@@ -1,4 +1,7 @@
 ---
+gitea_runner_openbao_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('openbao') }}"
+gitea_runner_gitea_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('gitea') }}"
+gitea_runner_platform_gitea_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology.gitea }}"
 gitea_runner_site_dir: /opt/gitea-runner
 gitea_runner_data_dir: "{{ gitea_runner_site_dir }}/data"
 gitea_runner_compose_file: "{{ gitea_runner_site_dir }}/docker-compose.yml"
@@ -12,3 +15,28 @@ gitea_runner_instance_url: "{{ hostvars['proxmox_florin'].platform_service_topol
 gitea_runner_registration_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/runner-registration-token.txt
 gitea_runner_name: docker-build-lv3
 gitea_runner_labels: self-hosted:host,linux:host,amd64:host,docker:docker
+gitea_runner_renovate_enabled: true
+gitea_runner_renovate_username: renovate-bot
+gitea_runner_renovate_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/renovate-password.txt
+gitea_runner_renovate_repository: ops/proxmox_florin_server
+gitea_runner_renovate_token_scopes: write:repository,read:user,write:issue,read:organization
+gitea_runner_renovate_clone_host: "{{ gitea_runner_gitea_service_topology.public_hostname }}"
+gitea_runner_renovate_clone_host_address: 127.0.0.1
+gitea_runner_renovate_clone_host_port: "{{ gitea_runner_platform_gitea_service_topology.ports.controller }}"
+gitea_runner_renovate_clone_target_host: "{{ gitea_runner_platform_gitea_service_topology.private_ip }}"
+gitea_runner_renovate_clone_target_port: "{{ gitea_runner_platform_gitea_service_topology.ports.internal }}"
+gitea_runner_renovate_openbao_address: "http://{{ gitea_runner_openbao_service_topology.private_ip }}:{{ hostvars['proxmox_florin'].platform_port_assignments.openbao_http_port }}"
+gitea_runner_renovate_secret_path: services/gitea-runner/renovate-runtime
+gitea_runner_renovate_policy_name: lv3-service-gitea-runner-renovate
+gitea_runner_renovate_approle_name: gitea-runner-renovate
+gitea_runner_renovate_openbao_agent_dir: "{{ gitea_runner_site_dir }}/openbao/renovate"
+gitea_runner_renovate_credential_dir: "{{ gitea_runner_site_dir }}/credentials/renovate"
+gitea_runner_renovate_credential_dir_in_container: /var/run/lv3/renovate
+gitea_runner_renovate_credential_file: "{{ gitea_runner_renovate_credential_dir }}/renovate.env"
+gitea_runner_renovate_credential_file_in_container: "{{ gitea_runner_renovate_credential_dir_in_container }}/renovate.env"
+gitea_runner_renovate_agent_config_file: "{{ gitea_runner_renovate_openbao_agent_dir }}/agent.hcl"
+gitea_runner_renovate_agent_template_file: "{{ gitea_runner_renovate_openbao_agent_dir }}/renovate.env.ctmpl"
+gitea_runner_renovate_role_id_file: "{{ gitea_runner_renovate_openbao_agent_dir }}/role_id"
+gitea_runner_renovate_secret_id_file: "{{ gitea_runner_renovate_openbao_agent_dir }}/secret_id"
+gitea_runner_renovate_agent_service_name: lv3-gitea-runner-renovate-openbao
+gitea_runner_renovate_agent_container_name: gitea-runner-renovate-openbao-agent

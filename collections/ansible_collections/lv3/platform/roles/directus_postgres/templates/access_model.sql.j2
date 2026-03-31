@@ -1,0 +1,99 @@
+\set ON_ERROR_STOP on
+
+INSERT INTO directus_roles (id, name, icon, description, parent)
+VALUES
+  ('{{ directus_observer_role_id }}', 'Directus Observer', 'visibility', 'Read-only browser role for the Directus operational data API.', NULL),
+  ('{{ directus_operator_role_id }}', 'Directus Operator', 'settings', 'Repo-managed browser role for platform operators with write access to the service registry.', NULL)
+ON CONFLICT (id) DO UPDATE
+SET
+  name = EXCLUDED.name,
+  icon = EXCLUDED.icon,
+  description = EXCLUDED.description,
+  parent = EXCLUDED.parent;
+
+INSERT INTO directus_policies (id, name, icon, description, ip_access, enforce_tfa, admin_access, app_access)
+VALUES
+  ('{{ directus_observer_policy_id }}', 'Directus Observer', 'visibility', 'Read-only browser access for the Directus service registry.', NULL, FALSE, FALSE, TRUE),
+  ('{{ directus_operator_policy_id }}', 'Directus Operator', 'settings', 'Write-capable browser access for platform administrators using Directus.', NULL, FALSE, FALSE, TRUE),
+  ('{{ directus_service_registry_policy_id }}', 'Directus Service Registry Token', 'vpn_key', 'Read-only API token access for the governed service registry collection.', NULL, FALSE, FALSE, FALSE)
+ON CONFLICT (id) DO UPDATE
+SET
+  name = EXCLUDED.name,
+  icon = EXCLUDED.icon,
+  description = EXCLUDED.description,
+  ip_access = EXCLUDED.ip_access,
+  enforce_tfa = EXCLUDED.enforce_tfa,
+  admin_access = EXCLUDED.admin_access,
+  app_access = EXCLUDED.app_access;
+
+DELETE FROM directus_permissions
+WHERE policy IN (
+  '{{ directus_observer_policy_id }}',
+  '{{ directus_operator_policy_id }}',
+  '{{ directus_service_registry_policy_id }}'
+)
+AND collection = '{{ directus_bootstrap_collection_name }}';
+
+INSERT INTO directus_permissions (collection, action, permissions, validation, presets, fields, policy)
+VALUES
+  ('{{ directus_bootstrap_collection_name }}', 'read', '{}', NULL, NULL, '*', '{{ directus_observer_policy_id }}'),
+  ('{{ directus_bootstrap_collection_name }}', 'read', '{}', NULL, NULL, '*', '{{ directus_operator_policy_id }}'),
+  ('{{ directus_bootstrap_collection_name }}', 'create', '{}', NULL, NULL, '*', '{{ directus_operator_policy_id }}'),
+  ('{{ directus_bootstrap_collection_name }}', 'update', '{}', NULL, NULL, '*', '{{ directus_operator_policy_id }}'),
+  ('{{ directus_bootstrap_collection_name }}', 'delete', '{}', NULL, NULL, '*', '{{ directus_operator_policy_id }}'),
+  ('{{ directus_bootstrap_collection_name }}', 'read', '{}', NULL, NULL, '*', '{{ directus_service_registry_policy_id }}');
+
+DELETE FROM directus_access
+WHERE role IN ('{{ directus_observer_role_id }}', '{{ directus_operator_role_id }}')
+  OR id = '{{ directus_service_registry_access_id }}';
+
+INSERT INTO directus_users (
+  id,
+  first_name,
+  last_name,
+  email,
+  title,
+  description,
+  status,
+  role,
+  token,
+  provider,
+  email_notifications
+)
+VALUES (
+  '{{ directus_service_registry_user_id }}',
+  'Service',
+  'Registry Token',
+  'service-registry@lv3.org',
+  'Directus Service Registry Token',
+  'Repo-managed bearer token for REST and GraphQL reads of the governed service registry collection.',
+  'active',
+  NULL,
+  '{{ lookup("ansible.builtin.file", directus_service_registry_token_local_file) | trim }}',
+  'default',
+  FALSE
+)
+ON CONFLICT (id) DO UPDATE
+SET
+  first_name = EXCLUDED.first_name,
+  last_name = EXCLUDED.last_name,
+  email = EXCLUDED.email,
+  title = EXCLUDED.title,
+  description = EXCLUDED.description,
+  status = EXCLUDED.status,
+  role = EXCLUDED.role,
+  token = EXCLUDED.token,
+  provider = EXCLUDED.provider,
+  email_notifications = EXCLUDED.email_notifications;
+
+INSERT INTO directus_access (id, role, "user", policy, sort)
+VALUES
+  ('{{ directus_observer_policy_id }}', '{{ directus_observer_role_id }}', NULL, '{{ directus_observer_policy_id }}', 1),
+  ('{{ directus_operator_policy_id }}', '{{ directus_operator_role_id }}', NULL, '{{ directus_operator_policy_id }}', 2),
+  ('{{ directus_service_registry_access_id }}', NULL, '{{ directus_service_registry_user_id }}', '{{ directus_service_registry_policy_id }}', 3)
+ON CONFLICT (id) DO UPDATE
+SET
+  role = EXCLUDED.role,
+  "user" = EXCLUDED."user",
+  policy = EXCLUDED.policy,
+  sort = EXCLUDED.sort;

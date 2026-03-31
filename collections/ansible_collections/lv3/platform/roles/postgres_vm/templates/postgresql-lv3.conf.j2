@@ -1,3 +1,6 @@
 # Managed by Ansible. Keep overrides explicit and small.
 listen_addresses = '{{ postgres_vm_listen_addresses | join(",") }}'
+max_connections = {{ postgres_vm_max_connections }}
+superuser_reserved_connections = {{ postgres_vm_superuser_reserved_connections }}
+reserved_connections = {{ postgres_vm_reserved_connections }}
 password_encryption = 'scram-sha-256'

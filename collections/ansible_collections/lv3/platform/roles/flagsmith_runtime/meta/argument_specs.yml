@@ -1,0 +1,52 @@
+---
+# Purpose: Describe the required runtime variables for the Flagsmith stack.
+
+argument_specs:
+  main:
+    short_description: Converge the Flagsmith runtime, bootstrap identity, and repo-managed feature seed state.
+    options:
+      flagsmith_site_dir:
+        type: path
+        required: true
+      flagsmith_compose_file:
+        type: path
+        required: true
+      flagsmith_env_file:
+        type: path
+        required: true
+      flagsmith_secret_dir:
+        type: path
+        required: true
+      flagsmith_runtime_image:
+        type: str
+        required: true
+      flagsmith_internal_port:
+        type: int
+        required: true
+      flagsmith_internal_base_url:
+        type: str
+        required: true
+      flagsmith_public_base_url:
+        type: str
+        required: true
+      flagsmith_database_host:
+        type: str
+        required: true
+      flagsmith_database_name:
+        type: str
+        required: true
+      flagsmith_database_user:
+        type: str
+        required: true
+      flagsmith_database_password_local_file:
+        type: path
+        required: true
+      flagsmith_django_secret_key_local_file:
+        type: path
+        required: true
+      flagsmith_admin_password_local_file:
+        type: path
+        required: true
+      flagsmith_environment_keys_local_file:
+        type: path
+        required: true

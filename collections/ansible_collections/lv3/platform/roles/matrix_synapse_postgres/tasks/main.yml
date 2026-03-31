@@ -1,0 +1,493 @@
+---
+# Purpose: Provision the Matrix Synapse PostgreSQL role, database, and mirrored password artifact.
+# Use case: Applied on postgres-lv3 before the Matrix Synapse runtime converges on docker-runtime-lv3.
+#
+# Inputs (required):
+#   - matrix_synapse_database_name (str, required): Managed PostgreSQL database name.
+#   - matrix_synapse_database_user (str, required): Managed PostgreSQL login role.
+#   - matrix_synapse_postgres_secret_dir (path, required): Guest-side secret directory for the mirrored password.
+#   - matrix_synapse_postgres_password_file (path, required): Guest-side database password path.
+#   - matrix_synapse_database_password_local_file (path, required): Controller-local database password path.
+#
+# Inputs (optional):
+#   - matrix_synapse_local_artifact_dir (path, optional): Controller-local artifact directory.
+#   - matrix_synapse_bridge_databases (list, optional): Additional bridge databases and password artifacts.
+#
+# Outputs:
+#   - PostgreSQL role and database provisioned for Matrix Synapse and the first mautrix bridges, with passwords mirrored locally and on postgres-lv3.
+#
+# Idempotency: Fully idempotent
+#              Existing passwords, roles, and databases are reused; repeat runs only reconcile drift.
+#
+# Dependencies:
+#   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+#   - ADR 0256: Mautrix Bridges For External Chat Channel Adapters
+#   - Requires: postgres-lv3 writable primary state.
+#   - Role: postgres_vm — prepares the managed PostgreSQL host before service provisioning.
+#
+# Related ADRs: 0165, 0255, 0256
+# Related Runbooks: docs/runbooks/configure-matrix-synapse.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-29
+- name: Validate Matrix Synapse PostgreSQL inputs
+  ansible.builtin.assert:
+    that:
+      - matrix_synapse_database_name | length > 0
+      - matrix_synapse_database_user | length > 0
+      - matrix_synapse_postgres_secret_dir | length > 0
+      - matrix_synapse_postgres_password_file | length > 0
+      - matrix_synapse_database_password_local_file | length > 0
+    fail_msg: >-
+      matrix_synapse_postgres requires database names and local or remote password paths.
+
+- name: Ensure the Matrix Synapse PostgreSQL secret directory exists
+  ansible.builtin.file:
+    path: "{{ matrix_synapse_postgres_secret_dir }}"
+    state: directory
+    owner: root
+    group: postgres
+    mode: "0750"
+
+- name: Ensure the local Matrix Synapse artifact directory exists
+  ansible.builtin.file:
+    path: "{{ matrix_synapse_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the Matrix Synapse database password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ matrix_synapse_database_password_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ matrix_synapse_database_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: matrix_synapse_postgres_password_generation
+  changed_when: "'changed' in matrix_synapse_postgres_password_generation.stdout"
+  no_log: true
+
+- name: Read the Matrix Synapse database password
+  ansible.builtin.slurp:
+    src: "{{ matrix_synapse_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: matrix_synapse_postgres_password_raw
+  no_log: true
+
+- name: Record the Matrix Synapse database password
+  ansible.builtin.set_fact:
+    matrix_synapse_database_password: "{{ matrix_synapse_postgres_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Mirror the Matrix Synapse database password to the control machine
+  ansible.builtin.copy:
+    dest: "{{ matrix_synapse_database_password_local_file }}"
+    content: "{{ matrix_synapse_database_password }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Persist the Matrix Synapse database password on the current guest
+  ansible.builtin.copy:
+    dest: "{{ matrix_synapse_postgres_password_file }}"
+    content: "{{ matrix_synapse_database_password }}\n"
+    owner: root
+    group: postgres
+    mode: "0640"
+  no_log: true
+
+- name: Check whether the local PostgreSQL member is writable
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT CASE WHEN pg_is_in_recovery() THEN 0 ELSE 1 END"
+  register: matrix_synapse_postgres_writable_check
+  changed_when: false
+
+- name: Check whether the Matrix Synapse database role already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_roles WHERE rolname = '{{ matrix_synapse_database_user }}'"
+  register: matrix_synapse_postgres_role_check
+  changed_when: false
+  when: matrix_synapse_postgres_writable_check.stdout | trim == "1"
+
+- name: Create the Matrix Synapse database role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        CREATE ROLE {{ matrix_synapse_database_user }} LOGIN PASSWORD
+        '{{ matrix_synapse_database_password }}'
+  changed_when: true
+  no_log: true
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - matrix_synapse_postgres_role_check.stdout != "1"
+
+- name: Check whether the Matrix Synapse PostgreSQL database already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_database WHERE datname = '{{ matrix_synapse_database_name }}'"
+  register: matrix_synapse_postgres_database_check
+  changed_when: false
+  when: matrix_synapse_postgres_writable_check.stdout | trim == "1"
+
+- name: Read the current Matrix Synapse database locale
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - >-
+        SELECT datcollate || '|' || datctype
+        FROM pg_database
+        WHERE datname = '{{ matrix_synapse_database_name }}'
+  register: matrix_synapse_postgres_database_locale
+  changed_when: false
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - matrix_synapse_postgres_database_check.stdout == "1"
+
+- name: Record whether the Matrix Synapse database locale requires recreation
+  ansible.builtin.set_fact:
+    matrix_synapse_postgres_database_needs_locale_recreation: >-
+      {{
+        matrix_synapse_postgres_database_locale.stdout | trim
+        != matrix_synapse_database_collation ~ '|' ~ matrix_synapse_database_ctype
+      }}
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - matrix_synapse_postgres_database_check.stdout == "1"
+
+- name: Count non-system tables in the Matrix Synapse database before locale correction
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ matrix_synapse_database_name }}"
+      - -Atqc
+      - >-
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
+  register: matrix_synapse_postgres_non_system_table_count
+  changed_when: false
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - matrix_synapse_postgres_database_needs_locale_recreation | default(false)
+
+- name: Assert the Matrix Synapse database can be recreated to correct its locale
+  ansible.builtin.assert:
+    that:
+      - matrix_synapse_postgres_non_system_table_count.stdout | trim | int == 0
+    fail_msg: >-
+      Matrix Synapse database locale drifted from the required
+      {{ matrix_synapse_database_collation }}/{{ matrix_synapse_database_ctype }}
+      setting after tables were created. Manual migration is required before rerunning
+      automation.
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - matrix_synapse_postgres_database_needs_locale_recreation | default(false)
+
+- name: Terminate active Matrix Synapse database sessions before locale correction
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - postgres
+      - -Atqc
+      - >-
+        SELECT pg_terminate_backend(pid)
+        FROM pg_stat_activity
+        WHERE datname = '{{ matrix_synapse_database_name }}'
+          AND pid <> pg_backend_pid()
+  changed_when: false
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - matrix_synapse_postgres_database_needs_locale_recreation | default(false)
+
+- name: Drop the Matrix Synapse database when locale correction is required
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - postgres
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "DROP DATABASE {{ matrix_synapse_database_name }}"
+  changed_when: true
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - matrix_synapse_postgres_database_needs_locale_recreation | default(false)
+
+- name: Create the Matrix Synapse PostgreSQL database
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        CREATE DATABASE {{ matrix_synapse_database_name }}
+        OWNER {{ matrix_synapse_database_user }}
+        TEMPLATE {{ matrix_synapse_database_template }}
+        LC_COLLATE '{{ matrix_synapse_database_collation }}'
+        LC_CTYPE '{{ matrix_synapse_database_ctype }}'
+  changed_when: true
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - >-
+      matrix_synapse_postgres_database_check.stdout != "1"
+      or matrix_synapse_postgres_database_needs_locale_recreation | default(false)
+
+- name: Read the Matrix Synapse database locale after convergence
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - >-
+        SELECT datcollate || '|' || datctype
+        FROM pg_database
+        WHERE datname = '{{ matrix_synapse_database_name }}'
+  register: matrix_synapse_postgres_database_locale_after
+  changed_when: false
+  when: matrix_synapse_postgres_writable_check.stdout | trim == "1"
+
+- name: Assert the Matrix Synapse database locale matches the required setting
+  ansible.builtin.assert:
+    that:
+      - >-
+        matrix_synapse_postgres_database_locale_after.stdout | trim
+        == matrix_synapse_database_collation ~ '|' ~ matrix_synapse_database_ctype
+    fail_msg: >-
+      Matrix Synapse database locale must be
+      {{ matrix_synapse_database_collation }}/{{ matrix_synapse_database_ctype }}
+      for Synapse startup compatibility.
+  when: matrix_synapse_postgres_writable_check.stdout | trim == "1"
+
+- name: Ensure the Matrix Synapse database owner is correct
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        ALTER DATABASE {{ matrix_synapse_database_name }}
+        OWNER TO {{ matrix_synapse_database_user }}
+  changed_when: false
+  when: matrix_synapse_postgres_writable_check.stdout | trim == "1"
+
+- name: Generate the Matrix bridge database passwords
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.password_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ item.password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  loop: "{{ matrix_synapse_bridge_databases }}"
+  loop_control:
+    label: "{{ item.id }}"
+  register: matrix_synapse_bridge_password_generation
+  changed_when: "'changed' in matrix_synapse_bridge_password_generation.stdout"
+  no_log: true
+
+- name: Persist the Matrix bridge database passwords on the current guest
+  ansible.builtin.copy:
+    dest: "{{ item.password_remote_file }}"
+    content: "{{ lookup('ansible.builtin.file', item.password_local_file) | trim }}\n"
+    owner: root
+    group: postgres
+    mode: "0640"
+  loop: "{{ matrix_synapse_bridge_databases }}"
+  loop_control:
+    label: "{{ item.id }}"
+  no_log: true
+
+- name: Check whether the Matrix bridge database roles already exist
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_roles WHERE rolname = '{{ item.database_user }}'"
+  loop: "{{ matrix_synapse_bridge_databases }}"
+  loop_control:
+    label: "{{ item.id }}"
+  register: matrix_synapse_bridge_role_checks
+  changed_when: false
+  when: matrix_synapse_postgres_writable_check.stdout | trim == "1"
+
+- name: Create the missing Matrix bridge database roles
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        CREATE ROLE {{ item.database_user }} LOGIN PASSWORD
+        '{{ lookup('ansible.builtin.file', item.password_local_file) | trim }}'
+  loop: "{{ matrix_synapse_bridge_databases }}"
+  loop_control:
+    label: "{{ item.id }}"
+    index_var: matrix_synapse_bridge_role_index
+  changed_when: true
+  no_log: true
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - matrix_synapse_bridge_role_checks.results[matrix_synapse_bridge_role_index].stdout != "1"
+
+- name: Ensure the Matrix bridge database role passwords match the managed secrets
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        ALTER ROLE {{ item.database_user }} PASSWORD '{{ lookup('ansible.builtin.file', item.password_local_file) | trim }}'
+  loop: "{{ matrix_synapse_bridge_databases }}"
+  loop_control:
+    label: "{{ item.id }}"
+  changed_when: false
+  no_log: true
+  when: matrix_synapse_postgres_writable_check.stdout | trim == "1"
+
+- name: Check whether the Matrix bridge PostgreSQL databases already exist
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_database WHERE datname = '{{ item.database_name }}'"
+  loop: "{{ matrix_synapse_bridge_databases }}"
+  loop_control:
+    label: "{{ item.id }}"
+  register: matrix_synapse_bridge_database_checks
+  changed_when: false
+  when: matrix_synapse_postgres_writable_check.stdout | trim == "1"
+
+- name: Create the missing Matrix bridge PostgreSQL databases
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        CREATE DATABASE {{ item.database_name }}
+        OWNER {{ item.database_user }}
+        TEMPLATE {{ item.database_template }}
+        LC_COLLATE '{{ item.database_collation }}'
+        LC_CTYPE '{{ item.database_ctype }}'
+  loop: "{{ matrix_synapse_bridge_databases }}"
+  loop_control:
+    label: "{{ item.id }}"
+    index_var: matrix_synapse_bridge_database_index
+  changed_when: true
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - matrix_synapse_bridge_database_checks.results[matrix_synapse_bridge_database_index].stdout != "1"
+
+- name: Read the Matrix bridge database locales after convergence
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - >-
+        SELECT datcollate || '|' || datctype
+        FROM pg_database
+        WHERE datname = '{{ item.database_name }}'
+  loop: "{{ matrix_synapse_bridge_databases }}"
+  loop_control:
+    label: "{{ item.id }}"
+  register: matrix_synapse_bridge_database_locales_after
+  changed_when: false
+  when: matrix_synapse_postgres_writable_check.stdout | trim == "1"
+
+- name: Assert the Matrix bridge database locales match the managed settings
+  ansible.builtin.assert:
+    that:
+      - >-
+        matrix_synapse_bridge_database_locales_after.results[matrix_synapse_bridge_database_locale_after_index].stdout | trim
+        == item.database_collation ~ '|' ~ item.database_ctype
+    fail_msg: >-
+      Matrix bridge database {{ item.database_name }} must use
+      {{ item.database_collation }}/{{ item.database_ctype }}
+      for predictable bridge compatibility.
+  loop: "{{ matrix_synapse_bridge_databases }}"
+  loop_control:
+    label: "{{ item.id }}"
+    index_var: matrix_synapse_bridge_database_locale_after_index
+  when: matrix_synapse_postgres_writable_check.stdout | trim == "1"
+
+- name: Ensure the Matrix bridge database owners are correct
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER DATABASE {{ item.database_name }} OWNER TO {{ item.database_user }}"
+  loop: "{{ matrix_synapse_bridge_databases }}"
+  loop_control:
+    label: "{{ item.id }}"
+  changed_when: false
+  when: matrix_synapse_postgres_writable_check.stdout | trim == "1"

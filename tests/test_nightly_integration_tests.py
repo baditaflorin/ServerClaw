@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 from pathlib import Path
 
 
@@ -43,3 +44,27 @@ def test_workflow_runs_suite_and_returns_payload(monkeypatch, tmp_path: Path) ->
     payload = nightly_integration_tests.main(repo_path=str(tmp_path))
 
     assert payload["status"] == "passed"
+
+
+def test_workflow_loads_environment_catalog_from_repo_path(monkeypatch, tmp_path: Path) -> None:
+    (tmp_path / "config").mkdir(parents=True)
+    (tmp_path / "scripts").mkdir(parents=True)
+    (tmp_path / ".local" / "integration-tests").mkdir(parents=True)
+    (tmp_path / "scripts" / "environment_catalog.py").write_text(
+        "def environment_choices():\n"
+        "    return ['production', 'staging']\n"
+        "def primary_environment():\n"
+        "    return 'staging'\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(nightly_integration_tests, "publish_notifications", lambda repo_root, payload: None)
+    monkeypatch.setattr(
+        nightly_integration_tests,
+        "execute_suite",
+        lambda repo_root, environment, report_file: {"status": "passed", "environment": environment, "mode": "nightly", "summary": {"passed": 1, "failed": 0, "skipped": 0}, "tests": [], "duration_seconds": 0.1},
+    )
+    sys.modules.pop("environment_catalog", None)
+
+    payload = nightly_integration_tests.main(repo_path=str(tmp_path))
+
+    assert payload["environment"] == "staging"

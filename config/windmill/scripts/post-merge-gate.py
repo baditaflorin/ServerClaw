@@ -1,14 +1,20 @@
 import argparse
 import json
+import os
 import shlex
 import subprocess
+import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, TypedDict
 
 
-LOCAL_FALLBACK_STAGES = [
+GIT_REQUIRED_FALLBACK_STAGES = [
+    "workstream-surfaces",
+    "agent-standards",
+]
+WORKER_SAFE_FALLBACK_STAGES = [
     "generated-vars",
     "role-argument-specs",
     "json",
@@ -28,7 +34,11 @@ LOCAL_PROVIDER_BOUNDARY_COMMAND = [
 RUNNER_IMAGE_ERROR_MARKERS = (
     "unsupported manifest media type",
     "Unable to find image 'registry.lv3.org/check-runner/",
+    "docker: error during connect:",
+    "Cannot connect to the Docker daemon",
+    "docker.sock/_ping",
 )
+VALIDATION_RUNNER_ID = "windmill-post-merge-worker"
 
 
 class CommandResult(TypedDict):
@@ -46,9 +56,51 @@ def _load_gate_status(status_path: Path) -> dict[str, Any] | None:
     return None
 
 
+def _git_checkout_available(repo_root: Path) -> bool:
+    result = _run(["git", "-C", str(repo_root), "rev-parse", "--is-inside-work-tree"], cwd=repo_root)
+    return result.returncode == 0 and result.stdout.strip() == "true"
+
+
 def _runner_image_pull_failed(stdout: str, stderr: str) -> bool:
     combined = f"{stdout}\n{stderr}"
     return any(marker in combined for marker in RUNNER_IMAGE_ERROR_MARKERS)
+
+
+def _gate_status_runner_startup_failed(gate_status: dict[str, Any] | None) -> bool:
+    if not gate_status or gate_status.get("status") == "passed":
+        return False
+    checks = gate_status.get("checks")
+    if not isinstance(checks, list):
+        return False
+    return any(isinstance(check, dict) and check.get("returncode") == 125 for check in checks)
+
+
+def _load_runner_context(repo_root: Path) -> dict[str, Any]:
+    command = [
+        sys.executable or "python3",
+        str(repo_root / "scripts" / "validation_runner_contracts.py"),
+        "--runner",
+        VALIDATION_RUNNER_ID,
+        "--workspace",
+        str(repo_root),
+        "--format",
+        "json",
+    ]
+    result = _run(command, cwd=repo_root)
+    if result.returncode != 0:
+        return {
+            "id": VALIDATION_RUNNER_ID,
+            "load_error": result.stderr.strip()
+            or result.stdout.strip()
+            or f"command exited {result.returncode}",
+        }
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return {
+            "id": VALIDATION_RUNNER_ID,
+            "load_error": result.stdout.strip() or "runner context did not return JSON",
+        }
 
 
 def _fallback_status_payload(
@@ -59,6 +111,7 @@ def _fallback_status_payload(
     returncode: int,
     duration_seconds: float,
     commands: list[CommandResult],
+    runner_context: dict[str, Any],
 ) -> dict[str, Any]:
     return {
         "status": status,
@@ -66,6 +119,7 @@ def _fallback_status_payload(
         "workspace": str(repo_root),
         "manifest": str(manifest_path),
         "executed_at": datetime.now(timezone.utc).isoformat(),
+        "runner": runner_context,
         "checks": [
             {
                 "id": "local-fallback",
@@ -83,8 +137,11 @@ def _fallback_status_payload(
 
 
 def _run_local_fallback(repo_root: Path, manifest_path: Path, status_path: Path) -> dict[str, Any]:
+    fallback_stages = list(WORKER_SAFE_FALLBACK_STAGES)
+    if _git_checkout_available(repo_root):
+        fallback_stages = [*GIT_REQUIRED_FALLBACK_STAGES, *fallback_stages]
     commands = [
-        ["./scripts/validate_repo.sh", *LOCAL_FALLBACK_STAGES],
+        ["./scripts/validate_repo.sh", *fallback_stages],
         LOCAL_PROVIDER_BOUNDARY_COMMAND,
     ]
     started = time.monotonic()
@@ -111,6 +168,7 @@ def _run_local_fallback(repo_root: Path, manifest_path: Path, status_path: Path)
             break
 
     duration_seconds = time.monotonic() - started
+    runner_context = _load_runner_context(repo_root)
     fallback_status = _fallback_status_payload(
         repo_root=repo_root,
         manifest_path=manifest_path,
@@ -118,6 +176,7 @@ def _run_local_fallback(repo_root: Path, manifest_path: Path, status_path: Path)
         returncode=returncode,
         duration_seconds=duration_seconds,
         commands=command_results,
+        runner_context=runner_context,
     )
     status_path.parent.mkdir(parents=True, exist_ok=True)
     status_path.write_text(json.dumps(fallback_status, indent=2) + "\n", encoding="utf-8")
@@ -160,18 +219,31 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
         "windmill-post-merge",
         "--print-json",
     ]
-    result = _run(command, cwd=repo_root)
+    previous_runner_id = os.environ.get("LV3_VALIDATION_RUNNER_ID")
+    os.environ["LV3_VALIDATION_RUNNER_ID"] = VALIDATION_RUNNER_ID
+    try:
+        result = _run(command, cwd=repo_root)
+    finally:
+        if previous_runner_id is None:
+            os.environ.pop("LV3_VALIDATION_RUNNER_ID", None)
+        else:
+            os.environ["LV3_VALIDATION_RUNNER_ID"] = previous_runner_id
+    gate_status = _load_gate_status(status_path)
     payload: dict[str, Any] = {
-        "status": "ok" if result.returncode == 0 else "error",
+        "status": "ok"
+        if result.returncode == 0 and (gate_status is None or gate_status.get("status") == "passed")
+        else "error",
         "command": " ".join(shlex.quote(part) for part in command),
         "returncode": result.returncode,
         "stdout": result.stdout.strip(),
         "stderr": result.stderr.strip(),
     }
-    gate_status = _load_gate_status(status_path)
     if gate_status is not None:
         payload["gate_status"] = gate_status
-    if result.returncode != 0 and _runner_image_pull_failed(result.stdout, result.stderr):
+    runner_startup_failed = _runner_image_pull_failed(result.stdout, result.stderr) or _gate_status_runner_startup_failed(
+        gate_status
+    )
+    if payload["status"] == "error" and runner_startup_failed:
         payload["primary_gate_error"] = {
             "command": payload["command"],
             "returncode": result.returncode,

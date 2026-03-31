@@ -393,6 +393,84 @@
       }
     },
     {
+      "id": "personal_data_plane",
+      "name": "Personal Data Plane",
+      "summary": "Provide durable user-owned personal files and DAV-backed calendar, contact, and task data through a replaceable standards-based contract rather than one SaaS provider API.",
+      "scope": "critical_shared_surface",
+      "owner": "platform-operations",
+      "review_cadence": "quarterly",
+      "required_outcomes": [
+        "Provide the canonical personal file, attachment, calendar, contact, and task surface for ServerClaw operators and automations.",
+        "Keep user data portable through standards-based DAV and filesystem export paths."
+      ],
+      "service_guarantees": [
+        "User-owned files and DAV collections remain reachable through stable WebDAV, CalDAV, and CardDAV endpoints.",
+        "Account, sharing, and sync metadata remain recoverable from repo-managed infrastructure and portable exports."
+      ],
+      "canonical_inputs": [
+        {
+          "name": "personal_data_sync_request",
+          "description": "User or automation request to store, read, or synchronize files and DAV-backed objects through the canonical personal data surface."
+        },
+        {
+          "name": "platform_runtime_secret_set",
+          "description": "Repo-managed credentials and publication settings required to bootstrap and maintain the personal data plane."
+        }
+      ],
+      "canonical_outputs": [
+        {
+          "name": "dav_collection_surface",
+          "description": "Stable WebDAV, CalDAV, and CardDAV endpoints used by clients and automations without provider-specific SDK coupling."
+        },
+        {
+          "name": "durable_personal_object_store",
+          "description": "Recoverable user-owned files, attachments, and metadata that remain exportable through standards-based tooling."
+        }
+      ],
+      "security_expectations": [
+        "Support repo-managed secret rotation and named non-root operator recovery paths.",
+        "Keep authentication and sharing policy inside documented runtime configuration rather than ad hoc UI drift."
+      ],
+      "audit_expectations": [
+        "Administrative bootstrap and runtime publication changes remain attributable to a named operator or automation identity.",
+        "Critical configuration and data-location choices remain exportable from repo-managed artifacts and receipts."
+      ],
+      "observability_requirements": [
+        "Expose a public health signal and local verification path for the personal data runtime.",
+        "Surface failures in publication, bootstrap, cron processing, or DAV discovery through monitored probes."
+      ],
+      "portability_constraints": [
+        "Consumers depend on WebDAV, CalDAV, CardDAV, and documented file export paths rather than a Nextcloud-only SDK.",
+        "User data and metadata must remain migratable through portable filesystem, database, and DAV export workflows."
+      ],
+      "migration_expectations": {
+        "export_formats": [
+          "filesystem exports",
+          "database dumps",
+          "DAV synchronization exports"
+        ],
+        "import_requirements": [
+          "A replacement personal data plane can import files, metadata, and DAV collections from repo-managed exports without hidden UI state.",
+          "The replacement can preserve the public hostname contract or a documented redirect path during migration."
+        ],
+        "fallback_behaviour": "Read-only maintenance is acceptable during migration if user data remains intact and exportable from the managed runtime."
+      },
+      "failure_modes": [
+        {
+          "mode": "personal data plane unavailable",
+          "acceptable_degradation": "User file sync and DAV clients stop updating, but existing data remains recoverable from the managed runtime and backups.",
+          "operator_response": "Recover the runtime or restore from documented exports rather than adopting a provider-specific emergency workflow."
+        }
+      ],
+      "current_selection": {
+        "product_name": "Nextcloud",
+        "service_id": "nextcloud",
+        "selection_adr": "0260",
+        "runbook": "docs/runbooks/configure-nextcloud.md",
+        "notes": "Selected for self-hosted standards-based personal file and DAV data management with repo-managed runtime automation."
+      }
+    },
+    {
       "id": "workflow_orchestrator",
       "name": "Workflow Orchestrator",
       "summary": "Run governed operator and automation workflows behind a stable execution contract so later product changes stay bounded by adapters and workflow metadata.",

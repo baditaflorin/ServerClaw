@@ -1,0 +1,137 @@
+---
+# Purpose: Verify the local JupyterHub runtime and smoke single-user contract after convergence.
+
+- name: Verify the JupyterHub local health endpoint
+  ansible.builtin.uri:
+    url: "{{ jupyterhub_internal_base_url }}/hub/health"
+    method: GET
+    status_code: 200
+  register: jupyterhub_verify_local_health
+  retries: 24
+  delay: 5
+  until: jupyterhub_verify_local_health.status == 200
+  changed_when: false
+
+- name: Exercise JupyterHub smoke-user provisioning through the local admin API
+  ansible.builtin.shell: |
+    set -euo pipefail
+    python3 - <<'PY'
+    import json
+    import sys
+    import time
+    import urllib.error
+    import urllib.request
+
+    base_url = "{{ jupyterhub_internal_base_url }}"
+    token = "{{ jupyterhub_service_api_token }}"
+    username = "{{ jupyterhub_verify_username }}"
+
+    def request(method: str, path: str, body: dict | None = None, ok_statuses: tuple[int, ...] = (200, 201, 202, 204, 404)):
+        payload = None if body is None else json.dumps(body).encode("utf-8")
+        req = urllib.request.Request(
+            f"{base_url}{path}",
+            data=payload,
+            method=method,
+            headers={
+                "Authorization": f"token {token}",
+                "Content-Type": "application/json",
+            },
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=30) as response:
+                raw = response.read().decode("utf-8") if response.length != 0 else ""
+                if response.status not in ok_statuses:
+                    raise RuntimeError(f"{method} {path} returned unexpected status {response.status}: {raw}")
+                return response.status, json.loads(raw) if raw else {}
+        except urllib.error.HTTPError as exc:
+            raw = exc.read().decode("utf-8")
+            if exc.code not in ok_statuses:
+                raise RuntimeError(f"{method} {path} failed with {exc.code}: {raw}") from exc
+            return exc.code, json.loads(raw) if raw else {}
+
+    request("GET", "/hub/api", ok_statuses=(200,))
+    request("POST", f"/hub/api/users/{username}", body={}, ok_statuses=(201, 409))
+    request("DELETE", f"/hub/api/users/{username}/server", ok_statuses=(202, 204, 400, 404))
+    request("POST", f"/hub/api/users/{username}/server", body={}, ok_statuses=(201, 202, 400))
+
+    deadline = time.time() + {{ jupyterhub_spawn_timeout_seconds | int }}
+    while time.time() < deadline:
+        _, payload = request("GET", f"/hub/api/users/{username}", ok_statuses=(200,))
+        server = payload.get("servers", {}).get("", {})
+        if server.get("ready"):
+            print(json.dumps(payload))
+            sys.exit(0)
+        time.sleep(5)
+
+    raise SystemExit("JupyterHub smoke user server did not become ready before the timeout.")
+    PY
+  args:
+    executable: /bin/bash
+  register: jupyterhub_smoke_user_api
+  changed_when: false
+
+- name: Record the spawned Jupyter single-user container name from the admin API payload
+  ansible.builtin.set_fact:
+    jupyterhub_smoke_container_name: >-
+      {{
+        (
+          (jupyterhub_smoke_user_api.stdout | from_json)
+          .servers[""]
+          .state
+          .object_name
+        )
+      }}
+
+- name: Verify the spawned Jupyter single-user container exposes the expected platform contract
+  ansible.builtin.shell: |
+    set -euo pipefail
+    container_name="{{ jupyterhub_smoke_container_name }}"
+    docker inspect "$container_name" >/dev/null
+    docker exec "$container_name" /bin/bash -lc 'env | grep -Fqx "OPENAI_BASE_URL={{ jupyterhub_openai_base_url }}"'
+    docker exec "$container_name" /bin/bash -lc 'env | grep -Fqx "OLLAMA_BASE_URL={{ jupyterhub_ollama_base_url }}"'
+    docker exec "$container_name" /bin/bash -lc 'env | grep -Fqx "PLATFORM_CONTEXT_URL={{ jupyterhub_platform_context_url }}"'
+    docker exec "$container_name" /bin/bash -lc 'env | grep -Fqx "JUPYTERHUB_SHARED_BUCKET={{ jupyterhub_shared_bucket_name }}"'
+    docker exec "$container_name" /bin/bash -lc 'getent hosts {{ jupyterhub_host_gateway_hostname }} >/dev/null'
+    docker exec "$container_name" python -c "import urllib.request; urllib.request.urlopen('http://minio:9000/minio/health/live', timeout=10)"
+    docker exec "$container_name" python - <<'PY'
+    import os
+    from minio import Minio
+
+    endpoint = os.environ["MINIO_ENDPOINT_URL"].removeprefix("http://").removeprefix("https://")
+    client = Minio(
+        endpoint,
+        access_key=os.environ["AWS_ACCESS_KEY_ID"],
+        secret_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+        secure=os.environ["MINIO_ENDPOINT_URL"].startswith("https://"),
+    )
+    assert client.bucket_exists(os.environ["JUPYTERHUB_SHARED_BUCKET"])
+    PY
+    docker exec "$container_name" python -c "import urllib.request; urllib.request.urlopen('{{ jupyterhub_ollama_base_url }}/api/version', timeout=10)"
+    docker exec "$container_name" python -c "import urllib.request; urllib.request.urlopen('{{ jupyterhub_platform_context_url }}/healthz', timeout=10)"
+  args:
+    executable: /bin/bash
+  register: jupyterhub_smoke_container_contract
+  changed_when: false
+
+- name: Stop the JupyterHub smoke user server
+  ansible.builtin.shell: |
+    set -euo pipefail
+    python3 - <<'PY'
+    import urllib.error
+    import urllib.request
+
+    req = urllib.request.Request(
+        "{{ jupyterhub_internal_base_url }}/hub/api/users/{{ jupyterhub_verify_username }}/server",
+        method="DELETE",
+        headers={"Authorization": "token {{ jupyterhub_service_api_token }}"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30):
+            pass
+    except urllib.error.HTTPError as exc:
+        if exc.code not in (202, 204, 400, 404):
+            raise
+    PY
+  args:
+    executable: /bin/bash
+  changed_when: false

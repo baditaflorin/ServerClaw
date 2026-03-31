@@ -291,10 +291,19 @@ def build_rotation_event(
     command: list[str],
 ) -> dict:
     timestamp = dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z")
+    status_suffix = {
+        "started": "started",
+        "succeeded": "completed",
+        "completed": "completed",
+        "failed": "failed",
+    }.get(status, status)
+    subject_root = str(secret["event_subject"]).strip()
+    if subject_root.endswith((".started", ".completed", ".failed")):
+        subject_root = subject_root.rsplit(".", 1)[0]
     return {
         "event_type": "secret_rotation",
         "event_id": uuid.uuid4().hex,
-        "subject": secret["event_subject"],
+        "subject": f"{subject_root}.{status_suffix}",
         "timestamp": timestamp,
         "status": status,
         "mode": mode,
@@ -415,10 +424,9 @@ def run_rotation(
         new_value=new_value,
         bootstrap_key_path=resolve_bootstrap_key(secret_manifest),
     )
-    rotation_event = build_rotation_event(secret_id, secret, status="started", mode=mode, command=command)
     result = run_command(command, capture_output=True)
     if result.returncode == 0:
-        success_event = rotation_event | {"status": "succeeded"}
+        success_event = build_rotation_event(secret_id, secret, status="succeeded", mode=mode, command=command)
         try:
             maybe_emit_success(success_event)
         except urllib.error.URLError:
@@ -427,7 +435,7 @@ def run_rotation(
             print(result.stdout.strip())
         return 0
 
-    failure_event = rotation_event | {"status": "failed"}
+    failure_event = build_rotation_event(secret_id, secret, status="failed", mode=mode, command=command)
     error_text = (result.stderr or result.stdout or "secret rotation playbook failed").strip()
     glitchtip_event = build_glitchtip_event(secret_id, secret, failure_event, error_text)
     try:

@@ -7,6 +7,7 @@ ROLE_RUNTIME_PATHS = {
     "windmill_runtime": "/run/lv3-secrets/windmill/runtime.env",
     "keycloak_runtime": "/run/lv3-secrets/keycloak/runtime.env",
     "mattermost_runtime": "/run/lv3-secrets/mattermost/runtime.env",
+    "matrix_synapse_runtime": "/run/lv3-secrets/matrix-synapse/runtime.env",
     "open_webui_runtime": "/run/lv3-secrets/open-webui/runtime.env",
     "netbox_runtime": "/run/lv3-secrets/netbox/runtime.env",
     "plane_runtime": "/run/lv3-secrets/plane/runtime.env",
@@ -20,6 +21,8 @@ def test_common_openbao_agent_helper_exists() -> None:
     assert "kv/data/" in helper
     assert 'static_secret_render_interval = "5m"' in template
     assert 'destination          = "{{ common_openbao_compose_env_env_file }}"' in template
+    assert "register: common_openbao_compose_env_approle_upsert" in helper
+    assert "until: common_openbao_compose_env_approle_upsert.status == 204" in helper
 
 
 def test_validate_repo_checks_for_unexpected_env_files() -> None:
@@ -129,6 +132,12 @@ def test_control_plane_recovery_uses_dedicated_windmill_backup_dsn() -> None:
     assert "docker run --rm --name" in helper_service_text
     assert "--entrypoint {{ common_openbao_systemd_credentials_container_entrypoint }}" in helper_service_text
     assert "common_openbao_systemd_credentials_secret_path" in helper_text
+    assert "Wait for the local OpenBao API to answer" in helper_text
+    assert helper_text.count("register: common_openbao_systemd_credentials_api_health") == 1
+    assert "register: common_openbao_systemd_credentials_api_health\n  retries: 24\n  delay: 5" in helper_text
+    assert "register: common_openbao_systemd_credentials_health\n  retries: 24\n  delay: 5" in helper_text
+    assert "register: common_openbao_systemd_credentials_approle_upsert" in helper_text
+    assert "until: common_openbao_systemd_credentials_approle_upsert.status == 204" in helper_text
 
 
 def test_mail_gateway_image_includes_telemetry_module() -> None:
@@ -154,3 +163,4 @@ def test_ops_portal_image_includes_publication_contract_helper() -> None:
     app_text = (REPO_ROOT / "scripts" / "ops_portal" / "app.py").read_text()
     assert "from publication_contract import registry_entries" in app_text
     assert "COPY publication_contract.py ./publication_contract.py" in dockerfile_text
+    assert "COPY stage_smoke.py ./stage_smoke.py" in dockerfile_text

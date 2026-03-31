@@ -1,4 +1,23 @@
 ---
+# Purpose: Provide default Docker runtime, bridge-chain recovery, and publication assurance inputs for managed Debian guests.
+# Use case: Loaded whenever the docker_runtime role configures or verifies a managed Docker host.
+#
+# Inputs (required):
+#   - None. Inventory and playbooks may override these defaults.
+#
+# Inputs (optional):
+#   - docker_runtime_* inventory overrides for packages, daemon config, bridge-chain timing, and publication helper paths.
+#
+# Outputs:
+#   - Canonical default variables used by the docker_runtime role.
+#
+# Idempotency: Fully idempotent
+#              Defaults only declare data and do not mutate host state directly.
+#
+# Dependencies:
+#   - ADR 0023: Docker runtime VM baseline.
+#   - ADR 0270: Docker publication self-healing and port-programming assertions.
+#   - Role: lv3.platform.docker_runtime - consumes these defaults during converge and verify.
 docker_runtime_prereq_packages:
   - ca-certificates
   - curl
@@ -27,16 +46,45 @@ docker_runtime_engine_packages:
 
 docker_runtime_admin_users:
   - "{{ proxmox_guest_ci_user }}"
+docker_runtime_public_edge_ipv4: "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
+docker_runtime_public_edge_host_aliases: >-
+  {{
+    (
+      hostvars['proxmox_florin'].platform_service_topology
+      | service_topology_edge_sites
+      | map(attribute='hostname')
+      | list
+    ) | unique | sort
+  }}
 
+docker_runtime_registry_mirrors:
+  - https://mirror.gcr.io
+docker_runtime_insecure_registries: []
 docker_runtime_daemon_config:
   live-restore: true
   log-driver: json-file
   log-opts:
     max-size: "10m"
     max-file: "5"
+  dns:
+    - "1.1.1.1"
+    - "8.8.8.8"
+  registry-mirrors: "{{ docker_runtime_registry_mirrors }}"
+  insecure-registries: "{{ docker_runtime_insecure_registries }}"
+  default-address-pools:
+    - base: 172.16.0.0/12
+      size: 24
+    - base: 192.168.0.0/16
+      size: 24
+    - base: 10.200.0.0/16
+      size: 24
 docker_runtime_require_nat_chain: true
+docker_runtime_chain_recheck_retries: 30
+docker_runtime_chain_recheck_delay_seconds: 2
 docker_runtime_nftables_config_file: /etc/nftables.conf
 docker_runtime_container_forward_compat_enabled: true
+docker_runtime_publication_assurance_script_path: /usr/local/bin/lv3-docker-publication-assurance
+docker_runtime_publication_assurance_helper_source: "{{ inventory_dir ~ '/../scripts/docker_publication_assurance.py' }}"
 docker_runtime_container_forward_source_cidrs:
   - 172.16.0.0/12
   - 192.168.0.0/16

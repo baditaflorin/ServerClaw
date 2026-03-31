@@ -1,0 +1,10 @@
+FROM {{ browser_runner_runtime_base_image }}
+
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1 PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
+COPY requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && python -m playwright install --with-deps chromium
+
+COPY browser_runner_service.py ./browser_runner_service.py

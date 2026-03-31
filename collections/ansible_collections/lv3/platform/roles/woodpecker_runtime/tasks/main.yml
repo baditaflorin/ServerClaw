@@ -1,0 +1,385 @@
+---
+# Purpose: Converge the Woodpecker runtime stack, managed secrets, Gitea OAuth application, and controller-local bootstrap artifacts.
+# Use case: Run during Woodpecker deployment or replay on docker-runtime-lv3 after the Woodpecker PostgreSQL backend is prepared.
+#
+# Inputs (required):
+#   - woodpecker_site_dir (path, required): Runtime root directory.
+#   - woodpecker_secret_dir (path, required): Guest-side secret directory.
+#   - woodpecker_compose_file (path, required): Managed compose file path.
+#   - woodpecker_env_file (path, required): Managed runtime environment file path.
+#   - woodpecker_http_port (int, required): Internal Woodpecker listener port.
+#   - woodpecker_controller_url (str, required): Host-controller access URL.
+#   - woodpecker_public_url (str, required): Public authenticated base URL.
+#   - woodpecker_database_password_local_file (path, required): Controller-local database password artifact.
+#   - woodpecker_gitea_admin_token_local_file (path, required): Controller-local Gitea admin API token.
+#
+# Inputs (optional):
+#   - woodpecker_local_artifact_dir (path, optional, default=.local/woodpecker): Controller-local artifact directory.
+#
+# Outputs:
+#   - Managed Woodpecker compose stack, rendered secrets, Gitea OAuth client artifacts, controller auth files, and seed bootstrap spec.
+#
+# Idempotency: Fully idempotent
+#              Secrets are generated once and reused, compose replay is repeatable, and the OAuth/bootstrap helpers tolerate existing state.
+#
+# Dependencies:
+#   - ADR 0287: Defines Woodpecker deployment, private controller access, and the seed repo activation flow.
+#   - Requires: woodpecker_postgres has already created the Woodpecker database password artifact.
+#
+# Related ADRs: 0165, 0287
+# Related Runbooks: docs/runbooks/configure-woodpecker.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+- name: Validate Woodpecker runtime inputs
+  ansible.builtin.assert:
+    that:
+      - woodpecker_site_dir | length > 0
+      - woodpecker_secret_dir | length > 0
+      - woodpecker_compose_file | length > 0
+      - woodpecker_env_file | length > 0
+      - woodpecker_http_port | int > 0
+      - woodpecker_controller_url | length > 0
+      - woodpecker_public_url | length > 0
+      - woodpecker_server_image | length > 0
+      - woodpecker_agent_image | length > 0
+      - woodpecker_database_password_local_file | length > 0
+      - woodpecker_gitea_admin_token_local_file | length > 0
+      - woodpecker_gitea_admin_password_local_file | length > 0
+      - woodpecker_gitea_client_id_local_file | length > 0
+      - woodpecker_gitea_client_secret_local_file | length > 0
+      - woodpecker_agent_secret_local_file | length > 0
+      - woodpecker_bootstrap_spec_local_file | length > 0
+    fail_msg: >-
+      woodpecker_runtime requires runtime paths, pinned image refs, database auth,
+      controller-local Gitea credentials, and bootstrap artifact paths.
+
+- name: Ensure the Woodpecker database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ woodpecker_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: woodpecker_database_password_local
+
+- name: Fail if the Woodpecker database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ woodpecker_database_password_local_file }} is missing on the control machine.
+      Converge woodpecker_postgres before deploying Woodpecker.
+  when: not woodpecker_database_password_local.stat.exists
+
+- name: Ensure the Gitea admin token exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ woodpecker_gitea_admin_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: woodpecker_gitea_admin_token_local
+
+- name: Fail if the Gitea admin token is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ woodpecker_gitea_admin_token_local_file }} is missing on the control machine.
+      Converge Gitea first so Woodpecker can bootstrap its OAuth application.
+  when: not woodpecker_gitea_admin_token_local.stat.exists
+
+- name: Ensure the Gitea admin password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ woodpecker_gitea_admin_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: woodpecker_gitea_admin_password_local
+
+- name: Fail if the Gitea admin password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ woodpecker_gitea_admin_password_local_file }} is missing on the control machine.
+      Converge Gitea first so Woodpecker can complete the governed login flow.
+  when: not woodpecker_gitea_admin_password_local.stat.exists
+
+- name: Ensure the Woodpecker runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+      - python3
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Woodpecker runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ woodpecker_site_dir }}"
+      mode: "0755"
+    - path: "{{ woodpecker_data_dir }}"
+      mode: "0755"
+    - path: "{{ woodpecker_server_data_dir }}"
+      mode: "0755"
+    - path: "{{ woodpecker_agent_data_dir }}"
+      mode: "0755"
+    - path: "{{ woodpecker_secret_dir }}"
+      mode: "0700"
+
+- name: Ensure the local Woodpecker artifact directory exists
+  ansible.builtin.file:
+    path: "{{ woodpecker_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Check whether the local Woodpecker agent secret already exists
+  ansible.builtin.stat:
+    path: "{{ woodpecker_agent_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: woodpecker_agent_secret_local
+
+- name: Check whether the persisted Woodpecker agent secret exists on the guest
+  ansible.builtin.stat:
+    path: "{{ woodpecker_agent_secret_guest_file }}"
+  register: woodpecker_agent_secret_guest
+
+- name: Read the persisted Woodpecker agent secret from the guest when the local copy is missing
+  ansible.builtin.slurp:
+    src: "{{ woodpecker_agent_secret_guest_file }}"
+  register: woodpecker_agent_secret_guest_raw
+  when:
+    - not woodpecker_agent_secret_local.stat.exists
+    - woodpecker_agent_secret_guest.stat.exists
+  no_log: true
+
+- name: Restore the Woodpecker agent secret to the control machine from the guest copy
+  ansible.builtin.copy:
+    dest: "{{ woodpecker_agent_secret_local_file }}"
+    content: "{{ woodpecker_agent_secret_guest_raw.content | b64decode | trim }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  when:
+    - not woodpecker_agent_secret_local.stat.exists
+    - woodpecker_agent_secret_guest.stat.exists
+  no_log: true
+
+- name: Generate the Woodpecker agent secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ woodpecker_agent_secret_local_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ woodpecker_agent_secret_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: woodpecker_agent_secret_generation
+  changed_when: "'changed' in woodpecker_agent_secret_generation.stdout"
+  no_log: true
+
+- name: Persist the Woodpecker agent secret on the guest
+  ansible.builtin.copy:
+    src: "{{ woodpecker_agent_secret_local_file }}"
+    dest: "{{ woodpecker_agent_secret_guest_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Generate the Woodpecker smoke secret locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ woodpecker_secret_smoke_local_file }}" ]; then
+      umask 077
+      openssl rand -hex 16 > "{{ woodpecker_secret_smoke_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: woodpecker_secret_smoke_generation
+  changed_when: "'changed' in woodpecker_secret_smoke_generation.stdout"
+  no_log: true
+
+- name: Wait for the Gitea sign-in page before Woodpecker OAuth bootstrap
+  ansible.builtin.uri:
+    url: "{{ woodpecker_gitea_runtime_url }}/user/login"
+    method: GET
+    status_code: 200
+  register: woodpecker_gitea_login_page
+  retries: 48
+  delay: 5
+  until: woodpecker_gitea_login_page.status == 200
+  changed_when: false
+
+- name: Prepare the Gitea OAuth application for Woodpecker
+  ansible.builtin.command:
+    argv:
+      - uv
+      - run
+      - --with
+      - pyyaml
+      - python
+      - "{{ playbook_dir }}/../scripts/woodpecker_bootstrap.py"
+      - prepare-oauth
+      - --gitea-url
+      - "{{ woodpecker_gitea_api_url }}"
+      - --token-file
+      - "{{ woodpecker_gitea_admin_token_local_file }}"
+      - --app-name
+      - "{{ woodpecker_gitea_oauth_app_name }}"
+      - --redirect-uri
+      - "{{ woodpecker_public_url }}/authorize"
+      - --client-id-output
+      - "{{ woodpecker_gitea_client_id_local_file }}"
+      - --client-secret-output
+      - "{{ woodpecker_gitea_client_secret_local_file }}"
+      - --existing-client-id-file
+      - "{{ woodpecker_gitea_client_id_local_file }}"
+      - --existing-client-secret-file
+      - "{{ woodpecker_gitea_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: woodpecker_prepare_oauth
+  changed_when: >-
+    '"recreated": true' in woodpecker_prepare_oauth.stdout
+    or '"client_id"' in woodpecker_prepare_oauth.stdout
+  no_log: true
+
+- name: Record the Woodpecker runtime inputs
+  ansible.builtin.set_fact:
+    woodpecker_database_dsn: >-
+      postgres://{{ woodpecker_database_user }}:{{ (lookup('ansible.builtin.file', woodpecker_database_password_local_file) | trim) | urlencode }}@{{ woodpecker_database_host }}:{{ woodpecker_database_port }}/{{ woodpecker_database_name }}?sslmode=disable
+    woodpecker_gitea_client_id: "{{ lookup('ansible.builtin.file', woodpecker_gitea_client_id_local_file) | trim }}"
+    woodpecker_gitea_client_secret: "{{ lookup('ansible.builtin.file', woodpecker_gitea_client_secret_local_file) | trim }}"
+    woodpecker_agent_secret: "{{ lookup('ansible.builtin.file', woodpecker_agent_secret_local_file) | trim }}"
+    woodpecker_runtime_secret_payload:
+      WOODPECKER_DATABASE_DATASOURCE: >-
+        postgres://{{ woodpecker_database_user }}:{{ (lookup('ansible.builtin.file', woodpecker_database_password_local_file) | trim) | urlencode }}@{{ woodpecker_database_host }}:{{ woodpecker_database_port }}/{{ woodpecker_database_name }}?sslmode=disable
+      WOODPECKER_GITEA_SECRET: "{{ lookup('ansible.builtin.file', woodpecker_gitea_client_secret_local_file) | trim }}"
+      WOODPECKER_AGENT_SECRET: "{{ lookup('ansible.builtin.file', woodpecker_agent_secret_local_file) | trim }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Woodpecker
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: woodpecker
+    common_openbao_compose_env_agent_dir: "{{ woodpecker_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ woodpecker_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ woodpecker_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ woodpecker_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ woodpecker_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ woodpecker_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ woodpecker_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ woodpecker_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ woodpecker_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ woodpecker_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ woodpecker_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: woodpecker.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ woodpecker_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ woodpecker_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ woodpecker_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ woodpecker_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Woodpecker environment file
+  ansible.builtin.template:
+    src: woodpecker.env.j2
+    dest: "{{ woodpecker_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the Woodpecker compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ woodpecker_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Woodpecker images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ woodpecker_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ woodpecker_site_dir }}"
+  register: woodpecker_pull
+  retries: 3
+  delay: 15
+  until: woodpecker_pull.rc == 0
+  changed_when: >-
+    'Pulling' in woodpecker_pull.stdout
+    or 'Downloaded newer image' in woodpecker_pull.stdout
+    or 'Pull complete' in woodpecker_pull.stdout
+
+- name: Start the Woodpecker stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ woodpecker_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ woodpecker_site_dir }}"
+  register: woodpecker_up
+  changed_when: >-
+    'Creating' in woodpecker_up.stdout
+    or 'Recreating' in woodpecker_up.stdout
+    or 'Starting' in woodpecker_up.stdout
+
+- name: Wait for Woodpecker to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ woodpecker_http_port }}"
+    delay: 0
+    timeout: 300
+
+- name: Wait for the Woodpecker local health endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ woodpecker_http_port }}{{ woodpecker_healthcheck_path }}"
+    method: GET
+    return_content: true
+    status_code:
+      - 200
+      - 204
+  register: woodpecker_health
+  retries: 60
+  delay: 5
+  until: woodpecker_health.status in [200, 204]
+  changed_when: false
+
+- name: Render the Woodpecker bootstrap specification locally
+  ansible.builtin.template:
+    src: bootstrap-spec.json.j2
+    dest: "{{ woodpecker_bootstrap_spec_local_file }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true

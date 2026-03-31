@@ -1,0 +1,80 @@
+rules:
+  # Risk: yaml.load without SafeLoader can deserialize attacker-controlled
+  # objects and execute code during repo-managed automation.
+  - id: lv3.semgrep.python.yaml-load-without-safe-loader
+    languages:
+      - python
+    severity: ERROR
+    message: Use yaml.safe_load or yaml.load(..., Loader=yaml.SafeLoader).
+    paths:
+      include:
+        - platform/**/*.py
+        - scripts/**/*.py
+        - config/windmill/scripts/**/*.py
+    patterns:
+      - pattern: yaml.load($DATA, ...)
+      - pattern-not: yaml.load($DATA, Loader=yaml.SafeLoader, ...)
+      - pattern-not: yaml.load($DATA, Loader=SafeLoader, ...)
+
+  # Risk: pickle deserialization executes arbitrary code when the input can be
+  # influenced by a caller or downloaded artifact.
+  - id: lv3.semgrep.python.pickle-deserialization
+    languages:
+      - python
+    severity: ERROR
+    message: Avoid pickle deserialization for repo-managed automation inputs.
+    paths:
+      include:
+        - platform/**/*.py
+        - scripts/**/*.py
+        - config/windmill/scripts/**/*.py
+    pattern-either:
+      - pattern: pickle.load(...)
+      - pattern: pickle.loads(...)
+
+  # Risk: eval executes arbitrary Python source and should not appear in the
+  # governed automation surface.
+  - id: lv3.semgrep.python.eval
+    languages:
+      - python
+    severity: WARNING
+    message: Avoid eval in repo-managed automation; parse structured input explicitly.
+    paths:
+      include:
+        - platform/**/*.py
+        - scripts/**/*.py
+        - config/windmill/scripts/**/*.py
+    pattern: eval(...)
+
+  # Risk: subprocess shell evaluation can splice attacker-controlled strings
+  # into a shell and turn data input into command execution.
+  - id: lv3.semgrep.python.subprocess-shell-true
+    languages:
+      - python
+    severity: WARNING
+    message: Avoid subprocess shell=True in repo-managed automation.
+    paths:
+      include:
+        - platform/**/*.py
+        - scripts/**/*.py
+        - config/windmill/scripts/**/*.py
+    pattern-either:
+      - pattern: subprocess.run(..., shell=True, ...)
+      - pattern: subprocess.Popen(..., shell=True, ...)
+      - pattern: subprocess.call(..., shell=True, ...)
+      - pattern: subprocess.check_call(..., shell=True, ...)
+      - pattern: subprocess.check_output(..., shell=True, ...)
+
+  # Risk: piping remote content into a shell from Ansible tasks bypasses normal
+  # artifact review and executes unverified code during automation.
+  - id: lv3.semgrep.ansible.shell-pipe-to-shell
+    languages:
+      - yaml
+    severity: ERROR
+    message: Do not pipe remote content directly into sh or bash from Ansible automation.
+    paths:
+      include:
+        - playbooks/**/*.yml
+        - roles/**/*.yml
+        - collections/ansible_collections/**/*.yml
+    pattern-regex: '(?im)^\s*(shell|ansible\.builtin\.shell):\s*.*\|\s*(sh|bash)\b'

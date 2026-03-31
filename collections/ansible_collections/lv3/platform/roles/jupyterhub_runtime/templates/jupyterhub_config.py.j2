@@ -1,0 +1,99 @@
+import os
+
+from dockerspawner import DockerSpawner
+from oauthenticator.generic import GenericOAuthenticator
+
+
+c = get_config()
+
+c.JupyterHub.authenticator_class = GenericOAuthenticator
+c.JupyterHub.spawner_class = DockerSpawner
+c.JupyterHub.bind_url = "http://0.0.0.0:8000"
+c.JupyterHub.cookie_secret_file = os.environ["JUPYTERHUB_COOKIE_SECRET_FILE"]
+c.JupyterHub.db_url = os.environ["JUPYTERHUB_DB_URL"]
+c.JupyterHub.hub_ip = "0.0.0.0"
+c.JupyterHub.hub_connect_ip = os.environ.get("JUPYTERHUB_HUB_CONNECT_IP", "{{ jupyterhub_hub_connect_ip }}")
+c.JupyterHub.default_url = os.environ.get("JUPYTERHUB_DEFAULT_URL", "{{ jupyterhub_default_url }}")
+
+c.Authenticator.allow_all = True
+c.Authenticator.admin_users = {
+    user.strip()
+    for user in os.environ.get("JUPYTERHUB_ADMIN_USERS", "").split(",")
+    if user.strip()
+}
+c.Authenticator.auto_login = True
+
+c.GenericOAuthenticator.client_id = os.environ["OIDC_CLIENT_ID"]
+c.GenericOAuthenticator.client_secret = os.environ["OIDC_CLIENT_SECRET"]
+c.GenericOAuthenticator.authorize_url = os.environ["OIDC_AUTHORIZE_URL"]
+c.GenericOAuthenticator.token_url = os.environ["OIDC_TOKEN_URL"]
+c.GenericOAuthenticator.userdata_url = os.environ["OIDC_USERDATA_URL"]
+c.GenericOAuthenticator.oauth_callback_url = f"{os.environ['JUPYTERHUB_PUBLIC_BASE_URL']}/hub/oauth_callback"
+c.GenericOAuthenticator.scope = os.environ.get("OIDC_SCOPES", "openid profile email").split()
+c.GenericOAuthenticator.username_claim = os.environ.get("OIDC_USERNAME_CLAIM", "{{ jupyterhub_keycloak_username_claim }}")
+c.GenericOAuthenticator.login_service = "Keycloak"
+c.GenericOAuthenticator.userdata_params = {"state": "state"}
+if os.environ.get("OIDC_ISSUER"):
+    c.GenericOAuthenticator.tls_verify = True
+
+c.JupyterHub.template_vars = {
+    "announcement_login": "Sign in with your LV3 Keycloak account.",
+}
+
+c.DockerSpawner.image = os.environ["SINGLEUSER_IMAGE"]
+c.DockerSpawner.network_name = os.environ["DOCKER_NETWORK_NAME"]
+c.DockerSpawner.use_internal_ip = True
+c.DockerSpawner.remove = True
+c.DockerSpawner.name_template = "jupyter-{username}"
+c.DockerSpawner.notebook_dir = os.environ.get("JUPYTERHUB_NOTEBOOK_DIR", "{{ jupyterhub_singleuser_notebook_dir }}")
+c.DockerSpawner.default_url = os.environ.get("JUPYTERHUB_DEFAULT_URL", "{{ jupyterhub_default_url }}")
+c.DockerSpawner.start_timeout = int(os.environ.get("JUPYTERHUB_SPAWN_TIMEOUT_SECONDS", "{{ jupyterhub_spawn_timeout_seconds }}"))
+c.DockerSpawner.http_timeout = int(os.environ.get("JUPYTERHUB_SPAWN_HTTP_TIMEOUT_SECONDS", "{{ jupyterhub_spawn_http_timeout_seconds }}"))
+c.DockerSpawner.extra_create_kwargs = {"user": "root"}
+c.DockerSpawner.extra_host_config = {
+    "extra_hosts": {
+        "{{ jupyterhub_host_gateway_hostname }}": "host-gateway",
+    },
+}
+c.DockerSpawner.volumes = {"jupyterhub-user-{username}": c.DockerSpawner.notebook_dir}
+c.DockerSpawner.environment = {
+    "CHOWN_HOME": "yes",
+    "CHOWN_HOME_OPTS": "-R",
+    "DOCKER_STACKS_JUPYTER_CMD": "lab",
+    "GRANT_SUDO": "no",
+    "OPENAI_BASE_URL": os.environ["OPENAI_BASE_URL"],
+    "OPENAI_API_KEY": os.environ["OPENAI_API_KEY"],
+    "OLLAMA_BASE_URL": os.environ["OLLAMA_BASE_URL"],
+    "PLATFORM_CONTEXT_URL": os.environ["PLATFORM_CONTEXT_URL"],
+    "PLATFORM_CONTEXT_API_TOKEN": os.environ.get("PLATFORM_CONTEXT_API_TOKEN", ""),
+    "AWS_ACCESS_KEY_ID": os.environ["AWS_ACCESS_KEY_ID"],
+    "AWS_SECRET_ACCESS_KEY": os.environ["AWS_SECRET_ACCESS_KEY"],
+    "AWS_ENDPOINT_URL_S3": os.environ["AWS_ENDPOINT_URL_S3"],
+    "MINIO_ENDPOINT_URL": os.environ["MINIO_ENDPOINT_URL"],
+    "JUPYTERHUB_SHARED_BUCKET": os.environ["JUPYTERHUB_SHARED_BUCKET"],
+    "JUPYTERHUB_SHARED_REGION": os.environ["JUPYTERHUB_SHARED_REGION"],
+}
+
+c.JupyterHub.services = [
+    {
+        "name": "lv3-ops",
+        "api_token": os.environ["JUPYTERHUB_SERVICE_API_TOKEN"],
+    }
+]
+c.JupyterHub.load_roles = [
+    {
+        "name": "lv3-jupyterhub-service-admin",
+        "description": "Repo-managed admin service token for JupyterHub smoke verification and operations automation.",
+        "scopes": [
+            "read:hub",
+            "list:users",
+            "read:users",
+            "admin:users",
+            "admin:servers",
+        ],
+        "services": ["lv3-ops"],
+    }
+]
+
+c.JupyterHub.shutdown_on_logout = False
+c.JupyterHub.cleanup_servers = False

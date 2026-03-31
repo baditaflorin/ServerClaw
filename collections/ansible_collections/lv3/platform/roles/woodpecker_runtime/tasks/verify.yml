@@ -1,0 +1,73 @@
+---
+# Purpose: Verify that the converged Woodpecker runtime is healthy on docker-runtime-lv3 before the controller bootstrap path runs.
+# Use case: Included after Woodpecker convergence to prove the server, agent, and local health endpoints are serving traffic.
+#
+# Inputs (required):
+#   - woodpecker_compose_file (path, required): Managed compose file path.
+#   - woodpecker_http_port (int, required): Internal Woodpecker listener port.
+#   - woodpecker_healthcheck_path (str, required): Local liveness endpoint path.
+#   - woodpecker_version_path (str, required): Local version endpoint path.
+#
+# Outputs:
+#   - Read-only verification results for local listener health, version, and the expected server plus agent containers.
+#
+# Idempotency: Fully idempotent
+#              This task file performs read-only checks and does not mutate runtime state.
+#
+# Dependencies:
+#   - ADR 0287: Requires guest-local Woodpecker verification after deployment.
+#   - Requires: woodpecker_runtime main tasks have rendered and started the stack.
+#
+# Related ADRs: 0165, 0287
+# Related Runbooks: docs/runbooks/configure-woodpecker.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+- name: Verify the Woodpecker containers are running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ woodpecker_compose_file }}"
+      - ps
+      - --services
+      - --filter
+      - status=running
+  args:
+    chdir: "{{ woodpecker_site_dir }}"
+  register: woodpecker_verify_running
+  changed_when: false
+
+- name: Assert the Woodpecker server and agent are running
+  ansible.builtin.assert:
+    that:
+      - "'woodpecker-server' in woodpecker_verify_running.stdout_lines"
+      - "'woodpecker-agent' in woodpecker_verify_running.stdout_lines"
+    fail_msg: "Woodpecker server or agent is not running."
+
+- name: Verify the Woodpecker local health endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ woodpecker_http_port }}{{ woodpecker_healthcheck_path }}"
+    method: GET
+    return_content: true
+    status_code:
+      - 200
+      - 204
+  register: woodpecker_verify_health
+  retries: 30
+  delay: 5
+  until: woodpecker_verify_health.status in [200, 204]
+  changed_when: false
+
+- name: Verify the Woodpecker local version endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ woodpecker_http_port }}{{ woodpecker_version_path }}"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: woodpecker_verify_version
+  retries: 30
+  delay: 5
+  until: woodpecker_verify_version.status == 200
+  changed_when: false

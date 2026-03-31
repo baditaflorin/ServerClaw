@@ -37,6 +37,7 @@ monitoring_stack_packages:
   - influxdb2
   - influxdb2-cli
   - loki
+  - loki-canary
   - prometheus
   - prometheus-blackbox-exporter
 monitoring_stack_dir: /etc/lv3/monitoring
@@ -74,6 +75,10 @@ monitoring_grafana_capacity_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-
 monitoring_grafana_capacity_dashboard_uid: lv3-capacity-overview
 monitoring_grafana_capacity_dashboard_title: Capacity Overview
 monitoring_grafana_capacity_dashboard_source_file: "{{ monitoring_repo_root }}/config/grafana/dashboards/capacity-overview.json"
+monitoring_grafana_log_canary_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-log-canary-overview.json
+monitoring_grafana_log_canary_dashboard_uid: lv3-log-canary-overview
+monitoring_grafana_log_canary_dashboard_title: LV3 Log Canary
+monitoring_grafana_log_canary_dashboard_source_file: "{{ monitoring_repo_root }}/config/grafana/dashboards/log-canary-overview.json"
 monitoring_influxdb_admin_user: lv3-monitoring-admin
 monitoring_influxdb_admin_password_file: /etc/lv3/monitoring/influxdb-admin-password
 monitoring_influxdb_operator_token_file: /etc/lv3/monitoring/influxdb-operator.token
@@ -89,6 +94,21 @@ monitoring_loki_port: 3100
 monitoring_loki_retention_default: 720h
 monitoring_loki_retention_edge_access: 720h
 monitoring_loki_retention_control_plane: 720h
+monitoring_loki_canary_service_name: loki-canary
+monitoring_loki_canary_service_file: /etc/systemd/system/loki-canary.service
+monitoring_loki_canary_metrics_port: 3500
+monitoring_loki_canary_interval: 15s
+monitoring_loki_canary_wait: 3m
+monitoring_loki_canary_max_wait: 5m
+monitoring_loki_canary_query_timeout: 30s
+monitoring_loki_canary_metric_test_interval: 2m
+monitoring_loki_canary_metric_test_range: 15m
+monitoring_loki_canary_spot_check_interval: 2m
+monitoring_loki_canary_spot_check_max: 30m
+monitoring_loki_canary_spot_check_query_rate: 1m
+monitoring_loki_canary_line_size: 256
+monitoring_loki_canary_log_selector: >-
+  {name="loki-canary",stream="stdout"}
 monitoring_grafana_annotation_retention: 2160h
 monitoring_prometheus_service_name: lv3-prometheus
 monitoring_prometheus_service_file: /etc/systemd/system/lv3-prometheus.service
@@ -102,6 +122,10 @@ monitoring_prometheus_slo_alerts_file: /etc/prometheus/rules/slo-alerts.yml
 monitoring_prometheus_slo_alerts_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/slo_alerts.yml"
 monitoring_prometheus_slo_targets_file: /etc/prometheus/file_sd/slo-targets.yml
 monitoring_prometheus_slo_targets_source_file: "{{ monitoring_repo_root }}/config/prometheus/file_sd/slo_targets.yml"
+monitoring_prometheus_https_tls_alerts_file: /etc/prometheus/rules/https-tls-alerts.yml
+monitoring_prometheus_https_tls_alerts_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/https_tls_alerts.yml"
+monitoring_prometheus_https_tls_targets_file: /etc/prometheus/file_sd/https-tls-targets.yml
+monitoring_prometheus_https_tls_targets_source_file: "{{ monitoring_repo_root }}/config/prometheus/file_sd/https_tls_targets.yml"
 monitoring_prometheus_retention_time: 15d
 monitoring_prometheus_enable_features:
   - exemplar-storage

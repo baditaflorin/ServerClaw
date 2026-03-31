@@ -1,0 +1,13 @@
+groups:
+  - name: lv3-tika
+    rules:
+      - alert: TikaDown
+        expr: probe_success{service="tika",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: tika
+        annotations:
+          summary: Apache Tika is unreachable on the private runtime port.
+          description: The Apache Tika readiness probe on docker-runtime-lv3 has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/configure-tika/

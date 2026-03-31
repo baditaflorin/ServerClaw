@@ -1,0 +1,11 @@
+{
+  "total_count": 1,
+  "workflows": [
+    {
+      "id": "validate.yml",
+      "name": "validate",
+      "path": ".gitea/workflows/validate.yml",
+      "state": "active"
+    }
+  ]
+}

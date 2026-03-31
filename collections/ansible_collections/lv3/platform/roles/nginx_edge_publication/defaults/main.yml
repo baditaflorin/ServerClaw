@@ -31,10 +31,20 @@ proxmox_guests: "{{ hostvars[public_edge_control_plane_host].proxmox_guests }}"
 management_tailscale_ipv4: "{{ hostvars[public_edge_control_plane_host].management_tailscale_ipv4 }}"
 platform_port_assignments: "{{ hostvars[public_edge_control_plane_host].platform_port_assignments }}"
 postgres_ha: "{{ hostvars[public_edge_control_plane_host].postgres_ha }}"
-public_edge_service_topology: "{{ platform_service_topology }}"
+public_edge_service_topology: >-
+  {{
+    hostvars[public_edge_control_plane_host].public_edge_service_topology
+    | default(
+        hostvars[public_edge_control_plane_host].platform_service_topology
+        | default(platform_service_topology)
+      )
+  }}
+public_edge_session_authority: "{{ platform_session_authority }}"
 public_edge_certbot_email: baditaflorin@gmail.com
 public_edge_cert_name: lv3-edge
 public_edge_acme_challenge_method: webroot
+public_edge_certbot_retries: 6
+public_edge_certbot_delay_seconds: 15
 public_edge_update_apt_cache: false
 public_edge_sync_generated_static_dirs: true
 public_edge_static_root: /var/www/lv3-edge
@@ -59,6 +69,16 @@ public_edge_robots_txt_content: |
   # There is no public content intended for indexing.
 public_edge_generated_build_root: "{{ inventory_dir | dirname }}/build"
 public_edge_static_sites: "{{ public_edge_service_topology | service_topology_edge_static_sites }}"
+public_edge_plausible_service_topology: "{{ public_edge_service_topology.get('plausible', {}) }}"
+public_edge_plausible_base_url: "{{ public_edge_plausible_service_topology.get('urls', {}).get('public', '') }}"
+public_edge_plausible_site_registrations: "{{ hostvars[public_edge_control_plane_host].plausible_site_registrations | default([]) }}"
+public_edge_plausible_tracked_sites: >-
+  {{
+    public_edge_plausible_site_registrations
+    | items2dict(key_name='hostname', value_name='site_domain')
+    if (public_edge_plausible_site_registrations | length > 0)
+    else {}
+  }}
 public_edge_security_headers_default:
   strict_transport_security: "max-age=63072000; includeSubDomains; preload"
   cross_origin_resource_policy: same-origin
@@ -83,6 +103,13 @@ public_edge_security_headers_overrides:
       'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:;
       connect-src 'self' https://coolify.lv3.org wss://coolify.lv3.org;
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+  chat.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
+      'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
+      connect-src 'self' https://chat.lv3.org ws://chat.lv3.org wss://chat.lv3.org;
+      worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
   docs.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
@@ -103,6 +130,14 @@ public_edge_security_headers_overrides:
       'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
       connect-src 'self' https://grafana.lv3.org wss://grafana.lv3.org;
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+  notebooks.lv3.org:
+    content_security_policy: >-
+      default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:;
+      style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:;
+      font-src 'self' data:; connect-src 'self' https://notebooks.lv3.org
+      wss://notebooks.lv3.org https://sso.lv3.org; worker-src 'self' blob:;
+      child-src 'self' blob:; manifest-src 'self'
   n8n.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
@@ -143,8 +178,9 @@ public_edge_security_headers_overrides:
   ops.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
-      object-src 'none'; script-src 'self' 'unsafe-inline' https://unpkg.com;
-      style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;
+      object-src 'none'; script-src 'self' https://unpkg.com;
+      style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://unpkg.com;
+      font-src 'self' data: https://unpkg.com;
       connect-src 'self'; manifest-src 'self'
   sso.lv3.org:
     content_security_policy: >-
@@ -152,6 +188,12 @@ public_edge_security_headers_overrides:
       object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
       img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://sso.lv3.org;
       frame-src 'self'; manifest-src 'self'
+  wiki.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
+      img-src 'self' data: https: blob:; font-src 'self' data:;
+      connect-src 'self' https://wiki.lv3.org; manifest-src 'self'
   status.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
@@ -165,6 +207,14 @@ public_edge_security_headers_overrides:
       img-src 'self' data:; font-src 'self' data:; connect-src 'self'
       https://uptime.lv3.org ws://uptime.lv3.org wss://uptime.lv3.org; manifest-src 'self'
 public_edge_extra_sites:
+  - hostname: registry.lv3.org
+    kind: proxy
+    upstream: "http://10.10.10.20:{{ platform_port_assignments.harbor_port }}"
+    client_max_body_size: 0
+    chunked_transfer_encoding: true
+    proxy_request_buffering: false
+    proxy_read_timeout_seconds: 900
+    proxy_send_timeout_seconds: 900
   - hostname: changelog.lv3.org
     kind: static_dir
     source_dir: changelog-portal
@@ -172,6 +222,16 @@ public_edge_extra_sites:
     kind: static_dir
     source_dir: docs-portal
 public_edge_authenticated_sites:
+  analytics.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+    unauthenticated_paths:
+      - /api/error
+      - /api/event
+      - /api/health
+      - /api/system/health/live
+      - /api/system/health/ready
+    unauthenticated_prefix_paths:
+      - /js/
   changelog.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   coolify.lv3.org:
@@ -180,6 +240,10 @@ public_edge_authenticated_sites:
     auth_proxy_upstream: http://127.0.0.1:4180
   draw.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
+  flags.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+    unauthenticated_paths:
+      - /health
   agents.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
     unauthenticated_paths:
@@ -214,4 +278,11 @@ public_edge_certificate_domains: >-
       + public_edge_additional_certificate_domains
     ) | unique
   }}
-public_edge_sites: "{{ (public_edge_service_topology | service_topology_edge_sites) + public_edge_extra_sites }}"
+public_edge_sites: >-
+  {{
+    (
+      public_edge_extra_sites
+      + (public_edge_service_topology | service_topology_edge_sites)
+    )
+    | unique(attribute='hostname')
+  }}

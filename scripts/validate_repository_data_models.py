@@ -11,6 +11,8 @@ from typing import Any
 
 from pathlib import Path
 
+import jsonschema
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
@@ -37,6 +39,9 @@ from platform.circuit import load_circuit_policies
 from platform.faults import load_network_impairment_matrix
 from platform.interface_contracts import validate_contracts
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
+from gate_bypass_waivers import load_catalog as load_gate_bypass_waiver_catalog
+from gate_bypass_waivers import summarize_receipts as summarize_gate_bypass_waivers
+from gate_bypass_waivers import validate_catalog as validate_gate_bypass_waiver_catalog
 from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
 from operator_manager import ROSTER_PATH, validate_operator_roster
 from platform.execution_lanes import load_execution_lane_catalog
@@ -47,6 +52,12 @@ from shared_policy_packs import (
     SHARED_POLICY_PACKS_SCHEMA_PATH,
     load_shared_policy_packs,
 )
+from runtime_assurance import (
+    SCHEMA_PATH as RUNTIME_ASSURANCE_SCHEMA_PATH,
+    load_runtime_assurance_catalog,
+    validate_runtime_assurance_catalog,
+)
+from stage_smoke_suites import load_stage_smoke_catalog, validate_stage_smoke_catalog
 from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
 from generate_slo_rules import outputs_match as slo_outputs_match
 from immutable_guest_replacement import load_guest_replacement_catalog, validate_guest_replacement_catalog
@@ -64,6 +75,11 @@ from slo_tracking import (
 )
 from service_completeness import load_context as load_service_completeness_context
 from service_redundancy import load_redundancy_catalog, validate_redundancy_catalog
+from vulnerability_budget import (
+    load_policy as load_vulnerability_budget_policy,
+    load_service_index as load_vulnerability_budget_service_index,
+    validate_policy as validate_vulnerability_budget_policy,
+)
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -73,6 +89,13 @@ from workflow_catalog import (
 from workstream_surface_ownership import validate_registry as validate_workstream_surface_ownership_registry
 from platform.config_merge import validate_merge_eligible_catalog
 from preview_environment import load_profile_catalog, validate_profile_catalog
+from repo_deploy_profiles import load_repo_deploy_catalog, validate_repo_deploy_catalog
+from repo_deploy_image_cache import load_profile_catalog as load_repo_deploy_base_image_profile_catalog
+from repo_deploy_image_cache import validate_profile_catalog as validate_repo_deploy_base_image_profile_catalog
+from validation_runner_contracts import (
+    load_contract_catalog as load_validation_runner_contract_catalog,
+    validate_contract_catalog as validate_validation_runner_contract_catalog,
+)
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
@@ -81,6 +104,7 @@ HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 UPTIME_MONITORS_PATH = repo_path("config", "uptime-kuma", "monitors.json")
 HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
 CERTIFICATE_CATALOG_PATH = repo_path("config", "certificate-catalog.json")
+SERVICE_CAPABILITY_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
 SECRET_CATALOG_PATH = repo_path("config", "secret-catalog.json")
 SEED_DATA_CATALOG_PATH = repo_path("config", "seed-data-catalog.json")
 TOKEN_POLICY_PATH = repo_path("config", "token-policy.yaml")
@@ -94,15 +118,24 @@ CAPACITY_MODEL_PATH = repo_path("config", "capacity-model.json")
 CAPACITY_MODEL_SCHEMA_PATH = repo_path("docs", "schema", "capacity-model.schema.json")
 EPHEMERAL_POOL_CATALOG_PATH = repo_path("config", "ephemeral-capacity-pools.json")
 EPHEMERAL_POOL_SCHEMA_PATH = repo_path("docs", "schema", "ephemeral-capacity-pools.schema.json")
+RESTORE_READINESS_PROFILE_PATH = repo_path("config", "restore-readiness-profiles.json")
+RESTORE_READINESS_PROFILE_SCHEMA_PATH = repo_path("docs", "schema", "restore-readiness-profiles.schema.json")
+PERSONA_CATALOG_PATH = repo_path("config", "persona-catalog.json")
+PERSONA_CATALOG_SCHEMA_PATH = repo_path("docs", "schema", "persona-catalog.schema.json")
+REPO_DEPLOY_CATALOG_PATH = repo_path("config", "repo-deploy-catalog.json")
+REPO_DEPLOY_CATALOG_SCHEMA_PATH = repo_path("docs", "schema", "repo-deploy-catalog.schema.json")
 REPLACEABILITY_REVIEW_CATALOG_PATH = repo_path("config", "replaceability-review-catalog.json")
 VERSION_SEMANTICS_PATH = repo_path("config", "version-semantics.json")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
+REPO_DEPLOY_BASE_IMAGE_PROFILES_PATH = repo_path("config", "repo-deploy-base-image-profiles.json")
+REPO_DEPLOY_BASE_IMAGE_PROFILES_SCHEMA_PATH = repo_path("docs", "schema", "repo-deploy-base-image-profiles.schema.json")
 TRIAGE_RULES_PATH = repo_path("config", "triage-rules.yaml")
 TRIAGE_AUTO_CHECK_ALLOWLIST_PATH = repo_path("config", "triage-auto-check-allowlist.yaml")
 CHANGELOG_REDACTION_PATH = repo_path("config", "changelog-redaction.yaml")
 AGENT_POLICIES_PATH = repo_path("config", "agent-policies.yaml")
 CIRCUIT_POLICIES_PATH = repo_path("config", "circuit-policies.yaml")
 MERGE_ELIGIBLE_FILES_PATH = repo_path("config", "merge-eligible-files.yaml")
+VALIDATION_RUNNER_CONTRACTS_PATH = repo_path("config", "validation-runner-contracts.json")
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -137,6 +170,7 @@ IDENTITY_REQUIRED_METADATA = {
     "rotation_or_expiry",
     "credential_storage",
 }
+LAUNCHER_PURPOSES = {"operate", "observe", "learn", "plan", "administer"}
 
 
 def require_str_int_mapping(value: Any, path: str) -> dict[str, int]:
@@ -314,6 +348,9 @@ def validate_no_scaffold_placeholders() -> None:
         repo_path("config", "capability-contract-catalog.json"): load_json(
             repo_path("config", "capability-contract-catalog.json")
         ),
+        repo_path("config", "persona-catalog.json"): load_json(
+            repo_path("config", "persona-catalog.json")
+        ),
         repo_path("config", "service-redundancy-catalog.json"): load_json(
             repo_path("config", "service-redundancy-catalog.json")
         ),
@@ -354,9 +391,10 @@ def validate_no_tracked_env_files() -> None:
     if completed.returncode == 0:
         tracked = [line.strip() for line in completed.stdout.splitlines() if line.strip()]
     else:
-        # Some remote validation runners materialize git worktrees through an
-        # alternate `.git-remote/` layout that breaks `git ls-files`. Fall back
-        # to a repository scan so the no-.env invariant still holds there.
+        # Immutable remote validation snapshots deliberately omit `.git`
+        # metadata, and some older worker mirrors used an alternate
+        # `.git-remote/` layout that also breaks `git ls-files`. Fall back to a
+        # repository scan so the no-.env invariant still holds in both modes.
         ignored_dirs = {".ansible", ".claude", ".git", ".git-remote", ".local", ".venv", ".worktrees"}
         tracked = []
         for path in REPO_ROOT.rglob("*.env"):
@@ -884,6 +922,28 @@ def validate_probe_definition(probe: Any, path: str) -> None:
         require_str(probe.get("unit"), f"{path}.unit")
         require_str(probe.get("expected_state"), f"{path}.expected_state")
 
+    if "docker_publication" in probe:
+        docker_publication = require_mapping(probe.get("docker_publication"), f"{path}.docker_publication")
+        require_str(docker_publication.get("container_name"), f"{path}.docker_publication.container_name")
+        if "required_networks" in docker_publication:
+            require_string_list(docker_publication.get("required_networks"), f"{path}.docker_publication.required_networks")
+        if "bindings" in docker_publication:
+            bindings = require_list(docker_publication.get("bindings"), f"{path}.docker_publication.bindings")
+            for index, binding in enumerate(bindings):
+                binding = require_mapping(binding, f"{path}.docker_publication.bindings[{index}]")
+                require_str(binding.get("host"), f"{path}.docker_publication.bindings[{index}].host")
+                require_int(binding.get("port"), f"{path}.docker_publication.bindings[{index}].port", 1)
+        if "derive_bindings_from_probes" in docker_publication:
+            require_bool(docker_publication.get("derive_bindings_from_probes"), f"{path}.docker_publication.derive_bindings_from_probes")
+        if "require_nat_chain" in docker_publication:
+            require_bool(docker_publication.get("require_nat_chain"), f"{path}.docker_publication.require_nat_chain")
+        if "require_forward_chain" in docker_publication:
+            require_bool(docker_publication.get("require_forward_chain"), f"{path}.docker_publication.require_forward_chain")
+        if "working_directory" in docker_publication:
+            require_str(docker_publication.get("working_directory"), f"{path}.docker_publication.working_directory")
+        if "compose_files" in docker_publication:
+            require_string_list(docker_publication.get("compose_files"), f"{path}.docker_publication.compose_files")
+
 
 def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
     catalog = require_mapping(
@@ -928,6 +988,8 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
             if not (REPO_ROOT / verify_file).is_file():
                 raise ValueError(f"{service_path}.verify_file does not exist: {verify_file}")
 
+        if "startup" in service:
+            validate_probe_definition(service.get("startup"), f"{service_path}.startup")
         validate_probe_definition(service.get("liveness"), f"{service_path}.liveness")
         validate_probe_definition(service.get("readiness"), f"{service_path}.readiness")
         if "tls_certificate_ids" in service:
@@ -985,6 +1047,24 @@ def validate_certificate_catalog(host_vars_context: dict[str, Any]) -> None:
         raise ValueError("config/certificate-catalog.json.certificates must not be empty")
 
     topology = host_vars_context["topology"]
+    service_capability_catalog = require_mapping(
+        load_json(SERVICE_CAPABILITY_CATALOG_PATH),
+        str(SERVICE_CAPABILITY_CATALOG_PATH),
+    )
+    allowed_service_ids = set(topology)
+    allowed_service_ids.update(
+        require_identifier(
+            entry.get("id"),
+            f"config/service-capability-catalog.json.services[{index}].id",
+        )
+        for index, entry in enumerate(
+            require_list(
+                service_capability_catalog.get("services"),
+                "config/service-capability-catalog.json.services",
+            )
+        )
+        for entry in [require_mapping(entry, f"config/service-capability-catalog.json.services[{index}]")]
+    )
     certificate_ids: set[str] = set()
     for index, item in enumerate(certificates):
         path = f"config/certificate-catalog.json.certificates[{index}]"
@@ -995,7 +1075,7 @@ def validate_certificate_catalog(host_vars_context: dict[str, Any]) -> None:
         certificate_ids.add(certificate_id)
 
         service_id = require_identifier(item.get("service_id"), f"{path}.service_id")
-        if service_id not in topology:
+        if service_id not in allowed_service_ids:
             raise ValueError(f"{path}.service_id references unknown platform service '{service_id}'")
 
         require_enum(item.get("status"), f"{path}.status", {"active", "planned"})
@@ -1460,6 +1540,56 @@ def validate_ephemeral_pool_catalog() -> None:
     require_str(schema.get("title"), "docs/schema/ephemeral-capacity-pools.schema.json.title")
 
 
+def validate_restore_readiness_profiles() -> None:
+    payload = load_json(RESTORE_READINESS_PROFILE_PATH)
+    schema = load_json(RESTORE_READINESS_PROFILE_SCHEMA_PATH)
+    jsonschema.validate(instance=payload, schema=schema)
+
+    require_str(payload.get("$schema"), "config/restore-readiness-profiles.json.$schema")
+    if payload["$schema"] != "docs/schema/restore-readiness-profiles.schema.json":
+        raise ValueError(
+            "config/restore-readiness-profiles.json.$schema must reference docs/schema/restore-readiness-profiles.schema.json"
+        )
+    require_semver(payload.get("schema_version"), "config/restore-readiness-profiles.json.schema_version")
+
+    profiles = require_mapping(payload.get("profiles"), "config/restore-readiness-profiles.json.profiles")
+    expected_profile_ids = {"backup-vm", "docker-runtime", "postgres"}
+    if set(profiles.keys()) != expected_profile_ids:
+        raise ValueError(
+            "config/restore-readiness-profiles.json.profiles must define exactly backup-vm, docker-runtime, and postgres"
+        )
+
+    synthetic_catalog = load_json(repo_path("config", "synthetic-transaction-catalog.json"))
+    synthetic_targets = require_mapping(
+        synthetic_catalog.get("targets"),
+        "config/synthetic-transaction-catalog.json.targets",
+    )
+
+    for profile_id, raw_profile in profiles.items():
+        path = f"config/restore-readiness-profiles.json.profiles.{profile_id}"
+        profile = require_mapping(raw_profile, path)
+        require_str(profile.get("description"), f"{path}.description")
+        require_int(profile.get("initial_wait_seconds"), f"{path}.initial_wait_seconds", 0)
+        require_int(profile.get("max_attempts"), f"{path}.max_attempts", 1)
+        require_int(profile.get("retry_delay_seconds"), f"{path}.retry_delay_seconds", 0)
+        network_checks = require_string_list(profile.get("network_dependency_checks"), f"{path}.network_dependency_checks")
+        if not network_checks:
+            raise ValueError(f"{path}.network_dependency_checks must not be empty")
+        require_identifier(profile.get("service_class"), f"{path}.service_class")
+
+        synthetic_replay = require_mapping(profile.get("synthetic_replay"), f"{path}.synthetic_replay")
+        enabled = require_bool(synthetic_replay.get("enabled"), f"{path}.synthetic_replay.enabled")
+        target_id = synthetic_replay.get("target_id")
+        if enabled:
+            target_id = require_str(target_id, f"{path}.synthetic_replay.target_id")
+            if target_id not in synthetic_targets:
+                raise ValueError(
+                    f"{path}.synthetic_replay.target_id references unknown target '{target_id}'"
+                )
+        elif target_id is not None:
+            require_str(target_id, f"{path}.synthetic_replay.target_id")
+
+
 def validate_error_registry() -> None:
     payload = require_mapping(load_yaml(ERROR_REGISTRY_PATH), str(ERROR_REGISTRY_PATH))
     require_semver(payload.get("schema_version"), "config/error-codes.yaml.schema_version")
@@ -1790,6 +1920,11 @@ def validate_workstream_live_apply_contracts() -> None:
                 require_string_list(step.get("paths"), f"{step_path}.paths")
             else:
                 require_str(step.get("path"), f"{step_path}.path")
+
+
+def validate_validation_runner_contracts() -> None:
+    catalog = load_validation_runner_contract_catalog(VALIDATION_RUNNER_CONTRACTS_PATH)
+    validate_validation_runner_contract_catalog(catalog)
 
 def validate_interface_contracts() -> None:
     validate_contracts()
@@ -2517,8 +2652,60 @@ def validate_slo_catalog_assets() -> None:
         raise ValueError("generated SLO artifacts are out of date")
 
 
+def validate_persona_catalog() -> None:
+    payload = load_json(PERSONA_CATALOG_PATH)
+    schema = load_json(PERSONA_CATALOG_SCHEMA_PATH)
+    jsonschema.validate(instance=payload, schema=schema)
+
+    personas = require_list(payload.get("personas"), "config/persona-catalog.json.personas")
+    seen_ids: set[str] = set()
+    default_count = 0
+    for index, persona in enumerate(personas):
+        path = f"config/persona-catalog.json.personas[{index}]"
+        persona = require_mapping(persona, path)
+        persona_id = require_identifier(persona.get("id"), f"{path}.id")
+        if persona_id in seen_ids:
+            raise ValueError(f"{path}.id duplicates '{persona_id}'")
+        seen_ids.add(persona_id)
+        require_str(persona.get("name"), f"{path}.name")
+        require_str(persona.get("description"), f"{path}.description")
+        is_default = require_bool(persona.get("default"), f"{path}.default")
+        if is_default:
+            default_count += 1
+        focus_purposes = require_string_list(persona.get("focus_purposes"), f"{path}.focus_purposes")
+        for purpose in focus_purposes:
+            if purpose not in LAUNCHER_PURPOSES:
+                raise ValueError(f"{path}.focus_purposes contains unsupported purpose '{purpose}'")
+        default_favorites = require_string_list(persona.get("default_favorites"), f"{path}.default_favorites")
+        for favorite in default_favorites:
+            if ":" not in favorite:
+                raise ValueError(f"{path}.default_favorites item '{favorite}' must use '<kind>:<id>' format")
+
+    if default_count != 1:
+        raise ValueError("config/persona-catalog.json must declare exactly one default persona")
+
+
+def validate_runtime_assurance_matrix_data() -> None:
+    payload = load_runtime_assurance_catalog()
+    validate_runtime_assurance_catalog(payload, schema_path=RUNTIME_ASSURANCE_SCHEMA_PATH)
+
+
+def validate_repo_deploy_catalog_data() -> None:
+    payload = load_repo_deploy_catalog(REPO_DEPLOY_CATALOG_PATH)
+    schema = load_json(REPO_DEPLOY_CATALOG_SCHEMA_PATH)
+    jsonschema.validate(instance=payload, schema=schema)
+    validate_repo_deploy_catalog(payload, path=REPO_DEPLOY_CATALOG_PATH)
+
+
 def validate_preview_environment_profiles() -> None:
     validate_profile_catalog(load_profile_catalog())
+
+
+def validate_repo_deploy_base_image_profiles() -> None:
+    payload = load_repo_deploy_base_image_profile_catalog(REPO_DEPLOY_BASE_IMAGE_PROFILES_PATH)
+    validate_repo_deploy_base_image_profile_catalog(payload, path=REPO_DEPLOY_BASE_IMAGE_PROFILES_PATH)
+    schema = load_json(REPO_DEPLOY_BASE_IMAGE_PROFILES_SCHEMA_PATH)
+    jsonschema.validate(instance=payload, schema=schema)
 
 
 def validate_replaceability_review_data() -> None:
@@ -2537,6 +2724,11 @@ def validate_repository_data_models() -> int:
     command_catalog = load_command_catalog()
     validate_command_catalog(command_catalog, workflow_catalog, secret_manifest)
     validate_container_image_catalog(load_image_catalog())
+    validate_vulnerability_budget_policy(
+        load_vulnerability_budget_policy(),
+        service_index=load_vulnerability_budget_service_index(),
+        image_catalog=load_image_catalog(),
+    )
     validate_error_registry()
     api_gateway_catalog, _ = load_api_gateway_catalog()
     validate_api_gateway_catalog(api_gateway_catalog)
@@ -2550,6 +2742,7 @@ def validate_repository_data_models() -> int:
     validate_mutation_audit_schema(load_mutation_audit_schema())
     validate_receipts()
     validate_promotion_receipts()
+    validate_stage_smoke_catalog(load_stage_smoke_catalog())
     validate_uptime_monitors()
     host_vars_context = validate_host_vars()
     validate_certificate_catalog(host_vars_context)
@@ -2562,10 +2755,15 @@ def validate_repository_data_models() -> int:
     token_classes = validate_token_policy()
     validate_token_inventory(token_classes, workflow_catalog)
     validate_circuit_policies()
+    validate_gate_bypass_waiver_catalog(load_gate_bypass_waiver_catalog())
+    gate_bypass_summary = summarize_gate_bypass_waivers()
+    if gate_bypass_summary["invalid_receipts"]:
+        raise ValueError("receipts/gate-bypasses contains invalid governed waiver receipts")
     validate_version_semantics()
     validate_workstreams_release_policy()
     validate_workstream_canonical_truth_metadata()
     validate_workstream_live_apply_contracts()
+    validate_validation_runner_contracts()
     load_network_impairment_matrix()
     validate_interface_contracts()
     validate_merge_eligible_files_contract()
@@ -2577,8 +2775,13 @@ def validate_repository_data_models() -> int:
     validate_shared_policy_packs()
     validate_capacity_model_schema()
     validate_capacity_model()
+    validate_persona_catalog()
+    validate_runtime_assurance_matrix_data()
+    validate_repo_deploy_catalog_data()
     validate_preview_environment_profiles()
+    validate_repo_deploy_base_image_profiles()
     validate_ephemeral_pool_catalog()
+    validate_restore_readiness_profiles()
     validate_replaceability_review_data()
     load_public_surface_scan_policy()
     validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])

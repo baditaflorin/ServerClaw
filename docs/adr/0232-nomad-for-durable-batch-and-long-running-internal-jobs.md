@@ -1,9 +1,10 @@
 # ADR 0232: Nomad For Durable Batch And Long-Running Internal Jobs
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.65
+- Implemented In Platform Version: 0.130.44
+- Implemented On: 2026-03-29
 - Date: 2026-03-28
 
 ## Context

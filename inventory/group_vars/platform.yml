@@ -58,18 +58,28 @@ platform_host:
       - name: postgres-lv3
         listen_address: 100.64.0.1
         listen_port: 5432
-        upstream_host: 10.10.10.55
+        upstream_host: 10.10.10.50
         upstream_port: 5432
       - name: windmill
         listen_address: 100.64.0.1
         listen_port: 8005
         upstream_host: 10.10.10.20
         upstream_port: 8000
+      - name: nomad
+        listen_address: 100.64.0.1
+        listen_port: 8013
+        upstream_host: 10.10.10.40
+        upstream_port: 4646
       - name: mattermost
         listen_address: 100.64.0.1
         listen_port: 8066
         upstream_host: 10.10.10.20
         upstream_port: 8065
+      - name: matrix-synapse
+        listen_address: 100.64.0.1
+        listen_port: 8015
+        upstream_host: 10.10.10.20
+        upstream_port: 8008
       - name: gitea
         listen_address: 100.64.0.1
         listen_port: 3009
@@ -90,6 +100,11 @@ platform_host:
         listen_port: 8200
         upstream_host: 10.10.10.20
         upstream_port: 8200
+      - name: openfga
+        listen_address: 100.64.0.1
+        listen_port: 8014
+        upstream_host: 10.10.10.20
+        upstream_port: 8098
       - name: semaphore
         listen_address: 100.64.0.1
         listen_port: 8020
@@ -100,6 +115,11 @@ platform_host:
         listen_port: 8011
         upstream_host: 10.10.10.20
         upstream_port: 8093
+      - name: woodpecker
+        listen_address: 100.64.0.1
+        listen_port: 8017
+        upstream_host: 10.10.10.20
+        upstream_port: 8102
       - name: open-webui
         listen_address: 100.64.0.1
         listen_port: 8008
@@ -136,41 +156,64 @@ platform_ports:
   monitoring_otlp_grpc_port: 4317
   monitoring_otlp_http_port: 4318
   netdata_port: 19999
+  mailpit_http_port: 8025
+  mailpit_smtp_port: 1025
   mail_platform_gateway_port: 8081
   ntfy_port: 2586
+  openfga_http_port: 8098
+  openfga_host_proxy_port: 8014
   openbao_http_port: 8201
   openbao_proxy_port: 8200
   semaphore_server_port: 3004
   semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
   windmill_host_proxy_port: 8005
+  nomad_server_port: 4646
+  nomad_rpc_port: 4647
+  nomad_serf_port: 4648
+  nomad_host_proxy_port: 8013
   mattermost_server_port: 8065
   mattermost_host_proxy_port: 8066
+  matrix_synapse_port: 8008
+  matrix_synapse_host_proxy_port: 8015
   gitea_http_port: 3003
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
+  gotenberg_port: 3007
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  plausible_port: 8016
+  flagsmith_port: 8017
   dify_port: 8094
+  changedetection_port: 5000
+  browser_runner_port: 8096
   outline_port: 3006
+  directus_port: 8055
+  jupyterhub_port: 8097
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
   excalidraw_port: 3095
   excalidraw_room_port: 3096
+  woodpecker_http_port: 8102
+  woodpecker_host_proxy_port: 8017
   ollama_api_port: 11434
   n8n_port: 5678
+  nextcloud_port: 8084
   coolify_dashboard_port: 8000
   coolify_proxy_port: 80
+  coolify_proxy_tls_port: 443
   coolify_host_proxy_port: 8012
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
+  serverclaw_port: 8096
   api_gateway_internal_port: 8083
   platform_context_internal_port: 8010
   platform_context_host_proxy_port: 8010
   homepage_port: 3090
   ops_portal_port: 8092
+  harbor_port: 8095
   plane_port: 8093
   plane_host_proxy_port: 8011
   ntopng_http_port: 3000
@@ -179,6 +222,8 @@ platform_ports:
   portainer_host_proxy_port: 9444
   step_ca_api_port: 9000
   step_ca_proxy_port: 9443
+  tika_port: 9998
+  tesseract_ocr_port: 3008
   headscale_http_port: 8080
   vaultwarden_https_port: 8222
 platform_port_assignments:
@@ -192,41 +237,64 @@ platform_port_assignments:
   monitoring_otlp_grpc_port: 4317
   monitoring_otlp_http_port: 4318
   netdata_port: 19999
+  mailpit_http_port: 8025
+  mailpit_smtp_port: 1025
   mail_platform_gateway_port: 8081
   ntfy_port: 2586
+  openfga_http_port: 8098
+  openfga_host_proxy_port: 8014
   openbao_http_port: 8201
   openbao_proxy_port: 8200
   semaphore_server_port: 3004
   semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
   windmill_host_proxy_port: 8005
+  nomad_server_port: 4646
+  nomad_rpc_port: 4647
+  nomad_serf_port: 4648
+  nomad_host_proxy_port: 8013
   mattermost_server_port: 8065
   mattermost_host_proxy_port: 8066
+  matrix_synapse_port: 8008
+  matrix_synapse_host_proxy_port: 8015
   gitea_http_port: 3003
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
+  gotenberg_port: 3007
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  plausible_port: 8016
+  flagsmith_port: 8017
   dify_port: 8094
+  changedetection_port: 5000
+  browser_runner_port: 8096
   outline_port: 3006
+  directus_port: 8055
+  jupyterhub_port: 8097
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
   excalidraw_port: 3095
   excalidraw_room_port: 3096
+  woodpecker_http_port: 8102
+  woodpecker_host_proxy_port: 8017
   ollama_api_port: 11434
   n8n_port: 5678
+  nextcloud_port: 8084
   coolify_dashboard_port: 8000
   coolify_proxy_port: 80
+  coolify_proxy_tls_port: 443
   coolify_host_proxy_port: 8012
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
+  serverclaw_port: 8096
   api_gateway_internal_port: 8083
   platform_context_internal_port: 8010
   platform_context_host_proxy_port: 8010
   homepage_port: 3090
   ops_portal_port: 8092
+  harbor_port: 8095
   plane_port: 8093
   plane_host_proxy_port: 8011
   ntopng_http_port: 3000
@@ -235,6 +303,8 @@ platform_port_assignments:
   portainer_host_proxy_port: 9444
   step_ca_api_port: 9000
   step_ca_proxy_port: 9443
+  tika_port: 9998
+  tesseract_ocr_port: 3008
   headscale_http_port: 8080
   vaultwarden_https_port: 8222
 platform_guest_catalog:
@@ -441,6 +511,29 @@ platform_guest_catalog:
       packages:
         - docker.io
         - git
+    - vmid: 180
+      name: artifact-cache-lv3
+      role: artifact-cache
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.80
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:18:AC:80
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 160
+      tags:
+        - artifact-cache
+        - cache
+        - docker
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: artifact-cache-plane
+        co_location_exceptions: []
+      packages:
+        - docker.io
   by_name:
     nginx-lv3:
       vmid: 110
@@ -652,6 +745,30 @@ platform_guest_catalog:
       packages:
         - docker.io
         - git
+    artifact-cache-lv3:
+      vmid: 180
+      name: artifact-cache-lv3
+      role: artifact-cache
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.80
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:18:AC:80
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 160
+      tags:
+        - artifact-cache
+        - cache
+        - docker
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: artifact-cache-plane
+        co_location_exceptions: []
+      packages:
+        - docker.io
   by_role:
     nginx:
       vmid: 110
@@ -863,6 +980,30 @@ platform_guest_catalog:
       packages:
         - docker.io
         - git
+    artifact-cache:
+      vmid: 180
+      name: artifact-cache-lv3
+      role: artifact-cache
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.80
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:18:AC:80
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 160
+      tags:
+        - artifact-cache
+        - cache
+        - docker
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: artifact-cache-plane
+        co_location_exceptions: []
+      packages:
+        - docker.io
 platform_service_topology:
   nginx_edge:
     service_name: nginx-edge
@@ -966,7 +1107,7 @@ platform_service_topology:
   headscale:
     service_name: headscale
     owning_vm: proxmox_florin
-    private_ip: '{{ hostvars[''proxmox_florin''].proxmox_internal_ipv4 }}'
+    private_ip: 10.10.10.1
     public_hostname: headscale.lv3.org
     exposure_model: edge-published
     observability:
@@ -1167,12 +1308,37 @@ platform_service_topology:
       type: A
       target: 65.108.75.123
       ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: static
+      slug: mail
+      title: LV3 Mail
+      description: The managed LV3 mail service accepts SMTP and IMAPS traffic on
+        the published mail hostname without exposing a browser-facing mailbox UI.
+      meta: Use the declared mail protocols on ports 587 and 993 instead of expecting
+        a public web application at this hostname.
     service_id: mail_platform
     ports:
       private_api: 8081
     urls:
       public: https://mail.lv3.org
       private_api: http://10.10.10.20:8081
+  mailpit:
+    service_name: mailpit
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: mailpit
+    ports:
+      internal: 8025
+      smtp: 1025
+    urls:
+      internal: http://10.10.10.20:8025
+      smtp: smtp://10.10.10.20:1025
   step_ca:
     service_name: step-ca
     owning_vm: docker-runtime-lv3
@@ -1191,6 +1357,32 @@ platform_service_topology:
     urls:
       internal: https://10.10.10.20:9000
       controller: https://100.64.0.1:9443
+  tika:
+    service_name: tika
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: tika
+    ports:
+      internal: 9998
+    urls:
+      internal: http://10.10.10.20:9998
+  tesseract_ocr:
+    service_name: tesseract-ocr
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: tesseract_ocr
+    ports:
+      internal: 3008
+    urls:
+      internal: http://10.10.10.20:3008
   semaphore:
     service_name: semaphore
     owning_vm: docker-runtime-lv3
@@ -1227,6 +1419,24 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8000
       controller: http://100.64.0.1:8005
+  nomad:
+    service_name: nomad
+    owning_vm: monitoring-lv3
+    private_ip: 10.10.10.40
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: https://100.64.0.1:8013
+    service_id: nomad
+    ports:
+      internal: 4646
+      controller: 8013
+    urls:
+      internal: https://10.10.10.40:4646
+      controller: https://100.64.0.1:8013
   gitea:
     service_name: gitea
     owning_vm: docker-runtime-lv3
@@ -1272,6 +1482,39 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8065
       controller: http://100.64.0.1:8066
+  matrix_synapse:
+    service_name: matrix-synapse
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: matrix.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: matrix
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8008
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8015
+    service_id: matrix_synapse
+    ports:
+      internal: 8008
+      controller: 8015
+    urls:
+      public: https://matrix.lv3.org
+      internal: http://10.10.10.20:8008
+      controller: http://100.64.0.1:8015
   netbox:
     service_name: netbox
     owning_vm: docker-runtime-lv3
@@ -1345,6 +1588,64 @@ platform_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  flagsmith:
+    service_name: flagsmith
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: flags.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: flags
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8017
+    service_id: flagsmith
+    ports:
+      internal: 8017
+    urls:
+      public: https://flags.lv3.org
+      internal: http://10.10.10.20:8017
+  plausible:
+    service_name: plausible
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: analytics.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: analytics
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8016
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+    service_id: plausible
+    ports:
+      internal: 8016
+    urls:
+      public: https://analytics.lv3.org
+      internal: http://10.10.10.20:8016
   dify:
     service_name: dify
     owning_vm: docker-runtime-lv3
@@ -1406,6 +1707,39 @@ platform_service_topology:
       public: https://tasks.lv3.org
       internal: http://10.10.10.20:8093
       controller: http://100.64.0.1:8011
+  woodpecker:
+    service_name: woodpecker
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: ci.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: ci
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8102
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8017
+    service_id: woodpecker
+    ports:
+      internal: 8102
+      controller: 8017
+    urls:
+      public: https://ci.lv3.org
+      internal: http://10.10.10.20:8102
+      controller: http://100.64.0.1:8017
   outline:
     service_name: outline
     owning_vm: docker-runtime-lv3
@@ -1427,13 +1761,13 @@ platform_service_topology:
       tls: true
       noindex: true
       kind: proxy
-      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
-        | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port
-        }}
+      upstream: http://10.10.10.20:3006
     service_id: outline
-    ports: {}
+    ports:
+      internal: 3006
     urls:
       public: https://wiki.lv3.org
+      internal: http://10.10.10.20:3006
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -1485,8 +1819,7 @@ platform_service_topology:
       upstream: http://10.10.10.20:3095
       prefix_proxy_routes:
         - path: /socket.io/
-          upstream: http://10.10.10.20:{{ platform_port_assignments.excalidraw_room_port
-            }}
+          upstream: http://10.10.10.20:3096
     service_id: excalidraw
     ports:
       internal: 3095
@@ -1511,6 +1844,47 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.64.0.1:8008
+  gotenberg:
+    service_name: gotenberg
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: gotenberg
+    ports:
+      internal: 3007
+    urls:
+      internal: http://10.10.10.20:3007
+  serverclaw:
+    service_name: serverclaw
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: chat.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: chat
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.70:8096
+    service_id: serverclaw
+    ports:
+      internal: 8096
+    urls:
+      public: https://chat.lv3.org
+      internal: http://10.10.10.70:8096
   ollama:
     service_name: ollama
     owning_vm: docker-runtime-lv3
@@ -1551,6 +1925,47 @@ platform_service_topology:
     urls:
       public: https://n8n.lv3.org
       internal: http://10.10.10.20:5678
+  nextcloud:
+    service_name: nextcloud
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: cloud.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: cloud
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8084
+      client_max_body_size: 16g
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+      exact_redirects:
+        - path: /.well-known/carddav
+          location: /remote.php/dav/
+          status: 301
+        - path: /.well-known/caldav
+          location: /remote.php/dav/
+          status: 301
+    service_id: nextcloud
+    ports:
+      internal: 8084
+    urls:
+      public: https://cloud.lv3.org
+      internal: http://10.10.10.20:8084
   coolify:
     service_name: coolify
     owning_vm: coolify-lv3
@@ -1604,7 +2019,7 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.70:80
+      upstream: https://10.10.10.70:443
       aliases:
         - '*.apps.lv3.org'
       crawl_policy_enabled: false
@@ -1612,10 +2027,10 @@ platform_service_topology:
       preserve_upstream_security_headers: true
     service_id: coolify_apps
     ports:
-      internal: 80
+      internal: 443
     urls:
       public: https://apps.lv3.org
-      internal: http://10.10.10.70:80
+      internal: https://10.10.10.70:443
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3
@@ -1643,6 +2058,32 @@ platform_service_topology:
     urls:
       public: https://api.lv3.org
       internal: http://10.10.10.20:8083
+  browser_runner:
+    service_name: browser-runner
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    service_id: browser_runner
+    ports:
+      internal: 8096
+    urls:
+      internal: http://10.10.10.20:8096
+  changedetection:
+    service_name: changedetection
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: changedetection
+    ports:
+      internal: 5000
+    urls:
+      internal: http://10.10.10.20:5000
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3
@@ -1686,6 +2127,38 @@ platform_service_topology:
     ports: {}
     urls:
       public: https://sso.lv3.org
+  harbor:
+    service_name: harbor
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: registry.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: public
+      name: registry
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8095
+      client_max_body_size: 0
+      chunked_transfer_encoding: true
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 900
+      proxy_send_timeout_seconds: 900
+    service_id: harbor
+    ports:
+      internal: 8095
+    urls:
+      public: https://registry.lv3.org
+      internal: http://10.10.10.20:8095
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
@@ -1758,6 +2231,38 @@ platform_service_topology:
     urls:
       internal: https://10.10.10.20:8200
       controller: https://100.64.0.1:8200
+  openfga:
+    service_name: openfga
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8014
+    service_id: openfga
+    ports:
+      internal: 8098
+      controller: 8014
+    urls:
+      internal: http://10.10.10.20:8098
+      controller: http://100.64.0.1:8014
+  temporal:
+    service_name: temporal
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: ssh-tunnel
+      url: grpc://127.0.0.1:7233
+    service_id: temporal
+    ports: {}
+    urls: {}
   ntfy:
     service_name: ntfy
     owning_vm: docker-runtime-lv3
@@ -1848,7 +2353,7 @@ platform_service_topology:
       visibility: tailnet
       name: database
       type: A
-      target: 10.10.10.55
+      target: 100.64.0.1
       ttl: 60
     service_id: postgres
     ports:
@@ -1869,6 +2374,76 @@ platform_service_topology:
     service_id: backup_pbs
     ports: {}
     urls: {}
+  directus:
+    service_name: directus
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: data.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: data
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8055
+    service_id: directus
+    ports:
+      internal: 8055
+    urls:
+      public: https://data.lv3.org
+      internal: http://10.10.10.20:8055
+  jupyterhub:
+    service_name: jupyterhub
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: notebooks.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: notebooks
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      client_max_body_size: 2g
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      upstream: http://10.10.10.20:8097
+    service_id: jupyterhub
+    ports:
+      internal: 8097
+    urls:
+      public: https://notebooks.lv3.org
+      internal: http://10.10.10.20:8097
+platform_session_authority:
+  authority_hostname: ops.lv3.org
+  ops_portal_client_id: ops-portal-oauth
+  keycloak_logout_url: https://sso.lv3.org/realms/lv3/protocol/openid-connect/logout
+  oauth2_proxy_sign_out_url: https://ops.lv3.org/oauth2/sign_out
+  shared_logout_path: /.well-known/lv3/session/logout
+  shared_logout_url: https://ops.lv3.org/.well-known/lv3/session/logout
+  shared_proxy_cleanup_path: /.well-known/lv3/session/proxy-logout
+  shared_proxy_cleanup_url: https://ops.lv3.org/.well-known/lv3/session/proxy-logout
+  shared_logged_out_path: /.well-known/lv3/session/logged-out
+  shared_logged_out_url: https://ops.lv3.org/.well-known/lv3/session/logged-out
 platform_dns_records:
   public: &id001
     - name: '@'
@@ -1915,7 +2490,19 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: matrix
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: langfuse
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: flags
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: analytics
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -1924,6 +2511,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: tasks
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: ci
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -1939,7 +2530,15 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: chat
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: n8n
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: cloud
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -1951,11 +2550,19 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: '*.apps'
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: api
       type: A
       value: 65.108.75.123
       ttl: 60
     - name: sso
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: registry
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -1967,7 +2574,11 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
-    - name: mail
+    - name: data
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: notebooks
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -2010,7 +2621,7 @@ platform_dns_records:
       ttl: 60
     - name: database
       type: A
-      value: 10.10.10.55
+      value: 100.64.0.1
       ttl: 60
 platform_management_allowed_tcp_ports:
   - 3001
@@ -2018,12 +2629,16 @@ platform_management_allowed_tcp_ports:
   - 8004
   - 9443
   - 8200
+  - 8014
   - 8020
   - 8080
   - 8005
+  - 8013
   - 8008
   - 8011
+  - 8017
   - 8066
+  - 8015
   - 8010
   - 9444
   - 443
@@ -2130,7 +2745,7 @@ public_edge_service_topology:
   headscale:
     service_name: headscale
     owning_vm: proxmox_florin
-    private_ip: '{{ hostvars[''proxmox_florin''].proxmox_internal_ipv4 }}'
+    private_ip: 10.10.10.1
     public_hostname: headscale.lv3.org
     exposure_model: edge-published
     observability:
@@ -2331,12 +2946,37 @@ public_edge_service_topology:
       type: A
       target: 65.108.75.123
       ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: static
+      slug: mail
+      title: LV3 Mail
+      description: The managed LV3 mail service accepts SMTP and IMAPS traffic on
+        the published mail hostname without exposing a browser-facing mailbox UI.
+      meta: Use the declared mail protocols on ports 587 and 993 instead of expecting
+        a public web application at this hostname.
     service_id: mail_platform
     ports:
       private_api: 8081
     urls:
       public: https://mail.lv3.org
       private_api: http://10.10.10.20:8081
+  mailpit:
+    service_name: mailpit
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: mailpit
+    ports:
+      internal: 8025
+      smtp: 1025
+    urls:
+      internal: http://10.10.10.20:8025
+      smtp: smtp://10.10.10.20:1025
   step_ca:
     service_name: step-ca
     owning_vm: docker-runtime-lv3
@@ -2355,6 +2995,32 @@ public_edge_service_topology:
     urls:
       internal: https://10.10.10.20:9000
       controller: https://100.64.0.1:9443
+  tika:
+    service_name: tika
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: tika
+    ports:
+      internal: 9998
+    urls:
+      internal: http://10.10.10.20:9998
+  tesseract_ocr:
+    service_name: tesseract-ocr
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: tesseract_ocr
+    ports:
+      internal: 3008
+    urls:
+      internal: http://10.10.10.20:3008
   semaphore:
     service_name: semaphore
     owning_vm: docker-runtime-lv3
@@ -2391,6 +3057,24 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8000
       controller: http://100.64.0.1:8005
+  nomad:
+    service_name: nomad
+    owning_vm: monitoring-lv3
+    private_ip: 10.10.10.40
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: https://100.64.0.1:8013
+    service_id: nomad
+    ports:
+      internal: 4646
+      controller: 8013
+    urls:
+      internal: https://10.10.10.40:4646
+      controller: https://100.64.0.1:8013
   gitea:
     service_name: gitea
     owning_vm: docker-runtime-lv3
@@ -2436,6 +3120,39 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8065
       controller: http://100.64.0.1:8066
+  matrix_synapse:
+    service_name: matrix-synapse
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: matrix.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: matrix
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8008
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8015
+    service_id: matrix_synapse
+    ports:
+      internal: 8008
+      controller: 8015
+    urls:
+      public: https://matrix.lv3.org
+      internal: http://10.10.10.20:8008
+      controller: http://100.64.0.1:8015
   netbox:
     service_name: netbox
     owning_vm: docker-runtime-lv3
@@ -2509,6 +3226,64 @@ public_edge_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  flagsmith:
+    service_name: flagsmith
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: flags.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: flags
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8017
+    service_id: flagsmith
+    ports:
+      internal: 8017
+    urls:
+      public: https://flags.lv3.org
+      internal: http://10.10.10.20:8017
+  plausible:
+    service_name: plausible
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: analytics.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: analytics
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8016
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+    service_id: plausible
+    ports:
+      internal: 8016
+    urls:
+      public: https://analytics.lv3.org
+      internal: http://10.10.10.20:8016
   dify:
     service_name: dify
     owning_vm: docker-runtime-lv3
@@ -2570,6 +3345,39 @@ public_edge_service_topology:
       public: https://tasks.lv3.org
       internal: http://10.10.10.20:8093
       controller: http://100.64.0.1:8011
+  woodpecker:
+    service_name: woodpecker
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: ci.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: ci
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8102
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8017
+    service_id: woodpecker
+    ports:
+      internal: 8102
+      controller: 8017
+    urls:
+      public: https://ci.lv3.org
+      internal: http://10.10.10.20:8102
+      controller: http://100.64.0.1:8017
   outline:
     service_name: outline
     owning_vm: docker-runtime-lv3
@@ -2591,13 +3399,13 @@ public_edge_service_topology:
       tls: true
       noindex: true
       kind: proxy
-      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
-        | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port
-        }}
+      upstream: http://10.10.10.20:3006
     service_id: outline
-    ports: {}
+    ports:
+      internal: 3006
     urls:
       public: https://wiki.lv3.org
+      internal: http://10.10.10.20:3006
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -2649,8 +3457,7 @@ public_edge_service_topology:
       upstream: http://10.10.10.20:3095
       prefix_proxy_routes:
         - path: /socket.io/
-          upstream: http://10.10.10.20:{{ platform_port_assignments.excalidraw_room_port
-            }}
+          upstream: http://10.10.10.20:3096
     service_id: excalidraw
     ports:
       internal: 3095
@@ -2675,6 +3482,47 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.64.0.1:8008
+  gotenberg:
+    service_name: gotenberg
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: gotenberg
+    ports:
+      internal: 3007
+    urls:
+      internal: http://10.10.10.20:3007
+  serverclaw:
+    service_name: serverclaw
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: chat.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: chat
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.70:8096
+    service_id: serverclaw
+    ports:
+      internal: 8096
+    urls:
+      public: https://chat.lv3.org
+      internal: http://10.10.10.70:8096
   ollama:
     service_name: ollama
     owning_vm: docker-runtime-lv3
@@ -2715,6 +3563,47 @@ public_edge_service_topology:
     urls:
       public: https://n8n.lv3.org
       internal: http://10.10.10.20:5678
+  nextcloud:
+    service_name: nextcloud
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: cloud.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: cloud
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8084
+      client_max_body_size: 16g
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+      exact_redirects:
+        - path: /.well-known/carddav
+          location: /remote.php/dav/
+          status: 301
+        - path: /.well-known/caldav
+          location: /remote.php/dav/
+          status: 301
+    service_id: nextcloud
+    ports:
+      internal: 8084
+    urls:
+      public: https://cloud.lv3.org
+      internal: http://10.10.10.20:8084
   coolify:
     service_name: coolify
     owning_vm: coolify-lv3
@@ -2768,7 +3657,7 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.70:80
+      upstream: https://10.10.10.70:443
       aliases:
         - '*.apps.lv3.org'
       crawl_policy_enabled: false
@@ -2776,10 +3665,10 @@ public_edge_service_topology:
       preserve_upstream_security_headers: true
     service_id: coolify_apps
     ports:
-      internal: 80
+      internal: 443
     urls:
       public: https://apps.lv3.org
-      internal: http://10.10.10.70:80
+      internal: https://10.10.10.70:443
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3
@@ -2807,6 +3696,32 @@ public_edge_service_topology:
     urls:
       public: https://api.lv3.org
       internal: http://10.10.10.20:8083
+  browser_runner:
+    service_name: browser-runner
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    service_id: browser_runner
+    ports:
+      internal: 8096
+    urls:
+      internal: http://10.10.10.20:8096
+  changedetection:
+    service_name: changedetection
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: changedetection
+    ports:
+      internal: 5000
+    urls:
+      internal: http://10.10.10.20:5000
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3
@@ -2850,6 +3765,38 @@ public_edge_service_topology:
     ports: {}
     urls:
       public: https://sso.lv3.org
+  harbor:
+    service_name: harbor
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: registry.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: public
+      name: registry
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8095
+      client_max_body_size: 0
+      chunked_transfer_encoding: true
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 900
+      proxy_send_timeout_seconds: 900
+    service_id: harbor
+    ports:
+      internal: 8095
+    urls:
+      public: https://registry.lv3.org
+      internal: http://10.10.10.20:8095
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
@@ -2922,6 +3869,38 @@ public_edge_service_topology:
     urls:
       internal: https://10.10.10.20:8200
       controller: https://100.64.0.1:8200
+  openfga:
+    service_name: openfga
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8014
+    service_id: openfga
+    ports:
+      internal: 8098
+      controller: 8014
+    urls:
+      internal: http://10.10.10.20:8098
+      controller: http://100.64.0.1:8014
+  temporal:
+    service_name: temporal
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: ssh-tunnel
+      url: grpc://127.0.0.1:7233
+    service_id: temporal
+    ports: {}
+    urls: {}
   ntfy:
     service_name: ntfy
     owning_vm: docker-runtime-lv3
@@ -3012,7 +3991,7 @@ public_edge_service_topology:
       visibility: tailnet
       name: database
       type: A
-      target: 10.10.10.55
+      target: 100.64.0.1
       ttl: 60
     service_id: postgres
     ports:
@@ -3033,6 +4012,65 @@ public_edge_service_topology:
     service_id: backup_pbs
     ports: {}
     urls: {}
+  directus:
+    service_name: directus
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: data.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: data
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8055
+    service_id: directus
+    ports:
+      internal: 8055
+    urls:
+      public: https://data.lv3.org
+      internal: http://10.10.10.20:8055
+  jupyterhub:
+    service_name: jupyterhub
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: notebooks.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: notebooks
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      client_max_body_size: 2g
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      upstream: http://10.10.10.20:8097
+    service_id: jupyterhub
+    ports:
+      internal: 8097
+    urls:
+      public: https://notebooks.lv3.org
+      internal: http://10.10.10.20:8097
 uptime_kuma_service_topology:
   service_name: uptime-kuma
   owning_vm: docker-runtime-lv3
@@ -3063,7 +4101,12 @@ uptime_kuma_service_topology:
 hetzner_dns_records: *id001
 platform_postgres_host: database.lv3.org
 openbao_postgres_host: 10.10.10.50
+openbao_http_extra_bind_addresses:
+  - 10.10.10.20
 openbao_controller_url: https://100.64.0.1:8200
+openfga_http_port: 8098
+openfga_host_proxy_port: 8014
+openfga_controller_url: http://100.64.0.1:8014
 semaphore_server_port: 3004
 semaphore_host_proxy_port: 8020
 semaphore_private_base_url: http://10.10.10.20:3004
@@ -3076,6 +4119,10 @@ plane_port: 8093
 plane_host_proxy_port: 8011
 plane_private_base_url: http://10.10.10.20:8093
 plane_controller_url: http://100.64.0.1:8011
+woodpecker_http_port: 8102
+woodpecker_host_proxy_port: 8017
+woodpecker_private_base_url: http://10.10.10.20:8102
+woodpecker_controller_url: http://100.64.0.1:8017
 api_gateway_internal_port: 8083
 api_gateway_public_url: https://api.lv3.org
 api_gateway_internal_url: http://10.10.10.20:8083
@@ -3088,6 +4135,11 @@ mattermost_server_port: 8065
 mattermost_host_proxy_port: 8066
 mattermost_private_base_url: http://10.10.10.20:8065
 mattermost_controller_url: http://100.64.0.1:8066
+matrix_synapse_port: 8008
+matrix_synapse_host_proxy_port: 8015
+matrix_synapse_private_base_url: http://10.10.10.20:8008
+matrix_synapse_controller_url: http://100.64.0.1:8015
+matrix_synapse_public_url: https://matrix.lv3.org
 gitea_http_port: 3003
 gitea_host_proxy_port: 3009
 gitea_root_url: http://git.lv3.org:3009
@@ -3095,7 +4147,7 @@ gitea_private_base_url: http://10.10.10.20:3003
 gitea_controller_url: http://100.64.0.1:3009
 platform_context_internal_port: 8010
 platform_context_host_proxy_port: 8010
-platform_context_private_url: http://10.10.10.20:8010
+platform_context_private_url: http://127.0.0.1:8010
 platform_context_controller_url: http://100.64.0.1:8010
 portainer_host_proxy_port: 9444
 portainer_controller_url: https://100.64.0.1:9444
@@ -3107,6 +4159,8 @@ step_ca_internal_url: https://10.10.10.20:9000
 step_ca_controller_url: https://100.64.0.1:9443
 windmill_host_proxy_port: 8005
 windmill_controller_url: http://100.64.0.1:8005
+nomad_host_proxy_port: 8013
+nomad_controller_url: https://100.64.0.1:8013
 monitoring_loki_push_api_url: http://10.10.10.40:3100/loki/api/v1/push
 proxmox_management_allowed_tcp_ports:
   - 3001
@@ -3114,12 +4168,16 @@ proxmox_management_allowed_tcp_ports:
   - 8004
   - 9443
   - 8200
+  - 8014
   - 8020
   - 8080
   - 8005
+  - 8013
   - 8008
   - 8011
+  - 8017
   - 8066
+  - 8015
   - 8010
   - 9444
   - 443
@@ -3134,28 +4192,46 @@ monitoring_tempo_http_port: 3200
 monitoring_otlp_grpc_port: 4317
 monitoring_otlp_http_port: 4318
 netdata_port: 19999
+mailpit_http_port: 8025
+mailpit_smtp_port: 1025
 mail_platform_gateway_port: 8081
 ntfy_port: 2586
 openbao_http_port: 8201
 openbao_proxy_port: 8200
 windmill_server_port: 8000
+nomad_server_port: 4646
+nomad_rpc_port: 4647
+nomad_serf_port: 4648
 netbox_server_port: 8082
+gotenberg_port: 3007
 searxng_port: 8881
 searxng_host_proxy_port: 80
 langfuse_port: 3002
+plausible_port: 8016
+flagsmith_port: 8017
 dify_port: 8094
+changedetection_port: 5000
+browser_runner_port: 8096
 outline_port: 3006
+directus_port: 8055
+jupyterhub_port: 8097
 dozzle_http_port: 8089
 dozzle_agent_port: 7007
 excalidraw_port: 3095
 excalidraw_room_port: 3096
 ollama_api_port: 11434
 n8n_port: 5678
+nextcloud_port: 8084
 coolify_dashboard_port: 8000
 coolify_proxy_port: 80
+coolify_proxy_tls_port: 443
 coolify_host_proxy_port: 8012
 open_webui_port: 8088
+serverclaw_port: 8096
 homepage_port: 3090
 ops_portal_port: 8092
+harbor_port: 8095
 ntopng_http_port: 3000
 portainer_https_port: 9443
+tika_port: 9998
+tesseract_ocr_port: 3008

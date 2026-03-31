@@ -73,6 +73,10 @@
           "status": "active",
           "url": "https://api.lv3.org",
           "subdomain": "api.lv3.org",
+          "stage_ready": true,
+          "smoke_suite_ids": [
+            "production-api-gateway-operator-path"
+          ],
           "notes": "Repository automation is ready; live publication still requires apply from main."
         }
       }
@@ -103,6 +107,255 @@
         "production": {
           "status": "active",
           "url": "https://10.10.10.60:8007"
+        }
+      }
+    },
+    {
+      "id": "browser_runner",
+      "name": "Browser Runner",
+      "description": "Private Playwright session runtime for governed web action, extraction, screenshots, and PDF capture.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8096",
+      "exposure": "private-only",
+      "uptime_monitor_name": "Browser Runner Private",
+      "health_probe_id": "browser_runner",
+      "adr": "0261",
+      "runbook": "docs/runbooks/configure-browser-runner.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-browser-runner/lv3-browser-runner",
+      "tags": [
+        "browser",
+        "playwright",
+        "automation",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:8096",
+          "notes": "The runtime stays private-only and is exposed to operators through the governed API gateway route plus the Dify tool bridge."
+        }
+      }
+    },
+    {
+      "id": "changedetection",
+      "name": "Changedetection.io",
+      "description": "Private upstream content, dependency feed, and provider API change monitoring service with repo-governed watch catalogue reconciliation.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:5000",
+      "exposure": "private-only",
+      "health_probe_id": "changedetection",
+      "image_catalog_ids": [
+        "changedetection_runtime"
+      ],
+      "adr": "0280",
+      "runbook": "docs/runbooks/configure-changedetection.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=changedetection-availability",
+      "tags": [
+        "change-detection",
+        "external-dependencies",
+        "observability",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:5000",
+          "notes": "The runtime stays private to docker-runtime-lv3; authenticated operator and automation access is brokered through the shared API gateway route at https://api.lv3.org/v1/changedetection."
+        }
+      }
+    },
+    {
+      "id": "changelog_portal",
+      "name": "Deployment History Portal",
+      "description": "Generated portal for browsing live applies, promotions, and mutation audit history.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "nginx-lv3",
+      "vmid": 110,
+      "public_url": "https://changelog.lv3.org",
+      "subdomain": "changelog.lv3.org",
+      "exposure": "edge-published",
+      "adr": "0081",
+      "runbook": "docs/runbooks/deployment-history-portal.md",
+      "tags": [
+        "portal",
+        "history",
+        "deployments"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://changelog.lv3.org",
+          "subdomain": "changelog.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "coolify",
+      "name": "Coolify",
+      "description": "Repo-managed PaaS control plane for deploying public applications directly from Git repositories.",
+      "category": "infrastructure",
+      "lifecycle_status": "active",
+      "vm": "coolify-lv3",
+      "vmid": 170,
+      "internal_url": "http://100.64.0.1:8012",
+      "public_url": "https://coolify.lv3.org",
+      "subdomain": "coolify.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "coolify",
+      "secret_catalog_ids": [
+        "coolify_root_password",
+        "coolify_api_token",
+        "coolify_server_ssh_private_key"
+      ],
+      "adr": "0194",
+      "runbook": "docs/runbooks/configure-coolify.md",
+      "tags": [
+        "paas",
+        "git",
+        "deployments",
+        "applications"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://coolify.lv3.org",
+          "subdomain": "coolify.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "coolify_apps",
+      "name": "Coolify Apps Ingress",
+      "description": "Shared public ingress surface for Coolify-managed applications published from the coolify-lv3 runtime.",
+      "category": "infrastructure",
+      "lifecycle_status": "active",
+      "vm": "coolify-lv3",
+      "vmid": 170,
+      "internal_url": "http://10.10.10.70:80",
+      "public_url": "https://apps.lv3.org",
+      "subdomain": "apps.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "coolify_apps",
+      "adr": "0194",
+      "runbook": "docs/runbooks/configure-coolify.md",
+      "tags": [
+        "paas",
+        "ingress",
+        "applications",
+        "wildcard"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://apps.lv3.org",
+          "subdomain": "apps.lv3.org",
+          "notes": "Shared entrypoint for repo-managed Coolify applications, with wildcard alias coverage handled by the edge topology."
+        }
+      }
+    },
+    {
+      "id": "dify",
+      "name": "Dify",
+      "description": "Visual LLM workflow and agent canvas with governed LV3 tool sync and trace export support.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8094",
+      "public_url": "https://agents.lv3.org",
+      "subdomain": "agents.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Dify Public",
+      "health_probe_id": "dify",
+      "secret_catalog_ids": [
+        "dify_database_password",
+        "dify_init_password",
+        "dify_admin_password",
+        "dify_secret_key",
+        "dify_redis_password",
+        "dify_qdrant_api_key",
+        "dify_sandbox_api_key",
+        "dify_plugin_daemon_key",
+        "dify_plugin_inner_api_key",
+        "dify_tools_api_key"
+      ],
+      "image_catalog_ids": [
+        "dify_api_runtime",
+        "dify_web_runtime",
+        "dify_redis_runtime",
+        "dify_qdrant_runtime",
+        "dify_sandbox_runtime",
+        "dify_plugin_daemon_runtime",
+        "dify_nginx_runtime",
+        "dify_ssrf_proxy_runtime"
+      ],
+      "adr": "0197",
+      "runbook": "docs/runbooks/configure-dify.md",
+      "tags": [
+        "agents",
+        "llm",
+        "workflow",
+        "canvas",
+        "edge-authenticated"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://agents.lv3.org",
+          "subdomain": "agents.lv3.org",
+          "notes": "Branch-local rollout uses a Dify-local Qdrant sidecar until ADR 0198 lands on main."
+        }
+      }
+    },
+    {
+      "id": "directus",
+      "name": "Directus",
+      "description": "REST and GraphQL operational data API over the dedicated Directus PostgreSQL database.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8055",
+      "public_url": "https://data.lv3.org",
+      "subdomain": "data.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Directus Public Health",
+      "health_probe_id": "directus",
+      "image_catalog_ids": [
+        "directus_runtime"
+      ],
+      "secret_catalog_ids": [
+        "directus_database_password",
+        "directus_key",
+        "directus_secret",
+        "directus_admin_password",
+        "directus_service_registry_token",
+        "keycloak_directus_client_secret"
+      ],
+      "adr": "0289",
+      "runbook": "docs/runbooks/configure-directus.md",
+      "tags": [
+        "data-api",
+        "directus",
+        "graphql",
+        "postgres",
+        "rest",
+        "oidc"
+      ],
+      "notes": "Directus runs on docker-runtime-lv3, uses a dedicated PostgreSQL database named directus, publishes data.lv3.org through the shared NGINX edge, delegates routine browser sign-in to Keycloak, and retains a repo-managed break-glass local admin password for recovery.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://data.lv3.org",
+          "subdomain": "data.lv3.org",
+          "notes": "Repo automation verifies the public /server/health endpoint, the Keycloak login redirect, and scoped REST plus GraphQL token access against the governed service_registry collection."
         }
       }
     },
@@ -166,56 +419,92 @@
       }
     },
     {
-      "id": "dify",
-      "name": "Dify",
-      "description": "Visual LLM workflow and agent canvas with governed LV3 tool sync and trace export support.",
-      "category": "automation",
+      "id": "docs_portal",
+      "name": "Developer Portal",
+      "description": "Generated public documentation site for services, ADRs, runbooks, release notes, and platform reference data.",
+      "category": "access",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:8094",
-      "public_url": "https://agents.lv3.org",
-      "subdomain": "agents.lv3.org",
+      "vm": "nginx-lv3",
+      "vmid": 110,
+      "public_url": "https://docs.lv3.org",
+      "subdomain": "docs.lv3.org",
       "exposure": "edge-published",
-      "uptime_monitor_name": "Dify Public",
-      "health_probe_id": "dify",
-      "secret_catalog_ids": [
-        "dify_database_password",
-        "dify_init_password",
-        "dify_admin_password",
-        "dify_secret_key",
-        "dify_redis_password",
-        "dify_qdrant_api_key",
-        "dify_sandbox_api_key",
-        "dify_plugin_daemon_key",
-        "dify_plugin_inner_api_key",
-        "dify_tools_api_key"
-      ],
-      "image_catalog_ids": [
-        "dify_api_runtime",
-        "dify_web_runtime",
-        "dify_redis_runtime",
-        "dify_qdrant_runtime",
-        "dify_sandbox_runtime",
-        "dify_plugin_daemon_runtime",
-        "dify_nginx_runtime",
-        "dify_ssrf_proxy_runtime"
-      ],
-      "adr": "0197",
-      "runbook": "docs/runbooks/configure-dify.md",
+      "adr": "0094",
+      "runbook": "docs/runbooks/developer-portal.md",
       "tags": [
-        "agents",
-        "llm",
-        "workflow",
-        "canvas",
-        "edge-authenticated"
+        "portal",
+        "documentation",
+        "developer-experience"
       ],
       "environments": {
         "production": {
           "status": "active",
-          "url": "https://agents.lv3.org",
-          "subdomain": "agents.lv3.org",
-          "notes": "Branch-local rollout uses a Dify-local Qdrant sidecar until ADR 0198 lands on main."
+          "url": "https://docs.lv3.org",
+          "subdomain": "docs.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "dozzle",
+      "name": "Dozzle",
+      "description": "Repo-managed real-time container log hub across the Docker guests.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8089",
+      "public_url": "https://logs.lv3.org",
+      "subdomain": "logs.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "dozzle",
+      "image_catalog_ids": [
+        "dozzle_runtime"
+      ],
+      "adr": "0150",
+      "runbook": "docs/runbooks/configure-dozzle.md",
+      "tags": [
+        "logs",
+        "docker",
+        "realtime",
+        "observability"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://logs.lv3.org",
+          "subdomain": "logs.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "excalidraw",
+      "name": "Excalidraw",
+      "description": "Private collaborative whiteboard and architecture diagram surface backed by repo-generated `.excalidraw` scenes.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:3095",
+      "public_url": "https://draw.lv3.org",
+      "subdomain": "draw.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Excalidraw Public",
+      "health_probe_id": "excalidraw",
+      "adr": "0202",
+      "runbook": "docs/runbooks/configure-excalidraw.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-excalidraw/lv3-excalidraw",
+      "tags": [
+        "architecture",
+        "diagramming",
+        "excalidraw",
+        "operator"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://draw.lv3.org",
+          "subdomain": "draw.lv3.org",
+          "notes": "Live applied on the ADR 0202 workstream branch and protected by the shared Keycloak-backed oauth2-proxy edge flow."
         }
       }
     },
@@ -251,6 +540,37 @@
           "status": "active",
           "url": "http://100.64.0.1:3009",
           "subdomain": "git.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "gotenberg",
+      "name": "Gotenberg",
+      "description": "Private stateless document rendering service for HTML, Markdown, text, and Office-to-PDF conversion workflows.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:3007",
+      "exposure": "private-only",
+      "health_probe_id": "gotenberg",
+      "image_catalog_ids": [
+        "gotenberg_runtime"
+      ],
+      "adr": "0278",
+      "runbook": "docs/runbooks/configure-gotenberg.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-gotenberg/lv3-gotenberg",
+      "tags": [
+        "documents",
+        "pdf",
+        "rendering",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:3007",
+          "notes": "The runtime stays private to the guest network; authenticated operator and automation access may be brokered through the shared API gateway route at https://api.lv3.org/v1/gotenberg."
         }
       }
     },
@@ -295,34 +615,113 @@
       }
     },
     {
-      "id": "excalidraw",
-      "name": "Excalidraw",
-      "description": "Private collaborative whiteboard and architecture diagram surface backed by repo-generated `.excalidraw` scenes.",
-      "category": "access",
+      "id": "harbor",
+      "name": "Harbor",
+      "description": "Private container registry with vulnerability scanning, operator SSO, and scoped robot credentials for repository automation.",
+      "category": "security",
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "http://10.10.10.20:3095",
-      "public_url": "https://draw.lv3.org",
-      "subdomain": "draw.lv3.org",
+      "internal_url": "http://10.10.10.20:8095",
+      "public_url": "https://registry.lv3.org",
+      "subdomain": "registry.lv3.org",
       "exposure": "edge-published",
-      "uptime_monitor_name": "Excalidraw Public",
-      "health_probe_id": "excalidraw",
-      "adr": "0202",
-      "runbook": "docs/runbooks/configure-excalidraw.md",
-      "dashboard_url": "https://grafana.lv3.org/d/lv3-excalidraw/lv3-excalidraw",
+      "uptime_monitor_name": "Harbor Registry Public",
+      "health_probe_id": "harbor",
+      "secret_catalog_ids": [
+        "harbor_admin_password",
+        "harbor_database_password",
+        "harbor_check_runner_robot_secret",
+        "keycloak_harbor_client_secret"
+      ],
+      "adr": "0201",
+      "runbook": "docs/runbooks/configure-harbor.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-harbor/lv3-harbor",
       "tags": [
-        "architecture",
-        "diagramming",
-        "excalidraw",
-        "operator"
+        "registry",
+        "containers",
+        "trivy",
+        "supply-chain"
       ],
       "environments": {
         "production": {
           "status": "active",
-          "url": "https://draw.lv3.org",
-          "subdomain": "draw.lv3.org",
-          "notes": "Live applied on the ADR 0202 workstream branch and protected by the shared Keycloak-backed oauth2-proxy edge flow."
+          "url": "https://registry.lv3.org",
+          "subdomain": "registry.lv3.org",
+          "notes": "Published through the shared NGINX edge while Harbor handles operator authentication and project policy."
+        }
+      }
+    },
+    {
+      "id": "headscale",
+      "name": "Headscale",
+      "description": "Repo-managed control plane for the LV3 zero-trust mesh VPN.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "proxmox_florin",
+      "internal_url": "http://10.10.10.1:8080",
+      "public_url": "https://headscale.lv3.org",
+      "subdomain": "headscale.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Headscale Public Health",
+      "health_probe_id": "headscale",
+      "secret_catalog_ids": [
+        "headscale_api_key"
+      ],
+      "adr": "0144",
+      "runbook": "docs/runbooks/configure-headscale.md",
+      "tags": [
+        "mesh",
+        "vpn",
+        "headscale",
+        "zero-trust"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://headscale.lv3.org",
+          "subdomain": "headscale.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "flagsmith",
+      "name": "Flagsmith",
+      "description": "Feature flag and remote configuration control plane with repo-managed environment and baseline feature seeding.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8017",
+      "public_url": "https://flags.lv3.org",
+      "subdomain": "flags.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Flagsmith Public Health",
+      "health_probe_id": "flagsmith",
+      "secret_catalog_ids": [
+        "flagsmith_database_password",
+        "flagsmith_django_secret_key",
+        "flagsmith_admin_password",
+        "flagsmith_environment_keys"
+      ],
+      "image_catalog_ids": [
+        "flagsmith_runtime"
+      ],
+      "adr": "0288",
+      "runbook": "docs/runbooks/configure-flagsmith.md",
+      "tags": [
+        "feature-flags",
+        "remote-config",
+        "control-plane",
+        "edge-authenticated"
+      ],
+      "notes": "The public UI and browser management API are protected by the shared edge oauth2-proxy and Keycloak flow while server-side environment keys remain private and repo-managed through OpenBao.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://flags.lv3.org",
+          "subdomain": "flags.lv3.org",
+          "notes": "The bootstrap org, project, environments, feature definitions, and environment API keys are seeded from the repo-managed Flagsmith runtime role."
         }
       }
     },
@@ -356,35 +755,6 @@
           "url": "https://home.lv3.org",
           "subdomain": "home.lv3.org",
           "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
-        }
-      }
-    },
-    {
-      "id": "realtime",
-      "name": "Netdata Realtime Metrics",
-      "description": "Authenticated Netdata parent dashboard for live host and guest metrics streamed into monitoring-lv3.",
-      "category": "observability",
-      "lifecycle_status": "active",
-      "vm": "monitoring-lv3",
-      "vmid": 140,
-      "internal_url": "http://10.10.10.40:19999",
-      "public_url": "https://realtime.lv3.org",
-      "subdomain": "realtime.lv3.org",
-      "exposure": "edge-published",
-      "health_probe_id": "realtime",
-      "adr": "0196",
-      "runbook": "docs/runbooks/configure-netdata.md",
-      "tags": [
-        "metrics",
-        "netdata",
-        "observability",
-        "realtime"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "https://realtime.lv3.org",
-          "subdomain": "realtime.lv3.org"
         }
       }
     },
@@ -508,6 +878,93 @@
       }
     },
     {
+      "id": "mailpit",
+      "name": "Mailpit",
+      "description": "Private SMTP interception surface for staging, development, and assertion-level email verification.",
+      "category": "communication",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8025",
+      "exposure": "private-only",
+      "health_probe_id": "mailpit",
+      "image_catalog_ids": [
+        "mailpit_runtime"
+      ],
+      "adr": "0282",
+      "runbook": "docs/runbooks/configure-mailpit.md",
+      "tags": [
+        "mail",
+        "smtp",
+        "development",
+        "testing"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:8025",
+          "notes": "Mailpit runs privately on docker-runtime-lv3 for non-production SMTP interception and operator inspection; production services must continue to relay through Stalwart."
+        }
+      }
+    },
+    {
+      "id": "matrix_synapse",
+      "name": "Matrix Synapse",
+      "description": "Repo-managed Matrix Synapse runtime with Discord and WhatsApp mautrix bridges that serves as the canonical ServerClaw conversation hub.",
+      "category": "communication",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8008",
+      "public_url": "https://matrix.lv3.org",
+      "subdomain": "matrix.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Matrix Synapse Public",
+      "health_probe_id": "matrix_synapse",
+      "image_catalog_ids": [
+        "matrix_synapse_runtime",
+        "matrix_mautrix_discord_runtime",
+        "matrix_mautrix_whatsapp_runtime"
+      ],
+      "secret_catalog_ids": [
+        "matrix_synapse_database_password",
+        "matrix_synapse_ops_password",
+        "matrix_synapse_registration_shared_secret",
+        "matrix_synapse_signing_key",
+        "matrix_synapse_mautrix_discord_database_password",
+        "matrix_synapse_mautrix_discord_as_token",
+        "matrix_synapse_mautrix_discord_hs_token",
+        "matrix_synapse_mautrix_discord_provisioning_shared_secret",
+        "matrix_synapse_mautrix_discord_avatar_proxy_key",
+        "matrix_synapse_mautrix_whatsapp_database_password",
+        "matrix_synapse_mautrix_whatsapp_as_token",
+        "matrix_synapse_mautrix_whatsapp_hs_token",
+        "matrix_synapse_mautrix_whatsapp_provisioning_shared_secret",
+        "matrix_synapse_mautrix_whatsapp_public_media_signing_key",
+        "matrix_synapse_mautrix_whatsapp_encryption_pickle_key"
+      ],
+      "adr": "0255",
+      "runbook": "docs/runbooks/configure-matrix-synapse.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-matrix-synapse/lv3-matrix-synapse",
+      "tags": [
+        "matrix",
+        "synapse",
+        "serverclaw",
+        "conversation",
+        "bridge",
+        "discord",
+        "whatsapp"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://matrix.lv3.org",
+          "subdomain": "matrix.lv3.org",
+          "notes": "The public Matrix client API is edge-published while authentication stays inside Synapse, federation remains disabled for ADR 0255, and ADR 0256 manages Discord plus WhatsApp bridge bots through application-service registrations and bridge-management-room smoke verification."
+        }
+      }
+    },
+    {
       "id": "mattermost",
       "name": "Mattermost",
       "description": "Private operator and agent collaboration surface for ChatOps workflows.",
@@ -534,30 +991,69 @@
       }
     },
     {
-      "id": "ntfy",
-      "name": "ntfy",
-      "description": "Private push notification gateway used for critical platform paging.",
-      "category": "communication",
+      "id": "n8n",
+      "name": "n8n",
+      "description": "Repo-managed external app connector fabric and webhook automation runtime for ServerClaw, with a public edge hostname and PostgreSQL-backed persistence.",
+      "category": "automation",
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "http://10.10.10.20:2586",
-      "exposure": "private-only",
-      "health_probe_id": "ntfy",
-      "secret_catalog_ids": [
-        "ntfy_alertmanager_password"
+      "internal_url": "http://10.10.10.20:5678",
+      "public_url": "https://n8n.lv3.org",
+      "subdomain": "n8n.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "n8n Public Health",
+      "health_probe_id": "n8n",
+      "image_catalog_ids": [
+        "n8n_runtime"
       ],
-      "adr": "0097",
-      "runbook": "docs/runbooks/configure-ntfy.md",
+      "secret_catalog_ids": [
+        "n8n_database_password",
+        "n8n_owner_password",
+        "n8n_encryption_key"
+      ],
+      "adr": "0151",
+      "runbook": "docs/runbooks/configure-n8n.md",
       "tags": [
-        "notifications",
-        "paging",
-        "private"
+        "automation",
+        "webhooks",
+        "integrations",
+        "workflows",
+        "serverclaw",
+        "connector-fabric"
       ],
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://10.10.10.20:2586"
+          "url": "https://n8n.lv3.org",
+          "subdomain": "n8n.lv3.org",
+          "notes": "The editor is protected by the shared oauth2-proxy and Keycloak edge flow while selected webhook paths remain intentionally public for governed ServerClaw connector calls."
+        }
+      }
+    },
+    {
+      "id": "nats_jetstream",
+      "name": "NATS JetStream",
+      "description": "Private internal event bus for platform control-plane, secret-rotation, and RAG lifecycle events.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "nats://10.10.10.20:4222",
+      "exposure": "private-only",
+      "adr": "0276",
+      "runbook": "docs/runbooks/nats-jetstream-event-bus.md",
+      "tags": [
+        "events",
+        "nats",
+        "jetstream",
+        "private"
+      ],
+      "notes": "The monitoring endpoint stays loopback-only on docker-runtime-lv3 at http://127.0.0.1:8222/healthz.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "nats://10.10.10.20:4222"
         }
       }
     },
@@ -596,6 +1092,47 @@
       }
     },
     {
+      "id": "nextcloud",
+      "name": "Nextcloud",
+      "description": "Repo-managed personal data plane for durable files, attachments, and DAV-backed calendars, contacts, and tasks.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8084",
+      "public_url": "https://cloud.lv3.org",
+      "subdomain": "cloud.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Nextcloud Public Status",
+      "health_probe_id": "nextcloud",
+      "image_catalog_ids": [
+        "nextcloud_runtime",
+        "nextcloud_redis_runtime"
+      ],
+      "secret_catalog_ids": [
+        "nextcloud_database_password",
+        "nextcloud_admin_password",
+        "nextcloud_redis_password"
+      ],
+      "adr": "0260",
+      "runbook": "docs/runbooks/configure-nextcloud.md",
+      "tags": [
+        "files",
+        "webdav",
+        "caldav",
+        "carddav",
+        "personal-data"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://cloud.lv3.org",
+          "subdomain": "cloud.lv3.org",
+          "notes": "Published through the shared NGINX edge while Nextcloud itself enforces session, login, and DAV discovery behavior."
+        }
+      }
+    },
+    {
       "id": "nginx_edge",
       "name": "NGINX Edge",
       "description": "Public ingress edge that terminates TLS and publishes selected services.",
@@ -623,6 +1160,83 @@
           "status": "active",
           "url": "https://nginx.lv3.org",
           "subdomain": "nginx.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "nomad",
+      "name": "Nomad",
+      "description": "Private distributed scheduler for durable batch jobs and long-running internal workloads.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "monitoring-lv3",
+      "vmid": 140,
+      "internal_url": "https://100.64.0.1:8013",
+      "exposure": "private-only",
+      "health_probe_id": "nomad",
+      "secret_catalog_ids": [
+        "nomad_acl_management_token",
+        "nomad_tls_ca_key",
+        "nomad_tls_server_key",
+        "nomad_tls_client_key"
+      ],
+      "adr": "0232",
+      "runbook": "docs/runbooks/configure-nomad.md",
+      "degradation_modes": [
+        {
+          "dependency": "docker_runtime",
+          "dependency_type": "soft",
+          "degraded_behaviour": "Runtime-targeted jobs cannot place while the docker-runtime Nomad client is unavailable. The Nomad server and build-targeted jobs continue to operate.",
+          "degraded_for_seconds_max": -1,
+          "recovery_signal": "docker-runtime-lv3 rejoins the Nomad client set",
+          "tested_by": "fault:docker-runtime-unavailable"
+        },
+        {
+          "dependency": "docker_build",
+          "dependency_type": "soft",
+          "degraded_behaviour": "Build-targeted or long-running helper jobs pinned to the build pool cannot place while the docker-build Nomad client is unavailable. The Nomad server and runtime-targeted jobs continue to operate.",
+          "degraded_for_seconds_max": -1,
+          "recovery_signal": "docker-build-lv3 rejoins the Nomad client set",
+          "tested_by": "fault:docker-build-unavailable"
+        }
+      ],
+      "tags": [
+        "scheduler",
+        "batch",
+        "jobs"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://100.64.0.1:8013"
+        }
+      }
+    },
+    {
+      "id": "ntfy",
+      "name": "ntfy",
+      "description": "Private push notification gateway used for critical platform paging.",
+      "category": "communication",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:2586",
+      "exposure": "private-only",
+      "health_probe_id": "ntfy",
+      "secret_catalog_ids": [
+        "ntfy_alertmanager_password"
+      ],
+      "adr": "0097",
+      "runbook": "docs/runbooks/configure-ntfy.md",
+      "tags": [
+        "notifications",
+        "paging",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:2586"
         }
       }
     },
@@ -679,45 +1293,6 @@
       }
     },
     {
-      "id": "n8n",
-      "name": "n8n",
-      "description": "Repo-managed webhook and API integration automation runtime with a public edge hostname and PostgreSQL-backed persistence.",
-      "category": "automation",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:5678",
-      "public_url": "https://n8n.lv3.org",
-      "subdomain": "n8n.lv3.org",
-      "exposure": "edge-published",
-      "uptime_monitor_name": "n8n Public Health",
-      "health_probe_id": "n8n",
-      "image_catalog_ids": [
-        "n8n_runtime"
-      ],
-      "secret_catalog_ids": [
-        "n8n_database_password",
-        "n8n_owner_password",
-        "n8n_encryption_key"
-      ],
-      "adr": "0151",
-      "runbook": "docs/runbooks/configure-n8n.md",
-      "tags": [
-        "automation",
-        "webhooks",
-        "integrations",
-        "workflows"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "https://n8n.lv3.org",
-          "subdomain": "n8n.lv3.org",
-          "notes": "The editor is protected by the shared oauth2-proxy and Keycloak edge flow while selected webhook paths remain intentionally public."
-        }
-      }
-    },
-    {
       "id": "open_webui",
       "name": "Open WebUI",
       "description": "Private operator and agent workbench for governed platform interactions.",
@@ -747,93 +1322,6 @@
         "production": {
           "status": "active",
           "url": "http://100.64.0.1:8008"
-        }
-      }
-    },
-    {
-      "id": "plane",
-      "name": "Plane",
-      "description": "Repo-managed Plane workspace for platform kanban tracking and ADR synchronization.",
-      "category": "automation",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:8093",
-      "public_url": "https://tasks.lv3.org",
-      "subdomain": "tasks.lv3.org",
-      "exposure": "edge-published",
-      "uptime_monitor_name": "Plane Public",
-      "health_probe_id": "plane",
-      "image_catalog_ids": [
-        "plane_frontend_runtime",
-        "plane_space_runtime",
-        "plane_admin_runtime",
-        "plane_live_runtime",
-        "plane_backend_runtime",
-        "plane_proxy_runtime",
-        "netbox_redis_runtime",
-        "langfuse_minio_runtime",
-        "plane_rabbitmq_runtime"
-      ],
-      "secret_catalog_ids": [
-        "plane_database_password",
-        "plane_secret_key",
-        "plane_live_server_secret_key",
-        "plane_rabbitmq_password",
-        "plane_aws_secret_access_key",
-        "plane_bootstrap_admin_password",
-        "plane_api_token"
-      ],
-      "adr": "0193",
-      "runbook": "docs/runbooks/configure-plane.md",
-      "tags": [
-        "tasks",
-        "kanban",
-        "adr",
-        "automation"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "https://tasks.lv3.org",
-          "subdomain": "tasks.lv3.org"
-        }
-      }
-    },
-    {
-      "id": "searxng",
-      "name": "SearXNG",
-      "description": "Private metasearch runtime for operator and agent web lookups with a tailnet-only hostname.",
-      "category": "automation",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:8881",
-      "public_url": "http://search.lv3.org",
-      "subdomain": "search.lv3.org",
-      "exposure": "private-only",
-      "health_probe_id": "searxng",
-      "image_catalog_ids": [
-        "searxng_runtime",
-        "searxng_valkey_runtime"
-      ],
-      "secret_catalog_ids": [
-        "searxng_secret_key"
-      ],
-      "adr": "0148",
-      "runbook": "docs/runbooks/configure-searxng.md",
-      "tags": [
-        "search",
-        "web",
-        "agents",
-        "privacy"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "http://search.lv3.org",
-          "subdomain": "search.lv3.org",
-          "notes": "Tailnet-only hostname published on the Proxmox host Tailscale IP."
         }
       }
     },
@@ -880,28 +1368,74 @@
       }
     },
     {
-      "id": "changelog_portal",
-      "name": "Deployment History Portal",
-      "description": "Generated portal for browsing live applies, promotions, and mutation audit history.",
+      "id": "openfga",
+      "name": "OpenFGA",
+      "description": "Private delegated authorization graph for ServerClaw workspace, assistant, skill, connector, and data-scope capability checks.",
       "category": "access",
       "lifecycle_status": "active",
-      "vm": "nginx-lv3",
-      "vmid": 110,
-      "public_url": "https://changelog.lv3.org",
-      "subdomain": "changelog.lv3.org",
-      "exposure": "edge-published",
-      "adr": "0081",
-      "runbook": "docs/runbooks/deployment-history-portal.md",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://100.64.0.1:8014",
+      "exposure": "private-only",
+      "health_probe_id": "openfga",
+      "image_catalog_ids": [
+        "openfga_runtime"
+      ],
+      "secret_catalog_ids": [
+        "openfga_database_password",
+        "openfga_preshared_key",
+        "keycloak_serverclaw_runtime_client_secret"
+      ],
+      "adr": "0262",
+      "runbook": "docs/runbooks/configure-openfga.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-openfga/lv3-openfga",
       "tags": [
-        "portal",
-        "history",
-        "deployments"
+        "authorization",
+        "delegation",
+        "private",
+        "serverclaw"
       ],
       "environments": {
         "production": {
           "status": "active",
-          "url": "https://changelog.lv3.org",
-          "subdomain": "changelog.lv3.org"
+          "url": "http://100.64.0.1:8014",
+          "notes": "Published through the Proxmox host Tailscale proxy and guarded by the repo-managed bearer-key contract."
+        }
+      }
+    },
+    {
+      "id": "temporal",
+      "name": "Temporal",
+      "description": "Private durable workflow and task queue engine for long-running platform automation that must survive worker crashes and retries.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "grpc://127.0.0.1:7233",
+      "exposure": "private-only",
+      "health_probe_id": "temporal",
+      "image_catalog_ids": [
+        "temporal_server_runtime",
+        "temporal_admin_tools_runtime",
+        "temporal_ui_runtime"
+      ],
+      "secret_catalog_ids": [
+        "temporal_database_password"
+      ],
+      "adr": "0293",
+      "runbook": "docs/runbooks/configure-temporal.md",
+      "tags": [
+        "workflow",
+        "durable",
+        "temporal",
+        "private"
+      ],
+      "notes": "The frontend gRPC port, HTTP port, and UI are intentionally loopback-only on docker-runtime-lv3; operators reach them through SSH tunneling or repo-managed admin-tools commands.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "grpc://127.0.0.1:7233",
+          "notes": "The repo-managed `lv3` namespace is bootstrapped automatically, while UI diagnostics are exposed only through a loopback tunnel to preserve the current guest firewall boundary."
         }
       }
     },
@@ -987,124 +1521,88 @@
       }
     },
     {
-      "id": "docs_portal",
-      "name": "Developer Portal",
-      "description": "Generated public documentation site for services, ADRs, runbooks, release notes, and platform reference data.",
+      "id": "jupyterhub",
+      "name": "JupyterHub",
+      "description": "Shared interactive notebook environment for exploratory platform analysis, prototype workflows, and governed operator experimentation.",
       "category": "access",
-      "lifecycle_status": "active",
-      "vm": "nginx-lv3",
-      "vmid": 110,
-      "public_url": "https://docs.lv3.org",
-      "subdomain": "docs.lv3.org",
-      "exposure": "edge-published",
-      "adr": "0094",
-      "runbook": "docs/runbooks/developer-portal.md",
-      "tags": [
-        "portal",
-        "documentation",
-        "developer-experience"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "https://docs.lv3.org",
-          "subdomain": "docs.lv3.org"
-        }
-      }
-    },
-    {
-      "id": "dozzle",
-      "name": "Dozzle",
-      "description": "Repo-managed real-time container log hub across the Docker guests.",
-      "category": "observability",
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "http://10.10.10.20:8089",
-      "public_url": "https://logs.lv3.org",
-      "subdomain": "logs.lv3.org",
+      "internal_url": "http://10.10.10.20:8097",
+      "public_url": "https://notebooks.lv3.org",
+      "subdomain": "notebooks.lv3.org",
       "exposure": "edge-published",
-      "health_probe_id": "dozzle",
-      "image_catalog_ids": [
-        "dozzle_runtime"
-      ],
-      "adr": "0150",
-      "runbook": "docs/runbooks/configure-dozzle.md",
-      "tags": [
-        "logs",
-        "docker",
-        "realtime",
-        "observability"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "https://logs.lv3.org",
-          "subdomain": "logs.lv3.org"
-        }
-      }
-    },
-    {
-      "id": "coolify",
-      "name": "Coolify",
-      "description": "Repo-managed PaaS control plane for deploying public applications directly from Git repositories.",
-      "category": "infrastructure",
-      "lifecycle_status": "active",
-      "vm": "coolify-lv3",
-      "vmid": 170,
-      "internal_url": "http://100.64.0.1:8012",
-      "public_url": "https://coolify.lv3.org",
-      "subdomain": "coolify.lv3.org",
-      "exposure": "edge-published",
-      "health_probe_id": "coolify",
+      "uptime_monitor_name": "JupyterHub Public Health",
+      "health_probe_id": "jupyterhub",
       "secret_catalog_ids": [
-        "coolify_root_password",
-        "coolify_api_token",
-        "coolify_server_ssh_private_key"
+        "jupyterhub_service_api_token",
+        "jupyterhub_minio_root_password",
+        "keycloak_jupyterhub_client_secret"
       ],
-      "adr": "0194",
-      "runbook": "docs/runbooks/configure-coolify.md",
+      "adr": "0291",
+      "runbook": "docs/runbooks/configure-jupyterhub.md",
       "tags": [
-        "paas",
-        "git",
-        "deployments",
-        "applications"
+        "jupyter",
+        "notebooks",
+        "exploration",
+        "oidc"
       ],
+      "notes": "The current repo-managed notebook contract exposes Ollama, the private platform-context API, and the service-local jupyterhub-shared MinIO bucket inside spawned single-user servers; shared global MinIO, raw Qdrant, and LiteLLM remain future work.",
       "environments": {
         "production": {
           "status": "active",
-          "url": "https://coolify.lv3.org",
-          "subdomain": "coolify.lv3.org"
+          "url": "https://notebooks.lv3.org",
+          "subdomain": "notebooks.lv3.org"
         }
       }
     },
     {
-      "id": "coolify_apps",
-      "name": "Coolify Apps Ingress",
-      "description": "Shared public ingress surface for Coolify-managed applications published from the coolify-lv3 runtime.",
-      "category": "infrastructure",
+      "id": "plane",
+      "name": "Plane",
+      "description": "Repo-managed Plane workspace for platform kanban tracking and ADR synchronization.",
+      "category": "automation",
       "lifecycle_status": "active",
-      "vm": "coolify-lv3",
-      "vmid": 170,
-      "internal_url": "http://10.10.10.70:80",
-      "public_url": "https://apps.lv3.org",
-      "subdomain": "apps.lv3.org",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8093",
+      "public_url": "https://tasks.lv3.org",
+      "subdomain": "tasks.lv3.org",
       "exposure": "edge-published",
-      "health_probe_id": "coolify_apps",
-      "adr": "0194",
-      "runbook": "docs/runbooks/configure-coolify.md",
+      "uptime_monitor_name": "Plane Public",
+      "health_probe_id": "plane",
+      "image_catalog_ids": [
+        "plane_frontend_runtime",
+        "plane_space_runtime",
+        "plane_admin_runtime",
+        "plane_live_runtime",
+        "plane_backend_runtime",
+        "plane_proxy_runtime",
+        "netbox_redis_runtime",
+        "langfuse_minio_runtime",
+        "plane_rabbitmq_runtime"
+      ],
+      "secret_catalog_ids": [
+        "plane_database_password",
+        "plane_secret_key",
+        "plane_live_server_secret_key",
+        "plane_rabbitmq_password",
+        "plane_aws_secret_access_key",
+        "plane_bootstrap_admin_password",
+        "plane_api_token"
+      ],
+      "adr": "0193",
+      "runbook": "docs/runbooks/configure-plane.md",
       "tags": [
-        "paas",
-        "ingress",
-        "applications",
-        "wildcard"
+        "tasks",
+        "kanban",
+        "adr",
+        "automation"
       ],
       "environments": {
         "production": {
           "status": "active",
-          "url": "https://apps.lv3.org",
-          "subdomain": "apps.lv3.org",
-          "notes": "Shared entrypoint for repo-managed Coolify applications, with wildcard alias coverage handled by the edge topology."
+          "url": "https://tasks.lv3.org",
+          "subdomain": "tasks.lv3.org"
         }
       }
     },
@@ -1132,6 +1630,49 @@
         "production": {
           "status": "active",
           "url": "http://100.64.0.1:8010"
+        }
+      }
+    },
+    {
+      "id": "plausible",
+      "name": "Plausible Analytics",
+      "description": "Privacy-first cookie-free web analytics dashboard and tracker for selected public LV3 pages.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8016",
+      "public_url": "https://analytics.lv3.org",
+      "subdomain": "analytics.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Plausible Public Health",
+      "health_probe_id": "plausible",
+      "image_catalog_ids": [
+        "plausible_runtime",
+        "plausible_postgres_runtime",
+        "plausible_clickhouse_runtime"
+      ],
+      "secret_catalog_ids": [
+        "plausible_database_password",
+        "plausible_secret_key_base",
+        "plausible_bootstrap_user_password",
+        "mail_platform_server_mailbox_password"
+      ],
+      "adr": "0283",
+      "runbook": "docs/runbooks/configure-plausible.md",
+      "tags": [
+        "analytics",
+        "privacy",
+        "observability",
+        "edge-authenticated"
+      ],
+      "notes": "The dashboard uses the shared edge OIDC boundary while the tracker, event ingestion path, and health endpoints remain intentionally public for instrumentation and probe traffic.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://analytics.lv3.org",
+          "subdomain": "analytics.lv3.org",
+          "notes": "Plausible Community Edition does not expose service-native OIDC in the verified upstream path, so browser access is gated at the shared edge and repo-managed site tracking is injected only on the declared public hostnames."
         }
       }
     },
@@ -1164,42 +1705,6 @@
         "production": {
           "status": "active",
           "url": "https://100.64.0.1:9444"
-        }
-      }
-    },
-    {
-      "id": "vaultwarden",
-      "name": "Vaultwarden",
-      "description": "Private Bitwarden-compatible credential vault for operator-managed passwords, recovery codes, and TOTP material.",
-      "category": "security",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
-      "vmid": 120,
-      "internal_url": "https://vault.lv3.org",
-      "subdomain": "vault.lv3.org",
-      "exposure": "private-only",
-      "health_probe_id": "vaultwarden",
-      "image_catalog_ids": [
-        "vaultwarden_runtime"
-      ],
-      "secret_catalog_ids": [
-        "vaultwarden_admin_token",
-        "vaultwarden_database_password"
-      ],
-      "adr": "0147",
-      "runbook": "docs/runbooks/configure-vaultwarden.md",
-      "dashboard_url": "https://grafana.lv3.org/d/lv3-vaultwarden/lv3-vaultwarden",
-      "tags": [
-        "credentials",
-        "totp",
-        "vault",
-        "private"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "https://vault.lv3.org",
-          "subdomain": "vault.lv3.org"
         }
       }
     },
@@ -1301,34 +1806,220 @@
       }
     },
     {
-      "id": "headscale",
-      "name": "Headscale",
-      "description": "Repo-managed control plane for the LV3 zero-trust mesh VPN.",
-      "category": "access",
+      "id": "realtime",
+      "name": "Netdata Realtime Metrics",
+      "description": "Authenticated Netdata parent dashboard for live host and guest metrics streamed into monitoring-lv3.",
+      "category": "observability",
       "lifecycle_status": "active",
-      "vm": "proxmox_florin",
-      "internal_url": "http://10.10.10.1:8080",
-      "public_url": "https://headscale.lv3.org",
-      "subdomain": "headscale.lv3.org",
+      "vm": "monitoring-lv3",
+      "vmid": 140,
+      "internal_url": "http://10.10.10.40:19999",
+      "public_url": "https://realtime.lv3.org",
+      "subdomain": "realtime.lv3.org",
       "exposure": "edge-published",
-      "uptime_monitor_name": "Headscale Public Health",
-      "health_probe_id": "headscale",
-      "secret_catalog_ids": [
-        "headscale_api_key"
-      ],
-      "adr": "0144",
-      "runbook": "docs/runbooks/configure-headscale.md",
+      "health_probe_id": "realtime",
+      "adr": "0196",
+      "runbook": "docs/runbooks/configure-netdata.md",
       "tags": [
-        "mesh",
-        "vpn",
-        "headscale",
-        "zero-trust"
+        "metrics",
+        "netdata",
+        "observability",
+        "realtime"
       ],
       "environments": {
         "production": {
           "status": "active",
-          "url": "https://headscale.lv3.org",
-          "subdomain": "headscale.lv3.org"
+          "url": "https://realtime.lv3.org",
+          "subdomain": "realtime.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "searxng",
+      "name": "SearXNG",
+      "description": "Private metasearch runtime for operator and agent web lookups with a tailnet-only hostname.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8881",
+      "public_url": "http://search.lv3.org",
+      "subdomain": "search.lv3.org",
+      "exposure": "private-only",
+      "health_probe_id": "searxng",
+      "image_catalog_ids": [
+        "searxng_runtime",
+        "searxng_valkey_runtime"
+      ],
+      "secret_catalog_ids": [
+        "searxng_secret_key"
+      ],
+      "adr": "0148",
+      "runbook": "docs/runbooks/configure-searxng.md",
+      "tags": [
+        "search",
+        "web",
+        "agents",
+        "privacy"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://search.lv3.org",
+          "subdomain": "search.lv3.org",
+          "notes": "Tailnet-only hostname published on the Proxmox host Tailscale IP."
+        }
+      }
+    },
+    {
+      "id": "woodpecker",
+      "name": "Woodpecker CI",
+      "description": "Repo-managed event-driven CI server with Gitea OAuth, a public edge URL, and a private controller path on the Proxmox host.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://100.64.0.1:8017",
+      "public_url": "https://ci.lv3.org",
+      "subdomain": "ci.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Woodpecker Public",
+      "health_probe_id": "woodpecker",
+      "image_catalog_ids": [
+        "woodpecker_server_runtime",
+        "woodpecker_agent_runtime"
+      ],
+      "secret_catalog_ids": [
+        "woodpecker_database_password",
+        "woodpecker_gitea_client_secret",
+        "woodpecker_agent_secret",
+        "woodpecker_api_token",
+        "woodpecker_secret_smoke"
+      ],
+      "adr": "0287",
+      "runbook": "docs/runbooks/configure-woodpecker.md",
+      "degradation_modes": [
+        {
+          "dependency": "postgres",
+          "dependency_type": "hard",
+          "degraded_behaviour": "Woodpecker cannot persist repositories, secrets, pipeline history, or queued state without PostgreSQL.",
+          "degraded_for_seconds_max": 0,
+          "recovery_signal": "Woodpecker database connectivity succeeds again",
+          "tested_by": "fault:postgres-unavailable"
+        }
+      ],
+      "tags": [
+        "ci",
+        "pipelines",
+        "git",
+        "automation"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://ci.lv3.org",
+          "subdomain": "ci.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "semaphore",
+      "name": "Semaphore",
+      "description": "Private Semaphore UI and API for bounded Ansible job execution.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://100.118.189.95:8020",
+      "exposure": "private-only",
+      "uptime_monitor_name": "Semaphore Private",
+      "health_probe_id": "semaphore",
+      "image_catalog_ids": [
+        "semaphore_runtime"
+      ],
+      "secret_catalog_ids": [
+        "semaphore_database_password",
+        "semaphore_admin_password",
+        "semaphore_api_token"
+      ],
+      "adr": "0149",
+      "runbook": "docs/runbooks/configure-semaphore.md",
+      "tags": [
+        "ansible",
+        "automation",
+        "jobs"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://100.118.189.95:8020"
+        }
+      }
+    },
+    {
+      "id": "serverclaw",
+      "name": "ServerClaw",
+      "description": "Public chat-first ServerClaw assistant surface backed by repo-governed local model and search integrations.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "coolify-lv3",
+      "vmid": 170,
+      "internal_url": "http://10.10.10.70:8096",
+      "public_url": "https://chat.lv3.org",
+      "subdomain": "chat.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "ServerClaw",
+      "health_probe_id": "serverclaw",
+      "image_catalog_ids": [
+        "open_webui_runtime"
+      ],
+      "secret_catalog_ids": [
+        "serverclaw_admin_password",
+        "serverclaw_secret_key",
+        "serverclaw_oidc_client_secret"
+      ],
+      "adr": "0254",
+      "runbook": "docs/runbooks/configure-serverclaw.md",
+      "tags": [
+        "agents",
+        "chat",
+        "assistant",
+        "public"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://chat.lv3.org",
+          "subdomain": "chat.lv3.org",
+          "notes": "ServerClaw uses in-app Keycloak OIDC for routine browser login while retaining a repo-managed bootstrap admin as break-glass access."
+        }
+      }
+    },
+    {
+      "id": "status_page",
+      "name": "Public Status Page",
+      "description": "Public-facing platform status page backed by Uptime Kuma and independently checked by Uptime Robot.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:3001/status/lv3-platform",
+      "public_url": "https://status.lv3.org",
+      "subdomain": "status.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "status_page",
+      "adr": "0109",
+      "runbook": "docs/runbooks/public-status-page.md",
+      "tags": [
+        "status",
+        "uptime",
+        "public"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://status.lv3.org",
+          "subdomain": "status.lv3.org"
         }
       }
     },
@@ -1359,6 +2050,66 @@
         "production": {
           "status": "active",
           "url": "https://100.64.0.1:9443"
+        }
+      }
+    },
+    {
+      "id": "tika",
+      "name": "Apache Tika",
+      "description": "Private stateless document text and metadata extraction service for the RAG and ServerClaw memory ingestion pipelines.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:9998",
+      "exposure": "private-only",
+      "uptime_monitor_name": "Tika Private",
+      "health_probe_id": "tika",
+      "image_catalog_ids": [
+        "tika_runtime"
+      ],
+      "adr": "0275",
+      "runbook": "docs/runbooks/configure-tika.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-tika/lv3-tika",
+      "tags": [
+        "documents",
+        "extraction",
+        "rag",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:9998",
+          "notes": "The runtime stays private to the guest network and is consumed directly by repo-managed ingestion workflows; no shared API gateway publication is issued."
+        }
+      }
+    },
+    {
+      "id": "tesseract_ocr",
+      "name": "Tesseract OCR",
+      "description": "Private OCR fallback API for scanned PDFs and image uploads when Apache Tika returns no embedded text.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:3008",
+      "exposure": "private-only",
+      "health_probe_id": "tesseract_ocr",
+      "adr": "0286",
+      "runbook": "docs/runbooks/configure-tesseract-ocr.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tesseract-ocr-availability",
+      "tags": [
+        "ocr",
+        "document-extraction",
+        "images",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:3008",
+          "notes": "Tesseract OCR stays private on docker-runtime-lv3 and is intended as the second-stage fallback when Tika returns no text for image-like documents or scanned PDFs."
         }
       }
     },
@@ -1401,30 +2152,38 @@
       }
     },
     {
-      "id": "status_page",
-      "name": "Public Status Page",
-      "description": "Public-facing platform status page backed by Uptime Kuma and independently checked by Uptime Robot.",
-      "category": "observability",
+      "id": "vaultwarden",
+      "name": "Vaultwarden",
+      "description": "Private Bitwarden-compatible credential vault for operator-managed passwords, recovery codes, and TOTP material.",
+      "category": "security",
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "http://10.10.10.20:3001/status/lv3-platform",
-      "public_url": "https://status.lv3.org",
-      "subdomain": "status.lv3.org",
-      "exposure": "edge-published",
-      "health_probe_id": "status_page",
-      "adr": "0109",
-      "runbook": "docs/runbooks/public-status-page.md",
+      "internal_url": "https://vault.lv3.org",
+      "subdomain": "vault.lv3.org",
+      "exposure": "private-only",
+      "health_probe_id": "vaultwarden",
+      "image_catalog_ids": [
+        "vaultwarden_runtime"
+      ],
+      "secret_catalog_ids": [
+        "vaultwarden_admin_token",
+        "vaultwarden_database_password"
+      ],
+      "adr": "0147",
+      "runbook": "docs/runbooks/configure-vaultwarden.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-vaultwarden/lv3-vaultwarden",
       "tags": [
-        "status",
-        "uptime",
-        "public"
+        "credentials",
+        "totp",
+        "vault",
+        "private"
       ],
       "environments": {
         "production": {
           "status": "active",
-          "url": "https://status.lv3.org",
-          "subdomain": "status.lv3.org"
+          "url": "https://vault.lv3.org",
+          "subdomain": "vault.lv3.org"
         }
       }
     },
@@ -1468,41 +2227,11 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://100.64.0.1:8005"
-        }
-      }
-    },
-    {
-      "id": "semaphore",
-      "name": "Semaphore",
-      "description": "Private Semaphore UI and API for bounded Ansible job execution.",
-      "category": "automation",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
-      "vmid": 120,
-      "internal_url": "http://100.118.189.95:8020",
-      "exposure": "private-only",
-      "uptime_monitor_name": "Semaphore Private",
-      "health_probe_id": "semaphore",
-      "image_catalog_ids": [
-        "semaphore_runtime"
-      ],
-      "secret_catalog_ids": [
-        "semaphore_database_password",
-        "semaphore_admin_password",
-        "semaphore_api_token"
-      ],
-      "adr": "0149",
-      "runbook": "docs/runbooks/configure-semaphore.md",
-      "tags": [
-        "ansible",
-        "automation",
-        "jobs"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "http://100.118.189.95:8020"
+          "url": "http://100.64.0.1:8005",
+          "stage_ready": true,
+          "smoke_suite_ids": [
+            "production-windmill-primary-path"
+          ]
         }
       }
     }

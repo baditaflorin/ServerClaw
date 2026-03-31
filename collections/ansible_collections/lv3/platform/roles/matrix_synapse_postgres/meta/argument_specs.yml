@@ -1,0 +1,56 @@
+---
+# Purpose: Declare the validated input contract for the matrix_synapse_postgres role.
+# Use case: Used by Ansible argument validation before provisioning the Matrix Synapse PostgreSQL database.
+#
+# Inputs (required):
+#   - matrix_synapse_database_name (str, required): Managed PostgreSQL database name.
+#   - matrix_synapse_database_user (str, required): Managed PostgreSQL login role.
+#   - matrix_synapse_postgres_secret_dir (path, required): Guest-side secret directory for the mirrored password.
+#   - matrix_synapse_postgres_password_file (path, required): Guest-side database password path.
+#   - matrix_synapse_database_password_local_file (path, required): Controller-local database password path.
+#
+# Inputs (optional):
+#   - matrix_synapse_local_artifact_dir (path, optional): Controller-local artifact directory.
+#   - matrix_synapse_bridge_databases (list, optional): Additional bridge databases and password artifacts.
+#
+# Outputs:
+#   - Argument-spec validation metadata for the matrix_synapse_postgres role.
+#
+# Idempotency: Fully idempotent
+#              This file only declares validation metadata.
+#
+# Dependencies:
+#   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+#   - ADR 0256: Mautrix Bridges For External Chat Channel Adapters
+#   - Role: matrix_synapse_postgres — validates inputs before database convergence.
+#
+# Related ADRs: 0165, 0255, 0256
+# Related Runbooks: docs/runbooks/configure-matrix-synapse.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-29
+argument_specs:
+  main:
+    short_description: Provision the Matrix Synapse PostgreSQL role and database.
+    options:
+      matrix_synapse_database_name:
+        type: str
+        required: true
+      matrix_synapse_database_user:
+        type: str
+        required: true
+      matrix_synapse_postgres_secret_dir:
+        type: path
+        required: true
+      matrix_synapse_postgres_password_file:
+        type: path
+        required: true
+      matrix_synapse_local_artifact_dir:
+        type: path
+        required: false
+      matrix_synapse_bridge_databases:
+        type: list
+        required: false
+      matrix_synapse_database_password_local_file:
+        type: path
+        required: true

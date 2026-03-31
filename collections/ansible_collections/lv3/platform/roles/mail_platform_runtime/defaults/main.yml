@@ -17,6 +17,7 @@ mail_platform_gateway_legacy_env_file: "{{ mail_platform_gateway_dir }}/gateway.
 mail_platform_openbao_agent_dir: "{{ mail_platform_site_dir }}/openbao"
 mail_platform_openbao_agent_image: "{{ openbao_agent_image }}"
 mail_platform_openbao_agent_container_name: mail-platform-openbao-agent
+mail_platform_docker_network_name: mail-platform_default
 mail_platform_openbao_secret_path: services/mail-platform/runtime
 mail_platform_openbao_policy_name: lv3-service-mail-platform-runtime
 mail_platform_openbao_approle_name: mail-platform-runtime
@@ -92,7 +93,7 @@ mail_platform_notification_profiles:
 mail_platform_gateway_trace_service_name: mail-gateway
 mail_platform_gateway_trace_service_namespace: lv3
 mail_platform_gateway_trace_environment: lv3
-mail_platform_gateway_trace_otlp_endpoint: "{{ platform_service_topology | platform_service_url('grafana', 'otlp_http') }}"
+mail_platform_gateway_trace_otlp_endpoint: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('grafana', 'otlp_http') }}"
 mail_platform_metrics_username: prometheus
 mail_platform_webhook_events:
   - queue.queue-message-authenticated

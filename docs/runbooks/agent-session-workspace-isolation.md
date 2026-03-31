@@ -36,6 +36,12 @@ The remote build gateway uses:
 <workspace_root>/.lv3-session-workspaces/<session_slug>/repo
 ```
 
+Each immutable remote run then expands beneath that stable session root as:
+
+```text
+<workspace_root>/.lv3-session-workspaces/<session_slug>/repo/.lv3-runs/<run_id>/repo
+```
+
 The default local state root is:
 
 ```text
@@ -68,6 +74,7 @@ LV3_SESSION_ID=adr-0156-live make remote-lint
 That same `LV3_SESSION_ID` will flow into:
 
 - the remote build-server checkout path
+- the immutable remote run namespace path
 - remote shell and remote Docker environments
 - validation-gate status payload metadata
 - scheduler state-store default paths when the tool is session-aware

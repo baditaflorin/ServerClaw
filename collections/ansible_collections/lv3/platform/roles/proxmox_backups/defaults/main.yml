@@ -5,6 +5,7 @@ proxmox_backup_protected_vmids:
   - 130
   - 140
   - 150
+  - 170
 
 proxmox_backup_storage:
   enabled: "{{ proxmox_backup_storage_enabled_override | default(false) }}"

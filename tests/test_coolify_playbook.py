@@ -18,6 +18,7 @@ def test_coolify_playbook_covers_vm_provision_guest_runtime_and_edge() -> None:
     assert play_names == [
         "Ensure the Coolify VM is provisioned on the Proxmox host",
         "Converge the Coolify private controller proxy and host firewall",
+        "Ensure Hetzner DNS publication for Coolify",
         "Converge Coolify on the dedicated guest",
         "Publish Coolify on the NGINX edge",
     ]
@@ -25,21 +26,31 @@ def test_coolify_playbook_covers_vm_provision_guest_runtime_and_edge() -> None:
     provision_roles = [role["role"] for role in playbook[0]["roles"]]
     assert provision_roles == ["lv3.platform.proxmox_guests"]
 
-    guest_roles = [role["role"] for role in playbook[2]["roles"]]
+    dns_task = playbook[2]["tasks"][0]
+    assert dns_task["name"] == "Ensure Hetzner DNS records are present"
+    assert dns_task["ansible.builtin.include_role"]["name"] == "lv3.platform.hetzner_dns_records"
+    assert dns_task["ansible.builtin.include_role"]["apply"] == {
+        "delegate_to": "localhost",
+        "become": False,
+    }
+    assert dns_task["run_once"] is True
+
+    guest_roles = [role["role"] for role in playbook[3]["roles"]]
     assert guest_roles == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.docker_runtime",
+        "lv3.platform.repo_deploy_image_cache",
         "lv3.platform.coolify_runtime",
     ]
 
-    edge_roles = [role["role"] for role in playbook[3]["roles"]]
+    edge_roles = [role["role"] for role in playbook[4]["roles"]]
     assert edge_roles == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.public_edge_oidc_auth",
         "lv3.platform.nginx_edge_publication",
     ]
-    expected_vars_file = "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
-    assert [play["vars_files"] for play in playbook] == [[expected_vars_file]] * 4
+    expected_vars_file = "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+    assert [play["vars_files"] for play in playbook] == [[expected_vars_file]] * 5
 
 
 def test_coolify_service_wrapper_imports_the_canonical_playbook() -> None:

@@ -1,0 +1,240 @@
+# Purpose: Recover the local OpenBao runtime before shared helpers read or write secrets.
+# Use case: Included by common OpenBao-backed helpers when Docker or the local OpenBao container may have fallen behind a replay.
+# Inputs: Local OpenBao site paths, HTTP port, and optional Docker chain retry controls.
+# Outputs: Restarts Docker when bridge chains are missing, recreates the OpenBao Compose service when the API is unavailable, and leaves the local API reachable for follow-up helper tasks.
+# Idempotency: Yes; only performs Docker or Compose recovery when the initial local API probe does not answer.
+# Dependencies: ADR 0165, ADR 0197, and ADR 0266.
+---
+- name: Record the local OpenBao runtime recovery paths
+  ansible.builtin.set_fact:
+    common_local_openbao_runtime_site_dir: "{{ openbao_site_dir | default('/opt/openbao') }}"
+    common_local_openbao_runtime_compose_file: >-
+      {{
+        openbao_compose_file
+        | default(((openbao_site_dir | default('/opt/openbao')) ~ '/docker-compose.yml'))
+      }}
+    common_local_openbao_runtime_container_name: "{{ openbao_container_name | default('lv3-openbao') }}"
+    common_local_openbao_runtime_network_name: >-
+      {{ ((openbao_site_dir | default('/opt/openbao')) | basename) ~ '_default' }}
+    common_local_openbao_runtime_chain_recheck_retries: "{{ openbao_runtime_chain_recheck_retries | default(30) }}"
+    common_local_openbao_runtime_chain_recheck_delay_seconds: "{{ openbao_runtime_chain_recheck_delay_seconds | default(2) }}"
+
+- name: Probe whether the local OpenBao API already answers
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
+    method: GET
+    status_code:
+      - 200
+      - 429
+      - 472
+      - 473
+      - 501
+      - 503
+  register: common_local_openbao_runtime_probe
+  retries: 3
+  delay: 2
+  until: (common_local_openbao_runtime_probe.status | default(0)) in [200, 429, 472, 473, 501, 503]
+  failed_when: false
+  changed_when: false
+
+- name: Reset SSH connection before recovering the local OpenBao runtime
+  ansible.builtin.meta: reset_connection
+  when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+
+- name: Inspect current OpenBao container networks before local recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - "{{ common_local_openbao_runtime_container_name }}"
+      - --format
+      - '{{ "{{json .NetworkSettings.Networks}}" }}'
+  register: common_local_openbao_runtime_container_networks
+  changed_when: false
+  failed_when: common_local_openbao_runtime_container_networks.rc not in [0, 1]
+  when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+
+- name: Inspect current OpenBao published ports before local recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - "{{ common_local_openbao_runtime_container_name }}"
+      - --format
+      - '{{ "{{json .NetworkSettings.Ports}}" }}'
+  register: common_local_openbao_runtime_container_ports
+  changed_when: false
+  failed_when: common_local_openbao_runtime_container_ports.rc not in [0, 1]
+  when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+
+- name: Record whether the local OpenBao runtime lost its Docker publication state
+  ansible.builtin.set_fact:
+    common_local_openbao_runtime_detached: >-
+      {{
+        common_local_openbao_runtime_container_networks.rc != 0
+        or common_local_openbao_runtime_container_ports.rc != 0
+        or (common_local_openbao_runtime_container_networks.stdout | trim) in ['', '{}', 'null']
+        or (common_local_openbao_runtime_container_ports.stdout | trim) in ['', '{}', 'null']
+        or ('"' ~ (openbao_http_port | string) ~ '/tcp"' not in common_local_openbao_runtime_container_ports.stdout)
+      }}
+  when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+
+- name: Check whether Docker nat chain exists before local OpenBao recovery
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: common_local_openbao_runtime_docker_nat_chain_check
+  changed_when: false
+  failed_when: common_local_openbao_runtime_docker_nat_chain_check.rc not in [0, 1]
+  when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+
+- name: Check whether Docker forward chain exists before local OpenBao recovery
+  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
+  register: common_local_openbao_runtime_docker_forward_chain_check
+  changed_when: false
+  failed_when: common_local_openbao_runtime_docker_forward_chain_check.rc not in [0, 1]
+  when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+
+- name: Restart Docker when required chains are missing before local OpenBao recovery
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+  when: >-
+    (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+    and (
+      common_local_openbao_runtime_docker_nat_chain_check.rc == 1
+      or common_local_openbao_runtime_docker_forward_chain_check.rc == 1
+    )
+
+- name: Recheck Docker nat chain before local OpenBao recovery
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: common_local_openbao_runtime_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: common_local_openbao_runtime_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: "{{ common_local_openbao_runtime_chain_recheck_retries }}"
+  delay: "{{ common_local_openbao_runtime_chain_recheck_delay_seconds }}"
+  until: common_local_openbao_runtime_docker_nat_chain_recheck.rc == 0
+  when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+
+- name: Recheck Docker forward chain before local OpenBao recovery
+  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
+  register: common_local_openbao_runtime_docker_forward_chain_recheck
+  changed_when: false
+  failed_when: common_local_openbao_runtime_docker_forward_chain_recheck.rc not in [0, 1]
+  retries: "{{ common_local_openbao_runtime_chain_recheck_retries }}"
+  delay: "{{ common_local_openbao_runtime_chain_recheck_delay_seconds }}"
+  until: common_local_openbao_runtime_docker_forward_chain_recheck.rc == 0
+  when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+
+- name: Assert Docker bridge chains are present before local OpenBao recovery
+  ansible.builtin.assert:
+    that:
+      - common_local_openbao_runtime_docker_nat_chain_recheck.rc == 0
+      - common_local_openbao_runtime_docker_forward_chain_recheck.rc == 0
+    fail_msg: >-
+      Docker bridge chains remain unavailable on {{ inventory_hostname }}
+      while recovering the local OpenBao runtime.
+  when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+
+- name: Check whether the local OpenBao Compose file exists before recovery
+  ansible.builtin.stat:
+    path: "{{ common_local_openbao_runtime_compose_file }}"
+  register: common_local_openbao_runtime_compose_file_stat
+  when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+
+- name: Fail when the local OpenBao Compose file is missing during recovery
+  ansible.builtin.fail:
+    msg: >-
+      {{ common_local_openbao_runtime_compose_file }} is missing on {{ inventory_hostname }}.
+      Converge OpenBao before preparing local secret delivery for
+      {{ common_local_openbao_runtime_consumer_name | default('the requested runtime service') }}.
+  when: >-
+    (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+    and not common_local_openbao_runtime_compose_file_stat.stat.exists
+
+- name: Check whether the OpenBao compose network exists before local recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - inspect
+      - "{{ common_local_openbao_runtime_network_name }}"
+  register: common_local_openbao_runtime_network
+  changed_when: false
+  failed_when: common_local_openbao_runtime_network.rc not in [0, 1]
+  when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+
+- name: Remove the detached OpenBao container before local recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - rm
+      - -f
+      - "{{ common_local_openbao_runtime_container_name }}"
+  register: common_local_openbao_runtime_container_remove
+  changed_when: common_local_openbao_runtime_container_remove.rc == 0
+  failed_when: common_local_openbao_runtime_container_remove.rc not in [0, 1]
+  when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+
+- name: Remove the stale OpenBao compose network before local recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - rm
+      - "{{ common_local_openbao_runtime_network_name }}"
+  register: common_local_openbao_runtime_network_remove
+  changed_when: common_local_openbao_runtime_network_remove.rc == 0
+  failed_when: common_local_openbao_runtime_network_remove.rc not in [0, 1]
+  when:
+    - (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+    - common_local_openbao_runtime_detached | default(false) | bool
+    - common_local_openbao_runtime_network.rc == 0
+
+- name: Recover the local OpenBao stack when the API is unavailable
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ common_local_openbao_runtime_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+      - --force-recreate
+      - openbao
+  args:
+    chdir: "{{ common_local_openbao_runtime_site_dir }}"
+  register: common_local_openbao_runtime_recovery
+  retries: 6
+  delay: 5
+  until: common_local_openbao_runtime_recovery.rc == 0
+  changed_when: >-
+    'Creating' in common_local_openbao_runtime_recovery.stdout
+    or 'Recreating' in common_local_openbao_runtime_recovery.stdout
+    or 'Starting' in common_local_openbao_runtime_recovery.stdout
+  when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+
+- name: Wait for the local OpenBao loopback port after recovery
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ openbao_http_port }}"
+    delay: 0
+    timeout: 120
+  when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
+
+- name: Wait for the local OpenBao API to answer after recovery
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
+    method: GET
+    status_code:
+      - 200
+      - 429
+      - 472
+      - 473
+      - 501
+      - 503
+  register: common_local_openbao_runtime_recovered_probe
+  retries: 24
+  delay: 5
+  until: (common_local_openbao_runtime_recovered_probe.status | default(0)) in [200, 429, 472, 473, 501, 503]
+  changed_when: false
+  when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]

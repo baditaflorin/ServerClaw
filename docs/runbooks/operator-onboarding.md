@@ -46,9 +46,15 @@ The workflow:
 
 ## Browser-First Path
 
-The same governed backend is also available through the Windmill admin app documented in [windmill-operator-access-admin.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0122-operator-admin-ui/docs/runbooks/windmill-operator-access-admin.md).
+The same governed backend is also available through the Windmill admin app documented in [windmill-operator-access-admin.md](windmill-operator-access-admin.md).
 
 Use that app when you need a non-terminal path from a new workstation. It calls the same ADR 0108 wrappers and does not create a second provisioning path.
+
+The app now includes a `Guided Onboarding` launcher:
+
+- the first-run Shepherd tour starts automatically on a fresh browser session
+- `Onboard Admin Or Operator` and `Onboard Viewer` give role-specific walkthroughs
+- dismissed tours can be resumed from the same launcher without restarting the page
 
 ## Direct Script Usage
 

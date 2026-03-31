@@ -172,6 +172,27 @@
       "notes": "Declared from inventory for ADR 0194 Coolify rollout."
     },
     {
+      "vmid": 180,
+      "name": "artifact-cache-lv3",
+      "status": "active",
+      "environment": "production",
+      "metrics_host": "artifact-cache-lv3",
+      "allocated": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 160
+      },
+      "budget": {
+        "ram_gb": 12,
+        "vcpu": 6,
+        "disk_gb": 240
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Validated from live qm config on 2026-03-30 for ADR 0296 dedicated artifact cache adoption."
+    },
+    {
       "vmid": 210,
       "name": "nginx-staging-lv3",
       "status": "planned",
@@ -296,6 +317,27 @@
         "/"
       ],
       "notes": "Declared staging backup guest in inventory; planned capacity placeholder pending staged backup topology."
+    },
+    {
+      "vmid": 280,
+      "name": "artifact-cache-staging-lv3",
+      "status": "planned",
+      "environment": "staging",
+      "metrics_host": "artifact-cache-staging-lv3",
+      "allocated": {
+        "ram_gb": 4,
+        "vcpu": 2,
+        "disk_gb": 64
+      },
+      "budget": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 96
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Declared staging artifact-cache placeholder from inventory host coverage; planned capacity only until a staged VM is provisioned."
     },
     {
       "vmid": 151,

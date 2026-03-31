@@ -1,0 +1,26 @@
+........................................................................ [ 82%]
+...............                                                          [100%]
+87 passed in 4.22s
+ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/jupyterhub.yml --syntax-check
+
+playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/jupyterhub.yml
+ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/ollama.yml --syntax-check
+
+playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/ollama.yml
+Service completeness: jupyterhub
+Status: PASS
+- ADR: ok (docs/adr/0291-jupyterhub-as-the-interactive-notebook-environment.md)
+- Ansible role: ok (collections/ansible_collections/lv3/platform/roles/jupyterhub_runtime)
+- Service capability catalog: ok (config/service-capability-catalog.json)
+- Health probe definition: ok (config/health-probe-catalog.json)
+- Subdomain entry: ok (config/subdomain-catalog.json)
+- API gateway registration: ok (config/api-gateway-catalog.json)
+- Dependency graph node: ok (config/dependency-graph.json)
+- Keycloak client scaffold: ok (config/service-completeness.json)
+- Secret definition: ok (config/secret-catalog.json)
+- Grafana dashboard: grandfathered until 2026-09-30 (config/grafana/dashboards/jupyterhub.json)
+- SLO definition: ok (config/slo-catalog.json)
+- Compose secrets injection: ok (collections/ansible_collections/lv3/platform/roles/jupyterhub_runtime/templates/docker-compose.yml.j2)
+- Data catalog entry: ok (config/data-catalog.json)
+- Alert rules: grandfathered until 2026-09-30 (config/alertmanager/rules/jupyterhub.yml)
+- Runbook: ok (docs/runbooks/configure-jupyterhub.md)

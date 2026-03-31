@@ -1,3 +1,9 @@
+# Purpose: Converge the OpenBao runtime, initialization flow, unseal artifacts, and repo-managed auth/bootstrap contracts.
+# Use case: Run during OpenBao deployment, TLS hardening, or downstream recovery when secret delivery must match repo truth.
+# Inputs: Runtime paths, TLS materials, PostgreSQL backend inputs, local artifact files, and bootstrap identity settings.
+# Outputs: The OpenBao runtime, bootstrap payloads, auth backends, and operator credentials match the declared configuration.
+# Idempotency: Partially idempotent because first-run initialization, unseal handling, and runtime restarts intentionally change state.
+# Dependencies: ADR 0165, ADR 0043, ADR 0101, and ADR 0231.
 ---
 - name: Validate OpenBao runtime inputs
   ansible.builtin.assert:
@@ -94,6 +100,8 @@
       - curl
     state: present
     update_cache: true
+    cache_valid_time: 3600
+    lock_timeout: 300
     force_apt_get: true
 
 - name: Ensure OpenBao runtime directories exist
@@ -148,17 +156,26 @@
     group: "{{ openbao_runtime_gid }}"
     mode: "0644"
 
+- name: Check whether the OpenBao external TLS certificate remains fresh enough
+  ansible.builtin.command:
+    argv:
+      - openssl
+      - x509
+      - -checkend
+      - "{{ openbao_tls_cert_renew_before_seconds | string }}"
+      - -noout
+      - -in
+      - "{{ openbao_tls_server_cert_host_file }}"
+  register: openbao_tls_certificate_freshness
+  changed_when: false
+  failed_when: false
+
 - name: Issue or renew the OpenBao external TLS certificate
   vars:
     mutation_audit_action: issue.openbao_tls_certificate
     mutation_audit_target: openbao-runtime
   ansible.builtin.shell: |
     set -euo pipefail
-    if [ -s "{{ openbao_tls_server_cert_host_file }}" ] && \
-      openssl x509 -checkend {{ openbao_tls_cert_renew_before_seconds }} -noout -in "{{ openbao_tls_server_cert_host_file }}" >/dev/null 2>&1; then
-      exit 0
-    fi
-
     step ca certificate \
       --force \
       --provisioner services \
@@ -181,6 +198,7 @@
     executable: /bin/bash
   register: openbao_tls_certificate_issue
   changed_when: "'changed' in openbao_tls_certificate_issue.stdout"
+  when: openbao_tls_certificate_freshness.rc != 0
   no_log: true
   tags:
     - mutation
@@ -216,8 +234,8 @@
   vars:
     mutation_audit_action: render.openbao_compose
     mutation_audit_target: openbao-runtime
-  ansible.builtin.template:
-    src: docker-compose.yml.j2
+  ansible.builtin.copy:
+    content: "{{ lookup('ansible.builtin.template', role_path ~ '/templates/docker-compose.yml.j2') }}"
     dest: "{{ openbao_compose_file }}"
     owner: root
     group: root
@@ -271,23 +289,32 @@
   ansible.builtin.command: iptables -t nat -S DOCKER
   register: openbao_docker_nat_chain_recheck
   changed_when: false
+  failed_when: openbao_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: "{{ openbao_runtime_chain_recheck_retries }}"
+  delay: "{{ openbao_runtime_chain_recheck_delay_seconds }}"
+  until: openbao_docker_nat_chain_recheck.rc == 0
 
 - name: Recheck Docker forward chain before OpenBao startup
   ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
   register: openbao_docker_forward_chain_recheck
   changed_when: false
+  failed_when: openbao_docker_forward_chain_recheck.rc not in [0, 1]
+  retries: "{{ openbao_runtime_chain_recheck_retries }}"
+  delay: "{{ openbao_runtime_chain_recheck_delay_seconds }}"
+  until: openbao_docker_forward_chain_recheck.rc == 0
 
-- name: Assert Docker nat chain is present before OpenBao startup
-  ansible.builtin.assert:
-    that:
-      - openbao_docker_nat_chain_recheck.rc == 0
-    fail_msg: "Docker is running but the nat DOCKER chain is missing; OpenBao published ports will fail."
+- name: Record Docker chain readiness before OpenBao startup
+  ansible.builtin.set_fact:
+    openbao_docker_chains_ready_before_startup: >-
+      {{ openbao_docker_nat_chain_recheck.rc == 0 and openbao_docker_forward_chain_recheck.rc == 0 }}
 
-- name: Assert Docker forward chain is present before OpenBao startup
-  ansible.builtin.assert:
-    that:
-      - openbao_docker_forward_chain_recheck.rc == 0
-    fail_msg: "Docker is running but the filter DOCKER-FORWARD chain is missing; OpenBao bridge networking will fail."
+- name: Warn when Docker chains are still missing before OpenBao startup
+  ansible.builtin.debug:
+    msg: >-
+      Docker DOCKER or DOCKER-FORWARD chains are still missing after restart;
+      continuing to docker compose up and relying on the published-port, loopback,
+      and seal-status checks to catch any remaining Docker startup failure.
+  when: not openbao_docker_chains_ready_before_startup
 
 - name: Check whether the named OpenBao container already exists
   ansible.builtin.command:
@@ -311,28 +338,153 @@
   changed_when: openbao_container_remove.rc == 0
   when: openbao_container_inspect.rc == 0
 
-- name: Start the OpenBao stack
+- name: Inspect the managed OpenBao default network before compose up
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - inspect
+      - "{{ openbao_default_network_name }}"
+  register: openbao_default_network_inspect
+  changed_when: false
+  failed_when: openbao_default_network_inspect.rc not in [0, 1]
+
+- name: Remove the detached managed OpenBao default network before compose up
   vars:
-    mutation_audit_action: start.openbao_stack
+    mutation_audit_action: remove.openbao_default_network
     mutation_audit_target: openbao-runtime
   ansible.builtin.command:
     argv:
       - docker
-      - compose
-      - --file
-      - "{{ openbao_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ openbao_site_dir }}"
-  register: openbao_up
-  changed_when: >-
-    'Creating' in openbao_up.stdout
-    or 'Recreating' in openbao_up.stdout
-    or 'Starting' in openbao_up.stdout
+      - network
+      - rm
+      - "{{ openbao_default_network_name }}"
+  register: openbao_default_network_remove
+  changed_when: openbao_default_network_remove.rc == 0
+  when:
+    - openbao_default_network_inspect.rc == 0
+    - >-
+      (
+        (openbao_default_network_inspect.stdout | from_json | first).Containers | default({})
+      ) | length == 0
   tags:
     - mutation
+
+- name: Start the OpenBao stack and recover Docker bridge-chain failures
+  block:
+    - name: Start the OpenBao stack
+      vars:
+        mutation_audit_action: start.openbao_stack
+        mutation_audit_target: openbao-runtime
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ openbao_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ openbao_site_dir }}"
+      register: openbao_up
+      changed_when: >-
+        'Creating' in openbao_up.stdout
+        or 'Recreating' in openbao_up.stdout
+        or 'Starting' in openbao_up.stdout
+      tags:
+        - mutation
+  rescue:
+    - name: Flag Docker bridge-chain failures during OpenBao startup
+      ansible.builtin.set_fact:
+        openbao_docker_bridge_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected OpenBao startup failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('OpenBao compose up failed')) }}"
+      when: not openbao_docker_bridge_chain_missing
+
+    - name: Restart Docker to restore bridge chains before retrying OpenBao startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Reset SSH connection before retrying OpenBao startup after Docker recovery
+      ansible.builtin.meta: reset_connection
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Recheck Docker nat chain after Docker recovery for OpenBao startup
+      ansible.builtin.command: iptables -t nat -S DOCKER
+      register: openbao_docker_nat_chain_retry
+      changed_when: false
+      failed_when: openbao_docker_nat_chain_retry.rc not in [0, 1]
+      retries: "{{ openbao_runtime_chain_recheck_retries }}"
+      delay: "{{ openbao_runtime_chain_recheck_delay_seconds }}"
+      until: openbao_docker_nat_chain_retry.rc == 0
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Recheck Docker forward chain after Docker recovery for OpenBao startup
+      ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
+      register: openbao_docker_forward_chain_retry
+      changed_when: false
+      failed_when: openbao_docker_forward_chain_retry.rc not in [0, 1]
+      retries: "{{ openbao_runtime_chain_recheck_retries }}"
+      delay: "{{ openbao_runtime_chain_recheck_delay_seconds }}"
+      until: openbao_docker_forward_chain_retry.rc == 0
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Remove the failed OpenBao container before retrying startup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - rm
+          - -f
+          - "{{ openbao_container_name }}"
+      register: openbao_container_remove_retry
+      changed_when: openbao_container_remove_retry.rc == 0
+      failed_when: false
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Remove the detached managed OpenBao default network before retrying startup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - network
+          - rm
+          - "{{ openbao_default_network_name }}"
+      register: openbao_default_network_remove_retry
+      changed_when: openbao_default_network_remove_retry.rc == 0
+      failed_when: false
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Retry OpenBao startup after Docker bridge-chain recovery
+      vars:
+        mutation_audit_action: start.openbao_stack
+        mutation_audit_target: openbao-runtime
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ openbao_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ openbao_site_dir }}"
+      register: openbao_up
+      changed_when: >-
+        'Creating' in openbao_up.stdout
+        or 'Recreating' in openbao_up.stdout
+        or 'Starting' in openbao_up.stdout
+      when: openbao_docker_bridge_chain_missing
+      tags:
+        - mutation
 
 - name: Install the OpenBao TLS renewal timer
   ansible.builtin.include_role:
@@ -455,7 +607,12 @@
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
     method: GET
     return_content: true
+    status_code: 200
   register: openbao_seal_status
+  retries: 12
+  delay: 2
+  until: openbao_seal_status.status == 200
+  changed_when: false
 
 - name: Unseal OpenBao with the first threshold of recovery keys
   ansible.builtin.uri:
@@ -478,7 +635,12 @@
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
     method: GET
     return_content: true
+    status_code: 200
   register: openbao_unsealed_status
+  retries: 12
+  delay: 2
+  until: openbao_unsealed_status.status == 200
+  changed_when: false
 
 - name: Assert that OpenBao is unsealed
   ansible.builtin.assert:
@@ -504,7 +666,16 @@
     headers:
       X-Vault-Token: "{{ openbao_init_payload.root_token }}"
     return_content: true
+    status_code:
+      - 200
+      - 500
+      - 502
+      - 503
   register: openbao_auth_methods
+  retries: 12
+  delay: 2
+  until: openbao_auth_methods.status == 200
+  changed_when: false
   no_log: true
 
 - name: Enable userpass auth
@@ -562,7 +733,16 @@
     headers:
       X-Vault-Token: "{{ openbao_init_payload.root_token }}"
     return_content: true
+    status_code:
+      - 200
+      - 500
+      - 502
+      - 503
   register: openbao_secret_engines
+  retries: 12
+  delay: 2
+  until: openbao_secret_engines.status == 200
+  changed_when: false
   no_log: true
 
 - name: Enable kv-v2 secrets engine
@@ -655,8 +835,15 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   loop: "{{ openbao_policy_contents.results }}"
   register: openbao_current_policies
+  retries: 12
+  delay: 2
+  until: openbao_current_policies.status in [200, 404]
+  changed_when: false
   no_log: true
 
 - name: Upsert OpenBao policies
@@ -745,8 +932,15 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   loop: "{{ openbao_transit_keys }}"
   register: openbao_transit_key_statuses
+  retries: 12
+  delay: 2
+  until: openbao_transit_key_statuses.status in [200, 404]
+  changed_when: false
   no_log: true
 
 - name: Create missing OpenBao transit keys
@@ -826,482 +1020,8 @@
   tags:
     - mutation
 
-- name: Read current controller Proxmox API secret
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ openbao_seeded_secret_paths.controller_proxmox_api }}"
-    method: GET
-    headers:
-      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
-    return_content: true
-    status_code:
-      - 200
-      - 404
-  register: openbao_controller_proxmox_api_current
-  no_log: true
-
-- name: Read current controller monitoring secret
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ openbao_seeded_secret_paths.controller_monitoring }}"
-    method: GET
-    headers:
-      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
-    return_content: true
-    status_code:
-      - 200
-      - 404
-  register: openbao_controller_monitoring_current
-  no_log: true
-
-- name: Read current mail platform runtime secret
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ openbao_seeded_secret_paths.mail_platform_runtime }}"
-    method: GET
-    headers:
-      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
-    return_content: true
-    status_code:
-      - 200
-      - 404
-  register: openbao_mail_platform_runtime_current
-  no_log: true
-
-- name: Read the controller-local Proxmox API payload
-  ansible.builtin.slurp:
-    src: "{{ proxmox_api_token_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: openbao_proxmox_api_payload_raw
-  no_log: true
-
-- name: Read the controller-local monitoring tokens
-  ansible.builtin.slurp:
-    src: "{{ item }}"
-  loop:
-    - "{{ monitoring_proxmox_writer_token_local_file }}"
-    - "{{ monitoring_guest_writer_token_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: openbao_monitoring_token_payloads
-  no_log: true
-
-- name: Read the controller-local mail platform secrets
-  ansible.builtin.slurp:
-    src: "{{ item }}"
-  loop:
-    - "{{ mail_platform_brevo_api_key_local_file }}"
-    - "{{ mail_platform_gateway_api_key_local_file }}"
-    - "{{ mail_platform_metrics_password_local_file }}"
-    - "{{ mail_platform_mailbox_password_local_file }}"
-    - "{{ mail_platform_admin_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: openbao_mail_platform_secret_payloads
-  no_log: true
-
-- name: Record OpenBao seeded secret facts
-  ansible.builtin.set_fact:
-    openbao_controller_proxmox_api_secret: "{{ openbao_proxmox_api_payload_raw.content | b64decode | from_json }}"
-    openbao_controller_monitoring_secret:
-      proxmox_writer_token: "{{ openbao_monitoring_token_payloads.results[0].content | b64decode | trim }}"
-      guest_writer_token: "{{ openbao_monitoring_token_payloads.results[1].content | b64decode | trim }}"
-    openbao_mail_platform_runtime_secret:
-      brevo_api_key: "{{ openbao_mail_platform_secret_payloads.results[0].content | b64decode | trim }}"
-      gateway_api_key: "{{ openbao_mail_platform_secret_payloads.results[1].content | b64decode | trim }}"
-      metrics_password: "{{ openbao_mail_platform_secret_payloads.results[2].content | b64decode | trim }}"
-      mailbox_password: "{{ openbao_mail_platform_secret_payloads.results[3].content | b64decode | trim }}"
-      stalwart_admin_password: "{{ openbao_mail_platform_secret_payloads.results[4].content | b64decode | trim }}"
-  no_log: true
-
-- name: Store controller Proxmox API secret in OpenBao
-  vars:
-    mutation_audit_action: store.openbao_controller_secret
-    mutation_audit_target: openbao-runtime
-    mutation_audit_emit_on_success: true
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ openbao_seeded_secret_paths.controller_proxmox_api }}"
-    method: POST
-    headers:
-      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
-    body_format: json
-    body:
-      data: "{{ openbao_controller_proxmox_api_secret }}"
-    status_code: 200
-  register: openbao_store_controller_secret_result
-  retries: 6
-  delay: 2
-  until: openbao_store_controller_secret_result.status == 200
-  when: >-
-    openbao_controller_proxmox_api_current.status == 404
-    or (openbao_controller_proxmox_api_current.json.data.data | default({})) != openbao_controller_proxmox_api_secret
-  no_log: true
-  tags:
-    - mutation
-
-- name: Store controller monitoring tokens in OpenBao
-  vars:
-    mutation_audit_action: store.openbao_monitoring_secret
-    mutation_audit_target: openbao-runtime
-    mutation_audit_emit_on_success: true
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ openbao_seeded_secret_paths.controller_monitoring }}"
-    method: POST
-    headers:
-      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
-    body_format: json
-    body:
-      data: "{{ openbao_controller_monitoring_secret }}"
-    status_code: 200
-  register: openbao_store_monitoring_secret_result
-  retries: 6
-  delay: 2
-  until: openbao_store_monitoring_secret_result.status == 200
-  when: >-
-    openbao_controller_monitoring_current.status == 404
-    or (openbao_controller_monitoring_current.json.data.data | default({})) != openbao_controller_monitoring_secret
-  no_log: true
-  tags:
-    - mutation
-
-- name: Store mail platform runtime secrets in OpenBao
-  vars:
-    mutation_audit_action: store.openbao_mail_platform_secret
-    mutation_audit_target: openbao-runtime
-    mutation_audit_emit_on_success: true
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ openbao_seeded_secret_paths.mail_platform_runtime }}"
-    method: POST
-    headers:
-      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
-    body_format: json
-    body:
-      data: "{{ openbao_mail_platform_runtime_secret }}"
-    status_code: 200
-  register: openbao_store_mail_platform_secret_result
-  retries: 6
-  delay: 2
-  until: openbao_store_mail_platform_secret_result.status == 200
-  when: >-
-    openbao_mail_platform_runtime_current.status == 404
-    or (openbao_mail_platform_runtime_current.json.data.data | default({})) != openbao_mail_platform_runtime_secret
-  no_log: true
-  tags:
-    - mutation
-
-- name: Load the rotatable secret catalog and controller secret manifest
-  ansible.builtin.set_fact:
-    openbao_rotatable_secret_catalog: "{{ lookup('ansible.builtin.file', openbao_secret_catalog_file) | from_json }}"
-    openbao_controller_secret_manifest: "{{ lookup('ansible.builtin.file', openbao_controller_secret_manifest_file) | from_json }}"
-  no_log: true
-
-- name: Derive OpenBao secret rotation facts from the loaded catalog
-  ansible.builtin.set_fact:
-    openbao_rotation_metadata: >-
-      {{
-        openbao_rotatable_secret_catalog.rotation_metadata
-        if openbao_rotatable_secret_catalog.rotation_metadata is defined
-        else openbao_rotatable_secret_catalog.metadata
-      }}
-    openbao_rotatable_secret_contracts: >-
-      {{
-        openbao_rotatable_secret_catalog.rotation_contracts
-        if openbao_rotatable_secret_catalog.rotation_contracts is defined
-        else openbao_rotatable_secret_catalog.secrets
-      }}
-  no_log: true
-
-- name: Read current dedicated rotatable secrets from OpenBao
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ item.value.openbao_path }}"
-    method: GET
-    headers:
-      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
-    return_content: true
-    status_code:
-      - 200
-      - 404
-  loop: "{{ openbao_rotatable_secret_contracts | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-  register: openbao_rotatable_secret_current
-  no_log: true
-
-- name: Seed dedicated rotatable secrets into OpenBao
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ item.value.openbao_path }}"
-    method: POST
-    headers:
-      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
-    body_format: json
-    body:
-      data:
-        "{{ item.value.openbao_field }}": "{{ lookup('ansible.builtin.file', openbao_controller_secret_manifest.secrets[item.value.seed_controller_secret_id].path) | trim }}"
-    status_code: 200
-  loop: "{{ openbao_rotatable_secret_contracts | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-  when: >-
-    (
-      openbao_rotatable_secret_current.results
-      | selectattr('item.key', 'equalto', item.key)
-      | map(attribute='status')
-      | first
-    ) == 404
-    or (
-      (
-        openbao_rotatable_secret_current.results
-        | selectattr('item.key', 'equalto', item.key)
-        | map(attribute='json.data.data')
-        | first
-        | default({})
-      ).get(item.value.openbao_field, '')
-      != (lookup('ansible.builtin.file', openbao_controller_secret_manifest.secrets[item.value.seed_controller_secret_id].path) | trim)
-    )
-  no_log: true
-
-- name: Seed rotation metadata for dedicated rotatable secrets
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/metadata/{{ item.value.openbao_path }}"
-    method: POST
-    headers:
-      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
-    body_format: json
-    body:
-      custom_metadata:
-        secret_id: "{{ item.key }}"
-        service: "{{ item.value.service }}"
-        owner: "{{ item.value.owner }}"
-        risk_level: "{{ item.value.risk_level }}"
-        approval_mode: "{{ item.value.approval_mode }}"
-        command_contract: "{{ item.value.command_contract }}"
-        rotation_period_days: "{{ item.value.rotation_period_days | string }}"
-        warning_window_days: "{{ item.value.warning_window_days | string }}"
-        "{{ openbao_rotation_metadata.last_rotated_metadata_key }}": "{{ item.value.last_rotated | default('unrotated', true) }}"
-        "{{ openbao_rotation_metadata.rotated_by_metadata_key }}": "openbao-seed"
-    status_code:
-      - 200
-      - 204
-  loop: "{{ openbao_rotatable_secret_contracts | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-  no_log: true
-
-- name: Read AppRole role IDs
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ item.name }}/role-id"
-    method: GET
-    headers:
-      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
-    return_content: true
-  loop: "{{ openbao_approles }}"
-  register: openbao_approle_role_ids
-  no_log: true
-
-- name: Generate fresh short-lived AppRole secret IDs
-  vars:
-    mutation_audit_action: generate.openbao_approle_secret_ids
-    mutation_audit_target: openbao-runtime
-    mutation_audit_emit_on_success: true
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ item.name }}/secret-id"
-    method: POST
-    headers:
-      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
-    body_format: json
-    body: {}
-    return_content: true
-    status_code: 200
-  loop: "{{ openbao_approles }}"
-  register: openbao_generated_secret_ids
-  no_log: true
-  tags:
-    - mutation
-
-- name: Persist fresh short-lived AppRole artifacts locally
-  ansible.builtin.copy:
-    dest: "{{ item.item.local_file }}"
-    content: "{{ {'role_name': item.item.name, 'auth_path': 'approle', 'role_id': (openbao_approle_role_ids.results | selectattr('item.name', 'equalto', item.item.name) | map(attribute='json.data.role_id') | first), 'secret_id': item.json.data.secret_id, 'secret_id_accessor': item.json.data.secret_id_accessor, 'generated_at': ansible_date_time.iso8601} | to_nice_json }}\n"
-    mode: "0600"
-  loop: "{{ openbao_generated_secret_ids.results | default([]) }}"
-  delegate_to: localhost
-  become: false
-  no_log: true
-
-- name: Verify userpass login for the ops operator
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/userpass/login/ops"
-    method: POST
-    body_format: json
-    body:
-      password: "{{ openbao_ops_password }}"
-    return_content: true
-    status_code: 200
-  register: openbao_ops_login
-  no_log: true
-
-- name: Assert that the ops userpass login succeeded
-  ansible.builtin.assert:
-    that:
-      - openbao_ops_login.json.auth.client_token | default('') | length > 0
-    fail_msg: "Managed userpass login for ops failed."
-
-- name: Read the controller AppRole artifact
-  ansible.builtin.slurp:
-    src: "{{ openbao_controller_approle_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: openbao_controller_approle_raw
-  no_log: true
-
-- name: Read the mail-platform AppRole artifact
-  ansible.builtin.slurp:
-    src: "{{ openbao_mail_platform_approle_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: openbao_mail_platform_approle_raw
-  no_log: true
-
-- name: Record AppRole artifact facts
-  ansible.builtin.set_fact:
-    openbao_controller_approle: "{{ openbao_controller_approle_raw.content | b64decode | from_json }}"
-    openbao_mail_platform_approle: "{{ openbao_mail_platform_approle_raw.content | b64decode | from_json }}"
-  no_log: true
-
-- name: Login with the controller AppRole
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/login"
-    method: POST
-    body_format: json
-    body:
-      role_id: "{{ openbao_controller_approle.role_id }}"
-      secret_id: "{{ openbao_controller_approle.secret_id }}"
-    return_content: true
-    status_code: 200
-  register: openbao_controller_login
-  no_log: true
-
-- name: Read the controller Proxmox API secret through the AppRole
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ openbao_seeded_secret_paths.controller_proxmox_api }}"
-    method: GET
-    headers:
-      X-Vault-Token: "{{ openbao_controller_login.json.auth.client_token }}"
-    return_content: true
-    status_code: 200
-  register: openbao_controller_secret_read
-  no_log: true
-
-- name: Assert that the controller AppRole can read the Proxmox API secret
-  ansible.builtin.assert:
-    that:
-      - openbao_controller_secret_read.json.data.data.user == proxmox_api_automation_user
-      - openbao_controller_secret_read.json.data.data.token_id == proxmox_api_token_id
-    fail_msg: "The controller AppRole could not read the expected Proxmox API secret payload."
-
-- name: Encrypt test material with the controller transit key
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/transit/encrypt/controller-automation"
-    method: POST
-    headers:
-      X-Vault-Token: "{{ openbao_controller_login.json.auth.client_token }}"
-    body_format: json
-    body:
-      plaintext: "{{ 'lv3-controller-test' | b64encode }}"
-    return_content: true
-    status_code: 200
-  register: openbao_controller_transit_encrypt
-  no_log: true
-
-- name: Decrypt test material with the controller transit key
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/transit/decrypt/controller-automation"
-    method: POST
-    headers:
-      X-Vault-Token: "{{ openbao_controller_login.json.auth.client_token }}"
-    body_format: json
-    body:
-      ciphertext: "{{ openbao_controller_transit_encrypt.json.data.ciphertext }}"
-    return_content: true
-    status_code: 200
-  register: openbao_controller_transit_decrypt
-  no_log: true
-
-- name: Assert that controller transit round-trip succeeded
-  ansible.builtin.assert:
-    that:
-      - (openbao_controller_transit_decrypt.json.data.plaintext | b64decode) == 'lv3-controller-test'
-    fail_msg: "Controller transit encryption or decryption failed."
-
-- name: Login with the mail-platform AppRole
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/login"
-    method: POST
-    body_format: json
-    body:
-      role_id: "{{ openbao_mail_platform_approle.role_id }}"
-      secret_id: "{{ openbao_mail_platform_approle.secret_id }}"
-    return_content: true
-    status_code: 200
-  register: openbao_mail_platform_login
-  no_log: true
-
-- name: Read the mail-platform runtime secret through the AppRole
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ openbao_seeded_secret_paths.mail_platform_runtime }}"
-    method: GET
-    headers:
-      X-Vault-Token: "{{ openbao_mail_platform_login.json.auth.client_token }}"
-    return_content: true
-    status_code: 200
-  register: openbao_mail_platform_secret_read
-  no_log: true
-
-- name: Assert that the mail-platform AppRole can read its runtime secret
-  ansible.builtin.assert:
-    that:
-      - openbao_mail_platform_secret_read.json.data.data.brevo_api_key | default('') | length > 0
-      - openbao_mail_platform_secret_read.json.data.data.gateway_api_key | default('') | length > 0
-    fail_msg: "The mail-platform AppRole could not read the expected runtime secret payload."
-
-- name: Request a PostgreSQL dynamic credential through the controller AppRole
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/{{ openbao_database_mount_path }}/creds/postgres-readonly"
-    method: GET
-    headers:
-      X-Vault-Token: "{{ openbao_controller_login.json.auth.client_token }}"
-    return_content: true
-    status_code: 200
-  register: openbao_postgres_dynamic_credential
-
-- name: Assert that a PostgreSQL dynamic credential was issued
-  ansible.builtin.assert:
-    that:
-      - openbao_postgres_dynamic_credential.json.data.username | default('') | length > 0
-      - openbao_postgres_dynamic_credential.json.data.password | default('') | length > 0
-    fail_msg: "OpenBao failed to issue a PostgreSQL dynamic credential."
-
-- name: Refresh short-lived AppRole secret IDs after managed verification
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ item.name }}/secret-id"
-    method: POST
-    headers:
-      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
-    body_format: json
-    body: {}
-    return_content: true
-    status_code: 200
-  loop: "{{ openbao_approles }}"
-  register: openbao_refreshed_secret_ids
-  no_log: true
-
-- name: Persist refreshed short-lived AppRole artifacts locally
-  ansible.builtin.copy:
-    dest: "{{ item.item.local_file }}"
-    content: "{{ {'role_name': item.item.name, 'auth_path': 'approle', 'role_id': (openbao_approle_role_ids.results | selectattr('item.name', 'equalto', item.item.name) | map(attribute='json.data.role_id') | first), 'secret_id': item.json.data.secret_id, 'secret_id_accessor': item.json.data.secret_id_accessor, 'generated_at': ansible_date_time.iso8601} | to_nice_json }}\n"
-    mode: "0600"
-  loop: "{{ openbao_refreshed_secret_ids.results | default([]) }}"
-  delegate_to: localhost
-  become: false
-  no_log: true
+- name: Seed controller secrets and verify OpenBao auth flows
+  ansible.builtin.import_tasks: seeded_secrets_and_verification.yml
 
 - name: Verify OpenBao health probes
   ansible.builtin.import_tasks: verify.yml

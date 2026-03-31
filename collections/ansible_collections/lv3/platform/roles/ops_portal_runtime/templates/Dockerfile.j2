@@ -6,9 +6,10 @@ COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 RUN useradd --system --create-home --uid 10001 opsportal
 
-COPY ops_portal ./ops_portal
-COPY search_fabric ./search_fabric
+COPY ops_portal/ ./ops_portal/
+COPY search_fabric/ ./search_fabric/
 COPY publication_contract.py ./publication_contract.py
+COPY stage_smoke.py ./stage_smoke.py
 RUN chown -R opsportal:opsportal /app
 
 EXPOSE 8090

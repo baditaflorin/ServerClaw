@@ -1,0 +1,153 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0301-main-integration/scripts/remote_exec.sh remote-validate --local-fallback
+Validation lane selection
+  mode: explicit_checks
+  branch: HEAD
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit
+  blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, policy-validation, alert-rule-validation, type-check, dependency-graph
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 0.74
+alert-rule-validation passed 1.39
+ansible-syntax        failed 72.78
+dependency-graph      passed 2.27
+policy-validation     passed 1.06
+schema-validation     passed 12.93
+type-check            passed 3.19
+workstream-surfaces   failed 2.82
+
+[ansible-syntax] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0301-main-integration-43b99d6c05/repo/.lv3-runs/20260330T183738Z-da04d0a0a1a0/repo:/workspace -v /opt/builds/.ansible/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=da04d0a0a1a040d0d1569b5f10481755d0d30e3507ac81fc8c8f2fc80c6cec0d -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T18:37:35.074445+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=5987aa09ebbfa42cb62a66542daa0307b4c29e19 -e LV3_SNAPSHOT_BRANCH=codex/ws-0301-main-integration -e LV3_VALIDATION_BASE_REF=origin/main -e LV3_VALIDATION_CHANGED_FILES_JSON=[".config-locations.yaml", ".gitea/workflows/validate.yml", ".github/workflows/validate.yml", "Makefile", "README.md", "RELEASE.md", "VERSION", "build/platform-manifest.json", "changelog.md", "config/check-runner-manifest.json", "config/semgrep/rule-pins.yaml", "config/semgrep/rules/dockerfile.yaml", "config/semgrep/rules/sast.yaml", "config/semgrep/rules/secrets.yaml", "config/validation-gate.json", "config/validation-lanes.yaml", "config/validation-runner-contracts.json", "config/workflow-catalog.json", "docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md", "docs/diagrams/agent-coordination-map.excalidraw", "docs/release-notes/0.177.108.md", "docs/release-notes/README.md", "docs/runbooks/docker-check-runners.md", "docs/runbooks/validate-repository-automation.md", "docs/runbooks/validation-gate.md", "docs/workstreams/ws-0301-live-apply.md", "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-local-docker-info-r1-0.177.108.txt", "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-no-git-semgrep-r1-0.177.108.txt", "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-remote-validate-r1-0.177.108.txt", "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-targeted-pytest-r1-0.177.108.txt", "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-validate-semgrep-r1-0.177.108.txt", "receipts/live-applies/evidence/2026-03-30-ws-0301-security-runner-publish-r1-0.177.106.txt", "receipts/live-applies/evidence/2026-03-30-ws-0301-security-runner-publish-r2-0.177.106.txt", "receipts/live-applies/evidence/2026-03-30-ws-0301-security-runner-publish-r3-0.177.106.txt", "receipts/sast/.gitignore", "scripts/run_gate.py", "scripts/semgrep_gate.py", "scripts/validate_repo.sh", "scripts/validation_runner_contracts.py", "tests/test_semgrep_gate.py", "tests/test_validation_gate.py", "tests/test_validation_lanes.py", "tests/test_validation_runner_contracts.py", "versions/stack.yaml", "workstreams.yaml"] -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -e LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha -w /workspace registry.lv3.org/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax
+[ansible-syntax] stdout
+Syntax check: playbooks/api-gateway.yml
+Syntax check: playbooks/artifact-cache-vm.yml
+Syntax check: playbooks/backup-vm.yml
+Syntax check: playbooks/browser-runner.yml
+Syntax check: playbooks/build-artifact-cache.yml
+Syntax check: playbooks/changedetection.yml
+Syntax check: playbooks/control-plane-recovery.yml
+Syntax check: playbooks/coolify.yml
+Syntax check: playbooks/data-retention.yml
+Syntax check: playbooks/database-dns.yml
+Syntax check: playbooks/dify.yml
+Syntax check: playbooks/docker-publication-assurance.yml
+Syntax check: playbooks/docker-runtime.yml
+Syntax check: playbooks/dozzle.yml
+Syntax check: playbooks/excalidraw.yml
+Syntax check: playbooks/gitea.yml
+Syntax check: playbooks/gotenberg.yml
+Syntax check: playbooks/guest-access.yml
+Syntax check: playbooks/guest-network-policy.yml
+Syntax check: playbooks/harbor.yml
+Syntax check: playbooks/headscale.yml
+Syntax check: playbooks/homepage.yml
+Syntax check: playbooks/keycloak.yml
+Syntax check: playbooks/langfuse.yml
+Syntax check: playbooks/mail-platform-diagnostics.yml
+Syntax check: playbooks/mail-platform-notification-profiles-verify.yml
+Syntax check: playbooks/mail-platform-send-gmail.yml
+Syntax check: playbooks/mail-platform-verify.yml
+Syntax check: playbooks/mail-platform.yml
+Syntax check: playbooks/mailpit.yml
+Syntax check: playbooks/matrix-synapse.yml
+Syntax check: playbooks/mattermost.yml
+Syntax check: playbooks/monitoring-stack.yml
+Syntax check: playbooks/n8n.yml
+Syntax check: playbooks/nats-jetstream.yml
+Syntax check: playbooks/netbox.yml
+Syntax check: playbooks/nextcloud.yml
+Syntax check: playbooks/nomad.yml
+Syntax check: playbooks/ntfy.yml
+Syntax check: playbooks/ntopng.yml
+Syntax check: playbooks/ollama.yml
+Syntax check: playbooks/open-webui.yml
+Syntax check: playbooks/openbao.yml
+Syntax check: playbooks/openfga.yml
+Syntax check: playbooks/ops-portal.yml
+Syntax check: playbooks/outline.yml
+Syntax check: playbooks/plane.yml
+Syntax check: playbooks/plausible.yml
+Syntax check: playbooks/portainer.yml
+Syntax check: playbooks/postgres-vm.yml
+Syntax check: playbooks/provision-subdomain.yml
+Syntax check: playbooks/proxmox-install.yml
+Syntax check: playbooks/proxmox-staging-bridge.yml
+Syntax check: playbooks/public-edge.yml
+Syntax check: playbooks/rag-context.yml
+Syntax check: playbooks/realtime.yml
+Syntax check: playbooks/route-dns-assertion-ledger.yml
+Syntax check: playbooks/searxng.yml
+Syntax check: playbooks/secret-rotation.yml
+Syntax check: playbooks/semaphore-self.yml
+Syntax check: playbooks/semaphore.yml
+Syntax check: playbooks/server-resident-reconciliation.yml
+Syntax check: playbooks/serverclaw.yml
+Syntax check: playbooks/site.yml
+Syntax check: playbooks/step-ca.yml
+Syntax check: playbooks/tesseract-ocr.yml
+Syntax check: playbooks/tika.yml
+Syntax check: playbooks/uptime-kuma.yml
+Syntax check: playbooks/vaultwarden.yml
+Syntax check: playbooks/windmill.yml
+Syntax check: playbooks/groups/access.yml
+Syntax check: playbooks/groups/automation.yml
+Syntax check: playbooks/groups/communication.yml
+Syntax check: playbooks/groups/data.yml
+Syntax check: playbooks/groups/observability.yml
+Syntax check: playbooks/groups/platform-apps.yml
+Syntax check: playbooks/groups/security.yml
+Syntax check: playbooks/services/api-gateway.yml
+Syntax check: playbooks/services/backup-vm.yml
+Syntax check: playbooks/services/browser-runner.yml
+Syntax check: playbooks/services/build-artifact-cache.yml
+Syntax check: playbooks/services/changedetection.yml
+Syntax check: playbooks/services/coolify.yml
+Syntax check: playbooks/services/dify.yml
+[ansible-syntax] stderr
+time="2026-03-30T18:38:59Z" level=error msg="error waiting for container: unexpected EOF"
+
+[workstream-surfaces] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0301-main-integration-43b99d6c05/repo/.lv3-runs/20260330T183738Z-da04d0a0a1a0/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=da04d0a0a1a040d0d1569b5f10481755d0d30e3507ac81fc8c8f2fc80c6cec0d -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T18:37:35.074445+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=5987aa09ebbfa42cb62a66542daa0307b4c29e19 -e LV3_SNAPSHOT_BRANCH=codex/ws-0301-main-integration -e LV3_VALIDATION_BASE_REF=origin/main -e LV3_VALIDATION_CHANGED_FILES_JSON=[".config-locations.yaml", ".gitea/workflows/validate.yml", ".github/workflows/validate.yml", "Makefile", "README.md", "RELEASE.md", "VERSION", "build/platform-manifest.json", "changelog.md", "config/check-runner-manifest.json", "config/semgrep/rule-pins.yaml", "config/semgrep/rules/dockerfile.yaml", "config/semgrep/rules/sast.yaml", "config/semgrep/rules/secrets.yaml", "config/validation-gate.json", "config/validation-lanes.yaml", "config/validation-runner-contracts.json", "config/workflow-catalog.json", "docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md", "docs/diagrams/agent-coordination-map.excalidraw", "docs/release-notes/0.177.108.md", "docs/release-notes/README.md", "docs/runbooks/docker-check-runners.md", "docs/runbooks/validate-repository-automation.md", "docs/runbooks/validation-gate.md", "docs/workstreams/ws-0301-live-apply.md", "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-local-docker-info-r1-0.177.108.txt", "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-no-git-semgrep-r1-0.177.108.txt", "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-remote-validate-r1-0.177.108.txt", "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-targeted-pytest-r1-0.177.108.txt", "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-validate-semgrep-r1-0.177.108.txt", "receipts/live-applies/evidence/2026-03-30-ws-0301-security-runner-publish-r1-0.177.106.txt", "receipts/live-applies/evidence/2026-03-30-ws-0301-security-runner-publish-r2-0.177.106.txt", "receipts/live-applies/evidence/2026-03-30-ws-0301-security-runner-publish-r3-0.177.106.txt", "receipts/sast/.gitignore", "scripts/run_gate.py", "scripts/semgrep_gate.py", "scripts/validate_repo.sh", "scripts/validation_runner_contracts.py", "tests/test_semgrep_gate.py", "tests/test_validation_gate.py", "tests/test_validation_lanes.py", "tests/test_validation_runner_contracts.py", "versions/stack.yaml", "workstreams.yaml"] -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+[workstream-surfaces] stdout
+Workstream surface ownership validation
+[workstream-surfaces] stderr
+Workstream surface ownership validation failed: workstream surface ownership validation failed:
+- README.md: outside declared owned surfaces for ws-0301-live-apply
+- RELEASE.md: outside declared owned surfaces for ws-0301-live-apply
+- VERSION: outside declared owned surfaces for ws-0301-live-apply
+- build/platform-manifest.json: outside declared owned surfaces for ws-0301-live-apply
+- changelog.md: outside declared owned surfaces for ws-0301-live-apply
+- docs/release-notes/0.177.108.md: outside declared owned surfaces for ws-0301-live-apply
+- docs/release-notes/README.md: outside declared owned surfaces for ws-0301-live-apply
+- versions/stack.yaml: outside declared owned surfaces for ws-0301-live-apply
+Validation lane selection
+  mode: explicit_checks
+  branch: codex/ws-0301-main-integration
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit
+  blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, policy-validation, alert-rule-validation, type-check, dependency-graph
+  changed files: .config-locations.yaml, .gitea/workflows/validate.yml, .github/workflows/validate.yml, Makefile, README.md, RELEASE.md, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 7.24
+alert-rule-validation passed 6.66
+ansible-syntax        passed 158.06
+dependency-graph      passed 8.11
+policy-validation     passed 11.66
+schema-validation     passed 59.30
+type-check            passed 11.25
+workstream-surfaces   failed 13.55
+
+[workstream-surfaces] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0301-main-integration:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0301-main-integration:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0301-main-integration:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=da04d0a0a1a040d0d1569b5f10481755d0d30e3507ac81fc8c8f2fc80c6cec0d -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T18:37:35.074445+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=5987aa09ebbfa42cb62a66542daa0307b4c29e19 -e LV3_SNAPSHOT_BRANCH=codex/ws-0301-main-integration -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+[workstream-surfaces] stdout
+Workstream surface ownership validation
+[workstream-surfaces] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+Workstream surface ownership validation failed: workstream surface ownership validation failed:
+- README.md: outside declared owned surfaces for ws-0301-live-apply
+- RELEASE.md: outside declared owned surfaces for ws-0301-live-apply
+- VERSION: outside declared owned surfaces for ws-0301-live-apply
+- build/platform-manifest.json: outside declared owned surfaces for ws-0301-live-apply
+- changelog.md: outside declared owned surfaces for ws-0301-live-apply
+- docs/release-notes/0.177.108.md: outside declared owned surfaces for ws-0301-live-apply
+- docs/release-notes/README.md: outside declared owned surfaces for ws-0301-live-apply
+- versions/stack.yaml: outside declared owned surfaces for ws-0301-live-apply

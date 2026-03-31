@@ -24,6 +24,28 @@ TASKS_PATH = (
     / "tasks"
     / "main.yml"
 )
+VERIFY_TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "api_gateway_runtime"
+    / "tasks"
+    / "verify.yml"
+)
+SYNC_TREE_TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "api_gateway_runtime"
+    / "tasks"
+    / "sync_tree.yml"
+)
 COMPOSE_TEMPLATE_PATH = (
     REPO_ROOT
     / "collections"
@@ -47,6 +69,7 @@ ENV_TEMPLATE_PATH = (
     / "api-gateway.env.j2"
 )
 REQUIREMENTS_PATH = REPO_ROOT / "requirements" / "api-gateway.txt"
+MAKEFILE_PATH = REPO_ROOT / "Makefile"
 
 
 def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
@@ -55,6 +78,10 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "api_gateway_keycloak_internal_base_url" in defaults
     assert "http://127.0.0.1:18080" in defaults
     assert "api_gateway_keycloak_verify_base_url: http://127.0.0.1:18080" in defaults
+    assert "api_gateway_keycloak_verify_ready_retries: 24" in defaults
+    assert "api_gateway_keycloak_verify_ready_delay: 5" in defaults
+    assert "api_gateway_keycloak_verify_token_retries: 18" in defaults
+    assert "api_gateway_keycloak_verify_token_delay: 5" in defaults
     assert "api_gateway_network_mode: host" in defaults
     assert "api_gateway_keycloak_docker_network: keycloak_default" in defaults
     assert "/realms/lv3/protocol/openid-connect/certs" in defaults
@@ -69,6 +96,13 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "dest: command-catalog.json" in defaults
     assert "dest: workflow-defaults.yaml" in defaults
     assert "dest: execution-lanes.yaml" in defaults
+    assert "api_gateway_runtime_assurance_matrix_src" in defaults
+    assert "dest: runtime-assurance-matrix.json" in defaults
+    assert "api_gateway_environment_topology_src" in defaults
+    assert "dest: environment-topology.json" in defaults
+    assert "api_gateway_runtime_packaged_probe_paths" in defaults
+    assert "/app/.gitea/workflows/release-bundle.yml" in defaults
+    assert "/app/.github/workflows/validate.yml" in defaults
     assert "api_gateway_database_name: windmill" in defaults
     assert "api_gateway_database_user: windmill_admin" in defaults
     assert "api_gateway_windmill_service_topology" in defaults
@@ -87,11 +121,14 @@ def test_api_gateway_compose_mounts_config_into_app_root() -> None:
     compose_template = COMPOSE_TEMPLATE_PATH.read_text(encoding="utf-8")
     env_template = ENV_TEMPLATE_PATH.read_text(encoding="utf-8")
 
+    assert "image: {{ api_gateway_image_name }}:latest" in compose_template
     assert "network_mode: {{ api_gateway_network_mode }}" in compose_template
     assert '- "{{ api_gateway_internal_port }}"' in compose_template
     assert "http://127.0.0.1:{{ api_gateway_internal_port }}/healthz" in compose_template
     assert "{{ api_gateway_config_dir }}:/config:ro" in compose_template
     assert "{{ api_gateway_config_dir }}:/app/config:ro" in compose_template
+    assert "build:" not in compose_template
+    assert "{{ api_gateway_service_dir }}/receipts:/app/receipts:ro" in compose_template
     assert "LV3_GATEWAY_GRAPH_DSN={{ api_gateway_graph_dsn }}" in env_template
     assert "LV3_GATEWAY_WORLD_STATE_DSN={{ api_gateway_world_state_dsn }}" in env_template
     assert "LV3_DIFY_TOOLS_API_KEY={{ api_gateway_dify_tools_api_key }}" in env_template
@@ -147,10 +184,13 @@ def test_windmill_runtime_templates_export_graph_world_state_and_ledger_dsns() -
 def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
     tasks = TASKS_PATH.read_text(encoding="utf-8")
+    verify_tasks = VERIFY_TASKS_PATH.read_text(encoding="utf-8")
+    sync_tree_tasks = SYNC_TREE_TASKS_PATH.read_text(encoding="utf-8")
     requirements = REQUIREMENTS_PATH.read_text(encoding="utf-8")
 
     assert "scripts/maintenance_window_tool.py" in defaults
     assert "scripts/slo_tracking.py" in defaults
+    assert "scripts/runtime_assurance.py" in defaults
     assert "api_gateway_tree_sync_specs" in defaults
     assert ".githooks/pre-push" in defaults
     assert ".github/workflows/validate.yml" in defaults
@@ -158,6 +198,7 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "README.md" in defaults
     assert "ansible.cfg" in defaults
     assert "workstreams.yaml" in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/gitea-sync.tar.gz"' in defaults
     assert 'remote_archive: "{{ api_gateway_site_dir }}/collections-sync.tar.gz"' in defaults
     assert 'remote_archive: "{{ api_gateway_site_dir }}/inventory-sync.tar.gz"' in defaults
     assert 'remote_archive: "{{ api_gateway_site_dir }}/migrations-sync.tar.gz"' in defaults
@@ -178,18 +219,69 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Sync the staged repo trees required by the API gateway runtime" in tasks
     assert "Ensure nested parent directories for managed API gateway source files exist" in tasks
     assert "ansible.builtin.include_tasks: sync_tree.yml" in tasks
+    assert "Inspect the built API gateway image id" in tasks
+    assert "Inspect the running API gateway container image id" in tasks
+    assert "api_gateway_container_image_drifted" in tasks
+    assert "Derive a per-run guest archive path for {{ api_gateway_tree_sync_spec.name }}" in sync_tree_tasks
+    assert "api_gateway_tree_remote_archive_path" in sync_tree_tasks
+    assert "(api_gateway_tree_archive_local.path | basename)" in sync_tree_tasks
+    assert 'dest: "{{ api_gateway_tree_remote_archive_path }}"' in sync_tree_tasks
+    assert "COPYFILE_DISABLE=1" in sync_tree_tasks
+    assert "COPY_EXTENDED_ATTRIBUTES_DISABLE=1" in sync_tree_tasks
+    assert 'apple_double="{{ api_gateway_tree_sync_spec.dest_parent }}/._{{ api_gateway_tree_sync_spec.source | basename }}"' in sync_tree_tasks
+    assert "api_gateway_tree_remove_destination" in sync_tree_tasks
+    assert 'tar --no-same-owner --no-same-permissions \\' in sync_tree_tasks
+    assert "Remove stale API gateway build-context ignore files" in tasks
+    assert "{{ api_gateway_service_dir }}/.dockerignore" in tasks
+    assert "Ensure the API gateway receipts build-context tree exists" not in tasks
+    assert "Sync the API gateway receipts build-context tree explicitly" not in tasks
+    assert 'src: "{{ api_gateway_repo_root }}/receipts/"' not in tasks
+    assert 'dest: "{{ api_gateway_service_dir }}/receipts/"' not in tasks
     assert "Remove stale managed API gateway config bundle entries" in tasks
     assert "ansible.builtin.meta: reset_connection" in tasks
+    assert "Build the API gateway image" in tasks
+    assert "mktemp -d /tmp/api-gateway-build." in tasks
+    assert 'DOCKER_BUILDKIT=0 docker build --pull=false -t "{{ api_gateway_image_name }}:latest"' in tasks
     assert "Check whether the API gateway container sees the runtime config bundle" in tasks
+    assert "Check whether the API gateway container sees the packaged runtime probes" in tasks
+    assert "Re-check whether the API gateway container sees the packaged runtime probes after startup recovery" in tasks
+    assert "Fail when the API gateway runtime still misses required packaged content after recovery" in tasks
+    assert "database not open" in tasks
+    assert "api_gateway_docker_builder_database_missing" in tasks
+    assert "api_gateway_docker_recoverable_start_failure" in tasks
+    assert "Restart Docker to restore the container engine before retrying the API gateway start" in tasks
+    assert "Retry the API gateway stack start after Docker engine recovery" in tasks
+    assert "/v1/platform/runtime-assurance" in verify_tasks
+    assert "runtime assurance endpoint returns a report envelope" in verify_tasks
+    assert "Check whether the controller-local legacy platform context token exists" in verify_tasks
+    assert "Read the controller-local legacy platform context token" in verify_tasks
+    assert "Default the Keycloak API gateway verification token request status" in verify_tasks
+    assert "Record whether the Keycloak verification token request returned an access token" in verify_tasks
+    assert "Mark the Keycloak verification token request as unavailable" in verify_tasks
+    assert "Record the API gateway verification bearer token from the legacy platform context" in verify_tasks
+    assert "API gateway verification requires either the Keycloak client secret or the" in verify_tasks
+    assert "tar --no-same-owner --no-same-permissions" in sync_tree_tasks
+    assert "api_gateway_keycloak_retry_after_seconds: 30" in defaults
+    assert "Request a Keycloak bearer token for API gateway verification" in verify_tasks
+    assert "Wait for the local Keycloak realm discovery endpoint used by API gateway verification" in verify_tasks
+    assert "/realms/lv3/.well-known/openid-configuration" in verify_tasks
+    assert "api_gateway_keycloak_verify_discovery.json.issuer == api_gateway_keycloak_issuer_url" in verify_tasks
+    assert 'retries: "{{ api_gateway_keycloak_verify_ready_retries }}"' in verify_tasks
+    assert 'delay: "{{ api_gateway_keycloak_verify_ready_delay }}"' in verify_tasks
+    assert 'retries: "{{ api_gateway_keycloak_verify_token_retries }}"' in verify_tasks
+    assert 'delay: "{{ api_gateway_keycloak_verify_token_delay }}"' in verify_tasks
+    assert "until: api_gateway_verify_token_response.status == 200" in verify_tasks
     assert "{{ api_gateway_service_dir }}/.githooks" in tasks
     assert "COPY Makefile ./Makefile" in tasks
     assert "COPY .githooks ./.githooks" in tasks
+    assert "COPY .gitea ./.gitea" in tasks
     assert "COPY .github ./.github" in tasks
     assert "COPY .pre-commit-config.yaml ./.pre-commit-config.yaml" in tasks
     assert "COPY README.md ./README.md" in tasks
     assert "COPY ansible.cfg ./ansible.cfg" in tasks
     assert "COPY maintenance_window_tool.py ./maintenance_window_tool.py" in tasks
     assert "COPY slo_tracking.py ./slo_tracking.py" in tasks
+    assert "COPY runtime_assurance.py ./runtime_assurance.py" in tasks
     assert "COPY collections ./collections" in tasks
     assert "COPY docs ./docs" in tasks
     assert "COPY inventory ./inventory" in tasks
@@ -206,4 +298,12 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "COPY versions ./versions" in tasks
     assert "COPY windmill ./windmill" in tasks
     assert "COPY workstreams.yaml ./workstreams.yaml" in tasks
+    assert "--build" not in tasks
     assert "psycopg[binary]==" in requirements
+
+
+def test_converge_api_gateway_passes_worktree_repo_root() -> None:
+    makefile = MAKEFILE_PATH.read_text(encoding="utf-8")
+
+    assert "converge-api-gateway:" in makefile
+    assert "-e api_gateway_repo_root=$(REPO_ROOT)" in makefile

@@ -1,0 +1,62 @@
+---
+# Playbook: tesseract-ocr.yml
+# Purpose: Build and converge the private Tesseract OCR runtime on the selected Docker runtime guest.
+# Use case: Run when ADR 0286 automation, OCR language packages, runtime sources, or extraction verification changes.
+#
+# Inputs (required):
+#   - env (str, required): Deployment environment selector that resolves the target Docker runtime host.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the live apply.
+#
+# Outputs:
+#   - Tesseract OCR running privately on the selected Docker runtime VM with repo-managed OCR health and extraction verification.
+#
+# Idempotency: Partially idempotent
+#              Reruns rebuild the same local image and force-recreate the stateless OCR runtime without mutating shared release truth on this branch.
+#
+# Dependencies:
+#   - ADR 0286: Defines Tesseract OCR as the scanned-image text extraction fallback service.
+#   - Requires: docker-runtime host access through the Proxmox jump path.
+#   - Role: lv3.platform.tesseract_ocr_runtime — builds, renders, and verifies the OCR runtime stack.
+#
+# Related ADRs: 0107, 0165, 0275, 0286
+# Related Runbooks: docs/runbooks/configure-tesseract-ocr.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- name: Converge Tesseract OCR on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - data
+    - service-tesseract-ocr
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.tesseract_ocr
+        playbook_execution_audit_target: tesseract_ocr
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.tesseract_ocr_runtime
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: tesseract_ocr
+        playbook_execution_post_verify_audit_action: playbook.verify.tesseract_ocr
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: tesseract_ocr

@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "tika_runtime",
+  "image_ref": "docker.io/apache/tika:3.2.3.0@sha256:3fafa194474c5f3a8cff25a0eefd07e7c0513b7f552074ad455e1af58a06bbea",
+  "scanner": "trivy",
+  "scanner_image": "docker.io/aquasec/trivy:0.63.0",
+  "scanned_on": "2026-03-30",
+  "summary": {
+    "critical": 0,
+    "high": 2
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.io/apache/tika:3.2.3.0@sha256:3fafa194474c5f3a8cff25a0eefd07e7c0513b7f552074ad455e1af58a06bbea (ubuntu 25.04)",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "critical": 0,
+      "high": 1
+    },
+    {
+      "target": "Java",
+      "class": "lang-pkgs",
+      "type": "jar",
+      "critical": 0,
+      "high": 1
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-30-tika-runtime.trivy.json"
+}

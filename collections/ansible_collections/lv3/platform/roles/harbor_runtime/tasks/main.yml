@@ -1,0 +1,1340 @@
+---
+# Purpose: Converge the Harbor runtime stack, managed secrets, Keycloak OIDC integration, project policy, and controller-local robot credentials.
+# Use case: Run during Harbor deployment or replay on docker-runtime-lv3 after edge publication and registry network access are prepared.
+#
+# Inputs (required):
+#   - harbor_site_dir (path, required): Harbor runtime root directory.
+#   - harbor_installer_dir (path, required): Harbor installer directory that owns prepare and compose assets.
+#   - harbor_secret_dir (path, required): Guest-side secret directory for Harbor admin and database passwords.
+#   - harbor_public_hostname (str, required): Published Harbor hostname.
+#   - harbor_public_base_url (str, required): Public Harbor URL used for callbacks and verification.
+#   - harbor_http_port (int, required): Internal Harbor listener port.
+#   - harbor_keycloak_realm_name (str, required): Keycloak realm used for Harbor OIDC.
+#   - harbor_keycloak_client_id (str, required): Keycloak client ID for Harbor.
+#   - harbor_check_runner_project_name (str, required): Managed Harbor project for check-runner images.
+#
+# Inputs (optional):
+#   - harbor_prepare_with_trivy (bool, optional, default=true): Enables Harbor prepare with Trivy assets.
+#   - harbor_check_runner_project_public (bool, optional, default=true): Sets public pull behavior for the managed project.
+#
+# Outputs:
+#   - Managed Harbor compose stack, synchronized controller-local secrets, Keycloak client configuration, project retention policy, and robot credentials.
+#
+# Idempotency: Conditionally idempotent
+#              Generated secrets are reused, API reconciliation is repeatable, and compose replay only occurs when assets changed or Harbor is unhealthy.
+#
+# Dependencies:
+#   - ADR 0201: Defines Harbor deployment, OIDC, CVE scanning, and registry robot credentials.
+#   - Requires: Keycloak bootstrap admin password file, generated topology facts, and Harbor installer access.
+#   - Task file: verify.yml — runs read-only Harbor verification after convergence.
+#
+# Related ADRs: 0165, 0201
+- name: Validate Harbor runtime inputs
+  ansible.builtin.assert:
+    that:
+      - harbor_site_dir | length > 0
+      - harbor_installer_dir | length > 0
+      - harbor_secret_dir | length > 0
+      - harbor_public_hostname | length > 0
+      - harbor_public_base_url | length > 0
+      - harbor_http_port | int > 0
+      - harbor_keycloak_realm_name | length > 0
+      - harbor_keycloak_client_id | length > 0
+      - harbor_check_runner_project_name | length > 0
+    fail_msg: "harbor_runtime requires installer paths, public topology, Keycloak inputs, and a managed Harbor project."
+
+- name: Ensure the Harbor runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - jq
+      - openssl
+      - python3-requests
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Harbor directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ harbor_site_dir }}"
+      mode: "0755"
+    - path: "{{ harbor_installer_root }}"
+      mode: "0755"
+    - path: "{{ harbor_data_dir }}"
+      mode: "0755"
+    - path: "{{ harbor_log_dir }}"
+      mode: "0755"
+    - path: "{{ harbor_secret_dir }}"
+      mode: "0700"
+
+- name: Ensure the local Harbor artifact directory exists
+  ansible.builtin.file:
+    path: "{{ harbor_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the Harbor admin password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ harbor_admin_password_remote_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ harbor_admin_password_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: harbor_admin_password_generation
+  changed_when: "'changed' in harbor_admin_password_generation.stdout"
+  no_log: true
+
+- name: Generate the Harbor internal database password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ harbor_database_password_remote_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ harbor_database_password_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: harbor_database_password_generation
+  changed_when: "'changed' in harbor_database_password_generation.stdout"
+  no_log: true
+
+- name: Read the Harbor admin password
+  ansible.builtin.slurp:
+    src: "{{ harbor_admin_password_remote_file }}"
+  register: harbor_admin_password_raw
+  no_log: true
+
+- name: Read the Harbor internal database password
+  ansible.builtin.slurp:
+    src: "{{ harbor_database_password_remote_file }}"
+  register: harbor_database_password_raw
+  no_log: true
+
+- name: Record Harbor runtime secrets
+  ansible.builtin.set_fact:
+    harbor_admin_password: "{{ harbor_admin_password_raw.content | b64decode | trim }}"
+    harbor_database_password: "{{ harbor_database_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Mirror the Harbor admin password to the control machine
+  ansible.builtin.copy:
+    dest: "{{ harbor_admin_password_local_file }}"
+    content: "{{ harbor_admin_password }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the Harbor database password to the control machine
+  ansible.builtin.copy:
+    dest: "{{ harbor_database_password_local_file }}"
+    content: "{{ harbor_database_password }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Download the Harbor installer archive
+  ansible.builtin.get_url:
+    url: "{{ harbor_installer_url }}"
+    dest: "{{ harbor_installer_archive }}"
+    mode: "0644"
+    force: false
+  register: harbor_installer_download
+
+- name: Extract the Harbor installer archive
+  ansible.builtin.unarchive:
+    src: "{{ harbor_installer_archive }}"
+    dest: "{{ harbor_installer_root }}"
+    remote_src: true
+    owner: root
+    group: root
+  register: harbor_installer_unarchive
+
+- name: Render Harbor configuration
+  ansible.builtin.template:
+    src: harbor.yml.j2
+    dest: "{{ harbor_config_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: harbor_config_template
+  no_log: true
+
+- name: Check whether the Harbor generated compose file already exists
+  ansible.builtin.stat:
+    path: "{{ harbor_generated_compose_file }}"
+  register: harbor_generated_compose_file_stat
+
+- name: Record whether Harbor prepare needs to regenerate compose assets
+  ansible.builtin.set_fact:
+    harbor_prepare_needed: >-
+      {{
+        harbor_installer_download.changed
+        or harbor_installer_unarchive.changed
+        or harbor_config_template.changed
+        or not harbor_generated_compose_file_stat.stat.exists
+      }}
+
+- name: Prepare Harbor compose assets
+  ansible.builtin.command:
+    argv: "{{ ['./prepare'] + (['--with-trivy'] if harbor_prepare_with_trivy else []) }}"
+  args:
+    chdir: "{{ harbor_installer_dir }}"
+  when: harbor_prepare_needed | bool
+  register: harbor_prepare
+  changed_when: harbor_prepare_needed | bool
+
+- name: Record whether Harbor compose assets changed
+  ansible.builtin.set_fact:
+    harbor_compose_assets_changed: >-
+      {{
+        harbor_installer_download.changed
+        or harbor_installer_unarchive.changed
+        or harbor_config_template.changed
+        or harbor_prepare_needed | bool
+      }}
+
+- name: Probe the Harbor ping endpoint before compose reconciliation
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/ping"
+    method: GET
+    status_code: 200
+  register: harbor_ping_before_reconcile
+  failed_when: false
+  changed_when: false
+
+- name: Record whether Harbor is already healthy before compose reconciliation
+  ansible.builtin.set_fact:
+    harbor_runtime_healthy_before_reconcile: "{{ harbor_ping_before_reconcile.status | default(0) == 200 }}"
+
+- name: Reset the Harbor compose stack before a controlled reapply
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - -f
+      - "{{ harbor_generated_compose_file }}"
+      - down
+      - --remove-orphans
+  args:
+    chdir: "{{ harbor_installer_dir }}"
+  register: harbor_compose_down
+  failed_when: false
+  changed_when: >-
+    'Stopping' in harbor_compose_down.stdout
+    or 'Stopping' in harbor_compose_down.stderr
+    or 'Removing' in harbor_compose_down.stdout
+    or 'Removing' in harbor_compose_down.stderr
+    or 'Network' in harbor_compose_down.stdout
+    or 'Network' in harbor_compose_down.stderr
+  when: (harbor_compose_assets_changed | bool) or not (harbor_runtime_healthy_before_reconcile | bool)
+
+- name: Remove stale Harbor containers after the compose reset
+  ansible.builtin.shell: |
+    set -euo pipefail
+    ensure_docker_socket() {
+      if ! docker info >/dev/null 2>&1; then
+        systemctl restart docker
+        sleep 10
+        docker info >/dev/null 2>&1
+      fi
+    }
+    ensure_docker_socket
+    stale_containers="$(docker ps -aq --filter label=com.docker.compose.project=harbor)"
+    if [ -n "${stale_containers}" ]; then
+      if ! docker rm -f ${stale_containers}; then
+        ensure_docker_socket
+        stale_containers="$(docker ps -aq --filter label=com.docker.compose.project=harbor)"
+        if [ -n "${stale_containers}" ]; then
+          docker rm -f ${stale_containers}
+        fi
+      fi
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: harbor_force_remove_containers
+  changed_when: "'changed' in harbor_force_remove_containers.stdout"
+  when: (harbor_compose_assets_changed | bool) or not (harbor_runtime_healthy_before_reconcile | bool)
+
+- name: Remove stale Harbor networks after the compose reset
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_networks="$(docker network ls -q --filter label=com.docker.compose.project={{ harbor_compose_project_name }})"
+    if [ -n "${stale_networks}" ]; then
+      docker network rm ${stale_networks}
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: harbor_force_remove_networks
+  changed_when: "'changed' in harbor_force_remove_networks.stdout"
+  when: (harbor_compose_assets_changed | bool) or not (harbor_runtime_healthy_before_reconcile | bool)
+
+- name: Start or update the Harbor compose stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - -f
+      - "{{ harbor_generated_compose_file }}"
+      - up
+      - -d
+  args:
+    chdir: "{{ harbor_installer_dir }}"
+  register: harbor_compose_up
+  retries: 6
+  delay: 10
+  until: harbor_compose_up.rc == 0
+  changed_when: >-
+    'Creating' in harbor_compose_up.stdout
+    or 'Recreating' in harbor_compose_up.stdout
+    or 'Starting' in harbor_compose_up.stdout
+    or 'Pulling' in harbor_compose_up.stdout
+  when: (harbor_compose_assets_changed | bool) or not (harbor_runtime_healthy_before_reconcile | bool)
+
+- name: Read the Harbor compose network state after reconciliation
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - inspect
+      - "{{ harbor_compose_network_name }}"
+      - --format
+      - "{{ '{{ json .Containers }}' }}"
+  register: harbor_network_inspect
+  failed_when: false
+  changed_when: false
+
+- name: Record the Harbor compose network container membership
+  ansible.builtin.set_fact:
+    harbor_network_container_members: "{{ harbor_network_inspect.stdout | default('{}') | from_json if harbor_network_inspect.rc == 0 else {} }}"
+    harbor_network_container_names: >-
+      {{
+        (
+          (harbor_network_inspect.stdout | default('{}') | from_json if harbor_network_inspect.rc == 0 else {})
+          | dict2items
+          | map(attribute='value.Name')
+          | list
+        )
+      }}
+
+- name: Read the Harbor published port bindings after reconciliation
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - nginx
+      - --format
+      - "{{ '{{ json .NetworkSettings.Ports }}' }}"
+  register: harbor_proxy_port_bindings_raw
+  failed_when: false
+  changed_when: false
+
+- name: Record the Harbor published port binding state
+  ansible.builtin.set_fact:
+    harbor_proxy_port_bindings: >-
+      {{
+        harbor_proxy_port_bindings_raw.stdout | default('{}') | from_json
+        if harbor_proxy_port_bindings_raw.rc == 0
+        and (harbor_proxy_port_bindings_raw.stdout | default('') | trim | length > 0)
+        else {}
+      }}
+
+- name: Record whether Harbor's published registry port binding is present
+  ansible.builtin.set_fact:
+    harbor_registry_port_binding_present: >-
+      {{
+        (
+          harbor_proxy_port_bindings.get('8080/tcp', [])
+          | selectattr('HostPort', 'equalto', harbor_http_port | string)
+          | list
+          | length
+        ) > 0
+      }}
+
+- name: Record whether Harbor needs one forced network recovery recycle
+  ansible.builtin.set_fact:
+    harbor_compose_needs_recovery: >-
+      {{
+        harbor_network_inspect.rc != 0
+        or (
+          harbor_runtime_container_names
+          | difference(harbor_network_container_names | default([]))
+          | length
+        ) > 0
+        or not (harbor_registry_port_binding_present | bool)
+      }}
+
+- name: Force one Harbor recycle when compose network membership is incomplete
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - -f
+      - "{{ harbor_generated_compose_file }}"
+      - down
+      - --remove-orphans
+  args:
+    chdir: "{{ harbor_installer_dir }}"
+  register: harbor_compose_recovery_down
+  changed_when: >-
+    'Stopping' in harbor_compose_recovery_down.stdout
+    or 'Removing' in harbor_compose_recovery_down.stdout
+    or 'Network' in harbor_compose_recovery_down.stdout
+  when: harbor_compose_needs_recovery | bool
+
+- name: Force one Harbor recreate when compose network membership is incomplete
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - -f
+      - "{{ harbor_generated_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+  args:
+    chdir: "{{ harbor_installer_dir }}"
+  register: harbor_compose_recovery_up
+  retries: 6
+  delay: 10
+  until: harbor_compose_recovery_up.rc == 0
+  changed_when: >-
+    'Creating' in harbor_compose_recovery_up.stdout
+    or 'Recreating' in harbor_compose_recovery_up.stdout
+    or 'Starting' in harbor_compose_recovery_up.stdout
+  when: harbor_compose_needs_recovery | bool
+
+- name: Wait for Harbor ping locally
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/ping"
+    method: GET
+    status_code: 200
+  register: harbor_ping
+  retries: 30
+  delay: 10
+  until: harbor_ping.status == 200
+  changed_when: false
+
+- name: Wait for Harbor containers to become healthy on the compose network
+  ansible.builtin.shell: |
+    set -euo pipefail
+    unhealthy=0
+    for container in {{ harbor_runtime_container_names | join(' ') }}; do
+      state="$(docker inspect "${container}" --format '{{ "{{ .State.Status }}" }} {{ "{{ if .State.Health }}" }}{{ "{{ .State.Health.Status }}" }}{{ "{{ else }}" }}none{{ "{{ end }}" }}' 2>/dev/null || echo missing missing)"
+      echo "${container} ${state}"
+      case "${state}" in
+        running\ healthy) ;;
+        running\ none) ;;
+        running\ starting) ;;
+        *)
+          unhealthy=1
+          ;;
+      esac
+    done
+    test "${unhealthy}" -eq 0
+  args:
+    executable: /bin/bash
+    chdir: "{{ harbor_installer_dir }}"
+  register: harbor_container_health
+  retries: 12
+  delay: 10
+  until: harbor_container_health.rc == 0
+  changed_when: false
+
+- name: Read the Keycloak bootstrap admin password
+  ansible.builtin.slurp:
+    src: "{{ harbor_keycloak_bootstrap_admin_password_remote_file }}"
+  register: harbor_keycloak_bootstrap_admin_password_raw
+  no_log: true
+
+- name: Record the Keycloak bootstrap admin password
+  ansible.builtin.set_fact:
+    harbor_keycloak_bootstrap_admin_password: "{{ harbor_keycloak_bootstrap_admin_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Wait for the local Keycloak admin endpoint to recover after Docker reconciliation
+  ansible.builtin.uri:
+    url: "{{ harbor_keycloak_local_admin_url }}/realms/master/.well-known/openid-configuration"
+    method: GET
+    status_code: 200
+  register: harbor_keycloak_admin_ready
+  retries: 24
+  delay: 5
+  until: harbor_keycloak_admin_ready.status == 200
+  changed_when: false
+
+- name: Request a Keycloak admin token for Harbor bootstrap
+  ansible.builtin.uri:
+    url: "{{ harbor_keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      grant_type: password
+      client_id: admin-cli
+      username: "{{ harbor_keycloak_bootstrap_admin_username }}"
+      password: "{{ harbor_keycloak_bootstrap_admin_password }}"
+    status_code: 200
+  register: harbor_keycloak_admin_token_response
+  retries: 12
+  delay: 5
+  until: harbor_keycloak_admin_token_response.status == 200
+  no_log: true
+
+- name: Record the Keycloak admin token
+  ansible.builtin.set_fact:
+    harbor_keycloak_admin_token: "{{ harbor_keycloak_admin_token_response.json.access_token }}"
+  no_log: true
+
+- name: Query the Harbor admin group in Keycloak
+  ansible.builtin.uri:
+    url: "{{ harbor_keycloak_local_admin_url }}/admin/realms/{{ harbor_keycloak_realm_name }}/groups?search={{ harbor_keycloak_admin_group | urlencode }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ harbor_keycloak_admin_token }}"
+    status_code: 200
+  register: harbor_keycloak_group_query
+  changed_when: false
+  no_log: true
+
+- name: Create the Harbor admin group in Keycloak when missing
+  ansible.builtin.uri:
+    url: "{{ harbor_keycloak_local_admin_url }}/admin/realms/{{ harbor_keycloak_realm_name }}/groups"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ harbor_keycloak_admin_token }}"
+    body_format: json
+    body:
+      name: "{{ harbor_keycloak_admin_group }}"
+    status_code:
+      - 201
+      - 409
+  when: >-
+    (harbor_keycloak_group_query.json | selectattr('name', 'equalto', harbor_keycloak_admin_group) | list | length) == 0
+  no_log: true
+
+- name: Query the Harbor Keycloak client
+  ansible.builtin.uri:
+    url: "{{ harbor_keycloak_local_admin_url }}/admin/realms/{{ harbor_keycloak_realm_name }}/clients?clientId={{ harbor_keycloak_client_id | urlencode }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ harbor_keycloak_admin_token }}"
+    status_code: 200
+  register: harbor_keycloak_client_query
+  changed_when: false
+  no_log: true
+
+- name: Create the Harbor Keycloak client when missing
+  ansible.builtin.uri:
+    url: "{{ harbor_keycloak_local_admin_url }}/admin/realms/{{ harbor_keycloak_realm_name }}/clients"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ harbor_keycloak_admin_token }}"
+    body_format: json
+    body:
+      clientId: "{{ harbor_keycloak_client_id }}"
+      name: Harbor
+      enabled: true
+      protocol: openid-connect
+      publicClient: false
+      standardFlowEnabled: true
+      directAccessGrantsEnabled: false
+      serviceAccountsEnabled: false
+      fullScopeAllowed: false
+      redirectUris:
+        - "{{ harbor_public_base_url }}/c/oidc/callback"
+      webOrigins:
+        - "{{ harbor_public_base_url }}"
+      adminUrl: "{{ harbor_public_base_url }}"
+      attributes:
+        post.logout.redirect.uris: "{{ harbor_public_base_url }}/*"
+    status_code:
+      - 201
+      - 409
+  when: harbor_keycloak_client_query.json | length == 0
+  no_log: true
+
+- name: Re-query the Harbor Keycloak client
+  ansible.builtin.uri:
+    url: "{{ harbor_keycloak_local_admin_url }}/admin/realms/{{ harbor_keycloak_realm_name }}/clients?clientId={{ harbor_keycloak_client_id | urlencode }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ harbor_keycloak_admin_token }}"
+    status_code: 200
+  register: harbor_keycloak_client_query_after
+  changed_when: false
+  no_log: true
+
+- name: Record the Harbor Keycloak client UUID
+  ansible.builtin.set_fact:
+    harbor_keycloak_client_uuid: "{{ (harbor_keycloak_client_query_after.json | first).id }}"
+  no_log: true
+
+- name: Read the Harbor Keycloak client secret
+  ansible.builtin.uri:
+    url: >-
+      {{ harbor_keycloak_local_admin_url }}/admin/realms/{{ harbor_keycloak_realm_name }}/clients/{{ harbor_keycloak_client_uuid }}/client-secret
+    method: GET
+    headers:
+      Authorization: "Bearer {{ harbor_keycloak_admin_token }}"
+    status_code: 200
+  register: harbor_keycloak_client_secret_response
+  changed_when: false
+  no_log: true
+
+- name: Record the Harbor Keycloak client secret
+  ansible.builtin.set_fact:
+    harbor_keycloak_client_secret: "{{ harbor_keycloak_client_secret_response.json.value }}"
+  no_log: true
+
+- name: Mirror the Harbor Keycloak client secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ harbor_keycloak_client_secret_local_file }}"
+    content: "{{ harbor_keycloak_client_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Query Harbor configuration
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/configurations"
+    method: GET
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    status_code:
+      - 200
+      - 401
+  register: harbor_config_query
+  failed_when: false
+  changed_when: false
+  no_log: true
+
+- name: Record whether the Harbor admin password needs reconciliation
+  ansible.builtin.set_fact:
+    harbor_admin_password_needs_reset: "{{ harbor_config_query.status | default(0) == 401 }}"
+
+- name: Reset the Harbor admin password seed in the Harbor database when credentials drift
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - harbor-db
+      - psql
+      - -U
+      - postgres
+      - -d
+      - registry
+      - -c
+      - update harbor_user set salt='', password='' where user_id = 1;
+  register: harbor_admin_password_reset
+  changed_when: "'UPDATE 1' in harbor_admin_password_reset.stdout"
+  when: harbor_admin_password_needs_reset | bool
+  no_log: true
+
+- name: Restart Harbor core after resetting the managed admin password seed
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - -f
+      - "{{ harbor_generated_compose_file }}"
+      - restart
+      - harbor-core
+  args:
+    chdir: "{{ harbor_installer_dir }}"
+  register: harbor_core_restart_after_password_reset
+  changed_when: harbor_core_restart_after_password_reset.rc == 0
+  when: harbor_admin_password_needs_reset | bool
+
+- name: Wait for Harbor ping locally after resetting the managed admin password seed
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/ping"
+    method: GET
+    status_code: 200
+  register: harbor_ping_after_admin_password_reset
+  retries: 30
+  delay: 10
+  until: harbor_ping_after_admin_password_reset.status == 200
+  changed_when: false
+  when: harbor_admin_password_needs_reset | bool
+
+- name: Re-query Harbor configuration after resetting the managed admin password seed
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/configurations"
+    method: GET
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: harbor_config_query_after_password_reset
+  changed_when: false
+  when: harbor_admin_password_needs_reset | bool
+  no_log: true
+
+- name: Verify the Harbor admin configuration API is reachable before OIDC bootstrap
+  block:
+    - name: Probe the Harbor admin configuration API before OIDC bootstrap
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/configurations"
+        method: GET
+        user: admin
+        password: "{{ harbor_admin_password }}"
+        force_basic_auth: true
+        status_code: 200
+      register: harbor_config_query_before_oidc
+      retries: 12
+      delay: 5
+      until: harbor_config_query_before_oidc.status == 200
+      changed_when: false
+      no_log: true
+  rescue:
+    - name: Force one Harbor recycle when the published admin configuration API is unavailable
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - -f
+          - "{{ harbor_generated_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ harbor_installer_dir }}"
+      register: harbor_compose_oidc_recovery_down
+      changed_when: >-
+        'Stopping' in harbor_compose_oidc_recovery_down.stdout
+        or 'Removing' in harbor_compose_oidc_recovery_down.stdout
+        or 'Network' in harbor_compose_oidc_recovery_down.stdout
+
+    - name: Remove stale Harbor containers after the OIDC readiness recycle
+      ansible.builtin.shell: |
+        set -euo pipefail
+        ensure_docker_socket() {
+          if ! docker info >/dev/null 2>&1; then
+            systemctl restart docker
+            sleep 10
+            docker info >/dev/null 2>&1
+          fi
+        }
+        ensure_docker_socket
+        stale_containers="$(docker ps -aq --filter label=com.docker.compose.project=harbor)"
+        if [ -n "${stale_containers}" ]; then
+          if ! docker rm -f ${stale_containers}; then
+            ensure_docker_socket
+            stale_containers="$(docker ps -aq --filter label=com.docker.compose.project=harbor)"
+            if [ -n "${stale_containers}" ]; then
+              docker rm -f ${stale_containers}
+            fi
+          fi
+          echo changed
+        fi
+      args:
+        executable: /bin/bash
+      register: harbor_oidc_recovery_container_cleanup
+      changed_when: "'changed' in harbor_oidc_recovery_container_cleanup.stdout"
+
+    - name: Remove stale Harbor networks after the OIDC readiness recycle
+      ansible.builtin.shell: |
+        set -euo pipefail
+        stale_networks="$(docker network ls -q --filter label=com.docker.compose.project={{ harbor_compose_project_name }})"
+        if [ -n "${stale_networks}" ]; then
+          docker network rm ${stale_networks}
+          echo changed
+        fi
+      args:
+        executable: /bin/bash
+      register: harbor_oidc_recovery_network_cleanup
+      changed_when: "'changed' in harbor_oidc_recovery_network_cleanup.stdout"
+
+    - name: Force one Harbor recreate when the published admin configuration API is unavailable
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - -f
+          - "{{ harbor_generated_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+      args:
+        chdir: "{{ harbor_installer_dir }}"
+      register: harbor_compose_oidc_recovery_up
+      retries: 6
+      delay: 10
+      until: harbor_compose_oidc_recovery_up.rc == 0
+      changed_when: >-
+        'Creating' in harbor_compose_oidc_recovery_up.stdout
+        or 'Recreating' in harbor_compose_oidc_recovery_up.stdout
+        or 'Starting' in harbor_compose_oidc_recovery_up.stdout
+
+    - name: Read the Harbor compose network state after the OIDC readiness recycle
+      ansible.builtin.command:
+        argv:
+          - docker
+          - network
+          - inspect
+          - "{{ harbor_compose_network_name }}"
+          - --format
+          - "{{ '{{ json .Containers }}' }}"
+      register: harbor_oidc_recovery_network_inspect
+      failed_when: false
+      changed_when: false
+
+    - name: Record the Harbor compose network container membership after the OIDC readiness recycle
+      ansible.builtin.set_fact:
+        harbor_oidc_recovery_network_container_members: >-
+          {{
+            harbor_oidc_recovery_network_inspect.stdout | default('{}') | from_json
+            if harbor_oidc_recovery_network_inspect.rc == 0
+            else {}
+          }}
+        harbor_oidc_recovery_network_container_names: >-
+          {{
+            (
+              (harbor_oidc_recovery_network_inspect.stdout | default('{}') | from_json
+              if harbor_oidc_recovery_network_inspect.rc == 0 else {})
+              | dict2items
+              | map(attribute='value.Name')
+              | list
+            )
+          }}
+
+    - name: Read the Harbor published port bindings after the OIDC readiness recycle
+      ansible.builtin.command:
+        argv:
+          - docker
+          - inspect
+          - nginx
+          - --format
+          - "{{ '{{ json .NetworkSettings.Ports }}' }}"
+      register: harbor_oidc_recovery_proxy_port_bindings_raw
+      failed_when: false
+      changed_when: false
+
+    - name: Record the Harbor published port binding state after the OIDC readiness recycle
+      ansible.builtin.set_fact:
+        harbor_oidc_recovery_proxy_port_bindings: >-
+          {{
+            harbor_oidc_recovery_proxy_port_bindings_raw.stdout | default('{}') | from_json
+            if harbor_oidc_recovery_proxy_port_bindings_raw.rc == 0
+            and (harbor_oidc_recovery_proxy_port_bindings_raw.stdout | default('') | trim | length > 0)
+            else {}
+          }}
+
+    - name: Record whether Harbor's published registry port binding is present after the OIDC readiness recycle
+      ansible.builtin.set_fact:
+        harbor_oidc_recovery_registry_port_binding_present: >-
+          {{
+            (
+              harbor_oidc_recovery_proxy_port_bindings.get('8080/tcp', [])
+              | selectattr('HostPort', 'equalto', harbor_http_port | string)
+              | list
+              | length
+            ) > 0
+          }}
+
+    - name: Assert the OIDC readiness recycle restored Harbor compose membership and published port bindings
+      ansible.builtin.assert:
+        that:
+          - harbor_oidc_recovery_network_inspect.rc == 0
+          - >
+            (
+              harbor_runtime_container_names
+              | difference(harbor_oidc_recovery_network_container_names | default([]))
+              | length
+            ) == 0
+          - harbor_oidc_recovery_registry_port_binding_present | bool
+        fail_msg: >-
+          Harbor recovered enough to answer the admin API probe, but the compose
+          network membership or published registry port binding is still missing
+          after the OIDC readiness recycle.
+
+    - name: Wait for Harbor ping locally after the OIDC readiness recycle
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/ping"
+        method: GET
+        status_code: 200
+      register: harbor_ping_after_oidc_recovery
+      retries: 30
+      delay: 10
+      until: harbor_ping_after_oidc_recovery.status == 200
+      changed_when: false
+
+    - name: Re-probe the Harbor admin configuration API after the OIDC readiness recycle
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/configurations"
+        method: GET
+        user: admin
+        password: "{{ harbor_admin_password }}"
+        force_basic_auth: true
+        status_code: 200
+      register: harbor_config_query_before_oidc
+      retries: 24
+      delay: 5
+      until: harbor_config_query_before_oidc.status == 200
+      changed_when: false
+      no_log: true
+
+- name: Configure Harbor OIDC defaults
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/configurations"
+    method: PUT
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      auth_mode: oidc_auth
+      oidc_name: "{{ harbor_oidc_provider_name }}"
+      oidc_endpoint: "{{ harbor_keycloak_public_base_url }}/realms/{{ harbor_keycloak_realm_name }}"
+      oidc_client_id: "{{ harbor_keycloak_client_id }}"
+      oidc_client_secret: "{{ harbor_keycloak_client_secret }}"
+      oidc_scope: "{{ harbor_oidc_scope }}"
+      oidc_user_claim: "{{ harbor_oidc_user_claim }}"
+      oidc_groups_claim: "{{ harbor_oidc_groups_claim }}"
+      oidc_verify_cert: "{{ harbor_oidc_verify_cert }}"
+      oidc_auto_onboard: true
+      oidc_admin_group: "{{ harbor_keycloak_admin_group }}"
+      project_creation_restriction: "{{ harbor_project_creation_restriction }}"
+      self_registration: false
+    status_code:
+      - 200
+      - 201
+  register: harbor_oidc_configuration
+  retries: 24
+  delay: 5
+  until: harbor_oidc_configuration.status in [200, 201]
+  no_log: true
+
+- name: Query the check-runner Harbor project
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/projects?name={{ harbor_check_runner_project_name | urlencode }}
+    method: GET
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: harbor_check_runner_project_query
+  changed_when: false
+  no_log: true
+
+- name: Create the check-runner Harbor project when missing
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/projects"
+    method: POST
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      project_name: "{{ harbor_check_runner_project_name }}"
+      metadata:
+        public: "{{ 'true' if harbor_check_runner_project_public else 'false' }}"
+        auto_scan: "true"
+        reuse_sys_cve_allowlist: "true"
+      storage_limit: -1
+    status_code:
+      - 201
+      - 409
+  when: harbor_check_runner_project_query.json | length == 0
+  no_log: true
+
+- name: Re-query the check-runner Harbor project
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/projects?name={{ harbor_check_runner_project_name | urlencode }}
+    method: GET
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: harbor_check_runner_project_query_after
+  changed_when: false
+  no_log: true
+
+- name: Record the check-runner Harbor project facts
+  ansible.builtin.set_fact:
+    harbor_check_runner_project: "{{ harbor_check_runner_project_query_after.json | first }}"
+    harbor_check_runner_project_id: "{{ ((harbor_check_runner_project_query_after.json | first).project_id | int) }}"
+    harbor_check_runner_robot_permission_name: >-
+      {{ harbor_check_runner_project_name ~ '+' ~ harbor_check_runner_robot_name }}
+    harbor_check_runner_robot_permissions:
+      - kind: project
+        namespace: "{{ harbor_check_runner_project_name }}"
+        access:
+          - resource: repository
+            action: pull
+          - resource: repository
+            action: push
+    harbor_check_runner_retention_policy: >-
+      {{
+        {
+          'algorithm': 'or',
+          'rules': [
+            {
+              'disabled': False,
+              'action': 'retain',
+              'template': 'nDaysSinceLastPush',
+              'params': {
+                'nDaysSinceLastPush': (harbor_check_runner_retention_days | int)
+              },
+              'scope_selectors': {
+                'repository': [
+                  {
+                    'kind': 'doublestar',
+                    'decoration': 'repoMatches',
+                    'pattern': '**'
+                  }
+                ]
+              },
+              'tag_selectors': [
+                {
+                  'kind': 'doublestar',
+                  'decoration': 'matches',
+                  'pattern': '**'
+                }
+              ]
+            }
+          ],
+          'trigger': {
+            'kind': 'Schedule',
+            'settings': {
+              'cron': harbor_check_runner_retention_cron
+            },
+            'references': {}
+          },
+          'scope': {
+            'level': 'project',
+            'ref': ((harbor_check_runner_project_query_after.json | first).project_id | int)
+          }
+        } | to_json | from_json
+      }}
+  no_log: true
+
+- name: Query the check-runner Harbor project metadata
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/projects/{{ harbor_check_runner_project_name | urlencode }}/metadatas/
+    method: GET
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: harbor_check_runner_project_metadata_before
+  changed_when: false
+  no_log: true
+
+- name: Record the existing check-runner Harbor retention policy ID
+  ansible.builtin.set_fact:
+    harbor_check_runner_retention_id_before: >-
+      {{ harbor_check_runner_project_metadata_before.json.retention_id | default('0') | int }}
+  no_log: true
+
+- name: Create the check-runner Harbor retention policy when missing
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/retentions"
+    method: POST
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body: "{{ harbor_check_runner_retention_policy }}"
+    status_code: 201
+  when: harbor_check_runner_retention_id_before == 0
+  no_log: true
+
+- name: Re-query the check-runner Harbor project metadata
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/projects/{{ harbor_check_runner_project_name | urlencode }}/metadatas/
+    method: GET
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: harbor_check_runner_project_metadata_after
+  changed_when: false
+  no_log: true
+
+- name: Record the check-runner Harbor retention policy ID
+  ansible.builtin.set_fact:
+    harbor_check_runner_retention_id: "{{ harbor_check_runner_project_metadata_after.json.retention_id | int }}"
+  no_log: true
+
+- name: Reconcile the check-runner Harbor retention policy
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/retentions/{{ harbor_check_runner_retention_id }}
+    method: PUT
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body: "{{ harbor_check_runner_retention_policy }}"
+    status_code: 200
+  changed_when: false
+  when: harbor_check_runner_retention_id | int > 0
+  no_log: true
+
+- name: Query the check-runner Harbor robot accounts
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/robots?q=Level=project,ProjectID={{ harbor_check_runner_project_id }}
+    method: GET
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: harbor_check_runner_robot_query
+  changed_when: false
+  no_log: true
+
+- name: Record the matching check-runner Harbor robot account
+  ansible.builtin.set_fact:
+    harbor_check_runner_robot_existing: >-
+      {{
+        (
+          harbor_check_runner_robot_query.json
+          | selectattr('name', 'search', (harbor_check_runner_robot_permission_name | regex_escape) ~ '$')
+          | list
+          | first
+        ) | default({})
+      }}
+  no_log: true
+
+- name: Record whether the check-runner Harbor robot account needs reconciliation
+  ansible.builtin.set_fact:
+    harbor_check_runner_robot_needs_reconciliation: "{{ harbor_check_runner_robot_existing == {} }}"
+  no_log: true
+
+- name: Create the check-runner Harbor robot account when missing
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/robots"
+    method: POST
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      name: "{{ harbor_check_runner_robot_name }}"
+      description: "{{ harbor_check_runner_robot_description }}"
+      duration: -1
+      level: project
+      disable: false
+      permissions: "{{ harbor_check_runner_robot_permissions }}"
+    status_code: 201
+  register: harbor_check_runner_robot_create
+  when: harbor_check_runner_robot_existing == {}
+  no_log: true
+
+- name: Reconcile the check-runner Harbor robot account definition
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/robots/{{ harbor_check_runner_robot_existing.id }}
+    method: PUT
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      name: "{{ harbor_check_runner_robot_existing.name }}"
+      description: "{{ harbor_check_runner_robot_description }}"
+      duration: -1
+      level: project
+      disable: false
+      permissions: "{{ harbor_check_runner_robot_permissions }}"
+    status_code: 200
+  changed_when: false
+  when: harbor_check_runner_robot_existing != {}
+  no_log: true
+
+- name: Check whether the local check-runner Harbor robot secret file exists
+  ansible.builtin.stat:
+    path: "{{ harbor_check_runner_robot_local_file }}"
+  register: harbor_check_runner_robot_local_file_stat
+  delegate_to: localhost
+  become: false
+
+- name: Read the local check-runner Harbor robot secret file
+  ansible.builtin.slurp:
+    src: "{{ harbor_check_runner_robot_local_file }}"
+  register: harbor_check_runner_robot_local_file_raw
+  when: harbor_check_runner_robot_local_file_stat.stat.exists
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Record the local check-runner Harbor robot secret payload
+  ansible.builtin.set_fact:
+    harbor_check_runner_robot_local_payload: >-
+      {{
+        (
+          harbor_check_runner_robot_local_file_raw.content
+          | b64decode
+          | from_json
+        )
+        if harbor_check_runner_robot_local_file_stat.stat.exists
+        else {}
+      }}
+  no_log: true
+
+- name: Record whether the check-runner Harbor robot account needs reconciliation after local state review
+  ansible.builtin.set_fact:
+    harbor_check_runner_robot_needs_reconciliation: >-
+      {{
+        harbor_check_runner_robot_needs_reconciliation
+        or (harbor_check_runner_robot_existing != {} and (
+          (harbor_check_runner_robot_local_payload.username | default('')) != harbor_check_runner_robot_existing.name
+          or (harbor_check_runner_robot_local_payload.secret | default('') | length) == 0
+        ))
+      }}
+  no_log: true
+
+- name: Record the live check-runner Harbor robot facts
+  ansible.builtin.set_fact:
+    harbor_check_runner_robot_live_id: >-
+      {{
+        harbor_check_runner_robot_create.json.id
+        if harbor_check_runner_robot_existing == {}
+        else harbor_check_runner_robot_existing.id
+      }}
+    harbor_check_runner_robot_live_username: >-
+      {{
+        harbor_check_runner_robot_create.json.name
+        if harbor_check_runner_robot_existing == {}
+        else harbor_check_runner_robot_existing.name
+      }}
+  no_log: true
+
+- name: Generate a replacement check-runner Harbor robot secret when local state is missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    while true; do
+      candidate="$(openssl rand -base64 24 | tr -d '\n')"
+      if printf '%s' "$candidate" | grep -q '[a-z]' \
+        && printf '%s' "$candidate" | grep -q '[A-Z]' \
+        && printf '%s' "$candidate" | grep -q '[0-9]'; then
+        printf '%s' "$candidate"
+        break
+      fi
+    done
+  args:
+    executable: /bin/bash
+  register: harbor_check_runner_robot_secret_generation
+  changed_when: true
+  when:
+    - harbor_check_runner_robot_existing != {}
+    - >
+      (harbor_check_runner_robot_local_payload.username | default('')) != harbor_check_runner_robot_existing.name
+      or (harbor_check_runner_robot_local_payload.secret | default('') | length) == 0
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Read the desired Harbor registry credential password
+  ansible.builtin.set_fact:
+    harbor_registry_credential_password: >-
+      {{
+        harbor_check_runner_robot_create.json.secret
+        if harbor_check_runner_robot_existing == {}
+        else (
+          harbor_check_runner_robot_secret_generation.stdout
+          if harbor_check_runner_robot_secret_generation is defined
+          and harbor_check_runner_robot_secret_generation.stdout | default('') | length > 0
+          else harbor_check_runner_robot_local_payload.secret | default('')
+        )
+      }}
+  no_log: true
+
+- name: Refresh the check-runner Harbor robot secret when local state is missing
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/robots/{{ harbor_check_runner_robot_existing.id }}
+    method: PATCH
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      secret: "{{ harbor_check_runner_robot_secret_generation.stdout }}"
+    status_code: 200
+  register: harbor_check_runner_robot_secret_refresh
+  when:
+    - harbor_check_runner_robot_existing != {}
+    - harbor_check_runner_robot_secret_generation is defined
+    - harbor_check_runner_robot_secret_generation.stdout | default('') | length > 0
+  no_log: true
+
+- name: Record whether Harbor registry credential containers need recreation
+  ansible.builtin.set_fact:
+    harbor_registry_credential_containers_need_recreation: >-
+      {{
+        harbor_check_runner_robot_existing == {}
+        or harbor_check_runner_robot_needs_reconciliation
+        or (
+          harbor_check_runner_robot_secret_refresh is defined
+          and not (harbor_check_runner_robot_secret_refresh.skipped | default(false))
+        )
+      }}
+  no_log: true
+
+- name: Mirror the live check-runner Harbor robot secret
+  ansible.builtin.copy:
+    dest: "{{ harbor_check_runner_robot_local_file }}"
+    content: >-
+      {{
+        {
+          'project': harbor_check_runner_project_name,
+          'project_id': harbor_check_runner_project_id,
+          'robot_name': harbor_check_runner_robot_name,
+          'username': harbor_check_runner_robot_live_username,
+          'secret': harbor_registry_credential_password,
+          'public_pull': harbor_check_runner_project_public
+        } | to_nice_json
+      }}
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the refreshed check-runner Harbor robot secret
+  ansible.builtin.copy:
+    dest: "{{ harbor_check_runner_robot_local_file }}"
+    content: >-
+      {{
+        {
+          'project': harbor_check_runner_project_name,
+          'project_id': harbor_check_runner_project_id,
+          'robot_name': harbor_check_runner_robot_name,
+          'username': harbor_check_runner_robot_live_username,
+          'secret': harbor_check_runner_robot_secret_refresh.json.secret,
+          'public_pull': harbor_check_runner_project_public
+        } | to_nice_json
+      }}
+    mode: "0600"
+  when:
+    - harbor_check_runner_robot_secret_refresh is defined
+    - not (harbor_check_runner_robot_secret_refresh.skipped | default(false))
+    - harbor_check_runner_robot_secret_refresh.json.secret | default('') | length > 0
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Import Harbor verification tasks
+  ansible.builtin.import_tasks: verify.yml

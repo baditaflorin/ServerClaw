@@ -8,14 +8,18 @@ HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 POSTGRES_GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "postgres_guests.yml"
 POSTGRES_CLIENT_PLAYBOOKS = [
     REPO_ROOT / "playbooks" / "dify.yml",
+    REPO_ROOT / "playbooks" / "directus.yml",
     REPO_ROOT / "playbooks" / "keycloak.yml",
     REPO_ROOT / "playbooks" / "langfuse.yml",
     REPO_ROOT / "playbooks" / "mattermost.yml",
+    REPO_ROOT / "playbooks" / "matrix-synapse.yml",
     REPO_ROOT / "playbooks" / "n8n.yml",
+    REPO_ROOT / "playbooks" / "nextcloud.yml",
     REPO_ROOT / "playbooks" / "outline.yml",
     REPO_ROOT / "playbooks" / "plane.yml",
     REPO_ROOT / "playbooks" / "postgres-vm.yml",
     REPO_ROOT / "playbooks" / "semaphore.yml",
+    REPO_ROOT / "playbooks" / "woodpecker.yml",
     REPO_ROOT / "playbooks" / "vaultwarden.yml",
     REPO_ROOT / "playbooks" / "windmill.yml",
 ]

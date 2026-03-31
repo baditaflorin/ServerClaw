@@ -8,6 +8,7 @@ from typing import Any, Final
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from environment_catalog import configured_environment_ids
 from environment_topology import ALLOWED_BINDING_STATUSES
+from stage_smoke import DEFAULT_SUITE_ID, DEFAULT_SUITE_NAME, declared_smoke_suites
 
 try:
     import jsonschema
@@ -74,6 +75,42 @@ def service_catalog_enforces_observed_guest_surfaces() -> bool:
     return current_git_branch() == "main"
 
 
+def require_smoke_suites(value: Any, path: str) -> list[dict[str, Any]]:
+    suites = require_list(value, path)
+    normalized: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    for index, suite in enumerate(suites):
+        suite = require_mapping(suite, f"{path}[{index}]")
+        suite_id = require_str(suite.get("id"), f"{path}[{index}].id")
+        if suite_id in seen_ids:
+            raise ValueError(f"{path} must not declare duplicate smoke suite '{suite_id}'")
+        seen_ids.add(suite_id)
+        name = require_str(suite.get("name"), f"{path}[{index}].name")
+        description = require_str(suite.get("description"), f"{path}[{index}].description")
+        required_receipt_keywords = require_string_list(
+            suite.get("required_receipt_keywords", []),
+            f"{path}[{index}].required_receipt_keywords",
+        )
+        required_verification_checks = require_string_list(
+            suite.get("required_verification_checks", []),
+            f"{path}[{index}].required_verification_checks",
+        )
+        if not required_receipt_keywords and not required_verification_checks:
+            raise ValueError(
+                f"{path}[{index}] must declare at least one receipt keyword or verification check token"
+            )
+        normalized.append(
+            {
+                "id": suite_id,
+                "name": name,
+                "description": description,
+                "required_receipt_keywords": required_receipt_keywords,
+                "required_verification_checks": required_verification_checks,
+            }
+        )
+    return normalized
+
+
 def require_environment_bindings(
     value: Any,
     path: str,
@@ -81,12 +118,12 @@ def require_environment_bindings(
     public_url: str | None,
     internal_url: str | None,
     subdomain: str | None,
-) -> dict[str, dict[str, str]]:
+) -> dict[str, dict[str, Any]]:
     bindings = require_mapping(value, path)
     if "production" not in bindings:
         raise ValueError(f"{path} must declare a production binding")
 
-    normalized: dict[str, dict[str, str]] = {}
+    normalized: dict[str, dict[str, Any]] = {}
     for env_id, binding in bindings.items():
         if env_id not in ALLOWED_ENVIRONMENTS:
             raise ValueError(f"{path}.{env_id} must be one of {sorted(ALLOWED_ENVIRONMENTS)}")
@@ -102,8 +139,28 @@ def require_environment_bindings(
             normalized_binding["subdomain"] = require_str(
                 binding.get("subdomain"), f"{path}.{env_id}.subdomain"
             )
+        if "stage_ready" in binding:
+            normalized_binding["stage_ready"] = require_bool(
+                binding.get("stage_ready"),
+                f"{path}.{env_id}.stage_ready",
+            )
+        if "smoke_suite_ids" in binding:
+            normalized_binding["smoke_suite_ids"] = require_string_list(
+                binding.get("smoke_suite_ids"),
+                f"{path}.{env_id}.smoke_suite_ids",
+            )
         if "notes" in binding:
             normalized_binding["notes"] = require_str(binding.get("notes"), f"{path}.{env_id}.notes")
+        if "smoke_suites" in binding:
+            normalized_binding["smoke_suites"] = require_smoke_suites(
+                binding.get("smoke_suites"),
+                f"{path}.{env_id}.smoke_suites",
+            )
+
+        if normalized_binding.get("stage_ready") and status != "active":
+            raise ValueError(f"{path}.{env_id}.stage_ready requires an active environment binding")
+        if normalized_binding.get("stage_ready") and not normalized_binding.get("smoke_suite_ids"):
+            raise ValueError(f"{path}.{env_id}.stage_ready requires at least one smoke suite id")
 
         if env_id == "production":
             expected_url = public_url or internal_url
@@ -144,6 +201,12 @@ def require_int(value: Any, path: str, minimum: int = 1) -> int:
         raise ValueError(f"{path} must be an integer")
     if value < minimum:
         raise ValueError(f"{path} must be >= {minimum}")
+    return value
+
+
+def require_bool(value: Any, path: str) -> bool:
+    if not isinstance(value, bool):
+        raise ValueError(f"{path} must be a boolean")
     return value
 
 
@@ -339,6 +402,16 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
             internal_url=internal_url,
             subdomain=subdomain,
         )
+        active_environment_ids = [
+            env_id
+            for env_id, binding in service.get("environments", {}).items()
+            if isinstance(binding, dict) and binding.get("status") == "active"
+        ]
+        for env_id in active_environment_ids:
+            if not declared_smoke_suites(service, env_id):
+                raise ValueError(
+                    f"services[{index}].environments.{env_id} must resolve at least one stage smoke suite"
+                )
 
         runbook = service.get("runbook")
         if runbook is not None and not repo_path(runbook).exists():
@@ -494,6 +567,17 @@ def show_service(catalog: dict[str, Any], service_id: str) -> int:
                 print(
                     f"  - {env_id}: {binding['status']} -> {binding['url']}{subdomain}"
                 )
+                smoke_suites = declared_smoke_suites(service, env_id) if binding.get("status") == "active" else []
+                if smoke_suites:
+                    explicit = isinstance(binding.get("smoke_suites"), list)
+                    qualifier = "declared" if explicit else "inherited"
+                    print(f"    smoke suites ({qualifier}):")
+                    for suite in smoke_suites:
+                        print(f"      - {suite['id']}: {suite['name']}")
+                elif binding.get("status") == "active":
+                    print(
+                        f"    smoke suites: {DEFAULT_SUITE_ID} ({DEFAULT_SUITE_NAME})"
+                    )
         tags = service.get("tags", [])
         if tags:
             print("Tags:")

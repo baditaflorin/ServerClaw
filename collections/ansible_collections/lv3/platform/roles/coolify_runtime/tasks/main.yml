@@ -205,25 +205,18 @@
     delay: 0
     timeout: 240
 
-- name: Wait for the guest-local Coolify health endpoint
-  ansible.builtin.uri:
-    url: "{{ coolify_private_url }}/api/health"
-    method: GET
-    status_code: 200
-    return_content: true
-    validate_certs: "{{ coolify_verify_ssl }}"
-  register: coolify_health
-  retries: 30
-  delay: 5
-  until:
-    - coolify_health.status == 200
-    - >-
-      (
-        (coolify_health.json.success | default(false)) | bool
-      ) or (
-        (coolify_health.content | default('') | trim) == 'OK'
-      )
-  changed_when: false
+- name: Clear stale Laravel bootstrap cache files before repo-managed Coolify bootstrap
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker exec -u 0 "{{ coolify_service_name }}" sh -lc '
+      find /var/www/html/bootstrap/cache -maxdepth 1 -type f \
+        \( -name "config.php" -o -name "events.php" -o -name "routes*.php" \) \
+        -print -delete
+    '
+  args:
+    executable: /bin/bash
+  register: coolify_bootstrap_cache_cleanup
+  changed_when: (coolify_bootstrap_cache_cleanup.stdout | default('') | trim) | length > 0
 
 - name: Ensure the Coolify root account and API settings are enforced
   ansible.builtin.shell: |
@@ -372,6 +365,26 @@
       - coolify_server_registration_payload.is_reachable | default(false) | bool
       - coolify_server_registration_payload.is_usable | default(false) | bool
     fail_msg: "Coolify did not expose a validated local deployment server after bootstrap."
+
+- name: Wait for the guest-local Coolify health endpoint
+  ansible.builtin.uri:
+    url: "{{ coolify_private_url }}/api/health"
+    method: GET
+    status_code: 200
+    return_content: true
+    validate_certs: "{{ coolify_verify_ssl }}"
+  register: coolify_health
+  retries: 30
+  delay: 5
+  until:
+    - coolify_health.status == 200
+    - >-
+      (
+        (coolify_health.json.success | default(false)) | bool
+      ) or (
+        (coolify_health.content | default('') | trim) == 'OK'
+      )
+  changed_when: false
 
 - name: Rotate the Coolify API token and persist it locally
   ansible.builtin.shell: |

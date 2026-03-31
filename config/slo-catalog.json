@@ -4,6 +4,36 @@
   "review_note": "Initial objectives should be recalibrated after 30 days of production telemetry.",
   "slos": [
     {
+      "id": "browser-runner-availability",
+      "service_id": "browser_runner",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:8096/healthz",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private browser runner remains reachable on docker-runtime-lv3 for governed Playwright session execution."
+    },
+    {
+      "id": "changedetection-availability",
+      "service_id": "changedetection",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:5000/",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private Changedetection.io runtime remains reachable on docker-runtime-lv3 for governed upstream release, advisory, and API change monitoring."
+    },
+    {
+      "id": "directus-availability",
+      "service_id": "directus",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://data.lv3.org/server/health",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Directus should keep the public health contract on data.lv3.org reachable through the shared edge."
+    },
+    {
       "id": "dozzle-availability",
       "service_id": "dozzle",
       "indicator": "availability",
@@ -34,6 +64,16 @@
       "description": "The private Gitea runtime remains reachable for repository hosting, webhooks, and self-hosted CI orchestration."
     },
     {
+      "id": "gotenberg-availability",
+      "service_id": "gotenberg",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:3007/health",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private Gotenberg document rendering API remains reachable on docker-runtime-lv3 for synchronous PDF conversion workflows."
+    },
+    {
       "id": "grafana-availability",
       "service_id": "grafana",
       "indicator": "availability",
@@ -44,6 +84,16 @@
       "description": "Grafana remains reachable through the public LV3 edge."
     },
     {
+      "id": "harbor-availability",
+      "service_id": "harbor",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://registry.lv3.org/api/v2.0/ping",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Harbor remains reachable through the shared LV3 edge for image pulls, pushes, and operator access."
+    },
+    {
       "id": "homepage-availability",
       "service_id": "homepage",
       "indicator": "availability",
@@ -52,16 +102,6 @@
       "target_url": "https://home.lv3.org",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The unified operator dashboard remains reachable through the authenticated LV3 edge."
-    },
-    {
-      "id": "realtime-availability",
-      "service_id": "realtime",
-      "indicator": "availability",
-      "objective_percent": 99.0,
-      "window_days": 30,
-      "target_url": "http://10.10.10.40:19999/api/v1/info",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "The Netdata parent remains reachable on monitoring-lv3 for real-time streamed platform metrics."
     },
     {
       "id": "keycloak-availability",
@@ -95,6 +135,26 @@
       "description": "Langfuse remains reachable through the public LV3 edge for trace ingestion and operator access."
     },
     {
+      "id": "mailpit-availability",
+      "service_id": "mailpit",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:8025/api/v1/info",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Mailpit remains reachable on the private guest-network listener for staging and development SMTP capture flows."
+    },
+    {
+      "id": "matrix-synapse-availability",
+      "service_id": "matrix_synapse",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://matrix.lv3.org/_matrix/client/versions",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Matrix Synapse remains reachable on the public client versions endpoint."
+    },
+    {
       "id": "netbox-availability",
       "service_id": "netbox",
       "indicator": "availability",
@@ -103,6 +163,16 @@
       "target_url": "http://10.10.10.20:8082/login/",
       "probe_module": "http_2xx_follow_redirects",
       "description": "NetBox remains reachable for inventory, IPAM, and topology workflows."
+    },
+    {
+      "id": "nextcloud-availability",
+      "service_id": "nextcloud",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://cloud.lv3.org/status.php",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The public Nextcloud status endpoint remains reachable for the canonical personal file and DAV data plane."
     },
     {
       "id": "nginx-edge-availability",
@@ -125,6 +195,27 @@
       "description": "Open WebUI remains reachable on the private runtime network."
     },
     {
+      "id": "openfga-availability",
+      "service_id": "openfga",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "http://100.64.0.1:8014/healthz",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private OpenFGA controller endpoint remains reachable for delegated authorization queries and bootstrap replay."
+    },
+    {
+      "id": "openfga-latency",
+      "service_id": "openfga",
+      "indicator": "latency",
+      "objective_percent": 95.0,
+      "window_days": 30,
+      "target_url": "http://100.64.0.1:8014/healthz",
+      "probe_module": "http_2xx_follow_redirects",
+      "latency_threshold_ms": 500,
+      "description": "The private OpenFGA controller endpoint responds in under 500ms for 95% of probes."
+    },
+    {
       "id": "outline-availability",
       "service_id": "outline",
       "indicator": "availability",
@@ -133,6 +224,26 @@
       "target_url": "https://wiki.lv3.org/_health",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Outline remains reachable through the public LV3 edge for living knowledge browsing and sync automation."
+    },
+    {
+      "id": "jupyterhub-availability",
+      "service_id": "jupyterhub",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://notebooks.lv3.org/hub/health",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "JupyterHub remains reachable through the public LV3 edge for interactive exploratory notebook sessions."
+    },
+    {
+      "id": "plane-availability",
+      "service_id": "plane",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "https://tasks.lv3.org/",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Plane remains reachable through the public LV3 edge for ADR board tracking and issue synchronization."
     },
     {
       "id": "platform-context-api-availability",
@@ -145,6 +256,26 @@
       "description": "The platform context API remains reachable for agent-assisted operator workflows."
     },
     {
+      "id": "plausible-availability",
+      "service_id": "plausible",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://analytics.lv3.org/api/system/health/ready",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The public Plausible readiness endpoint remains reachable for dashboard access, tracker delivery, and synthetic event verification."
+    },
+    {
+      "id": "realtime-availability",
+      "service_id": "realtime",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.40:19999/api/v1/info",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The Netdata parent remains reachable on monitoring-lv3 for real-time streamed platform metrics."
+    },
+    {
       "id": "semaphore-availability",
       "service_id": "semaphore",
       "indicator": "availability",
@@ -155,6 +286,16 @@
       "description": "Semaphore stays reachable for private Ansible job launches and API-based task inspection."
     },
     {
+      "id": "serverclaw-availability",
+      "service_id": "serverclaw",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "https://chat.lv3.org",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "ServerClaw remains reachable through the public LV3 edge for chat-first assistant access."
+    },
+    {
       "id": "status-page-availability",
       "service_id": "status_page",
       "indicator": "availability",
@@ -163,6 +304,26 @@
       "target_url": "https://status.lv3.org",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The public status page remains externally reachable as the last-resort platform signal."
+    },
+    {
+      "id": "tika-availability",
+      "service_id": "tika",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:9998/version",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private Apache Tika extraction API remains reachable on docker-runtime-lv3 for synchronous document text and metadata extraction workflows."
+    },
+    {
+      "id": "tesseract-ocr-availability",
+      "service_id": "tesseract_ocr",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:3008/healthz",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private Tesseract OCR runtime remains reachable on docker-runtime-lv3 for scanned-image and image-only document fallback extraction."
     },
     {
       "id": "uptime-kuma-availability",
@@ -195,14 +356,14 @@
       "description": "Windmill API stays reachable for scheduled automation."
     },
     {
-      "id": "plane-availability",
-      "service_id": "plane",
+      "id": "woodpecker-availability",
+      "service_id": "woodpecker",
       "indicator": "availability",
-      "objective_percent": 99.0,
+      "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://tasks.lv3.org/",
+      "target_url": "https://ci.lv3.org/healthz",
       "probe_module": "http_2xx_follow_redirects",
-      "description": "Plane remains reachable through the public LV3 edge for ADR board tracking and issue synchronization."
+      "description": "Woodpecker stays reachable for repo-managed CI bootstrap, API inspection, and manual validation pipeline triggers."
     }
   ]
 }

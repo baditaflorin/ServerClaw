@@ -1,0 +1,61 @@
+---
+# Purpose: Verify that the local browser runner health endpoint and bounded smoke session API both succeed after convergence.
+- name: Verify the browser runner health endpoint responds locally
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ browser_runner_runtime_internal_port }}/healthz"
+    method: GET
+    status_code: 200
+  register: browser_runner_runtime_health
+  retries: 12
+  delay: 5
+  until: browser_runner_runtime_health.status == 200
+  changed_when: false
+
+- name: Build the browser runner smoke payload
+  ansible.builtin.set_fact:
+    browser_runner_runtime_smoke_payload:
+      url: >-
+        data:text/html;charset=utf-8,%3C!doctype%20html%3E%3Chtml%20lang%3D%22en%22%3E%3Chead%3E%3Cmeta%20charset%3D%22utf-8%22%3E%3Ctitle%3ELV3%20Browser%20Runner%20Smoke%3C%2Ftitle%3E%3Cscript%3Efunction%20applyGreeting()%7Bconst%20raw%3Ddocument.getElementById(%22name%22).value.trim()%3Bdocument.getElementById(%22result%22).textContent%3Draw.toUpperCase()%3B%7D%3C%2Fscript%3E%3C%2Fhead%3E%3Cbody%3E%3Cmain%3E%3Ch1%3ELV3%20Browser%20Runner%20Smoke%3C%2Fh1%3E%3Clabel%20for%3D%22name%22%3EName%3C%2Flabel%3E%3Cinput%20id%3D%22name%22%20type%3D%22text%22%20value%3D%22%22%3E%3Cbutton%20id%3D%22apply%22%20type%3D%22button%22%20onclick%3D%22applyGreeting()%22%3EApply%3C%2Fbutton%3E%3Cp%20id%3D%22result%22%3EPENDING%3C%2Fp%3E%3C%2Fmain%3E%3C%2Fbody%3E%3C%2Fhtml%3E
+      steps:
+        - action: fill
+          selector: "#name"
+          value: browser runner
+          timeout_seconds: 15
+        - action: click
+          selector: "#apply"
+          timeout_seconds: 15
+        - action: wait_for_selector
+          selector: "#result"
+          state: visible
+          timeout_seconds: 15
+      selectors:
+        - name: heading
+          selector: h1
+        - name: result
+          selector: "#result"
+      capture_screenshot: true
+      capture_pdf: true
+      timeout_seconds: 30
+
+- name: Verify the browser runner smoke session succeeds locally
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ browser_runner_runtime_internal_port }}/sessions"
+    method: POST
+    body_format: json
+    body: "{{ browser_runner_runtime_smoke_payload }}"
+    status_code: 200
+    return_content: true
+  register: browser_runner_runtime_smoke
+  changed_when: false
+
+- name: Assert the browser runner smoke session returned the expected DOM results
+  ansible.builtin.assert:
+    that:
+      - browser_runner_runtime_smoke.json.title == 'LV3 Browser Runner Smoke'
+      - (browser_runner_runtime_smoke.json.selector_results | length) >= 2
+      - (browser_runner_runtime_smoke.json.selector_results | selectattr('name', 'equalto', 'heading') | map(attribute='text') | first) == 'LV3 Browser Runner Smoke'
+      - (browser_runner_runtime_smoke.json.selector_results | selectattr('name', 'equalto', 'result') | map(attribute='text') | first) == 'BROWSER RUNNER'
+      - (browser_runner_runtime_smoke.json.artifacts | length) >= 2
+    fail_msg: >-
+      The browser runner smoke session did not return the expected heading,
+      action result, and artifact set from the bounded local data-URL flow.

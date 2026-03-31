@@ -1,0 +1,85 @@
+log:
+  stdout: true
+  level: info
+
+persistence:
+  numHistoryShards: {{ temporal_num_history_shards }}
+  defaultStore: default
+  visibilityStore: visibility
+  datastores:
+    default:
+      sql:
+        pluginName: "postgres12"
+        databaseName: "{{ temporal_database_name }}"
+        connectAddr: "{{ temporal_database_host }}:5432"
+        connectProtocol: "tcp"
+        user: "{{ temporal_database_user }}"
+        password: "__TEMPORAL_DB_PASSWORD__"
+        maxConns: {{ temporal_default_store_max_conns }}
+        maxIdleConns: {{ temporal_default_store_max_idle_conns }}
+        maxConnLifetime: "1h"
+        tls:
+          enabled: false
+    visibility:
+      sql:
+        pluginName: "postgres12"
+        databaseName: "{{ temporal_visibility_database_name }}"
+        connectAddr: "{{ temporal_database_host }}:5432"
+        connectProtocol: "tcp"
+        user: "{{ temporal_database_user }}"
+        password: "__TEMPORAL_DB_PASSWORD__"
+        maxConns: {{ temporal_visibility_store_max_conns }}
+        maxIdleConns: {{ temporal_visibility_store_max_idle_conns }}
+        maxConnLifetime: "1h"
+        tls:
+          enabled: false
+
+global:
+  membership:
+    maxJoinDuration: 30s
+    broadcastAddress: "__TEMPORAL_BROADCAST_ADDRESS__"
+  pprof:
+    port: 0
+
+services:
+  frontend:
+    rpc:
+      grpcPort: {{ temporal_frontend_grpc_port }}
+      membershipPort: {{ temporal_frontend_membership_port }}
+      bindOnIP: "0.0.0.0"
+      httpPort: {{ temporal_frontend_http_port }}
+  matching:
+    rpc:
+      grpcPort: {{ temporal_matching_grpc_port }}
+      membershipPort: {{ temporal_matching_membership_port }}
+      bindOnIP: "0.0.0.0"
+  history:
+    rpc:
+      grpcPort: {{ temporal_history_grpc_port }}
+      membershipPort: {{ temporal_history_membership_port }}
+      bindOnIP: "0.0.0.0"
+  worker:
+    rpc:
+      grpcPort: {{ temporal_worker_grpc_port }}
+      membershipPort: {{ temporal_worker_membership_port }}
+      bindOnIP: "0.0.0.0"
+
+clusterMetadata:
+  enableGlobalNamespace: false
+  failoverVersionIncrement: 10
+  masterClusterName: "{{ temporal_cluster_name }}"
+  currentClusterName: "{{ temporal_cluster_name }}"
+  clusterInformation:
+    "{{ temporal_cluster_name }}":
+      enabled: true
+      initialFailoverVersion: 1
+      rpcName: "frontend"
+      rpcAddress: "{{ temporal_public_frontend_address }}"
+      httpAddress: "{{ temporal_public_frontend_http_address }}"
+
+dcRedirectionPolicy:
+  policy: "noop"
+
+dynamicConfigClient:
+  filepath: "/etc/temporal/config/dynamicconfig.yml"
+  pollInterval: "60s"

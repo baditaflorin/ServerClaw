@@ -24,6 +24,15 @@
     playbook_execution_service_probe: "{{ playbook_execution_health_probe_catalog.services[service_health_probe_id] }}"
   changed_when: false
 
+- name: Run startup verification
+  ansible.builtin.include_tasks: verify-probe.yml
+  vars:
+    playbook_execution_probe_stage: startup
+    playbook_execution_probe: "{{ playbook_execution_service_probe.startup }}"
+  when:
+    - inventory_hostname == playbook_execution_service_probe.owning_vm
+    - playbook_execution_service_probe.startup is defined
+
 - name: Run liveness verification
   ansible.builtin.include_tasks: verify-probe.yml
   vars:
@@ -31,12 +40,24 @@
     playbook_execution_probe: "{{ playbook_execution_service_probe.liveness }}"
   when: inventory_hostname == playbook_execution_service_probe.owning_vm
 
+- name: Repair Docker publication before readiness verification
+  ansible.builtin.include_tasks: docker-publication-assert.yml
+  vars:
+    playbook_execution_docker_publication_contract: "{{ playbook_execution_service_probe.readiness.docker_publication }}"
+  when:
+    - playbook_execution_verify_readiness | default(true)
+    - inventory_hostname == playbook_execution_service_probe.owning_vm
+    - playbook_execution_service_probe.readiness is defined
+    - playbook_execution_service_probe.readiness.docker_publication is defined
+
 - name: Run readiness verification
   ansible.builtin.include_tasks: verify-probe.yml
   vars:
     playbook_execution_probe_stage: readiness
     playbook_execution_probe: "{{ playbook_execution_service_probe.readiness }}"
-  when: inventory_hostname == playbook_execution_service_probe.owning_vm
+  when:
+    - playbook_execution_verify_readiness | default(true)
+    - inventory_hostname == playbook_execution_service_probe.owning_vm
 
 - name: Emit a best-effort playbook completion audit event
   ansible.builtin.command:

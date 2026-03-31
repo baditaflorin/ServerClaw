@@ -20,7 +20,7 @@ if [[ -n "$LV3_RUN_ID" ]]; then
       --format shell
   )"
 fi
-TOFU_PLAN_DIR="${TOFU_PLAN_DIR:-${LV3_RUN_TOFU_DIR:-${HOME:-/tmp}/.cache/lv3-tofu-plans}}"
+TOFU_PLAN_DIR="${TOFU_PLAN_DIR:-${LV3_RUN_TOFU_DIR:-$REPO_ROOT/.local/tofu-plans}}"
 
 usage() {
   cat <<'EOF'

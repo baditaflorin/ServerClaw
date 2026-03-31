@@ -1,8 +1,39 @@
 ---
-- name: Converge build artifact cache on the docker build guest
+- name: Converge build artifact cache consumers on the docker build guest
   hosts: "{{ 'docker-build-staging-lv3' if (env | default('production')) == 'staging' else 'docker-build-lv3' }}"
   become: true
   gather_facts: true
+  vars:
+    artifact_cache_remote_host: "{{ hostvars['artifact-cache-lv3'].ansible_host }}"
+    docker_runtime_registry_mirrors:
+      - "http://{{ artifact_cache_remote_host }}:5001"
+      - https://mirror.gcr.io
+    docker_runtime_insecure_registries:
+      - "{{ artifact_cache_remote_host }}:5001"
+      - "{{ artifact_cache_remote_host }}:5002"
+      - "{{ artifact_cache_remote_host }}:5003"
+      - "{{ artifact_cache_remote_host }}:5004"
+    build_server_buildkit_registry_mirrors:
+      docker.io:
+        mirrors:
+          - "{{ artifact_cache_remote_host }}:5001"
+        http: true
+        insecure: true
+      ghcr.io:
+        mirrors:
+          - "{{ artifact_cache_remote_host }}:5002"
+        http: true
+        insecure: true
+      artifacts.plane.so:
+        mirrors:
+          - "{{ artifact_cache_remote_host }}:5003"
+        http: true
+        insecure: true
+      docker.n8n.io:
+        mirrors:
+          - "{{ artifact_cache_remote_host }}:5004"
+        http: true
+        insecure: true
   tags:
     - tier-2
     - automation
@@ -18,4 +49,9 @@
           - "{{ playbook_execution_required_hosts.docker_build[playbook_execution_env] }}"
 
   roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.artifact_cache_runtime
+      vars:
+        artifact_cache_state: absent
     - role: lv3.platform.build_server

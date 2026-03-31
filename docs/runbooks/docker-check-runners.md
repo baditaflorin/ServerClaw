@@ -51,5 +51,7 @@ make push-check-runners
 ## Notes
 
 - `scripts/parallel_check.py` always mounts the current repo at `/workspace` and runs each requested check with `--cpus=4`.
+- `docker/check-runners/security` ships Trivy, Gitleaks, and Checkov for the heavyweight repo-security checks that truly need the shared security image publication flow.
+- `semgrep-sast` intentionally runs in the published Python runner and installs the pinned `semgrep==1.155.0` package at runtime with a pip cache mount. This avoids coupling Semgrep delivery to the Checkov dependency graph and keeps the security runner unchanged when the registry publication path is degraded.
 - The manifest is intentionally check-oriented rather than image-oriented so future gates can compose checks without copying command definitions.
 - Registry digests are written into the manifest only after the Windmill rebuild workflow publishes the images.

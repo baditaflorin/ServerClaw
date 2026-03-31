@@ -4,7 +4,7 @@ import hashlib
 import json
 import re
 from collections.abc import Iterable
-from datetime import UTC, datetime
+from platform.datetime_compat import UTC, datetime
 from pathlib import Path
 from typing import Any
 

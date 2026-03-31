@@ -3,6 +3,7 @@ ollama_runtime_site_dir: /opt/ollama
 ollama_runtime_data_dir: /data/ollama
 ollama_runtime_model_dir: "{{ ollama_runtime_data_dir }}/models"
 ollama_runtime_compose_file: "{{ ollama_runtime_site_dir }}/docker-compose.yml"
+ollama_runtime_compose_project_name: "{{ ollama_runtime_site_dir | basename }}"
 ollama_runtime_container_name: ollama
 ollama_runtime_image: "{{ container_image_catalog.images.ollama_runtime.ref }}"
 ollama_runtime_port: "{{ platform_service_topology | platform_service_port('ollama', 'internal') }}"

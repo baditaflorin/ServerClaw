@@ -77,3 +77,9 @@ argument_specs:
         default: 50
         description:
           - Soft cache retention target for BuildKit garbage collection.
+      build_server_buildkit_registry_mirrors:
+        type: dict
+        required: false
+        default: {}
+        description:
+          - Optional upstream-registry mirror definitions keyed by canonical registry host for BuildKit pulls.

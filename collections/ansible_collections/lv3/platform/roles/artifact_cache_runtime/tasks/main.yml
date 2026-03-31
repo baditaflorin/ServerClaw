@@ -1,0 +1,187 @@
+---
+# Purpose: Deploy internal pull-through registry mirrors, render a repo-derived seed plan, and prewarm repeated image pulls on the selected cache host.
+- name: Validate artifact cache runtime inputs
+  ansible.builtin.assert:
+    that:
+      - artifact_cache_state in ['present', 'absent']
+      - artifact_cache_site_dir | length > 0
+      - artifact_cache_data_root | length > 0
+      - artifact_cache_compose_file | length > 0
+      - artifact_cache_seed_plan_file | length > 0
+      - artifact_cache_bind_host | length > 0
+      - artifact_cache_registry_image | length > 0
+      - artifact_cache_seed_script | length > 0
+      - artifact_cache_seed_catalogs | length > 0
+      - artifact_cache_registry_mirrors | length > 0
+    fail_msg: >-
+      artifact_cache_runtime requires compose paths, a bind address, registry
+      mirror definitions, and a controller-local seed planner.
+
+- name: Check whether the artifact cache compose file already exists
+  ansible.builtin.stat:
+    path: "{{ artifact_cache_compose_file }}"
+  register: artifact_cache_compose_stat
+
+- name: Stop the artifact cache stack when state=absent
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ artifact_cache_compose_file }}"
+      - down
+      - --remove-orphans
+  args:
+    chdir: "{{ artifact_cache_site_dir }}"
+  register: artifact_cache_down
+  changed_when: >-
+    artifact_cache_compose_stat.stat.exists
+    and (
+      'Stopping' in artifact_cache_down.stdout
+      or 'Removing' in artifact_cache_down.stdout
+      or 'Network' in artifact_cache_down.stdout
+    )
+  when:
+    - artifact_cache_state == 'absent'
+    - artifact_cache_compose_stat.stat.exists
+
+- name: Wait for artifact cache listeners to stop when state=absent
+  ansible.builtin.wait_for:
+    host: "{{ artifact_cache_bind_host }}"
+    port: "{{ item.value.bind_port }}"
+    state: stopped
+    delay: 0
+    timeout: 180
+  loop: "{{ artifact_cache_registry_mirrors | dict2items }}"
+  loop_control:
+    label: "{{ item.value.registry_host }}"
+  when: artifact_cache_state == 'absent'
+
+- name: Ensure artifact cache directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: >-
+    {{
+      [artifact_cache_site_dir, artifact_cache_data_root]
+      + (artifact_cache_registry_mirrors | dict2items | map(attribute='value.storage_path') | list)
+    }}
+  when: artifact_cache_state == 'present'
+
+- name: Render the artifact cache compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ artifact_cache_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: artifact_cache_state == 'present'
+
+- name: Pull the artifact cache registry image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ artifact_cache_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ artifact_cache_site_dir }}"
+  register: artifact_cache_pull
+  changed_when: >-
+    'Pulling' in artifact_cache_pull.stdout
+    or 'Downloaded newer image' in artifact_cache_pull.stdout
+    or 'Pull complete' in artifact_cache_pull.stdout
+  when: artifact_cache_state == 'present'
+
+- name: Start the artifact cache stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ artifact_cache_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ artifact_cache_site_dir }}"
+  register: artifact_cache_up
+  changed_when: >-
+    'Creating' in artifact_cache_up.stdout
+    or 'Recreating' in artifact_cache_up.stdout
+    or 'Starting' in artifact_cache_up.stdout
+  when: artifact_cache_state == 'present'
+
+- name: Wait for artifact cache listeners
+  ansible.builtin.wait_for:
+    host: "{{ artifact_cache_bind_host }}"
+    port: "{{ item.value.bind_port }}"
+    delay: 0
+    timeout: 180
+  loop: "{{ artifact_cache_registry_mirrors | dict2items }}"
+  loop_control:
+    label: "{{ item.value.registry_host }}"
+  when: artifact_cache_state == 'present'
+
+- name: Generate the artifact cache seed plan from repo catalogs
+  ansible.builtin.shell: >-
+    {{ ansible_playbook_python | quote }}
+    {{ artifact_cache_seed_script | quote }}
+    {% for catalog in artifact_cache_seed_catalogs %}
+    --catalog {{ catalog | quote }}
+    {% endfor %}
+    {% for mirror in artifact_cache_registry_mirrors.values() %}
+    --mirror {{ (mirror.registry_host ~ '=' ~ mirror.mirror_registry) | quote }}
+    {% endfor %}
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  register: artifact_cache_seed_plan_command
+  when:
+    - artifact_cache_state == 'present'
+    - artifact_cache_seed_enabled | bool
+
+- name: Parse the artifact cache seed plan
+  ansible.builtin.set_fact:
+    artifact_cache_seed_plan: "{{ artifact_cache_seed_plan_command.stdout | from_json }}"
+  when:
+    - artifact_cache_state == 'present'
+    - artifact_cache_seed_enabled | bool
+
+- name: Persist the artifact cache seed plan on the guest
+  ansible.builtin.copy:
+    content: "{{ artifact_cache_seed_plan_command.stdout }}\n"
+    dest: "{{ artifact_cache_seed_plan_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when:
+    - artifact_cache_state == 'present'
+    - artifact_cache_seed_enabled | bool
+
+- name: Warm the mirrored image set through the cache endpoints
+  ansible.builtin.command:
+    argv:
+      - docker
+      - pull
+      - "{{ item.mirror_ref }}"
+  loop: "{{ artifact_cache_seed_plan.seed_images }}"
+  loop_control:
+    label: "{{ item.mirror_ref }}"
+  register: artifact_cache_warm_pull
+  changed_when: >-
+    'Pull complete' in artifact_cache_warm_pull.stdout
+    or 'Downloaded newer image' in artifact_cache_warm_pull.stdout
+    or 'Status: Downloaded newer image' in artifact_cache_warm_pull.stdout
+  when:
+    - artifact_cache_state == 'present'
+    - artifact_cache_seed_enabled | bool
+    - (artifact_cache_seed_plan.seed_images | default([])) | length > 0
+
+- name: Verify artifact cache health probes
+  ansible.builtin.import_tasks: verify.yml
+  when: artifact_cache_state == 'present'

@@ -74,6 +74,9 @@ main() {
     if [[ ! -d "$REPO_ROOT/$role_dir" ]]; then
       continue
     fi
+    if ! find "$REPO_ROOT/$role_dir" -type f ! -name '.DS_Store' ! -name '._*' -print -quit | grep -q .; then
+      continue
+    fi
     if [[ ! -f "$REPO_ROOT/$role_dir/meta/argument_specs.yml" ]]; then
       echo "Missing meta/argument_specs.yml for ${role_dir#"$COLLECTION_ROLES_ROOT"/}" >&2
       missing=1

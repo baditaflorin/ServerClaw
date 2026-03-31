@@ -1,0 +1,22 @@
+# Purpose: Default PostgreSQL inputs for the Directus database and durable service token.
+# Use case: Loaded when converging the Directus PostgreSQL role or access-model seed tasks.
+# Inputs: Database names, deterministic role/policy IDs, and controller-local artifact paths.
+# Outputs: Supplies stable defaults for database creation and service-token seeding.
+# Idempotency: Fully idempotent because this file only declares desired defaults.
+# Dependencies: ADR 0165, ADR 0042, and ADR 0289.
+---
+directus_database_name: directus
+directus_database_user: directus
+directus_postgres_secret_dir: /etc/lv3/directus
+directus_postgres_password_file: "{{ directus_postgres_secret_dir }}/database-password"
+directus_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus
+directus_database_password_local_file: "{{ directus_local_artifact_dir }}/database-password.txt"
+directus_service_registry_token_local_file: "{{ directus_local_artifact_dir }}/service-registry-token.txt"
+directus_bootstrap_collection_name: service_registry
+directus_observer_role_id: 4b0fd2c2-596a-4e1f-bd0a-a9d8617c4c40
+directus_operator_role_id: 1e4a3bf6-1798-49dd-b8e3-1c129422e7df
+directus_observer_policy_id: 8d8d63fd-a556-4de9-b9de-98c2f46f6b6f
+directus_operator_policy_id: f3520470-3198-4c17-9c7f-fd8f296f99e3
+directus_service_registry_policy_id: c2d42df7-4880-47d9-9dde-4c6087336351
+directus_service_registry_user_id: 26844f0d-d6f5-4a91-a884-980bf4cd4d4a
+directus_service_registry_access_id: dcc9b2e4-f84a-4b74-abf0-01b2bb8194d1

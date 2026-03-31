@@ -1,0 +1,111 @@
+---
+changedetection_runtime_site_dir: /opt/changedetection
+changedetection_runtime_secret_dir: /etc/lv3/changedetection
+changedetection_runtime_compose_file: "{{ changedetection_runtime_site_dir }}/docker-compose.yml"
+changedetection_runtime_watch_catalog_file: "{{ changedetection_runtime_secret_dir }}/watch-catalog.json"
+changedetection_runtime_sync_report_file: "{{ changedetection_runtime_site_dir }}/watch-sync-report.json"
+changedetection_runtime_api_token_file: "{{ changedetection_runtime_secret_dir }}/api-token"
+changedetection_runtime_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/changedetection
+changedetection_runtime_api_token_local_file: "{{ changedetection_runtime_local_artifact_dir }}/api-token.txt"
+changedetection_runtime_sync_script: "{{ playbook_dir }}/../scripts/changedetection_sync.py"
+changedetection_runtime_image: "{{ container_image_catalog.images.changedetection_runtime.ref }}"
+changedetection_runtime_container_name: changedetection
+changedetection_runtime_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('changedetection', 'internal') }}"
+changedetection_runtime_internal_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('changedetection', 'internal') }}"
+changedetection_runtime_base_url: "{{ changedetection_runtime_internal_base_url }}"
+changedetection_runtime_recheck_minimum_seconds: 3600
+changedetection_runtime_volume_name: changedetection-datastore
+changedetection_runtime_ntfy_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/alertmanager-password.txt
+changedetection_runtime_ntfy_username: alertmanager
+changedetection_runtime_ntfy_topic: platform-alerts
+changedetection_runtime_ntfy_host: "{{ hostvars['proxmox_florin'].platform_guest_catalog.by_name['docker-runtime-lv3'].ipv4 }}"
+changedetection_runtime_ntfy_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('ntfy', 'internal') }}"
+changedetection_runtime_mattermost_webhooks_remote_file: /etc/lv3/mattermost/incoming-webhooks.json
+changedetection_runtime_notification_channels:
+  platform-ops:
+    kind: mattermost
+    webhook_key: ops
+  security-high:
+    kind: ntfy
+    priority: high
+changedetection_runtime_watch_groups:
+  - id: upstream-releases
+    title: upstream-releases
+    notification_channel: platform-ops
+    overrides_watch: true
+  - id: security-advisories
+    title: security-advisories
+    notification_channel: security-high
+    overrides_watch: true
+  - id: dependency-feeds
+    title: dependency-feeds
+    notification_channel: platform-ops
+    overrides_watch: true
+  - id: api-schemas
+    title: api-schemas
+    notification_channel: platform-ops
+    overrides_watch: true
+changedetection_runtime_watches:
+  - id: coolify-releases
+    title: Coolify Releases
+    url: https://github.com/coollabsio/coolify/releases.atom
+    group: upstream-releases
+    interval_hours: 6
+    notification_channel: platform-ops
+    reason: Detect upstream Coolify releases that may require image and runtime review.
+  - id: n8n-releases
+    title: n8n Releases
+    url: https://github.com/n8n-io/n8n/releases.atom
+    group: upstream-releases
+    interval_hours: 6
+    notification_channel: platform-ops
+    reason: Detect upstream n8n releases that may affect the governed connector lane.
+  - id: gitea-releases
+    title: Gitea Releases
+    url: https://github.com/go-gitea/gitea/releases.atom
+    group: upstream-releases
+    interval_hours: 6
+    notification_channel: platform-ops
+    reason: Detect upstream Gitea releases that may change repo-hosting and CI expectations.
+  - id: debian-security-index
+    title: Debian Security Advisories
+    url: https://www.debian.org/security/index.en.html
+    group: security-advisories
+    interval_hours: 1
+    notification_channel: security-high
+    reason: Detect Debian security advisories that may require urgent patching across guests.
+  - id: proxmox-security-advisories
+    title: Proxmox Security Advisories
+    url: https://forum.proxmox.com/forums/security-advisories.26/
+    group: security-advisories
+    interval_hours: 1
+    notification_channel: security-high
+    reason: Detect Proxmox security announcements that may affect the hypervisor control plane.
+  - id: uptime-kuma-docker-tags
+    title: Uptime Kuma Docker Tags
+    url: https://hub.docker.com/v2/repositories/louislam/uptime-kuma/tags?page_size=1&ordering=last_updated
+    group: dependency-feeds
+    interval_hours: 12
+    notification_channel: platform-ops
+    reason: Detect new Uptime Kuma container tags before the monitoring lane drifts from upstream.
+  - id: dozzle-docker-tags
+    title: Dozzle Docker Tags
+    url: https://hub.docker.com/v2/repositories/amir20/dozzle/tags?page_size=1&ordering=last_updated
+    group: dependency-feeds
+    interval_hours: 12
+    notification_channel: platform-ops
+    reason: Detect new Dozzle container tags used by the private log viewing surface.
+  - id: hetzner-dns-api-docs
+    title: Hetzner DNS API Docs
+    url: https://dns.hetzner.com/api-docs/
+    group: api-schemas
+    interval_hours: 24
+    notification_channel: platform-ops
+    reason: Detect provider-side DNS API documentation changes that may affect publication automation.
+  - id: hetzner-cloud-docs
+    title: Hetzner Cloud Docs
+    url: https://docs.hetzner.cloud/
+    group: api-schemas
+    interval_hours: 24
+    notification_channel: platform-ops
+    reason: Detect provider-side cloud API documentation changes that may affect future infrastructure automation.

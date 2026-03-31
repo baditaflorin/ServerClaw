@@ -1,0 +1,34 @@
+{% macro pagefind_filter(name, values) -%}
+  {% if values %}
+    {% if values is string %}
+      <span data-pagefind-filter="{{ name }}">{{ values }}</span>
+    {% else %}
+      {% for value in values %}
+        <span data-pagefind-filter="{{ name }}">{{ value }}</span>
+      {% endfor %}
+    {% endif %}
+  {% endif %}
+{%- endmacro %}
+
+<div class="lv3-pagefind-metadata" data-pagefind-ignore hidden aria-hidden="true">
+  {% if page.meta %}
+    {{ pagefind_filter("sensitivity", page.meta.sensitivity) }}
+    {{ pagefind_filter("section", page.meta.pagefind_section) }}
+    {{ pagefind_filter("audience", page.meta.pagefind_audience) }}
+    {{ pagefind_filter("service", page.meta.pagefind_service) }}
+    {{ pagefind_filter("capability", page.meta.pagefind_capability) }}
+    {{ pagefind_filter("tag", page.meta.tags) }}
+  {% endif %}
+</div>
+
+{% include "partials/tags.html" %}
+{% include "partials/actions.html" %}
+<div data-pagefind-body>
+  {% if "<h1" not in page.content %}
+    <h1>{{ page.title | d(config.site_name, true)}}</h1>
+  {% endif %}
+  {{ page.content }}
+</div>
+{% include "partials/source-file.html" %}
+{% include "partials/feedback.html" %}
+{% include "partials/comments.html" %}

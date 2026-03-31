@@ -19,7 +19,10 @@
         "workflow_ids": [
           "adr-0077-compose-runtime-secrets-live-apply",
           "deploy-uptime-kuma",
-          "install-proxmox"
+          "install-proxmox",
+          "live-apply-group",
+          "live-apply-service",
+          "live-apply-site"
         ]
       },
       "invariant": "The governed host or service converge path leaves repo-managed infrastructure aligned with inventory intent and any declared post-verify probe healthy.",
@@ -79,13 +82,16 @@
         "workflow_ids": [
           "close-maintenance-window",
           "coolify-manage",
+          "deploy-repo-profile",
           "database-dns",
           "open-maintenance-window",
           "plane-manage",
           "portainer-manage",
+          "route-dns-assertion-ledger",
           "semaphore-manage",
           "uptime-kuma-manage",
-          "uptime-robot-manage"
+          "uptime-robot-manage",
+          "woodpecker-manage"
         ]
       },
       "invariant": "The targeted external control surface reflects the declared repo state or approved operator request, and the affected service still matches its published contract.",

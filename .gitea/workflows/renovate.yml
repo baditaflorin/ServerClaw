@@ -1,0 +1,385 @@
+name: renovate
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * *"
+
+jobs:
+  renovate:
+    runs-on: self-hosted
+    timeout-minutes: 30
+    container:
+      image: registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+    env:
+      DOCKER_HOST: unix:///var/run/docker.sock
+      RENOVATE_HELPER_IMAGE: registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+      RENOVATE_IMAGE: registry.lv3.org/check-runner/renovate:42.76.4@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
+      RENOVATE_BOOTSTRAP_ENV: /var/run/lv3/renovate/renovate.env
+      RENOVATE_RUNTIME_ENV: .tmp/renovate.runtime.env
+      RENOVATE_RUNTIME_STATE: .tmp/renovate.runtime.json
+    steps:
+      - name: Checkout
+        env:
+          WORKFLOW_REPOSITORY: ${{ github.repository }}
+          WORKFLOW_SERVER_URL: ${{ github.server_url }}
+          WORKFLOW_REF: ${{ github.ref }}
+          WORKFLOW_SHA: ${{ github.sha }}
+          WORKFLOW_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$PWD"
+          git init .
+          if git remote get-url origin >/dev/null 2>&1; then
+            git remote set-url origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"
+          else
+            git remote add origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"
+          fi
+          git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch --depth=1 origin "${WORKFLOW_REF}"
+          git checkout --force "${WORKFLOW_SHA}"
+
+      - name: Prepare Renovate runtime files
+        run: mkdir -p .tmp
+
+      - name: Bootstrap Docker CLI and discover runner host paths
+        run: |
+          set -euo pipefail
+          resolve_docker_bin() {
+            for candidate in \
+              "$(cat .tmp/docker-bin.path 2>/dev/null || true)" \
+              "$(command -v docker 2>/dev/null || true)" \
+              "$(command -v docker.io 2>/dev/null || true)" \
+              /usr/bin/docker \
+              /usr/bin/docker.io \
+              /usr/local/bin/docker \
+              /usr/local/bin/docker.io; do
+              if [ -n "${candidate}" ] && [ -x "${candidate}" ]; then
+                docker_bin="${candidate}"
+                return 0
+              fi
+            done
+            docker_bin=""
+            return 1
+          }
+          ensure_docker_bin() {
+            if resolve_docker_bin; then
+              printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
+              return 0
+            fi
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update >&2
+            apt-get install -y --no-install-recommends docker-cli >&2
+            hash -r
+            if ! resolve_docker_bin; then
+              echo "Docker CLI is unavailable after bootstrap." >&2
+              return 1
+            fi
+            printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
+          }
+          ensure_docker_bin
+          discover_workspace_host_path() {
+            current_container_id="${HOSTNAME:-$(hostname)}"
+            cgroup_container_id="$(sed -n 's|.*docker[-/]\\([0-9a-f]\\{12,64\\}\\).*|\\1|p' /proc/self/cgroup | head -n1)"
+            named_container_id="$("${docker_bin}" ps --filter "name=WORKFLOW-renovate_JOB-renovate" -q | head -n1)"
+            for candidate in "${current_container_id}" "${cgroup_container_id}" "${named_container_id}"; do
+              [ -n "${candidate}" ] || continue
+              workspace_host_path="$("${docker_bin}" inspect "${candidate}" --format "{{range .Mounts}}{{if eq .Destination \"${PWD}\"}}{{.Source}}{{end}}{{end}}" 2>/dev/null || true)"
+              if [ -n "${workspace_host_path}" ]; then
+                printf '%s\n' "${workspace_host_path}"
+                return 0
+              fi
+            done
+            return 1
+          }
+          discover_bootstrap_host_dir() {
+            "${docker_bin}" ps -q | while read -r container_id; do
+              "${docker_bin}" inspect "${container_id}" --format "{{range .Mounts}}{{if eq .Destination \"/var/run/lv3/renovate\"}}{{.Source}}{{end}}{{end}}"
+            done | python3 -c 'import sys; lines=[line.strip() for line in sys.stdin if line.strip()]; print(lines[0] if lines else "", end="")'
+          }
+          workspace_host_path="$(discover_workspace_host_path)"
+          if [ -z "${workspace_host_path}" ]; then
+            echo "Unable to determine the hosted workspace source path." >&2
+            exit 1
+          fi
+          bootstrap_host_dir="$(discover_bootstrap_host_dir)"
+          if [ -z "${bootstrap_host_dir}" ]; then
+            echo "Unable to determine the Renovate bootstrap credential host path." >&2
+            exit 1
+          fi
+          printf '%s\n' "${workspace_host_path}" > .tmp/workspace-host.path
+          printf '%s\n' "${bootstrap_host_dir}" > .tmp/bootstrap-host.path
+
+      - name: Mint a short-lived Renovate token
+        run: |
+          set -euo pipefail
+          resolve_docker_bin() {
+            for candidate in \
+              "$(cat .tmp/docker-bin.path 2>/dev/null || true)" \
+              "$(command -v docker 2>/dev/null || true)" \
+              "$(command -v docker.io 2>/dev/null || true)" \
+              /usr/bin/docker \
+              /usr/bin/docker.io \
+              /usr/local/bin/docker \
+              /usr/local/bin/docker.io; do
+              if [ -n "${candidate}" ] && [ -x "${candidate}" ]; then
+                docker_bin="${candidate}"
+                return 0
+              fi
+            done
+            docker_bin=""
+            return 1
+          }
+          ensure_docker_bin() {
+            if resolve_docker_bin; then
+              printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
+              return 0
+            fi
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update >&2
+            apt-get install -y --no-install-recommends docker-cli >&2
+            hash -r
+            if ! resolve_docker_bin; then
+              echo "Docker CLI is unavailable after bootstrap." >&2
+              return 1
+            fi
+            printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
+          }
+          ensure_docker_bin
+          workspace_host_path="$(cat .tmp/workspace-host.path)"
+          bootstrap_host_dir="$(cat .tmp/bootstrap-host.path)"
+          [ -n "${workspace_host_path}" ] || {
+            echo "Workspace host path is empty." >&2
+            exit 1
+          }
+          [ -n "${bootstrap_host_dir}" ] || {
+            echo "Renovate bootstrap host path is empty." >&2
+            exit 1
+          }
+          "${docker_bin}" run --rm \
+            --network host \
+            -e RENOVATE_BOOTSTRAP_ENV \
+            -e RENOVATE_RUNTIME_STATE \
+            -e RENOVATE_RUNTIME_ENV \
+            -v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro" \
+            -v "${workspace_host_path}:/workspace" \
+            -w /workspace \
+            "${RENOVATE_HELPER_IMAGE}" \
+            sh -lc '
+              set -euo pipefail
+              set -a
+              . "${RENOVATE_BOOTSTRAP_ENV}"
+              set +a
+              python3 scripts/renovate_runtime_token.py create \
+                --state-file "${RENOVATE_RUNTIME_STATE}" \
+                --env-file "${RENOVATE_RUNTIME_ENV}"
+            '
+
+      - name: Run Renovate through the pinned Harbor image
+        run: |
+          set -euo pipefail
+          resolve_docker_bin() {
+            for candidate in \
+              "$(cat .tmp/docker-bin.path 2>/dev/null || true)" \
+              "$(command -v docker 2>/dev/null || true)" \
+              "$(command -v docker.io 2>/dev/null || true)" \
+              /usr/bin/docker \
+              /usr/bin/docker.io \
+              /usr/local/bin/docker \
+              /usr/local/bin/docker.io; do
+              if [ -n "${candidate}" ] && [ -x "${candidate}" ]; then
+                docker_bin="${candidate}"
+                return 0
+              fi
+            done
+            docker_bin=""
+            return 1
+          }
+          ensure_docker_bin() {
+            if resolve_docker_bin; then
+              printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
+              return 0
+            fi
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update >&2
+            apt-get install -y --no-install-recommends docker-cli >&2
+            hash -r
+            if ! resolve_docker_bin; then
+              echo "Docker CLI is unavailable after bootstrap." >&2
+              return 1
+            fi
+            printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
+          }
+          ensure_docker_bin
+          workspace_host_path="$(cat .tmp/workspace-host.path)"
+          [ -n "${workspace_host_path}" ] || {
+            echo "Workspace host path is empty." >&2
+            exit 1
+          }
+          set -a
+          . "${RENOVATE_RUNTIME_ENV}"
+          set +a
+          renovate_add_host_arg=""
+          renovate_clone_proxy_pid=""
+          cleanup_clone_proxy() {
+            if [ -n "${renovate_clone_proxy_pid}" ]; then
+              kill "${renovate_clone_proxy_pid}" 2>/dev/null || true
+              wait "${renovate_clone_proxy_pid}" 2>/dev/null || true
+            fi
+          }
+          trap cleanup_clone_proxy EXIT
+          if [ -n "${RENOVATE_GIT_CLONE_HOST:-}" ] \
+            && [ -n "${RENOVATE_GIT_CLONE_HOST_ADDRESS:-}" ] \
+            && [ -n "${RENOVATE_GIT_CLONE_HOST_PORT:-}" ] \
+            && [ -n "${RENOVATE_GIT_CLONE_TARGET_HOST:-}" ] \
+            && [ -n "${RENOVATE_GIT_CLONE_TARGET_PORT:-}" ]; then
+            renovate_add_host_arg="--add-host=${RENOVATE_GIT_CLONE_HOST}:${RENOVATE_GIT_CLONE_HOST_ADDRESS}"
+            python3 - <<'PY' &
+          import os
+          import socket
+          import socketserver
+          import threading
+
+          listen_host = os.environ["RENOVATE_GIT_CLONE_HOST_ADDRESS"]
+          listen_port = int(os.environ["RENOVATE_GIT_CLONE_HOST_PORT"])
+          target_host = os.environ["RENOVATE_GIT_CLONE_TARGET_HOST"]
+          target_port = int(os.environ["RENOVATE_GIT_CLONE_TARGET_PORT"])
+
+          def pump(source: socket.socket, destination: socket.socket) -> None:
+              try:
+                  while True:
+                      payload = source.recv(65536)
+                      if not payload:
+                          try:
+                              destination.shutdown(socket.SHUT_WR)
+                          except OSError:
+                              pass
+                          return
+                      destination.sendall(payload)
+              except OSError:
+                  try:
+                      destination.shutdown(socket.SHUT_WR)
+                  except OSError:
+                      pass
+
+
+          class Relay(socketserver.BaseRequestHandler):
+              def handle(self) -> None:
+                  with socket.create_connection((target_host, target_port), timeout=30) as upstream:
+                      upstream.settimeout(None)
+                      self.request.settimeout(None)
+                      client_to_upstream = threading.Thread(
+                          target=pump,
+                          args=(self.request, upstream),
+                          daemon=True,
+                      )
+                      upstream_to_client = threading.Thread(
+                          target=pump,
+                          args=(upstream, self.request),
+                          daemon=True,
+                      )
+                      client_to_upstream.start()
+                      upstream_to_client.start()
+                      client_to_upstream.join()
+                      upstream_to_client.join()
+
+
+          class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+              allow_reuse_address = True
+              daemon_threads = True
+
+
+          with ThreadedTCPServer((listen_host, listen_port), Relay) as server:
+              server.serve_forever()
+          PY
+            renovate_clone_proxy_pid=$!
+            python3 - <<'PY'
+          import os
+          import socket
+          import time
+
+          listen_host = os.environ["RENOVATE_GIT_CLONE_HOST_ADDRESS"]
+          listen_port = int(os.environ["RENOVATE_GIT_CLONE_HOST_PORT"])
+          deadline = time.time() + 10
+          while time.time() < deadline:
+              try:
+                  with socket.create_connection((listen_host, listen_port), timeout=1):
+                      raise SystemExit(0)
+              except OSError:
+                  time.sleep(0.2)
+          raise SystemExit("Renovate clone relay did not become ready.")
+          PY
+          fi
+          "${docker_bin}" pull "${RENOVATE_IMAGE}"
+          "${docker_bin}" run --rm \
+            --network host \
+            ${renovate_add_host_arg} \
+            -e LOG_LEVEL \
+            -e RENOVATE_PLATFORM \
+            -e RENOVATE_ENDPOINT \
+            -e RENOVATE_REPOSITORIES \
+            -e RENOVATE_TOKEN \
+            -e RENOVATE_GIT_AUTHOR \
+            -e RENOVATE_REQUIRE_CONFIG \
+            -e RENOVATE_ONBOARDING \
+            -e RENOVATE_X_STATIC_REPO_CONFIG_FILE=/workspace/renovate.json \
+            -v "${workspace_host_path}:/workspace" \
+            -w /workspace \
+            "${RENOVATE_IMAGE}" \
+            renovate
+
+      - name: Revoke the short-lived Renovate token
+        if: always()
+        run: |
+          set -euo pipefail
+          resolve_docker_bin() {
+            for candidate in \
+              "$(cat .tmp/docker-bin.path 2>/dev/null || true)" \
+              "$(command -v docker 2>/dev/null || true)" \
+              "$(command -v docker.io 2>/dev/null || true)" \
+              /usr/bin/docker \
+              /usr/bin/docker.io \
+              /usr/local/bin/docker \
+              /usr/local/bin/docker.io; do
+              if [ -n "${candidate}" ] && [ -x "${candidate}" ]; then
+                docker_bin="${candidate}"
+                return 0
+              fi
+            done
+            docker_bin=""
+            return 1
+          }
+          ensure_docker_bin() {
+            if resolve_docker_bin; then
+              printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
+              return 0
+            fi
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update >&2
+            apt-get install -y --no-install-recommends docker-cli >&2
+            hash -r
+            if ! resolve_docker_bin; then
+              return 1
+            fi
+            printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
+          }
+          workspace_host_path="$(cat .tmp/workspace-host.path 2>/dev/null || true)"
+          bootstrap_host_dir="$(cat .tmp/bootstrap-host.path 2>/dev/null || true)"
+          if [ -n "${workspace_host_path}" ] && [ -n "${bootstrap_host_dir}" ] && ensure_docker_bin; then
+            "${docker_bin}" run --rm \
+              --network host \
+              -e RENOVATE_BOOTSTRAP_ENV \
+              -e RENOVATE_RUNTIME_STATE \
+              -e RENOVATE_RUNTIME_ENV \
+              -v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro" \
+              -v "${workspace_host_path}:/workspace" \
+              -w /workspace \
+              "${RENOVATE_HELPER_IMAGE}" \
+              sh -lc '
+                set -euo pipefail
+                set -a
+                . "${RENOVATE_BOOTSTRAP_ENV}"
+                set +a
+                python3 scripts/renovate_runtime_token.py cleanup \
+                  --state-file "${RENOVATE_RUNTIME_STATE}"
+              '
+          fi

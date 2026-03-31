@@ -1,0 +1,12 @@
+a3330585cae1c40bbaf005ff3398c700e1896f4e6f8a808dc20979e03104ec51  /app/ops_portal/app.py
+ae1f8ee31f508cae618b8e8b272cb6727645db4fab46a52948ae2ea8192d14d2  /app/ops_portal/runtime_assurance.py
+d9094470c32e2f93c71ba5b3eb4f2df7737186ec4e9299adb660a83e0194e904  /app/search_fabric/__init__.py
+9a4d9b883b325d449c783be38b03db43bde374ac3593689f2f18fdb8bf4b904c  /srv/ops-portal/data/config/workflow-catalog.json
+86819853d16693a72c2d5119690043b66f8db825d43ce4a5b6873bb52437033b  /srv/ops-portal/data/config/persona-catalog.json
+1655:    @app.get("/partials/launcher", response_class=HTMLResponse)
+1656:    async def launcher_partial(request: Request, query: str = "") -> HTMLResponse:
+292:            health_entry_data = health_entry if isinstance(health_entry, dict) else {}
+route /partials/launcher ['GET']
+route /actions/launcher/favorites/{item_id} ['POST']
+route /actions/launcher/persona/{persona_id} ['POST']
+route /launcher/go/{item_id} ['GET']

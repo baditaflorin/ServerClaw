@@ -1,0 +1,61 @@
+---
+# Purpose: Declare the validated input contract for the repo_deploy_image_cache role.
+argument_specs:
+  main:
+    short_description: Converge the governed repo-deploy base-image warm plan, runtime receipt, and refresh timer on a deployment host.
+    options:
+      repo_deploy_image_cache_repo_root:
+        type: path
+        required: true
+        description:
+          - Controller-local repository root used to resolve the catalog and helper script.
+      repo_deploy_image_cache_catalog_path:
+        type: path
+        required: true
+        description:
+          - Controller-local JSON catalog of approved repo-deploy base-image bundles.
+      repo_deploy_image_cache_script_source:
+        type: path
+        required: true
+        description:
+          - Controller-local helper script that validates catalogs and warms image plans.
+      repo_deploy_image_cache_runtime_root:
+        type: path
+        required: true
+        description:
+          - Guest-local directory that stores the rendered plan and the most recent warm receipt.
+      repo_deploy_image_cache_catalog_runtime_path:
+        type: path
+        required: true
+        description:
+          - Guest-local copy of the approved base-image profile catalog.
+      repo_deploy_image_cache_plan_file:
+        type: path
+        required: true
+        description:
+          - Guest-local rendered warm plan consumed by the refresh service.
+      repo_deploy_image_cache_receipt_file:
+        type: path
+        required: true
+        description:
+          - Guest-local receipt recording which images were warmed and when.
+      repo_deploy_image_cache_script_path:
+        type: path
+        required: true
+        description:
+          - Guest-local installed helper path used by immediate warm and timer-driven refreshes.
+      repo_deploy_image_cache_service_name:
+        type: str
+        required: true
+        description:
+          - Systemd service name for the repo-deploy base-image warm refresh.
+      repo_deploy_image_cache_timer_name:
+        type: str
+        required: true
+        description:
+          - Systemd timer name for the repo-deploy base-image warm refresh.
+      repo_deploy_image_cache_on_calendar:
+        type: str
+        required: true
+        description:
+          - Systemd OnCalendar schedule used to refresh the warmed base-image set.

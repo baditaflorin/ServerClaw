@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T11:31:13Z",
+  "recorded_by": "codex",
+  "source_commit": "69fe90b21a2ccc76bee5d22aef4d79c32e656554",
+  "repo_version_context": "0.177.72",
+  "platform_version_context": "0.130.49",
+  "workflow_id": "adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply",
+  "adr": "0252",
+  "summary": "Re-verified ADR 0252 from the latest realistic origin/main baseline by replaying the route and DNS assertion ledger, the shared edge publication, and the private Vaultwarden path from repo version 0.177.72 while preserving the existing platform baseline 0.130.49 and recording the reduced latest-main audit drift set.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "lv3 apex",
+      "address": "https://lv3.org/"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "mail publication",
+      "address": "https://mail.lv3.org/"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "database private route",
+      "address": "100.64.0.1:5432"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "vault private route",
+      "address": "https://vault.lv3.org/alive"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0252 regression and branch-surface validation",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema --with jinja2 pytest -q tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py tests/test_hetzner_dns_record_role.py tests/test_hetzner_dns_records_role.py tests/test_proxmox_tailscale_proxy_role.py tests/test_vaultwarden_runtime_role.py tests/test_edge_publication_makefile.py tests/test_nginx_edge_publication_role.py tests/test_security_headers_audit.py` returned `59 passed in 3.02s` from the latest-main worktree, and `scripts/validate_repo.sh agent-standards` passed once the branch was registered in `workstreams.yaml`."
+    },
+    {
+      "check": "Latest-main route and DNS assertion reconcile",
+      "result": "pass",
+      "observed": "`make route-dns-assertion-ledger` completed successfully with `localhost : ok=56 changed=0 failed=0 skipped=24`, keeping `lv3.org` and `mail.lv3.org` on `65.108.75.123`, `database.lv3.org` and `vault.lv3.org` on `100.64.0.1`, and preserving the earlier removal of the stale apex `AAAA`, `autoconfig`, `notify`, and `www` records."
+    },
+    {
+      "check": "Latest-main shared edge publication replay",
+      "result": "pass",
+      "observed": "`make configure-edge-publication` completed successfully with `nginx-lv3 : ok=61 changed=3 failed=0 skipped=14`; the replay republished the generated static portals, re-rendered the shared NGINX edge configuration, refreshed the generated docs portal metadata, and re-verified the HTTP and HTTPS probe hostnames without expanding the certificate set further."
+    },
+    {
+      "check": "Latest-main Vaultwarden private-route replay",
+      "result": "pass",
+      "observed": "`make converge-vaultwarden` completed successfully with `docker-runtime-lv3 : ok=106 changed=5 failed=0 skipped=10`, `postgres-lv3 : ok=42 changed=0 failed=0 skipped=7`, and `proxmox_florin : ok=37 changed=4 failed=0 skipped=15`; the replay preserved the private Tailscale proxy, refreshed the guest firewall and Proxmox security state, and re-verified the Vaultwarden controller URL health check from the control machine."
+    },
+    {
+      "check": "Latest-main exposure audit and direct probes",
+      "result": "partial",
+      "observed": "`make subdomain-exposure-audit` wrote `receipts/subdomain-exposure-audit/20260329T112637Z.json` with only two remaining WARN findings for the pre-existing `git.lv3.org` DNS drift; direct checks then confirmed `dig +short lv3.org` => `65.108.75.123`, `dig +short mail.lv3.org` => `65.108.75.123`, `dig +short database.lv3.org` => `100.64.0.1`, `dig +short vault.lv3.org` => `100.64.0.1`, `curl -I https://mail.lv3.org` => `HTTP/2 200`, `curl -I https://lv3.org` => `HTTP/2 308`, `tailscale ping -c 3 100.64.0.1` => `pong`, `curl --http1.1 --insecure https://vault.lv3.org/alive` => `200`, and `curl --http1.1 --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt --resolve vault.lv3.org:443:100.64.0.1 https://vault.lv3.org/alive` => `200`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0252-route-and-dns-publication-assertion-ledger.md",
+    "docs/runbooks/configure-vaultwarden.md",
+    "docs/runbooks/subdomain-exposure-audit.md",
+    "docs/runbooks/subdomain-governance.md",
+    "docs/workstreams/ws-0252-live-apply.md",
+    "docs/workstreams/ws-0252-mainline-replay.md",
+    "inventory/group_vars/platform.yml",
+    "playbooks/route-dns-assertion-ledger.yml",
+    "receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply.json",
+    "receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply.json",
+    "receipts/subdomain-exposure-audit/20260329T112637Z.json",
+    "tests/test_edge_publication_makefile.py",
+    "tests/test_hetzner_dns_record_role.py",
+    "tests/test_hetzner_dns_records_role.py",
+    "tests/test_proxmox_tailscale_proxy_role.py",
+    "tests/test_subdomain_catalog.py",
+    "tests/test_subdomain_exposure_audit.py",
+    "tests/test_vaultwarden_runtime_role.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "ADR 0252 itself remains first implemented in repo version 0.177.68 on platform version 0.130.43; this receipt records the later exact-main replay on top of repo version 0.177.72 and the already-current platform baseline 0.130.49.",
+    "The current-main replay reduced the residual audit drift set from the earlier ADR 0252 receipt: the latest audit now reports only the pre-existing `git.lv3.org` DNS warnings, and no longer reports the unrelated `registry.lv3.org` finding that remained on the first branch-local apply.",
+    "Controller-side direct probing of `vault.lv3.org` is reliable when curl is forced to HTTP/1.1; the default libcurl HTTP/2 negotiation can return an empty reply or time out across the current Tailscale proxy even while Ansible `uri`, Python requests, and pinned-route HTTP/1.1 probes return 200, so the runbook now documents the HTTP/1.1 probe form."
+  ]
+}

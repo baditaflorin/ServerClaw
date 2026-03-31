@@ -43,6 +43,11 @@ argument_specs:
         required: false
         description:
           - Docker networking mode used by the Windmill server container.
+      windmill_worker_network_mode:
+        type: str
+        required: false
+        description:
+          - Docker networking mode used by the Windmill worker containers.
       windmill_server_requires_docker_nat:
         type: bool
         required: false
@@ -100,6 +105,11 @@ argument_specs:
         required: false
         description:
           - Controller-local repository root used to stage the worker checkout content.
+      windmill_seed_app_repo_root_local_dir:
+        type: path
+        required: false
+        description:
+          - Controller-local raw app source root used to stage repo-managed Windmill app bundles.
       windmill_worker_repo_checkout_host_path:
         type: path
         required: false

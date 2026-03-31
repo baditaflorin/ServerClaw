@@ -1,0 +1,28 @@
+services:
+  browser-runner:
+    image: {{ browser_runner_runtime_image_name }}:latest
+    container_name: {{ browser_runner_runtime_container_name }}
+    restart: unless-stopped
+    network_mode: {{ browser_runner_runtime_network_mode }}
+    command:
+      - uvicorn
+      - browser_runner_service:app
+      - --host
+      - "{{ browser_runner_runtime_bind_host }}"
+      - --port
+      - "{{ browser_runner_runtime_internal_port }}"
+    environment:
+      BROWSER_RUNNER_ARTIFACT_ROOT: /data/artifacts
+      BROWSER_RUNNER_DEFAULT_TIMEOUT_SECONDS: "{{ browser_runner_runtime_default_timeout_seconds }}"
+      BROWSER_RUNNER_MAX_TIMEOUT_SECONDS: "{{ browser_runner_runtime_max_timeout_seconds }}"
+    volumes:
+      - {{ browser_runner_runtime_data_dir }}:/data
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:{{ browser_runner_runtime_internal_port }}/healthz', timeout=5)
+      interval: 30s
+      timeout: 5s
+      retries: 3

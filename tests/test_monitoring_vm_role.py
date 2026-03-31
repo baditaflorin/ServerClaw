@@ -10,6 +10,7 @@ VERIFY_PATH = REPO_ROOT / "roles" / "monitoring_vm" / "tasks" / "verify.yml"
 PLATFORM_DASHBOARD_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "lv3-platform-overview.json.j2"
 MAIL_DASHBOARD_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "lv3-mail-platform.json.j2"
 VM_DASHBOARD_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "lv3-vm-detail.json.j2"
+LOKI_CANARY_SERVICE_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "loki-canary.service.j2"
 
 
 def load_tasks(path: Path) -> list[dict]:
@@ -78,12 +79,65 @@ def test_capacity_dashboard_is_copied_imported_and_verified() -> None:
     )
 
 
+def test_log_canary_dashboard_is_copied_imported_and_verified() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    main_tasks = load_tasks(TASKS_PATH)
+    verify_tasks = load_tasks(VERIFY_PATH)
+
+    copy_task = next(task for task in main_tasks if task.get("name") == "Copy LV3 log canary overview dashboard")
+    import_task = next(task for task in main_tasks if task.get("name") == "Import LV3 log canary dashboard into Grafana")
+    verify_task = next(task for task in verify_tasks if task.get("name") == "Verify LV3 log canary dashboard is provisioned")
+
+    assert defaults["monitoring_grafana_log_canary_dashboard_source_file"] == (
+        "{{ monitoring_repo_root }}/config/grafana/dashboards/log-canary-overview.json"
+    )
+    assert defaults["monitoring_grafana_log_canary_dashboard_uid"] == "lv3-log-canary-overview"
+    assert copy_task["ansible.builtin.copy"]["src"] == "{{ monitoring_grafana_log_canary_dashboard_source_file }}"
+    assert import_task["ansible.builtin.uri"]["body"]["folderUid"] == "{{ monitoring_grafana_folder_uid }}"
+    assert verify_task["ansible.builtin.uri"]["url"] == (
+        "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_log_canary_dashboard_uid }}"
+    )
+
+
 def test_prometheus_template_scrapes_netdata_parent_exporter() -> None:
     template = (REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "prometheus.yml.j2").read_text()
 
     assert "job_name: netdata" in template
     assert "/api/v1/allmetrics" in template
     assert "prometheus_all_hosts" in template
+
+
+def test_prometheus_template_scrapes_loki_canary_metrics() -> None:
+    template = (REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "prometheus.yml.j2").read_text()
+
+    assert "job_name: loki-canary" in template
+    assert "127.0.0.1:{{ monitoring_loki_canary_metrics_port }}" in template
+
+
+def test_loki_canary_service_template_uses_push_mode_with_default_stream_labels() -> None:
+    template = LOKI_CANARY_SERVICE_TEMPLATE.read_text()
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+
+    assert "-push" in template
+    assert "-metric-test-interval" in template
+    assert "-labels=" not in template
+    assert defaults["monitoring_loki_canary_log_selector"] == '{name="loki-canary",stream="stdout"}'
+
+
+def test_prometheus_template_scrapes_https_tls_blackbox_targets() -> None:
+    template = (REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "prometheus.yml.j2").read_text()
+
+    assert "job_name: https-tls-blackbox" in template
+    assert "{{ monitoring_prometheus_https_tls_targets_file }}" in template
+    assert "__param_hostname" in template
+
+
+def test_blackbox_template_defines_follow_redirect_tls_modules() -> None:
+    template = (REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "blackbox.yml.j2").read_text()
+
+    assert "http_2xx_follow_redirects" in template
+    assert "http_2xx_insecure_tls" in template
+    assert "http_2xx_follow_redirects_insecure_tls" in template
 
 
 def test_dashboard_templates_do_not_use_bare_jinja_null_literals() -> None:

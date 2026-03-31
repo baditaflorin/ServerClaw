@@ -28,11 +28,13 @@ def load_json(path: Path) -> dict[str, Any]:
 
 def build_repository_context(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
     return {
+        "build_server_config": load_json(repo_root / "config" / "build-server.json"),
         "command_catalog": load_json(repo_root / "config" / "command-catalog.json"),
         "workflow_catalog": load_json(repo_root / "config" / "workflow-catalog.json"),
         "service_catalog": load_json(repo_root / "config" / "service-capability-catalog.json"),
         "validation_gate": load_json(repo_root / "config" / "validation-gate.json"),
         "check_runner_manifest": load_json(repo_root / "config" / "check-runner-manifest.json"),
+        "validation_runner_contracts": load_json(repo_root / "config" / "validation-runner-contracts.json"),
     }
 
 

@@ -1,0 +1,170 @@
+{
+  "$schema": "docs/schema/runtime-assurance-matrix.schema.json",
+  "schema_version": "1.0.0",
+  "dimensions": {
+    "declared_runtime": {
+      "title": "Declared runtime witness",
+      "description": "Proof that the active service and environment binding resolves to a live runtime witness instead of only a catalog row."
+    },
+    "health": {
+      "title": "Health semantics",
+      "description": "Stage-appropriate startup, readiness, liveness, and degraded-state evidence as summarized by the current health composite."
+    },
+    "route": {
+      "title": "Route truth",
+      "description": "Proof that the declared publication or operator path matches the active hostname and environment."
+    },
+    "tls": {
+      "title": "TLS posture",
+      "description": "Proof that declared HTTPS surfaces negotiate successfully on the live path and still align with the publication contract."
+    },
+    "smoke": {
+      "title": "Smoke verification",
+      "description": "Recent human-meaningful smoke evidence from governed live-apply receipts or equivalent deployment verification."
+    },
+    "browser_journey": {
+      "title": "Browser journey",
+      "description": "Recent login, post-login, and logout evidence for browser-driven operator or human-facing surfaces."
+    },
+    "log_queryability": {
+      "title": "Log queryability",
+      "description": "Recent evidence that the service's logs reach the shared query surface or an approved equivalent."
+    }
+  },
+  "profiles": {
+    "private_service": {
+      "title": "Private service",
+      "description": "Private supporting service with no operator browser surface as a required stage contract.",
+      "dimension_classes": {
+        "declared_runtime": "required",
+        "health": "required",
+        "route": "n_a",
+        "tls": "n_a",
+        "smoke": "best_effort",
+        "browser_journey": "n_a",
+        "log_queryability": "best_effort"
+      }
+    },
+    "private_browser_surface": {
+      "title": "Private browser surface",
+      "description": "Private operator-facing browser surface that still needs recent smoke and login evidence even without public publication.",
+      "dimension_classes": {
+        "declared_runtime": "required",
+        "health": "required",
+        "route": "best_effort",
+        "tls": "best_effort",
+        "smoke": "required",
+        "browser_journey": "required",
+        "log_queryability": "best_effort"
+      }
+    },
+    "edge_informational_surface": {
+      "title": "Informational edge surface",
+      "description": "Published informational surface whose route and TLS posture are required while deeper smoke or browser proof remains best-effort.",
+      "dimension_classes": {
+        "declared_runtime": "required",
+        "health": "required",
+        "route": "required",
+        "tls": "required",
+        "smoke": "best_effort",
+        "browser_journey": "best_effort",
+        "log_queryability": "best_effort"
+      }
+    },
+    "edge_browser_surface": {
+      "title": "Edge browser surface",
+      "description": "Public or operator-facing browser surface that requires route, TLS, smoke, and browser-journey proof.",
+      "dimension_classes": {
+        "declared_runtime": "required",
+        "health": "required",
+        "route": "required",
+        "tls": "required",
+        "smoke": "required",
+        "browser_journey": "required",
+        "log_queryability": "best_effort"
+      }
+    },
+    "edge_api_surface": {
+      "title": "Edge API surface",
+      "description": "Published API surface that requires route, TLS, and smoke proof but not a browser journey.",
+      "dimension_classes": {
+        "declared_runtime": "required",
+        "health": "required",
+        "route": "required",
+        "tls": "required",
+        "smoke": "required",
+        "browser_journey": "n_a",
+        "log_queryability": "best_effort"
+      }
+    }
+  },
+  "default_profile_by_exposure": {
+    "edge-published": "edge_browser_surface",
+    "edge-static": "edge_informational_surface",
+    "informational-only": "edge_informational_surface",
+    "private-only": "private_service"
+  },
+  "service_overrides": {
+    "api_gateway": {
+      "profile": "edge_api_surface",
+      "notes": "The gateway is a published API rather than a browser workflow."
+    },
+    "headscale": {
+      "profile": "edge_api_surface",
+      "notes": "The published health and API surfaces matter more than a browser journey."
+    },
+    "backup_pbs": {
+      "profile": "private_browser_surface",
+      "notes": "PBS has a private operator web surface."
+    },
+    "gitea": {
+      "profile": "private_browser_surface",
+      "notes": "Gitea is a private browser-driven operator surface."
+    },
+    "mattermost": {
+      "profile": "private_browser_surface",
+      "notes": "Mattermost is a private browser-driven collaboration surface."
+    },
+    "netbox": {
+      "profile": "private_browser_surface",
+      "notes": "NetBox is a private operator browser surface."
+    },
+    "ntopng": {
+      "profile": "private_browser_surface",
+      "notes": "ntopng exposes a private browser UI."
+    },
+    "open_webui": {
+      "profile": "private_browser_surface",
+      "notes": "Open WebUI is a private browser workbench."
+    },
+    "portainer": {
+      "profile": "private_browser_surface",
+      "notes": "Portainer is a private browser runtime surface."
+    },
+    "searxng": {
+      "profile": "private_browser_surface",
+      "notes": "SearXNG is a private browser search surface."
+    },
+    "vaultwarden": {
+      "profile": "private_browser_surface",
+      "notes": "Vaultwarden is a private browser credential surface."
+    },
+    "windmill": {
+      "profile": "private_browser_surface",
+      "notes": "Windmill has a private browser operator surface."
+    },
+    "semaphore": {
+      "profile": "private_browser_surface",
+      "notes": "Semaphore is a private browser automation surface."
+    },
+    "coolify_apps": {
+      "profile": "edge_informational_surface",
+      "notes": "The wildcard ingress is shared infrastructure rather than one browser app."
+    }
+  },
+  "freshness_days_by_dimension": {
+    "smoke": 30,
+    "browser_journey": 30,
+    "log_queryability": 45
+  }
+}

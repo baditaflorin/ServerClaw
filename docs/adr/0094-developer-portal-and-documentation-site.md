@@ -85,7 +85,7 @@ Each service page template includes:
 # {{ service.name }}
 
 **Status**: {{ service.status }}
-**Published URL**: [{{ service.public_url }}]({{ service.public_url }})
+**Published URL**: `{{ service.public_url }}`
 **Internal URL**: `{{ service.internal_url }}`
 **VM**: {{ service.vm }}
 **Health probe**: `{{ service.health_probe.endpoint }}`
@@ -97,12 +97,12 @@ Each service page template includes:
 ## API
 
 {% if service.api_docs_url %}
-See [API reference]({{ service.api_docs_url }}).
+API reference: `{{ service.api_docs_url }}`
 {% endif %}
 
 ## Related ADR
 
-[ADR {{ service.adr }}](../architecture/decisions/{{ service.adr_slug }}.md)
+ADR {{ service.adr }} -> ../architecture/decisions/{{ service.adr_slug }}.md
 ```
 
 ### OpenAPI rendering

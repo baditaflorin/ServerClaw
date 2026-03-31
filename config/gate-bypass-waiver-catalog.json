@@ -1,0 +1,39 @@
+{
+  "$schema": "docs/schema/gate-bypass-waiver-catalog.schema.json",
+  "schema_version": "1.0.0",
+  "expiring_soon_days": 2,
+  "repeat_after_expiry": {
+    "warning_after_occurrences": 1,
+    "blocker_after_occurrences": 2
+  },
+  "reason_codes": {
+    "build_server_unreachable": {
+      "summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+      "max_expiry_days": 2,
+      "allowed_bypasses": [
+        "skip_remote_gate"
+      ]
+    },
+    "runner_image_pull_failure": {
+      "summary": "The gate runner images or their registry path could not be pulled even though the surrounding gate contract was otherwise healthy.",
+      "max_expiry_days": 2,
+      "allowed_bypasses": [
+        "skip_remote_gate"
+      ]
+    },
+    "controller_dependency_gap": {
+      "summary": "The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.",
+      "max_expiry_days": 3,
+      "allowed_bypasses": [
+        "skip_remote_gate"
+      ]
+    },
+    "emergency_hotfix": {
+      "summary": "A break-glass production fix required a governed push before the normal validation lane could be fully restored.",
+      "max_expiry_days": 1,
+      "allowed_bypasses": [
+        "skip_remote_gate"
+      ]
+    }
+  }
+}

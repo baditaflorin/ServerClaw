@@ -1,4 +1,25 @@
 ---
+# Purpose: Declare supported docker_runtime role inputs and validation metadata for managed Docker guests.
+# Use case: Evaluated by Ansible and repo validation when the docker_runtime role is invoked.
+#
+# Inputs (required):
+#   - docker_runtime_prereq_packages, docker_runtime_conflicting_packages, docker_runtime_engine_packages
+#   - docker_runtime_admin_users, docker_runtime_apt_key_url, docker_runtime_apt_keyring_path
+#   - docker_runtime_apt_repo_file, docker_runtime_apt_repo_uri
+#
+# Inputs (optional):
+#   - docker_runtime_* overrides for daemon config, bridge-chain timing, and publication assurance behavior.
+#
+# Outputs:
+#   - Argument validation rules for the docker_runtime role.
+#
+# Idempotency: Fully idempotent
+#              Argument specs define schema only and do not mutate host state.
+#
+# Dependencies:
+#   - ADR 0023: Docker runtime VM baseline.
+#   - ADR 0270: Docker publication self-healing and port-programming assertions.
+#   - Role: lv3.platform.docker_runtime - validated by this schema.
 argument_specs:
   main:
     short_description: Install and configure the Docker runtime on Debian guests.
@@ -27,6 +48,29 @@ argument_specs:
         required: true
         description:
           - Local users that should be added to the docker group.
+      docker_runtime_public_edge_ipv4:
+        type: str
+        required: false
+        description:
+          - Internal IPv4 for the shared public edge VM used for guest split-horizon host aliases.
+      docker_runtime_public_edge_host_aliases:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Public edge hostnames that should resolve internally to the shared edge VM from Docker guests.
+      docker_runtime_registry_mirrors:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Optional Docker registry mirror URLs applied to the daemon config.
+      docker_runtime_insecure_registries:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Optional host:port registries that Docker should treat as insecure HTTP endpoints.
       docker_runtime_apt_key_url:
         type: str
         required: true
@@ -57,3 +101,13 @@ argument_specs:
         required: false
         description:
           - Docker daemon configuration rendered into `/etc/docker/daemon.json`.
+      docker_runtime_publication_assurance_script_path:
+        type: path
+        required: false
+        description:
+          - Destination path for the repo-managed Docker publication assurance helper installed on managed Docker guests.
+      docker_runtime_publication_assurance_helper_source:
+        type: path
+        required: false
+        description:
+          - Controller-local source path for the repo-managed Docker publication assurance helper content.

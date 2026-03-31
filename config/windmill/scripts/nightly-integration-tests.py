@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 import subprocess
@@ -11,8 +12,6 @@ import sys
 import urllib.request
 from pathlib import Path
 from typing import Any
-
-from environment_catalog import environment_choices, primary_environment
 
 
 def post_json_webhook(url: str, payload: dict[str, Any]) -> None:
@@ -41,6 +40,15 @@ def maybe_read_secret_path(repo_root: Path, secret_id: str) -> str | None:
     return secret_path.read_text(encoding="utf-8").strip()
 
 
+def _load_environment_catalog(repo_root: Path):
+    scripts_dir = repo_root / "scripts"
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
+    import environment_catalog
+
+    return environment_catalog
+
+
 def build_summary(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
@@ -55,6 +63,10 @@ def execute_suite(repo_root: Path, environment: str, report_file: Path) -> dict[
     scripts_dir = repo_root / "scripts"
     if str(scripts_dir) not in sys.path:
         sys.path.insert(0, str(scripts_dir))
+
+    overrides = load_integration_env_overrides(repo_root)
+    for name, value in overrides.items():
+        os.environ.setdefault(name, value)
 
     import integration_suite
 
@@ -90,10 +102,27 @@ def execute_suite(repo_root: Path, environment: str, report_file: Path) -> dict[
         text=True,
         capture_output=True,
         check=False,
+        env={**os.environ, **overrides},
     )
     if report_file.exists():
         return json.loads(report_file.read_text(encoding="utf-8"))
     raise RuntimeError(completed.stderr.strip() or completed.stdout.strip() or "nightly integration suite failed")
+
+
+def load_integration_env_overrides(repo_root: Path) -> dict[str, str]:
+    helper_path = repo_root / "config" / "windmill" / "scripts" / "windmill_integration_env.py"
+    if not helper_path.exists():
+        return {}
+    spec = importlib.util.spec_from_file_location("lv3_windmill_integration_env", helper_path)
+    if spec is None or spec.loader is None:
+        return {}
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    resolver = getattr(module, "integration_env_overrides", None)
+    if not callable(resolver):
+        return {}
+    overrides = resolver(repo_root)
+    return overrides if isinstance(overrides, dict) else {}
 
 
 def publish_notifications(repo_root: Path, payload: dict[str, Any]) -> None:
@@ -143,14 +172,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--environment",
-        default=primary_environment(),
-        choices=environment_choices(),
+        default="",
         help="Environment selection forwarded to scripts/integration_suite.py.",
     )
     return parser
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server", environment: str = "production") -> dict[str, Any]:
+def main(repo_path: str = "/srv/proxmox_florin_server", environment: str = "") -> dict[str, Any]:
     repo_root = Path(repo_path)
     if not repo_root.exists():
         return {
@@ -159,8 +187,19 @@ def main(repo_path: str = "/srv/proxmox_florin_server", environment: str = "prod
             "expected_repo_path": str(repo_root),
         }
 
+    environment_catalog = _load_environment_catalog(repo_root)
+    effective_environment = environment.strip() or environment_catalog.primary_environment()
+    allowed_environments = set(environment_catalog.environment_choices())
+    if effective_environment not in allowed_environments:
+        return {
+            "status": "blocked",
+            "reason": "unsupported environment",
+            "environment": effective_environment,
+            "allowed_environments": sorted(allowed_environments),
+        }
+
     report_file = repo_root / ".local" / "integration-tests" / "nightly-last-run.json"
-    payload = execute_suite(repo_root, environment, report_file)
+    payload = execute_suite(repo_root, effective_environment, report_file)
     publish_notifications(repo_root, payload)
     return payload
 

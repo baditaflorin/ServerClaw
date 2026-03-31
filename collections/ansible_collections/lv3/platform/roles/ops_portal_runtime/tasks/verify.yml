@@ -19,6 +19,13 @@
       - ops_portal_verify_running.stdout_lines | select('equalto', ops_portal_container_name) | list | length == 1
     fail_msg: "Ops portal container is not running."
 
+- name: Wait for the ops portal listener
+  ansible.builtin.wait_for:
+    host: "{{ ops_portal_verify_address }}"
+    port: "{{ ops_portal_internal_port }}"
+    delay: 0
+    timeout: 180
+
 - name: Verify the ops portal health endpoint responds locally
   ansible.builtin.uri:
     url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/health"
@@ -26,6 +33,9 @@
     status_code: 200
   register: ops_portal_verify_health
   changed_when: false
+  retries: 20
+  delay: 3
+  until: ops_portal_verify_health.status == 200
 
 - name: Verify the ops portal root page renders locally
   ansible.builtin.uri:
@@ -34,3 +44,71 @@
     status_code: 200
   register: ops_portal_verify_root
   changed_when: false
+  retries: 20
+  delay: 3
+  until: ops_portal_verify_root.status == 200
+
+- name: Verify the runtime assurance scoreboard partial renders locally
+  ansible.builtin.uri:
+    url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/partials/overview"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: ops_portal_verify_overview
+  changed_when: false
+  retries: 18
+  delay: 5
+  until: ops_portal_verify_overview.status == 200
+
+- name: Assert the runtime assurance scoreboard is present
+  ansible.builtin.assert:
+    that:
+      - "'Runtime Assurance' in ops_portal_verify_overview.content"
+      - "'Scoreboard and rollup by active service and environment' in ops_portal_verify_overview.content"
+    fail_msg: "Ops portal overview rendered without the runtime assurance scoreboard."
+
+- name: Verify the application launcher partial renders locally
+  ansible.builtin.uri:
+    url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/partials/launcher"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: ops_portal_verify_launcher
+  changed_when: false
+  retries: 18
+  delay: 5
+  until: ops_portal_verify_launcher.status == 200
+
+- name: Assert the application launcher is present
+  ansible.builtin.assert:
+    that:
+      - "'Application Launcher' in ops_portal_verify_launcher.content"
+      - "'Search destinations, pin favorites, and reopen recent paths from one shared masthead control.' in ops_portal_verify_launcher.content"
+    fail_msg: "Ops portal launcher partial rendered without the expected launcher surface."
+
+- name: Verify the runtime assurance matrix partial renders locally
+  ansible.builtin.uri:
+    url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/partials/runtime-assurance"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: ops_portal_verify_runtime_assurance
+  changed_when: false
+  retries: 18
+  delay: 5
+  until: ops_portal_verify_runtime_assurance.status == 200
+
+- name: Assert the runtime assurance matrix panel is present
+  ansible.builtin.assert:
+    that:
+      - "'Bindings' in ops_portal_verify_runtime_assurance.content"
+      - "'Runbook' in ops_portal_verify_runtime_assurance.content or 'No active service/environment bindings' in ops_portal_verify_runtime_assurance.content"
+    fail_msg: "Ops portal runtime assurance matrix partial did not render the ADR 0244 view."
+
+- name: Assert the runtime assurance matrix panel is not degraded
+  ansible.builtin.assert:
+    that:
+      - "'Runtime assurance data is degraded:' not in ops_portal_verify_runtime_assurance.content"
+    fail_msg: >-
+      Ops portal runtime assurance matrix partial rendered with degraded live
+      gateway data instead of the authenticated runtime assurance view.

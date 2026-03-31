@@ -1,0 +1,3 @@
+dependency_graph_validation=pass
+dependency_diagram_check=pass
+generated_diagrams_check=pass

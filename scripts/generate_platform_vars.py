@@ -30,41 +30,64 @@ PORT_KEYS = (
     "monitoring_otlp_grpc_port",
     "monitoring_otlp_http_port",
     "netdata_port",
+    "mailpit_http_port",
+    "mailpit_smtp_port",
     "mail_platform_gateway_port",
     "ntfy_port",
+    "openfga_http_port",
+    "openfga_host_proxy_port",
     "openbao_http_port",
     "openbao_proxy_port",
     "semaphore_server_port",
     "semaphore_host_proxy_port",
     "windmill_server_port",
     "windmill_host_proxy_port",
+    "nomad_server_port",
+    "nomad_rpc_port",
+    "nomad_serf_port",
+    "nomad_host_proxy_port",
     "mattermost_server_port",
     "mattermost_host_proxy_port",
+    "matrix_synapse_port",
+    "matrix_synapse_host_proxy_port",
     "gitea_http_port",
     "gitea_host_proxy_port",
     "netbox_server_port",
     "netbox_host_proxy_port",
+    "gotenberg_port",
     "searxng_port",
     "searxng_host_proxy_port",
     "langfuse_port",
+    "plausible_port",
+    "flagsmith_port",
     "dify_port",
+    "changedetection_port",
+    "browser_runner_port",
     "outline_port",
+    "directus_port",
+    "jupyterhub_port",
     "dozzle_http_port",
     "dozzle_agent_port",
     "excalidraw_port",
     "excalidraw_room_port",
+    "woodpecker_http_port",
+    "woodpecker_host_proxy_port",
     "ollama_api_port",
     "n8n_port",
+    "nextcloud_port",
     "coolify_dashboard_port",
     "coolify_proxy_port",
+    "coolify_proxy_tls_port",
     "coolify_host_proxy_port",
     "open_webui_port",
     "open_webui_host_proxy_port",
+    "serverclaw_port",
     "api_gateway_internal_port",
     "platform_context_internal_port",
     "platform_context_host_proxy_port",
     "homepage_port",
     "ops_portal_port",
+    "harbor_port",
     "plane_port",
     "plane_host_proxy_port",
     "ntopng_http_port",
@@ -73,6 +96,8 @@ PORT_KEYS = (
     "portainer_host_proxy_port",
     "step_ca_api_port",
     "step_ca_proxy_port",
+    "tika_port",
+    "tesseract_ocr_port",
     "headscale_http_port",
     "vaultwarden_https_port",
     "headscale_http_port",
@@ -80,6 +105,19 @@ PORT_KEYS = (
 
 MANAGEMENT_IPV4_TOKEN = "{{ management_ipv4 }}"
 MANAGEMENT_TAILSCALE_IPV4_TOKEN = "{{ management_tailscale_ipv4 }}"
+SESSION_AUTHORITY_SHARED_LOGOUT_PATH = "/.well-known/lv3/session/logout"
+SESSION_AUTHORITY_SHARED_PROXY_CLEANUP_PATH = "/.well-known/lv3/session/proxy-logout"
+SESSION_AUTHORITY_SHARED_LOGGED_OUT_PATH = "/.well-known/lv3/session/logged-out"
+HOST_VAR_TEMPLATE_RE = re.compile(r"{{\s*([a-z0-9_]+(?:\.[a-z0-9_]+)*)\s*}}")
+HOST_SELF_TEMPLATE_RE = re.compile(
+    r"""{{\s*hostvars\[(?:'|")proxmox_florin(?:'|")\]\.([a-z0-9_]+(?:\.[a-z0-9_]+)*)\s*}}"""
+)
+PORT_ASSIGNMENT_TEMPLATE_RE = re.compile(
+    r"""{{\s*(?:hostvars\[(?:'|")proxmox_florin(?:'|")\]\.)?platform_port_assignments\.([a-z0-9_]+)\s*}}"""
+)
+GUEST_IPV4_TEMPLATE_RE = re.compile(
+    r"""{{\s*\(proxmox_guests\s+\|\s+selectattr\('name',\s+'equalto',\s+'([^']+)'\)\s+\|\s+map\(attribute='ipv4'\)\s+\|\s+first\)\s*}}"""
+)
 
 
 def yaml_dump(payload: Any) -> str:
@@ -121,6 +159,10 @@ def require_list(value: Any, path: str) -> list[Any]:
     return value
 
 
+def require_string_list(value: Any, path: str) -> list[str]:
+    return [require_string(item, f"{path}[{index}]") for index, item in enumerate(require_list(value, path))]
+
+
 def resolve_dns_target(target: str, host_vars: dict[str, Any]) -> str:
     if target == MANAGEMENT_IPV4_TOKEN:
         return require_string(host_vars.get("management_ipv4"), "host_vars.management_ipv4")
@@ -137,10 +179,14 @@ def resolve_dns_target(target: str, host_vars: dict[str, Any]) -> str:
 def resolve_host_var_template(value: Any, host_vars: dict[str, Any], path: str) -> Any:
     if not isinstance(value, str):
         return value
-    match = re.fullmatch(r"{{\s*([a-z0-9_]+(?:\.[a-z0-9_]+)*)\s*}}", value)
+    match = HOST_VAR_TEMPLATE_RE.fullmatch(value)
     if match is None:
         return value
-    keys = match.group(1).split(".")
+    return lookup_host_var_path(host_vars, match.group(1), path)
+
+
+def lookup_host_var_path(host_vars: dict[str, Any], dotted_path: str, path: str) -> Any:
+    keys = dotted_path.split(".")
     current: Any = host_vars
     traversed = []
     for key in keys:
@@ -149,6 +195,72 @@ def resolve_host_var_template(value: Any, host_vars: dict[str, Any], path: str) 
             raise ValueError(f"{path} references unknown host var {'.'.join(traversed)!r}")
         current = current[key]
     return current
+
+
+def render_known_templates_in_string(
+    value: str,
+    host_vars: dict[str, Any],
+    guest_ipv4_by_name: dict[str, str],
+    ports: dict[str, int],
+    path: str,
+) -> str:
+    def replace_host_self(match: re.Match[str]) -> str:
+        resolved = lookup_host_var_path(host_vars, match.group(1), path)
+        return str(resolved)
+
+    def replace_port_assignment(match: re.Match[str]) -> str:
+        port_key = match.group(1)
+        if port_key not in ports:
+            raise ValueError(f"{path} references unknown port assignment {port_key!r}")
+        return str(ports[port_key])
+
+    def replace_guest_ipv4(match: re.Match[str]) -> str:
+        guest_name = match.group(1)
+        if guest_name not in guest_ipv4_by_name:
+            raise ValueError(f"{path} references unknown proxmox guest {guest_name!r}")
+        return guest_ipv4_by_name[guest_name]
+
+    def replace_host_var(match: re.Match[str]) -> str:
+        resolved = lookup_host_var_path(host_vars, match.group(1), path)
+        return str(resolved)
+
+    rendered = value
+    previous = None
+    while rendered != previous:
+        previous = rendered
+        rendered = PORT_ASSIGNMENT_TEMPLATE_RE.sub(replace_port_assignment, rendered)
+        rendered = HOST_SELF_TEMPLATE_RE.sub(replace_host_self, rendered)
+        rendered = GUEST_IPV4_TEMPLATE_RE.sub(replace_guest_ipv4, rendered)
+        rendered = HOST_VAR_TEMPLATE_RE.sub(replace_host_var, rendered)
+    return rendered
+
+
+def render_known_templates(
+    value: Any,
+    host_vars: dict[str, Any],
+    guest_ipv4_by_name: dict[str, str],
+    ports: dict[str, int],
+    path: str,
+) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: render_known_templates(
+                item,
+                host_vars,
+                guest_ipv4_by_name,
+                ports,
+                f"{path}.{key}",
+            )
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [
+            render_known_templates(item, host_vars, guest_ipv4_by_name, ports, f"{path}[{index}]")
+            for index, item in enumerate(value)
+        ]
+    if isinstance(value, str):
+        return render_known_templates_in_string(value, host_vars, guest_ipv4_by_name, ports, path)
+    return value
 
 
 def extract_port(raw_url: str, path: str) -> int:
@@ -190,6 +302,35 @@ def build_dns_records(
     service_topology: dict[str, Any],
     host_vars: dict[str, Any],
 ) -> dict[str, list[dict[str, Any]]]:
+    def append_record(visibility: str, record: dict[str, Any]) -> None:
+        bucket = records.setdefault(visibility, [])
+        if record not in bucket:
+            bucket.append(record)
+
+    def managed_zone_name(service: dict[str, Any], path: str) -> str:
+        dns = require_mapping(service.get("dns"), f"{path}.dns")
+        public_hostname = require_string(service.get("public_hostname"), f"{path}.public_hostname")
+        dns_name = require_string(dns.get("name"), f"{path}.dns.name")
+        if dns_name == "@":
+            return public_hostname
+        prefix = f"{dns_name}."
+        if not public_hostname.startswith(prefix):
+            raise ValueError(
+                f"{path}.public_hostname must start with {prefix!r} so wildcard aliases can derive the zone name"
+            )
+        zone_name = public_hostname[len(prefix) :]
+        if not zone_name:
+            raise ValueError(f"{path}.public_hostname must include a managed DNS zone suffix")
+        return zone_name
+
+    def relative_record_name(fqdn: str, zone_name: str, path: str) -> str:
+        if fqdn == zone_name:
+            return "@"
+        suffix = f".{zone_name}"
+        if not fqdn.endswith(suffix):
+            raise ValueError(f"{path} must stay inside the managed DNS zone {zone_name}")
+        return fqdn[: -len(suffix)]
+
     records = {
         "public": [
             {
@@ -201,14 +342,13 @@ def build_dns_records(
         ],
         "tailnet": [],
     }
-    for service in service_topology.values():
+    for service_id, service in service_topology.items():
         dns = service.get("dns")
         if not dns or not dns.get("managed"):
             continue
         visibility = dns["visibility"]
-        if visibility not in records:
-            records[visibility] = []
-        records[visibility].append(
+        append_record(
+            visibility,
             {
                 "name": dns["name"],
                 "type": dns["type"],
@@ -216,10 +356,26 @@ def build_dns_records(
                 "ttl": dns["ttl"],
             }
         )
+        edge = require_mapping(service.get("edge", {}), f"service_topology.{service_id}.edge")
+        aliases = require_string_list(edge.get("aliases", []), f"service_topology.{service_id}.edge.aliases")
+        if visibility != "public" or not aliases:
+            continue
+        zone_name = managed_zone_name(service, f"service_topology.{service_id}")
+        for index, alias in enumerate(aliases):
+            append_record(
+                visibility,
+                {
+                    "name": relative_record_name(alias, zone_name, f"service_topology.{service_id}.edge.aliases[{index}]"),
+                    "type": dns["type"],
+                    "value": dns["target"],
+                    "ttl": dns["ttl"],
+                },
+            )
 
     for index, record in enumerate(host_vars.get("mail_platform_dns_records", [])):
         record = require_mapping(record, f"host_vars.mail_platform_dns_records[{index}]")
-        records["public"].append(
+        append_record(
+            "public",
             {
                 "name": require_string(record.get("name"), f"host_vars.mail_platform_dns_records[{index}].name"),
                 "type": require_string(record.get("type"), f"host_vars.mail_platform_dns_records[{index}].type"),
@@ -290,6 +446,12 @@ def build_service_urls(
         urls["controller"] = service_url("https", tailscale_ipv4, ports["step_ca_proxy_port"])
         port_map["internal"] = ports["step_ca_api_port"]
         port_map["controller"] = ports["step_ca_proxy_port"]
+    elif service_id == "tika":
+        urls["internal"] = service_url("http", private_ip, ports["tika_port"])
+        port_map["internal"] = ports["tika_port"]
+    elif service_id == "tesseract_ocr":
+        urls["internal"] = service_url("http", private_ip, ports["tesseract_ocr_port"])
+        port_map["internal"] = ports["tesseract_ocr_port"]
     elif service_id == "semaphore":
         urls["internal"] = service_url("http", private_ip, ports["semaphore_server_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["semaphore_host_proxy_port"])
@@ -300,11 +462,21 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["windmill_host_proxy_port"])
         port_map["internal"] = ports["windmill_server_port"]
         port_map["controller"] = ports["windmill_host_proxy_port"]
+    elif service_id == "nomad":
+        urls["internal"] = service_url("https", private_ip, ports["nomad_server_port"])
+        urls["controller"] = service_url("https", tailscale_ipv4, ports["nomad_host_proxy_port"])
+        port_map["internal"] = ports["nomad_server_port"]
+        port_map["controller"] = ports["nomad_host_proxy_port"]
     elif service_id == "mattermost":
         urls["internal"] = service_url("http", private_ip, ports["mattermost_server_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["mattermost_host_proxy_port"])
         port_map["internal"] = ports["mattermost_server_port"]
         port_map["controller"] = ports["mattermost_host_proxy_port"]
+    elif service_id == "matrix_synapse":
+        urls["internal"] = service_url("http", private_ip, ports["matrix_synapse_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["matrix_synapse_host_proxy_port"])
+        port_map["internal"] = ports["matrix_synapse_port"]
+        port_map["controller"] = ports["matrix_synapse_host_proxy_port"]
     elif service_id == "gitea":
         urls["internal"] = service_url("http", private_ip, ports["gitea_http_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["gitea_host_proxy_port"])
@@ -315,6 +487,9 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["netbox_host_proxy_port"])
         port_map["internal"] = ports["netbox_server_port"]
         port_map["controller"] = ports["netbox_host_proxy_port"]
+    elif service_id == "gotenberg":
+        urls["internal"] = service_url("http", private_ip, ports["gotenberg_port"])
+        port_map["internal"] = ports["gotenberg_port"]
     elif service_id == "searxng":
         public_hostname = service.get("public_hostname")
         urls["internal"] = service_url("http", private_ip, ports["searxng_port"])
@@ -329,14 +504,48 @@ def build_service_urls(
     elif service_id == "langfuse":
         urls["internal"] = service_url("http", private_ip, ports["langfuse_port"])
         port_map["internal"] = ports["langfuse_port"]
+    elif service_id == "flagsmith":
+        urls["internal"] = service_url("http", private_ip, ports["flagsmith_port"])
+        port_map["internal"] = ports["flagsmith_port"]
+    elif service_id == "plausible":
+        urls["internal"] = service_url("http", private_ip, ports["plausible_port"])
+        port_map["internal"] = ports["plausible_port"]
+    elif service_id == "mailpit":
+        urls["internal"] = service_url("http", private_ip, ports["mailpit_http_port"])
+        urls["smtp"] = service_url("smtp", private_ip, ports["mailpit_smtp_port"])
+        port_map["internal"] = ports["mailpit_http_port"]
+        port_map["smtp"] = ports["mailpit_smtp_port"]
     elif service_id == "dify":
         urls["internal"] = service_url("http", private_ip, ports["dify_port"])
         port_map["internal"] = ports["dify_port"]
+    elif service_id == "changedetection":
+        urls["internal"] = service_url("http", private_ip, ports["changedetection_port"])
+        port_map["internal"] = ports["changedetection_port"]
+    elif service_id == "browser_runner":
+        urls["internal"] = service_url("http", private_ip, ports["browser_runner_port"])
+        port_map["internal"] = ports["browser_runner_port"]
+    elif service_id == "outline":
+        urls["internal"] = service_url("http", private_ip, ports["outline_port"])
+        port_map["internal"] = ports["outline_port"]
+    elif service_id == "directus":
+        urls["internal"] = service_url("http", private_ip, ports["directus_port"])
+        port_map["internal"] = ports["directus_port"]
+    elif service_id == "jupyterhub":
+        urls["internal"] = service_url("http", private_ip, ports["jupyterhub_port"])
+        port_map["internal"] = ports["jupyterhub_port"]
+    elif service_id == "harbor":
+        urls["internal"] = service_url("http", private_ip, ports["harbor_port"])
+        port_map["internal"] = ports["harbor_port"]
     elif service_id == "plane":
         urls["internal"] = service_url("http", private_ip, ports["plane_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["plane_host_proxy_port"])
         port_map["internal"] = ports["plane_port"]
         port_map["controller"] = ports["plane_host_proxy_port"]
+    elif service_id == "woodpecker":
+        urls["internal"] = service_url("http", private_ip, ports["woodpecker_http_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["woodpecker_host_proxy_port"])
+        port_map["internal"] = ports["woodpecker_http_port"]
+        port_map["controller"] = ports["woodpecker_host_proxy_port"]
     elif service_id == "dozzle":
         urls["internal"] = service_url("http", private_ip, ports["dozzle_http_port"])
         port_map["internal"] = ports["dozzle_http_port"]
@@ -349,19 +558,25 @@ def build_service_urls(
     elif service_id == "n8n":
         urls["internal"] = service_url("http", private_ip, ports["n8n_port"])
         port_map["internal"] = ports["n8n_port"]
+    elif service_id == "nextcloud":
+        urls["internal"] = service_url("http", private_ip, ports["nextcloud_port"])
+        port_map["internal"] = ports["nextcloud_port"]
     elif service_id == "coolify":
         urls["internal"] = service_url("http", private_ip, ports["coolify_dashboard_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["coolify_host_proxy_port"])
         port_map["internal"] = ports["coolify_dashboard_port"]
         port_map["controller"] = ports["coolify_host_proxy_port"]
     elif service_id == "coolify_apps":
-        urls["internal"] = service_url("http", private_ip, ports["coolify_proxy_port"])
-        port_map["internal"] = ports["coolify_proxy_port"]
+        urls["internal"] = service_url("https", private_ip, ports["coolify_proxy_tls_port"])
+        port_map["internal"] = ports["coolify_proxy_tls_port"]
     elif service_id == "open_webui":
         urls["internal"] = service_url("http", private_ip, ports["open_webui_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["open_webui_host_proxy_port"])
         port_map["internal"] = ports["open_webui_port"]
         port_map["controller"] = ports["open_webui_host_proxy_port"]
+    elif service_id == "serverclaw":
+        urls["internal"] = service_url("http", private_ip, ports["serverclaw_port"])
+        port_map["internal"] = ports["serverclaw_port"]
     elif service_id == "api_gateway":
         urls["internal"] = service_url("http", private_ip, ports["api_gateway_internal_port"])
         port_map["internal"] = ports["api_gateway_internal_port"]
@@ -377,6 +592,11 @@ def build_service_urls(
         urls["controller"] = service_url("https", tailscale_ipv4, ports["openbao_proxy_port"])
         port_map["internal"] = ports["openbao_proxy_port"]
         port_map["controller"] = ports["openbao_proxy_port"]
+    elif service_id == "openfga":
+        urls["internal"] = service_url("http", private_ip, ports["openfga_http_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["openfga_host_proxy_port"])
+        port_map["internal"] = ports["openfga_http_port"]
+        port_map["controller"] = ports["openfga_host_proxy_port"]
     elif service_id == "platform_context_api":
         urls["internal"] = service_url("http", private_ip, ports["platform_context_internal_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["platform_context_host_proxy_port"])
@@ -491,6 +711,13 @@ def build_service_topology(
             service["edge"]["action_url"] = urls["controller"]
         if "access" in service and "controller" in urls:
             service["access"]["url"] = urls["controller"]
+        service = render_known_templates(
+            service,
+            host_vars,
+            guest_ipv4_by_name,
+            ports,
+            f"host_vars.lv3_service_topology.{service_id}",
+        )
 
         resolved[service_id] = service
     return resolved
@@ -539,6 +766,43 @@ def build_tcp_proxies(host_vars: dict[str, Any], ports: dict[str, int]) -> list[
     return resolved
 
 
+def build_platform_session_authority(service_topology: dict[str, Any]) -> dict[str, str]:
+    keycloak_service = require_mapping(
+        service_topology.get("keycloak"),
+        "platform_service_topology.keycloak",
+    )
+    ops_portal_service = require_mapping(
+        service_topology.get("ops_portal"),
+        "platform_service_topology.ops_portal",
+    )
+    keycloak_public_url = require_string(
+        require_mapping(keycloak_service.get("urls"), "platform_service_topology.keycloak.urls").get("public"),
+        "platform_service_topology.keycloak.urls.public",
+    )
+    ops_portal_public_url = require_string(
+        require_mapping(
+            ops_portal_service.get("urls"),
+            "platform_service_topology.ops_portal.urls",
+        ).get("public"),
+        "platform_service_topology.ops_portal.urls.public",
+    )
+    return {
+        "authority_hostname": require_string(
+            ops_portal_service.get("public_hostname"),
+            "platform_service_topology.ops_portal.public_hostname",
+        ),
+        "ops_portal_client_id": "ops-portal-oauth",
+        "keycloak_logout_url": f"{keycloak_public_url}/realms/lv3/protocol/openid-connect/logout",
+        "oauth2_proxy_sign_out_url": f"{ops_portal_public_url}/oauth2/sign_out",
+        "shared_logout_path": SESSION_AUTHORITY_SHARED_LOGOUT_PATH,
+        "shared_logout_url": f"{ops_portal_public_url}{SESSION_AUTHORITY_SHARED_LOGOUT_PATH}",
+        "shared_proxy_cleanup_path": SESSION_AUTHORITY_SHARED_PROXY_CLEANUP_PATH,
+        "shared_proxy_cleanup_url": f"{ops_portal_public_url}{SESSION_AUTHORITY_SHARED_PROXY_CLEANUP_PATH}",
+        "shared_logged_out_path": SESSION_AUTHORITY_SHARED_LOGGED_OUT_PATH,
+        "shared_logged_out_url": f"{ops_portal_public_url}{SESSION_AUTHORITY_SHARED_LOGGED_OUT_PATH}",
+    }
+
+
 def build_platform_vars(
     stack: dict[str, Any] | None = None,
     host_vars: dict[str, Any] | None = None,
@@ -550,18 +814,22 @@ def build_platform_vars(
     resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
     guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
     service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+    session_authority = build_platform_session_authority(service_topology)
     dns_records = build_dns_records(service_topology, host_vars)
     tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
     monitoring_service = service_topology["grafana"]
     mail_service = service_topology["mail_platform"]
     mattermost_service = service_topology["mattermost"]
+    matrix_synapse_service = service_topology["matrix_synapse"]
     gitea_service = service_topology["gitea"]
     netbox_service = service_topology["netbox"]
     open_webui_service = service_topology["open_webui"]
     plane_service = service_topology["plane"]
+    woodpecker_service = service_topology["woodpecker"]
     api_gateway_service = service_topology["api_gateway"]
     headscale_service = service_topology["headscale"]
     openbao_service = service_topology["openbao"]
+    openfga_service = service_topology["openfga"]
     platform_context_service = service_topology["platform_context_api"]
     portainer_service = service_topology["portainer"]
     vaultwarden_service = service_topology["vaultwarden"]
@@ -570,6 +838,7 @@ def build_platform_vars(
     semaphore_service = service_topology["semaphore"]
     uptime_kuma_service = service_topology["uptime_kuma"]
     windmill_service = service_topology["windmill"]
+    nomad_service = service_topology["nomad"]
     host_id = require_string(stack["desired_state"]["host_id"], "versions/stack.yaml.desired_state.host_id")
     postgres_ha = require_mapping(host_vars.get("postgres_ha"), "host_vars.postgres_ha")
     postgres_primary_inventory_host = require_string(postgres_ha.get("initial_primary"), "host_vars.postgres_ha.initial_primary")
@@ -650,6 +919,7 @@ def build_platform_vars(
         "platform_port_assignments": copy.deepcopy(resolved_ports),
         "platform_guest_catalog": guest_catalog,
         "platform_service_topology": service_topology,
+        "platform_session_authority": session_authority,
         "platform_dns_records": dns_records,
         "platform_management_allowed_tcp_ports": [
             resolved_ports["ntopng_proxy_port"],
@@ -657,12 +927,16 @@ def build_platform_vars(
             resolved_ports["netbox_host_proxy_port"],
             resolved_ports["step_ca_proxy_port"],
             resolved_ports["openbao_proxy_port"],
+            resolved_ports["openfga_host_proxy_port"],
             resolved_ports["semaphore_host_proxy_port"],
             resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
+            resolved_ports["nomad_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
             resolved_ports["plane_host_proxy_port"],
+            resolved_ports["woodpecker_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],
+            resolved_ports["matrix_synapse_host_proxy_port"],
             resolved_ports["platform_context_host_proxy_port"],
             resolved_ports["portainer_host_proxy_port"],
             443,
@@ -672,7 +946,22 @@ def build_platform_vars(
         "hetzner_dns_records": dns_records["public"],
         "platform_postgres_host": postgres_service["public_hostname"],
         "openbao_postgres_host": postgres_primary_ip,
+        "openbao_http_extra_bind_addresses": render_known_templates(
+            copy.deepcopy(
+                require_list(
+                    host_vars.get("openbao_http_extra_bind_addresses", []),
+                    "host_vars.openbao_http_extra_bind_addresses",
+                )
+            ),
+            host_vars,
+            guest_ipv4_by_name,
+            resolved_ports,
+            "host_vars.openbao_http_extra_bind_addresses",
+        ),
         "openbao_controller_url": openbao_service["urls"]["controller"],
+        "openfga_http_port": resolved_ports["openfga_http_port"],
+        "openfga_host_proxy_port": resolved_ports["openfga_host_proxy_port"],
+        "openfga_controller_url": openfga_service["urls"]["controller"],
         "semaphore_server_port": resolved_ports["semaphore_server_port"],
         "semaphore_host_proxy_port": resolved_ports["semaphore_host_proxy_port"],
         "semaphore_private_base_url": semaphore_service["urls"]["internal"],
@@ -685,6 +974,10 @@ def build_platform_vars(
         "plane_host_proxy_port": resolved_ports["plane_host_proxy_port"],
         "plane_private_base_url": plane_service["urls"]["internal"],
         "plane_controller_url": plane_service["urls"]["controller"],
+        "woodpecker_http_port": resolved_ports["woodpecker_http_port"],
+        "woodpecker_host_proxy_port": resolved_ports["woodpecker_host_proxy_port"],
+        "woodpecker_private_base_url": woodpecker_service["urls"]["internal"],
+        "woodpecker_controller_url": woodpecker_service["urls"]["controller"],
         "api_gateway_internal_port": resolved_ports["api_gateway_internal_port"],
         "api_gateway_public_url": api_gateway_service["urls"]["public"],
         "api_gateway_internal_url": api_gateway_service["urls"]["internal"],
@@ -697,6 +990,11 @@ def build_platform_vars(
         "mattermost_host_proxy_port": resolved_ports["mattermost_host_proxy_port"],
         "mattermost_private_base_url": mattermost_service["urls"]["internal"],
         "mattermost_controller_url": mattermost_service["urls"]["controller"],
+        "matrix_synapse_port": resolved_ports["matrix_synapse_port"],
+        "matrix_synapse_host_proxy_port": resolved_ports["matrix_synapse_host_proxy_port"],
+        "matrix_synapse_private_base_url": matrix_synapse_service["urls"]["internal"],
+        "matrix_synapse_controller_url": matrix_synapse_service["urls"]["controller"],
+        "matrix_synapse_public_url": matrix_synapse_service["urls"]["public"],
         "gitea_http_port": resolved_ports["gitea_http_port"],
         "gitea_host_proxy_port": resolved_ports["gitea_host_proxy_port"],
         "gitea_root_url": gitea_service["urls"].get("public", gitea_service["urls"]["controller"]),
@@ -704,7 +1002,7 @@ def build_platform_vars(
         "gitea_controller_url": gitea_service["urls"]["controller"],
         "platform_context_internal_port": resolved_ports["platform_context_internal_port"],
         "platform_context_host_proxy_port": resolved_ports["platform_context_host_proxy_port"],
-        "platform_context_private_url": platform_context_service["urls"]["internal"],
+        "platform_context_private_url": f"http://127.0.0.1:{resolved_ports['platform_context_internal_port']}",
         "platform_context_controller_url": platform_context_service["urls"]["controller"],
         "portainer_host_proxy_port": resolved_ports["portainer_host_proxy_port"],
         "portainer_controller_url": portainer_service["urls"]["controller"],
@@ -716,6 +1014,8 @@ def build_platform_vars(
         "step_ca_controller_url": step_ca_service["urls"]["controller"],
         "windmill_host_proxy_port": resolved_ports["windmill_host_proxy_port"],
         "windmill_controller_url": windmill_service["urls"]["controller"],
+        "nomad_host_proxy_port": resolved_ports["nomad_host_proxy_port"],
+        "nomad_controller_url": nomad_service["urls"]["controller"],
         "monitoring_loki_push_api_url": monitoring_service["urls"]["loki_push"],
         "proxmox_management_allowed_tcp_ports": [
             resolved_ports["ntopng_proxy_port"],
@@ -723,12 +1023,16 @@ def build_platform_vars(
             resolved_ports["netbox_host_proxy_port"],
             resolved_ports["step_ca_proxy_port"],
             resolved_ports["openbao_proxy_port"],
+            resolved_ports["openfga_host_proxy_port"],
             resolved_ports["semaphore_host_proxy_port"],
             resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
+            resolved_ports["nomad_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
             resolved_ports["plane_host_proxy_port"],
+            resolved_ports["woodpecker_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],
+            resolved_ports["matrix_synapse_host_proxy_port"],
             resolved_ports["platform_context_host_proxy_port"],
             resolved_ports["portainer_host_proxy_port"],
             443,

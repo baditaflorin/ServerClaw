@@ -1,0 +1,182 @@
+# Purpose: Create and maintain the PostgreSQL role, database, and durable service token used by Directus.
+# Use case: Run before the Directus runtime so the application and later access-model seed can rely on stable credentials.
+# Inputs: Database names, PostgreSQL secret paths, and controller-local artifact paths.
+# Outputs: A managed PostgreSQL role and database for Directus plus controller-local password and token artefacts.
+# Idempotency: Partially idempotent because it creates long-lived secret material only when missing and otherwise reconciles the database state in place.
+# Dependencies: ADR 0165, ADR 0042, and ADR 0289.
+---
+- name: Validate Directus PostgreSQL inputs
+  ansible.builtin.assert:
+    that:
+      - directus_database_name | length > 0
+      - directus_database_user | length > 0
+      - directus_postgres_secret_dir | length > 0
+      - directus_postgres_password_file | length > 0
+      - directus_database_password_local_file | length > 0
+      - directus_service_registry_token_local_file | length > 0
+    fail_msg: "directus_postgres requires database names and controller-local password/token paths."
+
+- name: Ensure the Directus PostgreSQL secret directory exists
+  ansible.builtin.file:
+    path: "{{ directus_postgres_secret_dir }}"
+    state: directory
+    owner: root
+    group: postgres
+    mode: "0750"
+
+- name: Ensure the local Directus artifact directory exists
+  ansible.builtin.file:
+    path: "{{ directus_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the Directus database password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ directus_database_password_local_file }}" ]; then
+      umask 077
+      openssl rand -hex 24 > "{{ directus_database_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: directus_postgres_password_generation
+  changed_when: "'changed' in directus_postgres_password_generation.stdout"
+  no_log: true
+
+- name: Generate the Directus service registry token
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ directus_service_registry_token_local_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ directus_service_registry_token_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: directus_service_registry_token_generation
+  changed_when: "'changed' in directus_service_registry_token_generation.stdout"
+  no_log: true
+
+- name: Read the Directus database password
+  ansible.builtin.slurp:
+    src: "{{ directus_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: directus_postgres_password_raw
+  no_log: true
+
+- name: Record the Directus database password
+  ansible.builtin.set_fact:
+    directus_database_password: "{{ directus_postgres_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Persist the Directus database password on the PostgreSQL member
+  ansible.builtin.copy:
+    dest: "{{ directus_postgres_password_file }}"
+    content: "{{ directus_database_password }}\n"
+    owner: root
+    group: postgres
+    mode: "0640"
+  no_log: true
+
+- name: Check whether the local PostgreSQL member is writable
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT CASE WHEN pg_is_in_recovery() THEN 0 ELSE 1 END"
+  register: directus_postgres_writable_check
+  changed_when: false
+
+- name: Check whether the Directus role already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_roles WHERE rolname = '{{ directus_database_user }}'"
+  register: directus_postgres_role_check
+  changed_when: false
+  when: directus_postgres_writable_check.stdout | trim == "1"
+
+- name: Create the Directus role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        CREATE ROLE {{ directus_database_user }} LOGIN
+        PASSWORD '{{ directus_database_password }}'
+  changed_when: true
+  no_log: true
+  when:
+    - directus_postgres_writable_check.stdout | trim == "1"
+    - directus_postgres_role_check.stdout != "1"
+
+- name: Ensure the Directus role password matches the managed secret
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER ROLE {{ directus_database_user }} PASSWORD '{{ directus_database_password }}'"
+  changed_when: false
+  no_log: true
+  when: directus_postgres_writable_check.stdout | trim == "1"
+
+- name: Check whether the Directus database already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_database WHERE datname = '{{ directus_database_name }}'"
+  register: directus_postgres_database_check
+  changed_when: false
+  when: directus_postgres_writable_check.stdout | trim == "1"
+
+- name: Create the Directus database
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "CREATE DATABASE {{ directus_database_name }} OWNER {{ directus_database_user }}"
+  changed_when: true
+  when:
+    - directus_postgres_writable_check.stdout | trim == "1"
+    - directus_postgres_database_check.stdout != "1"
+
+- name: Ensure the Directus database owner is correct
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER DATABASE {{ directus_database_name }} OWNER TO {{ directus_database_user }}"
+  changed_when: false
+  when: directus_postgres_writable_check.stdout | trim == "1"

@@ -1,13 +1,12 @@
-# Release 0.177.52
+# Release 0.177.111
 
-- Date: 2026-03-28
+- Date: 2026-03-31
 
 ## Summary
-- verifies ADR 0224 from the latest mainline by carrying the host-resident supervisor baseline into repo truth and re-proving that reconciliation, supervision, validation, and approval now run through server-resident platform surfaces
-- implemented ADR 0226 by installing the repo-managed systemd service, timer, and path baseline for host-resident control loops on proxmox_florin and verifying both manual and path-triggered reconcile passes
+- integrates ADR 0291 into main by replaying JupyterHub as the authenticated interactive notebook environment on the latest realistic origin/main baseline, preserving the verified notebooks.lv3.org, Keycloak, Ollama, platform-context, and smoke-user contract without inventing a new branch-local truth source
 
 ## Platform Impact
-- ADR 0224 and ADR 0226 are now carried in merged repository truth while the verified live platform version remains 0.130.42 because the exact-main replay re-proves the existing host-resident control model without introducing a newer platform contract
+- platform version remains 0.130.73 because ADR 0291 first became true on 0.130.71; this release integrates the rebased JupyterHub exact-main proof, validation fixes, and concurrent-worktree automation hardening onto main without introducing a new platform-version bump.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

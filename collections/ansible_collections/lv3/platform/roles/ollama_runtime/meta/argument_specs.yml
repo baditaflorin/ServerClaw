@@ -15,6 +15,9 @@ argument_specs:
       ollama_runtime_compose_file:
         type: path
         required: true
+      ollama_runtime_compose_project_name:
+        type: str
+        required: true
       ollama_runtime_container_name:
         type: str
         required: true

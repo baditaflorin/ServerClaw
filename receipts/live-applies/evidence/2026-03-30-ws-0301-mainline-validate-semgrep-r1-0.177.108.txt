@@ -1,0 +1,6 @@
+Semgrep SAST and secret-pattern validation
+Semgrep gate summary
+  repo: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0301-main-integration
+  source sha: 5987aa09ebbfa42cb62a66542daa0307b4c29e19
+  sarif: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0301-main-integration/receipts/sast/5987aa09ebbfa42cb62a66542daa0307b4c29e19.sarif.json
+  findings: error=0 warning=2 note=0 total=2

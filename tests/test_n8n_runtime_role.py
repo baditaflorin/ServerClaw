@@ -17,7 +17,12 @@ def load_tasks(path: Path) -> list[dict]:
 
 def test_runtime_defaults_pin_public_hostname_and_local_artifacts() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text())
-    assert defaults["n8n_port"] == "{{ platform_service_topology | platform_service_port('n8n', 'internal') }}"
+    assert defaults["n8n_network_mode"] == "host"
+    assert defaults["n8n_requires_docker_nat"] == "{{ n8n_network_mode != 'host' }}"
+    assert defaults["n8n_port"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('n8n', 'internal') }}"
+    assert defaults["n8n_internal_base_url"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('n8n', 'internal') }}"
+    assert defaults["n8n_public_base_url"] == "{{ hostvars['proxmox_florin'].platform_service_topology.n8n.urls.public }}"
+    assert defaults["n8n_public_hostname"] == "{{ hostvars['proxmox_florin'].platform_service_topology.n8n.public_hostname }}"
     assert defaults["n8n_database_host"] == "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
     assert defaults["n8n_owner_password_local_file"].endswith("/.local/n8n/owner-password.txt")
     assert defaults["n8n_encryption_key_local_file"].endswith("/.local/n8n/encryption-key.txt")
@@ -40,8 +45,10 @@ def test_runtime_uses_openbao_secret_injection_for_database_password_and_encrypt
     assert "N8N_ENCRYPTION_KEY" in template
 
 
-def test_compose_template_exposes_n8n_port_and_data_volume() -> None:
+def test_compose_template_uses_host_network_and_keeps_data_volume() -> None:
     template = COMPOSE_TEMPLATE.read_text()
+    assert "network_mode: {{ n8n_network_mode }}" in template
+    assert "{% if n8n_network_mode != 'host' %}" in template
     assert '"{{ n8n_port }}:5678"' in template
     assert "{{ n8n_data_dir }}:/home/node/.n8n" in template
 
@@ -76,7 +83,13 @@ def test_runtime_recovers_missing_docker_bridge_chains_before_startup() -> None:
 
     assert nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
     assert forward_check["ansible.builtin.command"]["argv"] == ["iptables", "-S", "DOCKER-FORWARD"]
-    assert restart["when"] == "n8n_docker_nat_chain_check.rc == 1 or n8n_docker_forward_chain_check.rc == 1"
+    assert nat_check["when"] == "n8n_requires_docker_nat | bool"
+    assert forward_check["when"] == "n8n_requires_docker_nat | bool"
+    assert restart["when"] == (
+        "n8n_requires_docker_nat | bool and (n8n_docker_nat_chain_check.rc == 1 or "
+        "n8n_docker_forward_chain_check.rc == 1)"
+    )
+    assert assert_task["when"] == "n8n_requires_docker_nat | bool"
     assert assert_task["ansible.builtin.assert"]["that"] == [
         "n8n_docker_nat_chain_recheck.rc == 0",
         "n8n_docker_forward_chain_recheck.rc == 0",
@@ -85,8 +98,12 @@ def test_runtime_recovers_missing_docker_bridge_chains_before_startup() -> None:
     start_task = next(task for task in startup["block"] if task.get("name") == "Start the n8n runtime")
     rescue_fact = next(task for task in startup["rescue"] if task.get("name") == "Flag Docker bridge-chain failures during n8n startup")
     retry_task = next(task for task in startup["rescue"] if task.get("name") == "Retry n8n startup after Docker bridge-chain recovery")
+    recheck_nat = next(task for task in tasks if task.get("name") == "Recheck the Docker nat chain before n8n startup")
+    recheck_forward = next(task for task in tasks if task.get("name") == "Recheck the Docker forward chain before n8n startup")
 
     assert start_task["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "--remove-orphans"]
     assert "No chain/target/match by that name" in rescue_fact["ansible.builtin.set_fact"]["n8n_docker_bridge_chain_missing"]
     assert "Unable to enable ACCEPT OUTGOING rule" in rescue_fact["ansible.builtin.set_fact"]["n8n_docker_bridge_chain_missing"]
+    assert recheck_nat["when"] == "n8n_requires_docker_nat | bool"
+    assert recheck_forward["when"] == "n8n_requires_docker_nat | bool"
     assert retry_task["when"] == "n8n_docker_bridge_chain_missing"

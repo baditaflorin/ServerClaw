@@ -1,0 +1,55 @@
+---
+# Playbook: changedetection.yml
+# Purpose: Converge the private Changedetection.io runtime on docker-runtime-lv3 and refresh its governed API gateway route.
+# Use case: Run when the Changedetection image, watch catalogue, firewall exposure, notification routing, or authenticated gateway route changes.
+#
+# Inputs (required):
+#   - env (str, required): Deployment environment selector used by the shared preflight helpers.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH path used by the shared scoped runner.
+#
+# Outputs:
+#   - A private Changedetection.io runtime on docker-runtime-lv3 with a named datastore volume, mirrored API token, and reconciled watches
+#   - API gateway config bundle refreshed so /v1/changedetection proxies to the private runtime
+#
+# Idempotency: Fully idempotent
+#              The runtime converge, gateway refresh, and API sync all re-run safely, and the verify step proves the desired watch catalogue is drift-free.
+#
+# Dependencies:
+#   - ADR 0280: Changedetection.io for external content and API change monitoring.
+#   - ADR 0092: Governs the authenticated API gateway route used for operator and automation access.
+#   - Requires: docker-runtime-lv3, Mattermost, and ntfy are already reachable through the governed jump path.
+#   - Role: changedetection_runtime — deploys the runtime and synchronizes the watch catalogue.
+#   - Role: lv3.platform.api_gateway_runtime — refreshes the governed gateway route bundle.
+#
+# Related ADRs: 0086, 0124, 0280
+# Related Runbooks: docs/runbooks/configure-changedetection.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+# =============================================================================
+
+- name: Converge Changedetection and refresh API gateway routing on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+  vars:
+    preflight_wait_for_connection: false
+  tags:
+    - tier-2
+    - observability
+    - service-changedetection
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.changedetection_runtime
+    - role: lv3.platform.api_gateway_runtime

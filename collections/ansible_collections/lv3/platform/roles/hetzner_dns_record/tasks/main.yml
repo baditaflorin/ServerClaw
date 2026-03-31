@@ -6,6 +6,7 @@
       - hetzner_dns_record_name | length > 0
       - hetzner_dns_record_type | length > 0
       - hetzner_dns_record_value | length > 0
+      - hetzner_dns_record_state in ['present', 'absent']
       - (lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim) | length > 0
     fail_msg: >-
       Set {{ hetzner_dns_api_token_env_var }} before running the Hetzner DNS record playbook.
@@ -104,50 +105,13 @@
             | list
           )
           if (hetzner_dns_record_value_match_regex | default('') | length > 0)
-          else dns_provider_boundary_exact_records
+          else (
+            dns_provider_boundary_same_name_type_records
+            if hetzner_dns_record_state == 'present'
+            else dns_provider_boundary_exact_records
+          )
         )
       }}
-
-- name: Create the canonical DNS record when absent
-  ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_url }}/records"
-    method: POST
-    headers:
-      Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
-    body_format: json
-    body:
-      zone_id: "{{ dns_provider_boundary_zone.provider_ref }}"
-      name: "{{ hetzner_dns_record_name }}"
-      type: "{{ hetzner_dns_record_type }}"
-      value: "{{ hetzner_dns_record_value }}"
-      ttl: "{{ hetzner_dns_record_ttl | int }}"
-    status_code:
-      - 200
-      - 201
-  when: dns_provider_boundary_matching_records | length == 0
-  changed_when: true
-  no_log: true
-
-- name: Update the canonical DNS record when drift is detected
-  ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_url }}/records/{{ dns_provider_boundary_matching_records[0].provider_ref }}"
-    method: PUT
-    headers:
-      Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
-    body_format: json
-    body:
-      zone_id: "{{ dns_provider_boundary_zone.provider_ref }}"
-      name: "{{ hetzner_dns_record_name }}"
-      type: "{{ hetzner_dns_record_type }}"
-      value: "{{ hetzner_dns_record_value }}"
-      ttl: "{{ hetzner_dns_record_ttl | int }}"
-    status_code: 200
-  when:
-    - dns_provider_boundary_matching_records | length == 1
-    - dns_provider_boundary_matching_records[0].record_value != hetzner_dns_record_value
-      or (dns_provider_boundary_matching_records[0].record_ttl | int) != (hetzner_dns_record_ttl | int)
-  changed_when: true
-  no_log: true
 
 - name: Assert that only one canonical DNS record match exists
   ansible.builtin.assert:
@@ -156,3 +120,183 @@
     fail_msg: >-
       Multiple Hetzner DNS records matched {{ hetzner_dns_record_name }} {{ hetzner_dns_record_type }}
       for managed identity {{ hetzner_dns_record_value_match_regex | default(hetzner_dns_record_value) }}.
+
+- name: Delete the canonical DNS record when it is retired
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_url }}/records/{{ dns_provider_boundary_matching_records[0].provider_ref }}"
+    method: DELETE
+    headers:
+      Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
+    status_code:
+      - 200
+      - 204
+      - 429
+      - 500
+      - 502
+      - 503
+      - 504
+  register: hetzner_dns_record_delete_response
+  when:
+    - hetzner_dns_record_state == 'absent'
+    - dns_provider_boundary_matching_records | length == 1
+  retries: 5
+  delay: 2
+  until:
+    - hetzner_dns_record_delete_response.status in [200, 204]
+    - (hetzner_dns_record_delete_response.json.error.code | default(0) | int) == 0
+  failed_when: false
+  changed_when: >-
+    hetzner_dns_record_delete_response.status in [200, 204]
+    and (hetzner_dns_record_delete_response.json.error.code | default(0) | int) == 0
+  no_log: true
+
+- name: Fail with provider details when DNS record deletion did not complete
+  ansible.builtin.fail:
+    msg: >-
+      Hetzner DNS did not delete {{ hetzner_dns_record_name }} {{ hetzner_dns_record_type }}
+      in zone {{ hetzner_dns_record_zone_name }}. HTTP
+      {{ hetzner_dns_record_delete_response.status | default('unknown') }}, provider
+      error {{ hetzner_dns_record_delete_response.json.error.code | default('none') }}:
+      {{
+        hetzner_dns_record_delete_response.json.error.message
+        | default('no provider message returned')
+      }}.
+      If this is the documented DNS Console brownout during migration, retry after
+      the brownout window or migrate the zone to Hetzner Console first.
+  when:
+    - hetzner_dns_record_state == 'absent'
+    - dns_provider_boundary_matching_records | length == 1
+    - not (
+        hetzner_dns_record_delete_response.status in [200, 204]
+        and (hetzner_dns_record_delete_response.json.error.code | default(0) | int) == 0
+      )
+
+- name: Create the canonical DNS record when absent
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_url }}/records"
+    method: POST
+    headers:
+      Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
+      Content-Type: application/json
+    body: >-
+      {{
+        {
+          "zone_id": dns_provider_boundary_zone.provider_ref,
+          "name": hetzner_dns_record_name,
+          "type": hetzner_dns_record_type,
+          "value": hetzner_dns_record_value,
+          "ttl": (hetzner_dns_record_ttl | int)
+        } | to_json
+      }}
+    return_content: true
+    status_code:
+      - 200
+      - 201
+      - 429
+      - 500
+      - 502
+      - 503
+      - 504
+  register: hetzner_dns_record_create_response
+  when:
+    - hetzner_dns_record_state == 'present'
+    - dns_provider_boundary_matching_records | length == 0
+  retries: 5
+  delay: 2
+  until:
+    - hetzner_dns_record_create_response.status in [200, 201]
+    - (hetzner_dns_record_create_response.json.error.code | default(0) | int) == 0
+    - (hetzner_dns_record_create_response.json.record.id | default('') | length) > 0
+  failed_when: false
+  changed_when: >-
+    hetzner_dns_record_create_response.status in [200, 201]
+    and (hetzner_dns_record_create_response.json.error.code | default(0) | int) == 0
+    and (hetzner_dns_record_create_response.json.record.id | default('') | length) > 0
+  no_log: true
+
+- name: Fail with provider details when DNS record creation did not complete
+  ansible.builtin.fail:
+    msg: >-
+      Hetzner DNS did not create {{ hetzner_dns_record_name }} {{ hetzner_dns_record_type }}
+      in zone {{ hetzner_dns_record_zone_name }} with value {{ hetzner_dns_record_value }}.
+      HTTP {{ hetzner_dns_record_create_response.status | default('unknown') }},
+      provider error {{ hetzner_dns_record_create_response.json.error.code | default('none') }}:
+      {{
+        hetzner_dns_record_create_response.json.error.message
+        | default('no provider message returned')
+      }}.
+      If this is the documented DNS Console brownout during migration, retry after
+      the brownout window or migrate the zone to Hetzner Console first.
+  when:
+    - hetzner_dns_record_state == 'present'
+    - dns_provider_boundary_matching_records | length == 0
+    - not (
+        hetzner_dns_record_create_response.status in [200, 201]
+        and (hetzner_dns_record_create_response.json.error.code | default(0) | int) == 0
+        and (hetzner_dns_record_create_response.json.record.id | default('') | length) > 0
+      )
+
+- name: Update the canonical DNS record when drift is detected
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_url }}/records/{{ dns_provider_boundary_matching_records[0].provider_ref }}"
+    method: PUT
+    headers:
+      Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
+      Content-Type: application/json
+    body: >-
+      {{
+        {
+          "zone_id": dns_provider_boundary_zone.provider_ref,
+          "name": hetzner_dns_record_name,
+          "type": hetzner_dns_record_type,
+          "value": hetzner_dns_record_value,
+          "ttl": (hetzner_dns_record_ttl | int)
+        } | to_json
+      }}
+    return_content: true
+    status_code:
+      - 200
+      - 429
+      - 500
+      - 502
+      - 503
+      - 504
+  register: hetzner_dns_record_update_response
+  when:
+    - hetzner_dns_record_state == 'present'
+    - dns_provider_boundary_matching_records | length == 1
+    - dns_provider_boundary_matching_records[0].record_value != hetzner_dns_record_value
+      or (dns_provider_boundary_matching_records[0].record_ttl | int) != (hetzner_dns_record_ttl | int)
+  retries: 5
+  delay: 2
+  until:
+    - hetzner_dns_record_update_response.status == 200
+    - (hetzner_dns_record_update_response.json.error.code | default(0) | int) == 0
+  failed_when: false
+  changed_when: >-
+    hetzner_dns_record_update_response.status == 200
+    and (hetzner_dns_record_update_response.json.error.code | default(0) | int) == 0
+  no_log: true
+
+- name: Fail with provider details when DNS record update did not complete
+  ansible.builtin.fail:
+    msg: >-
+      Hetzner DNS did not update {{ hetzner_dns_record_name }} {{ hetzner_dns_record_type }}
+      in zone {{ hetzner_dns_record_zone_name }} to value {{ hetzner_dns_record_value }}.
+      HTTP {{ hetzner_dns_record_update_response.status | default('unknown') }},
+      provider error {{ hetzner_dns_record_update_response.json.error.code | default('none') }}:
+      {{
+        hetzner_dns_record_update_response.json.error.message
+        | default('no provider message returned')
+      }}.
+      If this is the documented DNS Console brownout during migration, retry after
+      the brownout window or migrate the zone to Hetzner Console first.
+  when:
+    - hetzner_dns_record_state == 'present'
+    - dns_provider_boundary_matching_records | length == 1
+    - dns_provider_boundary_matching_records[0].record_value != hetzner_dns_record_value
+      or (dns_provider_boundary_matching_records[0].record_ttl | int) != (hetzner_dns_record_ttl | int)
+    - not (
+        hetzner_dns_record_update_response.status == 200
+        and (hetzner_dns_record_update_response.json.error.code | default(0) | int) == 0
+      )

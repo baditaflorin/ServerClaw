@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0226-host-control-loops-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_at": "2026-03-28T21:25:04Z",
+  "recorded_by": "codex",
+  "source_commit": "5e750cc6e97a6d05f0d1cca10c78118d9908a7c5",
+  "repo_version_context": "0.177.51",
+  "platform_version_context": "0.130.42",
+  "workflow_id": "adr-0226-host-control-loops-mainline-live-apply",
+  "adr": "0226",
+  "summary": "Integrated ADR 0226 on top of repo release 0.177.51 by replaying `make configure-host-control-loops` from the latest origin/main merged candidate, confirming the host-resident systemd service, timer, and path units stayed idempotent, and re-verifying both manual and path-triggered reconcile runs end to end on proxmox_florin.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "systemd_unit",
+      "name": "lv3-host-control-loop-reconcile.service"
+    },
+    {
+      "kind": "systemd_unit",
+      "name": "lv3-host-control-loop-reconcile.timer"
+    },
+    {
+      "kind": "systemd_unit",
+      "name": "lv3-host-control-loop-reconcile.path"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Merged-main workflow contract and regression slice",
+      "result": "pass",
+      "observed": "`make workflow-info WORKFLOW=configure-host-control-loops` reported the expected ADR 0226 host-live workflow contract, and `uv run --with pytest pytest -q tests/test_proxmox_host_control_loops_role.py` returned `3 passed in 0.05s` on the latest origin/main merged candidate."
+    },
+    {
+      "check": "Merged-main-equivalent host replay",
+      "result": "pass",
+      "observed": "`make configure-host-control-loops` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0226-main-merge` with final recap `proxmox_florin ok=33 changed=0 failed=0`, proving the repo-managed host control-loop baseline remained idempotent after rebasing onto the latest origin/main baseline."
+    },
+    {
+      "check": "Live systemd state after merged-main replay",
+      "result": "pass",
+      "observed": "`systemctl show` on `proxmox_florin` reported `lv3-host-control-loop-reconcile.service Result=success ActiveState=inactive SubState=dead UnitFileState=static`, the timer as `active/waiting` with `NextElapseUSecRealtime=Sat 2026-03-28 22:30:59 CET` and `LastTriggerUSec=Sat 2026-03-28 22:01:21 CET`, and the path unit as `active/waiting` with `Triggers=lv3-host-control-loop-reconcile.service`."
+    },
+    {
+      "check": "Explicit one-shot reconcile replay from the integrated candidate",
+      "result": "pass",
+      "observed": "`sudo systemctl start lv3-host-control-loop-reconcile.service` recorded `trigger: scheduled_or_manual` at `2026-03-28T21:24:49Z` with `history_path: /var/lib/lv3-host-control-loops/runs/20260328T212449Z.json`."
+    },
+    {
+      "check": "Path-triggered reconcile replay from the integrated candidate",
+      "result": "pass",
+      "observed": "Writing request `{\"reason\":\"ws-0226-main-merge-20260328T2125Z\"}` to `/var/lib/lv3-host-control-loops/requests/reconcile.request` was consumed immediately; `latest.json` recorded `trigger: path_request` at `2026-03-28T21:25:04Z` with `history_path: /var/lib/lv3-host-control-loops/runs/20260328T212504Z.json`, and the journal showed a clean start and finish at `22:25:04 CET`."
+    }
+  ],
+  "evidence_refs": [
+    "Makefile",
+    "config/workflow-catalog.json",
+    "config/command-catalog.json",
+    "playbooks/proxmox-install.yml",
+    "collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/README.md",
+    "collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/templates/lv3-host-control-loop-reconcile.service.j2",
+    "docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md",
+    "docs/runbooks/configure-host-control-loops.md",
+    "docs/workstreams/ws-0226-live-apply.md",
+    "docs/workstreams/ws-0226-main-merge.md",
+    "receipts/live-applies/2026-03-28-adr-0226-host-control-loops-live-apply.json",
+    "receipts/live-applies/2026-03-28-adr-0226-host-control-loops-mainline-live-apply.json",
+    "tests/test_proxmox_host_control_loops_role.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The earlier branch-local live-apply receipt remains preserved as the first isolated-worktree replay, but this latest-main merged receipt is the canonical source for the release and platform bump that follow from the current integration branch.",
+    "The earlier oneshot contract repair remains effective on the merged-main candidate: the replay stayed idempotent with `changed=0`, the manual start returned `trigger: scheduled_or_manual`, and the path-triggered request executed cleanly without returning to `start-limit-hit`.",
+    "The integrated release step that follows this receipt updates `VERSION`, `RELEASE.md`, `changelog.md`, `docs/release-notes/*`, `README.md`, `build/platform-manifest.json`, `versions/stack.yaml`, and the workstream metadata to record ADR 0226 in repo version 0.177.52 and platform version 0.130.42."
+  ]
+}

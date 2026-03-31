@@ -49,15 +49,54 @@
 - name: Flush Proxmox Tailscale proxy systemd handlers
   ansible.builtin.meta: flush_handlers
 
-- name: Enable and start Proxmox Tailscale proxy sockets
+- name: Read current Proxmox Tailscale proxy unit states
+  ansible.builtin.shell: |
+    set -euo pipefail
+    socket_state="$(systemctl show -p ActiveState --value lv3-tailscale-proxy-{{ item.name }}.socket)"
+    service_state="$(systemctl show -p ActiveState --value lv3-tailscale-proxy-{{ item.name }}.service)"
+    printf 'socket=%s\nservice=%s\n' "$socket_state" "$service_state"
+  args:
+    executable: /bin/bash
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: proxmox_tailscale_proxy_unit_states
+  changed_when: false
+
+- name: Enable Proxmox Tailscale proxy sockets
   ansible.builtin.systemd:
     name: "lv3-tailscale-proxy-{{ item.name }}.socket"
     enabled: true
-    state: started
   loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
   loop_control:
     label: "{{ item.name }}"
 
+- name: Start Proxmox Tailscale proxy sockets when the listener is not already owned by an active proxy service
+  ansible.builtin.systemd:
+    name: "lv3-tailscale-proxy-{{ item.name }}.socket"
+    state: started
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  vars:
+    proxmox_tailscale_proxy_unit_state_lines: >-
+      {{
+        proxmox_tailscale_proxy_unit_states.results
+        | selectattr('item.name', 'equalto', item.name)
+        | map(attribute='stdout_lines')
+        | first
+        | default([])
+      }}
+    proxmox_tailscale_service_active_state: >-
+      {{
+        proxmox_tailscale_proxy_unit_state_lines
+        | select('match', '^service=')
+        | map('regex_replace', '^service=', '')
+        | list
+        | first
+        | default('')
+      }}
+  when: proxmox_tailscale_service_active_state != 'active'
 - name: Read active Proxmox Tailscale proxy service command lines
   ansible.builtin.shell: |
     set -euo pipefail
@@ -74,14 +113,24 @@
   register: proxmox_tailscale_proxy_cmdlines
   changed_when: false
 
-- name: Restart active Proxmox Tailscale proxy services when their unit or upstream changes
+- name: Stop active Proxmox Tailscale proxy services before re-arming changed proxy listeners
   ansible.builtin.systemd:
     name: "lv3-tailscale-proxy-{{ item.name }}.service"
-    state: restarted
+    state: stopped
   loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
   loop_control:
     label: "{{ item.name }}"
   vars:
+    proxmox_tailscale_socket_unit_changed: >-
+      {{
+        (
+          proxmox_tailscale_proxy_sockets.results
+          | selectattr('item.name', 'equalto', item.name)
+          | map(attribute='changed')
+          | first
+          | default(false)
+        ) | bool
+      }}
     proxmox_tailscale_service_unit_changed: >-
       {{
         (
@@ -100,9 +149,261 @@
         | first
         | default('')
       }}
+    proxmox_tailscale_restart_required: >-
+      {{
+        proxmox_tailscale_socket_unit_changed
+        or proxmox_tailscale_service_unit_changed
+        or (
+          proxmox_tailscale_running_cmdline | length > 0
+          and (item.upstream_host ~ ':' ~ (item.upstream_port | string)) not in proxmox_tailscale_running_cmdline
+        )
+      }}
+    proxmox_tailscale_proxy_unit_state_lines: >-
+      {{
+        proxmox_tailscale_proxy_unit_states.results
+        | selectattr('item.name', 'equalto', item.name)
+        | map(attribute='stdout_lines')
+        | first
+        | default([])
+      }}
+    proxmox_tailscale_socket_active_state: >-
+      {{
+        proxmox_tailscale_proxy_unit_state_lines
+        | select('match', '^socket=')
+        | map('regex_replace', '^socket=', '')
+        | list
+        | first
+        | default('')
+      }}
+    proxmox_tailscale_service_active_state: >-
+      {{
+        proxmox_tailscale_proxy_unit_state_lines
+        | select('match', '^service=')
+        | map('regex_replace', '^service=', '')
+        | list
+        | first
+        | default('')
+      }}
+  when:
+    - proxmox_tailscale_restart_required
+    - proxmox_tailscale_service_active_state == 'active'
+    - proxmox_tailscale_socket_active_state != 'active'
+
+- name: Start Proxmox Tailscale proxy sockets after re-arming changed proxy listeners
+  ansible.builtin.systemd:
+    name: "lv3-tailscale-proxy-{{ item.name }}.socket"
+    state: started
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  vars:
+    proxmox_tailscale_socket_unit_changed: >-
+      {{
+        (
+          proxmox_tailscale_proxy_sockets.results
+          | selectattr('item.name', 'equalto', item.name)
+          | map(attribute='changed')
+          | first
+          | default(false)
+        ) | bool
+      }}
+    proxmox_tailscale_service_unit_changed: >-
+      {{
+        (
+          proxmox_tailscale_proxy_services.results
+          | selectattr('item.name', 'equalto', item.name)
+          | map(attribute='changed')
+          | first
+          | default(false)
+        ) | bool
+      }}
+    proxmox_tailscale_running_cmdline: >-
+      {{
+        proxmox_tailscale_proxy_cmdlines.results
+        | selectattr('item.name', 'equalto', item.name)
+        | map(attribute='stdout')
+        | first
+        | default('')
+      }}
+    proxmox_tailscale_restart_required: >-
+      {{
+        proxmox_tailscale_socket_unit_changed
+        or proxmox_tailscale_service_unit_changed
+        or (
+          proxmox_tailscale_running_cmdline | length > 0
+          and (item.upstream_host ~ ':' ~ (item.upstream_port | string)) not in proxmox_tailscale_running_cmdline
+        )
+      }}
+    proxmox_tailscale_proxy_unit_state_lines: >-
+      {{
+        proxmox_tailscale_proxy_unit_states.results
+        | selectattr('item.name', 'equalto', item.name)
+        | map(attribute='stdout_lines')
+        | first
+        | default([])
+      }}
+    proxmox_tailscale_socket_active_state: >-
+      {{
+        proxmox_tailscale_proxy_unit_state_lines
+        | select('match', '^socket=')
+        | map('regex_replace', '^socket=', '')
+        | list
+        | first
+        | default('')
+      }}
+    proxmox_tailscale_service_active_state: >-
+      {{
+        proxmox_tailscale_proxy_unit_state_lines
+        | select('match', '^service=')
+        | map('regex_replace', '^service=', '')
+        | list
+        | first
+        | default('')
+      }}
+  when:
+    - proxmox_tailscale_restart_required
+    - proxmox_tailscale_service_active_state == 'active'
+    - proxmox_tailscale_socket_active_state != 'active'
+
+- name: Read effective Proxmox Tailscale proxy unit states
+  ansible.builtin.shell: |
+    set -euo pipefail
+    socket_state="$(systemctl show -p ActiveState --value lv3-tailscale-proxy-{{ item.name }}.socket)"
+    service_state="$(systemctl show -p ActiveState --value lv3-tailscale-proxy-{{ item.name }}.service)"
+    printf 'socket=%s\nservice=%s\n' "$socket_state" "$service_state"
+  args:
+    executable: /bin/bash
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: proxmox_tailscale_proxy_effective_unit_states
+  changed_when: false
+
+- name: Restart active Proxmox Tailscale proxy services when their unit or upstream changes
+  ansible.builtin.systemd:
+    name: "lv3-tailscale-proxy-{{ item.name }}.service"
+    state: restarted
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  vars:
+    proxmox_tailscale_socket_unit_changed: >-
+      {{
+        (
+          proxmox_tailscale_proxy_sockets.results
+          | selectattr('item.name', 'equalto', item.name)
+          | map(attribute='changed')
+          | first
+          | default(false)
+        ) | bool
+      }}
+    proxmox_tailscale_service_unit_changed: >-
+      {{
+        (
+          proxmox_tailscale_proxy_services.results
+          | selectattr('item.name', 'equalto', item.name)
+          | map(attribute='changed')
+          | first
+          | default(false)
+        ) | bool
+      }}
+    proxmox_tailscale_running_cmdline: >-
+      {{
+        proxmox_tailscale_proxy_cmdlines.results
+        | selectattr('item.name', 'equalto', item.name)
+        | map(attribute='stdout')
+        | first
+        | default('')
+      }}
+    proxmox_tailscale_proxy_unit_state_lines: >-
+      {{
+        proxmox_tailscale_proxy_effective_unit_states.results
+        | selectattr('item.name', 'equalto', item.name)
+        | map(attribute='stdout_lines')
+        | first
+        | default([])
+      }}
+    proxmox_tailscale_socket_active_state: >-
+      {{
+        proxmox_tailscale_proxy_unit_state_lines
+        | select('match', '^socket=')
+        | map('regex_replace', '^socket=', '')
+        | list
+        | first
+        | default('')
+      }}
+    proxmox_tailscale_service_active_state: >-
+      {{
+        proxmox_tailscale_proxy_unit_state_lines
+        | select('match', '^service=')
+        | map('regex_replace', '^service=', '')
+        | list
+        | first
+        | default('')
+      }}
+    proxmox_tailscale_restart_required: >-
+      {{
+        proxmox_tailscale_socket_unit_changed
+        or proxmox_tailscale_service_unit_changed
+        or (
+          proxmox_tailscale_running_cmdline | length > 0
+          and (item.upstream_host ~ ':' ~ (item.upstream_port | string)) not in proxmox_tailscale_running_cmdline
+        )
+      }}
   when: >-
-    proxmox_tailscale_service_unit_changed
-    or (
-      proxmox_tailscale_running_cmdline | length > 0
-      and (item.upstream_host ~ ':' ~ (item.upstream_port | string)) not in proxmox_tailscale_running_cmdline
-    )
+    proxmox_tailscale_restart_required
+    and proxmox_tailscale_service_active_state == 'active'
+    and proxmox_tailscale_socket_active_state == 'active'
+
+- name: Read final Proxmox Tailscale proxy unit states
+  ansible.builtin.shell: |
+    set -euo pipefail
+    socket_state="$(systemctl show -p ActiveState --value lv3-tailscale-proxy-{{ item.name }}.socket)"
+    service_state="$(systemctl show -p ActiveState --value lv3-tailscale-proxy-{{ item.name }}.service)"
+    printf 'socket=%s\nservice=%s\n' "$socket_state" "$service_state"
+  args:
+    executable: /bin/bash
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: proxmox_tailscale_proxy_final_unit_states
+  changed_when: false
+
+- name: Assert Proxmox Tailscale proxy listeners remain active after converge
+  ansible.builtin.assert:
+    that:
+      - proxmox_tailscale_socket_active_state == 'active' or proxmox_tailscale_service_active_state == 'active'
+    fail_msg: >-
+      Proxmox Tailscale proxy {{ item.name }} is unavailable after converge
+      (socket={{ proxmox_tailscale_socket_active_state | default('unknown') }},
+      service={{ proxmox_tailscale_service_active_state | default('unknown') }}).
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  vars:
+    proxmox_tailscale_proxy_unit_state_lines: >-
+      {{
+        proxmox_tailscale_proxy_final_unit_states.results
+        | selectattr('item.name', 'equalto', item.name)
+        | map(attribute='stdout_lines')
+        | first
+        | default([])
+      }}
+    proxmox_tailscale_socket_active_state: >-
+      {{
+        proxmox_tailscale_proxy_unit_state_lines
+        | select('match', '^socket=')
+        | map('regex_replace', '^socket=', '')
+        | list
+        | first
+        | default('')
+      }}
+    proxmox_tailscale_service_active_state: >-
+      {{
+        proxmox_tailscale_proxy_unit_state_lines
+        | select('match', '^service=')
+        | map('regex_replace', '^service=', '')
+        | list
+        | first
+        | default('')
+      }}

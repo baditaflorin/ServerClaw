@@ -1,6 +1,136 @@
 {
   "schema_version": "1.0.0",
   "workflows": {
+    "converge-plausible": {
+      "description": "Converge Plausible on docker-runtime-lv3, publish analytics.lv3.org through the shared edge, and verify public tracker injection plus synthetic event ingestion.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-plausible",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-plausible"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
+        ],
+        "generated_secret_ids": [
+          "plausible_database_password",
+          "plausible_secret_key_base",
+          "plausible_bootstrap_user_password"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-plausible"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-plausible.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/plausible.yml",
+        "playbooks/services/plausible.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/plausible.yml",
+        "collections/ansible_collections/lv3/platform/roles/plausible_runtime",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/subdomain-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/service-completeness.json"
+      ],
+      "outputs": [
+        "A repo-managed Plausible Community Edition runtime on docker-runtime-lv3 with controller-local mirrored secrets, an edge-authenticated dashboard at analytics.lv3.org, public tracker and health paths, and injected tracking on the declared public LV3 hostnames."
+      ],
+      "verification_commands": [
+        "make syntax-check-plausible",
+        "curl -fsS https://analytics.lv3.org/api/system/health/ready",
+        "curl -fsS https://nginx.lv3.org/ | grep -F \"https://analytics.lv3.org/js/script.js\"",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@10.10.10.20 \"curl -fsS http://127.0.0.1:8016/api/health\"",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@10.10.10.20 'sudo docker exec plausible bin/plausible rpc \"import Ecto.Query; site = Plausible.Sites.get_by_domain!(\\\"nginx.lv3.org\\\"); seen = Plausible.ClickhouseRepo.exists?(from e in \\\"events_v2\\\", where: e.site_id == ^site.id and e.pathname == ^\\\"/plausible-smoke\\\" and e.name == \\\"pageview\\\"); IO.puts(Jason.encode!(%{seen: seen}))\"'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-flagsmith": {
+      "description": "Converge Flagsmith on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish flags.lv3.org through the shared edge, and verify seeded feature state plus environment keys.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-flagsmith",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-flagsmith"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
+        ],
+        "generated_secret_ids": [
+          "flagsmith_database_password",
+          "flagsmith_django_secret_key",
+          "flagsmith_admin_password",
+          "flagsmith_environment_keys"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-flagsmith"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-flagsmith.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/flagsmith.yml",
+        "playbooks/services/flagsmith.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/flagsmith.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/flagsmith.yml",
+        "collections/ansible_collections/lv3/platform/roles/flagsmith_postgres",
+        "collections/ansible_collections/lv3/platform/roles/flagsmith_runtime",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/subdomain-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/secret-catalog.json",
+        "config/controller-local-secrets.json",
+        "config/service-completeness.json"
+      ],
+      "outputs": [
+        "A repo-managed Flagsmith Community Edition runtime on docker-runtime-lv3 with a shared PostgreSQL backing store, mirrored environment API keys, seeded environments and feature state, and an edge-authenticated UI at flags.lv3.org."
+      ],
+      "verification_commands": [
+        "make syntax-check-flagsmith",
+        "curl -fsS https://flags.lv3.org/health",
+        "curl -I https://flags.lv3.org/",
+        "curl -I https://flags.lv3.org/api/v1/projects/",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@10.10.10.20 \"curl -fsS http://127.0.0.1:8017/health\""
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "validate": {
       "description": "Run the repository validation pipeline used before merge to main.",
       "lifecycle_status": "active",
@@ -18,15 +148,20 @@
       "implementation_refs": [
         "Makefile",
         "config/control-plane-lanes.json",
+        "config/semgrep/rules",
+        "config/validation-lanes.yaml",
         "scripts/controller_automation_toolkit.py",
         "scripts/control_plane_lanes.py",
+        "scripts/semgrep_gate.py",
         "scripts/validate_repo.sh",
+        "scripts/validation_lanes.py",
         "scripts/generate_status_docs.py",
         "scripts/validate_repository_data_models.py",
+        ".gitea/workflows/validate.yml",
         ".github/workflows/validate.yml"
       ],
       "outputs": [
-        "Repository validation result across syntax, YAML, Ansible lint, shell, JSON, canonical data-model, and generated-document checks."
+        "Repository validation result across syntax, YAML, Ansible lint, shell, JSON, Semgrep SAST and secret-pattern scans, canonical data-model, generated-document checks, and the ADR 0264 lane-catalog contract."
       ],
       "verification_commands": [
         "make validate"
@@ -104,13 +239,15 @@
         "Makefile",
         "config/build-server.json",
         "config/validation-gate.json",
+        "config/validation-lanes.yaml",
         "scripts/remote_exec.sh",
         "scripts/run_gate.py",
+        "scripts/validation_lanes.py",
         "scripts/parallel_check.py",
         ".githooks/pre-push"
       ],
       "outputs": [
-        "A blocking pass or fail result across the nine configured pre-push validation checks, together with a recorded last-run status payload."
+        "A lane-aware blocking pass or fail result across the fast global invariants plus the selected ADR 0264 validation lanes, together with a recorded last-run status payload."
       ],
       "verification_commands": [
         "make pre-push-gate",
@@ -128,7 +265,7 @@
       }
     },
     "gate-status": {
-      "description": "Show the configured validation gate checks plus the last local, bypass, and post-merge results.",
+      "description": "Show the configured validation gate checks plus the last local, waiver, and post-merge results.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -143,19 +280,36 @@
       "owner_runbook": "docs/runbooks/validation-gate.md",
       "implementation_refs": [
         "Makefile",
+        "config/gate-bypass-waiver-catalog.json",
         "config/validation-gate.json",
+        "config/validation-lanes.yaml",
         "config/windmill/scripts/gate-status.py",
+        "scripts/gate_bypass_waivers.py",
         "scripts/gate_status.py",
+        "scripts/validation_lanes.py",
         "scripts/log_gate_bypass.py",
         "receipts/gate-bypasses/.gitkeep"
       ],
       "outputs": [
-        "A human-readable or machine-readable summary of enabled validation checks, the last local gate run, the last post-merge gate run, and the latest explicit bypass receipt."
+        "A human-readable or machine-readable summary of enabled validation checks and lanes, the last local gate run, the last post-merge gate run, the latest explicit bypass receipt, any open waivers, and repeated reason-code escalation state."
       ],
       "verification_commands": [
         "make gate-status",
         "python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server"
       ],
+      "human_navigation": {
+        "launcher": {
+          "enabled": true,
+          "label": "Validation Gate Status",
+          "description": "Open the safe validation status path in the shared runbook launcher.",
+          "purpose": "observe",
+          "personas": [
+            "operator",
+            "observer"
+          ],
+          "href": "/#runbooks"
+        }
+      },
       "execution_class": "diagnostic",
       "budget": {
         "max_duration_seconds": 900,
@@ -176,7 +330,11 @@
         "command": "make post-merge-gate"
       },
       "preflight": {
-        "required": false
+        "required": true,
+        "required_secret_ids": [],
+        "bootstrap_manifest_ids": [
+          "controller-local-base"
+        ]
       },
       "validation_targets": [],
       "live_impact": "repo_only",
@@ -184,11 +342,13 @@
       "implementation_refs": [
         "Makefile",
         "config/validation-gate.json",
+        "config/validation-lanes.yaml",
         "config/windmill/scripts/post-merge-gate.py",
-        "scripts/run_gate.py"
+        "scripts/run_gate.py",
+        "scripts/validation_lanes.py"
       ],
       "outputs": [
-        "A post-merge pass or fail result for the same validation manifest used by the interactive pre-push gate."
+        "A post-merge lane-aware pass or fail result for the same validation manifest and ADR 0264 lane catalog used by the interactive pre-push gate."
       ],
       "verification_commands": [
         "make post-merge-gate"
@@ -199,6 +359,58 @@
         "max_steps": 250,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
+    },
+    "stage-smoke-suites": {
+      "description": "Run the repo-managed ADR 0251 smoke suites for a declared service and environment using the shared integration-suite engine.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "stage-smoke-suites",
+        "command": "make stage-smoke-suites STAGE_SMOKE_ARGS='--service <service> --environment <environment>'"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/integration-test-suite.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/service-capability-catalog.json",
+        "config/stage-smoke-suites.json",
+        "config/windmill/scripts/stage-smoke-suites.py",
+        "docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md",
+        "docs/runbooks/environment-promotion-pipeline.md",
+        "docs/runbooks/integration-test-suite.md",
+        "scripts/integration_suite.py",
+        "scripts/stage_smoke_suites.py",
+        "tests/test_integration_suite.py",
+        "tests/test_stage_smoke_suites.py",
+        "tests/integration/test_authentication.py",
+        "tests/integration/test_deployment.py",
+        "tests/integration/test_platform_api.py"
+      ],
+      "outputs": [
+        "An aggregate JSON report describing the declared smoke suites that ran for the selected service and environment.",
+        "Per-suite integration-suite reports written beside the aggregate report for receipt and promotion evidence."
+      ],
+      "verification_commands": [
+        "python3 scripts/stage_smoke_suites.py --validate",
+        "python3 scripts/stage_smoke_suites.py --service windmill --environment production",
+        "python3 config/windmill/scripts/stage-smoke-suites.py --repo-path /srv/proxmox_florin_server --service windmill --environment production"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 200,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "abort_silently"
@@ -303,6 +515,19 @@
         "python3 -m pytest tests/test_fault_injection.py tests/test_fault_injection_repo_surfaces.py tests/test_fault_injection_windmill.py tests/test_windmill_operator_admin_app.py -q",
         "python3 config/windmill/scripts/fault-injection.py --repo-path /srv/proxmox_florin_server --scenario-names fault:keycloak-unavailable --dry-run"
       ],
+      "human_navigation": {
+        "launcher": {
+          "enabled": true,
+          "label": "Fault Injection",
+          "description": "Jump to the governed resilience drill path in the ops portal runbook launcher.",
+          "purpose": "administer",
+          "personas": [
+            "administrator",
+            "observer"
+          ],
+          "href": "/#runbooks"
+        }
+      },
       "execution_class": "diagnostic",
       "budget": {
         "max_duration_seconds": 1800,
@@ -357,6 +582,19 @@
         "python3 -m pytest tests/test_network_impairment_matrix.py tests/test_network_impairment_matrix_repo_surfaces.py tests/test_network_impairment_matrix_windmill.py -q",
         "python3 config/windmill/scripts/network-impairment-matrix.py --repo-path /srv/proxmox_florin_server --target-class staging"
       ],
+      "human_navigation": {
+        "launcher": {
+          "enabled": true,
+          "label": "Network Impairment Matrix",
+          "description": "Open the staged degradation planning and rehearsal path from the shared shell.",
+          "purpose": "plan",
+          "personas": [
+            "planner",
+            "operator"
+          ],
+          "href": "/#runbooks"
+        }
+      },
       "execution_class": "diagnostic",
       "budget": {
         "max_duration_seconds": 600,
@@ -782,6 +1020,10 @@
         "required": true,
         "required_secret_ids": [
           "bootstrap_ssh_private_key"
+        ],
+        "bootstrap_manifest_ids": [
+          "controller-local-base",
+          "shared-edge-generated-portals"
         ]
       },
       "validation_targets": [
@@ -1326,6 +1568,52 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-docker-publication-assurance": {
+      "description": "Converge the shared ADR 0270 Docker publication assurance helper on managed Docker guests and verify every declared publication contract before readiness is trusted.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-docker-publication-assurance",
+        "command": "make converge-docker-publication-assurance"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-docker-publication-assurance"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/docker-publication-assurance.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/docker-publication-assurance.yml",
+        "playbooks/tasks/docker-publication-assert.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml",
+        "scripts/docker_publication_assurance.py",
+        "config/health-probe-catalog.json"
+      ],
+      "outputs": [
+        "The Docker publication assurance helper installed on managed Docker guests plus repaired and verified publication contracts for services that declare readiness.docker_publication."
+      ],
+      "verification_commands": [
+        "make syntax-check-docker-publication-assurance",
+        "make converge-docker-publication-assurance env=production"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-postgres-vm": {
       "description": "Converge the dedicated PostgreSQL guest baseline on postgres-lv3.",
       "lifecycle_status": "active",
@@ -1416,6 +1704,59 @@
         "max_concurrent_instances": 1,
         "max_touched_hosts": 3,
         "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-mailpit": {
+      "description": "Deploy the private Mailpit SMTP interceptor on docker-runtime-lv3 for staging and development mail capture plus REST-API assertions.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-mailpit",
+        "command": "make converge-mailpit"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-mailpit"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-mailpit.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/mailpit.yml",
+        "playbooks/services/mailpit.yml",
+        "roles/mailpit_runtime",
+        "playbooks/mail-platform-verify.yml",
+        "inventory/group_vars/all.yml",
+        "inventory/group_vars/staging.yml",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json"
+      ],
+      "outputs": [
+        "A private Mailpit runtime on docker-runtime-lv3 with guest-network HTTP and SMTP listeners plus repo-managed SMTP capture verification."
+      ],
+      "verification_commands": [
+        "make syntax-check-mailpit",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8025/api/v1/info'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 - <<'\"'\"'PY'\"'\"'\nimport json\nimport smtplib\nimport urllib.request\nfrom email.message import EmailMessage\nsubject = \"LV3 workflow Mailpit verification\"\nurllib.request.urlopen(urllib.request.Request(\"http://127.0.0.1:8025/api/v1/messages\", method=\"DELETE\"), timeout=30).read()\nmessage = EmailMessage()\nmessage[\"From\"] = \"workflow-check@lv3.org\"\nmessage[\"To\"] = \"mailpit-workflow@lv3.org\"\nmessage[\"Subject\"] = subject\nmessage.set_content(\"Workflow verification through Mailpit\")\nwith smtplib.SMTP(\"127.0.0.1\", 1025, timeout=15) as client:\n    client.send_message(message)\npayload = json.loads(urllib.request.urlopen(\"http://127.0.0.1:8025/api/v1/messages\", timeout=30).read().decode(\"utf-8\"))\nassert any(item.get(\"Subject\") == subject for item in payload.get(\"messages\", []))\nprint(\"verified\")\nPY'",
+        "ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mail-platform-verify.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e env=staging --syntax-check"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 1,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
       }
@@ -1535,6 +1876,225 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-tika": {
+      "description": "Deploy the private Apache Tika runtime on docker-runtime-lv3 and verify the standard `/version`, `/tika`, and `/meta` extraction contracts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-tika",
+        "command": "make converge-tika"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-tika"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-tika.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/tika.yml",
+        "playbooks/services/tika.yml",
+        "roles/tika_runtime",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/image-catalog.json"
+      ],
+      "outputs": [
+        "A private Apache Tika runtime on docker-runtime-lv3 with version, plaintext extraction, and metadata extraction verified on the standard REST endpoints."
+      ],
+      "verification_commands": [
+        "make syntax-check-tika",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p\" ops@10.10.10.20 'curl -fsS http://127.0.0.1:9998/version'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p\" ops@10.10.10.20 'body=$(mktemp); trap '\"'\"'rm -f \"$body\"'\"'\"' EXIT; printf \"<html><body><h1>LV3 Tika workflow verification</h1></body></html>\" | curl -fsS -X PUT -H \"Content-Type: text/html\" -H \"Accept: text/plain\" --data-binary @- http://127.0.0.1:9998/tika >\"$body\"; grep -q \"LV3 Tika workflow verification\" \"$body\"'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p\" ops@10.10.10.20 'printf \"<html><body><h1>LV3 Tika metadata verification</h1></body></html>\" | curl -fsS -X PUT -H \"Content-Type: text/html\" -H \"Accept: application/json\" --data-binary @- http://127.0.0.1:9998/meta | grep -q \"X-TIKA:Parsed-By\"'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 220,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-nomad": {
+      "description": "Converge the private Nomad scheduler on monitoring-lv3 plus the runtime and build clients, including controller-local TLS and ACL bootstrap artifacts and repo-managed smoke jobs.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-nomad",
+        "command": "make converge-nomad"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "nomad_acl_management_token",
+          "nomad_tls_ca_key",
+          "nomad_tls_server_key",
+          "nomad_tls_client_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-nomad"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-nomad.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/groups/automation.yml",
+        "playbooks/nomad.yml",
+        "playbooks/services/nomad.yml",
+        "collections/ansible_collections/lv3/platform/roles/nomad_cluster_member/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/nomad_cluster_bootstrap/tasks/main.yml",
+        "config/nomad/jobs/lv3-nomad-smoke-service.nomad.hcl",
+        "config/nomad/jobs/lv3-nomad-smoke-batch.nomad.hcl",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/generate_platform_vars.py"
+      ],
+      "outputs": [
+        "A private Nomad API published on the Proxmox Tailscale proxy, a Nomad server on monitoring-lv3, Nomad clients on docker-runtime-lv3 and docker-build-lv3, and repo-managed smoke jobs verified across both client classes."
+      ],
+      "verification_commands": [
+        "make syntax-check-nomad",
+        "make converge-nomad",
+        "NOMAD_ADDR=https://100.64.0.1:8013 NOMAD_CACERT=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem NOMAD_TOKEN=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tokens/bootstrap-management.token) nomad node status"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-openfga": {
+      "description": "Converge OpenFGA on docker-runtime-lv3, publish the Proxmox host controller proxy, and seed the repo-managed ServerClaw delegated authorization graph.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-openfga",
+        "command": "make converge-openfga"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "openfga_database_password",
+          "openfga_preshared_key",
+          "keycloak_serverclaw_runtime_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-openfga"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-openfga.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/openfga.yml",
+        "playbooks/services/openfga.yml",
+        "collections/ansible_collections/lv3/platform/roles/openfga_postgres",
+        "collections/ansible_collections/lv3/platform/roles/openfga_runtime",
+        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/serverclaw_authz.py",
+        "config/serverclaw-authz/bootstrap.json",
+        "config/serverclaw-authz/model.json"
+      ],
+      "outputs": [
+        "A private OpenFGA runtime on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a Proxmox-host controller proxy, mirrored operator and runtime Keycloak client secrets, and a verified delegated authorization store, model, tuple seed, and check set."
+      ],
+      "verification_commands": [
+        "make syntax-check-openfga",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 '\\''curl -fsS http://127.0.0.1:8098/healthz && docker compose --file /opt/openfga/docker-compose.yml ps'\\'''",
+        "curl -fsS -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt)\" http://100.64.0.1:8014/stores",
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/serverclaw_authz.py verify --config /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt --keycloak-url http://10.10.10.20:8091"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-temporal": {
+      "description": "Converge Temporal on docker-runtime-lv3, provision its PostgreSQL history and visibility stores on postgres-lv3, and bootstrap the private `lv3` namespace plus loopback-only diagnostics.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-temporal",
+        "command": "make converge-temporal"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "temporal_database_password"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-temporal"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-temporal.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/temporal.yml",
+        "playbooks/services/temporal.yml",
+        "collections/ansible_collections/lv3/platform/roles/temporal_postgres",
+        "collections/ansible_collections/lv3/platform/roles/temporal_runtime",
+        "scripts/temporal_smoke.py",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/service-completeness.json",
+        "config/data-catalog.json",
+        "config/dependency-graph.json"
+      ],
+      "outputs": [
+        "A repo-managed Temporal runtime on docker-runtime-lv3 with PostgreSQL-backed history plus visibility stores on postgres-lv3, loopback-only gRPC/HTTP plus UI endpoints, and an automatically reconciled `lv3` namespace."
+      ],
+      "verification_commands": [
+        "make syntax-check-temporal",
+        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a \"docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator cluster health && docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator namespace describe --namespace lv3 && curl -fsS http://127.0.0.1:8099 >/dev/null\" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-windmill": {
       "description": "Converge Windmill on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and expose the operator-only Tailscale proxy on the Proxmox host.",
       "lifecycle_status": "active",
@@ -1589,6 +2149,78 @@
       "budget": {
         "max_duration_seconds": 1500,
         "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-woodpecker": {
+      "description": "Converge Woodpecker on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish ci.lv3.org through the shared edge, and bootstrap the governed seed repository plus controller-local auth bundle.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-woodpecker",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-woodpecker"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "woodpecker_database_password",
+          "woodpecker_gitea_client_id",
+          "woodpecker_gitea_client_secret",
+          "woodpecker_agent_secret",
+          "woodpecker_api_token",
+          "woodpecker_admin_auth",
+          "woodpecker_bootstrap_spec",
+          "woodpecker_secret_smoke"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-woodpecker"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-woodpecker.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/woodpecker.yml",
+        "playbooks/services/woodpecker.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/woodpecker.yml",
+        "roles/woodpecker_postgres/tasks/main.yml",
+        "roles/woodpecker_runtime/tasks/main.yml",
+        "platform/ansible/woodpecker.py",
+        "scripts/woodpecker_bootstrap.py",
+        "scripts/woodpecker_tool.py",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "Woodpecker CI deployed on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a public ci.lv3.org publication, a private controller URL on the Proxmox host, controller-local auth artifacts under .local/woodpecker, and the ops/proxmox_florin_server seed repository activated with the smoke secret."
+      ],
+      "verification_commands": [
+        "make syntax-check-woodpecker",
+        "curl -fsS http://100.64.0.1:8017/healthz",
+        "curl -fsS https://ci.lv3.org/healthz",
+        "make woodpecker-manage ACTION=whoami",
+        "make woodpecker-manage ACTION=list-secrets WOODPECKER_ARGS='--repo ops/proxmox_florin_server'",
+        "make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main --wait'"
+      ],
+      "execution_class": "mutation",
+      "target_lane": "lane:docker-runtime",
+      "resource_reservation": {
+        "cpu_milli": 2000,
+        "memory_mb": 1024,
+        "disk_iops": 120,
+        "estimated_duration_seconds": 900
+      },
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 3,
         "max_restarts": 0,
@@ -1662,7 +2294,11 @@
         "command": "make merge-config-changes"
       },
       "preflight": {
-        "required": false
+        "required": true,
+        "required_secret_ids": [],
+        "bootstrap_manifest_ids": [
+          "controller-local-base"
+        ]
       },
       "validation_targets": [
         "validate-data-models"
@@ -1751,6 +2387,19 @@
         "echo '' | python3 scripts/parse_ansible_drift.py",
         "python3 scripts/drift_detector.py --help"
       ],
+      "human_navigation": {
+        "launcher": {
+          "enabled": true,
+          "label": "Drift Status",
+          "description": "Jump directly to the latest multi-source drift view in the interactive ops portal.",
+          "purpose": "observe",
+          "personas": [
+            "observer",
+            "operator"
+          ],
+          "href": "/#drift"
+        }
+      },
       "execution_class": "diagnostic",
       "budget": {
         "max_duration_seconds": 1800,
@@ -1763,7 +2412,7 @@
       }
     },
     "subdomain-exposure-audit": {
-      "description": "Run the ADR 0139 subdomain exposure registry audit, check live DNS and edge auth behavior, and store one receipt.",
+      "description": "Run the ADR 0139 subdomain exposure registry plus ADR 0252 route and DNS publication audit, check public DNS, private routes, TLS, and edge auth behavior, and store one receipt.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -1795,10 +2444,11 @@
         "docs/runbooks/subdomain-exposure-audit.md"
       ],
       "outputs": [
-        "A timestamped receipt that records repo contract drift, live DNS status drift, optional Hetzner zone discrepancies, and any missing edge OIDC enforcement for tracked hostnames."
+        "A timestamped receipt that records repo contract drift, live DNS status drift, Hetzner zone record-set discrepancies, missing private-route reachability, TLS coverage or verification drift, and any missing edge OIDC enforcement for tracked hostnames."
       ],
       "verification_commands": [
         "uvx --from pyyaml python scripts/subdomain_exposure_audit.py --validate",
+        "make subdomain-exposure-audit",
         "uv run --with pytest --with pyyaml --with jsonschema --with jinja2 pytest -q tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py tests/test_docs_site.py",
         "python3 config/windmill/scripts/subdomain-exposure-audit.py --help"
       ],
@@ -1835,8 +2485,10 @@
       "owner_runbook": "docs/runbooks/backup-restore-verification.md",
       "implementation_refs": [
         "Makefile",
+        "config/restore-readiness-profiles.json",
         "config/windmill/scripts/restore-verification.py",
         "config/synthetic-transaction-catalog.json",
+        "docs/schema/restore-readiness-profiles.schema.json",
         "docs/runbooks/backup-restore-verification.md",
         "docs/runbooks/synthetic-transaction-replay.md",
         "receipts/restore-verifications",
@@ -1850,12 +2502,13 @@
         "tests/test_restore_verification_windmill.py"
       ],
       "outputs": [
-        "A dated restore-verification receipt recording the selected backup, restore duration, boot time, per-target smoke tests, synthetic replay success rate, latency distribution, and overall pass or fail status.",
+        "A dated restore-verification receipt recording the selected backup, restore duration, boot time, the declared readiness profile, the readiness ladder stages reached, warm-up attempts, per-target smoke tests, synthetic replay success rate, latency distribution, and overall pass or fail status.",
         "Mutation-audit evidence plus optional NATS and Mattermost notifications for the restore-verification run."
       ],
       "verification_commands": [
         "python3 -m py_compile scripts/restore_verification.py scripts/synthetic_transaction_replay.py scripts/smoke_tests/postgres_smoke.py scripts/smoke_tests/docker_runtime_smoke.py scripts/smoke_tests/backup_vm_smoke.py config/windmill/scripts/restore-verification.py",
         "uv run --with pytest --with pyyaml pytest tests/test_restore_verification.py tests/test_restore_verification_windmill.py tests/test_synthetic_transaction_replay.py -q",
+        "uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate",
         "python3 scripts/synthetic_transaction_replay.py --target restore-docker-runtime --dry-run",
         "uv run --with pyyaml python scripts/restore_verification.py --help"
       ],
@@ -1865,6 +2518,59 @@
         "max_steps": 400,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "backup-coverage-ledger": {
+      "description": "Run the ADR 0271 backup coverage ledger against the live Proxmox backup jobs and storage listings, write one receipt, and surface uncovered assets explicitly in DR readiness reporting.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "backup-coverage-ledger",
+        "command": "make backup-coverage-ledger"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/backup-coverage-ledger.md",
+      "implementation_refs": [
+        "Makefile",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_backups/defaults/main.yml",
+        "config/windmill/scripts/backup-coverage-ledger.py",
+        "docs/runbooks/backup-coverage-ledger.md",
+        "docs/runbooks/configure-backup-vm.md",
+        "docs/runbooks/disaster-recovery.md",
+        "receipts/backup-coverage",
+        "scripts/backup_coverage_ledger.py",
+        "scripts/generate_dr_report.py",
+        "tests/test_backup_coverage_ledger.py",
+        "tests/test_backup_coverage_ledger_windmill.py",
+        "tests/test_disaster_recovery.py"
+      ],
+      "outputs": [
+        "A dated backup-coverage receipt that records governed assets, the current Proxmox backup job coverage, the latest observed backup evidence, and any uncovered or degraded assets.",
+        "DR readiness output that names uncovered assets directly instead of hiding them behind the generic off-site backup check."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile scripts/backup_coverage_ledger.py config/windmill/scripts/backup-coverage-ledger.py",
+        "uv run --with pytest --with pyyaml pytest tests/test_backup_coverage_ledger.py tests/test_backup_coverage_ledger_windmill.py tests/test_disaster_recovery.py -q",
+        "uv run --with pyyaml python scripts/backup_coverage_ledger.py --format json"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 80,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
@@ -1974,6 +2680,55 @@
         "escalation_action": "abort_silently"
       }
     },
+    "weekly-https-tls-assurance": {
+      "description": "Run the ADR 0249 HTTPS/TLS assurance scan, store a receipt, and keep deeper TLS posture evidence alongside the recurring blackbox probes.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "https-tls-assurance",
+        "command": "make https-tls-assurance ENV=production"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/https-tls-assurance.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/prometheus/file_sd/https_tls_targets.yml",
+        "config/prometheus/rules/https_tls_alerts.yml",
+        "config/windmill/scripts/https-tls-assurance.py",
+        "config/workflow-catalog.json",
+        "docs/runbooks/https-tls-assurance.md",
+        "receipts/https-tls-assurance",
+        "scripts/generate_https_tls_assurance.py",
+        "scripts/https_tls_assurance.py",
+        "scripts/https_tls_assurance_targets.py"
+      ],
+      "outputs": [
+        "A timestamped HTTPS/TLS assurance receipt covering the declared HTTPS surface set with raw testssl artifacts and classified TLS findings."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile scripts/https_tls_assurance_targets.py scripts/generate_https_tls_assurance.py scripts/https_tls_assurance.py config/windmill/scripts/https-tls-assurance.py",
+        "uv run --with pyyaml python scripts/generate_https_tls_assurance.py --check",
+        "uv run --with pyyaml python scripts/https_tls_assurance.py --env production --skip-testssl --print-report-json",
+        "uv run --with pytest --with pyyaml pytest -q tests/test_https_tls_assurance_targets.py tests/test_monitoring_vm_role.py tests/test_https_tls_assurance_windmill_wrapper.py"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 3600,
+        "max_steps": 200,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
+    },
     "audit-token-inventory": {
       "description": "Run the ADR 0141 token inventory audit against the canonical token policy and emit a receipt plus ledger event.",
       "lifecycle_status": "active",
@@ -2001,7 +2756,7 @@
         "tests/test_token_lifecycle.py"
       ],
       "outputs": [
-        "A token inventory audit receipt under receipts/token-lifecycle/ with healthy, warning, expired, and remediation counts.",
+        "A token inventory audit receipt under receipts/token-lifecycle/ for CLI runs, or under .local/token-lifecycle/receipts/ from the Windmill wrapper, with healthy, warning, expired, and remediation counts.",
         "A mutation-ledger file event describing the audit summary."
       ],
       "verification_commands": [
@@ -2048,7 +2803,7 @@
         "tests/test_token_lifecycle.py"
       ],
       "outputs": [
-        "An exposure incident receipt under receipts/security-incidents/ capturing the exposure window, revocation, replacement, session invalidation, and impact steps.",
+        "An exposure incident receipt under receipts/security-incidents/ for CLI runs, or under .local/token-lifecycle/incidents/ from the Windmill wrapper, capturing the exposure window, revocation, replacement, session invalidation, and impact steps.",
         "Mutation-ledger file events for revocation and incident creation when the required hooks succeed."
       ],
       "verification_commands": [
@@ -2427,6 +3182,66 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-jupyterhub": {
+      "description": "Deploy JupyterHub on docker-runtime-lv3, publish it at notebooks.lv3.org, and verify the interactive notebook spawn contract against current platform services.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-jupyterhub",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-jupyterhub"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
+        ],
+        "generated_secret_ids": [
+          "keycloak_jupyterhub_client_secret",
+          "jupyterhub_service_api_token",
+          "jupyterhub_minio_root_password"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-jupyterhub"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-jupyterhub.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/jupyterhub.yml",
+        "playbooks/services/jupyterhub.yml",
+        "roles/jupyterhub_runtime",
+        "roles/keycloak_runtime",
+        "roles/nginx_edge_publication",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/api-gateway-catalog.json"
+      ],
+      "outputs": [
+        "A public JupyterHub notebook environment on docker-runtime-lv3 with Keycloak browser login, repo-managed single-user images, and smoke-verified access to current exploratory platform dependencies."
+      ],
+      "verification_commands": [
+        "make syntax-check-jupyterhub",
+        "curl -fsS https://notebooks.lv3.org/hub/health",
+        "curl -I https://notebooks.lv3.org/hub/oauth_login"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-keycloak": {
       "description": "Converge Keycloak on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at sso.lv3.org, and wire Grafana through the shared SSO broker.",
       "lifecycle_status": "active",
@@ -2440,6 +3255,9 @@
         "required_secret_ids": [
           "bootstrap_ssh_private_key",
           "hetzner_dns_api_token"
+        ],
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
         ],
         "generated_secret_ids": [
           "keycloak_database_password",
@@ -2480,6 +3298,64 @@
         "max_concurrent_instances": 1,
         "max_touched_hosts": 2,
         "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-harbor": {
+      "description": "Converge Harbor on docker-runtime-lv3, publish it at registry.lv3.org through the shared edge, bootstrap Keycloak OIDC, and seed the check-runner project automation credentials.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-harbor",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-harbor"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "harbor_admin_password",
+          "harbor_database_password",
+          "harbor_check_runner_robot_secret",
+          "keycloak_harbor_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-harbor"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-harbor.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/harbor.yml",
+        "playbooks/services/harbor.yml",
+        "collections/ansible_collections/lv3/platform/roles/harbor_runtime",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/controller-local-secrets.json"
+      ],
+      "outputs": [
+        "A repo-managed Harbor deployment on docker-runtime-lv3 with Trivy scanning enabled, a public registry endpoint at registry.lv3.org, Keycloak-backed browser sign-in, and a generated robot credential for check-runner image publication."
+      ],
+      "verification_commands": [
+        "make syntax-check-harbor",
+        "curl -fsS https://registry.lv3.org/api/v2.0/ping",
+        "curl -fsS -u \"admin:$(cat .local/harbor/admin-password.txt)\" https://registry.lv3.org/api/v2.0/projects/check-runner",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' ops@10.10.10.30 'docker pull registry.lv3.org/check-runner/python:3.12.10'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 1,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
       }
@@ -2535,6 +3411,81 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-matrix-synapse": {
+      "description": "Converge Matrix Synapse on docker-runtime-lv3, provision its PostgreSQL backend plus bridge databases on postgres-lv3, publish matrix.lv3.org through the shared edge, render Discord and WhatsApp application-service registrations, and expose the private controller proxy on the Proxmox host.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-matrix-synapse",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-matrix-synapse"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "matrix_synapse_database_password",
+          "matrix_synapse_ops_password",
+          "matrix_synapse_registration_shared_secret",
+          "matrix_synapse_signing_key",
+          "matrix_synapse_mautrix_discord_database_password",
+          "matrix_synapse_mautrix_discord_as_token",
+          "matrix_synapse_mautrix_discord_hs_token",
+          "matrix_synapse_mautrix_discord_provisioning_shared_secret",
+          "matrix_synapse_mautrix_discord_avatar_proxy_key",
+          "matrix_synapse_mautrix_whatsapp_database_password",
+          "matrix_synapse_mautrix_whatsapp_as_token",
+          "matrix_synapse_mautrix_whatsapp_hs_token",
+          "matrix_synapse_mautrix_whatsapp_provisioning_shared_secret",
+          "matrix_synapse_mautrix_whatsapp_public_media_signing_key",
+          "matrix_synapse_mautrix_whatsapp_encryption_pickle_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-matrix-synapse"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-matrix-synapse.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/matrix-synapse.yml",
+        "playbooks/services/matrix-synapse.yml",
+        "roles/matrix_synapse_postgres",
+        "roles/matrix_synapse_runtime",
+        "roles/proxmox_tailscale_proxy",
+        "roles/proxmox_security",
+        "roles/nginx_edge_publication",
+        "scripts/matrix_admin_register.py",
+        "scripts/matrix_bridge_smoke.py",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/uptime-kuma/monitors.json",
+        "config/grafana/dashboards/matrix-synapse.json",
+        "config/alertmanager/rules/matrix-synapse.yml"
+      ],
+      "outputs": [
+        "A repo-managed Matrix Synapse runtime on docker-runtime-lv3 with PostgreSQL persistence, Discord and WhatsApp mautrix bridges, a private controller proxy on the Proxmox host, and a public client API at matrix.lv3.org while federation remains disabled."
+      ],
+      "verification_commands": [
+        "make syntax-check-matrix-synapse",
+        "curl -fsS https://matrix.lv3.org/_matrix/client/versions",
+        "curl -fsS http://100.64.0.1:8015/_matrix/client/versions",
+        "python3 scripts/matrix_admin_register.py --base-url https://matrix.lv3.org --shared-secret-file .local/matrix-synapse/registration-shared-secret.txt --username ops --password-file .local/matrix-synapse/ops-password.txt --admin",
+        "python3 scripts/matrix_bridge_smoke.py --base-url https://matrix.lv3.org --username ops --password-file .local/matrix-synapse/ops-password.txt --bot-user-id @discordbot:matrix.lv3.org --bot-user-id @whatsappbot:matrix.lv3.org"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-ops-portal": {
       "description": "Converge the interactive ops portal on docker-runtime-lv3 so the browser control plane stays aligned with the shared API gateway contracts.",
       "lifecycle_status": "active",
@@ -2574,6 +3525,19 @@
         "ssh ops@100.118.189.95 'ssh ops@10.10.10.20 \"curl -sf http://127.0.0.1:8092/health\"'",
         "curl -I https://ops.lv3.org"
       ],
+      "human_navigation": {
+        "launcher": {
+          "enabled": true,
+          "label": "Converge Ops Portal",
+          "description": "Open the governed portal deployment workflow through the shared runbook and action shell.",
+          "purpose": "administer",
+          "personas": [
+            "administrator",
+            "operator"
+          ],
+          "href": "/#runbooks"
+        }
+      },
       "execution_class": "mutation",
       "budget": {
         "max_duration_seconds": 900,
@@ -2652,7 +3616,7 @@
       }
     },
     "converge-n8n": {
-      "description": "Converge n8n on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress.",
+      "description": "Converge the n8n connector fabric on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress for ServerClaw adapters.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2687,17 +3651,77 @@
         "config/uptime-kuma/monitors.json"
       ],
       "outputs": [
-        "A repo-managed n8n runtime on docker-runtime-lv3 with PostgreSQL persistence and public webhook ingress while the editor remains behind the shared edge auth flow."
+        "A repo-managed n8n runtime on docker-runtime-lv3 with PostgreSQL persistence, public webhook ingress for thin ServerClaw adapters, and a protected editor path behind the shared edge auth flow."
       ],
       "verification_commands": [
         "make syntax-check-n8n",
         "curl -fsS https://n8n.lv3.org/healthz",
+        "curl -sSI https://n8n.lv3.org/",
+        "curl -sSI https://n8n.lv3.org/webhook-test/serverclaw-connector-smoke",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'curl -fsS http://127.0.0.1:5678/healthz/readiness'"
       ],
       "execution_class": "mutation",
       "budget": {
         "max_duration_seconds": 1200,
         "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-nextcloud": {
+      "description": "Converge Nextcloud on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish cloud.lv3.org with DAV redirects and large-upload support.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-nextcloud",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-nextcloud"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "nextcloud_database_password",
+          "nextcloud_admin_password",
+          "nextcloud_redis_password"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-nextcloud"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-nextcloud.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/nextcloud.yml",
+        "playbooks/services/nextcloud.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/nextcloud.yml",
+        "collections/ansible_collections/lv3/platform/roles/nextcloud_postgres",
+        "collections/ansible_collections/lv3/platform/roles/nextcloud_runtime",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/uptime-kuma/monitors.json"
+      ],
+      "outputs": [
+        "A repo-managed Nextcloud runtime on docker-runtime-lv3 with PostgreSQL metadata, Redis-backed locking, cron execution, and the public cloud.lv3.org DAV surface through the shared edge."
+      ],
+      "verification_commands": [
+        "make syntax-check-nextcloud",
+        "curl -fsS https://cloud.lv3.org/status.php",
+        "curl -fsSI https://cloud.lv3.org/.well-known/caldav",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8084/status.php'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker exec --user www-data nextcloud-app php occ background:status'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 3,
         "max_restarts": 0,
@@ -3002,6 +4026,59 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-serverclaw": {
+      "description": "Deploy the first public ServerClaw surface on coolify-lv3, reconcile its dedicated Keycloak client, and publish chat.lv3.org through the shared edge.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-serverclaw",
+        "command": "make converge-serverclaw"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "serverclaw_admin_password",
+          "serverclaw_secret_key",
+          "serverclaw_oidc_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-serverclaw"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-serverclaw.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/serverclaw.yml",
+        "collections/ansible_collections/lv3/platform/roles/open_webui_runtime",
+        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
+        "inventory/group_vars/all.yml",
+        "inventory/group_vars/platform.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "A public ServerClaw runtime deployed on coolify-lv3 with a dedicated Keycloak client, repo-managed bootstrap auth, and chat.lv3.org published through the shared edge."
+      ],
+      "verification_commands": [
+        "make syntax-check-serverclaw",
+        "curl -I https://chat.lv3.org/",
+        "ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a \"curl -s -X POST http://127.0.0.1:8096/api/v1/auths/signin -H 'Content-Type: application/json' -d '{\\\"email\\\":\\\"ops@lv3.org\\\",\\\"password\\\":\\\"'\\\"$(sudo cat /etc/lv3/serverclaw/admin-password.txt)\\\"'\\\"}'\" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-searxng": {
       "description": "Deploy the private SearXNG runtime on docker-runtime-lv3, publish its tailnet-only hostname through the Proxmox host proxy, and re-render Open WebUI to use the local search endpoint.",
       "lifecycle_status": "active",
@@ -3267,7 +4344,9 @@
       "preflight": {
         "required": true,
         "required_secret_ids": [
-          "bootstrap_ssh_private_key"
+          "bootstrap_ssh_private_key",
+          "gitea_release_bundle_cosign_private_key",
+          "gitea_release_bundle_cosign_password"
         ],
         "generated_secret_ids": [
           "gitea_database_password",
@@ -3288,17 +4367,21 @@
         "collections/ansible_collections/lv3/platform/roles/gitea_postgres",
         "collections/ansible_collections/lv3/platform/roles/gitea_runtime",
         "collections/ansible_collections/lv3/platform/roles/gitea_runner",
+        ".gitea/workflows/release-bundle.yml",
+        "scripts/release_bundle.py",
+        "docs/runbooks/signed-release-bundles.md",
         "inventory/host_vars/proxmox_florin.yml",
         "config/service-capability-catalog.json",
         "config/health-probe-catalog.json"
       ],
       "outputs": [
-        "A private Gitea runtime on docker-runtime-lv3 with Keycloak OIDC login, a PostgreSQL backend on postgres-lv3, the bootstrapped ops/proxmox_florin_server repository path, and a dedicated self-hosted Actions runner on docker-build-lv3."
+        "A private Gitea runtime on docker-runtime-lv3 with Keycloak OIDC login, a PostgreSQL backend on postgres-lv3, the bootstrapped ops/proxmox_florin_server repository path, a dedicated self-hosted Actions runner on docker-build-lv3, and the ADR 0233 release-bundle signing plus repo-token secrets seeded for server-resident publication and verification."
       ],
       "verification_commands": [
         "make syntax-check-gitea",
         "curl -sf http://100.64.0.1:3009/api/v1/version",
-        "curl -sf http://100.64.0.1:3009/api/swagger >/dev/null"
+        "curl -sf http://100.64.0.1:3009/api/swagger >/dev/null",
+        "python3 scripts/release_bundle.py validate --public-key-path keys/gitea-release-bundle-cosign.pub"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -3307,6 +4390,59 @@
         "max_concurrent_instances": 1,
         "max_touched_hosts": 4,
         "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-gotenberg": {
+      "description": "Deploy the private Gotenberg runtime on docker-runtime-lv3 and refresh the shared API gateway route used for authenticated PDF rendering requests.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-gotenberg",
+        "command": "make converge-gotenberg"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-gotenberg"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-gotenberg.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/gotenberg.yml",
+        "playbooks/services/gotenberg.yml",
+        "roles/gotenberg_runtime",
+        "roles/api_gateway_runtime",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/api-gateway-catalog.json",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json"
+      ],
+      "outputs": [
+        "A private Gotenberg runtime on docker-runtime-lv3 with Chromium and LibreOffice render paths verified locally, plus an authenticated /v1/gotenberg route on the shared platform API gateway."
+      ],
+      "verification_commands": [
+        "make syntax-check-gotenberg",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:3007/health'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'html=$(mktemp --suffix=.html); pdf=$(mktemp); trap '\"'\"'rm -f \"$html\" \"$pdf\"'\"'\"' EXIT; printf \"<html><body><h1>LV3 Gotenberg workflow verification</h1></body></html>\" >\"$html\"; curl -fsS -o \"$pdf\" -F \"files=@${html};filename=index.html;type=text/html\" http://127.0.0.1:3007/forms/chromium/convert/html; head -c 4 \"$pdf\" | grep -q %PDF'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'txt=$(mktemp --suffix=.txt); pdf=$(mktemp); trap '\"'\"'rm -f \"$txt\" \"$pdf\"'\"'\"' EXIT; printf \"LV3 Gotenberg workflow verification\\n\" >\"$txt\"; curl -fsS -o \"$pdf\" -F \"files=@${txt};filename=verification.txt;type=text/plain\" http://127.0.0.1:3007/forms/libreoffice/convert; head -c 4 \"$pdf\" | grep -q %PDF'",
+        "LV3_TOKEN=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt) && curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" https://api.lv3.org/v1/gotenberg/health"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 280,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 1,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
       }
@@ -3744,6 +4880,51 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "deploy-repo-profile": {
+      "description": "Deploy one named repo-deploy profile through the governed Coolify lane without restating raw repository, domain, and compose arguments.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "deploy-repo-profile",
+        "command": "make deploy-repo-profile PROFILE=education-wemeshup-production DEPLOY_PROFILE_ARGS='--wait'"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "coolify_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/configure-coolify.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/repo-deploy-catalog.json",
+        "docs/schema/repo-deploy-catalog.schema.json",
+        "scripts/repo_deploy_profiles.py",
+        "scripts/coolify_tool.py",
+        "scripts/lv3_cli.py"
+      ],
+      "outputs": [
+        "A named repo-deploy profile expands into the governed Coolify deployment contract and refreshes one approved application from committed upstream Git state."
+      ],
+      "verification_commands": [
+        "python3 scripts/repo_deploy_profiles.py show education-wemeshup-production",
+        "make deploy-repo-profile PROFILE=education-wemeshup-production DEPLOY_PROFILE_ARGS='--wait'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "configure-backup-vm": {
       "description": "Converge the dedicated backup VM, host-side PBS integration, and the optional ADR 0100 off-site copy of backup-lv3.",
       "lifecycle_status": "active",
@@ -3786,6 +4967,51 @@
         "max_steps": 260,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "configure-artifact-cache-vm": {
+      "description": "Provision the dedicated artifact-cache VM, converge the private cache-plane runtime on it, and leave build-host consumer adoption to the governed service replay.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "configure-artifact-cache-vm",
+        "command": "make configure-artifact-cache-vm"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-artifact-cache-vm"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-artifact-cache-vm.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/artifact-cache-vm.yml",
+        "playbooks/services/build-artifact-cache.yml",
+        "roles/artifact_cache_runtime/tasks/main.yml",
+        "roles/proxmox_guests/tasks/main.yml"
+      ],
+      "outputs": [
+        "artifact-cache-lv3 provisioned as VM 180 on 10.10.10.80 with Docker, guest firewall policy, named ops access, and the managed cache-plane runtime listening privately on ports 5001-5004."
+      ],
+      "verification_commands": [
+        "make syntax-check-artifact-cache-vm",
+        "make live-apply-service service=build-artifact-cache env=production EXTRA_ARGS='-e bypass_promotion=true'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 260,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
@@ -3884,7 +5110,7 @@
       }
     },
     "database-dns": {
-      "description": "Publish the private database.lv3.org DNS record toward the Patroni-managed PostgreSQL VIP.",
+      "description": "Publish the current private database.lv3.org DNS record toward the Proxmox host Tailscale proxy while the PostgreSQL HA VIP remains unapplied live.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -3901,17 +5127,66 @@
         "validate"
       ],
       "live_impact": "external_live",
-      "owner_runbook": "docs/runbooks/postgres-failover.md",
+      "owner_runbook": "docs/runbooks/configure-postgres-vm.md",
       "implementation_refs": [
         "Makefile",
         "playbooks/database-dns.yml",
         "roles/hetzner_dns_record/tasks/main.yml"
       ],
       "outputs": [
-        "database.lv3.org DNS record updated to the private PostgreSQL VIP."
+        "database.lv3.org DNS record updated to the private Proxmox Tailscale PostgreSQL proxy."
       ],
       "verification_commands": [
         "dig +short database.lv3.org"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "route-dns-assertion-ledger": {
+      "description": "Reconcile the ADR 0252 route and DNS assertion ledger drift set across the Hetzner zone, including apex publication truth, tailnet-only DNS targets, and stale record retirements.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "route-dns-assertion-ledger",
+        "command": "HETZNER_DNS_API_TOKEN=... make route-dns-assertion-ledger"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "hetzner_dns_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "validate-generated-vars",
+        "validate-data-models"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/subdomain-exposure-audit.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/route-dns-assertion-ledger.yml",
+        "collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "The governed apex, mail, database, and vault DNS records are aligned with the live route assertion ledger.",
+        "The stale apex IPv6, autoconfig, notify, and www records are retired from the lv3.org zone."
+      ],
+      "verification_commands": [
+        "dig +short lv3.org",
+        "dig +short mail.lv3.org",
+        "dig +short database.lv3.org",
+        "dig +short vault.lv3.org"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -4078,6 +5353,158 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "live-apply-group": {
+      "description": "Run one grouped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "live-apply-group",
+        "command": "make live-apply-group group=observability env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [],
+        "bootstrap_manifest_ids": [
+          "controller-local-base",
+          "shared-edge-generated-portals"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/playbook-execution-model.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/workflow-catalog.json",
+        "config/worktree-bootstrap-manifests.json",
+        "docs/runbooks/controller-local-secrets-and-preflight.md",
+        "docs/runbooks/playbook-execution-model.md",
+        "scripts/preflight_controller_local.py",
+        "scripts/workflow_catalog.py",
+        "scripts/interface_contracts.py",
+        "scripts/service_redundancy.py"
+      ],
+      "outputs": [
+        "A grouped live-apply wrapper that repairs required generated artifacts up front, then runs the selected group playbook through the governed shared entrypoint."
+      ],
+      "verification_commands": [
+        "make preflight WORKFLOW=live-apply-group",
+        "make live-apply-group group=observability env=staging EXTRA_ARGS='--syntax-check'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "live-apply-service": {
+      "description": "Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "live-apply-service",
+        "command": "make live-apply-service service=public-edge env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [],
+        "bootstrap_manifest_ids": [
+          "controller-local-base",
+          "shared-edge-generated-portals"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/playbook-execution-model.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/workflow-catalog.json",
+        "config/worktree-bootstrap-manifests.json",
+        "docs/runbooks/controller-local-secrets-and-preflight.md",
+        "docs/runbooks/playbook-execution-model.md",
+        "scripts/preflight_controller_local.py",
+        "scripts/workflow_catalog.py",
+        "scripts/interface_contracts.py",
+        "scripts/service_redundancy.py",
+        "scripts/immutable_guest_replacement.py"
+      ],
+      "outputs": [
+        "A service live-apply wrapper that repairs required generated artifacts up front, then runs the selected service playbook through the governed shared entrypoint."
+      ],
+      "verification_commands": [
+        "make preflight WORKFLOW=live-apply-service",
+        "make live-apply-service service=public-edge env=staging EXTRA_ARGS='--syntax-check'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "live-apply-site": {
+      "description": "Run the full site live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "live-apply-site",
+        "command": "make live-apply-site env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [],
+        "bootstrap_manifest_ids": [
+          "controller-local-base",
+          "shared-edge-generated-portals"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/playbook-execution-model.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/site.yml",
+        "config/workflow-catalog.json",
+        "config/worktree-bootstrap-manifests.json",
+        "docs/runbooks/controller-local-secrets-and-preflight.md",
+        "docs/runbooks/playbook-execution-model.md",
+        "scripts/preflight_controller_local.py",
+        "scripts/workflow_catalog.py",
+        "scripts/interface_contracts.py",
+        "scripts/service_redundancy.py"
+      ],
+      "outputs": [
+        "A full-site live-apply wrapper that repairs required generated artifacts up front, then runs the shared site convergence path."
+      ],
+      "verification_commands": [
+        "make preflight WORKFLOW=live-apply-site",
+        "make live-apply-site env=staging EXTRA_ARGS='--syntax-check'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 3600,
+        "max_steps": 450,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 8,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "live-apply-waves": {
       "description": "Execute one reviewed dependency-wave manifest so each wave acquires its locks up front and runs its playbooks in parallel.",
       "lifecycle_status": "active",
@@ -4090,6 +5517,10 @@
         "required": true,
         "required_secret_ids": [
           "bootstrap_ssh_private_key"
+        ],
+        "bootstrap_manifest_ids": [
+          "controller-local-base",
+          "shared-edge-generated-portals"
         ]
       },
       "validation_targets": [
@@ -4900,6 +6331,49 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "woodpecker-manage": {
+      "description": "Run governed Woodpecker API actions such as checking identity, activating the seed repository, listing repository secrets, or triggering the repo validation pipeline.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "woodpecker-manage",
+        "command": "make woodpecker-manage ACTION=whoami"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "woodpecker_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/configure-woodpecker.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/woodpecker_tool.py",
+        "platform/ansible/woodpecker.py"
+      ],
+      "outputs": [
+        "Governed Woodpecker repository inspection, secret management, and pipeline execution through the repo-managed wrapper instead of ad hoc API calls."
+      ],
+      "verification_commands": [
+        "make woodpecker-manage ACTION=whoami",
+        "make woodpecker-manage ACTION=list-secrets WOODPECKER_ARGS='--repo ops/proxmox_florin_server'",
+        "make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main --wait'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-plane": {
       "description": "Converge Plane on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at tasks.lv3.org, and verify the repo-managed ADR synchronization path.",
       "lifecycle_status": "active",
@@ -5004,6 +6478,242 @@
         "max_concurrent_instances": 1,
         "max_touched_hosts": 1,
         "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-browser-runner": {
+      "description": "Converge the private Playwright browser runner on docker-runtime-lv3, refresh the shared API gateway route, and verify the governed browser-session execution surface for operators and Dify.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-browser-runner",
+        "command": "make converge-browser-runner"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "keycloak_agent_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-browser-runner",
+        "syntax-check-api-gateway"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-browser-runner.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/browser-runner.yml",
+        "playbooks/services/browser-runner.yml",
+        "collections/ansible_collections/lv3/platform/roles/browser_runner_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/browser_runner_runtime/tasks/verify.yml",
+        "collections/ansible_collections/lv3/platform/roles/browser_runner_runtime/templates/docker-compose.yml.j2",
+        "scripts/browser_runner_service.py",
+        "scripts/browser_runner_client.py",
+        "scripts/browser_runner_smoke.py",
+        "docs/runbooks/configure-browser-runner.md",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/api-gateway-catalog.json",
+        "config/agent-tool-registry.json"
+      ],
+      "outputs": [
+        "A private Playwright browser-session runtime on docker-runtime-lv3, an authenticated `/v1/browser-runner/*` gateway route, and the governed `browser-run-session` Dify tool surface."
+      ],
+      "verification_commands": [
+        "make syntax-check-browser-runner",
+        "python3 scripts/validate_service_completeness.py --service browser_runner",
+        "curl -fsS https://api.lv3.org/v1/browser-runner/healthz -H 'Authorization: Bearer ${ACCESS_TOKEN}'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-changedetection": {
+      "description": "Deploy the private Changedetection.io runtime on docker-runtime-lv3, refresh the governed API gateway route, and reconcile the repo-managed upstream watch catalogue.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-changedetection",
+        "command": "make converge-changedetection"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-changedetection"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-changedetection.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/changedetection.yml",
+        "playbooks/services/changedetection.yml",
+        "roles/changedetection_runtime",
+        "roles/api_gateway_runtime",
+        "scripts/changedetection_sync.py",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/api-gateway-catalog.json",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/slo-catalog.json",
+        "config/data-catalog.json"
+      ],
+      "outputs": [
+        "A private Changedetection.io runtime on docker-runtime-lv3 with repo-managed upstream watch groups, mirrored API token, drift-free sync proof, and an authenticated `/v1/changedetection` route on the shared platform API gateway."
+      ],
+      "verification_commands": [
+        "make syntax-check-changedetection",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/changedetection/docker-compose.yml ps && curl -fsS http://127.0.0.1:5000/'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:5000/api/v1/systeminfo -H \"x-api-key: $(sudo cat /etc/lv3/changedetection/api-token)\"'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 -c '\\''import json; payload=json.load(open(\"/opt/changedetection/watch-sync-report.json\", encoding=\"utf-8\")); assert payload[\"check_only\"] is True and payload[\"changed\"] is False; print(json.dumps(payload[\"summary\"], sort_keys=True))'\\'''",
+        "LV3_TOKEN=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt) && curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" https://api.lv3.org/v1/changedetection/"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 280,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-tesseract-ocr": {
+      "description": "Build and deploy the private Tesseract OCR fallback runtime on docker-runtime-lv3 and verify direct OCR plus the Tika-first helper path.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-tesseract-ocr",
+        "command": "make converge-tesseract-ocr"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-tesseract-ocr"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-tesseract-ocr.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/tesseract-ocr.yml",
+        "playbooks/services/tesseract-ocr.yml",
+        "roles/tesseract_ocr_runtime",
+        "scripts/tesseract_ocr_service.py",
+        "scripts/document_extraction.py",
+        "requirements/tesseract-ocr.txt",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/slo-catalog.json",
+        "config/data-catalog.json"
+      ],
+      "outputs": [
+        "A private Tesseract OCR runtime on docker-runtime-lv3 with repo-managed direct OCR verification plus a Tika-first fallback extraction helper for scanned-image documents."
+      ],
+      "verification_commands": [
+        "make syntax-check-tesseract-ocr",
+        "curl -fsS http://10.10.10.20:3008/healthz",
+        "curl -fsS -F 'file=@collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png;filename=ocr-ok.png;type=image/png' http://10.10.10.20:3008/ocr",
+        "python3 scripts/document_extraction.py collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png --tika-url http://10.10.10.20:9998 --tesseract-url http://10.10.10.20:3008"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 260,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-directus": {
+      "description": "Deploy the Directus PostgreSQL backend, runtime, Keycloak client, and public edge publication, then verify REST, GraphQL, and OIDC access end to end.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-directus",
+        "command": "make converge-directus"
+      },
+      "preflight": {
+        "required": true,
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
+        ],
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "directus_database_password",
+          "directus_key",
+          "directus_secret",
+          "directus_admin_password",
+          "directus_service_registry_token",
+          "keycloak_directus_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-directus"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-directus.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/directus.yml",
+        "playbooks/services/directus.yml",
+        "roles/directus_postgres",
+        "roles/directus_runtime",
+        "roles/keycloak_runtime",
+        "scripts/directus_bootstrap.py",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/image-catalog.json",
+        "config/subdomain-catalog.json",
+        "config/command-catalog.json",
+        "config/workflow-catalog.json"
+      ],
+      "outputs": [
+        "A published Directus runtime on data.lv3.org backed by the dedicated directus PostgreSQL database, a repo-managed Keycloak client, a governed service_registry collection, and durable REST plus GraphQL verification credentials."
+      ],
+      "verification_commands": [
+        "make syntax-check-directus",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/directus/docker-compose.yml ps && curl -fsS http://127.0.0.1:8055/server/health'",
+        "curl -fsS https://data.lv3.org/server/health",
+        "python3 scripts/directus_bootstrap.py verify-public --base-url https://data.lv3.org --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus/service-registry-token.txt --collection service_registry --expected-service-name directus --expected-sso-host sso.lv3.org"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 280,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 2,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
       }

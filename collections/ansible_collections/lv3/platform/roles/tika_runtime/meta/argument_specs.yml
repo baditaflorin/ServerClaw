@@ -1,0 +1,41 @@
+# Purpose: Declare the argument contract for the Apache Tika runtime role.
+# Use case: Run during syntax and argument validation before converging the Tika runtime.
+# Inputs: tika_runtime_* variables required by the role.
+# Outputs: Machine-readable argument specs for the tika_runtime role.
+# Idempotency: Fully idempotent; metadata only validates role inputs.
+# Dependencies: ADR 0165 metadata standard, ADR 0275, and the tika_runtime role tasks.
+---
+argument_specs:
+  main:
+    short_description: Converge the private Apache Tika runtime for document text extraction.
+    options:
+      tika_runtime_site_dir:
+        type: path
+        required: true
+      tika_runtime_compose_file:
+        type: path
+        required: true
+      tika_runtime_container_name:
+        type: str
+        required: true
+      tika_runtime_image:
+        type: str
+        required: true
+      tika_runtime_port:
+        type: int
+        required: true
+      tika_runtime_base_url:
+        type: str
+        required: true
+      tika_runtime_container_port:
+        type: int
+        required: true
+      tika_runtime_sample_text:
+        type: str
+        required: true
+      tika_runtime_java_opts:
+        type: str
+        required: true
+      tika_runtime_verify_html_fixture:
+        type: str
+        required: true

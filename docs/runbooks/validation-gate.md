@@ -36,6 +36,13 @@ Inspect the configured checks and the last recorded outcomes:
 make gate-status
 ```
 
+Inspect the lane catalog and the current lane selection for this checkout:
+
+```bash
+python3 scripts/validation_lanes.py --list
+python3 scripts/validation_lanes.py --resolve
+```
+
 Run the fast local hook set across the whole checkout:
 
 ```bash
@@ -44,44 +51,81 @@ uvx --from pre-commit pre-commit run --all-files
 
 ## Gate Definition
 
-The authoritative gate manifest is [config/validation-gate.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-gate.json).
+The authoritative gate surfaces are:
 
-It defines these blocking checks:
+- [config/validation-gate.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-gate.json)
+- [config/validation-lanes.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-lanes.yaml)
+- [config/validation-runner-contracts.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-runner-contracts.json)
 
-- `ansible-lint`
-- `yaml-lint`
-- `type-check`
-- `integration-tests`
-- `schema-validation`
-- `ansible-syntax`
-- `policy-validation`
-- `tofu-validate`
-- `packer-validate`
-- `security-scan`
-- `artifact-secret-scan`
-- `service-completeness`
+`config/validation-gate.json` still declares the runnable checks, container images, and commands.
+`config/validation-lanes.yaml` now maps changed repo surfaces to ADR 0264 validation lanes and keeps only a small fast set of global invariants blocking for every run.
+`config/validation-runner-contracts.json` adds the ADR 0266 runner capability catalog so each gate run can attest the active runner and fail closed as `runner_unavailable` when the requested checks are not eligible on that execution surface.
 
-`scripts/run_gate.py` reads that manifest and executes the checks in parallel via [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py).
+The always-blocking fast global invariants are:
 
-ADR 0230 adds `policy-validation`, which runs [scripts/policy_checks.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/policy_checks.py) against the shared `policy/` bundle and verifies the OPA or Conftest toolchain cache under `LV3_POLICY_TOOLCHAIN_ROOT`. The same manifest-backed check now runs in the local gate, the build-server `remote-validate` path, and the worker-side Windmill post-merge gate.
+- `workstream-surfaces`
+- `agent-standards`
+
+The lane-scoped checks are grouped into these blocking lanes:
+
+- `documentation-and-adr`
+- `repository-structure-and-schema`
+- `generated-artifact-and-canonical-truth`
+- `service-syntax-and-unit`
+- `remote-builder`
+- `live-apply-and-promotion`
+
+[scripts/run_gate.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/run_gate.py) now reads the lane catalog and the runner-contract catalog, resolves changed files against the lane catalog, and executes only the blocking lane checks plus the fast global invariants. If a changed file does not match any declared surface class, the gate widens safely back to all lanes instead of silently skipping protection. If the selected runner contract cannot satisfy a requested check, the gate records that check as `runner_unavailable` before the Docker runner path starts.
+
+[scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py) still performs the container-backed execution once the blocking check set is resolved, and now classifies Docker-daemon, image-pull, and missing-runner failures as `runner_unavailable` instead of reporting them as content failures.
+
+Live-apply receipts under `receipts/live-applies/` are now a declared surface class, so receipt-only updates stay in the repository-structure-and-schema plus generated-artifact-and-canonical-truth lanes instead of widening the gate back to every lane.
+
+ADR 0230 adds `policy-validation`, which runs [scripts/policy_checks.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/policy_checks.py) against the shared `policy/` bundle and verifies the OPA or Conftest toolchain cache under `LV3_POLICY_TOOLCHAIN_ROOT`. That check now participates in the `repository-structure-and-schema` lane across the controller path, the build-server `remote-validate` path, and the worker-side Windmill post-merge gate.
+
+Repo-managed validation installs third-party Ansible collections from the public `release_galaxy` server by default, so local Docker fallback does not depend on resolving the private `galaxy.lv3.org` endpoint just to lint or syntax-check the checkout.
 
 The `schema-validation` stage now also runs [scripts/provider_boundary_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/provider_boundary_catalog.py) so ADR 0207 provider-boundary guards fail the gate if a declared boundary leaks raw provider payload selectors beyond its translation step.
+That stage now uses a longer timeout budget than the lighter Python-only checks so exact-main replays still finish when release, receipt, and canonical-truth changes widen the schema workload on slower fallback paths.
 
 The `integration-tests` stage runs [scripts/integration_suite.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/integration_suite.py) in `gate` mode against the `staging` environment. If the service catalog does not currently expose any active staging endpoints and no `LV3_INTEGRATION_*` overrides are supplied, the check records a structured skip and exits successfully instead of failing the gate.
 
 The `artifact-secret-scan` stage runs [scripts/published_artifact_secret_scan.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/published_artifact_secret_scan.py) in the security runner image so published receipts and generated portal/search artifacts are checked with `gitleaks` before merge.
 
-When the push starts from a Git worktree checkout, [scripts/remote_exec.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/remote_exec.sh) now mirrors the minimal worktree git metadata into the build-server workspace before running remote checks. That keeps `git ls-files` and similar repo-aware gate commands working on `build-lv3` instead of pointing back to a laptop-local `.git/worktrees/...` path.
+The `semgrep-sast` stage runs [scripts/semgrep_gate.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/semgrep_gate.py) in the published Python runner image, installs the pinned `semgrep==1.155.0` package with a pip cache mount, and then scans the repo-managed rule packs under `config/semgrep/rules/` across Python automation, Dockerfiles, and governed executable surfaces. The wrapper writes SARIF output under `receipts/sast/`, writes a JSON summary under `.local/validation-gate/semgrep-summary.json`, forces Semgrep into no-git traversal mode when the checkout is an immutable snapshot or worker mirror, and emits best-effort `sast_finding_introduced` mutation-audit events only when a comparable baseline can actually be resolved.
+
+When the push starts from a Git worktree checkout, [scripts/remote_exec.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/remote_exec.sh) now builds one immutable content-addressed repository snapshot, uploads that archive into the active build-server session workspace, and unpacks it into a fresh `.lv3-runs/<run_id>/repo` namespace before running remote checks. The remote gate therefore validates one consistent repository image without depending on mirrored `.git/worktrees/...` metadata.
+[scripts/run_python_with_packages.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/run_python_with_packages.sh) now keeps Python-based gate checks runnable inside the registry-backed runner images even when those images do not ship `uv`; the helper uses `uv` when present and otherwise falls back to the runner's native Python plus pip-installed dependencies only when imports are missing.
 
 ## Bypass Model
 
 The supported audited bypass is:
 
 ```bash
-SKIP_REMOTE_GATE=1 git push
+SKIP_REMOTE_GATE=1 \
+GATE_BYPASS_REASON_CODE=build_server_unreachable \
+GATE_BYPASS_DETAIL="build-lv3 SSH probe timed out during the remote pre-push gate" \
+GATE_BYPASS_SUBSTITUTE_EVIDENCE="./scripts/validate_repo.sh agent-standards;python3 scripts/gate_status.py --format json" \
+GATE_BYPASS_REMEDIATION_REF=ws-0267-live-apply \
+git push
 ```
 
-That path records a receipt under [receipts/gate-bypasses](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/gate-bypasses).
+That path records a governed waiver receipt under [receipts/gate-bypasses](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/gate-bypasses).
+
+ADR 0267 now requires every new bypass receipt to include:
+
+- `GATE_BYPASS_REASON_CODE` from [config/gate-bypass-waiver-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/gate-bypass-waiver-catalog.json)
+- `GATE_BYPASS_DETAIL` with the concrete failure class
+- `GATE_BYPASS_SUBSTITUTE_EVIDENCE` listing the substitute validations that already passed
+- `GATE_BYPASS_REMEDIATION_REF` pointing at the cleanup workstream or issue
+
+Optional fields:
+
+- `GATE_BYPASS_IMPACTED_LANES` for a comma-separated override to the default `remote-pre-push-gate`
+- `GATE_BYPASS_OWNER` to override the inferred git user or shell user
+- `GATE_BYPASS_EXPIRES_ON=YYYY-MM-DD` to shorten the default policy window from the catalog
+
+If those fields are missing, the hook now fails closed instead of writing another vague bypass receipt.
 
 `git push --no-verify` still skips both hook layers, but native Git hooks cannot observe that bypass after the fact. Treat it as break-glass only and record the reason in the change notes if it is used.
 
@@ -90,14 +134,25 @@ That path records a receipt under [receipts/gate-bypasses](/Users/live/Documents
 The gate writes the last local or remote-triggered run to:
 
 - `.local/validation-gate/last-run.json`
+- `.local/validation-gate/remote-validate-last-run.json`
 
-That payload now includes a `session_workspace` object so operators can tell which controller session or worktree produced the latest result.
+Those payloads now include:
+
+- `session_workspace` so operators can tell which controller session or worktree produced the latest result
+- `runner.id`, `runner.capability_contract`, and `runner.environment_attestation` so operators can see the attested execution surface, tooling, network class, and scratch-space guarantees used for that run
+- `lane_selection` so operators can see which lanes and checks blocked for that run
+- `lane_results` so passed lanes publish reusable green-path summaries
+- `fast_global_results` so the always-blocking invariants are visible separately from the selected lanes
 
 The Windmill post-merge gate writes its most recent result to:
 
 - `.local/validation-gate/post-merge-last-run.json`
 
-`make gate-status` reads both files when present.
+`make gate-status` reads all three files when present and now also summarizes:
+
+- legacy versus governed bypass receipts
+- currently open waivers and their expiry dates
+- repeated expired reason codes that have escalated to warning or release-blocking status
 
 ## Windmill Post-Merge Gate
 
@@ -107,30 +162,39 @@ Windmill should call:
 python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server
 ```
 
-That workflow re-runs the same `config/validation-gate.json` manifest after merge on `main` and records the result in the worker checkout.
+That workflow is seeded into the `lv3` workspace as `f/lv3/post_merge_gate`, re-runs the same lane-aware validation catalog after merge on `main`, records the result in the worker checkout, and forces `LV3_VALIDATION_RUNNER_ID=windmill-post-merge-worker` so the recorded payload names the worker runner contract instead of inheriting a controller-local default.
 
 If the worker cannot pull the registry-backed `check-runner` images and the manifest run fails with a runner-image error, the post-merge script falls back to a worker-safe local subset:
 
-- `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals`
+- `./scripts/validate_repo.sh workstream-surfaces agent-standards generated-vars role-argument-specs json alert-rules generated-docs generated-portals`
 - `uv run --with pyyaml python3 scripts/provider_boundary_catalog.py --validate`
 
 That fallback intentionally omits the full `data-models` stage because mirrored worker checkouts can lack the complete historical git ancestry needed to validate every live-apply receipt `source_commit`, even when the ADR 0207 provider-boundary contract itself is healthy.
 The mirrored worker checkout still needs the canonical generated-doc inputs (`README.md`, `VERSION`, `changelog.md`, `mkdocs.yml`, `roles/`, `versions/`, and `workstreams.yaml`) because the fallback keeps `generated-docs` and `generated-portals` enabled even without `.git`.
 The mirrored worker checkout also needs the ADR 0230 policy surfaces (`policy/`, `scripts/policy_checks.py`, `scripts/policy_toolchain.py`, `scripts/command_catalog.py`, `scripts/gate_status.py`, and `config/windmill/scripts/gate-status.py`) because the worker-side approval and gate-status wrappers evaluate the same shared policy bundle after each sync.
-When the replay starts from a non-primary git worktree, rerun `playbooks/windmill.yml` with `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` so the worker mirror reflects the branch under verification instead of the shared top-level checkout.
+The worker mirror is file-backed rather than git-backed, so `role-argument-specs` now skips empty role directories in no-git mode and `windmill_runtime` prunes stale empty directories from synchronized roots before the fallback runs.
+The worker currently evaluates `generated-portals` with its local Python `3.11` interpreter, so repo-managed portal generators must remain compatible with that parser as well as the newer controller-side Python runtimes.
+`make converge-windmill` now pins `windmill_worker_checkout_repo_root_local_dir=$(REPO_ROOT)` automatically, so repo-scoped worktree replays mirror the active worktree into `/srv/proxmox_florin_server` even when other integration worktrees are converging concurrently. If the replay starts from an out-of-tree or temporary playbook path instead of the Makefile wrapper, rerun it with `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` so the worker mirror still reflects the branch under verification.
 
 ## Troubleshooting
 
 - if `make install-hooks` fails during `pre-commit` bootstrap, rerun it with working internet access so `pre-commit` can fetch hook environments
 - if the build server is unreachable, rerun `make pre-push-gate`; the wrapper already falls back to local Docker execution
+- if the local Docker fallback is running on an emulated platform such as Apple Silicon with amd64 runner images, expect the `ansible-lint` and `ansible-syntax` stages to take several minutes; the manifest timeout budget is intentionally higher for those checks than for the lighter Python-only stages
+- if `semgrep-sast` fails, inspect `receipts/sast/*.sarif.json` plus `.local/validation-gate/semgrep-summary.json` before muting a rule; the wrapper records the exact rule ids, severity counts, and whether baseline comparison ran or was skipped
+- if `make remote-validate` or `make pre-push-gate` records `runner_unavailable`, treat that as runner drift or admission failure first and inspect the recorded `runner.environment_attestation` plus `runner_unavailable_reason` fields before debugging repository content
 - if two remote gate runs appear to reuse one checkout, set distinct `LV3_SESSION_ID` values and rerun so each session gets its own build-server workspace
-- if a remote gate run fails with `fatal: not a git repository` from a worktree path, rerun on the updated `main`; the remote sync now rewrites worktree metadata into `.git-remote/` inside the build workspace
+- if a remote gate run fails with `fatal: not a git repository`, treat it as a validator regression rather than a checkout-shape requirement; the build-server path now uses immutable no-git snapshots and the affected check should be fixed to reason about repository content instead
 - if the Windmill post-merge gate points at an older mirrored worker tree without the canonical generated-doc inputs, replay `windmill_runtime` first so `/srv/proxmox_florin_server` includes the full worker-safe validation surface before rerunning the gate
 - if `policy-validation` fails on the build server or worker because OPA or Conftest binaries are missing, rerun the same entrypoint after clearing the cached toolchain root and ensure `LV3_POLICY_TOOLCHAIN_ROOT` points at a writable directory
-- if the Windmill worker mirror picked up files from the shared checkout instead of the branch worktree, replay `playbooks/windmill.yml` with `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` before rerunning the gate
+- if the Windmill worker mirror picked up files from the wrong concurrent worktree, rerun `make converge-windmill` from the intended repo worktree; if you are bypassing the Makefile wrapper, rerun `playbooks/windmill.yml` with `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` before rerunning the gate
+- if the Windmill worker mirror still misses exact-worktree files such as `config/validation-lanes.yaml` after that replay, treat it as a stale checkout regression: copy the exact worktree validation surfaces into `/srv/proxmox_florin_server`, delete `/opt/windmill/worker-checkout.sha256` so the next managed replay cannot trust the stale checksum marker, and then rerun `config/windmill/scripts/post-merge-gate.py`
+- if you hot-sync worker validation wrappers such as `config/windmill/scripts/gate-status.py` into `/srv/proxmox_florin_server` without replaying `playbooks/windmill.yml`, immediately refresh the mirrored generated artifacts with `python3 scripts/generate_dependency_diagram.py --write`, `uvx --from pyyaml python scripts/canonical_truth.py --write`, and `python3 scripts/generate_diagrams.py --write` before rerunning `config/windmill/scripts/post-merge-gate.py`; the worker mirror is file-backed, not git-backed, and the fallback keeps `generated-docs` enabled
 - if the mirrored worker policy tree contains `._*` or `.DS_Store` files from a macOS checkout, replay `playbooks/windmill.yml`; ADR 0230 strips those metadata files during the repo sync before rerunning the worker gate
+- if the worker-local fallback reports a removed role as missing `meta/argument_specs.yml`, replay `playbooks/windmill.yml` from the current worktree so the worker mirror prunes stale empty directories before rerunning `f/lv3/post_merge_gate`
 - if the Windmill post-merge gate falls back locally because runner images cannot be pulled, treat the build-server `remote-validate` run as the authoritative full-manifest proof and use the fallback output to confirm the worker-safe ADR 0207 boundary checks still passed
 - if a remote or worker-local fallback fails on `int | None` or another modern type annotation, export `LV3_VALIDATE_PYTHON_BIN=/absolute/path/to/python3.10+` before rerunning so the direct Python validators do not inherit an older login-shell interpreter
 - if `packer-validate` falls back locally, inspect the build-worker plugin cache under `/opt/builds/.packer.d`; the remote gate expects the `github.com/hashicorp/proxmox` plugin to be prewarmed there when outbound GitHub access is unavailable
 - if a local fallback fails because Docker is unavailable, fix the local Docker daemon or restore build-server reachability before pushing
 - if `make gate-status` shows no results, run `make pre-push-gate` once to seed the local status file
+- if `SKIP_REMOTE_GATE=1 git push` now fails with a waiver validation error, fill in the required `GATE_BYPASS_*` fields instead of retrying with `--no-verify`

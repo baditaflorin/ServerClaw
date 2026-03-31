@@ -16,6 +16,7 @@ def load_tasks() -> list[dict]:
 def test_role_defaults_pin_private_model_storage() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text())
     assert defaults["ollama_runtime_model_dir"] == "{{ ollama_runtime_data_dir }}/models"
+    assert defaults["ollama_runtime_compose_project_name"] == "{{ ollama_runtime_site_dir | basename }}"
     assert defaults["ollama_runtime_default_model"] == "llama3.2:3b"
 
 
@@ -46,6 +47,8 @@ def test_role_recovers_missing_docker_nat_chain_before_startup() -> None:
     )
     rescue_names = [task["name"] for task in start_block["rescue"]]
     assert "Restart Docker to restore nat chain before retrying Ollama startup" in rescue_names
+    assert "Detect stale Docker networking drift during Ollama startup" in rescue_names
+    assert "Remove the stale Ollama compose network before retrying startup" in rescue_names
     assert "Retry Ollama startup after Docker nat-chain recovery" in rescue_names
 
 
@@ -59,10 +62,18 @@ def test_role_force_recreates_ollama_when_port_binding_is_missing() -> None:
         "{{ ollama_runtime_port }}",
     ]
 
-    recreate_task = next(
-        task for task in tasks if task.get("name") == "Force-recreate Ollama when the host port binding is missing"
+    recreate_block = next(
+        task for task in tasks if task.get("name") == "Force-recreate Ollama when the host port binding is missing and recover stale Docker networking drift"
     )
+    recreate_task = next(
+        task for task in recreate_block["block"] if task.get("name") == "Force-recreate Ollama when the host port binding is missing"
+    )
+    rescue_names = [task["name"] for task in recreate_block["rescue"]]
+
     assert "--force-recreate" in recreate_task["ansible.builtin.command"]["argv"]
+    assert "Detect stale Docker networking drift during Ollama force-recreate" in rescue_names
+    assert "Remove the stale Ollama compose network before retrying force-recreate" in rescue_names
+    assert "Retry Ollama force-recreate after Docker networking recovery" in rescue_names
 
 
 def test_compose_template_exposes_private_runtime_port_and_model_volume() -> None:

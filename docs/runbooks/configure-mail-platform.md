@@ -82,6 +82,21 @@ The same converge also publishes a private SMTP submission relay for local platf
 
 The host-address form is intended for VM-local platform workloads that can consume the Docker-runtime host address directly. The container-DNS form is intended for workloads that share the mail Docker network on `docker-runtime-lv3`. STARTTLS stays disabled on this listener for plaintext-auth internal consumers. Keycloak uses the shared-network hostname `lv3-mail-stalwart:1587` because both the host-private path and the public hostname path proved unreliable from another container network. Public client submission remains on TCP `587`.
 
+## Non-Production SMTP Contract
+
+Production inventory keeps `smtp_host` pointed at Stalwart. Non-production inventory
+can override the shared SMTP contract to point at Mailpit instead:
+
+- `inventory/group_vars/all.yml` keeps the production default on Stalwart
+- `inventory/group_vars/staging.yml` overrides `smtp_host: mailpit`,
+  `smtp_port: 1025`, and `smtp_docker_network_name: dev-tools_default`
+- staging verification in `playbooks/mail-platform-verify.yml` clears Mailpit,
+  sends a probe through SMTP, and asserts the captured message through the
+  Mailpit REST API instead of the production IMAP mailbox path
+
+Mailpit is the non-production assertion target only. Production services must
+continue to relay through Stalwart.
+
 Authentication:
 
 - admin header: `X-API-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt)`
@@ -159,6 +174,7 @@ Run these checks after converge:
 - outbound transactional delivery currently uses the Brevo HTTP API from the mail gateway
 - the private SMTP submission relay on TCP `1587` exists specifically for VM-local platform workloads that need authenticated mail without depending on public STARTTLS certificate trust, so STARTTLS is intentionally disabled on that listener
 - containerized workloads on `docker-runtime-lv3` should prefer the shared-network hostname `lv3-mail-stalwart:1587` over host-published mail ports when they need authenticated internal submission
+- if a replay hits `failed to create endpoint ... network ... does not exist` while recreating the mail-platform containers after Docker networking recovery, treat it as stale compose-network drift: rerun the repo-managed converge and let the role reset the stack with `docker compose down --remove-orphans` before retrying the startup
 - sender governance is enforced through notification-profile-specific mailbox identities and scoped API keys instead of one shared global send credential
 - the first distributed traces for this workflow come from inbound gateway requests plus outbound HTTP calls to Stalwart and Brevo, with `service.namespace=lv3` and `deployment.environment=lv3` exported through `OTEL_RESOURCE_ATTRIBUTES`
 - if direct public SMTP delivery from one profile is required later, add the sender identity, DKIM, and reverse-DNS path explicitly for that profile instead of reusing broad relay assumptions

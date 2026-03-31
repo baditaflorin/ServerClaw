@@ -1,0 +1,54 @@
+
+PLAY [Debug Flagsmith seed reconcile on docker-runtime-lv3] ********************
+
+TASK [Run the seed helper directly for debug visibility] ***********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run the seed helper directly for debug visibility","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:34:16.723Z","vm":"controller","workflow_id":"ansible-playbook"}
+fatal: [docker-runtime-lv3]: FAILED! => {"ansible_facts": {"discovered_interpreter_python": "/usr/bin/python3.13"}, "changed": false, "cmd": ["python3", "/opt/flagsmith/flagsmith_seed.py", "reconcile", "--base-url", "http://10.10.10.20:8017", "--admin-email", "flagsmith.automation@lv3.org", "--admin-password-file", "/etc/lv3/flagsmith/admin-password.txt", "--organisation-name", "LV3 Platform", "--project-name", "Platform Services", "--environment-spec-json", "[{\"name\": \"production\", \"allow_client_traits\": true}, {\"name\": \"staging\", \"allow_client_traits\": true}, {\"name\": \"development\", \"allow_client_traits\": true}]", "--feature-spec-json", "[{\"name\": \"SERVERCLAW_EXPERIMENTAL_TOOLS\", \"type\": \"STANDARD\", \"default_enabled\": false, \"initial_value\": \"\", \"environment_overrides\": {\"production\": {\"enabled\": false}, \"staging\": {\"enabled\": false}, \"development\": {\"enabled\": true}}}, {\"name\": \"CONF_LLM_MODEL_NAME\", \"type\": \"STANDARD\", \"default_enabled\": true, \"initial_value\": \"gpt-5.4-mini\", \"environment_overrides\": {\"production\": {\"enabled\": true, \"feature_state_value\": \"gpt-5.4-mini\"}, \"staging\": {\"enabled\": true, \"feature_state_value\": \"gpt-5.4-mini\"}, \"development\": {\"enabled\": true, \"feature_state_value\": \"gpt-5.4\"}}}]"], "delta": "0:00:01.501662", "end": "2026-03-30 18:34:20.924118", "msg": "non-zero return code", "rc": 1, "start": "2026-03-30 18:34:19.422456", "stderr": "'id'", "stderr_lines": ["'id'"], "stdout": "", "stdout_lines": []}
+...ignoring
+{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"non-zero return code","ignored":true,"level":"ERROR","msg":"Task failed: Run the seed helper directly for debug visibility","service_id":"ansible","target":"docker-runtime-lv3","task_status":"failed","trace_id":"background","ts":"2026-03-30T18:34:21.012Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Show seed debug result] **************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Show seed debug result","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:34:21.016Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "seed_debug": {
+        "ansible_facts": {
+            "discovered_interpreter_python": "/usr/bin/python3.13"
+        },
+        "changed": false,
+        "cmd": [
+            "python3",
+            "/opt/flagsmith/flagsmith_seed.py",
+            "reconcile",
+            "--base-url",
+            "http://10.10.10.20:8017",
+            "--admin-email",
+            "flagsmith.automation@lv3.org",
+            "--admin-password-file",
+            "/etc/lv3/flagsmith/admin-password.txt",
+            "--organisation-name",
+            "LV3 Platform",
+            "--project-name",
+            "Platform Services",
+            "--environment-spec-json",
+            "[{\"name\": \"production\", \"allow_client_traits\": true}, {\"name\": \"staging\", \"allow_client_traits\": true}, {\"name\": \"development\", \"allow_client_traits\": true}]",
+            "--feature-spec-json",
+            "[{\"name\": \"SERVERCLAW_EXPERIMENTAL_TOOLS\", \"type\": \"STANDARD\", \"default_enabled\": false, \"initial_value\": \"\", \"environment_overrides\": {\"production\": {\"enabled\": false}, \"staging\": {\"enabled\": false}, \"development\": {\"enabled\": true}}}, {\"name\": \"CONF_LLM_MODEL_NAME\", \"type\": \"STANDARD\", \"default_enabled\": true, \"initial_value\": \"gpt-5.4-mini\", \"environment_overrides\": {\"production\": {\"enabled\": true, \"feature_state_value\": \"gpt-5.4-mini\"}, \"staging\": {\"enabled\": true, \"feature_state_value\": \"gpt-5.4-mini\"}, \"development\": {\"enabled\": true, \"feature_state_value\": \"gpt-5.4\"}}}]"
+        ],
+        "delta": "0:00:01.501662",
+        "end": "2026-03-30 18:34:20.924118",
+        "failed": true,
+        "msg": "non-zero return code",
+        "rc": 1,
+        "start": "2026-03-30 18:34:19.422456",
+        "stderr": "'id'",
+        "stderr_lines": [
+            "'id'"
+        ],
+        "stdout": "",
+        "stdout_lines": []
+    }
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Show seed debug result","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:34:21.076Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+docker-runtime-lv3         : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=1

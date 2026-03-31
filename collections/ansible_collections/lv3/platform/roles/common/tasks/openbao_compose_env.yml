@@ -53,6 +53,43 @@
     common_openbao_compose_env_init_payload: "{{ lookup('ansible.builtin.file', openbao_init_local_file) | from_json }}"
   no_log: true
 
+- name: Recover the local OpenBao runtime before helper API calls
+  ansible.builtin.include_tasks: ensure_local_openbao_runtime.yml
+  vars:
+    common_local_openbao_runtime_consumer_name: "{{ common_openbao_compose_env_service_name }}"
+
+- name: Ensure the controller-local SSH control path directory exists before OpenBao API retries
+  ansible.builtin.file:
+    path: "{{ lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  when: (lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') | default('', true) | length) > 0
+
+- name: Record whether the local OpenBao runtime needed recovery for compose env injection
+  ansible.builtin.set_fact:
+    common_openbao_compose_env_runtime_needs_recovery: >-
+      {{
+        (common_local_openbao_runtime_probe.status | default(0))
+        not in [200, 429, 472, 473, 501, 503]
+      }}
+
+- name: Wait for the Docker daemon to answer after networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: common_openbao_compose_env_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: common_openbao_compose_env_docker_info.rc == 0
+  when: common_openbao_compose_env_runtime_needs_recovery | bool
+
 - name: Wait for the local OpenBao API to answer
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
@@ -65,7 +102,7 @@
       - 501
       - 503
   register: common_openbao_compose_env_api_health
-  retries: 24
+  retries: 48
   delay: 5
   until: common_openbao_compose_env_api_health.status in [200, 429, 472, 473, 501, 503]
   changed_when: false
@@ -128,7 +165,7 @@
       - 472
       - 473
   register: common_openbao_compose_env_health
-  retries: 24
+  retries: 48
   delay: 5
   until: common_openbao_compose_env_health.status in [200, 429, 472, 473]
   changed_when: false
@@ -156,7 +193,13 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   register: common_openbao_compose_env_current_secret
+  retries: 12
+  delay: 5
+  until: common_openbao_compose_env_current_secret.status in [200, 404]
   changed_when: false
   no_log: true
 
@@ -185,7 +228,13 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   register: common_openbao_compose_env_current_policy
+  retries: 12
+  delay: 5
+  until: common_openbao_compose_env_current_policy.status in [200, 404]
   changed_when: false
   no_log: true
 
@@ -219,6 +268,10 @@
       secret_id_ttl: 0
       secret_id_num_uses: 0
     status_code: 204
+  register: common_openbao_compose_env_approle_upsert
+  retries: 12
+  delay: 2
+  until: common_openbao_compose_env_approle_upsert.status == 204
   no_log: true
 
 - name: Read the OpenBao AppRole role ID
@@ -230,6 +283,9 @@
     return_content: true
     status_code: 200
   register: common_openbao_compose_env_role_id
+  retries: 12
+  delay: 2
+  until: common_openbao_compose_env_role_id.status == 200
   changed_when: false
   no_log: true
 

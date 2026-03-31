@@ -1,0 +1,132 @@
+---
+# Purpose: Build the private Playwright browser runner image from repo-managed sources, start the runtime on docker-runtime-lv3, and verify the local session API.
+- name: Validate browser runner runtime inputs
+  ansible.builtin.assert:
+    that:
+      - browser_runner_runtime_site_dir | length > 0
+      - browser_runner_runtime_service_dir | length > 0
+      - browser_runner_runtime_data_dir | length > 0
+      - browser_runner_runtime_artifact_dir | length > 0
+      - browser_runner_runtime_compose_file | length > 0
+      - browser_runner_runtime_dockerfile | length > 0
+      - browser_runner_runtime_requirements_file | length > 0
+      - browser_runner_runtime_service_script | length > 0
+      - browser_runner_runtime_container_name | length > 0
+      - browser_runner_runtime_image_name | length > 0
+      - browser_runner_runtime_base_image | length > 0
+      - browser_runner_runtime_internal_port | int > 0
+      - browser_runner_runtime_bind_host | length > 0
+      - browser_runner_runtime_network_mode | length > 0
+      - browser_runner_runtime_default_timeout_seconds | int > 0
+      - browser_runner_runtime_max_timeout_seconds | int >= browser_runner_runtime_default_timeout_seconds | int
+      - browser_runner_runtime_service_sources | length > 0
+    fail_msg: >-
+      browser_runner_runtime requires the runtime paths, local image build
+      inputs, bounded timeout configuration, and repo-managed service sources.
+
+- name: Ensure browser runner runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - docker-compose-plugin
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure browser runner directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ browser_runner_runtime_site_dir }}"
+    - "{{ browser_runner_runtime_service_dir }}"
+    - "{{ browser_runner_runtime_data_dir }}"
+    - "{{ browser_runner_runtime_artifact_dir }}"
+
+- name: Render the browser runner compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ browser_runner_runtime_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the browser runner Dockerfile
+  ansible.builtin.template:
+    src: Dockerfile.j2
+    dest: "{{ browser_runner_runtime_dockerfile }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Sync the browser runner service sources
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ browser_runner_runtime_service_sources }}"
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Build the browser runner image
+  ansible.builtin.shell: |
+    set -euo pipefail
+    build_dir="$(mktemp -d /tmp/browser-runner-build.XXXXXX)"
+    log_file="/tmp/browser-runner-build.log"
+    trap 'rm -rf "$build_dir"' EXIT
+    cp -a "{{ browser_runner_runtime_service_dir }}/." "$build_dir/"
+    if DOCKER_BUILDKIT=0 docker build --pull=false -t "{{ browser_runner_runtime_image_name }}:latest" "$build_dir" >"$log_file" 2>&1; then
+      cat "$log_file"
+    else
+      rc="$?"
+      cat "$log_file"
+      exit "$rc"
+    fi
+  args:
+    chdir: "{{ browser_runner_runtime_site_dir }}"
+    executable: /bin/bash
+  register: browser_runner_runtime_build
+  retries: 2
+  delay: 5
+  until: browser_runner_runtime_build.rc == 0
+  changed_when: >-
+    'writing image' in (browser_runner_runtime_build.stdout | lower)
+    or 'writing image' in (browser_runner_runtime_build.stderr | lower)
+    or 'naming to' in (browser_runner_runtime_build.stdout | lower)
+    or 'naming to' in (browser_runner_runtime_build.stderr | lower)
+    or 'exporting to image' in (browser_runner_runtime_build.stdout | lower)
+    or 'exporting to image' in (browser_runner_runtime_build.stderr | lower)
+    or 'successfully built' in (browser_runner_runtime_build.stdout | lower)
+    or 'successfully tagged' in (browser_runner_runtime_build.stdout | lower)
+
+- name: Start the browser runner stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ browser_runner_runtime_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ browser_runner_runtime_site_dir }}"
+  register: browser_runner_runtime_up
+  changed_when: >-
+    'Creating' in browser_runner_runtime_up.stdout
+    or 'Recreating' in browser_runner_runtime_up.stdout
+    or 'Starting' in browser_runner_runtime_up.stdout
+
+- name: Wait for the browser runner listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ browser_runner_runtime_internal_port }}"
+    delay: 0
+    timeout: 240
+
+- name: Verify the browser runner runtime
+  ansible.builtin.import_tasks: verify.yml

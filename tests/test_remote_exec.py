@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -27,7 +28,7 @@ printf '%s\n' "$*" >> "${REMOTE_EXEC_SSH_LOG:?}"
 if [[ "${REMOTE_EXEC_SSH_FAIL:-0}" == "1" ]]; then
   exit 255
 fi
-if [[ "${REMOTE_EXEC_REMOTE_FAIL:-0}" == "1" && "$*" != *" true" && "$*" != *"mkdir -p"* && "$*" != *".git-remote"* ]]; then
+if [[ "${REMOTE_EXEC_REMOTE_FAIL:-0}" == "1" && "$*" != *" true" && "$*" != *"mkdir -p"* && "$*" != *"tar -xzf"* && "$*" != *"test -f"* ]]; then
   exit 1
 fi
 if [[ "$*" == *"docker run"* ]]; then
@@ -40,6 +41,9 @@ if [[ "$*" == *" && pwd"* ]]; then
   printf '%s\n' "${REMOTE_EXEC_WORKSPACE_ROOT:?}"
 fi
 if [[ "$*" == *".local/validation-gate/last-run.json"* ]]; then
+  printf '%s' "${REMOTE_EXEC_STATUS_PAYLOAD:-}"
+fi
+if [[ "$*" == *".local/validation-gate/remote-validate-last-run.json"* ]]; then
   printf '%s' "${REMOTE_EXEC_STATUS_PAYLOAD:-}"
 fi
 """,
@@ -98,22 +102,43 @@ def build_config(
         "registry_base": "registry.lv3.org",
         "commands": {
             "remote-lint": {
+                "runner_id": "build-server-validation",
+                "local_fallback_runner_id": "controller-local-validation",
                 "runner_label": "lint-ansible",
+                "validation_lanes": ["yaml-lint", "ansible-lint"],
                 "command": "printf remote-lint",
                 "local_fallback_command": local_command,
             },
             "remote-validate": {
+                "runner_id": "build-server-validation",
+                "local_fallback_runner_id": "controller-local-validation",
                 "runner_label": "validate-schemas",
+                "status_file": ".local/validation-gate/remote-validate-last-run.json",
+                "validation_lanes": [
+                    "ansible-syntax",
+                    "schema-validation",
+                    "policy-validation",
+                    "alert-rule-validation",
+                    "type-check",
+                    "dependency-graph",
+                ],
                 "command": "printf remote-validate",
                 "local_fallback_command": local_command,
             },
             "pre-push-gate": {
+                "runner_id": "build-server-validation",
+                "local_fallback_runner_id": "controller-local-validation",
                 "skip_docker": True,
+                "status_file": ".local/validation-gate/last-run.json",
+                "validation_lanes": "all-validation-gate-checks",
                 "command": "printf remote-pre-push",
                 "local_fallback_command": local_command,
             },
             "remote-packer-validate": {
+                "runner_id": "build-server-validation",
+                "local_fallback_runner_id": "controller-local-validation",
                 "runner_label": "packer-validate",
+                "validation_lanes": ["packer-validate"],
                 "command": "printf remote-packer-validate",
                 "local_fallback_command": local_command,
             },
@@ -212,19 +237,32 @@ def run_remote_exec(
     return completed
 
 
+def extract_run_workspace_root(text: str) -> str:
+    match = re.search(r"(/opt/builds/proxmox_florin_server/\.lv3-session-workspaces/test-session/repo/\.lv3-runs/[^ ]+/repo)", text)
+    assert match is not None, text
+    return match.group(1)
+
+
 def test_remote_exec_uses_docker_runner_metadata(tmp_path: Path) -> None:
     completed = run_remote_exec(tmp_path, "remote-lint", extra_env={"REMOTE_EXEC_VERBOSE": "1"})
 
     assert completed.returncode == 0, completed.stderr
+    run_workspace_root = extract_run_workspace_root(completed.stderr)
     assert "Remote docker command:" in completed.stderr
     assert "registry.lv3.org/check-runner/ansible:0.1.0" in completed.stderr
     assert "/opt/builds/.ansible/collections:/opt/builds/.ansible/collections" in completed.stderr
     assert "LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha" in completed.stderr
-    assert f"{REMOTE_WORKSPACE_ROOT}:/workspace" in completed.stderr
+    assert f"{run_workspace_root}:/workspace" in completed.stderr
     assert "GIT_CONFIG_KEY_0=safe.directory" in completed.stderr
     assert "GIT_CONFIG_VALUE_0=/workspace" in completed.stderr
-    assert "docker run" in completed.ssh_log.read_text()  # type: ignore[attr-defined]
-    assert "--checksum" in completed.rsync_log.read_text()  # type: ignore[attr-defined]
+    ssh_log = completed.ssh_log.read_text()  # type: ignore[attr-defined]
+    assert "bash -lc" in ssh_log
+    assert "check-runner/ansible:0.1.0" in ssh_log
+    assert "docker run" in ssh_log
+    rsync_log = completed.rsync_log.read_text()  # type: ignore[attr-defined]
+    assert "--checksum" in rsync_log
+    assert "repository-snapshot-" in rsync_log
+    assert ".lv3-snapshots" in rsync_log
 
 
 def test_remote_exec_falls_back_locally_when_requested(tmp_path: Path) -> None:
@@ -249,7 +287,7 @@ def test_remote_exec_falls_back_locally_when_sync_fails(tmp_path: Path) -> None:
     )
 
     assert completed.returncode == 0
-    assert "remote sync failed" in completed.stderr
+    assert "snapshot upload failed" in completed.stderr
     assert completed.marker.read_text() == "local-fallback"  # type: ignore[attr-defined]
 
 
@@ -286,6 +324,7 @@ def test_check_build_server_uses_rsync_dry_run(tmp_path: Path) -> None:
     rsync_log = completed.rsync_log.read_text()  # type: ignore[attr-defined]
     assert "--dry-run" in rsync_log
     assert "--verbose" in rsync_log
+    assert "repository-snapshot-" in rsync_log
     assert "build-server-ok" in completed.stdout
     assert REMOTE_WORKSPACE_ROOT in completed.stdout
 
@@ -385,18 +424,17 @@ def test_remote_exec_materializes_worktree_git_metadata_for_remote_workspace(tmp
     assert completed.returncode == 0, completed.stderr
     ssh_log = completed.ssh_log.read_text()  # type: ignore[attr-defined]
     rsync_log = completed.rsync_log.read_text()  # type: ignore[attr-defined]
-    assert ".git-remote/worktree" in ssh_log
-    assert ".git-remote/common" in ssh_log
-    assert ".git-remote/worktree/gitdir" in ssh_log
-    assert "scripts/cases" in ssh_log
+    run_workspace_root = extract_run_workspace_root(ssh_log)
+    assert ".lv3-snapshots" in ssh_log
+    assert ".lv3-runs" in ssh_log
+    assert "tar -xzf" in ssh_log
     assert REMOTE_WORKSPACE_ROOT in ssh_log
-    assert f"rm -rf {REMOTE_WORKSPACE_ROOT}/.git-remote ||" not in ssh_log
-    assert ".git-remote/worktree/" in rsync_log
-    assert ".git-remote/common/" in rsync_log
-    assert "--delete" in rsync_log
-    assert "./HEAD" in rsync_log
-    assert "./config" in rsync_log
-    assert "./objects" not in rsync_log
+    assert run_workspace_root.startswith(f"{REMOTE_WORKSPACE_ROOT}/.lv3-runs/")
+    assert ".git-remote" not in ssh_log
+    assert ".git-remote" not in rsync_log
+    assert "--delete" not in rsync_log
+    assert "repository-snapshot-" in rsync_log
+    assert ".lv3-snapshots" in rsync_log
 
 
 def test_remote_exec_syncs_remote_gate_status_back_to_local_checkout(tmp_path: Path) -> None:
@@ -430,4 +468,10 @@ def test_remote_exec_forwards_packer_related_environment_variables(tmp_path: Pat
     assert "LV3_RUN_ID=adr-0177-run" in ssh_log
     assert f"LV3_SESSION_ID={SESSION_ID}" in ssh_log
     assert "LV3_SESSION_SLUG=test-session" in ssh_log
-    assert f"LV3_SESSION_LOCAL_ROOT={REMOTE_WORKSPACE_ROOT}/.local/session-workspaces/test-session" in ssh_log
+    assert "LV3_SNAPSHOT_ID=" in ssh_log
+    assert "LV3_SNAPSHOT_SOURCE_COMMIT=" in ssh_log
+    assert "LV3_SNAPSHOT_BRANCH=" in ssh_log
+    assert re.search(
+        r"LV3_SESSION_LOCAL_ROOT=/opt/builds/proxmox_florin_server/\.lv3-session-workspaces/test-session/repo/\.lv3-runs/.+/repo/\.local/session-workspaces/test-session",
+        ssh_log,
+    )

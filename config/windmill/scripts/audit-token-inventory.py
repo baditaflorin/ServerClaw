@@ -4,6 +4,19 @@ import subprocess
 from pathlib import Path
 
 
+def _prepare_runtime_directory(path: Path) -> Path:
+    path.mkdir(parents=True, exist_ok=True)
+    if (path.stat().st_mode & 0o7777) != 0o1777:
+        try:
+            path.chmod(0o1777)
+        except OSError:
+            pass
+    probe = path / ".windmill-write-probe"
+    probe.write_text("", encoding="utf-8")
+    probe.unlink()
+    return path
+
+
 def main(
     repo_path: str = "/srv/proxmox_florin_server",
     execute_remediations: bool = False,
@@ -11,11 +24,21 @@ def main(
 ):
     repo_root = Path(repo_path)
     workflow = repo_root / "scripts" / "token_lifecycle.py"
+    receipt_dir = repo_root / ".local" / "token-lifecycle" / "receipts"
     if not workflow.exists():
         return {
             "status": "blocked",
             "reason": "token lifecycle script is missing from the worker checkout",
             "expected_repo_path": str(repo_root),
+        }
+    try:
+        receipt_dir = _prepare_runtime_directory(receipt_dir)
+    except OSError as exc:
+        return {
+            "status": "blocked",
+            "reason": "token lifecycle audit receipt directory is not writable",
+            "receipt_dir": str(receipt_dir),
+            "error": str(exc),
         }
 
     command = [
@@ -27,6 +50,8 @@ def main(
         str(workflow),
         "audit",
         "--print-report-json",
+        "--receipt-dir",
+        str(receipt_dir),
     ]
     if execute_remediations:
         command.append("--execute-remediations")

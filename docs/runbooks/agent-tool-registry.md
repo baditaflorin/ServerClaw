@@ -91,6 +91,13 @@ scripts/agent_tool_registry.py \
   --call query-platform-context \
   --args-json '{"question":"how does step-ca issue SSH certificates","top_k":3}'
 ```
+
+Call the governed browser runner tool:
+
+```bash
+scripts/agent_tool_registry.py \
+  --call browser-run-session \
+  --args-json '{"url":"https://example.com","selectors":[{"name":"heading","selector":"h1"}],"capture_screenshot":true}'
 ```
 
 ## Audit Events
@@ -104,6 +111,11 @@ This is the bounded ADR 0069 tool-call audit stream. It does not claim to replac
 
 For `query-platform-context`, the bearer token path defaults to `.local/platform-context/api-token.txt`.
 Set `LV3_PLATFORM_CONTEXT_API_TOKEN_FILE=/absolute/path/to/api-token.txt` to override it for nonstandard controller layouts.
+
+For `browser-run-session`, the base URL defaults to the `browser_runner` service entry in
+`config/service-capability-catalog.json`. Set
+`LV3_BROWSER_RUNNER_BASE_URL=http://127.0.0.1:18096` to point the governed tool at a local
+tunnel or alternate verification endpoint.
 
 ## Operating Rule
 

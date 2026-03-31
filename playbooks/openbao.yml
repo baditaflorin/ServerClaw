@@ -159,16 +159,38 @@
         openbao_refresh_init_payload: "{{ openbao_refresh_init_payload_raw.content | b64decode | from_json }}"
       no_log: true
 
-    - name: Read AppRole role IDs for refreshed controller-local artifacts
-      ansible.builtin.uri:
-        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ item.name }}/role-id"
-        method: GET
-        headers:
-          X-Vault-Token: "{{ openbao_refresh_init_payload.root_token }}"
-        return_content: true
-        status_code: 200
+    - name: Ensure OpenBao remains unsealed before refreshing controller-local AppRole artifacts
+      ansible.builtin.include_role:
+        name: lv3.platform.openbao_runtime
+        tasks_from: ensure_unsealed.yml
+      vars:
+        openbao_unseal_context: refreshing controller-local AppRole artifacts
+        openbao_unseal_init_payload: "{{ openbao_refresh_init_payload }}"
+
+    - name: Read the persisted AppRole artifacts before refreshing secret IDs
+      ansible.builtin.slurp:
+        src: "{{ item.local_file }}"
       loop: "{{ openbao_verification_approles }}"
-      register: openbao_refresh_role_ids
+      delegate_to: localhost
+      become: false
+      register: openbao_refresh_existing_artifacts_raw
+      no_log: true
+
+    - name: Record persisted AppRole artifact facts before refreshing secret IDs
+      ansible.builtin.set_fact:
+        openbao_refresh_existing_artifacts: >-
+          {{
+            dict(
+              openbao_refresh_existing_artifacts_raw.results
+              | map(attribute='item.name')
+              | zip(
+                  openbao_refresh_existing_artifacts_raw.results
+                  | map(attribute='content')
+                  | map('b64decode')
+                  | map('from_json')
+                )
+            )
+          }}
       no_log: true
 
     - name: Generate refreshed AppRole secret IDs after end-to-end verification
@@ -188,7 +210,7 @@
     - name: Persist refreshed AppRole artifacts locally after end-to-end verification
       ansible.builtin.copy:
         dest: "{{ item.item.local_file }}"
-        content: "{{ {'role_name': item.item.name, 'auth_path': 'approle', 'role_id': (openbao_refresh_role_ids.results | selectattr('item.name', 'equalto', item.item.name) | map(attribute='json.data.role_id') | first), 'secret_id': item.json.data.secret_id, 'secret_id_accessor': item.json.data.secret_id_accessor, 'generated_at': ansible_date_time.iso8601} | to_nice_json }}\n"
+        content: "{{ {'role_name': item.item.name, 'auth_path': 'approle', 'role_id': openbao_refresh_existing_artifacts[item.item.name].role_id, 'secret_id': item.json.data.secret_id, 'secret_id_accessor': item.json.data.secret_id_accessor, 'generated_at': ansible_date_time.iso8601} | to_nice_json }}\n"
         mode: "0600"
       loop: "{{ openbao_refresh_secret_ids.results | default([]) }}"
       delegate_to: localhost

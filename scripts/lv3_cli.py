@@ -20,23 +20,23 @@ import urllib.parse
 import urllib.request
 import webbrowser
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Iterable
 
 import yaml
+from script_bootstrap import ensure_repo_root_on_path
 
-CODE_ROOT = Path(__file__).resolve().parent.parent
+CODE_ROOT = ensure_repo_root_on_path(__file__)
 REPO_ROOT = CODE_ROOT
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
 
+from platform.datetime_compat import UTC, datetime, timedelta
 from controller_automation_toolkit import resolve_repo_local_path
 from dependency_graph import dependency_summary, load_dependency_graph
 from environment_catalog import environment_choices, primary_environment
 from platform.conflict import IntentConflictRegistry
 from repo_package_loader import load_repo_package
+from repo_deploy_profiles import profile_by_id
 import runbook_executor
 
 try:
@@ -47,6 +47,7 @@ except ImportError:  # pragma: no cover - packaged entrypoint path
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.idempotency import IdempotencyStore
 from platform.llm import PlatformContextRetriever
+from platform.memory import MemorySubstrateClient
 from platform.scheduler import build_scheduler
 from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
 CLI_VERSION = "0.1.0"
@@ -405,6 +406,7 @@ def resolve_deploy_repo_command(
     *,
     repo: str,
     branch: str,
+    source: str,
     app_name: str,
     project: str,
     environment: str,
@@ -412,15 +414,28 @@ def resolve_deploy_repo_command(
     domain: str | None,
     subdomain: str | None,
     build_pack: str,
+    ports: str,
+    description: str | None,
+    private_key_uuid: str | None,
+    deploy_key_name: str | None,
+    deploy_key_path: str | None,
+    dockerfile_location: str | None,
+    docker_compose_location: str | None,
+    compose_domains: list[str] | None,
+    publish_directory: str | None,
     wait: bool,
     force: bool,
     timeout: int,
+    max_deploy_attempts: int,
+    retry_delay: int,
 ) -> CommandPlan:
     coolify_args: list[str] = [
         "--repo",
         repo,
         "--branch",
         branch,
+        "--source",
+        source,
         "--app-name",
         app_name,
         "--project",
@@ -429,6 +444,8 @@ def resolve_deploy_repo_command(
         environment,
         "--build-pack",
         build_pack,
+        "--ports",
+        ports,
     ]
     if base_directory:
         coolify_args.extend(["--base-directory", base_directory])
@@ -436,12 +453,32 @@ def resolve_deploy_repo_command(
         coolify_args.extend(["--domain", domain])
     if subdomain:
         coolify_args.extend(["--subdomain", subdomain])
+    if description:
+        coolify_args.extend(["--description", description])
+    if private_key_uuid:
+        coolify_args.extend(["--private-key-uuid", private_key_uuid])
+    if deploy_key_name:
+        coolify_args.extend(["--deploy-key-name", deploy_key_name])
+    if deploy_key_path:
+        coolify_args.extend(["--deploy-key-path", deploy_key_path])
+    if dockerfile_location:
+        coolify_args.extend(["--dockerfile-location", dockerfile_location])
+    if docker_compose_location:
+        coolify_args.extend(["--docker-compose-location", docker_compose_location])
+    for compose_domain in compose_domains or []:
+        coolify_args.extend(["--compose-domain", compose_domain])
+    if publish_directory:
+        coolify_args.extend(["--publish-directory", publish_directory])
     if wait:
         coolify_args.append("--wait")
     if force:
         coolify_args.append("--force")
     if timeout != 900:
         coolify_args.extend(["--timeout", str(timeout)])
+    if max_deploy_attempts != 3:
+        coolify_args.extend(["--max-deploy-attempts", str(max_deploy_attempts)])
+    if retry_delay != 15:
+        coolify_args.extend(["--retry-delay", str(retry_delay)])
 
     return CommandPlan(
         label=f"deploy-repo {app_name}",
@@ -452,6 +489,45 @@ def resolve_deploy_repo_command(
             "ACTION=deploy-repo",
             f"COOLIFY_ARGS={command_string(coolify_args)}",
         ],
+    )
+
+
+def resolve_deploy_repo_profile_command(
+    *,
+    profile_id: str,
+    branch: str | None,
+    wait: bool,
+    force: bool,
+    timeout: int,
+    max_deploy_attempts: int,
+    retry_delay: int,
+) -> CommandPlan:
+    _, profile = profile_by_id(profile_id)
+    extra_args: list[str] = []
+    if branch:
+        extra_args.extend(["--branch", branch])
+    if wait:
+        extra_args.append("--wait")
+    if force:
+        extra_args.append("--force")
+    if timeout != 900:
+        extra_args.extend(["--timeout", str(timeout)])
+    if max_deploy_attempts != 3:
+        extra_args.extend(["--max-deploy-attempts", str(max_deploy_attempts)])
+    if retry_delay != 15:
+        extra_args.extend(["--retry-delay", str(retry_delay)])
+
+    command = [
+        "make",
+        "deploy-repo-profile",
+        f"PROFILE={profile_id}",
+    ]
+    if extra_args:
+        command.append(f"DEPLOY_PROFILE_ARGS={command_string(extra_args)}")
+    return CommandPlan(
+        label=f"deploy-repo-profile {profile['app_name']}",
+        route="controller local -> repo deploy profile catalog -> Coolify API wrapper",
+        command=command,
     )
 
 
@@ -1160,11 +1236,12 @@ def run_windmill_request(
     token = load_secret_file("windmill_superadmin_secret")
     script_path = workflow_name if "/" in workflow_name else f"f/lv3/{workflow_name}"
     encoded_path = urllib.parse.quote(script_path, safe="")
-    url = f"{base_url}/api/w/lv3/jobs/run_wait_result/p/{encoded_path}"
+    metadata_url = f"{base_url}/api/w/lv3/scripts/get/p/{encoded_path}"
+    url = f"{base_url}/api/w/lv3/jobs/run/h/<resolved-hash>"
     encoded_payload = json.dumps(payload).encode("utf-8")
     plan = CommandPlan(
         label=f"run {workflow_name}",
-        route="controller -> budgeted scheduler -> Windmill API",
+        route="controller -> resolve script hash -> budgeted scheduler -> Windmill API",
         command=[
             "curl",
             "-X",
@@ -1173,6 +1250,8 @@ def run_windmill_request(
             "Authorization: Bearer <redacted>",
             "-H",
             "Content-Type: application/json",
+            metadata_url,
+            "then",
             url,
             "--data-binary",
             encoded_payload.decode("utf-8"),
@@ -2083,6 +2162,167 @@ def query_platform_context_command(question: str, *, limit: int, json_output: bo
     return 0
 
 
+def _load_memory_metadata(raw_metadata: str) -> dict[str, Any]:
+    try:
+        payload = json.loads(raw_metadata)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"--metadata-json must contain valid JSON: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise ValueError("--metadata-json must decode to a JSON object")
+    return payload
+
+
+def memory_put_command(
+    *,
+    memory_id: str | None,
+    scope_kind: str,
+    scope_id: str,
+    object_type: str,
+    title: str,
+    content: str,
+    provenance: str,
+    retention_class: str,
+    consent_boundary: str,
+    delegation_boundary: str | None,
+    source_uri: str | None,
+    metadata_json: str,
+    expires_at: str | None,
+    json_output: bool,
+) -> int:
+    try:
+        client = MemorySubstrateClient(timeout_seconds=30)
+        payload: dict[str, Any] = {
+            "scope_kind": scope_kind,
+            "scope_id": scope_id,
+            "object_type": object_type,
+            "title": title,
+            "content": content,
+            "provenance": provenance,
+            "retention_class": retention_class,
+            "consent_boundary": consent_boundary,
+            "metadata": _load_memory_metadata(metadata_json),
+        }
+        if memory_id:
+            payload["memory_id"] = memory_id
+        if delegation_boundary:
+            payload["delegation_boundary"] = delegation_boundary
+        if source_uri:
+            payload["source_uri"] = source_uri
+        if expires_at:
+            payload["expires_at"] = expires_at
+        result = client.upsert_entry(payload)
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"ServerClaw memory put failed: {exc}", file=sys.stderr)
+        return 1
+    if json_output:
+        emit_json(result)
+        return 0
+    entry = result["entry"]
+    print(f"Stored memory entry {entry['memory_id']} [{entry['scope_kind']}:{entry['scope_id']}] {entry['object_type']}")
+    print(f"{entry['title']}  provenance={entry['provenance']}  retention={entry['retention_class']}")
+    return 0
+
+
+def memory_query_command(
+    query: str,
+    *,
+    scope_kind: str,
+    scope_id: str,
+    object_type: str | None,
+    limit: int,
+    json_output: bool,
+) -> int:
+    try:
+        client = MemorySubstrateClient(timeout_seconds=30)
+        payload = client.query(
+            query,
+            scope_kind=scope_kind,
+            scope_id=scope_id,
+            object_type=object_type,
+            limit=limit,
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"ServerClaw memory query failed: {exc}", file=sys.stderr)
+        return 1
+    if json_output:
+        emit_json(payload)
+        return 0
+    matches = payload.get("matches", [])
+    if not matches:
+        print(f"No ServerClaw memory matches for '{query}'.")
+        return 0
+    for index, match in enumerate(matches, start=1):
+        backends = ",".join(match.get("matched_backends", [])) or "none"
+        print(
+            f"[{index}] {match['memory_id']} | {match['object_type']} | "
+            f"{match['title']} | backends={backends} | score={match['hybrid_score']:.3f}"
+        )
+        print(textwrap.shorten(str(match.get("content", "")).replace("\n", " "), width=200, placeholder=" ..."))
+        print()
+    return 0
+
+
+def memory_get_command(memory_id: str, *, json_output: bool) -> int:
+    try:
+        client = MemorySubstrateClient(timeout_seconds=30)
+        payload = client.get_entry(memory_id)
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"ServerClaw memory get failed: {exc}", file=sys.stderr)
+        return 1
+    if json_output:
+        emit_json(payload)
+        return 0
+    print(f"{payload['memory_id']} [{payload['scope_kind']}:{payload['scope_id']}] {payload['object_type']}")
+    print(payload["title"])
+    print(textwrap.shorten(str(payload.get("content", "")).replace("\n", " "), width=240, placeholder=" ..."))
+    return 0
+
+
+def memory_list_command(
+    *,
+    scope_kind: str,
+    scope_id: str,
+    object_type: str | None,
+    limit: int,
+    json_output: bool,
+) -> int:
+    try:
+        client = MemorySubstrateClient(timeout_seconds=30)
+        payload = client.list_entries(
+            scope_kind=scope_kind,
+            scope_id=scope_id,
+            object_type=object_type,
+            limit=limit,
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"ServerClaw memory list failed: {exc}", file=sys.stderr)
+        return 1
+    if json_output:
+        emit_json(payload)
+        return 0
+    entries = payload.get("entries", [])
+    if not entries:
+        print(f"No ServerClaw memory entries for {scope_kind}:{scope_id}.")
+        return 0
+    for entry in entries:
+        print(f"{entry['memory_id']} | {entry['object_type']} | {entry['title']}")
+    return 0
+
+
+def memory_delete_command(memory_id: str, *, json_output: bool) -> int:
+    try:
+        client = MemorySubstrateClient(timeout_seconds=30)
+        payload = client.delete_entry(memory_id)
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"ServerClaw memory delete failed: {exc}", file=sys.stderr)
+        return 1
+    if json_output:
+        emit_json(payload)
+        return 0
+    print(f"Deleted memory entry {payload['memory_id']}.")
+    return 0
+
+
 def agent_state_client(agent_id: str, task_id: str) -> AgentStateClient:
     return AgentStateClient(agent_id=agent_id, task_id=task_id)
 
@@ -2521,6 +2761,7 @@ def build_parser() -> argparse.ArgumentParser:
     deploy_repo = subparsers.add_parser("deploy-repo", help="Deploy one repository through the governed Coolify wrapper.")
     deploy_repo.add_argument("--repo", required=True, help="Repository URL.")
     deploy_repo.add_argument("--branch", default="main", help="Repository branch.")
+    deploy_repo.add_argument("--source", default="auto", choices=["auto", "public", "private-deploy-key"])
     deploy_repo.add_argument("--base-directory", help="Optional base directory inside the repository.")
     deploy_repo.add_argument("--app-name", default="repo-smoke", help="Coolify application name.")
     deploy_repo.add_argument("--project", default="LV3 Apps", help="Coolify project name.")
@@ -2528,9 +2769,34 @@ def build_parser() -> argparse.ArgumentParser:
     deploy_repo.add_argument("--domain", help="Full domain URL, for example http://apps.lv3.org.")
     deploy_repo.add_argument("--subdomain", help="Subdomain under apps.lv3.org, for example hello.")
     deploy_repo.add_argument("--build-pack", default="static", choices=["nixpacks", "static", "dockerfile", "dockercompose"])
+    deploy_repo.add_argument("--ports", default="80", help="Comma-separated exposed ports.")
+    deploy_repo.add_argument("--description", help="Optional Coolify application description.")
+    deploy_repo.add_argument("--private-key-uuid", help="Existing Coolify private key UUID.")
+    deploy_repo.add_argument("--deploy-key-name", help="Deploy key label to reuse or create.")
+    deploy_repo.add_argument("--deploy-key-path", help="Local SSH private key path used for deploy-key bootstrap.")
+    deploy_repo.add_argument("--dockerfile-location", help="Repository-relative Dockerfile path.")
+    deploy_repo.add_argument("--docker-compose-location", help="Repository-relative Docker Compose path.")
+    deploy_repo.add_argument("--compose-domain", action="append", help="Map one compose service to one domain using SERVICE=DOMAIN.")
+    deploy_repo.add_argument("--publish-directory", help="Static publish directory for static builds.")
     deploy_repo.add_argument("--wait", action="store_true")
     deploy_repo.add_argument("--force", action="store_true")
     deploy_repo.add_argument("--timeout", type=int, default=900)
+    deploy_repo.add_argument("--max-deploy-attempts", type=int, default=3)
+    deploy_repo.add_argument("--retry-delay", type=int, default=15)
+
+    deploy_repo_profile = subparsers.add_parser(
+        "deploy-repo-profile",
+        help="Deploy one named repo-deploy profile through the governed Coolify wrapper.",
+    )
+    deploy_repo_profile.add_argument("profile")
+    deploy_repo_profile.add_argument("--branch", help="Override the catalog branch.")
+    deploy_repo_profile.add_argument("--wait", action="store_true")
+    deploy_repo_profile.add_argument("--force", action="store_true")
+    deploy_repo_profile.add_argument("--timeout", type=int, default=900)
+    deploy_repo_profile.add_argument("--max-deploy-attempts", type=int, default=3)
+    deploy_repo_profile.add_argument("--retry-delay", type=int, default=15)
+    deploy_repo_profile.add_argument("--dry-run", action="store_true")
+    deploy_repo_profile.add_argument("--explain", action="store_true")
     deploy_repo.add_argument("--dry-run", action="store_true")
     deploy_repo.add_argument("--explain", action="store_true")
 
@@ -2561,6 +2827,43 @@ def build_parser() -> argparse.ArgumentParser:
     query_platform_context.add_argument("question")
     query_platform_context.add_argument("--limit", type=int, default=5)
     query_platform_context.add_argument("--json", action="store_true")
+
+    memory = subparsers.add_parser("memory", help="Manage the private ServerClaw memory substrate.")
+    memory_subparsers = memory.add_subparsers(dest="memory_action", required=True)
+    memory_put = memory_subparsers.add_parser("put", help="Create or update one memory entry.")
+    memory_put.add_argument("--memory-id")
+    memory_put.add_argument("--scope-kind", required=True, choices=["owner", "workspace"])
+    memory_put.add_argument("--scope-id", required=True)
+    memory_put.add_argument("--object-type", required=True)
+    memory_put.add_argument("--title", required=True)
+    memory_put.add_argument("--content", required=True)
+    memory_put.add_argument("--provenance", required=True)
+    memory_put.add_argument("--retention-class", required=True)
+    memory_put.add_argument("--consent-boundary", required=True)
+    memory_put.add_argument("--delegation-boundary")
+    memory_put.add_argument("--source-uri")
+    memory_put.add_argument("--metadata-json", default="{}")
+    memory_put.add_argument("--expires-at")
+    memory_put.add_argument("--json", action="store_true")
+    memory_query = memory_subparsers.add_parser("query", help="Query ServerClaw memory by hybrid recall.")
+    memory_query.add_argument("query")
+    memory_query.add_argument("--scope-kind", required=True, choices=["owner", "workspace"])
+    memory_query.add_argument("--scope-id", required=True)
+    memory_query.add_argument("--object-type")
+    memory_query.add_argument("--limit", type=int, default=5)
+    memory_query.add_argument("--json", action="store_true")
+    memory_get = memory_subparsers.add_parser("get", help="Fetch one memory entry by id.")
+    memory_get.add_argument("memory_id")
+    memory_get.add_argument("--json", action="store_true")
+    memory_list = memory_subparsers.add_parser("list", help="List memory entries for one scope.")
+    memory_list.add_argument("--scope-kind", required=True, choices=["owner", "workspace"])
+    memory_list.add_argument("--scope-id", required=True)
+    memory_list.add_argument("--object-type")
+    memory_list.add_argument("--limit", type=int, default=20)
+    memory_list.add_argument("--json", action="store_true")
+    memory_delete = memory_subparsers.add_parser("delete", help="Delete one memory entry by id.")
+    memory_delete.add_argument("memory_id")
+    memory_delete.add_argument("--json", action="store_true")
 
     status = subparsers.add_parser("status", help="Show service health status.")
     status.add_argument("service", nargs="?")
@@ -2913,6 +3216,7 @@ def main(argv: list[str] | None = None) -> int:
             resolve_deploy_repo_command(
                 repo=args.repo,
                 branch=args.branch,
+                source=args.source,
                 app_name=args.app_name,
                 project=args.project,
                 environment=args.environment,
@@ -2920,9 +3224,35 @@ def main(argv: list[str] | None = None) -> int:
                 domain=args.domain,
                 subdomain=args.subdomain,
                 build_pack=args.build_pack,
+                ports=args.ports,
+                description=args.description,
+                private_key_uuid=args.private_key_uuid,
+                deploy_key_name=args.deploy_key_name,
+                deploy_key_path=args.deploy_key_path,
+                dockerfile_location=args.dockerfile_location,
+                docker_compose_location=args.docker_compose_location,
+                compose_domains=args.compose_domain,
+                publish_directory=args.publish_directory,
                 wait=args.wait,
                 force=args.force,
                 timeout=args.timeout,
+                max_deploy_attempts=args.max_deploy_attempts,
+                retry_delay=args.retry_delay,
+            ),
+            dry_run=args.dry_run,
+            explain=args.explain,
+            no_color=no_color,
+        )
+    if args.command == "deploy-repo-profile":
+        return run_plan(
+            resolve_deploy_repo_profile_command(
+                profile_id=args.profile,
+                branch=args.branch,
+                wait=args.wait,
+                force=args.force,
+                timeout=args.timeout,
+                max_deploy_attempts=args.max_deploy_attempts,
+                retry_delay=args.retry_delay,
             ),
             dry_run=args.dry_run,
             explain=args.explain,
@@ -2943,6 +3273,44 @@ def main(argv: list[str] | None = None) -> int:
         return search_command(args.query, collection=args.collection, limit=args.limit, rebuild=args.rebuild)
     if args.command == "query-platform-context":
         return query_platform_context_command(args.question, limit=args.limit, json_output=args.json)
+    if args.command == "memory":
+        if args.memory_action == "put":
+            return memory_put_command(
+                memory_id=args.memory_id,
+                scope_kind=args.scope_kind,
+                scope_id=args.scope_id,
+                object_type=args.object_type,
+                title=args.title,
+                content=args.content,
+                provenance=args.provenance,
+                retention_class=args.retention_class,
+                consent_boundary=args.consent_boundary,
+                delegation_boundary=args.delegation_boundary,
+                source_uri=args.source_uri,
+                metadata_json=args.metadata_json,
+                expires_at=args.expires_at,
+                json_output=args.json,
+            )
+        if args.memory_action == "query":
+            return memory_query_command(
+                args.query,
+                scope_kind=args.scope_kind,
+                scope_id=args.scope_id,
+                object_type=args.object_type,
+                limit=args.limit,
+                json_output=args.json,
+            )
+        if args.memory_action == "get":
+            return memory_get_command(args.memory_id, json_output=args.json)
+        if args.memory_action == "list":
+            return memory_list_command(
+                scope_kind=args.scope_kind,
+                scope_id=args.scope_id,
+                object_type=args.object_type,
+                limit=args.limit,
+                json_output=args.json,
+            )
+        return memory_delete_command(args.memory_id, json_output=args.json)
     if args.command == "status":
         return status_command(args.service, args.env, timeout=args.timeout, no_color=no_color)
     if args.command == "health":

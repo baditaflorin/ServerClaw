@@ -45,11 +45,11 @@ def test_windmill_defaults_seed_config_merge_script_and_schedule() -> None:
     assert len(script_paths) == len(seed_scripts)
     assert (
         script_map["f/lv3/scheduler_watchdog_loop"]["local_file"]
-        == "{{ inventory_dir }}/../config/windmill/scripts/scheduler-watchdog-loop.py"
+        == "{{ windmill_seed_script_root_local_dir }}/scheduler-watchdog-loop.py"
     )
     assert (
         script_map["f/lv3/scheduler_watchdog"]["local_file"]
-        == "{{ inventory_dir }}/../windmill/scheduler/watchdog-loop.py"
+        == "{{ windmill_seed_repo_root_local_dir }}/windmill/scheduler/watchdog-loop.py"
     )
 
 
@@ -68,7 +68,7 @@ def test_windmill_script_sync_uses_manifest_helper() -> None:
 
     assert "Create a local manifest path for repo-managed Windmill scripts" in tasks
     assert "Render the repo-managed Windmill script manifest locally" in tasks
-    assert "{{ inventory_dir }}/../scripts/sync_windmill_seed_scripts.py" in tasks
+    assert "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_scripts.py" in tasks
     assert "uv" in tasks
     assert "--with" in tasks
     assert "pyyaml" in tasks
@@ -77,8 +77,22 @@ def test_windmill_script_sync_uses_manifest_helper() -> None:
     assert '"20"' in tasks
     assert '--settle-interval' in tasks
     assert '"2.0"' in tasks
-    assert "{{ inventory_dir }}/../scripts/sync_windmill_seed_schedules.py" in tasks
+    assert "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_schedules.py" in tasks
+    assert tasks.count("pyyaml") >= 2
     assert "{{ windmill_seed_schedule_manifest_local.path }}" in tasks
+    assert tasks.count('{{ windmill_base_url }}') == 2
+    assert tasks.count('{{ windmill_private_base_url }}') == 5
+
+
+def test_make_converge_windmill_forwards_extra_args() -> None:
+    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+
+    target_start = makefile.index("converge-windmill:")
+    next_target = makefile.index("\nconverge-coolify:", target_start)
+    target_block = makefile[target_start:next_target]
+
+    assert "$(EXTRA_ARGS)" in target_block
+    assert "--playbook $(REPO_ROOT)/playbooks/windmill.yml" in target_block
 
 
 def test_windmill_defaults_use_git_common_dir_for_shared_local_artifacts() -> None:

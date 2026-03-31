@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0.0",
+  "store": {
+    "name": "serverclaw-authz"
+  },
+  "model_path": "config/serverclaw-authz/model.json",
+  "principals": {
+    "operator": {
+      "principal": "principal:keycloak-user__florin.badita",
+      "grant_type": "declared",
+      "username": "florin.badita",
+      "expected_claims": {}
+    },
+    "runtime": {
+      "principal": "principal:keycloak-client__serverclaw-runtime",
+      "grant_type": "client_credentials",
+      "client_id": "serverclaw-runtime",
+      "client_secret_file": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-runtime-client-secret.txt",
+      "expected_claims": {
+        "azp": "serverclaw-runtime"
+      }
+    }
+  },
+  "tuples": [
+    {
+      "user": "principal:keycloak-user__florin.badita",
+      "relation": "owner",
+      "object": "workspace:primary"
+    },
+    {
+      "user": "assistant:serverclaw",
+      "relation": "assistant",
+      "object": "workspace:primary"
+    },
+    {
+      "user": "workspace:primary",
+      "relation": "member_of",
+      "object": "assistant:serverclaw"
+    },
+    {
+      "user": "principal:keycloak-client__serverclaw-runtime",
+      "relation": "runtime",
+      "object": "assistant:serverclaw"
+    },
+    {
+      "user": "skill:repo-automation",
+      "relation": "skill",
+      "object": "assistant:serverclaw"
+    },
+    {
+      "user": "assistant:serverclaw",
+      "relation": "delegate",
+      "object": "skill:repo-automation"
+    },
+    {
+      "user": "connector:proxmox-api",
+      "relation": "connector",
+      "object": "skill:repo-automation"
+    },
+    {
+      "user": "skill:repo-automation",
+      "relation": "delegate",
+      "object": "connector:proxmox-api"
+    },
+    {
+      "user": "data_scope:guest-inventory",
+      "relation": "data_scope",
+      "object": "connector:proxmox-api"
+    },
+    {
+      "user": "connector:proxmox-api",
+      "relation": "delegate",
+      "object": "data_scope:guest-inventory"
+    },
+    {
+      "user": "assistant:serverclaw",
+      "relation": "assistant_sender",
+      "object": "channel:ops-console"
+    },
+    {
+      "user": "assistant:serverclaw",
+      "relation": "assistant_receiver",
+      "object": "channel:ops-console"
+    }
+  ],
+  "checks": [
+    {
+      "name": "operator-can-act-as-assistant",
+      "user": "principal:keycloak-user__florin.badita",
+      "relation": "actor",
+      "object": "assistant:serverclaw",
+      "allowed": true
+    },
+    {
+      "name": "runtime-can-execute-skill",
+      "user": "principal:keycloak-client__serverclaw-runtime",
+      "relation": "can_execute",
+      "object": "skill:repo-automation",
+      "allowed": true
+    },
+    {
+      "name": "runtime-can-call-connector",
+      "user": "principal:keycloak-client__serverclaw-runtime",
+      "relation": "can_call",
+      "object": "connector:proxmox-api",
+      "allowed": true
+    },
+    {
+      "name": "runtime-can-read-data-scope",
+      "user": "principal:keycloak-client__serverclaw-runtime",
+      "relation": "can_read",
+      "object": "data_scope:guest-inventory",
+      "allowed": true
+    },
+    {
+      "name": "operator-can-send-channel-message",
+      "user": "principal:keycloak-user__florin.badita",
+      "relation": "can_send",
+      "object": "channel:ops-console",
+      "allowed": true
+    },
+    {
+      "name": "unauthorized-client-cannot-read-data-scope",
+      "user": "principal:keycloak-client__unauthorized",
+      "relation": "can_read",
+      "object": "data_scope:guest-inventory",
+      "allowed": false
+    }
+  ]
+}

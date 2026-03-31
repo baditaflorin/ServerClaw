@@ -1,0 +1,131 @@
+---
+# Purpose: Render the approved repo-deploy warm plan, prefetch its images immediately, and install a refresh timer plus freshness verification.
+- name: Validate repo deploy image cache inputs
+  ansible.builtin.assert:
+    that:
+      - repo_deploy_image_cache_repo_root | length > 0
+      - repo_deploy_image_cache_catalog_path | length > 0
+      - repo_deploy_image_cache_script_source | length > 0
+      - repo_deploy_image_cache_runtime_root | length > 0
+      - repo_deploy_image_cache_catalog_runtime_path | length > 0
+      - repo_deploy_image_cache_plan_file | length > 0
+      - repo_deploy_image_cache_receipt_file | length > 0
+      - repo_deploy_image_cache_script_path | length > 0
+      - repo_deploy_image_cache_service_name | length > 0
+      - repo_deploy_image_cache_timer_name | length > 0
+      - repo_deploy_image_cache_on_calendar | length > 0
+    fail_msg: >-
+      repo_deploy_image_cache requires controller-local catalog inputs, guest-local
+      runtime paths, and refresh timer names.
+
+- name: Install runtime prerequisites for repo deploy image cache
+  ansible.builtin.apt:
+    name:
+      - python3
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure repo deploy image cache runtime directory exists
+  ansible.builtin.file:
+    path: "{{ repo_deploy_image_cache_runtime_root }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Copy the repo deploy image cache helper to the guest
+  ansible.builtin.copy:
+    src: "{{ repo_deploy_image_cache_script_source }}"
+    dest: "{{ repo_deploy_image_cache_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Copy the approved repo deploy base-image catalog to the guest
+  ansible.builtin.copy:
+    src: "{{ repo_deploy_image_cache_catalog_path }}"
+    dest: "{{ repo_deploy_image_cache_catalog_runtime_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Generate the repo deploy image warm plan from the approved profile catalog
+  ansible.builtin.command:
+    argv:
+      - "{{ ansible_playbook_python }}"
+      - "{{ repo_deploy_image_cache_script_source }}"
+      - plan
+      - --catalog
+      - "{{ repo_deploy_image_cache_catalog_path }}"
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  register: repo_deploy_image_cache_plan_command
+
+- name: Parse the repo deploy image warm plan
+  ansible.builtin.set_fact:
+    repo_deploy_image_cache_plan: "{{ repo_deploy_image_cache_plan_command.stdout | from_json }}"
+
+- name: Record the strictest freshness bound for the repo deploy image warm plan
+  ansible.builtin.set_fact:
+    repo_deploy_image_cache_max_age_seconds: >-
+      {{
+        (
+          repo_deploy_image_cache_plan.seed_images
+          | map(attribute='freshness_hours')
+          | min
+          | int
+        ) * 3600
+      }}
+
+- name: Persist the repo deploy image warm plan on the guest
+  ansible.builtin.copy:
+    content: "{{ repo_deploy_image_cache_plan_command.stdout }}\n"
+    dest: "{{ repo_deploy_image_cache_plan_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Warm the approved repo deploy image set immediately
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ repo_deploy_image_cache_script_path }}"
+      - warm
+      - --plan-file
+      - "{{ repo_deploy_image_cache_plan_file }}"
+      - --receipt-file
+      - "{{ repo_deploy_image_cache_receipt_file }}"
+      - --required
+  register: repo_deploy_image_cache_warm
+  changed_when: >-
+    (
+      repo_deploy_image_cache_warm.stdout | from_json
+    ).changed_count | int > 0
+
+- name: Render the repo deploy image cache systemd service
+  ansible.builtin.template:
+    src: lv3-repo-deploy-image-cache.service.j2
+    dest: "/etc/systemd/system/{{ repo_deploy_image_cache_service_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the repo deploy image cache systemd timer
+  ansible.builtin.template:
+    src: lv3-repo-deploy-image-cache.timer.j2
+    dest: "/etc/systemd/system/{{ repo_deploy_image_cache_timer_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable the repo deploy image cache timer
+  ansible.builtin.systemd:
+    name: "{{ repo_deploy_image_cache_timer_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Verify repo deploy image cache freshness and timer state
+  ansible.builtin.import_tasks: verify.yml

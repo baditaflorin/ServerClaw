@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0288-flagsmith-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T19:26:08Z",
+  "recorded_by": "codex",
+  "source_commit": "cea3f83adc0e6f5de87985b129e05c826c676150",
+  "repo_version_context": "0.177.108",
+  "platform_version_context": "0.130.71",
+  "workflow_id": "adr-0288-flagsmith-live-apply",
+  "adr": "0288",
+  "summary": "Live-applied ADR 0288 from the latest available `0.177.108` mainline lineage by converging the repo-managed Flagsmith runtime on `docker-runtime-lv3`, keeping the public `flags.lv3.org` edge route behind the shared oauth2-proxy and Keycloak boundary, repairing sparse feature-state verification and Docker bridge-chain recovery during the correction loop, and confirming the seeded runtime plus public health surface are now stable on the live `0.130.71` platform.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Flagsmith public edge",
+      "address": "https://flags.lv3.org/"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Flagsmith private runtime",
+      "address": "http://10.10.10.20:8017"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused Flagsmith regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest -q tests/test_flagsmith_seed.py tests/test_flagsmith_runtime_role.py tests/test_flagsmith_playbook.py tests/test_generate_platform_vars.py tests/test_hetzner_dns_record_role.py tests/test_nginx_edge_publication_role.py tests/test_subdomain_catalog.py` returned `72 passed in 3.58s` after the live replay repairs were folded back into the branch."
+    },
+    {
+      "check": "Flagsmith syntax coverage",
+      "result": "pass",
+      "observed": "`make syntax-check-flagsmith` passed on the repaired worktree before the converged replay."
+    },
+    {
+      "check": "Branch repository validation bundle",
+      "result": "pass",
+      "observed": "`git diff --check`, `uv run --with pyyaml --with jsonschema python scripts/live_apply_receipts.py --validate`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, and `./scripts/validate_repo.sh agent-standards workstream-surfaces health-probes` all passed after the workstream manifest was updated to include `tests/test_flagsmith_seed.py`; the final ownership replay scoped `LV3_VALIDATION_CHANGED_FILES_JSON` to the ADR 0288 surfaces so two unrelated dirty files already present in the shared worktree did not count against this branch."
+    },
+    {
+      "check": "Generic live-apply-service wrapper gate",
+      "result": "partial",
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true HETZNER_DNS_API_TOKEN=... make live-apply-service service=flagsmith env=production` passed its service bootstrap steps and then stopped at `check-canonical-truth` with `Canonical truth is stale. Run `uvx --from pyyaml python scripts/canonical_truth.py --write`.` and `README.md`, which is the expected protected-files gate on a workstream branch before the exact-main integration step."
+    },
+    {
+      "check": "Focused runtime replay",
+      "result": "pass",
+      "observed": "The settled replay captured in `receipts/live-applies/evidence/2026-03-30-ws-0288-flagsmith-runtime-focused-r13.txt` completed with final recap `docker-runtime-lv3 : ok=73 changed=0 unreachable=0 failed=0 skipped=29 rescued=0 ignored=0`."
+    },
+    {
+      "check": "Governed production converge",
+      "result": "pass",
+      "observed": "`HETZNER_DNS_API_TOKEN=... make converge-flagsmith env=production` succeeded with final recaps `docker-runtime-lv3 : ok=171 changed=2 unreachable=0 failed=0 skipped=36 rescued=0 ignored=0`, `localhost : ok=23 changed=0 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`, `nginx-lv3 : ok=40 changed=5 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`, and `postgres-lv3 : ok=51 changed=0 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0`, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0288-converge-flagsmith-r2.txt`."
+    },
+    {
+      "check": "Public and guest-local probes",
+      "result": "pass",
+      "observed": "`curl -fsS https://flags.lv3.org/health` returned the Flagsmith system status page, `curl -I https://flags.lv3.org/` and `curl -I https://flags.lv3.org/api/v1/projects/` both returned `HTTP/2 302` redirects into the shared oauth2-proxy sign-in flow, and a guest-local `curl -fsS http://127.0.0.1:8017/health` on `docker-runtime-lv3` returned the same status page."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md",
+    "docs/runbooks/configure-flagsmith.md",
+    "docs/workstreams/ws-0288-live-apply.md",
+    "playbooks/flagsmith.yml",
+    "playbooks/services/flagsmith.yml",
+    "collections/ansible_collections/lv3/platform/roles/flagsmith_postgres/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/flagsmith_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/flagsmith_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/flagsmith_runtime/tasks/verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/flagsmith_runtime/templates/docker-compose.yml.j2",
+    "collections/ansible_collections/lv3/platform/roles/flagsmith_runtime/templates/flagsmith.env.ctmpl.j2",
+    "scripts/flagsmith_seed.py",
+    "tests/test_flagsmith_playbook.py",
+    "tests/test_flagsmith_runtime_role.py",
+    "tests/test_flagsmith_seed.py",
+    "workstreams.yaml",
+    "receipts/live-applies/evidence/2026-03-30-ws-0288-flagsmith-featurestate-debug-r7.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0288-flagsmith-featurestate-patch-exact-r7.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0288-flagsmith-featurestate-patch-shape-r7.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0288-flagsmith-featurestate-sample-r7.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0288-flagsmith-seed-debug-r8.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0288-flagsmith-seed-trace-r7.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0288-branch-data-model-validate-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0288-branch-git-diff-check-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0288-branch-live-apply-receipts-validate-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0288-branch-validate-r4.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0288-flagsmith-runtime-focused-r13.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0288-converge-flagsmith-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0288-live-apply-service-flagsmith.txt",
+    "receipts/live-applies/2026-03-30-adr-0288-flagsmith-live-apply.json"
+  ],
+  "notes": [
+    "This receipt records the first branch-local proof for ADR 0288 on top of repo version 0.177.108 and platform version 0.130.71 before the exact-main integration step.",
+    "The correction loop exposed two real contract gaps: Flagsmith feature-state PATCH responses were sparse and needed a refetch-before-verify path, and live feature-state values arrived as typed nested payloads that had to be normalized before drift checks could pass.",
+    "The branch validation bundle also exposed one repo-contract gap in the workstream manifest: `tests/test_flagsmith_seed.py` had to be added to the declared owned surfaces before the ownership gate could pass.",
+    "The runtime replay also exposed transient Docker bridge-chain and stale compose-network failures on docker-runtime-lv3; the runtime role now recovers by restarting Docker, rerunning bridge programming, and retrying compose with force-recreate when those signatures appear.",
+    "A manual Hetzner DNS API POST created the `flags.lv3.org` A record during early debugging, but the settled repository converge now treats that record as managed and drift-free with no further DNS mutation required.",
+    "Protected exact-main surfaces still remain for merge-to-main: refresh `README.md`, `VERSION`, the release section in `changelog.md`, `versions/stack.yaml`, and the final ADR 0288 repo-version metadata from the synchronized latest-main replay."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-03-30-adr-0288-flagsmith-live-repair",
+    "surface": "collections/ansible_collections/lv3/platform/roles/flagsmith_runtime/tasks/main.yml",
+    "repair_action": "Normalized typed feature-state values and sparse PATCH responses in `scripts/flagsmith_seed.py`, switched runtime tuning back to the supported env-driven image contract, hardened the OpenBao env handoff, and added Docker bridge-chain recovery plus compose force-recreate fallback in the Flagsmith runtime role.",
+    "verification": "Reran the focused pytest slice and syntax check, replayed the settled runtime converge on docker-runtime-lv3, completed the governed production converge across postgres, runtime, edge, and localhost lanes, and confirmed the public plus guest-local health probes returned the expected Flagsmith status and oauth2-proxy redirects.",
+    "diagnosis": "contract_drift"
+  }
+}

@@ -15,16 +15,14 @@ import sys
 import tempfile
 import uuid
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
-    del sys.modules["platform"]
+from script_bootstrap import ensure_repo_root_on_path
 
+REPO_ROOT = ensure_repo_root_on_path(__file__)
+
+from platform.datetime_compat import UTC, datetime
 from controller_automation_toolkit import (
     emit_cli_error,
     load_json,
@@ -34,7 +32,17 @@ from controller_automation_toolkit import (
     write_json,
 )
 from maintenance_window_tool import list_active_windows_best_effort, suppress_findings_for_maintenance
+from platform.degradation import default_state_path
 from platform.events import build_envelope
+from platform.health.semantics import (
+    RUNTIME_STATE_DEGRADED,
+    RUNTIME_STATE_FAILED,
+    RUNTIME_STATE_READY,
+    RUNTIME_STATE_STARTUP,
+    classify_runtime_state,
+    legacy_status_for_runtime_state,
+)
+from scripts.docker_publication_assurance import build_remote_command
 from tls_cert_probe import collect_certificate_results
 
 
@@ -341,7 +349,9 @@ def build_service_probes(catalog: dict[str, Any]) -> list[dict[str, Any]]:
         return catalog["probes"]
     probes: list[dict[str, Any]] = []
     for service_id, service in sorted(catalog["services"].items()):
-        for phase in ("liveness", "readiness"):
+        for phase in ("startup", "liveness", "readiness"):
+            if phase not in service:
+                continue
             probes.append(
                 {
                     "id": f"{service_id}-{phase}",
@@ -350,6 +360,7 @@ def build_service_probes(catalog: dict[str, Any]) -> list[dict[str, Any]]:
                     "target": service["owning_vm"],
                     "phase": phase,
                     "definition": service[phase],
+                    "service_definition": service,
                 }
             )
     return probes
@@ -377,7 +388,7 @@ def execute_structured_probe(context: dict[str, Any], probe: dict[str, Any]) -> 
             "stderr": truncate(result.stderr),
             "ok": ok,
         }
-        return ok, detail
+        return apply_docker_publication_assertion(context, probe, runner, target, ok, detail)
 
     if kind == "command":
         command = join_argv(probe_definition["argv"])
@@ -396,7 +407,7 @@ def execute_structured_probe(context: dict[str, Any], probe: dict[str, Any]) -> 
             "stderr": truncate(result.stderr),
             "ok": ok,
         }
-        return ok, detail
+        return apply_docker_publication_assertion(context, probe, runner, target, ok, detail)
 
     if kind == "http":
         command = build_http_probe_command(probe_definition)
@@ -417,7 +428,7 @@ def execute_structured_probe(context: dict[str, Any], probe: dict[str, Any]) -> 
             "stderr": truncate(result.stderr),
             "ok": ok,
         }
-        return ok, detail
+        return apply_docker_publication_assertion(context, probe, runner, target, ok, detail)
 
     if kind == "tcp":
         command = build_tcp_probe_command(probe_definition)
@@ -436,9 +447,137 @@ def execute_structured_probe(context: dict[str, Any], probe: dict[str, Any]) -> 
             "stderr": truncate(result.stderr),
             "ok": ok,
         }
-        return ok, detail
+        return apply_docker_publication_assertion(context, probe, runner, target, ok, detail)
 
     raise ValueError(f"Unsupported structured probe kind: {kind}")
+
+
+def apply_docker_publication_assertion(
+    context: dict[str, Any],
+    probe: dict[str, Any],
+    runner: str,
+    target: str,
+    probe_ok: bool,
+    detail: dict[str, Any],
+) -> tuple[bool, dict[str, Any]]:
+    service_definition = probe.get("service_definition")
+    if probe.get("phase") != "readiness" or not isinstance(service_definition, dict):
+        return probe_ok, detail
+
+    readiness = service_definition.get("readiness")
+    if not isinstance(readiness, dict):
+        return probe_ok, detail
+
+    contract = readiness.get("docker_publication")
+    if not isinstance(contract, dict):
+        return probe_ok, detail
+
+    command = join_argv(
+        build_remote_command(
+            service_id=probe["service_id"],
+            service_probe=service_definition,
+            contract=contract,
+            heal=False,
+        )
+    )
+    result = execute_runner(context, runner, target, command)
+    try:
+        publication_payload = json.loads(result.stdout) if result.stdout else {}
+    except json.JSONDecodeError:
+        publication_payload = {"ok": False, "summary": truncate(result.stdout)}
+
+    publication_ok = result.returncode == 0 and publication_payload.get("ok") is True
+    detail["docker_publication"] = {
+        "ok": publication_ok,
+        "summary": publication_payload.get("summary", ""),
+        "container_name": contract.get("container_name"),
+    }
+    if probe_ok and publication_ok:
+        return True, detail
+
+    detail["ok"] = False
+    detail["stderr"] = truncate(
+        publication_payload.get("summary")
+        or result.stderr
+        or detail.get("stderr", "")
+        or "docker publication contract failed"
+    )
+    return False, detail
+
+
+def load_active_degradations() -> dict[str, list[dict[str, Any]]]:
+    path = default_state_path(REPO_ROOT)
+    if not path.exists():
+        return {}
+    try:
+        payload = load_json(path)
+    except (OSError, json.JSONDecodeError):
+        return {}
+    services = payload.get("services", {}) if isinstance(payload, dict) else {}
+    if not isinstance(services, dict):
+        return {}
+    normalized: dict[str, list[dict[str, Any]]] = {}
+    for service_id, entries in services.items():
+        if not isinstance(service_id, str) or not isinstance(entries, dict):
+            continue
+        active = [entry for entry in entries.values() if isinstance(entry, dict)]
+        if active:
+            normalized[service_id] = active
+    return normalized
+
+
+def detail_to_phase_result(detail: dict[str, Any]) -> dict[str, Any]:
+    message = (
+        detail.get("stderr")
+        or detail.get("stdout")
+        or (f"HTTP {detail['http_status']}" if isinstance(detail.get("http_status"), int) else "")
+    )
+    return {
+        "phase": detail.get("probe_phase"),
+        "kind": detail.get("probe_kind"),
+        "supported": True,
+        "ok": detail.get("ok") is True,
+        "status": "ok" if detail.get("ok") is True else "failed",
+        "http_status": detail.get("http_status"),
+        "detail": message,
+        "command": detail.get("command"),
+        "runner": detail.get("runner"),
+        "target": detail.get("target"),
+    }
+
+
+def service_health_detail(
+    service_id: str,
+    probe_details: list[dict[str, Any]],
+    *,
+    active_degradations: list[dict[str, Any]],
+) -> dict[str, Any]:
+    phase_results = {
+        str(detail.get("probe_phase")): detail_to_phase_result(detail)
+        for detail in probe_details
+        if detail.get("probe_phase")
+    }
+    runtime_state, reason = classify_runtime_state(
+        phase_results,
+        degraded_active=bool(active_degradations),
+    )
+    if runtime_state == RUNTIME_STATE_FAILED:
+        severity = "critical"
+    elif runtime_state in {RUNTIME_STATE_DEGRADED, RUNTIME_STATE_STARTUP}:
+        severity = "warning"
+    elif runtime_state == RUNTIME_STATE_READY:
+        severity = "ok"
+    else:
+        severity = "warning"
+    return {
+        "service_id": service_id,
+        "runtime_state": runtime_state,
+        "status": legacy_status_for_runtime_state(runtime_state),
+        "severity": severity,
+        "reason": reason,
+        "active_degradations": active_degradations,
+        "phase_results": phase_results,
+    }
 
 
 def format_certificate_subject(subject: Any) -> str | None:
@@ -491,8 +630,8 @@ def probe_tls_certificate(
 def check_service_health(context: dict[str, Any], run_id: str) -> dict[str, Any]:
     catalog = load_json(HEALTH_PROBE_CATALOG_PATH)
     probes = build_service_probes(catalog)
-    failures: list[dict[str, Any]] = []
-    successes: list[dict[str, Any]] = []
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    active_degradations = load_active_degradations()
 
     def run_probe(probe: dict[str, Any]) -> tuple[bool, dict[str, Any]]:
         if probe.get("runner") == "structured":
@@ -503,27 +642,54 @@ def check_service_health(context: dict[str, Any], run_id: str) -> dict[str, Any]
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         futures = [executor.submit(run_probe, probe) for probe in probes]
         for future in concurrent.futures.as_completed(futures):
-            ok, detail = future.result()
-            if ok:
-                successes.append(detail)
-            else:
-                failures.append(detail)
-    failures.sort(key=lambda item: item["probe_id"])
-    successes.sort(key=lambda item: item["probe_id"])
-
-    if failures:
+            _ok, detail = future.result()
+            grouped.setdefault(str(detail["service_id"]), []).append(detail)
+    details = [
+        service_health_detail(
+            service_id,
+            sorted(service_details, key=lambda item: str(item.get("probe_phase"))),
+            active_degradations=active_degradations.get(service_id, []),
+        )
+        for service_id, service_details in sorted(grouped.items())
+    ]
+    counts = {
+        "failed": sum(1 for item in details if item["runtime_state"] == RUNTIME_STATE_FAILED),
+        "startup": sum(1 for item in details if item["runtime_state"] == RUNTIME_STATE_STARTUP),
+        "degraded": sum(1 for item in details if item["runtime_state"] == RUNTIME_STATE_DEGRADED),
+        "ready": sum(1 for item in details if item["runtime_state"] == RUNTIME_STATE_READY),
+        "unknown": sum(1 for item in details if item["runtime_state"] not in {
+            RUNTIME_STATE_FAILED,
+            RUNTIME_STATE_STARTUP,
+            RUNTIME_STATE_DEGRADED,
+            RUNTIME_STATE_READY,
+        }),
+    }
+    if counts["failed"]:
         severity = "critical"
-        summary = f"{len(failures)} of {len(probes)} service probes failed."
+        summary = (
+            f"{counts['failed']} services failed, {counts['startup']} are starting, "
+            f"and {counts['degraded']} are degraded across {len(details)} service checks."
+        )
+    elif counts["startup"] or counts["degraded"] or counts["unknown"]:
+        severity = "warning"
+        summary = (
+            f"{counts['startup']} services are starting and {counts['degraded']} are degraded; "
+            f"{counts['ready']} of {len(details)} are ready and {counts['unknown']} remain unknown."
+        )
     else:
         severity = "ok"
-        summary = f"All {len(probes)} service probes passed."
+        summary = f"All {len(details)} services are ready across {len(probes)} probe checks."
     return make_finding(
         check="check-service-health",
         severity=severity,
         summary=summary,
-        details=failures or successes,
+        details=details,
         run_id=run_id,
-        outputs={"checked_probe_count": len(probes)},
+        outputs={
+            "checked_probe_count": len(probes),
+            "service_count": len(details),
+            "runtime_states": counts,
+        },
     )
 
 

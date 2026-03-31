@@ -1,4 +1,25 @@
 - targets:
+    - http://10.10.10.20:8096/healthz
+  labels:
+    service_id: browser_runner
+    slo_id: browser-runner-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - http://10.10.10.20:5000/
+  labels:
+    service_id: changedetection
+    slo_id: changedetection-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - https://data.lv3.org/server/health
+  labels:
+    service_id: directus
+    slo_id: directus-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - http://10.10.10.20:8089/healthcheck
   labels:
     service_id: dozzle
@@ -20,6 +41,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - http://10.10.10.20:3007/health
+  labels:
+    service_id: gotenberg
+    slo_id: gotenberg-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://grafana.lv3.org
   labels:
     service_id: grafana
@@ -27,17 +55,17 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://registry.lv3.org/api/v2.0/ping
+  labels:
+    service_id: harbor
+    slo_id: harbor-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://home.lv3.org
   labels:
     service_id: homepage
     slo_id: homepage-availability
-    indicator: availability
-    probe_module: http_2xx_follow_redirects
-- targets:
-    - http://10.10.10.40:19999/api/v1/info
-  labels:
-    service_id: realtime
-    slo_id: realtime-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
@@ -62,10 +90,31 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - http://10.10.10.20:8025/api/v1/info
+  labels:
+    service_id: mailpit
+    slo_id: mailpit-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - https://matrix.lv3.org/_matrix/client/versions
+  labels:
+    service_id: matrix_synapse
+    slo_id: matrix-synapse-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - http://10.10.10.20:8082/login/
   labels:
     service_id: netbox
     slo_id: netbox-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - https://cloud.lv3.org/status.php
+  labels:
+    service_id: nextcloud
+    slo_id: nextcloud-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
@@ -83,10 +132,38 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - http://100.64.0.1:8014/healthz
+  labels:
+    service_id: openfga
+    slo_id: openfga-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - http://100.64.0.1:8014/healthz
+  labels:
+    service_id: openfga
+    slo_id: openfga-latency
+    indicator: latency
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://wiki.lv3.org/_health
   labels:
     service_id: outline
     slo_id: outline-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - https://notebooks.lv3.org/hub/health
+  labels:
+    service_id: jupyterhub
+    slo_id: jupyterhub-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - https://tasks.lv3.org/
+  labels:
+    service_id: plane
+    slo_id: plane-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
@@ -97,6 +174,20 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://analytics.lv3.org/api/system/health/ready
+  labels:
+    service_id: plausible
+    slo_id: plausible-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - http://10.10.10.40:19999/api/v1/info
+  labels:
+    service_id: realtime
+    slo_id: realtime-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - http://10.10.10.20:3004/api/ping
   labels:
     service_id: semaphore
@@ -104,10 +195,31 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://chat.lv3.org
+  labels:
+    service_id: serverclaw
+    slo_id: serverclaw-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://status.lv3.org
   labels:
     service_id: status_page
     slo_id: status-page-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - http://10.10.10.20:9998/version
+  labels:
+    service_id: tika
+    slo_id: tika-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - http://10.10.10.20:3008/healthz
+  labels:
+    service_id: tesseract_ocr
+    slo_id: tesseract-ocr-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
@@ -132,9 +244,9 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://tasks.lv3.org/
+    - https://ci.lv3.org/healthz
   labels:
-    service_id: plane
-    slo_id: plane-availability
+    service_id: woodpecker
+    slo_id: woodpecker-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects

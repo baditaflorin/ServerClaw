@@ -13,6 +13,30 @@
       - gitea_runner_registration_token_local_file | length > 0
       - gitea_runner_name | length > 0
       - gitea_runner_labels | length > 0
+      - gitea_runner_renovate_username | length > 0
+      - gitea_runner_renovate_password_local_file | length > 0
+      - gitea_runner_renovate_repository | length > 0
+      - gitea_runner_renovate_token_scopes | length > 0
+      - gitea_runner_renovate_clone_host | length > 0
+      - gitea_runner_renovate_clone_host_address | length > 0
+      - gitea_runner_renovate_clone_host_port | string | length > 0
+      - gitea_runner_renovate_clone_target_host | length > 0
+      - gitea_runner_renovate_clone_target_port | string | length > 0
+      - gitea_runner_renovate_openbao_address | length > 0
+      - gitea_runner_renovate_secret_path | length > 0
+      - gitea_runner_renovate_policy_name | length > 0
+      - gitea_runner_renovate_approle_name | length > 0
+      - gitea_runner_renovate_openbao_agent_dir | length > 0
+      - gitea_runner_renovate_credential_dir | length > 0
+      - gitea_runner_renovate_credential_dir_in_container | length > 0
+      - gitea_runner_renovate_credential_file | length > 0
+      - gitea_runner_renovate_credential_file_in_container | length > 0
+      - gitea_runner_renovate_agent_config_file | length > 0
+      - gitea_runner_renovate_agent_template_file | length > 0
+      - gitea_runner_renovate_role_id_file | length > 0
+      - gitea_runner_renovate_secret_id_file | length > 0
+      - gitea_runner_renovate_agent_service_name | length > 0
+      - gitea_runner_renovate_agent_container_name | length > 0
     fail_msg: "gitea_runner requires runtime paths, image metadata, and a mirrored registration token."
 
 - name: Ensure the Gitea runner registration token exists on the control machine
@@ -34,6 +58,29 @@
     gitea_runner_registration_token: "{{ lookup('ansible.builtin.file', gitea_runner_registration_token_local_file) | trim }}"
   no_log: true
 
+- name: Ensure the Gitea Renovate bot password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ gitea_runner_renovate_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: gitea_runner_renovate_password_local
+  when: gitea_runner_renovate_enabled | bool
+
+- name: Fail if the Gitea Renovate bot password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ gitea_runner_renovate_password_local_file }} is missing on the control machine.
+      Converge the Gitea runtime first so the Renovate bot credential is mirrored locally.
+  when:
+    - gitea_runner_renovate_enabled | bool
+    - not gitea_runner_renovate_password_local.stat.exists
+
+- name: Record the Gitea Renovate bot password
+  ansible.builtin.set_fact:
+    gitea_runner_renovate_password: "{{ lookup('ansible.builtin.file', gitea_runner_renovate_password_local_file) | trim }}"
+  no_log: true
+  when: gitea_runner_renovate_enabled | bool
+
 - name: Verify Docker Compose plugin is available
   ansible.builtin.command:
     argv:
@@ -54,6 +101,64 @@
     - "{{ gitea_runner_site_dir }}"
     - "{{ gitea_runner_data_dir }}"
 
+- name: Prepare the Renovate credential bundle for the Gitea runner
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_systemd_credentials
+  vars:
+    common_openbao_systemd_credentials_service_name: gitea-runner-renovate
+    common_openbao_systemd_credentials_agent_dir: "{{ gitea_runner_renovate_openbao_agent_dir }}"
+    common_openbao_systemd_credentials_credential_dir: "{{ gitea_runner_renovate_credential_dir }}"
+    common_openbao_systemd_credentials_credential_file: "{{ gitea_runner_renovate_credential_file }}"
+    common_openbao_systemd_credentials_secret_path: "{{ gitea_runner_renovate_secret_path }}"
+    common_openbao_systemd_credentials_secret_payload:
+      RENOVATE_GITEA_BASE_URL: "{{ gitea_runner_instance_url }}"
+      RENOVATE_GITEA_USERNAME: "{{ gitea_runner_renovate_username }}"
+      RENOVATE_GITEA_PASSWORD: "{{ gitea_runner_renovate_password }}"
+      RENOVATE_GITEA_TOKEN_SCOPES: "{{ gitea_runner_renovate_token_scopes }}"
+      RENOVATE_REPOSITORY: "{{ gitea_runner_renovate_repository }}"
+      RENOVATE_GIT_CLONE_HOST: "{{ gitea_runner_renovate_clone_host }}"
+      RENOVATE_GIT_CLONE_HOST_ADDRESS: "{{ gitea_runner_renovate_clone_host_address }}"
+      RENOVATE_GIT_CLONE_HOST_PORT: "{{ gitea_runner_renovate_clone_host_port }}"
+      RENOVATE_GIT_CLONE_TARGET_HOST: "{{ gitea_runner_renovate_clone_target_host }}"
+      RENOVATE_GIT_CLONE_TARGET_PORT: "{{ gitea_runner_renovate_clone_target_port }}"
+    common_openbao_systemd_credentials_policy_name: "{{ gitea_runner_renovate_policy_name }}"
+    common_openbao_systemd_credentials_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ gitea_runner_renovate_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ gitea_runner_renovate_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_systemd_credentials_approle_name: "{{ gitea_runner_renovate_approle_name }}"
+    common_openbao_systemd_credentials_agent_config_file: "{{ gitea_runner_renovate_agent_config_file }}"
+    common_openbao_systemd_credentials_agent_template_file: "{{ gitea_runner_renovate_agent_template_file }}"
+    common_openbao_systemd_credentials_agent_template_content: |-
+      RENOVATE_GITEA_BASE_URL=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_GITEA_BASE_URL ]][[ end ]]
+      RENOVATE_GITEA_USERNAME=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_GITEA_USERNAME ]][[ end ]]
+      RENOVATE_GITEA_PASSWORD=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_GITEA_PASSWORD ]][[ end ]]
+      RENOVATE_GITEA_TOKEN_SCOPES=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_GITEA_TOKEN_SCOPES ]][[ end ]]
+      RENOVATE_REPOSITORY=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_REPOSITORY ]][[ end ]]
+      RENOVATE_GIT_CLONE_HOST=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_GIT_CLONE_HOST ]][[ end ]]
+      RENOVATE_GIT_CLONE_HOST_ADDRESS=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_GIT_CLONE_HOST_ADDRESS ]][[ end ]]
+      RENOVATE_GIT_CLONE_HOST_PORT=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_GIT_CLONE_HOST_PORT ]][[ end ]]
+      RENOVATE_GIT_CLONE_TARGET_HOST=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_GIT_CLONE_TARGET_HOST ]][[ end ]]
+      RENOVATE_GIT_CLONE_TARGET_PORT=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_GIT_CLONE_TARGET_PORT ]][[ end ]]
+    common_openbao_systemd_credentials_role_id_file: "{{ gitea_runner_renovate_role_id_file }}"
+    common_openbao_systemd_credentials_secret_id_file: "{{ gitea_runner_renovate_secret_id_file }}"
+    common_openbao_systemd_credentials_image: "{{ openbao_agent_image }}"
+    common_openbao_systemd_credentials_agent_service_name: "{{ gitea_runner_renovate_agent_service_name }}"
+    common_openbao_systemd_credentials_container_name: "{{ gitea_runner_renovate_agent_container_name }}"
+    common_openbao_systemd_credentials_openbao_address: "{{ gitea_runner_renovate_openbao_address }}"
+    common_openbao_systemd_credentials_manage_local_openbao_runtime: false
+  no_log: true
+  when: gitea_runner_renovate_enabled | bool
+
 - name: Render the Gitea runner config
   ansible.builtin.template:
     src: config.yaml.j2
@@ -61,6 +166,7 @@
     owner: root
     group: root
     mode: "0644"
+  register: gitea_runner_config_render
 
 - name: Render the Gitea runner compose file
   ansible.builtin.template:
@@ -69,6 +175,15 @@
     owner: root
     group: root
     mode: "0644"
+  register: gitea_runner_compose_render
+
+- name: Record whether the Gitea runner stack needs a force recreate
+  ansible.builtin.set_fact:
+    gitea_runner_force_recreate: >-
+      {{
+        (gitea_runner_config_render.changed | default(false))
+        or (gitea_runner_compose_render.changed | default(false))
+      }}
 
 - name: Pull the Gitea runner image
   ansible.builtin.command:
@@ -88,14 +203,18 @@
 
 - name: Start the Gitea runner stack
   ansible.builtin.command:
-    argv:
-      - "{{ gitea_runner_compose_bin }}"
-      - compose
-      - --file
-      - "{{ gitea_runner_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
+    argv: >-
+      {{
+        [
+          gitea_runner_compose_bin,
+          'compose',
+          '--file',
+          gitea_runner_compose_file,
+          'up',
+          '-d',
+          '--remove-orphans',
+        ] + (['--force-recreate'] if gitea_runner_force_recreate else [])
+      }}
   args:
     chdir: "{{ gitea_runner_site_dir }}"
   register: gitea_runner_up
@@ -123,3 +242,17 @@
     that:
       - gitea_runner_verify_running.stdout_lines | select('equalto', gitea_runner_container_name) | list | length == 1
     fail_msg: "Gitea runner container is not running."
+
+- name: Assert the Renovate credential bundle exists on the runner host
+  ansible.builtin.stat:
+    path: "{{ gitea_runner_renovate_credential_file }}"
+  register: gitea_runner_renovate_credential_stat
+  when: gitea_runner_renovate_enabled | bool
+
+- name: Confirm the Renovate credential bundle rendered successfully
+  ansible.builtin.assert:
+    that:
+      - gitea_runner_renovate_credential_stat.stat.exists
+      - gitea_runner_renovate_credential_stat.stat.size | int > 0
+    fail_msg: "The Renovate credential bundle did not render on docker-build-lv3."
+  when: gitea_runner_renovate_enabled | bool

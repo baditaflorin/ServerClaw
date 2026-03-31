@@ -11,7 +11,7 @@ import urllib.parse
 import urllib.request
 import uuid
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from platform.datetime_compat import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Protocol
@@ -39,29 +39,10 @@ from .speculative import (
     run_conflict_probe,
 )
 from .watchdog import ActiveJobRecord, SchedulerStateStore, Watchdog
+from .windmill_client import HttpWindmillClient, WindmillClient
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-
-
-class WindmillClient(Protocol):
-    def submit_workflow(
-        self,
-        workflow_id: str,
-        arguments: dict[str, Any],
-        *,
-        timeout_seconds: int | None = None,
-    ) -> dict[str, Any]:
-        ...
-
-    def get_job(self, job_id: str) -> dict[str, Any]:
-        ...
-
-    def list_jobs(self, *, running: bool | None = None) -> list[dict[str, Any]]:
-        ...
-
-    def cancel_job(self, job_id: str, *, reason: str | None = None) -> dict[str, Any] | None:
-        ...
 
 
 @dataclass
@@ -163,217 +144,6 @@ class SchedulerResult:
     reason: str | None = None
     budget: dict[str, Any] | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
-
-
-class HttpWindmillClient:
-    def __init__(
-        self,
-        *,
-        base_url: str,
-        token: str,
-        workspace: str = "lv3",
-        request_timeout_seconds: float = default_timeout("http_request"),
-        circuit_breaker: Any | None = None,
-        circuit_registry: CircuitRegistry | None = None,
-    ) -> None:
-        self._base_url = base_url.rstrip("/")
-        self._token = token
-        self._workspace = workspace
-        self._internal_api_retry_policy = policy_for_surface("internal_api")
-        self._request_timeout_seconds = resolve_timeout_seconds("http_request", request_timeout_seconds)
-        self._circuit_breaker = circuit_breaker
-        self._session_token: str | None = None
-        if self._circuit_breaker is None:
-            registry = circuit_registry or CircuitRegistry(REPO_ROOT)
-            if registry.has_policy("windmill"):
-                self._circuit_breaker = registry.sync_breaker(
-                    "windmill",
-                    exception_classifier=should_count_urllib_exception,
-                )
-
-    def _login_with_bootstrap_secret(self) -> str:
-        payload = json.dumps(
-            {
-                "email": "superadmin_secret@windmill.dev",
-                "password": self._token,
-            }
-        ).encode("utf-8")
-        request = urllib.request.Request(
-            f"{self._base_url}/api/auth/login",
-            data=payload,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        with urllib.request.urlopen(
-            request,
-            timeout=resolve_timeout_seconds("http_request", self._request_timeout_seconds),
-        ) as response:
-            token = response.read().decode("utf-8").strip()
-        if not token:
-            raise RuntimeError("Windmill bootstrap login returned an empty session token")
-        self._session_token = token
-        return token
-
-    def _request(
-        self,
-        path: str,
-        *,
-        method: str,
-        payload: Any | None = None,
-        timeout: float | None = None,
-        retry: bool = True,
-        allow_login_retry: bool = True,
-    ) -> Any:
-        data = None
-        auth_token = self._session_token or self._token
-        headers = {"Authorization": f"Bearer {auth_token}"}
-        if payload is not None:
-            data = json.dumps(payload).encode("utf-8")
-            headers["Content-Type"] = "application/json"
-        request = urllib.request.Request(
-            f"{self._base_url}{path}",
-            data=data,
-            headers=headers,
-            method=method,
-        )
-        def execute() -> str:
-            open_request = lambda: urllib.request.urlopen(
-                request,
-                timeout=resolve_timeout_seconds("http_request", timeout or self._request_timeout_seconds),
-            )
-            response_cm = (
-                with_retry(
-                    open_request,
-                    policy=self._internal_api_retry_policy,
-                    error_context=f"windmill {method} {path}",
-                )
-                if retry
-                else open_request()
-            )
-            with response_cm as response:
-                return response.read().decode("utf-8")
-
-        if self._circuit_breaker is not None:
-            try:
-                body = self._circuit_breaker.call(execute)
-            except urllib.error.HTTPError as exc:
-                if exc.code != 401 or not allow_login_retry or self._session_token is not None:
-                    raise
-                self._login_with_bootstrap_secret()
-                return self._request(
-                    path,
-                    method=method,
-                    payload=payload,
-                    timeout=timeout,
-                    retry=retry,
-                    allow_login_retry=False,
-                )
-        else:
-            try:
-                body = execute()
-            except urllib.error.HTTPError as exc:
-                if exc.code != 401 or not allow_login_retry or self._session_token is not None:
-                    raise
-                self._login_with_bootstrap_secret()
-                return self._request(
-                    path,
-                    method=method,
-                    payload=payload,
-                    timeout=timeout,
-                    retry=retry,
-                    allow_login_retry=False,
-                )
-        if not body.strip():
-            return None
-        try:
-            return json.loads(body)
-        except json.JSONDecodeError:
-            return body
-
-    def submit_workflow(
-        self,
-        workflow_id: str,
-        arguments: dict[str, Any],
-        *,
-        timeout_seconds: int | None = None,
-    ) -> dict[str, Any]:
-        script_path = workflow_id if "/" in workflow_id else f"f/{self._workspace}/{workflow_id}"
-        encoded_path = urllib.parse.quote(script_path, safe="")
-        try:
-            response = self._request(
-                f"/api/w/{self._workspace}/jobs/run/p/{encoded_path}",
-                method="POST",
-                payload=arguments,
-                retry=False,
-            )
-            if isinstance(response, str):
-                return {"job_id": response, "running": True}
-            if isinstance(response, dict):
-                if "job_id" in response or "id" in response:
-                    return {"job_id": str(response.get("job_id") or response.get("id")), **response}
-                return response
-            raise RuntimeError(f"unexpected Windmill submit response: {response!r}")
-        except urllib.error.HTTPError as exc:
-            if exc.code not in {404, 405}:
-                raise
-
-        response = self._request(
-            f"/api/w/{self._workspace}/jobs/run_wait_result/p/{encoded_path}",
-            method="POST",
-            payload=arguments,
-            timeout=resolve_timeout_seconds("http_request", timeout_seconds or self._request_timeout_seconds),
-            retry=False,
-        )
-        return {
-            "completed": True,
-            "success": True,
-            "result": response,
-            "mode": "sync_fallback",
-        }
-
-    def get_job(self, job_id: str) -> dict[str, Any]:
-        response = self._request(
-            f"/api/w/{self._workspace}/jobs_u/get/{urllib.parse.quote(job_id, safe='')}",
-            method="GET",
-        )
-        if not isinstance(response, dict):
-            raise RuntimeError(f"unexpected Windmill job response: {response!r}")
-        return response
-
-    def list_jobs(self, *, running: bool | None = None) -> list[dict[str, Any]]:
-        query: dict[str, str] = {}
-        if running is not None:
-            query["running"] = "true" if running else "false"
-        path = f"/api/w/{self._workspace}/jobs/list"
-        if query:
-            path = f"{path}?{urllib.parse.urlencode(query)}"
-        response = self._request(path, method="GET")
-        if isinstance(response, list):
-            return [item for item in response if isinstance(item, dict)]
-        if isinstance(response, dict):
-            for key in ("jobs", "items", "results", "data"):
-                value = response.get(key)
-                if isinstance(value, list):
-                    return [item for item in value if isinstance(item, dict)]
-        raise RuntimeError(f"unexpected Windmill jobs response: {response!r}")
-
-    def cancel_job(self, job_id: str, *, reason: str | None = None) -> dict[str, Any] | None:
-        encoded = urllib.parse.quote(job_id, safe="")
-        payload = {"reason": reason} if reason else None
-        for path in (
-            f"/api/w/{self._workspace}/jobs_u/cancel/{encoded}",
-            f"/api/w/{self._workspace}/jobs_u/queue/cancel/{encoded}",
-            f"/api/w/{self._workspace}/jobs_u/force_cancel/{encoded}",
-            f"/api/w/{self._workspace}/jobs_u/queue/force_cancel/{encoded}",
-        ):
-            try:
-                response = self._request(path, method="POST", payload=payload)
-                return response if isinstance(response, dict) else {"response": response}
-            except urllib.error.HTTPError as exc:
-                if exc.code in {404, 405}:
-                    continue
-                raise
-        return None
 
 
 class BudgetedWorkflowScheduler:

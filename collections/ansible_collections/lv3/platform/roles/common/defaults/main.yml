@@ -1,3 +1,9 @@
+# Purpose: Define shared default variables for reusable common-role task entrypoints.
+# Use case: Load when another role imports the common helper role for assertions, directory trees, waits, or Docker/OpenBao helpers.
+# Inputs: None; this file provides default values consumed by role callers and task includes.
+# Outputs: Stable default variables for the common role.
+# Idempotency: Fully idempotent; defaults declare desired values only.
+# Dependencies: ADR 0165 metadata standard and the common role task entrypoints.
 ---
 common_assert_vars_required: []
 common_assert_vars_expressions: []
@@ -16,6 +22,11 @@ common_systemd_unit_state: started
 common_systemd_unit_daemon_reload: false
 common_systemd_unit_verify_active: false
 common_systemd_unit_expected_active_state: active
+
+common_docker_bridge_chains_service_name: docker
+common_docker_bridge_chains_require_nat_chain: true
+common_docker_bridge_chains_retries: 10
+common_docker_bridge_chains_delay: 2
 
 common_wait_port_host: 127.0.0.1
 common_wait_port_port: 0
@@ -45,3 +56,4 @@ common_openbao_systemd_credentials_container_entrypoint: /bin/vault
 common_openbao_systemd_credentials_agent_service_name: ""
 common_openbao_systemd_credentials_container_name: ""
 common_openbao_systemd_credentials_openbao_address: ""
+common_openbao_systemd_credentials_manage_local_openbao_runtime: true

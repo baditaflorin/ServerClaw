@@ -18,6 +18,7 @@ def test_build_dr_report_falls_back_to_control_plane_restore_drill(tmp_path: Pat
     adr_dir = tmp_path / "docs" / "adr"
     table_top_dir = tmp_path / "receipts" / "dr-table-top-reviews"
     restore_dir = tmp_path / "receipts" / "restore-verifications"
+    backup_coverage_dir = tmp_path / "receipts" / "backup-coverage"
 
     write(
         targets,
@@ -53,6 +54,23 @@ backups:
         table_top_dir / "2026-03-23-review.json",
         json.dumps({"reviewed_on": "2026-03-23", "result": "completed_with_gaps"}) + "\n",
     )
+    write(
+        backup_coverage_dir / "20260329T010203Z.json",
+        json.dumps(
+            {
+                "generated_at": "2026-03-29T01:02:03Z",
+                "summary": {
+                    "governed_assets": 2,
+                    "protected": 1,
+                    "degraded": 0,
+                    "uncovered": 1,
+                    "degraded_assets": [],
+                    "uncovered_assets": ["backup-lv3"],
+                },
+            }
+        )
+        + "\n",
+    )
     restore_dir.mkdir(parents=True)
 
     report = build_dr_report(
@@ -60,13 +78,16 @@ backups:
         stack_path=stack,
         table_top_dir=table_top_dir,
         restore_dir=restore_dir,
+        backup_coverage_dir=backup_coverage_dir,
         adr_dir=adr_dir,
     )
 
     assert report["restore_evidence"]["source"] == "control_plane_restore_drill"
+    assert report["backup_coverage"]["summary"]["uncovered_assets"] == ["backup-lv3"]
     assert report["offsite_backup"]["configured"] is False
     assert report["overall_status"] == "degraded"
     assert "Host loss" in render_dr_report(report)
+    assert "backup-lv3" in render_dr_report(report)
     assert "Docs site (ADR 0094): complete" in render_release_status(report)
 
 

@@ -8,8 +8,13 @@ import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
+
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
 
 from canonical_errors import ErrorRegistry, PlatformHTTPError
 from dependency_graph import compute_impact, graph_to_dict, load_dependency_graph
@@ -18,11 +23,20 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, PointStruct, VectorParams
+from qdrant_client.models import Distance, PointIdsList, PointStruct, VectorParams
 
 from platform.logging import clear_context, generate_trace_id, get_logger, set_context
+from platform.memory import MemoryEntryInput, MemoryStore
+from platform.world_state._db import isoformat
 from platform_context_corpus import build_chunks
 from slo_tracking import build_slo_status_entries, default_grafana_url, default_prometheus_url
+
+try:
+    from search_fabric import SearchClient, SearchDocument, SearchIndexer
+    from search_fabric.utils import sha256_text, utc_now_iso
+except ImportError:  # pragma: no cover - packaged import path
+    from scripts.search_fabric import SearchClient, SearchDocument, SearchIndexer
+    from scripts.search_fabric.utils import sha256_text, utc_now_iso
 
 
 DEFAULT_COLLECTION = "platform_context"
@@ -41,6 +55,31 @@ class RebuildRequest(BaseModel):
     replace: bool = True
     chunks: list[dict[str, Any]] = Field(default_factory=list)
     manifest: dict[str, Any] | None = None
+
+
+class MemoryEntryRequest(BaseModel):
+    memory_id: str | None = None
+    scope_kind: Literal["owner", "workspace"]
+    scope_id: str = Field(min_length=1, max_length=128)
+    object_type: str = Field(min_length=2, max_length=64)
+    title: str = Field(min_length=1, max_length=256)
+    content: str = Field(min_length=1, max_length=20000)
+    provenance: str = Field(min_length=1, max_length=256)
+    retention_class: str = Field(min_length=1, max_length=64)
+    consent_boundary: str = Field(min_length=1, max_length=128)
+    delegation_boundary: str | None = Field(default=None, max_length=128)
+    source_uri: str | None = Field(default=None, max_length=512)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    last_refreshed_at: datetime | None = None
+    expires_at: datetime | None = None
+
+
+class MemoryQueryRequest(BaseModel):
+    query: str = Field(min_length=2, max_length=1000)
+    scope_kind: Literal["owner", "workspace"]
+    scope_id: str = Field(min_length=1, max_length=128)
+    object_type: str | None = Field(default=None, min_length=2, max_length=64)
+    limit: int = Field(default=5, ge=1, le=20)
 
 
 class TokenHashEmbedder:
@@ -147,6 +186,9 @@ class ServiceConfig:
     ollama_url: str | None = None
     prometheus_url: str | None = None
     grafana_url: str | None = None
+    memory_dsn: str | None = None
+    memory_collection_name: str = "serverclaw_memory"
+    memory_index_path: Path | None = None
 
 
 class PlatformContextService:
@@ -155,6 +197,10 @@ class PlatformContextService:
         self.error_registry = ErrorRegistry.load(config.error_registry_path)
         self.client = self._build_client()
         self.embedder = self._build_embedder()
+        self.memory_store = self._build_memory_store()
+        self._memory_search_client: SearchClient | None = None
+        if self.memory_store is not None:
+            self.memory_store.ensure_sqlite_schema()
 
     def _build_client(self) -> QdrantClient:
         if self.config.qdrant_location:
@@ -185,6 +231,11 @@ class PlatformContextService:
                 )
                 return TokenHashEmbedder(self.config.embedding_dimension)
         raise ValueError(f"unsupported embedding backend: {self.config.embedding_backend}")
+
+    def _build_memory_store(self) -> MemoryStore | None:
+        if not self.config.memory_dsn:
+            return None
+        return MemoryStore(dsn=self.config.memory_dsn)
 
     def _required_dimension(self, embeddings: list[list[float]] | None = None) -> int:
         if embeddings:
@@ -244,6 +295,326 @@ class PlatformContextService:
         result = self.rebuild(chunks, replace=True)
         result["source"] = str(self.config.corpus_root)
         return result
+
+    def _require_memory_store(self) -> MemoryStore:
+        if self.memory_store is None:
+            raise RuntimeError("ServerClaw memory substrate is not configured")
+        return self.memory_store
+
+    def _memory_index_path(self) -> Path:
+        if self.config.memory_index_path is not None:
+            return self.config.memory_index_path
+        return self.config.corpus_root / "build" / "serverclaw-memory-index" / "documents.json"
+
+    def _memory_search_client_instance(self) -> SearchClient:
+        if self._memory_search_client is None:
+            self._memory_search_client = SearchClient(
+                self.config.corpus_root,
+                index_path=self._memory_index_path(),
+            )
+        return self._memory_search_client
+
+    def ensure_memory_collection(self, *, replace: bool = False, dimension: int | None = None) -> None:
+        if replace and self.client.collection_exists(self.config.memory_collection_name):
+            self.client.delete_collection(self.config.memory_collection_name)
+        if self.client.collection_exists(self.config.memory_collection_name):
+            return
+        self.client.create_collection(
+            collection_name=self.config.memory_collection_name,
+            vectors_config=VectorParams(
+                size=dimension or self._required_dimension(),
+                distance=Distance.COSINE,
+            ),
+        )
+
+    def rebuild_memory_keyword_index(self) -> dict[str, Any]:
+        store = self._require_memory_store()
+        entries = store.all_active_entries()
+        documents = []
+        for entry in entries:
+            metadata = {
+                "scope_kind": entry.scope_kind,
+                "scope_id": entry.scope_id,
+                "object_type": entry.object_type,
+                "provenance": entry.provenance,
+                "retention_class": entry.retention_class,
+                "consent_boundary": entry.consent_boundary,
+                "delegation_boundary": entry.delegation_boundary,
+                "source_uri": entry.source_uri,
+                "last_refreshed_at": isoformat(entry.last_refreshed_at),
+            }
+            documents.append(
+                SearchDocument(
+                    doc_id=entry.memory_id,
+                    collection="serverclaw_memory",
+                    title=entry.title,
+                    body=entry.content,
+                    url=f"memory:{entry.memory_id}",
+                    metadata=metadata,
+                    indexed_at=utc_now_iso(),
+                    content_hash=sha256_text(
+                        entry.memory_id,
+                        entry.title,
+                        entry.content,
+                        json.dumps(metadata, sort_keys=True, separators=(",", ":")),
+                    ),
+                )
+            )
+        payload = SearchIndexer(self.config.corpus_root, index_path=self._memory_index_path()).write_index(
+            documents,
+            stats={
+                "collection_counts": {"serverclaw_memory": len(documents)},
+                "updated_count": len(documents),
+                "skipped_count": 0,
+            },
+        )
+        self._memory_search_client = None
+        return payload
+
+    def _memory_keyword_matches(
+        self,
+        query: str,
+        *,
+        scope_kind: str,
+        scope_id: str,
+        object_type: str | None,
+        limit: int,
+    ) -> dict[str, dict[str, Any]]:
+        if not self._memory_index_path().exists():
+            self.rebuild_memory_keyword_index()
+        payload = self._memory_search_client_instance().query(
+            query,
+            collection="serverclaw_memory",
+            facets={
+                "scope_kind": scope_kind,
+                "scope_id": scope_id,
+                **({"object_type": object_type} if object_type else {}),
+            },
+            limit=max(limit * 5, 10),
+        )
+        return {item["doc_id"]: item for item in payload.get("results", []) if isinstance(item, dict)}
+
+    def _memory_semantic_matches(
+        self,
+        query: str,
+        *,
+        scope_kind: str,
+        scope_id: str,
+        object_type: str | None,
+        limit: int,
+    ) -> dict[str, dict[str, Any]]:
+        if not self.client.collection_exists(self.config.memory_collection_name):
+            return {}
+        vector = self.embedder.embed_query(query)
+        if hasattr(self.client, "query_points"):
+            response = self.client.query_points(
+                collection_name=self.config.memory_collection_name,
+                query=vector,
+                limit=max(limit * 5, 10),
+                with_payload=True,
+            )
+            points = response.points
+        else:
+            points = self.client.search(
+                collection_name=self.config.memory_collection_name,
+                query_vector=vector,
+                limit=max(limit * 5, 10),
+                with_payload=True,
+            )
+        matches: dict[str, dict[str, Any]] = {}
+        for point in points:
+            payload = point.payload or {}
+            if payload.get("scope_kind") != scope_kind or payload.get("scope_id") != scope_id:
+                continue
+            if object_type and payload.get("object_type") != object_type:
+                continue
+            matches[str(payload.get("memory_id") or point.id)] = {
+                "score": float(point.score or 0.0),
+                "payload": payload,
+            }
+        return matches
+
+    def upsert_memory_entry(self, request: MemoryEntryRequest) -> dict[str, Any]:
+        store = self._require_memory_store()
+        entry = store.upsert(
+            MemoryEntryInput(
+                memory_id=request.memory_id,
+                scope_kind=request.scope_kind,
+                scope_id=request.scope_id,
+                object_type=request.object_type,
+                title=request.title,
+                content=request.content,
+                provenance=request.provenance,
+                retention_class=request.retention_class,
+                consent_boundary=request.consent_boundary,
+                delegation_boundary=request.delegation_boundary,
+                source_uri=request.source_uri,
+                metadata=request.metadata,
+                last_refreshed_at=request.last_refreshed_at,
+                expires_at=request.expires_at,
+            )
+        )
+        embedding_text = f"{entry.title}\n\n{entry.content}"
+        embeddings = self.embedder.embed_documents([embedding_text])
+        self.ensure_memory_collection(dimension=self._required_dimension(embeddings))
+        self.client.upsert(
+            collection_name=self.config.memory_collection_name,
+            points=[
+                PointStruct(
+                    id=entry.memory_id,
+                    vector=embeddings[0],
+                    payload={
+                        "memory_id": entry.memory_id,
+                        "scope_kind": entry.scope_kind,
+                        "scope_id": entry.scope_id,
+                        "object_type": entry.object_type,
+                        "title": entry.title,
+                        "content": entry.content,
+                        "provenance": entry.provenance,
+                        "retention_class": entry.retention_class,
+                        "consent_boundary": entry.consent_boundary,
+                        "delegation_boundary": entry.delegation_boundary,
+                        "source_uri": entry.source_uri,
+                        "last_refreshed_at": isoformat(entry.last_refreshed_at),
+                    },
+                )
+            ],
+        )
+        self.rebuild_memory_keyword_index()
+        return {
+            "entry": entry.to_dict(),
+            "indexed_backends": ["postgres", "qdrant", "local-search"],
+            "memory_collection": self.config.memory_collection_name,
+            "memory_index_path": str(self._memory_index_path()),
+        }
+
+    def get_memory_entry(self, memory_id: str) -> dict[str, Any] | None:
+        store = self._require_memory_store()
+        entry = store.get(memory_id)
+        return entry.to_dict() if entry is not None else None
+
+    def list_memory_entries(
+        self,
+        *,
+        scope_kind: str,
+        scope_id: str,
+        object_type: str | None,
+        limit: int,
+    ) -> dict[str, Any]:
+        store = self._require_memory_store()
+        entries = store.list_entries(
+            scope_kind=scope_kind,
+            scope_id=scope_id,
+            object_type=object_type,
+            limit=limit,
+        )
+        return {
+            "count": len(entries),
+            "entries": [entry.to_dict() for entry in entries],
+        }
+
+    def delete_memory_entry(self, memory_id: str) -> bool:
+        store = self._require_memory_store()
+        deleted = store.delete(memory_id)
+        if not deleted:
+            return False
+        if self.client.collection_exists(self.config.memory_collection_name):
+            self.client.delete(
+                collection_name=self.config.memory_collection_name,
+                points_selector=PointIdsList(points=[memory_id]),
+            )
+        self.rebuild_memory_keyword_index()
+        return True
+
+    def query_memory(self, request: MemoryQueryRequest) -> dict[str, Any]:
+        store = self._require_memory_store()
+        semantic_matches: dict[str, dict[str, Any]] = {}
+        fallback_reason = None
+        try:
+            semantic_matches = self._memory_semantic_matches(
+                request.query,
+                scope_kind=request.scope_kind,
+                scope_id=request.scope_id,
+                object_type=request.object_type,
+                limit=request.limit,
+            )
+        except Exception as exc:  # noqa: BLE001
+            fallback_reason = str(exc)
+        keyword_matches = self._memory_keyword_matches(
+            request.query,
+            scope_kind=request.scope_kind,
+            scope_id=request.scope_id,
+            object_type=request.object_type,
+            limit=request.limit,
+        )
+        candidate_ids = list(dict.fromkeys([*semantic_matches.keys(), *keyword_matches.keys()]))
+        if not candidate_ids:
+            return {
+                "query": request.query,
+                "scope_kind": request.scope_kind,
+                "scope_id": request.scope_id,
+                "object_type": request.object_type,
+                "retrieval_backend": "keyword-fallback" if fallback_reason else "hybrid",
+                "matches": [],
+                "memory_collection": self.config.memory_collection_name,
+                "memory_index_path": str(self._memory_index_path()),
+                **({"fallback_reason": fallback_reason} if fallback_reason else {}),
+            }
+        entries = {
+            entry.memory_id: entry
+            for entry in store.list_entries(
+                scope_kind=request.scope_kind,
+                scope_id=request.scope_id,
+                object_type=request.object_type,
+                memory_ids=candidate_ids,
+                limit=max(len(candidate_ids), request.limit),
+            )
+        }
+        ranked: list[tuple[float, str]] = []
+        for memory_id in candidate_ids:
+            semantic_score = float(semantic_matches.get(memory_id, {}).get("score", 0.0) or 0.0)
+            keyword_score = float(keyword_matches.get(memory_id, {}).get("score", 0.0) or 0.0)
+            ranked.append((semantic_score + keyword_score, memory_id))
+        ranked.sort(key=lambda item: (-item[0], item[1]))
+        matches = []
+        for _combined_score, memory_id in ranked[: request.limit]:
+            entry = entries.get(memory_id)
+            if entry is None:
+                continue
+            matched_backends = []
+            semantic_score = float(semantic_matches.get(memory_id, {}).get("score", 0.0) or 0.0)
+            keyword_score = float(keyword_matches.get(memory_id, {}).get("score", 0.0) or 0.0)
+            if semantic_score > 0:
+                matched_backends.append("semantic")
+            if keyword_score > 0:
+                matched_backends.append("keyword")
+            matches.append(
+                {
+                    **entry.to_dict(),
+                    "semantic_score": semantic_score,
+                    "keyword_score": keyword_score,
+                    "hybrid_score": semantic_score + keyword_score,
+                    "matched_backends": matched_backends,
+                }
+            )
+        retrieval_backend = "hybrid"
+        if fallback_reason and keyword_matches:
+            retrieval_backend = "keyword-fallback"
+        elif semantic_matches and not keyword_matches:
+            retrieval_backend = "semantic-only"
+        elif keyword_matches and not semantic_matches:
+            retrieval_backend = "keyword-only"
+        return {
+            "query": request.query,
+            "scope_kind": request.scope_kind,
+            "scope_id": request.scope_id,
+            "object_type": request.object_type,
+            "retrieval_backend": retrieval_backend,
+            "matches": matches,
+            "memory_collection": self.config.memory_collection_name,
+            "memory_index_path": str(self._memory_index_path()),
+            **({"fallback_reason": fallback_reason} if fallback_reason else {}),
+        }
 
     def query(self, question: str, top_k: int) -> dict[str, Any]:
         fallback_reason = None
@@ -435,6 +806,14 @@ def build_config() -> ServiceConfig:
         or default_prometheus_url(stack_path=corpus_root / "versions" / "stack.yaml"),
         grafana_url=os.environ.get("PLATFORM_CONTEXT_GRAFANA_URL")
         or default_grafana_url(service_catalog_path=corpus_root / "config" / "service-capability-catalog.json"),
+        memory_dsn=os.environ.get("PLATFORM_CONTEXT_MEMORY_DSN") or None,
+        memory_collection_name=os.environ.get("PLATFORM_CONTEXT_MEMORY_COLLECTION", "serverclaw_memory"),
+        memory_index_path=Path(
+            os.environ.get(
+                "PLATFORM_CONTEXT_MEMORY_INDEX_PATH",
+                corpus_root / "build" / "serverclaw-memory-index" / "documents.json",
+            )
+        ),
     )
 
 
@@ -566,7 +945,12 @@ async def handle_unexpected_error(request: Request, exc: Exception) -> JSONRespo
 @app.get("/healthz")
 def healthz() -> dict[str, Any]:
     current_service = get_service()
-    return {"status": "ok", "collection": current_service.config.collection_name}
+    return {
+        "status": "ok",
+        "collection": current_service.config.collection_name,
+        "memory_collection": current_service.config.memory_collection_name,
+        "memory_enabled": current_service.memory_store is not None,
+    }
 
 
 @app.get("/v1/platform-summary", dependencies=[Depends(require_auth)])
@@ -631,6 +1015,57 @@ def platform_slos() -> dict[str, Any]:
 @app.post("/v1/context/query", dependencies=[Depends(require_auth)])
 def query_context(request: QueryRequest) -> dict[str, Any]:
     return get_service().query(request.question, request.top_k)
+
+
+@app.post("/v1/memory/entries", dependencies=[Depends(require_auth)])
+def upsert_memory_entry(request: MemoryEntryRequest) -> dict[str, Any]:
+    return get_service().upsert_memory_entry(request)
+
+
+@app.get("/v1/memory/entries", dependencies=[Depends(require_auth)])
+def list_memory_entries(
+    scope_kind: Literal["owner", "workspace"],
+    scope_id: str = Query(min_length=1, max_length=128),
+    object_type: str | None = Query(default=None, min_length=2, max_length=64),
+    limit: int = Query(default=20, ge=1, le=50),
+) -> dict[str, Any]:
+    return get_service().list_memory_entries(
+        scope_kind=scope_kind,
+        scope_id=scope_id,
+        object_type=object_type,
+        limit=limit,
+    )
+
+
+@app.get("/v1/memory/entries/{memory_id}", dependencies=[Depends(require_auth)])
+def get_memory_entry(memory_id: str, request: Request) -> dict[str, Any]:
+    payload = get_service().get_memory_entry(memory_id)
+    if payload is None:
+        raise_platform_error(
+            request,
+            "INPUT_UNKNOWN_MEMORY_ENTRY",
+            message=f"Unknown memory entry: {memory_id}",
+            context={"memory_id": memory_id},
+        )
+    return payload
+
+
+@app.delete("/v1/memory/entries/{memory_id}", dependencies=[Depends(require_auth)])
+def delete_memory_entry(memory_id: str, request: Request) -> dict[str, Any]:
+    deleted = get_service().delete_memory_entry(memory_id)
+    if not deleted:
+        raise_platform_error(
+            request,
+            "INPUT_UNKNOWN_MEMORY_ENTRY",
+            message=f"Unknown memory entry: {memory_id}",
+            context={"memory_id": memory_id},
+        )
+    return {"deleted": True, "memory_id": memory_id}
+
+
+@app.post("/v1/memory/query", dependencies=[Depends(require_auth)])
+def query_memory(request: MemoryQueryRequest) -> dict[str, Any]:
+    return get_service().query_memory(request)
 
 
 @app.post("/v1/admin/rebuild", dependencies=[Depends(require_auth)])

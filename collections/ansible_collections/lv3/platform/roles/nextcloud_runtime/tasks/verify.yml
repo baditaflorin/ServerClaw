@@ -1,0 +1,78 @@
+# Purpose: Verify that the managed Nextcloud runtime is healthy, installed, and operator-accessible after converge.
+# Use case: Include at the end of Nextcloud convergence or replay verification to confirm local health and bootstrap state.
+# Inputs: nextcloud_* runtime URLs, container names, and OCC retry settings.
+# Outputs: Verified service health, admin presence, and expected runtime assertions.
+# Idempotency: Fully idempotent; verification reads state and fails if expectations are not met.
+# Dependencies: ADR 0165 metadata standard, ADR 0260, and a running nextcloud_runtime deployment.
+---
+- name: Verify the Nextcloud local status endpoint
+  ansible.builtin.uri:
+    url: "{{ nextcloud_internal_base_url }}/status.php"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: nextcloud_verify_status
+  retries: 24
+  delay: 5
+  until: nextcloud_verify_status.status == 200
+  changed_when: false
+
+- name: Assert the Nextcloud local status payload reports an installed instance
+  ansible.builtin.assert:
+    that:
+      - (nextcloud_verify_status.content | from_json).installed | default(false)
+      - (nextcloud_verify_status.content | from_json).maintenance | default(false) == false
+      - (nextcloud_verify_status.content | from_json).version | length > 0
+    fail_msg: "Nextcloud answered locally, but the status payload did not report an installed and healthy instance."
+
+- name: Verify the bootstrap Nextcloud admin exists
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --user
+      - www-data
+      - "{{ nextcloud_container_name }}"
+      - php
+      - occ
+      - user:info
+      - "{{ nextcloud_admin_user }}"
+      - --output=json
+  register: nextcloud_verify_admin
+  retries: "{{ nextcloud_occ_command_retries | int }}"
+  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
+  until: nextcloud_verify_admin.rc == 0
+  changed_when: false
+  no_log: true
+
+- name: Assert the bootstrap Nextcloud admin is enabled
+  ansible.builtin.assert:
+    that:
+      - (nextcloud_verify_admin.stdout | from_json).enabled | default(false)
+    fail_msg: "The repo-managed Nextcloud bootstrap admin could not be queried through OCC."
+  no_log: true
+
+- name: Verify Nextcloud background jobs run in cron mode
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --user
+      - www-data
+      - "{{ nextcloud_container_name }}"
+      - php
+      - occ
+      - config:app:get
+      - core
+      - backgroundjobs_mode
+  register: nextcloud_verify_background_jobs
+  retries: "{{ nextcloud_occ_command_retries | int }}"
+  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
+  until: nextcloud_verify_background_jobs.rc == 0
+  changed_when: false
+
+- name: Assert the Nextcloud background job mode is cron
+  ansible.builtin.assert:
+    that:
+      - nextcloud_verify_background_jobs.stdout | trim == 'cron'
+    fail_msg: "Nextcloud background jobs are not configured for the managed cron runner."

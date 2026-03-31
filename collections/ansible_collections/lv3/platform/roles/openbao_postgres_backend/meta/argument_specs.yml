@@ -2,4 +2,24 @@
 argument_specs:
   main:
     short_description: OpenBao PostgreSQL backend role inputs.
-    options: {}
+    options:
+      openbao_postgres_admin_role:
+        type: str
+        required: true
+        description:
+          - PostgreSQL login role that OpenBao uses to mint dynamic credentials.
+      openbao_postgres_admin_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local artifact path that stores the OpenBao rotator password.
+      openbao_postgres_database:
+        type: str
+        required: true
+        description:
+          - Database that the OpenBao rotator must be able to connect to.
+      openbao_postgres_reserved_connection_role:
+        type: str
+        required: true
+        description:
+          - PostgreSQL capability role that grants access to reserved connection slots.

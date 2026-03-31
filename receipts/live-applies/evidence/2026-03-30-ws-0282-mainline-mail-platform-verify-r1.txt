@@ -1,0 +1,30 @@
+
+PLAY [Warm the host graph for guest jump access] *******************************
+
+TASK [Record mail verification start] ******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Record mail verification start","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T07:21:45.229Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin] => {
+    "msg": "Starting mail platform live verification for staging."
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Record mail verification start","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T07:21:45.250Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+PLAY [Prepare the mail verification target state] ******************************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T07:21:45.265Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-staging-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"docker-runtime-staging-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T07:21:49.497Z","vm":"docker-runtime-staging-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Read inbox count before the production SMTP probe] ***********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Read inbox count before the production SMTP probe","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T07:21:49.500Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-staging-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Read inbox count before the production SMTP probe","service_id":"ansible","target":"docker-runtime-staging-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T07:21:49.510Z","vm":"docker-runtime-staging-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Clear any previous Mailpit messages before the staging SMTP probe] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: Clear any previous Mailpit messages before the staging SMTP probe","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T07:21:49.514Z","vm":"controller","workflow_id":"ansible-playbook"}
+fatal: [docker-runtime-staging-lv3]: FAILED! => {"changed": false, "content": "", "elapsed": 0, "msg": "Status code was -1 and not [200]: Request failed: <urlopen error [Errno 111] Connection refused>", "redirected": false, "status": -1, "url": "http://127.0.0.1:8025/api/v1/messages"}
+{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"Status code was -1 and not [200]: Request failed: <urlopen error [Errno 111] Connection refused>","ignored":false,"level":"ERROR","msg":"Task failed: Clear any previous Mailpit messages before the staging SMTP probe","service_id":"ansible","target":"docker-runtime-staging-lv3","task_status":"failed","trace_id":"background","ts":"2026-03-30T07:21:50.588Z","vm":"docker-runtime-staging-lv3","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+docker-runtime-staging-lv3 : ok=1    changed=0    unreachable=0    failed=1    skipped=1    rescued=0    ignored=0
+proxmox_florin             : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0

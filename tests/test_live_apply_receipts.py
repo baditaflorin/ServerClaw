@@ -77,6 +77,39 @@ def test_validate_receipt_rejects_non_hash_when_git_metadata_lacks_objects(
         )
 
 
+def test_validate_receipt_accepts_hash_when_git_metadata_has_no_matching_object(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_lookup_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_exists", lambda _commit: False)
+    monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")
+    monkeypatch.delenv("LV3_REQUIRE_RECEIPT_SOURCE_COMMIT_OBJECTS", raising=False)
+
+    live_apply_receipts.validate_receipt(
+        build_receipt("c4db21b414c44e5bcd9d6c1fe5ae4fdd9e5cac99"),
+        Path("2026-03-23-test-receipt.json"),
+        {"workflows": {"test-workflow": {}}},
+    )
+
+
+def test_validate_receipt_rejects_missing_object_in_strict_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_lookup_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_exists", lambda _commit: False)
+    monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")
+    monkeypatch.setenv("LV3_REQUIRE_RECEIPT_SOURCE_COMMIT_OBJECTS", "1")
+
+    with pytest.raises(ValueError, match="current git object database"):
+        live_apply_receipts.validate_receipt(
+            build_receipt("c4db21b414c44e5bcd9d6c1fe5ae4fdd9e5cac99"),
+            Path("2026-03-23-test-receipt.json"),
+            {"workflows": {"test-workflow": {}}},
+        )
+
+
 def test_validate_receipt_accepts_legacy_live_apply_workflow_ids(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -124,6 +157,32 @@ def test_validate_receipt_accepts_optional_correction_loop_block(
     )
 
 
+def test_validate_receipt_accepts_optional_smoke_suites(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: False)
+    monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")
+
+    receipt = build_receipt("c4db21b414c44e5bcd9d6c1fe5ae4fdd9e5cac99")
+    receipt["smoke_suites"] = [
+        {
+            "suite_id": "production-windmill-primary-path",
+            "service_id": "windmill",
+            "environment": "production",
+            "status": "passed",
+            "executed_at": "2026-03-23T12:00:00Z",
+            "summary": "1 passed, 0 failed, 0 skipped",
+            "report_ref": "docs/adr/0083-docker-based-check-runner.md",
+        }
+    ]
+
+    live_apply_receipts.validate_receipt(
+        receipt,
+        Path("2026-03-23-test-receipt.json"),
+        {"workflows": {"test-workflow": {}}},
+    )
+
+
 def test_receipt_environment_for_path_accepts_catalog_driven_subdirectories(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -151,3 +210,38 @@ def test_receipt_environment_for_path_accepts_catalog_driven_subdirectories(
         )
         == "preview"
     )
+
+
+def test_iter_receipt_paths_skips_nested_evidence_json(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    receipts_dir = tmp_path / "receipts" / "live-applies"
+    receipts_dir.mkdir(parents=True, exist_ok=True)
+    tracked_receipt = receipts_dir / "2026-03-29-adr-0251-stage-smoke-live-apply.json"
+    tracked_receipt.write_text("{}", encoding="utf-8")
+    evidence_json = receipts_dir / "preview" / "evidence" / "2026-03-29-adr-0251-gate-status-live.json"
+    evidence_json.parent.mkdir(parents=True, exist_ok=True)
+    evidence_json.write_text("{}", encoding="utf-8")
+
+    monkeypatch.setattr(live_apply_receipts, "RECEIPTS_DIR", receipts_dir)
+
+    assert live_apply_receipts.iter_receipt_paths(receipts_dir) == [tracked_receipt]
+
+def test_iter_receipt_paths_skips_evidence_artifacts(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    (tmp_path / "2026-03-29-valid-live-apply.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "staging").mkdir()
+    (tmp_path / "staging" / "2026-03-29-valid-staging-live-apply.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "preview").mkdir()
+    (tmp_path / "preview" / "2026-03-29-valid-preview-live-apply.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "evidence").mkdir()
+    (tmp_path / "evidence" / "2026-03-29-non-receipt-evidence.json").write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(live_apply_receipts, "RECEIPTS_DIR", tmp_path)
+
+    paths = [path.relative_to(tmp_path).as_posix() for path in live_apply_receipts.iter_receipt_paths(tmp_path)]
+
+    assert paths == [
+        "2026-03-29-valid-live-apply.json",
+        "preview/2026-03-29-valid-preview-live-apply.json",
+        "staging/2026-03-29-valid-staging-live-apply.json",
+    ]

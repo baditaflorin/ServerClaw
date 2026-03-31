@@ -1,0 +1,174 @@
+---
+# Purpose: Converge the private NATS JetStream runtime that backs ADR 0276 event delivery.
+# Use case: Run during initial deployment, recovery of the stopped runtime, or drift reconciliation on docker-runtime-lv3.
+# Inputs: nats_jetstream_* role variables plus the controller-local admin password file.
+# Outputs: /opt/nats-jetstream config and compose files, a running lv3-nats-jetstream container, and a healthy loopback monitor endpoint.
+# Idempotency: Yes; the role re-renders config deterministically and replays docker compose safely.
+# Dependencies: ADR 0079, ADR 0124, ADR 0276, and the docker runtime being available on docker-runtime-lv3.
+- name: Validate NATS JetStream runtime inputs
+  ansible.builtin.assert:
+    that:
+      - nats_jetstream_image | length > 0
+      - nats_jetstream_container_name | length > 0
+      - nats_jetstream_site_dir | length > 0
+      - nats_jetstream_config_dir | length > 0
+      - nats_jetstream_data_dir | length > 0
+      - nats_jetstream_compose_file | length > 0
+      - nats_jetstream_config_file | length > 0
+      - nats_jetstream_admin_password_local_file | length > 0
+      - nats_jetstream_admin_user | length > 0
+      - nats_jetstream_port | int > 0
+      - nats_jetstream_monitor_port | int > 0
+      - nats_jetstream_publish_allow | length > 0
+      - nats_jetstream_subscribe_allow | length > 0
+      - nats_jetstream_additional_users is iterable
+    fail_msg: "nats_jetstream_runtime requires image, compose, port, and admin-password inputs."
+
+- name: Ensure the controller-local NATS artifact directory exists
+  ansible.builtin.file:
+    path: "{{ nats_jetstream_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the controller-local NATS admin password exists
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ nats_jetstream_admin_password_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 > "{{ nats_jetstream_admin_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: nats_jetstream_password_generation
+  changed_when: "'changed' in nats_jetstream_password_generation.stdout"
+  no_log: true
+
+- name: Read the controller-local NATS admin password
+  ansible.builtin.slurp:
+    src: "{{ nats_jetstream_admin_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: nats_jetstream_admin_password_raw
+  no_log: true
+
+- name: Record the NATS admin password fact
+  ansible.builtin.set_fact:
+    nats_jetstream_admin_password: "{{ nats_jetstream_admin_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Read the controller-local NATS additional user passwords
+  ansible.builtin.slurp:
+    src: "{{ item.password_local_file }}"
+  loop: "{{ nats_jetstream_additional_users }}"
+  loop_control:
+    label: "{{ item.user }}"
+  delegate_to: localhost
+  become: false
+  register: nats_jetstream_additional_user_passwords
+  when: nats_jetstream_additional_users | length > 0
+  no_log: true
+
+- name: Seed the resolved NATS principal list with the admin principal
+  ansible.builtin.set_fact:
+    nats_jetstream_users_resolved:
+      - user: "{{ nats_jetstream_admin_user }}"
+        password: "{{ nats_jetstream_admin_password }}"
+        publish_allow: "{{ nats_jetstream_publish_allow }}"
+        subscribe_allow: "{{ nats_jetstream_subscribe_allow }}"
+        allow_responses: false
+  no_log: true
+
+- name: Append the additional NATS principals
+  ansible.builtin.set_fact:
+    nats_jetstream_users_resolved: >-
+      {{
+        nats_jetstream_users_resolved
+        + [
+            {
+              "user": item.item.user,
+              "password": item.content | b64decode | trim,
+              "publish_allow": item.item.publish_allow,
+              "subscribe_allow": item.item.subscribe_allow,
+              "allow_responses": item.item.allow_responses | default(false),
+            }
+          ]
+      }}
+  loop: "{{ nats_jetstream_additional_user_passwords.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item.user }}"
+  when: nats_jetstream_additional_users | length > 0
+  no_log: true
+
+- name: Ensure the NATS JetStream runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ nats_jetstream_site_dir }}"
+      mode: "0755"
+    - path: "{{ nats_jetstream_config_dir }}"
+      mode: "0755"
+    - path: "{{ nats_jetstream_data_dir }}"
+      mode: "0755"
+
+- name: Render the NATS server config
+  ansible.builtin.template:
+    src: nats-server.conf.j2
+    dest: "{{ nats_jetstream_config_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the NATS compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ nats_jetstream_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the NATS container image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ nats_jetstream_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ nats_jetstream_site_dir }}"
+  register: nats_jetstream_pull
+  changed_when: >-
+    'Pull complete' in nats_jetstream_pull.stdout
+    or 'Downloaded newer image' in nats_jetstream_pull.stdout
+    or 'Pulling' in nats_jetstream_pull.stdout
+
+- name: Start the NATS JetStream stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ nats_jetstream_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ nats_jetstream_site_dir }}"
+  register: nats_jetstream_up
+  changed_when: >-
+    'Creating' in nats_jetstream_up.stdout
+    or 'Recreating' in nats_jetstream_up.stdout
+    or 'Starting' in nats_jetstream_up.stdout
+
+- name: Verify the NATS JetStream runtime
+  ansible.builtin.import_tasks: verify.yml

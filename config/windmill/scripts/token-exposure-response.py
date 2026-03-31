@@ -4,6 +4,19 @@ import subprocess
 from pathlib import Path
 
 
+def _prepare_runtime_directory(path: Path) -> Path:
+    path.mkdir(parents=True, exist_ok=True)
+    if (path.stat().st_mode & 0o7777) != 0o1777:
+        try:
+            path.chmod(0o1777)
+        except OSError:
+            pass
+    probe = path / ".windmill-write-probe"
+    probe.write_text("", encoding="utf-8")
+    probe.unlink()
+    return path
+
+
 def main(
     token_id: str = "",
     exposure_source: str = "",
@@ -13,6 +26,7 @@ def main(
 ):
     repo_root = Path(repo_path)
     workflow = repo_root / "scripts" / "token_lifecycle.py"
+    incident_dir = repo_root / ".local" / "token-lifecycle" / "incidents"
     if not workflow.exists():
         return {
             "status": "blocked",
@@ -21,6 +35,15 @@ def main(
         }
     if not token_id:
         return {"status": "blocked", "reason": "token_id is required"}
+    try:
+        incident_dir = _prepare_runtime_directory(incident_dir)
+    except OSError as exc:
+        return {
+            "status": "blocked",
+            "reason": "token exposure incident directory is not writable",
+            "incident_dir": str(incident_dir),
+            "error": str(exc),
+        }
 
     command = [
         "uv",
@@ -33,6 +56,8 @@ def main(
         "--token-id",
         token_id,
         "--print-report-json",
+        "--incident-dir",
+        str(incident_dir),
     ]
     if exposure_source:
         command.extend(["--exposure-source", exposure_source])

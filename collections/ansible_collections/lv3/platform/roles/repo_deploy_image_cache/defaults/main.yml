@@ -1,0 +1,15 @@
+---
+# Purpose: Define controller-local catalog inputs and guest-local runtime paths for governed repo-deploy base-image warming.
+repo_deploy_image_cache_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"
+repo_deploy_image_cache_catalog_path: "{{ repo_deploy_image_cache_repo_root }}/config/repo-deploy-base-image-profiles.json"
+repo_deploy_image_cache_script_source: "{{ repo_deploy_image_cache_repo_root }}/scripts/repo_deploy_image_cache.py"
+
+repo_deploy_image_cache_runtime_root: /opt/repo-deploy-image-cache
+repo_deploy_image_cache_catalog_runtime_path: "{{ repo_deploy_image_cache_runtime_root }}/catalog.json"
+repo_deploy_image_cache_plan_file: "{{ repo_deploy_image_cache_runtime_root }}/seed-plan.json"
+repo_deploy_image_cache_receipt_file: "{{ repo_deploy_image_cache_runtime_root }}/warm-status.json"
+repo_deploy_image_cache_script_path: /usr/local/bin/lv3-repo-deploy-image-cache.py
+
+repo_deploy_image_cache_service_name: lv3-repo-deploy-image-cache.service
+repo_deploy_image_cache_timer_name: lv3-repo-deploy-image-cache.timer
+repo_deploy_image_cache_on_calendar: hourly

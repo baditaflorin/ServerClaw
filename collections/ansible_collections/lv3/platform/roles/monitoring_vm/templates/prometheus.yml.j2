@@ -39,6 +39,15 @@ scrape_configs:
         labels:
           service: otel-collector
 
+  - job_name: loki-canary
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 127.0.0.1:{{ monitoring_loki_canary_metrics_port }}
+        labels:
+          service: loki-canary
+          assurance_dimension: log-queryability
+
   - job_name: netdata
     metrics_path: /api/v1/allmetrics
     params:
@@ -63,6 +72,23 @@ scrape_configs:
       - source_labels: [probe_module]
         target_label: __param_module
       - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 127.0.0.1:{{ monitoring_blackbox_exporter_port }}
+
+  - job_name: https-tls-blackbox
+    metrics_path: /probe
+    file_sd_configs:
+      - files:
+          - {{ monitoring_prometheus_https_tls_targets_file }}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [probe_module]
+        target_label: __param_module
+      - source_labels: [probe_hostname]
+        target_label: __param_hostname
+      - source_labels: [display_url]
         target_label: instance
       - target_label: __address__
         replacement: 127.0.0.1:{{ monitoring_blackbox_exporter_port }}

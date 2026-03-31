@@ -1,0 +1,111 @@
+---
+# Purpose: Execute the shared Docker publication assurance helper for a service-specific readiness contract.
+# Use case: Included by post-verify when a service declares readiness.docker_publication and must repair host publication before readiness is trusted.
+#
+# Inputs (required):
+#   - service_health_probe_id
+#   - playbook_execution_service_probe
+#   - playbook_execution_docker_publication_contract
+#
+# Inputs (optional):
+#   - playbook_execution_docker_publication_command (string, optional, default=/usr/local/bin/lv3-docker-publication-assurance)
+#
+# Outputs:
+#   - The publication assurance helper runs and records a structured result for downstream verification tasks.
+#
+# Idempotency: Fully idempotent
+#              Repairs only occur when the declared Docker publication contract is broken.
+#
+# Dependencies:
+#   - ADR 0246: Startup, readiness, and liveness semantics.
+#   - ADR 0270: Docker publication self-healing and port-programming assertions.
+#   - Script: scripts/docker_publication_assurance.py - remote publication recovery helper.
+- name: Assert the Docker publication contract is defined
+  ansible.builtin.assert:
+    that:
+      - playbook_execution_docker_publication_contract is defined
+      - playbook_execution_docker_publication_contract.container_name is defined
+    fail_msg: "Docker publication assurance requires a contract with container_name."
+  changed_when: false
+
+- name: Create a transient Docker publication assurance helper path
+  ansible.builtin.tempfile:
+    state: file
+    suffix: -lv3-docker-publication-assurance
+  register: playbook_execution_docker_publication_helper_tempfile
+  changed_when: false
+  when: playbook_execution_docker_publication_command is not defined
+
+- name: Stage the repo-managed Docker publication assurance helper for verification
+  ansible.builtin.copy:
+    content: >-
+      {{
+        lookup(
+          'ansible.builtin.file',
+          lookup('ansible.builtin.pipe', 'git -C ' ~ (playbook_dir | quote) ~ ' rev-parse --show-toplevel')
+          ~ '/scripts/docker_publication_assurance.py'
+        )
+      }}
+    dest: "{{ playbook_execution_docker_publication_helper_tempfile.path }}"
+    owner: root
+    group: root
+    mode: "0755"
+  changed_when: false
+  when: playbook_execution_docker_publication_command is not defined
+
+- name: Select the Docker publication assurance helper command
+  ansible.builtin.set_fact:
+    playbook_execution_docker_publication_effective_command: >-
+      {{
+        playbook_execution_docker_publication_command
+        if playbook_execution_docker_publication_command is defined
+        else playbook_execution_docker_publication_helper_tempfile.path
+      }}
+  changed_when: false
+
+- name: Run Docker publication assurance before final readiness verification
+  ansible.builtin.command:
+    argv:
+      - "{{ playbook_execution_docker_publication_effective_command }}"
+      - --service-id
+      - "{{ service_health_probe_id }}"
+      - --service-probe-base64
+      - "{{ playbook_execution_service_probe | to_json | b64encode }}"
+      - --contract-base64
+      - "{{ playbook_execution_docker_publication_contract | to_json | b64encode }}"
+      - --heal
+      - --allow-listener-warmup-after-heal
+  register: playbook_execution_docker_publication_command_result
+  retries: 6
+  delay: 2
+  until: >-
+    (
+      playbook_execution_docker_publication_command_result.stdout
+      | default('', true)
+      | trim
+      | length
+    ) > 0
+  changed_when: >-
+    (
+      playbook_execution_docker_publication_command_result.stdout
+      | default('{}', true)
+      | from_json
+    ).healed | default(false)
+  failed_when: playbook_execution_docker_publication_command_result.rc != 0
+
+- name: Record the Docker publication assurance result
+  ansible.builtin.set_fact:
+    playbook_execution_docker_publication_result: >-
+      {{
+        playbook_execution_docker_publication_command_result.stdout
+        | default('{}', true)
+        | from_json
+      }}
+  changed_when: false
+
+- name: Remove the transient Docker publication assurance helper
+  ansible.builtin.file:
+    path: "{{ playbook_execution_docker_publication_helper_tempfile.path }}"
+    state: absent
+  changed_when: false
+  when: playbook_execution_docker_publication_command is not defined

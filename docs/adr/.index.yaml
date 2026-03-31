@@ -6,12 +6,12 @@
 # ============================================================================
 
 schema_version: 1
-generated: '2026-03-28'
-total_adrs: 258
+generated: '2026-03-31'
+total_adrs: 324
 implementation_status_summary:
-  Implemented: 212
-  Partial: 4
-  Not Implemented: 41
+  Implemented: 269
+  Partial: 6
+  Not Implemented: 48
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -33,10 +33,20 @@ concerns:
     - '0167'
     - 0168
     - 0181
+    - '0224'
+    - '0254'
+    - 0293
   api:
     - 0049
     - '0075'
     - '0145'
+    - '0272'
+    - 0285
+    - 0286
+    - 0287
+    - 0289
+    - 0292
+    - 0294
   automation:
     - '0030'
     - '0035'
@@ -59,11 +69,13 @@ concerns:
     - '0204'
     - '0221'
     - 0228
+    - '0306'
   bootstrap:
     - '0001'
     - '0003'
     - '0215'
     - '0220'
+    - 0268
   ci-cd:
     - 0009
     - '0031'
@@ -94,6 +106,15 @@ concerns:
     - '0230'
     - '0233'
     - '0251'
+    - '0264'
+    - '0265'
+    - '0266'
+    - '0267'
+    - 0269
+    - '0275'
+    - 0287
+    - 0295
+    - '0305'
   documentation:
     - '0074'
     - 0081
@@ -106,6 +127,8 @@ concerns:
     - 0148
     - 0198
     - 0239
+    - '0263'
+    - '0277'
   host-os:
     - '0002'
     - '0004'
@@ -128,6 +151,9 @@ concerns:
     - '0146'
     - 0196
     - '0250'
+    - 0258
+    - 0280
+    - 0293
   networking:
     - '0015'
     - '0021'
@@ -140,6 +166,9 @@ concerns:
     - 0183
     - 0189
     - '0252'
+    - '0256'
+    - '0273'
+    - '0276'
   platform:
     - 0019
     - '0025'
@@ -198,6 +227,7 @@ concerns:
     - 0193
     - 0194
     - 0199
+    - '0201'
     - '0202'
     - '0205'
     - '0206'
@@ -226,12 +256,39 @@ concerns:
     - '0244'
     - '0247'
     - '0253'
+    - '0255'
+    - '0257'
+    - 0259
+    - '0260'
+    - '0261'
+    - '0270'
+    - '0274'
+    - 0278
+    - 0279
+    - 0281
+    - 0282
+    - 0283
+    - 0284
+    - 0285
+    - 0286
+    - 0288
+    - 0288
+    - 0289
+    - 0290
+    - 0290
+    - 0291
+    - 0292
+    - 0298
+    - 0299
+    - '0303'
   release:
     - 0008
     - '0110'
     - '0120'
     - '0155'
     - '0246'
+    - 0297
+    - '0304'
   resilience:
     - '0163'
     - '0167'
@@ -259,10 +316,16 @@ concerns:
     - '0231'
     - 0248
     - 0249
+    - '0262'
+    - '0300'
+    - '0301'
   storage:
     - '0020'
     - '0051'
     - 0099
+    - '0271'
+    - '0274'
+    - '0302'
   testing:
     - '0111'
     - 0187
@@ -290,6 +353,9 @@ concerns:
     - '0157'
     - 0191
     - '0223'
+    - 0284
+    - 0291
+    - 0296
 discovery_queries:
   how do we bootstrap:
     - '0001'
@@ -3477,6 +3543,21 @@ adr_index:
     summary: We will deploy Outline on docker-runtime-lv3 and publish it at https://wiki.lv3.org.
     filename: 0199-outline-living-knowledge-wiki.md
     implemented_version: 0.177.19
+  - adr: '0201'
+    title: Harbor - Vulnerability-Scanning Container Registry
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - harbor
+      - vulnerability-scanning
+      - container
+      - registry
+    summary: 'Migrate registry.lv3.org from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds: Trivy-powered
+      vu'
+    filename: 0201-harbor-container-registry-with-cve-scanning.md
+    implemented_version: 0.177.63
   - adr: '0202'
     title: Excalidraw Auto Generated Architecture Diagrams
     status: Accepted
@@ -3794,9 +3875,24 @@ adr_index:
     summary: We will centralize HA and replication intent in one canonical topology
     filename: 0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
   - adr: '0224'
+    title: Self-Service Repo Intake And Agent-Assisted Deployments
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-28'
+    concern: agent-discovery
+    keywords:
+      - self-service
+      - repo
+      - intake
+      - agent-assisted
+      - deployments
+    summary: We will extend the existing ADR 0194 Coolify deploy path instead of introducing
+    filename: 0224-self-service-repo-intake-and-agent-assisted-deployments.md
+    implemented_version: 0.177.31
+  - adr: '0224'
     title: Server-Resident Operations As The Default Control Model
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: resilience
     keywords:
@@ -3808,6 +3904,7 @@ adr_index:
       - model
     summary: We will make server-resident operations the default control model.
     filename: 0224-server-resident-operations-as-the-default-control-model.md
+    implemented_version: 0.177.52
   - adr: '0225'
     title: Server-Resident Reconciliation Via Ansible Pull
     status: Accepted
@@ -3825,7 +3922,7 @@ adr_index:
   - adr: '0226'
     title: Systemd Units, Timers, And Paths For Host-Resident Control Loops
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -3838,6 +3935,7 @@ adr_index:
       - loops
     summary: We will use systemd as the canonical host-resident supervisor for platform
     filename: 0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+    implemented_version: 0.177.52
   - adr: '0227'
     title: Bounded Command Execution Via Systemd-Run And Approved Wrappers
     status: Accepted
@@ -3857,7 +3955,7 @@ adr_index:
   - adr: 0228
     title: Windmill As The Default Browser-And-API Operations Surface
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: automation
     keywords:
@@ -3869,6 +3967,7 @@ adr_index:
       - surface
     summary: We will treat Windmill as the default browser-first and API-first operations
     filename: 0228-windmill-as-the-default-browser-and-api-operations-surface.md
+    implemented_version: 0.177.70
   - adr: 0229
     title: Gitea Actions Runners For On-Platform Validation And Release Preparation
     status: Accepted
@@ -3922,7 +4021,7 @@ adr_index:
   - adr: '0232'
     title: Nomad For Durable Batch And Long-Running Internal Jobs
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -3934,10 +4033,11 @@ adr_index:
       - jobs
     summary: We will adopt Nomad as the future distributed scheduler for internal jobs
     filename: 0232-nomad-for-durable-batch-and-long-running-internal-jobs.md
+    implemented_version: 0.177.65
   - adr: '0233'
     title: Signed Release Bundles Via Gitea Releases And Cosign
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -3949,10 +4049,11 @@ adr_index:
       - cosign
     summary: We will package server-consumable control inputs as signed release bundles
     filename: 0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+    implemented_version: 0.177.54
   - adr: '0234'
     title: Shared Human App Shell And Navigation Via PatternFly
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -3964,10 +4065,11 @@ adr_index:
       - patternfly
     summary: We will use PatternFly as the default open source app-shell and design
     filename: 0234-shared-human-app-shell-and-navigation-via-patternfly.md
+    implemented_version: 0.177.72
   - adr: '0235'
     title: Cross-Application Launcher And Favorites Via PatternFly Application Launcher
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -3979,10 +4081,11 @@ adr_index:
       - launcher
     summary: We will standardize on the PatternFly Application Launcher as the default
     filename: 0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md
+    implemented_version: 0.177.70
   - adr: '0236'
     title: Server-State And Mutation Feedback Via TanStack Query
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -3993,10 +4096,11 @@ adr_index:
       - query
     summary: We will use TanStack Query as the default server-state and mutation-feedback
     filename: 0236-server-state-and-mutation-feedback-via-tanstack-query.md
+    implemented_version: 0.177.81
   - adr: '0237'
     title: Schema-First Human Forms Via React Hook Form And Zod
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4009,10 +4113,11 @@ adr_index:
       - zod
     summary: We will build first-party structured forms with React Hook Form for form
     filename: 0237-schema-first-human-forms-via-react-hook-form-and-zod.md
+    implemented_version: 0.177.74
   - adr: 0238
     title: Data-Dense Operator Grids Via AG Grid Community
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4024,10 +4129,11 @@ adr_index:
       - community
     summary: We will use AG Grid Community as the default open source grid library for
     filename: 0238-data-dense-operator-grids-via-ag-grid-community.md
+    implemented_version: 0.177.66
   - adr: 0239
     title: Browser-Local Search Experience Via Pagefind
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: documentation
     keywords:
@@ -4037,10 +4143,11 @@ adr_index:
       - pagefind
     summary: We will use Pagefind as the default browser-local search layer for static or
     filename: 0239-browser-local-search-experience-via-pagefind.md
+    implemented_version: 0.177.62
   - adr: '0240'
     title: Operator Visualization Panels Via Apache ECharts
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4051,10 +4158,11 @@ adr_index:
       - echarts
     summary: We will use Apache ECharts as the default charting and lightweight
     filename: 0240-operator-visualization-panels-via-apache-echarts.md
+    implemented_version: 0.177.64
   - adr: '0241'
     title: Rich Content And Inline Knowledge Editing Via Tiptap
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4066,10 +4174,11 @@ adr_index:
       - tiptap
     summary: We will use Tiptap as the default rich-content editor framework for
     filename: 0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+    implemented_version: 0.177.61
   - adr: '0242'
     title: Guided Human Onboarding Via Shepherd Tours
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4080,6 +4189,7 @@ adr_index:
       - tours
     summary: We will use Shepherd.js for guided first-run tours, contextual onboarding,
     filename: 0242-guided-human-onboarding-via-shepherd-tours.md
+    implemented_version: 0.177.58
   - adr: '0243'
     title: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core
     status: Accepted
@@ -4100,7 +4210,7 @@ adr_index:
   - adr: '0244'
     title: Runtime Assurance Matrix Per Service And Environment
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4112,10 +4222,11 @@ adr_index:
       - environment
     summary: We will govern runtime assurance through a service-by-environment assurance
     filename: 0244-runtime-assurance-matrix-per-service-and-environment.md
+    implemented_version: 0.177.80
   - adr: '0245'
     title: Declared-To-Live Service Attestation
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: testing
     keywords:
@@ -4124,10 +4235,11 @@ adr_index:
       - attestation
     summary: We will require declared-to-live service attestation for every active
     filename: 0245-declared-to-live-service-attestation.md
+    implemented_version: 0.177.72
   - adr: '0246'
     title: Startup, Readiness, Liveness, And Degraded State Semantics
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: release
     keywords:
@@ -4139,6 +4251,7 @@ adr_index:
       - semantics
     summary: 'We will standardize four service-health semantics for runtime assurance:'
     filename: 0246-startup-readiness-liveness-and-degraded-state-semantics.md
+    implemented_version: 0.177.60
   - adr: '0247'
     title: Authenticated Browser Journey Verification Via Playwright
     status: Accepted
@@ -4156,7 +4269,7 @@ adr_index:
   - adr: 0248
     title: Session And Logout Authority Across Keycloak, Oauth2-Proxy, And App Surfaces
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: security
     keywords:
@@ -4170,10 +4283,11 @@ adr_index:
       - surfaces
     summary: We will make Keycloak the session authority for protected browser surfaces
     filename: 0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-apps.md
+    implemented_version: 0.177.63
   - adr: 0249
     title: HTTPS And TLS Assurance Via Blackbox Exporter And testssl.sh
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: security
     keywords:
@@ -4186,10 +4300,11 @@ adr_index:
       - sh
     summary: We will use Prometheus Blackbox Exporter for recurring protocol-level probe
     filename: 0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
+    implemented_version: 0.177.82
   - adr: '0250'
     title: Log Ingestion And Queryability Canaries Via Loki Canary
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: monitoring
     keywords:
@@ -4201,10 +4316,11 @@ adr_index:
       - canary
     summary: We will use Loki Canary as the default end-to-end log-path assurance signal
     filename: 0250-log-ingestion-and-queryability-canaries-via-loki-canary.md
+    implemented_version: 0.177.57
   - adr: '0251'
     title: Stage-Scoped Smoke Suites And Promotion Gates
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -4215,10 +4331,11 @@ adr_index:
       - gates
     summary: We will require stage-scoped smoke suites for active services and wire them
     filename: 0251-stage-scoped-smoke-suites-and-promotion-gates.md
+    implemented_version: 0.177.86
   - adr: '0252'
     title: Route And DNS Publication Assertion Ledger
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: networking
     keywords:
@@ -4229,10 +4346,11 @@ adr_index:
       - ledger
     summary: We will maintain a route and DNS publication assertion ledger for all
     filename: 0252-route-and-dns-publication-assertion-ledger.md
+    implemented_version: 0.177.68
   - adr: '0253'
     title: Unified Runtime Assurance Scoreboard And Rollup
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4243,3 +4361,1052 @@ adr_index:
       - rollup
     summary: We will publish a unified runtime assurance scoreboard that rolls the
     filename: 0253-unified-runtime-assurance-scoreboard-and-rollup.md
+    implemented_version: 0.177.59
+  - adr: '0254'
+    title: ServerClaw As A Distinct Self-Hosted Agent Product On LV3
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: agent-discovery
+    keywords:
+      - serverclaw
+      - as
+      - distinct
+      - self-hosted
+      - agent
+      - product
+      - lv3
+    summary: We will define ServerClaw as a distinct product surface on top of the LV3
+    filename: 0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md
+    implemented_version: 0.177.91
+  - adr: '0255'
+    title: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - matrix
+      - synapse
+      - as
+      - canonical
+      - serverclaw
+      - conversation
+      - hub
+    summary: We will use Matrix Synapse as the canonical conversation hub for
+    filename: 0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md
+    implemented_version: 0.177.85
+  - adr: '0256'
+    title: Mautrix Bridges For External Chat Channel Adapters
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: networking
+    keywords:
+      - mautrix
+      - bridges
+      - external
+      - chat
+      - channel
+      - adapters
+    summary: We will use mautrix bridges as the default external chat-channel adapters
+    filename: 0256-mautrix-bridges-for-external-chat-channel-adapters.md
+    implemented_version: 0.177.98
+  - adr: '0257'
+    title: OpenClaw-Compatible SKILL.md Packs And Workspace Precedence For ServerClaw
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - openclaw-compatible
+      - skill
+      - md
+      - packs
+      - workspace
+      - precedence
+      - serverclaw
+    summary: ServerClaw will adopt OpenClaw-compatible SKILL.md skill packs as its
+    filename: 0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md
+  - adr: 0258
+    title: Temporal As The Durable ServerClaw Session Orchestrator
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: monitoring
+    keywords:
+      - temporal
+      - as
+      - durable
+      - serverclaw
+      - session
+      - orchestrator
+    summary: We will use Temporal as the durable workflow engine for ServerClaw session
+    filename: 0258-temporal-as-the-durable-serverclaw-session-orchestrator.md
+  - adr: 0259
+    title: n8n As The External App Connector Fabric For ServerClaw
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - n8n
+      - as
+      - external
+      - app
+      - connector
+      - fabric
+      - serverclaw
+    summary: We will use n8n as the external app connector fabric for ServerClaw.
+    filename: 0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md
+    implemented_version: 0.177.79
+  - adr: '0260'
+    title: Nextcloud As The Canonical Personal Data Plane For ServerClaw
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - nextcloud
+      - as
+      - canonical
+      - personal
+      - data
+      - plane
+      - serverclaw
+    summary: We will use Nextcloud as the canonical personal data plane for ServerClaw.
+    filename: 0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md
+    implemented_version: 0.177.93
+  - adr: '0261'
+    title: Playwright Browser Runners For ServerClaw Web Action And Extraction
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - playwright
+      - browser
+      - runners
+      - serverclaw
+      - web
+      - action
+      - extraction
+    summary: We will use Playwright browser runners as the default ServerClaw browser
+    filename: 0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md
+    implemented_version: 0.177.95
+  - adr: '0262'
+    title: OpenFGA And Keycloak For Delegated ServerClaw Capability Authorization
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - openfga
+      - keycloak
+      - delegated
+      - serverclaw
+      - capability
+      - authorization
+    summary: We will use Keycloak for authentication and OpenFGA for delegated
+    filename: 0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization.md
+    implemented_version: 0.177.95
+  - adr: '0263'
+    title: Qdrant, PostgreSQL, And Local Search As The ServerClaw Memory Substrate
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: documentation
+    keywords:
+      - qdrant
+      - postgresql
+      - local
+      - search
+      - as
+      - serverclaw
+      - memory
+      - substrate
+    summary: We will use PostgreSQL, Qdrant, and the local search fabric together as the
+    filename: 0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md
+    implemented_version: 0.177.90
+  - adr: '0264'
+    title: Failure-Domain-Isolated Validation Lanes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - failure-domain-isolated
+      - validation
+      - lanes
+    summary: We will split repository and promotion validation into failure-domain-isolated
+    filename: 0264-failure-domain-isolated-validation-lanes.md
+    implemented_version: 0.177.84
+  - adr: '0265'
+    title: Immutable Validation Snapshots For Remote Builders And Schema Checks
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - immutable
+      - validation
+      - snapshots
+      - remote
+      - builders
+      - schema
+      - checks
+    summary: We will run remote builder and schema validation against immutable repository
+    filename: 0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+    implemented_version: 0.177.78
+  - adr: '0266'
+    title: Validation Runner Capability Contracts And Environment Attestation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - validation
+      - runner
+      - capability
+      - contracts
+      - environment
+      - attestation
+    summary: We will require every local or remote validation runner to publish a
+    filename: 0266-validation-runner-capability-contracts-and-environment-attestation.md
+    implemented_version: 0.177.88
+  - adr: '0267'
+    title: Expiring Gate Bypass Waivers With Structured Reason Codes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - expiring
+      - gate
+      - bypass
+      - waivers
+      - structured
+      - reason
+      - codes
+    summary: We will treat every gate bypass as an expiring waiver with a structured
+    filename: 0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md
+    implemented_version: 0.177.105
+  - adr: 0268
+    title: Fresh-Worktree Bootstrap Manifests For Generated Artifacts And Local Inputs
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: bootstrap
+    keywords:
+      - fresh-worktree
+      - bootstrap
+      - manifests
+      - generated
+      - artifacts
+      - local
+      - inputs
+    summary: We will require a bootstrap manifest for every fresh worktree path that can
+    filename: 0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+    implemented_version: 0.177.83
+  - adr: 0269
+    title: Vulnerability Budgets And Image-Host Freshness Promotion Gates
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - vulnerability
+      - budgets
+      - image-host
+      - freshness
+      - promotion
+      - gates
+    summary: We will introduce vulnerability budgets and freshness gates for managed
+    filename: 0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+    implemented_version: 0.177.72
+  - adr: '0270'
+    title: Docker Publication Self-Healing And Port-Programming Assertions
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - docker
+      - publication
+      - self-healing
+      - port-programming
+      - assertions
+    summary: We will add Docker publication self-healing and port-programming
+    filename: 0270-docker-publication-self-healing-and-port-programming-assertions.md
+    implemented_version: 0.177.94
+  - adr: '0271'
+    title: Backup Coverage Assertion Ledger And Backup-Of-Backup Policy
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: storage
+    keywords:
+      - backup
+      - coverage
+      - assertion
+      - ledger
+      - backup-of-backup
+      - policy
+    summary: We will maintain a backup coverage assertion ledger and a declared
+    filename: 0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md
+    implemented_version: 0.177.75
+  - adr: '0272'
+    title: Restore Readiness Ladders And Stateful Warm-Up Verification Profiles
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: api
+    keywords:
+      - restore
+      - readiness
+      - ladders
+      - stateful
+      - warm-up
+      - verification
+      - profiles
+    summary: We will verify restores through readiness ladders and
+    filename: 0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+    implemented_version: 0.177.75
+  - adr: '0273'
+    title: Public Endpoint Admission Control For DNS Catalog And Certificate Concordance
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: networking
+    keywords:
+      - public
+      - endpoint
+      - admission
+      - control
+      - dns
+      - catalog
+      - certificate
+      - concordance
+    summary: We will require public endpoint admission control that proves concordance
+    filename: 0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+    implemented_version: 0.177.77
+  - adr: '0274'
+    title: Governed Base Image Mirrors And Warm Caches For Repo Deployments
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - governed
+      - base
+      - image
+      - mirrors
+      - warm
+      - caches
+      - repo
+      - deployments
+    summary: We will add a cache-first base-image policy for governed repo deployments.
+    filename: 0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md
+    implemented_version: 0.177.104
+  - adr: '0274'
+    title: MinIO As The S3-Compatible Object Storage Layer
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: storage
+    keywords:
+      - minio
+      - as
+      - s3-compatible
+      - object
+      - storage
+      - layer
+    summary: We will deploy MinIO in standalone mode on the docker-runtime VM as the
+    filename: 0274-minio-as-the-s3-compatible-object-storage-layer.md
+  - adr: '0275'
+    title: Apache Tika Server For Document Text Extraction In The RAG Pipeline
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: ci-cd
+    keywords:
+      - apache
+      - tika
+      - server
+      - document
+      - text
+      - extraction
+      - rag
+      - pipeline
+    summary: We will deploy Apache Tika Server as the canonical document extraction
+    filename: 0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
+    implemented_version: 0.177.102
+  - adr: '0276'
+    title: NATS JetStream As The Platform Event Bus
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: networking
+    keywords:
+      - nats
+      - jetstream
+      - as
+      - platform
+      - event
+      - bus
+    summary: We will deploy NATS with JetStream enabled as the platform event bus.
+    filename: 0276-nats-jetstream-as-the-platform-event-bus.md
+    implemented_version: 0.177.97
+  - adr: '0277'
+    title: Typesense As The Full-Text Search Engine For Internal Structured Data
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: documentation
+    keywords:
+      - typesense
+      - as
+      - full-text
+      - search
+      - engine
+      - internal
+      - structured
+      - data
+    summary: We will deploy Typesense as the full-text search engine for internal
+    filename: 0277-typesense-as-the-full-text-search-engine-for-internal-structured-data.md
+  - adr: 0278
+    title: Gotenberg As The Document-To-PDF Rendering Service
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - gotenberg
+      - as
+      - document-to-pdf
+      - rendering
+      - service
+    summary: We will deploy Gotenberg as the shared document-to-PDF rendering service.
+    filename: 0278-gotenberg-as-the-document-to-pdf-rendering-service.md
+    implemented_version: 0.177.92
+  - adr: 0279
+    title: Grist As The No-Code Operational Spreadsheet Database
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - grist
+      - as
+      - no-code
+      - operational
+      - spreadsheet
+      - database
+    summary: We will deploy Grist as the shared no-code operational spreadsheet
+    filename: 0279-grist-as-the-no-code-operational-spreadsheet-database.md
+  - adr: 0280
+    title: Changedetection.io For External Content And API Change Monitoring
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: monitoring
+    keywords:
+      - changedetection
+      - io
+      - external
+      - content
+      - api
+      - change
+      - monitoring
+    summary: We will deploy Changedetection.io as the external content and API change
+    filename: 0280-changedetection-io-for-external-content-and-api-change-monitoring.md
+    implemented_version: 0.177.100
+  - adr: 0281
+    title: GlitchTip As The Sentry-Compatible Application Error Tracker
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - glitchtip
+      - as
+      - sentry-compatible
+      - application
+      - error
+      - tracker
+    summary: We will deploy GlitchTip as the platform's application error tracking
+    filename: 0281-glitchtip-as-the-sentry-compatible-application-error-tracker.md
+  - adr: 0282
+    title: Mailpit As The SMTP Development Mail Interceptor
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - mailpit
+      - as
+      - smtp
+      - development
+      - mail
+      - interceptor
+    summary: We will deploy Mailpit as the SMTP development mail interceptor, available
+    filename: 0282-mailpit-as-the-smtp-development-mail-interceptor.md
+    implemented_version: 0.177.96
+  - adr: 0283
+    title: Plausible Analytics As The Privacy-First Web Traffic Analytics Layer
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - plausible
+      - analytics
+      - as
+      - privacy-first
+      - web
+      - traffic
+      - analytics
+      - layer
+    summary: We will deploy Plausible Analytics as the privacy-first web traffic
+    filename: 0283-plausible-analytics-as-the-privacy-first-web-traffic-analytics-layer.md
+    implemented_version: 0.177.99
+  - adr: 0284
+    title: Netbox As The Network IPAM And Topology Source Of Truth
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: vm-topology
+    keywords:
+      - netbox
+      - as
+      - network
+      - ipam
+      - topology
+      - source
+      - truth
+    summary: We will deploy Netbox as the single authoritative source of truth for
+    filename: 0284-netbox-as-the-network-ipam-and-topology-source-of-truth.md
+  - adr: 0284
+    title: Piper TTS As The CPU Neural Text-To-Speech Service
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - piper
+      - tts
+      - as
+      - cpu
+      - neural
+      - text-to-speech
+      - service
+    summary: We will deploy Piper TTS as the canonical CPU neural text-to-speech service.
+    filename: 0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md
+  - adr: 0285
+    title: Paperless-ngx As The Document Management And Archive API
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - paperless-ngx
+      - as
+      - document
+      - management
+      - archive
+      - api
+    summary: We will deploy Paperless-ngx as the document management and archive API
+    filename: 0285-paperless-ngx-as-the-document-management-and-archive-api.md
+  - adr: 0285
+    title: Whisper ASR As The CPU Speech-To-Text Service
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - whisper
+      - asr
+      - as
+      - cpu
+      - speech-to-text
+      - service
+    summary: We will deploy whisper-asr-webservice (faster-whisper backend) as the
+    filename: 0285-whisper-asr-as-the-cpu-speech-to-text-service.md
+  - adr: 0286
+    title: Tesseract OCR Service For Scanned Image Text Extraction
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - tesseract
+      - ocr
+      - service
+      - scanned
+      - image
+      - text
+      - extraction
+    summary: We will deploy Tesseract OCR as a REST service to fill the image-OCR gap
+    filename: 0286-tesseract-ocr-service-for-scanned-image-text-extraction.md
+    implemented_version: 0.177.107
+  - adr: 0286
+    title: Vikunja As The Task And Project Management REST API
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - vikunja
+      - as
+      - task
+      - project
+      - management
+      - rest
+      - api
+    summary: We will deploy Vikunja as the task and project management REST API for
+    filename: 0286-vikunja-as-the-task-and-project-management-rest-api.md
+  - adr: 0287
+    title: LiteLLM As The Unified LLM API Proxy And Router
+    status: Deprecated
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - litellm
+      - as
+      - unified
+      - llm
+      - api
+      - proxy
+      - router
+    summary: We will deploy LiteLLM as the unified LLM API proxy and router.
+    filename: 0287-litellm-as-the-unified-llm-api-proxy-and-router.md
+  - adr: 0287
+    title: Woodpecker CI As The API-Driven Continuous Integration Server
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: ci-cd
+    keywords:
+      - woodpecker
+      - ci
+      - as
+      - api-driven
+      - continuous
+      - integration
+      - server
+    summary: We will deploy Woodpecker CI as the platform's event-driven continuous
+    filename: 0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md
+    implemented_version: 0.177.110
+  - adr: 0288
+    title: Crawl4AI As The LLM-Optimised Web Content Crawler
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - crawl4ai
+      - as
+      - llm-optimised
+      - web
+      - content
+      - crawler
+    summary: We will deploy Crawl4AI as the LLM-optimised web content crawler.
+    filename: 0288-crawl4ai-as-the-llm-optimised-web-content-crawler.md
+  - adr: 0288
+    title: Flagsmith As The Feature Flag And Remote Configuration Service
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - flagsmith
+      - as
+      - feature
+      - flag
+      - remote
+      - configuration
+      - service
+    summary: We will deploy Flagsmith as the feature flag and remote configuration
+    filename: 0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md
+    implemented_version: 0.177.109
+  - adr: 0289
+    title: Directus As The REST And GraphQL Data API Layer Over Postgres
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - directus
+      - as
+      - rest
+      - graphql
+      - data
+      - api
+      - layer
+      - over
+    summary: We will deploy Directus as the REST and GraphQL data API layer for
+    filename: 0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md
+    implemented_version: 0.177.109
+  - adr: 0289
+    title: Label Studio As The Human-In-The-Loop Data Annotation Platform
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - label
+      - studio
+      - as
+      - human-in-the-loop
+      - data
+      - annotation
+      - platform
+    summary: We will deploy Label Studio as the human-in-the-loop data annotation
+    filename: 0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md
+  - adr: 0290
+    title: MLflow As The Machine Learning Experiment Tracker And Model Registry
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - mlflow
+      - as
+      - machine
+      - learning
+      - experiment
+      - tracker
+      - model
+      - registry
+    summary: We will deploy MLflow as the machine learning experiment tracker and model
+    filename: 0290-mlflow-as-the-machine-learning-experiment-tracker-and-model-registry.md
+  - adr: 0290
+    title: Redpanda As The Kafka-Compatible Streaming Platform
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - redpanda
+      - as
+      - kafka-compatible
+      - streaming
+      - platform
+    summary: We will deploy Redpanda as the Kafka-compatible streaming platform for
+    filename: 0290-redpanda-as-the-kafka-compatible-streaming-platform.md
+  - adr: 0291
+    title: JupyterHub As The Interactive Notebook Environment
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - jupyterhub
+      - as
+      - interactive
+      - notebook
+      - environment
+    summary: We will deploy JupyterHub as the shared interactive notebook environment.
+    filename: 0291-jupyterhub-as-the-interactive-notebook-environment.md
+  - adr: 0291
+    title: SFTPGo As The Managed File Transfer Service With REST Provisioning
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: vm-topology
+    keywords:
+      - sftpgo
+      - as
+      - managed
+      - file
+      - transfer
+      - service
+      - rest
+      - provisioning
+    summary: We will deploy SFTPGo as the managed file transfer service for all SFTP,
+    filename: 0291-sftpgo-as-the-managed-file-transfer-service-with-rest-provisioning.md
+  - adr: 0292
+    title: Apache Superset As The SQL-First Business Intelligence Layer
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - apache
+      - superset
+      - as
+      - sql-first
+      - business
+      - intelligence
+      - layer
+    summary: We will deploy Apache Superset as the shared SQL-first business intelligence
+    filename: 0292-apache-superset-as-the-sql-first-business-intelligence-layer.md
+  - adr: 0292
+    title: Lago As The Usage Metering And Billing API Layer
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - lago
+      - as
+      - usage
+      - metering
+      - billing
+      - api
+      - layer
+    summary: We will deploy Lago as the usage metering and billing API layer for
+    filename: 0292-lago-as-the-usage-metering-and-billing-api-layer.md
+  - adr: 0293
+    title: Livekit As The Real-Time Audio And Voice Channel For Agents
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: agent-discovery
+    keywords:
+      - livekit
+      - as
+      - real-time
+      - audio
+      - voice
+      - channel
+      - agents
+    summary: We will deploy Livekit as the real-time audio and voice channel for agent
+    filename: 0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
+  - adr: 0293
+    title: Temporal As The Durable Workflow And Task Queue Engine
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: monitoring
+    keywords:
+      - temporal
+      - as
+      - durable
+      - workflow
+      - task
+      - queue
+      - engine
+    summary: We will deploy Temporal as the durable workflow engine for long-running,
+    filename: 0293-temporal-as-the-durable-workflow-and-task-queue-engine.md
+    implemented_version: 0.177.109
+  - adr: 0294
+    title: One-API As The Unified LLM API Proxy And Router
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - one-api
+      - as
+      - unified
+      - llm
+      - api
+      - proxy
+      - router
+    summary: We will deploy One-API as the unified LLM API proxy and router, superseding
+    filename: 0294-one-api-as-the-unified-llm-api-proxy-and-router.md
+  - adr: 0295
+    title: Shared Artifact Cache Plane For Container And Package Dependencies
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: ci-cd
+    keywords:
+      - shared
+      - artifact
+      - cache
+      - plane
+      - container
+      - package
+      - dependencies
+    summary: We will treat reusable dependency downloads as a shared artifact cache plane
+    filename: 0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
+    implemented_version: 0.177.73
+  - adr: 0296
+    title: Dedicated Artifact-Cache VM With Phased Consumer Adoption
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: vm-topology
+    keywords:
+      - dedicated
+      - artifact-cache
+      - vm
+      - phased
+      - consumer
+      - adoption
+    summary: We will adopt artifact caching in two phases.
+    filename: 0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
+    implemented_version: 0.177.103
+  - adr: 0297
+    title: Renovate Bot As The Automated Stack Version Upgrade Proposer
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: release
+    keywords:
+      - renovate
+      - bot
+      - as
+      - automated
+      - stack
+      - version
+      - upgrade
+      - proposer
+    summary: We will deploy Renovate Bot as a scheduled Gitea Actions job on
+    filename: 0297-renovate-bot-as-the-automated-stack-version-upgrade-proposer.md
+  - adr: 0298
+    title: Syft And Grype For Platform-Wide SBOM Generation And Continuous CVE Scanning
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - syft
+      - grype
+      - platform-wide
+      - sbom
+      - generation
+      - continuous
+      - cve
+      - scanning
+    summary: We will deploy Syft and Grype as Gitea Actions CI steps and as a
+    filename: 0298-syft-and-grype-for-platform-wide-sbom-generation-and-continuous-cve-scanning.md
+  - adr: 0299
+    title: Ntfy As The Self-Hosted Push Notification Channel For Programmatic Alert Delivery
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - ntfy
+      - as
+      - self-hosted
+      - push
+      - notification
+      - channel
+      - programmatic
+      - alert
+    summary: We will formalise ntfy as the platform's self-hosted push notification channel
+    filename: 0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
+  - adr: '0300'
+    title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: security
+    keywords:
+      - falco
+      - container
+      - runtime
+      - syscall
+      - security
+      - monitoring
+      - autonomous
+      - anomaly
+    summary: We will deploy Falco as a systemd service on each production VM, using the
+    filename: 0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md
+  - adr: '0301'
+    title: Semgrep For SAST And Application Code Security Scanning In The CI Gate
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: security
+    keywords:
+      - semgrep
+      - sast
+      - application
+      - code
+      - security
+      - scanning
+      - ci
+      - gate
+    summary: We will integrate Semgrep as a required step in the repo-managed
+    filename: 0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md
+    implemented_version: 0.177.108
+  - adr: '0302'
+    title: Restic For Encrypted File-Level Backup Of Platform Configuration And State Artifacts
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: storage
+    keywords:
+      - restic
+      - encrypted
+      - file-level
+      - backup
+      - platform
+      - configuration
+      - state
+      - artifacts
+    summary: We will deploy Restic as a scheduled backup agent for platform configuration
+    filename: 0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts.md
+  - adr: '0303'
+    title: pgaudit For PostgreSQL Query And Privilege Change Audit Logging
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - pgaudit
+      - postgresql
+      - query
+      - privilege
+      - change
+      - audit
+      - logging
+    summary: We will enable pgaudit on the production PostgreSQL instance and configure it
+    filename: 0303-pgaudit-for-postgresql-query-and-privilege-change-audit-logging.md
+  - adr: '0304'
+    title: Atlas For Declarative Database Schema Migration Versioning And Pre-Migration Linting
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: release
+    keywords:
+      - atlas
+      - declarative
+      - database
+      - schema
+      - migration
+      - versioning
+      - pre-migration
+      - linting
+    summary: We will integrate Atlas as the migration linting and drift detection layer
+    filename: 0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
+  - adr: '0305'
+    title: k6 For Continuous Load Testing And SLO Error Budget Burn Validation
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: ci-cd
+    keywords:
+      - k6
+      - continuous
+      - load
+      - testing
+      - slo
+      - error
+      - budget
+      - burn
+    summary: We will integrate k6 as the platform's load testing and SLO budget burn
+    filename: 0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+  - adr: '0306'
+    title: Checkov For IaC Policy Compliance Scanning Of OpenTofu, Compose, And Ansible
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: automation
+    keywords:
+      - checkov
+      - iac
+      - policy
+      - compliance
+      - scanning
+      - opentofu
+      - compose
+      - ansible
+    summary: We will integrate Checkov as a required CI gate step for all IaC surfaces in
+    filename: 0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md

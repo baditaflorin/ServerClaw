@@ -12,6 +12,12 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+DEFAULT_HTTP_TIMEOUT_S = 10.0
+MIN_SETTLE_TIMEOUT_S = 10.0
+ABSENT_SETTLE_TIMEOUT_MULTIPLIER = 10.0
+CONTENT_SETTLE_TIMEOUT_MULTIPLIER = 30.0
+
+
 def resolve_repo_root(script_path: Path | None = None) -> Path:
     candidate = (script_path or Path(__file__)).resolve()
     for parent in (candidate.parent, *candidate.parents):
@@ -33,7 +39,7 @@ if str(REPO_ROOT) not in sys.path:
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
 
-from platform.retry import PlatformRetryError, RetryClass, RetryPolicy, with_retry
+from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
 
 
 class SyncError(RuntimeError):
@@ -47,7 +53,12 @@ class RetryableSyncError(SyncError):
 class SyncTransportError(RetryableSyncError):
     pass
 
-def login_with_bootstrap_secret(base_url: str, secret: str) -> str:
+
+def login_with_bootstrap_secret(
+    base_url: str,
+    secret: str,
+    timeout_s: float = DEFAULT_HTTP_TIMEOUT_S,
+) -> str:
     request = urllib.request.Request(
         f"{base_url.rstrip('/')}/api/auth/login",
         data=json.dumps(
@@ -60,7 +71,7 @@ def login_with_bootstrap_secret(base_url: str, secret: str) -> str:
         method="POST",
     )
     try:
-        with urllib.request.urlopen(request) as response:
+        with urllib.request.urlopen(request, timeout=timeout_s) as response:
             token = response.read().decode("utf-8").strip()
     except urllib.error.HTTPError as exc:
         body = exc.read().decode("utf-8")
@@ -89,21 +100,22 @@ def request_json_or_text(
     method: str,
     payload: dict | None = None,
     expected_statuses: tuple[int, ...],
+    timeout_s: float = DEFAULT_HTTP_TIMEOUT_S,
 ) -> tuple[int, str]:
     url = f"{base_url}/api/w/{urllib.parse.quote(workspace, safe='')}/{path}"
     request = build_request(url, token, method, payload)
     try:
-        with urllib.request.urlopen(request) as response:
+        with urllib.request.urlopen(request, timeout=timeout_s) as response:
             status = response.status
             body = response.read().decode("utf-8")
     except urllib.error.HTTPError as exc:
         status = exc.code
         body = exc.read().decode("utf-8")
         if status == 401:
-            session_token = login_with_bootstrap_secret(base_url, token)
+            session_token = login_with_bootstrap_secret(base_url, token, timeout_s=timeout_s)
             request = build_request(url, session_token, method, payload)
             try:
-                with urllib.request.urlopen(request) as response:
+                with urllib.request.urlopen(request, timeout=timeout_s) as response:
                     status = response.status
                     body = response.read().decode("utf-8")
             except urllib.error.HTTPError as retry_exc:
@@ -119,7 +131,14 @@ def request_json_or_text(
     return status, body
 
 
-def delete_script(*, base_url: str, workspace: str, token: str, script_path: str) -> None:
+def delete_script(
+    *,
+    base_url: str,
+    workspace: str,
+    token: str,
+    script_path: str,
+    timeout_s: float = DEFAULT_HTTP_TIMEOUT_S,
+) -> None:
     status, body = request_json_or_text(
         base_url=base_url,
         workspace=workspace,
@@ -127,6 +146,7 @@ def delete_script(*, base_url: str, workspace: str, token: str, script_path: str
         path=f"scripts/delete/p/{urllib.parse.quote(script_path, safe='')}",
         method="POST",
         expected_statuses=(200, 400, 404),
+        timeout_s=timeout_s,
     )
     if status == 400 and "no rows returned" not in body.lower():
         raise SyncError(f"delete {script_path} returned 400: {body[:500]}")
@@ -138,6 +158,7 @@ def get_script(
     workspace: str,
     token: str,
     script_path: str,
+    timeout_s: float = DEFAULT_HTTP_TIMEOUT_S,
 ) -> tuple[int, dict | None]:
     status, body = request_json_or_text(
         base_url=base_url,
@@ -146,6 +167,7 @@ def get_script(
         path=f"scripts/get/p/{urllib.parse.quote(script_path, safe='')}",
         method="GET",
         expected_statuses=(200, 404),
+        timeout_s=timeout_s,
     )
     if status == 404:
         return status, None
@@ -163,7 +185,13 @@ def wait_for_absent(
 ) -> None:
     deadline = time.monotonic() + timeout_s
     while time.monotonic() < deadline:
-        status, _ = get_script(base_url=base_url, workspace=workspace, token=token, script_path=script_path)
+        status, _ = get_script(
+            base_url=base_url,
+            workspace=workspace,
+            token=token,
+            script_path=script_path,
+            timeout_s=timeout_s,
+        )
         if status == 404:
             return
         time.sleep(interval_s)
@@ -177,6 +205,7 @@ def create_script(
     token: str,
     spec: dict,
     content: str,
+    timeout_s: float = DEFAULT_HTTP_TIMEOUT_S,
 ) -> tuple[int, str]:
     payload = {
         "path": spec["path"],
@@ -195,6 +224,7 @@ def create_script(
         method="POST",
         payload=payload,
         expected_statuses=(201, 400),
+        timeout_s=timeout_s,
     )
 
 
@@ -210,11 +240,21 @@ def wait_for_content(
 ) -> None:
     deadline = time.monotonic() + timeout_s
     while time.monotonic() < deadline:
-        status, payload = get_script(base_url=base_url, workspace=workspace, token=token, script_path=script_path)
+        status, payload = get_script(
+            base_url=base_url,
+            workspace=workspace,
+            token=token,
+            script_path=script_path,
+            timeout_s=timeout_s,
+        )
         if status == 200 and payload and payload.get("content") == expected_content:
             return
         time.sleep(interval_s)
     raise SyncError(f"timed out waiting for {script_path} to match expected content")
+
+
+def settle_timeout(settle_interval_s: float, multiplier: float) -> float:
+    return max(MIN_SETTLE_TIMEOUT_S, settle_interval_s * multiplier)
 
 
 def sync_script(
@@ -225,34 +265,80 @@ def sync_script(
     spec: dict,
     max_attempts: int,
     settle_interval_s: float,
+    request_timeout_s: float = DEFAULT_HTTP_TIMEOUT_S,
 ) -> dict:
     content = Path(spec["local_file"]).read_text(encoding="utf-8")
     attempts = 0
+    absent_timeout_s = settle_timeout(settle_interval_s, ABSENT_SETTLE_TIMEOUT_MULTIPLIER)
+    content_timeout_s = settle_timeout(settle_interval_s, CONTENT_SETTLE_TIMEOUT_MULTIPLIER)
 
     def sync_attempt() -> dict:
         nonlocal attempts
         attempts += 1
+        script_absent_after_delete = False
         try:
-            delete_script(base_url=base_url, workspace=workspace, token=token, script_path=spec["path"])
-            time.sleep(settle_interval_s)
-            wait_for_absent(
+            delete_script(
                 base_url=base_url,
                 workspace=workspace,
                 token=token,
                 script_path=spec["path"],
-                timeout_s=max(3.0, settle_interval_s * 4),
-                interval_s=settle_interval_s,
+                timeout_s=request_timeout_s,
             )
+        except SyncTransportError as exc:
+            try:
+                status, _ = get_script(
+                    base_url=base_url,
+                    workspace=workspace,
+                    token=token,
+                    script_path=spec["path"],
+                    timeout_s=request_timeout_s,
+                )
+            except (RetryableSyncError, SyncError, OSError):
+                raise PlatformRetryError(
+                    str(exc),
+                    code="platform:windmill_seed_sync_pending",
+                    retry_class=RetryClass.BACKOFF,
+                ) from exc
+            if status == 404:
+                script_absent_after_delete = True
+            else:
+                raise PlatformRetryError(
+                    str(exc),
+                    code="platform:windmill_seed_sync_pending",
+                    retry_class=RetryClass.BACKOFF,
+                ) from exc
         except (RetryableSyncError, OSError) as exc:
             raise PlatformRetryError(
                 str(exc),
                 code="platform:windmill_seed_sync_pending",
                 retry_class=RetryClass.BACKOFF,
             ) from exc
-        except SyncError:
-            pass
         try:
-            status, body = create_script(base_url=base_url, workspace=workspace, token=token, spec=spec, content=content)
+            if not script_absent_after_delete:
+                time.sleep(settle_interval_s)
+                wait_for_absent(
+                    base_url=base_url,
+                    workspace=workspace,
+                    token=token,
+                    script_path=spec["path"],
+                    timeout_s=absent_timeout_s,
+                    interval_s=settle_interval_s,
+                )
+        except (RetryableSyncError, SyncError, OSError) as exc:
+            raise PlatformRetryError(
+                str(exc),
+                code="platform:windmill_seed_sync_pending",
+                retry_class=RetryClass.BACKOFF,
+            ) from exc
+        try:
+            status, body = create_script(
+                base_url=base_url,
+                workspace=workspace,
+                token=token,
+                spec=spec,
+                content=content,
+                timeout_s=request_timeout_s,
+            )
         except (RetryableSyncError, OSError) as exc:
             raise PlatformRetryError(
                 str(exc),
@@ -265,15 +351,22 @@ def sync_script(
                 code="platform:windmill_seed_sync_pending",
                 retry_class=RetryClass.BACKOFF,
             )
-        wait_for_content(
-            base_url=base_url,
-            workspace=workspace,
-            token=token,
-            script_path=spec["path"],
-            expected_content=content,
-            timeout_s=max(3.0, settle_interval_s * 4),
-            interval_s=settle_interval_s,
-        )
+        try:
+            wait_for_content(
+                base_url=base_url,
+                workspace=workspace,
+                token=token,
+                script_path=spec["path"],
+                expected_content=content,
+                timeout_s=content_timeout_s,
+                interval_s=settle_interval_s,
+            )
+        except (RetryableSyncError, SyncError, OSError) as exc:
+            raise PlatformRetryError(
+                str(exc),
+                code="platform:windmill_seed_sync_pending",
+                retry_class=RetryClass.BACKOFF,
+            ) from exc
         return {"path": spec["path"], "attempts": attempts, "status": "synced"}
 
     try:
@@ -290,7 +383,10 @@ def sync_script(
             error_context=f"windmill seed sync for {spec['path']}",
         )
     except Exception as exc:
-        raise SyncError(f"failed to sync {spec['path']} after {max_attempts} attempts: {exc}") from exc
+        detail = str(exc)
+        if isinstance(exc, MaxRetriesExceeded) and exc.last_error is not None:
+            detail = f"{detail}; last error: {exc.last_error}"
+        raise SyncError(f"failed to sync {spec['path']} after {max_attempts} attempts: {detail}") from exc
 
 
 def main() -> int:
@@ -300,6 +396,7 @@ def main() -> int:
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--max-attempts", type=int, default=8)
     parser.add_argument("--settle-interval", type=float, default=1.0)
+    parser.add_argument("--http-timeout", type=float, default=DEFAULT_HTTP_TIMEOUT_S)
     args = parser.parse_args()
 
     token = os.environ.get("WINDMILL_TOKEN", "").strip()
@@ -319,6 +416,7 @@ def main() -> int:
                     spec=spec,
                     max_attempts=args.max_attempts,
                     settle_interval_s=args.settle_interval,
+                    request_timeout_s=args.http_timeout,
                 )
             )
     except Exception as exc:

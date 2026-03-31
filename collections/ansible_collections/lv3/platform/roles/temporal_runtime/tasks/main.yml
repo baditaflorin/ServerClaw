@@ -1,0 +1,422 @@
+# Purpose: Converge the private Temporal runtime, OpenBao-backed secrets, and namespace bootstrap artifacts.
+# Use case: Run during Temporal deploys, updates, and exact-main replays for ADR 0293 durable workflow infrastructure.
+# Inputs: Runtime paths, database credentials, OpenBao integration settings, published loopback ports, and namespace defaults.
+# Outputs: Configures the Temporal runtime, compose stack, runtime secrets, and default namespace on the target host.
+# Idempotency: Partially idempotent because namespace bootstrap report mirroring and runtime secret refreshes may intentionally update artifacts.
+# Dependencies: ADR 0165, ADR 0077, ADR 0270, and ADR 0293.
+---
+- name: Validate Temporal runtime inputs
+  ansible.builtin.assert:
+    that:
+      - temporal_site_dir | length > 0
+      - temporal_config_dir | length > 0
+      - temporal_compose_file | length > 0
+      - temporal_env_file | length > 0
+      - temporal_server_image | length > 0
+      - temporal_admin_tools_image | length > 0
+      - temporal_ui_image | length > 0
+      - temporal_database_name | length > 0
+      - temporal_visibility_database_name | length > 0
+      - temporal_database_user | length > 0
+      - temporal_database_host | length > 0
+      - temporal_database_password_local_file | length > 0
+      - temporal_default_namespace | length > 0
+      - temporal_default_namespace_retention | length > 0
+    fail_msg: "temporal_runtime requires runtime paths, image refs, database credentials, and namespace defaults."
+
+- name: Ensure the Temporal database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ temporal_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: temporal_database_password_local
+
+- name: Fail if the Temporal database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ temporal_database_password_local_file }} is missing on the control machine.
+      Converge the Temporal PostgreSQL role first so the runtime can connect to postgres-lv3.
+  when: not temporal_database_password_local.stat.exists
+
+- name: Ensure the local Temporal artifact directory exists
+  ansible.builtin.file:
+    path: "{{ temporal_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Record the Temporal runtime secrets
+  ansible.builtin.set_fact:
+    temporal_runtime_secret_payload:
+      TEMPORAL_DB_PASSWORD: "{{ lookup('ansible.builtin.file', temporal_database_password_local_file) | trim }}"
+  no_log: true
+
+- name: Ensure the Temporal runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ temporal_site_dir }}"
+      mode: "0755"
+    - path: "{{ temporal_config_dir }}"
+      mode: "0755"
+
+- name: Prepare OpenBao agent runtime secret injection for Temporal
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: temporal
+    common_openbao_compose_env_agent_dir: "{{ temporal_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ temporal_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ temporal_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ temporal_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ temporal_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ temporal_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ temporal_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ temporal_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ temporal_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ temporal_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ temporal_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: temporal.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ temporal_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ temporal_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ temporal_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ temporal_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Temporal dynamic config file
+  ansible.builtin.template:
+    src: dynamicconfig.yml.j2
+    dest: "{{ temporal_dynamic_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: temporal_dynamic_config_render
+
+- name: Render the Temporal server config templates
+  ansible.builtin.template:
+    src: server-config.yml.j2
+    dest: "{{ temporal_component.config_template_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ temporal_server_components }}"
+  loop_control:
+    loop_var: temporal_component
+    label: "{{ temporal_component.role }}"
+  register: temporal_server_config_render
+
+- name: Render the Temporal compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ temporal_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: temporal_compose_render
+
+- name: Ensure Docker bridge networking chains are present before Temporal startup
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: true
+
+- name: Pull the Temporal compose images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --profile
+      - tools
+      - --file
+      - "{{ temporal_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ temporal_site_dir }}"
+  register: temporal_pull
+  changed_when: >-
+    'Pulling' in temporal_pull.stdout
+    or 'Downloaded newer image' in temporal_pull.stdout
+    or 'Pull complete' in temporal_pull.stdout
+
+- name: Record whether the Temporal runtime stack must be recreated
+  ansible.builtin.set_fact:
+    temporal_runtime_force_recreate: >-
+      {{
+        temporal_pull.changed
+        or temporal_dynamic_config_render.changed
+        or temporal_server_config_render.changed
+        or temporal_compose_render.changed
+      }}
+
+- name: Start the Temporal OpenBao agent
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ temporal_compose_file }}"
+      - up
+      - -d
+      - openbao-agent
+  args:
+    chdir: "{{ temporal_site_dir }}"
+  register: temporal_openbao_agent_up
+  changed_when: >-
+    'Creating' in temporal_openbao_agent_up.stdout
+    or 'Recreating' in temporal_openbao_agent_up.stdout
+    or 'Starting' in temporal_openbao_agent_up.stdout
+    or 'Running' in temporal_openbao_agent_up.stdout
+
+- name: Wait for the Temporal runtime env file
+  ansible.builtin.shell: |
+    set -euo pipefail
+    test -s "{{ temporal_env_file }}"
+    grep -Eq '^TEMPORAL_DB_PASSWORD=[0-9a-f]+$' "{{ temporal_env_file }}"
+  args:
+    executable: /bin/bash
+  register: temporal_runtime_env_contract
+  retries: 24
+  delay: 5
+  until: temporal_runtime_env_contract.rc == 0
+  changed_when: false
+  no_log: true
+
+- name: Converge the Temporal runtime stack with forced recreation when rendered inputs changed
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ temporal_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ temporal_site_dir }}"
+  register: temporal_up
+  when: temporal_runtime_force_recreate | bool
+  changed_when: >-
+    'Creating' in temporal_up.stdout
+    or 'Recreating' in temporal_up.stdout
+    or 'Starting' in temporal_up.stdout
+
+- name: Converge the Temporal runtime stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ temporal_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ temporal_site_dir }}"
+  register: temporal_up
+  when: not temporal_runtime_force_recreate | bool
+  changed_when: >-
+    'Creating' in temporal_up.stdout
+    or 'Recreating' in temporal_up.stdout
+    or 'Starting' in temporal_up.stdout
+
+- name: Wait for the Temporal cluster to become ready for namespace administration
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --profile
+      - tools
+      - --file
+      - "{{ temporal_compose_file }}"
+      - run
+      - --rm
+      - temporal-admin-tools
+      - temporal
+      - operator
+      - cluster
+      - health
+  args:
+    chdir: "{{ temporal_site_dir }}"
+  register: temporal_cluster_health
+  retries: 24
+  delay: 5
+  until: temporal_cluster_health.rc == 0
+  changed_when: false
+
+- name: Check whether the Temporal namespace already exists
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --profile
+      - tools
+      - --file
+      - "{{ temporal_compose_file }}"
+      - run
+      - --rm
+      - temporal-admin-tools
+      - temporal
+      - operator
+      - namespace
+      - describe
+      - --namespace
+      - "{{ temporal_default_namespace }}"
+  args:
+    chdir: "{{ temporal_site_dir }}"
+  register: temporal_namespace_describe
+  retries: 12
+  delay: 5
+  until: >-
+    temporal_namespace_describe.rc == 0
+    or (
+      'namespace' in (((temporal_namespace_describe.stdout | default('')) ~ ' ' ~ (temporal_namespace_describe.stderr | default(''))) | lower)
+      and 'not found' in (((temporal_namespace_describe.stdout | default('')) ~ ' ' ~ (temporal_namespace_describe.stderr | default(''))) | lower)
+    )
+  changed_when: false
+  failed_when: temporal_namespace_describe.rc not in [0, 1]
+
+- name: Record the current Temporal namespace retention window
+  ansible.builtin.set_fact:
+    temporal_namespace_retention_observed: >-
+      {{
+        (
+          temporal_namespace_describe.stdout
+          | regex_findall('Config\\.WorkflowExecutionRetentionTtl\\s+([^\\n]+)')
+          | first
+          | default('')
+        ) | trim
+      }}
+  when: temporal_namespace_describe.rc == 0
+
+- name: Decide whether the Temporal namespace retention window needs reconciliation
+  ansible.builtin.set_fact:
+    temporal_namespace_needs_retention_update: >-
+      {{
+        temporal_namespace_describe.rc == 0
+        and (
+          temporal_namespace_retention_observed
+          | regex_replace('0s$', '')
+          | regex_replace('0m$', '')
+        ) != temporal_default_namespace_retention
+      }}
+
+- name: Create the repo-managed Temporal namespace when missing
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --profile
+      - tools
+      - --file
+      - "{{ temporal_compose_file }}"
+      - run
+      - --rm
+      - temporal-admin-tools
+      - temporal
+      - operator
+      - namespace
+      - create
+      - --namespace
+      - "{{ temporal_default_namespace }}"
+      - --retention
+      - "{{ temporal_default_namespace_retention }}"
+      - --email
+      - "{{ temporal_namespace_owner_email }}"
+  args:
+    chdir: "{{ temporal_site_dir }}"
+  register: temporal_namespace_create
+  retries: 6
+  delay: 5
+  until: temporal_namespace_create.rc == 0
+  changed_when: temporal_namespace_create.rc == 0
+  when: temporal_namespace_describe.rc != 0
+
+- name: Reconcile the Temporal namespace retention window
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --profile
+      - tools
+      - --file
+      - "{{ temporal_compose_file }}"
+      - run
+      - --rm
+      - temporal-admin-tools
+      - temporal
+      - operator
+      - namespace
+      - update
+      - --namespace
+      - "{{ temporal_default_namespace }}"
+      - --retention
+      - "{{ temporal_default_namespace_retention }}"
+      - --email
+      - "{{ temporal_namespace_owner_email }}"
+  args:
+    chdir: "{{ temporal_site_dir }}"
+  register: temporal_namespace_update
+  retries: 6
+  delay: 5
+  until: temporal_namespace_update.rc == 0
+  changed_when: false
+  when: temporal_namespace_needs_retention_update | default(false)
+
+- name: Capture the Temporal namespace description as JSON
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --profile
+      - tools
+      - --file
+      - "{{ temporal_compose_file }}"
+      - run
+      - --rm
+      - temporal-admin-tools
+      - temporal
+      - --output
+      - json
+      - operator
+      - namespace
+      - describe
+      - --namespace
+      - "{{ temporal_default_namespace }}"
+  args:
+    chdir: "{{ temporal_site_dir }}"
+  register: temporal_namespace_describe_json
+  retries: 12
+  delay: 5
+  until: temporal_namespace_describe_json.rc == 0
+  changed_when: false
+
+- name: Mirror the Temporal namespace report to the control machine
+  ansible.builtin.copy:
+    dest: "{{ temporal_namespace_report_local_file }}"
+    content: "{{ temporal_namespace_describe_json.stdout }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+
+- name: Verify the Temporal runtime
+  ansible.builtin.import_tasks: verify.yml

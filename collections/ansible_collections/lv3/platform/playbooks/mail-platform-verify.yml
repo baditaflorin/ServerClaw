@@ -7,15 +7,15 @@
   tasks:
     - name: Record mail verification start
       ansible.builtin.debug:
-        msg: "Starting mail platform live verification."
+        msg: "Starting mail platform live verification for {{ playbook_execution_env }}."
 
-- name: Read the server mailbox state before inbound probe
-  hosts: docker-runtime-lv3
+- name: Prepare the mail verification target state
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
   become: true
   gather_facts: true
 
   tasks:
-    - name: Read inbox count before SMTP probe
+    - name: Read inbox count before the production SMTP probe
       ansible.builtin.shell: |
         python3 - <<'PY'
         import imaplib
@@ -34,9 +34,20 @@
         executable: /bin/bash
       register: mail_platform_inbox_before
       changed_when: false
+      when: playbook_execution_env == 'production'
 
-- name: Send an inbound probe through the public SMTP endpoint
-  hosts: monitoring-lv3
+    - name: Clear any previous Mailpit messages before the staging SMTP probe
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ hostvars['proxmox_florin'].platform_port_assignments.mailpit_http_port | default(8025) }}/api/v1/messages"
+        method: DELETE
+        status_code: 200
+        return_content: true
+      register: mailpit_clear_messages
+      changed_when: false
+      when: playbook_execution_env == 'staging'
+
+- name: Send the SMTP verification probe
+  hosts: "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
   become: true
   gather_facts: true
 
@@ -63,6 +74,7 @@
       register: mail_platform_public_inbound_probe
       changed_when: false
       failed_when: false
+      when: playbook_execution_env == 'production'
 
     - name: Fall back to private SMTP probe when public mail endpoint does not answer
       ansible.builtin.shell: |
@@ -85,19 +97,44 @@
         executable: /bin/bash
       register: mail_platform_private_inbound_probe
       changed_when: false
-      when: mail_platform_public_inbound_probe.rc != 0
+      when:
+        - playbook_execution_env == 'production'
+        - mail_platform_public_inbound_probe.rc != 0
 
-- name: Verify inbound delivery and send a live outbound Gmail probe
-  hosts: docker-runtime-lv3
+    - name: Send a staging SMTP probe to Mailpit
+      ansible.builtin.shell: |
+        python3 - <<'PY'
+        import smtplib
+        from email.message import EmailMessage
+
+        message = EmailMessage()
+        message['From'] = 'monitor-probe@lv3.org'
+        message['To'] = 'mailpit-staging@lv3.org'
+        message['Subject'] = 'LV3 staging Mailpit probe {{ mail_platform_probe_id | default("manual") }}'
+        message.set_content('Staging mail verification was captured by Mailpit')
+
+        with smtplib.SMTP('{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}', {{ hostvars['proxmox_florin'].platform_port_assignments.mailpit_smtp_port | default(1025) }}, timeout=30) as client:
+            client.send_message(message)
+
+        print('sent')
+        PY
+      args:
+        executable: /bin/bash
+      register: mailpit_staging_probe
+      changed_when: false
+      when: playbook_execution_env == 'staging'
+
+- name: Verify the SMTP verification outcome
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
   become: true
   gather_facts: true
 
   tasks:
-    - name: Wait briefly for inbound SMTP delivery
+    - name: Wait briefly for the SMTP probe to arrive
       ansible.builtin.pause:
-        seconds: 8
+        seconds: "{{ 8 if playbook_execution_env == 'production' else 2 }}"
 
-    - name: Read inbox count after SMTP probe
+    - name: Read inbox count after the production SMTP probe
       ansible.builtin.shell: |
         python3 - <<'PY'
         import imaplib
@@ -116,8 +153,9 @@
         executable: /bin/bash
       register: mail_platform_inbox_after
       changed_when: false
+      when: playbook_execution_env == 'production'
 
-    - name: Assert the inbound SMTP probe is present in IMAP
+    - name: Assert the production inbound SMTP probe is present in IMAP
       ansible.builtin.shell: |
         python3 - <<'PY'
         import imaplib
@@ -162,6 +200,7 @@
         executable: /bin/bash
       register: mail_platform_inbound_probe_match
       changed_when: false
+      when: playbook_execution_env == 'production'
 
     - name: Verify the notification profile catalog through the mail gateway
       ansible.builtin.shell: |
@@ -193,6 +232,7 @@
         executable: /bin/bash
       register: mail_platform_profile_catalog
       changed_when: false
+      when: playbook_execution_env == 'production'
 
     - name: Verify scoped profile keys reject mismatched profile ids
       ansible.builtin.shell: |
@@ -234,6 +274,7 @@
         executable: /bin/bash
       register: mail_platform_profile_scope_rejection
       changed_when: false
+      when: playbook_execution_env == 'production'
 
     - name: Send outbound Gmail probes through each notification profile
       ansible.builtin.shell: |
@@ -300,8 +341,42 @@
         executable: /bin/bash
       register: mail_platform_outbound_probe
       changed_when: false
+      when: playbook_execution_env == 'production'
 
-    - name: Show live mail verification summary
+    - name: Read the captured staging Mailpit messages
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ hostvars['proxmox_florin'].platform_port_assignments.mailpit_http_port | default(8025) }}/api/v1/messages"
+        method: GET
+        status_code: 200
+      register: mailpit_staging_messages
+      retries: 20
+      delay: 2
+      until: (mailpit_staging_messages.json.messages | default([]) | length) > 0
+      changed_when: false
+      when: playbook_execution_env == 'staging'
+
+    - name: Record the matching staging Mailpit messages
+      ansible.builtin.set_fact:
+        mailpit_staging_matching_messages: >-
+          {{
+            mailpit_staging_messages.json.messages
+            | selectattr('Subject', 'equalto', 'LV3 staging Mailpit probe ' ~ (mail_platform_probe_id | default('manual')))
+            | list
+          }}
+      when: playbook_execution_env == 'staging'
+
+    - name: Assert the staging SMTP probe was captured by Mailpit
+      ansible.builtin.assert:
+        that:
+          - mailpit_clear_messages.content == 'ok'
+          - hostvars[playbook_execution_host_patterns.monitoring[playbook_execution_env]].mailpit_staging_probe.stdout == 'sent'
+          - mailpit_staging_matching_messages | length == 1
+          - mailpit_staging_matching_messages[0].To[0].Address == 'mailpit-staging@lv3.org'
+          - mailpit_staging_matching_messages[0].Snippet == 'Staging mail verification was captured by Mailpit'
+        fail_msg: "The staging SMTP probe did not appear in Mailpit as expected."
+      when: playbook_execution_env == 'staging'
+
+    - name: Show production mail verification summary
       ansible.builtin.debug:
         msg:
           - "inbox_before={{ mail_platform_inbox_before.stdout | int }}"
@@ -310,5 +385,14 @@
           - "profile_catalog={{ mail_platform_profile_catalog.stdout_lines[1] | default('missing') }}"
           - "scope_rejection_status={{ mail_platform_profile_scope_rejection.stdout_lines[0] | default('missing') }}"
           - "outbound_profiles={{ mail_platform_outbound_probe.stdout | default('missing') }}"
-          - "public_inbound_rc={{ hostvars['monitoring-lv3'].mail_platform_public_inbound_probe.rc | default('missing') }}"
-          - "private_inbound_rc={{ hostvars['monitoring-lv3'].mail_platform_private_inbound_probe.rc | default('not-run') }}"
+          - "public_inbound_rc={{ hostvars[playbook_execution_host_patterns.monitoring[playbook_execution_env]].mail_platform_public_inbound_probe.rc | default('missing') }}"
+          - "private_inbound_rc={{ hostvars[playbook_execution_host_patterns.monitoring[playbook_execution_env]].mail_platform_private_inbound_probe.rc | default('not-run') }}"
+      when: playbook_execution_env == 'production'
+
+    - name: Show staging Mailpit verification summary
+      ansible.builtin.debug:
+        msg:
+          - "mailpit_cleared={{ mailpit_clear_messages.content | default('missing') }}"
+          - "staging_probe={{ mailpit_staging_probe.stdout | default('missing') }}"
+          - "captured_subjects={{ mailpit_staging_matching_messages | map(attribute='Subject') | list | join(',') }}"
+      when: playbook_execution_env == 'staging'

@@ -1,0 +1,529 @@
+---
+# Purpose: Build the repo-managed JupyterHub images, converge the runtime stack, and verify a smoke single-user spawn.
+
+- name: Validate JupyterHub runtime inputs
+  ansible.builtin.assert:
+    that:
+      - jupyterhub_site_dir | length > 0
+      - jupyterhub_hub_build_dir | length > 0
+      - jupyterhub_singleuser_build_dir | length > 0
+      - jupyterhub_data_dir | length > 0
+      - jupyterhub_hub_data_dir | length > 0
+      - jupyterhub_minio_data_dir | length > 0
+      - jupyterhub_secret_dir | length > 0
+      - jupyterhub_compose_file | length > 0
+      - jupyterhub_config_file | length > 0
+      - jupyterhub_env_file | length > 0
+      - jupyterhub_internal_port | int > 0
+      - jupyterhub_internal_base_url | length > 0
+      - jupyterhub_public_base_url | length > 0
+      - jupyterhub_keycloak_client_secret_local_file | length > 0
+      - jupyterhub_hub_image_name | length > 0
+      - jupyterhub_singleuser_image_name | length > 0
+      - jupyterhub_hub_base_image | length > 0
+      - jupyterhub_singleuser_base_image | length > 0
+      - jupyterhub_minio_image | length > 0
+      - jupyterhub_compose_network_name | length > 0
+      - jupyterhub_shared_bucket_name | length > 0
+      - jupyterhub_verify_username | length > 0
+    fail_msg: >-
+      jupyterhub_runtime requires runtime paths, image pins, OIDC credentials,
+      and the smoke-user verification contract.
+
+- name: Check whether the JupyterHub Keycloak client secret exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ jupyterhub_keycloak_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: jupyterhub_keycloak_client_secret_local
+
+- name: Check whether the platform-context API token exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ jupyterhub_platform_context_api_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: jupyterhub_platform_context_token_local
+
+- name: Fail if the JupyterHub Keycloak client secret is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ jupyterhub_keycloak_client_secret_local_file }} is missing on the control machine.
+      Converge the Keycloak runtime before deploying JupyterHub.
+  when: not jupyterhub_keycloak_client_secret_local.stat.exists
+
+- name: Ensure the JupyterHub runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the JupyterHub runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ jupyterhub_site_dir }}"
+      mode: "0755"
+    - path: "{{ jupyterhub_hub_build_dir }}"
+      mode: "0755"
+    - path: "{{ jupyterhub_singleuser_build_dir }}"
+      mode: "0755"
+    - path: "{{ jupyterhub_data_dir }}"
+      mode: "0755"
+    - path: "{{ jupyterhub_hub_data_dir }}"
+      mode: "0755"
+    - path: "{{ jupyterhub_minio_data_dir }}"
+      mode: "0755"
+    - path: "{{ jupyterhub_minio_data_dir }}/{{ jupyterhub_shared_bucket_name }}"
+      mode: "0755"
+    - path: "{{ jupyterhub_secret_dir }}"
+      mode: "0700"
+
+- name: Generate the JupyterHub runtime secrets
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      {{ item.command }} > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - path: "{{ jupyterhub_service_api_token_remote_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ jupyterhub_proxy_auth_token_remote_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ jupyterhub_minio_root_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\\n'"
+  register: jupyterhub_secret_generation
+  changed_when: "'changed' in jupyterhub_secret_generation.stdout"
+  no_log: true
+
+- name: Read the JupyterHub runtime secrets
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  register: jupyterhub_secret_reads
+  loop:
+    - "{{ jupyterhub_service_api_token_remote_file }}"
+    - "{{ jupyterhub_proxy_auth_token_remote_file }}"
+    - "{{ jupyterhub_minio_root_password_remote_file }}"
+  no_log: true
+
+- name: Record the JupyterHub runtime secrets
+  ansible.builtin.set_fact:
+    jupyterhub_service_api_token: "{{ jupyterhub_secret_reads.results[0].content | b64decode | trim }}"
+    jupyterhub_proxy_auth_token: "{{ jupyterhub_secret_reads.results[1].content | b64decode | trim }}"
+    jupyterhub_minio_root_password: "{{ jupyterhub_secret_reads.results[2].content | b64decode | trim }}"
+    jupyterhub_keycloak_client_secret: "{{ lookup('ansible.builtin.file', jupyterhub_keycloak_client_secret_local_file) | trim }}"
+    jupyterhub_platform_context_api_token: >-
+      {{
+        (lookup('ansible.builtin.file', jupyterhub_platform_context_api_token_local_file) | trim)
+        if jupyterhub_platform_context_token_local.stat.exists
+        else ''
+      }}
+    jupyterhub_runtime_secret_payload:
+      JUPYTERHUB_PROXY_AUTH_TOKEN: "{{ jupyterhub_secret_reads.results[1].content | b64decode | trim }}"
+      JUPYTERHUB_SERVICE_API_TOKEN: "{{ jupyterhub_secret_reads.results[0].content | b64decode | trim }}"
+      MINIO_ROOT_PASSWORD: "{{ jupyterhub_secret_reads.results[2].content | b64decode | trim }}"
+      OIDC_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', jupyterhub_keycloak_client_secret_local_file) | trim }}"
+      PLATFORM_CONTEXT_API_TOKEN: >-
+        {{
+          (lookup('ansible.builtin.file', jupyterhub_platform_context_api_token_local_file) | trim)
+          if jupyterhub_platform_context_token_local.stat.exists
+          else ''
+        }}
+  no_log: true
+
+- name: Ensure the local JupyterHub artifact directory exists
+  ansible.builtin.file:
+    path: "{{ jupyterhub_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the JupyterHub runtime secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  loop:
+    - dest: "{{ jupyterhub_service_api_token_local_file }}"
+      content: "{{ jupyterhub_service_api_token }}"
+    - dest: "{{ jupyterhub_minio_root_password_local_file }}"
+      content: "{{ jupyterhub_minio_root_password }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for JupyterHub
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: jupyterhub
+    common_openbao_compose_env_agent_dir: "{{ jupyterhub_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ jupyterhub_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ jupyterhub_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ jupyterhub_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ jupyterhub_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ jupyterhub_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ jupyterhub_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ jupyterhub_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ jupyterhub_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ jupyterhub_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ jupyterhub_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: jupyterhub.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ jupyterhub_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ jupyterhub_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ jupyterhub_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ jupyterhub_legacy_env_file }}"
+  no_log: true
+
+- name: Render the JupyterHub environment file
+  ansible.builtin.template:
+    src: jupyterhub.env.j2
+    dest: "{{ jupyterhub_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: jupyterhub_env_template
+  no_log: true
+
+- name: Render the JupyterHub config file
+  ansible.builtin.template:
+    src: jupyterhub_config.py.j2
+    dest: "{{ jupyterhub_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: jupyterhub_config_template
+
+- name: Render the JupyterHub compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ jupyterhub_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: jupyterhub_compose_template
+
+- name: Render the JupyterHub hub Dockerfile
+  ansible.builtin.template:
+    src: hub.Dockerfile.j2
+    dest: "{{ jupyterhub_hub_build_dir }}/Dockerfile"
+    owner: root
+    group: root
+    mode: "0644"
+  register: jupyterhub_hub_dockerfile
+
+- name: Render the JupyterHub hub Python requirements
+  ansible.builtin.template:
+    src: hub-requirements.txt.j2
+    dest: "{{ jupyterhub_hub_build_dir }}/requirements.txt"
+    owner: root
+    group: root
+    mode: "0644"
+  register: jupyterhub_hub_requirements
+
+- name: Render the JupyterHub single-user Dockerfile
+  ansible.builtin.template:
+    src: singleuser.Dockerfile.j2
+    dest: "{{ jupyterhub_singleuser_build_dir }}/Dockerfile"
+    owner: root
+    group: root
+    mode: "0644"
+  register: jupyterhub_singleuser_dockerfile
+
+- name: Render the JupyterHub single-user Python requirements
+  ansible.builtin.template:
+    src: singleuser-requirements.txt.j2
+    dest: "{{ jupyterhub_singleuser_build_dir }}/requirements.txt"
+    owner: root
+    group: root
+    mode: "0644"
+  register: jupyterhub_singleuser_requirements
+
+- name: Ensure the JupyterHub hub base image is cached locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if docker image inspect "{{ jupyterhub_hub_base_image }}" >/dev/null 2>&1; then
+      exit 0
+    fi
+    timeout "{{ jupyterhub_base_image_pull_timeout_seconds }}" \
+      docker pull "{{ jupyterhub_hub_base_image }}" || true
+    docker image inspect "{{ jupyterhub_hub_base_image }}" >/dev/null 2>&1
+  args:
+    chdir: "{{ jupyterhub_site_dir }}"
+    executable: /bin/bash
+  register: jupyterhub_hub_base_image_cache
+  changed_when: >-
+    'Downloaded newer image' in (jupyterhub_hub_base_image_cache.stdout | default(''))
+    or 'Pull complete' in (jupyterhub_hub_base_image_cache.stdout | default(''))
+    or 'Status: Downloaded newer image' in (jupyterhub_hub_base_image_cache.stdout | default(''))
+  retries: 5
+  delay: 10
+  until: jupyterhub_hub_base_image_cache.rc == 0
+
+- name: Ensure the JupyterHub single-user base image is cached locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if docker image inspect "{{ jupyterhub_singleuser_base_image }}" >/dev/null 2>&1; then
+      exit 0
+    fi
+    timeout "{{ jupyterhub_base_image_pull_timeout_seconds }}" \
+      docker pull "{{ jupyterhub_singleuser_base_image }}" || true
+    docker image inspect "{{ jupyterhub_singleuser_base_image }}" >/dev/null 2>&1
+  args:
+    chdir: "{{ jupyterhub_site_dir }}"
+    executable: /bin/bash
+  register: jupyterhub_singleuser_base_image_cache
+  changed_when: >-
+    'Downloaded newer image' in (jupyterhub_singleuser_base_image_cache.stdout | default(''))
+    or 'Pull complete' in (jupyterhub_singleuser_base_image_cache.stdout | default(''))
+    or 'Status: Downloaded newer image' in (jupyterhub_singleuser_base_image_cache.stdout | default(''))
+  retries: 5
+  delay: 10
+  until: jupyterhub_singleuser_base_image_cache.rc == 0
+
+- name: Build the JupyterHub hub image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - build
+      - --network
+      - host
+      - --pull=false
+      - -t
+      - "{{ jupyterhub_hub_image_name }}:latest"
+      - "{{ jupyterhub_hub_build_dir }}"
+  args:
+    chdir: "{{ jupyterhub_site_dir }}"
+  environment:
+    DOCKER_BUILDKIT: "0"
+    COMPOSE_DOCKER_CLI_BUILD: "0"
+  register: jupyterhub_hub_build
+  changed_when: >-
+    'writing image' in (jupyterhub_hub_build.stdout | lower)
+    or 'writing image' in (jupyterhub_hub_build.stderr | lower)
+    or 'naming to' in (jupyterhub_hub_build.stdout | lower)
+    or 'naming to' in (jupyterhub_hub_build.stderr | lower)
+    or 'exporting to image' in (jupyterhub_hub_build.stdout | lower)
+    or 'successfully built' in (jupyterhub_hub_build.stdout | lower)
+    or 'successfully tagged' in (jupyterhub_hub_build.stdout | lower)
+  retries: 3
+  delay: 10
+  until: jupyterhub_hub_build.rc == 0
+
+- name: Build the JupyterHub single-user image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - build
+      - --network
+      - host
+      - --pull=false
+      - -t
+      - "{{ jupyterhub_singleuser_image_name }}:latest"
+      - "{{ jupyterhub_singleuser_build_dir }}"
+  args:
+    chdir: "{{ jupyterhub_site_dir }}"
+  environment:
+    DOCKER_BUILDKIT: "0"
+    COMPOSE_DOCKER_CLI_BUILD: "0"
+  register: jupyterhub_singleuser_build
+  changed_when: >-
+    'writing image' in (jupyterhub_singleuser_build.stdout | lower)
+    or 'writing image' in (jupyterhub_singleuser_build.stderr | lower)
+    or 'naming to' in (jupyterhub_singleuser_build.stdout | lower)
+    or 'naming to' in (jupyterhub_singleuser_build.stderr | lower)
+    or 'exporting to image' in (jupyterhub_singleuser_build.stdout | lower)
+    or 'successfully built' in (jupyterhub_singleuser_build.stdout | lower)
+    or 'successfully tagged' in (jupyterhub_singleuser_build.stdout | lower)
+  retries: 3
+  delay: 10
+  until: jupyterhub_singleuser_build.rc == 0
+
+- name: Pull the JupyterHub compose-managed images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ jupyterhub_compose_file }}"
+      - pull
+      - openbao-agent
+      - minio
+  args:
+    chdir: "{{ jupyterhub_site_dir }}"
+  register: jupyterhub_pull
+  changed_when: >-
+    'Pulling' in jupyterhub_pull.stdout
+    or 'Downloaded newer image' in jupyterhub_pull.stdout
+    or 'Pull complete' in jupyterhub_pull.stdout
+
+- name: Check whether the Docker nat chain exists before JupyterHub startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: jupyterhub_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing before JupyterHub startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: jupyterhub_docker_nat_chain.rc != 0
+
+- name: Ensure Docker bridge networking chains are present before JupyterHub startup
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: true
+  when: jupyterhub_docker_nat_chain.rc != 0
+
+- name: Assert Docker nat chain is present before JupyterHub startup
+  ansible.builtin.assert:
+    that:
+      - jupyterhub_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_verify.rc | default(1)) == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; JupyterHub published ports will fail."
+
+- name: Check whether the JupyterHub local port is already published
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ jupyterhub_internal_port }}"
+    delay: 0
+    timeout: 1
+  register: jupyterhub_local_port_probe
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the current JupyterHub local health endpoint is healthy before startup
+  ansible.builtin.uri:
+    url: "{{ jupyterhub_internal_base_url }}/hub/health"
+    method: GET
+    status_code: 200
+  register: jupyterhub_health_probe
+  changed_when: false
+  failed_when: false
+
+- name: Record whether the JupyterHub startup needs a force recreate
+  ansible.builtin.set_fact:
+    jupyterhub_force_recreate: >-
+      {{
+        jupyterhub_docker_nat_chain.rc != 0
+        or (jupyterhub_env_template.changed | default(false))
+        or (jupyterhub_config_template.changed | default(false))
+        or (jupyterhub_compose_template.changed | default(false))
+        or (jupyterhub_hub_dockerfile.changed | default(false))
+        or (jupyterhub_hub_requirements.changed | default(false))
+        or (jupyterhub_singleuser_dockerfile.changed | default(false))
+        or (jupyterhub_singleuser_requirements.changed | default(false))
+        or (jupyterhub_hub_build.changed | default(false))
+        or (jupyterhub_singleuser_build.changed | default(false))
+        or (jupyterhub_pull.changed | default(false))
+        or (jupyterhub_local_port_probe.failed | default(false))
+        or (jupyterhub_health_probe.status | default(0)) != 200
+      }}
+
+- name: Force-recreate the JupyterHub runtime stack after Docker networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ jupyterhub_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+      - --force-recreate
+  args:
+    chdir: "{{ jupyterhub_site_dir }}"
+  register: jupyterhub_force_recreate_up
+  changed_when: >-
+    'Creating' in jupyterhub_force_recreate_up.stdout
+    or 'Recreating' in jupyterhub_force_recreate_up.stdout
+    or 'Starting' in jupyterhub_force_recreate_up.stdout
+  failed_when: false
+  retries: 3
+  delay: 5
+  until: jupyterhub_force_recreate_up.rc == 0
+  when: jupyterhub_force_recreate
+
+- name: Assert the JupyterHub force-recreate succeeded
+  ansible.builtin.assert:
+    that:
+      - jupyterhub_force_recreate_up.rc == 0
+    fail_msg: "{{ jupyterhub_force_recreate_up.stderr | default(jupyterhub_force_recreate_up.msg | default('jupyterhub compose force-recreate failed')) }}"
+  when: jupyterhub_force_recreate
+
+- name: Start the JupyterHub runtime stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ jupyterhub_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ jupyterhub_site_dir }}"
+  register: jupyterhub_start_up
+  changed_when: >-
+    'Creating' in jupyterhub_start_up.stdout
+    or 'Recreating' in jupyterhub_start_up.stdout
+    or 'Starting' in jupyterhub_start_up.stdout
+  when: not jupyterhub_force_recreate
+
+- name: Assert the JupyterHub runtime stack started successfully
+  ansible.builtin.assert:
+    that:
+      - jupyterhub_start_up.rc == 0
+    fail_msg: "{{ jupyterhub_start_up.stderr | default(jupyterhub_start_up.msg | default('jupyterhub compose up failed')) }}"
+  when: not jupyterhub_force_recreate
+
+- name: Wait for the JupyterHub runtime listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ jupyterhub_internal_port }}"
+    delay: 0
+    timeout: 240
+
+- name: Wait for the JupyterHub local health endpoint
+  ansible.builtin.uri:
+    url: "{{ jupyterhub_internal_base_url }}/hub/health"
+    method: GET
+    status_code: 200
+  register: jupyterhub_local_health_wait
+  retries: 48
+  delay: 5
+  until: jupyterhub_local_health_wait.status == 200
+  changed_when: false
+
+- name: Verify the JupyterHub runtime
+  ansible.builtin.import_tasks: verify.yml

@@ -1,0 +1,316 @@
+......F.FFF.                                                             [100%]
+=================================== FAILURES ===================================
+_________ test_runtime_tasks_require_oidc_secret_and_database_password _________
+
+    def test_runtime_tasks_require_oidc_secret_and_database_password() -> None:
+>       tasks = load_tasks()
+                ^^^^^^^^^^^^
+
+tests/test_gitea_runtime_role.py:87:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_gitea_runtime_role.py:17: in load_tasks
+    return yaml.safe_load(ROLE_TASKS.read_text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/__init__.py:125: in safe_load
+    return load(stream, SafeLoader)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/__init__.py:81: in load
+    return loader.get_single_data()
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/constructor.py:49: in get_single_data
+    node = self.get_single_node()
+           ^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:36: in get_single_node
+    document = self.compose_document()
+               ^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:55: in compose_document
+    node = self.compose_node(None, None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:82: in compose_node
+    node = self.compose_sequence_node(anchor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:111: in compose_sequence_node
+    node.value.append(self.compose_node(node, index))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:84: in compose_node
+    node = self.compose_mapping_node(anchor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:127: in compose_mapping_node
+    while not self.check_event(MappingEndEvent):
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/parser.py:98: in check_event
+    self.current_event = self.state()
+                         ^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/parser.py:428: in parse_block_mapping_key
+    if self.check_token(KeyToken):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/scanner.py:115: in check_token
+    while self.need_more_tokens():
+          ^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/scanner.py:152: in need_more_tokens
+    self.stale_possible_simple_keys()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <yaml.loader.SafeLoader object at 0x1084c2490>
+
+    def stale_possible_simple_keys(self):
+        # Remove entries that are no longer possible simple keys. According to
+        # the YAML specification, simple keys
+        # - should be limited to a single line,
+        # - should be no longer than 1024 characters.
+        # Disabling this procedure will allow simple keys of any length and
+        # height (may cause problems if indentation is broken though).
+        for level in list(self.possible_simple_keys):
+            key = self.possible_simple_keys[level]
+            if key.line != self.line  \
+                    or self.index-key.index > 1024:
+                if key.required:
+>                   raise ScannerError("while scanning a simple key", key.mark,
+                            "could not find expected ':'", self.get_mark())
+E                   yaml.scanner.ScannerError: while scanning a simple key
+E                     in "<unicode string>", line 462, column 1:
+E                       import json
+E                       ^
+E                   could not find expected ':'
+E                     in "<unicode string>", line 463, column 1:
+E                       import sys
+E                       ^
+
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/scanner.py:291: ScannerError
+______________ test_gitea_waits_on_the_published_service_address _______________
+
+    def test_gitea_waits_on_the_published_service_address() -> None:
+>       tasks = load_tasks()
+                ^^^^^^^^^^^^
+
+tests/test_gitea_runtime_role.py:109:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_gitea_runtime_role.py:17: in load_tasks
+    return yaml.safe_load(ROLE_TASKS.read_text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/__init__.py:125: in safe_load
+    return load(stream, SafeLoader)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/__init__.py:81: in load
+    return loader.get_single_data()
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/constructor.py:49: in get_single_data
+    node = self.get_single_node()
+           ^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:36: in get_single_node
+    document = self.compose_document()
+               ^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:55: in compose_document
+    node = self.compose_node(None, None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:82: in compose_node
+    node = self.compose_sequence_node(anchor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:111: in compose_sequence_node
+    node.value.append(self.compose_node(node, index))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:84: in compose_node
+    node = self.compose_mapping_node(anchor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:127: in compose_mapping_node
+    while not self.check_event(MappingEndEvent):
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/parser.py:98: in check_event
+    self.current_event = self.state()
+                         ^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/parser.py:428: in parse_block_mapping_key
+    if self.check_token(KeyToken):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/scanner.py:115: in check_token
+    while self.need_more_tokens():
+          ^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/scanner.py:152: in need_more_tokens
+    self.stale_possible_simple_keys()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <yaml.loader.SafeLoader object at 0x1087182d0>
+
+    def stale_possible_simple_keys(self):
+        # Remove entries that are no longer possible simple keys. According to
+        # the YAML specification, simple keys
+        # - should be limited to a single line,
+        # - should be no longer than 1024 characters.
+        # Disabling this procedure will allow simple keys of any length and
+        # height (may cause problems if indentation is broken though).
+        for level in list(self.possible_simple_keys):
+            key = self.possible_simple_keys[level]
+            if key.line != self.line  \
+                    or self.index-key.index > 1024:
+                if key.required:
+>                   raise ScannerError("while scanning a simple key", key.mark,
+                            "could not find expected ':'", self.get_mark())
+E                   yaml.scanner.ScannerError: while scanning a simple key
+E                     in "<unicode string>", line 462, column 1:
+E                       import json
+E                       ^
+E                   could not find expected ':'
+E                     in "<unicode string>", line 463, column 1:
+E                       import sys
+E                       ^
+
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/scanner.py:291: ScannerError
+_________ test_gitea_waits_for_internal_keycloak_oidc_before_bootstrap _________
+
+    def test_gitea_waits_for_internal_keycloak_oidc_before_bootstrap() -> None:
+>       tasks = load_tasks()
+                ^^^^^^^^^^^^
+
+tests/test_gitea_runtime_role.py:115:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_gitea_runtime_role.py:17: in load_tasks
+    return yaml.safe_load(ROLE_TASKS.read_text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/__init__.py:125: in safe_load
+    return load(stream, SafeLoader)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/__init__.py:81: in load
+    return loader.get_single_data()
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/constructor.py:49: in get_single_data
+    node = self.get_single_node()
+           ^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:36: in get_single_node
+    document = self.compose_document()
+               ^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:55: in compose_document
+    node = self.compose_node(None, None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:82: in compose_node
+    node = self.compose_sequence_node(anchor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:111: in compose_sequence_node
+    node.value.append(self.compose_node(node, index))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:84: in compose_node
+    node = self.compose_mapping_node(anchor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:127: in compose_mapping_node
+    while not self.check_event(MappingEndEvent):
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/parser.py:98: in check_event
+    self.current_event = self.state()
+                         ^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/parser.py:428: in parse_block_mapping_key
+    if self.check_token(KeyToken):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/scanner.py:115: in check_token
+    while self.need_more_tokens():
+          ^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/scanner.py:152: in need_more_tokens
+    self.stale_possible_simple_keys()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <yaml.loader.SafeLoader object at 0x1084c3c50>
+
+    def stale_possible_simple_keys(self):
+        # Remove entries that are no longer possible simple keys. According to
+        # the YAML specification, simple keys
+        # - should be limited to a single line,
+        # - should be no longer than 1024 characters.
+        # Disabling this procedure will allow simple keys of any length and
+        # height (may cause problems if indentation is broken though).
+        for level in list(self.possible_simple_keys):
+            key = self.possible_simple_keys[level]
+            if key.line != self.line  \
+                    or self.index-key.index > 1024:
+                if key.required:
+>                   raise ScannerError("while scanning a simple key", key.mark,
+                            "could not find expected ':'", self.get_mark())
+E                   yaml.scanner.ScannerError: while scanning a simple key
+E                     in "<unicode string>", line 462, column 1:
+E                       import json
+E                       ^
+E                   could not find expected ':'
+E                     in "<unicode string>", line 463, column 1:
+E                       import sys
+E                       ^
+
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/scanner.py:291: ScannerError
+_____________ test_gitea_runtime_recovers_stale_docker_networking ______________
+
+    def test_gitea_runtime_recovers_stale_docker_networking() -> None:
+>       tasks = load_tasks()
+                ^^^^^^^^^^^^
+
+tests/test_gitea_runtime_role.py:127:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_gitea_runtime_role.py:17: in load_tasks
+    return yaml.safe_load(ROLE_TASKS.read_text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/__init__.py:125: in safe_load
+    return load(stream, SafeLoader)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/__init__.py:81: in load
+    return loader.get_single_data()
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/constructor.py:49: in get_single_data
+    node = self.get_single_node()
+           ^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:36: in get_single_node
+    document = self.compose_document()
+               ^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:55: in compose_document
+    node = self.compose_node(None, None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:82: in compose_node
+    node = self.compose_sequence_node(anchor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:111: in compose_sequence_node
+    node.value.append(self.compose_node(node, index))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:84: in compose_node
+    node = self.compose_mapping_node(anchor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/composer.py:127: in compose_mapping_node
+    while not self.check_event(MappingEndEvent):
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/parser.py:98: in check_event
+    self.current_event = self.state()
+                         ^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/parser.py:428: in parse_block_mapping_key
+    if self.check_token(KeyToken):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/scanner.py:115: in check_token
+    while self.need_more_tokens():
+          ^^^^^^^^^^^^^^^^^^^^^^^
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/scanner.py:152: in need_more_tokens
+    self.stale_possible_simple_keys()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <yaml.loader.SafeLoader object at 0x108718cd0>
+
+    def stale_possible_simple_keys(self):
+        # Remove entries that are no longer possible simple keys. According to
+        # the YAML specification, simple keys
+        # - should be limited to a single line,
+        # - should be no longer than 1024 characters.
+        # Disabling this procedure will allow simple keys of any length and
+        # height (may cause problems if indentation is broken though).
+        for level in list(self.possible_simple_keys):
+            key = self.possible_simple_keys[level]
+            if key.line != self.line  \
+                    or self.index-key.index > 1024:
+                if key.required:
+>                   raise ScannerError("while scanning a simple key", key.mark,
+                            "could not find expected ':'", self.get_mark())
+E                   yaml.scanner.ScannerError: while scanning a simple key
+E                     in "<unicode string>", line 462, column 1:
+E                       import json
+E                       ^
+E                   could not find expected ':'
+E                     in "<unicode string>", line 463, column 1:
+E                       import sys
+E                       ^
+
+/Users/live/.cache/uv/archive-v0/CCZR4x0fhRZC5PA2qxYpj/lib/python3.13/site-packages/yaml/scanner.py:291: ScannerError
+=========================== short test summary info ============================
+FAILED tests/test_gitea_runtime_role.py::test_runtime_tasks_require_oidc_secret_and_database_password
+FAILED tests/test_gitea_runtime_role.py::test_gitea_waits_on_the_published_service_address
+FAILED tests/test_gitea_runtime_role.py::test_gitea_waits_for_internal_keycloak_oidc_before_bootstrap
+FAILED tests/test_gitea_runtime_role.py::test_gitea_runtime_recovers_stale_docker_networking
+4 failed, 8 passed in 0.34s

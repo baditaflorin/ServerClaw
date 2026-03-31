@@ -1,0 +1,34 @@
+# Purpose: Define the repo-built Tesseract OCR runtime paths, build inputs, service topology, and verification fixture.
+# Use case: Load when converging ADR 0286 so the private OCR runtime can be built, published, and verified consistently.
+# Inputs: Generated service topology for `tesseract_ocr`, repo-managed service sources, and optional role overrides.
+# Outputs: Default variables consumed by the tesseract_ocr_runtime role tasks and templates.
+# Idempotency: Fully idempotent; defaults describe desired values only.
+# Dependencies: ADR 0165 metadata standard, ADR 0286, and the tesseract_ocr_runtime role.
+---
+tesseract_ocr_runtime_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('tesseract_ocr') }}"
+tesseract_ocr_runtime_site_dir: /opt/tesseract-ocr
+tesseract_ocr_runtime_service_dir: "{{ tesseract_ocr_runtime_site_dir }}/app"
+tesseract_ocr_runtime_compose_file: "{{ tesseract_ocr_runtime_site_dir }}/docker-compose.yml"
+tesseract_ocr_runtime_dockerfile: "{{ tesseract_ocr_runtime_service_dir }}/Dockerfile"
+tesseract_ocr_runtime_requirements_file: "{{ tesseract_ocr_runtime_service_dir }}/requirements.txt"
+tesseract_ocr_runtime_service_script: "{{ tesseract_ocr_runtime_service_dir }}/tesseract_ocr_service.py"
+tesseract_ocr_runtime_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"
+tesseract_ocr_runtime_container_name: tesseract-ocr
+tesseract_ocr_runtime_image_name: lv3/tesseract-ocr
+tesseract_ocr_runtime_base_image: python:3.12-slim-bookworm
+tesseract_ocr_runtime_container_port: 8000
+tesseract_ocr_runtime_port: "{{ tesseract_ocr_runtime_service_topology.ports.internal }}"
+tesseract_ocr_runtime_internal_base_url: "{{ tesseract_ocr_runtime_service_topology.urls.internal }}"
+tesseract_ocr_runtime_local_base_url: "http://127.0.0.1:{{ tesseract_ocr_runtime_port }}"
+tesseract_ocr_runtime_bind_host: 0.0.0.0
+tesseract_ocr_runtime_default_language: eng
+tesseract_ocr_runtime_language_packages:
+  - eng
+tesseract_ocr_runtime_max_pages: 20
+tesseract_ocr_runtime_render_dpi: 200
+tesseract_ocr_runtime_verify_filename: ocr-ok.png
+tesseract_ocr_runtime_service_sources:
+  - src: "{{ tesseract_ocr_runtime_repo_root }}/scripts/tesseract_ocr_service.py"
+    dest: "{{ tesseract_ocr_runtime_service_script }}"
+  - src: "{{ tesseract_ocr_runtime_repo_root }}/requirements/tesseract-ocr.txt"
+    dest: "{{ tesseract_ocr_runtime_requirements_file }}"

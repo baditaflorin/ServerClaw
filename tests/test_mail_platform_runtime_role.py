@@ -49,6 +49,13 @@ def test_control_plane_lane_points_at_private_submission_relay() -> None:
     assert submission["endpoint"] == "10.10.10.20:1587"
 
 
+def test_defaults_resolve_mail_gateway_otlp_endpoint_from_canonical_host_topology() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    assert defaults["mail_platform_gateway_trace_otlp_endpoint"] == (
+        "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('grafana', 'otlp_http') }}"
+    )
+
+
 def test_mail_platform_runtime_verifies_plaintext_private_submission_auth() -> None:
     tasks = yaml.safe_load(TASKS_PATH.read_text())
     verify_task = next(
@@ -107,12 +114,66 @@ def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rota
         for task in rotate_tasks
         if task.get("name") == "Force-recreate the mail platform runtime with rotated secret material after Docker networking recovery"
     )
+    network_flag = next(
+        task
+        for task in tasks
+        if task.get("name") == "Flag stale mail platform compose-network failures during startup"
+    )
+    network_reset = next(
+        task
+        for task in tasks
+        if task.get("name") == "Reset stale mail platform compose resources before retrying startup"
+    )
+    network_cleanup = next(
+        task
+        for task in tasks
+        if task.get("name") == "Remove the stale mail-platform compose network before retrying startup"
+    )
+    network_retry = next(
+        task
+        for task in tasks
+        if task.get("name") == "Retry mail platform stack startup after compose-network recovery"
+    )
+    rotate_network_flag = next(
+        task
+        for task in rotate_tasks
+        if task.get("name") == "Flag stale mail platform compose-network failures during rotation"
+    )
+    rotate_network_reset = next(
+        task
+        for task in rotate_tasks
+        if task.get("name") == "Reset stale mail platform compose resources before retrying rotation"
+    )
+    rotate_network_cleanup = next(
+        task
+        for task in rotate_tasks
+        if task.get("name") == "Remove the stale mail-platform compose network before retrying rotation"
+    )
+    rotate_network_retry = next(
+        task
+        for task in rotate_tasks
+        if task.get("name") == "Retry mail platform rotation after compose-network recovery"
+    )
     assert nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
     assert nat_restore["ansible.builtin.service"]["name"] == "docker"
     assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
+    assert force_recreate["failed_when"] is False
+    assert "failed to create endpoint" in network_flag["ansible.builtin.set_fact"]["mail_platform_docker_network_missing"]
+    assert network_reset["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
+    assert "{{ mail_platform_docker_network_name }}" in network_cleanup["ansible.builtin.shell"]
+    assert network_cleanup["args"]["executable"] == "/bin/bash"
+    assert network_retry["ansible.builtin.command"]["argv"][-2:] == ["--force-recreate", "--remove-orphans"]
     assert rotate_nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
     assert rotate_nat_restore["ansible.builtin.service"]["name"] == "docker"
-    assert "--force-recreate" in rotate_force_recreate["ansible.builtin.command"]["argv"]
+    assert "--force-recreate" in rotate_force_recreate["ansible.builtin.shell"]
+    assert rotate_force_recreate["failed_when"] is False
+    assert "failed to create endpoint" in rotate_network_flag["ansible.builtin.set_fact"][
+        "mail_platform_rotation_docker_network_missing"
+    ]
+    assert rotate_network_reset["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
+    assert "{{ mail_platform_docker_network_name }}" in rotate_network_cleanup["ansible.builtin.shell"]
+    assert rotate_network_cleanup["args"]["executable"] == "/bin/bash"
+    assert rotate_network_retry["ansible.builtin.command"]["argv"][-2:] == ["stalwart", "mail-gateway"]
 
 
 def test_mail_platform_runtime_force_recreates_when_runtime_inputs_change() -> None:
@@ -128,3 +189,17 @@ def test_mail_platform_runtime_force_recreates_when_runtime_inputs_change() -> N
     assert "mail_platform_gateway_profiles.changed" in expression
     assert "mail_platform_compose.changed" in expression
     assert "mail_platform_gateway_build.changed" in expression
+
+
+def test_mail_platform_runtime_stages_openbao_env_template_locally_before_helper_include() -> None:
+    tasks_text = TASKS_PATH.read_text()
+    assert "Create a controller-local staging path for the mail platform OpenBao agent runtime env template" in tasks_text
+    assert "mail_platform_openbao_agent_template_local" in tasks_text
+    assert "Resolve the mail gateway OTLP endpoint before delegating the OpenBao env template render" in tasks_text
+    assert "mail_platform_gateway_trace_otlp_endpoint_resolved" in tasks_text
+    assert "mail-gateway.env.ctmpl.j2" in tasks_text
+    assert "common_openbao_compose_env_agent_template_local_file" in tasks_text
+    assert 'common_openbao_compose_env_agent_template_local_file: "{{ mail_platform_openbao_agent_template_local.path }}"' in tasks_text
+    assert "Remove the controller-local mail platform OpenBao agent runtime env template staging file" in tasks_text
+    assert "common_openbao_compose_env_agent_template_content" not in tasks_text
+    assert "common_openbao_compose_env_agent_template_src: mail-gateway.env.ctmpl.j2" not in tasks_text

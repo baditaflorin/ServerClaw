@@ -1,20 +1,23 @@
 schema_version: 1.0.0
-repo_version: 0.177.52
-platform_version: 0.130.42
+repo_version: 0.177.111
+platform_version: 0.130.73
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
-    monitoring: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
+    monitoring: 2026-03-28-adr-0250-log-queryability-canary-live-apply
+    nats_jetstream: 2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply
     realtime: 2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply
     capacity_model: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
     capability_contracts: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
     world_state_materializer: 2026-03-27-adr-0113-world-state-materializer-mainline-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
-    public_edge_publication: 2026-03-28-adr-0021-shared-edge-certificate-repair-mainline-live-apply
+    public_edge_publication: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
-    api_gateway: 2026-03-28-adr-0209-use-case-services-live-apply
+    api_gateway: 2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply
+    artifact_cache_plane: 2026-03-30-adr-0296-dedicated-artifact-cache-vm-mainline-live-apply
+    docker_publication: 2026-03-30-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     dozzle: 2026-03-26-adr-0150-dozzle-live-apply
     gitea: 2026-03-26-adr-0143-gitea-live-apply
@@ -24,14 +27,16 @@ live_apply_evidence:
     uptime_kuma: 2026-03-22-adr-0027-uptime-kuma-live-apply
     build_telemetry: 2026-03-22-adr-0028-build-telemetry-live-apply
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
+    backup_coverage: 2026-03-29-adr-0271-backup-coverage-ledger-mainline-live-apply
     guest_network_policy: 2026-03-22-adr-0067-guest-network-policy-live-apply
     runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
     mail_platform: 2026-03-24-keycloak-password-reset-mail-live-apply
     step_ca: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
-    openbao: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
-    vaultwarden: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
+    openbao: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+    vaultwarden: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply
     certificate_lifecycle: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
-    windmill: 2026-03-28-adr-0209-use-case-services-live-apply
+    windmill: 2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply
+    woodpecker: 2026-03-30-adr-0287-woodpecker-mainline-live-apply
     self_correcting_automation_loops: 2026-03-28-adr-0204-self-correcting-automation-loops-live-apply
     budgeted_workflow_scheduler: 2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply
     observation_to_action_closure_loop: 2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply
@@ -46,32 +51,34 @@ live_apply_evidence:
     config_merge: 2026-03-26-adr-0158-config-merge-live-apply
     control_plane_recovery: 2026-03-28-adr-0231-local-secret-delivery-live-apply
     control_metadata_witness: 2026-03-27-adr-0181-control-metadata-witness-live-apply
-    local_search_and_indexing_fabric: 2026-03-26-adr-0121-search-indexing-fabric-live-apply
+    local_search_and_indexing_fabric: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
     platform_event_taxonomy: 2026-03-26-adr-0124-platform-event-taxonomy-live-apply
     netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
-    keycloak: 2026-03-26-adr-0171-fault-injection-live-apply
-    n8n: 2026-03-26-adr-0151-n8n-live-apply
+    keycloak: 2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply
+    n8n: 2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply
     platform_context: 2026-03-28-adr-0198-semantic-rag-mainline-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
+    openfga: 2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply
     open_webui: 2026-03-25-adr-0145-open-webui-ollama-connector-live-apply
-    remote_build_gateway: 2026-03-26-adr-0156-agent-session-workspace-isolation-live-apply
+    remote_build_gateway: 2026-03-29-adr-0265-immutable-validation-snapshots-mainline-live-apply
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
     security_posture_reporting: 2026-03-26-adr-0102-security-posture-live-apply
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     semaphore: 2026-03-25-adr-0149-semaphore-live-apply
     searxng: 2026-03-26-adr-0148-searxng-live-apply
-    ops_portal: 2026-03-28-adr-0209-use-case-services-live-apply
+    ops_portal: 2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply
     ollama: 2026-03-27-adr-0176-inventory-sharding-mainline-live-apply
-    operator_access: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+    operator_access: 2026-03-28-adr-0238-operator-grid-live-apply
     preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
     staging_environment: 2026-03-27-adr-0183-staging-live-apply
     immutable_guest_replacement: 2026-03-27-adr-0191-immutable-guest-replacement-live-apply
     capacity_classes: 2026-03-27-adr-0192-capacity-classes-live-apply
     excalidraw: 2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply
     failure_domain_policy: 2026-03-27-adr-0184-failure-domain-labels-live-apply
-    coolify: 2026-03-28-adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply
-    coolify_apps: 2026-03-28-adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply
+    flagsmith: 2026-03-30-adr-0288-flagsmith-mainline-live-apply
+    coolify: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
+    coolify_apps: 2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply
     outline: 2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply
     network_impairment_matrix: 2026-03-27-adr-0189-network-impairment-matrix-live-apply
     plane: 2026-03-28-adr-0193-plane-mainline-live-apply
@@ -97,9 +104,42 @@ live_apply_evidence:
     gitea_actions_runners: 2026-03-28-adr-0229-gitea-actions-runners-live-apply
     bounded_command_execution: 2026-03-28-adr-0227-bounded-command-execution-mainline-live-apply
     policy_validation: 2026-03-28-adr-0230-policy-decisions-live-apply
-    promotion_pipeline: 2026-03-28-adr-0230-policy-decisions-live-apply
+    promotion_pipeline: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
     server_resident_operations: 2026-03-28-adr-0224-server-resident-operations-default-control-live-apply
-    host_control_loops: 2026-03-28-adr-0226-host-control-loops-live-apply
+    host_control_loops: 2026-03-28-adr-0226-host-control-loops-mainline-live-apply
+    signed_release_bundles: 2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply
+    log_queryability_canary: 2026-03-28-adr-0250-log-queryability-canary-live-apply
+    operator_access_guided_onboarding: 2026-03-28-adr-0242-guided-human-onboarding-live-apply
+    runtime_state_semantics: 2026-03-28-adr-0246-runtime-state-semantics-live-apply
+    docs_portal: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
+    harbor: 2026-03-29-adr-0201-harbor-mainline-live-apply
+    ops_portal_visualizations: 2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply
+    nomad_scheduler: 2026-03-29-adr-0232-nomad-mainline-live-apply
+    serverclaw: 2026-03-30-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply
+    serverclaw_memory: 2026-03-29-adr-0263-serverclaw-memory-substrate-mainline-live-apply
+    route_dns_assertion_ledger: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
+    session_logout_authority: 2026-03-29-adr-0248-session-logout-authority-mainline-live-apply
+    restore_verification: 2026-03-29-adr-0272-restore-readiness-mainline-live-apply
+    public_endpoint_admission_control: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
+    https_tls_assurance: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
+    validation_gate: 2026-03-30-adr-0267-gate-bypass-waivers-mainline-live-apply
+    validation_runner_contracts: 2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply
+    matrix_synapse: 2026-03-30-adr-0256-mautrix-bridges-mainline-live-apply
+    stage_smoke_suites: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+    gotenberg: 2026-03-30-adr-0278-gotenberg-mainline-live-apply
+    nextcloud: 2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply
+    browser_runner: 2026-03-30-adr-0261-playwright-browser-runners-live-apply
+    mailpit: 2026-03-30-adr-0282-mailpit-mainline-live-apply
+    plausible_analytics: 2026-03-30-adr-0283-plausible-analytics-mainline-live-apply
+    changedetection: 2026-03-30-adr-0280-changedetection-mainline-live-apply
+    tika: 2026-03-30-adr-0275-apache-tika-live-apply
+    artifact_cache_vm: 2026-03-30-adr-0296-dedicated-artifact-cache-vm-mainline-live-apply
+    repo_deploy_base_image_cache: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
+    vulnerability_budget_gate: 2026-03-30-adr-0269-vulnerability-budget-gates-mainline-live-apply
+    tesseract_ocr: 2026-03-30-adr-0286-tesseract-ocr-live-apply
+    directus: 2026-03-30-adr-0289-directus-mainline-live-apply
+    temporal: 2026-03-30-adr-0293-temporal-mainline-live-apply
+    jupyterhub: 2026-03-30-adr-0291-jupyterhub-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -397,6 +437,7 @@ desired_state:
     edge_vm: 10.10.10.10
     tls_termination: nginx_edge
     published_hostnames:
+      - lv3.org
       - apps.lv3.org
       - api.lv3.org
       - build.lv3.org
@@ -405,6 +446,7 @@ desired_state:
       - docker.lv3.org
       - docs.lv3.org
       - grafana.lv3.org
+      - mail.lv3.org
       - nginx.lv3.org
       - ops.lv3.org
       - proxmox.lv3.org
@@ -414,7 +456,7 @@ desired_state:
       - wiki.lv3.org
 
 observed_state:
-  checked_at: 2026-03-28
+  checked_at: 2026-03-30
   access:
     ssh_bootstrap_key_working: true
     host_ops_user_working: true
@@ -535,7 +577,7 @@ observed_state:
   dns:
     zone: lv3.org
     root_a: 65.108.75.123
-    root_aaaa_present: true
+    root_aaaa_present: false
     root_aaaa_matches_current_host_ipv6: false
     created_a_subdomains:
       - mail.lv3.org
@@ -547,6 +589,7 @@ observed_state:
       - uptime.lv3.org
       - sso.lv3.org
       - database.lv3.org
+      - vault.lv3.org
   guests:
     template:
       vmid: 9000
@@ -593,6 +636,7 @@ observed_state:
     grafana_version: 12.4.1
     influxdb_running: true
     loki_running: true
+    loki_canary_running: true
     prometheus_running: true
     tempo_running: true
     alloy_log_shipping_active: true
@@ -613,6 +657,9 @@ observed_state:
       - uid: lv3-mail-platform
         title: LV3 Mail Platform
         panels: 14
+      - uid: lv3-log-canary-overview
+        title: LV3 Log Canary
+        panels: 11
       - uid: lv3-vm-nginx-lv3
         title: LV3 nginx-lv3 Detail
         panels: 12
@@ -629,6 +676,8 @@ observed_state:
         title: LV3 postgres-lv3 Detail
         panels: 8
     grafana_dashboards_provisioned: true
+    log_queryability_canary_verified: true
+    log_queryability_canary_selector: '{name="loki-canary",stream="stdout"}'
     influxdb_internal_url: http://10.10.10.40:8086
     proxmox_metric_server_id: influxdb-http
     proxmox_metrics_flow_verified: true
@@ -937,11 +986,13 @@ observed_state:
   public_publication:
     edge_configured: true
     edge_tls_certificate_present: true
+    apex_domain_live: true
     apps_domain_live: true
     api_domain_live: true
     coolify_domain_live: true
     docs_domain_live: true
     grafana_domain_live: true
+    mail_domain_live: true
     ops_domain_live: true
     sso_domain_live: true
     status_domain_live: true
@@ -950,6 +1001,7 @@ observed_state:
     security_headers_audit_passed: true
     security_headers_audited_at: 2026-03-25T06:15:03Z
     published_hostnames:
+      - lv3.org
       - apps.lv3.org
       - api.lv3.org
       - build.lv3.org
@@ -958,6 +1010,7 @@ observed_state:
       - docker.lv3.org
       - docs.lv3.org
       - grafana.lv3.org
+      - mail.lv3.org
       - nginx.lv3.org
       - ops.lv3.org
       - proxmox.lv3.org
@@ -971,7 +1024,7 @@ observed_state:
     guest_firewall_enabled: true
     tailscale_proxy_host: 100.64.0.1:5432
     dns_name: database.lv3.org
-    dns_resolves_to_tailscale_ip: false
+    dns_resolves_to_tailscale_ip: true
     public_ipv4_reachable: false
   backups:
     configured: true
@@ -1005,8 +1058,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.52
+    current: 0.177.111
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.42
+    current: 0.130.73
     meaning: intended platform release for the actual server configuration

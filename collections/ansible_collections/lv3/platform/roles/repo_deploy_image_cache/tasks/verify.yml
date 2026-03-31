@@ -1,0 +1,31 @@
+---
+# Purpose: Verify the guest-local warm receipt matches the approved plan and that the refresh timer is active.
+- name: Verify the repo deploy image cache receipt is fresh
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ repo_deploy_image_cache_script_path }}"
+      - verify
+      - --plan-file
+      - "{{ repo_deploy_image_cache_plan_file }}"
+      - --receipt-file
+      - "{{ repo_deploy_image_cache_receipt_file }}"
+      - --required
+      - --max-age-seconds
+      - "{{ repo_deploy_image_cache_max_age_seconds | string }}"
+  changed_when: false
+
+- name: Verify the repo deploy image cache timer is active
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - is-active
+      - "{{ repo_deploy_image_cache_timer_name }}"
+  register: repo_deploy_image_cache_timer_state
+  changed_when: false
+
+- name: Assert the repo deploy image cache timer is active
+  ansible.builtin.assert:
+    that:
+      - repo_deploy_image_cache_timer_state.stdout | trim == "active"
+    fail_msg: "The repo deploy image cache timer is not active."

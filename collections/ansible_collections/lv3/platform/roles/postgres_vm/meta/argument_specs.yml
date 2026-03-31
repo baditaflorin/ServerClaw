@@ -29,6 +29,21 @@ argument_specs:
         required: true
         description:
           - Administrative PostgreSQL role that must exist after convergence.
+      postgres_vm_max_connections:
+        type: int
+        required: true
+        description:
+          - Maximum client connection budget exposed by PostgreSQL.
+      postgres_vm_superuser_reserved_connections:
+        type: int
+        required: true
+        description:
+          - Portion of the connection budget reserved for PostgreSQL superusers.
+      postgres_vm_reserved_connections:
+        type: int
+        required: true
+        description:
+          - Portion of the connection budget reserved for roles granted pg_use_reserved_connections.
       postgres_vm_listen_addresses:
         type: list
         elements: str

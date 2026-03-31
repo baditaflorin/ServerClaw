@@ -3,6 +3,29 @@
   "schema_version": "1.0.0",
   "services": [
     {
+      "id": "browser_runner",
+      "name": "Browser Runner",
+      "upstream": "http://10.10.10.20:8096",
+      "gateway_prefix": "/v1/browser-runner",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 60,
+      "healthcheck_path": "/healthz",
+      "openapi_path": "/openapi.json"
+    },
+    {
+      "id": "changedetection",
+      "name": "Changedetection.io",
+      "upstream": "http://10.10.10.20:5000",
+      "gateway_prefix": "/v1/changedetection",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 60,
+      "healthcheck_path": "/"
+    },
+    {
       "id": "dozzle",
       "name": "Dozzle",
       "upstream": "http://10.10.10.20:8089",
@@ -25,6 +48,17 @@
       "healthcheck_path": "/api/healthz"
     },
     {
+      "id": "gotenberg",
+      "name": "Gotenberg",
+      "upstream": "http://10.10.10.20:3007",
+      "gateway_prefix": "/v1/gotenberg",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 60,
+      "healthcheck_path": "/health"
+    },
+    {
       "id": "grafana",
       "name": "Grafana",
       "upstream": "http://10.10.10.40:3000",
@@ -34,6 +68,17 @@
       "strip_prefix": true,
       "timeout_seconds": 30,
       "healthcheck_path": "/api/health"
+    },
+    {
+      "id": "harbor",
+      "name": "Harbor",
+      "upstream": "http://10.10.10.20:8095",
+      "gateway_prefix": "/v1/harbor",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 60,
+      "healthcheck_path": "/api/v2.0/ping"
     },
     {
       "id": "keycloak",
@@ -69,6 +114,17 @@
       "healthcheck_path": "/health"
     },
     {
+      "id": "matrix_synapse",
+      "name": "Matrix Synapse",
+      "upstream": "http://10.10.10.20:8008",
+      "gateway_prefix": "/v1/matrix-synapse",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/_matrix/client/versions"
+    },
+    {
       "id": "mattermost",
       "name": "Mattermost",
       "upstream": "http://10.10.10.20:8065",
@@ -102,17 +158,6 @@
       "healthcheck_path": "/health"
     },
     {
-      "id": "plane",
-      "name": "Plane",
-      "upstream": "http://10.10.10.20:8093",
-      "gateway_prefix": "/v1/plane",
-      "auth": "keycloak_jwt",
-      "required_role": "platform-operator",
-      "strip_prefix": true,
-      "timeout_seconds": 30,
-      "healthcheck_path": "/"
-    },
-    {
       "id": "openbao",
       "name": "OpenBao",
       "upstream": "https://10.10.10.20:8200",
@@ -122,6 +167,17 @@
       "strip_prefix": true,
       "timeout_seconds": 30,
       "healthcheck_path": "/v1/sys/health"
+    },
+    {
+      "id": "openfga",
+      "name": "OpenFGA",
+      "upstream": "http://10.10.10.20:8098",
+      "gateway_prefix": "/v1/openfga",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/healthz"
     },
     {
       "id": "ops_portal",
@@ -144,6 +200,28 @@
       "strip_prefix": true,
       "timeout_seconds": 30,
       "healthcheck_path": "/_health"
+    },
+    {
+      "id": "jupyterhub",
+      "name": "JupyterHub",
+      "upstream": "http://10.10.10.20:8097",
+      "gateway_prefix": "/v1/jupyterhub",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 60,
+      "healthcheck_path": "/hub/health"
+    },
+    {
+      "id": "plane",
+      "name": "Plane",
+      "upstream": "http://10.10.10.20:8093",
+      "gateway_prefix": "/v1/plane",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/"
     },
     {
       "id": "platform_context_api",
@@ -169,6 +247,17 @@
       "healthcheck_path": "/api/status"
     },
     {
+      "id": "realtime",
+      "name": "Realtime Metrics",
+      "upstream": "http://10.10.10.40:19999",
+      "gateway_prefix": "/v1/realtime",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-read",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/v1/info"
+    },
+    {
       "id": "semaphore",
       "name": "Semaphore",
       "upstream": "http://10.10.10.20:3004",
@@ -180,15 +269,15 @@
       "healthcheck_path": "/api/ping"
     },
     {
-      "id": "realtime",
-      "name": "Realtime Metrics",
-      "upstream": "http://10.10.10.40:19999",
-      "gateway_prefix": "/v1/realtime",
+      "id": "serverclaw",
+      "name": "ServerClaw",
+      "upstream": "http://10.10.10.70:8096",
+      "gateway_prefix": "/v1/serverclaw",
       "auth": "keycloak_jwt",
       "required_role": "platform-read",
       "strip_prefix": true,
       "timeout_seconds": 30,
-      "healthcheck_path": "/api/v1/info"
+      "healthcheck_path": "/"
     },
     {
       "id": "uptime_kuma",
@@ -222,6 +311,17 @@
       "strip_prefix": true,
       "timeout_seconds": 30,
       "healthcheck_path": "/api/version"
+    },
+    {
+      "id": "woodpecker",
+      "name": "Woodpecker",
+      "upstream": "http://10.10.10.20:8102",
+      "gateway_prefix": "/v1/woodpecker",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/healthz"
     }
   ]
 }

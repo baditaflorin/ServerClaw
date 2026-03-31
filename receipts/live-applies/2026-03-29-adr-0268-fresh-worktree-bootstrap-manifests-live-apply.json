@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_by": "codex",
+  "source_commit": "4afedf213338b2cc40a61c3f2c1a4a43c3df748c",
+  "repo_version_context": "0.177.79",
+  "platform_version_context": "0.130.54",
+  "workflow_id": "adr-0268-fresh-worktree-bootstrap-manifests-live-apply",
+  "adr": "0268",
+  "summary": "Implemented ADR 0268 so isolated worktrees declare bootstrap manifests, automatically rebuild the shared edge portal artifacts before governed runs continue, and fail early on missing controller-local inputs; validated the generic `live-apply-service` wrapper from a clean worktree and replayed the production `configure-edge-publication` path successfully on `nginx-lv3`.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "nginx.lv3.org",
+      "address": "https://nginx.lv3.org"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "docs.lv3.org",
+      "address": "https://docs.lv3.org"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "changelog.lv3.org",
+      "address": "https://changelog.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0268 regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with-requirements requirements/docs.txt python -m pytest -q tests/test_docs_site.py tests/test_preflight_controller_local.py tests/test_correction_loops.py` returned `17 passed in 66.50s` after the bootstrap, docs-portal, and nested-shell regressions were fixed."
+    },
+    {
+      "check": "Catalog and repository validation",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python scripts/workflow_catalog.py --validate`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `./scripts/validate_repo.sh agent-standards`, and `git diff --check` all passed on the committed ADR 0268 branch implementation."
+    },
+    {
+      "check": "Fresh-worktree bootstrap recovery through the generic service wrapper",
+      "result": "pass",
+      "observed": "After removing `build/ops-portal/`, `build/changelog-portal/`, and `build/docs-portal/`, `make live-apply-service service=public-edge env=staging EXTRA_ARGS=--syntax-check` rebuilt all three directories through the new bootstrap manifests and reached the next `check-canonical-truth` gate. That gate stopped the wrapper on this branch because the protected `README.md` integration summary is intentionally deferred until merge-to-main."
+    },
+    {
+      "check": "Branch-local production edge replay",
+      "result": "pass",
+      "observed": "`make configure-edge-publication env=production` completed successfully after the repaired bootstrap path, with `nginx-lv3 ok=61 changed=4 failed=0` and the shared static portal directories republished through the NGINX edge."
+    },
+    {
+      "check": "Public edge verification after replay",
+      "result": "pass",
+      "observed": "`curl -I --max-time 20 https://grafana.lv3.org` returned `HTTP/2 302` to `/login`, `curl -I --max-time 20 https://nginx.lv3.org` returned `HTTP/2 200`, and both `https://docs.lv3.org` and `https://changelog.lv3.org` returned `HTTP/2 302` to the expected `/oauth2/sign_in` entrypoint with the shared `x-robots-tag: noindex, nofollow` headers intact."
+    }
+  ],
+  "evidence_refs": [
+    ".config-locations.yaml",
+    "Makefile",
+    "config/command-catalog.json",
+    "config/correction-loops.json",
+    "config/workflow-catalog.json",
+    "config/worktree-bootstrap-manifests.json",
+    "docs/adr/0094-developer-portal-and-documentation-site.md",
+    "docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md",
+    "docs/runbooks/controller-local-secrets-and-preflight.md",
+    "docs/runbooks/playbook-execution-model.md",
+    "docs/release-process.md",
+    "docs/workstreams/ws-0268-live-apply.md",
+    "mkdocs.yml",
+    "receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json",
+    "scripts/generate_docs_site.py",
+    "scripts/preflight_controller_local.py",
+    "scripts/workflow_catalog.py",
+    "scripts/worktree_bootstrap.py",
+    "tests/test_docs_site.py",
+    "tests/test_preflight_controller_local.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This receipt captures the isolated-worktree proof for ADR 0268. The follow-up merge-to-main step still needs to update the protected integration files `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml`, then replay the merged-main production path and record the canonical mainline receipt.",
+    "The branch-local docs support fix is part of the ADR 0268 implementation scope because strict MkDocs warnings in `docs/adr/0094-developer-portal-and-documentation-site.md` prevented the declared `make docs` bootstrap artifact from materializing successfully in a fresh worktree.",
+    "The nested bootstrap shell now preserves the caller environment instead of spawning `/bin/bash -lc`, which prevents `python3` from falling back to the Xcode 3.9 interpreter during recursive `make generate-changelog-portal` runs."
+  ]
+}

@@ -1,0 +1,76 @@
+# Purpose: Declare the argument contract for the private Tesseract OCR runtime role.
+# Use case: Run during syntax and argument validation before converging ADR 0286 on docker-runtime-lv3.
+# Inputs: tesseract_ocr_runtime_* variables required by the role.
+# Outputs: Machine-readable argument specs for the tesseract_ocr_runtime role.
+# Idempotency: Fully idempotent; metadata only validates role inputs.
+# Dependencies: ADR 0165 metadata standard, ADR 0286, and the tesseract_ocr_runtime role tasks.
+---
+argument_specs:
+  main:
+    short_description: Build and converge the private Tesseract OCR runtime.
+    options:
+      tesseract_ocr_runtime_service_topology:
+        type: dict
+        required: true
+      tesseract_ocr_runtime_site_dir:
+        type: path
+        required: true
+      tesseract_ocr_runtime_service_dir:
+        type: path
+        required: true
+      tesseract_ocr_runtime_compose_file:
+        type: path
+        required: true
+      tesseract_ocr_runtime_dockerfile:
+        type: path
+        required: true
+      tesseract_ocr_runtime_requirements_file:
+        type: path
+        required: true
+      tesseract_ocr_runtime_service_script:
+        type: path
+        required: true
+      tesseract_ocr_runtime_container_name:
+        type: str
+        required: true
+      tesseract_ocr_runtime_image_name:
+        type: str
+        required: true
+      tesseract_ocr_runtime_base_image:
+        type: str
+        required: true
+      tesseract_ocr_runtime_container_port:
+        type: int
+        required: true
+      tesseract_ocr_runtime_port:
+        type: int
+        required: true
+      tesseract_ocr_runtime_internal_base_url:
+        type: str
+        required: true
+      tesseract_ocr_runtime_local_base_url:
+        type: str
+        required: true
+      tesseract_ocr_runtime_bind_host:
+        type: str
+        required: true
+      tesseract_ocr_runtime_default_language:
+        type: str
+        required: true
+      tesseract_ocr_runtime_language_packages:
+        type: list
+        elements: str
+        required: true
+      tesseract_ocr_runtime_max_pages:
+        type: int
+        required: true
+      tesseract_ocr_runtime_render_dpi:
+        type: int
+        required: true
+      tesseract_ocr_runtime_verify_filename:
+        type: str
+        required: true
+      tesseract_ocr_runtime_service_sources:
+        type: list
+        elements: dict
+        required: true

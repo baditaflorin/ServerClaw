@@ -149,6 +149,36 @@ def test_build_docker_command_mounts_declared_caches(
     assert "TRIVY_CACHE_DIR=/var/lib/trivy" in command
 
 
+def test_build_docker_command_forwards_validation_context(tmp_path: Path, monkeypatch) -> None:
+    parallel_check = load_parallel_check_module()
+    monkeypatch.setenv("LV3_SNAPSHOT_BRANCH", "codex/adr-0264-live-apply")
+    monkeypatch.setenv("LV3_DOCKER_WORKSPACE_PATH", "/host/gitea-runner/workspace")
+    monkeypatch.setenv("LV3_VALIDATION_BASE_REF", "origin/main")
+    monkeypatch.setenv(
+        "LV3_VALIDATION_CHANGED_FILES_JSON",
+        '["config/validation-gate.json", "scripts/run_gate.py"]',
+    )
+
+    check = parallel_check.CheckDefinition(
+        label="workstream-surfaces",
+        image="registry.lv3.org/check-runner/python:3.12.10",
+        command="./scripts/validate_repo.sh workstream-surfaces",
+        working_dir="/workspace",
+        timeout_seconds=30,
+    )
+
+    command = parallel_check.build_docker_command(check, tmp_path, "docker")
+
+    assert "/host/gitea-runner/workspace:/workspace" in command
+    assert "LV3_DOCKER_WORKSPACE_PATH=/host/gitea-runner/workspace" in command
+    assert "LV3_SNAPSHOT_BRANCH=codex/adr-0264-live-apply" in command
+    assert "LV3_VALIDATION_BASE_REF=origin/main" in command
+    assert (
+        'LV3_VALIDATION_CHANGED_FILES_JSON=["config/validation-gate.json", "scripts/run_gate.py"]'
+        in command
+    )
+
+
 def test_run_checks_returns_non_zero_when_any_check_fails(tmp_path: Path) -> None:
     parallel_check = load_parallel_check_module()
     fake_docker = tmp_path / "fake-docker"
@@ -175,6 +205,22 @@ def test_run_checks_returns_non_zero_when_any_check_fails(tmp_path: Path) -> Non
 
     assert [result.status for result in results] == ["passed", "failed"]
     assert results[1].returncode == 1
+
+
+def test_execute_check_marks_missing_docker_as_runner_unavailable(tmp_path: Path) -> None:
+    parallel_check = load_parallel_check_module()
+    check = parallel_check.CheckDefinition(
+        label="schema-validation",
+        image="example/schema:latest",
+        command="true",
+        working_dir="/workspace",
+        timeout_seconds=30,
+    )
+
+    result = parallel_check.execute_check(check, tmp_path, str(tmp_path / "missing-docker"))
+
+    assert result.status == "runner_unavailable"
+    assert result.returncode == 127
 
 
 def test_main_supports_all_checks(tmp_path: Path, capsys) -> None:

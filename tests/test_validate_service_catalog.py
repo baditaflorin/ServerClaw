@@ -48,7 +48,86 @@ class ValidateServiceCatalogTest(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertIn("Service: api_gateway", output)
         self.assertIn("Runbook: docs/runbooks/configure-api-gateway.md", output)
+        self.assertIn("smoke suites (inherited):", output)
         self.assertIn("Degradation modes:", output)
+
+    def test_n8n_service_entry_describes_serverclaw_connector_role(self) -> None:
+        catalog = service_catalog.load_service_catalog()
+        n8n = next(item for item in catalog["services"] if item["id"] == "n8n")
+
+        self.assertIn("ServerClaw", n8n["description"])
+        self.assertIn("connector-fabric", n8n["tags"])
+
+    def test_invalid_explicit_smoke_suite_requires_matching_tokens(self) -> None:
+        catalog = {
+            "$schema": "docs/schema/service-capability-catalog.schema.json",
+            "schema_version": "1.0.0",
+            "services": [
+                {
+                    "id": "grafana",
+                    "name": "Grafana",
+                    "description": "Metrics dashboards and alerting for the platform.",
+                    "category": "observability",
+                    "lifecycle_status": "active",
+                    "vm": "monitoring-lv3",
+                    "vmid": 140,
+                    "internal_url": "http://10.10.10.40:3000",
+                    "public_url": "https://grafana.lv3.org",
+                    "subdomain": "grafana.lv3.org",
+                    "exposure": "edge-published",
+                    "environments": {
+                        "production": {
+                            "status": "active",
+                            "url": "https://grafana.lv3.org",
+                            "subdomain": "grafana.lv3.org",
+                            "smoke_suites": [
+                                {
+                                    "id": "broken-suite",
+                                    "name": "Broken suite",
+                                    "description": "Missing both receipt keywords and verification tokens."
+                                }
+                            ]
+                        }
+                    },
+                    "uptime_monitor_name": "Grafana Public",
+                    "health_probe_id": "grafana",
+                    "adr": "0011",
+                    "runbook": "docs/runbooks/monitoring-stack.md",
+                    "tags": ["dashboards", "metrics", "monitoring"],
+                }
+            ],
+        }
+
+        with self.assertRaisesRegex(ValueError, "must declare at least one receipt keyword or verification check token"):
+            service_catalog.validate_service_catalog(catalog)
+
+    def test_stage_ready_environment_requires_smoke_suite_ids(self) -> None:
+        catalog = {
+            "$schema": "docs/schema/service-capability-catalog.schema.json",
+            "schema_version": "1.0.0",
+            "services": [
+                {
+                    "id": "demo",
+                    "name": "Demo",
+                    "description": "Demo service.",
+                    "category": "automation",
+                    "lifecycle_status": "active",
+                    "vm": "docker-runtime-lv3",
+                    "exposure": "private-only",
+                    "internal_url": "http://10.10.10.20:9999",
+                    "environments": {
+                        "production": {
+                            "status": "active",
+                            "url": "http://10.10.10.20:9999",
+                            "stage_ready": True,
+                        }
+                    },
+                }
+            ],
+        }
+
+        with self.assertRaisesRegex(ValueError, "stage_ready requires at least one smoke suite id"):
+            service_catalog.validate_service_catalog(catalog)
 
 
 if __name__ == "__main__":

@@ -3,11 +3,12 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from platform.datetime_compat import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Callable
 
 from platform.degradation import default_state_path
+from platform.health.semantics import canonical_runtime_state, runtime_state_score
 from platform.ledger import LedgerReader
 from platform.maintenance import list_active_windows_best_effort
 from platform.slo import build_slo_status_entries
@@ -283,14 +284,7 @@ def load_degradation_state(repo_root: Path) -> dict[str, list[dict[str, Any]]]:
 
 
 def _score_probe_status(status: str) -> tuple[float, str]:
-    normalized = status.strip().lower()
-    if normalized in {"ok", "healthy"}:
-        return 1.0, "healthy probe result"
-    if normalized in {"degraded", "warn", "warning"}:
-        return 0.5, "service probe is degraded"
-    if normalized in {"down", "failed", "error", "unhealthy", "unreachable"}:
-        return 0.0, "service probe is failing"
-    return 0.8, "probe state is unknown; treated as cautionary"
+    return runtime_state_score(status)
 
 
 def _service_health_map(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -312,7 +306,7 @@ def _maintenance_active(service_id: str, windows: list[dict[str, Any]]) -> bool:
 
 def _health_probe_signal(service_id: str, health_map: dict[str, dict[str, Any]]) -> Signal:
     item = health_map.get(service_id, {})
-    status = str(item.get("status", "unknown"))
+    status = canonical_runtime_state(item)
     score, reason = _score_probe_status(status)
     detail = (
         f"{reason}; HTTP {item['http_status']}" if isinstance(item.get("http_status"), int) else reason
@@ -576,9 +570,13 @@ def compute_health_entries(
             score = sum(signal.score * signal.weight for signal in signals)
             score = max(0.0, min(1.0, score))
             status = _status_for_score(score)
+            if signals[0].value == "startup":
+                status = "degraded"
+                safe_to_act = False
+            else:
+                safe_to_act = score >= 0.7 and not any(signal.score == 0.0 for signal in signals)
             if any(signal.score == 0.0 for signal in signals) and status == "healthy":
                 status = "degraded"
-            safe_to_act = score >= 0.7 and not any(signal.score == 0.0 for signal in signals)
             if active_degradations.get(service_id):
                 status = "degraded"
                 safe_to_act = False

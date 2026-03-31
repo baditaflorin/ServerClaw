@@ -46,6 +46,7 @@ from platform.logging import get_logger, set_context
 from platform.policy.engine import evaluate_promotion_gate_policy
 from slo_tracking import build_slo_status_entries, default_prometheus_url, find_budget_breaches
 from standby_capacity import evaluate_service_standby
+from vulnerability_budget import evaluate_service_vulnerability_gate
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -210,6 +211,85 @@ def build_stage_health_summary(stage_receipt: dict[str, Any]) -> dict[str, Any]:
     return {"passed": all_passed, "checks": checks}
 
 
+def service_environment_binding(service: dict[str, Any], environment: str) -> dict[str, Any] | None:
+    environments = service.get("environments")
+    if not isinstance(environments, dict):
+        return None
+    binding = environments.get(environment)
+    if not isinstance(binding, dict):
+        return None
+    return binding
+
+
+def build_stage_smoke_gate(
+    *,
+    service_id: str,
+    service: dict[str, Any],
+    environment: str,
+    stage_receipt: dict[str, Any],
+) -> dict[str, Any]:
+    binding = service_environment_binding(service, environment) or {}
+    declared_suite_ids = [
+        str(item).strip()
+        for item in binding.get("smoke_suite_ids", [])
+        if isinstance(item, str) and item.strip()
+    ]
+    enforced = bool(binding.get("stage_ready")) and bool(declared_suite_ids)
+
+    observed_suites: list[dict[str, Any]] = []
+    for index, item in enumerate(stage_receipt.get("smoke_suites", [])):
+        item = require_mapping(item, f"stage_receipt.smoke_suites[{index}]")
+        observed_suites.append(
+            {
+                "suite_id": require_str(item.get("suite_id"), f"stage_receipt.smoke_suites[{index}].suite_id"),
+                "service_id": require_str(item.get("service_id"), f"stage_receipt.smoke_suites[{index}].service_id"),
+                "environment": require_str(
+                    item.get("environment"),
+                    f"stage_receipt.smoke_suites[{index}].environment",
+                ),
+                "status": require_str(item.get("status"), f"stage_receipt.smoke_suites[{index}].status"),
+                "executed_at": require_str(
+                    item.get("executed_at"),
+                    f"stage_receipt.smoke_suites[{index}].executed_at",
+                ),
+                "summary": require_str(item.get("summary"), f"stage_receipt.smoke_suites[{index}].summary"),
+            }
+        )
+        report_ref = item.get("report_ref")
+        if isinstance(report_ref, str) and report_ref.strip():
+            observed_suites[-1]["report_ref"] = report_ref
+
+    observed_suite_index = {item["suite_id"]: item for item in observed_suites}
+    missing_suite_ids = sorted(set(declared_suite_ids) - set(observed_suite_index))
+    failed_suite_ids = sorted(
+        suite_id
+        for suite_id in declared_suite_ids
+        if suite_id in observed_suite_index and observed_suite_index[suite_id]["status"] != "passed"
+    )
+    passed_suite_ids = sorted(
+        suite_id
+        for suite_id in declared_suite_ids
+        if suite_id in observed_suite_index and observed_suite_index[suite_id]["status"] == "passed"
+    )
+
+    reasons: list[str] = []
+    if enforced and missing_suite_ids:
+        reasons.append("staging smoke suites missing from staged receipt: " + ", ".join(missing_suite_ids))
+    if enforced and failed_suite_ids:
+        reasons.append("staging smoke suites did not pass: " + ", ".join(failed_suite_ids))
+
+    return {
+        "enforced": enforced,
+        "passed": not reasons,
+        "required_suite_ids": declared_suite_ids,
+        "missing_suite_ids": missing_suite_ids,
+        "failed_suite_ids": failed_suite_ids,
+        "passed_suite_ids": passed_suite_ids,
+        "observed_suites": observed_suites,
+        "reasons": reasons,
+    }
+
+
 def recorded_at_for_receipt(receipt: dict[str, Any]) -> dt.datetime:
     if isinstance(receipt.get("recorded_at"), str) and receipt["recorded_at"].strip():
         return iso_to_datetime(receipt["recorded_at"])
@@ -308,6 +388,13 @@ def check_promotion_gate(
         reasons.append("staging receipt verification is not clean")
 
     service = service_index[service_id]
+    smoke_gate = build_stage_smoke_gate(
+        service_id=service_id,
+        service=service,
+        environment="staging",
+        stage_receipt=stage_receipt,
+    )
+    reasons.extend(smoke_gate["reasons"])
     aliases = service_aliases(service_id, service)
     blocking_findings = [
         finding
@@ -317,6 +404,7 @@ def check_promotion_gate(
     if blocking_findings:
         reasons.append(f"open critical findings exist for service '{service_id}'")
 
+    vulnerability_gate = evaluate_service_vulnerability_gate(service_id)
     capacity_model = load_capacity_model()
     capacity_approved, capacity_reasons = check_capacity_gate(capacity_model)
     standby_gate = evaluate_service_standby(service_id, catalog={"services": list(service_index.values())}, model=capacity_model)
@@ -329,7 +417,18 @@ def check_promotion_gate(
             "age_hours": age.total_seconds() / 3600.0,
             "verification_passed": stage_health["passed"],
         },
+        "smoke_gate": {
+            "enforced": smoke_gate["enforced"],
+            "required_suite_ids": smoke_gate["required_suite_ids"],
+            "missing_suite_ids": smoke_gate["missing_suite_ids"],
+            "failed_suite_ids": smoke_gate["failed_suite_ids"],
+            "reasons": smoke_gate["reasons"],
+        },
         "blocking_findings": {"count": len(blocking_findings)},
+        "vulnerability_gate": {
+            "approved": vulnerability_gate["approved"],
+            "reasons": vulnerability_gate["reasons"],
+        },
         "capacity_gate": {
             "approved": capacity_approved,
             "reasons": capacity_reasons,
@@ -355,8 +454,20 @@ def check_promotion_gate(
         "playbook": service_id,
         "staging_receipt": str(receipt_relative_path(staging_receipt_path)),
         "staging_health_check": stage_health,
+        "stage_smoke_gate": {
+            "enforced": smoke_gate["enforced"],
+            "passed": smoke_gate["passed"],
+            "required_suite_ids": smoke_gate["required_suite_ids"],
+            "missing_suite_ids": smoke_gate["missing_suite_ids"],
+            "failed_suite_ids": smoke_gate["failed_suite_ids"],
+            "passed_suite_ids": smoke_gate["passed_suite_ids"],
+            "observed_suites": smoke_gate["observed_suites"],
+            "reasons": smoke_gate["reasons"],
+        },
+        "smoke_gate": smoke_gate,
         "approval": approval,
         "blocking_findings": blocking_findings,
+        "vulnerability_gate": vulnerability_gate,
         "capacity_gate": {
             "approved": capacity_approved,
             "reasons": capacity_reasons,
@@ -379,6 +490,7 @@ def build_live_apply_receipt(
     evidence_refs: list[str],
     notes: list[str],
     environment: str,
+    smoke_suites: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "schema_version": "1.0.0",
@@ -398,6 +510,8 @@ def build_live_apply_receipt(
         "evidence_refs": evidence_refs,
         "notes": notes,
     }
+    if smoke_suites:
+        payload["smoke_suites"] = smoke_suites
     return payload
 
 
@@ -427,8 +541,9 @@ def build_promotion_receipt(
     gate_actor_id: str,
     prod_receipt: str | None,
     notes: list[str],
+    stage_smoke_gate: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    return {
+    payload = {
         "schema_version": "1.0.0",
         "promotion_id": promotion_id,
         "branch": branch,
@@ -444,6 +559,9 @@ def build_promotion_receipt(
         "ts": utc_now_iso(),
         "notes": notes,
     }
+    if stage_smoke_gate is not None:
+        payload["stage_smoke_gate"] = stage_smoke_gate
+    return payload
 
 
 def validate_promotion_receipt(receipt: dict[str, Any], path: Path) -> None:
@@ -485,6 +603,32 @@ def validate_promotion_receipt(receipt: dict[str, Any], path: Path) -> None:
         require_str(item.get("result"), f"{path.name}.staging_health_check.checks[{index}].result")
         require_bool(item.get("passed"), f"{path.name}.staging_health_check.checks[{index}].passed")
         require_str(item.get("observed"), f"{path.name}.staging_health_check.checks[{index}].observed")
+
+    stage_smoke_gate = receipt.get("stage_smoke_gate")
+    if stage_smoke_gate is not None:
+        stage_smoke_gate = require_mapping(stage_smoke_gate, f"{path.name}.stage_smoke_gate")
+        require_bool(stage_smoke_gate.get("enforced"), f"{path.name}.stage_smoke_gate.enforced")
+        require_bool(stage_smoke_gate.get("passed"), f"{path.name}.stage_smoke_gate.passed")
+        for field in ("required_suite_ids", "missing_suite_ids", "failed_suite_ids", "passed_suite_ids", "reasons"):
+            values = require_list(stage_smoke_gate.get(field, []), f"{path.name}.stage_smoke_gate.{field}")
+            for index, value in enumerate(values):
+                require_str(value, f"{path.name}.stage_smoke_gate.{field}[{index}]")
+        observed_suites = require_list(
+            stage_smoke_gate.get("observed_suites", []),
+            f"{path.name}.stage_smoke_gate.observed_suites",
+        )
+        for index, item in enumerate(observed_suites):
+            item = require_mapping(item, f"{path.name}.stage_smoke_gate.observed_suites[{index}]")
+            for field in ("suite_id", "service_id", "environment", "status", "summary"):
+                require_str(
+                    item.get(field),
+                    f"{path.name}.stage_smoke_gate.observed_suites[{index}].{field}",
+                )
+            if item["status"] not in {"passed", "failed", "skipped"}:
+                raise ValueError(
+                    f"{path.name}: stage_smoke_gate.observed_suites[{index}].status must be one of "
+                    "['failed', 'passed', 'skipped']"
+                )
 
     staging_receipt_path = resolve_receipt_path(receipt["staging_receipt"])
     if not staging_receipt_path.exists():
@@ -629,7 +773,15 @@ def promote_service(
             {
                 "check": "Staging gate",
                 "result": "pass",
-                "observed": f"The staged receipt `{gate['staging_receipt']}` was recent, clean, and had no blocking critical findings.",
+                "observed": (
+                    f"The staged receipt `{gate['staging_receipt']}` was recent, clean, and "
+                    + (
+                        "its required stage smoke suites passed: "
+                        + ", ".join(gate["smoke_gate"]["passed_suite_ids"])
+                        if gate["smoke_gate"]["enforced"]
+                        else "no enforced stage smoke suites were required for this promotion."
+                    )
+                ),
             },
             {
                 "check": "Production apply",
@@ -649,6 +801,7 @@ def promote_service(
             f"Approval classes: {', '.join(approver_classes)}.",
         ],
         environment="production",
+        smoke_suites=gate["smoke_gate"]["observed_suites"] or None,
     )
     prod_receipt_path = RECEIPTS_DIR / f"{prod_receipt_id}.json"
     write_json(prod_receipt_path, prod_receipt, indent=2)
@@ -664,6 +817,7 @@ def promote_service(
         gate_actor_class="operator",
         gate_actor_id=approver_classes[0] if approver_classes else requester_class,
         prod_receipt=str(receipt_relative_path(prod_receipt_path)),
+        stage_smoke_gate=gate["smoke_gate"],
         notes=[
             "This promotion record was generated by the repo-managed ADR 0073 promotion pipeline.",
             f"Production apply command: {prod_apply['command']}.",

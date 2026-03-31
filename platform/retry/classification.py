@@ -5,9 +5,9 @@ import socket
 import ssl
 import urllib.error
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from platform.datetime_compat import UTC, datetime
 from email.utils import parsedate_to_datetime
-from enum import StrEnum
+from platform.enum_compat import StrEnum
 
 try:
     import httpx

@@ -28,7 +28,7 @@ make syntax-check-openbao
 
 1. Reuses the shared ADR 0067 guest network policy that allows `docker-runtime-lv3` to reach `postgres-lv3`, while this workflow manages PostgreSQL authentication through `pg_hba.conf`.
 2. Creates the `openbao_rotator` PostgreSQL role with the minimum privileges needed to issue dynamic read-only credentials.
-3. Starts a Compose-managed OpenBao container under `/opt/openbao` with integrated Raft storage, a loopback-published HTTP listener on `127.0.0.1:8201`, and a managed step-ca-backed TLS listener on `:8200`.
+3. Starts a Compose-managed OpenBao container under `/opt/openbao` with integrated Raft storage, a loopback-published HTTP listener on `127.0.0.1:8201`, an optional guest-IP-published private HTTP listener for bounded automation consumers such as `docker-build-lv3`, and a managed step-ca-backed TLS listener on `:8200`.
 4. Initializes and unseals OpenBao once, then mirrors the bootstrap init payload to `.local/openbao/init.json` on the controller.
 5. Enables `kv`, `transit`, `database`, `userpass`, and `approle` paths.
 6. Creates named human and machine identities:
@@ -54,6 +54,10 @@ The converge creates these controller-local files:
 
 Treat the entire `.local/openbao/` subtree as recovery material and keep it out of git.
 
+The persisted AppRole JSON artifacts now carry reusable secret IDs within their
+existing `15m` TTL so concurrent controller-side automation and parallel agent
+worktrees do not invalidate each other by consuming a shared single-use file.
+
 ## Verification
 
 Basic runtime checks:
@@ -78,6 +82,10 @@ secret_id="$(jq -r '.secret_id' /Users/live/Documents/GITHUB_PROJECTS/proxmox_fl
 token="$(curl -fsS --request POST --data "{\"role_id\":\"$role_id\",\"secret_id\":\"$secret_id\"}" http://127.0.0.1:8201/v1/auth/approle/login | jq -r '.auth.client_token')"
 curl -fsS --header "X-Vault-Token: $token" http://127.0.0.1:8201/v1/database/creds/postgres-readonly
 ```
+
+If the AppRole login starts returning `invalid role or secret ID`, the artifact
+has usually expired rather than being permanently broken. Refresh it with
+`make converge-openbao` and retry.
 
 Controller-side mTLS verification for the private OpenBao API:
 
@@ -106,17 +114,45 @@ curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local
 ## Notes
 
 - The loopback HTTP API on `127.0.0.1:8201` remains the managed automation and operator path for bootstrap, verification, and recovery-safe forwarding.
+- ADR 0297 also allows the same HTTP listener to be published on the runtime
+  guest IP when a bounded caller such as `docker-build-lv3` needs direct access.
+  Keep that publication private and rely on the guest firewall to scope it to
+  the declared automation source only.
 - The external OpenBao API on `https://100.118.189.95:8200` is private-only, published through the Proxmox host Tailscale path, and requires a valid client certificate signed by `step-ca`.
 - The current implementation seeds existing mail, monitoring, Proxmox API, Windmill, and mail-profile artifacts into OpenBao so later consumers can fetch them without reintroducing git-managed secrets.
 - Dedicated rotatable secret paths and their metadata now align with `config/secret-catalog.json`, so future scheduled evaluators can inspect bounded credential age directly in OpenBao.
 
 ## Recovery Notes From The 2026-03-26 Live Apply
 
-As of the `2026-03-27` replay, `make converge-openbao` automatically recovers the recurring Docker publish regression by rechecking the guest `DOCKER` and `DOCKER-FORWARD` chains, restarting Docker when they are missing, and recreating the named `lv3-openbao` container before `docker compose up`.
+As of the `2026-03-29` replay, `make converge-openbao` automatically recovers the recurring Docker publish regression by rechecking the guest `DOCKER` and `DOCKER-FORWARD` chains, restarting Docker when they are missing, waiting for the chain rechecks to settle after that restart, and recreating the named `lv3-openbao` container before `docker compose up`.
+
+The same replay also hardened the post-unseal verification path: after a restart-and-unseal cycle, the role now retries the controller AppRole PostgreSQL dynamic credential request for a short bounded window because OpenBao can briefly close loopback HTTP requests while the database backend resumes.
+
+That recovery path now also removes an empty detached `openbao_default` network
+when Docker has lost the endpoint attachment. If Docker still has not recreated
+those chains after the bounded recheck window, the role logs that degraded
+preflight state and still continues into `docker compose up`; the decisive guard
+is whether the runtime can actually rebind `:8200`, answer on `127.0.0.1:8201`,
+and pass the subsequent seal-status plus AppRole verification steps.
+
+As of the `2026-03-30` exact-main replay, the role also treats a first-pass
+`docker compose up` DNAT failure as recoverable automation drift: it restarts
+Docker again, removes the half-created `lv3-openbao` container plus detached
+`openbao_default` network, rechecks `DOCKER` and `DOCKER-FORWARD`, and retries
+the stack start once before surfacing a hard failure.
+
+As of the `2026-03-29` ADR 0270 replay, the shared OpenBao helpers used by
+runtime secret injection and host-native systemd credential delivery also
+recover a missing loopback `127.0.0.1:8201` publication automatically. When the
+local health probe fails with a connection-refused style outage, the helper now
+force-recreates the `openbao` service, waits for the loopback listener to
+return, and only then retries the health call. This keeps later workflows such
+as `make converge-keycloak` from failing just because the private OpenBao API
+publication drifted while the container itself still existed.
 
 If a future rerun still leaves the guest runtime broken, the failure usually presents as `docker compose up` failing to bind `:8200` with an iptables DNAT error and `docker inspect lv3-openbao` showing an empty `NetworkSettings.Networks` object.
 
-Recover the guest runtime in this order:
+If the automated cleanup still cannot recover the guest runtime, repair it in this order:
 
 1. Restart Docker on `docker-runtime-lv3`.
 2. Remove the broken `lv3-openbao` container.

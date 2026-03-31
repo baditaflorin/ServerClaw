@@ -1,0 +1,8 @@
+[Unit]
+Description=Warm approved repo-deploy base images on the Coolify deployment lane
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 {{ repo_deploy_image_cache_script_path }} warm --plan-file {{ repo_deploy_image_cache_plan_file }} --receipt-file {{ repo_deploy_image_cache_receipt_file }} --required

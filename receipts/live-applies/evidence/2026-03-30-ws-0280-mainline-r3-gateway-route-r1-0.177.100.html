@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="None" data-darkmode="false">
+
+  <head>
+    <meta charset="utf-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" >
+    <meta name="description" content="Self hosted website change detection." >
+    <meta name="robots" content="noindex">
+    <title>Change Detection</title>
+
+        <link rel="alternate" type="application/rss+xml" title="Changedetection.io » Feed" href="http://10.10.10.20:5000/rss?token=ca5d5a8e3141799a26f8acb10f9a67a9" >
+
+        <link rel="stylesheet" href="/static/styles/pure-min.css" >
+    <link rel="stylesheet" href="/static/styles/flag-icons.min.css" >
+    <link rel="stylesheet" href="/static/styles/styles.css?v=0.54.7" >
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicons/favicon-16x16.png">
+    <link rel="manifest" href="/static/favicons/site.webmanifest" crossorigin="use-credentials">
+    <link rel="mask-icon" href="/static/favicons/safari-pinned-tab.svg" color="#5bbad5">
+    <link rel="shortcut icon" href="/static/favicons/favicon.ico">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="msapplication-config" content="favicons/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+    <script>
+        const csrftoken="ImZiNGRjY2M2NGI3MmQxYzg5MDg3ZjYyMGU3MGVjYzYwMDI1NzY0Mjki.acpRpQ.tbooUKFIwRs-SZ6h4D2qlG5Sops";
+        const socketio_url="/socket.io";
+        const is_authenticated = true;
+    </script>
+    <script src="/static/js/jquery-3.6.0.min.js"></script>
+    <script src="/static/js/csrf.js" defer></script>
+    <script src="/static/js/feather-icons.min.js" defer></script>
+
+    <script src="/static/js/socket.io.min.js"></script>
+    <script src="/static/js/realtime.js" defer></script>
+
+  </head>
+
+  <body class="">
+    <div class="header">
+    <div class="pure-menu-fixed" style="width: 100%;">
+      <div class="home-menu pure-menu pure-menu-horizontal" id="nav-menu">
+
+
+          <a  id="cdio-logo" class="pure-menu-heading" href="/">
+            <strong>Change</strong>Detection.io</a>
+
+
+
+
+
+        <ul class="pure-menu-list" id="top-right-menu">
+          <!-- Collapsible menu items (hidden on mobile, shown in drawer) -->
+
+
+
+
+
+
+    <li class="pure-menu-item menu-collapsible ">
+        <a href="/tags/list" class="pure-menu-link">GROUPS</a>
+    </li>
+    <li class="pure-menu-item menu-collapsible ">
+        <a href="/settings" class="pure-menu-link">SETTINGS</a>
+    </li>
+    <li class="pure-menu-item menu-collapsible ">
+        <a href="/imports/import" class="pure-menu-link">IMPORT</a>
+    </li>
+    <li class="pure-menu-item" id="menu-pause">
+        <a href="/settings/toggle-all-paused" ><img src="/static/images/pause.svg" alt="Pause auto-queue scheduling of watches" title="Pause auto-queue scheduling of watches" class="icon icon-pause" style="opacity: 0.3"></a>
+    </li>
+    <li class="pure-menu-item " id="menu-mute">
+        <a href="/settings/toggle-all-muted" ><img src="/static/images/bell-off.svg" alt="Mute notifications" title="Mute notifications" class="icon icon-mute" style="opacity: 0.3"></a>
+    </li>
+
+    <li class="pure-menu-item menu-collapsible" id="inline-menu-extras-group">
+        <button class="toggle-button toggle-light-mode " type="button" title="Toggle Light/Dark Mode">
+            <span class="visually-hidden">Toggle light/dark mode</span>
+            <span class="icon-light">
+            <svg xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 512 256.04"><path d="M128.02 0h.18c22.03 0 42.83 5.66 61 15.6h210.38c30.89 0 59 12.65 79.38 33.04C499.35 68.99 512 97.1 512 128.02c0 30.92-12.66 59.03-33.02 79.4l-.42.38c-20.34 20.15-48.29 32.64-78.98 32.64H189.24c-18.17 9.93-38.98 15.6-61.04 15.6h-.18c-35.2 0-67.22-14.41-90.42-37.6C14.41 195.25 0 163.24 0 128.02s14.4-67.24 37.59-90.43l.91-.83C61.65 14.05 93.29 0 128.02 0zm-5.95 54.42c0-1.95.8-3.73 2.08-5 2.74-2.77 7.27-2.76 10.02-.01l.14.16a7.042 7.042 0 0 1 1.94 4.85v12.95c0 1.95-.8 3.73-2.08 5.01-2.75 2.75-7.27 2.75-10.02 0a7.084 7.084 0 0 1-2.08-5.01V54.42zm6.05 31.17c11.72 0 22.32 4.75 30 12.43 7.67 7.68 12.43 18.29 12.43 30 0 11.72-4.75 22.32-12.43 30s-18.28 12.43-30 12.43c-11.72 0-22.32-4.75-30.01-12.43-7.67-7.68-12.43-18.28-12.43-30 0-11.72 4.76-22.32 12.43-30 7.69-7.67 18.3-12.43 30.01-12.43zm-56.33-5.34a7.114 7.114 0 0 1-2.07-5.01c0-3.9 3.18-7.09 7.09-7.09 1.81 0 3.62.69 5 2.07l9.16 9.16a7.065 7.065 0 0 1 2.08 5.01c0 1.8-.7 3.62-2.08 5.01a7.057 7.057 0 0 1-5.01 2.08c-1.8 0-3.61-.7-5-2.07l-9.17-9.16zm-17.28 53.81c-1.95 0-3.73-.8-5-2.08-2.77-2.74-2.76-7.27-.01-10.01l.15-.14a7.04 7.04 0 0 1 4.86-1.94h12.94a7.082 7.082 0 0 1 7.09 7.09c0 1.95-.8 3.73-2.07 5.01a7.099 7.099 0 0 1-5.02 2.07H54.51zm25.82 50.28a7.049 7.049 0 0 1-5 2.07c-3.91 0-7.09-3.16-7.09-7.08 0-1.81.68-3.62 2.07-5.01l9.31-9.29a7.02 7.02 0 0 1 4.86-1.94 7.09 7.09 0 0 1 7.09 7.09c0 1.79-.69 3.6-2.08 4.99l-9.16 9.17zm53.82 17.29c0 1.94-.8 3.73-2.08 5-2.74 2.76-7.27 2.75-10.02 0l-.13-.15a7.033 7.033 0 0 1-1.94-4.85v-12.95c0-1.96.8-3.73 2.07-5.01 2.76-2.75 7.27-2.75 10.03 0a7.1 7.1 0 0 1 2.07 5.01v12.95zm50.28-25.83a7.055 7.055 0 0 1 2.07 5.01c0 3.89-3.18 7.09-7.08 7.09-1.81 0-3.63-.69-5.01-2.07l-9.16-9.16a7.095 7.095 0 0 1-2.07-5.02c0-3.9 3.18-7.09 7.08-7.09 1.8 0 3.61.7 5 2.08l9.17 9.16zm17.29-53.82c1.93 0 3.73.81 5 2.08 2.76 2.75 2.75 7.27 0 10.02l-.15.14a7.098 7.098 0 0 1-4.85 1.94h-12.95c-1.96 0-3.74-.8-5.01-2.08-2.76-2.75-2.76-7.27 0-10.02a7.049 7.049 0 0 1 5.01-2.08h12.95zM175.89 71.7a7.074 7.074 0 0 1 5-2.07c3.9 0 7.1 3.19 7.1 7.09 0 1.81-.69 3.62-2.07 5l-9.32 9.31a7.12 7.12 0 0 1-4.86 1.93c-3.91 0-7.09-3.18-7.09-7.09 0-1.8.7-3.61 2.08-5l9.16-9.17zm34.17-41.87c2.96 2.47 5.81 5.07 8.53 7.8 23.22 23.15 37.63 55.17 37.63 90.39s-14.42 67.23-37.6 90.42a130.2 130.2 0 0 1-8.5 7.77h189.46c26.83 0 51.24-10.91 69.02-28.5l.32-.35c17.79-17.79 28.85-42.35 28.85-69.34 0-26.99-11.06-51.55-28.85-69.35-17.77-17.8-42.33-28.84-69.34-28.84H210.06zm-82.04-14.71h.18c62.09 0 112.89 50.81 112.89 112.9 0 62.1-50.86 112.9-112.89 112.9h-.18c-62.03 0-112.9-50.8-112.9-112.9 0-62.09 50.81-112.9 112.9-112.9z"/></svg>
+          </span>
+            <span class="icon-dark">
+            <svg xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 512 262.86"><path fill-rule="nonzero" d="M316.78 16.55h-205.9c-30.5 0-58.22 12.48-78.31 32.57C12.47 69.21 0 96.93 0 127.44c0 30.5 12.47 58.22 32.57 78.31 20.09 20.1 47.81 32.57 78.31 32.57h193.25c21.54 15.43 47.9 24.54 76.26 24.54h.18c36.14 0 69.02-14.79 92.83-38.6 23.8-23.81 38.6-56.67 38.6-92.83 0-36.15-14.78-69.03-38.63-92.8C449.53 14.8 416.67 0 380.57 0h-.18c-23.02 0-44.72 6.02-63.61 16.55zm70.62 97.17.43.09c.82-3.45 2.83-6.19 6.04-8.16 3.2-1.98 6.53-2.57 10.01-1.75l.1-.43c-3.47-.82-6.2-2.83-8.17-6.03-1.98-3.22-2.57-6.55-1.75-10.01l-.43-.1c-.82 3.47-2.83 6.2-6.03 8.18-3.21 1.98-6.55 2.56-10.02 1.74l-.1.43c3.47.82 6.2 2.84 8.18 6.04 1.99 3.19 2.56 6.52 1.74 10zm36.87 16.77.53.12c1.02-4.35 3.55-7.78 7.58-10.26 4.02-2.49 8.2-3.22 12.56-2.19l.13-.53c-4.35-1.03-7.78-3.55-10.26-7.59-2.49-4.03-3.22-8.22-2.2-12.56l-.53-.12c-1.02 4.35-3.55 7.77-7.58 10.26-4.02 2.49-8.21 3.22-12.56 2.19l-.13.53c4.36 1.03 7.78 3.55 10.26 7.58 2.49 4.02 3.22 8.22 2.2 12.57zm-38.79-61.01c-15.69 7.67-26.98 23.26-28.29 41.93-1.96 27.88 19.05 52.06 46.92 54.02 13.23.93 25.64-3.32 35.22-11.02 4.75-3.82 9.66-.45 7.59 4.36-11.33 26.42-38.45 44.04-68.74 41.91-38.29-2.69-67.14-35.91-64.45-74.19C316.3 89.8 347.05 61.67 383.44 62c6.71.06 8.13 4.5 2.04 7.48zm-5.09-53.95h.18c63.75 0 115.91 52.15 115.91 115.9 0 63.75-52.23 115.91-115.91 115.91h-.18c-63.68 0-115.91-52.16-115.91-115.91s52.16-115.9 115.91-115.9z"/></svg>
+          </span>
+        </button>
+        <button class="toggle-button language-selector" type="button" title="Change Language">
+            <span class="visually-hidden">Change language</span>
+            <span class="🌐" id="language-selector-flag"></span>
+        </button>
+        <a class="github-link" href="https://github.com/dgtlmoon/changedetection.io"
+           target="_blank"
+          rel="noopener" >
+            <svg class="octicon octicon-mark-github v-align-middle"  viewbox="0 0 16 16" version="1.1" aria-hidden="true">
+    <path
+     fill-rule="evenodd"
+     d="M 8,0 C 3.58,0 0,3.58 0,8 c 0,3.54 2.29,6.53 5.47,7.59 0.4,0.07 0.55,-0.17 0.55,-0.38 0,-0.19 -0.01,-0.82 -0.01,-1.49 C 4,14.09 3.48,13.23 3.32,12.78 3.23,12.55 2.84,11.84 2.5,11.65 2.22,11.5 1.82,11.13 2.49,11.12 3.12,11.11 3.57,11.7 3.72,11.94 4.44,13.15 5.59,12.81 6.05,12.6 6.12,12.08 6.33,11.73 6.56,11.53 4.78,11.33 2.92,10.64 2.92,7.58 2.92,6.71 3.23,5.99 3.74,5.43 3.66,5.23 3.38,4.41 3.82,3.31 c 0,0 0.67,-0.21 2.2,0.82 0.64,-0.18 1.32,-0.27 2,-0.27 0.68,0 1.36,0.09 2,0.27 1.53,-1.04 2.2,-0.82 2.2,-0.82 0.44,1.1 0.16,1.92 0.08,2.12 0.51,0.56 0.82,1.27 0.82,2.15 0,3.07 -1.87,3.75 -3.65,3.95 0.29,0.25 0.54,0.73 0.54,1.48 0,1.07 -0.01,1.93 -0.01,2.2 0,0.21 0.15,0.46 0.55,0.38 A 8.013,8.013 0 0 0 16,8 C 16,3.58 12.42,0 8,0 Z"
+     id="path2" />
+</svg>
+        </a>
+    </li>
+
+
+
+
+              <li class="pure-menu-item  menu-collapsible">
+                <button class="toggle-button" id="open-search-modal" type="button" title="Search, or Use Alt+S Key">
+                  <svg version="1.1" id="search" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 122.879 119.799" enable-background="new 0 0 122.879 119.799" xml:space="preserve"><g><path d="M49.988,0h0.016v0.007C63.803,0.011,76.298,5.608,85.34,14.652c9.027,9.031,14.619,21.515,14.628,35.303h0.007v0.033v0.04 h-0.007c-0.005,5.557-0.917,10.905-2.594,15.892c-0.281,0.837-0.575,1.641-0.877,2.409v0.007c-1.446,3.66-3.315,7.12-5.547,10.307 l29.082,26.139l0.018,0.016l0.157,0.146l0.011,0.011c1.642,1.563,2.536,3.656,2.649,5.78c0.11,2.1-0.543,4.248-1.979,5.971 l-0.011,0.016l-0.175,0.203l-0.035,0.035l-0.146,0.16l-0.016,0.021c-1.565,1.642-3.654,2.534-5.78,2.646 c-2.097,0.111-4.247-0.54-5.971-1.978l-0.015-0.011l-0.204-0.175l-0.029-0.024L78.761,90.865c-0.88,0.62-1.778,1.209-2.687,1.765 c-1.233,0.755-2.51,1.466-3.813,2.115c-6.699,3.342-14.269,5.222-22.272,5.222v0.007h-0.016v-0.007 c-13.799-0.004-26.296-5.601-35.338-14.645C5.605,76.291,0.016,63.805,0.007,50.021H0v-0.033v-0.016h0.007 c0.004-13.799,5.601-26.296,14.645-35.338C23.683,5.608,36.167,0.016,49.955,0.007V0H49.988L49.988,0z M50.004,11.21v0.007h-0.016 h-0.033V11.21c-10.686,0.007-20.372,4.35-27.384,11.359C15.56,29.578,11.213,39.274,11.21,49.973h0.007v0.016v0.033H11.21 c0.007,10.686,4.347,20.367,11.359,27.381c7.009,7.012,16.705,11.359,27.403,11.361v-0.007h0.016h0.033v0.007 c10.686-0.007,20.368-4.348,27.382-11.359c7.011-7.009,11.358-16.702,11.36-27.4h-0.006v-0.016v-0.033h0.006 c-0.006-10.686-4.35-20.372-11.358-27.384C70.396,15.56,60.703,11.213,50.004,11.21L50.004,11.21z"/></g></svg>
+                </button>
+              </li>
+
+
+
+
+          <li class="pure-menu-item" id="heart-us">
+                <svg
+                   fill="#ff0000"
+                   class="bi bi-heart"
+                   preserveAspectRatio="xMidYMid meet"
+                   viewBox="0 0 16.9 16.1"
+                   id="svg-heart"
+                   xmlns="http://www.w3.org/2000/svg"
+                   >
+                  <path id="heartpath" d="M 5.338316,0.50302766 C 0.71136983,0.50647126 -3.9576371,7.2707777 8.5004254,15.503028 23.833425,5.3700277 13.220206,-2.5384409 8.6762066,1.6475589 c -0.060791,0.054322 -0.11943,0.1110064 -0.1757812,0.1699219 -0.057,-0.059 -0.1157813,-0.116875 -0.1757812,-0.171875 C 7.4724566,0.86129334 6.4060729,0.50223298 5.338316,0.50302766 Z" style="fill:var(--color-background);fill-opacity:1;stroke:#ff0000;stroke-opacity:1" />
+                </svg>
+          </li>
+          <!-- Hamburger menu button (mobile only) -->
+          <li class="pure-menu-item">
+            <button class="hamburger-menu" id="hamburger-toggle" aria-label="Toggle menu">
+              <div class="hamburger-icon">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Mobile menu drawer -->
+      <div class="mobile-menu-overlay" id="mobile-menu-overlay"></div>
+      <div class="mobile-menu-drawer" id="mobile-menu-drawer">
+        <ul class="mobile-menu-items">
+
+
+
+
+
+
+    <li class="pure-menu-item menu-collapsible ">
+        <a href="/tags/list" class="pure-menu-link">GROUPS</a>
+    </li>
+    <li class="pure-menu-item menu-collapsible ">
+        <a href="/settings" class="pure-menu-link">SETTINGS</a>
+    </li>
+    <li class="pure-menu-item menu-collapsible ">
+        <a href="/imports/import" class="pure-menu-link">IMPORT</a>
+    </li>
+    <li class="pure-menu-item" id="menu-pause">
+        <a href="/settings/toggle-all-paused" ><img src="/static/images/pause.svg" alt="Pause auto-queue scheduling of watches" title="Pause auto-queue scheduling of watches" class="icon icon-pause" style="opacity: 0.3"></a>
+    </li>
+    <li class="pure-menu-item " id="menu-mute">
+        <a href="/settings/toggle-all-muted" ><img src="/static/images/bell-off.svg" alt="Mute notifications" title="Mute notifications" class="icon icon-mute" style="opacity: 0.3"></a>
+    </li>
+
+    <li class="pure-menu-item menu-collapsible" id="inline-menu-extras-group">
+        <button class="toggle-button toggle-light-mode " type="button" title="Toggle Light/Dark Mode">
+            <span class="visually-hidden">Toggle light/dark mode</span>
+            <span class="icon-light">
+            <svg xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 512 256.04"><path d="M128.02 0h.18c22.03 0 42.83 5.66 61 15.6h210.38c30.89 0 59 12.65 79.38 33.04C499.35 68.99 512 97.1 512 128.02c0 30.92-12.66 59.03-33.02 79.4l-.42.38c-20.34 20.15-48.29 32.64-78.98 32.64H189.24c-18.17 9.93-38.98 15.6-61.04 15.6h-.18c-35.2 0-67.22-14.41-90.42-37.6C14.41 195.25 0 163.24 0 128.02s14.4-67.24 37.59-90.43l.91-.83C61.65 14.05 93.29 0 128.02 0zm-5.95 54.42c0-1.95.8-3.73 2.08-5 2.74-2.77 7.27-2.76 10.02-.01l.14.16a7.042 7.042 0 0 1 1.94 4.85v12.95c0 1.95-.8 3.73-2.08 5.01-2.75 2.75-7.27 2.75-10.02 0a7.084 7.084 0 0 1-2.08-5.01V54.42zm6.05 31.17c11.72 0 22.32 4.75 30 12.43 7.67 7.68 12.43 18.29 12.43 30 0 11.72-4.75 22.32-12.43 30s-18.28 12.43-30 12.43c-11.72 0-22.32-4.75-30.01-12.43-7.67-7.68-12.43-18.28-12.43-30 0-11.72 4.76-22.32 12.43-30 7.69-7.67 18.3-12.43 30.01-12.43zm-56.33-5.34a7.114 7.114 0 0 1-2.07-5.01c0-3.9 3.18-7.09 7.09-7.09 1.81 0 3.62.69 5 2.07l9.16 9.16a7.065 7.065 0 0 1 2.08 5.01c0 1.8-.7 3.62-2.08 5.01a7.057 7.057 0 0 1-5.01 2.08c-1.8 0-3.61-.7-5-2.07l-9.17-9.16zm-17.28 53.81c-1.95 0-3.73-.8-5-2.08-2.77-2.74-2.76-7.27-.01-10.01l.15-.14a7.04 7.04 0 0 1 4.86-1.94h12.94a7.082 7.082 0 0 1 7.09 7.09c0 1.95-.8 3.73-2.07 5.01a7.099 7.099 0 0 1-5.02 2.07H54.51zm25.82 50.28a7.049 7.049 0 0 1-5 2.07c-3.91 0-7.09-3.16-7.09-7.08 0-1.81.68-3.62 2.07-5.01l9.31-9.29a7.02 7.02 0 0 1 4.86-1.94 7.09 7.09 0 0 1 7.09 7.09c0 1.79-.69 3.6-2.08 4.99l-9.16 9.17zm53.82 17.29c0 1.94-.8 3.73-2.08 5-2.74 2.76-7.27 2.75-10.02 0l-.13-.15a7.033 7.033 0 0 1-1.94-4.85v-12.95c0-1.96.8-3.73 2.07-5.01 2.76-2.75 7.27-2.75 10.03 0a7.1 7.1 0 0 1 2.07 5.01v12.95zm50.28-25.83a7.055 7.055 0 0 1 2.07 5.01c0 3.89-3.18 7.09-7.08 7.09-1.81 0-3.63-.69-5.01-2.07l-9.16-9.16a7.095 7.095 0 0 1-2.07-5.02c0-3.9 3.18-7.09 7.08-7.09 1.8 0 3.61.7 5 2.08l9.17 9.16zm17.29-53.82c1.93 0 3.73.81 5 2.08 2.76 2.75 2.75 7.27 0 10.02l-.15.14a7.098 7.098 0 0 1-4.85 1.94h-12.95c-1.96 0-3.74-.8-5.01-2.08-2.76-2.75-2.76-7.27 0-10.02a7.049 7.049 0 0 1 5.01-2.08h12.95zM175.89 71.7a7.074 7.074 0 0 1 5-2.07c3.9 0 7.1 3.19 7.1 7.09 0 1.81-.69 3.62-2.07 5l-9.32 9.31a7.12 7.12 0 0 1-4.86 1.93c-3.91 0-7.09-3.18-7.09-7.09 0-1.8.7-3.61 2.08-5l9.16-9.17zm34.17-41.87c2.96 2.47 5.81 5.07 8.53 7.8 23.22 23.15 37.63 55.17 37.63 90.39s-14.42 67.23-37.6 90.42a130.2 130.2 0 0 1-8.5 7.77h189.46c26.83 0 51.24-10.91 69.02-28.5l.32-.35c17.79-17.79 28.85-42.35 28.85-69.34 0-26.99-11.06-51.55-28.85-69.35-17.77-17.8-42.33-28.84-69.34-28.84H210.06zm-82.04-14.71h.18c62.09 0 112.89 50.81 112.89 112.9 0 62.1-50.86 112.9-112.89 112.9h-.18c-62.03 0-112.9-50.8-112.9-112.9 0-62.09 50.81-112.9 112.9-112.9z"/></svg>
+          </span>
+            <span class="icon-dark">
+            <svg xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 512 262.86"><path fill-rule="nonzero" d="M316.78 16.55h-205.9c-30.5 0-58.22 12.48-78.31 32.57C12.47 69.21 0 96.93 0 127.44c0 30.5 12.47 58.22 32.57 78.31 20.09 20.1 47.81 32.57 78.31 32.57h193.25c21.54 15.43 47.9 24.54 76.26 24.54h.18c36.14 0 69.02-14.79 92.83-38.6 23.8-23.81 38.6-56.67 38.6-92.83 0-36.15-14.78-69.03-38.63-92.8C449.53 14.8 416.67 0 380.57 0h-.18c-23.02 0-44.72 6.02-63.61 16.55zm70.62 97.17.43.09c.82-3.45 2.83-6.19 6.04-8.16 3.2-1.98 6.53-2.57 10.01-1.75l.1-.43c-3.47-.82-6.2-2.83-8.17-6.03-1.98-3.22-2.57-6.55-1.75-10.01l-.43-.1c-.82 3.47-2.83 6.2-6.03 8.18-3.21 1.98-6.55 2.56-10.02 1.74l-.1.43c3.47.82 6.2 2.84 8.18 6.04 1.99 3.19 2.56 6.52 1.74 10zm36.87 16.77.53.12c1.02-4.35 3.55-7.78 7.58-10.26 4.02-2.49 8.2-3.22 12.56-2.19l.13-.53c-4.35-1.03-7.78-3.55-10.26-7.59-2.49-4.03-3.22-8.22-2.2-12.56l-.53-.12c-1.02 4.35-3.55 7.77-7.58 10.26-4.02 2.49-8.21 3.22-12.56 2.19l-.13.53c4.36 1.03 7.78 3.55 10.26 7.58 2.49 4.02 3.22 8.22 2.2 12.57zm-38.79-61.01c-15.69 7.67-26.98 23.26-28.29 41.93-1.96 27.88 19.05 52.06 46.92 54.02 13.23.93 25.64-3.32 35.22-11.02 4.75-3.82 9.66-.45 7.59 4.36-11.33 26.42-38.45 44.04-68.74 41.91-38.29-2.69-67.14-35.91-64.45-74.19C316.3 89.8 347.05 61.67 383.44 62c6.71.06 8.13 4.5 2.04 7.48zm-5.09-53.95h.18c63.75 0 115.91 52.15 115.91 115.9 0 63.75-52.23 115.91-115.91 115.91h-.18c-63.68 0-115.91-52.16-115.91-115.91s52.16-115.9 115.91-115.9z"/></svg>
+          </span>
+        </button>
+        <button class="toggle-button language-selector" type="button" title="Change Language">
+            <span class="visually-hidden">Change language</span>
+            <span class="🌐" id="language-selector-flag"></span>
+        </button>
+        <a class="github-link" href="https://github.com/dgtlmoon/changedetection.io"
+           target="_blank"
+          rel="noopener" >
+            <svg class="octicon octicon-mark-github v-align-middle"  viewbox="0 0 16 16" version="1.1" aria-hidden="true">
+    <path
+     fill-rule="evenodd"
+     d="M 8,0 C 3.58,0 0,3.58 0,8 c 0,3.54 2.29,6.53 5.47,7.59 0.4,0.07 0.55,-0.17 0.55,-0.38 0,-0.19 -0.01,-0.82 -0.01,-1.49 C 4,14.09 3.48,13.23 3.32,12.78 3.23,12.55 2.84,11.84 2.5,11.65 2.22,11.5 1.82,11.13 2.49,11.12 3.12,11.11 3.57,11.7 3.72,11.94 4.44,13.15 5.59,12.81 6.05,12.6 6.12,12.08 6.33,11.73 6.56,11.53 4.78,11.33 2.92,10.64 2.92,7.58 2.92,6.71 3.23,5.99 3.74,5.43 3.66,5.23 3.38,4.41 3.82,3.31 c 0,0 0.67,-0.21 2.2,0.82 0.64,-0.18 1.32,-0.27 2,-0.27 0.68,0 1.36,0.09 2,0.27 1.53,-1.04 2.2,-0.82 2.2,-0.82 0.44,1.1 0.16,1.92 0.08,2.12 0.51,0.56 0.82,1.27 0.82,2.15 0,3.07 -1.87,3.75 -3.65,3.95 0.29,0.25 0.54,0.73 0.54,1.48 0,1.07 -0.01,1.93 -0.01,2.2 0,0.21 0.15,0.46 0.55,0.38 A 8.013,8.013 0 0 0 16,8 C 16,3.58 12.42,0 8,0 Z"
+     id="path2" />
+</svg>
+        </a>
+    </li>
+
+            <li class="pure-menu-item menu-collapsible"><div>v0.54.7</div><a href="https://changedetection.io/?ref=ed131496-a3f9-43a0-aed3-64f3fba2b01d">Let us host your instance!</a><br>
+            </li>
+        </ul>
+      </div>
+      <div id="pure-menu-horizontal-spinner"></div>
+      </div>
+
+    </div>
+
+      <div class="sticky-tab" id="hosted-sticky">
+        <a href="https://changedetection.io/?ref=ed131496-a3f9-43a0-aed3-64f3fba2b01d">Let us host your instance!</a>
+      </div>
+
+
+
+      <div class="sticky-tab" id="right-sticky">v0.54.7</div>
+
+    <section class="content">
+        <div id="overlay">
+            <div class="content">
+                <h4>Try our Chrome extension</h4>
+                <p>
+                    <a id="chrome-extension-link"
+                       title="Chrome Extension - Web Page Change Detection with changedetection.io!"
+                       href="https://chromewebstore.google.com/detail/changedetectionio-website/kefcfmgmlhmankjmnbijimhofdjekbop">
+                        <img alt="Chrome store icon" src="/static/images/google-chrome-icon.png">
+                        Chrome Webstore
+                    </a>
+                </p>
+                Easily add the current web-page from your browser directly into your changedetection.io tool, more great features coming soon!
+                <h4>Changedetection.io needs your support!</h4>
+                <p>
+                    You can help us by supporting changedetection.io on these platforms;
+                </p>
+                <p>
+                <ul>
+                    <li>
+                        <a href="https://alternativeto.net/software/changedetection-io/about/" title="Web page change detection at alternativeto.net">Rate us at
+                        AlternativeTo.net</a>
+                    </li>
+                <li>
+                    <a href="https://github.com/dgtlmoon/changedetection.io" title="Web page change detection on GitHub">Star us on GitHub</a>
+                </li>
+                <li>
+                    <a rel="nofollow" href="https://twitter.com/change_det_io" title="Web page change detection on Twitter">Follow us at Twitter/X</a>
+                </li>
+                <li>
+                    <a rel="nofollow" href="https://www.g2.com/products/changedetection-io/reviews" title="Web page change detection reviews at G2">G2 Software reviews</a>
+                </li>
+                <li>
+                    <a rel="nofollow" href="https://www.linkedin.com/company/changedetection-io" title="Visit web page change detection at LinkedIn">Check us out on LinkedIn</a>
+                </li>
+                <li>
+                    And tell your friends and colleagues :)
+                </li>
+                </ul>
+                <p>
+                    The more popular changedetection.io is, the more time we can dedicate to adding amazing features!
+                </p>
+                <p>
+                    Many thanks :)<br>
+                </p>
+                <p>
+                    <i>changedetection.io team</i>
+                </p>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+
+          <div class="content-main">
+            <header>
+
+            </header>
+
+
+
+
+
+            <script src="/static/js/jquery-3.6.0.min.js"></script>
+<script src="/static/js/watch-overview.js" defer></script>
+<script src="/static/js/modal.js"></script>
+<script>let nowtimeserver=1774866853;</script>
+<script>let favicon_baseURL="/static/favicon/PLACEHOLDER";</script>
+<script>
+// Initialize Feather icons after the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    feather.replace();
+
+    // Intersection Observer for lazy loading favicons
+    // Only load favicon images when they enter the viewport
+    if ('IntersectionObserver' in window) {
+        const faviconObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const src = img.getAttribute('data-src');
+
+                    if (src) {
+                        // Load the actual favicon
+                        img.src = src;
+                        img.removeAttribute('data-src');
+                    }
+
+                    // Stop observing this image
+                    observer.unobserve(img);
+                }
+            });
+        }, {
+            // Start loading slightly before the image enters viewport
+            rootMargin: '50px',
+            threshold: 0.01
+        });
+
+        // Observe all lazy favicon images
+        document.querySelectorAll('.lazy-favicon').forEach(img => {
+            faviconObserver.observe(img);
+        });
+    } else {
+        // Fallback for older browsers: load all favicons immediately
+        document.querySelectorAll('.lazy-favicon').forEach(img => {
+            const src = img.getAttribute('data-src');
+            if (src) {
+                img.src = src;
+                img.removeAttribute('data-src');
+            }
+        });
+    }
+});
+</script>
+<style>
+.checking-now .last-checked {
+    background-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.1) 100%);
+    background-size: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.9s ease
+}
+
+/* Auto-generated processor badge colors */
+.processor-badge-image_ssim_diff {
+  background-color: hsl(91, 66%, 86%);
+  color: hsl(91, 50%, 26%);
+}
+
+html[data-darkmode="true"] .processor-badge-image_ssim_diff {
+  background-color: hsl(91, 66%, 46%);
+  color: #fff;
+}
+
+.processor-badge-restock_diff {
+  background-color: hsl(10, 75%, 85%);
+  color: hsl(10, 50%, 35%);
+}
+
+html[data-darkmode="true"] .processor-badge-restock_diff {
+  background-color: hsl(10, 65%, 55%);
+  color: #fff;
+}
+
+.processor-badge-text_json_diff {
+  background-color: hsl(324, 84%, 89%);
+  color: hsl(324, 50%, 34%);
+}
+
+html[data-darkmode="true"] .processor-badge-text_json_diff {
+  background-color: hsl(324, 59%, 54%);
+  color: #fff;
+}
+
+/* Auto-generated tag colors */.button-tag.tag-apischemas {
+  background-color: hsl(40, 70%, 85%);
+  color: hsl(40, 50%, 35%);
+}
+
+.watch-tag-list.tag-apischemas {
+  background-color: hsl(40, 70%, 85%);
+  color: hsl(40, 50%, 35%);
+}
+
+html[data-darkmode="true"] .button-tag.tag-apischemas {
+  background-color: hsl(40, 55%, 55%);
+  color: #fff;
+}
+
+html[data-darkmode="true"] .watch-tag-list.tag-apischemas {
+  background-color: hsl(40, 55%, 55%);
+  color: #fff;
+}.button-tag.tag-dependencyfeeds {
+  background-color: hsl(318, 63%, 93%);
+  color: hsl(318, 50%, 28%);
+}
+
+.watch-tag-list.tag-dependencyfeeds {
+  background-color: hsl(318, 63%, 93%);
+  color: hsl(318, 50%, 28%);
+}
+
+html[data-darkmode="true"] .button-tag.tag-dependencyfeeds {
+  background-color: hsl(318, 73%, 48%);
+  color: #fff;
+}
+
+html[data-darkmode="true"] .watch-tag-list.tag-dependencyfeeds {
+  background-color: hsl(318, 73%, 48%);
+  color: #fff;
+}.button-tag.tag-securityadvisories {
+  background-color: hsl(118, 73%, 93%);
+  color: hsl(118, 50%, 38%);
+}
+
+.watch-tag-list.tag-securityadvisories {
+  background-color: hsl(118, 73%, 93%);
+  color: hsl(118, 50%, 38%);
+}
+
+html[data-darkmode="true"] .button-tag.tag-securityadvisories {
+  background-color: hsl(118, 73%, 58%);
+  color: #fff;
+}
+
+html[data-darkmode="true"] .watch-tag-list.tag-securityadvisories {
+  background-color: hsl(118, 73%, 58%);
+  color: #fff;
+}.button-tag.tag-upstreamreleases {
+  background-color: hsl(31, 76%, 86%);
+  color: hsl(31, 50%, 26%);
+}
+
+.watch-tag-list.tag-upstreamreleases {
+  background-color: hsl(31, 76%, 86%);
+  color: hsl(31, 50%, 26%);
+}
+
+html[data-darkmode="true"] .button-tag.tag-upstreamreleases {
+  background-color: hsl(31, 66%, 46%);
+  color: #fff;
+}
+
+html[data-darkmode="true"] .watch-tag-list.tag-upstreamreleases {
+  background-color: hsl(31, 66%, 46%);
+  color: #fff;
+}</style>
+<div class="box" id="form-quick-watch-add">
+
+    <form class="pure-form" action="/form/add/quickwatch" method="POST" id="new-watch-form">
+        <input type="hidden" name="csrf_token" value="ImZiNGRjY2M2NGI3MmQxYzg5MDg3ZjYyMGU3MGVjYzYwMDI1NzY0Mjki.acpRpQ.tbooUKFIwRs-SZ6h4D2qlG5Sops" >
+        <fieldset>
+            <legend>Add a new web page change detection watch</legend>
+            <div id="watch-add-wrapper-zone">
+
+    <span>
+    <input id="url" name="url" placeholder="https://..." required type="url" value="">
+
+    </span>
+
+
+    <span>
+    <input class="pure-button pure-button-primary" id="watch_submit_button" name="watch_submit_button" title="Watch this URL!" type="submit" value="Watch">
+
+    </span>
+
+
+    <span>
+    <input class="pure-button pure-button-primary" id="edit_and_watch_submit_button" name="edit_and_watch_submit_button" title="Edit first then Watch" type="submit" value="Edit > Watch">
+
+    </span>
+
+            </div>
+            <div id="watch-group-tag">
+
+    <div ><label for="tags">Group tag</label></div>
+    <div ><input class="transparent-field" id="tags" name="tags" placeholder="Watch group / tag" type="text" value="">
+
+
+    </div>
+
+            </div>
+            <div id="quick-watch-processor-type">
+
+  <span class="label "><label for="processor">Processor</label></span>
+  <span ><ul id="processor"><li><input checked id="processor-0" name="processor" type="radio" value="text_json_diff"> <label for="processor-0">Webpage Text/HTML, JSON and PDF changes</label></li><li><input id="processor-1" name="processor" type="radio" value="restock_diff"> <label for="processor-1">Re-stock &amp; Price detection for pages with a SINGLE product</label></li></ul>
+
+  </span>
+
+            </div>
+
+        </fieldset>
+        <span style="color:#eee; font-size: 80%;">
+            <strong>Tip: </strong> You can also add 'shared' watches. <a href="https://github.com/dgtlmoon/changedetection.io/wiki/Sharing-a-Watch">More info</a>
+        </span>
+    </form>
+</div>
+<div class="box">
+    <form class="pure-form" action="/form/checkbox-operations" method="POST" id="watch-list-form">
+    <input type="hidden" name="csrf_token" value="ImZiNGRjY2M2NGI3MmQxYzg5MDg3ZjYyMGU3MGVjYzYwMDI1NzY0Mjki.acpRpQ.tbooUKFIwRs-SZ6h4D2qlG5Sops" >
+    <input type="hidden" id="op_extradata" name="op_extradata" value="" >
+    <div id="checkbox-operations">
+        <button class="pure-button button-secondary button-xsmall"  name="op" value="pause"><i data-feather="pause" style="width: 14px; height: 14px; stroke: white; margin-right: 4px;"></i>Pause</button>
+        <button class="pure-button button-secondary button-xsmall"  name="op" value="unpause"><i data-feather="play" style="width: 14px; height: 14px; stroke: white; margin-right: 4px;"></i>UnPause</button>
+        <button class="pure-button button-secondary button-xsmall"  name="op" value="mute"><i data-feather="volume-x" style="width: 14px; height: 14px; stroke: white; margin-right: 4px;"></i>Mute</button>
+        <button class="pure-button button-secondary button-xsmall"  name="op" value="unmute"><i data-feather="volume-2" style="width: 14px; height: 14px; stroke: white; margin-right: 4px;"></i>UnMute</button>
+        <button class="pure-button button-secondary button-xsmall" name="op" value="recheck"><i data-feather="refresh-cw" style="width: 14px; height: 14px; stroke: white; margin-right: 4px;"></i>Recheck</button>
+        <button class="pure-button button-secondary button-xsmall" name="op" value="assign-tag" id="checkbox-assign-tag"><i data-feather="tag" style="width: 14px; height: 14px; stroke: white; margin-right: 4px;"></i>Tag</button>
+        <button class="pure-button button-secondary button-xsmall" name="op" value="mark-viewed"><i data-feather="eye" style="width: 14px; height: 14px; stroke: white; margin-right: 4px;"></i>Mark viewed</button>
+        <button class="pure-button button-secondary button-xsmall" name="op" value="notification-default"><i data-feather="bell" style="width: 14px; height: 14px; stroke: white; margin-right: 4px;"></i>Use default notification</button>
+        <button class="pure-button button-secondary button-xsmall" name="op" value="clear-errors"><i data-feather="x-circle" style="width: 14px; height: 14px; stroke: white; margin-right: 4px;"></i>Clear errors</button>
+        <button class="pure-button button-secondary button-xsmall" style="background: #dd4242;" name="op" value="clear-history"
+                       data-requires-confirm
+                       data-confirm-type="danger"
+                       data-confirm-title="Clear Histories"
+                       data-confirm-message="&lt;p&gt;Are you sure you want to clear history for the selected items?&lt;/p&gt;&lt;p&gt;This action cannot be undone.&lt;/p&gt;"
+                       data-confirm-button="OK"><i data-feather="trash-2" style="width: 14px; height: 14px; stroke: white; margin-right: 4px;"></i>Clear/reset history</button>
+        <button class="pure-button button-secondary button-xsmall" style="background: #dd4242;" name="op" value="delete"
+                       data-requires-confirm
+                       data-confirm-type="danger"
+                       data-confirm-title="Delete Watches?"
+                       data-confirm-message="&lt;p&gt;Are you sure you want to delete the selected watches?&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;This action cannot be undone.&lt;/p&gt;"
+                       data-confirm-button="Delete"><i data-feather="trash" style="width: 14px; height: 14px; stroke: white; margin-right: 4px;"></i>Delete</button>
+    </div>
+
+    <div id="stats_row">
+        <div class="left"></div>
+        <div class="right" >Queued size: <span id="queue-size-int">0</span></div>
+    </div><div>
+        <a href="/" class="pure-button button-tag active">All</a>
+
+    <!-- tag list --><a href="/?tag=87d7388f-b7ee-4178-a49b-3af90edd7d13" class="pure-button button-tag tag-apischemas ">api-schemas</a><a href="/?tag=90f616fc-34a4-4099-b0b5-2af414df6030" class="pure-button button-tag tag-dependencyfeeds ">dependency-feeds</a><a href="/?tag=8cdfa862-4064-4e0b-bc54-1b71994efb3d" class="pure-button button-tag tag-securityadvisories ">security-advisories</a><a href="/?tag=45817157-278f-4045-87be-badf34685183" class="pure-button button-tag tag-upstreamreleases ">upstream-releases</a></div><div id="watch-table-wrapper" class="has-error"><table class="pure-table pure-table-striped watch-table favicon-enabled">
+            <thead>
+            <tr><th><input style="vertical-align: middle" type="checkbox" id="check-all" > <a class="inactive"  href="/?sort=date_created&amp;order=desc"># <span class='arrow desc'></span></a></th>
+                <th>
+                    <a class="inactive" href="/?sort=paused&amp;order=desc"><i data-feather="pause" style="vertical-align: bottom; width: 14px; height: 14px;  margin-right: 4px;"></i><span class='arrow desc'></span></a>
+                    &nbsp;
+                    <a class="inactive" href="/?sort=notification_muted&amp;order=desc"><i data-feather="volume-2" style="vertical-align: bottom; width: 14px; height: 14px;  margin-right: 4px;"></i><span class='arrow desc'></span></a>
+                </th>
+                <th><a class="inactive" href="/?sort=label&amp;order=desc">Website <span class='arrow desc'></span></a></th><th><a class="inactive" href="/?sort=last_checked&amp;order=desc"><span class="hide-on-mobile">Last</span> Checked <span class='arrow desc'></span></a></th>
+                <th><a class="active desc" href="/?sort=last_changed&amp;order=desc"><span class="hide-on-mobile">Last</span> Changed <span class='arrow desc'></span></a></th>
+                <th class="empty-cell"></th>
+            </tr>
+            </thead>
+            <tbody><tr id="892149cc-e4d3-4a56-8939-36be9c6f687b" data-watch-uuid="892149cc-e4d3-4a56-8939-36be9c6f687b" class="pure-table-odd processor-text_json_diff no-restock-info single-history use-html-title">
+                <td class="inline checkbox-uuid" ><div><input name="uuids"  type="checkbox" value="892149cc-e4d3-4a56-8939-36be9c6f687b " > <span class="counter-i">1</span></div></td>
+                <td class="inline watch-controls">
+                    <div>
+                    <a class="ajax-op state-off pause-toggle" data-op="pause" href="/?op=pause&amp;uuid=892149cc-e4d3-4a56-8939-36be9c6f687b"><img src="/static/images/pause.svg" alt="Pause checks" title="Pause checks" class="icon icon-pause" ></a>
+                    <a class="ajax-op state-on pause-toggle"  data-op="pause" style="display: none" href="/?op=pause&amp;uuid=892149cc-e4d3-4a56-8939-36be9c6f687b"><img src="/static/images/play.svg" alt="UnPause checks" title="UnPause checks" class="icon icon-unpause" ></a>
+                    <a class="ajax-op state-off mute-toggle" data-op="mute" href="/?op=mute&amp;uuid=892149cc-e4d3-4a56-8939-36be9c6f687b"><img src="/static/images/bell-off.svg" alt="Mute notification" title="Mute notification" class="icon icon-mute" ></a>
+                    <a class="ajax-op state-on mute-toggle" data-op="mute"  style="display: none" href="/?op=mute&amp;uuid=892149cc-e4d3-4a56-8939-36be9c6f687b"><img src="/static/images/bell-off.svg" alt="UnMute notification" title="UnMute notification" class="icon icon-mute" ></a>
+                    </div>
+                </td>
+
+                <td class="title-col inline">
+                    <div class="flex-wrapper">
+
+                        <div>
+
+                            <img alt="Favicon thumbnail"
+                                 class="favicon lazy-favicon"
+                                 loading="lazy"
+                                 decoding="async"
+                                 fetchpriority="low"
+
+                                 src='data:image/svg+xml;utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="7.087" height="7.087" viewBox="0 0 7.087 7.087"%3E%3Ccircle cx="3.543" cy="3.543" r="3.279" stroke="%23e1e1e1" stroke-width="0.45" fill="none" opacity="0.74"/%3E%3C/svg%3E'>
+                        </div>
+
+                        <div><span class="processor-badge processor-badge-text_json_diff" title="Webpage Text/HTML, JSON and PDF changes">Text</span><span class="watch-title">
+
+                                    Coolify Releases
+
+                               <a class="external" target="_blank" rel="noopener" href="https://github.com/coollabsio/coolify/releases.atom">&nbsp;</a>
+                            </span>
+                            <div class="error-text" style="display:none;"></div><a href="/?tag=45817157-278f-4045-87be-badf34685183" class="watch-tag-list tag-upstreamreleases">upstream-releases</a></div>
+                    <div class="status-icons">
+                            <a class="link-spread" href="/share-url/892149cc-e4d3-4a56-8939-36be9c6f687b"><img src="/static/images/spread.svg" class="status-icon icon icon-spread" title="Create a link to share watch config with others" ></a></div>
+                    </div>
+                </td>
+                <td class="last-checked" data-timestamp="1774859758" data-fetchduration=2.187 data-eta_complete="1774859760.187" >
+                    <div class="spinner-wrapper" style="display:none;" >
+                        <span class="spinner"></span><span class="status-text">&nbsp;Checking now</span>
+                    </div>
+                    <span class="innertext">1 hour ago</span>
+                </td>
+                <td class="last-changed" data-timestamp="0">Not yet</td>
+                <td class="buttons">
+                    <div><a href="" class="already-in-queue-button recheck pure-button pure-button-primary" style="display: none;" disabled="disabled">Queued</a>
+                    <a href="/checknow?uuid=892149cc-e4d3-4a56-8939-36be9c6f687b" data-op='recheck' class="ajax-op recheck pure-button pure-button-primary">Recheck</a>
+                    <a href="/edit/892149cc-e4d3-4a56-8939-36be9c6f687b#general" class="pure-button pure-button-primary">Edit</a>
+                    <a href="/diff/892149cc-e4d3-4a56-8939-36be9c6f687b"  target=&#34;892149cc-e4d3-4a56-8939-36be9c6f687b&#34; class="pure-button pure-button-primary history-link" style="display: none;">History</a>
+                    <a href="/preview/892149cc-e4d3-4a56-8939-36be9c6f687b"  target=&#34;892149cc-e4d3-4a56-8939-36be9c6f687b&#34; class="pure-button pure-button-primary preview-link" style="display: none;">Preview</a>
+                    </div>
+                </td>
+            </tr><tr id="c4c5f0cd-be64-4023-aafa-981182b986cd" data-watch-uuid="c4c5f0cd-be64-4023-aafa-981182b986cd" class="pure-table-even processor-text_json_diff no-restock-info single-history use-html-title">
+                <td class="inline checkbox-uuid" ><div><input name="uuids"  type="checkbox" value="c4c5f0cd-be64-4023-aafa-981182b986cd " > <span class="counter-i">2</span></div></td>
+                <td class="inline watch-controls">
+                    <div>
+                    <a class="ajax-op state-off pause-toggle" data-op="pause" href="/?op=pause&amp;uuid=c4c5f0cd-be64-4023-aafa-981182b986cd"><img src="/static/images/pause.svg" alt="Pause checks" title="Pause checks" class="icon icon-pause" ></a>
+                    <a class="ajax-op state-on pause-toggle"  data-op="pause" style="display: none" href="/?op=pause&amp;uuid=c4c5f0cd-be64-4023-aafa-981182b986cd"><img src="/static/images/play.svg" alt="UnPause checks" title="UnPause checks" class="icon icon-unpause" ></a>
+                    <a class="ajax-op state-off mute-toggle" data-op="mute" href="/?op=mute&amp;uuid=c4c5f0cd-be64-4023-aafa-981182b986cd"><img src="/static/images/bell-off.svg" alt="Mute notification" title="Mute notification" class="icon icon-mute" ></a>
+                    <a class="ajax-op state-on mute-toggle" data-op="mute"  style="display: none" href="/?op=mute&amp;uuid=c4c5f0cd-be64-4023-aafa-981182b986cd"><img src="/static/images/bell-off.svg" alt="UnMute notification" title="UnMute notification" class="icon icon-mute" ></a>
+                    </div>
+                </td>
+
+                <td class="title-col inline">
+                    <div class="flex-wrapper">
+
+                        <div>
+
+                            <img alt="Favicon thumbnail"
+                                 class="favicon lazy-favicon"
+                                 loading="lazy"
+                                 decoding="async"
+                                 fetchpriority="low"
+
+                                 src='data:image/svg+xml;utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="7.087" height="7.087" viewBox="0 0 7.087 7.087"%3E%3Ccircle cx="3.543" cy="3.543" r="3.279" stroke="%23e1e1e1" stroke-width="0.45" fill="none" opacity="0.74"/%3E%3C/svg%3E'>
+                        </div>
+
+                        <div><span class="processor-badge processor-badge-text_json_diff" title="Webpage Text/HTML, JSON and PDF changes">Text</span><span class="watch-title">
+
+                                    Debian Security Advisories
+
+                               <a class="external" target="_blank" rel="noopener" href="https://www.debian.org/security/index.en.html">&nbsp;</a>
+                            </span>
+                            <div class="error-text" style="display:none;"></div><a href="/?tag=8cdfa862-4064-4e0b-bc54-1b71994efb3d" class="watch-tag-list tag-securityadvisories">security-advisories</a></div>
+                    <div class="status-icons">
+                            <a class="link-spread" href="/share-url/c4c5f0cd-be64-4023-aafa-981182b986cd"><img src="/static/images/spread.svg" class="status-icon icon icon-spread" title="Create a link to share watch config with others" ></a></div>
+                    </div>
+                </td>
+                <td class="last-checked" data-timestamp="1774863359" data-fetchduration=-0.145 data-eta_complete="1774863358.855" >
+                    <div class="spinner-wrapper" style="display:none;" >
+                        <span class="spinner"></span><span class="status-text">&nbsp;Checking now</span>
+                    </div>
+                    <span class="innertext">58 minutes ago</span>
+                </td>
+                <td class="last-changed" data-timestamp="0">Not yet</td>
+                <td class="buttons">
+                    <div><a href="" class="already-in-queue-button recheck pure-button pure-button-primary" style="display: none;" disabled="disabled">Queued</a>
+                    <a href="/checknow?uuid=c4c5f0cd-be64-4023-aafa-981182b986cd" data-op='recheck' class="ajax-op recheck pure-button pure-button-primary">Recheck</a>
+                    <a href="/edit/c4c5f0cd-be64-4023-aafa-981182b986cd#general" class="pure-button pure-button-primary">Edit</a>
+                    <a href="/diff/c4c5f0cd-be64-4023-aafa-981182b986cd"  target=&#34;c4c5f0cd-be64-4023-aafa-981182b986cd&#34; class="pure-button pure-button-primary history-link" style="display: none;">History</a>
+                    <a href="/preview/c4c5f0cd-be64-4023-aafa-981182b986cd"  target=&#34;c4c5f0cd-be64-4023-aafa-981182b986cd&#34; class="pure-button pure-button-primary preview-link" style="display: none;">Preview</a>
+                    </div>
+                </td>
+            </tr><tr id="5c553ec2-0a30-40e5-93e3-0cc12ac55750" data-watch-uuid="5c553ec2-0a30-40e5-93e3-0cc12ac55750" class="pure-table-odd processor-text_json_diff no-restock-info single-history use-html-title">
+                <td class="inline checkbox-uuid" ><div><input name="uuids"  type="checkbox" value="5c553ec2-0a30-40e5-93e3-0cc12ac55750 " > <span class="counter-i">3</span></div></td>
+                <td class="inline watch-controls">
+                    <div>
+                    <a class="ajax-op state-off pause-toggle" data-op="pause" href="/?op=pause&amp;uuid=5c553ec2-0a30-40e5-93e3-0cc12ac55750"><img src="/static/images/pause.svg" alt="Pause checks" title="Pause checks" class="icon icon-pause" ></a>
+                    <a class="ajax-op state-on pause-toggle"  data-op="pause" style="display: none" href="/?op=pause&amp;uuid=5c553ec2-0a30-40e5-93e3-0cc12ac55750"><img src="/static/images/play.svg" alt="UnPause checks" title="UnPause checks" class="icon icon-unpause" ></a>
+                    <a class="ajax-op state-off mute-toggle" data-op="mute" href="/?op=mute&amp;uuid=5c553ec2-0a30-40e5-93e3-0cc12ac55750"><img src="/static/images/bell-off.svg" alt="Mute notification" title="Mute notification" class="icon icon-mute" ></a>
+                    <a class="ajax-op state-on mute-toggle" data-op="mute"  style="display: none" href="/?op=mute&amp;uuid=5c553ec2-0a30-40e5-93e3-0cc12ac55750"><img src="/static/images/bell-off.svg" alt="UnMute notification" title="UnMute notification" class="icon icon-mute" ></a>
+                    </div>
+                </td>
+
+                <td class="title-col inline">
+                    <div class="flex-wrapper">
+
+                        <div>
+
+                            <img alt="Favicon thumbnail"
+                                 class="favicon lazy-favicon"
+                                 loading="lazy"
+                                 decoding="async"
+                                 fetchpriority="low"
+
+                                 src='data:image/svg+xml;utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="7.087" height="7.087" viewBox="0 0 7.087 7.087"%3E%3Ccircle cx="3.543" cy="3.543" r="3.279" stroke="%23e1e1e1" stroke-width="0.45" fill="none" opacity="0.74"/%3E%3C/svg%3E'>
+                        </div>
+
+                        <div><span class="processor-badge processor-badge-text_json_diff" title="Webpage Text/HTML, JSON and PDF changes">Text</span><span class="watch-title">
+
+                                    Dozzle Docker Tags
+
+                               <a class="external" target="_blank" rel="noopener" href="https://hub.docker.com/v2/repositories/amir20/dozzle/tags?page_size=1&amp;ordering=last_updated">&nbsp;</a>
+                            </span>
+                            <div class="error-text" style="display:none;"></div><a href="/?tag=90f616fc-34a4-4099-b0b5-2af414df6030" class="watch-tag-list tag-dependencyfeeds">dependency-feeds</a></div>
+                    <div class="status-icons">
+                            <a class="link-spread" href="/share-url/5c553ec2-0a30-40e5-93e3-0cc12ac55750"><img src="/static/images/spread.svg" class="status-icon icon icon-spread" title="Create a link to share watch config with others" ></a></div>
+                    </div>
+                </td>
+                <td class="last-checked" data-timestamp="1774859758" data-fetchduration=1.044 data-eta_complete="1774859759.044" >
+                    <div class="spinner-wrapper" style="display:none;" >
+                        <span class="spinner"></span><span class="status-text">&nbsp;Checking now</span>
+                    </div>
+                    <span class="innertext">1 hour ago</span>
+                </td>
+                <td class="last-changed" data-timestamp="0">Not yet</td>
+                <td class="buttons">
+                    <div><a href="" class="already-in-queue-button recheck pure-button pure-button-primary" style="display: none;" disabled="disabled">Queued</a>
+                    <a href="/checknow?uuid=5c553ec2-0a30-40e5-93e3-0cc12ac55750" data-op='recheck' class="ajax-op recheck pure-button pure-button-primary">Recheck</a>
+                    <a href="/edit/5c553ec2-0a30-40e5-93e3-0cc12ac55750#general" class="pure-button pure-button-primary">Edit</a>
+                    <a href="/diff/5c553ec2-0a30-40e5-93e3-0cc12ac55750"  target=&#34;5c553ec2-0a30-40e5-93e3-0cc12ac55750&#34; class="pure-button pure-button-primary history-link" style="display: none;">History</a>
+                    <a href="/preview/5c553ec2-0a30-40e5-93e3-0cc12ac55750"  target=&#34;5c553ec2-0a30-40e5-93e3-0cc12ac55750&#34; class="pure-button pure-button-primary preview-link" style="display: none;">Preview</a>
+                    </div>
+                </td>
+            </tr><tr id="3e00587d-09d2-46b2-b23b-e3716b7ed86d" data-watch-uuid="3e00587d-09d2-46b2-b23b-e3716b7ed86d" class="pure-table-even processor-text_json_diff no-restock-info single-history use-html-title">
+                <td class="inline checkbox-uuid" ><div><input name="uuids"  type="checkbox" value="3e00587d-09d2-46b2-b23b-e3716b7ed86d " > <span class="counter-i">4</span></div></td>
+                <td class="inline watch-controls">
+                    <div>
+                    <a class="ajax-op state-off pause-toggle" data-op="pause" href="/?op=pause&amp;uuid=3e00587d-09d2-46b2-b23b-e3716b7ed86d"><img src="/static/images/pause.svg" alt="Pause checks" title="Pause checks" class="icon icon-pause" ></a>
+                    <a class="ajax-op state-on pause-toggle"  data-op="pause" style="display: none" href="/?op=pause&amp;uuid=3e00587d-09d2-46b2-b23b-e3716b7ed86d"><img src="/static/images/play.svg" alt="UnPause checks" title="UnPause checks" class="icon icon-unpause" ></a>
+                    <a class="ajax-op state-off mute-toggle" data-op="mute" href="/?op=mute&amp;uuid=3e00587d-09d2-46b2-b23b-e3716b7ed86d"><img src="/static/images/bell-off.svg" alt="Mute notification" title="Mute notification" class="icon icon-mute" ></a>
+                    <a class="ajax-op state-on mute-toggle" data-op="mute"  style="display: none" href="/?op=mute&amp;uuid=3e00587d-09d2-46b2-b23b-e3716b7ed86d"><img src="/static/images/bell-off.svg" alt="UnMute notification" title="UnMute notification" class="icon icon-mute" ></a>
+                    </div>
+                </td>
+
+                <td class="title-col inline">
+                    <div class="flex-wrapper">
+
+                        <div>
+
+                            <img alt="Favicon thumbnail"
+                                 class="favicon lazy-favicon"
+                                 loading="lazy"
+                                 decoding="async"
+                                 fetchpriority="low"
+
+                                 src='data:image/svg+xml;utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="7.087" height="7.087" viewBox="0 0 7.087 7.087"%3E%3Ccircle cx="3.543" cy="3.543" r="3.279" stroke="%23e1e1e1" stroke-width="0.45" fill="none" opacity="0.74"/%3E%3C/svg%3E'>
+                        </div>
+
+                        <div><span class="processor-badge processor-badge-text_json_diff" title="Webpage Text/HTML, JSON and PDF changes">Text</span><span class="watch-title">
+
+                                    Gitea Releases
+
+                               <a class="external" target="_blank" rel="noopener" href="https://github.com/go-gitea/gitea/releases.atom">&nbsp;</a>
+                            </span>
+                            <div class="error-text" style="display:none;"></div><a href="/?tag=45817157-278f-4045-87be-badf34685183" class="watch-tag-list tag-upstreamreleases">upstream-releases</a></div>
+                    <div class="status-icons">
+                            <a class="link-spread" href="/share-url/3e00587d-09d2-46b2-b23b-e3716b7ed86d"><img src="/static/images/spread.svg" class="status-icon icon icon-spread" title="Create a link to share watch config with others" ></a></div>
+                    </div>
+                </td>
+                <td class="last-checked" data-timestamp="1774859758" data-fetchduration=1.933 data-eta_complete="1774859759.933" >
+                    <div class="spinner-wrapper" style="display:none;" >
+                        <span class="spinner"></span><span class="status-text">&nbsp;Checking now</span>
+                    </div>
+                    <span class="innertext">1 hour ago</span>
+                </td>
+                <td class="last-changed" data-timestamp="0">Not yet</td>
+                <td class="buttons">
+                    <div><a href="" class="already-in-queue-button recheck pure-button pure-button-primary" style="display: none;" disabled="disabled">Queued</a>
+                    <a href="/checknow?uuid=3e00587d-09d2-46b2-b23b-e3716b7ed86d" data-op='recheck' class="ajax-op recheck pure-button pure-button-primary">Recheck</a>
+                    <a href="/edit/3e00587d-09d2-46b2-b23b-e3716b7ed86d#general" class="pure-button pure-button-primary">Edit</a>
+                    <a href="/diff/3e00587d-09d2-46b2-b23b-e3716b7ed86d"  target=&#34;3e00587d-09d2-46b2-b23b-e3716b7ed86d&#34; class="pure-button pure-button-primary history-link" style="display: none;">History</a>
+                    <a href="/preview/3e00587d-09d2-46b2-b23b-e3716b7ed86d"  target=&#34;3e00587d-09d2-46b2-b23b-e3716b7ed86d&#34; class="pure-button pure-button-primary preview-link" style="display: none;">Preview</a>
+                    </div>
+                </td>
+            </tr><tr id="631cb709-36bc-4050-849a-819b8c0f1382" data-watch-uuid="631cb709-36bc-4050-849a-819b8c0f1382" class="pure-table-odd processor-text_json_diff no-restock-info single-history use-html-title">
+                <td class="inline checkbox-uuid" ><div><input name="uuids"  type="checkbox" value="631cb709-36bc-4050-849a-819b8c0f1382 " > <span class="counter-i">5</span></div></td>
+                <td class="inline watch-controls">
+                    <div>
+                    <a class="ajax-op state-off pause-toggle" data-op="pause" href="/?op=pause&amp;uuid=631cb709-36bc-4050-849a-819b8c0f1382"><img src="/static/images/pause.svg" alt="Pause checks" title="Pause checks" class="icon icon-pause" ></a>
+                    <a class="ajax-op state-on pause-toggle"  data-op="pause" style="display: none" href="/?op=pause&amp;uuid=631cb709-36bc-4050-849a-819b8c0f1382"><img src="/static/images/play.svg" alt="UnPause checks" title="UnPause checks" class="icon icon-unpause" ></a>
+                    <a class="ajax-op state-off mute-toggle" data-op="mute" href="/?op=mute&amp;uuid=631cb709-36bc-4050-849a-819b8c0f1382"><img src="/static/images/bell-off.svg" alt="Mute notification" title="Mute notification" class="icon icon-mute" ></a>
+                    <a class="ajax-op state-on mute-toggle" data-op="mute"  style="display: none" href="/?op=mute&amp;uuid=631cb709-36bc-4050-849a-819b8c0f1382"><img src="/static/images/bell-off.svg" alt="UnMute notification" title="UnMute notification" class="icon icon-mute" ></a>
+                    </div>
+                </td>
+
+                <td class="title-col inline">
+                    <div class="flex-wrapper">
+
+                        <div>
+
+                            <img alt="Favicon thumbnail"
+                                 class="favicon lazy-favicon"
+                                 loading="lazy"
+                                 decoding="async"
+                                 fetchpriority="low"
+
+                                 src='data:image/svg+xml;utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="7.087" height="7.087" viewBox="0 0 7.087 7.087"%3E%3Ccircle cx="3.543" cy="3.543" r="3.279" stroke="%23e1e1e1" stroke-width="0.45" fill="none" opacity="0.74"/%3E%3C/svg%3E'>
+                        </div>
+
+                        <div><span class="processor-badge processor-badge-text_json_diff" title="Webpage Text/HTML, JSON and PDF changes">Text</span><span class="watch-title">
+
+                                    Hetzner Cloud Docs
+
+                               <a class="external" target="_blank" rel="noopener" href="https://docs.hetzner.cloud/">&nbsp;</a>
+                            </span>
+                            <div class="error-text" style="display:none;"></div><a href="/?tag=87d7388f-b7ee-4178-a49b-3af90edd7d13" class="watch-tag-list tag-apischemas">api-schemas</a></div>
+                    <div class="status-icons">
+                            <a class="link-spread" href="/share-url/631cb709-36bc-4050-849a-819b8c0f1382"><img src="/static/images/spread.svg" class="status-icon icon icon-spread" title="Create a link to share watch config with others" ></a></div>
+                    </div>
+                </td>
+                <td class="last-checked" data-timestamp="1774859758" data-fetchduration=0.786 data-eta_complete="1774859758.786" >
+                    <div class="spinner-wrapper" style="display:none;" >
+                        <span class="spinner"></span><span class="status-text">&nbsp;Checking now</span>
+                    </div>
+                    <span class="innertext">1 hour ago</span>
+                </td>
+                <td class="last-changed" data-timestamp="0">Not yet</td>
+                <td class="buttons">
+                    <div><a href="" class="already-in-queue-button recheck pure-button pure-button-primary" style="display: none;" disabled="disabled">Queued</a>
+                    <a href="/checknow?uuid=631cb709-36bc-4050-849a-819b8c0f1382" data-op='recheck' class="ajax-op recheck pure-button pure-button-primary">Recheck</a>
+                    <a href="/edit/631cb709-36bc-4050-849a-819b8c0f1382#general" class="pure-button pure-button-primary">Edit</a>
+                    <a href="/diff/631cb709-36bc-4050-849a-819b8c0f1382"  target=&#34;631cb709-36bc-4050-849a-819b8c0f1382&#34; class="pure-button pure-button-primary history-link" style="display: none;">History</a>
+                    <a href="/preview/631cb709-36bc-4050-849a-819b8c0f1382"  target=&#34;631cb709-36bc-4050-849a-819b8c0f1382&#34; class="pure-button pure-button-primary preview-link" style="display: none;">Preview</a>
+                    </div>
+                </td>
+            </tr><tr id="e8b75bdb-153c-4353-956a-4e451b819ff0" data-watch-uuid="e8b75bdb-153c-4353-956a-4e451b819ff0" class="pure-table-even processor-text_json_diff has-error no-restock-info use-html-title">
+                <td class="inline checkbox-uuid" ><div><input name="uuids"  type="checkbox" value="e8b75bdb-153c-4353-956a-4e451b819ff0 " > <span class="counter-i">6</span></div></td>
+                <td class="inline watch-controls">
+                    <div>
+                    <a class="ajax-op state-off pause-toggle" data-op="pause" href="/?op=pause&amp;uuid=e8b75bdb-153c-4353-956a-4e451b819ff0"><img src="/static/images/pause.svg" alt="Pause checks" title="Pause checks" class="icon icon-pause" ></a>
+                    <a class="ajax-op state-on pause-toggle"  data-op="pause" style="display: none" href="/?op=pause&amp;uuid=e8b75bdb-153c-4353-956a-4e451b819ff0"><img src="/static/images/play.svg" alt="UnPause checks" title="UnPause checks" class="icon icon-unpause" ></a>
+                    <a class="ajax-op state-off mute-toggle" data-op="mute" href="/?op=mute&amp;uuid=e8b75bdb-153c-4353-956a-4e451b819ff0"><img src="/static/images/bell-off.svg" alt="Mute notification" title="Mute notification" class="icon icon-mute" ></a>
+                    <a class="ajax-op state-on mute-toggle" data-op="mute"  style="display: none" href="/?op=mute&amp;uuid=e8b75bdb-153c-4353-956a-4e451b819ff0"><img src="/static/images/bell-off.svg" alt="UnMute notification" title="UnMute notification" class="icon icon-mute" ></a>
+                    </div>
+                </td>
+
+                <td class="title-col inline">
+                    <div class="flex-wrapper">
+
+                        <div>
+
+                            <img alt="Favicon thumbnail"
+                                 class="favicon lazy-favicon"
+                                 loading="lazy"
+                                 decoding="async"
+                                 fetchpriority="low"
+
+                                 src='data:image/svg+xml;utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="7.087" height="7.087" viewBox="0 0 7.087 7.087"%3E%3Ccircle cx="3.543" cy="3.543" r="3.279" stroke="%23e1e1e1" stroke-width="0.45" fill="none" opacity="0.74"/%3E%3C/svg%3E'>
+                        </div>
+
+                        <div><span class="processor-badge processor-badge-text_json_diff" title="Webpage Text/HTML, JSON and PDF changes">Text</span><span class="watch-title">
+
+                                    Hetzner DNS API Docs
+
+                               <a class="external" target="_blank" rel="noopener" href="https://dns.hetzner.com/api-docs/">&nbsp;</a>
+                            </span>
+                            <div class="error-text" style="display:none;">Got HTML content but no text found (With 200 reply code)</div><a href="/?tag=87d7388f-b7ee-4178-a49b-3af90edd7d13" class="watch-tag-list tag-apischemas">api-schemas</a></div>
+                    <div class="status-icons">
+                            <a class="link-spread" href="/share-url/e8b75bdb-153c-4353-956a-4e451b819ff0"><img src="/static/images/spread.svg" class="status-icon icon icon-spread" title="Create a link to share watch config with others" ></a></div>
+                    </div>
+                </td>
+                <td class="last-checked" data-timestamp="1774859759" data-fetchduration=0.481 data-eta_complete="1774859759.481" >
+                    <div class="spinner-wrapper" style="display:none;" >
+                        <span class="spinner"></span><span class="status-text">&nbsp;Checking now</span>
+                    </div>
+                    <span class="innertext">1 hour ago</span>
+                </td>
+                <td class="last-changed" data-timestamp="0">Not yet</td>
+                <td class="buttons">
+                    <div><a href="" class="already-in-queue-button recheck pure-button pure-button-primary" style="display: none;" disabled="disabled">Queued</a>
+                    <a href="/checknow?uuid=e8b75bdb-153c-4353-956a-4e451b819ff0" data-op='recheck' class="ajax-op recheck pure-button pure-button-primary">Recheck</a>
+                    <a href="/edit/e8b75bdb-153c-4353-956a-4e451b819ff0#general" class="pure-button pure-button-primary">Edit</a>
+                    <a href="/diff/e8b75bdb-153c-4353-956a-4e451b819ff0"  target=&#34;e8b75bdb-153c-4353-956a-4e451b819ff0&#34; class="pure-button pure-button-primary history-link" style="display: none;">History</a>
+                    <a href="/preview/e8b75bdb-153c-4353-956a-4e451b819ff0"  target=&#34;e8b75bdb-153c-4353-956a-4e451b819ff0&#34; class="pure-button pure-button-primary preview-link" style="display: none;">Preview</a>
+                    </div>
+                </td>
+            </tr><tr id="f8f43046-6a4c-4eaa-9299-e5a988608a38" data-watch-uuid="f8f43046-6a4c-4eaa-9299-e5a988608a38" class="pure-table-odd processor-text_json_diff no-restock-info single-history use-html-title">
+                <td class="inline checkbox-uuid" ><div><input name="uuids"  type="checkbox" value="f8f43046-6a4c-4eaa-9299-e5a988608a38 " > <span class="counter-i">7</span></div></td>
+                <td class="inline watch-controls">
+                    <div>
+                    <a class="ajax-op state-off pause-toggle" data-op="pause" href="/?op=pause&amp;uuid=f8f43046-6a4c-4eaa-9299-e5a988608a38"><img src="/static/images/pause.svg" alt="Pause checks" title="Pause checks" class="icon icon-pause" ></a>
+                    <a class="ajax-op state-on pause-toggle"  data-op="pause" style="display: none" href="/?op=pause&amp;uuid=f8f43046-6a4c-4eaa-9299-e5a988608a38"><img src="/static/images/play.svg" alt="UnPause checks" title="UnPause checks" class="icon icon-unpause" ></a>
+                    <a class="ajax-op state-off mute-toggle" data-op="mute" href="/?op=mute&amp;uuid=f8f43046-6a4c-4eaa-9299-e5a988608a38"><img src="/static/images/bell-off.svg" alt="Mute notification" title="Mute notification" class="icon icon-mute" ></a>
+                    <a class="ajax-op state-on mute-toggle" data-op="mute"  style="display: none" href="/?op=mute&amp;uuid=f8f43046-6a4c-4eaa-9299-e5a988608a38"><img src="/static/images/bell-off.svg" alt="UnMute notification" title="UnMute notification" class="icon icon-mute" ></a>
+                    </div>
+                </td>
+
+                <td class="title-col inline">
+                    <div class="flex-wrapper">
+
+                        <div>
+
+                            <img alt="Favicon thumbnail"
+                                 class="favicon lazy-favicon"
+                                 loading="lazy"
+                                 decoding="async"
+                                 fetchpriority="low"
+
+                                 src='data:image/svg+xml;utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="7.087" height="7.087" viewBox="0 0 7.087 7.087"%3E%3Ccircle cx="3.543" cy="3.543" r="3.279" stroke="%23e1e1e1" stroke-width="0.45" fill="none" opacity="0.74"/%3E%3C/svg%3E'>
+                        </div>
+
+                        <div><span class="processor-badge processor-badge-text_json_diff" title="Webpage Text/HTML, JSON and PDF changes">Text</span><span class="watch-title">
+
+                                    n8n Releases
+
+                               <a class="external" target="_blank" rel="noopener" href="https://github.com/n8n-io/n8n/releases.atom">&nbsp;</a>
+                            </span>
+                            <div class="error-text" style="display:none;"></div><a href="/?tag=45817157-278f-4045-87be-badf34685183" class="watch-tag-list tag-upstreamreleases">upstream-releases</a></div>
+                    <div class="status-icons">
+                            <a class="link-spread" href="/share-url/f8f43046-6a4c-4eaa-9299-e5a988608a38"><img src="/static/images/spread.svg" class="status-icon icon icon-spread" title="Create a link to share watch config with others" ></a></div>
+                    </div>
+                </td>
+                <td class="last-checked" data-timestamp="1774859760" data-fetchduration=0.675 data-eta_complete="1774859760.675" >
+                    <div class="spinner-wrapper" style="display:none;" >
+                        <span class="spinner"></span><span class="status-text">&nbsp;Checking now</span>
+                    </div>
+                    <span class="innertext">1 hour ago</span>
+                </td>
+                <td class="last-changed" data-timestamp="0">Not yet</td>
+                <td class="buttons">
+                    <div><a href="" class="already-in-queue-button recheck pure-button pure-button-primary" style="display: none;" disabled="disabled">Queued</a>
+                    <a href="/checknow?uuid=f8f43046-6a4c-4eaa-9299-e5a988608a38" data-op='recheck' class="ajax-op recheck pure-button pure-button-primary">Recheck</a>
+                    <a href="/edit/f8f43046-6a4c-4eaa-9299-e5a988608a38#general" class="pure-button pure-button-primary">Edit</a>
+                    <a href="/diff/f8f43046-6a4c-4eaa-9299-e5a988608a38"  target=&#34;f8f43046-6a4c-4eaa-9299-e5a988608a38&#34; class="pure-button pure-button-primary history-link" style="display: none;">History</a>
+                    <a href="/preview/f8f43046-6a4c-4eaa-9299-e5a988608a38"  target=&#34;f8f43046-6a4c-4eaa-9299-e5a988608a38&#34; class="pure-button pure-button-primary preview-link" style="display: none;">Preview</a>
+                    </div>
+                </td>
+            </tr><tr id="962d397b-5b56-4971-852b-a78f6cf5e517" data-watch-uuid="962d397b-5b56-4971-852b-a78f6cf5e517" class="pure-table-even processor-text_json_diff no-restock-info single-history use-html-title">
+                <td class="inline checkbox-uuid" ><div><input name="uuids"  type="checkbox" value="962d397b-5b56-4971-852b-a78f6cf5e517 " > <span class="counter-i">8</span></div></td>
+                <td class="inline watch-controls">
+                    <div>
+                    <a class="ajax-op state-off pause-toggle" data-op="pause" href="/?op=pause&amp;uuid=962d397b-5b56-4971-852b-a78f6cf5e517"><img src="/static/images/pause.svg" alt="Pause checks" title="Pause checks" class="icon icon-pause" ></a>
+                    <a class="ajax-op state-on pause-toggle"  data-op="pause" style="display: none" href="/?op=pause&amp;uuid=962d397b-5b56-4971-852b-a78f6cf5e517"><img src="/static/images/play.svg" alt="UnPause checks" title="UnPause checks" class="icon icon-unpause" ></a>
+                    <a class="ajax-op state-off mute-toggle" data-op="mute" href="/?op=mute&amp;uuid=962d397b-5b56-4971-852b-a78f6cf5e517"><img src="/static/images/bell-off.svg" alt="Mute notification" title="Mute notification" class="icon icon-mute" ></a>
+                    <a class="ajax-op state-on mute-toggle" data-op="mute"  style="display: none" href="/?op=mute&amp;uuid=962d397b-5b56-4971-852b-a78f6cf5e517"><img src="/static/images/bell-off.svg" alt="UnMute notification" title="UnMute notification" class="icon icon-mute" ></a>
+                    </div>
+                </td>
+
+                <td class="title-col inline">
+                    <div class="flex-wrapper">
+
+                        <div>
+
+                            <img alt="Favicon thumbnail"
+                                 class="favicon lazy-favicon"
+                                 loading="lazy"
+                                 decoding="async"
+                                 fetchpriority="low"
+
+                                 src='data:image/svg+xml;utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="7.087" height="7.087" viewBox="0 0 7.087 7.087"%3E%3Ccircle cx="3.543" cy="3.543" r="3.279" stroke="%23e1e1e1" stroke-width="0.45" fill="none" opacity="0.74"/%3E%3C/svg%3E'>
+                        </div>
+
+                        <div><span class="processor-badge processor-badge-text_json_diff" title="Webpage Text/HTML, JSON and PDF changes">Text</span><span class="watch-title">
+
+                                    Proxmox Security Advisories
+
+                               <a class="external" target="_blank" rel="noopener" href="https://forum.proxmox.com/forums/security-advisories.26/">&nbsp;</a>
+                            </span>
+                            <div class="error-text" style="display:none;"></div><a href="/?tag=8cdfa862-4064-4e0b-bc54-1b71994efb3d" class="watch-tag-list tag-securityadvisories">security-advisories</a></div>
+                    <div class="status-icons">
+                            <a class="link-spread" href="/share-url/962d397b-5b56-4971-852b-a78f6cf5e517"><img src="/static/images/spread.svg" class="status-icon icon icon-spread" title="Create a link to share watch config with others" ></a></div>
+                    </div>
+                </td>
+                <td class="last-checked" data-timestamp="1774863360" data-fetchduration=-0.215 data-eta_complete="1774863359.785" >
+                    <div class="spinner-wrapper" style="display:none;" >
+                        <span class="spinner"></span><span class="status-text">&nbsp;Checking now</span>
+                    </div>
+                    <span class="innertext">58 minutes ago</span>
+                </td>
+                <td class="last-changed" data-timestamp="0">Not yet</td>
+                <td class="buttons">
+                    <div><a href="" class="already-in-queue-button recheck pure-button pure-button-primary" style="display: none;" disabled="disabled">Queued</a>
+                    <a href="/checknow?uuid=962d397b-5b56-4971-852b-a78f6cf5e517" data-op='recheck' class="ajax-op recheck pure-button pure-button-primary">Recheck</a>
+                    <a href="/edit/962d397b-5b56-4971-852b-a78f6cf5e517#general" class="pure-button pure-button-primary">Edit</a>
+                    <a href="/diff/962d397b-5b56-4971-852b-a78f6cf5e517"  target=&#34;962d397b-5b56-4971-852b-a78f6cf5e517&#34; class="pure-button pure-button-primary history-link" style="display: none;">History</a>
+                    <a href="/preview/962d397b-5b56-4971-852b-a78f6cf5e517"  target=&#34;962d397b-5b56-4971-852b-a78f6cf5e517&#34; class="pure-button pure-button-primary preview-link" style="display: none;">Preview</a>
+                    </div>
+                </td>
+            </tr><tr id="9de2df37-e18d-4d2a-a070-51369eacc424" data-watch-uuid="9de2df37-e18d-4d2a-a070-51369eacc424" class="pure-table-odd processor-text_json_diff no-restock-info single-history use-html-title">
+                <td class="inline checkbox-uuid" ><div><input name="uuids"  type="checkbox" value="9de2df37-e18d-4d2a-a070-51369eacc424 " > <span class="counter-i">9</span></div></td>
+                <td class="inline watch-controls">
+                    <div>
+                    <a class="ajax-op state-off pause-toggle" data-op="pause" href="/?op=pause&amp;uuid=9de2df37-e18d-4d2a-a070-51369eacc424"><img src="/static/images/pause.svg" alt="Pause checks" title="Pause checks" class="icon icon-pause" ></a>
+                    <a class="ajax-op state-on pause-toggle"  data-op="pause" style="display: none" href="/?op=pause&amp;uuid=9de2df37-e18d-4d2a-a070-51369eacc424"><img src="/static/images/play.svg" alt="UnPause checks" title="UnPause checks" class="icon icon-unpause" ></a>
+                    <a class="ajax-op state-off mute-toggle" data-op="mute" href="/?op=mute&amp;uuid=9de2df37-e18d-4d2a-a070-51369eacc424"><img src="/static/images/bell-off.svg" alt="Mute notification" title="Mute notification" class="icon icon-mute" ></a>
+                    <a class="ajax-op state-on mute-toggle" data-op="mute"  style="display: none" href="/?op=mute&amp;uuid=9de2df37-e18d-4d2a-a070-51369eacc424"><img src="/static/images/bell-off.svg" alt="UnMute notification" title="UnMute notification" class="icon icon-mute" ></a>
+                    </div>
+                </td>
+
+                <td class="title-col inline">
+                    <div class="flex-wrapper">
+
+                        <div>
+
+                            <img alt="Favicon thumbnail"
+                                 class="favicon lazy-favicon"
+                                 loading="lazy"
+                                 decoding="async"
+                                 fetchpriority="low"
+
+                                 src='data:image/svg+xml;utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="7.087" height="7.087" viewBox="0 0 7.087 7.087"%3E%3Ccircle cx="3.543" cy="3.543" r="3.279" stroke="%23e1e1e1" stroke-width="0.45" fill="none" opacity="0.74"/%3E%3C/svg%3E'>
+                        </div>
+
+                        <div><span class="processor-badge processor-badge-text_json_diff" title="Webpage Text/HTML, JSON and PDF changes">Text</span><span class="watch-title">
+
+                                    Uptime Kuma Docker Tags
+
+                               <a class="external" target="_blank" rel="noopener" href="https://hub.docker.com/v2/repositories/louislam/uptime-kuma/tags?page_size=1&amp;ordering=last_updated">&nbsp;</a>
+                            </span>
+                            <div class="error-text" style="display:none;"></div><a href="/?tag=90f616fc-34a4-4099-b0b5-2af414df6030" class="watch-tag-list tag-dependencyfeeds">dependency-feeds</a></div>
+                    <div class="status-icons">
+                            <a class="link-spread" href="/share-url/9de2df37-e18d-4d2a-a070-51369eacc424"><img src="/static/images/spread.svg" class="status-icon icon icon-spread" title="Create a link to share watch config with others" ></a></div>
+                    </div>
+                </td>
+                <td class="last-checked" data-timestamp="1774859760" data-fetchduration=0.859 data-eta_complete="1774859760.859" >
+                    <div class="spinner-wrapper" style="display:none;" >
+                        <span class="spinner"></span><span class="status-text">&nbsp;Checking now</span>
+                    </div>
+                    <span class="innertext">1 hour ago</span>
+                </td>
+                <td class="last-changed" data-timestamp="0">Not yet</td>
+                <td class="buttons">
+                    <div><a href="" class="already-in-queue-button recheck pure-button pure-button-primary" style="display: none;" disabled="disabled">Queued</a>
+                    <a href="/checknow?uuid=9de2df37-e18d-4d2a-a070-51369eacc424" data-op='recheck' class="ajax-op recheck pure-button pure-button-primary">Recheck</a>
+                    <a href="/edit/9de2df37-e18d-4d2a-a070-51369eacc424#general" class="pure-button pure-button-primary">Edit</a>
+                    <a href="/diff/9de2df37-e18d-4d2a-a070-51369eacc424"  target=&#34;9de2df37-e18d-4d2a-a070-51369eacc424&#34; class="pure-button pure-button-primary history-link" style="display: none;">History</a>
+                    <a href="/preview/9de2df37-e18d-4d2a-a070-51369eacc424"  target=&#34;9de2df37-e18d-4d2a-a070-51369eacc424&#34; class="pure-button pure-button-primary preview-link" style="display: none;">Preview</a>
+                    </div>
+                </td>
+            </tr></tbody>
+        </table>
+        <ul id="post-list-buttons">
+            <li id="post-list-with-errors" style="display: none;" >
+                <a href="/?with_errors=1" class="pure-button button-tag button-error">With errors (1)</a>
+            </li>
+            <li id="post-list-mark-views" style="display: none;" >
+                <a href="/form/mark-all-viewed?with_errors=0" class="pure-button button-tag " id="mark-all-viewed">Mark all viewed</a>
+            </li><li id="post-list-unread" style="display: none;" >
+                <a href="/?unread=1" class="pure-button button-tag">Unread (<span id="unread-tab-counter">0</span>)</a>
+            </li>
+            <li>
+               <a href="/checknow?with_errors=0" class="pure-button button-tag" id="recheck-all">Recheck all </a>
+            </li>
+            <li>
+                <a href="/rss?token=ca5d5a8e3141799a26f8acb10f9a67a9"><img alt="RSS Feed" id="feed-icon" src="/static/images/generic_feed-icon.svg" height="15"></a>
+            </li>
+        </ul>
+
+    </div>
+    </form>
+</div>
+          </div>
+        </div>
+    </section>
+    <script src="/static/js/toggle-theme.js" defer></script>
+    <script src="/static/js/hamburger-menu.js" defer></script>
+
+    <div id="checking-now-fixed-tab" style="display: none;"><span class="spinner"></span><span class="status-text">&nbsp;Checking now</span></div>
+    <div id="realtime-conn-error" style="display:none">Real-time updates offline</div>
+
+
+    <!-- Language Selection Modal -->
+    <dialog id="language-modal" class="modal-dialog" aria-labelledby="language-modal-title">
+      <div class="modal-header">
+        <h2 class="modal-title" id="language-modal-title">Select Language</h2>
+      </div>
+      <div class="modal-body">
+        <div class="language-list">
+
+          <a href="/set-language/cs?redirect=/" class="language-option" data-locale="cs">
+            <span class="lang-option fi fi-cz fis"></span> <span class="language-name">Čeština</span>
+          </a>
+
+          <a href="/set-language/de?redirect=/" class="language-option" data-locale="de">
+            <span class="lang-option fi fi-de fis"></span> <span class="language-name">Deutsch</span>
+          </a>
+
+          <a href="/set-language/en_GB?redirect=/" class="language-option" data-locale="en_GB">
+            <span class="lang-option fi fi-gb fis"></span> <span class="language-name">English (UK)</span>
+          </a>
+
+          <a href="/set-language/en_US?redirect=/" class="language-option" data-locale="en_US">
+            <span class="lang-option fi fi-us fis"></span> <span class="language-name">English (US)</span>
+          </a>
+
+          <a href="/set-language/es?redirect=/" class="language-option" data-locale="es">
+            <span class="lang-option fi fi-es fis"></span> <span class="language-name">Español</span>
+          </a>
+
+          <a href="/set-language/fr?redirect=/" class="language-option" data-locale="fr">
+            <span class="lang-option fi fi-fr fis"></span> <span class="language-name">Français</span>
+          </a>
+
+          <a href="/set-language/it?redirect=/" class="language-option" data-locale="it">
+            <span class="lang-option fi fi-it fis"></span> <span class="language-name">Italiano</span>
+          </a>
+
+          <a href="/set-language/ko?redirect=/" class="language-option" data-locale="ko">
+            <span class="lang-option fi fi-kr fis"></span> <span class="language-name">한국어</span>
+          </a>
+
+          <a href="/set-language/uk?redirect=/" class="language-option" data-locale="uk">
+            <span class="lang-option fi fi-ua fis"></span> <span class="language-name">Українська</span>
+          </a>
+
+          <a href="/set-language/zh?redirect=/" class="language-option" data-locale="zh">
+            <span class="lang-option fi fi-cn fis"></span> <span class="language-name">中文 (简体)</span>
+          </a>
+
+          <a href="/set-language/zh_Hant_TW?redirect=/" class="language-option" data-locale="zh_Hant_TW">
+            <span class="lang-option fi fi-tw fis"></span> <span class="language-name">繁體中文</span>
+          </a>
+
+        </div>
+        <div>
+            <a href="/language/auto-detect?redirect=/" >Auto-detect from browser</a>
+        </div>
+        <div>
+            Language support is in beta, please help us improve by opening a PR on GitHub with any updates.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="pure-button" id="close-language-modal">Cancel</button>
+      </div>
+    </dialog>
+
+    <!-- Search Modal -->
+
+    <dialog id="search-modal" class="modal-dialog" aria-labelledby="search-modal-title">
+      <div class="modal-header">
+        <h2 class="modal-title" id="search-modal-title">Search</h2>
+      </div>
+      <div class="modal-body">
+        <form id="search-form" method="GET">
+          <div class="pure-control-group">
+            <label for="search-modal-input">URL or Title</label>
+            <input id="search-modal-input" class="m-d" name="q" placeholder="Enter search term..." required type="text" value="" autofocus>
+            <input name="tags" type="hidden" value="">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="pure-button button-cancel" id="close-search-modal">Cancel</button>
+        <button type="submit" form="search-form" class="pure-button pure-button-primary">Search</button>
+      </div>
+    </dialog>
+
+
+
+  <script>
+  (function() {
+      /* AUTOMATIC TAB COLUMN-IZER FOR WHEN TABS WRAP */
+    // Exit early if no tabs on page
+    if (!document.querySelector('.tab')) return;
+
+    const cache = new Map();
+
+    function checkWrapping(ul) {
+      const tabs = ul.querySelectorAll('.tab');
+      if (tabs.length < 2) return false;
+
+      // Init cache on first run
+      if (!cache.has(ul)) {
+        ul.style.setProperty('--tab-width', '');
+        void ul.offsetHeight;
+        let max = 0;
+        tabs.forEach(t => max = Math.max(max, t.offsetWidth));
+        cache.set(ul, max);
+      }
+
+      // Temporarily use flex wrap to check if wrapping occurs
+      ul.style.display = 'flex';
+      ul.style.flexWrap = 'wrap';
+      void ul.offsetHeight;
+
+      const top = tabs[0].offsetTop;
+      const wrapped = Array.from(tabs).some((t, i) => i > 0 && t.offsetTop !== top);
+
+      // Reset display to use CSS grid
+      ul.style.display = '';
+      ul.style.flexWrap = '';
+
+      // Set CSS variable for wrapped mode
+      if (wrapped) {
+        ul.style.setProperty('--tab-width', `${cache.get(ul) + 10}px`);
+      } else {
+        ul.style.setProperty('--tab-width', '');
+      }
+
+      return wrapped;
+    }
+
+    function check() {
+      let any = false;
+      document.querySelectorAll('ul').forEach(ul => {
+        if (ul.querySelector('.tab') && checkWrapping(ul)) any = true;
+      });
+      document.body.classList.toggle('wrapped-tabs', any);
+    }
+
+    check();
+    let timer;
+    window.addEventListener('resize', () => {
+      clearTimeout(timer);
+      timer = setTimeout(check, 100);
+    });
+
+    // Re-check wrapping when tabs are switched via anchors
+    window.addEventListener('hashchange', () => {
+      clearTimeout(timer);
+      // Use requestAnimationFrame + setTimeout to ensure DOM has settled
+      requestAnimationFrame(() => {
+        timer = setTimeout(check, 0);
+      });
+    });
+  })();
+  </script>
+
+
+    <script src="/static/js/language-selector.js" defer></script>
+    <script src="/static/js/search-modal.js" defer></script>
+    <script src="/static/js/toast.js"></script>
+    <script src="/static/js/flask-toast-bridge.js" defer></script>
+  </body>
+
+</html>

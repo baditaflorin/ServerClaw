@@ -90,11 +90,32 @@ def schedule_payload(spec: dict) -> dict:
     return {
         "schedule": spec["schedule"],
         "timezone": spec["timezone"],
+        "script_path": spec["script_path"],
+        "is_flow": False,
         "args": spec.get("args", {}),
+        "enabled": spec.get("enabled", False),
         "summary": spec["summary"],
         "description": spec["description"],
         "no_flow_overlap": spec.get("no_flow_overlap", True),
     }
+
+
+def script_exists(*, base_url: str, workspace: str, token: str, script_path: str, timeout_s: float) -> bool:
+    status, _ = request_json_or_text(
+        base_url=base_url,
+        workspace=workspace,
+        token=token,
+        path=f"scripts/get/p/{urllib.parse.quote(script_path, safe='')}",
+        method="GET",
+        expected_statuses=(200, 404),
+        timeout_s=timeout_s,
+    )
+    return status == 200
+
+
+def is_missing_schedule_target_error(message: str) -> bool:
+    normalized = message.lower()
+    return "script not found at name" in normalized or "flow not found at name" in normalized
 
 
 def schedule_exists(*, base_url: str, workspace: str, token: str, schedule_path: str, timeout_s: float) -> bool:
@@ -133,21 +154,28 @@ def create_schedule(*, base_url: str, workspace: str, token: str, spec: dict, ti
         expected_statuses=(200, 201, 400),
         timeout_s=timeout_s,
     )
+    if status == 400 and is_missing_schedule_target_error(body):
+        raise RetryableSyncError(f"create {spec['path']} returned 400: {body[:500]}")
     if status == 400 and "already exists" not in body.lower():
         raise SyncError(f"create {spec['path']} returned 400: {body[:500]}")
 
 
 def update_schedule(*, base_url: str, workspace: str, token: str, spec: dict, timeout_s: float) -> None:
-    request_json_or_text(
-        base_url=base_url,
-        workspace=workspace,
-        token=token,
-        path=f"schedules/update/{urllib.parse.quote(spec['path'], safe='')}",
-        method="POST",
-        payload=schedule_payload(spec),
-        expected_statuses=(200,),
-        timeout_s=timeout_s,
-    )
+    try:
+        request_json_or_text(
+            base_url=base_url,
+            workspace=workspace,
+            token=token,
+            path=f"schedules/update/{urllib.parse.quote(spec['path'], safe='')}",
+            method="POST",
+            payload=schedule_payload(spec),
+            expected_statuses=(200,),
+            timeout_s=timeout_s,
+        )
+    except SyncError as exc:
+        if is_missing_schedule_target_error(str(exc)):
+            raise RetryableSyncError(str(exc)) from exc
+        raise
 
 
 def sync_schedule(
@@ -166,6 +194,14 @@ def sync_schedule(
         nonlocal attempts
         attempts += 1
         try:
+            if not script_exists(
+                base_url=base_url,
+                workspace=workspace,
+                token=token,
+                script_path=spec["script_path"],
+                timeout_s=request_timeout_s,
+            ):
+                raise RetryableSyncError(f"script target {spec['script_path']} is not visible yet")
             if schedule_exists(
                 base_url=base_url,
                 workspace=workspace,

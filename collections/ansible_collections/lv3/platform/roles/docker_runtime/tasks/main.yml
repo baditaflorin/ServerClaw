@@ -1,4 +1,25 @@
 ---
+# Purpose: Install and configure Docker Engine, its network prerequisites, and the publication assurance helper on managed Debian guests.
+# Use case: Run from the docker_runtime role during converge of the shared Docker hosts.
+#
+# Inputs (required):
+#   - docker_runtime_prereq_packages, docker_runtime_conflicting_packages, docker_runtime_engine_packages
+#   - docker_runtime_admin_users, docker_runtime_apt_key_url, docker_runtime_apt_keyring_path
+#   - docker_runtime_apt_repo_file, docker_runtime_apt_repo_uri
+#
+# Inputs (optional):
+#   - docker_runtime_* overrides for daemon config, public-edge aliases, bridge-chain checks, and helper install path.
+#
+# Outputs:
+#   - Docker Engine installed, configured, and prepared for bridge/NAT recovery and service publication verification.
+#
+# Idempotency: Fully idempotent
+#              Package, file, and service tasks reconcile managed state and only change the host when drift exists.
+#
+# Dependencies:
+#   - ADR 0023: Docker runtime VM baseline.
+#   - ADR 0270: Docker publication self-healing and port-programming assertions.
+#   - Role: lv3.platform.common - shared assertion, directory, and bridge-chain helpers.
 - name: Validate Docker runtime inputs
   ansible.builtin.include_role:
     name: lv3.platform.common
@@ -20,6 +41,7 @@
     name: "{{ docker_runtime_prereq_packages }}"
     state: present
     update_cache: true
+    lock_timeout: 300
     force_apt_get: true
 
 - name: Ensure Docker-managed directories exist
@@ -47,12 +69,14 @@
   ansible.builtin.apt:
     name: "{{ docker_runtime_conflicting_packages }}"
     state: absent
+    lock_timeout: 300
 
 - name: Install Docker runtime packages
   ansible.builtin.apt:
     name: "{{ docker_runtime_engine_packages }}"
     state: present
     update_cache: true
+    lock_timeout: 300
     force_apt_get: true
 
 - name: Ensure docker admin group exists
@@ -67,12 +91,39 @@
     append: true
   loop: "{{ docker_runtime_admin_users }}"
 
+- name: Pin public edge hostnames to the internal edge for Docker guests
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^\s*\d+\.\d+\.\d+\.\d+\s+{{ item | regex_escape() }}(?:\s|$)'
+    line: "{{ docker_runtime_public_edge_ipv4 }} {{ item }}"
+    state: present
+  loop: "{{ docker_runtime_public_edge_host_aliases | default([]) }}"
+  when:
+    - docker_runtime_public_edge_ipv4 | default('') | length > 0
+    - item | length > 0
+
 - name: Render Docker daemon configuration
   ansible.builtin.template:
     src: daemon.json.j2
     dest: /etc/docker/daemon.json
     mode: "0644"
   notify: Restart Docker
+
+- name: Install the Docker publication assurance helper
+  ansible.builtin.copy:
+    content: >-
+      {{
+        lookup(
+          'ansible.builtin.file',
+          lookup('ansible.builtin.pipe', 'git -C ' ~ (playbook_dir | quote) ~ ' rev-parse --show-toplevel')
+          ~ '/scripts/docker_publication_assurance.py'
+        )
+      }}
+    dest: "{{ docker_runtime_publication_assurance_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
 - name: Check whether nftables config exists
   ansible.builtin.stat:
     path: "{{ docker_runtime_nftables_config_file }}"
@@ -89,7 +140,8 @@
 
 - name: Build the Docker bridge forward-compat rule block
   ansible.builtin.set_fact:
-    docker_runtime_container_forward_rules: "{{ docker_runtime_container_forward_source_cidrs | map('regex_replace', '^(.*)$', 'ip saddr \\1 accept') | list }}"
+    docker_runtime_container_forward_rule_lines: "{{ docker_runtime_container_forward_source_cidrs | map('regex_replace', '^(.*)$', 'ip saddr \\1 accept') | list }}"
+    docker_runtime_container_forward_rule_block: "{{ docker_runtime_container_forward_source_cidrs | map('regex_replace', '^(.*)$', 'ip saddr \\1 accept') | join('\n') }}"
     docker_runtime_nftables_config_current: "{{ docker_runtime_nftables_config_raw.content | b64decode }}"
   when:
     - docker_runtime_container_forward_compat_enabled | bool
@@ -98,13 +150,13 @@
 - name: Patch nftables forward policy for Docker bridge egress
   ansible.builtin.lineinfile:
     path: "{{ docker_runtime_nftables_config_file }}"
-    line: "    {{ item }}"
-    insertafter: '^\s*ct state established,related accept$'
-  loop: "{{ docker_runtime_container_forward_rules }}"
+    line: "    ip saddr {{ item }} accept"
+    insertafter: '^\s*ct state (established,related|related,established) accept$'
+  loop: "{{ docker_runtime_container_forward_source_cidrs | reverse | list }}"
   when:
     - docker_runtime_container_forward_compat_enabled | bool
     - docker_runtime_nftables_config_stat.stat.exists
-    - item not in docker_runtime_nftables_config_current
+    - ("ip saddr " ~ item ~ " accept") not in docker_runtime_nftables_config_current
   register: docker_runtime_nftables_forward_patch
 
 - name: Read the nftables config after forward compatibility patch
@@ -118,21 +170,64 @@
 - name: Assert the Docker bridge forward-compat rule is present
   ansible.builtin.assert:
     that:
-      - docker_runtime_container_forward_rules | difference((docker_runtime_nftables_config_after.content | b64decode).splitlines() | map('trim') | list) | length == 0
+      - ("ip saddr " ~ item ~ " accept") in (docker_runtime_nftables_config_after.content | b64decode)
     fail_msg: >-
-      Existing nftables config did not accept the Docker bridge forward-compat patch; update
-      {{ docker_runtime_nftables_config_file }} before rerunning the Docker runtime converge.
+      Existing nftables config did not accept the Docker bridge forward-compat rule for {{ item }};
+      update {{ docker_runtime_nftables_config_file }} before rerunning the Docker runtime converge.
+  loop: "{{ docker_runtime_container_forward_source_cidrs }}"
   when:
     - docker_runtime_container_forward_compat_enabled | bool
     - docker_runtime_nftables_config_stat.stat.exists
 
-- name: Reload nftables after forward compatibility patch
-  ansible.builtin.command: "nft -f {{ docker_runtime_nftables_config_file }}"
-  changed_when: docker_runtime_nftables_forward_patch.results | selectattr('changed') | list | length > 0
+- name: Read the live nftables forward chain
+  ansible.builtin.command: nft list chain inet filter forward
+  register: docker_runtime_nftables_forward_chain_live
+  changed_when: false
+  failed_when: false
   when:
     - docker_runtime_container_forward_compat_enabled | bool
     - docker_runtime_nftables_config_stat.stat.exists
-    - docker_runtime_nftables_forward_patch.results | selectattr('changed') | list | length > 0
+
+- name: Apply Docker bridge forward-compat rules live without reloading nftables
+  ansible.builtin.command:
+    argv:
+      - nft
+      - add
+      - rule
+      - inet
+      - filter
+      - forward
+      - ip
+      - saddr
+      - "{{ item }}"
+      - accept
+  loop: "{{ docker_runtime_container_forward_source_cidrs }}"
+  register: docker_runtime_nftables_forward_live_patch
+  changed_when: true
+  when:
+    - docker_runtime_container_forward_compat_enabled | bool
+    - docker_runtime_nftables_config_stat.stat.exists
+    - ("ip saddr " ~ item ~ " accept") not in (docker_runtime_nftables_forward_chain_live.stdout | default(''))
+
+- name: Read the live nftables forward chain after incremental patch
+  ansible.builtin.command: nft list chain inet filter forward
+  register: docker_runtime_nftables_forward_chain_after
+  changed_when: false
+  when:
+    - docker_runtime_container_forward_compat_enabled | bool
+    - docker_runtime_nftables_config_stat.stat.exists
+
+- name: Assert the live Docker bridge forward-compat rules are present
+  ansible.builtin.assert:
+    that:
+      - ("ip saddr " ~ item ~ " accept") in docker_runtime_nftables_forward_chain_after.stdout
+    fail_msg: >-
+      The live nftables forward chain is missing the Docker bridge forward-compat rule for {{ item }};
+      apply the rule set manually before rerunning the Docker runtime converge.
+  loop: "{{ docker_runtime_container_forward_source_cidrs }}"
+  when:
+    - docker_runtime_container_forward_compat_enabled | bool
+    - docker_runtime_nftables_config_stat.stat.exists
 
 - name: Ensure Docker service is enabled and running
   ansible.builtin.include_role:
@@ -144,61 +239,20 @@
 - name: Flush Docker handlers before chain health checks
   ansible.builtin.meta: flush_handlers
 
-- name: Check whether Docker nat chain exists
-  ansible.builtin.command: iptables -t nat -S DOCKER
-  register: docker_runtime_nat_chain_check
+- name: Reset Docker failed state before nat-chain recovery restart
+  ansible.builtin.command: systemctl reset-failed docker.service
   changed_when: false
-  failed_when: docker_runtime_nat_chain_check.rc not in [0, 1]
   when: docker_runtime_require_nat_chain | bool
 
-- name: Check whether Docker forward chain exists
-  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
-  register: docker_runtime_forward_chain_check
-  changed_when: false
-  failed_when: docker_runtime_forward_chain_check.rc not in [0, 1]
-  when: docker_runtime_require_nat_chain | bool
-
-- name: Restart Docker when required chains are missing
-  ansible.builtin.systemd:
-    name: docker
-    state: restarted
-  when:
-    - docker_runtime_require_nat_chain | bool
-    - docker_runtime_nat_chain_check.rc == 1 or docker_runtime_forward_chain_check.rc == 1
-
-- name: Recheck Docker nat chain after restart
-  ansible.builtin.command: iptables -t nat -S DOCKER
-  register: docker_runtime_nat_chain_recheck
-  changed_when: false
-  failed_when: docker_runtime_nat_chain_recheck.rc not in [0, 1]
-  retries: 10
-  delay: 2
-  until: docker_runtime_nat_chain_recheck.rc == 0
-  when: docker_runtime_require_nat_chain | bool
-
-- name: Recheck Docker forward chain after restart
-  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
-  register: docker_runtime_forward_chain_recheck
-  changed_when: false
-  failed_when: docker_runtime_forward_chain_recheck.rc not in [0, 1]
-  retries: 10
-  delay: 2
-  until: docker_runtime_forward_chain_recheck.rc == 0
-  when: docker_runtime_require_nat_chain | bool
-
-- name: Assert Docker nat chain is present
-  ansible.builtin.assert:
-    that:
-      - docker_runtime_nat_chain_recheck.rc == 0
-    fail_msg: "Docker is running but the nat DOCKER chain is missing; published ports will fail."
-  when: docker_runtime_require_nat_chain | bool
-
-- name: Assert Docker filter forward chain is present
-  ansible.builtin.assert:
-    that:
-      - docker_runtime_forward_chain_recheck.rc == 0
-    fail_msg: "Docker is running but the filter DOCKER-FORWARD chain is missing; bridge networking will fail."
-  when: docker_runtime_require_nat_chain | bool
+- name: Ensure Docker bridge networking chains are present
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: "{{ docker_runtime_require_nat_chain }}"
+    common_docker_bridge_chains_retries: "{{ docker_runtime_chain_recheck_retries }}"
+    common_docker_bridge_chains_delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
 
 - name: Verify Docker runtime health probes
   ansible.builtin.import_tasks: verify.yml

@@ -66,18 +66,25 @@ def service_topology_edge_sites(catalog):
             site["slug"] = edge["slug"]
         elif kind == "proxy":
             site["upstream"] = edge["upstream"]
-            if "aliases" in edge:
-                site["aliases"] = edge["aliases"]
-            if "root_proxy_path" in edge:
-                site["root_proxy_path"] = edge["root_proxy_path"]
-            if "proxy_hide_headers" in edge:
-                site["proxy_hide_headers"] = edge["proxy_hide_headers"]
-            if "blocked_exact_paths" in edge:
-                site["blocked_exact_paths"] = edge["blocked_exact_paths"]
-            if "server_sent_events" in edge:
-                site["server_sent_events"] = edge["server_sent_events"]
-            if "prefix_proxy_routes" in edge:
-                site["prefix_proxy_routes"] = edge["prefix_proxy_routes"]
+            for optional_field in (
+                "aliases",
+                "blocked_exact_paths",
+                "chunked_transfer_encoding",
+                "client_max_body_size",
+                "crawl_policy_enabled",
+                "exact_redirects",
+                "prefix_proxy_routes",
+                "preserve_upstream_security_headers",
+                "proxy_hide_headers",
+                "proxy_read_timeout_seconds",
+                "proxy_request_buffering",
+                "proxy_send_timeout_seconds",
+                "root_proxy_path",
+                "security_headers_enabled",
+                "server_sent_events",
+            ):
+                if optional_field in edge:
+                    site[optional_field] = edge[optional_field]
         else:
             raise AnsibleFilterError(
                 f"service {service_id} has unsupported edge kind: {kind}"

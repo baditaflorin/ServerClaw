@@ -31,6 +31,11 @@ api_gateway_shared_local_root: >-
     ~ '/.local'
   }}
 api_gateway_tree_sync_specs:
+  - name: gitea workflow tree required by packaged workflow implementation refs
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: .gitea
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/gitea-sync.tar.gz"
   - name: ansible collection tree required by packaged workflow implementation refs
     archive_root: "{{ api_gateway_repo_root }}"
     source: collections
@@ -126,6 +131,8 @@ api_gateway_circuit_policies_src: "{{ api_gateway_repo_root }}/config/circuit-po
 api_gateway_ledger_event_types_src: "{{ api_gateway_repo_root }}/config/ledger-event-types.yaml"
 api_gateway_event_taxonomy_src: "{{ api_gateway_repo_root }}/config/event-taxonomy.yaml"
 api_gateway_timeout_hierarchy_src: "{{ api_gateway_repo_root }}/config/timeout-hierarchy.yaml"
+api_gateway_runtime_assurance_matrix_src: "{{ api_gateway_repo_root }}/config/runtime-assurance-matrix.json"
+api_gateway_environment_topology_src: "{{ api_gateway_repo_root }}/config/environment-topology.json"
 api_gateway_platform_vars_src: "{{ api_gateway_repo_root }}/inventory/group_vars/platform.yml"
 api_gateway_drift_receipts_glob: "{{ api_gateway_repo_root }}/receipts/drift-reports/*.json"
 api_gateway_platform_context_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt
@@ -155,6 +162,8 @@ api_gateway_sources:
     dest: maintenance_window_tool.py
   - src: "{{ api_gateway_repo_root }}/scripts/slo_tracking.py"
     dest: slo_tracking.py
+  - src: "{{ api_gateway_repo_root }}/scripts/runtime_assurance.py"
+    dest: runtime_assurance.py
   - src: "{{ api_gateway_repo_root }}/scripts/api_gateway/__init__.py"
     dest: api_gateway/__init__.py
   - src: "{{ api_gateway_repo_root }}/scripts/api_gateway/main.py"
@@ -196,6 +205,10 @@ api_gateway_config_sources:
     dest: event-taxonomy.yaml
   - src: "{{ api_gateway_timeout_hierarchy_src }}"
     dest: timeout-hierarchy.yaml
+  - src: "{{ api_gateway_runtime_assurance_matrix_src }}"
+    dest: runtime-assurance-matrix.json
+  - src: "{{ api_gateway_environment_topology_src }}"
+    dest: environment-topology.json
   - src: "{{ api_gateway_platform_vars_src }}"
     dest: platform.yml
 api_gateway_keycloak_internal_base_url: http://127.0.0.1:18080
@@ -203,8 +216,15 @@ api_gateway_keycloak_jwks_url: "{{ api_gateway_keycloak_internal_base_url }}/rea
 api_gateway_keycloak_issuer_url: https://sso.lv3.org/realms/lv3
 api_gateway_keycloak_token_url: https://sso.lv3.org/realms/lv3/protocol/openid-connect/token
 api_gateway_keycloak_verify_base_url: http://127.0.0.1:18080
+api_gateway_keycloak_verify_ready_retries: 24
+api_gateway_keycloak_verify_ready_delay: 5
+api_gateway_keycloak_verify_token_retries: 18
+api_gateway_keycloak_verify_token_delay: 5
 api_gateway_keycloak_docker_network: keycloak_default
 api_gateway_runtime_config_probe_path: /app/config/ledger-event-types.yaml
+api_gateway_runtime_packaged_probe_paths:
+  - /app/.gitea/workflows/release-bundle.yml
+  - /app/.github/workflows/validate.yml
 api_gateway_database_name: windmill
 api_gateway_database_user: windmill_admin
 api_gateway_database_inventory_host: >-

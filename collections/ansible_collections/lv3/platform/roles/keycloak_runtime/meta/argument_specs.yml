@@ -1,3 +1,9 @@
+# Purpose: Declare the supported input contract for the Keycloak runtime role.
+# Use case: Loaded by Ansible to validate required Keycloak runtime variables before execution.
+# Inputs: Role variables covering topology, bootstrap identities, runtime secrets, and delegated-auth settings.
+# Outputs: Provides argument specifications used by Ansible role validation.
+# Idempotency: Fully idempotent because this file only documents the role interface.
+# Dependencies: ADR 0165 and ADR 0262.
 ---
 argument_specs:
   main:
@@ -38,6 +44,16 @@ argument_specs:
         required: true
         description:
           - Compose file path for the runtime stack.
+      keycloak_compose_project_name:
+        type: str
+        required: true
+        description:
+          - Compose project name used for runtime network cleanup during forced replays.
+      keycloak_compose_network_name:
+        type: str
+        required: true
+        description:
+          - Managed compose network name removed before forced Keycloak recovery replays.
       keycloak_env_file:
         type: path
         required: true
@@ -132,7 +148,7 @@ argument_specs:
         type: path
         required: true
         description:
-          - Controller-local file containing the managed mailbox password used for Keycloak mail submission.
+          - Controller-local file containing the managed mailbox password used for Keycloak mail submission when SMTP auth is enabled.
       keycloak_mail_platform_submission_host:
         type: str
         required: true
@@ -148,11 +164,16 @@ argument_specs:
         required: true
         description:
           - Whether Keycloak should negotiate STARTTLS on the configured submission listener.
+      keycloak_mail_platform_submission_auth_enabled:
+        type: bool
+        required: true
+        description:
+          - Whether Keycloak should authenticate to the configured SMTP relay.
       keycloak_mail_platform_docker_network_name:
         type: str
         required: true
         description:
-          - External Docker network name Keycloak joins so it can reach the Stalwart relay directly.
+          - External Docker network name Keycloak joins so it can reach the configured SMTP relay directly.
       keycloak_mail_platform_from_address:
         type: str
         required: true
@@ -188,6 +209,16 @@ argument_specs:
         required: true
         description:
           - Controller-local file used to mirror the operations portal client secret.
+      keycloak_serverclaw_client_id:
+        type: str
+        required: true
+        description:
+          - OIDC client id used by the public ServerClaw surface.
+      keycloak_serverclaw_client_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the ServerClaw client secret.
       keycloak_agent_client_id:
         type: str
         required: true
@@ -208,6 +239,16 @@ argument_specs:
         required: true
         description:
           - Controller-local file used to mirror the API gateway client secret.
+      keycloak_serverclaw_runtime_client_id:
+        type: str
+        required: true
+        description:
+          - Confidential client id used by the ServerClaw runtime client-credentials flow.
+      keycloak_serverclaw_runtime_client_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the ServerClaw runtime client secret.
       keycloak_grafana_groups:
         type: dict
         required: true
@@ -229,6 +270,21 @@ argument_specs:
         required: true
         description:
           - Loopback-only Keycloak admin API URL used for bootstrap.
+      keycloak_admin_connection_timeout:
+        type: int
+        required: true
+        description:
+          - Timeout in seconds for repo-managed Keycloak admin module requests.
+      keycloak_admin_reconciliation_retries:
+        type: int
+        required: true
+        description:
+          - Retry attempts for transient failures in repo-managed Keycloak admin module reconciliation.
+      keycloak_admin_reconciliation_delay:
+        type: int
+        required: true
+        description:
+          - Delay in seconds between repo-managed Keycloak admin module reconciliation retries.
       keycloak_grafana_root_url:
         type: str
         required: true
@@ -239,3 +295,8 @@ argument_specs:
         required: true
         description:
           - Public operations portal base URL used when provisioning redirect URIs.
+      keycloak_serverclaw_root_url:
+        type: str
+        required: true
+        description:
+          - Public ServerClaw base URL used when provisioning redirect URIs.

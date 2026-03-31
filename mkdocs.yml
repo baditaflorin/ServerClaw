@@ -20,7 +20,6 @@ theme:
       accent: amber
 
 plugins:
-  - search
   - swagger-ui-tag:
       validatorUrl: "none"
       filter_files:
@@ -39,6 +38,10 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
+
+validation:
+  nav:
+    omitted_files: ignore
 
 nav:
   - Home: index.md

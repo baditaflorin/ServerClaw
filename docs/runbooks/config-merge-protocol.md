@@ -115,9 +115,12 @@ Verify the live database and Windmill seeds after `make converge-windmill`:
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.50 \
   "psql -d windmill -Atqc \"SELECT to_regclass('public.config_change_staging')\""
 
-curl -s \
-  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
-  http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fconfig_merge%2Fmerge_config_changes
+WINDMILL_TOKEN="$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+python3 scripts/windmill_run_wait_result.py \
+  --base-url http://100.64.0.1:8005 \
+  --workspace lv3 \
+  --path f/lv3/config_merge/merge_config_changes \
+  --payload-json '{}'
 ```
 
 Expected results:

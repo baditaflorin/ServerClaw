@@ -1,0 +1,46 @@
+# Purpose: Declare the supported input contract for the Temporal PostgreSQL helper role.
+# Use case: Loaded by Ansible to validate database bootstrap variables before the role runs.
+# Inputs: Temporal database names, secret paths, and controller-local password inputs.
+# Outputs: Provides argument specifications used by Ansible role validation.
+# Idempotency: Fully idempotent because this file only documents the role interface.
+# Dependencies: ADR 0165 and ADR 0293.
+---
+argument_specs:
+  main:
+    short_description: Provision the PostgreSQL role and databases required by Temporal.
+    options:
+      temporal_database_name:
+        type: str
+        required: true
+        description:
+          - PostgreSQL database name that Temporal should use for workflow history.
+      temporal_visibility_database_name:
+        type: str
+        required: true
+        description:
+          - PostgreSQL database name that Temporal should use for visibility records.
+      temporal_database_user:
+        type: str
+        required: true
+        description:
+          - PostgreSQL login role used by Temporal.
+      temporal_postgres_secret_dir:
+        type: path
+        required: true
+        description:
+          - Guest-local directory where the generated database password is stored.
+      temporal_postgres_password_file:
+        type: path
+        required: true
+        description:
+          - Guest-local file containing the generated database password.
+      temporal_local_artifact_dir:
+        type: path
+        required: true
+        description:
+          - Controller-local directory used to mirror Temporal bootstrap artifacts.
+      temporal_database_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the database password.

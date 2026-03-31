@@ -139,16 +139,66 @@
             or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
           }}
 
+    - name: Detect stale Docker networking drift during Ollama startup
+      ansible.builtin.set_fact:
+        ollama_runtime_compose_network_missing: >-
+          {{
+            'failed to create endpoint' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+            and 'does not exist' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+          }}
+
     - name: Surface unexpected Ollama startup failures
       ansible.builtin.fail:
         msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('ollama compose up failed')) }}"
-      when: not ollama_runtime_docker_nat_chain_missing
+      when:
+        - not ollama_runtime_docker_nat_chain_missing
+        - not ollama_runtime_compose_network_missing
 
     - name: Restart Docker to restore nat chain before retrying Ollama startup
       ansible.builtin.service:
         name: docker
         state: restarted
       when: ollama_runtime_docker_nat_chain_missing
+
+    - name: Reset stale Ollama compose resources after startup failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ ollama_runtime_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ ollama_runtime_site_dir }}"
+      register: ollama_runtime_network_reset
+      changed_when: >-
+        'Stopping' in (ollama_runtime_network_reset.stdout | default(''))
+        or 'Removing' in (ollama_runtime_network_reset.stdout | default(''))
+        or 'Removing' in (ollama_runtime_network_reset.stderr | default(''))
+      failed_when: false
+      when: ollama_runtime_compose_network_missing
+
+    - name: Remove the stale Ollama compose network before retrying startup
+      ansible.builtin.shell: |
+        set -euo pipefail
+        stale_networks="$(docker network ls -q --filter name=^{{ ollama_runtime_compose_project_name }}_default$)"
+        if [ -n "${stale_networks}" ]; then
+          docker network rm ${stale_networks}
+          echo changed
+        fi
+      args:
+        chdir: "{{ ollama_runtime_site_dir }}"
+        executable: /bin/bash
+      register: ollama_runtime_network_cleanup
+      changed_when: "'changed' in ollama_runtime_network_cleanup.stdout"
+      when: ollama_runtime_compose_network_missing
+
+    - name: Restart Docker to restore bridge networking before retrying Ollama startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: ollama_runtime_compose_network_missing
 
     - name: Retry Ollama startup after Docker nat-chain recovery
       ansible.builtin.command:
@@ -164,7 +214,7 @@
         chdir: "{{ ollama_runtime_site_dir }}"
       register: ollama_runtime_up
       changed_when: true
-      when: ollama_runtime_docker_nat_chain_missing
+      when: ollama_runtime_docker_nat_chain_missing or ollama_runtime_compose_network_missing
 
 - name: Check whether Ollama publishes the expected host port
   ansible.builtin.command:
@@ -177,22 +227,103 @@
   changed_when: false
   failed_when: false
 
-- name: Force-recreate Ollama when the host port binding is missing
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ ollama_runtime_compose_file }}"
-      - up
-      - -d
-      - --force-recreate
-      - --remove-orphans
-  args:
-    chdir: "{{ ollama_runtime_site_dir }}"
-  register: ollama_runtime_force_recreate
-  changed_when: true
+- name: Force-recreate Ollama when the host port binding is missing and recover stale Docker networking drift
   when: ollama_runtime_port_binding_check.stdout | trim == ''
+  block:
+    - name: Force-recreate Ollama when the host port binding is missing
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ ollama_runtime_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ ollama_runtime_site_dir }}"
+      register: ollama_runtime_force_recreate
+      changed_when: true
+  rescue:
+    - name: Detect stale Docker networking drift during Ollama force-recreate
+      ansible.builtin.set_fact:
+        ollama_runtime_force_recreate_network_missing: >-
+          {{
+            'failed to create endpoint' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+            and 'does not exist' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+          }}
+
+    - name: Surface unexpected Ollama force-recreate failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('ollama force-recreate failed')) }}"
+      when: not ollama_runtime_force_recreate_network_missing
+
+    - name: Reset stale Ollama compose resources after force-recreate failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ ollama_runtime_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ ollama_runtime_site_dir }}"
+      register: ollama_runtime_force_recreate_down_retry
+      changed_when: >-
+        'Stopping' in (ollama_runtime_force_recreate_down_retry.stdout | default(''))
+        or 'Removing' in (ollama_runtime_force_recreate_down_retry.stdout | default(''))
+        or 'Removing' in (ollama_runtime_force_recreate_down_retry.stderr | default(''))
+      failed_when: false
+      when: ollama_runtime_force_recreate_network_missing
+
+    - name: Remove the stale Ollama compose network before retrying force-recreate
+      ansible.builtin.shell: |
+        set -euo pipefail
+        stale_networks="$(docker network ls -q --filter name=^{{ ollama_runtime_compose_project_name }}_default$)"
+        if [ -n "${stale_networks}" ]; then
+          docker network rm ${stale_networks}
+          echo changed
+        fi
+      args:
+        chdir: "{{ ollama_runtime_site_dir }}"
+        executable: /bin/bash
+      register: ollama_runtime_force_recreate_network_cleanup
+      changed_when: "'changed' in ollama_runtime_force_recreate_network_cleanup.stdout"
+      when: ollama_runtime_force_recreate_network_missing
+
+    - name: Restart Docker to restore bridge networking before retrying Ollama force-recreate
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: ollama_runtime_force_recreate_network_missing
+
+    - name: Ensure Docker bridge networking chains are present before retrying Ollama force-recreate
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+      when: ollama_runtime_force_recreate_network_missing
+
+    - name: Retry Ollama force-recreate after Docker networking recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ ollama_runtime_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ ollama_runtime_site_dir }}"
+      register: ollama_runtime_force_recreate_retry
+      changed_when: true
+      when: ollama_runtime_force_recreate_network_missing
 
 - name: Recheck Ollama host port binding
   ansible.builtin.command:

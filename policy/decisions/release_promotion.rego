@@ -16,11 +16,21 @@ deny["staging receipt verification is not clean"] if {
 }
 
 deny[msg] if {
+  some reason in input.smoke_gate.reasons
+  msg := reason
+}
+
+deny[msg] if {
   input.blocking_findings.count > 0
   msg := sprintf(
     "open critical findings exist for service '%s'",
     [input.service_id],
   )
+}
+
+deny[msg] if {
+  some reason in input.vulnerability_gate.reasons
+  msg := reason
 }
 
 deny[msg] if {

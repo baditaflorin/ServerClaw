@@ -1,0 +1,110 @@
+{% if runtime_assurance_warning %}
+<div class="banner warning">Runtime assurance data is degraded: {{ runtime_assurance_warning }}</div>
+{% endif %}
+
+<div class="overview-grid">
+  <section class="panel summary-panel">
+    <div class="stat-block">
+      <span class="label">Bindings</span>
+      <strong>{{ runtime_assurance.summary.total }}</strong>
+    </div>
+    <div class="stat-block">
+      <span class="label">Pass</span>
+      <strong>{{ runtime_assurance.summary.pass }}</strong>
+    </div>
+    <div class="stat-block">
+      <span class="label">Degraded</span>
+      <strong>{{ runtime_assurance.summary.degraded }}</strong>
+    </div>
+    <div class="stat-block">
+      <span class="label">Failed</span>
+      <strong>{{ runtime_assurance.summary.failed }}</strong>
+    </div>
+  </section>
+
+  <section class="panel summary-panel">
+    <h3>Snapshot</h3>
+    <p class="muted">
+      {% if runtime_assurance.generated_at %}
+      {{ runtime_assurance.generated_at|humanize_timestamp }}
+      {% else %}
+      Not recorded
+      {% endif %}
+    </p>
+    <p class="muted">{{ runtime_assurance.summary.unknown }} binding(s) still need fresher governed evidence.</p>
+  </section>
+</div>
+
+<div class="service-grid">
+  {% if runtime_assurance.entries %}
+    {% for entry in runtime_assurance.entries %}
+    <article class="service-card">
+      <div class="service-head">
+        <div>
+          <p class="service-category">{{ entry.environment }} · {{ entry.profile_title }}</p>
+          <h3>{{ entry.service_name }}</h3>
+          <p class="muted">{{ entry.primary_url or "No primary route recorded" }}</p>
+        </div>
+        <span class="status-dot {{ entry.overall_status|status_tone }}">{{ entry.overall_status }}</span>
+      </div>
+
+      <dl class="service-meta">
+        <div>
+          <dt>Required</dt>
+          <dd>{{ entry.summary.required or 0 }}</dd>
+        </div>
+        <div>
+          <dt>Best effort</dt>
+          <dd>{{ entry.summary.best_effort or 0 }}</dd>
+        </div>
+        <div>
+          <dt>Unknown</dt>
+          <dd>{{ entry.summary.unknown or 0 }}</dd>
+        </div>
+        <div>
+          <dt>Exceptions</dt>
+          <dd>{{ entry.exception_dimensions|length }}</dd>
+        </div>
+      </dl>
+
+      {% if entry.exception_titles %}
+      <div class="hint-strip">
+        {% for title in entry.exception_titles %}
+        <span>{{ title }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if entry.exception_dimensions %}
+      <ul class="compact-list">
+        {% for dimension in entry.exception_dimensions[:3] %}
+        <li>
+          <strong>{{ dimension.title }}</strong>
+          <span>{{ dimension.status }}</span>
+          <span class="muted">{{ dimension.reason }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      {% if entry.runbook or entry.adr or entry.primary_url %}
+      <div class="link-row">
+        {% if entry.runbook %}
+        <a href="{{ docs_base_url }}/{{ entry.runbook }}" target="_blank" rel="noreferrer">Runbook</a>
+        {% endif %}
+        {% if entry.adr %}
+        <a href="{{ docs_base_url }}/adr/{{ entry.adr }}" target="_blank" rel="noreferrer">ADR {{ entry.adr }}</a>
+        {% endif %}
+        {% if entry.primary_url %}
+        <a href="{{ entry.primary_url }}" target="_blank" rel="noreferrer">Surface</a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </article>
+    {% endfor %}
+  {% else %}
+  <section class="panel">
+    <p class="muted">No active service/environment bindings are currently covered by the runtime assurance matrix.</p>
+  </section>
+  {% endif %}
+</div>

@@ -1,0 +1,71 @@
+homeserver:
+  address: http://matrix-synapse:8008
+  domain: {{ matrix_synapse_server_name }}
+  software: standard
+  async_media: false
+
+appservice:
+  address: http://mautrix-discord:29334
+  hostname: 0.0.0.0
+  port: 29334
+  database:
+    type: postgres
+    uri: postgres://{{ matrix_synapse_mautrix_discord_database_user }}:{{ matrix_synapse_mautrix_discord_database_password | urlencode }}@{{ matrix_synapse_mautrix_discord_database_host }}/{{ matrix_synapse_mautrix_discord_database_name }}?sslmode=disable
+    max_open_conns: 20
+    max_idle_conns: 2
+  id: discord
+  bot:
+    username: discordbot
+    displayname: Discord bridge bot
+    avatar: ""
+  ephemeral_events: true
+  async_transactions: false
+  as_token: "{{ matrix_synapse_mautrix_discord_as_token }}"
+  hs_token: "{{ matrix_synapse_mautrix_discord_hs_token }}"
+
+bridge:
+  username_template: "{% raw %}discord_{{.}}{% endraw %}"
+  displayname_template: "{% raw %}{{if .Webhook}}Webhook{{else}}{{or .GlobalName .Username}}{{if .Bot}} (bot){{end}}{{end}}{% endraw %}"
+  channel_name_template: "{% raw %}{{if or (eq .Type 3) (eq .Type 4)}}{{.Name}}{{else}}#{{.Name}}{{end}}{% endraw %}"
+  guild_name_template: "{% raw %}{{.Name}}{% endraw %}"
+  private_chat_portal_meta: default
+  public_address: null
+  avatar_proxy_key: "{{ matrix_synapse_mautrix_discord_avatar_proxy_key }}"
+  portal_message_buffer: 128
+  delivery_receipts: false
+  message_status_events: false
+  message_error_notices: true
+  restricted_rooms: false
+  autojoin_thread_on_open: true
+  embed_fields_as_tables: true
+  delete_guild_on_leave: true
+  federate_rooms: false
+  double_puppet_server_map: {}
+  double_puppet_allow_discovery: false
+  login_shared_secret_map: {}
+  command_prefix: '!discord'
+  management_room_text:
+    welcome: "Hello, I'm a Discord bridge bot."
+    welcome_connected: "Use `help` for help."
+    welcome_unconnected: "Use `help` for help or `login` to log in."
+    additional_help: ""
+  provisioning:
+    prefix: /_matrix/provision
+    shared_secret: "{{ matrix_synapse_mautrix_discord_provisioning_shared_secret }}"
+    debug_endpoints: false
+  permissions:
+    "*": relay
+    "{{ matrix_synapse_server_name }}": user
+    "{{ matrix_synapse_admin_user_id }}": admin
+
+logging:
+  min_level: info
+  writers:
+    - type: stdout
+      format: pretty-colored
+    - type: file
+      format: json
+      filename: ./logs/mautrix-discord.log
+      max_size: 100
+      max_backups: 10
+      compress: true

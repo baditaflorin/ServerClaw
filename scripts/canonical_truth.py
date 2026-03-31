@@ -24,7 +24,9 @@ UNRELEASED_PATTERN = re.compile(r"(?ms)(^## Unreleased\n)(.*?)(?=^## )")
 LATEST_RECEIPTS_PATTERN = re.compile(
     r"(?ms)(^live_apply_evidence:\n(?:  [^\n]*\n)*?  latest_receipts:\n)(.*?)(?=^\S)"
 )
-WORKSTREAM_RELEASE_MARK_PATTERN = r"(?ms)(^  - id: {workstream_id}\n.*?^      included_in_repo_version:\s*)(null|\S+)"
+WORKSTREAM_BLOCK_PATTERN = r"(?ms)^  - id: {workstream_id}\n.*?(?=^  - id: |\Z)"
+WORKSTREAM_RELEASE_BUMP_PATTERN = re.compile(r"(?m)^(      release_bump:\s*\S+\n)")
+WORKSTREAM_INCLUDED_IN_REPO_VERSION_PATTERN = re.compile(r"(?m)^(      included_in_repo_version:\s*)(null|\S+)\n")
 
 
 @dataclass(frozen=True)
@@ -225,7 +227,14 @@ def assemble_latest_receipts(
     )
     assembled = {str(key): str(value) for key, value in current_mapping.items()}
     items = workstreams if workstreams is not None else load_workstream_canonical_truth()
-    for item in sorted(items, key=lambda candidate: (int(candidate.adr), candidate.workstream_id)):
+    for item in sorted(
+        items,
+        key=lambda candidate: (
+            parse_semver(candidate.included_in_repo_version) if candidate.included_in_repo_version else (0, 0, 0),
+            int(candidate.adr),
+            candidate.workstream_id,
+        ),
+    ):
         if item.status != LIVE_APPLIED_STATUS:
             continue
         for capability, receipt_id in item.latest_receipts.items():
@@ -340,14 +349,33 @@ def mark_pending_workstreams_released(version: str, *, workstreams_path: Path | 
     updated = resolved_workstreams_path.read_text(encoding="utf-8")
     changed_ids: list[str] = []
     for item in items:
-        pattern = re.compile(WORKSTREAM_RELEASE_MARK_PATTERN.format(workstream_id=re.escape(item.workstream_id)))
-        replacement = rf"\g<1>{version}"
-        next_text, count = pattern.subn(replacement, updated, count=1)
+        pattern = re.compile(WORKSTREAM_BLOCK_PATTERN.format(workstream_id=re.escape(item.workstream_id)))
+        match = pattern.search(updated)
+        if match is None:
+            raise ValueError(
+                f"failed to locate workstream '{item.workstream_id}' in {resolved_workstreams_path.name}"
+            )
+
+        block = match.group(0)
+        if WORKSTREAM_INCLUDED_IN_REPO_VERSION_PATTERN.search(block):
+            next_block, count = WORKSTREAM_INCLUDED_IN_REPO_VERSION_PATTERN.subn(
+                rf"\g<1>{version}\n",
+                block,
+                count=1,
+            )
+        else:
+            next_block, count = WORKSTREAM_RELEASE_BUMP_PATTERN.subn(
+                rf"\g<1>      included_in_repo_version: {version}\n",
+                block,
+                count=1,
+            )
+
         if count != 1:
             raise ValueError(
                 f"failed to mark workstream '{item.workstream_id}' as released in {resolved_workstreams_path.name}"
             )
-        updated = next_text
+
+        updated = f"{updated[:match.start()]}{next_block}{updated[match.end():]}"
         changed_ids.append(item.workstream_id)
 
     resolved_workstreams_path.write_text(updated, encoding="utf-8")

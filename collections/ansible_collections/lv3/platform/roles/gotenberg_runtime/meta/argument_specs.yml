@@ -1,0 +1,50 @@
+# Purpose: Declare the argument contract for the Gotenberg runtime role.
+# Use case: Run during syntax and argument validation before converging the Gotenberg runtime.
+# Inputs: gotenberg_runtime_* variables required by the role.
+# Outputs: Machine-readable argument specs for the gotenberg_runtime role.
+# Idempotency: Fully idempotent; metadata only validates role inputs.
+# Dependencies: ADR 0165 metadata standard, ADR 0278, and the gotenberg_runtime role tasks.
+---
+argument_specs:
+  main:
+    short_description: Converge the private Gotenberg document rendering runtime.
+    options:
+      gotenberg_runtime_site_dir:
+        type: path
+        required: true
+      gotenberg_runtime_compose_file:
+        type: path
+        required: true
+      gotenberg_runtime_container_name:
+        type: str
+        required: true
+      gotenberg_runtime_container_port:
+        type: int
+        required: true
+      gotenberg_runtime_image:
+        type: str
+        required: true
+      gotenberg_runtime_port:
+        type: int
+        required: true
+      gotenberg_runtime_internal_base_url:
+        type: str
+        required: true
+      gotenberg_runtime_local_base_url:
+        type: str
+        required: true
+      gotenberg_runtime_healthcheck_path:
+        type: str
+        required: true
+      gotenberg_runtime_memory_limit:
+        type: str
+        required: true
+      gotenberg_runtime_cpu_limit:
+        type: str
+        required: true
+      gotenberg_runtime_chromium_auto_start:
+        type: bool
+        required: true
+      gotenberg_runtime_libreoffice_auto_start:
+        type: bool
+        required: true

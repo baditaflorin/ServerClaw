@@ -26,7 +26,7 @@ Rotation model:
 
 1. **Static secrets** (e.g. PostgreSQL service passwords, SMTP credentials, Windmill API tokens) are migrated to OpenBao KV with a `rotation_period` metadata field
 2. a scheduled Windmill workflow (`rotate-credentials`) runs daily, reads the KV metadata, and rotates any secret whose age exceeds `rotation_period - warning_window`
-3. rotation events emit a structured NATS event (`credentials.rotated`) and a GlitchTip notice so failures are visible
+3. rotation events emit a structured NATS event (`secret.rotation.completed`) and a GlitchTip notice so failures are visible
 4. each service role has a `tasks/rotate.yml` that applies the new credential to the running service without a full re-convergence (e.g. a Docker `exec` for a password change, or a systemd unit reload)
 5. a `config/secret-catalog.json` lists every managed secret with its type, owner service, rotation period, and last-rotated timestamp (updated by the Windmill workflow)
 

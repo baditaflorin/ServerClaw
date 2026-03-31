@@ -1,4 +1,29 @@
+# Purpose: Converge the public NGINX edge publication runtime, site catalog, and certificate wiring.
+# Use case: Run during edge publication deploys, updates, and exact-main validation replays.
+# Inputs: Public edge topology, certificate inputs, site definitions, and shared publication paths.
+# Outputs: Renders edge configuration, certificates, and related publication state on the edge host.
+# Idempotency: Partially idempotent because certificate issuance and runtime restarts may refresh live state.
+# Dependencies: ADR 0165 and the public-edge publication catalogs.
 ---
+- name: Resolve public edge site and certificate catalogs
+  ansible.builtin.set_fact:
+    public_edge_certificate_domains: >-
+      {{
+        (
+          (public_edge_service_topology | service_topology_edge_certificate_domains)
+          + (public_edge_extra_sites | map(attribute='hostname') | list)
+          + public_edge_additional_certificate_domains
+        ) | unique
+      }}
+    public_edge_sites: >-
+      {{
+        (
+          public_edge_extra_sites
+          + (public_edge_service_topology | service_topology_edge_sites)
+        )
+        | unique(attribute='hostname')
+      }}
+
 - name: Validate public edge publication inputs
   ansible.builtin.assert:
     that:
@@ -174,6 +199,33 @@
           )
       }}
 
+- name: Initialize the site-local certificate request catalog
+  ansible.builtin.set_fact:
+    public_edge_site_certificate_requests: []
+
+- name: Derive site-local certificate requests for hostnames missing from the shared certificate
+  ansible.builtin.set_fact:
+    public_edge_site_certificate_requests: >-
+      {{
+        public_edge_site_certificate_requests
+        + [
+            {
+              'hostname': item.hostname,
+              'cert_name': item.hostname,
+              'domains': ([item.hostname] + (item.aliases | default([]))) | unique,
+            }
+          ]
+      }}
+  loop: "{{ public_edge_sites }}"
+  when: >-
+    public_edge_certificate.stat.exists
+    and (
+      (
+        ([item.hostname] + (item.aliases | default([])))
+        | difference(public_edge_current_certificate_domains)
+      ) | length
+    ) > 0
+
 - name: Render NGINX public edge configuration
   ansible.builtin.template:
     src: lv3-edge.conf.j2
@@ -225,14 +277,89 @@
       if public_edge_acme_challenge_method == 'dns-hetzner'
       else {}
     }}
+  register: public_edge_certbot_issue
+  retries: "{{ public_edge_certbot_retries }}"
+  delay: "{{ public_edge_certbot_delay_seconds }}"
+  until: public_edge_certbot_issue.rc == 0
   when: not public_edge_certificate.stat.exists
   changed_when: true
 
-- name: Expand the public edge Let's Encrypt certificate when domains were added
+- name: Check whether site-local certificates already exist for hostnames missing from the shared certificate
+  ansible.builtin.stat:
+    path: "/etc/letsencrypt/live/{{ item.cert_name }}/fullchain.pem"
+  loop: "{{ public_edge_site_certificate_requests }}"
+  register: public_edge_site_certificate_stats
+
+- name: Read SANs from existing site-local certificates
+  ansible.builtin.command:
+    argv:
+      - openssl
+      - x509
+      - -in
+      - "/etc/letsencrypt/live/{{ item.item.cert_name }}/fullchain.pem"
+      - -noout
+      - -ext
+      - subjectAltName
+  loop: >-
+    {{
+      public_edge_site_certificate_stats.results
+      | selectattr('stat.exists')
+      | list
+    }}
+  register: public_edge_site_certificate_san_reads
+  changed_when: false
+
+- name: Build the site-local certificate SAN catalog
+  ansible.builtin.set_fact:
+    public_edge_site_certificate_existing_sans_by_name: >-
+      {{
+        dict(
+          (
+            public_edge_site_certificate_san_reads.results | default([])
+            | map(attribute='item.item.cert_name')
+          )
+          | zip(
+              public_edge_site_certificate_san_reads.results | default([])
+              | map(attribute='stdout')
+              | map('regex_findall', 'DNS:([^, ]+)')
+            )
+        )
+      }}
+
+- name: Derive site-local certificate coverage requirements
+  ansible.builtin.set_fact:
+    public_edge_site_certificate_requirements: >-
+      {{
+        (public_edge_site_certificate_requirements | default([]))
+        + [
+            item
+            | combine(
+                {
+                  'missing_domains': (
+                    item.domains
+                    | difference(
+                        public_edge_site_certificate_existing_sans_by_name.get(item.cert_name, [])
+                      )
+                  )
+                }
+              )
+          ]
+      }}
+  loop: "{{ public_edge_site_certificate_requests }}"
+
+- name: Ensure site-local Let's Encrypt certificates exist for hostnames missing from the shared certificate
   ansible.builtin.command:
     argv: >-
       {{
-        ['certbot', 'certonly', '--non-interactive', '--agree-tos', '--expand', '--email', public_edge_certbot_email, '--cert-name', public_edge_cert_name]
+        ['certbot', 'certonly', '--non-interactive', '--agree-tos', '--email', public_edge_certbot_email]
+        + (
+          ['--expand', '--cert-name', item.cert_name]
+          if (
+            public_edge_site_certificate_existing_sans_by_name.get(item.cert_name, [])
+            | length
+          ) > 0
+          else ['--cert-name', item.cert_name]
+        )
         + (
           ['--webroot', '-w', public_edge_acme_root]
           if public_edge_acme_challenge_method == 'webroot'
@@ -242,7 +369,7 @@
             '--dns-hetzner-propagation-seconds', public_edge_dns_hetzner_propagation_seconds | string
           ]
         )
-        + ['-d', public_edge_certificate_domains | join(',')]
+        + ['-d', item.domains | join(',')]
       }}
   environment: >-
     {{
@@ -250,10 +377,25 @@
       if public_edge_acme_challenge_method == 'dns-hetzner'
       else {}
     }}
-  when:
-    - public_edge_certificate.stat.exists
-    - public_edge_missing_certificate_domains | length > 0
+  loop: "{{ public_edge_site_certificate_requirements | default([]) }}"
+  when: item.missing_domains | length > 0
   changed_when: true
+
+- name: Build the site-local TLS material map for the final NGINX render
+  ansible.builtin.set_fact:
+    public_edge_site_tls_materials: >-
+      {{
+        dict(
+          (
+            public_edge_site_certificate_requests | default([])
+            | map(attribute='hostname')
+          )
+          | zip(
+              public_edge_site_certificate_requests | default([])
+              | map(attribute='cert_name')
+            )
+        )
+      }}
 
 - name: Install NGINX reload hook for certificate renewal
   ansible.builtin.copy:

@@ -25,8 +25,11 @@ services:
     image: {{ n8n_image }}
     container_name: {{ n8n_container_name }}
     restart: unless-stopped
+    network_mode: {{ n8n_network_mode }}
+{% if n8n_network_mode != 'host' %}
     ports:
       - "{{ n8n_port }}:5678"
+{% endif %}
     env_file:
       - {{ n8n_env_file }}
     depends_on:

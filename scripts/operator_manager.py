@@ -17,6 +17,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from mutation_audit import build_event, emit_event
 from platform.operator_access import (
@@ -111,6 +115,9 @@ class OperatorBackend(Protocol):
         ...
 
     def reset_password(self, operator: dict[str, Any], password: str, *, temporary: bool) -> dict[str, Any]:
+        ...
+
+    def update_operator_notes(self, operator: dict[str, Any], notes_markdown: str) -> dict[str, Any]:
         ...
 
     def inventory_operator(self, operator: dict[str, Any], state: dict[str, Any], offline: bool) -> dict[str, Any]:
@@ -441,6 +448,13 @@ def dump_operator_roster(payload: dict[str, Any], path: Path = ROSTER_PATH) -> N
     path.write_text(yaml.safe_dump(normalized, sort_keys=False), encoding="utf-8")
 
 
+def normalize_notes_markdown(value: str) -> str | None:
+    normalized = value.replace("\r\n", "\n").strip()
+    if not normalized:
+        return None
+    return normalized
+
+
 def role_payload(role: str) -> dict[str, Any]:
     definition = ROLE_DEFINITIONS[role]
     return {
@@ -553,6 +567,28 @@ def mark_operator_inactive(roster: dict[str, Any], operator_id: str, offboarded_
         operator["audit"]["offboarded_at"] = utc_now()
         operator["audit"]["offboarded_by"] = offboarded_by
         return validate_operator_roster(updated), operator
+    raise OperatorManagerError(f"Operator '{operator_id}' was not found in {ROSTER_PATH}.")
+
+
+def update_operator_notes_in_roster(
+    roster: dict[str, Any],
+    operator_id: str,
+    notes_markdown: str,
+    updated_by: str,
+) -> tuple[dict[str, Any], dict[str, Any], bool]:
+    updated = copy.deepcopy(roster)
+    normalized_notes = normalize_notes_markdown(notes_markdown)
+    for operator in updated["operators"]:
+        if operator["id"] != operator_id:
+            continue
+        previous_notes = normalize_notes_markdown(str(operator.get("notes", "")))
+        if normalized_notes is None:
+            operator.pop("notes", None)
+        else:
+            operator["notes"] = normalized_notes
+        operator["audit"]["last_reviewed_at"] = utc_now()
+        operator["audit"]["last_reviewed_by"] = updated_by
+        return validate_operator_roster(updated), operator, previous_notes != normalized_notes
     raise OperatorManagerError(f"Operator '{operator_id}' was not found in {ROSTER_PATH}.")
 
 
@@ -771,6 +807,16 @@ class LiveBackend:
         audit = self._emit_audit("operator.password_recovered", operator["id"])
         return {"keycloak": keycloak, "audit": audit}
 
+    def update_operator_notes(self, operator: dict[str, Any], notes_markdown: str) -> dict[str, Any]:
+        audit = self._emit_audit("operator.notes_updated", operator["id"])
+        return {
+            "status": "ok",
+            "operator_id": operator["id"],
+            "notes_present": bool(normalize_notes_markdown(notes_markdown)),
+            "note_length": len(notes_markdown.strip()),
+            "audit": audit,
+        }
+
     def inventory_operator(self, operator: dict[str, Any], state: dict[str, Any], offline: bool) -> dict[str, Any]:
         ssh_enabled = ROLE_DEFINITIONS[operator["role"]].ssh_enabled
         summary = {
@@ -855,6 +901,14 @@ class NoopBackend:
                 "required_actions": ["UPDATE_PASSWORD"] if temporary else [],
                 "failure_counters_cleared": True,
             }
+        }
+
+    def update_operator_notes(self, operator: dict[str, Any], notes_markdown: str) -> dict[str, Any]:
+        return {
+            "status": "dry-run",
+            "operator_id": operator["id"],
+            "notes_present": bool(normalize_notes_markdown(notes_markdown)),
+            "note_length": len(notes_markdown.strip()),
         }
 
     def inventory_operator(self, operator: dict[str, Any], state: dict[str, Any], offline: bool) -> dict[str, Any]:
@@ -1027,6 +1081,36 @@ def reset_password(
     }
 
 
+def update_notes(
+    *,
+    roster_path: Path,
+    state_dir: Path,
+    operator_id: str,
+    actor_id: str,
+    actor_class: str,
+    notes_markdown: str,
+    dry_run: bool,
+) -> dict[str, Any]:
+    roster = load_operator_roster(roster_path)
+    updated_roster, updated_operator, changed = update_operator_notes_in_roster(roster, operator_id, notes_markdown, actor_id)
+    if not dry_run:
+        dump_operator_roster(updated_roster, roster_path)
+    backend = select_backend(dry_run=dry_run, actor_class=actor_class, actor_id=actor_id)
+    effective_notes = updated_operator.get("notes", "")
+    result = backend.update_operator_notes(updated_operator, effective_notes)
+    state_path = operator_state_path(operator_id, state_dir)
+    if not dry_run:
+        state_path = persist_state(operator_id, "update-notes", result, state_dir=state_dir)
+    return {
+        "status": "dry-run" if dry_run else "ok",
+        "changed": changed,
+        "operator": updated_operator,
+        "roster_path": str(roster_path),
+        "state_path": str(state_path),
+        "result": result,
+    }
+
+
 def sync(
     *,
     roster_path: Path,
@@ -1191,6 +1275,15 @@ def build_parser() -> argparse.ArgumentParser:
     reset_password_parser.add_argument("--temporary", action="store_true")
     reset_password_parser.add_argument("--dry-run", action="store_true")
 
+    update_notes_parser = subparsers.add_parser(
+        "update-notes",
+        help="Update one operator's bounded markdown notes in the repo-authoritative roster.",
+    )
+    update_notes_parser.add_argument("--id", required=True)
+    update_notes_parser.add_argument("--notes-markdown", default="")
+    update_notes_parser.add_argument("--notes-file")
+    update_notes_parser.add_argument("--dry-run", action="store_true")
+
     inventory_parser = subparsers.add_parser("inventory", help="Show the access inventory for one operator.")
     inventory_parser.add_argument("--id", required=True)
     inventory_parser.add_argument("--offline", action="store_true")
@@ -1264,6 +1357,19 @@ def main(argv: list[str] | None = None) -> int:
                 actor_class=args.actor_class,
                 password=args.password,
                 temporary=args.temporary,
+                dry_run=args.dry_run,
+            )
+        elif args.command == "update-notes":
+            notes_markdown = args.notes_markdown
+            if args.notes_file:
+                notes_markdown = Path(args.notes_file).read_text(encoding="utf-8")
+            payload = update_notes(
+                roster_path=roster_path,
+                state_dir=state_dir,
+                operator_id=args.id,
+                actor_id=args.actor_id,
+                actor_class=args.actor_class,
+                notes_markdown=notes_markdown,
                 dry_run=args.dry_run,
             )
         elif args.command == "inventory":

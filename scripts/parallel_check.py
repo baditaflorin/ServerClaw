@@ -17,6 +17,26 @@ from typing import Iterable
 
 DEFAULT_MANIFEST = Path("config/check-runner-manifest.json")
 SPINNER_FRAMES = "|/-\\"
+PASSTHROUGH_ENV_VARS = (
+    "LV3_SNAPSHOT_ID",
+    "LV3_SNAPSHOT_GENERATED_AT",
+    "LV3_SNAPSHOT_SOURCE_COMMIT",
+    "LV3_SNAPSHOT_BRANCH",
+    "LV3_DOCKER_WORKSPACE_PATH",
+    "LV3_VALIDATION_BASE_REF",
+    "LV3_VALIDATION_CHANGED_FILES_JSON",
+)
+RUNNER_UNAVAILABLE_MARKERS = (
+    "cannot connect to the docker daemon",
+    "error during connect",
+    "is the docker daemon running",
+    "unable to find image 'registry.lv3.org/check-runner/",
+    "unsupported manifest media type",
+    "no matching manifest for",
+    "pull access denied",
+    "received unexpected http status: 502 bad gateway",
+    "exec format error",
+)
 
 
 @dataclass(frozen=True)
@@ -38,6 +58,14 @@ class CheckResult:
     stdout: str
     stderr: str
     docker_command: list[str]
+
+
+def classify_runner_unavailable(stdout: str, stderr: str) -> str | None:
+    combined = f"{stdout}\n{stderr}".lower()
+    for marker in RUNNER_UNAVAILABLE_MARKERS:
+        if marker in combined:
+            return marker
+    return None
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
@@ -118,13 +146,20 @@ def build_docker_command(
     workspace: Path,
     docker_binary: str,
 ) -> list[str]:
-    mount_args = ["-v", f"{workspace.resolve()}:/workspace"]
+    workspace_mount_source = os.environ.get("LV3_DOCKER_WORKSPACE_PATH", "").strip()
+    if not workspace_mount_source:
+        workspace_mount_source = str(workspace.resolve())
+    mount_args = ["-v", f"{workspace_mount_source}:/workspace"]
     env_args: list[str] = []
     safe_directories = sorted({"/workspace", check.working_dir})
     env_args.extend(["-e", f"GIT_CONFIG_COUNT={len(safe_directories)}"])
     for index, safe_directory in enumerate(safe_directories):
         env_args.extend(["-e", f"GIT_CONFIG_KEY_{index}=safe.directory"])
         env_args.extend(["-e", f"GIT_CONFIG_VALUE_{index}={safe_directory}"])
+    for env_name in PASSTHROUGH_ENV_VARS:
+        value = os.environ.get(env_name)
+        if value:
+            env_args.extend(["-e", f"{env_name}={value}"])
     git_metadata_file = workspace / ".git"
     if git_metadata_file.is_file():
         gitdir_line = git_metadata_file.read_text(encoding="utf-8").strip()
@@ -215,14 +250,22 @@ def execute_check(
             check=False,
             timeout=check.timeout_seconds,
         )
-        status = "passed" if completed.returncode == 0 else "failed"
+        stdout = completed.stdout.strip()
+        stderr = completed.stderr.strip()
+        unavailable_reason = classify_runner_unavailable(stdout, stderr)
+        if completed.returncode == 0:
+            status = "passed"
+        elif unavailable_reason is not None:
+            status = "runner_unavailable"
+        else:
+            status = "failed"
         return CheckResult(
             label=check.label,
             status=status,
             returncode=completed.returncode,
             duration_seconds=time.monotonic() - started,
-            stdout=completed.stdout.strip(),
-            stderr=completed.stderr.strip(),
+            stdout=stdout,
+            stderr=stderr,
             docker_command=docker_command,
         )
     except subprocess.TimeoutExpired as exc:
@@ -233,6 +276,16 @@ def execute_check(
             duration_seconds=time.monotonic() - started,
             stdout=normalize_process_output(exc.stdout),
             stderr=normalize_process_output(exc.stderr),
+            docker_command=docker_command,
+        )
+    except FileNotFoundError as exc:
+        return CheckResult(
+            label=check.label,
+            status="runner_unavailable",
+            returncode=127,
+            duration_seconds=time.monotonic() - started,
+            stdout="",
+            stderr=str(exc),
             docker_command=docker_command,
         )
 

@@ -31,52 +31,79 @@ platform_port_assignments:
   monitoring_otlp_grpc_port: 4317
   monitoring_otlp_http_port: 4318
   netdata_port: 19999
+  mailpit_http_port: 8025
+  mailpit_smtp_port: 1025
   mail_platform_gateway_port: 8081
   mail_platform_internal_submission_port: 1587
   ntfy_port: 2586
+  openfga_http_port: 8098
+  openfga_host_proxy_port: 8014
   openbao_http_port: 8201
   openbao_proxy_port: 8200
   semaphore_server_port: 3004
   semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
   windmill_host_proxy_port: 8005
+  nomad_server_port: 4646
+  nomad_rpc_port: 4647
+  nomad_serf_port: 4648
+  nomad_host_proxy_port: 8013
   mattermost_server_port: 8065
   mattermost_host_proxy_port: 8066
+  matrix_synapse_port: 8008
+  matrix_synapse_host_proxy_port: 8015
   gitea_http_port: 3003
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
+  gotenberg_port: 3007
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  plausible_port: 8016
+  flagsmith_port: 8017
   dify_port: 8094
+  changedetection_port: 5000
+  browser_runner_port: 8096
   outline_port: 3006
+  directus_port: 8055
+  jupyterhub_port: 8097
   plane_port: 8093
   plane_host_proxy_port: 8011
+  woodpecker_http_port: 8102
+  woodpecker_host_proxy_port: 8017
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
   excalidraw_port: 3095
   excalidraw_room_port: 3096
   ollama_api_port: 11434
   n8n_port: 5678
+  nextcloud_port: 8084
   coolify_dashboard_port: 8000
   coolify_proxy_port: 80
+  coolify_proxy_tls_port: 443
   coolify_host_proxy_port: 8012
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
+  serverclaw_port: 8096
   api_gateway_internal_port: 8083
   platform_context_internal_port: 8010
   platform_context_host_proxy_port: 8010
   homepage_port: 3090
   ops_portal_port: 8092
+  harbor_port: 8095
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
   portainer_https_port: 9443
   portainer_host_proxy_port: 9444
   step_ca_api_port: 9000
   step_ca_proxy_port: 9443
+  tika_port: 9998
+  tesseract_ocr_port: 3008
   headscale_http_port: 8080
   vaultwarden_https_port: 8222
+openbao_http_extra_bind_addresses:
+  - "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
 proxmox_tailscale_hostname: proxmox-florin-subnet-router
 proxmox_tailscale_login_server: https://headscale.lv3.org
 proxmox_tailscale_tags: []
@@ -126,18 +153,28 @@ proxmox_tailscale_tcp_proxies:
   - name: postgres-lv3
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: 5432
-    upstream_host: 10.10.10.55
+    upstream_host: 10.10.10.50
     upstream_port: 5432
   - name: windmill
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.windmill_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: 8000
+  - name: nomad
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.nomad_host_proxy_port }}"
+    upstream_host: 10.10.10.40
+    upstream_port: "{{ platform_port_assignments.nomad_server_port }}"
   - name: mattermost
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.mattermost_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: 8065
+  - name: matrix-synapse
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.matrix_synapse_host_proxy_port }}"
+    upstream_host: 10.10.10.20
+    upstream_port: "{{ platform_port_assignments.matrix_synapse_port }}"
   - name: gitea
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.gitea_host_proxy_port }}"
@@ -158,6 +195,11 @@ proxmox_tailscale_tcp_proxies:
     listen_port: "{{ platform_port_assignments.openbao_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: "{{ platform_port_assignments.openbao_proxy_port }}"
+  - name: openfga
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.openfga_host_proxy_port }}"
+    upstream_host: 10.10.10.20
+    upstream_port: "{{ platform_port_assignments.openfga_http_port }}"
   - name: semaphore
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.semaphore_host_proxy_port }}"
@@ -168,6 +210,11 @@ proxmox_tailscale_tcp_proxies:
     listen_port: "{{ platform_port_assignments.plane_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: "{{ platform_port_assignments.plane_port }}"
+  - name: woodpecker
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.woodpecker_host_proxy_port }}"
+    upstream_host: 10.10.10.20
+    upstream_port: "{{ platform_port_assignments.woodpecker_http_port }}"
   - name: open-webui
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.open_webui_host_proxy_port }}"
@@ -394,6 +441,29 @@ proxmox_guests:
     packages:
       - docker.io
       - git
+  - vmid: 180
+    name: artifact-cache-lv3
+    role: artifact-cache
+    template_key: lv3-debian-base
+    ipv4: 10.10.10.80
+    cidr: 24
+    gateway4: 10.10.10.1
+    macaddr: BC:24:11:18:AC:80
+    cores: 4
+    memory_mb: 8192
+    disk_gb: 160
+    tags:
+      - artifact-cache
+      - cache
+      - docker
+      - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: artifact-cache-plane
+      co_location_exceptions: []
+    packages:
+      - docker.io
 
 network_policy:
   guest_management_sources:
@@ -429,6 +499,30 @@ network_policy:
             - 587
             - 993
           description: Public mail ingress forwarded by the host
+        - source: management
+          protocol: tcp
+          ports:
+            - 1025
+            - 8025
+          description: Operator access to the private Mailpit SMTP and UI listeners
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 1025
+            - 8025
+          description: Guest-network access to the Mailpit SMTP and UI listeners
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 1025
+            - 8025
+          description: Local Docker workloads using the private Mailpit SMTP and UI listeners
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 1025
+            - 8025
+          description: Local Docker workloads using the private Mailpit SMTP and UI listeners
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
@@ -444,16 +538,29 @@ network_policy:
           ports:
             - 3003
             - 3004
+            - 5000
             - 8000
+            - 8008
             - 8010
             - 8082
             - 8088
+            - 8102
             - 8200
             - 8222
             - 8881
             - 9000
             - 9443
           description: Host-side private service proxies
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 8016
+          description: Reverse proxy access to Plausible Analytics and tracker endpoints
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 8017
+          description: Reverse proxy access to Flagsmith edge publication and public health checks
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -483,26 +590,76 @@ network_policy:
         - source: all_guests
           protocol: tcp
           ports:
+            - 3007
+            - 3008
+            - 8055
             - 8881
+            - 9998
             - 11434
-          description: Private guest-to-guest agent API traffic
+          description: Private guest-to-guest document rendering, extraction, OCR, agent API, and governed data API traffic
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 8017
+          description: Private guest-to-guest access to Flagsmith environment evaluation and management APIs
+        - source: host
+          protocol: tcp
+          ports:
+            - 8017
+          description: Proxmox host verification and controller-side access to the private Flagsmith runtime
+        - source: host
+          protocol: tcp
+          ports:
+            - 3008
+            - 9998
+          description: Proxmox host verification and controller-side access to the private Tika and Tesseract OCR APIs
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
+            - 8017
+          description: Local Docker workloads that evaluate flags or fetch remote configuration from the private Flagsmith API
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 3007
+            - 3008
+            - 5000
+            - 8055
             - 8881
+            - 9998
             - 11434
-          description: Local Docker workloads that use the private Ollama and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Directus, Ollama, and SearXNG APIs
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
+            - 8017
+          description: Local Docker workloads that evaluate flags or fetch remote configuration from the private Flagsmith API
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 3007
+            - 3008
+            - 5000
+            - 8055
             - 8881
+            - 9998
             - 11434
-          description: Local Docker workloads that use the private Ollama and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Directus, Ollama, and SearXNG APIs
         - source: docker-build-lv3
           protocol: tcp
           ports:
             - 3003
           description: Gitea Actions runner access from docker-build-lv3
+        - source: docker-build-lv3
+          protocol: tcp
+          ports:
+            - 8201
+          description: OpenBao automation access from docker-build-lv3
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 8008
+          description: Reverse proxy access to the Matrix Synapse client API
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -536,6 +693,16 @@ network_policy:
         - source: nginx-lv3
           protocol: tcp
           ports:
+            - 8095
+          description: Edge access to the Harbor registry and operator UI
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 8102
+          description: Reverse proxy access to the Woodpecker public UI and API
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
             - 8089
           description: Reverse proxy access to the Dozzle hub
         - source: nginx-lv3
@@ -546,13 +713,41 @@ network_policy:
         - source: nginx-lv3
           protocol: tcp
           ports:
+            - 8084
+          description: Reverse proxy access to the Nextcloud personal data plane
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 8084
+          description: Private guest-to-guest access to Nextcloud on the managed internal network
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 8084
+          description: Local Docker workloads that reach Nextcloud over the private runtime listener
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 8084
+          description: Local Docker workloads that reach Nextcloud over the private runtime listener
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
             - 8083
           description: Edge access to the unified platform API gateway
         - source: monitoring-lv3
           protocol: tcp
           ports:
+            - 3008
+            - 5000
             - 8089
-          description: Private monitoring probes for the Dozzle hub
+            - 9998
+          description: Private monitoring probes for the Tesseract OCR, Changedetection, Tika, and Dozzle runtimes
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 8017
+          description: Private monitoring probes for the Flagsmith runtime
         - source: monitoring-lv3
           protocol: tcp
           ports:
@@ -574,6 +769,11 @@ network_policy:
           ports:
             - 2586
           description: Alertmanager access to the private ntfy paging gateway
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 4647
+          description: Nomad server RPC to docker-runtime-lv3
     docker-build-lv3:
       allow_container_forwarding: true
       allowed_inbound:
@@ -587,6 +787,11 @@ network_policy:
           ports:
             - 7007
           description: Dozzle hub access to the docker-build agent
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 4647
+          description: Nomad server RPC to docker-build-lv3
     monitoring-lv3:
       allowed_inbound:
         - source: management
@@ -594,6 +799,11 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: host
+          protocol: tcp
+          ports:
+            - 4646
+          description: Proxmox host Tailscale controller proxy access to the Nomad API
         - source: host
           protocol: tcp
           ports:
@@ -640,6 +850,16 @@ network_policy:
             - 2379
             - 2380
           description: etcd quorum traffic from the replica PostgreSQL member
+        - source: docker-runtime-lv3
+          protocol: tcp
+          ports:
+            - 4647
+          description: Nomad client RPC from docker-runtime-lv3
+        - source: docker-build-lv3
+          protocol: tcp
+          ports:
+            - 4647
+          description: Nomad client RPC from docker-build-lv3
     coolify-lv3:
       allow_container_forwarding: true
       allowed_inbound:
@@ -662,8 +882,33 @@ network_policy:
           protocol: tcp
           ports:
             - 80
+            - 443
             - 8000
+            - 8096
           description: Shared edge publication for the Coolify dashboard and wildcard app ingress
+    artifact-cache-lv3:
+      allowed_inbound:
+        - source: management
+          protocol: tcp
+          ports:
+            - 22
+          description: Operator and Ansible SSH access
+        - source: host
+          protocol: tcp
+          ports:
+            - 5001
+            - 5002
+            - 5003
+            - 5004
+          description: Host-side verification and private cache-plane checks
+        - source: docker-build-lv3
+          protocol: tcp
+          ports:
+            - 5001
+            - 5002
+            - 5003
+            - 5004
+          description: Build-host and CI consumers use the dedicated cache plane
     postgres-lv3:
       allowed_inbound:
         - source: management
@@ -828,6 +1073,58 @@ mail_platform_dns_records:
     value: '"brevo-code:b5e6a2e60000b8da96b912f8ea4c2e9a"'
     value_match_regex: '^"brevo-code:'
     ttl: 300
+
+route_dns_assertion_extra_records:
+  - name: "@"
+    type: A
+    value: "{{ management_ipv4 }}"
+    ttl: 60
+
+route_dns_assertion_retired_records:
+  - name: "@"
+    type: AAAA
+    value: "2a01:4f8:d0a:27bd::2"
+    ttl: 60
+    state: absent
+  - name: autoconfig
+    type: CNAME
+    value: "mail.your-server.de."
+    value_match_regex: '^mail\\.your-server\\.de\\.?$'
+    ttl: 300
+    state: absent
+  - name: notify
+    type: A
+    value: "{{ management_ipv4 }}"
+    ttl: 60
+    state: absent
+  - name: www
+    type: AAAA
+    value: "2a01:4f8:d0a:27bd::2"
+    ttl: 60
+    state: absent
+
+plausible_site_registrations:
+  - hostname: nginx.lv3.org
+    site_domain: nginx.lv3.org
+    timezone: Europe/Bucharest
+  - hostname: proxmox.lv3.org
+    site_domain: proxmox.lv3.org
+    timezone: Europe/Bucharest
+  - hostname: docker.lv3.org
+    site_domain: docker.lv3.org
+    timezone: Europe/Bucharest
+  - hostname: build.lv3.org
+    site_domain: build.lv3.org
+    timezone: Europe/Bucharest
+  - hostname: mail.lv3.org
+    site_domain: mail.lv3.org
+    timezone: Europe/Bucharest
+  - hostname: status.lv3.org
+    site_domain: status.lv3.org
+    timezone: Europe/Bucharest
+  - hostname: uptime.lv3.org
+    site_domain: uptime.lv3.org
+    timezone: Europe/Bucharest
 
 lv3_service_topology:
   nginx_edge:
@@ -1067,6 +1364,22 @@ lv3_service_topology:
       type: A
       target: "{{ management_ipv4 }}"
       ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: static
+      slug: mail
+      title: LV3 Mail
+      description: The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.
+      meta: Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.
+  mailpit:
+    service_name: mailpit
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
   step_ca:
     service_name: step-ca
     owning_vm: docker-runtime-lv3
@@ -1078,6 +1391,22 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ step_ca_controller_url }}"
+  tika:
+    service_name: tika
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+  tesseract_ocr:
+    service_name: tesseract-ocr
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
   semaphore:
     service_name: semaphore
     owning_vm: docker-runtime-lv3
@@ -1100,6 +1429,17 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ windmill_controller_url }}"
+  nomad:
+    service_name: nomad
+    owning_vm: monitoring-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ nomad_controller_url }}"
   gitea:
     service_name: gitea
     owning_vm: docker-runtime-lv3
@@ -1130,6 +1470,31 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ mattermost_controller_url }}"
+  matrix_synapse:
+    service_name: matrix-synapse
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: matrix.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: matrix
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.matrix_synapse_port }}"
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ matrix_synapse_controller_url }}"
   netbox:
     service_name: netbox
     owning_vm: docker-runtime-lv3
@@ -1182,6 +1547,52 @@ lv3_service_topology:
       noindex: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}"
+  flagsmith:
+    service_name: flagsmith
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: flags.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: flags
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.flagsmith_port }}"
+  plausible:
+    service_name: plausible
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: analytics.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: analytics
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plausible_port }}"
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
   dify:
     service_name: dify
     owning_vm: docker-runtime-lv3
@@ -1229,6 +1640,31 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ plane_controller_url }}"
+  woodpecker:
+    service_name: woodpecker
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: ci.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: ci
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.woodpecker_http_port }}"
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ woodpecker_controller_url }}"
   outline:
     service_name: outline
     owning_vm: docker-runtime-lv3
@@ -1308,6 +1744,36 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ open_webui_controller_url }}"
+  gotenberg:
+    service_name: gotenberg
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+  serverclaw:
+    service_name: serverclaw
+    owning_vm: coolify-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: chat.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: chat
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.serverclaw_port }}"
   ollama:
     service_name: ollama
     owning_vm: docker-runtime-lv3
@@ -1337,6 +1803,41 @@ lv3_service_topology:
       tls: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.n8n_port }}"
+  nextcloud:
+    service_name: nextcloud
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: cloud.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: cloud
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.nextcloud_port }}"
+      client_max_body_size: 16g
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+      exact_redirects:
+        - path: /.well-known/carddav
+          location: /remote.php/dav/
+          status: 301
+        - path: /.well-known/caldav
+          location: /remote.php/dav/
+          status: 301
   coolify:
     service_name: coolify
     owning_vm: coolify-lv3
@@ -1382,7 +1883,7 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.coolify_proxy_port }}"
+      upstream: "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:443"
       aliases:
         - "*.apps.lv3.org"
       crawl_policy_enabled: false
@@ -1409,6 +1910,22 @@ lv3_service_topology:
       tls: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}"
+  browser_runner:
+    service_name: browser-runner
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+  changedetection:
+    service_name: changedetection
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3
@@ -1441,6 +1958,32 @@ lv3_service_topology:
       tls: true
       kind: proxy
       upstream: http://10.10.10.20:8091
+  harbor:
+    service_name: harbor
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: registry.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: public
+      name: registry
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://10.10.10.20:{{ platform_port_assignments.harbor_port }}"
+      client_max_body_size: 0
+      chunked_transfer_encoding: true
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 900
+      proxy_send_timeout_seconds: 900
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
@@ -1494,6 +2037,27 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ openbao_controller_url }}"
+  openfga:
+    service_name: openfga
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+  temporal:
+    service_name: temporal
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: ssh-tunnel
+      url: grpc://127.0.0.1:7233
   ntfy:
     service_name: ntfy
     owning_vm: docker-runtime-lv3
@@ -1556,7 +2120,7 @@ lv3_service_topology:
       visibility: tailnet
       name: database
       type: A
-      target: "{{ postgres_ha.vip_ipv4 }}"
+      target: "{{ management_tailscale_ipv4 }}"
       ttl: 60
   backup_pbs:
     service_name: backup-pbs
@@ -1566,3 +2130,50 @@ lv3_service_topology:
     observability:
       guest_dashboard: false
       service_telemetry: false
+  directus:
+    service_name: directus
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: data.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: data
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.directus_port }}"
+  jupyterhub:
+    service_name: jupyterhub
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: notebooks.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: notebooks
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      client_max_body_size: 2g
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.jupyterhub_port }}"

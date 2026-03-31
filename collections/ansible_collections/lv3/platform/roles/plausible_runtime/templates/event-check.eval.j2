@@ -1,0 +1,12 @@
+import Ecto.Query
+
+site = Plausible.Sites.get_by_domain!("{{ plausible_verify_site_domain }}")
+path = "{{ plausible_verify_path }}"
+
+seen =
+  Plausible.ClickhouseRepo.exists?(
+    from e in "events_v2",
+      where: e.site_id == ^site.id and e.pathname == ^path and e.name == "pageview"
+  )
+
+IO.puts(Jason.encode!(%{seen: seen}))

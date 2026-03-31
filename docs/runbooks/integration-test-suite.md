@@ -24,26 +24,41 @@ Gate-mode run, matching `config/validation-gate.json`:
 python3 scripts/integration_suite.py --mode gate --environment staging
 ```
 
+Targeted smoke run for one primary path:
+
+```bash
+python3 scripts/integration_suite.py \
+  --mode gate \
+  --environment production \
+  --target tests/integration/test_deployment.py::test_windmill_version_endpoint_reports_version \
+  --required-service-id windmill
+```
+
+Catalog-backed ADR 0251 smoke run:
+
+```bash
+python3 scripts/stage_smoke_suites.py --service windmill --environment production
+```
+
 Nightly Windmill-compatible run:
 
 ```bash
 python3 config/windmill/scripts/nightly-integration-tests.py --repo-path /srv/proxmox_florin_server
 ```
 
+Windmill seeds the same wrapper at `f/lv3/nightly_integration_tests` for browser-first or API-triggered execution inside the `lv3` workspace.
+
 ## Environment Model
 
 The runner resolves defaults from [config/service-capability-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/service-capability-catalog.json) for these services when the selected environment is `active`:
 
+- `api_gateway`
 - `keycloak`
 - `grafana`
 - `netbox`
 - `openbao`
 - `postgres`
 - `windmill`
-
-The platform API gateway is still provided explicitly because ADR 0092 is not yet integrated into the service catalog contract:
-
-- `LV3_INTEGRATION_GATEWAY_URL`
 
 If the chosen environment has no active endpoints in the service catalog and no `LV3_INTEGRATION_*` overrides are provided, the runner writes a structured `skipped` report instead of failing.
 
@@ -64,11 +79,18 @@ Core target resolution:
 - `LV3_INTEGRATION_TEMPO_QUERY_URL`
 - `LV3_INTEGRATION_VERIFY_TLS`
 
+Worker-side Windmill runs also honor `LV3_WINDMILL_BASE_URL` as the default
+Windmill target when no explicit `LV3_INTEGRATION_WINDMILL_URL` override is
+set, and the Windmill wrappers fall back to the guest-local health probe URL
+from `config/health-probe-catalog.json` when the job sandbox does not expose
+that worker env variable directly.
+
 Authentication and API access:
 
 - `LV3_TEST_RUNNER_USERNAME`
 - `LV3_TEST_RUNNER_PASSWORD`
 - `LV3_TEST_BEARER_TOKEN`
+- `LV3_INTEGRATION_REQUIRED_SERVICE_IDS`
 - `LV3_KEYCLOAK_PASSWORD_GRANT_CLIENT_ID`
 - `LV3_KEYCLOAK_PASSWORD_GRANT_CLIENT_SECRET`
 - `LV3_GRAFANA_TOKEN`
@@ -97,6 +119,7 @@ The runner writes JSON reports under:
 
 - `.local/integration-tests/<environment>-<mode>.json`
 - `.local/integration-tests/nightly-last-run.json`
+- `.local/stage-smoke-suites/<environment>-<service>.json` through `scripts/stage_smoke_suites.py`
 
 Each report includes:
 
@@ -104,6 +127,12 @@ Each report includes:
 - discovered targets
 - passed, failed, and skipped counts
 - per-test outcomes and durations
+
+The ADR 0251 smoke runner adds:
+
+- the declared smoke suite ids resolved from `config/service-capability-catalog.json`
+- one per-suite integration report beside the aggregate smoke report
+- a `receipt_smoke_suites` block that can be copied into live-apply receipts
 
 ## Safety Rules
 
@@ -130,4 +159,10 @@ Destructive failover opt-in:
 
 ```bash
 LV3_ENABLE_FAILOVER_TEST=1 python3 scripts/integration_suite.py --mode destructive --environment production
+```
+
+Catalog validation for ADR 0251:
+
+```bash
+python3 scripts/stage_smoke_suites.py --validate
 ```

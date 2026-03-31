@@ -1,0 +1,11 @@
+{
+  "repo": {
+    "full_name": {{ woodpecker_seed_repo_full_name | to_json }},
+    "branch": {{ woodpecker_seed_repo_branch | to_json }}
+  },
+  "secret": {
+    "name": {{ woodpecker_secret_smoke_name | to_json }},
+    "value_file": {{ woodpecker_secret_smoke_local_file | to_json }},
+    "events": {{ woodpecker_secret_smoke_events | to_nice_json }}
+  }
+}

@@ -1,0 +1,303 @@
+{
+  "SchemaVersion": 2,
+  "CreatedAt": "2026-03-29T21:54:30.112722133Z",
+  "ArtifactName": "docker.io/apache/tika:3.2.3.0@sha256:3fafa194474c5f3a8cff25a0eefd07e7c0513b7f552074ad455e1af58a06bbea",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "Size": 360539648,
+    "OS": {
+      "Family": "ubuntu",
+      "Name": "25.04"
+    },
+    "ImageID": "sha256:26fad49b93a54011fb0a5399e8bb4e4c1ff4ece1d890d91773b0469fef418567",
+    "DiffIDs": [
+      "sha256:cdc5ad4f4ae25248b758c61a7d62e674b852c3d962f0186c871f924bf97186f6",
+      "sha256:92b71d3e3cf5c2a2954627a6354b35bcfc66d751a2945fd6b7ecccf90e931147",
+      "sha256:de0108f73f88b392d4db46772ac3b39bfd2cc1dd291b25f902c5296f79c20225"
+    ],
+    "RepoDigests": [
+      "apache/tika@sha256:3fafa194474c5f3a8cff25a0eefd07e7c0513b7f552074ad455e1af58a06bbea"
+    ],
+    "ImageConfig": {
+      "architecture": "amd64",
+      "created": "2025-09-15T18:44:36.764095121Z",
+      "history": [
+        {
+          "created": "2025-08-01T23:04:21.578175814Z",
+          "created_by": "/bin/sh -c #(nop)  ARG RELEASE",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-08-01T23:04:21.610881395Z",
+          "created_by": "/bin/sh -c #(nop)  ARG LAUNCHPAD_BUILD_ARCH",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-08-01T23:04:21.645298337Z",
+          "created_by": "/bin/sh -c #(nop)  LABEL org.opencontainers.image.ref.name=ubuntu",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-08-01T23:04:21.67149041Z",
+          "created_by": "/bin/sh -c #(nop)  LABEL org.opencontainers.image.version=25.04",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-08-01T23:04:23.920309409Z",
+          "created_by": "/bin/sh -c #(nop) ADD file:0b62dcb33fe378845a262fa61527f246a452317a171d84377cd6915b5d44c281 in / "
+        },
+        {
+          "created": "2025-08-01T23:04:24.310095255Z",
+          "created_by": "/bin/sh -c #(nop)  CMD [\"/bin/bash\"]",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-09-15T18:44:36.608790012Z",
+          "created_by": "ARG UID_GID=35002:35002",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-09-15T18:44:36.608790012Z",
+          "created_by": "ARG JRE=openjdk-21-jre-headless",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-09-15T18:44:36.608790012Z",
+          "created_by": "RUN |2 UID_GID=35002:35002 JRE=openjdk-21-jre-headless /bin/sh -c set -eux     \u0026\u0026 apt-get update     \u0026\u0026 apt-get install --yes --no-install-recommends         ${JRE}         ca-certificates     \u0026\u0026 apt-get clean -y \u0026\u0026 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2025-09-15T18:44:36.608790012Z",
+          "created_by": "ARG TIKA_VERSION=3.2.3",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-09-15T18:44:36.608790012Z",
+          "created_by": "ENV TIKA_VERSION=3.2.3",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-09-15T18:44:36.764095121Z",
+          "created_by": "COPY /tika-server-standard-3.2.3.jar /tika-server-standard-3.2.3.jar # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2025-09-15T18:44:36.764095121Z",
+          "created_by": "USER 35002:35002",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-09-15T18:44:36.764095121Z",
+          "created_by": "EXPOSE \u0026{[{{67 0} {67 0}}] 0xc0004fd400}",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-09-15T18:44:36.764095121Z",
+          "created_by": "ENTRYPOINT [\"/bin/sh\" \"-c\" \"exec java -cp \\\"/tika-server-standard-${TIKA_VERSION}.jar:/tika-extras/*\\\" org.apache.tika.server.core.TikaServerCli -h 0.0.0.0 $0 $@\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-09-15T18:44:36.764095121Z",
+          "created_by": "LABEL maintainer=Apache Tika Developers dev@tika.apache.org",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        }
+      ],
+      "os": "linux",
+      "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+          "sha256:cdc5ad4f4ae25248b758c61a7d62e674b852c3d962f0186c871f924bf97186f6",
+          "sha256:92b71d3e3cf5c2a2954627a6354b35bcfc66d751a2945fd6b7ecccf90e931147",
+          "sha256:de0108f73f88b392d4db46772ac3b39bfd2cc1dd291b25f902c5296f79c20225"
+        ]
+      },
+      "config": {
+        "Entrypoint": [
+          "/bin/sh",
+          "-c",
+          "exec java -cp \"/tika-server-standard-${TIKA_VERSION}.jar:/tika-extras/*\" org.apache.tika.server.core.TikaServerCli -h 0.0.0.0 $0 $@"
+        ],
+        "Env": [
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "TIKA_VERSION=3.2.3"
+        ],
+        "Labels": {
+          "maintainer": "Apache Tika Developers dev@tika.apache.org",
+          "org.opencontainers.image.ref.name": "ubuntu",
+          "org.opencontainers.image.version": "25.04"
+        },
+        "User": "35002:35002",
+        "ExposedPorts": {
+          "9998/tcp": {}
+        }
+      }
+    },
+    "Layers": [
+      {
+        "Size": 79394816,
+        "Digest": "sha256:df3646a507d2b3b1b0bde6e6a491ee8926b6961e71b422b45b15dec9c6e2bc9e",
+        "DiffID": "sha256:cdc5ad4f4ae25248b758c61a7d62e674b852c3d962f0186c871f924bf97186f6"
+      },
+      {
+        "Size": 214915584,
+        "Digest": "sha256:3c1b8ef3054a9c618d40059b83a810a6fd79512b1912bfa083d14aa680999834",
+        "DiffID": "sha256:92b71d3e3cf5c2a2954627a6354b35bcfc66d751a2945fd6b7ecccf90e931147"
+      },
+      {
+        "Size": 66229248,
+        "Digest": "sha256:3ea45e6c043d53c1a63474605b69861d47f247f6fb916b8de65f8876c6e4509f",
+        "DiffID": "sha256:de0108f73f88b392d4db46772ac3b39bfd2cc1dd291b25f902c5296f79c20225"
+      }
+    ]
+  },
+  "Results": [
+    {
+      "Target": "docker.io/apache/tika:3.2.3.0@sha256:3fafa194474c5f3a8cff25a0eefd07e7c0513b7f552074ad455e1af58a06bbea (ubuntu 25.04)",
+      "Class": "os-pkgs",
+      "Type": "ubuntu",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2025-68973",
+          "PkgID": "gpgv@2.4.4-2ubuntu23.1",
+          "PkgName": "gpgv",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/ubuntu/gpgv@2.4.4-2ubuntu23.1?arch=amd64\u0026distro=ubuntu-25.04",
+            "UID": "c42f8b7ddd8a26b1"
+          },
+          "InstalledVersion": "2.4.4-2ubuntu23.1",
+          "FixedVersion": "2.4.4-2ubuntu23.2",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:df3646a507d2b3b1b0bde6e6a491ee8926b6961e71b422b45b15dec9c6e2bc9e",
+            "DiffID": "sha256:cdc5ad4f4ae25248b758c61a7d62e674b852c3d962f0186c871f924bf97186f6"
+          },
+          "SeveritySource": "ubuntu",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-68973",
+          "DataSource": {
+            "ID": "ubuntu",
+            "Name": "Ubuntu CVE Tracker",
+            "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
+          },
+          "Title": "GnuPG: GnuPG: Information disclosure and potential arbitrary code execution via out-of-bounds write",
+          "Description": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments of an index variable where one is intended, leading to an out-of-bounds write for crafted input. (For ExtendedLTS, 2.2.51 and later are fixed versions.)",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-675",
+            "CWE-787"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 3,
+            "azure": 3,
+            "cbl-mariner": 3,
+            "nvd": 3,
+            "oracle-oval": 3,
+            "photon": 3,
+            "redhat": 3,
+            "rocky": 3,
+            "ubuntu": 3
+          },
+          "CVSS": {
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
+              "V3Score": 7.8
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/12/29/11",
+            "https://access.redhat.com/errata/RHSA-2026:0719",
+            "https://access.redhat.com/security/cve/CVE-2025-68973",
+            "https://bugzilla.redhat.com/2425966",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2425966",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68973",
+            "https://dev.gnupg.org/T7906",
+            "https://dev.gnupg.org/T8001",
+            "https://errata.almalinux.org/9/ALSA-2026-0719.html",
+            "https://errata.rockylinux.org/RLSA-2026:0719",
+            "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
+            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
+            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
+            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372 (gnupg-2.2.51)",
+            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48 (gnupg-2.4.9)",
+            "https://github.com/gpg/gnupg/compare/gnupg-2.2.50...gnupg-2.2.51",
+            "https://gpg.fail/memcpy",
+            "https://linux.oracle.com/cve/CVE-2025-68973.html",
+            "https://linux.oracle.com/errata/ELSA-2026-1677.html",
+            "https://lists.debian.org/debian-lts-announce/2026/01/msg00008.html",
+            "https://media.ccc.de/v/39c3-to-sign-or-not-to-sign-practical-vulnerabilities-i",
+            "https://news.ycombinator.com/item?id=46403200",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-68973",
+            "https://ubuntu.com/security/notices/USN-7946-1",
+            "https://ubuntu.com/security/notices/USN-7946-2",
+            "https://www.cve.org/CVERecord?id=CVE-2025-68973",
+            "https://www.openwall.com/lists/oss-security/2025/12/28/5"
+          ],
+          "PublishedDate": "2025-12-28T17:16:01.5Z",
+          "LastModifiedDate": "2026-01-14T19:16:46.857Z"
+        }
+      ]
+    },
+    {
+      "Target": "Java",
+      "Class": "lang-pkgs",
+      "Type": "jar",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "GHSA-72hv-8253-57qq",
+          "PkgName": "com.fasterxml.jackson.core:jackson-core",
+          "PkgPath": "tika-server-standard-3.2.3.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.20.0",
+            "UID": "861c62159a71774c"
+          },
+          "InstalledVersion": "2.20.0",
+          "FixedVersion": "2.18.6, 2.21.1, 3.1.0",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:3ea45e6c043d53c1a63474605b69861d47f247f6fb916b8de65f8876c6e4509f",
+            "DiffID": "sha256:de0108f73f88b392d4db46772ac3b39bfd2cc1dd291b25f902c5296f79c20225"
+          },
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://github.com/advisories/GHSA-72hv-8253-57qq",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Title": "jackson-core: Number Length Constraint Bypass in Async Parser Leads to Potential DoS Condition",
+          "Description": "### Summary\nThe non-blocking (async) JSON parser in `jackson-core` bypasses the `maxNumberLength` constraint (default: 1000 characters) defined in `StreamReadConstraints`. This allows an attacker to send JSON with arbitrarily long numbers through the async parser API, leading to excessive memory allocation and potential CPU exhaustion, resulting in a Denial of Service (DoS).\n\nThe standard synchronous parser correctly enforces this limit, but the async parser fails to do so, creating an inconsistent enforcement policy.\n\n### Details\nThe root cause is that the async parsing path in `NonBlockingUtf8JsonParserBase` (and related classes) does not call the methods responsible for number length validation.\n\n- The number parsing methods (e.g., `_finishNumberIntegralPart`) accumulate digits into the `TextBuffer` without any length checks.\n- After parsing, they call `_valueComplete()`, which finalizes the token but does **not** call `resetInt()` or `resetFloat()`.\n- The `resetInt()`/`resetFloat()` methods in `ParserBase` are where the `validateIntegerLength()` and `validateFPLength()` checks are performed.\n- Because this validation step is skipped, the `maxNumberLength` constraint is never enforced in the async code path.\n\n### PoC\nThe following JUnit 5 test demonstrates the vulnerability. It shows that the async parser accepts a 5,000-digit number, whereas the limit should be 1,000.\n\n```java\npackage tools.jackson.core.unittest.dos;\n\nimport java.nio.charset.StandardCharsets;\n\nimport org.junit.jupiter.api.Test;\n\nimport tools.jackson.core.*;\nimport tools.jackson.core.exc.StreamConstraintsException;\nimport tools.jackson.core.json.JsonFactory;\nimport tools.jackson.core.json.async.NonBlockingByteArrayJsonParser;\n\nimport static org.junit.jupiter.api.Assertions.*;\n\n/**\n * POC: Number Length Constraint Bypass in Non-Blocking (Async) JSON Parsers\n *\n * Authors: sprabhav7, rohan-repos\n * \n * maxNumberLength default = 1000 characters (digits).\n * A number with more than 1000 digits should be rejected by any parser.\n *\n * BUG: The async parser never calls resetInt()/resetFloat() which is where\n * validateIntegerLength()/validateFPLength() lives. Instead it calls\n * _valueComplete() which skips all number length validation.\n *\n * CWE-770: Allocation of Resources Without Limits or Throttling\n */\nclass AsyncParserNumberLengthBypassTest {\n\n    private static final int MAX_NUMBER_LENGTH = 1000;\n    private static final int TEST_NUMBER_LENGTH = 5000;\n\n    private final JsonFactory factory = new JsonFactory();\n\n    // CONTROL: Sync parser correctly rejects a number exceeding maxNumberLength\n    @Test\n    void syncParserRejectsLongNumber() throws Exception {\n        byte[] payload = buildPayloadWithLongInteger(TEST_NUMBER_LENGTH);\n\t\t\n\t\t// Output to console\n        System.out.println(\"[SYNC] Parsing \" + TEST_NUMBER_LENGTH + \"-digit number (limit: \" + MAX_NUMBER_LENGTH + \")\");\n        try {\n            try (JsonParser p = factory.createParser(ObjectReadContext.empty(), payload)) {\n                while (p.nextToken() != null) {\n                    if (p.currentToken() == JsonToken.VALUE_NUMBER_INT) {\n                        System.out.println(\"[SYNC] Accepted number with \" + p.getText().length() + \" digits — UNEXPECTED\");\n                    }\n                }\n            }\n            fail(\"Sync parser must reject a \" + TEST_NUMBER_LENGTH + \"-digit number\");\n        } catch (StreamConstraintsException e) {\n            System.out.println(\"[SYNC] Rejected with StreamConstraintsException: \" + e.getMessage());\n        }\n    }\n\n    // VULNERABILITY: Async parser accepts the SAME number that sync rejects\n    @Test\n    void asyncParserAcceptsLongNumber() throws Exception {\n        byte[] payload = buildPayloadWithLongInteger(TEST_NUMBER_LENGTH);\n\n        NonBlockingByteArrayJsonParser p =\n            (NonBlockingByteArrayJsonParser) factory.createNonBlockingByteArrayParser(ObjectReadContext.empty());\n        p.feedInput(payload, 0, payload.length);\n        p.endOfInput();\n\n        boolean foundNumber = false;\n        try {\n            while (p.nextToken() != null) {\n                if (p.currentToken() == JsonToken.VALUE_NUMBER_INT) {\n                    foundNumber = true;\n                    String numberText = p.getText();\n                    assertEquals(TEST_NUMBER_LENGTH, numberText.length(),\n                        \"Async parser silently accepted all \" + TEST_NUMBER_LENGTH + \" digits\");\n                }\n            }\n            // Output to console\n            System.out.println(\"[ASYNC INT] Accepted number with \" + TEST_NUMBER_LENGTH + \" digits — BUG CONFIRMED\");\n            assertTrue(foundNumber, \"Parser should have produced a VALUE_NUMBER_INT token\");\n        } catch (StreamConstraintsException e) {\n            fail(\"Bug is fixed — async parser now correctly rejects long numbers: \" + e.getMessage());\n        }\n        p.close();\n    }\n\n    private byte[] buildPayloadWithLongInteger(int numDigits) {\n        StringBuilder sb = new StringBuilder(numDigits + 10);\n        sb.append(\"{\\\"v\\\":\");\n        for (int i = 0; i \u003c numDigits; i++) {\n            sb.append((char) ('1' + (i % 9)));\n        }\n        sb.append('}');\n        return sb.toString().getBytes(StandardCharsets.UTF_8);\n    }\n}\n\n```\n\n\n### Impact\nA malicious actor can send a JSON document with an arbitrarily long number to an application using the async parser (e.g., in a Spring WebFlux or other reactive application). This can cause:\n1.  **Memory Exhaustion:** Unbounded allocation of memory in the `TextBuffer` to store the number's digits, leading to an `OutOfMemoryError`.\n2.  **CPU Exhaustion:** If the application subsequently calls `getBigIntegerValue()` or `getDecimalValue()`, the JVM can be tied up in O(n^2) `BigInteger` parsing operations, leading to a CPU-based DoS.\n\n### Suggested Remediation\n\nThe async parsing path should be updated to respect the `maxNumberLength` constraint. The simplest fix appears to ensure that `_valueComplete()` or a similar method in the async path calls the appropriate validation methods (`resetInt()` or `resetFloat()`) already present in `ParserBase`, mirroring the behavior of the synchronous parsers.\n\n**NOTE:** This research was performed in collaboration with [rohan-repos](https://github.com/rohan-repos)",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "ghsa": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N",
+              "V40Score": 8.7
+            }
+          },
+          "References": [
+            "https://github.com/FasterXML/jackson-core",
+            "https://github.com/FasterXML/jackson-core/commit/b0c428e6f993e1b5ece5c1c3cb2523e887cd52cf",
+            "https://github.com/FasterXML/jackson-core/pull/1555",
+            "https://github.com/FasterXML/jackson-core/security/advisories/GHSA-72hv-8253-57qq"
+          ],
+          "PublishedDate": "2026-02-28T02:01:05Z",
+          "LastModifiedDate": "2026-03-03T16:59:14Z"
+        }
+      ]
+    }
+  ]
+}

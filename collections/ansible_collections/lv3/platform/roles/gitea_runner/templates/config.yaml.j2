@@ -6,6 +6,8 @@ runner:
   capacity: 2
   envs:
     DOCKER_HOST: unix:///var/run/docker.sock
+    # Workflow-side Docker helpers translate workspace and credential binds back to host paths.
+    GITEA_RUNNER_HOST_DATA_DIR: {{ gitea_runner_data_dir }}
 
 container:
   network: host

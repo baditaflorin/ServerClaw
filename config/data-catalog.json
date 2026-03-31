@@ -3,49 +3,65 @@
   "schema_version": "1.0.0",
   "data_stores": [
     {
-      "id": "openbao-secrets",
-      "service": "openbao",
-      "name": "OpenBao KV secrets",
-      "class": "secret",
-      "retention_days": null,
+      "id": "woodpecker-pipeline-history",
+      "service": "woodpecker",
+      "name": "Woodpecker pipeline history",
+      "class": "internal",
+      "retention_days": 90,
       "backup_included": true,
-      "access_role": "break_glass",
+      "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "kv/services/*",
-        "kv/controller/*"
+        "Woodpecker PostgreSQL data",
+        "/opt/woodpecker/data/server"
       ],
-      "notes": "Secret material is retained until explicit deletion or rotation removes the prior value."
+      "notes": "Pipeline logs and repository activation metadata can contain branch names, repository details, and operator-trigger context, so they remain private and restorable with the Woodpecker control plane."
     },
     {
-      "id": "tls-private-keys",
-      "service": "step_ca",
-      "name": "TLS private keys",
-      "class": "secret",
-      "retention_days": 7,
-      "backup_included": false,
-      "access_role": "service_account",
-      "pii_risk": "low",
-      "locations": [
-        "step-ca runtime volumes",
-        "/etc/pve/local/pve-ssl.*"
-      ],
-      "notes": "Runtime keys are rotated with certificate renewal and old material should not persist beyond the overlap window."
-    },
-    {
-      "id": "loki-logs",
-      "service": "grafana",
-      "name": "Loki log store",
-      "class": "internal",
+      "id": "browser-runner-artifacts",
+      "service": "browser_runner",
+      "name": "Browser runner bounded session artifacts",
+      "class": "confidential",
       "retention_days": 30,
       "backup_included": false,
-      "access_role": "platform-read",
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/browser-runner/data/artifacts",
+        "browser-run-session structured outputs"
+      ],
+      "notes": "Captured screenshots, PDFs, selector text, and downloaded files may contain third-party page content or delegated-session data, so retention stays intentionally short and private."
+    },
+    {
+      "id": "changedetection-watch-history",
+      "service": "changedetection",
+      "name": "Changedetection watch history and diff datastore",
+      "class": "internal",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
       "pii_risk": "low",
       "locations": [
-        "/var/lib/loki",
-        "Grafana Loki datasource"
+        "Docker volume changedetection-datastore on docker-runtime-lv3",
+        "/etc/lv3/changedetection/watch-catalog.json",
+        "/opt/changedetection/watch-sync-report.json"
       ],
-      "notes": "Operational logs may contain internal IP addresses, usernames, and error details."
+      "notes": "Changedetection stores repo-managed watch metadata, snapshots, diff history, and the most recent drift-free sync report for upstream content monitoring."
+    },
+    {
+      "id": "directus_primary_data",
+      "service": "directus",
+      "name": "Directus operational metadata database",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "low",
+      "locations": [
+        "PostgreSQL database directus on postgres-lv3",
+        "Directus system tables plus governed collections in the public schema of the dedicated directus database"
+      ],
+      "notes": "Directus persists repo-governed operational metadata in a dedicated PostgreSQL database. Upstream Directus 11.17.0 keeps both system tables and managed collections in the public schema of that dedicated database, so schema isolation is enforced at the database boundary rather than by a separate PostgreSQL schema."
     },
     {
       "id": "dozzle-live-log-stream",
@@ -64,6 +80,23 @@
       "notes": "Dozzle is read-only and does not persist its own datastore; it exposes recent container log buffers from the managed Docker hosts for real-time debugging."
     },
     {
+      "id": "drift-report-receipts",
+      "service": "platform_control_plane",
+      "name": "Drift detection receipts",
+      "class": "internal",
+      "retention_days": 90,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "receipts/drift-reports"
+      ],
+      "retention_paths": [
+        "drift-reports"
+      ],
+      "notes": "Drift findings are operationally useful across recent investigations but are superseded by longer-term audit evidence."
+    },
+    {
       "id": "excalidraw-generated-scenes",
       "service": "excalidraw",
       "name": "Generated Excalidraw scene set",
@@ -79,152 +112,52 @@
       "notes": "The committed architecture scene sources are regenerated from repo truth and remain part of normal repository backup scope."
     },
     {
-      "id": "netdata-realtime-metrics",
-      "service": "realtime",
-      "name": "Netdata realtime metrics store",
-      "class": "internal",
-      "retention_days": 1,
-      "backup_included": false,
-      "access_role": "platform-read",
-      "pii_risk": "low",
-      "locations": [
-        "/var/cache/netdata",
-        "https://realtime.lv3.org"
-      ],
-      "notes": "Netdata stores short-lived host and guest metrics for live operator troubleshooting and anomaly triage; long-term retention remains outside the scope of this service."
-    },
-    {
-      "id": "tempo-traces",
-      "service": "grafana",
-      "name": "Tempo trace blocks",
-      "class": "internal",
-      "retention_days": 14,
-      "backup_included": false,
-      "access_role": "platform-read",
-      "pii_risk": "low",
-      "locations": [
-        "/var/lib/tempo/blocks",
-        "Grafana Tempo datasource"
-      ],
-      "notes": "Trace payloads support short-lived troubleshooting and should remain bounded to protect monitoring disk capacity."
-    },
-    {
-      "id": "langfuse-trace-store",
-      "service": "langfuse",
-      "name": "Langfuse trace and observation store",
-      "class": "confidential",
-      "retention_days": 90,
-      "backup_included": false,
-      "access_role": "platform-operator",
-      "pii_risk": "high",
-      "locations": [
-        "Langfuse PostgreSQL database",
-        "/opt/langfuse/data/clickhouse"
-      ],
-      "notes": "Langfuse captures prompt, trace, and generation payloads that may contain operator-entered context and model outputs."
-    },
-    {
-      "id": "langfuse-object-storage",
-      "service": "langfuse",
-      "name": "Langfuse event and media object storage",
-      "class": "confidential",
-      "retention_days": 90,
-      "backup_included": false,
-      "access_role": "platform-operator",
-      "pii_risk": "high",
-      "locations": [
-        "/opt/langfuse/data/minio/langfuse/events",
-        "/opt/langfuse/data/minio/langfuse/media"
-      ],
-      "notes": "Blob-backed event uploads and media attachments may contain raw prompts, responses, and attached evidence artifacts."
-    },
-    {
-      "id": "grafana-annotations",
-      "service": "grafana",
-      "name": "Grafana annotations",
-      "class": "internal",
-      "retention_days": 90,
-      "backup_included": true,
-      "access_role": "platform-read",
-      "pii_risk": "low",
-      "locations": [
-        "Grafana SQLite/PostgreSQL annotation store"
-      ],
-      "notes": "Annotations capture deployment and incident context that remains useful longer than raw logs."
-    },
-    {
-      "id": "mutation-audit-log",
-      "service": "platform_control_plane",
-      "name": "Mutation audit log",
+      "id": "flagsmith-control-plane-state",
+      "service": "flagsmith",
+      "name": "Flagsmith project, environment, and feature state",
       "class": "confidential",
       "retention_days": 365,
       "backup_included": true,
       "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "/var/log/platform/mutation-audit.jsonl",
-        ".local/state/mutation-audit/mutation-audit.jsonl",
-        "Loki {job=\"mutation-audit\"}"
+        "Flagsmith PostgreSQL database on postgres-lv3"
       ],
-      "notes": "Audit events record operator and automation identities and must remain available for at least one annual review cycle."
+      "notes": "Flagsmith persists organisations, projects, environments, feature definitions, segment metadata, and environment-specific flag state in the shared PostgreSQL cluster."
     },
     {
-      "id": "windmill-run-history",
-      "service": "windmill",
-      "name": "Windmill job history",
-      "class": "internal",
-      "retention_days": 60,
-      "backup_included": true,
-      "access_role": "platform-operator",
-      "pii_risk": "medium",
-      "locations": [
-        "Windmill PostgreSQL data",
-        "Windmill workspace logs"
-      ],
-      "notes": "Workflow logs can contain operator context and transient execution metadata but do not need indefinite retention."
-    },
-    {
-      "id": "homepage-config",
-      "service": "homepage",
-      "name": "Homepage generated dashboard config",
+      "id": "fixture-receipts",
+      "service": "platform_control_plane",
+      "name": "Ephemeral fixture receipts",
       "class": "internal",
       "retention_days": 30,
-      "backup_included": true,
-      "access_role": "platform-read",
+      "backup_included": false,
+      "access_role": "platform-operator",
       "pii_risk": "low",
       "locations": [
-        "/opt/homepage/config"
+        "receipts/fixtures"
       ],
-      "notes": "Homepage stores only repo-generated dashboard configuration and lightweight runtime state for the unified service dashboard."
+      "retention_paths": [
+        "fixtures"
+      ],
+      "notes": "Fixture receipts track temporary environments and can be discarded after the short-lived debugging window closes."
     },
     {
-      "id": "mattermost-messages",
-      "service": "mattermost",
-      "name": "Mattermost messages and attachments",
+      "id": "gate-bypass-receipts",
+      "service": "platform_control_plane",
+      "name": "Validation gate bypass receipts",
       "class": "confidential",
-      "retention_days": 730,
+      "retention_days": 365,
       "backup_included": true,
       "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "mattermost PostgreSQL database",
-        "/opt/mattermost/volumes/app/mattermost"
+        "receipts/gate-bypasses"
       ],
-      "notes": "ChatOps history supports incident reconstruction and should retain two years of operator discussion."
-    },
-    {
-      "id": "netbox-change-log",
-      "service": "netbox",
-      "name": "NetBox object change log",
-      "class": "internal",
-      "retention_days": 180,
-      "backup_included": true,
-      "access_role": "platform-read",
-      "pii_risk": "low",
-      "locations": [
-        "NetBox PostgreSQL extras_objectchange table"
+      "retention_paths": [
+        "gate-bypasses"
       ],
-      "notes": "Object-change history should remain available through at least one quarterly planning cycle without growing unbounded."
+      "notes": "Bypass records capture exception handling and should remain available for annual audit review."
     },
     {
       "id": "gitea-repositories",
@@ -243,19 +176,362 @@
       "notes": "Repositories, issues, webhook configuration, and audit metadata are operational records that should remain restorable for multi-year incident and change reconstruction."
     },
     {
-      "id": "vaultwarden-shared-vault",
-      "service": "vaultwarden",
-      "name": "Vaultwarden shared credential vault",
-      "class": "secret",
+      "id": "gotenberg-transient-render-buffers",
+      "service": "gotenberg",
+      "name": "Gotenberg transient render buffers",
+      "class": "internal",
       "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Transient request and response buffers inside the gotenberg container on docker-runtime-lv3",
+        "Ephemeral temporary files created during Chromium and LibreOffice conversions on docker-runtime-lv3"
+      ],
+      "notes": "Gotenberg is stateless and does not persist source documents or rendered PDFs after each synchronous conversion finishes."
+    },
+    {
+      "id": "tika-transient-document-extraction",
+      "service": "tika",
+      "name": "Apache Tika transient document extraction payloads",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "Transient request and response buffers inside the tika container on docker-runtime-lv3",
+        "Ephemeral extracted plaintext and metadata returned synchronously to callers on docker-runtime-lv3"
+      ],
+      "notes": "Apache Tika is stateless and does not persist source documents, extracted text, or metadata after each synchronous request completes, but uploaded documents may contain sensitive content in transit."
+    },
+    {
+      "id": "tesseract-ocr-transient-request-buffers",
+      "service": "tesseract_ocr",
+      "name": "Tesseract OCR transient request buffers",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Transient uploaded image and PDF buffers inside the tesseract-ocr container on docker-runtime-lv3",
+        "Ephemeral rendered page images created during PDF OCR on docker-runtime-lv3"
+      ],
+      "notes": "The OCR runtime is stateless and discards uploaded source files, rendered page images, and extracted text after each synchronous request completes."
+    },
+    {
+      "id": "grafana-annotations",
+      "service": "grafana",
+      "name": "Grafana annotations",
+      "class": "internal",
+      "retention_days": 90,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "Grafana SQLite/PostgreSQL annotation store"
+      ],
+      "notes": "Annotations capture deployment and incident context that remains useful longer than raw logs."
+    },
+    {
+      "id": "harbor-registry-artifacts",
+      "service": "harbor",
+      "name": "Harbor registry artifacts and chart storage",
+      "class": "confidential",
+      "retention_days": 90,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/harbor/data/registry",
+        "/opt/harbor/data/chart_storage"
+      ],
+      "notes": "Private container images, OCI artifacts, and retained charts are durable release assets that must remain recoverable through the managed retention window."
+    },
+    {
+      "id": "harbor-registry-metadata",
+      "service": "harbor",
+      "name": "Harbor registry metadata and scan results",
+      "class": "confidential",
+      "retention_days": 90,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Harbor PostgreSQL database",
+        "/opt/harbor/data/database"
+      ],
+      "notes": "Harbor stores project metadata, robot-account policy, replication state, and vulnerability scan findings that support supply-chain auditing and recovery."
+    },
+    {
+      "id": "homepage-config",
+      "service": "homepage",
+      "name": "Homepage generated dashboard config",
+      "class": "internal",
+      "retention_days": 30,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "/opt/homepage/config"
+      ],
+      "notes": "Homepage stores only repo-generated dashboard configuration and lightweight runtime state for the unified service dashboard."
+    },
+    {
+      "id": "image-scan-reports",
+      "service": "platform_control_plane",
+      "name": "Image scan receipts",
+      "class": "internal",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "low",
+      "locations": [
+        "receipts/image-scans"
+      ],
+      "retention_paths": [
+        "image-scans"
+      ],
+      "notes": "Security scan evidence should remain available across one full patching and review cycle."
+    },
+    {
+      "id": "langfuse-object-storage",
+      "service": "langfuse",
+      "name": "Langfuse event and media object storage",
+      "class": "confidential",
+      "retention_days": 90,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/langfuse/data/minio/langfuse/events",
+        "/opt/langfuse/data/minio/langfuse/media"
+      ],
+      "notes": "Blob-backed event uploads and media attachments may contain raw prompts, responses, and attached evidence artifacts."
+    },
+    {
+      "id": "langfuse-trace-store",
+      "service": "langfuse",
+      "name": "Langfuse trace and observation store",
+      "class": "confidential",
+      "retention_days": 90,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "Langfuse PostgreSQL database",
+        "/opt/langfuse/data/clickhouse"
+      ],
+      "notes": "Langfuse captures prompt, trace, and generation payloads that may contain operator-entered context and model outputs."
+    },
+    {
+      "id": "live-apply-receipts",
+      "service": "platform_control_plane",
+      "name": "Live-apply receipts",
+      "class": "internal",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "receipts/live-applies",
+        "receipts/live-applies/staging"
+      ],
+      "retention_paths": [
+        "live-applies"
+      ],
+      "notes": "Deployment evidence remains part of the short-term operational timeline and is summarized into longer-lived release history."
+    },
+    {
+      "id": "loki-logs",
+      "service": "grafana",
+      "name": "Loki log store",
+      "class": "internal",
+      "retention_days": 30,
+      "backup_included": false,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "/var/lib/loki",
+        "Grafana Loki datasource"
+      ],
+      "notes": "Operational logs may contain internal IP addresses, usernames, and error details."
+    },
+    {
+      "id": "mailpit-captured-messages",
+      "service": "mailpit",
+      "name": "Mailpit captured message cache",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Mailpit in-memory message store on docker-runtime-lv3"
+      ],
+      "notes": "Mailpit intentionally keeps intercepted staging and development messages in ephemeral in-memory storage so assertion traffic is inspectable but lost on restart."
+    },
+    {
+      "id": "matrix-synapse-event-store",
+      "service": "matrix_synapse",
+      "name": "Matrix Synapse events and room state",
+      "class": "confidential",
+      "retention_days": 730,
       "backup_included": true,
       "access_role": "platform-operator",
       "pii_risk": "high",
       "locations": [
-        "Vaultwarden PostgreSQL database",
-        "/opt/vaultwarden/data"
+        "Matrix Synapse PostgreSQL database"
       ],
-      "notes": "Shared operator credentials, recovery codes, and TOTP seeds remain until explicit deletion or rotation removes them from the private vault."
+      "notes": "Conversation history, room membership, and server-to-user metadata are retained for two years for assistant auditability and recovery."
+    },
+    {
+      "id": "matrix-synapse-media-store",
+      "service": "matrix_synapse",
+      "name": "Matrix Synapse media store",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/matrix-synapse/data/media_store"
+      ],
+      "notes": "Uploaded Matrix media is retained for one year unless a stricter room- or user-level policy is introduced later."
+    },
+    {
+      "id": "mattermost-messages",
+      "service": "mattermost",
+      "name": "Mattermost messages and attachments",
+      "class": "confidential",
+      "retention_days": 730,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "mattermost PostgreSQL database",
+        "/opt/mattermost/volumes/app/mattermost"
+      ],
+      "notes": "ChatOps history supports incident reconstruction and should retain two years of operator discussion."
+    },
+    {
+      "id": "mutation-audit-log",
+      "service": "platform_control_plane",
+      "name": "Mutation audit log",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/var/log/platform/mutation-audit.jsonl",
+        ".local/state/mutation-audit/mutation-audit.jsonl",
+        "Loki {job=\"mutation-audit\"}"
+      ],
+      "notes": "Audit events record operator and automation identities and must remain available for at least one annual review cycle."
+    },
+    {
+      "id": "netbox-change-log",
+      "service": "netbox",
+      "name": "NetBox object change log",
+      "class": "internal",
+      "retention_days": 180,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "NetBox PostgreSQL extras_objectchange table"
+      ],
+      "notes": "Object-change history should remain available through at least one quarterly planning cycle without growing unbounded."
+    },
+    {
+      "id": "netdata-realtime-metrics",
+      "service": "realtime",
+      "name": "Netdata realtime metrics store",
+      "class": "internal",
+      "retention_days": 1,
+      "backup_included": false,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "/var/cache/netdata",
+        "https://realtime.lv3.org"
+      ],
+      "notes": "Netdata stores short-lived host and guest metrics for live operator troubleshooting and anomaly triage; long-term retention remains outside the scope of this service."
+    },
+    {
+      "id": "nextcloud-account-metadata",
+      "service": "nextcloud",
+      "name": "Nextcloud account and sharing metadata",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "high",
+      "locations": [
+        "Nextcloud PostgreSQL database"
+      ],
+      "notes": "Account records, shares, app state, and file metadata define the canonical personal data plane and must remain restorable with the runtime filesystem."
+    },
+    {
+      "id": "nextcloud-personal-files",
+      "service": "nextcloud",
+      "name": "Nextcloud personal files and DAV payloads",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/nextcloud/data/html/data"
+      ],
+      "notes": "User-owned files, attachments, calendar bodies, contacts, and task payloads remain under user-directed retention and must stay recoverable."
+    },
+    {
+      "id": "openbao-secrets",
+      "service": "openbao",
+      "name": "OpenBao KV secrets",
+      "class": "secret",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "medium",
+      "locations": [
+        "kv/services/*",
+        "kv/controller/*"
+      ],
+      "notes": "Secret material is retained until explicit deletion or rotation removes the prior value."
+    },
+    {
+      "id": "openfga-authorization-graph",
+      "service": "openfga",
+      "name": "OpenFGA authorization graph",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "PostgreSQL openfga database on postgres-lv3",
+        "serverclaw-authz store, authorization models, and tuples"
+      ],
+      "notes": "The delegated authorization graph persists named operator and service-principal relationships until the repo-managed bootstrap contract removes or replaces them."
+    },
+    {
+      "id": "temporal-workflow-history",
+      "service": "temporal",
+      "name": "Temporal workflow history and visibility",
+      "class": "confidential",
+      "retention_days": 7,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "PostgreSQL temporal database on postgres-lv3",
+        "PostgreSQL temporal_visibility database on postgres-lv3"
+      ],
+      "notes": "Temporal persists workflow event history, timers, and visibility records for the repo-managed `lv3` namespace using the declared retention window."
     },
     {
       "id": "outline-attachment-storage",
@@ -286,22 +562,89 @@
       "notes": "Outline stores workspace, user, collection, and document metadata that may include operator identities and operational text."
     },
     {
-      "id": "live-apply-receipts",
-      "service": "platform_control_plane",
-      "name": "Live-apply receipts",
-      "class": "internal",
+      "id": "jupyterhub-user-notebook-volumes",
+      "service": "jupyterhub",
+      "name": "JupyterHub per-user notebook volumes",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "Docker named volumes jupyterhub-user-* on docker-runtime-lv3 under /var/lib/docker/volumes"
+      ],
+      "notes": "Per-user notebook workspaces can contain exploratory code, exported data, ad hoc credentials, and copied operational artifacts that must be treated as confidential operator material."
+    },
+    {
+      "id": "jupyterhub-shared-notebook-bucket",
+      "service": "jupyterhub",
+      "name": "JupyterHub shared notebook bucket",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/jupyterhub/data/minio/jupyterhub-shared"
+      ],
+      "notes": "The service-local MinIO bucket stores shared notebook assets and collaborative exploratory artifacts exchanged between operators."
+    },
+    {
+      "id": "plane-object-storage",
+      "service": "plane",
+      "name": "Plane attachment object storage",
+      "class": "confidential",
       "retention_days": 365,
       "backup_included": true,
-      "access_role": "platform-read",
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/plane/data/minio"
+      ],
+      "notes": "Plane attachment uploads and exported artifacts are persisted in the local MinIO-backed object store on docker-runtime-lv3."
+    },
+    {
+      "id": "plane-workspace-store",
+      "service": "plane",
+      "name": "Plane workspace and issue store",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Plane PostgreSQL database"
+      ],
+      "notes": "Plane stores project boards, issue metadata, and operator-entered planning content that should remain recoverable across normal backup cycles."
+    },
+    {
+      "id": "plausible-analytics-events",
+      "service": "plausible",
+      "name": "Plausible analytics event store",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
       "pii_risk": "low",
       "locations": [
-        "receipts/live-applies",
-        "receipts/live-applies/staging"
+        "Docker volume plausible-event-data"
       ],
-      "retention_paths": [
-        "live-applies"
+      "notes": "ClickHouse stores privacy-preserving pageview and referral aggregates for the declared public LV3 sites without raw IP retention."
+    },
+    {
+      "id": "plausible-site-metadata",
+      "service": "plausible",
+      "name": "Plausible site, user, and configuration metadata",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Docker volume plausible-db-data",
+        "Docker volume plausible-data"
       ],
-      "notes": "Deployment evidence remains part of the short-term operational timeline and is summarized into longer-lived release history."
+      "notes": "PostgreSQL-backed site configuration, dashboard state, and the bootstrap recovery user metadata remain restorable with the runtime volumes."
     },
     {
       "id": "promotion-receipts",
@@ -321,74 +664,6 @@
       "notes": "Promotion evidence remains useful for release forensics for one year."
     },
     {
-      "id": "gate-bypass-receipts",
-      "service": "platform_control_plane",
-      "name": "Validation gate bypass receipts",
-      "class": "confidential",
-      "retention_days": 365,
-      "backup_included": true,
-      "access_role": "platform-operator",
-      "pii_risk": "medium",
-      "locations": [
-        "receipts/gate-bypasses"
-      ],
-      "retention_paths": [
-        "gate-bypasses"
-      ],
-      "notes": "Bypass records capture exception handling and should remain available for annual audit review."
-    },
-    {
-      "id": "drift-report-receipts",
-      "service": "platform_control_plane",
-      "name": "Drift detection receipts",
-      "class": "internal",
-      "retention_days": 90,
-      "backup_included": true,
-      "access_role": "platform-read",
-      "pii_risk": "low",
-      "locations": [
-        "receipts/drift-reports"
-      ],
-      "retention_paths": [
-        "drift-reports"
-      ],
-      "notes": "Drift findings are operationally useful across recent investigations but are superseded by longer-term audit evidence."
-    },
-    {
-      "id": "fixture-receipts",
-      "service": "platform_control_plane",
-      "name": "Ephemeral fixture receipts",
-      "class": "internal",
-      "retention_days": 30,
-      "backup_included": false,
-      "access_role": "platform-operator",
-      "pii_risk": "low",
-      "locations": [
-        "receipts/fixtures"
-      ],
-      "retention_paths": [
-        "fixtures"
-      ],
-      "notes": "Fixture receipts track temporary environments and can be discarded after the short-lived debugging window closes."
-    },
-    {
-      "id": "image-scan-reports",
-      "service": "platform_control_plane",
-      "name": "Image scan receipts",
-      "class": "internal",
-      "retention_days": 365,
-      "backup_included": true,
-      "access_role": "platform-operator",
-      "pii_risk": "low",
-      "locations": [
-        "receipts/image-scans"
-      ],
-      "retention_paths": [
-        "image-scans"
-      ],
-      "notes": "Security scan evidence should remain available across one full patching and review cycle."
-    },
-    {
       "id": "semaphore-task-history",
       "service": "semaphore",
       "name": "Semaphore task history",
@@ -404,32 +679,79 @@
       "notes": "Task output can contain operator context, playbook names, and limited execution logs, so it should stay private and be retained long enough for incident review."
     },
     {
-      "id": "plane-workspace-store",
-      "service": "plane",
-      "name": "Plane workspace and issue store",
+      "id": "serverclaw-workspace-store",
+      "service": "serverclaw",
+      "name": "ServerClaw workspace and chat state",
       "class": "confidential",
-      "retention_days": 365,
-      "backup_included": true,
+      "retention_days": 90,
+      "backup_included": false,
       "access_role": "platform-operator",
-      "pii_risk": "medium",
+      "pii_risk": "high",
       "locations": [
-        "Plane PostgreSQL database"
+        "/opt/serverclaw/data",
+        "https://chat.lv3.org"
       ],
-      "notes": "Plane stores project boards, issue metadata, and operator-entered planning content that should remain recoverable across normal backup cycles."
+      "notes": "ServerClaw persists chat history, workspace metadata, uploaded knowledge artifacts, and user-facing assistant settings in its Open WebUI data volume on coolify-lv3."
     },
     {
-      "id": "plane-object-storage",
-      "service": "plane",
-      "name": "Plane attachment object storage",
-      "class": "confidential",
-      "retention_days": 365,
+      "id": "tempo-traces",
+      "service": "grafana",
+      "name": "Tempo trace blocks",
+      "class": "internal",
+      "retention_days": 14,
+      "backup_included": false,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "/var/lib/tempo/blocks",
+        "Grafana Tempo datasource"
+      ],
+      "notes": "Trace payloads support short-lived troubleshooting and should remain bounded to protect monitoring disk capacity."
+    },
+    {
+      "id": "tls-private-keys",
+      "service": "step_ca",
+      "name": "TLS private keys",
+      "class": "secret",
+      "retention_days": 7,
+      "backup_included": false,
+      "access_role": "service_account",
+      "pii_risk": "low",
+      "locations": [
+        "step-ca runtime volumes",
+        "/etc/pve/local/pve-ssl.*"
+      ],
+      "notes": "Runtime keys are rotated with certificate renewal and old material should not persist beyond the overlap window."
+    },
+    {
+      "id": "vaultwarden-shared-vault",
+      "service": "vaultwarden",
+      "name": "Vaultwarden shared credential vault",
+      "class": "secret",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "Vaultwarden PostgreSQL database",
+        "/opt/vaultwarden/data"
+      ],
+      "notes": "Shared operator credentials, recovery codes, and TOTP seeds remain until explicit deletion or rotation removes them from the private vault."
+    },
+    {
+      "id": "windmill-run-history",
+      "service": "windmill",
+      "name": "Windmill job history",
+      "class": "internal",
+      "retention_days": 60,
       "backup_included": true,
       "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "/opt/plane/data/minio"
+        "Windmill PostgreSQL data",
+        "Windmill workspace logs"
       ],
-      "notes": "Plane attachment uploads and exported artifacts are persisted in the local MinIO-backed object store on docker-runtime-lv3."
+      "notes": "Workflow logs can contain operator context and transient execution metadata but do not need indefinite retention."
     }
   ]
 }

@@ -58,6 +58,16 @@ argument_specs:
         required: true
         description:
           - Directory used for persisted Qdrant data.
+      platform_context_memory_index_dir:
+        type: path
+        required: false
+        description:
+          - Directory that stores the ServerClaw local keyword index.
+      platform_context_memory_index_path:
+        type: path
+        required: false
+        description:
+          - Path to the generated ServerClaw local keyword index JSON file.
       platform_context_secret_dir:
         type: path
         required: true
@@ -123,6 +133,11 @@ argument_specs:
         required: true
         description:
           - Collection name used to store indexed corpus embeddings.
+      platform_context_memory_collection:
+        type: str
+        required: false
+        description:
+          - Dedicated Qdrant collection name used for ServerClaw memory objects.
       platform_context_embedding_backend:
         type: str
         required: true
@@ -164,11 +179,21 @@ argument_specs:
         required: false
         description:
           - Base URL for the local Ollama runtime used by semantic embeddings.
+      platform_context_memory_dsn:
+        type: str
+        required: false
+        description:
+          - Shared PostgreSQL DSN used for canonical ServerClaw memory state.
       platform_context_repo_root:
         type: path
         required: false
         description:
           - Repository root used to resolve mirrored service and corpus sources.
+      platform_context_search_fabric_source_dir:
+        type: path
+        required: false
+        description:
+          - Repository path for the shared local search-fabric package copied into the runtime image.
       platform_context_corpus_sources:
         type: list
         elements: dict
@@ -186,3 +211,33 @@ argument_specs:
         required: false
         description:
           - Controller-local rebuild helper retained for operator workflows.
+      platform_context_memory_verification_scope_kind:
+        type: str
+        required: false
+        description:
+          - Scope kind used by the live ServerClaw memory smoke verification.
+      platform_context_memory_verification_scope_id:
+        type: str
+        required: false
+        description:
+          - Scope identifier used by the live ServerClaw memory smoke verification.
+      platform_context_memory_verification_object_type:
+        type: str
+        required: false
+        description:
+          - Object type used by the live ServerClaw memory smoke verification.
+      platform_context_memory_verification_title:
+        type: str
+        required: false
+        description:
+          - Title for the temporary ServerClaw memory smoke entry.
+      platform_context_memory_verification_content:
+        type: str
+        required: false
+        description:
+          - Content for the temporary ServerClaw memory smoke entry.
+      platform_context_memory_verification_query:
+        type: str
+        required: false
+        description:
+          - Query used to prove semantic and keyword recall for the temporary ServerClaw memory entry.

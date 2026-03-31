@@ -1,0 +1,13 @@
+Preflight workflow: converge-plausible
+Description: Converge Plausible on docker-runtime-lv3, publish analytics.lv3.org through the shared edge, and verify public tracker injection plus synthetic event ingestion.
+Bootstrap manifest: shared-edge-generated-portals
+Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
+PASS bootstrap artifact ops_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0283-live-apply/build/ops-portal via `make generate-ops-portal`
+PASS bootstrap artifact changelog_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0283-live-apply/build/changelog-portal via `make generate-changelog-portal`
+PASS bootstrap artifact docs_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0283-live-apply/build/docs-portal via `make docs`
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+PASS env hetzner_dns_api_token: HETZNER_DNS_API_TOKEN is set
+INFO generated plausible_database_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plausible/database-password.txt
+INFO generated plausible_secret_key_base: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plausible/secret-key-base.txt
+INFO generated plausible_bootstrap_user_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plausible/bootstrap-user-password.txt
+Result: PASS (converge-plausible)

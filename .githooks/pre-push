@@ -7,10 +7,26 @@ cd "$REPO_ROOT"
 
 if [[ "${SKIP_REMOTE_GATE:-0}" == "1" ]]; then
   echo "validation gate: skipping remote gate because SKIP_REMOTE_GATE=1"
-  python3 scripts/log_gate_bypass.py \
-    --bypass skip_remote_gate \
-    --source pre-push-hook \
-    --reason "${GATE_BYPASS_REASON:-unspecified}"
+  bypass_args=(
+    --bypass skip_remote_gate
+    --source pre-push-hook
+    --reason-code "${GATE_BYPASS_REASON_CODE:-}"
+    --detail "${GATE_BYPASS_DETAIL:-${GATE_BYPASS_REASON:-}}"
+    --substitute-evidence "${GATE_BYPASS_SUBSTITUTE_EVIDENCE:-}"
+    --remediation-ref "${GATE_BYPASS_REMEDIATION_REF:-}"
+  )
+  if [[ -n "${GATE_BYPASS_IMPACTED_LANES:-}" ]]; then
+    bypass_args+=( --impacted-lane "${GATE_BYPASS_IMPACTED_LANES}" )
+  else
+    bypass_args+=( --impacted-lane remote-pre-push-gate )
+  fi
+  if [[ -n "${GATE_BYPASS_OWNER:-}" ]]; then
+    bypass_args+=( --owner "${GATE_BYPASS_OWNER}" )
+  fi
+  if [[ -n "${GATE_BYPASS_EXPIRES_ON:-}" ]]; then
+    bypass_args+=( --expires-on "${GATE_BYPASS_EXPIRES_ON}" )
+  fi
+  python3 scripts/log_gate_bypass.py "${bypass_args[@]}"
   exit 0
 fi
 

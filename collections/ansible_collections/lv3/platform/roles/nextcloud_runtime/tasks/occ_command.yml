@@ -1,0 +1,127 @@
+# Purpose: Run a Nextcloud OCC command with guarded retries and controlled runtime recovery.
+# Use case: Include whenever Nextcloud administration needs an OCC command that can survive transient container interruptions.
+# Inputs: nextcloud_occ_command_* variables describing the command, retry policy, and failure messaging.
+# Outputs: A completed OCC command result or an explicit recovery/failure path.
+# Idempotency: Partially idempotent; the wrapper is repeatable, but the invoked OCC command determines end-state changes.
+# Dependencies: ADR 0165 metadata standard, ADR 0260, and a running nextcloud_runtime deployment.
+---
+- name: "{{ nextcloud_occ_command_description }}"
+  ansible.builtin.command:
+    argv: "{{ nextcloud_occ_command_argv }}"
+  register: nextcloud_occ_command_result
+  retries: "{{ nextcloud_occ_command_retries | int }}"
+  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
+  until: nextcloud_occ_command_result.rc == 0
+  changed_when: false
+  failed_when: false
+  no_log: "{{ nextcloud_occ_command_no_log | default(false) | bool }}"
+
+- name: Detect whether the Nextcloud OCC command needs runtime recovery
+  ansible.builtin.set_fact:
+    nextcloud_occ_command_recovery_needed: >-
+      {{
+        (nextcloud_occ_command_result.rc | default(1)) != 0
+        and (
+          'is not running' in ((nextcloud_occ_command_result.stderr | default('')) ~ ' ' ~ (nextcloud_occ_command_result.stdout | default('')))
+          or 'No such container' in ((nextcloud_occ_command_result.stderr | default('')) ~ ' ' ~ (nextcloud_occ_command_result.stdout | default('')))
+          or 'Cannot connect to the Docker daemon' in ((nextcloud_occ_command_result.stderr | default('')) ~ ' ' ~ (nextcloud_occ_command_result.stdout | default('')))
+          or 'context deadline exceeded' in ((nextcloud_occ_command_result.stderr | default('')) ~ ' ' ~ (nextcloud_occ_command_result.stdout | default('')))
+        )
+      }}
+
+- name: Surface unexpected Nextcloud OCC command failures
+  ansible.builtin.fail:
+    msg: >-
+      {{
+        nextcloud_occ_command_result.stderr
+        | default(nextcloud_occ_command_result.stdout)
+        | default(nextcloud_occ_failure_message | default('Nextcloud OCC command failed unexpectedly.'))
+      }}
+  when:
+    - (nextcloud_occ_command_result.rc | default(1)) != 0
+    - not nextcloud_occ_command_recovery_needed
+
+- name: Recover the Nextcloud runtime after a concurrent interruption
+  when: nextcloud_occ_command_recovery_needed
+  block:
+    - name: Wait for Docker to be active before recovering the Nextcloud runtime
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - is-active
+          - docker
+      register: nextcloud_docker_active_after_occ_failure
+      retries: 30
+      delay: 2
+      until: nextcloud_docker_active_after_occ_failure.stdout | trim == 'active'
+      changed_when: false
+
+    - name: Ensure Docker bridge networking chains are present before recovering the Nextcloud runtime
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+
+    - name: Restart the Nextcloud runtime after a concurrent interruption
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ nextcloud_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ nextcloud_site_dir }}"
+      register: nextcloud_compose_recovery_up_after_occ_failure
+      changed_when: >-
+        'Creating' in nextcloud_compose_recovery_up_after_occ_failure.stdout
+        or 'Starting' in nextcloud_compose_recovery_up_after_occ_failure.stdout
+        or 'Recreating' in nextcloud_compose_recovery_up_after_occ_failure.stdout
+        or 'Running' in nextcloud_compose_recovery_up_after_occ_failure.stdout
+
+    - name: Wait for Nextcloud local status after runtime recovery
+      ansible.builtin.uri:
+        url: "{{ nextcloud_internal_base_url }}/status.php"
+        method: GET
+        status_code: 200
+        return_content: true
+      register: nextcloud_status_probe_after_occ_recovery
+      retries: 60
+      delay: 5
+      until: nextcloud_status_probe_after_occ_recovery.status == 200
+      changed_when: false
+
+    - name: Wait until Nextcloud reports it is installed after runtime recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - exec
+          - --user
+          - www-data
+          - "{{ nextcloud_container_name }}"
+          - php
+          - occ
+          - status
+          - --output=json
+      register: nextcloud_occ_status_after_recovery
+      retries: 30
+      delay: 5
+      until: >-
+        nextcloud_occ_status_after_recovery.rc == 0
+        and ((nextcloud_occ_status_after_recovery.stdout | from_json).installed | default(false))
+      changed_when: false
+      no_log: true
+
+    - name: Retry the Nextcloud OCC command after runtime recovery
+      ansible.builtin.command:
+        argv: "{{ nextcloud_occ_command_argv }}"
+      register: nextcloud_occ_command_retry_result
+      retries: "{{ nextcloud_occ_command_retries | int }}"
+      delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
+      until: nextcloud_occ_command_retry_result.rc == 0
+      changed_when: false
+      no_log: "{{ nextcloud_occ_command_no_log | default(false) | bool }}"

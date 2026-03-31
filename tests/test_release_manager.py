@@ -8,6 +8,7 @@ import pytest
 
 import canonical_truth
 import controller_automation_toolkit as toolkit
+import gate_bypass_waivers
 import generate_release_notes
 import release_manager
 
@@ -136,6 +137,38 @@ workstreams:
         + "\n",
     )
     write(
+        tmp_path / "config" / "gate-bypass-waiver-catalog.json",
+        json.dumps(
+            {
+                "$schema": "docs/schema/gate-bypass-waiver-catalog.schema.json",
+                "schema_version": "1.0.0",
+                "expiring_soon_days": 2,
+                "repeat_after_expiry": {
+                    "warning_after_occurrences": 1,
+                    "blocker_after_occurrences": 2,
+                },
+                "reason_codes": {
+                    "build_server_unreachable": {
+                        "summary": "builder unavailable",
+                        "max_expiry_days": 2,
+                        "allowed_bypasses": ["skip_remote_gate"],
+                    }
+                },
+            },
+            indent=2,
+        )
+        + "\n",
+    )
+    write(
+        tmp_path / "docs" / "schema" / "gate-bypass-waiver-catalog.schema.json",
+        (Path(release_manager.REPO_ROOT) / "docs" / "schema" / "gate-bypass-waiver-catalog.schema.json").read_text(),
+    )
+    write(
+        tmp_path / "docs" / "schema" / "gate-bypass-waiver-receipt.schema.json",
+        (Path(release_manager.REPO_ROOT) / "docs" / "schema" / "gate-bypass-waiver-receipt.schema.json").read_text(),
+    )
+    write(tmp_path / "receipts" / "gate-bypasses" / ".gitkeep", "")
+    write(
         tmp_path / "docs" / "adr" / "0001-example.md",
         """# ADR 0001: Example
 
@@ -164,6 +197,11 @@ workstreams:
     monkeypatch.setattr(release_manager, "OUTLINE_BASE_URL", "https://wiki.lv3.org")
     monkeypatch.setattr(release_manager, "CHANGELOG_PATH", tmp_path / "changelog.md")
     monkeypatch.setattr(release_manager, "RELEASE_NOTES_INDEX_PATH", tmp_path / "docs" / "release-notes" / "README.md")
+    monkeypatch.setattr(gate_bypass_waivers, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(gate_bypass_waivers, "DEFAULT_CATALOG_PATH", tmp_path / "config" / "gate-bypass-waiver-catalog.json")
+    monkeypatch.setattr(gate_bypass_waivers, "DEFAULT_RECEIPT_DIR", tmp_path / "receipts" / "gate-bypasses")
+    monkeypatch.setattr(gate_bypass_waivers, "CATALOG_SCHEMA_PATH", tmp_path / "docs" / "schema" / "gate-bypass-waiver-catalog.schema.json")
+    monkeypatch.setattr(gate_bypass_waivers, "RECEIPT_SCHEMA_PATH", tmp_path / "docs" / "schema" / "gate-bypass-waiver-receipt.schema.json")
     monkeypatch.setattr(canonical_truth, "infer_release_bump", lambda: "patch")
     monkeypatch.setattr(canonical_truth, "load_workstream_canonical_truth", lambda *args, **kwargs: [])
     monkeypatch.setattr(canonical_truth, "assemble_changelog_text", lambda changelog_text, **kwargs: changelog_text)
@@ -191,9 +229,98 @@ def test_release_status_snapshot_reports_blockers(release_repo: Path) -> None:
 
     assert snapshot["release_blockers"]["status"] == "blocked"
     assert snapshot["criteria"][0]["detail"].startswith("2/2 implemented")
+    assert snapshot["gate_bypass_waivers"]["totals"]["all_receipts"] == 0
+
+
+def test_release_status_snapshot_reports_waiver_blockers(release_repo: Path) -> None:
+    receipt_dir = release_repo / "receipts" / "gate-bypasses"
+    write(
+        receipt_dir / "20260329T090000Z-main-aaaaaaa-skip-remote-gate.json",
+        json.dumps(
+            {
+                "schema_version": "2.0.0",
+                "created_at": "2026-03-29T09:00:00Z",
+                "bypass": "skip_remote_gate",
+                "source": "manual",
+                "branch": "main",
+                "commit": "aaaaaaa",
+                "waiver": {
+                    "reason_code": "build_server_unreachable",
+                    "reason_summary": "builder unavailable",
+                    "detail": "first expiry",
+                    "impacted_lanes": ["remote-pre-push-gate"],
+                    "substitute_evidence": ["make gate-status"],
+                    "owner": "ops",
+                    "expires_on": "2026-03-29",
+                    "remediation_ref": "ws-0267-live-apply",
+                },
+            },
+            indent=2,
+        )
+        + "\n",
+    )
+    write(
+        receipt_dir / "20260402T090000Z-main-bbbbbbb-skip-remote-gate.json",
+        json.dumps(
+            {
+                "schema_version": "2.0.0",
+                "created_at": "2026-04-02T09:00:00Z",
+                "bypass": "skip_remote_gate",
+                "source": "manual",
+                "branch": "main",
+                "commit": "bbbbbbb",
+                "waiver": {
+                    "reason_code": "build_server_unreachable",
+                    "reason_summary": "builder unavailable",
+                    "detail": "second expiry",
+                    "impacted_lanes": ["remote-pre-push-gate"],
+                    "substitute_evidence": ["make gate-status"],
+                    "owner": "ops",
+                    "expires_on": "2026-04-02",
+                    "remediation_ref": "ws-0267-live-apply",
+                },
+            },
+            indent=2,
+        )
+        + "\n",
+    )
+    write(
+        receipt_dir / "20260405T090000Z-main-ccccccc-skip-remote-gate.json",
+        json.dumps(
+            {
+                "schema_version": "2.0.0",
+                "created_at": "2026-04-05T09:00:00Z",
+                "bypass": "skip_remote_gate",
+                "source": "manual",
+                "branch": "main",
+                "commit": "ccccccc",
+                "waiver": {
+                    "reason_code": "build_server_unreachable",
+                    "reason_summary": "builder unavailable",
+                    "detail": "third expiry",
+                    "impacted_lanes": ["remote-pre-push-gate"],
+                    "substitute_evidence": ["make gate-status"],
+                    "owner": "ops",
+                    "expires_on": "2026-04-05",
+                    "remediation_ref": "ws-0267-live-apply",
+                },
+            },
+            indent=2,
+        )
+        + "\n",
+    )
+
+    snapshot = release_manager.build_release_status_snapshot(timeout=0)
+
+    assert snapshot["release_blockers"]["status"] == "blocked"
+    assert "waiver blockers" in snapshot["release_blockers"]["detail"]
+    assert snapshot["gate_bypass_waivers"]["release_blockers"][0]["reason_code"] == "build_server_unreachable"
 
 
 def test_release_cut_updates_core_release_files(release_repo: Path) -> None:
+    refreshed: list[str] = []
+    release_manager.refresh_generated_truth_surfaces = lambda: refreshed.append("generated")
+
     exit_code = release_manager.main(
         [
             "--bump",
@@ -214,6 +341,7 @@ def test_release_cut_updates_core_release_files(release_repo: Path) -> None:
     assert (release_repo / "RELEASE.md").exists()
     assert (release_repo / "docs" / "release-notes" / "0.1.1.md").exists()
     assert "[0.1.1](" in (release_repo / "docs" / "release-notes" / "README.md").read_text()
+    assert refreshed == ["generated"]
 
 
 def test_release_cut_can_infer_bump_from_canonical_truth_metadata(release_repo: Path) -> None:

@@ -1,11 +1,33 @@
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from .conftest import auth_header, http_request, poll_job, require_url
 
 
 pytestmark = pytest.mark.integration
+
+
+def test_windmill_version_endpoint_reports_version(integration_config) -> None:
+    windmill_url = require_url(
+        integration_config.windmill_url,
+        "LV3_INTEGRATION_WINDMILL_URL is required for Windmill smoke checks",
+    )
+    response = http_request(
+        "GET",
+        f"{windmill_url}/api/version",
+        verify=integration_config.verify_tls,
+    )
+    assert response.status_code == 200, response.text
+    try:
+        payload = response.json()
+    except json.JSONDecodeError:
+        version = response.text.strip()
+    else:
+        version = str(payload.get("version", "")).strip()
+    assert version
 
 
 def test_deployment_trigger_runs_in_check_mode(keycloak_token: str, integration_config) -> None:

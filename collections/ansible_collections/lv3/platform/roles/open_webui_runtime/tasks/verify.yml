@@ -1,3 +1,9 @@
+# Purpose: Verify the Open WebUI runtime health, bootstrap admin flow, and configured integrations.
+# Use case: Imported at the end of Open WebUI convergence and during targeted verification runs.
+# Inputs: Open WebUI base URLs, bootstrap credentials, and enabled integration settings.
+# Outputs: Produces runtime assertions for the HTTP surface, admin sign-in, and optional connectors.
+# Idempotency: Idempotent because these tasks only probe live state.
+# Dependencies: ADR 0165 and the converged Open WebUI runtime.
 ---
 - name: Verify the Open WebUI HTTP surface
   ansible.builtin.uri:
@@ -23,6 +29,7 @@
   register: open_webui_verify_admin_signin
   changed_when: false
   no_log: true
+  when: open_webui_enable_password_auth | bool
 
 - name: Assert Open WebUI sign-in returned the expected account
   ansible.builtin.assert:
@@ -31,3 +38,4 @@
       - (open_webui_verify_admin_signin.json.role | default('')) == 'admin'
     fail_msg: "Open WebUI started, but the repo-managed admin bootstrap could not be verified."
   no_log: true
+  when: open_webui_enable_password_auth | bool

@@ -3,6 +3,102 @@
   "schema_version": "1.0.0",
   "certificates": [
     {
+      "id": "agents-edge",
+      "service_id": "dify",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for agents.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "agents.lv3.org",
+        "port": 443,
+        "server_name": "agents.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "analytics-edge",
+      "service_id": "plausible",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for analytics.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "analytics.lv3.org",
+        "port": 443,
+        "server_name": "analytics.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "api-edge",
+      "service_id": "api_gateway",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for api.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "api.lv3.org",
+        "port": 443,
+        "server_name": "api.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "apps-edge",
+      "service_id": "coolify_apps",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for apps.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "apps.lv3.org",
+        "port": 443,
+        "server_name": "apps.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
       "id": "backup-pbs-ui",
       "service_id": "backup_pbs",
       "status": "active",
@@ -49,6 +145,150 @@
       }
     },
     {
+      "id": "changelog-edge",
+      "service_id": "changelog_portal",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for changelog.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "changelog.lv3.org",
+        "port": 443,
+        "server_name": "changelog.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "ci-edge",
+      "service_id": "woodpecker",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for ci.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "ci.lv3.org",
+        "port": 443,
+        "server_name": "ci.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "chat-edge",
+      "service_id": "serverclaw",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for chat.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "chat.lv3.org",
+        "port": 443,
+        "server_name": "chat.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "cloud-edge",
+      "service_id": "nextcloud",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for cloud.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "cloud.lv3.org",
+        "port": 443,
+        "server_name": "cloud.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "coolify-edge",
+      "service_id": "coolify",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for coolify.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "coolify.lv3.org",
+        "port": 443,
+        "server_name": "coolify.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "data-edge",
+      "service_id": "directus",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for data.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "data.lv3.org",
+        "port": 443,
+        "server_name": "data.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
       "id": "docker-runtime-edge",
       "service_id": "docker_runtime",
       "status": "active",
@@ -58,6 +298,78 @@
         "host": "docker.lv3.org",
         "port": 443,
         "server_name": "docker.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "docs-edge",
+      "service_id": "docs_portal",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for docs.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "docs.lv3.org",
+        "port": 443,
+        "server_name": "docs.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "draw-edge",
+      "service_id": "excalidraw",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for draw.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "draw.lv3.org",
+        "port": 443,
+        "server_name": "draw.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "flags-edge",
+      "service_id": "flagsmith",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for flags.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "flags.lv3.org",
+        "port": 443,
+        "server_name": "flags.lv3.org"
       },
       "policy": {
         "warn_days": 21,
@@ -97,6 +409,54 @@
       }
     },
     {
+      "id": "headscale-edge",
+      "service_id": "headscale",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for headscale.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "headscale.lv3.org",
+        "port": 443,
+        "server_name": "headscale.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "home-edge",
+      "service_id": "homepage",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for home.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "home.lv3.org",
+        "port": 443,
+        "server_name": "home.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
       "id": "keycloak-edge",
       "service_id": "keycloak",
       "status": "active",
@@ -106,6 +466,78 @@
         "host": "sso.lv3.org",
         "port": 443,
         "server_name": "sso.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "langfuse-edge",
+      "service_id": "langfuse",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for langfuse.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "langfuse.lv3.org",
+        "port": 443,
+        "server_name": "langfuse.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "logs-edge",
+      "service_id": "dozzle",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for logs.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "logs.lv3.org",
+        "port": 443,
+        "server_name": "logs.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "lv3-org-apex-edge",
+      "service_id": "nginx_edge",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for the lv3.org apex crawl-policy endpoint.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "lv3.org",
+        "port": 443,
+        "server_name": "lv3.org"
       },
       "policy": {
         "warn_days": 21,
@@ -145,6 +577,54 @@
       }
     },
     {
+      "id": "matrix-edge",
+      "service_id": "matrix_synapse",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for matrix.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "matrix.lv3.org",
+        "port": 443,
+        "server_name": "matrix.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "n8n-edge",
+      "service_id": "n8n",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for n8n.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "n8n.lv3.org",
+        "port": 443,
+        "server_name": "n8n.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
       "id": "nginx-edge-public",
       "service_id": "nginx_edge",
       "status": "active",
@@ -169,15 +649,15 @@
       }
     },
     {
-      "id": "lv3-org-apex-edge",
-      "service_id": "nginx_edge",
+      "id": "notebooks-edge",
+      "service_id": "jupyterhub",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for the lv3.org apex crawl-policy endpoint.",
+      "summary": "Shared NGINX edge certificate served for notebooks.lv3.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "lv3.org",
+        "host": "notebooks.lv3.org",
         "port": 443,
-        "server_name": "lv3.org"
+        "server_name": "notebooks.lv3.org"
       },
       "policy": {
         "warn_days": 21,
@@ -232,6 +712,30 @@
       }
     },
     {
+      "id": "ops-edge",
+      "service_id": "ops_portal",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for ops.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "ops.lv3.org",
+        "port": 443,
+        "server_name": "ops.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
       "id": "portainer-proxy",
       "service_id": "portainer",
       "status": "active",
@@ -251,48 +755,6 @@
         "managed_by_repo": false,
         "host": "docker-runtime-lv3",
         "notes": "Portainer still serves its container-local certificate. A follow-up ADR can replace it with step-ca-managed material."
-      }
-    },
-    {
-      "id": "vaultwarden-private",
-      "service_id": "vaultwarden",
-      "status": "active",
-      "summary": "Vaultwarden HTTPS endpoint exposed through the Proxmox host Tailscale proxy.",
-      "expected_issuer": "step-ca",
-      "endpoint": {
-        "host": "100.64.0.1",
-        "port": 443,
-        "server_name": "vault.lv3.org"
-      },
-      "policy": {
-        "warn_hours": 6,
-        "critical_hours": 2
-      },
-      "renewal": {
-        "agent": "systemd-step-issue",
-        "managed_by_repo": true,
-        "host": "docker-runtime-lv3",
-        "unit_name": "lv3-vaultwarden-cert-renew",
-        "on_calendar": "*:0/15",
-        "randomized_delay_seconds": 60,
-        "reload_command": "docker compose --file /opt/vaultwarden/docker-compose.yml restart vaultwarden"
-      },
-      "material": {
-        "certificate_file": "/opt/vaultwarden/tls/server.crt",
-        "key_file": "/opt/vaultwarden/tls/server.key",
-        "root_file": "/opt/step-ca/home/certs/root_ca.crt",
-        "subject": "vault.lv3.org",
-        "sans": [
-          "vault.lv3.org",
-          "10.10.10.20",
-          "100.118.189.95",
-          "127.0.0.1",
-          "localhost"
-        ],
-        "ca_url": "https://10.10.10.20:9000",
-        "provisioner": "services",
-        "password_file": "/opt/step-ca/secrets/services-password.txt",
-        "not_after": "24h"
       }
     },
     {
@@ -342,6 +804,78 @@
       }
     },
     {
+      "id": "realtime-edge",
+      "service_id": "realtime",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for realtime.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "realtime.lv3.org",
+        "port": 443,
+        "server_name": "realtime.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "registry-edge",
+      "service_id": "harbor",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for registry.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "registry.lv3.org",
+        "port": 443,
+        "server_name": "registry.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "status-edge",
+      "service_id": "status_page",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for status.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "status.lv3.org",
+        "port": 443,
+        "server_name": "status.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
       "id": "step-ca-proxy",
       "service_id": "step_ca",
       "status": "active",
@@ -364,6 +898,30 @@
       }
     },
     {
+      "id": "tasks-edge",
+      "service_id": "plane",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for tasks.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "tasks.lv3.org",
+        "port": 443,
+        "server_name": "tasks.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
       "id": "uptime-kuma-edge",
       "service_id": "uptime_kuma",
       "status": "active",
@@ -373,6 +931,72 @@
         "host": "uptime.lv3.org",
         "port": 443,
         "server_name": "uptime.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "vaultwarden-private",
+      "service_id": "vaultwarden",
+      "status": "active",
+      "summary": "Vaultwarden HTTPS endpoint exposed through the Proxmox host Tailscale proxy.",
+      "expected_issuer": "step-ca",
+      "endpoint": {
+        "host": "100.64.0.1",
+        "port": 443,
+        "server_name": "vault.lv3.org"
+      },
+      "policy": {
+        "warn_hours": 6,
+        "critical_hours": 2
+      },
+      "renewal": {
+        "agent": "systemd-step-issue",
+        "managed_by_repo": true,
+        "host": "docker-runtime-lv3",
+        "unit_name": "lv3-vaultwarden-cert-renew",
+        "on_calendar": "*:0/15",
+        "randomized_delay_seconds": 60,
+        "reload_command": "docker compose --file /opt/vaultwarden/docker-compose.yml restart vaultwarden"
+      },
+      "material": {
+        "certificate_file": "/opt/vaultwarden/tls/server.crt",
+        "key_file": "/opt/vaultwarden/tls/server.key",
+        "root_file": "/opt/step-ca/home/certs/root_ca.crt",
+        "subject": "vault.lv3.org",
+        "sans": [
+          "vault.lv3.org",
+          "10.10.10.20",
+          "100.118.189.95",
+          "127.0.0.1",
+          "localhost"
+        ],
+        "ca_url": "https://10.10.10.20:9000",
+        "provisioner": "services",
+        "password_file": "/opt/step-ca/secrets/services-password.txt",
+        "not_after": "24h"
+      }
+    },
+    {
+      "id": "wiki-edge",
+      "service_id": "outline",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for wiki.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "wiki.lv3.org",
+        "port": 443,
+        "server_name": "wiki.lv3.org"
       },
       "policy": {
         "warn_days": 21,

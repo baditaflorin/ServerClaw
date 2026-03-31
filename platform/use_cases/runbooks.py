@@ -5,17 +5,16 @@ import json
 import re
 import sys
 import time
-import urllib.parse
-import urllib.request
 import uuid
 from copy import deepcopy
-from datetime import UTC, datetime
+from platform.datetime_compat import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol
 
-from platform.circuit import CircuitRegistry, should_count_urllib_exception
+from platform.circuit import CircuitRegistry
 from platform.mutation_audit import build_event, emit_event_best_effort
 from platform.repo import load_json, load_yaml, write_json
+from platform.scheduler import HttpWindmillClient
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -401,43 +400,21 @@ class WindmillWorkflowRunner:
         self.token = token
         self.workspace = workspace
         self.repo_root = repo_root
-        self.circuit_breaker = circuit_breaker
-        if self.circuit_breaker is None:
-            registry = circuit_registry or CircuitRegistry(repo_root or REPO_ROOT)
-            if registry.has_policy("windmill"):
-                self.circuit_breaker = registry.sync_breaker(
-                    "windmill",
-                    exception_classifier=should_count_urllib_exception,
-                )
+        self._client = HttpWindmillClient(
+            base_url=self.base_url,
+            token=token,
+            workspace=workspace,
+            circuit_breaker=circuit_breaker,
+            circuit_registry=circuit_registry,
+        )
+        self.circuit_breaker = getattr(self._client, "_circuit_breaker", None)
 
     def run_workflow(self, workflow_id: str, payload: dict[str, Any], *, timeout_seconds: int | None = None) -> Any:
-        script_path = workflow_id if "/" in workflow_id else f"f/{self.workspace}/{workflow_id}"
-        encoded_path = urllib.parse.quote(script_path, safe="")
-        url = f"{self.base_url}/api/w/{self.workspace}/jobs/run_wait_result/p/{encoded_path}"
-        request = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={
-                "Authorization": f"Bearer {self.token}",
-                "Content-Type": "application/json",
-            },
-            method="POST",
+        return self._client.run_workflow_wait_result(
+            workflow_id,
+            payload,
+            timeout_seconds=timeout_seconds,
         )
-
-        def execute() -> str:
-            with urllib.request.urlopen(request, timeout=timeout_seconds or 30) as response:
-                return response.read().decode("utf-8")
-
-        if self.circuit_breaker is not None:
-            body = self.circuit_breaker.call(execute)
-        else:
-            body = execute()
-        if not body.strip():
-            return None
-        try:
-            return json.loads(body)
-        except json.JSONDecodeError:
-            return body
 
 
 class RunbookUseCaseService:

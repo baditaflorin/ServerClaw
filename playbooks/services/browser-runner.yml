@@ -1,0 +1,28 @@
+---
+# Playbook: services/browser-runner.yml
+# Purpose: Provide the canonical service-scoped entrypoint for the ADR 0261 browser runner live apply.
+# Use case: Used by shared live-apply and service-scoped automation paths that target only the browser runner runtime.
+#
+# Inputs (required):
+#   - None.
+#
+# Inputs (optional):
+#   - None.
+#
+# Outputs:
+#   - Imports the top-level browser runner playbook without redefining service scope.
+#
+# Idempotency: Fully idempotent
+#              This file only re-exports the canonical playbook entrypoint.
+#
+# Dependencies:
+#   - ADR 0261: Owns the governed browser action and extraction runtime decision.
+#   - Requires: playbooks/browser-runner.yml.
+#   - Role: import_playbook — delegates execution to the canonical playbook.
+#
+# Related ADRs: 0165
+# Related Runbooks: docs/runbooks/configure-browser-runner.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-29
+- import_playbook: ../browser-runner.yml

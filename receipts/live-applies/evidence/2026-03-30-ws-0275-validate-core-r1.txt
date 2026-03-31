@@ -1,0 +1,4 @@
+Generated platform vars validation
+Repository data model validation
+Health probe contract validation
+Alert rule validation

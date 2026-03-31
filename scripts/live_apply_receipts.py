@@ -24,7 +24,9 @@ DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 COMMIT_HASH_PATTERN = re.compile(r"^[0-9a-f]{7,64}$")
 LEGACY_WORKFLOW_ID_PATTERN = re.compile(r"^adr-\d{4}-[a-z0-9-]+-live-apply$")
 ALLOWED_RESULTS = {"pass", "partial", "fail"}
+ALLOWED_SMOKE_SUITE_STATUSES = {"passed", "failed", "skipped"}
 ALLOWED_ENVIRONMENTS = set(receipt_environment_ids())
+NON_RECEIPT_TOP_LEVEL_DIRS = {"evidence"}
 ALLOWED_CORRECTION_LOOP_DIAGNOSES = {
     "transient_failure",
     "contract_drift",
@@ -54,20 +56,45 @@ def git_commit_lookup_available() -> bool:
     return command_succeeds(["git", "cat-file", "-e", "HEAD^{commit}"])
 
 
-def validate_source_commit(commit: str, path: Path) -> None:
-    if git_commit_lookup_available():
-        if not git_commit_exists(commit):
-            raise ValueError(f"{path.name}: source_commit '{commit}' is not a valid git commit")
-        return
+def strict_source_commit_object_validation_enabled() -> bool:
+    return os.environ.get("LV3_REQUIRE_RECEIPT_SOURCE_COMMIT_OBJECTS", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
 
+
+def validate_source_commit(commit: str, path: Path) -> None:
     if not COMMIT_HASH_PATTERN.fullmatch(commit):
         raise ValueError(
             f"{path.name}: source_commit '{commit}' must look like a git commit hash when .git metadata is unavailable"
         )
 
+    if not git_commit_lookup_available():
+        return
 
-def iter_receipt_paths() -> list[Path]:
-    return sorted(RECEIPTS_DIR.rglob("*.json"))
+    if git_commit_exists(commit):
+        return
+
+    if strict_source_commit_object_validation_enabled():
+        raise ValueError(
+            f"{path.name}: source_commit '{commit}' is not available in the current git object database"
+        )
+
+
+def iter_receipt_paths(receipts_dir: Path = RECEIPTS_DIR) -> list[Path]:
+    if not receipts_dir.exists():
+        return []
+    receipt_paths: list[Path] = []
+    for path in sorted(receipts_dir.rglob("*.json")):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(receipts_dir)
+        if "evidence" in relative.parts:
+            continue
+        receipt_paths.append(path)
+    return receipt_paths
 
 
 def receipt_environment_for_path(path: Path) -> str:
@@ -175,6 +202,35 @@ def validate_receipt(receipt: dict, path: Path, workflow_catalog: dict) -> None:
             raise ValueError(
                 f"{path.name}: verification result '{item['result']}' must be one of {sorted(ALLOWED_RESULTS)}"
             )
+
+    smoke_suites = receipt.get("smoke_suites")
+    if smoke_suites is not None:
+        if not isinstance(smoke_suites, list) or not smoke_suites:
+            raise ValueError(f"{path.name}: smoke_suites must be a non-empty list when present")
+        seen_suite_ids: set[str] = set()
+        for item in smoke_suites:
+            if not isinstance(item, dict):
+                raise ValueError(f"{path.name}: smoke_suites entries must be objects")
+            for field in ("suite_id", "service_id", "environment", "status", "executed_at", "summary"):
+                if not isinstance(item.get(field), str) or not item[field]:
+                    raise ValueError(f"{path.name}: smoke_suites field '{field}' is required")
+            if item["status"] not in ALLOWED_SMOKE_SUITE_STATUSES:
+                raise ValueError(
+                    f"{path.name}: smoke_suites status '{item['status']}' must be one of {sorted(ALLOWED_SMOKE_SUITE_STATUSES)}"
+                )
+            if item["environment"] not in ALLOWED_ENVIRONMENTS:
+                raise ValueError(
+                    f"{path.name}: smoke_suites environment '{item['environment']}' must be one of {sorted(ALLOWED_ENVIRONMENTS)}"
+                )
+            if item["suite_id"] in seen_suite_ids:
+                raise ValueError(f"{path.name}: smoke_suites must not repeat suite_id '{item['suite_id']}'")
+            seen_suite_ids.add(item["suite_id"])
+            report_ref = item.get("report_ref")
+            if report_ref is not None:
+                if not isinstance(report_ref, str) or not report_ref.strip():
+                    raise ValueError(f"{path.name}: smoke_suites report_ref must be a non-empty string when present")
+                if not (REPO_ROOT / report_ref).exists():
+                    raise ValueError(f"{path.name}: smoke_suites report ref '{report_ref}' does not exist")
 
     evidence_refs = receipt.get("evidence_refs")
     if not isinstance(evidence_refs, list) or not evidence_refs:
@@ -291,6 +347,14 @@ def show_receipt(receipt_id: str) -> int:
     print("Verification:")
     for item in receipt["verification"]:
         print(f"  - [{item['result']}] {item['check']}: {item['observed']}")
+    if receipt.get("smoke_suites"):
+        print("Smoke suites:")
+        for item in receipt["smoke_suites"]:
+            report_suffix = f" ({item['report_ref']})" if item.get("report_ref") else ""
+            print(
+                f"  - [{item['status']}] {item['suite_id']} "
+                f"{item['service_id']}@{item['environment']}: {item['summary']}{report_suffix}"
+            )
     print("Evidence refs:")
     for ref in receipt["evidence_refs"]:
         print(f"  - {ref}")

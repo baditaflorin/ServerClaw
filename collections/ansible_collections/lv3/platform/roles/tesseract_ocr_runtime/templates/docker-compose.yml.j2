@@ -1,0 +1,27 @@
+services:
+  tesseract-ocr:
+    image: {{ tesseract_ocr_runtime_image_name }}:latest
+    container_name: {{ tesseract_ocr_runtime_container_name }}
+    restart: unless-stopped
+    command:
+      - uvicorn
+      - tesseract_ocr_service:app
+      - --host
+      - "{{ tesseract_ocr_runtime_bind_host }}"
+      - --port
+      - "{{ tesseract_ocr_runtime_container_port }}"
+    ports:
+      - "{{ tesseract_ocr_runtime_port }}:{{ tesseract_ocr_runtime_container_port }}"
+    environment:
+      TESSERACT_OCR_DEFAULT_LANGUAGE: "{{ tesseract_ocr_runtime_default_language }}"
+      TESSERACT_OCR_MAX_PAGES: "{{ tesseract_ocr_runtime_max_pages }}"
+      TESSERACT_OCR_RENDER_DPI: "{{ tesseract_ocr_runtime_render_dpi }}"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:{{ tesseract_ocr_runtime_container_port }}/healthz', timeout=5)
+      interval: 30s
+      timeout: 5s
+      retries: 3

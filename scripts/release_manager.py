@@ -10,11 +10,16 @@ import subprocess
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
+from platform.datetime_compat import UTC, datetime
 import canonical_truth
+import gate_bypass_waivers
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path, run_command
 from generate_release_notes import (
     CHANGELOG_PATH,
@@ -265,13 +270,27 @@ def release_blockers_result(semantics: dict[str, Any]) -> CriterionResult:
         for workstream in registry["workstreams"]
         if workstream.get("status") in blocking_statuses
     ]
-    detail = "0 workstreams in progress" if not blocked else f"{len(blocked)} blocking workstreams: {', '.join(blocked[:5])}"
+    waiver_summary = gate_bypass_waivers.summarize_receipts()
+    waiver_blockers = waiver_summary["release_blockers"]
+    detail_parts: list[str] = []
+    if blocked:
+        detail_parts.append(f"{len(blocked)} blocking workstreams: {', '.join(blocked[:5])}")
+    else:
+        detail_parts.append("0 workstreams in progress")
+    if waiver_blockers:
+        detail_parts.append(
+            "waiver blockers: "
+            + ", ".join(
+                f"{item['reason_code']} x{item['repeat_after_expiry_occurrences']}"
+                for item in waiver_blockers
+            )
+        )
     return CriterionResult(
         id="release-blockers",
         label="Release blockers",
-        status="met" if not blocked else "blocked",
-        detail=detail,
-        met=not blocked,
+        status="met" if not blocked and not waiver_blockers else "blocked",
+        detail="; ".join(detail_parts),
+        met=not blocked and not waiver_blockers,
     )
 
 
@@ -286,6 +305,7 @@ def build_release_status_snapshot(*, timeout: float = 2.0) -> dict[str, Any]:
         dr_table_top_result(semantics),
     ]
     blockers = release_blockers_result(semantics)
+    waiver_summary = gate_bypass_waivers.summarize_receipts()
     met_count = sum(1 for criterion in criteria if criterion.met)
     return {
         "generated_at": datetime.now(UTC).isoformat(),
@@ -295,6 +315,12 @@ def build_release_status_snapshot(*, timeout: float = 2.0) -> dict[str, Any]:
             "status": blockers.status,
             "detail": blockers.detail,
             "met": blockers.met,
+        },
+        "gate_bypass_waivers": {
+            "totals": waiver_summary["totals"],
+            "warnings": waiver_summary["warnings"],
+            "release_blockers": waiver_summary["release_blockers"],
+            "open_waivers": waiver_summary["open_waivers"],
         },
         "target_version": "1.0.0",
         "criteria": [
@@ -317,14 +343,24 @@ def build_release_status_snapshot(*, timeout: float = 2.0) -> dict[str, Any]:
 
 
 def render_status(snapshot: dict[str, Any]) -> str:
+    waiver_summary = snapshot["gate_bypass_waivers"]
     lines = [
         "Platform 1.0.0 readiness",
         f"- Generated: {snapshot['generated_at']}",
         f"- Repository version: {snapshot['repo_version']}",
         f"- Platform version: {snapshot['platform_version']}",
         f"- Release blockers: {snapshot['release_blockers']['detail']}",
+        f"- Gate bypass waivers: {waiver_summary['totals']['open_waivers']} open, {len(waiver_summary['warnings'])} warnings, {len(waiver_summary['release_blockers'])} blockers",
         f"- Criteria met: {snapshot['summary']['met']}/{snapshot['summary']['total']} ({snapshot['summary']['percent']:.2f}%)",
     ]
+    for item in waiver_summary["open_waivers"]:
+        lines.append(
+            f"- OPEN WAIVER {item['reason_code']} until {item['expires_on']} ({item['owner']}; {item['remediation_ref']})"
+        )
+    for item in waiver_summary["release_blockers"] + waiver_summary["warnings"]:
+        lines.append(
+            f"- WAIVER {item['status'].upper()} {item['reason_code']}: {item['repeat_after_expiry_occurrences']} repeat(s) past expiry"
+        )
     for criterion in snapshot["criteria"]:
         marker = "OK" if criterion["met"] else "PENDING"
         lines.append(f"- {marker} {criterion['label']}: {criterion['detail']}")
@@ -374,6 +410,42 @@ def sync_outline_knowledge_surface() -> None:
         raise ValueError(f"outline knowledge sync failed: {detail}")
 
 
+def refresh_generated_truth_surfaces() -> None:
+    commands = [
+        (
+            "platform manifest",
+            [
+                "uv",
+                "run",
+                "--with",
+                "pyyaml",
+                "--with",
+                "jsonschema",
+                "python3",
+                str(repo_path("scripts", "platform_manifest.py")),
+                "--write",
+            ],
+        ),
+        (
+            "generated diagrams",
+            [
+                "uv",
+                "run",
+                "--with",
+                "pyyaml",
+                "python3",
+                str(repo_path("scripts", "generate_diagrams.py")),
+                "--write",
+            ],
+        ),
+    ]
+    for label, command in commands:
+        result = run_command(command, cwd=REPO_ROOT)
+        if result.returncode != 0:
+            detail = (result.stderr or result.stdout or "unknown error").strip()
+            raise ValueError(f"failed to refresh {label}: {detail}")
+
+
 def write_release(version: str, *, platform_impact: str, released_on: str | None = None) -> dict[str, Any]:
     blockers = release_blockers_result(load_version_semantics())
     if not blockers.met:
@@ -403,6 +475,7 @@ def write_release(version: str, *, platform_impact: str, released_on: str | None
     )
     canonical_truth.mark_pending_workstreams_released(version)
     canonical_truth.write_assembled_truth(update_readme=True)
+    refresh_generated_truth_surfaces()
     sync_outline_knowledge_surface()
     return {"version": version, "notes": notes}
 

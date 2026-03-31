@@ -1,0 +1,73 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-detached-final/scripts/remote_exec.sh pre-push-gate --local-fallback
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 0.97
+alert-rule-validation passed 2.30
+ansible-lint          passed 223.91
+ansible-syntax        passed 134.18
+artifact-secret-scan  passed 3.50
+dependency-direction  passed 2.95
+dependency-graph      passed 3.47
+documentation-index   passed 2.09
+generated-docs        passed 8.63
+generated-portals     passed 30.80
+integration-tests     passed 1.77
+packer-validate       passed 6.83
+policy-validation     passed 2.22
+schema-validation     passed 16.57
+security-scan         passed 16.18
+semgrep-sast          passed 63.18
+service-completeness  failed 1.01
+tofu-validate         passed 1.97
+type-check            passed 4.58
+workstream-surfaces   passed 4.67
+yaml-lint             passed 15.46
+
+[service-completeness] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0289-main-detached-final-574be9e631/repo/.lv3-runs/20260330T211322Z-5a49aeb2a172/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=5a49aeb2a17212bdf197acecd79ed0d29f8a3d6bf528bc0a00c44dfce8cc30c8 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T21:13:15.959246+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=9d9572d9c0df1f54238a7e4217fae4e70289adbc -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/validate_service_completeness.py --validate >/dev/null
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: Makefile, README.md, RELEASE.md, build/platform-manifest.json, collections/ansible_collections/lv3/platform/playbooks/directus.yml, collections/ansible_collections/lv3/platform/playbooks/services/directus.yml, ...
+
+CHECK                STATUS    DURATION(s)
+agent-standards       passed    8.63
+alert-rule-validation passed    11.09
+ansible-lint          timed_out 600.01
+ansible-syntax        passed    396.95
+artifact-secret-scan  passed    21.67
+dependency-direction  passed    14.99
+dependency-graph      passed    15.43
+documentation-index   passed    14.25
+generated-docs        passed    31.59
+generated-portals     passed    173.76
+integration-tests     passed    5.68
+packer-validate       passed    43.06
+policy-validation     passed    22.36
+schema-validation     passed    254.41
+security-scan         passed    165.78
+semgrep-sast          passed    197.10
+service-completeness  failed    11.26
+tofu-validate         passed    6.02
+type-check            passed    20.96
+workstream-surfaces   passed    18.02
+yaml-lint             passed    45.59
+
+[ansible-lint] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-detached-final:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0289-main-detached-final:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0289-main-detached-final:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-detached-final/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=5a49aeb2a17212bdf197acecd79ed0d29f8a3d6bf528bc0a00c44dfce8cc30c8 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T21:13:15.959246+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=9d9572d9c0df1f54238a7e4217fae4e70289adbc -e LV3_SNAPSHOT_BRANCH=HEAD -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -w /workspace registry.lv3.org/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/lint-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/lint-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/lint-requirements.sha ./scripts/validate_repo.sh ansible-lint
+[ansible-lint] stdout
+Ansible lint
+[ansible-lint] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+
+[service-completeness] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-detached-final:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0289-main-detached-final:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0289-main-detached-final:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=5a49aeb2a17212bdf197acecd79ed0d29f8a3d6bf528bc0a00c44dfce8cc30c8 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T21:13:15.959246+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=9d9572d9c0df1f54238a7e4217fae4e70289adbc -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/validate_service_completeness.py --validate >/dev/null
+[service-completeness] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested

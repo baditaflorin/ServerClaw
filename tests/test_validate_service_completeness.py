@@ -94,3 +94,22 @@ def test_legacy_service_uses_grandfathered_suppressions(
     assert result.passing
     grandfathered_items = {item.item_id: item.grandfathered_until for item in result.items if item.grandfathered_until}
     assert grandfathered_items["api_gateway"] == "2026-09-23"
+
+
+def test_find_adr_path_prefers_service_specific_match_when_ids_are_duplicated(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    adr_dir = tmp_path / "docs" / "adr"
+    generic = adr_dir / "0288-crawl4ai-as-the-llm-optimised-web-content-crawler.md"
+    specific = adr_dir / "0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md"
+    generic.write_text("# ADR 0288 generic\n", encoding="utf-8")
+    specific.write_text("# ADR 0288 flagsmith\n", encoding="utf-8")
+
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+
+    assert service_completeness.find_adr_path(
+        "0288",
+        service_id="flagsmith",
+        service_name="Flagsmith",
+    ) == specific

@@ -1,0 +1,5 @@
+{
+  "https_tls_blackbox_active_targets": 33,
+  "https_tls_assurance_rule_groups": 1,
+  "https_tls_assurance_rules": 99
+}

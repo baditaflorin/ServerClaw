@@ -31,13 +31,25 @@
     force_apt_get: true
     cache_valid_time: 3600
 
-- name: Enable IPv4 forwarding
-  ansible.posix.sysctl:
-    name: net.ipv4.ip_forward
-    value: "1"
-    state: present
-    sysctl_set: true
-    reload: true
+- name: Persist IPv4 forwarding configuration
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/99-lv3-ip-forwarding.conf
+    content: |
+      net.ipv4.ip_forward = 1
+    mode: "0644"
+  register: proxmox_network_ipv4_forwarding
+
+- name: Read the active IPv4 forwarding value
+  ansible.builtin.command: sysctl -n net.ipv4.ip_forward
+  register: proxmox_network_ipv4_forwarding_current
+  changed_when: false
+
+- name: Apply IPv4 forwarding configuration
+  ansible.builtin.command: sysctl --system
+  when:
+    - proxmox_network_ipv4_forwarding.changed
+      or (proxmox_network_ipv4_forwarding_current.stdout | trim) != "1"
+  changed_when: true
 
 - name: Render Proxmox host network interfaces
   ansible.builtin.template:

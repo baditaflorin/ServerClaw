@@ -1,3 +1,4 @@
+{% if open_webui_enable_openbao_agent | bool %}
 services:
   openbao-agent:
     image: {{ open_webui_openbao_agent_image }}
@@ -20,6 +21,9 @@ services:
     volumes:
       - {{ open_webui_openbao_agent_dir }}:/openbao-agent:ro
       - {{ open_webui_env_file | dirname }}:{{ open_webui_env_file | dirname }}
+{% else %}
+services:
+{% endif %}
 
   open-webui:
     image: {{ open_webui_image }}
@@ -31,8 +35,10 @@ services:
       - "host.docker.internal:host-gateway"
     env_file:
       - {{ open_webui_env_file }}
+{% if open_webui_enable_openbao_agent | bool %}
     depends_on:
       openbao-agent:
         condition: service_healthy
+{% endif %}
     volumes:
       - {{ open_webui_data_dir }}:/app/backend/data

@@ -1,3 +1,9 @@
+# Purpose: Define repo-managed control-plane recovery backup defaults, secret paths, and retention settings.
+# Use case: Loaded whenever the control-plane recovery backup runtime converges or validates.
+# Inputs: Runtime directory layout, OpenBao identities, backup schedule, and controller-local SSH key paths.
+# Outputs: Supplies stable defaults consumed by the control-plane recovery runtime role.
+# Idempotency: Fully idempotent because this file only declares defaults.
+# Dependencies: ADR 0165 and ADR 0231.
 ---
 control_plane_recovery_runtime_root: /opt/control-plane-recovery
 control_plane_recovery_runtime_config_dir: /etc/lv3/control-plane-recovery
@@ -62,8 +68,7 @@ control_plane_recovery_windmill_backup_database_password: >-
     | trim
   }}
 control_plane_recovery_windmill_backup_database_dsn: >-
-  {%- set password = control_plane_recovery_windmill_backup_database_password | trim -%}
-  {%- if password | length == 0 -%}{{ "" }}{%- else -%}postgresql://{{ control_plane_recovery_windmill_backup_database_user }}:{{ password | urlencode | replace('/', '%2F') }}@{{ control_plane_recovery_windmill_backup_database_host }}:{{ control_plane_recovery_windmill_backup_database_port }}/{{ control_plane_recovery_windmill_backup_database_name }}?sslmode=disable{%- endif -%}
+  {%- set password = control_plane_recovery_windmill_backup_database_password | trim -%}{%- if password | length > 0 -%}postgresql://{{ control_plane_recovery_windmill_backup_database_user }}:{{ password | urlencode | replace('/', '%2F') }}@{{ control_plane_recovery_windmill_backup_database_host }}:{{ control_plane_recovery_windmill_backup_database_port }}/{{ control_plane_recovery_windmill_backup_database_name }}?sslmode=disable{%- endif -%}
 control_plane_recovery_runtime_openbao_secret_payload:
   windmill_db_dsn: "{{ control_plane_recovery_windmill_backup_database_dsn }}"
 control_plane_recovery_runtime_openbao_policy_rules: |-

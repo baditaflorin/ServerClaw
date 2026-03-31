@@ -1,0 +1,57 @@
+---
+nomad_cluster_version: 1.11.3
+nomad_cluster_download_url: >-
+  https://releases.hashicorp.com/nomad/{{ nomad_cluster_version }}/nomad_{{ nomad_cluster_version }}_linux_amd64.zip
+nomad_cluster_packages:
+  - ca-certificates
+  - curl
+  - unzip
+nomad_cluster_user: nomad
+nomad_cluster_group: nomad
+nomad_cluster_config_dir: /etc/lv3/nomad
+nomad_cluster_tls_dir: "{{ nomad_cluster_config_dir }}/tls"
+nomad_cluster_data_dir: /var/lib/nomad
+nomad_cluster_plugin_dir: "{{ nomad_cluster_data_dir }}/plugins"
+nomad_cluster_log_dir: /var/log/nomad
+nomad_cluster_config_file: "{{ nomad_cluster_config_dir }}/nomad.hcl"
+nomad_cluster_service_name: lv3-nomad
+nomad_cluster_service_file: /etc/systemd/system/lv3-nomad.service
+nomad_cluster_service_user: root
+nomad_cluster_service_group: root
+nomad_cluster_cli_wrapper_file: /usr/local/bin/lv3-nomad
+nomad_cluster_http_port: "{{ platform_port_assignments.nomad_server_port }}"
+nomad_cluster_rpc_port: "{{ platform_port_assignments.nomad_rpc_port }}"
+nomad_cluster_serf_port: "{{ platform_port_assignments.nomad_serf_port }}"
+nomad_cluster_region: global
+nomad_cluster_datacenter: dc1
+nomad_cluster_log_level: INFO
+nomad_cluster_server: false
+nomad_cluster_client: false
+nomad_cluster_bootstrap_expect: 1
+nomad_cluster_bind_address: 0.0.0.0
+nomad_cluster_advertise_address: "{{ ansible_host }}"
+nomad_cluster_node_name: "{{ inventory_hostname }}"
+nomad_cluster_node_class: ""
+nomad_cluster_node_meta: {}
+nomad_cluster_server_inventory_host: "{{ playbook_execution_host_patterns.monitoring[playbook_execution_env] }}"
+nomad_cluster_server_rpc_addresses:
+  - "{{ hostvars[nomad_cluster_server_inventory_host].ansible_host }}:{{ platform_port_assignments.nomad_rpc_port }}"
+nomad_cluster_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad
+nomad_cluster_local_tls_dir: "{{ nomad_cluster_local_dir }}/tls"
+nomad_cluster_local_ca_cert_file: "{{ nomad_cluster_local_tls_dir }}/nomad-agent-ca.pem"
+nomad_cluster_local_server_cert_file: "{{ nomad_cluster_local_tls_dir }}/server.pem"
+nomad_cluster_local_server_key_file: "{{ nomad_cluster_local_tls_dir }}/server-key.pem"
+nomad_cluster_local_client_cert_file: "{{ nomad_cluster_local_tls_dir }}/client.pem"
+nomad_cluster_local_client_key_file: "{{ nomad_cluster_local_tls_dir }}/client-key.pem"
+nomad_cluster_ca_cert_file: "{{ nomad_cluster_tls_dir }}/nomad-agent-ca.pem"
+nomad_cluster_member_cert_file: "{{ nomad_cluster_tls_dir }}/nomad-agent.pem"
+nomad_cluster_member_key_file: "{{ nomad_cluster_tls_dir }}/nomad-agent-key.pem"
+nomad_cluster_bootstrap_token_remote_file: "{{ nomad_cluster_config_dir }}/bootstrap-management.token"
+nomad_cluster_acl_enabled: true
+nomad_cluster_tls_verify_https_client: false
+nomad_cluster_ui_enabled: true
+nomad_cluster_telemetry_publish_allocation_metrics: true
+nomad_cluster_telemetry_publish_node_metrics: true
+nomad_cluster_docker_plugin_enabled: true
+nomad_cluster_docker_allow_privileged: false
+nomad_cluster_docker_volumes_enabled: true

@@ -1,0 +1,250 @@
+---
+# Playbook: woodpecker.yml
+# Purpose: Converge the repo-managed Woodpecker server and agent, its PostgreSQL backend, the host-side Tailscale proxy, the Gitea OAuth bootstrap path, and the ci.lv3.org edge publication.
+# Use case: Run during production Woodpecker deployment, upgrade, or recovery when the API-driven CI control plane must match repo truth.
+#
+# Inputs (required):
+#   - env (str, required): Target environment selector used by the scoped Ansible wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH path to managed guests.
+#
+# Outputs:
+#   - Woodpecker runtime converged on docker-runtime-lv3, PostgreSQL access prepared on postgres-lv3, ci.lv3.org published through the edge, and controller-local auth artifacts refreshed.
+#
+# Idempotency: Fully idempotent
+#              Runtime secrets and OAuth/bootstrap artifacts are reused when present, and repeat runs reconcile the same seed repository activation plus API-secret contract.
+#
+# Dependencies:
+#   - ADR 0287: Woodpecker CI As The API Driven Continuous Integration Server
+#   - Requires: OpenBao, Gitea, docker-runtime-lv3, postgres-lv3, and the shared NGINX edge to be reachable
+#   - Role: woodpecker_postgres — provisions the Woodpecker database and password material
+#   - Role: woodpecker_runtime — deploys Woodpecker, prepares Gitea OAuth, and renders the controller bootstrap spec
+#
+# Related ADRs: 0021, 0042, 0077, 0287
+# Related Runbooks: docs/runbooks/configure-woodpecker.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- name: Converge the Tailscale operator proxy for Woodpecker
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - automation
+    - service-woodpecker
+
+  roles:
+    - role: lv3.platform.proxmox_tailscale_proxy
+    - role: lv3.platform.proxmox_security
+      vars:
+        proxmox_security_manage_acme: false
+
+- name: Ensure Hetzner DNS publication for Woodpecker
+  hosts: proxmox_hosts
+  become: false
+  gather_facts: false
+  tags:
+    - tier-1
+    - automation
+    - service-woodpecker
+
+  tasks:
+    - name: Ensure Hetzner DNS records are present
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_records
+        apply:
+          delegate_to: localhost
+          become: false
+      run_once: true
+
+- name: Converge PostgreSQL access for Woodpecker
+  hosts: postgres-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-woodpecker
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - postgres-lv3
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.postgres_vm
+    - role: lv3.platform.woodpecker_postgres
+
+- name: Converge Woodpecker on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-woodpecker
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.woodpecker
+        playbook_execution_audit_target: woodpecker
+        required_hosts:
+          - docker-runtime-lv3
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.woodpecker_runtime
+
+  post_tasks:
+    - name: Verify Woodpecker health probes
+      ansible.builtin.include_role:
+        name: lv3.platform.woodpecker_runtime
+        tasks_from: verify
+
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: woodpecker
+        playbook_execution_verify_readiness: false
+        playbook_execution_post_verify_audit_action: playbook.verify.woodpecker
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: woodpecker
+
+- name: Publish Woodpecker through the NGINX edge
+  hosts: nginx-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-woodpecker
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - nginx-lv3
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication
+
+- name: Bootstrap the controller-local Woodpecker auth artifacts and seed repository
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tags:
+    - tier-3
+    - automation
+    - service-woodpecker
+
+  vars:
+    woodpecker_public_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('woodpecker', 'public') }}"
+    woodpecker_controller_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('woodpecker', 'controller') }}"
+    woodpecker_gitea_controller_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('gitea', 'controller') }}"
+    woodpecker_auth_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/admin-auth.json
+    woodpecker_api_token_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/api-token.txt
+    woodpecker_bootstrap_spec_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/bootstrap-spec.json
+    woodpecker_gitea_password_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-password.txt
+    woodpecker_gitea_token_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt
+    woodpecker_seed_repo_full_name: ops/proxmox_florin_server
+
+  tasks:
+    - name: Wait for the public Woodpecker health endpoint to answer
+      ansible.builtin.uri:
+        url: "{{ woodpecker_public_url }}/healthz"
+        method: GET
+        return_content: true
+        status_code:
+          - 200
+          - 204
+      register: woodpecker_public_health
+      retries: 60
+      delay: 5
+      until: woodpecker_public_health.status in [200, 204]
+      changed_when: false
+
+    - name: Bootstrap the Woodpecker seed repository and auth artifacts
+      ansible.builtin.command:
+        argv:
+          - uv
+          - run
+          - --with
+          - pyyaml
+          - python
+          - "{{ playbook_dir }}/../scripts/woodpecker_bootstrap.py"
+          - apply
+          - --base-url
+          - "{{ woodpecker_controller_url }}"
+          - --login-base-url
+          - "{{ woodpecker_public_url }}"
+          - --gitea-url
+          - "{{ woodpecker_gitea_controller_url }}"
+          - --username
+          - ops-gitea
+          - --password-file
+          - "{{ woodpecker_gitea_password_file }}"
+          - --gitea-token-file
+          - "{{ woodpecker_gitea_token_file }}"
+          - --spec-file
+          - "{{ woodpecker_bootstrap_spec_file }}"
+          - --auth-json-output
+          - "{{ woodpecker_auth_file }}"
+          - --api-token-output
+          - "{{ woodpecker_api_token_file }}"
+          - --existing-token-file
+          - "{{ woodpecker_api_token_file }}"
+      register: woodpecker_bootstrap
+      changed_when: false
+      no_log: true
+
+    - name: Verify the Woodpecker controller auth identity
+      ansible.builtin.command:
+        argv:
+          - uv
+          - run
+          - --with
+          - pyyaml
+          - python
+          - "{{ playbook_dir }}/../scripts/woodpecker_tool.py"
+          - --auth-file
+          - "{{ woodpecker_auth_file }}"
+          - whoami
+      register: woodpecker_verify_whoami
+      changed_when: false
+      no_log: true
+
+    - name: Verify the Woodpecker seed repository secret exists
+      ansible.builtin.command:
+        argv:
+          - uv
+          - run
+          - --with
+          - pyyaml
+          - python
+          - "{{ playbook_dir }}/../scripts/woodpecker_tool.py"
+          - --auth-file
+          - "{{ woodpecker_auth_file }}"
+          - list-secrets
+          - --repo
+          - "{{ woodpecker_seed_repo_full_name }}"
+      register: woodpecker_verify_secrets
+      changed_when: false
+      no_log: true

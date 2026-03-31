@@ -1,0 +1,88 @@
+network:
+  os_name: Mautrix-WhatsApp bridge
+  browser_name: unknown
+  proxy: null
+  get_proxy_url: null
+  proxy_only_login: false
+  displayname_template: "{% raw %}{{or .BusinessName .PushName .Phone .RedactedPhone \"Unknown user\"}} (WA){% endraw %}"
+
+bridge:
+  command_prefix: '!wa'
+  personal_filtering_spaces: true
+  bridge_status_notices: errors
+  permissions:
+    "*": relay
+    "{{ matrix_synapse_server_name }}": user
+    "{{ matrix_synapse_admin_user_id }}": admin
+
+database:
+  type: postgres
+  uri: postgres://{{ matrix_synapse_mautrix_whatsapp_database_user }}:{{ matrix_synapse_mautrix_whatsapp_database_password | urlencode }}@{{ matrix_synapse_mautrix_whatsapp_database_host }}/{{ matrix_synapse_mautrix_whatsapp_database_name }}?sslmode=disable
+  max_open_conns: 5
+  max_idle_conns: 1
+
+homeserver:
+  address: http://matrix-synapse:8008
+  domain: {{ matrix_synapse_server_name }}
+  software: standard
+  async_media: false
+
+appservice:
+  address: http://mautrix-whatsapp:29318
+  public_address: null
+  hostname: 0.0.0.0
+  port: 29318
+  id: whatsapp
+  bot:
+    username: whatsappbot
+    displayname: WhatsApp bridge bot
+    avatar: ""
+  ephemeral_events: true
+  async_transactions: false
+  as_token: "{{ matrix_synapse_mautrix_whatsapp_as_token }}"
+  hs_token: "{{ matrix_synapse_mautrix_whatsapp_hs_token }}"
+  username_template: "{% raw %}whatsapp_{{.}}{% endraw %}"
+
+provisioning:
+  shared_secret: "{{ matrix_synapse_mautrix_whatsapp_provisioning_shared_secret }}"
+  allow_matrix_auth: true
+  debug_endpoints: false
+  enable_session_transfers: false
+
+public_media:
+  enabled: false
+  signing_key: "{{ matrix_synapse_mautrix_whatsapp_public_media_signing_key }}"
+  expiry: 0
+  hash_length: 32
+  path_prefix: /_mautrix/publicmedia
+  use_database: false
+
+double_puppet:
+  servers: {}
+  allow_discovery: false
+  secrets: {}
+
+encryption:
+  allow: false
+  default: false
+  require: false
+  appservice: false
+  msc4190: false
+  msc4392: false
+  self_sign: false
+  allow_key_sharing: true
+  pickle_key: "{{ matrix_synapse_mautrix_whatsapp_encryption_pickle_key }}"
+
+env_config_prefix: null
+
+logging:
+  min_level: info
+  writers:
+    - type: stdout
+      format: pretty-colored
+    - type: file
+      format: json
+      filename: ./logs/bridge.log
+      max_size: 100
+      max_backups: 10
+      compress: false

@@ -1,0 +1,25 @@
+when:
+  - event: manual
+  - event: push
+    branch: main
+
+labels:
+  lv3: "true"
+
+steps:
+  validate-woodpecker-contract:
+    image: python:3.12-slim
+    commands:
+      - apt-get update
+      - apt-get install -y --no-install-recommends bash git make ca-certificates
+      - python3 -m pip install --no-cache-dir uv
+      - python3 --version
+      - uv --version
+      - test -n "$LV3_WOODPECKER_SECRET_SMOKE"
+      - make validate-generated-vars
+      - make syntax-check-woodpecker
+      - ./scripts/validate_repo.sh json health-probes agent-standards
+      - uv run --with pytest --with pyyaml python -m pytest tests/test_generate_platform_vars.py tests/test_postgres_vm_access_policy.py tests/test_woodpecker_playbook.py tests/test_woodpecker_runtime_role.py tests/test_woodpecker_client.py -q
+    environment:
+      LV3_WOODPECKER_SECRET_SMOKE:
+        from_secret: LV3_WOODPECKER_SECRET_SMOKE

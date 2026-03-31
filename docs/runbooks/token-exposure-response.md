@@ -46,7 +46,7 @@ python3 config/windmill/scripts/token-exposure-response.py \
 3. Revokes the token immediately through the configured hook contract.
 4. Issues a replacement token when a rotation hook exists.
 5. Invalidates sessions when the token policy requires it.
-6. Writes an incident receipt under `receipts/security-incidents/` and emits ledger events for revocation and incident creation.
+6. Writes an incident receipt under `receipts/security-incidents/` for CLI runs, or under `.local/token-lifecycle/incidents/` from the Windmill wrapper, and emits ledger events for revocation and incident creation.
 
 ## Operator notes
 

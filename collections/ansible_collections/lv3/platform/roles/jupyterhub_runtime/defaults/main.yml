@@ -1,0 +1,89 @@
+---
+# Purpose: Default runtime inputs for the repo-managed JupyterHub notebook service.
+
+jupyterhub_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('jupyterhub') }}"
+jupyterhub_session_authority: "{{ platform_session_authority }}"
+jupyterhub_site_dir: /opt/jupyterhub
+jupyterhub_hub_build_dir: "{{ jupyterhub_site_dir }}/hub"
+jupyterhub_singleuser_build_dir: "{{ jupyterhub_site_dir }}/singleuser"
+jupyterhub_data_dir: "{{ jupyterhub_site_dir }}/data"
+jupyterhub_hub_data_dir: "{{ jupyterhub_data_dir }}/hub"
+jupyterhub_minio_data_dir: "{{ jupyterhub_data_dir }}/minio"
+jupyterhub_secret_dir: /etc/lv3/jupyterhub
+jupyterhub_compose_file: "{{ jupyterhub_site_dir }}/docker-compose.yml"
+jupyterhub_config_file: "{{ jupyterhub_site_dir }}/jupyterhub_config.py"
+jupyterhub_env_file: "{{ compose_runtime_secret_root }}/jupyterhub/runtime.env"
+jupyterhub_legacy_env_file: "{{ jupyterhub_site_dir }}/jupyterhub.env"
+jupyterhub_openbao_agent_dir: "{{ jupyterhub_site_dir }}/openbao"
+jupyterhub_openbao_agent_image: "{{ openbao_agent_image }}"
+jupyterhub_openbao_agent_container_name: jupyterhub-openbao-agent
+jupyterhub_openbao_secret_path: services/jupyterhub/runtime-env
+jupyterhub_openbao_policy_name: lv3-service-jupyterhub-runtime
+jupyterhub_openbao_approle_name: jupyterhub-runtime
+jupyterhub_internal_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.jupyterhub_port }}"
+jupyterhub_internal_base_url: "http://127.0.0.1:{{ jupyterhub_internal_port }}"
+jupyterhub_public_base_url: "https://{{ jupyterhub_service_topology.public_hostname }}"
+jupyterhub_public_edge_private_ip: "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
+jupyterhub_public_hostname_overrides:
+  - hostname: "{{ jupyterhub_service_topology.public_hostname }}"
+    address: "{{ jupyterhub_public_edge_private_ip }}"
+  - hostname: "{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}"
+    address: "{{ jupyterhub_public_edge_private_ip }}"
+jupyterhub_container_name: jupyterhub
+jupyterhub_minio_container_name: jupyterhub-minio
+jupyterhub_compose_network_name: jupyterhub_default
+jupyterhub_hub_image_name: lv3/jupyterhub-hub
+jupyterhub_singleuser_image_name: lv3/jupyterhub-singleuser
+jupyterhub_hub_base_image: quay.io/jupyterhub/jupyterhub:5.4.4@sha256:a4860afa5c3a99762006e42ec0c068e24b5a73a29c9145b3f8c19d49cd014f7d
+jupyterhub_singleuser_base_image: quay.io/jupyter/scipy-notebook:python-3.12@sha256:d0a76193887ed48cdc9adcc2cf042ae189901187226bf0466793acac1822ea78
+jupyterhub_base_image_pull_timeout_seconds: 180
+jupyterhub_minio_image: "{{ container_image_catalog.images.langfuse_minio_runtime.ref }}"
+jupyterhub_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/jupyterhub
+jupyterhub_service_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/jupyterhub/service-api-token.txt
+jupyterhub_minio_root_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/jupyterhub/minio-root-password.txt
+jupyterhub_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/jupyterhub-client-secret.txt
+jupyterhub_platform_context_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt
+jupyterhub_service_api_token_remote_file: "{{ jupyterhub_secret_dir }}/service-api-token.txt"
+jupyterhub_proxy_auth_token_remote_file: "{{ jupyterhub_secret_dir }}/proxy-auth-token.txt"
+jupyterhub_minio_root_password_remote_file: "{{ jupyterhub_secret_dir }}/minio-root-password.txt"
+jupyterhub_keycloak_client_id: jupyterhub
+jupyterhub_keycloak_issuer: https://sso.lv3.org/realms/lv3
+jupyterhub_keycloak_authorize_url: https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth
+jupyterhub_keycloak_token_url: https://sso.lv3.org/realms/lv3/protocol/openid-connect/token
+jupyterhub_keycloak_userdata_url: https://sso.lv3.org/realms/lv3/protocol/openid-connect/userinfo
+jupyterhub_keycloak_logout_url: >-
+  {{ jupyterhub_session_authority.keycloak_logout_url }}?client_id={{ jupyterhub_keycloak_client_id }}&post_logout_redirect_uri={{ jupyterhub_public_base_url | urlencode }}
+jupyterhub_keycloak_scopes:
+  - openid
+  - profile
+  - email
+jupyterhub_keycloak_username_claim: preferred_username
+jupyterhub_admin_users:
+  - florin.badita
+jupyterhub_minio_root_user: minio
+jupyterhub_shared_bucket_name: jupyterhub-shared
+jupyterhub_shared_region: eu-central-1
+jupyterhub_singleuser_notebook_dir: /home/jovyan/work
+jupyterhub_default_url: /lab
+jupyterhub_verify_username: jupyterhub-smoke
+jupyterhub_hub_connect_ip: "{{ jupyterhub_container_name }}"
+jupyterhub_host_gateway_hostname: host.docker.internal
+jupyterhub_ollama_base_url: "http://{{ jupyterhub_host_gateway_hostname }}:{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('ollama', 'internal') }}"
+jupyterhub_openai_base_url: "{{ jupyterhub_ollama_base_url }}/v1"
+jupyterhub_platform_context_url: "http://{{ jupyterhub_host_gateway_hostname }}:{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('platform_context_api', 'internal') }}"
+jupyterhub_spawn_timeout_seconds: 300
+jupyterhub_spawn_http_timeout_seconds: 120
+jupyterhub_hub_python_dependencies:
+  - oauthenticator==17.4.0
+  - dockerspawner==14.0.0
+jupyterhub_singleuser_python_dependencies:
+  - jupyterhub==5.4.4
+  - jupyterlab==4.5.6
+  - pandas==3.0.1
+  - sqlalchemy==2.0.48
+  - psycopg2-binary==2.9.11
+  - influxdb-client==1.50.0
+  - qdrant-client==1.17.1
+  - openai==2.30.0
+  - minio==7.2.20
+  - langfuse==4.0.2

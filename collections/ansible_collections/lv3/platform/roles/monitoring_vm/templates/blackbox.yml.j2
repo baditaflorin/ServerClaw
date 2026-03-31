@@ -7,6 +7,15 @@ modules:
       valid_status_codes: []
       method: GET
 
+  http_2xx_follow_redirects:
+    prober: http
+    timeout: 10s
+    http:
+      preferred_ip_protocol: ip4
+      valid_status_codes: []
+      method: GET
+      follow_redirects: true
+
   http_2xx_insecure:
     prober: http
     timeout: 10s
@@ -14,6 +23,28 @@ modules:
       preferred_ip_protocol: ip4
       valid_status_codes: []
       method: GET
+      tls_config:
+        insecure_skip_verify: true
+
+  http_2xx_insecure_tls:
+    prober: http
+    timeout: 10s
+    http:
+      preferred_ip_protocol: ip4
+      valid_status_codes: []
+      method: GET
+      follow_redirects: true
+      tls_config:
+        insecure_skip_verify: true
+
+  http_2xx_follow_redirects_insecure_tls:
+    prober: http
+    timeout: 10s
+    http:
+      preferred_ip_protocol: ip4
+      valid_status_codes: []
+      method: GET
+      follow_redirects: true
       tls_config:
         insecure_skip_verify: true
 

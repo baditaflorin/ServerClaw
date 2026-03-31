@@ -1,0 +1,70 @@
+# Purpose: Verify the local Apache Tika version, plaintext extraction, and metadata contracts.
+# Use case: Run after the Tika runtime starts to confirm the standard `/version`, `/tika`, and `/meta` endpoints behave as expected.
+# Inputs: Running Tika container plus the configured runtime URL and HTML verification fixture.
+# Outputs: Read-only verification results for the version banner, plaintext extraction, and metadata payload.
+# Idempotency: Fully idempotent; these are read-only HTTP checks against the live service.
+# Dependencies: ADR 0275 and ADR 0165; requires the tika_runtime compose stack to be running.
+---
+- name: Verify the Apache Tika version endpoint responds
+  ansible.builtin.uri:
+    url: "{{ tika_runtime_base_url }}/version"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: tika_runtime_verify_version
+  retries: 18
+  delay: 5
+  until: tika_runtime_verify_version.status == 200
+  changed_when: false
+
+- name: Assert the Apache Tika version banner is present
+  ansible.builtin.assert:
+    that:
+      - "'Apache Tika' in tika_runtime_verify_version.content"
+    fail_msg: "Apache Tika version verification did not return the expected banner."
+
+- name: Verify Apache Tika extracts plaintext from the HTML fixture
+  ansible.builtin.uri:
+    url: "{{ tika_runtime_base_url }}/tika"
+    method: PUT
+    body: "{{ tika_runtime_verify_html_fixture }}"
+    headers:
+      Content-Type: text/html
+      Accept: text/plain
+    status_code: 200
+    return_content: true
+  register: tika_runtime_verify_text
+  changed_when: false
+
+- name: Assert Apache Tika returned clean plaintext
+  ansible.builtin.assert:
+    that:
+      - "'Hello Tika' in tika_runtime_verify_text.content"
+      - "'Example extraction fixture.' in tika_runtime_verify_text.content"
+      - "'<html' not in tika_runtime_verify_text.content"
+    fail_msg: "Apache Tika did not return the expected plaintext extraction output."
+
+- name: Verify Apache Tika returns JSON metadata for the HTML fixture
+  ansible.builtin.uri:
+    url: "{{ tika_runtime_base_url }}/meta"
+    method: PUT
+    body: "{{ tika_runtime_verify_html_fixture }}"
+    headers:
+      Content-Type: text/html
+      Accept: application/json
+    status_code: 200
+    return_content: true
+  register: tika_runtime_verify_meta
+  changed_when: false
+
+- name: Decode the Apache Tika metadata response
+  ansible.builtin.set_fact:
+    tika_runtime_verify_meta_payload: "{{ tika_runtime_verify_meta.content | from_json }}"
+
+- name: Assert Apache Tika returned metadata for the fixture
+  ansible.builtin.assert:
+    that:
+      - tika_runtime_verify_meta_payload['Content-Type'] is defined
+      - tika_runtime_verify_meta_payload['Content-Type'] is match('^text/html(;.*)?$')
+      - tika_runtime_verify_meta_payload['X-TIKA:Parsed-By'] is defined
+    fail_msg: "Apache Tika did not return the expected metadata JSON payload."

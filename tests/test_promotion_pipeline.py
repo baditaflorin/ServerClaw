@@ -44,8 +44,33 @@ def make_catalog_context() -> tuple[dict, dict, dict]:
     return {}, workflow_catalog, command_catalog
 
 
+def make_service(service_id: str, name: str, vm: str) -> dict:
+    return {
+        "id": service_id,
+        "name": name,
+        "vm": vm,
+        "environments": {
+            "production": {"status": "active", "url": f"https://{service_id}.lv3.org"},
+            "staging": {"status": "active", "url": f"https://{service_id}.staging.lv3.org"},
+        },
+    }
+
+
 class PromotionPipelineTests(unittest.TestCase):
     def setUp(self) -> None:
+        self.stage_ready_service = {
+            "id": "grafana",
+            "name": "Grafana",
+            "vm": "monitoring-lv3",
+            "environments": {
+                "staging": {
+                    "status": "active",
+                    "url": "https://grafana.staging.lv3.org",
+                    "stage_ready": True,
+                    "smoke_suite_ids": ["staging-grafana-primary-path"],
+                }
+            },
+        }
         self.stage_receipt = {
             "schema_version": "1.0.0",
             "receipt_id": "2026-03-23-grafana-staging",
@@ -62,9 +87,20 @@ class PromotionPipelineTests(unittest.TestCase):
             "targets": [{"kind": "guest", "name": "monitoring-lv3"}],
             "verification": [
                 {
-                    "check": "Grafana health",
+                    "check": "Grafana smoke",
                     "result": "pass",
-                    "observed": "Ready.",
+                    "observed": "Smoke path ready.",
+                }
+            ],
+            "smoke_suites": [
+                {
+                    "suite_id": "staging-grafana-primary-path",
+                    "service_id": "grafana",
+                    "environment": "staging",
+                    "status": "passed",
+                    "executed_at": "2026-03-23T09:05:00Z",
+                    "summary": "1 passed, 0 failed, 0 skipped",
+                    "report_ref": "docs/adr/0073-environment-promotion-gate-and-deployment-pipeline.md",
                 }
             ],
             "evidence_refs": ["docs/adr/0073-environment-promotion-gate-and-deployment-pipeline.md"],
@@ -76,9 +112,16 @@ class PromotionPipelineTests(unittest.TestCase):
             side_effect=self._fake_policy_decision,
         )
         self.policy_patcher.start()
+        self.vulnerability_patcher = patch.object(
+            promotion_pipeline,
+            "evaluate_service_vulnerability_gate",
+            return_value={"approved": True, "reasons": [], "host": {}, "images": [], "profile": "edge-published"},
+        )
+        self.vulnerability_patcher.start()
 
     def tearDown(self) -> None:
         self.policy_patcher.stop()
+        self.vulnerability_patcher.stop()
 
     def _fake_policy_decision(self, payload: dict, *, repo_root=None, toolchain=None) -> dict:
         reasons = list(payload["approval"]["reasons"])
@@ -86,8 +129,10 @@ class PromotionPipelineTests(unittest.TestCase):
             reasons.append("staging receipt is older than 24 hours")
         if not payload["staging_receipt"]["verification_passed"]:
             reasons.append("staging receipt verification is not clean")
+        reasons.extend(payload["smoke_gate"]["reasons"])
         if payload["blocking_findings"]["count"] > 0:
             reasons.append(f"open critical findings exist for service '{payload['service_id']}'")
+        reasons.extend(payload["vulnerability_gate"]["reasons"])
         reasons.extend(payload["capacity_gate"]["reasons"])
         reasons.extend(payload["standby_gate"]["reasons"])
         if not payload["slo_gate"]["checked"]:
@@ -116,7 +161,7 @@ class PromotionPipelineTests(unittest.TestCase):
             ), patch.object(
                 promotion_pipeline,
                 "load_service_index",
-                return_value={"grafana": {"id": "grafana", "name": "Grafana", "vm": "monitoring-lv3"}},
+                return_value={"grafana": self.stage_ready_service},
             ), patch.object(
                 promotion_pipeline, "load_receipt", return_value=self.stage_receipt
             ), patch.object(
@@ -170,7 +215,7 @@ class PromotionPipelineTests(unittest.TestCase):
             ), patch.object(
                 promotion_pipeline,
                 "load_service_index",
-                return_value={"grafana": {"id": "grafana", "name": "Grafana", "vm": "monitoring-lv3"}},
+                return_value={"grafana": self.stage_ready_service},
             ), patch.object(
                 promotion_pipeline, "load_receipt", return_value=stale_receipt
             ), patch.object(
@@ -221,7 +266,7 @@ class PromotionPipelineTests(unittest.TestCase):
             ), patch.object(
                 promotion_pipeline,
                 "load_service_index",
-                return_value={"grafana": {"id": "grafana", "name": "Grafana", "vm": "monitoring-lv3"}},
+                return_value={"grafana": self.stage_ready_service},
             ), patch.object(
                 promotion_pipeline, "load_receipt", return_value=self.stage_receipt
             ), patch.object(
@@ -274,7 +319,7 @@ class PromotionPipelineTests(unittest.TestCase):
             ), patch.object(
                 promotion_pipeline,
                 "load_service_index",
-                return_value={"grafana": {"id": "grafana", "name": "Grafana", "vm": "monitoring-lv3"}},
+                return_value={"grafana": self.stage_ready_service},
             ), patch.object(
                 promotion_pipeline, "load_receipt", return_value=self.stage_receipt
             ), patch.object(
@@ -328,7 +373,7 @@ class PromotionPipelineTests(unittest.TestCase):
             ), patch.object(
                 promotion_pipeline,
                 "load_service_index",
-                return_value={"postgres": {"id": "postgres", "name": "PostgreSQL", "vm": "postgres-lv3"}},
+                return_value={"postgres": make_service("postgres", "PostgreSQL", "postgres-lv3")},
             ), patch.object(
                 promotion_pipeline, "load_receipt", return_value=self.stage_receipt
             ), patch.object(
@@ -386,7 +431,7 @@ class PromotionPipelineTests(unittest.TestCase):
             ), patch.object(
                 promotion_pipeline,
                 "load_service_index",
-                return_value={"grafana": {"id": "grafana", "name": "Grafana", "vm": "monitoring-lv3"}},
+                return_value={"grafana": self.stage_ready_service},
             ), patch.object(
                 promotion_pipeline, "load_receipt", return_value=self.stage_receipt
             ), patch.object(
@@ -431,6 +476,122 @@ class PromotionPipelineTests(unittest.TestCase):
         self.assertEqual(verdict["gate_decision"], "rejected")
         self.assertIn("SLO error budget below 10%", verdict["reasons"][0] + " ".join(verdict["reasons"]))
 
+    def test_gate_rejects_missing_required_stage_smoke_suite(self) -> None:
+        from unittest.mock import patch
+
+        missing_smoke_receipt = dict(self.stage_receipt)
+        missing_smoke_receipt["smoke_suites"] = []
+        with tempfile.TemporaryDirectory() as temp_dir:
+            stage_dir = Path(temp_dir) / "staging"
+            stage_dir.mkdir(parents=True, exist_ok=True)
+            stage_path = stage_dir / "receipt.json"
+            stage_path.write_text("{}")
+
+            with patch.object(promotion_pipeline, "STAGING_RECEIPTS_DIR", stage_dir), patch.object(
+                promotion_pipeline, "load_catalog_context", return_value=make_catalog_context()
+            ), patch.object(
+                promotion_pipeline,
+                "load_service_index",
+                return_value={"grafana": self.stage_ready_service},
+            ), patch.object(
+                promotion_pipeline, "load_receipt", return_value=missing_smoke_receipt
+            ), patch.object(
+                promotion_pipeline, "validate_receipt", return_value=None
+            ), patch.object(
+                promotion_pipeline, "resolve_receipt_path", return_value=stage_path
+            ), patch.object(
+                promotion_pipeline, "receipt_relative_path", return_value=Path("receipts/live-applies/staging/receipt.json")
+            ), patch.object(
+                promotion_pipeline, "load_findings", return_value=[]
+            ), patch.object(
+                promotion_pipeline, "load_capacity_model", return_value=object()
+            ), patch.object(
+                promotion_pipeline, "check_capacity_gate", return_value=(True, [])
+            ), patch.object(
+                promotion_pipeline,
+                "evaluate_service_standby",
+                return_value={"approved": True, "enforced": False, "tier": None, "reasons": [], "warnings": []},
+            ), patch.object(
+                promotion_pipeline, "evaluate_slo_gate", return_value={"checked": True, "entries": [], "blocking": [], "reason": None, "prometheus_url": "http://monitoring"}
+            ), patch.object(
+                promotion_pipeline.dt, "datetime", wraps=promotion_pipeline.dt.datetime
+            ) as mocked_datetime:
+                mocked_datetime.now.return_value = promotion_pipeline.dt.datetime(
+                    2026, 3, 23, 12, 0, tzinfo=promotion_pipeline.dt.timezone.utc
+                )
+                verdict = promotion_pipeline.check_promotion_gate(
+                    service_id="grafana",
+                    staging_receipt_ref="receipts/live-applies/staging/receipt.json",
+                    requester_class="human_operator",
+                    approver_classes=["human_operator"],
+                )
+
+        self.assertEqual(verdict["gate_decision"], "rejected")
+        self.assertIn("staging smoke suites missing from staged receipt", " ".join(verdict["reasons"]))
+
+    def test_gate_rejects_vulnerability_budget_failure(self) -> None:
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            stage_dir = Path(temp_dir) / "staging"
+            stage_dir.mkdir(parents=True, exist_ok=True)
+            stage_path = stage_dir / "receipt.json"
+            stage_path.write_text("{}")
+
+            with patch.object(promotion_pipeline, "STAGING_RECEIPTS_DIR", stage_dir), patch.object(
+                promotion_pipeline, "load_catalog_context", return_value=make_catalog_context()
+            ), patch.object(
+                promotion_pipeline,
+                "load_service_index",
+                return_value={"windmill": {"id": "windmill", "name": "Windmill", "vm": "docker-runtime-lv3"}},
+            ), patch.object(
+                promotion_pipeline, "load_receipt", return_value=self.stage_receipt
+            ), patch.object(
+                promotion_pipeline, "validate_receipt", return_value=None
+            ), patch.object(
+                promotion_pipeline, "resolve_receipt_path", return_value=stage_path
+            ), patch.object(
+                promotion_pipeline, "receipt_relative_path", return_value=Path("receipts/live-applies/staging/receipt.json")
+            ), patch.object(
+                promotion_pipeline, "load_findings", return_value=[]
+            ), patch.object(
+                promotion_pipeline,
+                "evaluate_service_vulnerability_gate",
+                return_value={
+                    "approved": False,
+                    "reasons": ["image windmill_runtime has 3 critical findings, above the budget 0"],
+                    "host": {},
+                    "images": [],
+                    "profile": "edge-published",
+                },
+            ), patch.object(
+                promotion_pipeline, "load_capacity_model", return_value=object()
+            ), patch.object(
+                promotion_pipeline, "check_capacity_gate", return_value=(True, [])
+            ), patch.object(
+                promotion_pipeline,
+                "evaluate_service_standby",
+                return_value={"approved": True, "enforced": False, "tier": None, "reasons": [], "warnings": []},
+            ), patch.object(
+                promotion_pipeline,
+                "evaluate_slo_gate",
+                return_value={"checked": True, "entries": [], "blocking": [], "reason": None, "prometheus_url": "http://monitoring"},
+            ), patch.object(
+                promotion_pipeline.dt, "datetime", wraps=promotion_pipeline.dt.datetime
+            ) as mocked_datetime:
+                mocked_datetime.now.return_value = promotion_pipeline.dt.datetime(
+                    2026, 3, 23, 12, 0, tzinfo=promotion_pipeline.dt.timezone.utc
+                )
+                verdict = promotion_pipeline.check_promotion_gate(
+                    service_id="windmill",
+                    staging_receipt_ref="receipts/live-applies/staging/receipt.json",
+                    requester_class="human_operator",
+                    approver_classes=["human_operator"],
+                )
+
+        self.assertEqual(verdict["gate_decision"], "rejected")
+        self.assertIn("image windmill_runtime has 3 critical findings", " ".join(verdict["reasons"]))
+
     def test_validate_promotion_receipt_accepts_linked_receipts(self) -> None:
         from unittest.mock import patch
 
@@ -459,6 +620,24 @@ class PromotionPipelineTests(unittest.TestCase):
                             "observed": "Ready.",
                         }
                     ],
+                },
+                "stage_smoke_gate": {
+                    "enforced": True,
+                    "passed": True,
+                    "required_suite_ids": ["staging-grafana-primary-path"],
+                    "missing_suite_ids": [],
+                    "failed_suite_ids": [],
+                    "passed_suite_ids": ["staging-grafana-primary-path"],
+                    "observed_suites": [
+                        {
+                            "suite_id": "staging-grafana-primary-path",
+                            "service_id": "grafana",
+                            "environment": "staging",
+                            "status": "passed",
+                            "summary": "1 passed, 0 failed, 0 skipped",
+                        }
+                    ],
+                    "reasons": [],
                 },
                 "gate_decision": "approved",
                 "gate_actor": {"class": "operator", "id": "ops"},

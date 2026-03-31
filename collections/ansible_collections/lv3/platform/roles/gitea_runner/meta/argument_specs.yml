@@ -36,3 +36,78 @@ argument_specs:
       gitea_runner_labels:
         type: str
         required: true
+      gitea_runner_renovate_enabled:
+        type: bool
+        required: true
+      gitea_runner_renovate_username:
+        type: str
+        required: true
+      gitea_runner_renovate_password_local_file:
+        type: path
+        required: true
+      gitea_runner_renovate_repository:
+        type: str
+        required: true
+      gitea_runner_renovate_token_scopes:
+        type: str
+        required: true
+      gitea_runner_renovate_clone_host:
+        type: str
+        required: true
+      gitea_runner_renovate_clone_host_address:
+        type: str
+        required: true
+      gitea_runner_renovate_clone_host_port:
+        type: str
+        required: true
+      gitea_runner_renovate_clone_target_host:
+        type: str
+        required: true
+      gitea_runner_renovate_clone_target_port:
+        type: str
+        required: true
+      gitea_runner_renovate_openbao_address:
+        type: str
+        required: true
+      gitea_runner_renovate_secret_path:
+        type: str
+        required: true
+      gitea_runner_renovate_policy_name:
+        type: str
+        required: true
+      gitea_runner_renovate_approle_name:
+        type: str
+        required: true
+      gitea_runner_renovate_openbao_agent_dir:
+        type: path
+        required: true
+      gitea_runner_renovate_credential_dir:
+        type: path
+        required: true
+      gitea_runner_renovate_credential_dir_in_container:
+        type: path
+        required: true
+      gitea_runner_renovate_credential_file:
+        type: path
+        required: true
+      gitea_runner_renovate_credential_file_in_container:
+        type: path
+        required: true
+      gitea_runner_renovate_agent_config_file:
+        type: path
+        required: true
+      gitea_runner_renovate_agent_template_file:
+        type: path
+        required: true
+      gitea_runner_renovate_role_id_file:
+        type: path
+        required: true
+      gitea_runner_renovate_secret_id_file:
+        type: path
+        required: true
+      gitea_runner_renovate_agent_service_name:
+        type: str
+        required: true
+      gitea_runner_renovate_agent_container_name:
+        type: str
+        required: true

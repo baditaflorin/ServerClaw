@@ -3,12 +3,12 @@ from __future__ import annotations
 import datetime as dt
 import json
 import os
-from pathlib import Path
 from typing import Any, Callable
 
+from platform.repo import repo_path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-LEDGER_EVENT_TYPES_PATH = REPO_ROOT / "config" / "ledger-event-types.yaml"
+REPO_ROOT = repo_path()
+LEDGER_EVENT_TYPES_PATH = repo_path("config", "ledger-event-types.yaml")
 LEDGER_DSN_ENV = "LV3_LEDGER_DSN"
 
 

@@ -1,0 +1,1876 @@
+groups:
+  - name: https_tls_assurance
+    interval: 1m
+    rules:
+      - alert: HTTPSProbeFailed_api_gateway_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="api-gateway-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: api_gateway
+          assurance_id: api-gateway-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: api-gateway-public HTTPS probe is failing.
+          description: https://api.lv3.org:443/healthz is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_api_gateway_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="api-gateway-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: api_gateway
+          assurance_id: api-gateway-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: api-gateway-public TLS certificate is approaching expiry.
+          description: https://api.lv3.org:443/healthz has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_api_gateway_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="api-gateway-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: api_gateway
+          assurance_id: api-gateway-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: api-gateway-public TLS certificate is within the critical expiry
+            window.
+          description: https://api.lv3.org:443/healthz has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_backup_pbs_internal
+        expr: probe_success{job="https-tls-blackbox",assurance_id="backup-pbs-internal"}
+          == 0
+        for: 5m
+        labels:
+          service_id: backup_pbs
+          assurance_id: backup-pbs-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: backup-pbs-internal HTTPS probe is failing.
+          description: https://10.10.10.60:8007/api2/json/version is no longer completing
+            a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_backup_pbs_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="backup-pbs-internal"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: backup_pbs
+          assurance_id: backup-pbs-internal
+          environment: production
+          scope: internal
+          severity: warning
+        annotations:
+          summary: backup-pbs-internal TLS certificate is approaching expiry.
+          description: https://10.10.10.60:8007/api2/json/version has less than 21
+            days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_backup_pbs_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="backup-pbs-internal"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: backup_pbs
+          assurance_id: backup-pbs-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: backup-pbs-internal TLS certificate is within the critical expiry
+            window.
+          description: https://10.10.10.60:8007/api2/json/version has less than 14
+            days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_changelog_portal_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="changelog-portal-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: changelog_portal
+          assurance_id: changelog-portal-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: changelog-portal-public HTTPS probe is failing.
+          description: https://changelog.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_changelog_portal_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="changelog-portal-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: changelog_portal
+          assurance_id: changelog-portal-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: changelog-portal-public TLS certificate is approaching expiry.
+          description: https://changelog.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_changelog_portal_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="changelog-portal-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: changelog_portal
+          assurance_id: changelog-portal-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: changelog-portal-public TLS certificate is within the critical
+            expiry window.
+          description: https://changelog.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_coolify_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="coolify-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: coolify
+          assurance_id: coolify-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: coolify-public HTTPS probe is failing.
+          description: https://coolify.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_coolify_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="coolify-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: coolify
+          assurance_id: coolify-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: coolify-public TLS certificate is approaching expiry.
+          description: https://coolify.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_coolify_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="coolify-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: coolify
+          assurance_id: coolify-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: coolify-public TLS certificate is within the critical expiry window.
+          description: https://coolify.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_coolify_apps_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="coolify-apps-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: coolify_apps
+          assurance_id: coolify-apps-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: coolify-apps-public HTTPS probe is failing.
+          description: https://apps.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_coolify_apps_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="coolify-apps-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: coolify_apps
+          assurance_id: coolify-apps-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: coolify-apps-public TLS certificate is approaching expiry.
+          description: https://apps.lv3.org:443/ has less than 21 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_coolify_apps_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="coolify-apps-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: coolify_apps
+          assurance_id: coolify-apps-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: coolify-apps-public TLS certificate is within the critical expiry
+            window.
+          description: https://apps.lv3.org:443/ has less than 14 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_dify_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="dify-public"} ==
+          0
+        for: 5m
+        labels:
+          service_id: dify
+          assurance_id: dify-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: dify-public HTTPS probe is failing.
+          description: https://agents.lv3.org:443/healthz is no longer completing
+            a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_dify_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="dify-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: dify
+          assurance_id: dify-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: dify-public TLS certificate is approaching expiry.
+          description: https://agents.lv3.org:443/healthz has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_dify_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="dify-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: dify
+          assurance_id: dify-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: dify-public TLS certificate is within the critical expiry window.
+          description: https://agents.lv3.org:443/healthz has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_directus_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="directus-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: directus
+          assurance_id: directus-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: directus-public HTTPS probe is failing.
+          description: https://data.lv3.org:443/server/health is no longer completing
+            a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_directus_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="directus-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: directus
+          assurance_id: directus-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: directus-public TLS certificate is approaching expiry.
+          description: https://data.lv3.org:443/server/health has less than 21 days
+            remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_directus_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="directus-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: directus
+          assurance_id: directus-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: directus-public TLS certificate is within the critical expiry window.
+          description: https://data.lv3.org:443/server/health has less than 14 days
+            remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_docker_build_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="docker-build-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: docker_build
+          assurance_id: docker-build-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: docker-build-public HTTPS probe is failing.
+          description: https://build.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_docker_build_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="docker-build-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: docker_build
+          assurance_id: docker-build-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: docker-build-public TLS certificate is approaching expiry.
+          description: https://build.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_docker_build_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="docker-build-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: docker_build
+          assurance_id: docker-build-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: docker-build-public TLS certificate is within the critical expiry
+            window.
+          description: https://build.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_docker_runtime_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="docker-runtime-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: docker_runtime
+          assurance_id: docker-runtime-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: docker-runtime-public HTTPS probe is failing.
+          description: https://docker.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_docker_runtime_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="docker-runtime-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: docker_runtime
+          assurance_id: docker-runtime-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: docker-runtime-public TLS certificate is approaching expiry.
+          description: https://docker.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_docker_runtime_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="docker-runtime-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: docker_runtime
+          assurance_id: docker-runtime-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: docker-runtime-public TLS certificate is within the critical expiry
+            window.
+          description: https://docker.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_docs_portal_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="docs-portal-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: docs_portal
+          assurance_id: docs-portal-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: docs-portal-public HTTPS probe is failing.
+          description: https://docs.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_docs_portal_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="docs-portal-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: docs_portal
+          assurance_id: docs-portal-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: docs-portal-public TLS certificate is approaching expiry.
+          description: https://docs.lv3.org:443/ has less than 21 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_docs_portal_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="docs-portal-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: docs_portal
+          assurance_id: docs-portal-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: docs-portal-public TLS certificate is within the critical expiry
+            window.
+          description: https://docs.lv3.org:443/ has less than 14 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_dozzle_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="dozzle-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: dozzle
+          assurance_id: dozzle-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: dozzle-public HTTPS probe is failing.
+          description: https://logs.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_dozzle_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="dozzle-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: dozzle
+          assurance_id: dozzle-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: dozzle-public TLS certificate is approaching expiry.
+          description: https://logs.lv3.org:443/ has less than 21 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_dozzle_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="dozzle-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: dozzle
+          assurance_id: dozzle-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: dozzle-public TLS certificate is within the critical expiry window.
+          description: https://logs.lv3.org:443/ has less than 14 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_excalidraw_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="excalidraw-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: excalidraw
+          assurance_id: excalidraw-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: excalidraw-public HTTPS probe is failing.
+          description: https://draw.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_excalidraw_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="excalidraw-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: excalidraw
+          assurance_id: excalidraw-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: excalidraw-public TLS certificate is approaching expiry.
+          description: https://draw.lv3.org:443/ has less than 21 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_excalidraw_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="excalidraw-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: excalidraw
+          assurance_id: excalidraw-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: excalidraw-public TLS certificate is within the critical expiry
+            window.
+          description: https://draw.lv3.org:443/ has less than 14 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_flagsmith_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="flagsmith-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: flagsmith
+          assurance_id: flagsmith-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: flagsmith-public HTTPS probe is failing.
+          description: https://flags.lv3.org:443/health is no longer completing a
+            healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_flagsmith_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="flagsmith-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: flagsmith
+          assurance_id: flagsmith-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: flagsmith-public TLS certificate is approaching expiry.
+          description: https://flags.lv3.org:443/health has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_flagsmith_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="flagsmith-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: flagsmith
+          assurance_id: flagsmith-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: flagsmith-public TLS certificate is within the critical expiry
+            window.
+          description: https://flags.lv3.org:443/health has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_grafana_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="grafana-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: grafana
+          assurance_id: grafana-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: grafana-public HTTPS probe is failing.
+          description: https://grafana.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_grafana_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="grafana-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: grafana
+          assurance_id: grafana-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: grafana-public TLS certificate is approaching expiry.
+          description: https://grafana.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_grafana_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="grafana-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: grafana
+          assurance_id: grafana-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: grafana-public TLS certificate is within the critical expiry window.
+          description: https://grafana.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_harbor_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="harbor-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: harbor
+          assurance_id: harbor-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: harbor-public HTTPS probe is failing.
+          description: https://registry.lv3.org:443/api/v2.0/ping is no longer completing
+            a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_harbor_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="harbor-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: harbor
+          assurance_id: harbor-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: harbor-public TLS certificate is approaching expiry.
+          description: https://registry.lv3.org:443/api/v2.0/ping has less than 21
+            days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_harbor_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="harbor-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: harbor
+          assurance_id: harbor-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: harbor-public TLS certificate is within the critical expiry window.
+          description: https://registry.lv3.org:443/api/v2.0/ping has less than 14
+            days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_headscale_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="headscale-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: headscale
+          assurance_id: headscale-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: headscale-public HTTPS probe is failing.
+          description: https://headscale.lv3.org:443/health is no longer completing
+            a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_headscale_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="headscale-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: headscale
+          assurance_id: headscale-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: headscale-public TLS certificate is approaching expiry.
+          description: https://headscale.lv3.org:443/health has less than 21 days
+            remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_headscale_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="headscale-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: headscale
+          assurance_id: headscale-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: headscale-public TLS certificate is within the critical expiry
+            window.
+          description: https://headscale.lv3.org:443/health has less than 14 days
+            remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_homepage_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="homepage-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: homepage
+          assurance_id: homepage-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: homepage-public HTTPS probe is failing.
+          description: https://home.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_homepage_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="homepage-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: homepage
+          assurance_id: homepage-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: homepage-public TLS certificate is approaching expiry.
+          description: https://home.lv3.org:443/ has less than 21 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_homepage_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="homepage-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: homepage
+          assurance_id: homepage-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: homepage-public TLS certificate is within the critical expiry window.
+          description: https://home.lv3.org:443/ has less than 14 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_jupyterhub_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="jupyterhub-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: jupyterhub
+          assurance_id: jupyterhub-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: jupyterhub-public HTTPS probe is failing.
+          description: https://notebooks.lv3.org:443/hub/health is no longer completing
+            a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_jupyterhub_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="jupyterhub-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: jupyterhub
+          assurance_id: jupyterhub-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: jupyterhub-public TLS certificate is approaching expiry.
+          description: https://notebooks.lv3.org:443/hub/health has less than 21 days
+            remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_jupyterhub_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="jupyterhub-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: jupyterhub
+          assurance_id: jupyterhub-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: jupyterhub-public TLS certificate is within the critical expiry
+            window.
+          description: https://notebooks.lv3.org:443/hub/health has less than 14 days
+            remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_keycloak_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="keycloak-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: keycloak
+          assurance_id: keycloak-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: keycloak-public HTTPS probe is failing.
+          description: https://sso.lv3.org:443/realms/lv3/.well-known/openid-configuration
+            is no longer completing a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_keycloak_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="keycloak-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: keycloak
+          assurance_id: keycloak-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: keycloak-public TLS certificate is approaching expiry.
+          description: https://sso.lv3.org:443/realms/lv3/.well-known/openid-configuration
+            has less than 21 days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_keycloak_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="keycloak-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: keycloak
+          assurance_id: keycloak-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: keycloak-public TLS certificate is within the critical expiry window.
+          description: https://sso.lv3.org:443/realms/lv3/.well-known/openid-configuration
+            has less than 14 days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_langfuse_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="langfuse-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: langfuse
+          assurance_id: langfuse-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: langfuse-public HTTPS probe is failing.
+          description: https://langfuse.lv3.org:443/api/public/health is no longer
+            completing a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_langfuse_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="langfuse-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: langfuse
+          assurance_id: langfuse-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: langfuse-public TLS certificate is approaching expiry.
+          description: https://langfuse.lv3.org:443/api/public/health has less than
+            21 days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_langfuse_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="langfuse-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: langfuse
+          assurance_id: langfuse-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: langfuse-public TLS certificate is within the critical expiry window.
+          description: https://langfuse.lv3.org:443/api/public/health has less than
+            14 days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_mail_platform_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="mail-platform-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: mail_platform
+          assurance_id: mail-platform-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: mail-platform-public HTTPS probe is failing.
+          description: https://mail.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_mail_platform_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="mail-platform-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: mail_platform
+          assurance_id: mail-platform-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: mail-platform-public TLS certificate is approaching expiry.
+          description: https://mail.lv3.org:443/ has less than 21 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_mail_platform_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="mail-platform-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: mail_platform
+          assurance_id: mail-platform-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: mail-platform-public TLS certificate is within the critical expiry
+            window.
+          description: https://mail.lv3.org:443/ has less than 14 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_matrix_synapse_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="matrix-synapse-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: matrix_synapse
+          assurance_id: matrix-synapse-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: matrix-synapse-public HTTPS probe is failing.
+          description: https://matrix.lv3.org:443/_matrix/client/versions is no longer
+            completing a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_matrix_synapse_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="matrix-synapse-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: matrix_synapse
+          assurance_id: matrix-synapse-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: matrix-synapse-public TLS certificate is approaching expiry.
+          description: https://matrix.lv3.org:443/_matrix/client/versions has less
+            than 21 days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_matrix_synapse_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="matrix-synapse-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: matrix_synapse
+          assurance_id: matrix-synapse-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: matrix-synapse-public TLS certificate is within the critical expiry
+            window.
+          description: https://matrix.lv3.org:443/_matrix/client/versions has less
+            than 14 days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_n8n_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="n8n-public"} ==
+          0
+        for: 5m
+        labels:
+          service_id: n8n
+          assurance_id: n8n-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: n8n-public HTTPS probe is failing.
+          description: https://n8n.lv3.org:443/healthz is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_n8n_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="n8n-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: n8n
+          assurance_id: n8n-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: n8n-public TLS certificate is approaching expiry.
+          description: https://n8n.lv3.org:443/healthz has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_n8n_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="n8n-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: n8n
+          assurance_id: n8n-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: n8n-public TLS certificate is within the critical expiry window.
+          description: https://n8n.lv3.org:443/healthz has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_nextcloud_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="nextcloud-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: nextcloud
+          assurance_id: nextcloud-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: nextcloud-public HTTPS probe is failing.
+          description: https://cloud.lv3.org:443/status.php is no longer completing
+            a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_nextcloud_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="nextcloud-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: nextcloud
+          assurance_id: nextcloud-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: nextcloud-public TLS certificate is approaching expiry.
+          description: https://cloud.lv3.org:443/status.php has less than 21 days
+            remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_nextcloud_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="nextcloud-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: nextcloud
+          assurance_id: nextcloud-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: nextcloud-public TLS certificate is within the critical expiry
+            window.
+          description: https://cloud.lv3.org:443/status.php has less than 14 days
+            remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_nginx_edge_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="nginx-edge-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: nginx_edge
+          assurance_id: nginx-edge-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: nginx-edge-public HTTPS probe is failing.
+          description: https://nginx.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_nginx_edge_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="nginx-edge-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: nginx_edge
+          assurance_id: nginx-edge-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: nginx-edge-public TLS certificate is approaching expiry.
+          description: https://nginx.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_nginx_edge_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="nginx-edge-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: nginx_edge
+          assurance_id: nginx-edge-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: nginx-edge-public TLS certificate is within the critical expiry
+            window.
+          description: https://nginx.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_nomad_internal
+        expr: probe_success{job="https-tls-blackbox",assurance_id="nomad-internal"}
+          == 0
+        for: 5m
+        labels:
+          service_id: nomad
+          assurance_id: nomad-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: nomad-internal HTTPS probe is failing.
+          description: https://100.64.0.1:8013/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_nomad_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="nomad-internal"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: nomad
+          assurance_id: nomad-internal
+          environment: production
+          scope: internal
+          severity: warning
+        annotations:
+          summary: nomad-internal TLS certificate is approaching expiry.
+          description: https://100.64.0.1:8013/ has less than 21 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_nomad_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="nomad-internal"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: nomad
+          assurance_id: nomad-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: nomad-internal TLS certificate is within the critical expiry window.
+          description: https://100.64.0.1:8013/ has less than 14 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_openbao_internal
+        expr: probe_success{job="https-tls-blackbox",assurance_id="openbao-internal"}
+          == 0
+        for: 5m
+        labels:
+          service_id: openbao
+          assurance_id: openbao-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: openbao-internal HTTPS probe is failing.
+          description: https://100.64.0.1:8200/v1/sys/health is no longer completing
+            a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_openbao_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="openbao-internal"}
+          - time()) / 3600) < 6
+        for: 15m
+        labels:
+          service_id: openbao
+          assurance_id: openbao-internal
+          environment: production
+          scope: internal
+          severity: warning
+        annotations:
+          summary: openbao-internal TLS certificate is approaching expiry.
+          description: https://100.64.0.1:8200/v1/sys/health has less than 6 hours
+            remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_openbao_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="openbao-internal"}
+          - time()) / 3600) < 2
+        for: 15m
+        labels:
+          service_id: openbao
+          assurance_id: openbao-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: openbao-internal TLS certificate is within the critical expiry
+            window.
+          description: https://100.64.0.1:8200/v1/sys/health has less than 2 hours
+            remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_ops_portal_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="ops-portal-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: ops_portal
+          assurance_id: ops-portal-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: ops-portal-public HTTPS probe is failing.
+          description: https://ops.lv3.org:443/health is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_ops_portal_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="ops-portal-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: ops_portal
+          assurance_id: ops-portal-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: ops-portal-public TLS certificate is approaching expiry.
+          description: https://ops.lv3.org:443/health has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_ops_portal_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="ops-portal-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: ops_portal
+          assurance_id: ops-portal-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: ops-portal-public TLS certificate is within the critical expiry
+            window.
+          description: https://ops.lv3.org:443/health has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_outline_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="outline-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: outline
+          assurance_id: outline-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: outline-public HTTPS probe is failing.
+          description: https://wiki.lv3.org:443/_health is no longer completing a
+            healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_outline_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="outline-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: outline
+          assurance_id: outline-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: outline-public TLS certificate is approaching expiry.
+          description: https://wiki.lv3.org:443/_health has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_outline_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="outline-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: outline
+          assurance_id: outline-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: outline-public TLS certificate is within the critical expiry window.
+          description: https://wiki.lv3.org:443/_health has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_plane_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="plane-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: plane
+          assurance_id: plane-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: plane-public HTTPS probe is failing.
+          description: https://tasks.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_plane_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="plane-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: plane
+          assurance_id: plane-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: plane-public TLS certificate is approaching expiry.
+          description: https://tasks.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_plane_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="plane-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: plane
+          assurance_id: plane-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: plane-public TLS certificate is within the critical expiry window.
+          description: https://tasks.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_plausible_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="plausible-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: plausible
+          assurance_id: plausible-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: plausible-public HTTPS probe is failing.
+          description: https://analytics.lv3.org:443/api/system/health/ready is no
+            longer completing a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_plausible_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="plausible-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: plausible
+          assurance_id: plausible-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: plausible-public TLS certificate is approaching expiry.
+          description: https://analytics.lv3.org:443/api/system/health/ready has less
+            than 21 days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_plausible_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="plausible-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: plausible
+          assurance_id: plausible-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: plausible-public TLS certificate is within the critical expiry
+            window.
+          description: https://analytics.lv3.org:443/api/system/health/ready has less
+            than 14 days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_portainer_internal
+        expr: probe_success{job="https-tls-blackbox",assurance_id="portainer-internal"}
+          == 0
+        for: 5m
+        labels:
+          service_id: portainer
+          assurance_id: portainer-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: portainer-internal HTTPS probe is failing.
+          description: https://100.64.0.1:9444/api/status is no longer completing
+            a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_portainer_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="portainer-internal"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: portainer
+          assurance_id: portainer-internal
+          environment: production
+          scope: internal
+          severity: warning
+        annotations:
+          summary: portainer-internal TLS certificate is approaching expiry.
+          description: https://100.64.0.1:9444/api/status has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_portainer_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="portainer-internal"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: portainer
+          assurance_id: portainer-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: portainer-internal TLS certificate is within the critical expiry
+            window.
+          description: https://100.64.0.1:9444/api/status has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_proxmox_ui_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="proxmox-ui-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: proxmox_ui
+          assurance_id: proxmox-ui-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: proxmox-ui-public HTTPS probe is failing.
+          description: https://proxmox.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_proxmox_ui_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="proxmox-ui-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: proxmox_ui
+          assurance_id: proxmox-ui-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: proxmox-ui-public TLS certificate is approaching expiry.
+          description: https://proxmox.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_proxmox_ui_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="proxmox-ui-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: proxmox_ui
+          assurance_id: proxmox-ui-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: proxmox-ui-public TLS certificate is within the critical expiry
+            window.
+          description: https://proxmox.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_proxmox_ui_internal
+        expr: probe_success{job="https-tls-blackbox",assurance_id="proxmox-ui-internal"}
+          == 0
+        for: 5m
+        labels:
+          service_id: proxmox_ui
+          assurance_id: proxmox-ui-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: proxmox-ui-internal HTTPS probe is failing.
+          description: https://100.64.0.1:8006/api2/json/version is no longer completing
+            a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_proxmox_ui_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="proxmox-ui-internal"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: proxmox_ui
+          assurance_id: proxmox-ui-internal
+          environment: production
+          scope: internal
+          severity: warning
+        annotations:
+          summary: proxmox-ui-internal TLS certificate is approaching expiry.
+          description: https://100.64.0.1:8006/api2/json/version has less than 21
+            days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_proxmox_ui_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="proxmox-ui-internal"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: proxmox_ui
+          assurance_id: proxmox-ui-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: proxmox-ui-internal TLS certificate is within the critical expiry
+            window.
+          description: https://100.64.0.1:8006/api2/json/version has less than 14
+            days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_realtime_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="realtime-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: realtime
+          assurance_id: realtime-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: realtime-public HTTPS probe is failing.
+          description: https://realtime.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_realtime_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="realtime-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: realtime
+          assurance_id: realtime-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: realtime-public TLS certificate is approaching expiry.
+          description: https://realtime.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_realtime_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="realtime-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: realtime
+          assurance_id: realtime-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: realtime-public TLS certificate is within the critical expiry window.
+          description: https://realtime.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_serverclaw_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="serverclaw-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: serverclaw
+          assurance_id: serverclaw-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: serverclaw-public HTTPS probe is failing.
+          description: https://chat.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_serverclaw_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="serverclaw-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: serverclaw
+          assurance_id: serverclaw-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: serverclaw-public TLS certificate is approaching expiry.
+          description: https://chat.lv3.org:443/ has less than 21 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_serverclaw_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="serverclaw-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: serverclaw
+          assurance_id: serverclaw-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: serverclaw-public TLS certificate is within the critical expiry
+            window.
+          description: https://chat.lv3.org:443/ has less than 14 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_status_page_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="status-page-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: status_page
+          assurance_id: status-page-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: status-page-public HTTPS probe is failing.
+          description: https://status.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_status_page_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="status-page-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: status_page
+          assurance_id: status-page-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: status-page-public TLS certificate is approaching expiry.
+          description: https://status.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_status_page_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="status-page-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: status_page
+          assurance_id: status-page-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: status-page-public TLS certificate is within the critical expiry
+            window.
+          description: https://status.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_step_ca_internal
+        expr: probe_success{job="https-tls-blackbox",assurance_id="step-ca-internal"}
+          == 0
+        for: 5m
+        labels:
+          service_id: step_ca
+          assurance_id: step-ca-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: step-ca-internal HTTPS probe is failing.
+          description: https://100.64.0.1:9443/health is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_step_ca_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="step-ca-internal"}
+          - time()) / 3600) < 6
+        for: 15m
+        labels:
+          service_id: step_ca
+          assurance_id: step-ca-internal
+          environment: production
+          scope: internal
+          severity: warning
+        annotations:
+          summary: step-ca-internal TLS certificate is approaching expiry.
+          description: https://100.64.0.1:9443/health has less than 6 hours remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_step_ca_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="step-ca-internal"}
+          - time()) / 3600) < 2
+        for: 15m
+        labels:
+          service_id: step_ca
+          assurance_id: step-ca-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: step-ca-internal TLS certificate is within the critical expiry
+            window.
+          description: https://100.64.0.1:9443/health has less than 2 hours remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_uptime_kuma_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="uptime-kuma-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: uptime_kuma
+          assurance_id: uptime-kuma-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: uptime-kuma-public HTTPS probe is failing.
+          description: https://uptime.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_uptime_kuma_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="uptime-kuma-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: uptime_kuma
+          assurance_id: uptime-kuma-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: uptime-kuma-public TLS certificate is approaching expiry.
+          description: https://uptime.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_uptime_kuma_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="uptime-kuma-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: uptime_kuma
+          assurance_id: uptime-kuma-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: uptime-kuma-public TLS certificate is within the critical expiry
+            window.
+          description: https://uptime.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_vaultwarden_operator
+        expr: probe_success{job="https-tls-blackbox",assurance_id="vaultwarden-operator"}
+          == 0
+        for: 5m
+        labels:
+          service_id: vaultwarden
+          assurance_id: vaultwarden-operator
+          environment: production
+          scope: operator
+          severity: critical
+        annotations:
+          summary: vaultwarden-operator HTTPS probe is failing.
+          description: https://vault.lv3.org:443/alive is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_vaultwarden_operator
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="vaultwarden-operator"}
+          - time()) / 3600) < 6
+        for: 15m
+        labels:
+          service_id: vaultwarden
+          assurance_id: vaultwarden-operator
+          environment: production
+          scope: operator
+          severity: warning
+        annotations:
+          summary: vaultwarden-operator TLS certificate is approaching expiry.
+          description: https://vault.lv3.org:443/alive has less than 6 hours remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_vaultwarden_operator
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="vaultwarden-operator"}
+          - time()) / 3600) < 2
+        for: 15m
+        labels:
+          service_id: vaultwarden
+          assurance_id: vaultwarden-operator
+          environment: production
+          scope: operator
+          severity: critical
+        annotations:
+          summary: vaultwarden-operator TLS certificate is within the critical expiry
+            window.
+          description: https://vault.lv3.org:443/alive has less than 2 hours remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_woodpecker_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="woodpecker-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: woodpecker
+          assurance_id: woodpecker-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: woodpecker-public HTTPS probe is failing.
+          description: https://ci.lv3.org:443/healthz is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_woodpecker_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="woodpecker-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: woodpecker
+          assurance_id: woodpecker-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: woodpecker-public TLS certificate is approaching expiry.
+          description: https://ci.lv3.org:443/healthz has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_woodpecker_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="woodpecker-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: woodpecker
+          assurance_id: woodpecker-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: woodpecker-public TLS certificate is within the critical expiry
+            window.
+          description: https://ci.lv3.org:443/healthz has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md

@@ -1,0 +1,13 @@
+# Purpose: Provide the default database and secret paths for the Nextcloud PostgreSQL bootstrap role.
+# Use case: Load when provisioning the dedicated Nextcloud database user, password, and local operator artifacts.
+# Inputs: Optional overrides for database names and secret locations.
+# Outputs: Default variables consumed by the nextcloud_postgres role tasks.
+# Idempotency: Fully idempotent; defaults declare desired values only.
+# Dependencies: ADR 0165 metadata standard, ADR 0260, and the nextcloud_postgres role.
+---
+nextcloud_database_name: nextcloud
+nextcloud_database_user: nextcloud
+nextcloud_postgres_secret_dir: /etc/lv3/nextcloud
+nextcloud_postgres_password_file: "{{ nextcloud_postgres_secret_dir }}/database-password"
+nextcloud_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud
+nextcloud_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud/database-password.txt

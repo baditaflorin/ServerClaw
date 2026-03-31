@@ -46,7 +46,7 @@
 
 - a single `PLATFORM_EVENTS` stream bound to `platform.>` on the internal NATS runtime
 - current publishers emitting canonical `platform.*` subjects with the shared envelope
-- subscribers validating against `platform.findings.observation`, `platform.maintenance.*`, `platform.world_state.refreshed`, and `platform.ledger.event_written` instead of legacy ad hoc subjects
+- subscribers validating against `platform.findings.observation`, `platform.maintenance.*`, `platform.world_state.refreshed`, and `platform.mutation.recorded` instead of legacy ad hoc subjects
 
 ## Verification
 

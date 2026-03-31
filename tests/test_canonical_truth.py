@@ -191,6 +191,38 @@ def test_assemble_stack_updates_repo_version_and_latest_receipts(canonical_repo:
     assert "api_gateway: 2026-03-26-adr-0163-retry-taxonomy-live-apply" in updated
 
 
+def test_assemble_latest_receipts_prefers_newer_repo_version_over_higher_adr(canonical_repo: Path) -> None:
+    items = [
+        canonical_truth.WorkstreamCanonicalTruth(
+            workstream_id="ws-0273-mainline",
+            adr="0273",
+            title="Older integrated edge receipt",
+            status="live_applied",
+            changelog_entry=None,
+            release_bump=None,
+            included_in_repo_version="0.177.77",
+            latest_receipts={"public_edge_publication": "older-edge-receipt"},
+        ),
+        canonical_truth.WorkstreamCanonicalTruth(
+            workstream_id="ws-0268-mainline",
+            adr="0268",
+            title="Newer integrated edge receipt",
+            status="live_applied",
+            changelog_entry=None,
+            release_bump=None,
+            included_in_repo_version="0.177.81",
+            latest_receipts={"public_edge_publication": "newer-edge-receipt"},
+        ),
+    ]
+
+    latest = canonical_truth.assemble_latest_receipts(
+        items,
+        stack_path=canonical_repo / "versions" / "stack.yaml",
+    )
+
+    assert latest["public_edge_publication"] == "newer-edge-receipt"
+
+
 def test_mark_pending_workstreams_released_sets_repo_version(canonical_repo: Path) -> None:
     changed = canonical_truth.mark_pending_workstreams_released("0.10.1")
 
@@ -198,6 +230,39 @@ def test_mark_pending_workstreams_released_sets_repo_version(canonical_repo: Pat
     workstreams_text = (canonical_repo / "workstreams.yaml").read_text(encoding="utf-8")
     assert "included_in_repo_version: 0.10.1" in workstreams_text
     assert "included_in_repo_version: null" not in workstreams_text
+
+
+def test_mark_pending_workstreams_released_inserts_version_without_touching_next_block(canonical_repo: Path) -> None:
+    workstreams_path = canonical_repo / "workstreams.yaml"
+    workstreams_text = workstreams_path.read_text(encoding="utf-8").replace(
+        "      included_in_repo_version: null\n",
+        "",
+        1,
+    )
+    workstreams_text += """
+  - id: adr-0200-following-workstream
+    adr: "0200"
+    title: Following workstream
+    status: merged
+    branch: codex/adr-0200-following-workstream
+    worktree_path: ../following
+    doc: /tmp/repo/docs/workstreams/adr-0200-following-workstream.md
+    canonical_truth:
+      changelog_entry: implemented ADR 0200 following workstream
+      release_bump: patch
+      included_in_repo_version: 9.9.9
+      latest_receipts: {}
+"""
+    write(workstreams_path, workstreams_text)
+
+    changed = canonical_truth.mark_pending_workstreams_released("0.10.1")
+
+    assert changed == ["adr-0174-canonical-truth-assembly"]
+    updated = workstreams_path.read_text(encoding="utf-8")
+    assert "id: adr-0174-canonical-truth-assembly" in updated
+    assert "release_bump: patch\n      included_in_repo_version: 0.10.1\n" in updated
+    assert "id: adr-0200-following-workstream" in updated
+    assert "included_in_repo_version: 9.9.9" in updated
 
 
 def test_invalid_release_bump_is_rejected(canonical_repo: Path) -> None:

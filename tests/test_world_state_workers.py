@@ -214,6 +214,11 @@ def test_collect_openbao_secret_expiry_uses_repo_metadata(worker_repo: Path) -> 
 def test_collect_service_health_uses_http_contract_expected_status(tmp_path: Path) -> None:
     class UnauthorizedButHealthyHandler(BaseHTTPRequestHandler):
         def do_GET(self) -> None:  # noqa: N802
+            if self.path == "/health":
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b"ok")
+                return
             self.send_response(401)
             self.end_headers()
             self.wfile.write(b"unauthorized")
@@ -300,10 +305,13 @@ def test_collect_service_health_uses_http_contract_expected_status(tmp_path: Pat
 
         payload = collect_service_health(tmp_path)
 
-        assert payload["summary"]["statuses"]["ok"] == 1
+        assert payload["summary"]["statuses"]["healthy"] == 1
+        assert payload["summary"]["runtime_states"]["ready"] == 1
         assert payload["services"][0]["service_id"] == "windmill"
         assert payload["services"][0]["probe_source"] == "readiness"
-        assert payload["services"][0]["detail"] == "HTTP 401"
+        assert payload["services"][0]["detail"] == "all supported probe phases passed"
+        assert payload["services"][0]["runtime_state"] == "ready"
+        assert payload["services"][0]["phase_results"]["readiness"]["http_status"] == 401
     finally:
         server.shutdown()
         server.server_close()
@@ -370,10 +378,101 @@ def test_collect_service_health_marks_reset_probe_as_down_instead_of_crashing(tm
         payload = collect_service_health(tmp_path)
 
         assert payload["summary"]["statuses"]["down"] == 1
+        assert payload["summary"]["runtime_states"]["failed"] == 1
         assert payload["services"][0]["service_id"] == "windmill"
         assert payload["services"][0]["probe_source"] == "readiness"
         assert payload["services"][0]["probe_kind"] == "http"
         assert payload["services"][0]["error"]
+        assert payload["services"][0]["runtime_state"] == "failed"
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_collect_service_health_marks_startup_when_startup_probe_has_not_completed(tmp_path: Path) -> None:
+    class StartupHandler(BaseHTTPRequestHandler):
+        def do_GET(self) -> None:  # noqa: N802
+            if self.path == "/healthz":
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b"ok")
+                return
+            self.send_response(503)
+            self.end_headers()
+            self.wfile.write(b"starting")
+
+        def log_message(self, format: str, *args: object) -> None:  # noqa: A003
+            return
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), StartupHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    port = server.server_address[1]
+
+    try:
+        write(
+            tmp_path / "config" / "service-capability-catalog.json",
+            json.dumps(
+                {
+                    "services": [
+                        {
+                            "id": "api_gateway",
+                            "name": "API Gateway",
+                            "lifecycle_status": "active",
+                            "internal_url": f"http://127.0.0.1:{port}/healthz",
+                            "health_probe_id": "api_gateway",
+                            "vm": "docker-runtime-lv3",
+                            "vmid": 120,
+                            "environments": {"production": {"status": "active", "url": f"http://127.0.0.1:{port}/healthz"}},
+                        }
+                    ]
+                },
+                indent=2,
+            )
+            + "\n",
+        )
+        write(
+            tmp_path / "config" / "health-probe-catalog.json",
+            json.dumps(
+                {
+                    "schema_version": "1.1.0",
+                    "services": {
+                        "api_gateway": {
+                            "startup": {
+                                "kind": "http",
+                                "url": f"http://127.0.0.1:{port}/v1/health",
+                                "method": "GET",
+                                "expected_status": [401],
+                                "timeout_seconds": 5,
+                            },
+                            "liveness": {
+                                "kind": "http",
+                                "url": f"http://127.0.0.1:{port}/healthz",
+                                "method": "GET",
+                                "expected_status": [200],
+                                "timeout_seconds": 5,
+                            },
+                            "readiness": {
+                                "kind": "http",
+                                "url": f"http://127.0.0.1:{port}/v1/health",
+                                "method": "GET",
+                                "expected_status": [401],
+                                "timeout_seconds": 5,
+                            },
+                        }
+                    },
+                },
+                indent=2,
+            )
+            + "\n",
+        )
+
+        payload = collect_service_health(tmp_path)
+
+        assert payload["summary"]["statuses"]["starting"] == 1
+        assert payload["summary"]["runtime_states"]["startup"] == 1
+        assert payload["services"][0]["runtime_state"] == "startup"
+        assert payload["services"][0]["probe_source"] == "startup"
     finally:
         server.shutdown()
         server.server_close()

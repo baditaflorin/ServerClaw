@@ -35,7 +35,9 @@
               'docker-build': 'build',
               'monitoring': 'monitoring',
               'postgres': 'data',
-              'backup': 'backup'
+              'postgres-replica': 'data',
+              'backup': 'backup',
+              'coolify': 'paas'
             }[
               (
                 hostvars[groups['proxmox_hosts'][0]].proxmox_guests

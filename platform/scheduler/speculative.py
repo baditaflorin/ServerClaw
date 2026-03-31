@@ -5,7 +5,7 @@ import importlib.util
 import json
 import uuid
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from platform.datetime_compat import UTC, datetime
 from pathlib import Path
 from typing import Any, Callable
 

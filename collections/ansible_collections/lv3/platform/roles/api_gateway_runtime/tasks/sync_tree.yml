@@ -23,6 +23,8 @@
           {{ api_gateway_tree_sync_spec.dest_parent }}/{{ api_gateway_tree_sync_spec.source | basename }}
       ansible.builtin.shell: |
         set -euo pipefail
+        export COPYFILE_DISABLE=1
+        export COPY_EXTENDED_ATTRIBUTES_DISABLE=1
         tar -C "{{ api_gateway_tree_sync_spec.archive_root }}" -czf "{{ api_gateway_tree_archive_local.path }}" "{{ api_gateway_tree_sync_spec.source }}"
       args:
         executable: /bin/bash
@@ -32,10 +34,28 @@
       tags:
         - mutation
 
+    - name: Derive a per-run guest archive path for {{ api_gateway_tree_sync_spec.name }}
+      ansible.builtin.set_fact:
+        api_gateway_tree_remote_archive_path: >-
+          {{
+            (api_gateway_tree_sync_spec.remote_archive | regex_replace('\\.tar\\.gz$', ''))
+            ~ '-'
+            ~ (api_gateway_tree_archive_local.path | basename)
+          }}
+
     - name: Remove the previously staged guest copy for {{ api_gateway_tree_sync_spec.name }}
-      ansible.builtin.file:
-        path: "{{ api_gateway_tree_sync_spec.dest_parent }}/{{ api_gateway_tree_sync_spec.source | basename }}"
-        state: absent
+      ansible.builtin.shell: |
+        set -euo pipefail
+        destination="{{ api_gateway_tree_sync_spec.dest_parent }}/{{ api_gateway_tree_sync_spec.source | basename }}"
+        apple_double="{{ api_gateway_tree_sync_spec.dest_parent }}/._{{ api_gateway_tree_sync_spec.source | basename }}"
+        if [ -e "$destination" ] || [ -e "$apple_double" ]; then
+          rm -rf "$destination" "$apple_double"
+          echo changed
+        fi
+      args:
+        executable: /bin/bash
+      register: api_gateway_tree_remove_destination
+      changed_when: "'changed' in api_gateway_tree_remove_destination.stdout"
       when: not (api_gateway_tree_sync_spec.preserve_destination_root | default(false))
 
     - name: Clear the previously staged guest contents for {{ api_gateway_tree_sync_spec.name }}
@@ -55,7 +75,7 @@
     - name: Copy the staged archive to the guest for {{ api_gateway_tree_sync_spec.name }}
       ansible.builtin.copy:
         src: "{{ api_gateway_tree_archive_local.path }}"
-        dest: "{{ api_gateway_tree_sync_spec.remote_archive }}"
+        dest: "{{ api_gateway_tree_remote_archive_path }}"
         owner: root
         group: root
         mode: "0600"
@@ -63,14 +83,16 @@
     - name: Expand the staged archive on the guest for {{ api_gateway_tree_sync_spec.name }}
       ansible.builtin.shell: |
         set -euo pipefail
-        tar -xzf "{{ api_gateway_tree_sync_spec.remote_archive }}" -C "{{ api_gateway_tree_sync_spec.dest_parent }}"
+        tar --no-same-owner --no-same-permissions \
+          -xzf "{{ api_gateway_tree_remote_archive_path }}" \
+          -C "{{ api_gateway_tree_sync_spec.dest_parent }}"
       args:
         executable: /bin/bash
       changed_when: true
   always:
     - name: Remove the staged archive from the guest for {{ api_gateway_tree_sync_spec.name }}
       ansible.builtin.file:
-        path: "{{ api_gateway_tree_sync_spec.remote_archive }}"
+        path: "{{ api_gateway_tree_remote_archive_path | default(api_gateway_tree_sync_spec.remote_archive) }}"
         state: absent
 
     - name: Remove the local staging archive for the {{ api_gateway_tree_sync_spec.name }}

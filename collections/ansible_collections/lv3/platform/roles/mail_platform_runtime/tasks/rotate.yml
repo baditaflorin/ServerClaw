@@ -1,3 +1,9 @@
+# Purpose: Rotate repo-managed mail platform secrets and re-render the affected runtime artifacts.
+# Use case: Included by governed secret-rotation flows when a mail platform core or profile secret changes.
+# Inputs: Secret rotation contract facts, current mail-platform secret files, notification profiles, and local artifact paths.
+# Outputs: The selected mail platform secret and derived runtime artifacts are refreshed to the requested value.
+# Idempotency: Partially idempotent because each run intentionally applies a new secret value when rotation is requested.
+# Dependencies: ADR 0165, ADR 0065, and ADR 0171.
 ---
 - name: Assert the mail platform rotation request is valid
   ansible.builtin.assert:
@@ -302,25 +308,92 @@
     state: restarted
   when: mail_platform_rotation_docker_nat_chain.rc != 0
 
-- name: Force-recreate the mail platform runtime with rotated secret material after Docker networking recovery
+- name: Recheck the Docker nat chain before mail-platform rotation
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: mail_platform_rotation_docker_nat_chain_recheck
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: mail_platform_rotation_docker_nat_chain_recheck.rc == 0
+  when: mail_platform_rotation_docker_nat_chain.rc != 0
+
+- name: Wait for the Docker daemon to answer after networking recovery for mail-platform rotation
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: mail_platform_rotation_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: mail_platform_rotation_docker_info.rc == 0
+  when: mail_platform_rotation_docker_nat_chain.rc != 0
+
+- name: Assert Docker nat chain is present before mail-platform rotation
+  ansible.builtin.assert:
+    that:
+      - mail_platform_rotation_docker_nat_chain.rc == 0 or mail_platform_rotation_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; mail-platform rotation published ports will fail."
+
+- name: Remove stale mail-platform compose resources before rotation force recreate
   ansible.builtin.command:
     argv:
       - docker
       - compose
       - --file
       - "{{ mail_platform_compose_file }}"
-      - up
-      - -d
-      - --force-recreate
+      - rm
+      - --stop
+      - --force
       - stalwart
       - mail-gateway
   args:
     chdir: "{{ mail_platform_site_dir }}"
-  register: mail_platform_rotation_up
+  register: mail_platform_rotation_down
   changed_when: >-
-    'Recreating' in mail_platform_rotation_up.stdout
+    'Stopping' in mail_platform_rotation_down.stdout
+    or 'Removing' in mail_platform_rotation_down.stdout
+    or 'Removed' in mail_platform_rotation_down.stdout
+  failed_when: false
+  when: mail_platform_rotation_docker_nat_chain.rc != 0
+
+- name: Force-recreate the mail platform runtime with rotated secret material after Docker networking recovery
+  ansible.builtin.shell: |
+    docker compose --file "{{ mail_platform_compose_file }}" rm --stop --force stalwart mail-gateway || true
+    docker compose --file "{{ mail_platform_compose_file }}" up -d --force-recreate stalwart mail-gateway
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_rotation_up
+  failed_when: false
+  changed_when: >-
+    'Stopping' in mail_platform_rotation_up.stdout
+    or 'Removing' in mail_platform_rotation_up.stdout
+    or 'Removed' in mail_platform_rotation_up.stdout
+    or 'Recreating' in mail_platform_rotation_up.stdout
     or 'Creating' in mail_platform_rotation_up.stdout
     or 'Starting' in mail_platform_rotation_up.stdout
+  retries: 3
+  delay: 5
+  until: mail_platform_rotation_up.rc == 0
+  when: mail_platform_rotation_docker_nat_chain.rc != 0
+
+- name: Assert the mail platform rotation force-recreate succeeded
+  ansible.builtin.assert:
+    that:
+      - mail_platform_rotation_up.rc == 0
+    fail_msg: >-
+      {{
+        mail_platform_rotation_up.stderr
+        | default(mail_platform_rotation_up.msg | default('mail-platform rotation compose force-recreate failed'))
+      }}
   when: mail_platform_rotation_docker_nat_chain.rc != 0
 
 - name: Restart the mail platform runtime with rotated secret material
@@ -338,11 +411,97 @@
   args:
     chdir: "{{ mail_platform_site_dir }}"
   register: mail_platform_rotation_up
+  failed_when: false
   changed_when: >-
     'Recreating' in mail_platform_rotation_up.stdout
     or 'Creating' in mail_platform_rotation_up.stdout
     or 'Starting' in mail_platform_rotation_up.stdout
+  retries: 3
+  delay: 5
+  until: mail_platform_rotation_up.rc == 0
   when: mail_platform_rotation_docker_nat_chain.rc == 0
+
+- name: Assert the mail platform rotation restart succeeded
+  ansible.builtin.assert:
+    that:
+      - mail_platform_rotation_up.rc == 0
+    fail_msg: >-
+      {{
+        mail_platform_rotation_up.stderr
+        | default(mail_platform_rotation_up.msg | default('mail-platform rotation compose up failed'))
+      }}
+  when: mail_platform_rotation_docker_nat_chain.rc == 0
+
+- name: Flag stale mail platform compose-network failures during rotation
+  ansible.builtin.set_fact:
+    mail_platform_rotation_docker_network_missing: >-
+      {{
+        (mail_platform_rotation_up.rc | default(0)) != 0
+        and 'failed to create endpoint' in (mail_platform_rotation_up.stderr | default(''))
+        and 'does not exist' in (mail_platform_rotation_up.stderr | default(''))
+      }}
+
+- name: Surface unexpected mail platform rotation failures
+  ansible.builtin.fail:
+    msg: >-
+      {{
+        mail_platform_rotation_up.stderr
+        | default(mail_platform_rotation_up.msg | default('mail-platform rotation compose up failed'))
+      }}
+  when:
+    - (mail_platform_rotation_up.rc | default(0)) != 0
+    - not mail_platform_rotation_docker_network_missing
+
+- name: Reset stale mail platform compose resources before retrying rotation
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mail_platform_compose_file }}"
+      - down
+      - --remove-orphans
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_rotation_down
+  changed_when: >-
+    'Stopping' in (mail_platform_rotation_down.stdout | default(''))
+    or 'Removing' in (mail_platform_rotation_down.stdout | default(''))
+    or 'Removing' in (mail_platform_rotation_down.stderr | default(''))
+  failed_when: false
+  when: mail_platform_rotation_docker_network_missing
+
+- name: Remove the stale mail-platform compose network before retrying rotation
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_networks="$(docker network ls -q --filter name=^{{ mail_platform_docker_network_name }}$)"
+    if [ -n "$stale_networks" ]; then
+      docker network rm $stale_networks
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: mail_platform_rotation_network_cleanup
+  changed_when: "'changed' in mail_platform_rotation_network_cleanup.stdout"
+  when: mail_platform_rotation_docker_network_missing
+
+- name: Retry mail platform rotation after compose-network recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mail_platform_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - stalwart
+      - mail-gateway
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_rotation_up
+  changed_when: true
+  when: mail_platform_rotation_docker_network_missing
 
 - name: Wait for the Stalwart management API after rotation
   ansible.builtin.wait_for:

@@ -184,6 +184,15 @@ mail_platform_brevo_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/pr
 mail_platform_brevo_sender_email: "{{ mail_platform_mailbox_address }}"
 mail_platform_brevo_sender_name: Florin Mail Bridge
 mail_platform_reply_to_email: "{{ mail_platform_mailbox_address }}"
+smtp_host: lv3-mail-stalwart
+smtp_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.mail_platform_internal_submission_port | default(1587) }}"
+smtp_starttls: false
+smtp_auth_enabled: true
+smtp_username: "{{ mail_platform_mailbox_login }}"
+smtp_password_local_file: "{{ mail_platform_mailbox_password_local_file }}"
+smtp_docker_network_name: mail-platform_default
+smtp_from_address: "{{ mail_platform_mailbox_address }}"
+smtp_reply_to_address: "{{ mail_platform_reply_to_email }}"
 openbao_postgres_admin_role: openbao_rotator
 openbao_postgres_database: postgres
 openbao_tls_enabled: true
@@ -221,6 +230,32 @@ open_webui_enable_web_search: true
 open_webui_searxng_query_url: "http://host.docker.internal:8881/search?q=<query>&format=json"
 open_webui_default_models: "{{ ollama_default_model }}"
 open_webui_default_pinned_models: "{{ ollama_default_model }}"
+serverclaw_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
+serverclaw_admin_email: ops@lv3.org
+serverclaw_admin_name: Florin Badita
+serverclaw_public_url: https://chat.lv3.org
+serverclaw_webui_name: ServerClaw
+serverclaw_enable_oidc: true
+serverclaw_enable_login_form: true
+serverclaw_enable_password_auth: true
+serverclaw_oidc_client_id: serverclaw
+serverclaw_oidc_provider_url: https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+serverclaw_enable_ollama_api: true
+serverclaw_ollama_base_url: http://10.10.10.20:11434
+serverclaw_enable_web_search: true
+serverclaw_searxng_query_url: http://10.10.10.20:8881/search?q=<query>&format=json
+serverclaw_default_models: "{{ ollama_default_model }}"
+serverclaw_default_pinned_models: "{{ ollama_default_model }}"
+serverclaw_default_user_role: user
+serverclaw_workspace_knowledge_access: true
+serverclaw_workspace_prompts_access: true
+serverclaw_workspace_tools_access: false
+serverclaw_workspace_skills_access: true
+serverclaw_cors_allow_origin: "{{ serverclaw_public_url }}"
+serverclaw_session_cookie_same_site: lax
+serverclaw_auth_cookie_same_site: lax
+serverclaw_session_cookie_secure: true
+serverclaw_auth_cookie_secure: true
 platform_context_host_proxy_port: 8010
 platform_context_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ platform_context_host_proxy_port }}"
 platform_context_embedding_backend: ollama

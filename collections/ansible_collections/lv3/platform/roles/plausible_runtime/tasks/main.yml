@@ -1,0 +1,319 @@
+---
+# Purpose: Converge the Plausible Analytics runtime, OpenBao-backed secrets, and repo-managed bootstrap contract.
+# Use case: Run during Plausible deploys, updates, and recovery when analytics.lv3.org must match repo truth.
+# Inputs: Runtime paths, image pins, SMTP credentials, registered sites, and OpenBao integration settings.
+# Outputs: A running Plausible CE stack on docker-runtime-lv3 plus controller-local mirrors of the generated runtime secrets.
+# Idempotency: Partially idempotent because generated secrets are created once and the bootstrap contract may intentionally reconcile live state.
+# Dependencies: ADR 0165, ADR 0077, ADR 0086, and ADR 0283.
+- name: Validate Plausible runtime inputs
+  ansible.builtin.assert:
+    that:
+      - plausible_site_dir | length > 0
+      - plausible_compose_file | length > 0
+      - plausible_clickhouse_config_dir | length > 0
+      - plausible_secret_dir | length > 0
+      - plausible_env_file | length > 0
+      - plausible_container_name | length > 0
+      - plausible_db_container_name | length > 0
+      - plausible_clickhouse_container_name | length > 0
+      - plausible_internal_port | int > 0
+      - plausible_runtime_image | length > 0
+      - plausible_postgres_image | length > 0
+      - plausible_clickhouse_image | length > 0
+      - plausible_public_base_url | length > 0
+      - plausible_internal_base_url | length > 0
+      - plausible_database_password_local_file | length > 0
+      - plausible_secret_key_base_local_file | length > 0
+      - plausible_bootstrap_user_password_local_file | length > 0
+      - plausible_mailbox_password_local_file | length > 0
+      - plausible_site_registrations | length > 0
+    fail_msg: >-
+      plausible_runtime requires runtime paths, pinned image refs, a mirrored mail-platform password,
+      and at least one repo-managed Plausible site registration.
+
+- name: Check whether the Plausible SMTP mailbox password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ plausible_mailbox_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: plausible_mailbox_password_local
+
+- name: Fail if the Plausible SMTP mailbox password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ plausible_mailbox_password_local_file }} is missing on the control machine.
+      Converge the mail-platform runtime first so Plausible can deliver notifications.
+  when: not plausible_mailbox_password_local.stat.exists
+
+- name: Ensure the Plausible runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the local Plausible artifact directory exists
+  ansible.builtin.file:
+    path: "{{ plausible_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the Plausible runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ plausible_site_dir }}"
+      mode: "0755"
+    - path: "{{ plausible_clickhouse_config_dir }}"
+      mode: "0755"
+    - path: "{{ plausible_secret_dir }}"
+      mode: "0700"
+
+- name: Generate the Plausible runtime secrets
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      {{ item.command }} > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - path: "{{ plausible_database_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\n'"
+    - path: "{{ plausible_secret_key_base_remote_file }}"
+      command: "openssl rand -hex 64"
+    - path: "{{ plausible_bootstrap_user_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\n'"
+  register: plausible_secret_generation
+  changed_when: "'changed' in plausible_secret_generation.stdout"
+  no_log: true
+
+- name: Read the Plausible runtime secrets
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  register: plausible_secret_reads
+  loop:
+    - "{{ plausible_database_password_remote_file }}"
+    - "{{ plausible_secret_key_base_remote_file }}"
+    - "{{ plausible_bootstrap_user_password_remote_file }}"
+  no_log: true
+
+- name: Record the Plausible runtime secrets
+  ansible.builtin.set_fact:
+    plausible_database_password: "{{ plausible_secret_reads.results[0].content | b64decode | trim }}"
+    plausible_secret_key_base: "{{ plausible_secret_reads.results[1].content | b64decode | trim }}"
+    plausible_bootstrap_user_password: "{{ plausible_secret_reads.results[2].content | b64decode | trim }}"
+    plausible_mailbox_password: "{{ lookup('ansible.builtin.file', plausible_mailbox_password_local_file) | trim }}"
+    plausible_runtime_secret_payload:
+      DATABASE_URL: >-
+        postgres://{{ plausible_database_user }}:{{
+          (plausible_secret_reads.results[0].content | b64decode | trim) | urlencode
+        }}@plausible-db:5432/{{ plausible_database_name }}
+      SECRET_KEY_BASE: "{{ plausible_secret_reads.results[1].content | b64decode | trim }}"
+      SMTP_USER_PWD: "{{ lookup('ansible.builtin.file', plausible_mailbox_password_local_file) | trim }}"
+  no_log: true
+
+- name: Mirror the Plausible runtime secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  loop:
+    - dest: "{{ plausible_database_password_local_file }}"
+      content: "{{ plausible_database_password }}"
+    - dest: "{{ plausible_secret_key_base_local_file }}"
+      content: "{{ plausible_secret_key_base }}"
+    - dest: "{{ plausible_bootstrap_user_password_local_file }}"
+      content: "{{ plausible_bootstrap_user_password }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Plausible
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: plausible
+    common_openbao_compose_env_agent_dir: "{{ plausible_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ plausible_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ plausible_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ plausible_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ plausible_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ plausible_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ plausible_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ plausible_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ plausible_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ plausible_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ plausible_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: plausible.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ plausible_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ plausible_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ plausible_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ plausible_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Plausible environment file
+  ansible.builtin.template:
+    src: plausible.env.j2
+    dest: "{{ plausible_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the Plausible ClickHouse config bundle
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ plausible_clickhouse_config_dir }}/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - src: clickhouse/logs.xml.j2
+      dest: logs.xml
+    - src: clickhouse/ipv4-only.xml.j2
+      dest: ipv4-only.xml
+    - src: clickhouse/low-resources.xml.j2
+      dest: low-resources.xml
+    - src: clickhouse/default-profile-low-resources-overrides.xml.j2
+      dest: default-profile-low-resources-overrides.xml
+
+- name: Render the Plausible compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ plausible_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure Docker bridge networking chains are ready before Plausible startup
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: true
+
+- name: Pull the Plausible images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ plausible_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ plausible_site_dir }}"
+  register: plausible_pull
+  changed_when: >-
+    'Pulling' in plausible_pull.stdout
+    or 'Downloaded newer image' in plausible_pull.stdout
+    or 'Pull complete' in plausible_pull.stdout
+
+- name: Start the Plausible stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ plausible_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ plausible_site_dir }}"
+  register: plausible_up
+  changed_when: >-
+    'Creating' in plausible_up.stdout
+    or 'Recreating' in plausible_up.stdout
+    or 'Starting' in plausible_up.stdout
+
+- name: Check whether Plausible publishes the expected host port
+  ansible.builtin.command:
+    argv:
+      - docker
+      - port
+      - "{{ plausible_container_name }}"
+      - 8000/tcp
+  register: plausible_port_binding_check
+  changed_when: false
+  failed_when: false
+
+- name: Force-recreate Plausible when the host port binding is missing
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ plausible_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ plausible_site_dir }}"
+  register: plausible_force_recreate
+  changed_when: true
+  when: plausible_port_binding_check.stdout | trim == ""
+
+- name: Wait for Plausible to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ plausible_internal_port }}"
+    delay: 0
+    timeout: 300
+
+- name: Wait for the Plausible health endpoint
+  ansible.builtin.uri:
+    url: "{{ plausible_internal_base_url }}/api/health"
+    method: GET
+    status_code:
+      - 200
+    return_content: false
+    timeout: 30
+  register: plausible_health_ready
+  retries: 36
+  delay: 5
+  until: plausible_health_ready.status == 200
+  changed_when: false
+
+- name: Reconcile the Plausible bootstrap user and site registrations
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ plausible_container_name }}"
+      - bin/plausible
+      - rpc
+      - "{{ lookup('ansible.builtin.template', 'bootstrap.eval.j2') | trim }}"
+  register: plausible_bootstrap
+  changed_when: >-
+    (
+      (plausible_bootstrap.stdout | trim | from_json).changed
+      | default(false)
+    )
+  no_log: true
+
+- name: Verify the Plausible runtime
+  ansible.builtin.import_tasks: verify.yml

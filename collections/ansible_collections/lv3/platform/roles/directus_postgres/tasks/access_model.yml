@@ -1,0 +1,78 @@
+# Purpose: Seed the Directus access model for browser operators and the durable service-registry API token.
+# Use case: Run after the Directus runtime has created its system tables and the governed collection schema exists.
+# Inputs: Directus database name, deterministic role/policy IDs, collection name, and the controller-local service token.
+# Outputs: Directus role, policy, permission, access, and API-token user rows exist in PostgreSQL with deterministic identities.
+# Idempotency: Partially idempotent because it renders and reapplies the SQL seed file to reconcile the access model in place.
+# Dependencies: ADR 0165, ADR 0042, ADR 0063, and ADR 0289.
+---
+- name: Validate Directus access-model inputs
+  ansible.builtin.assert:
+    that:
+      - directus_database_name | length > 0
+      - directus_bootstrap_collection_name | length > 0
+      - directus_service_registry_token_local_file | length > 0
+    fail_msg: "directus_postgres access_model requires the database name, collection name, and service token path."
+
+- name: Check whether the Directus service token exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ directus_service_registry_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: directus_service_registry_token_access_local
+
+- name: Fail if the Directus service token is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ directus_service_registry_token_local_file }} is missing on the control machine.
+      Converge the directus_postgres main task first so the durable API token exists before seeding permissions.
+  when: not directus_service_registry_token_access_local.stat.exists
+
+- name: Wait for the Directus system tables to exist
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ directus_database_name }}"
+      - -Atqc
+      - >-
+        SELECT 1
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+          AND table_name = 'directus_users'
+  register: directus_system_table_check
+  changed_when: false
+  retries: 24
+  delay: 5
+  until: directus_system_table_check.stdout | trim == "1"
+
+- name: Render the Directus access-model SQL seed
+  ansible.builtin.template:
+    src: access_model.sql.j2
+    dest: /tmp/directus-access-model.sql
+    owner: postgres
+    group: postgres
+    mode: "0600"
+  no_log: true
+
+- name: Apply the Directus access-model SQL seed
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -d
+      - "{{ directus_database_name }}"
+      - -f
+      - /tmp/directus-access-model.sql
+  register: directus_access_model_apply
+  changed_when: false
+  no_log: true
+
+- name: Remove the rendered Directus access-model SQL seed
+  ansible.builtin.file:
+    path: /tmp/directus-access-model.sql
+    state: absent

@@ -2,8 +2,29 @@ schema_version: 1.0.0
 
 streams:
   - name: PLATFORM_EVENTS
+    description: Canonical platform control-plane and mutation events.
     subjects:
       - platform.>
+    retention: limits
+    max_age: 90d
+    storage: file
+    replicas: 1
+    discard: old
+    duplicate_window: 2m
+  - name: RAG_DOCUMENT
+    description: RAG document staging and extraction lifecycle events.
+    subjects:
+      - rag.document.>
+    retention: limits
+    max_age: 30d
+    storage: file
+    replicas: 1
+    discard: old
+    duplicate_window: 2m
+  - name: SECRET_ROTATION
+    description: Secret rotation lifecycle events for downstream reload consumers.
+    subjects:
+      - secret.rotation.>
     retention: limits
     max_age: 90d
     storage: file
