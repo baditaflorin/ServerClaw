@@ -1,5 +1,7 @@
 ---
-- name: Submit OpenBao recovery key {{ common_openbao_unseal_key_index + 1 }} during {{ common_openbao_unseal_context }}
+- name: "Submit OpenBao recovery key {{ common_openbao_unseal_step_label }}"
+  vars:
+    common_openbao_unseal_step_label: "{{ common_openbao_unseal_context }} #{{ common_openbao_unseal_key_index + 1 }}"
   ansible.builtin.uri:
     url: "{{ common_openbao_unseal_api_url }}/v1/sys/unseal"
     method: POST
@@ -15,7 +17,9 @@
   when: not common_openbao_unseal_completed | bool
   no_log: true
 
-- name: Record OpenBao unseal progress after recovery key {{ common_openbao_unseal_key_index + 1 }} during {{ common_openbao_unseal_context }}
+- name: "Record OpenBao unseal progress {{ common_openbao_unseal_step_label }}"
+  vars:
+    common_openbao_unseal_step_label: "{{ common_openbao_unseal_context }} #{{ common_openbao_unseal_key_index + 1 }}"
   ansible.builtin.set_fact:
     common_openbao_unseal_completed: "{{ not (common_openbao_unseal_step.json.sealed | default(true) | bool) }}"
   when: not common_openbao_unseal_completed | bool
