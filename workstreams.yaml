@@ -18428,7 +18428,7 @@ workstreams:
   - id: ws-0288-crawl4ai-main-merge
     adr: "0288"
     title: Integrate ADR 0288 Crawl4AI exact-main replay onto current origin/main
-    status: in_progress
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0288-crawl4ai-main-merge-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-crawl4ai-main-merge-r2
@@ -18569,7 +18569,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0288 by carrying the private Crawl4AI runtime, compose-managed bridge isolation, exact-main live-apply evidence, and automation-path compatibility repairs onto main on top of the already-merged Piper baseline
       release_bump: patch
-      included_in_repo_version: 0.177.114
+      included_in_repo_version: 0.177.115
       latest_receipts:
         crawl4ai: 2026-03-31-adr-0288-crawl4ai-mainline-live-apply
   - id: ws-0289-live-apply

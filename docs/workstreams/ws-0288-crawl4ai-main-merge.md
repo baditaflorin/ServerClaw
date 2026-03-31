@@ -3,7 +3,7 @@
 - ADR: [ADR 0288](../adr/0288-crawl4ai-as-the-llm-optimised-web-content-crawler.md)
 - Title: integrate the private Crawl4AI runtime onto the latest `origin/main` without disturbing the already-merged Flagsmith ws-0288 records
 - Status: ready_for_merge
-- Included In Repo Version: 0.177.114
+- Included In Repo Version: pending
 - Canonical Mainline Receipt: `2026-03-31-adr-0288-crawl4ai-mainline-live-apply`
 - Live Applied In Platform Version: 0.130.75
 - Branch: `codex/ws-0288-crawl4ai-main-merge-r2`
