@@ -40,6 +40,7 @@
       - 303
       - 307
       - 308
+      - 400
   register: grist_publish_auth_redirect
   changed_when: false
 
@@ -58,10 +59,10 @@
         )
         or
         (
-          (grist_publish_auth_redirect.status | int) == 200
+          (grist_publish_auth_redirect.status | int) in [200, 400]
           and 'Loading... - Grist' in (grist_publish_auth_redirect.content | default(''))
           and '"supportAnon":false' in (grist_publish_auth_redirect.content | default(''))
         )
     fail_msg: >-
       Grist is reachable publicly, but the unauthenticated document route did not
-      redirect into the expected login-controlled surface.
+      reach the expected login-controlled surface.

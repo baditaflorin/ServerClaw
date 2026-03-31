@@ -126,10 +126,11 @@ def test_publish_tasks_wait_for_public_status_and_verify_login_gating() -> None:
     assert redirect_task["ansible.builtin.uri"]["follow_redirects"] == "none"
     assert redirect_task["ansible.builtin.uri"]["return_content"] is True
     assert 200 in redirect_task["ansible.builtin.uri"]["status_code"]
+    assert 400 in redirect_task["ansible.builtin.uri"]["status_code"]
     assert 302 in redirect_task["ansible.builtin.uri"]["status_code"]
     login_gate_expression = assert_task["ansible.builtin.assert"]["that"][0]
     assert "grist_publish_auth_redirect.location is defined" in login_gate_expression
-    assert "(grist_publish_auth_redirect.status | int) == 200" in login_gate_expression
+    assert "(grist_publish_auth_redirect.status | int) in [200, 400]" in login_gate_expression
     assert "'Loading... - Grist'" in login_gate_expression
     assert '\'"supportAnon":false\'' in login_gate_expression
 

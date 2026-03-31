@@ -98,7 +98,9 @@ Runtime verification:
 
 ```bash
 curl -fsS https://grist.lv3.org/status
-curl -sSI https://grist.lv3.org/o/docs/
+curl -sS -D /tmp/grist-o-docs.headers https://grist.lv3.org/o/docs/ -o /tmp/grist-o-docs.body
+sed -n '1,20p' /tmp/grist-o-docs.headers
+rg '"supportAnon":false' /tmp/grist-o-docs.body
 python3 - <<'PY'
 import urllib.request
 with urllib.request.urlopen("https://grist.lv3.org/status", timeout=10) as resp:
@@ -108,8 +110,10 @@ PY
 
 The public `/status` endpoint should return `200` and the body
 `Grist server(home,docs,static) is alive.` while unauthenticated requests to
-`https://grist.lv3.org/o/docs/` should still redirect into the login-controlled
-surface.
+`https://grist.lv3.org/o/docs/` should render the Grist auth shell with
+`"supportAnon":false`. The current public edge returns that auth-controlled
+shell as `HTTP 400` rather than a redirect, so verify the body markers instead
+of assuming `302`.
 
 ## Operating notes
 
