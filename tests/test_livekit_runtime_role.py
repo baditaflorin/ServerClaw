@@ -16,7 +16,7 @@ CTMPL_TEMPLATE = REPO_ROOT / "roles" / "livekit_runtime" / "templates" / "liveki
 def test_defaults_define_livekit_runtime_contract() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text())
 
-    assert defaults["livekit_service_topology"] == "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('livekit') }}"
+    assert defaults["livekit_service_topology"] == "{{ platform_service_topology | service_topology_get('livekit') }}"
     assert defaults["livekit_image"] == "{{ container_image_catalog.images.livekit_runtime.ref }}"
     assert defaults["livekit_compose_file"] == "{{ livekit_site_dir }}/docker-compose.yml"
     assert defaults["livekit_config_file"] == "{{ livekit_site_dir }}/livekit.yaml"
@@ -27,7 +27,7 @@ def test_defaults_define_livekit_runtime_contract() -> None:
     assert defaults["livekit_api_key_local_file"] == "{{ livekit_local_artifact_dir }}/api-key.txt"
     assert defaults["livekit_api_secret_local_file"] == "{{ livekit_local_artifact_dir }}/api-secret.txt"
     assert defaults["livekit_helper_script_local_file"] == "{{ livekit_repo_root }}/scripts/livekit_tool.py"
-    assert defaults["livekit_signal_port"] == "{{ platform_service_topology | platform_service_port('livekit', 'internal') }}"
+    assert defaults["livekit_signal_port"] == "{{ livekit_service_topology.ports.internal }}"
     assert defaults["livekit_media_tcp_port"] == "{{ livekit_service_topology.ports.media_tcp }}"
     assert defaults["livekit_media_udp_port"] == "{{ livekit_service_topology.ports.media_udp }}"
     assert defaults["livekit_public_url"] == "https://{{ livekit_public_hostname }}"

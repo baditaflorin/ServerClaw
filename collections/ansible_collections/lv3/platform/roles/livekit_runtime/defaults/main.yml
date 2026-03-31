@@ -25,7 +25,7 @@
 #
 # Author: LV3 Platform
 # Last Updated: 2026-03-30
-livekit_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('livekit') }}"
+livekit_service_topology: "{{ platform_service_topology | service_topology_get('livekit') }}"
 livekit_image: "{{ container_image_catalog.images.livekit_runtime.ref }}"
 livekit_container_name: lv3-livekit
 livekit_site_dir: /opt/livekit
@@ -56,7 +56,7 @@ livekit_api_key_local_file: "{{ livekit_local_artifact_dir }}/api-key.txt"
 livekit_api_secret_local_file: "{{ livekit_local_artifact_dir }}/api-secret.txt"
 livekit_helper_script_local_file: "{{ livekit_repo_root }}/scripts/livekit_tool.py"
 livekit_remote_helper_script: "{{ livekit_site_dir }}/livekit_tool.py"
-livekit_signal_port: "{{ platform_service_topology | platform_service_port('livekit', 'internal') }}"
+livekit_signal_port: "{{ livekit_service_topology.ports.internal }}"
 livekit_media_tcp_port: "{{ livekit_service_topology.ports.media_tcp }}"
 livekit_media_udp_port: "{{ livekit_service_topology.ports.media_udp }}"
 livekit_public_hostname: "{{ livekit_service_topology.public_hostname }}"
