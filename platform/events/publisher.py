@@ -17,7 +17,6 @@ NATS_PUBLISH_POLICY = policy_for_surface("nats_publish")
 async def connect_nats(nats_url: str, credentials: dict[str, str] | None = None) -> Any:
     from nats.aio.client import Client as NATS
 
-    nc = NATS()
     kwargs: dict[str, Any] = {
         "servers": [nats_url],
         "connect_timeout": NATS_CONNECT_TIMEOUT_SECONDS,
@@ -27,12 +26,17 @@ async def connect_nats(nats_url: str, credentials: dict[str, str] | None = None)
     }
     if credentials:
         kwargs.update(credentials)
-    await async_with_retry(
-        lambda: nc.connect(**kwargs),
+
+    async def connect_once() -> Any:
+        nc = NATS()
+        await nc.connect(**kwargs)
+        return nc
+
+    return await async_with_retry(
+        connect_once,
         policy=NATS_PUBLISH_POLICY,
         error_context=f"nats connect {nats_url}",
     )
-    return nc
 
 
 async def publish_nats_events_async(
