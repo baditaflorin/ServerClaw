@@ -48,6 +48,15 @@
       "adr": "0280"
     },
     {
+      "id": "crawl4ai",
+      "service": "crawl4ai",
+      "name": "Crawl4AI",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0288"
+    },
+    {
       "id": "changelog_portal",
       "service": "changelog_portal",
       "name": "Changelog Portal",
@@ -639,6 +648,12 @@
       "to": "ntfy",
       "type": "soft",
       "description": "Security-advisory watches use the private ntfy gateway for high-priority push notifications."
+    },
+    {
+      "from": "crawl4ai",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Crawl4AI runtime and its bounded headless-browser worker pool are hosted on docker-runtime-lv3."
     },
     {
       "from": "changelog_portal",

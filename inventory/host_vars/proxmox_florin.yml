@@ -66,6 +66,7 @@ platform_port_assignments:
   lago_front_port: 8100
   dify_port: 8094
   changedetection_port: 5000
+  crawl4ai_port: 11235
   browser_runner_port: 8096
   outline_port: 3006
   directus_port: 8055
@@ -600,10 +601,11 @@ network_policy:
             - 3007
             - 3008
             - 8055
+            - 11235
             - 8881
             - 9998
             - 11434
-          description: Private guest-to-guest document rendering, extraction, OCR, agent API, and governed data API traffic
+          description: Private guest-to-guest document rendering, extraction, OCR, crawl extraction, agent API, and governed data API traffic
         - source: all_guests
           protocol: tcp
           ports:
@@ -632,10 +634,11 @@ network_policy:
             - 3008
             - 5000
             - 8055
+            - 11235
             - 8881
             - 9998
             - 11434
-          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Directus, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Directus, Crawl4AI, Ollama, and SearXNG APIs
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
@@ -648,10 +651,11 @@ network_policy:
             - 3008
             - 5000
             - 8055
+            - 11235
             - 8881
             - 9998
             - 11434
-          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Directus, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Directus, Crawl4AI, Ollama, and SearXNG APIs
         - source: docker-build-lv3
           protocol: tcp
           ports:
@@ -1985,6 +1989,14 @@ lv3_service_topology:
       service_telemetry: true
   changedetection:
     service_name: changedetection
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+  crawl4ai:
+    service_name: crawl4ai
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
     exposure_model: private-only

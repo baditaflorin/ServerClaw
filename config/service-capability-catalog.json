@@ -171,6 +171,37 @@
       }
     },
     {
+      "id": "crawl4ai",
+      "name": "Crawl4AI",
+      "description": "Private LLM-optimised web content crawler for cleaned Markdown extraction and bounded browser-assisted fetches.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:11235",
+      "exposure": "private-only",
+      "health_probe_id": "crawl4ai",
+      "image_catalog_ids": [
+        "crawl4ai_runtime"
+      ],
+      "adr": "0288",
+      "runbook": "docs/runbooks/configure-crawl4ai.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=crawl4ai-availability",
+      "tags": [
+        "crawl",
+        "markdown",
+        "automation",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:11235",
+          "notes": "The runtime stays private to docker-runtime-lv3 and the guest network; there is no public DNS record and no shared API gateway route for Crawl4AI."
+        }
+      }
+    },
+    {
       "id": "changelog_portal",
       "name": "Deployment History Portal",
       "description": "Generated portal for browsing live applies, promotions, and mutation audit history.",

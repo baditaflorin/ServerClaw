@@ -1,0 +1,78 @@
+---
+# Purpose: Verify the local Crawl4AI health, monitoring, playground, and markdown crawl contracts.
+# Inputs: Running Crawl4AI container plus the configured local runtime URL and verification target URL.
+# Outputs: Read-only health, monitor, and markdown probe results proving the private crawler is operational.
+# Idempotency: Fully idempotent; these are read-only verification steps.
+# Dependencies: ADR 0288 and ADR 0165; requires the crawl4ai_runtime compose stack to be running.
+- name: Verify the Crawl4AI health endpoint responds locally
+  ansible.builtin.uri:
+    url: "{{ crawl4ai_runtime_local_base_url }}{{ crawl4ai_runtime_healthcheck_path }}"
+    method: GET
+    status_code:
+      - 200
+    return_content: true
+    timeout: 30
+  register: crawl4ai_runtime_verify_health
+  retries: 12
+  delay: 2
+  until: crawl4ai_runtime_verify_health.status == 200
+  changed_when: false
+
+- name: Verify the Crawl4AI monitoring endpoint reports an active browser pool
+  ansible.builtin.uri:
+    url: "{{ crawl4ai_runtime_local_base_url }}{{ crawl4ai_runtime_monitor_health_path }}"
+    method: GET
+    status_code:
+      - 200
+    return_content: true
+    timeout: 30
+  register: crawl4ai_runtime_verify_monitor
+  retries: 12
+  delay: 2
+  until: crawl4ai_runtime_verify_monitor.status == 200
+  changed_when: false
+
+- name: Assert the Crawl4AI monitoring endpoint reports the permanent browser pool
+  ansible.builtin.assert:
+    that:
+      - crawl4ai_runtime_verify_monitor.json.pool.permanent.active | bool
+      - crawl4ai_runtime_verify_monitor.json.pool.total_memory_mb | int >= 0
+    fail_msg: "Crawl4AI monitor health did not report an active permanent browser pool."
+
+- name: Verify the Crawl4AI playground responds locally
+  ansible.builtin.uri:
+    url: "{{ crawl4ai_runtime_local_base_url }}{{ crawl4ai_runtime_playground_path }}"
+    method: GET
+    status_code:
+      - 200
+    return_content: false
+    timeout: 30
+  register: crawl4ai_runtime_verify_playground
+  retries: 12
+  delay: 2
+  until: crawl4ai_runtime_verify_playground.status == 200
+  changed_when: false
+
+- name: Verify the Crawl4AI markdown endpoint returns cleaned content for the runbook smoke URL
+  ansible.builtin.uri:
+    url: "{{ crawl4ai_runtime_local_base_url }}/md"
+    method: POST
+    body_format: json
+    body:
+      url: "{{ crawl4ai_runtime_verify_url }}"
+    status_code:
+      - 200
+    return_content: true
+    timeout: 180
+  register: crawl4ai_runtime_verify_markdown
+  retries: 3
+  delay: 5
+  until: crawl4ai_runtime_verify_markdown.status == 200
+  changed_when: false
+
+- name: Assert the Crawl4AI markdown endpoint returns the expected content marker
+  ansible.builtin.assert:
+    that:
+      - crawl4ai_runtime_verify_markdown.json.success | bool
+      - crawl4ai_runtime_verify_expected_substring in crawl4ai_runtime_verify_markdown.json.markdown
+    fail_msg: "Crawl4AI did not return the expected cleaned markdown content for the verification URL."

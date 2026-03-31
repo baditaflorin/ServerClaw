@@ -18,7 +18,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Lago, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Vaultwarden, Windmill, n8n |
+| `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Lago, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway, Woodpecker CI |
 | `4` | Ops Portal |
 
@@ -59,6 +59,7 @@ graph TD
     changedetection["Changedetection.io\nTier 2"]
     changelog_portal["Changelog Portal\nTier 2"]
     coolify_apps["Coolify Apps Ingress\nTier 2"]
+    crawl4ai["Crawl4AI\nTier 2"]
     docs_portal["Developer Portal\nTier 2"]
     dify["Dify\nTier 2"]
     directus["Directus\nTier 2"]
@@ -105,6 +106,7 @@ graph TD
     coolify -->|soft| nginx_edge
     coolify_apps -->|hard| coolify
     coolify_apps -->|soft| nginx_edge
+    crawl4ai -->|hard| docker_runtime
     dify -->|soft| api_gateway
     dify -->|soft| keycloak
     dify -->|soft| langfuse

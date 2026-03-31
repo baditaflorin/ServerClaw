@@ -49,6 +49,21 @@
       "notes": "Changedetection stores repo-managed watch metadata, snapshots, diff history, and the most recent drift-free sync report for upstream content monitoring."
     },
     {
+      "id": "crawl4ai-transient-crawl-buffers",
+      "service": "crawl4ai",
+      "name": "Crawl4AI transient crawl buffers",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Transient request and response buffers inside the crawl4ai container on docker-runtime-lv3",
+        "Ephemeral browser session and temporary extraction state inside the Crawl4AI runtime on docker-runtime-lv3"
+      ],
+      "notes": "Crawl4AI is stateless in this deployment and does not persist crawl history after each synchronous Markdown or extraction response completes."
+    },
+    {
       "id": "directus_primary_data",
       "service": "directus",
       "name": "Directus operational metadata database",

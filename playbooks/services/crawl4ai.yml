@@ -1,0 +1,26 @@
+---
+# Playbook: services/crawl4ai.yml
+# Purpose: Stable wrapper that exposes the canonical Crawl4AI service converge playbook to generic live-apply entrypoints.
+# Use case: Used by `make live-apply-service service=crawl4ai` and other workflow wrappers that resolve service leaf playbooks.
+#
+# Inputs (required):
+#   - Same required inputs as playbooks/crawl4ai.yml.
+#
+# Inputs (optional):
+#   - Same optional inputs as playbooks/crawl4ai.yml.
+#
+# Outputs:
+#   - Imports playbooks/crawl4ai.yml without redefining any service logic.
+#
+# Idempotency: Fully idempotent
+#              This wrapper only imports the canonical Crawl4AI playbook.
+#
+# Dependencies:
+#   - playbooks/crawl4ai.yml
+#
+# Related ADRs: 0165, 0288
+# Related Runbooks: docs/runbooks/configure-crawl4ai.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+- import_playbook: ../crawl4ai.yml

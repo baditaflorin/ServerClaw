@@ -235,6 +235,65 @@
         "reason": "Changedetection stays private and uses an authenticated API contract; repo-managed runtime verification plus the governed API gateway check are the supported health path."
       }
     },
+    "crawl4ai": {
+      "service_name": "crawl4ai",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "crawl4ai_runtime",
+      "verify_file": "roles/crawl4ai_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Crawl4AI startup completes once the private health endpoint responds on the local listener.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:11235/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "Crawl4AI keeps serving the private health endpoint on docker-runtime-lv3.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:11235/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "docker_publication": {
+          "container_name": "crawl4ai",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 11235
+            }
+          ],
+          "required_networks": [
+            "crawl4ai_runtime"
+          ]
+        }
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "The private monitor endpoint reports an active permanent browser pool after startup settles.",
+        "timeout_seconds": 120,
+        "retries": 3,
+        "delay_seconds": 5,
+        "argv": [
+          "/bin/bash",
+          "-lc",
+          "set -euo pipefail; payload=$(mktemp); trap 'rm -f \"$payload\"' EXIT; curl -fsS http://127.0.0.1:11235/monitor/health > \"$payload\"; python3 -c 'import json, pathlib, sys; monitor=json.loads(pathlib.Path(sys.argv[1]).read_text()); assert monitor[\"pool\"][\"permanent\"][\"active\"] is True' \"$payload\""
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Crawl4AI stays private-only and is verified through repo-managed health, monitor, and markdown smoke probes instead of a public uptime monitor."
+      }
+    },
     "coolify": {
       "service_name": "coolify",
       "owning_vm": "coolify-lv3",

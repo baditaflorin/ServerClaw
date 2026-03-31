@@ -29,6 +29,34 @@
         "converge-changedetection"
       ]
     },
+    "crawl4ai_runtime": {
+      "kind": "runtime",
+      "service_id": "crawl4ai",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "crawl4ai",
+      "registry_ref": "docker.io/unclecode/crawl4ai",
+      "tag": "0.8.0",
+      "digest": "sha256:4d8b065bf185962733cb5f9701f4122d03383fa1ab6b5f6a9873f04fa0416a84",
+      "ref": "docker.io/unclecode/crawl4ai:0.8.0@sha256:4d8b065bf185962733cb5f9701f4122d03383fa1ab6b5f6a9873f04fa0416a84",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-30-crawl4ai-runtime.json",
+      "exception": {
+        "reason": "The pinned upstream Crawl4AI image reports critical and high Trivy findings in bundled Debian and Python components; keep it digest-pinned and review at the next image rotation window.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-30",
+        "review_by": "2026-04-13"
+      },
+      "consumers": [
+        "roles/crawl4ai_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-crawl4ai"
+      ]
+    },
     "dify_api_runtime": {
       "kind": "runtime",
       "service_id": "dify",

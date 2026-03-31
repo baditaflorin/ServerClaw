@@ -75,6 +75,16 @@ def test_build_platform_vars_includes_directus_publication_topology() -> None:
     assert platform_vars["directus_port"] == 8055
 
 
+def test_build_platform_vars_includes_crawl4ai_private_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    crawl4ai = platform_vars["platform_service_topology"]["crawl4ai"]
+
+    assert crawl4ai["ports"]["internal"] == 11235
+    assert crawl4ai["urls"]["internal"] == "http://10.10.10.20:11235"
+    assert crawl4ai["exposure_model"] == "private-only"
+    assert platform_vars["crawl4ai_port"] == 11235
+
+
 def test_build_platform_vars_includes_harbor_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     harbor = platform_vars["platform_service_topology"]["harbor"]

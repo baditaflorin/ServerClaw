@@ -78,6 +78,7 @@ live_apply_evidence:
     excalidraw: 2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply
     failure_domain_policy: 2026-03-27-adr-0184-failure-domain-labels-live-apply
     flagsmith: 2026-03-30-adr-0288-flagsmith-mainline-live-apply
+    crawl4ai: 2026-03-31-adr-0288-crawl4ai-mainline-live-apply
     coolify: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
     coolify_apps: 2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply
     outline: 2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply

@@ -64,6 +64,7 @@ PORT_KEYS = (
     "lago_front_port",
     "dify_port",
     "changedetection_port",
+    "crawl4ai_port",
     "browser_runner_port",
     "outline_port",
     "directus_port",
@@ -529,6 +530,9 @@ def build_service_urls(
     elif service_id == "changedetection":
         urls["internal"] = service_url("http", private_ip, ports["changedetection_port"])
         port_map["internal"] = ports["changedetection_port"]
+    elif service_id == "crawl4ai":
+        urls["internal"] = service_url("http", private_ip, ports["crawl4ai_port"])
+        port_map["internal"] = ports["crawl4ai_port"]
     elif service_id == "browser_runner":
         urls["internal"] = service_url("http", private_ip, ports["browser_runner_port"])
         port_map["internal"] = ports["browser_runner_port"]

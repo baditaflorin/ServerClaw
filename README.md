@@ -287,6 +287,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `control_plane_recovery` | `2026-03-28-adr-0231-local-secret-delivery-live-apply` |
 | `coolify` | `2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply` |
 | `coolify_apps` | `2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply` |
+| `crawl4ai` | `2026-03-31-adr-0288-crawl4ai-mainline-live-apply` |
 | `deadlock_detector` | `2026-03-26-adr-0162-deadlock-detector-live-apply` |
 | `dependency_graph_runtime` | `2026-03-26-adr-0117-dependency-graph-live-apply` |
 | `dify` | `2026-03-28-adr-0197-dify-mainline-live-apply` |
@@ -630,6 +631,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Changedetection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-changedetection.md)
 - [Configure Control-Plane Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-control-plane-recovery.md)
 - [Configure Coolify](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-coolify.md)
+- [Configure Crawl4AI](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-crawl4ai.md)
 - [Configure Dify](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-dify.md)
 - [Configure Directus](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-directus.md)
 - [Configure Docker Build VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-build-vm.md)
@@ -1438,6 +1440,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0284-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0284-main-merge.md)
 - [Workstream ws-0286-live-apply: Live Apply ADR 0286 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0286-live-apply.md)
 - [Workstream ws-0287-live-apply: ADR 0287 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0287-live-apply.md)
+- [Workstream ws-0288-crawl4ai-main-merge: ADR 0288 Crawl4AI Exact-Main Integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0288-crawl4ai-main-merge.md)
 - [Workstream ws-0288-live-apply: ADR 0288 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0288-live-apply.md)
 - [Workstream ws-0288-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0288-main-merge.md)
 - [Workstream ws-0289-live-apply: Live Apply ADR 0289 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0289-live-apply.md)
@@ -1784,6 +1787,7 @@ This repository is intentionally opinionated:
 | `0284` | Integrate ADR 0284 Piper exact-main replay into current origin/main | `live_applied` | [ws-0284-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0284-main-merge.md) |
 | `0286` | Live apply Tesseract OCR from latest origin/main on top of the current Apache Tika baseline | `merged` | [ws-0286-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0286-live-apply.md) |
 | `0287` | Live apply Woodpecker CI as the API-driven continuous integration server from latest origin/main | `merged` | [ws-0287-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0287-live-apply.md) |
+| `0288` | Integrate ADR 0288 Crawl4AI exact-main replay onto current origin/main | `merged` | [ws-0288-crawl4ai-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0288-crawl4ai-main-merge.md) |
 | `0288` | ADR 0288 live apply from latest origin/main | `live_applied` | [ws-0288-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0288-live-apply.md) |
 | `0288` | Integrate ADR 0288 Flagsmith exact-main replay onto current origin/main | `merged` | [ws-0288-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0288-main-merge.md) |
 | `0289` | Live apply ADR 0289 Directus from latest origin/main | `live_applied` | [ws-0289-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0289-live-apply.md) |

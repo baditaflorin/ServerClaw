@@ -13,6 +13,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - http://10.10.10.20:11235/health
+  labels:
+    service_id: crawl4ai
+    slo_id: crawl4ai-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://data.lv3.org/server/health
   labels:
     service_id: directus
