@@ -6,7 +6,7 @@
   "recorded_on": "2026-03-31",
   "recorded_at": "2026-03-31T22:57:06Z",
   "recorded_by": "codex",
-  "source_commit": "9abc788b807fcc5537a0b20e1339c7543e732cc6",
+  "source_commit": "bc41cbab7192eecdb68673753c36f057d7ce3925",
   "repo_version_context": "0.177.124",
   "platform_version_context": "0.130.79",
   "workflow_id": "adr-0274-minio-object-storage-mainline-live-apply",
