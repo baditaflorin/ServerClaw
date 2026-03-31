@@ -134,10 +134,10 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
     ]
     assert "dependency failed to start" in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_dependency_race"]
     assert "No such container:" in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_dependency_race"]
-    assert 'service "migrate" didn\'\'t complete successfully' in recovery_fact_task["ansible.builtin.set_fact"][
-        "lago_compose_migrate_failed"
-    ]
+    assert 'service "migrate"' in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_migrate_failed"]
+    assert "complete successfully" in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_migrate_failed"]
     assert migrate_logs_task["when"] == "lago_compose_migrate_failed"
+    assert "exit 137" in migrate_race_fact_task["ansible.builtin.set_fact"]["lago_migrate_database_race"]
     assert "connection to server at" in migrate_race_fact_task["ansible.builtin.set_fact"]["lago_migrate_database_race"]
     assert "failed: Connection timed out" in migrate_race_fact_task["ansible.builtin.set_fact"]["lago_migrate_database_race"]
     assert "failed: Connection refused" in migrate_race_fact_task["ansible.builtin.set_fact"]["lago_migrate_database_race"]

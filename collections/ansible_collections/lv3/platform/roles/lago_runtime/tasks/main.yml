@@ -260,8 +260,8 @@
           }}
         lago_compose_migrate_failed: >-
           {{
-            'service "migrate" didn''t complete successfully'
-            in (ansible_failed_result.stderr | default(''))
+            'service "migrate"' in (ansible_failed_result.stderr | default(''))
+            and 'complete successfully' in (ansible_failed_result.stderr | default(''))
           }}
 
     - name: Capture Lago migrate logs after startup failure
@@ -281,21 +281,26 @@
         lago_migrate_database_race: >-
           {{
             lago_compose_migrate_failed
-            and 'connection to server at' in (
-              (lago_migrate_logs.stdout | default(''))
-              ~ '\n'
-              ~ (lago_migrate_logs.stderr | default(''))
-            )
             and (
-              'failed: Connection timed out' in (
-                (lago_migrate_logs.stdout | default(''))
-                ~ '\n'
-                ~ (lago_migrate_logs.stderr | default(''))
-              )
-              or 'failed: Connection refused' in (
-                (lago_migrate_logs.stdout | default(''))
-                ~ '\n'
-                ~ (lago_migrate_logs.stderr | default(''))
+              'exit 137' in (ansible_failed_result.stderr | default(''))
+              or (
+                'connection to server at' in (
+                  (lago_migrate_logs.stdout | default(''))
+                  ~ '\n'
+                  ~ (lago_migrate_logs.stderr | default(''))
+                )
+                and (
+                  'failed: Connection timed out' in (
+                    (lago_migrate_logs.stdout | default(''))
+                    ~ '\n'
+                    ~ (lago_migrate_logs.stderr | default(''))
+                  )
+                  or 'failed: Connection refused' in (
+                    (lago_migrate_logs.stdout | default(''))
+                    ~ '\n'
+                    ~ (lago_migrate_logs.stderr | default(''))
+                  )
+                )
               )
             )
           }}
