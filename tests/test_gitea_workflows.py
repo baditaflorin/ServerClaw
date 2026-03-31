@@ -1,4 +1,10 @@
+import os
+import socket
+import socketserver
 import subprocess
+import sys
+import threading
+import time
 from pathlib import Path
 
 
@@ -41,6 +47,15 @@ def extract_run_block(workflow: str, *, step_name: str) -> str:
         else:
             body.append(line)
     return "\n".join(body) + "\n"
+
+
+def extract_inline_python(run_block: str, *, anchor: str) -> str:
+    start = run_block.index(anchor) + len(anchor)
+    remainder = run_block[start:]
+    if remainder.startswith("\n"):
+        remainder = remainder[1:]
+    end = remainder.index("\nPY\n")
+    return remainder[:end]
 
 
 def test_validate_workflow_uses_pinned_python_runner_and_manual_checkout() -> None:
@@ -112,6 +127,10 @@ def test_renovate_workflow_bootstraps_inside_pinned_python_runner() -> None:
     assert "cleanup_clone_proxy()" in workflow
     assert "python3 - <<'PY' &" in workflow
     assert "ThreadedTCPServer" in workflow
+    assert "import threading" in workflow
+    assert "destination.shutdown(socket.SHUT_WR)" in workflow
+    assert "select.select" not in workflow
+    assert "BlockingIOError" not in workflow
     assert "Renovate clone relay did not become ready." in workflow
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
     assert '"${docker_bin}" run --rm \\' in workflow
@@ -136,3 +155,100 @@ def test_renovate_workflow_run_block_is_shell_syntax_valid(tmp_path: Path) -> No
     )
 
     assert result.returncode == 0, result.stderr
+
+
+def test_renovate_clone_relay_streams_large_http_response() -> None:
+    workflow = RENOVATE_WORKFLOW.read_text(encoding="utf-8")
+    run_block = extract_run_block(workflow, step_name="Run Renovate through the pinned Harbor image")
+    relay_script = extract_inline_python(run_block, anchor="python3 - <<'PY' &")
+    expected_body = (b"packfile-chunk-" * 8192) + (b"tail" * 4096)
+
+    class UpstreamHandler(socketserver.BaseRequestHandler):
+        def handle(self) -> None:
+            request = b""
+            while b"\r\n\r\n" not in request:
+                chunk = self.request.recv(4096)
+                if not chunk:
+                    break
+                request += chunk
+            headers = (
+                b"HTTP/1.1 200 OK\r\n"
+                + f"Content-Length: {len(expected_body)}\r\n".encode("ascii")
+                + b"Connection: close\r\n\r\n"
+            )
+            self.request.sendall(headers)
+            for offset in range(0, len(expected_body), 32768):
+                self.request.sendall(expected_body[offset : offset + 32768])
+
+    class ThreadedUpstreamServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+        allow_reuse_address = True
+        daemon_threads = True
+
+    def reserve_port() -> int:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.bind(("127.0.0.1", 0))
+            sock.listen(1)
+            return int(sock.getsockname()[1])
+
+    def wait_for_port(port: int, *, timeout_seconds: float) -> None:
+        deadline = time.time() + timeout_seconds
+        while time.time() < deadline:
+            try:
+                with socket.create_connection(("127.0.0.1", port), timeout=0.2):
+                    return
+            except OSError:
+                time.sleep(0.05)
+        raise AssertionError(f"Timed out waiting for relay port {port} to accept connections")
+
+    target_port = reserve_port()
+    relay_port = reserve_port()
+    relay_process: subprocess.Popen[str] | None = None
+
+    with ThreadedUpstreamServer(("127.0.0.1", target_port), UpstreamHandler) as upstream_server:
+        upstream_thread = threading.Thread(target=upstream_server.serve_forever, daemon=True)
+        upstream_thread.start()
+        env = os.environ.copy()
+        env.update(
+            {
+                "RENOVATE_GIT_CLONE_HOST_ADDRESS": "127.0.0.1",
+                "RENOVATE_GIT_CLONE_HOST_PORT": str(relay_port),
+                "RENOVATE_GIT_CLONE_TARGET_HOST": "127.0.0.1",
+                "RENOVATE_GIT_CLONE_TARGET_PORT": str(target_port),
+            }
+        )
+        relay_process = subprocess.Popen(
+            [sys.executable, "-c", relay_script],
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        try:
+            wait_for_port(relay_port, timeout_seconds=5)
+            with socket.create_connection(("127.0.0.1", relay_port), timeout=5) as client:
+                client.sendall(
+                    b"GET /ops/proxmox_florin_server.git/info/refs?service=git-upload-pack HTTP/1.1\r\n"
+                    b"Host: git.lv3.org\r\n"
+                    b"Connection: close\r\n\r\n"
+                )
+                response_chunks: list[bytes] = []
+                while True:
+                    chunk = client.recv(65536)
+                    if not chunk:
+                        break
+                    response_chunks.append(chunk)
+            response = b"".join(response_chunks)
+            assert b"\r\n\r\n" in response
+            header_block, body = response.split(b"\r\n\r\n", 1)
+            assert header_block.startswith(b"HTTP/1.1 200 OK")
+            assert f"Content-Length: {len(expected_body)}".encode("ascii") in header_block
+            assert body == expected_body
+        finally:
+            if relay_process is not None:
+                relay_process.terminate()
+                stdout, stderr = relay_process.communicate(timeout=5)
+                assert relay_process.returncode is not None
+                assert stderr == "", stderr
+        upstream_server.shutdown()
+        upstream_thread.join(timeout=5)

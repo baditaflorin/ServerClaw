@@ -235,37 +235,52 @@ jobs:
             renovate_add_host_arg="--add-host=${RENOVATE_GIT_CLONE_HOST}:${RENOVATE_GIT_CLONE_HOST_ADDRESS}"
             python3 - <<'PY' &
           import os
-          import select
           import socket
           import socketserver
+          import threading
 
           listen_host = os.environ["RENOVATE_GIT_CLONE_HOST_ADDRESS"]
           listen_port = int(os.environ["RENOVATE_GIT_CLONE_HOST_PORT"])
           target_host = os.environ["RENOVATE_GIT_CLONE_TARGET_HOST"]
           target_port = int(os.environ["RENOVATE_GIT_CLONE_TARGET_PORT"])
 
+          def pump(source: socket.socket, destination: socket.socket) -> None:
+              try:
+                  while True:
+                      payload = source.recv(65536)
+                      if not payload:
+                          try:
+                              destination.shutdown(socket.SHUT_WR)
+                          except OSError:
+                              pass
+                          return
+                      destination.sendall(payload)
+              except OSError:
+                  try:
+                      destination.shutdown(socket.SHUT_WR)
+                  except OSError:
+                      pass
+
 
           class Relay(socketserver.BaseRequestHandler):
               def handle(self) -> None:
                   with socket.create_connection((target_host, target_port), timeout=30) as upstream:
-                      upstream.setblocking(False)
-                      self.request.setblocking(False)
-                      sockets = [self.request, upstream]
-                      while True:
-                          readable, _, exceptional = select.select(sockets, [], sockets, 1)
-                          if exceptional:
-                              return
-                          if not readable:
-                              continue
-                          for current in readable:
-                              try:
-                                  payload = current.recv(65536)
-                              except BlockingIOError:
-                                  continue
-                              if not payload:
-                                  return
-                              peer = upstream if current is self.request else self.request
-                              peer.sendall(payload)
+                      upstream.settimeout(None)
+                      self.request.settimeout(None)
+                      client_to_upstream = threading.Thread(
+                          target=pump,
+                          args=(self.request, upstream),
+                          daemon=True,
+                      )
+                      upstream_to_client = threading.Thread(
+                          target=pump,
+                          args=(upstream, self.request),
+                          daemon=True,
+                      )
+                      client_to_upstream.start()
+                      upstream_to_client.start()
+                      client_to_upstream.join()
+                      upstream_to_client.join()
 
 
           class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
