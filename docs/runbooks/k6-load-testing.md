@@ -42,6 +42,12 @@ The Windmill worker seeds `f/lv3/k6_load_testing` and schedules:
 
 - Prometheus remote-write must be reachable on the private monitoring address
   from `docker-build-lv3` and `docker-runtime-lv3`.
+- The private Gitea `validate.yml` smoke gate runs inside a containerized runner,
+  so it must export `LV3_DOCKER_WORKSPACE_PATH` before calling `make k6-smoke`
+  or the nested `docker run` cannot mount the checkout from the runner host.
+- The public GitHub mirror validation stays repo-only for ADR 0305 because the
+  hosted runner cannot reach the private Prometheus remote-write path or the
+  private OpenFGA health endpoint.
 - Smoke probes are intended to remain the blocking CI path. Load and soak probes
   are scheduled Windmill diagnostics and should be paused or coordinated with a
   maintenance window if a service is already degraded.

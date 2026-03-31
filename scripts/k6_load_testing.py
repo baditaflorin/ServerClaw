@@ -282,6 +282,13 @@ def write_run_config(
     return path
 
 
+def docker_workspace_mount_source(repo_root: Path) -> str:
+    override = os.environ.get("LV3_DOCKER_WORKSPACE_PATH", "").strip()
+    if override:
+        return str(Path(override).resolve())
+    return str(repo_root.resolve())
+
+
 def run_k6(
     *,
     repo_root: Path,
@@ -296,6 +303,7 @@ def run_k6(
     image_catalog = load_image_catalog()
     image_entry = require_mapping(image_catalog["images"].get("k6_runtime"), "config/image-catalog.json.images.k6_runtime")
     image_ref = require_str(image_entry.get("ref"), "config/image-catalog.json.images.k6_runtime.ref")
+    workspace_mount_source = docker_workspace_mount_source(repo_root)
     command = [
         "docker",
         "run",
@@ -303,7 +311,7 @@ def run_k6(
         "--network",
         "host",
         "--volume",
-        f"{repo_root}:{repo_root}",
+        f"{workspace_mount_source}:{repo_root}",
         "--workdir",
         str(repo_root),
         "--env",

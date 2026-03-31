@@ -19527,3 +19527,142 @@ workstreams:
       included_in_repo_version: 0.177.111
       latest_receipts:
         jupyterhub: 2026-03-30-adr-0291-jupyterhub-mainline-live-apply
+  - id: ws-0305-live-apply
+    adr: "0305"
+    title: Live apply ADR 0305 k6 load testing and SLO error-budget burn validation from latest origin/main
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0305-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-live-apply.md
+    depends_on:
+      - adr-0096-slo-tracking
+      - adr-0119-budgeted-workflow-scheduler
+      - adr-0123-service-uptime-contracts-and-monitor-backed-health
+      - adr-0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization
+      - adr-0276-nats-jetstream-as-the-platform-event-bus
+      - adr-0297-renovate-bot-as-the-automated-stack-version-upgrade-proposer
+      - adr-0299-ntfy-as-the-push-notification-channel
+      - adr-0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0305-live-apply.md
+      - docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+      - docs/runbooks/k6-load-testing.md
+      - docs/schema/k6-receipt.schema.json
+      - docs/schema/capacity-model.schema.json
+      - docs/adr/.index.yaml
+      - Makefile
+      - .gitea/workflows/validate.yml
+      - config/image-catalog.json
+      - config/capacity-model.json
+      - config/k6/scripts/http-slo-probe.js
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/control-plane-lanes.json
+      - config/api-publication.json
+      - config/event-taxonomy.yaml
+      - config/ntfy/server.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - scripts/capacity_report.py
+      - scripts/generate_platform_vars.py
+      - scripts/k6_load_testing.py
+      - scripts/promotion_pipeline.py
+      - scripts/slo_tracking.py
+      - scripts/validate_nats_topics.py
+      - scripts/validate_repository_data_models.py
+      - platform/slo.py
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/**
+      - config/windmill/scripts/k6-load-testing.py
+      - tests/test_capacity_report.py
+      - tests/test_k6_load_testing.py
+      - tests/test_k6_load_testing_windmill.py
+      - tests/test_gitea_workflows.py
+      - tests/test_monitoring_vm_role.py
+      - tests/test_windmill_default_operations_surface.py
+      - tests/test_windmill_operator_admin_app.py
+      - tests/test_promotion_pipeline.py
+      - tests/test_slo_tracking.py
+      - tests/unit/test_event_taxonomy.py
+      - receipts/image-scans/2026-03-31-k6-runtime.json
+      - receipts/image-scans/2026-03-31-k6-runtime.trivy.json
+      - receipts/k6/**
+      - receipts/live-applies/**
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0305_docs
+          paths:
+            - docs/workstreams/ws-0305-live-apply.md
+            - docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+            - docs/runbooks/k6-load-testing.md
+          mode: exclusive
+        - id: adr_0305_repository_automation
+          paths:
+            - Makefile
+            - .gitea/workflows/validate.yml
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - config/control-plane-lanes.json
+            - config/api-publication.json
+            - config/event-taxonomy.yaml
+            - config/ntfy/server.yml
+            - scripts/k6_load_testing.py
+            - scripts/capacity_report.py
+            - scripts/promotion_pipeline.py
+            - scripts/slo_tracking.py
+            - scripts/validate_nats_topics.py
+            - scripts/validate_repository_data_models.py
+            - platform/slo.py
+            - tests/test_k6_load_testing.py
+            - tests/test_k6_load_testing_windmill.py
+            - tests/test_gitea_workflows.py
+            - tests/test_capacity_report.py
+            - tests/test_monitoring_vm_role.py
+            - tests/test_windmill_default_operations_surface.py
+            - tests/test_windmill_operator_admin_app.py
+            - tests/test_promotion_pipeline.py
+            - tests/test_slo_tracking.py
+            - tests/unit/test_event_taxonomy.py
+          mode: shared_contract
+          contract: repository-automation-v1
+        - id: adr_0305_platform_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+            - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/**
+            - config/windmill/scripts/k6-load-testing.py
+            - config/capacity-model.json
+            - config/k6/scripts/http-slo-probe.js
+            - docs/schema/k6-receipt.schema.json
+            - docs/schema/capacity-model.schema.json
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: adr_0305_image_policy
+          paths:
+            - config/image-catalog.json
+            - receipts/image-scans/2026-03-31-k6-runtime.json
+            - receipts/image-scans/2026-03-31-k6-runtime.trivy.json
+          mode: shared_contract
+          contract: image-policy-v1
+        - id: adr_0305_live_receipts
+          paths:
+            - receipts/k6/**
+            - receipts/live-applies/**
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false

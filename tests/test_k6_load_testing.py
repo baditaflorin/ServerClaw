@@ -230,3 +230,43 @@ def test_validate_k6_receipt_rejects_unbalanced_counts(tmp_path: Path) -> None:
         assert "request counts must add up" in str(exc)
     else:
         raise AssertionError("validate_k6_receipt should reject unbalanced counts")
+
+
+def test_run_k6_uses_host_workspace_override(monkeypatch, tmp_path: Path) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_run(command, cwd, text, capture_output, check):  # type: ignore[no-untyped-def]
+        captured["command"] = command
+        captured["cwd"] = cwd
+
+        class Completed:
+            returncode = 0
+            stderr = ""
+            stdout = ""
+
+        return Completed()
+
+    monkeypatch.setenv("LV3_DOCKER_WORKSPACE_PATH", "/host/gitea-runner/workspace")
+    monkeypatch.setattr(
+        k6_load_testing,
+        "load_image_catalog",
+        lambda: {"images": {"k6_runtime": {"ref": "docker.io/grafana/k6:1.7.1@sha256:test"}}},
+    )
+    monkeypatch.setattr(k6_load_testing.subprocess, "run", fake_run)
+
+    returncode, output = k6_load_testing.run_k6(
+        repo_root=tmp_path,
+        run_id="20260331T060000Z",
+        scenario="smoke",
+        runner_context="gitea-actions",
+        environment="production",
+        config_path=tmp_path / ".local" / "k6" / "config.json",
+        summary_path=tmp_path / "receipts" / "k6" / "raw" / "summary.json",
+        prometheus_remote_write_url="http://10.10.10.40:9090/api/v1/write",
+    )
+
+    assert returncode == 0
+    assert output == ""
+    command = captured["command"]
+    assert isinstance(command, list)
+    assert f"/host/gitea-runner/workspace:{tmp_path}" in command
