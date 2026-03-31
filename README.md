@@ -210,7 +210,7 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.122` |
+| Repository version | `0.177.123` |
 | Platform version | `0.130.78` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
@@ -1172,6 +1172,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0304: Atlas For Declarative Database Schema Migration Versioning And Pre-Migration Linting](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md)
 - [ADR 0305: k6 For Continuous Load Testing And SLO Error Budget Burn Validation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md)
 - [ADR 0306: Checkov For IaC Policy Compliance Scanning Of OpenTofu, Compose, And Ansible](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md)
+- [ADR 0307: Platform Workbench As The Cohesive First-Party App Frame](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0307-platform-workbench-as-the-cohesive-first-party-app-frame.md)
+- [ADR 0308: Journey-Aware Entry Routing And Saved Home Selection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0308-journey-aware-entry-routing-and-saved-home-selection.md)
+- [ADR 0309: Task-Oriented Information Architecture Across The Platform Workbench](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md)
+- [ADR 0310: First-Run Activation Checklists And Progressive Capability Reveal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md)
+- [ADR 0311: Global Command Palette And Universal Open Dialog Via cmdk](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0311-global-command-palette-and-universal-open-dialog-via-cmdk.md)
+- [ADR 0312: Shared Notification Center And Activity Timeline Across Human Surfaces](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md)
+- [ADR 0313: Contextual Help, Glossary, And Escalation Drawer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0313-contextual-help-glossary-and-escalation-drawer.md)
+- [ADR 0314: Resumable Multi-Step Flows And Return-To-Task Reentry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0314-resumable-multi-step-flows-and-return-to-task-reentry.md)
+- [ADR 0315: Canonical Page States And Next-Best-Action Guidance For Human Surfaces](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0315-canonical-page-states-and-next-best-action-guidance-for-human-surfaces.md)
+- [ADR 0316: Journey Analytics And Onboarding Success Scorecards](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0316-journey-analytics-and-onboarding-success-scorecards.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -1356,6 +1366,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0270: Docker Publication Self-Healing And Port-Programming Assertions](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0270-docker-publication-self-healing-and-port-programming-assertions.md)
 - [Workstream ADR 0273: Public Endpoint Admission Control](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md)
 - [Workstream ADR 0295: Artifact Cache Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md)
+- [Workstream ADR 0307: Platform App Cohesion, Onboarding, And User-Flow Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0307-platform-app-cohesion-bundle.md)
 - [Workstream ws-0021-edge-cert-repair: Shared Edge Certificate Expansion Repair](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0021-edge-cert-repair.md)
 - [Workstream ws-0101-live-apply: ADR 0101 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0101-live-apply.md)
 - [Workstream ws-0105-live-apply: Live Apply ADR 0105 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md)
@@ -1510,7 +1521,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.122` |
+| Repository version | `0.177.123` |
 | Platform version | `0.130.78` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1847,6 +1858,7 @@ This repository is intentionally opinionated:
 | `0305` | Live apply ADR 0305 k6 load testing and SLO error-budget burn validation from latest origin/main | `live_applied` | [ws-0305-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-live-apply.md) |
 | `0305` | Integrate ADR 0305 k6 exact-main replay onto origin/main | `live_applied` | [ws-0305-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md) |
 | `0306` | Live apply Checkov IaC policy scanning from latest origin/main | `live_applied` | [ws-0306-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md) |
+| `0307` | Platform app cohesion, onboarding, and user-flow architecture bundle | `merged` | [adr-0307-platform-app-cohesion-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0307-platform-app-cohesion-bundle.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow
