@@ -16,7 +16,9 @@ for variable_name in "${required_vars[@]}"; do
   fi
 done
 
-cat > /etc/redpanda/redpanda.yaml <<EOF
+runtime_config_file=/tmp/redpanda.yaml
+
+cat > "${runtime_config_file}" <<EOF
 redpanda:
   data_directory: /var/lib/redpanda/data
   node_id: 0
@@ -77,18 +79,18 @@ pandaproxy_client:
   brokers:
     - address: 127.0.0.1
       port: {{ redpanda_loopback_kafka_port }}
-  sasl_mechanism: \${REDPANDA_SASL_MECHANISM}
-  scram_username: \${REDPANDA_ADMIN_USER}
-  scram_password: \${REDPANDA_ADMIN_PASSWORD}
+  sasl_mechanism: ${REDPANDA_SASL_MECHANISM}
+  scram_username: ${REDPANDA_ADMIN_USER}
+  scram_password: ${REDPANDA_ADMIN_PASSWORD}
   produce_ack_level: -1
   retries: 5
 schema_registry_client:
   brokers:
     - address: 127.0.0.1
       port: {{ redpanda_loopback_kafka_port }}
-  sasl_mechanism: \${REDPANDA_SASL_MECHANISM}
-  scram_username: \${REDPANDA_ADMIN_USER}
-  scram_password: \${REDPANDA_ADMIN_PASSWORD}
+  sasl_mechanism: ${REDPANDA_SASL_MECHANISM}
+  scram_username: ${REDPANDA_ADMIN_USER}
+  scram_password: ${REDPANDA_ADMIN_PASSWORD}
   produce_batch_delay_ms: 0
   produce_batch_record_count: 0
 EOF
@@ -96,7 +98,7 @@ EOF
 export RP_BOOTSTRAP_USER="${REDPANDA_ADMIN_USER}:${REDPANDA_ADMIN_PASSWORD}"
 
 exec redpanda \
-  --redpanda-cfg /etc/redpanda/redpanda.yaml \
+  --redpanda-cfg "${runtime_config_file}" \
   --overprovisioned \
   --smp {{ redpanda_smp }} \
   --memory {{ redpanda_memory }} \
