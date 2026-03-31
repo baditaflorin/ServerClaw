@@ -60,6 +60,20 @@
   changed_when: false
   when: alertmanager_runtime_pgaudit_relay_enabled | bool
 
+- name: Verify the loaded Alertmanager config includes the pgaudit relay route
+  ansible.builtin.uri:
+    url: "{{ alertmanager_runtime_url }}/api/v2/status"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: alertmanager_runtime_status
+  changed_when: false
+  failed_when: >
+    alertmanager_runtime_status.status != 200
+    or 'pgaudit-unknown-role-relay' not in (alertmanager_runtime_status.json.config.original | default(''))
+    or 'PostgresUnknownRoleConnection' not in (alertmanager_runtime_status.json.config.original | default(''))
+  when: alertmanager_runtime_pgaudit_relay_enabled | bool
+
 - name: Verify Prometheus Loki Canary rules are loaded
   ansible.builtin.uri:
     url: "http://127.0.0.1:9090/api/v1/rules"

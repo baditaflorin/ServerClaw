@@ -6,6 +6,7 @@ approved_roles:
   - gitea
   - glitchtip
   - keycloak
+  - lago
   - langfuse
   - matrix_synapse
   - mattermost_admin
@@ -14,12 +15,14 @@ approved_roles:
   - n8n
   - netbox
   - nextcloud
+  - oneapi
   - openbao_rotator
   - openfga
   - ops
   - outline
   - outline_production
   - outline_staging
+  - paperless
   - patroni
   - plane_admin
   - plausible

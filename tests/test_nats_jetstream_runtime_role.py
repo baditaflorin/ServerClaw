@@ -13,6 +13,7 @@ PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "nats-jetstream.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "nats-jetstream.yml"
 SECRET_MANIFEST_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -82,6 +83,16 @@ def test_playbook_and_service_wrapper_point_to_runtime_role() -> None:
         "lv3.platform.nats_jetstream_runtime",
     ]
     assert wrapper == [{"import_playbook": "../nats-jetstream.yml"}]
+
+
+def test_inventory_allows_monitoring_relay_access_to_the_nats_client_listener() -> None:
+    host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+
+    monitoring_rule = next(
+        rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 4222 in rule["ports"]
+    )
+    assert 4222 in monitoring_rule["ports"]
 
 
 def test_secret_manifest_and_execution_scopes_register_nats_runtime_inputs() -> None:

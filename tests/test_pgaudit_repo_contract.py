@@ -21,8 +21,11 @@ def test_approved_roles_are_unique_and_cover_live_high_risk_logins() -> None:
     assert {
         "directus",
         "flagsmith",
+        "lago",
         "n8n",
+        "oneapi",
         "ops",
+        "paperless",
         "plausible",
         "postgres",
         "temporal",

@@ -4,6 +4,7 @@
     that:
       - alertmanager_runtime_package | length > 0
       - alertmanager_runtime_service_name | length > 0
+      - alertmanager_runtime_env_file | length > 0
       - alertmanager_runtime_config_template | length > 0
       - alertmanager_runtime_config_file | length > 0
       - alertmanager_runtime_data_dir | length > 0
@@ -210,6 +211,15 @@
     - Reload systemd
     - Restart pgaudit alert relay
   when: alertmanager_runtime_pgaudit_relay_enabled | bool
+
+- name: Render Alertmanager package environment file
+  ansible.builtin.template:
+    src: prometheus-alertmanager.env.j2
+    dest: "{{ alertmanager_runtime_env_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Alertmanager
 
 - name: Render Alertmanager configuration
   ansible.builtin.template:

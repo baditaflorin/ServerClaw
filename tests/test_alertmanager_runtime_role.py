@@ -10,6 +10,7 @@ TASKS_PATH = ROLE_ROOT / "tasks" / "main.yml"
 VERIFY_PATH = ROLE_ROOT / "tasks" / "verify.yml"
 ALERTMANAGER_CONFIG_PATH = REPO_ROOT / "config" / "alertmanager" / "alertmanager.yml"
 ALERT_RULES_PATH = REPO_ROOT / "config" / "alertmanager" / "rules" / "platform.yml"
+ALERTMANAGER_ENV_TEMPLATE = ROLE_ROOT / "templates" / "prometheus-alertmanager.env.j2"
 RELAY_ENV_TEMPLATE = ROLE_ROOT / "templates" / "pgaudit-alert-relay.env.j2"
 RELAY_SERVICE_TEMPLATE = ROLE_ROOT / "templates" / "pgaudit-alert-relay.service.j2"
 RELAY_SCRIPT_TEMPLATE = ROLE_ROOT / "templates" / "pgaudit-alert-relay.py.j2"
@@ -22,6 +23,7 @@ def load_yaml(path: Path) -> list[dict] | dict:
 def test_alertmanager_runtime_defaults_define_pgaudit_relay_contract() -> None:
     defaults = load_yaml(DEFAULTS_PATH)
 
+    assert defaults["alertmanager_runtime_env_file"] == "/etc/default/prometheus-alertmanager"
     assert defaults["alertmanager_runtime_pgaudit_relay_enabled"] is True
     assert defaults["alertmanager_runtime_pgaudit_relay_service_name"] == "pgaudit-alert-relay"
     assert defaults["alertmanager_runtime_pgaudit_relay_nats_subject"] == "platform.security.pgaudit_unknown_role"
@@ -31,11 +33,16 @@ def test_alertmanager_runtime_defaults_define_pgaudit_relay_contract() -> None:
 def test_alertmanager_runtime_tasks_render_and_start_pgaudit_relay() -> None:
     tasks = load_yaml(TASKS_PATH)
 
+    alertmanager_env_task = next(
+        task for task in tasks if task.get("name") == "Render Alertmanager package environment file"
+    )
     env_task = next(task for task in tasks if task.get("name") == "Render pgaudit alert relay environment file")
     script_task = next(task for task in tasks if task.get("name") == "Render pgaudit alert relay script")
     service_task = next(task for task in tasks if task.get("name") == "Render pgaudit alert relay systemd service")
     start_task = next(task for task in tasks if task.get("name") == "Enable and start pgaudit alert relay")
 
+    assert alertmanager_env_task["ansible.builtin.template"]["src"] == "prometheus-alertmanager.env.j2"
+    assert alertmanager_env_task["ansible.builtin.template"]["dest"] == "{{ alertmanager_runtime_env_file }}"
     assert env_task["ansible.builtin.template"]["src"] == "pgaudit-alert-relay.env.j2"
     assert script_task["ansible.builtin.template"]["src"] == "pgaudit-alert-relay.py.j2"
     assert service_task["ansible.builtin.template"]["src"] == "pgaudit-alert-relay.service.j2"
@@ -75,14 +82,30 @@ def test_alertmanager_runtime_verifies_pgaudit_relay_health_and_rules() -> None:
     relay_health_task = next(
         task for task in verify_tasks if task.get("name") == "Verify pgaudit alert relay health endpoint responds"
     )
+    loaded_config_task = next(
+        task
+        for task in verify_tasks
+        if task.get("name") == "Verify the loaded Alertmanager config includes the pgaudit relay route"
+    )
     verify_task = next(
         task for task in verify_tasks if task.get("name") == "Verify Prometheus PostgreSQL audit rules are loaded"
     )
 
     assert relay_health_task["ansible.builtin.uri"]["url"] == "{{ alertmanager_runtime_pgaudit_relay_health_url }}"
+    assert loaded_config_task["ansible.builtin.uri"]["url"] == "{{ alertmanager_runtime_url }}/api/v2/status"
+    assert "pgaudit-unknown-role-relay" in loaded_config_task["failed_when"]
+    assert "PostgresUnknownRoleConnection" in loaded_config_task["failed_when"]
     assert verify_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:9090/api/v1/rules"
     assert "PostgresPrivilegeChangeBurst" in verify_task["failed_when"]
     assert "PostgresUnknownRoleConnection" in verify_task["failed_when"]
+
+
+def test_alertmanager_package_env_template_pins_repo_managed_runtime_flags() -> None:
+    env_template = ALERTMANAGER_ENV_TEMPLATE.read_text()
+
+    assert "--config.file={{ alertmanager_runtime_config_file }}" in env_template
+    assert "--storage.path={{ alertmanager_runtime_data_dir }}" in env_template
+    assert "--web.listen-address=127.0.0.1:{{ alertmanager_runtime_port }}" in env_template
 
 
 def test_pgaudit_relay_templates_pin_local_listener_and_nats_publication_subject() -> None:

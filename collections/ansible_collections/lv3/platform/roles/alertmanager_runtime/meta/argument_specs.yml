@@ -9,6 +9,9 @@ argument_specs:
       alertmanager_runtime_service_name:
         type: str
         required: true
+      alertmanager_runtime_env_file:
+        type: path
+        required: true
       alertmanager_runtime_config_template:
         type: path
         required: true
