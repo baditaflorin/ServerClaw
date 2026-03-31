@@ -4270,7 +4270,7 @@
           "langfuse_encryption_key",
           "langfuse_clickhouse_password",
           "langfuse_redis_password",
-          "langfuse_minio_root_password",
+          "langfuse_minio_secret_key",
           "langfuse_bootstrap_user_password",
           "langfuse_project_secret_key",
           "keycloak_langfuse_client_secret"
@@ -4306,6 +4306,66 @@
         "max_steps": 350,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-minio": {
+      "description": "Deploy the shared MinIO runtime on docker-runtime-lv3, publish the public S3 API and authenticated console, and verify the launch buckets and policies.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-minio",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-minio"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "minio_root_password",
+          "langfuse_minio_secret_key",
+          "gitea_minio_secret_key",
+          "loki_minio_secret_key",
+          "platform_context_minio_secret_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-minio"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/minio-object-storage.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/minio.yml",
+        "playbooks/services/minio.yml",
+        "roles/minio_runtime",
+        "roles/nginx_edge_publication",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/generate_platform_vars.py",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/subdomain-catalog.json"
+      ],
+      "outputs": [
+        "A shared MinIO runtime on docker-runtime-lv3 with the public S3 API at minio.lv3.org, an authenticated operator console at minio-console.lv3.org, and repo-managed launch buckets for Langfuse, Gitea LFS, Loki, and RAG staging."
+      ],
+      "verification_commands": [
+        "make syntax-check-minio",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:9010/minio/health/live'",
+        "curl -fsSI https://minio.lv3.org/minio/health/live",
+        "curl -fsSI https://minio-console.lv3.org/"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"

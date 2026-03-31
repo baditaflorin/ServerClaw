@@ -4,13 +4,13 @@
 # Purpose: Machine-readable directory map enabling LLM agents to discover the
 #          full repository layout in a single read — no exploration needed.
 # Usage:   Read this file first. Use 'for_agents' hints to navigate task work.
-# Updated: 2026-03-29
+# Updated: 2026-03-30
 # Maintained by: Integration agent (human review on major reorganisations)
 # ============================================================================
 
 repository: proxmox_florin_server
 schema_version: 1
-last_updated: "2026-03-29"
+last_updated: "2026-03-30"
 purpose: |
   Infrastructure-as-code for a Hetzner dedicated server running Proxmox VE 9
   on Debian 13. Manages bootstrap, VM provisioning, networking, backup,
@@ -22,7 +22,7 @@ quick_start_for_agents:
   step_2: "Read AGENTS.md for working rules, conventions, and handoff protocol"
   step_3: "Read this file (.repo-structure.yaml) to navigate directories"
   step_4: "Read .config-locations.yaml to find where specific configs live"
-  step_5: "Read docs/adr/.index.yaml to search all 210+ decisions by keyword"
+  step_5: "Read docs/adr/.index.yaml to search all 320+ decisions by keyword"
   step_6: "Check workstreams.yaml for parallel work already in flight"
   note: >
     Do NOT glob-explore the tree. All key paths are listed below.
@@ -72,12 +72,12 @@ directories:
 
   docs/adr:
     purpose: Architecture Decision Records — every major design decision
-    contains: "0001.md through 0213.md; .index.yaml for machine-readable search"
+    contains: "ADR markdown files plus .index.yaml for machine-readable search"
     concern: governance, architecture
     keywords: [decisions, architecture, history, rationale, consequences, adr]
     for_agents: >
       Read .index.yaml to find relevant ADRs by keyword — do not enumerate
-      all 170+ files. Start here for project direction and design rationale.
+      all 320+ files. Start here for project direction and design rationale.
     key_files:
       ".index.yaml": "Machine-readable ADR catalog — search by keyword/concern"
 

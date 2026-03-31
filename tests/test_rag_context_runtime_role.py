@@ -9,6 +9,7 @@ VERIFY_TASKS = REPO_ROOT / "roles" / "rag_context_runtime" / "tasks" / "verify.y
 COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "rag_context_runtime" / "templates" / "docker-compose.yml.j2"
 ROLE_DEFAULTS = REPO_ROOT / "roles" / "rag_context_runtime" / "defaults" / "main.yml"
 ENV_TEMPLATE = REPO_ROOT / "roles" / "rag_context_runtime" / "templates" / "platform-context.env.j2"
+ENV_CTEMPLATE = REPO_ROOT / "roles" / "rag_context_runtime" / "templates" / "platform-context.env.ctmpl.j2"
 REQUIREMENTS = REPO_ROOT / "requirements" / "platform-context-api.txt"
 
 
@@ -59,9 +60,11 @@ def test_role_restores_docker_nat_chain_before_recreate() -> None:
     assert wait_task["ansible.builtin.command"]["argv"] == ["docker", "info", "--format", '{{ "{{.ServerVersion}}" }}']
 
 
-def test_role_defaults_do_not_depend_on_platform_service_topology() -> None:
+def test_role_defaults_include_minio_staging_contract() -> None:
     defaults = ROLE_DEFAULTS.read_text()
-    assert "platform_service_topology" not in defaults
+    assert "platform_context_minio_secret_key_local_file" in defaults
+    assert "platform_context_minio_bucket_name: rag-staging" in defaults
+    assert "platform_service_url('minio', 'internal')" in defaults
     assert "platform_context_memory_dsn" in defaults
     assert "platform_context_memory_collection" in defaults
 
@@ -78,6 +81,18 @@ def test_env_template_exposes_serverclaw_memory_settings() -> None:
     assert "PLATFORM_CONTEXT_MEMORY_DSN" in template
     assert "PLATFORM_CONTEXT_MEMORY_COLLECTION" in template
     assert "PLATFORM_CONTEXT_MEMORY_INDEX_PATH" in template
+    assert "PLATFORM_CONTEXT_STAGING_S3_ENDPOINT" in template
+    assert "PLATFORM_CONTEXT_STAGING_S3_BUCKET" in template
+    assert "PLATFORM_CONTEXT_STAGING_S3_SECRET_ACCESS_KEY" in template
+    assert template.count("PLATFORM_CONTEXT_OLLAMA_URL") == 1
+
+
+def test_env_ctemplate_exposes_openbao_backed_minio_staging_settings() -> None:
+    template = ENV_CTEMPLATE.read_text(encoding="utf-8")
+    assert "PLATFORM_CONTEXT_STAGING_S3_ENDPOINT" in template
+    assert "PLATFORM_CONTEXT_STAGING_S3_BUCKET" in template
+    assert "PLATFORM_CONTEXT_STAGING_S3_SECRET_ACCESS_KEY=[[ with secret " in template
+    assert template.count("PLATFORM_CONTEXT_OLLAMA_URL") == 1
 
 
 def test_platform_context_requirements_keep_sentence_transformers_optional() -> None:
@@ -196,3 +211,10 @@ def test_verify_tasks_smoke_serverclaw_memory_query() -> None:
         == "Verify the ServerClaw memory query endpoint returns the smoke entry through both recall paths"
     )
     assert smoke_task["ansible.builtin.uri"]["url"] == "{{ platform_context_private_url }}/v1/memory/query"
+
+
+def test_role_requires_platform_context_minio_secret_before_runtime_render() -> None:
+    tasks = load_tasks()
+    names = {task["name"] for task in tasks}
+    assert "Ensure the platform context MinIO secret key exists on the control machine" in names
+    assert "Fail if the platform context MinIO secret key is missing locally" in names

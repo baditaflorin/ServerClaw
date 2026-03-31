@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  openbao-agent:
+    image: {{ minio_openbao_agent_image }}
+    container_name: {{ minio_openbao_agent_container_name }}
+    restart: unless-stopped
+    user: "0:0"
+    entrypoint:
+      - /bin/sh
+      - -lc
+      - >-
+        vault agent -config=/vault/agent.hcl
+    environment:
+      BAO_ADDR: http://host.docker.internal:{{ openbao_http_port }}
+      BAO_SKIP_VERIFY: "true"
+      BAO_SKIP_DROP_ROOT: "true"
+    volumes:
+      - {{ minio_openbao_agent_dir }}:/vault:rw
+      - {{ minio_env_file | dirname }}:{{ minio_env_file | dirname }}:rw
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  minio:
+    image: {{ minio_image }}
+    container_name: {{ minio_container_name }}
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_started
+    env_file:
+      - {{ minio_env_file }}
+    command:
+      - server
+      - /data
+      - --console-address
+      - :9001
+    ports:
+      - "{{ minio_api_port }}:9000"
+      - "{{ minio_console_port }}:9001"
+    volumes:
+      - {{ minio_data_dir }}:/data

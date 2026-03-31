@@ -1,0 +1,116 @@
+---
+# Playbook: minio.yml
+# Purpose: Converge the shared MinIO object-storage runtime, its public DNS publication, and the authenticated console edge route.
+# Use case: Run during ADR 0274 deployment, upgrade, or recovery when the platform-wide S3-compatible storage layer must match repo truth.
+#
+# Inputs (required):
+#   - proxmox_guest_ssh_connection_mode (string, required): SSH path used by the docker-runtime and edge guest plays.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Selects the target environment lane.
+#
+# Outputs:
+#   - MinIO DNS records, runtime configuration, bucket policies, and edge publication are reconciled to the declared platform state.
+#
+# Idempotency: Partially idempotent
+#              Reruns reconcile the same runtime, bucket policies, and public publication without mutating protected release truth on this branch.
+#
+# Dependencies:
+#   - ADR 0274: Defines MinIO as the shared S3-compatible object-storage layer.
+#   - Requires: docker-runtime-lv3, nginx-lv3, and OpenBao to already exist.
+#   - Role: lv3.platform.minio_runtime - converges the MinIO runtime, credentials, buckets, and policies.
+#   - Role: lv3.platform.nginx_edge_publication - publishes the API and authenticated console through the shared edge.
+#
+# Related ADRs: 0077, 0165, 0274
+# Related Runbooks: docs/runbooks/minio-object-storage.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- name: Ensure Hetzner DNS publication for MinIO
+  hosts: proxmox_hosts
+  become: false
+  gather_facts: false
+
+  tasks:
+    - name: Ensure Hetzner DNS records are present
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_records
+        apply:
+          delegate_to: localhost
+          become: false
+      run_once: true
+
+- name: Converge MinIO on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.minio
+        playbook_execution_audit_target: minio
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.minio_runtime
+
+- name: Publish MinIO through the NGINX edge
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication
+
+- name: Verify MinIO public publication after edge convergence
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+
+  tasks:
+    - name: Verify the MinIO public health endpoint
+      ansible.builtin.uri:
+        url: "{{ minio_public_url }}/minio/health/live"
+        method: GET
+        status_code: 200
+        return_content: false
+        timeout: 30
+      changed_when: false
+
+    - name: Verify the MinIO console redirects through oauth2-proxy
+      ansible.builtin.uri:
+        url: "{{ minio_console_public_url }}/"
+        method: GET
+        follow_redirects: none
+        status_code: 302
+        return_content: false
+        timeout: 30
+      register: minio_console_public_redirect
+      changed_when: false
+
+    - name: Assert the MinIO console stays behind oauth2-proxy
+      ansible.builtin.assert:
+        that:
+          - "'/oauth2/' in (minio_console_public_redirect.location | default(''))"
+        fail_msg: >-
+          {{ minio_console_public_url }} must redirect through oauth2-proxy before exposing the MinIO console.

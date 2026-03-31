@@ -246,6 +246,15 @@
       "adr": "0282"
     },
     {
+      "id": "minio",
+      "service": "minio",
+      "name": "MinIO",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "data",
+      "adr": "0274"
+    },
+    {
       "id": "redpanda",
       "service": "redpanda",
       "name": "Redpanda",
@@ -827,6 +836,12 @@
       "description": "Gitea persists repositories, metadata, and issue state in Postgres."
     },
     {
+      "from": "gitea",
+      "to": "minio",
+      "type": "soft",
+      "description": "Git LFS object reads and writes depend on the shared MinIO bucket, while repository hosting and metadata remain available without new LFS traffic."
+    },
+    {
       "from": "gotenberg",
       "to": "api_gateway",
       "type": "soft",
@@ -849,6 +864,12 @@
       "to": "nginx_edge",
       "type": "soft",
       "description": "Public access to grafana.lv3.org depends on the shared NGINX edge; private reachability remains available if the edge is degraded."
+    },
+    {
+      "from": "grafana",
+      "to": "minio",
+      "type": "soft",
+      "description": "Loki chunk persistence now depends on the shared MinIO bucket, while metrics and trace dashboards can still serve partial observability if object storage is degraded."
     },
     {
       "from": "harbor",
@@ -924,6 +945,12 @@
     },
     {
       "from": "langfuse",
+      "to": "minio",
+      "type": "soft",
+      "description": "Langfuse event export and media attachment flows depend on the shared MinIO bucket, while core trace and project metadata remain available from Postgres and ClickHouse."
+    },
+    {
+      "from": "langfuse",
       "to": "openbao",
       "type": "startup_only",
       "description": "Langfuse starts from OpenBao-rendered runtime secrets mirrored into its compose environment."
@@ -933,6 +960,18 @@
       "to": "postgres",
       "type": "hard",
       "description": "Langfuse stores application metadata, users, projects, and bootstrap state in Postgres."
+    },
+    {
+      "from": "minio",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public API and console reachability depend on the shared NGINX edge publication path, while the private guest-network listeners remain reachable directly."
+    },
+    {
+      "from": "minio",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "MinIO starts from OpenBao-rendered root credentials mirrored into its compose environment before bucket and policy reconciliation runs."
     },
     {
       "from": "mail_platform",
@@ -1239,6 +1278,12 @@
       "to": "openbao",
       "type": "startup_only",
       "description": "The platform context API loads its bearer token and runtime configuration from OpenBao-rendered environment files."
+    },
+    {
+      "from": "platform_context_api",
+      "to": "minio",
+      "type": "soft",
+      "description": "Raw document upload staging depends on the shared MinIO bucket, while read-only query access can still run against the indexed corpus if staging is unavailable."
     },
     {
       "from": "platform_context_api",

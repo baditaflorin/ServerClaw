@@ -63,6 +63,8 @@ PORT_KEYS = (
     "searxng_host_proxy_port",
     "langfuse_port",
     "plausible_port",
+    "minio_api_port",
+    "minio_console_port",
     "flagsmith_port",
     "dify_port",
     "changedetection_port",
@@ -363,6 +365,39 @@ def build_dns_records(
                 "ttl": dns["ttl"],
             }
         )
+        additional_records = require_list(
+            dns.get("additional_records", []),
+            f"service_topology.{service_id}.dns.additional_records",
+        )
+        for index, extra_record in enumerate(additional_records):
+            extra_record = require_mapping(
+                extra_record,
+                f"service_topology.{service_id}.dns.additional_records[{index}]",
+            )
+            append_record(
+                visibility,
+                {
+                    "name": require_string(
+                        extra_record.get("name"),
+                        f"service_topology.{service_id}.dns.additional_records[{index}].name",
+                    ),
+                    "type": require_string(
+                        extra_record.get("type"),
+                        f"service_topology.{service_id}.dns.additional_records[{index}].type",
+                    ),
+                    "value": resolve_dns_target(
+                        require_string(
+                            extra_record.get("target"),
+                            f"service_topology.{service_id}.dns.additional_records[{index}].target",
+                        ),
+                        host_vars,
+                    ),
+                    "ttl": require_int(
+                        extra_record.get("ttl"),
+                        f"service_topology.{service_id}.dns.additional_records[{index}].ttl",
+                    ),
+                },
+            )
         edge = require_mapping(service.get("edge", {}), f"service_topology.{service_id}.edge")
         aliases = require_string_list(edge.get("aliases", []), f"service_topology.{service_id}.edge.aliases")
         if visibility != "public" or not aliases:
@@ -417,6 +452,7 @@ def build_service_urls(
     port_map: dict[str, Any] = {}
 
     public_hostname = service.get("public_hostname")
+    console_public_hostname = service.get("console_public_hostname")
     if public_hostname:
         if service_id == "gitea":
             urls["public"] = service_url("http", public_hostname, ports["gitea_host_proxy_port"])
@@ -517,6 +553,13 @@ def build_service_urls(
     elif service_id == "plausible":
         urls["internal"] = service_url("http", private_ip, ports["plausible_port"])
         port_map["internal"] = ports["plausible_port"]
+    elif service_id == "minio":
+        urls["internal"] = service_url("http", private_ip, ports["minio_api_port"])
+        urls["console_internal"] = service_url("http", private_ip, ports["minio_console_port"])
+        if console_public_hostname:
+            urls["console_public"] = f"https://{console_public_hostname}"
+        port_map["internal"] = ports["minio_api_port"]
+        port_map["console"] = ports["minio_console_port"]
     elif service_id == "mailpit":
         urls["internal"] = service_url("http", private_ip, ports["mailpit_http_port"])
         urls["smtp"] = service_url("smtp", private_ip, ports["mailpit_smtp_port"])
@@ -847,6 +890,7 @@ def build_platform_vars(
     mattermost_service = service_topology["mattermost"]
     matrix_synapse_service = service_topology["matrix_synapse"]
     gitea_service = service_topology["gitea"]
+    minio_service = service_topology["minio"]
     netbox_service = service_topology["netbox"]
     open_webui_service = service_topology["open_webui"]
     plane_service = service_topology["plane"]
@@ -1025,6 +1069,8 @@ def build_platform_vars(
         "gitea_root_url": gitea_service["urls"].get("public", gitea_service["urls"]["controller"]),
         "gitea_private_base_url": gitea_service["urls"]["internal"],
         "gitea_controller_url": gitea_service["urls"]["controller"],
+        "minio_public_url": minio_service["urls"]["public"],
+        "minio_console_public_url": minio_service["urls"]["console_public"],
         "platform_context_internal_port": resolved_ports["platform_context_internal_port"],
         "platform_context_host_proxy_port": resolved_ports["platform_context_host_proxy_port"],
         "platform_context_private_url": f"http://127.0.0.1:{resolved_ports['platform_context_internal_port']}",

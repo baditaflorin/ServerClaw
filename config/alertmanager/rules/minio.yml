@@ -1,0 +1,13 @@
+groups:
+  - name: lv3-minio
+    rules:
+      - alert: MinioDown
+        expr: probe_success{service="minio",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: minio
+        annotations:
+          summary: MinIO is unreachable on the shared object-storage endpoint.
+          description: The MinIO readiness probe on docker-runtime-lv3 has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/minio-object-storage/

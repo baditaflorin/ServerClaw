@@ -155,6 +155,16 @@
       "description": "Mailpit remains reachable on the private guest-network listener for staging and development SMTP capture flows."
     },
     {
+      "id": "minio-availability",
+      "service_id": "minio",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://minio.lv3.org/minio/health/live",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The shared MinIO S3-compatible object-storage API remains reachable through the public LV3 edge."
+    },
+    {
       "id": "matrix-synapse-availability",
       "service_id": "matrix_synapse",
       "indicator": "availability",

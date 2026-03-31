@@ -4,6 +4,10 @@ portal_display: full
 tags:
   - architecture
   - dependency-graph
+pagefind_section: architecture
+pagefind_audience:
+  - contributors
+  - operators
 ---
 
 !!! note "Sensitivity: INTERNAL"
@@ -17,7 +21,7 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
+| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
 | `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway, Woodpecker CI |
 | `4` | Ops Portal |
@@ -37,6 +41,7 @@ graph TD
     jupyterhub["JupyterHub\nTier 1"]
     mail_platform["Mail Platform\nTier 1"]
     mailpit["Mailpit\nTier 1"]
+    minio["MinIO\nTier 1"]
     nats_jetstream["NATS JetStream\nTier 1"]
     realtime["Netdata Realtime Metrics\nTier 1"]
     nginx_edge["NGINX Edge\nTier 1"]
@@ -133,11 +138,13 @@ graph TD
     flagsmith -->|hard| postgres
     gitea -->|soft| docker_build
     gitea -->|soft| keycloak
+    gitea -->|soft| minio
     gitea -->|startup_only| openbao
     gitea -->|hard| postgres
     gotenberg -->|soft| api_gateway
     gotenberg -->|hard| docker_runtime
     grafana -->|soft| keycloak
+    grafana -->|soft| minio
     grafana -->|soft| nginx_edge
     harbor -->|soft| keycloak
     harbor -->|soft| nginx_edge
@@ -155,6 +162,7 @@ graph TD
     keycloak -->|hard| postgres
     keycloak -->|startup_only| step_ca
     langfuse -->|soft| keycloak
+    langfuse -->|soft| minio
     langfuse -->|soft| nginx_edge
     langfuse -->|startup_only| openbao
     langfuse -->|hard| postgres
@@ -165,6 +173,8 @@ graph TD
     matrix_synapse -->|hard| postgres
     mattermost -->|startup_only| openbao
     mattermost -->|hard| postgres
+    minio -->|soft| nginx_edge
+    minio -->|startup_only| openbao
     n8n -->|soft| keycloak
     n8n -->|soft| nginx_edge
     n8n -->|startup_only| openbao
@@ -200,6 +210,7 @@ graph TD
     plane -->|soft| nginx_edge
     plane -->|startup_only| openbao
     plane -->|hard| postgres
+    platform_context_api -->|soft| minio
     platform_context_api -->|startup_only| openbao
     platform_context_api -->|reads_from| step_ca
     plausible -->|hard| docker_runtime
