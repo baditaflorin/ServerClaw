@@ -10,5 +10,7 @@ ollama_runtime_port: "{{ platform_service_topology | platform_service_port('olla
 ollama_runtime_base_url: "{{ platform_service_topology | platform_service_url('ollama', 'internal') }}"
 ollama_runtime_model_catalog_path: "{{ inventory_dir | dirname }}/config/ollama-models.yaml"
 ollama_runtime_default_model: llama3.2:3b
+ollama_runtime_image_pull_retries: 3
+ollama_runtime_image_pull_delay_seconds: 15
 ollama_runtime_memory_limit: 8g
 ollama_runtime_cpu_limit: 4

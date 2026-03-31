@@ -18,6 +18,23 @@ def test_role_defaults_pin_private_model_storage() -> None:
     assert defaults["ollama_runtime_model_dir"] == "{{ ollama_runtime_data_dir }}/models"
     assert defaults["ollama_runtime_compose_project_name"] == "{{ ollama_runtime_site_dir | basename }}"
     assert defaults["ollama_runtime_default_model"] == "llama3.2:3b"
+    assert defaults["ollama_runtime_image_pull_retries"] == 3
+    assert defaults["ollama_runtime_image_pull_delay_seconds"] == 15
+
+
+def test_role_retries_transient_ollama_image_pull_failures() -> None:
+    tasks = load_tasks()
+    pull_task = next(task for task in tasks if task.get("name") == "Pull the Ollama image")
+    assert pull_task["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "compose",
+        "--file",
+        "{{ ollama_runtime_compose_file }}",
+        "pull",
+    ]
+    assert pull_task["retries"] == "{{ ollama_runtime_image_pull_retries }}"
+    assert pull_task["delay"] == "{{ ollama_runtime_image_pull_delay_seconds }}"
+    assert pull_task["until"] == "ollama_runtime_pull.rc == 0"
 
 
 def test_role_only_pulls_missing_startup_models_inside_container() -> None:

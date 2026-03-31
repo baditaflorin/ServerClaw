@@ -73,6 +73,9 @@
   args:
     chdir: "{{ ollama_runtime_site_dir }}"
   register: ollama_runtime_pull
+  retries: "{{ ollama_runtime_image_pull_retries }}"
+  delay: "{{ ollama_runtime_image_pull_delay_seconds }}"
+  until: ollama_runtime_pull.rc == 0
   changed_when: >-
     'Pulling' in ollama_runtime_pull.stdout
     or 'Downloaded newer image' in ollama_runtime_pull.stdout
