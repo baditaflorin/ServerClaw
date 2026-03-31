@@ -400,6 +400,21 @@
   changed_when: false
   when: windmill_postgres_writable_check.stdout | trim == "1"
 
+- name: Recheck local PostgreSQL SQL readiness before world_state reconciliation
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - SELECT 1
+  register: windmill_postgres_world_state_sql_probe
+  changed_when: false
+  retries: 12
+  delay: 5
+  until: windmill_postgres_world_state_sql_probe.stdout | trim == "1"
+  when: windmill_postgres_writable_check.stdout | trim == "1"
+
 - name: Check whether the world_state schema already exists
   become: true
   become_user: postgres
@@ -413,7 +428,9 @@
       - "SELECT 1 FROM pg_namespace WHERE nspname = 'world_state'"
   register: windmill_world_state_schema_check
   changed_when: false
-  when: windmill_postgres_writable_check.stdout | trim == "1"
+  when:
+    - windmill_postgres_writable_check.stdout | trim == "1"
+    - windmill_postgres_world_state_sql_probe.stdout | trim == "1"
 
 - name: Ensure the Windmill support role can use the world_state schema
   become: true

@@ -6088,6 +6088,7 @@ workstreams:
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
             - docs/runbooks/configure-windmill.md
             - docs/runbooks/windmill-default-operations-surface.md
+            - tests/test_windmill_default_operations_surface.py
           mode: shared_contract
           contract: windmill-seed-scripts-v1
         - id: serverclaw_skill_pack_repo_surface
@@ -6102,7 +6103,6 @@ workstreams:
             - tests/test_serverclaw_skill_packs.py
             - tests/test_serverclaw_skills_windmill.py
             - tests/test_agent_tool_registry.py
-            - tests/test_windmill_default_operations_surface.py
           mode: exclusive
     ready_to_merge: false
     live_applied: false

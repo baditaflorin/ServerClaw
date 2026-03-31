@@ -125,6 +125,8 @@ def test_windmill_postgres_support_role_enforces_bypassrls() -> None:
     assert "ALTER ROLE {{ windmill_database_support_role }} BYPASSRLS" in tasks
     assert "Wait for local PostgreSQL SQL readiness before Windmill role reconciliation" in tasks
     assert "windmill_postgres_local_sql_probe.stdout | trim == \"1\"" in tasks
+    assert "Recheck local PostgreSQL SQL readiness before world_state reconciliation" in tasks
+    assert "windmill_postgres_world_state_sql_probe.stdout | trim == \"1\"" in tasks
     assert "windmill_postgres_writable_check.rc == 0" in tasks
     assert "SHOW shared_preload_libraries" in tasks
     assert "SELECT 1 FROM pg_extension WHERE extname = 'pgaudit'" in tasks
