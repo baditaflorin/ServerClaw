@@ -6,9 +6,12 @@ grist_session_authority: "{{ platform_session_authority }}"
 grist_site_dir: /opt/grist
 grist_persist_dir: "{{ grist_site_dir }}/persist"
 grist_secret_dir: /etc/lv3/grist
+grist_runtime_uid: "1001"
+grist_runtime_gid: "1001"
 grist_compose_file: "{{ grist_site_dir }}/docker-compose.yml"
+grist_static_env_file: "{{ grist_site_dir }}/grist.env"
 grist_env_file: "{{ compose_runtime_secret_root }}/grist/runtime.env"
-grist_legacy_env_file: "{{ grist_site_dir }}/grist.env"
+grist_legacy_env_file: "{{ grist_site_dir }}/grist.legacy.env"
 grist_openbao_agent_dir: "{{ grist_site_dir }}/openbao"
 grist_openbao_agent_image: "{{ openbao_agent_image }}"
 grist_openbao_agent_container_name: grist-openbao-agent

@@ -1944,6 +1944,341 @@ workstreams:
       included_in_repo_version: 0.177.88
       latest_receipts:
         validation_runner_contracts: 2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply
+  - id: ws-0279-live-apply
+    adr: "0279"
+    title: Live apply Grist from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0279-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0279-live-apply.md
+    depends_on:
+      - adr-0063-keycloak-sso
+      - adr-0086-backup-and-recovery
+      - adr-0191-immutable-guest-replacement
+      - adr-0279-grist-as-the-no-code-operational-spreadsheet-database
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0279-live-apply.md
+      - docs/adr/0279-grist-as-the-no-code-operational-spreadsheet-database.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-grist.md
+      - playbooks/grist.yml
+      - playbooks/services/grist.yml
+      - collections/ansible_collections/lv3/platform/roles/grist_runtime/
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - config/ansible-execution-scopes.yaml
+      - config/subdomain-catalog.json
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
+      - config/secret-catalog.json
+      - config/controller-local-secrets.json
+      - config/image-catalog.json
+      - config/certificate-catalog.json
+      - config/api-gateway-catalog.json
+      - config/dependency-graph.json
+      - config/slo-catalog.json
+      - config/data-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/grafana/dashboards/grist.json
+      - config/grafana/dashboards/slo-overview.json
+      - config/alertmanager/rules/grist.yml
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/file_sd/https_tls_targets.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/https_tls_alerts.yml
+      - config/uptime-kuma/monitors.json
+      - config/subdomain-exposure-registry.json
+      - docs/site-generated/architecture/dependency-graph.md
+      - receipts/ops-portal-snapshot.html
+      - scripts/generate_platform_vars.py
+      - receipts/image-scans/2026-03-30-grist-runtime.json
+      - receipts/image-scans/2026-03-30-grist-runtime.trivy.json
+      - receipts/live-applies/2026-03-30-adr-0279-grist-live-apply.json
+      - receipts/live-applies/evidence/2026-03-30-adr-0279-grist-live-apply.txt
+      - tests/test_grist_runtime_role.py
+      - tests/test_grist_playbook.py
+      - tests/test_keycloak_runtime_role.py
+      - tests/test_openbao_compose_env_helper.py
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0279_docs
+          paths:
+            - docs/workstreams/ws-0279-live-apply.md
+            - docs/adr/0279-grist-as-the-no-code-operational-spreadsheet-database.md
+            - docs/runbooks/configure-grist.md
+          mode: exclusive
+        - id: adr_0279_runtime_automation
+          paths:
+            - playbooks/grist.yml
+            - playbooks/services/grist.yml
+            - collections/ansible_collections/lv3/platform/roles/grist_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/**
+            - tests/test_grist_runtime_role.py
+            - tests/test_grist_playbook.py
+            - tests/test_keycloak_runtime_role.py
+          mode: exclusive
+        - id: adr_0279_openbao_compose_env_helper_contract
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+          mode: shared_contract
+          contract: openbao-compose-env-helper-v1
+        - id: adr_0279_platform_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: adr_0279_shared_catalog_contract
+          paths:
+            - config/ansible-execution-scopes.yaml
+            - config/subdomain-catalog.json
+            - config/service-capability-catalog.json
+            - config/health-probe-catalog.json
+            - config/secret-catalog.json
+            - config/controller-local-secrets.json
+            - config/image-catalog.json
+            - config/certificate-catalog.json
+            - config/api-gateway-catalog.json
+            - config/dependency-graph.json
+            - config/slo-catalog.json
+            - config/data-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/grafana/dashboards/slo-overview.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/file_sd/https_tls_targets.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/https_tls_alerts.yml
+            - config/uptime-kuma/monitors.json
+            - config/subdomain-exposure-registry.json
+          mode: shared_contract
+          contract: service-catalogs-v1
+        - id: adr_0279_grist_specific_catalogs
+          paths:
+            - config/grafana/dashboards/grist.json
+            - config/alertmanager/rules/grist.yml
+          mode: exclusive
+        - id: adr_0279_generated_portals_contract
+          paths:
+            - docs/site-generated/architecture/dependency-graph.md
+            - receipts/ops-portal-snapshot.html
+          mode: shared_contract
+          contract: generated-portals-v1
+        - id: adr_0279_live_receipts
+          paths:
+            - receipts/image-scans/2026-03-30-grist-runtime.json
+            - receipts/image-scans/2026-03-30-grist-runtime.trivy.json
+            - receipts/live-applies/2026-03-30-adr-0279-grist-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-adr-0279-grist-live-apply.txt
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      included_in_repo_version: 0.177.113
+      latest_receipts:
+        grist: 2026-03-31-adr-0279-grist-mainline-live-apply
+  - id: ws-0279-main-merge
+    adr: "0279"
+    title: Integrate ADR 0279 exact-main replay onto current origin/main
+    status: ready_for_merge
+    owner: codex
+    branch: codex/ws-0279-main-merge-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-merge-r2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0279-main-merge.md
+    depends_on:
+      - ws-0279-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0279-main-merge.md
+      - docs/workstreams/ws-0279-live-apply.md
+      - docs/adr/0279-grist-as-the-no-code-operational-spreadsheet-database.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-grist.md
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - playbooks/grist.yml
+      - playbooks/services/grist.yml
+      - collections/ansible_collections/lv3/platform/roles/grist_runtime/
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/
+      - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+      - config/ansible-execution-scopes.yaml
+      - config/subdomain-catalog.json
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
+      - config/secret-catalog.json
+      - config/controller-local-secrets.json
+      - config/image-catalog.json
+      - config/certificate-catalog.json
+      - config/api-gateway-catalog.json
+      - config/dependency-graph.json
+      - config/slo-catalog.json
+      - config/data-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/grafana/dashboards/grist.json
+      - config/grafana/dashboards/slo-overview.json
+      - config/alertmanager/rules/grist.yml
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/file_sd/https_tls_targets.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/https_tls_alerts.yml
+      - config/uptime-kuma/monitors.json
+      - config/subdomain-exposure-registry.json
+      - docs/site-generated/architecture/dependency-graph.md
+      - receipts/ops-portal-snapshot.html
+      - receipts/image-scans/2026-03-30-grist-runtime.json
+      - receipts/image-scans/2026-03-30-grist-runtime.trivy.json
+      - receipts/live-applies/2026-03-30-adr-0279-grist-live-apply.json
+      - receipts/live-applies/2026-03-30-adr-0279-grist-mainline-live-apply.json
+      - receipts/live-applies/2026-03-31-adr-0279-grist-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-30-adr-0279-*
+      - receipts/live-applies/evidence/2026-03-30-ws-0279-mainline-*
+      - receipts/live-applies/evidence/2026-03-31-adr-0279-*
+      - receipts/live-applies/evidence/2026-03-31-ws-0279-*
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0279_main_merge_docs
+          paths:
+            - docs/workstreams/ws-0279-main-merge.md
+            - docs/workstreams/ws-0279-live-apply.md
+            - docs/adr/0279-grist-as-the-no-code-operational-spreadsheet-database.md
+            - docs/runbooks/configure-grist.md
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-0279-mainline-docs-v1
+        - id: adr_0279_main_merge_runtime
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - playbooks/grist.yml
+            - playbooks/services/grist.yml
+            - collections/ansible_collections/lv3/platform/roles/grist_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+            - scripts/generate_platform_vars.py
+            - tests/test_common_docker_bridge_chains_helper.py
+            - tests/test_grist_runtime_role.py
+            - tests/test_grist_playbook.py
+            - tests/test_keycloak_runtime_role.py
+            - tests/test_mail_platform_runtime_role.py
+            - tests/test_openbao_compose_env_helper.py
+          mode: shared_contract
+          contract: adr-0279-mainline-runtime-v1
+        - id: adr_0279_main_merge_shared_catalog_contract
+          paths:
+            - config/ansible-execution-scopes.yaml
+            - config/subdomain-catalog.json
+            - config/service-capability-catalog.json
+            - config/health-probe-catalog.json
+            - config/secret-catalog.json
+            - config/controller-local-secrets.json
+            - config/image-catalog.json
+            - config/certificate-catalog.json
+            - config/api-gateway-catalog.json
+            - config/dependency-graph.json
+            - config/slo-catalog.json
+            - config/data-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/grafana/dashboards/slo-overview.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/file_sd/https_tls_targets.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/https_tls_alerts.yml
+            - config/uptime-kuma/monitors.json
+            - config/subdomain-exposure-registry.json
+          mode: shared_contract
+          contract: service-catalogs-v1
+        - id: adr_0279_main_merge_grist_specific_catalogs
+          paths:
+            - config/grafana/dashboards/grist.json
+            - config/alertmanager/rules/grist.yml
+          mode: shared_contract
+          contract: adr-0279-mainline-grist-catalogs-v1
+        - id: adr_0279_main_merge_release_truth
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - docs/site-generated/architecture/dependency-graph.md
+            - receipts/ops-portal-snapshot.html
+          mode: shared_contract
+          contract: mainline-truth-surfaces-v1
+        - id: adr_0279_main_merge_receipts
+          paths:
+            - receipts/image-scans/2026-03-30-grist-runtime.json
+            - receipts/image-scans/2026-03-30-grist-runtime.trivy.json
+            - receipts/live-applies/2026-03-30-adr-0279-grist-live-apply.json
+            - receipts/live-applies/2026-03-30-adr-0279-grist-mainline-live-apply.json
+            - receipts/live-applies/2026-03-31-adr-0279-grist-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-adr-0279-*
+            - receipts/live-applies/evidence/2026-03-30-ws-0279-mainline-*
+            - receipts/live-applies/evidence/2026-03-31-adr-0279-*
+            - receipts/live-applies/evidence/2026-03-31-ws-0279-mainline-*
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: integrates ADR 0279 into main by replaying the Grist
+        service on the synchronized 0.177.112 / 0.130.74 baseline, landing the
+        Grist persist-ownership repair plus the Docker bridge-chain, Keycloak,
+        and mail-platform recovery hardening discovered during the latest-main
+        run, restoring the split static-plus-secret Grist OIDC runtime
+        configuration, and advancing platform_version to 0.130.75 after the
+        successful March 31 r5 live apply
+      release_bump: patch
+      included_in_repo_version: 0.177.113
+      latest_receipts:
+        grist: 2026-03-31-adr-0279-grist-mainline-live-apply
   - id: ws-0283-live-apply
     adr: "0283"
     title: Live apply Plausible Analytics from latest origin/main

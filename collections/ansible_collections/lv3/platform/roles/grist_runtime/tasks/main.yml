@@ -8,7 +8,10 @@
       - grist_persist_dir | length > 0
       - grist_secret_dir | length > 0
       - grist_compose_file | length > 0
+      - grist_static_env_file | length > 0
       - grist_env_file | length > 0
+      - grist_runtime_uid | length > 0
+      - grist_runtime_gid | length > 0
       - grist_internal_port | int > 0
       - grist_internal_base_url | length > 0
       - grist_public_base_url | length > 0
@@ -57,6 +60,22 @@
       mode: "0755"
     - path: "{{ grist_secret_dir }}"
       mode: "0700"
+
+- name: Ensure the Grist persist directory is writable by the runtime user
+  ansible.builtin.file:
+    path: "{{ grist_persist_dir }}"
+    state: directory
+    owner: "{{ grist_runtime_uid }}"
+    group: "{{ grist_runtime_gid }}"
+    mode: "0755"
+
+- name: Ensure existing Grist persist content is owned by the runtime user
+  ansible.builtin.file:
+    path: "{{ grist_persist_dir }}"
+    state: directory
+    owner: "{{ grist_runtime_uid }}"
+    group: "{{ grist_runtime_gid }}"
+    recurse: true
 
 - name: Generate the Grist session secret
   ansible.builtin.shell: |
@@ -142,7 +161,7 @@
 - name: Render the Grist environment file
   ansible.builtin.template:
     src: grist.env.j2
-    dest: "{{ grist_env_file }}"
+    dest: "{{ grist_static_env_file }}"
     owner: root
     group: root
     mode: "0600"
@@ -228,6 +247,20 @@
       - grist_docker_nat_chain.rc == 0 or grist_docker_nat_chain_recheck.rc == 0
     fail_msg: "Docker is running but the nat DOCKER chain is missing; Grist published ports will fail."
 
+- name: Wait for the Keycloak issuer discovery document before Grist startup
+  ansible.builtin.uri:
+    url: "{{ grist_keycloak_issuer }}/.well-known/openid-configuration"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: grist_keycloak_discovery
+  retries: 18
+  delay: 5
+  until: >-
+    grist_keycloak_discovery.status == 200
+    and ((grist_keycloak_discovery.json | default({})).issuer | default('')) == grist_keycloak_issuer
+  changed_when: false
+
 - name: Check whether the Grist local port is already published
   ansible.builtin.wait_for:
     host: 127.0.0.1
@@ -277,10 +310,96 @@
     'Creating' in grist_force_recreate_up.stdout
     or 'Recreating' in grist_force_recreate_up.stdout
     or 'Starting' in grist_force_recreate_up.stdout
-  retries: 2
-  delay: 3
-  until: grist_force_recreate_up.rc == 0
+  failed_when: false
   when: grist_force_recreate | bool
+
+- name: Flag stale Grist compose-network failures during force-recreate
+  ansible.builtin.set_fact:
+    grist_force_recreate_network_missing: >-
+      {{
+        (grist_force_recreate_up.rc | default(0)) != 0
+        and 'failed to create endpoint' in (grist_force_recreate_up.stderr | default(''))
+        and 'does not exist' in (grist_force_recreate_up.stderr | default(''))
+      }}
+  when: grist_force_recreate | bool
+
+- name: Surface unexpected Grist force-recreate failures
+  ansible.builtin.fail:
+    msg: >-
+      {{
+        grist_force_recreate_up.stderr
+        | default(grist_force_recreate_up.msg | default('grist compose force-recreate failed'))
+      }}
+  when:
+    - grist_force_recreate | bool
+    - (grist_force_recreate_up.rc | default(0)) != 0
+    - not (grist_force_recreate_network_missing | default(false))
+
+- name: Reset stale Grist compose resources before retrying force-recreate
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ grist_compose_file }}"
+      - down
+      - --remove-orphans
+  args:
+    chdir: "{{ grist_site_dir }}"
+  register: grist_force_recreate_down
+  changed_when: >-
+    'Stopping' in (grist_force_recreate_down.stdout | default(''))
+    or 'Removing' in (grist_force_recreate_down.stdout | default(''))
+    or 'Removing' in (grist_force_recreate_down.stderr | default(''))
+  failed_when: false
+  when: grist_force_recreate_network_missing | default(false)
+
+- name: Remove the stale Grist compose network before retrying force-recreate
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_networks="$(docker network ls -q --filter name=^{{ grist_site_dir | basename }}_default$)"
+    if [ -n "${stale_networks}" ]; then
+      docker network rm ${stale_networks}
+      echo changed
+    fi
+  args:
+    chdir: "{{ grist_site_dir }}"
+    executable: /bin/bash
+  register: grist_force_recreate_network_cleanup
+  changed_when: "'changed' in grist_force_recreate_network_cleanup.stdout"
+  when: grist_force_recreate_network_missing | default(false)
+
+- name: Restart Docker to restore bridge networking before retrying Grist force-recreate
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: grist_force_recreate_network_missing | default(false)
+
+- name: Ensure Docker bridge networking chains are present before retrying Grist force-recreate
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: true
+  when: grist_force_recreate_network_missing | default(false)
+
+- name: Retry Grist force-recreate after Docker networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ grist_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ grist_site_dir }}"
+  register: grist_force_recreate_retry
+  changed_when: true
+  when: grist_force_recreate_network_missing | default(false)
 
 - name: Start the Grist runtime stack when a force recreate is not needed
   ansible.builtin.command:

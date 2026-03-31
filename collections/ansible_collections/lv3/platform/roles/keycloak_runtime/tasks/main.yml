@@ -483,119 +483,338 @@
     or 'Starting' in keycloak_up.stdout
   when: not keycloak_force_recreate
 
-- name: Wait for the Keycloak management port
-  ansible.builtin.wait_for:
-    host: 127.0.0.1
-    port: "{{ keycloak_local_management_port }}"
-    delay: 0
-    timeout: 240
+- name: Warm the Keycloak admin APIs before realm reconciliation
+  block:
+    - name: Wait for the Keycloak management port
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ keycloak_local_management_port }}"
+        delay: 0
+        timeout: 240
 
-- name: Wait for the Keycloak readiness endpoint
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
-    method: GET
-    status_code: 200
-  register: keycloak_health_ready
-  retries: "{{ keycloak_startup_probe_retries }}"
-  delay: "{{ keycloak_startup_probe_delay }}"
-  until: keycloak_health_ready.status == 200
-  changed_when: false
+    - name: Wait for the Keycloak readiness endpoint
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
+        method: GET
+        status_code: 200
+      register: keycloak_health_ready
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: keycloak_health_ready.status == 200
+      changed_when: false
 
-- name: Wait for the Keycloak admin API to answer
-  ansible.builtin.uri:
-    url: "{{ keycloak_local_admin_url }}/realms/master/.well-known/openid-configuration"
-    method: GET
-    status_code: 200
-  register: keycloak_master_openid_config
-  retries: "{{ keycloak_startup_probe_retries }}"
-  delay: "{{ keycloak_startup_probe_delay }}"
-  until: keycloak_master_openid_config.status == 200
-  changed_when: false
+    - name: Wait for the Keycloak admin API to answer
+      ansible.builtin.uri:
+        url: "{{ keycloak_local_admin_url }}/realms/master/.well-known/openid-configuration"
+        method: GET
+        status_code: 200
+      register: keycloak_master_openid_config
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: keycloak_master_openid_config.status == 200
+      changed_when: false
 
-- name: Wait for the Keycloak bootstrap admin token endpoint to succeed
-  ansible.builtin.uri:
-    url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
-    method: POST
-    body_format: form-urlencoded
-    body:
-      grant_type: password
-      client_id: admin-cli
-      username: "{{ keycloak_bootstrap_admin_username }}"
-      password: "{{ keycloak_bootstrap_admin_password }}"
-    return_content: true
-    status_code:
-      - 200
-      - 400
-      - 401
-      - 500
-  register: keycloak_bootstrap_admin_token_probe
-  retries: "{{ keycloak_startup_probe_retries }}"
-  delay: "{{ keycloak_startup_probe_delay }}"
-  until: keycloak_bootstrap_admin_token_probe.status == 200
-  changed_when: false
-  no_log: true
+    - name: Wait for the Keycloak bootstrap admin token endpoint to succeed
+      ansible.builtin.uri:
+        url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          grant_type: password
+          client_id: admin-cli
+          username: "{{ keycloak_bootstrap_admin_username }}"
+          password: "{{ keycloak_bootstrap_admin_password }}"
+        return_content: true
+        status_code:
+          - 200
+          - 400
+          - 401
+          - 500
+      register: keycloak_bootstrap_admin_token_probe
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: keycloak_bootstrap_admin_token_probe.status == 200
+      changed_when: false
+      no_log: true
 
-- name: Wait for an authenticated Keycloak admin realm query to answer
-  ansible.builtin.uri:
-    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
-    method: GET
-    headers:
-      Authorization: "Bearer {{ keycloak_bootstrap_admin_token_probe.json.access_token }}"
-    return_content: true
-    status_code:
-      - 200
-      - 404
-  register: keycloak_admin_realm_probe
-  retries: "{{ keycloak_startup_probe_retries }}"
-  delay: "{{ keycloak_startup_probe_delay }}"
-  until: keycloak_admin_realm_probe.status in [200, 404]
-  changed_when: false
-  no_log: true
+    - name: Wait for an authenticated Keycloak admin realm query to answer
+      ansible.builtin.uri:
+        url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ keycloak_bootstrap_admin_token_probe.json.access_token }}"
+        return_content: true
+        status_code:
+          - 200
+          - 404
+      register: keycloak_admin_realm_probe
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: keycloak_admin_realm_probe.status in [200, 404]
+      changed_when: false
+      no_log: true
 
-- name: Allow the Keycloak admin API to settle after the first authenticated probe
-  ansible.builtin.pause:
-    seconds: "{{ keycloak_startup_probe_delay }}"
-  changed_when: false
+    - name: Allow the Keycloak admin API to settle after the first authenticated probe
+      ansible.builtin.pause:
+        seconds: "{{ keycloak_startup_probe_delay }}"
+      changed_when: false
 
-- name: Reconfirm the Keycloak bootstrap admin token endpoint after the settle window
-  ansible.builtin.uri:
-    url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
-    method: POST
-    body_format: form-urlencoded
-    body:
-      grant_type: password
-      client_id: admin-cli
-      username: "{{ keycloak_bootstrap_admin_username }}"
-      password: "{{ keycloak_bootstrap_admin_password }}"
-    return_content: true
-    status_code:
-      - 200
-      - 400
-      - 401
-      - 500
-  register: keycloak_bootstrap_admin_token_probe_confirmed
-  retries: "{{ keycloak_startup_probe_retries }}"
-  delay: "{{ keycloak_startup_probe_delay }}"
-  until: keycloak_bootstrap_admin_token_probe_confirmed.status == 200
-  changed_when: false
-  no_log: true
+    - name: Reconfirm the Keycloak bootstrap admin token endpoint after the settle window
+      ansible.builtin.uri:
+        url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          grant_type: password
+          client_id: admin-cli
+          username: "{{ keycloak_bootstrap_admin_username }}"
+          password: "{{ keycloak_bootstrap_admin_password }}"
+        return_content: true
+        status_code:
+          - 200
+          - 400
+          - 401
+          - 500
+      register: keycloak_bootstrap_admin_token_probe_confirmed
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: keycloak_bootstrap_admin_token_probe_confirmed.status == 200
+      changed_when: false
+      no_log: true
 
-- name: Reconfirm an authenticated Keycloak admin realm query after the settle window
-  ansible.builtin.uri:
-    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
-    method: GET
-    headers:
-      Authorization: "Bearer {{ keycloak_bootstrap_admin_token_probe_confirmed.json.access_token }}"
-    return_content: true
-    status_code:
-      - 200
-      - 404
-  register: keycloak_admin_realm_probe_confirmed
-  retries: "{{ keycloak_startup_probe_retries }}"
-  delay: "{{ keycloak_startup_probe_delay }}"
-  until: keycloak_admin_realm_probe_confirmed.status in [200, 404]
-  changed_when: false
-  no_log: true
+    - name: Reconfirm an authenticated Keycloak admin realm query after the settle window
+      ansible.builtin.uri:
+        url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ keycloak_bootstrap_admin_token_probe_confirmed.json.access_token }}"
+        return_content: true
+        status_code:
+          - 200
+          - 404
+      register: keycloak_admin_realm_probe_confirmed
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: keycloak_admin_realm_probe_confirmed.status in [200, 404]
+      changed_when: false
+      no_log: true
+  rescue:
+    - name: Detect whether the Docker service is active before Keycloak startup probe recovery
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - is-active
+          - docker
+      register: keycloak_startup_probe_recovery_docker_active_state
+      changed_when: false
+      failed_when: keycloak_startup_probe_recovery_docker_active_state.rc not in [0, 3, 4]
+
+    - name: Reset Docker failed state before Keycloak startup probe recovery
+      ansible.builtin.command: systemctl reset-failed docker.service
+      changed_when: false
+      when: keycloak_startup_probe_recovery_docker_active_state.rc != 0
+
+    - name: Start Docker before Keycloak startup probe recovery
+      ansible.builtin.service:
+        name: docker
+        state: started
+      when: keycloak_startup_probe_recovery_docker_active_state.rc != 0
+
+    - name: Ensure Docker bridge networking chains are present after Keycloak startup probe failure
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+
+    - name: Assert Docker nat chain is present after Keycloak startup probe failure
+      ansible.builtin.assert:
+        that:
+          - keycloak_startup_probe_recovery_docker_active_state.rc != 0 or keycloak_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_verify.rc | default(1)) == 0
+        fail_msg: "Docker is running but the nat DOCKER chain is missing; Keycloak recovery cannot republish the admin endpoints."
+
+    - name: Recreate the Keycloak OpenBao agent before retrying the startup probes
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ keycloak_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - openbao-agent
+      args:
+        chdir: "{{ keycloak_site_dir }}"
+      register: keycloak_startup_probe_recovery_openbao_agent_up
+      changed_when: >-
+        'Creating' in keycloak_startup_probe_recovery_openbao_agent_up.stdout
+        or 'Recreating' in keycloak_startup_probe_recovery_openbao_agent_up.stdout
+        or 'Starting' in keycloak_startup_probe_recovery_openbao_agent_up.stdout
+        or 'Running' in keycloak_startup_probe_recovery_openbao_agent_up.stdout
+
+    - name: Wait for the Keycloak runtime env file after startup probe recovery
+      ansible.builtin.shell: |
+        set -euo pipefail
+        test -s "{{ keycloak_env_file }}"
+        grep -Fqx "KC_DB_URL_HOST={{ keycloak_database_host }}" "{{ keycloak_env_file }}"
+        grep -Fqx "KC_BOOTSTRAP_ADMIN_USERNAME={{ keycloak_bootstrap_admin_username }}" "{{ keycloak_env_file }}"
+      args:
+        chdir: "{{ keycloak_site_dir }}"
+        executable: /bin/bash
+      register: keycloak_startup_probe_recovery_runtime_env_contract
+      retries: 24
+      delay: 5
+      until: keycloak_startup_probe_recovery_runtime_env_contract.rc == 0
+      changed_when: false
+      no_log: true
+
+    - name: Recreate the Keycloak service before retrying the startup probes
+      ansible.builtin.shell: |
+        set -euo pipefail
+        for attempt in $(seq 1 3); do
+          if [ "{{ keycloak_mail_platform_docker_network_name | length }}" -gt 0 ] \
+            && ! docker network inspect "{{ keycloak_mail_platform_docker_network_name }}" >/dev/null 2>&1; then
+            sleep 5
+            continue
+          fi
+
+          if docker compose --file "{{ keycloak_compose_file }}" up -d --force-recreate --no-deps keycloak; then
+            exit 0
+          fi
+
+          stale_ids="$(docker ps -aq \
+            --filter label=com.docker.compose.project=keycloak \
+            --filter label=com.docker.compose.service=keycloak)"
+          if [ -n "$stale_ids" ]; then
+            docker rm -f $stale_ids || true
+          fi
+          sleep 5
+        done
+        exit 1
+      args:
+        chdir: "{{ keycloak_site_dir }}"
+        executable: /bin/bash
+      register: keycloak_startup_probe_recovery_up
+      changed_when: >-
+        'Creating' in keycloak_startup_probe_recovery_up.stdout
+        or 'Recreating' in keycloak_startup_probe_recovery_up.stdout
+        or 'Starting' in keycloak_startup_probe_recovery_up.stdout
+
+    - name: Wait for the Keycloak management port after startup probe recovery
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ keycloak_local_management_port }}"
+        delay: 0
+        timeout: 240
+
+    - name: Wait for the Keycloak readiness endpoint after startup probe recovery
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
+        method: GET
+        status_code: 200
+      register: keycloak_startup_probe_recovery_health_ready
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: keycloak_startup_probe_recovery_health_ready.status == 200
+      changed_when: false
+
+    - name: Wait for the Keycloak admin API after startup probe recovery
+      ansible.builtin.uri:
+        url: "{{ keycloak_local_admin_url }}/realms/master/.well-known/openid-configuration"
+        method: GET
+        status_code: 200
+      register: keycloak_startup_probe_recovery_master_openid_config
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: keycloak_startup_probe_recovery_master_openid_config.status == 200
+      changed_when: false
+
+    - name: Wait for the Keycloak bootstrap admin token endpoint after startup probe recovery
+      ansible.builtin.uri:
+        url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          grant_type: password
+          client_id: admin-cli
+          username: "{{ keycloak_bootstrap_admin_username }}"
+          password: "{{ keycloak_bootstrap_admin_password }}"
+        return_content: true
+        status_code:
+          - 200
+          - 400
+          - 401
+          - 500
+      register: keycloak_startup_probe_recovery_bootstrap_admin_token_probe
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: keycloak_startup_probe_recovery_bootstrap_admin_token_probe.status == 200
+      changed_when: false
+      no_log: true
+
+    - name: Wait for an authenticated Keycloak admin realm query after startup probe recovery
+      ansible.builtin.uri:
+        url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ keycloak_startup_probe_recovery_bootstrap_admin_token_probe.json.access_token }}"
+        return_content: true
+        status_code:
+          - 200
+          - 404
+      register: keycloak_startup_probe_recovery_admin_realm_probe
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: keycloak_startup_probe_recovery_admin_realm_probe.status in [200, 404]
+      changed_when: false
+      no_log: true
+
+    - name: Allow the Keycloak admin API to settle after startup probe recovery
+      ansible.builtin.pause:
+        seconds: "{{ keycloak_startup_probe_delay }}"
+      changed_when: false
+
+    - name: Reconfirm the Keycloak bootstrap admin token endpoint after startup probe recovery
+      ansible.builtin.uri:
+        url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          grant_type: password
+          client_id: admin-cli
+          username: "{{ keycloak_bootstrap_admin_username }}"
+          password: "{{ keycloak_bootstrap_admin_password }}"
+        return_content: true
+        status_code:
+          - 200
+          - 400
+          - 401
+          - 500
+      register: keycloak_startup_probe_recovery_bootstrap_admin_token_probe_confirmed
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: keycloak_startup_probe_recovery_bootstrap_admin_token_probe_confirmed.status == 200
+      changed_when: false
+      no_log: true
+
+    - name: Reconfirm an authenticated Keycloak admin realm query after startup probe recovery
+      ansible.builtin.uri:
+        url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ keycloak_startup_probe_recovery_bootstrap_admin_token_probe_confirmed.json.access_token }}"
+        return_content: true
+        status_code:
+          - 200
+          - 404
+      register: keycloak_startup_probe_recovery_admin_realm_probe_confirmed
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: keycloak_startup_probe_recovery_admin_realm_probe_confirmed.status in [200, 404]
+      changed_when: false
+      no_log: true
 
 - name: Verify Keycloak resolves the internal mail-platform relay host
   ansible.builtin.command:
@@ -921,7 +1140,6 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_langfuse_client_reconcile is succeeded
-
     - name: Ensure the Directus OAuth client exists
       community.general.keycloak_client:
         realm: "{{ keycloak_realm_name }}"
@@ -961,6 +1179,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_directus_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_directus_client_reconcile is succeeded
 
     - name: Ensure the Outline OAuth client exists
       community.general.keycloak_client:
@@ -1006,7 +1228,6 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_outline_client_reconcile is succeeded
-
     - name: Ensure the JupyterHub OAuth client exists
       community.general.keycloak_client:
         realm: "{{ keycloak_realm_name }}"
@@ -1137,6 +1358,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_grist_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_grist_client_reconcile is succeeded
 
     - name: Ensure the API gateway client exists
       community.general.keycloak_client:
@@ -1346,6 +1571,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_grist_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_grist_client_secret_info is succeeded
       no_log: true
 
     - name: Read the Outline client secret

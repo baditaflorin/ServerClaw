@@ -575,6 +575,43 @@
         or (mail_platform_gateway_build.changed | default(false))
       }}
 
+- name: Reset the mail platform stack before a force recreate
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mail_platform_compose_file }}"
+      - down
+      - --remove-orphans
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_force_recreate_down
+  failed_when: false
+  changed_when: >-
+    'Stopping' in (mail_platform_force_recreate_down.stdout | default(''))
+    or 'Removing' in (mail_platform_force_recreate_down.stdout | default(''))
+    or 'Network' in (mail_platform_force_recreate_down.stdout | default(''))
+    or 'Stopping' in (mail_platform_force_recreate_down.stderr | default(''))
+    or 'Removing' in (mail_platform_force_recreate_down.stderr | default(''))
+    or 'Network' in (mail_platform_force_recreate_down.stderr | default(''))
+  when: mail_platform_force_recreate
+
+- name: Remove stale mail platform compose networks before recovery
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_networks="$(docker network ls -q --filter name={{ mail_platform_docker_network_name }})"
+    if [ -n "${stale_networks}" ]; then
+      docker network rm ${stale_networks}
+      echo changed
+    fi
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+    executable: /bin/bash
+  register: mail_platform_force_recreate_network_cleanup
+  changed_when: "'changed' in mail_platform_force_recreate_network_cleanup.stdout"
+  when: mail_platform_force_recreate
+
 - name: Force-recreate the mail platform stack after Docker networking recovery
   ansible.builtin.command:
     argv:

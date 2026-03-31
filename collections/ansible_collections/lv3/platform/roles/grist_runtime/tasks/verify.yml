@@ -18,3 +18,87 @@
     that:
       - "'alive' in (grist_verify_local_status.content | default(''))"
     fail_msg: "Grist started, but the local /status endpoint did not report a healthy runtime."
+
+- name: Verify the Grist local document route reaches the auth-controlled surface
+  ansible.builtin.uri:
+    url: "{{ grist_internal_base_url }}/o/docs/"
+    method: GET
+    follow_redirects: none
+    return_content: true
+    status_code:
+      - 200
+      - 302
+      - 303
+      - 307
+      - 308
+    headers:
+      Host: "{{ grist_service_topology.public_hostname }}"
+      X-Forwarded-Host: "{{ grist_service_topology.public_hostname }}"
+      X-Forwarded-Proto: https
+  register: grist_verify_local_auth_surface
+  changed_when: false
+
+- name: Assert the Grist local document route is login-gated
+  ansible.builtin.assert:
+    that:
+      - >-
+        (
+          grist_verify_local_auth_surface.location is defined
+          and (
+            'login' in grist_verify_local_auth_surface.location
+            or 'oidc' in grist_verify_local_auth_surface.location
+            or 'oauth' in grist_verify_local_auth_surface.location
+            or hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname in grist_verify_local_auth_surface.location
+          )
+        )
+        or
+        (
+          (grist_verify_local_auth_surface.status | int) == 200
+          and 'Loading... - Grist' in (grist_verify_local_auth_surface.content | default(''))
+          and '"supportAnon":false' in (grist_verify_local_auth_surface.content | default(''))
+        )
+    fail_msg: >-
+      The local Grist runtime answered /o/docs/, but it did not present the
+      expected login-controlled surface.
+
+- name: Verify the Grist local document route reaches the auth-controlled surface
+  ansible.builtin.uri:
+    url: "{{ grist_internal_base_url }}/o/docs/"
+    method: GET
+    follow_redirects: none
+    return_content: true
+    status_code:
+      - 200
+      - 302
+      - 303
+      - 307
+      - 308
+    headers:
+      Host: "{{ grist_service_topology.public_hostname }}"
+      X-Forwarded-Host: "{{ grist_service_topology.public_hostname }}"
+      X-Forwarded-Proto: https
+  register: grist_verify_local_auth_surface
+  changed_when: false
+
+- name: Assert the Grist local document route is login-gated
+  ansible.builtin.assert:
+    that:
+      - >-
+        (
+          grist_verify_local_auth_surface.location is defined
+          and (
+            'login' in grist_verify_local_auth_surface.location
+            or 'oidc' in grist_verify_local_auth_surface.location
+            or 'oauth' in grist_verify_local_auth_surface.location
+            or hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname in grist_verify_local_auth_surface.location
+          )
+        )
+        or
+        (
+          (grist_verify_local_auth_surface.status | int) == 200
+          and 'Loading... - Grist' in (grist_verify_local_auth_surface.content | default(''))
+          and '"supportAnon":false' in (grist_verify_local_auth_surface.content | default(''))
+        )
+    fail_msg: >-
+      The local Grist runtime answered /o/docs/, but it did not present the
+      expected login-controlled surface.

@@ -139,11 +139,11 @@
     - >
       (
         common_docker_bridge_chains_expect_forward_chain | default(false)
-        and common_docker_bridge_chains_forward_check.rc == 1
+        and common_docker_bridge_chains_forward_check.rc != 0
       )
       or (
         (common_docker_bridge_chains_require_nat_chain | bool)
-        and common_docker_bridge_chains_nat_check.rc == 1
+        and common_docker_bridge_chains_nat_check.rc != 0
       )
 
 - name: Recheck Docker nat chain after health evaluation
@@ -179,6 +179,22 @@
   delay: "{{ common_docker_bridge_chains_delay }}"
   until: common_docker_bridge_chains_forward_recheck.rc == 0
   when: common_docker_bridge_chains_active_state.rc == 0
+
+- name: Restart Docker when required bridge chains are still missing after the retry loop
+  ansible.builtin.systemd_service:
+    name: "{{ common_docker_bridge_chains_service_name }}"
+    state: restarted
+  when:
+    - common_docker_bridge_chains_active_state.rc == 0
+    - >
+      (
+        common_docker_bridge_chains_expect_forward_chain | default(false)
+        and common_docker_bridge_chains_forward_recheck.rc != 0
+      )
+      or (
+        (common_docker_bridge_chains_require_nat_chain | bool)
+        and common_docker_bridge_chains_nat_recheck.rc != 0
+      )
 
 - name: Verify Docker nat chain after retry loop
   ansible.builtin.command:

@@ -94,6 +94,16 @@ def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rota
         for task in tasks
         if task.get("name") == "Restore Docker networking when the nat chain is missing before mail-platform startup"
     )
+    force_recreate_down = next(
+        task
+        for task in tasks
+        if task.get("name") == "Reset the mail platform stack before a force recreate"
+    )
+    force_recreate_network_cleanup = next(
+        task
+        for task in tasks
+        if task.get("name") == "Remove stale mail platform compose networks before recovery"
+    )
     force_recreate = next(
         task
         for task in tasks
@@ -156,6 +166,8 @@ def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rota
     )
     assert nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
     assert nat_restore["ansible.builtin.service"]["name"] == "docker"
+    assert force_recreate_down["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
+    assert "mail_platform_docker_network_name" in force_recreate_network_cleanup["ansible.builtin.shell"]
     assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
     assert force_recreate["failed_when"] is False
     assert "failed to create endpoint" in network_flag["ansible.builtin.set_fact"]["mail_platform_docker_network_missing"]

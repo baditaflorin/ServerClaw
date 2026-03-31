@@ -144,7 +144,9 @@
   register: common_openbao_compose_env_unsealed_status
   retries: 12
   delay: 2
-  until: common_openbao_compose_env_unsealed_status.status == 200
+  until: >-
+    common_openbao_compose_env_unsealed_status.status == 200
+    and not (common_openbao_compose_env_unsealed_status.json.sealed | bool)
   changed_when: false
 
 - name: Assert the local OpenBao API is unsealed before runtime secret injection
@@ -311,7 +313,9 @@
   register: common_openbao_compose_env_approle_unsealed_status
   retries: 12
   delay: 2
-  until: common_openbao_compose_env_approle_unsealed_status.status == 200
+  until: >-
+    common_openbao_compose_env_approle_unsealed_status.status == 200
+    and not (common_openbao_compose_env_approle_unsealed_status.json.sealed | bool)
   changed_when: false
 
 - name: Assert the local OpenBao API is unsealed before reading AppRole identity files

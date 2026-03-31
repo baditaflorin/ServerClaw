@@ -12,11 +12,30 @@ SERVERCLAW_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "se
 
 
 def load_tasks(path: Path = TASKS_PATH) -> list[dict]:
-    return yaml.safe_load(path.read_text())
+    raw_tasks = yaml.safe_load(path.read_text())
+    flattened: list[dict] = []
+
+    def visit(task_list: list[dict]) -> None:
+        for task in task_list:
+            flattened.append(task)
+            for nested_key in ("block", "rescue", "always"):
+                nested_tasks = task.get(nested_key)
+                if nested_tasks:
+                    visit(nested_tasks)
+
+    visit(raw_tasks)
+    return flattened
 
 
 def load_serverclaw_tasks() -> list[dict]:
     return yaml.safe_load(SERVERCLAW_TASKS_PATH.read_text())
+
+
+def assert_task_retries(task: dict, register: str) -> None:
+    assert task["register"] == register
+    assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
+    assert task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
+    assert task["until"] == f"{register} is succeeded"
 
 
 def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
@@ -104,9 +123,7 @@ def test_realm_task_applies_repo_managed_smtp_settings() -> None:
     )
     realm_task = next(task for task in realm_block["block"] if task.get("name") == "Ensure the LV3 realm exists")
     assert realm_task["community.general.keycloak_realm"]["smtp_server"] == "{{ keycloak_realm_smtp_server }}"
-    assert realm_task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
-    assert realm_task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
-    assert realm_task["until"] == "keycloak_realm_reconcile is succeeded"
+    assert_task_retries(realm_task, "keycloak_realm_reconcile")
 
 
 def test_role_restores_docker_nat_chain_before_startup() -> None:
@@ -267,6 +284,9 @@ def test_role_retries_api_gateway_client_reconcile_and_secret_read() -> None:
 def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
+    startup_block = next(
+        task for task in tasks if task.get("name") == "Warm the Keycloak admin APIs before realm reconciliation"
+    )
     readiness_task = next(task for task in tasks if task.get("name") == "Wait for the Keycloak readiness endpoint")
     admin_api_task = next(task for task in tasks if task.get("name") == "Wait for the Keycloak admin API to answer")
     token_probe_task = next(
@@ -292,6 +312,31 @@ def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile(
     )
     assert defaults["keycloak_startup_probe_retries"] == 60
     assert defaults["keycloak_startup_probe_delay"] == 5
+    recovery_bridge_helper = next(
+        task
+        for task in startup_block["rescue"]
+        if task.get("name") == "Ensure Docker bridge networking chains are present after Keycloak startup probe failure"
+    )
+    recovery_runtime_env_wait = next(
+        task
+        for task in startup_block["rescue"]
+        if task.get("name") == "Wait for the Keycloak runtime env file after startup probe recovery"
+    )
+    recovery_recreate = next(
+        task
+        for task in startup_block["rescue"]
+        if task.get("name") == "Recreate the Keycloak service before retrying the startup probes"
+    )
+    recovery_token_probe_task = next(
+        task
+        for task in startup_block["rescue"]
+        if task.get("name") == "Wait for the Keycloak bootstrap admin token endpoint after startup probe recovery"
+    )
+    recovery_confirmed_token_probe_task = next(
+        task
+        for task in startup_block["rescue"]
+        if task.get("name") == "Reconfirm the Keycloak bootstrap admin token endpoint after startup probe recovery"
+    )
     assert readiness_task["retries"] == "{{ keycloak_startup_probe_retries }}"
     assert readiness_task["delay"] == "{{ keycloak_startup_probe_delay }}"
     assert admin_api_task["retries"] == "{{ keycloak_startup_probe_retries }}"
@@ -314,6 +359,18 @@ def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile(
     assert admin_probe_confirmed_task["ansible.builtin.uri"]["headers"]["Authorization"] == (
         "Bearer {{ keycloak_bootstrap_admin_token_probe_confirmed.json.access_token }}"
     )
+    assert recovery_bridge_helper["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert recovery_bridge_helper["ansible.builtin.include_role"]["tasks_from"] == "docker_bridge_chains"
+    assert recovery_bridge_helper["vars"]["common_docker_bridge_chains_require_nat_chain"] is True
+    assert 'grep -Fqx "KC_DB_URL_HOST={{ keycloak_database_host }}" "{{ keycloak_env_file }}"' in recovery_runtime_env_wait["ansible.builtin.shell"]
+    assert (
+        "docker compose --file \"{{ keycloak_compose_file }}\" up -d --force-recreate --no-deps keycloak"
+        in recovery_recreate["ansible.builtin.shell"]
+    )
+    assert recovery_token_probe_task["retries"] == "{{ keycloak_startup_probe_retries }}"
+    assert recovery_token_probe_task["delay"] == "{{ keycloak_startup_probe_delay }}"
+    assert recovery_confirmed_token_probe_task["retries"] == "{{ keycloak_startup_probe_retries }}"
+    assert recovery_confirmed_token_probe_task["delay"] == "{{ keycloak_startup_probe_delay }}"
 
 
 def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
@@ -326,57 +383,61 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
     assert realm_block["module_defaults"]["group/community.general.keycloak"]["connection_timeout"] == (
         "{{ keycloak_admin_connection_timeout }}"
     )
-    retry_task_names = [
-        "Ensure the LV3 realm exists",
-        "Ensure the Keycloak realm groups exist",
-        "Ensure the Keycloak realm roles exist",
-        "Ensure realm roles are mapped to Keycloak groups",
-        "Ensure the Grafana OAuth client exists",
-        "Ensure the operations portal OAuth client exists",
-        "Ensure the Gitea OAuth client exists",
-        "Ensure the agent service client exists",
-        "Ensure the Langfuse OAuth client exists",
-        "Ensure the Outline OAuth client exists",
-        "Ensure the JupyterHub OAuth client exists",
-        "Ensure the ServerClaw OAuth client exists",
-        "Ensure the API gateway client exists",
-        "Ensure the obsolete ServerClaw operator CLI direct-grant client is absent",
-        "Ensure the ServerClaw runtime client exists",
-        "Ensure realm roles are mapped to service account users",
-        "Read the Grafana client secret",
-        "Read the operations portal client secret",
-        "Read the Gitea client secret",
-        "Read the agent client secret",
-        "Read the Langfuse client secret",
-        "Read the Directus client secret",
-        "Read the Outline client secret",
-        "Read the JupyterHub client secret",
-        "Read the ServerClaw client secret",
-        "Read the API gateway client secret",
-        "Read the ServerClaw runtime client secret",
+    retried_realm_tasks = [
+        ("Ensure the Keycloak realm groups exist", "keycloak_realm_groups_reconcile"),
+        ("Ensure the Keycloak realm roles exist", "keycloak_realm_roles_reconcile"),
+        ("Ensure realm roles are mapped to Keycloak groups", "keycloak_group_realm_role_mappings_reconcile"),
+        ("Ensure the Grafana OAuth client exists", "keycloak_grafana_client_reconcile"),
+        ("Ensure the operations portal OAuth client exists", "keycloak_ops_portal_client_reconcile"),
+        ("Ensure the Gitea OAuth client exists", "keycloak_gitea_client_reconcile"),
+        ("Ensure the agent service client exists", "keycloak_agent_client_reconcile"),
+        ("Ensure the Langfuse OAuth client exists", "keycloak_langfuse_client_reconcile"),
+        ("Ensure the Directus OAuth client exists", "keycloak_directus_client_reconcile"),
+        ("Ensure the JupyterHub OAuth client exists", "keycloak_jupyterhub_client_reconcile"),
+        ("Ensure the Outline OAuth client exists", "keycloak_outline_client_reconcile"),
+        ("Ensure the ServerClaw OAuth client exists", "keycloak_serverclaw_client_reconcile"),
+        ("Ensure the Grist OAuth client exists", "keycloak_grist_client_reconcile"),
+        ("Ensure the API gateway client exists", "keycloak_api_gateway_client_reconcile"),
+        (
+            "Ensure realm roles are mapped to service account users",
+            "keycloak_service_account_realm_role_mappings_reconcile",
+        ),
     ]
-    retry_tasks = [next(task for task in realm_block["block"] if task.get("name") == name) for name in retry_task_names]
-    for task in retry_tasks:
-        assert "register" in task
-        assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
-        assert task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
-        assert task["until"] == f"{task['register']} is succeeded"
+    runtime_contract_tasks = [
+        next(
+            task
+            for task in realm_block["block"]
+            if task.get("name") == "Ensure the obsolete ServerClaw operator CLI direct-grant client is absent"
+        ),
+        next(task for task in realm_block["block"] if task.get("name") == "Ensure the ServerClaw runtime client exists"),
+        next(task for task in realm_block["block"] if task.get("name") == "Read the ServerClaw runtime client secret"),
+    ]
+    for task_name, register in retried_realm_tasks:
+        task = next(task for task in realm_block["block"] if task.get("name") == task_name)
+        assert_task_retries(task, register)
+    for task in runtime_contract_tasks:
+        assert_task_retries(task, task["register"])
 
 
-def test_all_keycloak_client_secret_reads_retry_reconciliation_until_success() -> None:
+def test_realm_reconciliation_retries_client_secret_reads() -> None:
     tasks = load_tasks()
     realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
-    read_secret_tasks = [
-        task
-        for task in realm_block["block"]
-        if task.get("name", "").startswith("Read the ") and task.get("name", "").endswith(" client secret")
-    ]
-
-    assert len(read_secret_tasks) == 11
-    for task in read_secret_tasks:
-        assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
-        assert task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
-        assert task["until"] == f"{task['register']} is succeeded"
+    for task_name, register in [
+        ("Read the Grafana client secret", "keycloak_grafana_client_secret_info"),
+        ("Read the operations portal client secret", "keycloak_ops_portal_client_secret_info"),
+        ("Read the Gitea client secret", "keycloak_gitea_client_secret_info"),
+        ("Read the agent client secret", "keycloak_agent_client_secret_info"),
+        ("Read the Langfuse client secret", "keycloak_langfuse_client_secret_info"),
+        ("Read the Directus client secret", "keycloak_directus_client_secret_info"),
+        ("Read the Grist client secret", "keycloak_grist_client_secret_info"),
+        ("Read the Outline client secret", "keycloak_outline_client_secret_info"),
+        ("Read the JupyterHub client secret", "keycloak_jupyterhub_client_secret_info"),
+        ("Read the ServerClaw client secret", "keycloak_serverclaw_client_secret_info"),
+        ("Read the API gateway client secret", "keycloak_api_gateway_client_secret_info"),
+        ("Read the ServerClaw runtime client secret", "keycloak_serverclaw_runtime_client_secret_info"),
+    ]:
+        task = next(task for task in realm_block["block"] if task.get("name") == task_name)
+        assert_task_retries(task, register)
 
 
 def test_runtime_token_verification_retries_confidential_clients() -> None:

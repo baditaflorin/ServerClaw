@@ -69,8 +69,18 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "retries: 6" in tasks
     assert "register: common_openbao_compose_env_api_health\n  retries: 48\n  delay: 5" in tasks
     assert "register: common_openbao_compose_env_health\n  retries: 48\n  delay: 5" in tasks
+    assert (
+        "until: >-\n"
+        "    common_openbao_compose_env_unsealed_status.status == 200\n"
+        "    and not (common_openbao_compose_env_unsealed_status.json.sealed | bool)"
+    ) in tasks
     assert "- name: Re-read the local OpenBao seal status before materializing AppRole identity files" in tasks
     assert "- name: Unseal the local OpenBao API when AppRole identity materialization finds it sealed" in tasks
+    assert (
+        "until: >-\n"
+        "    common_openbao_compose_env_approle_unsealed_status.status == 200\n"
+        "    and not (common_openbao_compose_env_approle_unsealed_status.json.sealed | bool)"
+    ) in tasks
     assert "- name: Assert the local OpenBao API is unsealed before reading AppRole identity files" in tasks
     assert "- name: Wait for the local OpenBao API to become active after AppRole reseal recovery" in tasks
     assert "- name: Read the OpenBao AppRole role ID" in tasks

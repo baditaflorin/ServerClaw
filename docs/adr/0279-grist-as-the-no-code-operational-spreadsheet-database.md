@@ -1,8 +1,8 @@
 # ADR 0279: Grist As The No-Code Operational Spreadsheet Database
 
 - Status: Accepted
-- Implementation Status: Live applied on workstream branch
-- Implemented In Repo Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.105
 - Implemented In Platform Version: 0.130.60
 - Implemented On: 2026-03-30
 - Date: 2026-03-29

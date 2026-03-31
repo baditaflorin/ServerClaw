@@ -16,6 +16,7 @@ The Grist workflow converges:
 - `bootstrap_ssh_private_key` is present under `.local/ssh/`
 - the OpenBao init payload is already available under `.local/openbao/init.json`
 - Keycloak is already deployed and healthy on `sso.lv3.org`
+- the Keycloak discovery document answers at `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration`
 - Hetzner DNS API credentials are available when the edge certificate needs expansion
 
 ## Converge
@@ -71,6 +72,11 @@ The runtime stores persistent Grist state under `/opt/grist/persist` on
 
 These files are the authoritative Grist document and instance store and must
 stay within the documented backup scope.
+
+The live March 31 replay also confirmed that `/opt/grist/persist` and its
+contents must remain owned by runtime UID/GID `1001:1001`; if a manual repair
+ever resets that ownership, rerun the role before trusting Grist login or
+document persistence again.
 
 ## Verification
 

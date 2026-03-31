@@ -33,6 +33,7 @@ services:
       - "{{ item.hostname }}:{{ item.address }}"
 {% endfor %}
     env_file:
+      - {{ grist_static_env_file }}
       - {{ grist_env_file }}
     ports:
       - "{{ ansible_host }}:{{ grist_internal_port }}:8484"

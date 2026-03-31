@@ -793,6 +793,46 @@ groups:
           summary: open-webui-availability has less than 10% error budget remaining
           description: Open WebUI remains reachable on the private runtime network.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_grist_availability
+        expr: (slo:grist_availability:error_rate_5m > (14 * 0.005000)) and (slo:grist_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: grist
+          slo_id: grist-availability
+          indicator: availability
+        annotations:
+          summary: grist-availability is burning its error budget at 14x
+          description: Grist remains reachable through the public LV3 edge for operator-managed
+            spreadsheet databases and workflow tables.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_grist_availability
+        expr: slo:grist_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: grist
+          slo_id: grist-availability
+          indicator: availability
+        annotations:
+          summary: grist-availability is burning its error budget at 3x
+          description: Grist remains reachable through the public LV3 edge for operator-managed
+            spreadsheet databases and workflow tables.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_grist_availability
+        expr: slo:grist_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: grist
+          slo_id: grist-availability
+          indicator: availability
+        annotations:
+          summary: grist-availability has less than 10% error budget remaining
+          description: Grist remains reachable through the public LV3 edge for operator-managed
+            spreadsheet databases and workflow tables.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_openfga_availability
         expr: (slo:openfga_availability:error_rate_5m > (14 * 0.005000)) and (slo:openfga_availability:error_rate_1h
           > (14 * 0.005000))
