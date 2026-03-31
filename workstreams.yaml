@@ -2178,7 +2178,7 @@ workstreams:
         restoring the governed Restic live-apply backup trigger for the service
         wrapper
       release_bump: patch
-      included_in_repo_version: 0.177.118
+      included_in_repo_version: 0.177.119
       latest_receipts:
         lago: 2026-03-31-adr-0292-lago-mainline-live-apply
   - id: ws-0295-live-apply

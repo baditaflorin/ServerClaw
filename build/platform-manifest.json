@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.118",
+  "repo_version": "0.177.119",
   "platform_version": "0.130.77",
-  "generated_at": "2026-03-31T13:48:20Z",
-  "next_refresh_at": "2026-03-31T14:48:20Z",
+  "generated_at": "2026-03-31T15:37:23Z",
+  "next_refresh_at": "2026-03-31T16:37:23Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -304,6 +304,17 @@
         "primary_url": "https://sso.lv3.org",
         "last_live_apply": "2026-03-31T00:00:00Z",
         "slo_status": "unknown"
+      },
+      "lago": {
+        "service_name": "Lago",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://billing.lv3.org",
+        "last_live_apply": "2026-03-31T00:00:00Z"
       },
       "langfuse": {
         "service_name": "Langfuse",
@@ -1713,6 +1724,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-keycloak.md"
+      },
+      {
+        "id": "converge-lago",
+        "description": "Converge Lago on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish billing.lv3.org through the shared edge, and verify public producer ingest plus current-usage aggregation end to end.",
+        "tags": [
+          "converge-lago",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-lago.md"
       },
       {
         "id": "converge-langfuse",
@@ -4619,6 +4656,16 @@
         ]
       },
       {
+        "id": "configure-lago",
+        "title": "Configure Lago",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-lago.md",
+        "workflow_ids": [
+          "converge-lago"
+        ]
+      },
+      {
         "id": "configure-langfuse",
         "title": "Configure Langfuse",
         "agent_trust_required": "T3",
@@ -5554,10 +5601,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.117",
+    "last_version": "0.177.118",
     "deployed_at": "2026-03-31",
-    "summary": "implements ADR 0298 by live-applying exact-main Syft and Grype SBOM generation and continuous CVE scanning on docker-runtime-lv3, including native worker tooling, repo-local Syft temp extraction, and the verified 62-image refresh path integrates ADR 0298 into main by carrying the final Syft and Grype SBOM/CVE scanning surfaces, the native Windmill worker tooling contract, and the exact-main 62-image live refresh proof from docker-runtime-lv3",
-    "release_notes_url": "docs/release-notes/0.177.118.md"
+    "summary": "implements ADR 0292 by hardening exact-main Lago replay recovery, verifying the protected billing.lv3.org surface plus public event-ingest and current-usage smoke contracts on merged mainline, and restoring the governed Restic live-apply backup trigger for the service wrapper",
+    "release_notes_url": "docs/release-notes/0.177.119.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
