@@ -151,7 +151,7 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert "docker_compose_up_after_down" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "com.docker.compose.project.working_dir" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "docker_compose_up" in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'command.extend(["up", "-d", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert confirm_recovery["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
     assert confirm_recovery["ansible.builtin.command"]["stdin"] == (
         "{{ docker_runtime_pre_restart_container_details | default([]) | to_json }}"

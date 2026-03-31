@@ -525,7 +525,7 @@
                 command.extend(["--file", config_file])
             services = sorted(compose_group["services"])
             container_names = sorted(compose_group["container_names"])
-            command.extend(["up", "-d", *services])
+            command.extend(["up", "-d", "--force-recreate", *services])
 
             try:
                 run_with_retry(command, cwd=working_dir or None)
