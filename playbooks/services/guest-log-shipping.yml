@@ -33,6 +33,7 @@
               'nginx': 'edge',
               'docker-runtime': 'control-plane',
               'docker-build': 'build',
+              'artifact-cache': 'build',
               'monitoring': 'monitoring',
               'postgres': 'data',
               'postgres-replica': 'data',
@@ -54,8 +55,27 @@
       vars:
         loki_log_agent_role: "{{ monitoring_stack_guest_role }}"
         loki_log_agent_lane: "{{ monitoring_stack_guest_lane }}"
+        loki_log_agent_http_listen_address: >-
+          {{
+            ansible_host ~ ':12345'
+            if monitoring_stack_guest_role == 'postgres' and inventory_hostname == 'postgres-lv3'
+            else '127.0.0.1:12345'
+          }}
         loki_log_agent_nginx_logs_enabled: "{{ monitoring_stack_guest_role == 'nginx' }}"
         loki_log_agent_docker_logs_enabled: "{{ monitoring_stack_guest_role == 'docker-runtime' }}"
+        loki_log_agent_postgres_audit_enabled: "{{ monitoring_stack_guest_role == 'postgres' and inventory_hostname == 'postgres-lv3' }}"
+        loki_log_agent_postgres_audit_approved_roles: >-
+          {{
+            (
+              lookup(
+                'ansible.builtin.file',
+                (inventory_dir | dirname) ~ '/config/pgaudit/approved-roles.yaml',
+              )
+              | from_yaml
+            ).approved_roles
+            if monitoring_stack_guest_role == 'postgres' and inventory_hostname == 'postgres-lv3'
+            else []
+          }}
         loki_log_agent_file_scrapes: >-
           {{
             [
@@ -88,3 +108,104 @@
       ansible.builtin.import_tasks: ../tasks/notify.yml
       vars:
         playbook_execution_notification_service: guest-log-shipping
+
+- name: Verify PostgreSQL audit scrape after guest log shipping
+  hosts: "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+  become: true
+  gather_facts: false
+  tags:
+    - tier-2
+    - observability
+    - service-guest-log-shipping
+
+  vars:
+    monitoring_stack_postgres_audit_host: >-
+      {{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}
+    monitoring_stack_postgres_audit_metrics_job_name: postgres-audit-alloy
+    monitoring_stack_postgres_audit_metrics_port: 12345
+    monitoring_stack_postgres_audit_metrics_target: >-
+      {{
+        hostvars[groups['proxmox_hosts'][0]].platform_guest_catalog.by_name[
+          monitoring_stack_postgres_audit_host
+        ].ipv4
+      }}:{{ monitoring_stack_postgres_audit_metrics_port }}
+    monitoring_stack_postgres_audit_metrics_probe_role: guest_log_shipping_metrics_probe
+
+  tasks:
+    - name: Verify Prometheus scrapes the PostgreSQL audit Alloy target after guest log shipping
+      ansible.builtin.uri:
+        url: >-
+          http://127.0.0.1:9090/api/v1/query?query={{
+            ('up{job="' ~ monitoring_stack_postgres_audit_metrics_job_name ~ '"}') | urlencode
+          }}
+        method: GET
+        timeout: 10
+        status_code: 200
+        return_content: true
+      register: monitoring_stack_verify_postgres_audit_scrape
+      retries: 20
+      delay: 3
+      until: >
+        monitoring_stack_verify_postgres_audit_scrape.status == 200
+        and (monitoring_stack_verify_postgres_audit_scrape.json.data.result | length) > 0
+        and (monitoring_stack_verify_postgres_audit_scrape.json.data.result[0].metric.instance | default('')) == monitoring_stack_postgres_audit_metrics_target
+        and ((monitoring_stack_verify_postgres_audit_scrape.json.data.result[0].value[1] | float) >= 1)
+      changed_when: false
+      failed_when: >
+        monitoring_stack_verify_postgres_audit_scrape.status != 200
+        or (monitoring_stack_verify_postgres_audit_scrape.json.data.result | length) == 0
+        or (monitoring_stack_verify_postgres_audit_scrape.json.data.result[0].metric.instance | default('')) != monitoring_stack_postgres_audit_metrics_target
+        or ((monitoring_stack_verify_postgres_audit_scrape.json.data.result[0].value[1] | float) < 1)
+
+    - name: Seed deterministic PostgreSQL audit lines after guest log shipping
+      ansible.builtin.command:
+        argv:
+          - psql
+          - -v
+          - ON_ERROR_STOP=1
+          - postgres
+          - -c
+          - >-
+            DROP ROLE IF EXISTS {{ monitoring_stack_postgres_audit_metrics_probe_role }};
+            CREATE ROLE {{ monitoring_stack_postgres_audit_metrics_probe_role }} NOLOGIN;
+            DROP ROLE {{ monitoring_stack_postgres_audit_metrics_probe_role }};
+      delegate_to: "{{ monitoring_stack_postgres_audit_host }}"
+      become: true
+      become_user: postgres
+      changed_when: false
+
+    - name: Verify the PostgreSQL audit Alloy endpoint exposes the expected metric families after guest log shipping
+      ansible.builtin.command:
+        argv:
+          - python3
+          - -c
+          - |
+            import urllib.request
+
+            target = "http://{{ monitoring_stack_postgres_audit_metrics_target }}/metrics"
+            needles = {
+                "# HELP loki_process_custom_postgres_audit_events_total ": False,
+                "# HELP loki_process_custom_postgres_connection_authorized_total ": False,
+            }
+
+            with urllib.request.urlopen(target, timeout=10) as response:
+                for raw_line in response:
+                    line = raw_line.decode("utf-8", "replace")
+                    for needle in needles:
+                        if needle in line:
+                            needles[needle] = True
+                    if all(needles.values()):
+                        break
+
+            missing = [needle.strip() for needle, present in needles.items() if not present]
+            if missing:
+                raise SystemExit(
+                    "missing expected PostgreSQL audit Alloy metrics: " + ", ".join(missing)
+                )
+      delegate_to: "{{ monitoring_stack_postgres_audit_host }}"
+      register: monitoring_stack_verify_postgres_audit_metrics_endpoint
+      retries: 20
+      delay: 3
+      until: monitoring_stack_verify_postgres_audit_metrics_endpoint.rc == 0
+      changed_when: false
+      failed_when: monitoring_stack_verify_postgres_audit_metrics_endpoint.rc != 0

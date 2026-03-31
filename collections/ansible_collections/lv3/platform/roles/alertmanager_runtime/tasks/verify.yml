@@ -9,7 +9,7 @@
 #   - None.
 #
 # Outputs:
-#   - Confirms Alertmanager is healthy and the Loki Canary alert rules are visible to Prometheus.
+#   - Confirms Alertmanager is healthy, the pgaudit relay is reachable, and key alert rules are visible to Prometheus.
 #
 # Idempotency: Fully idempotent
 #              Read-only verification tasks against the live monitoring stack.
@@ -17,13 +17,14 @@
 # Dependencies:
 #   - ADR 0097: Defines the alert routing baseline for the platform.
 #   - ADR 0250: Adds the Loki Canary alert rule group that must be loaded after copy and reload.
+#   - ADR 0303: Adds the PostgreSQL audit alert relay and audit-specific alert rules.
 #   - Requires: alertmanager_runtime has already rendered configuration and Prometheus rules.
 #
-# Related ADRs: 0097, 0250
-# Related Runbooks: docs/runbooks/log-queryability-canary.md
+# Related ADRs: 0097, 0250, 0303
+# Related Runbooks: docs/runbooks/log-queryability-canary.md, docs/runbooks/postgres-audit.md
 #
 # Author: LV3 Platform
-# Last Updated: 2026-03-28
+# Last Updated: 2026-03-31
 ---
 - name: Verify Alertmanager health endpoint responds
   ansible.builtin.uri:
@@ -47,6 +48,32 @@
   until: alertmanager_runtime_ready.status == 200
   changed_when: false
 
+- name: Verify pgaudit alert relay health endpoint responds
+  ansible.builtin.uri:
+    url: "{{ alertmanager_runtime_pgaudit_relay_health_url }}"
+    method: GET
+    status_code: 200
+  register: alertmanager_runtime_pgaudit_relay_health
+  retries: 20
+  delay: 3
+  until: alertmanager_runtime_pgaudit_relay_health.status == 200
+  changed_when: false
+  when: alertmanager_runtime_pgaudit_relay_enabled | bool
+
+- name: Verify the loaded Alertmanager config includes the pgaudit relay route
+  ansible.builtin.uri:
+    url: "{{ alertmanager_runtime_url }}/api/v2/status"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: alertmanager_runtime_status
+  changed_when: false
+  failed_when: >
+    alertmanager_runtime_status.status != 200
+    or 'pgaudit-unknown-role-relay' not in (alertmanager_runtime_status.json.config.original | default(''))
+    or 'PostgresUnknownRoleConnection' not in (alertmanager_runtime_status.json.config.original | default(''))
+  when: alertmanager_runtime_pgaudit_relay_enabled | bool
+
 - name: Verify Prometheus Loki Canary rules are loaded
   ansible.builtin.uri:
     url: "http://127.0.0.1:9090/api/v1/rules"
@@ -59,3 +86,17 @@
     alertmanager_runtime_loki_canary_rules.status != 200
     or 'lv3-log-canary' not in (alertmanager_runtime_loki_canary_rules.content | default(''))
     or 'LokiCanaryTargetDown' not in (alertmanager_runtime_loki_canary_rules.content | default(''))
+
+- name: Verify Prometheus PostgreSQL audit rules are loaded
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:9090/api/v1/rules"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: alertmanager_runtime_postgres_audit_rules
+  changed_when: false
+  failed_when: >
+    alertmanager_runtime_postgres_audit_rules.status != 200
+    or 'postgres-audit' not in (alertmanager_runtime_postgres_audit_rules.content | default(''))
+    or 'PostgresPrivilegeChangeBurst' not in (alertmanager_runtime_postgres_audit_rules.content | default(''))
+    or 'PostgresUnknownRoleConnection' not in (alertmanager_runtime_postgres_audit_rules.content | default(''))

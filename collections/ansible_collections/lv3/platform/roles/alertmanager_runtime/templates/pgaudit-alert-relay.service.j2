@@ -1,0 +1,28 @@
+[Unit]
+Description=PostgreSQL pgaudit Alertmanager relay
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=prometheus
+Group=prometheus
+EnvironmentFile={{ alertmanager_runtime_pgaudit_relay_env_file }}
+ExecStart=/usr/bin/python3 {{ alertmanager_runtime_pgaudit_relay_script_file }}
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictRealtime=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

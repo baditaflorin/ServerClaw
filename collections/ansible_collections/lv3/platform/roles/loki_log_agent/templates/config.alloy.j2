@@ -3,6 +3,10 @@ logging {
   format = "logfmt"
 }
 
+{% if loki_log_agent_postgres_audit_enabled %}
+{% set approved_roles_pattern = '^(?:' ~ (loki_log_agent_postgres_audit_approved_roles | map('regex_escape') | join('|')) ~ ')$' %}
+{% endif %}
+
 loki.write "lv3" {
   endpoint {
     url = "{{ loki_log_agent_loki_push_url }}"
@@ -123,6 +127,117 @@ loki.source.docker "containers" {
     environment = "{{ loki_log_agent_environment }}",
     lane        = "{{ loki_log_agent_lane }}",
     source      = "docker",
+  }
+}
+{% endif %}
+{% if loki_log_agent_postgres_audit_enabled %}
+loki.process "postgres_audit" {
+  forward_to = [loki.write.lv3.receiver]
+
+  stage.regex {
+    expression = "^(?P<log_ts>[^\\[]+)\\[(?P<pid>\\d+)\\]\\s+(?:(?P<db_role>[^@\\s]+)@(?P<db>\\S+)\\s+)?(?P<message>.*)$"
+  }
+
+  stage.labels {
+    values = {
+      db      = "",
+      db_role = "",
+    }
+  }
+
+  stage.match {
+    selector      = "{job=\"postgres-audit\"} |~ \"AUDIT:\""
+    pipeline_name = "postgres_audit_lines"
+
+    stage.regex {
+      source     = "message"
+      expression = "^[A-Z]+:\\s+AUDIT:\\s+(?P<audit_type>SESSION|OBJECT),(?P<statement_id>[^,]+),(?P<substatement_id>[^,]+),(?P<command_class>[^,]+),(?P<command>[^,]*),(?P<object_type>[^,]*),(?P<object_name>[^,]*),"
+    }
+
+    stage.labels {
+      values = {
+        audit_type    = "",
+        command       = "",
+        command_class = "",
+        object_type   = "",
+      }
+    }
+
+    stage.metrics {
+      metric.counter {
+        name              = "postgres_audit_events_total"
+        description       = "PostgreSQL audit events parsed from pgaudit log lines"
+        prefix            = ""
+        match_all         = true
+        action            = "inc"
+        max_idle_duration = "24h"
+      }
+    }
+  }
+
+  stage.match {
+    selector      = "{job=\"postgres-audit\"} |~ \"connection authorized:\""
+    pipeline_name = "postgres_connection_authorized"
+
+    stage.regex {
+      source     = "message"
+      expression = "^[A-Z]+:\\s+connection authorized:\\s+user=(?P<connection_role>\\S+)\\s+database=(?P<connection_db>\\S+).*"
+    }
+
+    stage.labels {
+      values = {
+        db      = "connection_db",
+        db_role = "connection_role",
+      }
+    }
+
+    stage.metrics {
+      metric.counter {
+        name              = "postgres_connection_authorized_total"
+        description       = "Authorized PostgreSQL connection events parsed from server logs"
+        prefix            = ""
+        match_all         = true
+        action            = "inc"
+        max_idle_duration = "24h"
+      }
+    }
+
+    stage.match {
+      selector = "{db_role!~\"{{ approved_roles_pattern }}\"}"
+
+      stage.metrics {
+        metric.counter {
+          name              = "postgres_unknown_connection_events_total"
+          description       = "Authorized PostgreSQL connection events from roles outside the approved login-role catalog"
+          prefix            = ""
+          match_all         = true
+          action            = "inc"
+          max_idle_duration = "24h"
+        }
+      }
+    }
+  }
+}
+
+loki.source.file "postgres_audit" {
+  targets = [
+{% for log_path in loki_log_agent_postgres_audit_paths %}
+    {
+      __path__     = "{{ log_path }}",
+      host         = "{{ loki_log_agent_hostname }}",
+      node_role    = "{{ loki_log_agent_role }}",
+      service      = "postgres",
+      job          = "postgres-audit",
+      environment  = "{{ loki_log_agent_environment }}",
+      lane         = "{{ loki_log_agent_lane }}",
+      source       = "file",
+      log_type     = "postgresql",
+    },
+{% endfor %}
+  ]
+  forward_to = [loki.process.postgres_audit.receiver]
+  file_match {
+    enabled = true
   }
 }
 {% endif %}

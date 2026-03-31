@@ -1,7 +1,16 @@
 ---
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
 - name: Restart Alertmanager
   ansible.builtin.systemd:
     name: "{{ alertmanager_runtime_service_name }}"
+    state: restarted
+
+- name: Restart pgaudit alert relay
+  ansible.builtin.systemd:
+    name: "{{ alertmanager_runtime_pgaudit_relay_service_name }}"
     state: restarted
 
 - name: Restart Prometheus

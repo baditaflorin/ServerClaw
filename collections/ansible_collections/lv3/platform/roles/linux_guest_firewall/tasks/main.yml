@@ -73,3 +73,26 @@
     tasks_from: docker_bridge_chains
   vars:
     common_docker_bridge_chains_service_name: docker
+
+- name: Re-render guest nftables policy after Docker bridge chain evaluation
+  ansible.builtin.template:
+    src: nftables.conf.j2
+    dest: "{{ linux_guest_firewall_config_file }}"
+    mode: "0644"
+    validate: /usr/sbin/nft -c -f %s
+  register: linux_guest_firewall_post_bridge_config
+
+- name: Reload guest nftables policy after Docker bridge chain evaluation
+  ansible.builtin.command: "nft -f {{ linux_guest_firewall_config_file }}"
+  when: linux_guest_firewall_post_bridge_config.changed
+  changed_when: true
+
+- name: Reset SSH connection after post-bridge guest nftables policy evaluation
+  ansible.builtin.meta: reset_connection
+
+- name: Wait for guest SSH after post-bridge nftables changes
+  ansible.builtin.wait_for_connection:
+    timeout: 120
+    connect_timeout: 5
+    sleep: 2
+  when: linux_guest_firewall_post_bridge_config.changed

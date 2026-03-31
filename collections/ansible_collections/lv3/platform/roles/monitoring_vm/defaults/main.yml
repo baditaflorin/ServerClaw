@@ -143,6 +143,14 @@ monitoring_prometheus_rule_files:
   - /etc/prometheus/rules/*.yml
 monitoring_prometheus_alertmanager_targets:
   - 127.0.0.1:9093
+monitoring_postgres_audit_metrics_job_name: postgres-audit-alloy
+monitoring_postgres_audit_metrics_port: 12345
+monitoring_postgres_audit_metrics_target: >-
+  {{
+    hostvars[groups['proxmox_hosts'][0]].platform_guest_catalog.by_name[
+      'postgres-staging-lv3' if inventory_hostname == 'monitoring-staging-lv3' else 'postgres-lv3'
+    ].ipv4
+  }}:{{ monitoring_postgres_audit_metrics_port }}
 monitoring_netdata_parent_port: "{{ hostvars[groups['proxmox_hosts'][0]].platform_port_assignments.netdata_port }}"
 monitoring_netdata_parent_metrics_url: >-
   http://127.0.0.1:{{ monitoring_netdata_parent_port }}/api/v1/allmetrics?format=prometheus_all_hosts&source=as-collected

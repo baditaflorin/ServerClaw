@@ -4,13 +4,14 @@ import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULTS_PATH = REPO_ROOT / "roles" / "monitoring_vm" / "defaults" / "main.yml"
-TASKS_PATH = REPO_ROOT / "roles" / "monitoring_vm" / "tasks" / "main.yml"
-VERIFY_PATH = REPO_ROOT / "roles" / "monitoring_vm" / "tasks" / "verify.yml"
-PLATFORM_DASHBOARD_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "lv3-platform-overview.json.j2"
-MAIL_DASHBOARD_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "lv3-mail-platform.json.j2"
-VM_DASHBOARD_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "lv3-vm-detail.json.j2"
-LOKI_CANARY_SERVICE_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "loki-canary.service.j2"
+ROLE_ROOT = REPO_ROOT / "roles" / "monitoring_vm"
+DEFAULTS_PATH = ROLE_ROOT / "defaults" / "main.yml"
+TASKS_PATH = ROLE_ROOT / "tasks" / "main.yml"
+VERIFY_PATH = ROLE_ROOT / "tasks" / "verify.yml"
+PLATFORM_DASHBOARD_TEMPLATE = ROLE_ROOT / "templates" / "lv3-platform-overview.json.j2"
+MAIL_DASHBOARD_TEMPLATE = ROLE_ROOT / "templates" / "lv3-mail-platform.json.j2"
+VM_DASHBOARD_TEMPLATE = ROLE_ROOT / "templates" / "lv3-vm-detail.json.j2"
+LOKI_CANARY_SERVICE_TEMPLATE = ROLE_ROOT / "templates" / "loki-canary.service.j2"
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 
 
@@ -118,7 +119,7 @@ def test_log_canary_dashboard_is_copied_imported_and_verified() -> None:
 
 
 def test_prometheus_template_scrapes_netdata_parent_exporter() -> None:
-    template = (REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "prometheus.yml.j2").read_text()
+    template = (ROLE_ROOT / "templates" / "prometheus.yml.j2").read_text()
 
     assert "job_name: netdata" in template
     assert "/api/v1/allmetrics" in template
@@ -126,10 +127,40 @@ def test_prometheus_template_scrapes_netdata_parent_exporter() -> None:
 
 
 def test_prometheus_template_scrapes_loki_canary_metrics() -> None:
-    template = (REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "prometheus.yml.j2").read_text()
+    template = (ROLE_ROOT / "templates" / "prometheus.yml.j2").read_text()
 
     assert "job_name: loki-canary" in template
     assert "127.0.0.1:{{ monitoring_loki_canary_metrics_port }}" in template
+
+
+def test_prometheus_template_scrapes_postgres_audit_alloy_metrics() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    template = (ROLE_ROOT / "templates" / "prometheus.yml.j2").read_text()
+
+    assert defaults["monitoring_postgres_audit_metrics_job_name"] == "postgres-audit-alloy"
+    assert defaults["monitoring_postgres_audit_metrics_port"] == 12345
+    assert "job_name: {{ monitoring_postgres_audit_metrics_job_name }}" in template
+    assert "{{ monitoring_postgres_audit_metrics_target }}" in template
+    assert "metric_relabel_configs:" in template
+    assert "regex: loki_process_custom_(postgres_(audit_events_total|connection_authorized_total|unknown_connection_events_total))" in template
+    assert "replacement: $1" in template
+
+
+def test_verify_tasks_query_prometheus_without_escaped_job_label_quotes() -> None:
+    verify_tasks = load_tasks(VERIFY_PATH)
+    loki_scrape_task = next(
+        task for task in verify_tasks if task.get("name") == "Verify Prometheus scrapes the Loki Canary target"
+    )
+
+    assert '\\"' not in loki_scrape_task["ansible.builtin.uri"]["url"]
+
+
+def test_verify_tasks_keep_cross_guest_postgres_audit_scrape_outside_monitoring_role() -> None:
+    verify_tasks = load_tasks(VERIFY_PATH)
+
+    assert all(
+        task.get("name") != "Verify Prometheus scrapes the PostgreSQL audit Alloy target" for task in verify_tasks
+    )
 
 
 def test_loki_canary_service_template_uses_push_mode_with_default_stream_labels() -> None:
@@ -143,7 +174,7 @@ def test_loki_canary_service_template_uses_push_mode_with_default_stream_labels(
 
 
 def test_prometheus_template_scrapes_https_tls_blackbox_targets() -> None:
-    template = (REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "prometheus.yml.j2").read_text()
+    template = (ROLE_ROOT / "templates" / "prometheus.yml.j2").read_text()
 
     assert "job_name: https-tls-blackbox" in template
     assert "{{ monitoring_prometheus_https_tls_targets_file }}" in template
@@ -151,7 +182,7 @@ def test_prometheus_template_scrapes_https_tls_blackbox_targets() -> None:
 
 
 def test_blackbox_template_defines_follow_redirect_tls_modules() -> None:
-    template = (REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "blackbox.yml.j2").read_text()
+    template = (ROLE_ROOT / "templates" / "blackbox.yml.j2").read_text()
 
     assert "http_2xx_follow_redirects" in template
     assert "http_2xx_insecure_tls" in template

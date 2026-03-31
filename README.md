@@ -192,6 +192,7 @@ The repository now also ships ADR 0137 crawl policy automation live on productio
 The repository now also ships the first ADR 0166 canonical error rollout live on production: `config/error-codes.yaml` and `scripts/canonical_errors.py` now normalize repo-managed gateway and platform-context failures behind one trace-id-backed error envelope, and the 2026-03-26 live replay from `main` verified the canonical `AUTH_TOKEN_MISSING` response on both `https://api.lv3.org/v1/health` and `http://100.64.0.1:8010/v1/platform-summary`.
 ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-lv3` now serves the repo-managed private event bus on `10.10.10.20:4222`, the 2026-03-30 exact-main replay re-verified the `PLATFORM_EVENTS`, `RAG_DOCUMENT`, and `SECRET_ROTATION` streams after a short shared Docker-runtime correction loop, and the controller-side check/apply paths plus platform, secret-rotation, and RAG smoke publishes all completed cleanly.
 ADR 0302 Restic file-level backups are now live on production from `main`: `docker-runtime-lv3` now writes encrypted snapshots of `receipts/`, `config/`, `versions/stack.yaml`, and the controller-local secret manifest into the MinIO-backed `restic-config-backup` repository, and the 2026-03-31 exact-main replay re-verified the systemd timer, the event-driven live-apply trigger path, and the governed restore-verification rehearsal end to end.
+ADR 0303 PostgreSQL pgaudit query and privilege audit logging is now live on production from `main`: `postgres-lv3` now runs with repo-managed `pgaudit` preload and approved-role catalogs, Alloy ships structured PostgreSQL audit and unknown-role connection signals into Loki and Prometheus, and the 2026-03-31 exact-main replay re-verified the unknown-role alert path through Alertmanager, the local relay on `monitoring-lv3`, and JetStream publication on `platform.security.pgaudit_unknown_role`.
 ADR 0305 k6 continuous load testing and SLO error-budget burn validation is now
 integrated on `main`: release `0.177.120` carries the repo-managed smoke,
 load, and soak entrypoints together with Windmill scheduling, Prometheus
@@ -207,7 +208,7 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.121` |
+| Repository version | `0.177.122` |
 | Platform version | `0.130.78` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
@@ -369,6 +370,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `plausible_analytics` | `2026-03-30-adr-0283-plausible-analytics-mainline-live-apply` |
 | `policy_validation` | `2026-03-28-adr-0230-policy-decisions-live-apply` |
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
+| `postgres_audit` | `2026-03-31-adr-0303-pgaudit-mainline-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `preview_environment` | `2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z` |
 | `promotion_pipeline` | `2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
@@ -779,6 +781,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Platform Timeout Hierarchy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-timeout-hierarchy.md)
 - [Playbook Execution Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/playbook-execution-model.md)
 - [Portal Authentication By Default](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/portal-authentication-by-default.md)
+- [PostgreSQL Audit Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/postgres-audit.md)
 - [Runbook: Postgres Down](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/postgres-down.md)
 - [PostgreSQL Failover Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/postgres-failover.md)
 - [Prepare Mail Platform Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/prepare-mail-platform-rollout.md)
@@ -1480,6 +1483,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0301-live-apply: Live Apply ADR 0301 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0301-live-apply.md)
 - [Workstream ws-0302-live-apply: ADR 0302 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-live-apply.md)
 - [Workstream ws-0302-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-main-integration.md)
+- [Workstream ws-0303-live-apply: Live Apply ADR 0303 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0303-live-apply.md)
 - [Workstream ws-0305-live-apply: Live Apply ADR 0305 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-live-apply.md)
 - [Workstream ws-0305-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md)
 - [Workstream ws-0306-live-apply: Live Apply ADR 0306 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md)
@@ -1500,7 +1504,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.121` |
+| Repository version | `0.177.122` |
 | Platform version | `0.130.78` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1832,6 +1836,7 @@ This repository is intentionally opinionated:
 | `0301` | Live apply ADR 0301 from latest origin/main | `merged` | [ws-0301-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0301-live-apply.md) |
 | `0302` | ADR 0302 live apply from latest origin/main | `live_applied` | [ws-0302-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-live-apply.md) |
 | `0302` | Integrate ADR 0302 Restic exact-main replay onto current origin/main | `live_applied` | [ws-0302-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-main-integration.md) |
+| `0303` | Live apply PostgreSQL pgaudit query and privilege audit logging from latest origin/main | `live_applied` | [ws-0303-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0303-live-apply.md) |
 | `0305` | Live apply ADR 0305 k6 load testing and SLO error-budget burn validation from latest origin/main | `live_applied` | [ws-0305-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-live-apply.md) |
 | `0305` | Integrate ADR 0305 k6 exact-main replay onto origin/main | `live_applied` | [ws-0305-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md) |
 | `0306` | Live apply Checkov IaC policy scanning from latest origin/main | `live_applied` | [ws-0306-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md) |

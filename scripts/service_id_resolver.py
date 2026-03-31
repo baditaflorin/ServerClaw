@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import argparse
+import sys
 from typing import Final
 
 from controller_automation_toolkit import load_json, load_yaml, repo_path
@@ -48,3 +50,37 @@ def resolve_service_id(service_id: str) -> str:
     if normalized in load_service_catalog_ids():
         return normalized
     return load_service_aliases().get(normalized, normalized)
+
+
+def exists_in_catalog(service_id: str) -> bool:
+    return resolve_service_id(service_id) in load_service_catalog_ids()
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Resolve and inspect governed service ids.")
+    parser.add_argument("--resolve", help="Resolve one requested service id through the service catalog and alias map.")
+    parser.add_argument(
+        "--exists-in-catalog",
+        metavar="SERVICE_ID",
+        help="Exit 0 when the requested id resolves to a service capability catalog entry, else exit 1.",
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+
+    if bool(args.resolve) == bool(args.exists_in_catalog):
+        parser.print_help()
+        return 0
+
+    if args.resolve:
+        print(resolve_service_id(args.resolve))
+        return 0
+
+    return 0 if exists_in_catalog(args.exists_in_catalog) else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
