@@ -71,6 +71,7 @@ def test_renovate_workflow_uses_harbor_pinned_image_and_runtime_token_helper() -
     assert "cleanup_clone_proxy()" in workflow
     assert "ThreadedTCPServer" in workflow
     assert "Renovate clone relay did not become ready." in workflow
+    assert 'RENOVATE_X_STATIC_REPO_CONFIG_FILE=/workspace/renovate.json' in workflow
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
     assert 'RENOVATE_HELPER_IMAGE: registry.lv3.org/check-runner/python:3.12.10@sha256:' in workflow
 

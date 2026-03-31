@@ -318,6 +318,7 @@ jobs:
             -e RENOVATE_ENDPOINT \
             -e RENOVATE_REPOSITORIES \
             -e RENOVATE_TOKEN \
+            -e RENOVATE_X_STATIC_REPO_CONFIG_FILE=/workspace/renovate.json \
             -v "${workspace_host_path}:/workspace" \
             -w /workspace \
             "${RENOVATE_IMAGE}" \

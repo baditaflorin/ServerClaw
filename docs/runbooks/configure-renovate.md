@@ -103,6 +103,11 @@ curl -sS \
 - `renovate.json` sets `gitAuthor` to the dedicated bot identity so hosted
   Renovate runs can create branches and commits even when the platform API does
   not return a non-empty human display name for the bot account.
+- The workflow also passes `RENOVATE_X_STATIC_REPO_CONFIG_FILE=/workspace/renovate.json`
+  into the Renovate container. This is an official experimental Renovate
+  variable and is used here specifically so a workstream branch can validate
+  the branch-local `renovate.json` before that config lands on the private
+  repo's unrelated default-branch history.
 - The runner-side bootstrap bundle also carries `RENOVATE_GIT_CLONE_HOST`,
   `RENOVATE_GIT_CLONE_HOST_ADDRESS`, `RENOVATE_GIT_CLONE_HOST_PORT`,
   `RENOVATE_GIT_CLONE_TARGET_HOST`, and `RENOVATE_GIT_CLONE_TARGET_PORT`.

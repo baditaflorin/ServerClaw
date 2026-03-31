@@ -131,6 +131,7 @@ def test_renovate_workflow_bootstraps_inside_pinned_python_runner() -> None:
     assert "destination.shutdown(socket.SHUT_WR)" in workflow
     assert "select.select" not in workflow
     assert "BlockingIOError" not in workflow
+    assert '-e RENOVATE_X_STATIC_REPO_CONFIG_FILE=/workspace/renovate.json \\' in workflow
     assert "Renovate clone relay did not become ready." in workflow
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
     assert '"${docker_bin}" run --rm \\' in workflow
