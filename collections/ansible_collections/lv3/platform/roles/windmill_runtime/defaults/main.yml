@@ -310,6 +310,7 @@ windmill_worker_runtime_writable_directories:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/sbom"
     mode: "1777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/cve"
+    mode: "1777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/k6"
     mode: "1777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/k6/raw"
