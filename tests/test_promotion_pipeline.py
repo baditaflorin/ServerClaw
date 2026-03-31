@@ -252,6 +252,43 @@ class PromotionPipelineTests(unittest.TestCase):
         self.assertEqual(verdict["gate_decision"], "rejected")
         self.assertIn("staging receipt is older than 24 hours", verdict["reasons"])
 
+    def test_evaluate_slo_gate_blocks_on_k6_budget_warning(self) -> None:
+        entries = [
+            {
+                "id": "keycloak-availability",
+                "service_id": "keycloak",
+                "indicator": "availability",
+                "metrics": {"budget_remaining": 0.75},
+                "metrics_available": True,
+                "metrics_error": None,
+                "k6": {
+                    "current_signal": {
+                        "scenario": "load",
+                        "receipt_path": "receipts/k6/load-keycloak-20260331T070000Z.json",
+                        "result": "passed",
+                        "error_budget_remaining_pct": 15.0,
+                    },
+                    "latest_receipts": {
+                        "load": {
+                            "scenario": "load",
+                            "receipt_path": "receipts/k6/load-keycloak-20260331T070000Z.json",
+                            "result": "passed",
+                            "error_budget_remaining_pct": 15.0,
+                        }
+                    },
+                },
+            }
+        ]
+
+        with patch.object(promotion_pipeline, "build_slo_status_entries", return_value=entries):
+            gate = promotion_pipeline.evaluate_slo_gate(prometheus_url="http://monitoring", service_id="keycloak")
+
+        self.assertTrue(gate["checked"])
+        self.assertIn(
+            "latest k6 load receipt for keycloak shows 15.0% remaining (receipts/k6/load-keycloak-20260331T070000Z.json)",
+            gate["blocking_messages"],
+        )
+
     def test_gate_rejects_critical_findings_for_service(self) -> None:
         from unittest.mock import patch
 

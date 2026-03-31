@@ -1,0 +1,327 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/k6-receipt.schema.json",
+  "title": "LV3 k6 receipt",
+  "type": "object",
+  "required": [
+    "$schema",
+    "schema_version",
+    "receipt_id",
+    "scenario",
+    "service_id",
+    "environment",
+    "runner_context",
+    "recorded_on",
+    "recorded_at",
+    "recorded_by",
+    "source_commit",
+    "repo_version_context",
+    "k6_image_ref",
+    "summary_export",
+    "prometheus_remote_write_url",
+    "scenario_config",
+    "metrics",
+    "slo_assessment",
+    "regression",
+    "notifications",
+    "result",
+    "failure_reasons"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "docs/schema/k6-receipt.schema.json"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario": {
+      "enum": [
+        "smoke",
+        "load",
+        "soak"
+      ]
+    },
+    "service_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_]*$"
+    },
+    "service_name": {
+      "type": "string"
+    },
+    "target_url": {
+      "type": "string"
+    },
+    "environment": {
+      "type": "string"
+    },
+    "runner_context": {
+      "type": "string"
+    },
+    "recorded_on": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "recorded_by": {
+      "type": "string"
+    },
+    "source_commit": {
+      "type": "string"
+    },
+    "repo_version_context": {
+      "type": "string"
+    },
+    "k6_image_ref": {
+      "type": "string"
+    },
+    "summary_export": {
+      "type": "string"
+    },
+    "prometheus_remote_write_url": {
+      "type": "string"
+    },
+    "scenario_config": {
+      "type": "object",
+      "required": [
+        "vus",
+        "max_error_rate",
+        "think_time_seconds",
+        "request_timeout_seconds"
+      ],
+      "properties": {
+        "vus": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "duration": {
+          "type": "string"
+        },
+        "ramp_up_duration": {
+          "type": "string"
+        },
+        "hold_duration": {
+          "type": "string"
+        },
+        "max_error_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "think_time_seconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "request_timeout_seconds": {
+          "type": "number",
+          "minimum": 1
+        },
+        "latency_threshold_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "request_count",
+        "success_count",
+        "failed_count",
+        "error_rate",
+        "http_req_duration_p95_ms",
+        "http_req_duration_avg_ms",
+        "http_req_duration_max_ms"
+      ],
+      "properties": {
+        "request_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "success_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "http_req_duration_p95_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "http_req_duration_avg_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "http_req_duration_max_ms": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "slo_assessment": {
+      "type": "object",
+      "required": [
+        "availability_slo_id",
+        "latency_slo_id",
+        "latency_threshold_ms",
+        "availability_objective_percent",
+        "error_budget_consumed_pct",
+        "error_budget_remaining_pct",
+        "error_budget_warning_threshold_pct",
+        "within_error_budget",
+        "latency_threshold_passed"
+      ],
+      "properties": {
+        "availability_slo_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "latency_slo_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "latency_threshold_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "availability_objective_percent": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "error_budget_consumed_pct": {
+          "type": "number",
+          "minimum": 0
+        },
+        "error_budget_remaining_pct": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "error_budget_warning_threshold_pct": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "within_error_budget": {
+          "type": "boolean"
+        },
+        "latency_threshold_passed": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "regression": {
+      "type": "object",
+      "required": [
+        "checked",
+        "baseline_receipt",
+        "baseline_p95_ms",
+        "current_p95_ms",
+        "regression_ratio",
+        "threshold_ratio",
+        "regressed"
+      ],
+      "properties": {
+        "checked": {
+          "type": "boolean"
+        },
+        "baseline_receipt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "baseline_p95_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "current_p95_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "regression_ratio": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "threshold_ratio": {
+          "type": "number",
+          "minimum": 0
+        },
+        "regressed": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "notifications": {
+      "type": "object",
+      "required": [
+        "nats_event_published",
+        "ntfy_topic_notified"
+      ],
+      "properties": {
+        "nats_event_published": {
+          "type": "boolean"
+        },
+        "ntfy_topic_notified": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "result": {
+      "enum": [
+        "passed",
+        "failed"
+      ]
+    },
+    "failure_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

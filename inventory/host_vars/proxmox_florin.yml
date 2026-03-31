@@ -868,6 +868,16 @@ network_policy:
         - source: docker-runtime-lv3
           protocol: tcp
           ports:
+            - 9090
+          description: Private Prometheus remote-write from docker-runtime-lv3 k6 and tracing workloads
+        - source: docker-build-lv3
+          protocol: tcp
+          ports:
+            - 9090
+          description: Private Prometheus remote-write from docker-build-lv3 CI and validation workloads
+        - source: docker-runtime-lv3
+          protocol: tcp
+          ports:
             - 7007
           description: Dozzle hub access to the monitoring agent
         - source: nginx-lv3

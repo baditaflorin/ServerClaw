@@ -15,6 +15,7 @@ from platform.repo import PYYAML_INSTALL_HINT, load_json, load_yaml
 GRAFANA_DASHBOARD_UID = "lv3-slo-overview"
 SLO_STATUS_BUDGET_WARN = 0.50
 SLO_STATUS_BUDGET_CRITICAL = 0.10
+K6_WARNING_THRESHOLD_PCT = 20.0
 SLO_INDICATORS = {"availability", "latency"}
 SLO_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
@@ -220,6 +221,81 @@ def prometheus_query_value(prometheus_url: str, expr: str, *, timeout: float = 5
     return float(value[1])
 
 
+def relative_repo_path(path: Path, repo_root: Path) -> str:
+    try:
+        return str(path.relative_to(repo_root))
+    except ValueError:
+        return str(path)
+
+
+def receipt_recorded_at(receipt: dict[str, Any]) -> str:
+    value = receipt.get("recorded_at")
+    if isinstance(value, str) and value.strip():
+        return value
+    recorded_on = receipt.get("recorded_on")
+    if isinstance(recorded_on, str) and recorded_on.strip():
+        return f"{recorded_on}T00:00:00Z"
+    return ""
+
+
+def summarize_k6_receipt(receipt: dict[str, Any], path: Path, *, repo_root: Path) -> dict[str, Any] | None:
+    service_id = receipt.get("service_id")
+    scenario = receipt.get("scenario")
+    if not isinstance(service_id, str) or not service_id.strip():
+        return None
+    if not isinstance(scenario, str) or not scenario.strip():
+        return None
+    metrics = receipt.get("metrics") if isinstance(receipt.get("metrics"), dict) else {}
+    slo_assessment = receipt.get("slo_assessment") if isinstance(receipt.get("slo_assessment"), dict) else {}
+    regression = receipt.get("regression") if isinstance(receipt.get("regression"), dict) else {}
+    return {
+        "service_id": service_id,
+        "scenario": scenario,
+        "receipt_path": relative_repo_path(path, repo_root),
+        "recorded_at": receipt_recorded_at(receipt),
+        "recorded_on": receipt.get("recorded_on"),
+        "result": receipt.get("result"),
+        "request_count": metrics.get("request_count"),
+        "error_rate": metrics.get("error_rate"),
+        "http_req_duration_p95_ms": metrics.get("http_req_duration_p95_ms"),
+        "http_req_duration_avg_ms": metrics.get("http_req_duration_avg_ms"),
+        "error_budget_remaining_pct": slo_assessment.get("error_budget_remaining_pct"),
+        "error_budget_consumed_pct": slo_assessment.get("error_budget_consumed_pct"),
+        "latency_threshold_passed": slo_assessment.get("latency_threshold_passed"),
+        "regression_checked": regression.get("checked"),
+        "regressed": regression.get("regressed"),
+        "regression_ratio": regression.get("regression_ratio"),
+    }
+
+
+def load_latest_k6_receipts(*, repo_root: Path, receipts_dir: Path | None = None) -> dict[str, dict[str, dict[str, Any]]]:
+    target_dir = receipts_dir or _repo_path(repo_root, "receipts", "k6")
+    if not target_dir.exists():
+        return {}
+    latest: dict[str, dict[str, dict[str, Any]]] = {}
+    for path in sorted(target_dir.glob("*.json")):
+        try:
+            receipt = load_json(path)
+        except Exception:  # noqa: BLE001
+            continue
+        summary = summarize_k6_receipt(receipt, path, repo_root=repo_root)
+        if summary is None:
+            continue
+        by_service = latest.setdefault(summary["service_id"], {})
+        existing = by_service.get(summary["scenario"])
+        if existing is None or summary["recorded_at"] > existing["recorded_at"]:
+            by_service[summary["scenario"]] = summary
+    return latest
+
+
+def current_k6_signal(latest_receipts: dict[str, dict[str, Any]]) -> dict[str, Any] | None:
+    for scenario in ("load", "soak", "smoke"):
+        signal = latest_receipts.get(scenario)
+        if signal is not None:
+            return signal
+    return None
+
+
 def build_slo_status_entries(
     *,
     repo_root: Path | None = None,
@@ -240,6 +316,8 @@ def build_slo_status_entries(
     )
     effective_grafana_url = (grafana_url or default_grafana_url(repo_root=repo_root, service_catalog_path=resolved_service_catalog_path)).rstrip("/")
     effective_prometheus_url = default_prometheus_url(repo_root=repo_root, stack_path=resolved_stack_path) if prometheus_url is None else prometheus_url
+    resolved_repo_root = Path(repo_root) if repo_root is not None else resolved_catalog_path.parents[1]
+    latest_k6_receipts = load_latest_k6_receipts(repo_root=resolved_repo_root, receipts_dir=_repo_path(resolved_repo_root, "receipts", "k6"))
     effective_query = query_fn
     if effective_query is None and effective_prometheus_url:
         effective_query = lambda expr: prometheus_query_value(effective_prometheus_url, expr)
@@ -282,6 +360,11 @@ def build_slo_status_entries(
                 "metrics_available": metrics_error is None and any(value is not None for value in live_metrics.values()),
                 "metrics_error": metrics_error,
                 "status": format_budget_status(live_metrics["budget_remaining"]),
+                "k6": {
+                    "current_signal": current_k6_signal(latest_k6_receipts.get(slo["service_id"], {})),
+                    "latest_receipts": latest_k6_receipts.get(slo["service_id"], {}),
+                    "warning_threshold_percent": K6_WARNING_THRESHOLD_PCT,
+                },
                 "dashboard_url": (
                     f"{effective_grafana_url}/d/{GRAFANA_DASHBOARD_UID}/{GRAFANA_DASHBOARD_UID}"
                     f"?var-slo={urllib.parse.quote(slo['id'])}"

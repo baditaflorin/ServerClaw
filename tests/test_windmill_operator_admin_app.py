@@ -57,6 +57,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_worker_checkout_repo_root_local_dir"].strip().startswith("{{\n  (playbook_dir ~ '/..')")
     assert "inventory_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
     assert "playbook_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
+    assert "ntfy_alertmanager_password" in defaults["windmill_worker_secret_mirror_ids"]
     assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
     assert defaults["windmill_worker_checkout_integrity_files"] == [
         "Makefile",
@@ -178,7 +179,10 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/fixtures", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/sbom", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/cve", "mode": "1777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/k6", "mode": "1777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/k6/raw", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local", "mode": "0755"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/k6", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/reaper-runs", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/runtime", "mode": "1777"}.items()),
@@ -198,6 +202,14 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert sbom_schedule["timezone"] == "Europe/Bucharest"
     assert sbom_schedule["script_path"] == "f/lv3/sbom_refresh"
     assert sbom_schedule["enabled"] is True
+    weekly_k6_schedule = next(entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/k6_load_weekly")
+    assert weekly_k6_schedule["schedule"] == "0 0 5 * * 7"
+    assert weekly_k6_schedule["args"]["scenario"] == "load"
+    assert weekly_k6_schedule["args"]["publish_nats"] is True
+    assert weekly_k6_schedule["args"]["notify_ntfy"] is True
+    monthly_k6_schedule = next(entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/k6_soak_monthly")
+    assert monthly_k6_schedule["schedule"] == "0 30 5 1 * *"
+    assert monthly_k6_schedule["args"]["scenario"] == "soak"
 
 
 def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> None:

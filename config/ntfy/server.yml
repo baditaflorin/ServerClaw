@@ -12,3 +12,4 @@ auth-users:
 auth-access:
   - "{{ ntfy_runtime_username }}:platform-alerts:rw"
   - "{{ ntfy_runtime_username }}:platform-alerts-sbom-verify:rw"
+  - "{{ ntfy_runtime_username }}:platform.slo.warn:rw"

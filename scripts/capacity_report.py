@@ -20,6 +20,7 @@ from shared_policy_packs import load_shared_policy_packs
 CAPACITY_MODEL_PATH = REPO_ROOT / "config" / "capacity-model.json"
 INVENTORY_PATH = REPO_ROOT / "inventory" / "hosts.yml"
 SECRET_MANIFEST_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
+SERVICE_CATALOG_PATH = REPO_ROOT / "config" / "service-capability-catalog.json"
 FIXTURE_RECEIPTS_DIR = REPO_ROOT / "receipts" / "fixtures"
 SSH_TIMEOUT_SECONDS = 10
 SHARED_POLICIES = load_shared_policy_packs()
@@ -415,6 +416,13 @@ def validate_capacity_model_payload(payload: dict[str, Any]) -> None:
         "config/capacity-model.json.host.reserved_for_platform",
     )
 
+    services_payload = require_mapping(load_json(SERVICE_CATALOG_PATH), str(SERVICE_CATALOG_PATH))
+    known_service_ids = {
+        require_str(entry.get("id"), f"{SERVICE_CATALOG_PATH}.services[{index}].id")
+        for index, entry in enumerate(require_list(services_payload.get("services"), f"{SERVICE_CATALOG_PATH}.services"))
+        if isinstance(entry, dict)
+    }
+
     inventory_hosts = load_inventory_hosts()
     proxmox_host = inventory_hosts.get("proxmox_florin")
     if not proxmox_host:
@@ -611,6 +619,55 @@ def validate_capacity_model_payload(payload: dict[str, Any]) -> None:
         if kind == "planned_growth" and capacity_class == "ha_reserved":
             raise ValueError(
                 f"config/capacity-model.json.reservations[{index}] planned_growth must not use ha_reserved; use a planned standby guest or standby reservation instead"
+            )
+
+    seen_profile_service_ids: set[str] = set()
+    for index, item in enumerate(
+        require_list(payload.get("service_load_profiles", []), "config/capacity-model.json.service_load_profiles")
+    ):
+        profile = require_mapping(item, f"config/capacity-model.json.service_load_profiles[{index}]")
+        service_id = require_str(
+            profile.get("service_id"),
+            f"config/capacity-model.json.service_load_profiles[{index}].service_id",
+        )
+        if service_id in seen_profile_service_ids:
+            raise ValueError(f"duplicate capacity-model service_load_profile for '{service_id}'")
+        seen_profile_service_ids.add(service_id)
+        if service_id not in known_service_ids:
+            raise ValueError(
+                f"config/capacity-model.json.service_load_profiles[{index}].service_id references unknown service '{service_id}'"
+            )
+        require_number(
+            profile.get("typical_concurrency"),
+            f"config/capacity-model.json.service_load_profiles[{index}].typical_concurrency",
+            1,
+        )
+        if "smoke_vus" in profile:
+            smoke_vus = require_number(
+                profile.get("smoke_vus"),
+                f"config/capacity-model.json.service_load_profiles[{index}].smoke_vus",
+                1,
+            )
+            if smoke_vus > 3:
+                raise ValueError(
+                    f"config/capacity-model.json.service_load_profiles[{index}].smoke_vus must be <= 3"
+                )
+        if "request_timeout_seconds" in profile:
+            require_number(
+                profile.get("request_timeout_seconds"),
+                f"config/capacity-model.json.service_load_profiles[{index}].request_timeout_seconds",
+                1,
+            )
+        if "think_time_seconds" in profile:
+            require_number(
+                profile.get("think_time_seconds"),
+                f"config/capacity-model.json.service_load_profiles[{index}].think_time_seconds",
+                0,
+            )
+        if "notes" in profile:
+            require_str(
+                profile.get("notes"),
+                f"config/capacity-model.json.service_load_profiles[{index}].notes",
             )
 
 

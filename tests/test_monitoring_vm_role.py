@@ -24,6 +24,17 @@ def test_defaults_define_public_grafana_url_from_service_topology() -> None:
     )
 
 
+def test_defaults_expose_private_prometheus_remote_write_endpoint() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    template = (REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "prometheus.service.j2").read_text()
+
+    assert defaults["monitoring_prometheus_listen_address"] == "0.0.0.0:9090"
+    assert defaults["monitoring_prometheus_remote_write_url"] == (
+        "http://{{ hostvars[groups['proxmox_hosts'][0]].lv3_service_topology.grafana.private_ip }}:9090/api/v1/write"
+    )
+    assert "{{ monitoring_prometheus_listen_address }}" in template
+
+
 def test_main_tasks_explicitly_disable_public_dashboards_and_embedding() -> None:
     tasks = load_tasks(TASKS_PATH)
     public_dashboards = next(task for task in tasks if task.get("name") == "Disable Grafana public dashboards")
