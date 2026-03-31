@@ -7,6 +7,7 @@ import datetime as dt
 import json
 import os
 import re
+import socket
 import subprocess
 import sys
 import urllib.parse
@@ -162,6 +163,31 @@ def default_prometheus_remote_write_url(repo_root: Path) -> str:
     return f"{url.rstrip('/')}/api/v1/write"
 
 
+def default_nats_url(repo_root: Path) -> str:
+    env_url = os.environ.get("LV3_NATS_URL", "").strip()
+    if env_url:
+        return env_url.rstrip("/")
+    nats_service = load_service_index(repo_root).get("nats")
+    if isinstance(nats_service, dict):
+        internal_url = nats_service.get("internal_url")
+        if isinstance(internal_url, str) and internal_url.strip():
+            return internal_url.rstrip("/")
+    return DEFAULT_NATS_URL
+
+
+def ensure_nats_url_reachable(nats_url: str, *, timeout_seconds: float = 1.0) -> None:
+    parsed = urllib.parse.urlparse(nats_url)
+    host = parsed.hostname
+    port = parsed.port or 4222
+    if not host:
+        raise ValueError(f"invalid NATS URL '{nats_url}'")
+    try:
+        with socket.create_connection((host, port), timeout=timeout_seconds):
+            pass
+    except OSError as exc:
+        raise RuntimeError(f"NATS endpoint unavailable at {nats_url}: {exc}") from exc
+
+
 def relative_repo_path(path: Path, repo_root: Path) -> str:
     try:
         return str(path.relative_to(repo_root))
@@ -263,7 +289,7 @@ def build_targets(
                 "think_time_seconds": float(profile.get("think_time_seconds", DEFAULT_THINK_TIME_SECONDS)),
                 "ramp_up_duration": load_ramp_up_duration,
                 "hold_duration": load_hold_duration,
-                "duration": soak_duration,
+                "duration": load_hold_duration,
             }
         )
     if not targets:
@@ -452,6 +478,8 @@ def publish_regression_event(
 ) -> bool:
     if not regression["regressed"]:
         return False
+    nats_url = default_nats_url(repo_root)
+    ensure_nats_url_reachable(nats_url)
     publish_nats_events(
         [
             {
@@ -469,7 +497,7 @@ def publish_regression_event(
                 },
             }
         ],
-        nats_url=os.environ.get("LV3_NATS_URL", DEFAULT_NATS_URL),
+        nats_url=nats_url,
         credentials=None,
     )
     return True
@@ -553,15 +581,17 @@ def build_receipts(
             error_budget_consumed_pct = min((error_rate / budget_ratio) * 100.0, 100.0) if budget_ratio > 0 else 100.0
         error_budget_remaining_pct = max(0.0, 100.0 - error_budget_consumed_pct)
 
+        metric_failures: list[str] = []
         failure_reasons: list[str] = []
         if error_rate > DEFAULT_MAX_ERROR_RATE:
-            failure_reasons.append(
+            metric_failures.append(
                 f"error rate {error_rate:.4f} exceeded {DEFAULT_MAX_ERROR_RATE:.4f}"
             )
         if not latency_passed and latency_threshold_ms is not None:
-            failure_reasons.append(
+            metric_failures.append(
                 f"p95 latency {p95_ms:.2f}ms exceeded {float(latency_threshold_ms):.2f}ms"
             )
+        failure_reasons.extend(metric_failures)
 
         regression = build_regression_payload(
             repo_root=repo_root,
@@ -659,7 +689,7 @@ def build_receipts(
                 "nats_event_published": nats_published,
                 "ntfy_topic_notified": ntfy_topic,
             },
-            "result": "failed" if failure_reasons else "passed",
+            "result": "failed" if metric_failures else "passed",
             "failure_reasons": failure_reasons,
         }
         write_json(receipt_path, receipt)

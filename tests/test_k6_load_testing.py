@@ -4,6 +4,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
@@ -129,6 +131,7 @@ def test_build_targets_uses_smoke_dedup_and_load_profiles(tmp_path: Path) -> Non
     assert len(load) == 1
     assert load[0]["vus"] == 5
     assert load[0]["hold_duration"] == "5m"
+    assert load[0]["duration"] == "5m"
 
 
 def test_build_regression_payload_uses_previous_receipt(tmp_path: Path) -> None:
@@ -545,3 +548,167 @@ def test_build_receipts_keeps_failed_receipt_when_ntfy_warning_delivery_fails(mo
     assert payload["result"] == "failed"
     assert payload["notifications"]["ntfy_topic_notified"] is None
     assert any("ntfy notification unavailable: missing secret" == reason for reason in payload["failure_reasons"])
+
+
+def test_publish_regression_event_fails_fast_when_nats_endpoint_is_unreachable(monkeypatch, tmp_path: Path) -> None:
+    (tmp_path / "config").mkdir(parents=True)
+    (tmp_path / "config" / "service-capability-catalog.json").write_text(
+        json.dumps(
+            {
+                "services": [
+                    {
+                        "id": "nats",
+                        "name": "NATS",
+                        "internal_url": "nats://10.10.10.20:4222",
+                    }
+                ]
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.delenv("LV3_NATS_URL", raising=False)
+    monkeypatch.setattr(
+        k6_load_testing.socket,
+        "create_connection",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("timed out")),
+    )
+    monkeypatch.setattr(
+        k6_load_testing,
+        "publish_nats_events",
+        lambda **_kwargs: (_ for _ in ()).throw(AssertionError("publish_nats_events should not be called")),
+    )
+
+    with pytest.raises(RuntimeError, match="timed out"):
+        k6_load_testing.publish_regression_event(
+            repo_root=tmp_path,
+            service_id="keycloak",
+            scenario="load",
+            receipt_path=tmp_path / "receipts" / "k6" / "load-keycloak.json",
+            regression={
+                "checked": True,
+                "baseline_receipt": "receipts/k6/load-keycloak-previous.json",
+                "baseline_p95_ms": 10.0,
+                "current_p95_ms": 25.0,
+                "regression_ratio": 1.5,
+                "threshold_ratio": 0.2,
+                "regressed": True,
+            },
+        )
+
+
+def test_build_receipts_keeps_passed_result_when_only_nats_regression_notification_fails(
+    monkeypatch,
+    tmp_path: Path,
+    capsys,
+) -> None:
+    recorded_at = k6_load_testing.dt.datetime(2026, 3, 31, 12, 4, 12, tzinfo=k6_load_testing.dt.timezone.utc)
+    summary_path = tmp_path / "receipts" / "k6" / "raw" / "20260331T120412Z-load-summary.json"
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
+    summary_path.write_text("{}", encoding="utf-8")
+    (tmp_path / "config").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "config" / "service-capability-catalog.json").write_text(
+        json.dumps(
+            {
+                "services": [
+                    {
+                        "id": "nats",
+                        "name": "NATS",
+                        "internal_url": "nats://10.10.10.20:4222",
+                    }
+                ]
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.delenv("LV3_NATS_URL", raising=False)
+    monkeypatch.setattr(
+        k6_load_testing,
+        "load_image_catalog",
+        lambda: {"images": {"k6_runtime": {"ref": "docker.io/grafana/k6:1.7.1@sha256:test"}}},
+    )
+    monkeypatch.setattr(k6_load_testing, "current_commit", lambda _repo_root: "deadbeef")
+    monkeypatch.setattr(k6_load_testing, "current_repo_version", lambda _repo_root: "0.1.0")
+    monkeypatch.setattr(k6_load_testing, "default_prometheus_remote_write_url", lambda _repo_root: "http://10.10.10.40:9090/api/v1/write")
+    monkeypatch.setattr(
+        k6_load_testing,
+        "build_regression_payload",
+        lambda **_kwargs: {
+            "checked": True,
+            "baseline_receipt": "receipts/k6/load-keycloak-previous.json",
+            "baseline_p95_ms": 10.0,
+            "current_p95_ms": 25.0,
+            "regression_ratio": 1.5,
+            "threshold_ratio": 0.2,
+            "regressed": True,
+        },
+    )
+    monkeypatch.setattr(
+        k6_load_testing.socket,
+        "create_connection",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("connection refused")),
+    )
+    monkeypatch.setattr(
+        k6_load_testing,
+        "publish_nats_events",
+        lambda **_kwargs: (_ for _ in ()).throw(AssertionError("publish_nats_events should not be called")),
+    )
+
+    summary = {
+        "metrics": {
+            "checks{service_id:keycloak}": {
+                "passes": 10,
+                "fails": 0,
+                "value": 1,
+            },
+            "http_req_duration{service_id:keycloak}": {
+                "p(95)": 25.0,
+                "avg": 20.0,
+                "max": 30.0,
+            },
+        }
+    }
+    targets = [
+        {
+            "service_id": "keycloak",
+            "service_name": "Keycloak",
+            "target_url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
+            "availability_slo_id": "keycloak-availability",
+            "availability_objective_percent": 99.7,
+            "latency_slo_id": "keycloak-latency",
+            "latency_threshold_ms": 500.0,
+            "vus": 5,
+            "duration": "5m",
+            "ramp_up_duration": "1m",
+            "hold_duration": "5m",
+            "think_time_seconds": 1.0,
+            "request_timeout_seconds": 10.0,
+        }
+    ]
+
+    receipts = k6_load_testing.build_receipts(
+        repo_root=tmp_path,
+        scenario="load",
+        runner_context="manual",
+        environment="production",
+        recorded_at=recorded_at,
+        summary_path=summary_path,
+        summary=summary,
+        targets=targets,
+        output_dir=tmp_path / "receipts" / "k6",
+        publish_nats=True,
+        notify_ntfy_flag=False,
+    )
+
+    captured = capsys.readouterr()
+    assert "failed to publish NATS regression event" in captured.err
+    payload = json.loads(receipts[0].read_text(encoding="utf-8"))
+    assert payload["result"] == "passed"
+    assert payload["notifications"]["nats_event_published"] is False
+    assert any(
+        reason.startswith("nats regression notification unavailable:")
+        for reason in payload["failure_reasons"]
+    )
