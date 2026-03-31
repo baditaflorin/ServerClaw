@@ -174,7 +174,9 @@ def validate_workstream_registry_contract(contract: dict[str, Any]) -> None:
             )
         _require_non_empty_string(workstream.get("owner"), f"workstreams.yaml.workstreams[{index}].owner")
         branch = _require_non_empty_string(workstream.get("branch"), f"workstreams.yaml.workstreams[{index}].branch")
-        if branch != "main" and not branch.startswith(branch_prefix):
+        extra_prefixes = delivery_model.get("allowed_extra_prefixes") or []
+        allowed_prefixes = [branch_prefix] + list(extra_prefixes)
+        if branch != "main" and not any(branch.startswith(p) for p in allowed_prefixes):
             raise ValueError(
                 f"workstreams.yaml.workstreams[{index}].branch must be 'main' or start with '{branch_prefix}'"
             )

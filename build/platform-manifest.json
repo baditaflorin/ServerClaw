@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.122",
+  "repo_version": "0.177.123",
   "platform_version": "0.130.78",
-  "generated_at": "2026-03-31T19:24:44Z",
-  "next_refresh_at": "2026-03-31T20:24:44Z",
+  "generated_at": "2026-03-31T21:51:51Z",
+  "next_refresh_at": "2026-03-31T22:51:51Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5445,7 +5445,7 @@
         "id": "security-posture-reporting",
         "title": "Security Posture Reporting",
         "agent_trust_required": "T1",
-        "steps": 7,
+        "steps": 6,
         "path": "docs/runbooks/security-posture-reporting.md",
         "workflow_ids": [
           "security-posture-scan"
@@ -5689,10 +5689,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.121",
+    "last_version": "0.177.122",
     "deployed_at": "2026-03-31",
-    "summary": "implements ADR 0303 by enabling PostgreSQL pgaudit query and privilege audit logging, shipping structured audit and connection signals into Loki and Prometheus, and routing unknown-role alerts to ntfy plus NATS with recorded exact-main live-apply evidence",
-    "release_notes_url": "docs/release-notes/0.177.122.md"
+    "summary": "implemented ADRs 0307 through 0316 by defining the cohesive platform",
+    "release_notes_url": "docs/release-notes/0.177.123.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

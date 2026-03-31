@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.177.122
+repo_version: 0.177.123
 platform_version: 0.130.78
 
 live_apply_evidence:
@@ -15,8 +15,8 @@ live_apply_evidence:
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
     public_edge_publication: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
-    api_gateway: 2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply
-    artifact_cache_plane: 2026-03-30-adr-0296-dedicated-artifact-cache-vm-mainline-live-apply
+    api_gateway: 2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply
+    artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
     docker_publication: 2026-03-30-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     dozzle: 2026-03-26-adr-0150-dozzle-live-apply
@@ -107,7 +107,7 @@ live_apply_evidence:
     gitea_actions_runners: 2026-03-28-adr-0229-gitea-actions-runners-live-apply
     bounded_command_execution: 2026-03-28-adr-0227-bounded-command-execution-mainline-live-apply
     policy_validation: 2026-03-28-adr-0230-policy-decisions-live-apply
-    promotion_pipeline: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+    promotion_pipeline: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
     server_resident_operations: 2026-03-28-adr-0224-server-resident-operations-default-control-live-apply
     host_control_loops: 2026-03-28-adr-0226-host-control-loops-mainline-live-apply
     signed_release_bundles: 2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply
@@ -125,10 +125,10 @@ live_apply_evidence:
     restore_verification: 2026-03-29-adr-0272-restore-readiness-mainline-live-apply
     public_endpoint_admission_control: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
     https_tls_assurance: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
-    validation_gate: 2026-03-30-adr-0267-gate-bypass-waivers-mainline-live-apply
+    validation_gate: 2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply
     validation_runner_contracts: 2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply
-    matrix_synapse: 2026-03-30-adr-0256-mautrix-bridges-mainline-live-apply
-    stage_smoke_suites: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+    matrix_synapse: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
+    stage_smoke_suites: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
     gotenberg: 2026-03-30-adr-0278-gotenberg-mainline-live-apply
     nextcloud: 2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply
     browser_runner: 2026-03-30-adr-0261-playwright-browser-runners-live-apply
@@ -1085,7 +1085,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.122
+    current: 0.177.123
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.78
