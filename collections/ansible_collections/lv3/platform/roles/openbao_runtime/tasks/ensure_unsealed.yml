@@ -1,4 +1,11 @@
 ---
+# Purpose: Guarantee OpenBao is unsealed and active before dependent runtime bootstrap or verification steps continue.
+# Use case: Included by OpenBao consumers when a converge or verification flow must recover from an unexpected sealed state.
+# Inputs: The OpenBao HTTP port, unseal init payload, key threshold, and a descriptive unseal context string.
+# Outputs: A confirmed unsealed and active OpenBao runtime suitable for subsequent secret reads or writes.
+# Idempotency: Fully idempotent because seal status is checked first and unseal calls run only when the node is sealed.
+# Dependencies: ADR 0165, the openbao_runtime role, and access to the repo-managed OpenBao init payload.
+
 - name: Read OpenBao seal status before {{ openbao_unseal_context | default('managed verification') }}
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
@@ -21,9 +28,6 @@
     status_code: 200
   loop: "{{ openbao_unseal_init_payload.keys_base64[: (openbao_init_key_threshold | int)] }}"
   register: openbao_runtime_reseal_recovery
-  retries: 6
-  delay: 2
-  until: openbao_runtime_reseal_recovery.status == 200
   when: openbao_runtime_seal_status.json.sealed | bool
   no_log: true
 

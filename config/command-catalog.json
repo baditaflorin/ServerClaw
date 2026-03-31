@@ -2671,6 +2671,51 @@
         "timeout_seconds": 900
       }
     },
+    "converge-paperless": {
+      "description": "Converge the public Paperless-ngx archive, governed API route, and repo-managed taxonomy verification on docker-runtime-lv3.",
+      "workflow_id": "converge-paperless",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish or correct the paperless.lv3.org A record on the shared edge."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-paperless passes",
+        "make validate passes before the apply",
+        "The public Paperless upload surface, docs.lv3.org hostname reservation, and governed `/v1/paperless` API route are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, one public root response, one authenticated documents response, the drift-free taxonomy verification, and one smoke upload report."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Paperless runtime fails to start, the edge publication does not preserve the intended authenticated access path, or the taxonomy verify path reports drift after convergence.",
+          "Stop if the public upload smoke test fails or leaves behind unmanaged documents after cleanup."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Paperless runtime, Keycloak client, and edge publication from version control before retrying.",
+          "Do not leave behind ad hoc Docker, DNS, nginx, or Paperless taxonomy drift outside the repo-managed workflow."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "converge-excalidraw": {
       "description": "Converge the private Excalidraw runtime, collaboration room, and authenticated edge publication at draw.lv3.org.",
       "workflow_id": "converge-excalidraw",

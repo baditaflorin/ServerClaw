@@ -159,6 +159,147 @@ def test_summarize_latest_snapshots_clamps_negative_interval_age(tmp_path: Path)
     assert receipt["sources"][0]["reasons"][0].startswith("Latest snapshot is 0 minutes old")
 
 
+def test_refresh_latest_snapshot_receipt_for_live_apply_updates_cached_entries(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    (repo_root / "config").mkdir(parents=True)
+    (repo_root / "versions").mkdir(parents=True)
+    (repo_root / "config" / "service.yml").write_text("service: value\n", encoding="utf-8")
+    (repo_root / "versions" / "stack.yaml").write_text("platform_version: 0.130.75\n", encoding="utf-8")
+
+    config_source = restic_backup.Source(
+        "config",
+        "config",
+        (repo_root / "config",),
+        1440,
+        "event_driven",
+        "successful_live_apply",
+        {"keep_daily": 30},
+        True,
+        False,
+        None,
+    )
+    versions_source = restic_backup.Source(
+        "versions_stack",
+        "versions_stack",
+        (repo_root / "versions" / "stack.yaml",),
+        1440,
+        "event_driven",
+        "successful_live_apply",
+        {"keep_daily": 30},
+        True,
+        False,
+        None,
+    )
+    receipts_source = restic_backup.Source(
+        "receipts",
+        "receipts",
+        (repo_root / "receipts",),
+        360,
+        "interval",
+        "every_6_hours",
+        {"keep_daily": 90},
+        False,
+        False,
+        {"path": "receipts", "expected_minimum_files": 1},
+    )
+
+    existing = {
+        "schema_version": "1.0.0",
+        "recorded_at": "2026-03-31T06:01:31Z",
+        "recorded_on": "2026-03-31",
+        "recorded_by": "codex",
+        "repository": {"bucket": "restic-config-backup", "endpoint": "http://10.200.18.3:9000"},
+        "summary": {
+            "governed_sources": 3,
+            "protected": 3,
+            "uncovered": 0,
+            "inactive": 0,
+            "uncovered_sources": [],
+            "inactive_sources": [],
+        },
+        "sources": [
+            {
+                "source_id": "receipts",
+                "label": "receipts",
+                "paths": ["receipts"],
+                "state": "protected",
+                "expected_schedule": "every_6_hours",
+                "freshness_minutes": 360,
+                "freshness_policy": "interval",
+                "retention": {"keep_daily": 90},
+                "latest_snapshot": {
+                    "snapshot_id": "receipts-old",
+                    "recorded_at": "2026-03-31T06:01:31Z",
+                    "host": "docker-runtime-lv3",
+                    "paths": ["receipts"],
+                    "files": 10,
+                },
+                "last_restore_verification": None,
+                "reasons": ["Latest snapshot is 0 minutes old and within the 390 minute freshness window."],
+            },
+            {
+                "source_id": "config",
+                "label": "config",
+                "paths": ["config"],
+                "state": "protected",
+                "expected_schedule": "successful_live_apply",
+                "freshness_minutes": 1440,
+                "freshness_policy": "event_driven",
+                "retention": {"keep_daily": 30},
+                "latest_snapshot": {
+                    "snapshot_id": "config-old",
+                    "recorded_at": "2026-03-31T05:53:48Z",
+                    "host": "docker-runtime-lv3",
+                    "paths": ["config"],
+                    "files": 230,
+                },
+                "last_restore_verification": None,
+                "reasons": ["Latest snapshot exists and this source is governed by the event-driven 'successful_live_apply' policy."],
+            },
+            {
+                "source_id": "versions_stack",
+                "label": "versions_stack",
+                "paths": ["versions/stack.yaml"],
+                "state": "protected",
+                "expected_schedule": "successful_live_apply",
+                "freshness_minutes": 1440,
+                "freshness_policy": "event_driven",
+                "retention": {"keep_daily": 30},
+                "latest_snapshot": {
+                    "snapshot_id": "versions-old",
+                    "recorded_at": "2026-03-31T05:53:49Z",
+                    "host": "docker-runtime-lv3",
+                    "paths": ["versions/stack.yaml"],
+                    "files": 1,
+                },
+                "last_restore_verification": None,
+                "reasons": ["Latest snapshot exists and this source is governed by the event-driven 'successful_live_apply' policy."],
+            },
+        ],
+    }
+
+    refreshed = restic_backup.refresh_latest_snapshot_receipt_for_live_apply(
+        existing_receipt=existing,
+        sources=[receipts_source, config_source, versions_source],
+        source_results=[
+            {"source_id": "config", "result": "backed_up", "snapshot_id": "config-new", "files": 239},
+            {"source_id": "versions_stack", "result": "backed_up", "snapshot_id": "versions-new", "files": 1},
+        ],
+        repo_root=repo_root,
+        endpoint="http://10.200.35.3:9000",
+        host_name="docker-runtime-lv3",
+        generated_at=datetime(2026, 3, 31, 10, 47, 15, tzinfo=UTC),
+        bucket="restic-config-backup",
+    )
+
+    assert refreshed["repository"]["endpoint"] == "http://10.200.35.3:9000"
+    assert refreshed["summary"]["protected"] == 3
+    refreshed_sources = {entry["source_id"]: entry for entry in refreshed["sources"]}
+    assert refreshed_sources["receipts"]["latest_snapshot"]["snapshot_id"] == "receipts-old"
+    assert refreshed_sources["config"]["latest_snapshot"]["snapshot_id"] == "config-new"
+    assert refreshed_sources["versions_stack"]["latest_snapshot"]["snapshot_id"] == "versions-new"
+
+
 def test_snapshot_id_from_backup_stdout_reads_restic_json_stream() -> None:
     stdout = "\n".join(
         [

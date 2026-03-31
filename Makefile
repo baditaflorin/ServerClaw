@@ -89,9 +89,9 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 
 .PHONY: prepare-run-namespace validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-ansible-idempotency validate-shell validate-json validate-semgrep validate-compose-runtime-envs validate-dependency-direction validate-data-models validate-policy validate-architecture-fitness validate-interface-contracts validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-slo-rules validate-generated-slo generate-https-tls-assurance validate-generated-https-tls-assurance https-tls-assurance generate-status-docs assemble-canonical-truth check-canonical-truth generate-platform-manifest generate-status generate-ops-portal generate-changelog-portal generate-edge-static-sites generate-dependency-diagram generate-diagrams generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors docs deploy-ops-portal
 .PHONY: deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info interface-contracts interface-contract-info capability-contracts capability-contract-info services show-service environments environment-info preview-create preview-validate preview-destroy preview-list preview-info lanes lane-info execution-lanes execution-lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness managed-image-gate sbom-refresh upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status
-.PHONY: backup-coverage-ledger dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-browser-runner syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-artifact-cache-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-mailpit syntax-check-openbao syntax-check-openfga syntax-check-step-ca syntax-check-temporal syntax-check-headscale syntax-check-semaphore syntax-check-woodpecker syntax-check-windmill syntax-check-restic-config-backup syntax-check-keycloak syntax-check-langfuse syntax-check-netbox syntax-check-searxng syntax-check-flagsmith syntax-check-crawl4ai
+.PHONY: backup-coverage-ledger dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-browser-runner syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-artifact-cache-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-mailpit syntax-check-paperless syntax-check-openbao syntax-check-openfga syntax-check-step-ca syntax-check-temporal syntax-check-headscale syntax-check-semaphore syntax-check-woodpecker syntax-check-windmill syntax-check-restic-config-backup syntax-check-keycloak syntax-check-langfuse syntax-check-netbox syntax-check-searxng syntax-check-flagsmith syntax-check-crawl4ai
 .PHONY: syntax-check-ollama syntax-check-piper syntax-check-n8n syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-vaultwarden syntax-check-rag-context syntax-check-secret-rotation syntax-check-dozzle syntax-check-excalidraw syntax-check-realtime collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window ensure-resource-lock-registry resource-locks resource-lock-acquire resource-lock-release resource-lock-heartbeat operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-staging-bridge configure-ingress configure-edge-publication configure-tailscale configure-host-control-loops provision-guests
-.PHONY: harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-api-gateway converge-ops-portal converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-openbao converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-keycloak converge-langfuse converge-netbox converge-searxng converge-crawl4ai converge-ollama converge-piper converge-n8n converge-open-webui converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-realtime converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret
+.PHONY: harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-api-gateway converge-ops-portal converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-paperless converge-openbao converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-keycloak converge-langfuse converge-netbox converge-searxng converge-crawl4ai converge-ollama converge-piper converge-n8n converge-open-webui converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-realtime converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import syntax-check-matrix-synapse converge-matrix-synapse syntax-check-nomad converge-nomad remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server syntax-check-changedetection converge-changedetection syntax-check-gotenberg converge-gotenberg
 .PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-jupyterhub converge-jupyterhub
@@ -636,6 +636,9 @@ syntax-check-browser-runner:
 syntax-check-mailpit:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/mailpit.yml --syntax-check
 
+syntax-check-paperless:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/paperless.yml --syntax-check
+
 syntax-check-changedetection:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/changedetection.yml --syntax-check
 
@@ -974,6 +977,11 @@ converge-mailpit:
 	$(MAKE) preflight WORKFLOW=converge-mailpit
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/mailpit.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
+converge-paperless:
+	$(MAKE) preflight WORKFLOW=converge-paperless
+	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/paperless.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
 converge-changedetection:
 	$(MAKE) preflight WORKFLOW=converge-changedetection
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/changedetection.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
@@ -1231,7 +1239,7 @@ live-apply-group:
 	@if [ "$(env)" = "production" ]; then python3 $(REPO_ROOT)/scripts/vulnerability_budget.py --all; fi
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/groups/$(group).yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
-	python3 $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-group --live-apply-trigger
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-group --live-apply-trigger
 
 live-apply-service:
 	@test -n "$(service)" || (echo "set service=<service-id>"; exit 1)
@@ -1246,7 +1254,7 @@ live-apply-service:
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply --service "$(service)"
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/immutable_guest_replacement.py --check-live-apply --service "$(service)" $(if $(filter true,$(ALLOW_IN_PLACE_MUTATION)),--allow-in-place-mutation,)
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/services/$(service).yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
-	python3 $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-service --live-apply-trigger
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-service --live-apply-trigger
 
 live-apply-site:
 	$(MAKE) preflight WORKFLOW=live-apply-site
@@ -1258,13 +1266,13 @@ live-apply-site:
 	@if [ "$(env)" = "production" ]; then python3 $(REPO_ROOT)/scripts/vulnerability_budget.py --all; fi
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/site.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
-	python3 $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-site --live-apply-trigger
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-site --live-apply-trigger
 
 live-apply-waves:
 	@test -n "$(manifest)" || (echo "set manifest=config/dependency-waves/<plan>.yaml"; exit 1)
 	$(MAKE) preflight WORKFLOW=live-apply-waves
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/dependency_wave_apply.py --manifest "$(manifest)" --env "$(or $(env),production)" $(if $(CATALOG),--catalog "$(CATALOG)",) $(if $(EXTRA_ARGS),--extra-args "$(EXTRA_ARGS)",) $(WAVE_ARGS)
-	python3 $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env "$(or $(env),production)" --mode backup --triggered-by live-apply-waves --live-apply-trigger
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env "$(or $(env),production)" --mode backup --triggered-by live-apply-waves --live-apply-trigger
 
 live-apply-train-status:
 	python3 $(REPO_ROOT)/scripts/live_apply_merge_train.py --repo-root $(REPO_ROOT) status

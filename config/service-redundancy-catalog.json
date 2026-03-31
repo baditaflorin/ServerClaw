@@ -846,6 +846,24 @@
         "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the JupyterHub converge and smoke-spawn verification workflow."
       }
     },
+    "paperless": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 240,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120",
+        "pbs_vm_150"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 or postgres-lv3 when the Paperless archive runtime or metadata store cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3 and postgres-lv3, rerun the Paperless converge workflow from git, and replay the repo-managed taxonomy plus smoke verification."
+      }
+    },
     "platform_context_api": {
       "tier": "R1",
       "recovery_objective": {

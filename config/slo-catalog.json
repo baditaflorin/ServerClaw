@@ -256,6 +256,16 @@
       "description": "The private Piper TTS health endpoint remains reachable on docker-runtime-lv3 for real-time voice synthesis workflows."
     },
     {
+      "id": "paperless-availability",
+      "service_id": "paperless",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "https://paperless.lv3.org/",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Paperless remains reachable through the public LV3 edge for document archive access and governed API reconciliation."
+    },
+    {
       "id": "plane-availability",
       "service_id": "plane",
       "indicator": "availability",

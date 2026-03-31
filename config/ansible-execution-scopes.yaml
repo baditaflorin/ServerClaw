@@ -256,6 +256,12 @@ playbooks:
     shared_surfaces:
       - service:outline
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/paperless.yml:
+    playbook_id: paperless
+    mutation_scope: platform
+    shared_surfaces:
+      - service:paperless
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/jupyterhub.yml:
     playbook_id: jupyterhub
     mutation_scope: platform
@@ -446,6 +452,11 @@ playbooks:
     mutation_scope: host
     shared_surfaces:
       - service:piper
+  playbooks/services/paperless.yml:
+    playbook_id: paperless
+    mutation_scope: platform
+    shared_surfaces:
+      - service:paperless
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/jupyterhub.yml:
     playbook_id: jupyterhub

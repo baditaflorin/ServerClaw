@@ -1,12 +1,12 @@
-# Release 0.177.115
+# Release 0.177.116
 
 - Date: 2026-03-31
 
 ## Summary
-- Implemented ADR 0302 encrypted Restic file-level backups for platform configuration and state artifacts, including the MinIO-backed repository, systemd timer convergence, live-apply-trigger coverage for `config/` and `versions/stack.yaml`, restore verification receipts, and backup-coverage ledger integration.
+- implemented ADR 0285 by bringing the Paperless document archive service, its OpenBao and Keycloak recovery hardening, and the corrected public smoke-upload verification path onto main
 
 ## Platform Impact
-- ADR 0302 is now live on production: docker-runtime-lv3 writes encrypted Restic file-level backups into the MinIO-backed restic-config-backup repository and the managed backup plus restore verification paths are now evidenced in-repo.
+- exact-main Paperless live apply still pending; platform version will bump only after the merged main tree is replayed and verified
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

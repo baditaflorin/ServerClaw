@@ -1,4 +1,11 @@
 ---
+# Purpose: Converge a canonical Hetzner DNS record while recovering cleanly from provider create-query races.
+# Use case: Run during managed subdomain publication and exact-main DNS reconciliation.
+# Inputs: Zone name, record name/type/value/ttl, desired state, and the Hetzner DNS API token environment variable.
+# Outputs: The requested Hetzner DNS record matches repo truth or is absent when declared absent.
+# Idempotency: Fully idempotent because provider lookups, retries, and canonical comparisons avoid duplicate record writes.
+# Dependencies: ADR 0165 and the Hetzner DNS provider API contract.
+
 - name: Ensure Hetzner DNS API token is available
   ansible.builtin.assert:
     that:
@@ -214,6 +221,40 @@
     and (hetzner_dns_record_create_response.json.record.id | default('') | length) > 0
   no_log: true
 
+- name: Query Hetzner DNS records for the zone after a create attempt
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_url }}/records?zone_id={{ dns_provider_boundary_zone.provider_ref }}"
+    method: GET
+    headers:
+      Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
+    return_content: true
+    status_code:
+      - 200
+      - 429
+      - 500
+      - 502
+      - 503
+      - 504
+  register: hetzner_dns_records_post_create_query
+  when:
+    - hetzner_dns_record_state == 'present'
+    - dns_provider_boundary_matching_records | length == 0
+  retries: 5
+  delay: 2
+  until:
+    - hetzner_dns_records_post_create_query.status == 200
+    - >-
+      (
+        hetzner_dns_records_post_create_query.json.records | default([])
+        | selectattr('name', 'equalto', hetzner_dns_record_name)
+        | selectattr('type', 'equalto', hetzner_dns_record_type)
+        | selectattr('value', 'equalto', hetzner_dns_record_value)
+        | list
+        | length
+      ) > 0
+  failed_when: false
+  no_log: true
+
 - name: Fail with provider details when DNS record creation did not complete
   ansible.builtin.fail:
     msg: >-
@@ -234,6 +275,17 @@
         hetzner_dns_record_create_response.status in [200, 201]
         and (hetzner_dns_record_create_response.json.error.code | default(0) | int) == 0
         and (hetzner_dns_record_create_response.json.record.id | default('') | length) > 0
+      )
+    - not (
+        hetzner_dns_records_post_create_query.status | default(0) == 200
+        and (
+          hetzner_dns_records_post_create_query.json.records | default([])
+          | selectattr('name', 'equalto', hetzner_dns_record_name)
+          | selectattr('type', 'equalto', hetzner_dns_record_type)
+          | selectattr('value', 'equalto', hetzner_dns_record_value)
+          | list
+          | length
+        ) > 0
       )
 
 - name: Update the canonical DNS record when drift is detected

@@ -1,4 +1,11 @@
 ---
+# Purpose: Verify the live mail platform health, catalog state, and private submission relay behavior after converge.
+# Use case: Included by the mail_platform_runtime role to prove the governed Stalwart and gateway stack is healthy.
+# Inputs: The live gateway port, managed mailbox/profile runtime facts, and the generated mail platform credentials.
+# Outputs: Passing verification facts for the mail gateway API, managed domain/mailbox/profile inventory, and local SMTP auth path.
+# Idempotency: Fully idempotent because these tasks only read runtime state and assert expected behavior.
+# Dependencies: ADR 0165, the mail_platform_runtime main tasks, and a healthy local Stalwart plus gateway deployment.
+
 - name: Verify the mail gateway health endpoint
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/healthz"
@@ -15,6 +22,17 @@
       X-API-Key: "{{ mail_platform_gateway_api_key }}"
     status_code: 200
   register: mail_platform_verify_gateway_domains
+  changed_when: false
+  no_log: true
+
+- name: Verify the mail gateway CRUD API can list managed mailboxes
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/mailboxes"
+    method: GET
+    headers:
+      X-API-Key: "{{ mail_platform_gateway_api_key }}"
+    status_code: 200
+  register: mail_platform_verify_gateway_mailboxes
   changed_when: false
   no_log: true
 
@@ -52,38 +70,18 @@
         if code != 235:
             raise SystemExit(f"unexpected SMTP auth response: {code} {response!r}")
     PY
+  register: mail_platform_verify_submission_auth
   changed_when: false
-  no_log: true
-
-- name: Verify the mail domain exists in Stalwart
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ mail_platform_stalwart_http_port }}/api/principal?types=domain"
-    method: GET
-    user: admin
-    password: "{{ mail_platform_admin_password }}"
-    force_basic_auth: true
-    status_code: 200
-  register: mail_platform_verify_domains
-  changed_when: false
+  retries: "{{ mail_platform_submission_auth_retries }}"
+  delay: "{{ mail_platform_submission_auth_delay_seconds }}"
+  until: mail_platform_verify_submission_auth.rc == 0
   no_log: true
 
 - name: Assert the managed mail domain is present
   ansible.builtin.assert:
     that:
-      - (mail_platform_verify_domains.json.data['items'] | map(attribute='name') | list) is contains(mail_platform_domain)
+      - (mail_platform_verify_gateway_domains.json['items'] | map(attribute='name') | list) is contains(mail_platform_domain)
     fail_msg: "Managed domain {{ mail_platform_domain }} is not present in Stalwart."
-
-- name: Verify the managed mailbox exists in Stalwart
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ mail_platform_stalwart_http_port }}/api/principal?types=individual"
-    method: GET
-    user: admin
-    password: "{{ mail_platform_admin_password }}"
-    force_basic_auth: true
-    status_code: 200
-  register: mail_platform_verify_accounts
-  changed_when: false
-  no_log: true
 
 - name: Assert the managed mailbox accounts are present
   ansible.builtin.assert:
@@ -92,7 +90,7 @@
         (
           mail_platform_managed_mailboxes_runtime
           | map(attribute='localpart')
-          | difference(mail_platform_verify_accounts.json.data['items'] | map(attribute='name') | list)
+          | difference(mail_platform_verify_gateway_mailboxes.json['items'] | map(attribute='name') | list)
           | length
         ) == 0
     fail_msg: "One or more managed mailboxes are missing from Stalwart."

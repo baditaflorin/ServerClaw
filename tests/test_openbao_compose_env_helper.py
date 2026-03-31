@@ -53,6 +53,7 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "- name: Unseal the local OpenBao API when runtime secret injection finds it sealed" in tasks
     assert "/v1/sys/unseal" in tasks
     assert "keys_base64[: (openbao_init_key_threshold | default(2) | int)]" in tasks
+    assert "until: common_openbao_compose_env_unseal_result.status == 200" not in tasks
     assert "- name: Assert the local OpenBao API is unsealed before runtime secret injection" in tasks
     assert "- name: Wait for the local OpenBao API to become active" in tasks
     assert "- name: Upsert the OpenBao AppRole for the runtime agent" in tasks
@@ -66,7 +67,6 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "until: common_openbao_compose_env_current_policy.status in [200, 404]" in tasks
     assert "register: common_openbao_compose_env_approle_upsert" in tasks
     assert "until: common_openbao_compose_env_approle_upsert.status == 204" in tasks
-    assert "retries: 6" in tasks
 
 
 def test_systemd_helper_reuses_local_openbao_recovery() -> None:
@@ -77,6 +77,7 @@ def test_systemd_helper_reuses_local_openbao_recovery() -> None:
     assert "path: \"{{ lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') }}\"" in tasks
     assert "- name: Wait for the local OpenBao API to answer" in tasks
     assert "- name: Unseal the local OpenBao API when host-native secret delivery finds it sealed" in tasks
+    assert "until: common_openbao_systemd_credentials_unseal_result.status == 200" not in tasks
 
 
 def test_local_openbao_recovery_helper_recovers_compose_runtime_when_api_is_down() -> None:

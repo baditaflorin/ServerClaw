@@ -624,9 +624,6 @@
     status_code: 200
   loop: "{{ openbao_init_payload.keys_base64[:openbao_init_key_threshold] }}"
   register: openbao_unseal_result
-  retries: 6
-  delay: 2
-  until: openbao_unseal_result.status == 200
   when: openbao_seal_status.json.sealed | bool
   no_log: true
 
