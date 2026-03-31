@@ -1990,7 +1990,7 @@ workstreams:
         archive service, its OpenBao and Keycloak recovery hardening, and the
         corrected public smoke-upload verification path onto main
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.116
       latest_receipts:
         paperless: 2026-03-31-adr-0285-paperless-live-apply
   - id: ws-0295-live-apply
