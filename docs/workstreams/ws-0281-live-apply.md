@@ -2,15 +2,16 @@
 
 - ADR: [ADR 0281](../adr/0281-glitchtip-as-the-sentry-compatible-application-error-tracker.md)
 - Title: Replace the partial ad hoc GlitchTip install with a repo-managed Sentry-compatible error tracking service, instrument first-party producers, and verify the live stack end to end
-- Status: live_applied
+- Status: in_progress
 - Included In Repo Version: 0.177.104
-- Branch-Local Receipt: `receipts/live-applies/2026-03-30-adr-0281-glitchtip-live-apply.json`
+- Branch-Local Receipt: pending fresh latest-main quiet-window replay; historical receipt `receipts/live-applies/2026-03-30-adr-0281-glitchtip-live-apply.json`
 - Canonical Mainline Receipt: pending final `main` integration
-- Live Applied In Platform Version: 0.130.69
+- Live Applied In Platform Version: historical branch-local replay `0.130.69`; latest-main re-verification pending
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
-- Branch: `codex/ws-0281-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-live-apply`
+- Latest origin/main Base: `0.177.113` at `bb94f851a3398daaceb8348280afdd4adb6815d1`
+- Branch: `codex/ws-0281-mainline-v2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2`
 - Owner: codex
 - Depends On: `adr-0021-public-subdomain-publication-at-the-nginx-edge`, `adr-0042-postgresql-as-the-shared-relational-database`, `adr-0063-keycloak-sso-for-internal-services`, `adr-0077-compose-secrets-injection-pattern`, `adr-0130-mail-platform-for-transactional-email`, `adr-0191-immutable-guest-replacement`
 - Conflicts With: none
@@ -67,6 +68,17 @@
 - the current host already contains a partial manual GlitchTip install; replacing or reconciling it must preserve useful state without treating the ad hoc compose files as canonical truth
 - protected release files remain deferred until the later main integration step, even if the branch-local live apply completes successfully
 - the handoff must state the exact merge-to-main follow-through still required after the live apply is verified
+
+## Latest-Main Replay Status
+
+- ADR 0281 has been replayed onto the latest fetched `origin/main` base `bb94f851a3398daaceb8348280afdd4adb6815d1` (`0.177.113`) with commits `ea9c9cf5b` and `d8a18ff51`.
+- Fresh latest-main targeted validation passed from this worktree: `99 passed` across the replayed and hardening-adjacent pytest surfaces, captured in `receipts/live-applies/evidence/2026-03-31-adr-0281-targeted-latest-main-tests-r1-0.177.113.txt`.
+- Latest-main repo validation is green through `make syntax-check-glitchtip`, `scripts/generate_slo_rules.py --check`, `./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json role-argument-specs ansible-syntax data-models`, and `git diff --check`; see `receipts/live-applies/evidence/2026-03-31-adr-0281-latest-main-validation-r1-0.177.113.txt`.
+- Non-README generated checks also pass: `scripts/generate_dependency_diagram.py --check`, `scripts/generate_diagrams.py --check`, and `./scripts/validate_repo.sh generated-portals`; see `receipts/live-applies/evidence/2026-03-31-adr-0281-generated-non-readme-checks-r1-0.177.113.txt`.
+- `scripts/canonical_truth.py --check` and `scripts/generate_status_docs.py --check` currently fail only because they want to rewrite the protected top-level `README.md` after `ws-0281-live-apply` was returned to `in_progress`; that protected-file integration remains intentionally deferred off this workstream branch.
+- A fresh quiet-window check is currently blocked by concurrent live applies touching the same shared hosts. `receipts/live-applies/evidence/2026-03-31-adr-0281-quiet-window-blocked-r1-0.177.113.txt` shows 15 conflicting `ansible-playbook` controllers against `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`.
+- Read-only public-surface observation currently shows shared-edge drift: `errors.lv3.org` resolves to `65.108.75.123`, but the edge is serving `CN=nginx.lv3.org` and returning `308` redirects to `https://nginx.lv3.org/...` for both the GlitchTip health and auth endpoints. Evidence is in `receipts/live-applies/evidence/2026-03-31-adr-0281-current-public-surface-r1-0.177.113.txt`.
+- Because the shared hosts are not quiet and the public edge is presently drifted, the latest-main GlitchTip live apply has not yet been rerun safely from this worktree.
 
 ## Verification
 
@@ -132,14 +144,9 @@
 
 ## Outcome
 
-- ADR 0281 is fully live-applied from the latest rebased `origin/main`
-  lineage, with GlitchTip running under repo-managed automation on
-  `docker-runtime-lv3`, PostgreSQL wired on `postgres-lv3`, and
-  `errors.lv3.org` published through the shared NGINX edge.
-- The workstream is ready for the final protected-surface integration onto
-  `main`: update `VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`,
-  the ADR implementation metadata, and the canonical mainline receipt after
-  the exact-main replay is confirmed.
+- The latest-main replay and recovery hardening are now integrated in this worktree, and the repo-side validation path is largely green on top of `0.177.113`.
+- The live rerun remains blocked by external concurrent controller activity and current shared-edge drift, so this workstream is not yet ready for final protected-surface integration onto `main`.
+- Merge to `main` must wait for a fresh quiet window, a successful latest-main `make converge-glitchtip`, renewed public health/auth/smoke verification, and then the protected-file updates (`VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, ADR metadata, and canonical mainline receipt).
 
 ## Merge Criteria
 

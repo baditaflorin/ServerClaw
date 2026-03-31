@@ -232,9 +232,6 @@ roles:
   netbox_sync:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
-  nats_jetstream_runtime:
-    policy: tracked
-    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   nginx_edge_publication:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
