@@ -1644,6 +1644,7 @@ workstreams:
       - config/workflow-catalog.json
       - receipts/image-scans/
       - receipts/live-applies/
+      - receipts/live-applies/evidence/
       - receipts/ops-portal-snapshot.html
       - tests/
     ownership_manifest:
@@ -1670,7 +1671,7 @@ workstreams:
             - collections/ansible_collections/lv3/platform/roles/lago_postgres/**
             - collections/ansible_collections/lv3/platform/roles/lago_runtime/**
             - receipts/image-scans/**
-            - receipts/live-applies/
+            - receipts/live-applies/**
           mode: exclusive
         - id: automation_entrypoints
           paths:

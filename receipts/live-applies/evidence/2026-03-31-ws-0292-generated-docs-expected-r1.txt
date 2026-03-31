@@ -1,0 +1,3 @@
+Generated status document validation
+Canonical truth is stale. Run `uvx --from pyyaml python scripts/canonical_truth.py --write`.
+- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/README.md

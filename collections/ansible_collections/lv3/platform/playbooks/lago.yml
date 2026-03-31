@@ -33,8 +33,8 @@
   connection: local
   gather_facts: false
   vars:
-    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
-    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
+    subdomain_catalog_path: "{{ playbook_dir }}/../../../../../config/subdomain-catalog.json"
+    inventory_defaults_path: "{{ playbook_dir }}/../../../../../inventory/group_vars/all.yml"
     subdomain_fqdn: billing.lv3.org
 
   tasks:
@@ -133,7 +133,7 @@
   become: true
   gather_facts: true
   vars_files:
-    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+    - "{{ playbook_dir }}/../../../../../inventory/group_vars/platform.yml"
   vars:
     public_edge_sync_generated_static_dirs: false
 
