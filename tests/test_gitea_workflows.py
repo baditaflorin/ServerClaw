@@ -79,6 +79,7 @@ def test_release_bundle_workflow_uses_pinned_python_runner_and_manual_checkout()
 
 def test_renovate_workflow_bootstraps_inside_pinned_python_runner() -> None:
     workflow = RENOVATE_WORKFLOW.read_text(encoding="utf-8")
+    run_block = extract_run_block(workflow, step_name="Run Renovate through the pinned Harbor image")
 
     assert workflow.count(PYTHON_RUNNER_IMAGE) == 2
     assert "uses: actions/checkout@v4" not in workflow
@@ -115,6 +116,8 @@ def test_renovate_workflow_bootstraps_inside_pinned_python_runner() -> None:
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
     assert '"${docker_bin}" run --rm \\' in workflow
     assert '"${docker_bin}" pull "${RENOVATE_IMAGE}"' in workflow
+    assert "python3 - <<'PY' &\nimport os\n" in run_block
+    assert "python3 - <<'PY'\nimport os\n" in run_block
 
 
 def test_renovate_workflow_run_block_is_shell_syntax_valid(tmp_path: Path) -> None:
