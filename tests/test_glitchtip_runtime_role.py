@@ -8,6 +8,7 @@ ROLE_DEFAULTS = REPO_ROOT / "roles" / "glitchtip_runtime" / "defaults" / "main.y
 ROLE_TASKS = REPO_ROOT / "roles" / "glitchtip_runtime" / "tasks" / "main.yml"
 ROLE_VERIFY = REPO_ROOT / "roles" / "glitchtip_runtime" / "tasks" / "verify.yml"
 ROLE_PUBLISH = REPO_ROOT / "roles" / "glitchtip_runtime" / "tasks" / "publish.yml"
+ROLE_PUBLISH_VERIFY = REPO_ROOT / "roles" / "glitchtip_runtime" / "tasks" / "publish_verify.yml"
 ROLE_META = REPO_ROOT / "roles" / "glitchtip_runtime" / "meta" / "argument_specs.yml"
 POSTGRES_TASKS = REPO_ROOT / "roles" / "glitchtip_postgres" / "tasks" / "main.yml"
 POSTGRES_META = REPO_ROOT / "roles" / "glitchtip_postgres" / "meta" / "argument_specs.yml"
@@ -139,16 +140,36 @@ def test_glitchtip_runtime_tasks_manage_openbao_bootstrap_and_port_recovery() ->
 
 
 def test_glitchtip_publish_tasks_verify_public_settings_and_smoke_script() -> None:
-    tasks = load_yaml(ROLE_PUBLISH)
+    publish_tasks = load_yaml(ROLE_PUBLISH)
+    verify_tasks = load_yaml(ROLE_PUBLISH_VERIFY)
 
-    health_task = next(task for task in tasks if task.get("name") == "Wait for the GlitchTip public health endpoint")
-    auth_config_task = next(task for task in tasks if task.get("name") == "Read the GlitchTip public auth config document")
-    provider_task = next(task for task in tasks if task.get("name") == "Record the GlitchTip public Keycloak OIDC provider metadata")
-    assert_task = next(
-        task for task in tasks if task.get("name") == "Assert the GlitchTip public auth config advertises the Keycloak OIDC issuer"
+    orchestration_task = next(
+        task for task in publish_tasks if task.get("name") == "Verify the GlitchTip public surface with a controller-local quiet-window retry"
     )
-    smoke_task = next(task for task in tasks if task.get("name") == "Run the GlitchTip event smoke verification")
+    quiet_task = orchestration_task["block"][0]
+    retry_quiet_task = orchestration_task["rescue"][0]
+    verify_include_task = orchestration_task["block"][1]
+    retry_verify_task = orchestration_task["rescue"][1]
 
+    health_task = next(task for task in verify_tasks if task.get("name") == "Wait for the GlitchTip public health endpoint")
+    auth_config_task = next(task for task in verify_tasks if task.get("name") == "Read the GlitchTip public auth config document")
+    provider_task = next(task for task in verify_tasks if task.get("name") == "Record the GlitchTip public Keycloak OIDC provider metadata")
+    assert_task = next(
+        task for task in verify_tasks if task.get("name") == "Assert the GlitchTip public auth config advertises the Keycloak OIDC issuer"
+    )
+    smoke_task = next(task for task in verify_tasks if task.get("name") == "Run the GlitchTip event smoke verification")
+
+    quiet_command = quiet_task["ansible.builtin.shell"]
+    retry_quiet_command = retry_quiet_task["ansible.builtin.shell"]
+    assert "python3 {{ inventory_dir }}/../scripts/await_ansible_quiet.py" in quiet_command
+    assert "python3 {{ inventory_dir }}/../scripts/await_ansible_quiet.py" in retry_quiet_command
+    assert "--quiet-seconds 30" in quiet_command
+    assert "--poll-seconds 5" in quiet_command
+    assert "docker-runtime-lv3" in quiet_command
+    assert "nginx-lv3" in quiet_command
+    assert "--label glitchtip-publication-retry" in retry_quiet_command
+    assert verify_include_task["ansible.builtin.include_tasks"] == "publish_verify.yml"
+    assert retry_verify_task["ansible.builtin.include_tasks"] == "publish_verify.yml"
     assert health_task["ansible.builtin.uri"]["url"] == "{{ glitchtip_public_base_url }}/api/0/internal/health/"
     assert auth_config_task["ansible.builtin.uri"]["url"] == "{{ glitchtip_public_base_url }}/_allauth/browser/v1/config"
     provider_expression = provider_task["ansible.builtin.set_fact"]["glitchtip_publish_keycloak_provider"]
@@ -160,9 +181,15 @@ def test_glitchtip_publish_tasks_verify_public_settings_and_smoke_script() -> No
     assert "glitchtip_keycloak_server_url" in assert_task["ansible.builtin.assert"]["that"][2]
     assert ".well-known/openid-configuration" in assert_task["ansible.builtin.assert"]["that"][2]
     assert smoke_task["ansible.builtin.command"]["argv"][:2] == ["python3", "{{ inventory_dir }}/../scripts/glitchtip_event_smoke.py"]
-    assert smoke_task["ansible.builtin.command"]["argv"][-2:] == [
+    assert smoke_task["ansible.builtin.command"]["argv"][8:12] == [
         "--dsn-file",
         "{{ glitchtip_platform_findings_event_url_local_file }}",
+        "--timeout-seconds",
+        "300",
+    ]
+    assert smoke_task["ansible.builtin.command"]["argv"][-2:] == [
+        "--request-timeout-seconds",
+        "60",
     ]
 
 

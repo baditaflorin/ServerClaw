@@ -1,0 +1,67 @@
+---
+# Purpose: Verify the public GlitchTip publication and end-to-end event ingestion path after the controller has a quiet window.
+
+- name: Wait for the GlitchTip public health endpoint
+  ansible.builtin.uri:
+    url: "{{ glitchtip_public_base_url }}/api/0/internal/health/"
+    method: GET
+    status_code: 200
+  register: glitchtip_publish_public_health
+  retries: 24
+  delay: 5
+  until: glitchtip_publish_public_health.status == 200
+  changed_when: false
+
+- name: Read the GlitchTip public auth config document
+  ansible.builtin.uri:
+    url: "{{ glitchtip_public_base_url }}/_allauth/browser/v1/config"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: glitchtip_publish_auth_config
+  retries: 12
+  delay: 5
+  until: glitchtip_publish_auth_config.status == 200
+  changed_when: false
+
+- name: Record the GlitchTip public Keycloak OIDC provider metadata
+  ansible.builtin.set_fact:
+    glitchtip_publish_keycloak_provider: >-
+      {{
+        (
+          glitchtip_publish_auth_config.json.data.socialaccount.providers
+          | selectattr('id', 'equalto', glitchtip_keycloak_provider_id)
+          | list
+          | first
+        ) | default({})
+      }}
+
+- name: Assert the GlitchTip public auth config advertises the Keycloak OIDC issuer
+  ansible.builtin.assert:
+    that:
+      - glitchtip_publish_keycloak_provider != {}
+      - glitchtip_publish_keycloak_provider.client_id == glitchtip_keycloak_client_id
+      - >-
+        glitchtip_publish_keycloak_provider.openid_configuration_url
+        == (glitchtip_keycloak_server_url ~ '/.well-known/openid-configuration')
+    fail_msg: "GlitchTip public auth config does not yet expose the expected Keycloak OIDC configuration."
+
+- name: Run the GlitchTip event smoke verification
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/glitchtip_event_smoke.py"
+      - --base-url
+      - "{{ glitchtip_public_base_url }}"
+      - --organization-slug
+      - "{{ glitchtip_organization_slug }}"
+      - --api-token-file
+      - "{{ glitchtip_api_token_local_file }}"
+      - --dsn-file
+      - "{{ glitchtip_platform_findings_event_url_local_file }}"
+      - --timeout-seconds
+      - "300"
+      - --request-timeout-seconds
+      - "60"
+  register: glitchtip_publish_smoke
+  changed_when: false

@@ -63,7 +63,7 @@ Repository and syntax checks:
 
 ```bash
 make syntax-check-glitchtip
-uv run --with pytest python -m pytest -q tests/test_glitchtip_event.py tests/test_glitchtip_playbook.py tests/test_glitchtip_runtime_role.py
+uv run --with pytest python -m pytest -q tests/test_await_ansible_quiet.py tests/test_glitchtip_event.py tests/test_glitchtip_playbook.py tests/test_glitchtip_runtime_role.py
 ```
 
 Runtime and publication verification:
@@ -75,7 +75,9 @@ python3 scripts/glitchtip_event_smoke.py \
   --base-url https://errors.lv3.org \
   --organization-slug lv3 \
   --api-token-file .local/glitchtip/api-token.txt \
-  --dsn-file .local/glitchtip/platform-findings-event-url.txt
+  --dsn-file .local/glitchtip/platform-findings-event-url.txt \
+  --timeout-seconds 300 \
+  --request-timeout-seconds 60
 ```
 
 A mail-gateway runtime that has been reconverged after GlitchTip bootstrap should also expose the Sentry runtime environment variables:
@@ -87,6 +89,8 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   ops@10.10.10.20 \
   'docker exec mail-gateway env | grep -E "^SENTRY_(DSN|ENVIRONMENT|RELEASE)="'
 ```
+
+The repo-managed publication verification now waits for a quiet controller window across `docker-runtime-lv3` and `nginx-lv3` before probing `errors.lv3.org`, and it retries once after that quiet window if another live apply had just been mutating the shared runtime or edge.
 
 ## Notes
 

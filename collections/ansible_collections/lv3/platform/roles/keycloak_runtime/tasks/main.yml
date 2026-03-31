@@ -350,9 +350,35 @@
     or 'Network' in keycloak_force_recreate_down.stderr
   when: keycloak_force_recreate
 
-- name: Remove stale Keycloak compose networks after the reset
+- name: Remove stale Keycloak project containers before network cleanup
   ansible.builtin.shell: |
     set -euo pipefail
+    stale_ids="$(docker ps -aq --filter label=com.docker.compose.project=keycloak)"
+    if [ -n "$stale_ids" ]; then
+      docker rm -f $stale_ids
+      echo changed
+    fi
+  args:
+    chdir: "{{ keycloak_site_dir }}"
+    executable: /bin/bash
+  register: keycloak_project_container_cleanup
+  changed_when: "'changed' in keycloak_project_container_cleanup.stdout"
+  when: keycloak_force_recreate
+
+- name: Remove stale Keycloak compose networks after project cleanup
+  ansible.builtin.shell: |
+    set -euo pipefail
+    for attempt in $(seq 1 5); do
+      stale_networks="$(docker network ls -q --filter name={{ keycloak_compose_network_name }})"
+      if [ -z "${stale_networks}" ]; then
+        exit 0
+      fi
+      if docker network rm ${stale_networks}; then
+        echo changed
+        exit 0
+      fi
+      sleep 3
+    done
     stale_networks="$(docker network ls -q --filter name={{ keycloak_compose_network_name }})"
     if [ -n "${stale_networks}" ]; then
       docker network rm ${stale_networks}

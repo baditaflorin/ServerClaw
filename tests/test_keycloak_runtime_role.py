@@ -177,6 +177,11 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
         for task in tasks
         if task.get("name") == "Remove stale Keycloak compose replacement containers before recovery"
     )
+    project_cleanup = next(
+        task
+        for task in tasks
+        if task.get("name") == "Remove stale Keycloak project containers before network cleanup"
+    )
     force_recreate_block = next(
         task
         for task in tasks
@@ -204,7 +209,7 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
         task for task in tasks if task.get("name") == "Reset the Keycloak stack before a force recreate"
     )
     network_cleanup = next(
-        task for task in tasks if task.get("name") == "Remove stale Keycloak compose networks after the reset"
+        task for task in tasks if task.get("name") == "Remove stale Keycloak compose networks after project cleanup"
     )
     readiness_probe = next(
         task
@@ -224,6 +229,7 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert image_pull["retries"] == "{{ keycloak_image_pull_retries }}"
     assert image_pull["delay"] == "{{ keycloak_image_pull_delay_seconds }}"
     assert image_pull["until"] == "keycloak_pull.rc == 0"
+    assert "label=com.docker.compose.project=keycloak" in project_cleanup["ansible.builtin.shell"]
     assert "com.docker.compose.project=keycloak" in replace_cleanup["ansible.builtin.shell"]
     assert "com.docker.compose.replace" in replace_cleanup["ansible.builtin.shell"]
     assert openbao_agent_recreate["ansible.builtin.command"]["argv"][-4:] == ["up", "-d", "--force-recreate", "openbao-agent"]
@@ -243,6 +249,8 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     ]
     assert force_recreate_down["when"] == "keycloak_force_recreate"
     assert "{{ keycloak_compose_network_name }}" in network_cleanup["ansible.builtin.shell"]
+    assert "for attempt in $(seq 1 5)" in network_cleanup["ansible.builtin.shell"]
+    assert "sleep 3" in network_cleanup["ansible.builtin.shell"]
     assert network_cleanup["when"] == "keycloak_force_recreate"
     rescue_names = [task["name"] for task in force_recreate_block["rescue"]]
     assert "Detect Docker bridge-chain loss during the Keycloak force-recreate" in rescue_names

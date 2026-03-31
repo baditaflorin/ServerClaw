@@ -20,7 +20,7 @@ def read_secret_file(path: str) -> str:
     return Path(path).expanduser().read_text(encoding="utf-8").strip()
 
 
-def load_json_response(url: str, *, token: str) -> Any:
+def load_json_response(url: str, *, token: str, timeout_seconds: float) -> Any:
     request = urllib.request.Request(
         url,
         headers={
@@ -30,7 +30,7 @@ def load_json_response(url: str, *, token: str) -> Any:
         },
         method="GET",
     )
-    with urllib.request.urlopen(request, timeout=15) as response:
+    with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
         return json.loads(response.read().decode("utf-8"))
 
 
@@ -52,6 +52,7 @@ def main(
     dsn: str,
     timeout_seconds: int = 120,
     poll_interval_seconds: int = 5,
+    request_timeout_seconds: float = 60.0,
 ) -> int:
     marker = f"adr-0281-smoke-{uuid.uuid4().hex[:12]}"
     emitted = emit_glitchtip_event(
@@ -77,7 +78,11 @@ def main(
     issues_url = f"{base_url.rstrip('/')}/api/0/organizations/{organization_slug}/issues/?query={query}"
     while time.time() < deadline:
         try:
-            payload = load_json_response(issues_url, token=api_token)
+            payload = load_json_response(
+                issues_url,
+                token=api_token,
+                timeout_seconds=request_timeout_seconds,
+            )
             issues = extract_issue_list(payload)
             if issues:
                 print(
@@ -93,7 +98,7 @@ def main(
                     )
                 )
                 return 0
-        except urllib.error.URLError as exc:
+        except (urllib.error.URLError, TimeoutError) as exc:
             last_error = str(exc)
         time.sleep(poll_interval_seconds)
 
@@ -105,6 +110,7 @@ def main(
                 "event_id": emitted["event_id"],
                 "issues_url": issues_url,
                 "last_error": last_error,
+                "request_timeout_seconds": request_timeout_seconds,
             },
             indent=2,
             sort_keys=True,
@@ -124,6 +130,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dsn-file")
     parser.add_argument("--timeout-seconds", type=int, default=120)
     parser.add_argument("--poll-interval-seconds", type=int, default=5)
+    parser.add_argument("--request-timeout-seconds", type=float, default=60.0)
     return parser
 
 
@@ -139,5 +146,6 @@ if __name__ == "__main__":
             dsn=dsn,
             timeout_seconds=args.timeout_seconds,
             poll_interval_seconds=args.poll_interval_seconds,
+            request_timeout_seconds=args.request_timeout_seconds,
         )
     )

@@ -95,3 +95,26 @@ def test_glitchtip_event_smoke_extract_issue_list_supports_list_and_paginated_pa
     assert glitchtip_event_smoke.extract_issue_list([issue, "skip"]) == [issue]
     assert glitchtip_event_smoke.extract_issue_list({"results": [issue, "skip"]}) == [issue]
     assert glitchtip_event_smoke.extract_issue_list({"unexpected": []}) == []
+
+
+def test_glitchtip_event_smoke_load_json_response_uses_configured_timeout(monkeypatch) -> None:
+    observed: dict[str, Any] = {}
+
+    def fake_urlopen(request, timeout=0):
+        observed["url"] = request.full_url
+        observed["headers"] = dict(request.header_items())
+        observed["timeout"] = timeout
+        return FakeResponse(body=b"[]")
+
+    monkeypatch.setattr(glitchtip_event_smoke.urllib.request, "urlopen", fake_urlopen)
+
+    result = glitchtip_event_smoke.load_json_response(
+        "https://errors.lv3.org/api/0/organizations/lv3/issues/",
+        token="token-123",
+        timeout_seconds=42,
+    )
+
+    assert result == []
+    assert observed["url"] == "https://errors.lv3.org/api/0/organizations/lv3/issues/"
+    assert observed["headers"]["Authorization"] == "Bearer token-123"
+    assert observed["timeout"] == 42

@@ -35,63 +35,42 @@
       Converge the GlitchTip runtime first so the bootstrap role can export the repo-managed DSNs.
   when: not glitchtip_platform_findings_dsn_local.stat.exists
 
-- name: Wait for the GlitchTip public health endpoint
-  ansible.builtin.uri:
-    url: "{{ glitchtip_public_base_url }}/api/0/internal/health/"
-    method: GET
-    status_code: 200
-  register: glitchtip_publish_public_health
-  retries: 24
-  delay: 5
-  until: glitchtip_publish_public_health.status == 200
-  changed_when: false
+- name: Verify the GlitchTip public surface with a controller-local quiet-window retry
+  block:
+    - name: Wait for a controller-local quiet window before public GlitchTip verification
+      ansible.builtin.shell: >-
+        python3 {{ inventory_dir }}/../scripts/await_ansible_quiet.py
+        --label glitchtip-publication
+        --wait-seconds 1800
+        --quiet-seconds 30
+        --poll-seconds 5
+        {% for host in (
+          ['docker-runtime-staging-lv3', 'nginx-staging-lv3']
+          if (env | default('production')) == 'staging'
+          else ['docker-runtime-lv3', 'nginx-lv3']
+        ) %}
+        --host {{ host }}
+        {% endfor %}
+      changed_when: false
 
-- name: Read the GlitchTip public auth config document
-  ansible.builtin.uri:
-    url: "{{ glitchtip_public_base_url }}/_allauth/browser/v1/config"
-    method: GET
-    return_content: true
-    status_code: 200
-  register: glitchtip_publish_auth_config
-  retries: 12
-  delay: 5
-  until: glitchtip_publish_auth_config.status == 200
-  changed_when: false
+    - name: Verify the GlitchTip public surface
+      ansible.builtin.include_tasks: publish_verify.yml
+  rescue:
+    - name: Wait for a controller-local quiet window before retrying public GlitchTip verification
+      ansible.builtin.shell: >-
+        python3 {{ inventory_dir }}/../scripts/await_ansible_quiet.py
+        --label glitchtip-publication-retry
+        --wait-seconds 1800
+        --quiet-seconds 30
+        --poll-seconds 5
+        {% for host in (
+          ['docker-runtime-staging-lv3', 'nginx-staging-lv3']
+          if (env | default('production')) == 'staging'
+          else ['docker-runtime-lv3', 'nginx-lv3']
+        ) %}
+        --host {{ host }}
+        {% endfor %}
+      changed_when: false
 
-- name: Record the GlitchTip public Keycloak OIDC provider metadata
-  ansible.builtin.set_fact:
-    glitchtip_publish_keycloak_provider: >-
-      {{
-        (
-          glitchtip_publish_auth_config.json.data.socialaccount.providers
-          | selectattr('id', 'equalto', glitchtip_keycloak_provider_id)
-          | list
-          | first
-        ) | default({})
-      }}
-
-- name: Assert the GlitchTip public auth config advertises the Keycloak OIDC issuer
-  ansible.builtin.assert:
-    that:
-      - glitchtip_publish_keycloak_provider != {}
-      - glitchtip_publish_keycloak_provider.client_id == glitchtip_keycloak_client_id
-      - >-
-        glitchtip_publish_keycloak_provider.openid_configuration_url
-        == (glitchtip_keycloak_server_url ~ '/.well-known/openid-configuration')
-    fail_msg: "GlitchTip public auth config does not yet expose the expected Keycloak OIDC configuration."
-
-- name: Run the GlitchTip event smoke verification
-  ansible.builtin.command:
-    argv:
-      - python3
-      - "{{ inventory_dir }}/../scripts/glitchtip_event_smoke.py"
-      - --base-url
-      - "{{ glitchtip_public_base_url }}"
-      - --organization-slug
-      - "{{ glitchtip_organization_slug }}"
-      - --api-token-file
-      - "{{ glitchtip_api_token_local_file }}"
-      - --dsn-file
-      - "{{ glitchtip_platform_findings_event_url_local_file }}"
-  register: glitchtip_publish_smoke
-  changed_when: false
+    - name: Retry the GlitchTip public surface verification
+      ansible.builtin.include_tasks: publish_verify.yml
