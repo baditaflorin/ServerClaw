@@ -6,6 +6,7 @@ import argparse
 import base64
 import json
 import os
+import shlex
 import sys
 import time
 import urllib.error
@@ -25,6 +26,10 @@ def require_env(name: str) -> str:
     if not value:
         raise SystemExit(f"Missing required environment variable: {name}")
     return value
+
+
+def format_env_assignment(name: str, value: str) -> str:
+    return f"{name}={shlex.quote(value)}"
 
 
 def build_api_url(base_url: str, path: str) -> str:
@@ -135,28 +140,37 @@ def create_runtime_token(*, state_file: Path, env_file: Path) -> None:
 
     endpoint = build_api_url(base_url, "/")
     env_lines = [
-        "LOG_LEVEL=info",
-        "RENOVATE_PLATFORM=gitea",
-        f"RENOVATE_ENDPOINT={endpoint}",
-        f"RENOVATE_REPOSITORIES={repository}",
-        f"RENOVATE_TOKEN={token}",
-        f"RENOVATE_GIT_AUTHOR={os.environ.get('RENOVATE_GIT_AUTHOR', DEFAULT_GIT_AUTHOR).strip() or DEFAULT_GIT_AUTHOR}",
-        f"RENOVATE_REQUIRE_CONFIG={os.environ.get('RENOVATE_REQUIRE_CONFIG', DEFAULT_REQUIRE_CONFIG).strip() or DEFAULT_REQUIRE_CONFIG}",
-        f"RENOVATE_ONBOARDING={os.environ.get('RENOVATE_ONBOARDING', DEFAULT_ONBOARDING).strip() or DEFAULT_ONBOARDING}",
+        format_env_assignment("LOG_LEVEL", "info"),
+        format_env_assignment("RENOVATE_PLATFORM", "gitea"),
+        format_env_assignment("RENOVATE_ENDPOINT", endpoint),
+        format_env_assignment("RENOVATE_REPOSITORIES", repository),
+        format_env_assignment("RENOVATE_TOKEN", token),
+        format_env_assignment(
+            "RENOVATE_GIT_AUTHOR",
+            os.environ.get("RENOVATE_GIT_AUTHOR", DEFAULT_GIT_AUTHOR).strip() or DEFAULT_GIT_AUTHOR,
+        ),
+        format_env_assignment(
+            "RENOVATE_REQUIRE_CONFIG",
+            os.environ.get("RENOVATE_REQUIRE_CONFIG", DEFAULT_REQUIRE_CONFIG).strip() or DEFAULT_REQUIRE_CONFIG,
+        ),
+        format_env_assignment(
+            "RENOVATE_ONBOARDING",
+            os.environ.get("RENOVATE_ONBOARDING", DEFAULT_ONBOARDING).strip() or DEFAULT_ONBOARDING,
+        ),
     ]
     if clone_host and clone_host_address:
         env_lines.extend(
             [
-                f"RENOVATE_GIT_CLONE_HOST={clone_host}",
-                f"RENOVATE_GIT_CLONE_HOST_ADDRESS={clone_host_address}",
+                format_env_assignment("RENOVATE_GIT_CLONE_HOST", clone_host),
+                format_env_assignment("RENOVATE_GIT_CLONE_HOST_ADDRESS", clone_host_address),
             ]
         )
     if clone_host_port and clone_target_host and clone_target_port:
         env_lines.extend(
             [
-                f"RENOVATE_GIT_CLONE_HOST_PORT={clone_host_port}",
-                f"RENOVATE_GIT_CLONE_TARGET_HOST={clone_target_host}",
-                f"RENOVATE_GIT_CLONE_TARGET_PORT={clone_target_port}",
+                format_env_assignment("RENOVATE_GIT_CLONE_HOST_PORT", clone_host_port),
+                format_env_assignment("RENOVATE_GIT_CLONE_TARGET_HOST", clone_target_host),
+                format_env_assignment("RENOVATE_GIT_CLONE_TARGET_PORT", clone_target_port),
             ]
         )
     env_file.parent.mkdir(parents=True, exist_ok=True)

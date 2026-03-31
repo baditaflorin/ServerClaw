@@ -117,7 +117,7 @@ def test_renovate_runtime_token_writes_runtime_env(monkeypatch: pytest.MonkeyPat
     assert "RENOVATE_ENDPOINT=http://10.10.10.20:3003/api/v1/" in env_payload
     assert "RENOVATE_REPOSITORIES=ops/proxmox_florin_server" in env_payload
     assert "RENOVATE_TOKEN=token-value" in env_payload
-    assert "RENOVATE_GIT_AUTHOR=Renovate Bot <renovate-bot@lv3.internal>" in env_payload
+    assert "RENOVATE_GIT_AUTHOR='Renovate Bot <renovate-bot@lv3.internal>'" in env_payload
     assert "RENOVATE_REQUIRE_CONFIG=optional" in env_payload
     assert "RENOVATE_ONBOARDING=false" in env_payload
     assert "RENOVATE_GIT_CLONE_HOST=git.lv3.org" in env_payload
