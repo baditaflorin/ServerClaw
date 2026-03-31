@@ -102,11 +102,36 @@
     - docker_runtime_public_edge_ipv4 | default('') | length > 0
     - item | length > 0
 
+- name: Check whether the current Docker daemon config exists
+  ansible.builtin.stat:
+    path: /etc/docker/daemon.json
+  register: docker_runtime_daemon_config_stat
+
+- name: Read the current Docker daemon config
+  ansible.builtin.slurp:
+    src: /etc/docker/daemon.json
+  register: docker_runtime_daemon_config_raw
+  when: docker_runtime_daemon_config_stat.stat.exists
+
+- name: Record whether Docker currently has live-restore enabled
+  ansible.builtin.set_fact:
+    docker_runtime_previous_live_restore_enabled: >-
+      {{
+        (
+          (
+            (docker_runtime_daemon_config_raw.content | default('e30='))
+            | b64decode
+            | from_json
+          ).get('live-restore', false)
+        ) | bool
+      }}
+
 - name: Render Docker daemon configuration
   ansible.builtin.template:
     src: daemon.json.j2
     dest: /etc/docker/daemon.json
     mode: "0644"
+  register: docker_runtime_daemon_config_render
   notify: Restart Docker
 
 - name: Install the Docker publication assurance helper
@@ -229,6 +254,72 @@
   vars:
     common_systemd_unit_name: docker
 
+- name: Record container ids that are running before Docker restarts
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - -q
+      - --no-trunc
+  register: docker_runtime_pre_restart_container_ids
+  changed_when: false
+
+- name: Inspect running containers before Docker restarts
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - |
+        import json
+        import subprocess
+        import sys
+
+        container_ids = json.load(sys.stdin)
+        inspected = []
+
+        for container_id in container_ids:
+            result = subprocess.run(
+                ["docker", "inspect", container_id],
+                text=True,
+                capture_output=True,
+            )
+            if result.returncode == 0:
+                inspected.extend(json.loads(result.stdout or "[]"))
+                continue
+
+            stderr = (result.stderr or "").lower()
+            if "no such object" in stderr:
+                continue
+
+            raise subprocess.CalledProcessError(
+                result.returncode,
+                result.args,
+                output=result.stdout,
+                stderr=result.stderr,
+            )
+
+        print(json.dumps(inspected))
+    stdin: "{{ docker_runtime_pre_restart_container_ids.stdout_lines | to_json }}"
+  register: docker_runtime_pre_restart_container_inspect
+  changed_when: false
+  when: docker_runtime_pre_restart_container_ids.stdout_lines | length > 0
+
+- name: Record containers that were running before Docker restarts
+  ansible.builtin.set_fact:
+    docker_runtime_pre_restart_container_details: >-
+      {{
+        (docker_runtime_pre_restart_container_inspect.stdout | default('[]')) | from_json
+      }}
+    docker_runtime_pre_restart_container_names: >-
+      {{
+        (
+          (docker_runtime_pre_restart_container_inspect.stdout | default('[]')) | from_json
+        )
+        | map(attribute='Name')
+        | map('regex_replace', '^/', '')
+        | list
+      }}
+
 - name: Flush Docker handlers before chain health checks
   ansible.builtin.meta: flush_handlers
 
@@ -246,6 +337,374 @@
     common_docker_bridge_chains_require_nat_chain: "{{ docker_runtime_require_nat_chain }}"
     common_docker_bridge_chains_retries: "{{ docker_runtime_chain_recheck_retries }}"
     common_docker_bridge_chains_delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
+
+- name: Re-inspect pre-restart containers after Docker restarts
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - |
+        import json
+        import subprocess
+        import sys
+
+        container_names = json.load(sys.stdin)
+        statuses = []
+
+        for container_name in container_names:
+            result = subprocess.run(
+                ["docker", "inspect", container_name],
+                text=True,
+                capture_output=True,
+            )
+            if result.returncode == 0:
+                payload = json.loads(result.stdout or "[]")
+                container = payload[0] if payload else {}
+                statuses.append(
+                    {
+                        "requested_name": container_name,
+                        "full_name": container.get("Name") or f"/{container_name}",
+                        "exists": True,
+                        "running": bool(container.get("State", {}).get("Running")),
+                    }
+                )
+                continue
+
+            stderr = (result.stderr or "").lower()
+            if "no such object" in stderr:
+                statuses.append(
+                    {
+                        "requested_name": container_name,
+                        "full_name": f"/{container_name}",
+                        "exists": False,
+                        "running": False,
+                    }
+                )
+                continue
+
+            raise subprocess.CalledProcessError(
+                result.returncode,
+                result.args,
+                output=result.stdout,
+                stderr=result.stderr,
+            )
+
+        print(json.dumps(statuses))
+    stdin: "{{ docker_runtime_pre_restart_container_names | default([]) | to_json }}"
+  register: docker_runtime_post_restart_container_status
+  changed_when: false
+  when: docker_runtime_pre_restart_container_names | default([]) | length > 0
+
+- name: Record pre-restart containers that remained stopped after Docker restarts
+  ansible.builtin.set_fact:
+    docker_runtime_stopped_pre_restart_container_details: >-
+      {{
+        (
+          docker_runtime_pre_restart_container_details | default([])
+        )
+        | rejectattr(
+            'Name',
+            'in',
+            (
+              (
+                docker_runtime_post_restart_container_status.stdout | default('[]')
+              )
+              | from_json
+              | selectattr('exists')
+              | selectattr('running')
+              | map(attribute='full_name')
+              | list
+            )
+          )
+        | list
+      }}
+    docker_runtime_stopped_pre_restart_container_names: >-
+      {{
+        (
+          (
+            docker_runtime_pre_restart_container_details | default([])
+          )
+          | rejectattr(
+              'Name',
+              'in',
+              (
+                (
+                  docker_runtime_post_restart_container_status.stdout | default('[]')
+                )
+                | from_json
+                | selectattr('exists')
+                | selectattr('running')
+                | map(attribute='full_name')
+                | list
+              )
+            )
+          | list
+        )
+        | map(attribute='Name')
+        | map('regex_replace', '^/', '')
+        | list
+      }}
+
+- name: Recover pre-restart containers that remained stopped after Docker restarts
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - |
+        import json
+        import subprocess
+        import sys
+        import time
+
+        TRANSIENT_DOCKER_NETWORK_ERRORS = (
+            "No chain/target/match by that name",
+            "driver failed programming external connectivity",
+        )
+        STALE_COMPOSE_ENDPOINT_ERRORS = (
+            "failed to create endpoint",
+            "does not exist",
+        )
+
+
+        def run_with_retry(command, cwd=None, attempts=3, delay_seconds=3):
+            for attempt in range(1, attempts + 1):
+                result = subprocess.run(command, cwd=cwd, text=True, capture_output=True)
+                if result.returncode == 0:
+                    return
+
+                stderr = result.stderr or ""
+                if (
+                    attempt == attempts
+                    or not any(marker in stderr for marker in TRANSIENT_DOCKER_NETWORK_ERRORS)
+                ):
+                    raise subprocess.CalledProcessError(
+                        result.returncode,
+                        command,
+                        output=result.stdout,
+                        stderr=stderr,
+                    )
+
+                time.sleep(delay_seconds)
+
+        containers = json.load(sys.stdin)
+
+        direct_start = []
+        compose_groups = {}
+
+        for container in containers:
+            name = (container.get("Name") or "").lstrip("/")
+            labels = container.get("Config", {}).get("Labels") or {}
+            working_dir = labels.get("com.docker.compose.project.working_dir") or ""
+            config_files = labels.get("com.docker.compose.project.config_files") or ""
+            service = labels.get("com.docker.compose.service") or ""
+
+            if working_dir and service:
+                compose_group = compose_groups.setdefault(
+                    (working_dir, config_files),
+                    {"services": set(), "container_names": set()},
+                )
+                compose_group["services"].add(service)
+                if name:
+                    compose_group["container_names"].add(name)
+                continue
+
+            if name:
+                direct_start.append(name)
+
+        actions = []
+
+        if direct_start:
+            run_with_retry(["docker", "start", *direct_start])
+            actions.append({"type": "docker_start", "containers": direct_start})
+
+        for (working_dir, config_files), compose_group in sorted(compose_groups.items()):
+            command = ["docker", "compose"]
+            config_file_list = [value for value in config_files.split(",") if value]
+            for config_file in config_file_list:
+                command.extend(["--file", config_file])
+            services = sorted(compose_group["services"])
+            container_names = sorted(compose_group["container_names"])
+            command.extend(["up", "-d", "--force-recreate", *services])
+
+            try:
+                run_with_retry(command, cwd=working_dir or None)
+                actions.append(
+                    {
+                        "type": "docker_compose_up",
+                        "working_dir": working_dir,
+                        "config_files": config_file_list,
+                        "services": services,
+                    }
+                )
+            except subprocess.CalledProcessError as exc:
+                stderr = exc.stderr or ""
+                if not (
+                    container_names
+                    and all(marker in stderr for marker in STALE_COMPOSE_ENDPOINT_ERRORS)
+                ):
+                    raise
+
+                remove_command = ["docker", "rm", "-f", *container_names]
+                remove_result = subprocess.run(remove_command, text=True, capture_output=True)
+                if remove_result.returncode != 0 and "No such container" not in (remove_result.stderr or ""):
+                    raise subprocess.CalledProcessError(
+                        remove_result.returncode,
+                        remove_command,
+                        output=remove_result.stdout,
+                        stderr=remove_result.stderr,
+                    ) from exc
+                actions.append(
+                    {
+                        "type": "docker_rm_stale_compose_containers",
+                        "working_dir": working_dir,
+                        "config_files": config_file_list,
+                        "containers": container_names,
+                    }
+                )
+
+                recovery_command = ["docker", "compose"]
+                for config_file in config_file_list:
+                    recovery_command.extend(["--file", config_file])
+                recovery_command.extend(["up", "-d", "--force-recreate", *services])
+                try:
+                    run_with_retry(recovery_command, cwd=working_dir or None)
+                    actions.append(
+                        {
+                            "type": "docker_compose_up_force_recreate",
+                            "working_dir": working_dir,
+                            "config_files": config_file_list,
+                            "services": services,
+                        }
+                    )
+                    continue
+                except subprocess.CalledProcessError as recovery_exc:
+                    recovery_stderr = recovery_exc.stderr or ""
+                    if not all(marker in recovery_stderr for marker in STALE_COMPOSE_ENDPOINT_ERRORS):
+                        raise
+
+                down_command = ["docker", "compose"]
+                for config_file in config_file_list:
+                    down_command.extend(["--file", config_file])
+                down_command.extend(["down", "--remove-orphans"])
+                run_with_retry(down_command, cwd=working_dir or None)
+                actions.append(
+                    {
+                        "type": "docker_compose_down_remove_orphans",
+                        "working_dir": working_dir,
+                        "config_files": config_file_list,
+                        "services": services,
+                    }
+                )
+
+                final_up_command = ["docker", "compose"]
+                for config_file in config_file_list:
+                    final_up_command.extend(["--file", config_file])
+                final_up_command.extend(["up", "-d", *services])
+                run_with_retry(final_up_command, cwd=working_dir or None)
+                actions.append(
+                    {
+                        "type": "docker_compose_up_after_down",
+                        "working_dir": working_dir,
+                        "config_files": config_file_list,
+                        "services": services,
+                    }
+                )
+    stdin: >-
+      {{
+        (docker_runtime_stopped_pre_restart_container_details | default([])) | to_json
+      }}
+  register: docker_runtime_recover_stopped_containers
+  changed_when: docker_runtime_stopped_pre_restart_container_names | length > 0
+  when: docker_runtime_stopped_pre_restart_container_names | default([]) | length > 0
+
+- name: Confirm pre-restart containers recovered after Docker restarts
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - |
+        import json
+        import subprocess
+        import sys
+
+        NONPERSISTENT_RESTART_POLICIES = set({{ docker_runtime_nonpersistent_restart_policies | to_json }})
+
+        containers = json.load(sys.stdin)
+        statuses = []
+        all_running = True
+
+        for container in containers:
+            container_name = (container.get("Name") or "").lstrip("/")
+            restart_policy = (container.get("HostConfig") or {}).get("RestartPolicy") or {}
+            restart_policy_name = str(restart_policy.get("Name") or "").strip().lower()
+            require_running = restart_policy_name not in NONPERSISTENT_RESTART_POLICIES
+            result = subprocess.run(
+                ["docker", "inspect", container_name],
+                text=True,
+                capture_output=True,
+            )
+            if result.returncode == 0:
+                payload = json.loads(result.stdout or "[]")
+                live_container = payload[0] if payload else {}
+                state = live_container.get("State", {})
+                running = bool(state.get("Running"))
+                status = str(state.get("Status") or "")
+                exit_code = state.get("ExitCode")
+                healthy = running or (
+                    not require_running
+                    and status == "exited"
+                    and exit_code == 0
+                )
+                statuses.append(
+                    {
+                        "requested_name": container_name,
+                        "full_name": live_container.get("Name") or f"/{container_name}",
+                        "exists": True,
+                        "restart_policy_name": restart_policy_name,
+                        "require_running": require_running,
+                        "running": running,
+                        "status": status,
+                        "exit_code": exit_code,
+                        "healthy": healthy,
+                    }
+                )
+                all_running = all_running and healthy
+                continue
+
+            stderr = (result.stderr or "").lower()
+            if "no such object" in stderr:
+                statuses.append(
+                    {
+                        "requested_name": container_name,
+                        "full_name": f"/{container_name}",
+                        "exists": False,
+                        "restart_policy_name": restart_policy_name,
+                        "require_running": require_running,
+                        "running": False,
+                        "status": "missing",
+                        "exit_code": None,
+                        "healthy": False,
+                    }
+                )
+                all_running = False
+                continue
+
+            raise subprocess.CalledProcessError(
+                result.returncode,
+                result.args,
+                output=result.stdout,
+                stderr=result.stderr,
+            )
+
+        print(json.dumps(statuses))
+        sys.exit(0 if all_running else 1)
+    stdin: "{{ docker_runtime_pre_restart_container_details | default([]) | to_json }}"
+  register: docker_runtime_recovered_container_inspect
+  changed_when: false
+  retries: "{{ docker_runtime_container_recovery_retries }}"
+  delay: "{{ docker_runtime_container_recovery_delay_seconds }}"
+  until: docker_runtime_recovered_container_inspect.rc == 0
+  when: docker_runtime_pre_restart_container_details | default([]) | length > 0
 
 - name: Verify Docker runtime health probes
   ansible.builtin.import_tasks: verify.yml

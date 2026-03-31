@@ -1416,6 +1416,161 @@ workstreams:
       included_in_repo_version: 0.177.96
       latest_receipts:
         mailpit: 2026-03-30-adr-0282-mailpit-mainline-live-apply
+  - id: ws-0290-live-apply
+    adr: "0290"
+    title: Live apply Redpanda as the Kafka-compatible streaming platform from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0290-mainline
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0290-mainline
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0290-live-apply.md
+    depends_on:
+      - adr-0153-distributed-resource-lock-registry
+      - adr-0191-immutable-guest-replacement-for-stateful-and-edge-services
+      - adr-0077
+      - adr-0086
+      - adr-0165
+      - adr-0276
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0290-live-apply.md
+      - docs/adr/0290-redpanda-as-the-kafka-compatible-streaming-platform.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-redpanda.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
+      - receipts/ops-portal-snapshot.html
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - scripts/generate_platform_vars.py
+      - collections/ansible_collections/lv3/platform/playbooks/redpanda.yml
+      - collections/ansible_collections/lv3/platform/roles/redpanda_runtime/
+      - playbooks/redpanda.yml
+      - playbooks/services/redpanda.yml
+      - roles/redpanda_runtime/
+      - config/ansible-execution-scopes.yaml
+      - config/command-catalog.json
+      - config/controller-local-secrets.json
+      - config/data-catalog.json
+      - config/dependency-graph.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/secret-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/workflow-catalog.json
+      - config/ansible-role-idempotency.yml
+      - Makefile
+      - tests/test_ansible_role_idempotency.py
+      - tests/test_generate_platform_vars.py
+      - tests/test_redpanda_playbook.py
+      - tests/test_redpanda_runtime_role.py
+      - receipts/image-scans/
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: redpanda_generated_docs_contract
+          paths:
+            - README.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - docs/site-generated/architecture/dependency-graph.md
+            - receipts/ops-portal-snapshot.html
+          mode: shared_contract
+          contract: generated-docs-v1
+        - id: redpanda_mainline_integration_contract
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: latest-main-integration-v1
+        - id: adr_0290_redpanda_surface
+          paths:
+            - docs/workstreams/ws-0290-live-apply.md
+            - docs/adr/0290-redpanda-as-the-kafka-compatible-streaming-platform.md
+            - docs/runbooks/configure-redpanda.md
+            - collections/ansible_collections/lv3/platform/playbooks/redpanda.yml
+            - collections/ansible_collections/lv3/platform/roles/redpanda_runtime/**
+            - playbooks/redpanda.yml
+            - playbooks/services/redpanda.yml
+            - roles/redpanda_runtime/**
+            - tests/test_redpanda_playbook.py
+            - tests/test_redpanda_runtime_role.py
+            - receipts/image-scans/2026-03-30-redpanda-runtime.json
+            - receipts/image-scans/2026-03-30-redpanda-runtime.trivy.json
+            - receipts/live-applies/2026-03-31-adr-0290-redpanda-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-31-ws-0290-mainline-*
+          mode: exclusive
+        - id: topology_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+            - tests/test_generate_platform_vars.py
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: ansible_scope_catalog_contract
+          paths:
+            - config/ansible-execution-scopes.yaml
+          mode: shared_contract
+          contract: ansible-execution-scope-catalog-v1
+        - id: redpanda_service_catalog_contract
+          paths:
+            - config/command-catalog.json
+            - config/controller-local-secrets.json
+            - config/data-catalog.json
+            - config/dependency-graph.json
+            - config/health-probe-catalog.json
+            - config/image-catalog.json
+            - config/secret-catalog.json
+            - config/service-capability-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/workflow-catalog.json
+          mode: shared_contract
+          contract: service-catalogs-v1
+        - id: redpanda_repository_automation_contract
+          paths:
+            - Makefile
+            - config/ansible-role-idempotency.yml
+            - tests/test_ansible_role_idempotency.py
+          mode: shared_contract
+          contract: repository-automation-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0290 by bringing the private Redpanda Kafka-compatible streaming platform, topic reconciliation, and authenticated Admin API, HTTP Proxy, and Schema Registry runtime onto main after the exact-main governed replay on docker-runtime-lv3
+      release_bump: patch
+      included_in_repo_version: 0.177.116
+      latest_receipts:
+        redpanda: 2026-03-31-adr-0290-redpanda-mainline-live-apply
   - id: ws-0266-validation-runner-capability-contracts
     adr: "0266"
     title: Validation runner capability contracts and environment attestation
@@ -6023,6 +6178,138 @@ workstreams:
       included_in_repo_version: 0.177.79
       latest_receipts:
         n8n: 2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply
+  - id: ws-0257-live-apply
+    adr: "0257"
+    title: ServerClaw skill packs live apply
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0257-openclaw-skills-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-openclaw-skills
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0257-serverclaw-skill-packs-live-apply.md
+    depends_on:
+      - adr-0069-agent-tool-registry
+      - adr-0156-agent-session-workspace-isolation
+      - adr-0228-windmill-default-operations-surface
+      - adr-0254-serverclaw-product-surface
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/adr/0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md
+      - docs/workstreams/adr-0257-serverclaw-skill-packs-live-apply.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/serverclaw-skills.md
+      - docs/runbooks/agent-tool-registry.md
+      - docs/runbooks/configure-windmill.md
+      - docs/runbooks/windmill-default-operations-surface.md
+      - config/agent-tool-registry.json
+      - config/serverclaw/
+      - platform/use_cases/serverclaw_skills.py
+      - scripts/serverclaw_skill_packs.py
+      - scripts/agent_tool_registry.py
+      - scripts/validate_repository_data_models.py
+      - config/windmill/scripts/serverclaw-skills.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - tests/test_serverclaw_skill_packs.py
+      - tests/test_serverclaw_skills_windmill.py
+      - tests/test_agent_tool_registry.py
+      - tests/test_windmill_default_operations_surface.py
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: agent_tool_registry_contract
+          paths:
+            - config/agent-tool-registry.json
+            - scripts/agent_tool_registry.py
+          mode: shared_contract
+          contract: agent-tool-registry-v1
+        - id: windmill_seed_contract
+          paths:
+            - config/windmill/scripts/serverclaw-skills.py
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - docs/runbooks/configure-windmill.md
+            - docs/runbooks/windmill-default-operations-surface.md
+            - tests/test_windmill_default_operations_surface.py
+          mode: shared_contract
+          contract: windmill-seed-scripts-v1
+        - id: serverclaw_skill_pack_repo_surface
+          paths:
+            - docs/adr/0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md
+            - docs/workstreams/adr-0257-serverclaw-skill-packs-live-apply.md
+            - docs/runbooks/serverclaw-skills.md
+            - config/serverclaw/
+            - platform/use_cases/serverclaw_skills.py
+            - scripts/serverclaw_skill_packs.py
+            - scripts/validate_repository_data_models.py
+            - tests/test_serverclaw_skill_packs.py
+            - tests/test_serverclaw_skills_windmill.py
+            - tests/test_agent_tool_registry.py
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      latest_receipts:
+        serverclaw_skills: 2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply
+  - id: ws-0257-main-merge
+    adr: "0257"
+    title: Integrate ADR 0257 exact-main replay onto current origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0257-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-main-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0257-main-merge.md
+    depends_on:
+      - ws-0257-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0257-main-merge.md
+      - docs/workstreams/adr-0257-serverclaw-skill-packs-live-apply.md
+      - docs/adr/0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md
+      - docs/adr/.index.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0257_main_merge
+          paths:
+            - docs/workstreams/ws-0257-main-merge.md
+            - docs/adr/.index.yaml
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - receipts/live-applies/
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0257 by carrying the governed ServerClaw SKILL.md skill-pack contract onto the current mainline baseline, hardening exact-main OpenBao replay stability, and recording the verified controller, API gateway, and Windmill workspace-precedence proof set
+      release_bump: patch
+      included_in_repo_version: 0.177.117
   - id: ws-0259-main-merge
     adr: "0259"
     title: Integrate ADR 0259 exact-main replay onto current origin/main
@@ -17887,7 +18174,7 @@ workstreams:
   - id: ws-0298-live-apply
     adr: "0298"
     title: Live apply Syft and Grype for platform-wide SBOM generation and continuous CVE scanning from latest origin/main
-    status: implemented
+    status: live_applied
     owner: codex
     branch: codex/ws-0298-live-apply-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-live-apply-r2
@@ -17965,6 +18252,8 @@ workstreams:
       - receipts/cve/**
       - receipts/live-applies/2026-03-30-adr-0298-*
       - receipts/live-applies/evidence/2026-03-30-ws-0298-*
+      - receipts/live-applies/2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-31-ws-0298-mainline-*
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -18041,16 +18330,24 @@ workstreams:
             - receipts/cve/**
             - receipts/live-applies/2026-03-30-adr-0298-*
             - receipts/live-applies/evidence/2026-03-30-ws-0298-*
+            - receipts/live-applies/2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-31-ws-0298-mainline-*
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0298 by live-applying exact-main Syft and Grype SBOM generation and continuous CVE scanning on docker-runtime-lv3, including native worker tooling, repo-local Syft temp extraction, and the verified 62-image refresh path
+      release_bump: patch
+      included_in_repo_version: 0.177.118
+      latest_receipts:
+        sbom_cve_scanning: 2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply
   - id: ws-0298-main-merge
     adr: "0298"
     title: Integrate ADR 0298 exact-main replay onto current origin/main
-    status: merged
+    status: live_applied
     owner: codex
-    branch: codex/ws-0298-main-publish-r2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2
+    branch: codex/ws-0298-main-final-r4
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-final-r4
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0298-main-merge.md
     depends_on:
       - ws-0298-live-apply
@@ -18123,6 +18420,8 @@ workstreams:
       - receipts/live-applies/2026-03-30-adr-0298-*
       - receipts/live-applies/evidence/2026-03-30-ws-0298-*
       - receipts/live-applies/evidence/2026-03-31-ws-0298-main-merge-*
+      - receipts/live-applies/2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-31-ws-0298-mainline-*
       - README.md
       - RELEASE.md
       - VERSION
@@ -18210,6 +18509,8 @@ workstreams:
             - receipts/live-applies/2026-03-30-adr-0298-*
             - receipts/live-applies/evidence/2026-03-30-ws-0298-*
             - receipts/live-applies/evidence/2026-03-31-ws-0298-main-merge-*
+            - receipts/live-applies/2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-31-ws-0298-mainline-*
           mode: shared_contract
           contract: adr-0298-live-apply-v1
         - id: integration_readme_surface
@@ -18237,14 +18538,13 @@ workstreams:
             - docs/workstreams/ws-0298-main-merge.md
           mode: exclusive
     ready_to_merge: true
-    live_applied: false
+    live_applied: true
     canonical_truth:
-      changelog_entry: integrates ADR 0298 into main by carrying the Syft and Grype SBOM/CVE scanning surfaces, the native Windmill worker Docker socket contract, and the exact-main build-host refresh evidence while the platform baseline remains 0.130.74 because docker-runtime-lv3 and the cache plane were unstable during runtime revalidation
+      changelog_entry: integrates ADR 0298 into main by carrying the final Syft and Grype SBOM/CVE scanning surfaces, the native Windmill worker tooling contract, and the exact-main 62-image live refresh proof from docker-runtime-lv3
       release_bump: patch
-      included_in_repo_version: 0.177.114
+      included_in_repo_version: 0.177.118
       latest_receipts:
-        sbom_cve_scanning: 2026-03-31-ws-0298-main-merge-sbom-refresh-full-r3-build-host
-        windmill_runtime_drift: 2026-03-31-ws-0298-main-merge-runtime-compose-state-r1
+        sbom_cve_scanning: 2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply
   - id: ws-0288-live-apply
     adr: "0288"
     title: ADR 0288 live apply from latest origin/main

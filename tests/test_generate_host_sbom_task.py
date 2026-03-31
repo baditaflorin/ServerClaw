@@ -34,11 +34,15 @@ def test_generate_host_sbom_uses_syft_relative_excludes() -> None:
     assert "./proc/**" in argv
     assert "./run/**" in argv
     assert "./sys/**" in argv
+    assert "./tmp/**" in argv
+    assert "./var/tmp/**" in argv
     assert "./var/lib/containerd/**" in argv
     assert "./var/lib/docker/**" in argv
     assert "/dev/**" not in argv
     assert "/proc/**" not in argv
     assert "/run/**" not in argv
     assert "/sys/**" not in argv
+    assert "/tmp/**" not in argv
+    assert "/var/tmp/**" not in argv
     assert "/var/lib/containerd/**" not in argv
     assert "/var/lib/docker/**" not in argv

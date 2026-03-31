@@ -1,0 +1,9 @@
+admin_api_require_auth: true
+superusers:
+  - {{ redpanda_admin_user }}
+enable_sasl: true
+http_authentication:
+  - BASIC
+auto_create_topics_enabled: false
+default_topic_replication: 1
+default_topic_partitions: 1

@@ -38,6 +38,10 @@ PORT_KEYS = (
     "openfga_host_proxy_port",
     "openbao_http_port",
     "openbao_proxy_port",
+    "redpanda_kafka_port",
+    "redpanda_admin_port",
+    "redpanda_http_proxy_port",
+    "redpanda_schema_registry_port",
     "semaphore_server_port",
     "semaphore_host_proxy_port",
     "windmill_server_port",
@@ -518,6 +522,15 @@ def build_service_urls(
         urls["smtp"] = service_url("smtp", private_ip, ports["mailpit_smtp_port"])
         port_map["internal"] = ports["mailpit_http_port"]
         port_map["smtp"] = ports["mailpit_smtp_port"]
+    elif service_id == "redpanda":
+        urls["internal"] = service_url("kafka", private_ip, ports["redpanda_kafka_port"])
+        urls["admin"] = service_url("http", private_ip, ports["redpanda_admin_port"])
+        urls["http_proxy"] = service_url("http", private_ip, ports["redpanda_http_proxy_port"])
+        urls["schema_registry"] = service_url("http", private_ip, ports["redpanda_schema_registry_port"])
+        port_map["internal"] = ports["redpanda_kafka_port"]
+        port_map["admin"] = ports["redpanda_admin_port"]
+        port_map["http_proxy"] = ports["redpanda_http_proxy_port"]
+        port_map["schema_registry"] = ports["redpanda_schema_registry_port"]
     elif service_id == "dify":
         urls["internal"] = service_url("http", private_ip, ports["dify_port"])
         port_map["internal"] = ports["dify_port"]

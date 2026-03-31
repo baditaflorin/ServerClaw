@@ -65,6 +65,7 @@ def test_default_operations_surface_verification_paths_are_declared() -> None:
     expected_paths = {
         "f/lv3/post_merge_gate",
         "f/lv3/nightly_integration_tests",
+        "f/lv3/serverclaw_skills",
         "f/lv3/runbook_executor",
         "f/lv3/continuous_drift_detection",
         "f/lv3/subdomain_exposure_audit",

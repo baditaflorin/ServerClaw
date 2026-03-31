@@ -114,6 +114,7 @@ windmill_private_base_url: "http://{{ windmill_service_topology.private_ip }}:{{
 windmill_base_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
 windmill_runtime_api_base_url: "http://127.0.0.1:{{ windmill_server_port }}"
 windmill_worker_network_mode: "{{ windmill_server_network_mode }}"
+windmill_requires_docker_bridge_chains: true
 windmill_worker_api_base_url: >-
   {{ 'http://127.0.0.1:' ~ windmill_server_port if windmill_worker_network_mode == 'host' else 'http://windmill_server:8000' }}
 windmill_healthcheck_script_path: f/lv3/windmill_healthcheck
@@ -122,6 +123,7 @@ windmill_stage_smoke_suites_script_path: f/lv3/stage-smoke-suites
 windmill_default_operations_surface_script_paths:
   - f/lv3/post_merge_gate
   - f/lv3/nightly_integration_tests
+  - f/lv3/serverclaw_skills
   - f/lv3/run_triage
   - f/lv3/runbook_executor
   - f/lv3/calibrate_triage_rules
@@ -223,6 +225,7 @@ windmill_worker_checkout_checksum_file: >-
   }}
 windmill_worker_checkout_integrity_files:
   - Makefile
+  - config/sbom-scanner.json
   - config/validation-gate.json
   - config/validation-lanes.yaml
   - config/gate-bypass-waiver-catalog.json
@@ -231,13 +234,17 @@ windmill_worker_checkout_integrity_files:
   - scripts/policy_toolchain.py
   - scripts/command_catalog.py
   - scripts/controller_automation_toolkit.py
+  - scripts/validate_repo.sh
   - scripts/gate_bypass_waivers.py
   - scripts/gate_status.py
+  - scripts/sbom_scanner.py
+  - scripts/sbom_refresh.py
   - scripts/stage_smoke_suites.py
   - scripts/validation_lanes.py
   - scripts/run_python_with_packages.sh
   - config/windmill/scripts/gate-status.py
   - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+  - config/windmill/scripts/sbom-refresh.py
   - config/windmill/scripts/stage-smoke-suites.py
 windmill_worker_checkout_sync_paths:
   - .gitea
@@ -432,6 +439,11 @@ windmill_seed_scripts:
     language: python3
     summary: Maintain the LV3 build caches
     description: Repo-managed helper that purges the shared pip cache and checks the apt-cacher-ng report endpoint on the build server.
+  - path: f/lv3/backup_coverage_ledger
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/backup-coverage-ledger.py"
+    language: python3
+    summary: ADR 0267 backup coverage ledger
+    description: Repo-managed Windmill wrapper that rebuilds the backup coverage ledger from the current repo catalog and writes the published report artifacts.
   - path: f/lv3/post_merge_gate
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/post-merge-gate.py"
     language: python3
@@ -452,6 +464,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0129 runbook executor
     description: Repo-managed Windmill wrapper that executes, resumes, or inspects structured runbooks from the mounted worker checkout.
+  - path: f/lv3/serverclaw_skills
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/serverclaw-skills.py"
+    language: python3
+    summary: ADR 0257 ServerClaw skill packs
+    description: Repo-managed Windmill wrapper that resolves the governed bundled, shared, and workspace-local ServerClaw SKILL.md packs from the mounted worker checkout.
   - path: f/lv3/calibrate_triage_rules
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/calibrate-triage-rules.py"
     language: python3
@@ -492,6 +509,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0142 public surface security scan
     description: Repo-managed Windmill wrapper that runs the public-surface security scan and stores one receipt.
+  - path: f/lv3/weekly_https_tls_assurance
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/https-tls-assurance.py"
+    language: python3
+    summary: ADR 0249 HTTPS and TLS assurance
+    description: Repo-managed Windmill wrapper that runs the recurring HTTPS and TLS assurance workflow and stores the classified receipt set.
   - path: f/lv3/audit_token_inventory
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/audit-token-inventory.py"
     language: python3

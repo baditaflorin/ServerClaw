@@ -6,6 +6,9 @@
 # Dependencies: ADR 0098, ADR 0113, ADR 0165; requires a writable postgres member and local artifact storage.
 # Related Runbooks: docs/runbooks/configure-postgres-vm.md, docs/runbooks/world-state-materializer.md
 
+- name: Flush any pending PostgreSQL configuration handlers before Windmill SQL reconciliation
+  ansible.builtin.meta: flush_handlers
+
 - name: Validate Windmill PostgreSQL inputs
   ansible.builtin.assert:
     that:
@@ -109,6 +112,65 @@
   delay: 5
   until: windmill_postgres_local_sql_probe.stdout | trim == "1"
   when: windmill_postgres_writable_check.stdout | trim == "1"
+
+- name: Read PostgreSQL shared preload libraries before Windmill database reconciliation
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - postgres
+      - -Atqc
+      - SHOW shared_preload_libraries
+  register: windmill_postgres_shared_preload_libraries
+  changed_when: false
+  when: windmill_postgres_writable_check.stdout | trim == "1"
+
+- name: Record whether pgaudit is preloaded at the PostgreSQL cluster level
+  ansible.builtin.set_fact:
+    windmill_postgres_pgaudit_preloaded: >-
+      {{
+        (windmill_postgres_shared_preload_libraries.stdout | trim)
+        is search('(^|,)\\s*pgaudit\\s*(,|$)')
+      }}
+  when: windmill_postgres_writable_check.stdout | trim == "1"
+
+- name: Check whether the Windmill database still carries a stale pgaudit extension
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -Atqc
+      - "SELECT 1 FROM pg_extension WHERE extname = 'pgaudit'"
+  register: windmill_postgres_pgaudit_extension_check
+  changed_when: false
+  when:
+    - windmill_postgres_writable_check.stdout | trim == "1"
+    - windmill_postgres_cleanup_stale_pgaudit_extension
+    - not windmill_postgres_pgaudit_preloaded
+
+- name: Remove the stale Windmill pgaudit extension when the cluster is not preloading it
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - DROP EXTENSION IF EXISTS pgaudit CASCADE
+  changed_when: windmill_postgres_pgaudit_extension_check.stdout | trim == "1"
+  when:
+    - windmill_postgres_writable_check.stdout | trim == "1"
+    - windmill_postgres_cleanup_stale_pgaudit_extension
+    - not windmill_postgres_pgaudit_preloaded
+    - windmill_postgres_pgaudit_extension_check.stdout | trim == "1"
 
 - name: Check whether the Windmill support role already exists
   become: true
@@ -338,6 +400,21 @@
   changed_when: false
   when: windmill_postgres_writable_check.stdout | trim == "1"
 
+- name: Recheck local PostgreSQL SQL readiness before world_state reconciliation
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - SELECT 1
+  register: windmill_postgres_world_state_sql_probe
+  changed_when: false
+  retries: 12
+  delay: 5
+  until: windmill_postgres_world_state_sql_probe.stdout | trim == "1"
+  when: windmill_postgres_writable_check.stdout | trim == "1"
+
 - name: Check whether the world_state schema already exists
   become: true
   become_user: postgres
@@ -351,7 +428,9 @@
       - "SELECT 1 FROM pg_namespace WHERE nspname = 'world_state'"
   register: windmill_world_state_schema_check
   changed_when: false
-  when: windmill_postgres_writable_check.stdout | trim == "1"
+  when:
+    - windmill_postgres_writable_check.stdout | trim == "1"
+    - windmill_postgres_world_state_sql_probe.stdout | trim == "1"
 
 - name: Ensure the Windmill support role can use the world_state schema
   become: true

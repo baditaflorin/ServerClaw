@@ -164,6 +164,10 @@ platform_ports:
   openfga_host_proxy_port: 8014
   openbao_http_port: 8201
   openbao_proxy_port: 8200
+  redpanda_kafka_port: 9092
+  redpanda_admin_port: 9644
+  redpanda_http_proxy_port: 8103
+  redpanda_schema_registry_port: 8104
   semaphore_server_port: 3004
   semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
@@ -248,6 +252,10 @@ platform_port_assignments:
   openfga_host_proxy_port: 8014
   openbao_http_port: 8201
   openbao_proxy_port: 8200
+  redpanda_kafka_port: 9092
+  redpanda_admin_port: 9644
+  redpanda_http_proxy_port: 8103
+  redpanda_schema_registry_port: 8104
   semaphore_server_port: 3004
   semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
@@ -1345,6 +1353,25 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8025
       smtp: smtp://10.10.10.20:1025
+  redpanda:
+    service_name: redpanda
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: redpanda
+    ports:
+      internal: 9092
+      admin: 9644
+      http_proxy: 8103
+      schema_registry: 8104
+    urls:
+      internal: kafka://10.10.10.20:9092
+      admin: http://10.10.10.20:9644
+      http_proxy: http://10.10.10.20:8103
+      schema_registry: http://10.10.10.20:8104
   step_ca:
     service_name: step-ca
     owning_vm: docker-runtime-lv3
@@ -3047,6 +3074,25 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8025
       smtp: smtp://10.10.10.20:1025
+  redpanda:
+    service_name: redpanda
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: redpanda
+    ports:
+      internal: 9092
+      admin: 9644
+      http_proxy: 8103
+      schema_registry: 8104
+    urls:
+      internal: kafka://10.10.10.20:9092
+      admin: http://10.10.10.20:9644
+      http_proxy: http://10.10.10.20:8103
+      schema_registry: http://10.10.10.20:8104
   step_ca:
     service_name: step-ca
     owning_vm: docker-runtime-lv3
@@ -4328,6 +4374,10 @@ mail_platform_gateway_port: 8081
 ntfy_port: 2586
 openbao_http_port: 8201
 openbao_proxy_port: 8200
+redpanda_kafka_port: 9092
+redpanda_admin_port: 9644
+redpanda_http_proxy_port: 8103
+redpanda_schema_registry_port: 8104
 windmill_server_port: 8000
 nomad_server_port: 4646
 nomad_rpc_port: 4647

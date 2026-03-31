@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import http.client
+import io
 import json
 import os
 import subprocess
@@ -469,6 +470,62 @@ def test_schedule_sync_helper_uses_configured_http_timeout(monkeypatch: pytest.M
         "http://windmill.internal/api/w/lv3/"
         "schedules/exists/f%2Flv3%2Fquarterly_access_review_every_monday_0900"
     )
+
+
+def test_schedule_sync_helper_retries_sqlerr_backend_disconnect(monkeypatch: pytest.MonkeyPatch) -> None:
+    module = load_module("schedule_sync_helper_retryable_sqlerr", SCHEDULE_SYNC_HELPER_PATH)
+
+    def fake_urlopen(_request, timeout=None):
+        raise module.urllib.error.HTTPError(
+            "http://windmill.internal/api/w/lv3/scripts/get/p/f%2Flv3%2Fworld_state%2Frefresh_tls_certs",
+            400,
+            "Bad Request",
+            None,
+            io.BytesIO(
+                b"SqlErr: error communicating with database: Connection reset by peer (os error 104)"
+            ),
+        )
+
+    monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
+
+    with pytest.raises(module.RetryableSyncError, match="Connection reset by peer"):
+        module.request_json_or_text(
+            base_url="http://windmill.internal",
+            workspace="lv3",
+            token="token",
+            path="scripts/get/p/f%2Flv3%2Fworld_state%2Frefresh_tls_certs",
+            method="GET",
+            expected_statuses=(200,),
+            timeout_s=5.0,
+        )
+
+
+def test_script_sync_helper_retries_sqlerr_backend_disconnect(monkeypatch: pytest.MonkeyPatch) -> None:
+    module = load_module("script_sync_helper_retryable_sqlerr", SYNC_HELPER_PATH)
+
+    def fake_urlopen(_request, timeout=None):
+        raise module.urllib.error.HTTPError(
+            "http://windmill.internal/api/w/lv3/scripts/get/p/f%2Flv3%2Foperator_onboard",
+            400,
+            "Bad Request",
+            None,
+            io.BytesIO(
+                b"SqlErr: error communicating with database: Connection reset by peer (os error 104)"
+            ),
+        )
+
+    monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
+
+    with pytest.raises(module.RetryableSyncError, match="Connection reset by peer"):
+        module.request_json_or_text(
+            base_url="http://windmill.internal",
+            workspace="lv3",
+            token="token",
+            path="scripts/get/p/f%2Flv3%2Foperator_onboard",
+            method="GET",
+            expected_statuses=(200,),
+            timeout_s=5.0,
+        )
 
 
 def test_sync_helper_resolves_repo_root_from_shard_adjacent_script_path(tmp_path: Path) -> None:

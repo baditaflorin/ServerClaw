@@ -60,6 +60,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
     assert defaults["windmill_worker_checkout_integrity_files"] == [
         "Makefile",
+        "config/sbom-scanner.json",
         "config/validation-gate.json",
         "config/validation-lanes.yaml",
         "config/gate-bypass-waiver-catalog.json",
@@ -68,13 +69,17 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "scripts/policy_toolchain.py",
         "scripts/command_catalog.py",
         "scripts/controller_automation_toolkit.py",
+        "scripts/validate_repo.sh",
         "scripts/gate_bypass_waivers.py",
         "scripts/gate_status.py",
+        "scripts/sbom_scanner.py",
+        "scripts/sbom_refresh.py",
         "scripts/stage_smoke_suites.py",
         "scripts/validation_lanes.py",
         "scripts/run_python_with_packages.sh",
         "config/windmill/scripts/gate-status.py",
         "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+        "config/windmill/scripts/sbom-refresh.py",
         "config/windmill/scripts/stage-smoke-suites.py",
     ]
     assert defaults["windmill_seed_repo_root_local_dir"] == "{{ windmill_worker_checkout_repo_root_local_dir }}"
@@ -597,11 +602,15 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "--path {{ windmill_healthcheck_script_path | quote }}" in tasks
     assert "--path {{ windmill_stage_smoke_suites_script_path | quote }}" in verify_tasks
     assert "Converge repo-managed Windmill schedule enabled flags" in tasks
-    assert 'delegate_to: "{{ windmill_database_inventory_host }}"' in tasks
     assert "become_user: postgres" in tasks
-    assert '      - psql' in tasks
-    assert '      - "{{ windmill_database_name }}"' in tasks
-    assert "schedule.enabled IS DISTINCT FROM desired.enabled" in tasks
+    assert 'psql -d {{ windmill_database_name | quote }} -v ON_ERROR_STOP=1 <<\'SQL\'' in tasks
+    assert 'delegate_to: "{{ windmill_database_inventory_host }}"' in tasks
+    assert '$1 == "DATABASE_URL"' not in tasks
+    assert '. "{{ windmill_env_file }}"' not in tasks
+    assert "WITH desired(path, enabled) AS (" in tasks
+    assert "current.workspace_id = '{{ windmill_workspace_id | replace(\"'\", \"''\") }}'" in tasks
+    assert "current.path = desired.path" in tasks
+    assert "current.enabled IS DISTINCT FROM desired.enabled" in tasks
     assert "become: true" in tasks
     assert "Sync repo-managed Windmill raw apps" in tasks
     assert "Install frontend dependencies for repo-managed Windmill raw apps" in tasks
@@ -635,6 +644,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
         "  windmill_extra:", 1
     )[0]
     assert "- /var/run/docker.sock:/var/run/docker.sock" in native_worker_compose
+    assert "- /usr/local/bin/grype:/usr/local/bin/grype:ro" in native_worker_compose
+    assert "- /usr/local/bin/syft:/usr/local/bin/syft:ro" in native_worker_compose
     assert "python3 - <<'PY'" in tasks
     assert "gzip.GzipFile" in tasks
     assert "mtime=0" in tasks

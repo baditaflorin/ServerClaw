@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.116",
-  "platform_version": "0.130.75",
-  "generated_at": "2026-03-31T10:25:21Z",
-  "next_refresh_at": "2026-03-31T11:25:21Z",
+  "repo_version": "0.177.118",
+  "platform_version": "0.130.77",
+  "generated_at": "2026-03-31T13:48:20Z",
+  "next_refresh_at": "2026-03-31T14:48:20Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -523,18 +523,6 @@
         "last_live_apply": "2026-03-31T00:00:00Z",
         "slo_status": "unknown"
       },
-      "paperless": {
-        "service_name": "Paperless-ngx",
-        "status": "healthy",
-        "score": 0.95,
-        "safe_to_act": true,
-        "source": "repo_evidence",
-        "reason": "Repository evidence is complete enough for normal automation.",
-        "lifecycle_status": "active",
-        "primary_url": "https://paperless.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z",
-        "slo_status": "unknown"
-      },
       "piper": {
         "service_name": "Piper",
         "status": "healthy",
@@ -627,6 +615,17 @@
         "primary_url": "https://realtime.lv3.org",
         "last_live_apply": "2026-03-31T00:00:00Z",
         "slo_status": "unknown"
+      },
+      "redpanda": {
+        "service_name": "Redpanda",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "kafka://10.10.10.20:9092",
+        "last_live_apply": "2026-03-31T00:00:00Z"
       },
       "searxng": {
         "service_name": "SearXNG",
@@ -2158,32 +2157,6 @@
         "runbook": "docs/runbooks/platform-operations-portal.md"
       },
       {
-        "id": "converge-paperless",
-        "description": "Deploy the public Paperless-ngx archive on docker-runtime-lv3, refresh the governed API gateway route, and reconcile the repo-managed taxonomy and smoke verification path.",
-        "tags": [
-          "converge-paperless",
-          "guest-live",
-          "mutation",
-          "preflight",
-          "validated"
-        ],
-        "risk_class": "HIGH",
-        "automation_eligible": true,
-        "agent_trust_required": "T3",
-        "execution_class": "mutation",
-        "live_impact": "guest_live",
-        "budget": {
-          "max_duration_seconds": 1800,
-          "max_steps": 300,
-          "max_concurrent_instances": 1,
-          "max_touched_hosts": 3,
-          "max_restarts": 1,
-          "max_rollback_depth": 1,
-          "escalation_action": "notify_and_abort"
-        },
-        "runbook": "docs/runbooks/configure-paperless.md"
-      },
-      {
         "id": "converge-piper",
         "description": "Deploy the private Piper text-to-speech runtime on docker-runtime-lv3, load the repo-managed default voice, and verify the `/api/tts` WAV contract.",
         "tags": [
@@ -2364,6 +2337,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-netdata.md"
+      },
+      {
+        "id": "converge-redpanda",
+        "description": "Deploy the private Redpanda Kafka-compatible streaming runtime on docker-runtime-lv3 and verify the Admin API, HTTP Proxy, and Schema Registry contract.",
+        "tags": [
+          "converge-redpanda",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-redpanda.md"
       },
       {
         "id": "converge-restic-config-backup",
@@ -4780,16 +4779,6 @@
         ]
       },
       {
-        "id": "configure-paperless",
-        "title": "Configure Paperless",
-        "agent_trust_required": "T3",
-        "steps": 0,
-        "path": "docs/runbooks/configure-paperless.md",
-        "workflow_ids": [
-          "converge-paperless"
-        ]
-      },
-      {
         "id": "configure-piper",
         "title": "Configure Piper",
         "agent_trust_required": "T3",
@@ -4860,6 +4849,16 @@
         "path": "docs/runbooks/configure-public-ingress.md",
         "workflow_ids": [
           "configure-ingress"
+        ]
+      },
+      {
+        "id": "configure-redpanda",
+        "title": "Configure Redpanda",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-redpanda.md",
+        "workflow_ids": [
+          "converge-redpanda"
         ]
       },
       {
@@ -4957,7 +4956,7 @@
         "id": "configure-windmill",
         "title": "Configure Windmill",
         "agent_trust_required": "T3",
-        "steps": 24,
+        "steps": 25,
         "path": "docs/runbooks/configure-windmill.md",
         "workflow_ids": [
           "converge-windmill"
@@ -5555,10 +5554,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.115",
+    "last_version": "0.177.117",
     "deployed_at": "2026-03-31",
-    "summary": "implemented ADR 0285 by bringing the Paperless document archive service, its OpenBao and Keycloak recovery hardening, and the corrected public smoke-upload verification path onto main",
-    "release_notes_url": "docs/release-notes/0.177.116.md"
+    "summary": "implements ADR 0298 by live-applying exact-main Syft and Grype SBOM generation and continuous CVE scanning on docker-runtime-lv3, including native worker tooling, repo-local Syft temp extraction, and the verified 62-image refresh path integrates ADR 0298 into main by carrying the final Syft and Grype SBOM/CVE scanning surfaces, the native Windmill worker tooling contract, and the exact-main 62-image live refresh proof from docker-runtime-lv3",
+    "release_notes_url": "docs/release-notes/0.177.118.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -122,6 +122,31 @@ api_gateway_tree_sync_specs:
     source: windmill
     dest_parent: "{{ api_gateway_service_dir }}"
     remote_archive: "{{ api_gateway_site_dir }}/windmill-sync.tar.gz"
+  - name: Gitea workflow tree required by governed registry implementation refs
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: .gitea
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/gitea-sync.tar.gz"
+  - name: ServerClaw config tree required by governed skill-pack resolution
+    archive_root: "{{ api_gateway_repo_root }}/config"
+    source: serverclaw
+    dest_parent: "{{ api_gateway_site_dir }}/config"
+    remote_archive: "{{ api_gateway_site_dir }}/serverclaw-config-sync.tar.gz"
+  - name: ServerClaw skill-pack resolver script required by governed registry implementation refs
+    archive_root: "{{ api_gateway_repo_root }}/scripts"
+    source: serverclaw_skill_packs.py
+    dest_parent: "{{ api_gateway_service_dir }}/scripts"
+    remote_archive: "{{ api_gateway_site_dir }}/serverclaw-skill-packs-script-sync.tar.gz"
+  - name: ServerClaw use-case module required by governed registry implementation refs
+    archive_root: "{{ api_gateway_repo_root }}/platform/use_cases"
+    source: serverclaw_skills.py
+    dest_parent: "{{ api_gateway_service_dir }}/platform/use_cases"
+    remote_archive: "{{ api_gateway_site_dir }}/serverclaw-use-case-sync.tar.gz"
+  - name: ServerClaw runbook required by governed registry implementation refs
+    archive_root: "{{ api_gateway_repo_root }}/docs/runbooks"
+    source: serverclaw-skills.md
+    dest_parent: "{{ api_gateway_service_dir }}/docs/runbooks"
+    remote_archive: "{{ api_gateway_site_dir }}/serverclaw-runbook-sync.tar.gz"
 api_gateway_gateway_catalog_src: "{{ api_gateway_repo_root }}/config/api-gateway-catalog.json"
 api_gateway_service_catalog_src: "{{ api_gateway_repo_root }}/config/service-capability-catalog.json"
 api_gateway_error_registry_src: "{{ api_gateway_repo_root }}/config/error-codes.yaml"
@@ -216,7 +241,7 @@ api_gateway_keycloak_jwks_url: "{{ api_gateway_keycloak_internal_base_url }}/rea
 api_gateway_keycloak_issuer_url: https://sso.lv3.org/realms/lv3
 api_gateway_keycloak_token_url: https://sso.lv3.org/realms/lv3/protocol/openid-connect/token
 api_gateway_keycloak_verify_base_url: http://127.0.0.1:18080
-api_gateway_keycloak_verify_ready_retries: 24
+api_gateway_keycloak_verify_ready_retries: 60
 api_gateway_keycloak_verify_ready_delay: 5
 api_gateway_keycloak_verify_token_retries: 18
 api_gateway_keycloak_verify_token_delay: 5

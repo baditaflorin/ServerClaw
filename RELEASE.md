@@ -1,12 +1,13 @@
-# Release 0.177.116
+# Release 0.177.118
 
 - Date: 2026-03-31
 
 ## Summary
-- implemented ADR 0285 by bringing the Paperless document archive service, its OpenBao and Keycloak recovery hardening, and the corrected public smoke-upload verification path onto main
+- implements ADR 0298 by live-applying exact-main Syft and Grype SBOM generation and continuous CVE scanning on docker-runtime-lv3, including native worker tooling, repo-local Syft temp extraction, and the verified 62-image refresh path
+- integrates ADR 0298 into main by carrying the final Syft and Grype SBOM/CVE scanning surfaces, the native Windmill worker tooling contract, and the exact-main 62-image live refresh proof from docker-runtime-lv3
 
 ## Platform Impact
-- exact-main Paperless live apply still pending; platform version will bump only after the merged main tree is replayed and verified
+- Platform version advances to 0.130.77 after the exact-main ADR 0298 replay re-verifies Syft and Grype SBOM generation and continuous CVE scanning from the live Windmill native worker on docker-runtime-lv3, including native tooling mounts, repo-local Syft temp extraction, and a successful 62-image refresh.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

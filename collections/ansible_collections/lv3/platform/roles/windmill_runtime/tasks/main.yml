@@ -1166,6 +1166,94 @@
     state: absent
   delegate_to: localhost
   become: false
+
+- name: Load the shared SBOM scanner config for the Windmill native worker
+  ansible.builtin.set_fact:
+    windmill_worker_scanner_config: >-
+      {{
+        lookup(
+          'ansible.builtin.file',
+          (inventory_dir | dirname) ~ '/config/sbom-scanner.json'
+        ) | from_json
+      }}
+  changed_when: false
+
+- name: Check the installed Syft version for the Windmill native worker
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/syft
+      - version
+  register: windmill_worker_native_syft_version
+  changed_when: false
+  failed_when: false
+
+- name: Install the pinned Syft release for the Windmill native worker when required
+  when: windmill_worker_scanner_config.syft.version not in windmill_worker_native_syft_version.stdout
+  block:
+    - name: Create a temporary directory for the Windmill native Syft archive
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: lv3-syft-
+      register: windmill_worker_native_syft_archive_dir
+
+    - name: Download and unpack the pinned Windmill native Syft archive
+      ansible.builtin.unarchive:
+        src: "{{ windmill_worker_scanner_config.syft.linux_amd64_tarball }}"
+        dest: "{{ windmill_worker_native_syft_archive_dir.path }}"
+        remote_src: true
+
+    - name: Install the pinned Syft binary for the Windmill native worker
+      ansible.builtin.copy:
+        src: "{{ windmill_worker_native_syft_archive_dir.path }}/syft"
+        dest: /usr/local/bin/syft
+        owner: root
+        group: root
+        mode: "0755"
+        remote_src: true
+
+    - name: Remove the temporary Windmill native Syft archive directory
+      ansible.builtin.file:
+        path: "{{ windmill_worker_native_syft_archive_dir.path }}"
+        state: absent
+
+- name: Check the installed Grype version for the Windmill native worker
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/grype
+      - version
+  register: windmill_worker_native_grype_version
+  changed_when: false
+  failed_when: false
+
+- name: Install the pinned Grype release for the Windmill native worker when required
+  when: windmill_worker_scanner_config.grype.version not in windmill_worker_native_grype_version.stdout
+  block:
+    - name: Create a temporary directory for the Windmill native Grype archive
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: lv3-grype-
+      register: windmill_worker_native_grype_archive_dir
+
+    - name: Download and unpack the pinned Windmill native Grype archive
+      ansible.builtin.unarchive:
+        src: "{{ windmill_worker_scanner_config.grype.linux_amd64_tarball }}"
+        dest: "{{ windmill_worker_native_grype_archive_dir.path }}"
+        remote_src: true
+
+    - name: Install the pinned Grype binary for the Windmill native worker
+      ansible.builtin.copy:
+        src: "{{ windmill_worker_native_grype_archive_dir.path }}/grype"
+        dest: /usr/local/bin/grype
+        owner: root
+        group: root
+        mode: "0755"
+        remote_src: true
+
+    - name: Remove the temporary Windmill native Grype archive directory
+      ansible.builtin.file:
+        path: "{{ windmill_worker_native_grype_archive_dir.path }}"
+        state: absent
+
 - name: Render the Windmill compose file
   vars:
     mutation_audit_action: render.windmill_compose
@@ -1200,41 +1288,81 @@
   tags:
     - mutation
 
-- name: Check whether Docker nat chain exists before Windmill startup
-  ansible.builtin.command: iptables -t nat -S DOCKER
+- name: Check whether the Docker nat chain exists before Windmill startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
   register: windmill_docker_nat_chain_check
   changed_when: false
   failed_when: windmill_docker_nat_chain_check.rc not in [0, 1]
-  when: windmill_server_requires_docker_nat | bool
+  when: windmill_requires_docker_bridge_chains | bool
+
+- name: Check whether the Docker forward chain exists before Windmill startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -S
+      - DOCKER-FORWARD
+  register: windmill_docker_forward_chain_check
+  changed_when: false
+  failed_when: windmill_docker_forward_chain_check.rc not in [0, 1]
+  when: windmill_requires_docker_bridge_chains | bool
 
 - name: Verify Docker responds before Windmill startup
   ansible.builtin.command: docker info --format '{{ "{{ .ServerVersion }}" }}'
   changed_when: false
 
-- name: Restart Docker when the nat chain is missing before Windmill startup
+- name: Restart Docker when the nat or forward chain is missing before Windmill startup
   ansible.builtin.systemd:
     name: docker
     state: restarted
-  when:
-    - windmill_server_requires_docker_nat | bool
-    - windmill_docker_nat_chain_check.rc == 1
+  when: >-
+    windmill_requires_docker_bridge_chains | bool
+    and (windmill_docker_nat_chain_check.rc == 1 or windmill_docker_forward_chain_check.rc == 1)
 
-- name: Recheck Docker nat chain before Windmill startup
-  ansible.builtin.command: iptables -t nat -S DOCKER
+- name: Recheck the Docker nat chain before Windmill startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
   register: windmill_docker_nat_chain_recheck
   changed_when: false
   failed_when: windmill_docker_nat_chain_recheck.rc not in [0, 1]
-  retries: 5
+  retries: 6
   delay: 2
   until: windmill_docker_nat_chain_recheck.rc == 0
-  when: windmill_server_requires_docker_nat | bool
+  when: windmill_requires_docker_bridge_chains | bool
 
-- name: Assert Docker nat chain is present before Windmill startup
+- name: Recheck the Docker forward chain before Windmill startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -S
+      - DOCKER-FORWARD
+  register: windmill_docker_forward_chain_recheck
+  changed_when: false
+  failed_when: windmill_docker_forward_chain_recheck.rc not in [0, 1]
+  retries: 6
+  delay: 2
+  until: windmill_docker_forward_chain_recheck.rc == 0
+  when: windmill_requires_docker_bridge_chains | bool
+
+- name: Assert Docker bridge chains are present before Windmill startup
   ansible.builtin.assert:
     that:
       - windmill_docker_nat_chain_recheck.rc == 0
-    fail_msg: "Docker is running but the nat DOCKER chain is missing; Windmill published ports will fail."
-  when: windmill_server_requires_docker_nat | bool
+      - windmill_docker_forward_chain_recheck.rc == 0
+    fail_msg: >-
+      Docker is running but the nat DOCKER or filter DOCKER-FORWARD chain is missing;
+      Windmill bridge networking will fail.
+  when: windmill_requires_docker_bridge_chains | bool
 
 - name: Remove stale Windmill compose replacement containers before startup
   ansible.builtin.shell: |
@@ -1292,6 +1420,11 @@
               or ' not found' in (windmill_up.stderr | default(''))
             )
           }}
+        windmill_docker_bridge_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable ACCEPT OUTGOING rule' in (ansible_failed_result.stderr | default(''))
+          }}
 
     - name: Reset the stale Windmill compose network before retrying startup
       ansible.builtin.shell: |
@@ -1306,7 +1439,60 @@
       changed_when: "'changed' in windmill_network_reset.stdout"
       when: windmill_missing_network_failure | bool
 
-    - name: Recreate the full Windmill stack after stale-network cleanup
+    - name: Restart Docker to restore bridge chains before retrying Windmill startup
+      ansible.builtin.systemd:
+        name: docker
+        state: restarted
+      when: >-
+        windmill_requires_docker_bridge_chains | bool
+        and (windmill_missing_network_failure | bool or windmill_docker_bridge_chain_missing | bool)
+
+    - name: Recheck the Docker nat chain before retrying Windmill startup
+      ansible.builtin.command:
+        argv:
+          - iptables
+          - -t
+          - nat
+          - -S
+          - DOCKER
+      register: windmill_docker_nat_chain_recovery_check
+      changed_when: false
+      failed_when: windmill_docker_nat_chain_recovery_check.rc not in [0, 1]
+      retries: 6
+      delay: 2
+      until: windmill_docker_nat_chain_recovery_check.rc == 0
+      when: >-
+        windmill_requires_docker_bridge_chains | bool
+        and (windmill_missing_network_failure | bool or windmill_docker_bridge_chain_missing | bool)
+
+    - name: Recheck the Docker forward chain before retrying Windmill startup
+      ansible.builtin.command:
+        argv:
+          - iptables
+          - -S
+          - DOCKER-FORWARD
+      register: windmill_docker_forward_chain_recovery_check
+      changed_when: false
+      failed_when: windmill_docker_forward_chain_recovery_check.rc not in [0, 1]
+      retries: 6
+      delay: 2
+      until: windmill_docker_forward_chain_recovery_check.rc == 0
+      when: >-
+        windmill_requires_docker_bridge_chains | bool
+        and (windmill_missing_network_failure | bool or windmill_docker_bridge_chain_missing | bool)
+
+    - name: Assert Docker bridge chains are present before retrying Windmill startup
+      ansible.builtin.assert:
+        that:
+          - windmill_docker_nat_chain_recovery_check.rc == 0
+          - windmill_docker_forward_chain_recovery_check.rc == 0
+        fail_msg: >-
+          Docker bridge chains are still missing after a restart; Windmill compose networking cannot recover.
+      when: >-
+        windmill_requires_docker_bridge_chains | bool
+        and (windmill_missing_network_failure | bool or windmill_docker_bridge_chain_missing | bool)
+
+    - name: Recreate the full Windmill stack after stale-network cleanup or Docker bridge-chain recovery
       ansible.builtin.command:
         argv:
           - docker
@@ -1323,15 +1509,15 @@
         'Creating' in windmill_network_retry_up.stdout
         or 'Recreating' in windmill_network_retry_up.stdout
         or 'Starting' in windmill_network_retry_up.stdout
-      when: windmill_missing_network_failure | bool
+      when: windmill_missing_network_failure | bool or windmill_docker_bridge_chain_missing | bool
 
-    - name: Wait for Windmill to listen locally after stale-network cleanup
+    - name: Wait for Windmill to listen locally after stale-network cleanup or Docker bridge-chain recovery
       ansible.builtin.wait_for:
         host: 127.0.0.1
         port: "{{ windmill_server_port }}"
         delay: 0
         timeout: 180
-      when: windmill_missing_network_failure | bool
+      when: windmill_missing_network_failure | bool or windmill_docker_bridge_chain_missing | bool
 
     - name: Recreate the Windmill server container after startup timeout
       ansible.builtin.command:
@@ -1349,7 +1535,7 @@
       changed_when: >-
         'Removed' in windmill_server_recreate_rm.stdout
         or 'Stopping' in windmill_server_recreate_rm.stdout
-      when: not (windmill_missing_network_failure | bool)
+      when: not (windmill_missing_network_failure | bool or windmill_docker_bridge_chain_missing | bool)
 
     - name: Start a fresh Windmill server container
       ansible.builtin.command:
@@ -1368,7 +1554,7 @@
         'Creating' in windmill_server_recreate_up.stdout
         or 'Recreating' in windmill_server_recreate_up.stdout
         or 'Starting' in windmill_server_recreate_up.stdout
-      when: not (windmill_missing_network_failure | bool)
+      when: not (windmill_missing_network_failure | bool or windmill_docker_bridge_chain_missing | bool)
 
     - name: Wait for Windmill to listen locally after server recreation
       ansible.builtin.wait_for:
@@ -1376,7 +1562,7 @@
         port: "{{ windmill_server_port }}"
         delay: 0
         timeout: 180
-      when: not (windmill_missing_network_failure | bool)
+      when: not (windmill_missing_network_failure | bool or windmill_docker_bridge_chain_missing | bool)
 
 - name: Wait for the Windmill API version endpoint
   ansible.builtin.uri:
@@ -2209,27 +2395,31 @@
 - name: Converge repo-managed Windmill schedule enabled flags
   become: true
   become_user: postgres
+  ansible.builtin.shell: |
+    set -euo pipefail
+    psql -d {{ windmill_database_name | quote }} -v ON_ERROR_STOP=1 <<'SQL'
+    WITH desired(path, enabled) AS (
+      VALUES
+      {% for schedule in windmill_seed_schedules %}
+        ('{{ schedule.path | replace("'", "''") }}', {{ schedule.enabled | default(false) | ternary('true', 'false') }}){% if not loop.last %},{% endif %}
+      {% endfor %}
+    )
+    UPDATE schedule AS current
+    SET enabled = desired.enabled
+    FROM desired
+    WHERE current.workspace_id = '{{ windmill_workspace_id | replace("'", "''") }}'
+      AND current.path = desired.path
+      AND current.enabled IS DISTINCT FROM desired.enabled;
+    SQL
+  args:
+    executable: /bin/bash
   delegate_to: "{{ windmill_database_inventory_host }}"
-  ansible.builtin.command:
-    argv:
-      - psql
-      - -d
-      - "{{ windmill_database_name }}"
-      - -v
-      - ON_ERROR_STOP=1
-      - -c
-      - >-
-        UPDATE schedule
-        SET enabled = desired.enabled
-        FROM (
-          VALUES
-          {% for schedule in windmill_seed_schedules %}
-          ('{{ schedule.path | replace("'", "''") }}', {{ schedule.enabled | default(false) | ternary('TRUE', 'FALSE') }}){{ "," if not loop.last else "" }}
-          {% endfor %}
-        ) AS desired(path, enabled)
-        WHERE schedule.path = desired.path
-          AND schedule.enabled IS DISTINCT FROM desired.enabled;
+  register: windmill_seed_schedule_enabled_converge
   changed_when: false
+  retries: 3
+  delay: 5
+  until: windmill_seed_schedule_enabled_converge.rc == 0
+  no_log: true
 
 - name: Wait for Windmill workers to register before seeded healthcheck execution
   ansible.builtin.import_tasks: wait_for_workers.yml

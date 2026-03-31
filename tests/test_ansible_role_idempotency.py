@@ -23,6 +23,7 @@ def test_policy_file_covers_current_roles() -> None:
     assert enforced == ["preflight", "secret_fact", "wait_for_healthy"]
     assert "_template" in exempt
     assert "docker_runtime" in tracked
+    assert "redpanda_runtime" in tracked
 
 
 def test_validate_config_rejects_role_tree_drift(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

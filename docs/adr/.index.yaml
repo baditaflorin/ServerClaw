@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-31'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 276
+  Implemented: 277
   Partial: 6
-  Not Implemented: 41
+  Not Implemented: 40
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4415,7 +4415,7 @@ adr_index:
   - adr: '0257'
     title: OpenClaw-Compatible SKILL.md Packs And Workspace Precedence For ServerClaw
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4428,6 +4428,7 @@ adr_index:
       - serverclaw
     summary: ServerClaw will adopt OpenClaw-compatible SKILL.md skill packs as its
     filename: 0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md
+    implemented_version: 0.177.117
   - adr: 0258
     title: Temporal As The Durable ServerClaw Session Orchestrator
     status: Accepted
@@ -4906,7 +4907,7 @@ adr_index:
   - adr: 0285
     title: Paperless-ngx As The Document Management And Archive API
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Not Implemented
     date: '2026-03-29'
     concern: api
     keywords:
@@ -4918,7 +4919,6 @@ adr_index:
       - api
     summary: We will deploy Paperless-ngx as the document management and archive API
     filename: 0285-paperless-ngx-as-the-document-management-and-archive-api.md
-    implemented_version: 0.130.75
   - adr: 0285
     title: Whisper ASR As The CPU Speech-To-Text Service
     status: Accepted
@@ -5087,7 +5087,7 @@ adr_index:
   - adr: 0290
     title: Redpanda As The Kafka-Compatible Streaming Platform
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -5098,6 +5098,7 @@ adr_index:
       - platform
     summary: We will deploy Redpanda as the Kafka-compatible streaming platform for
     filename: 0290-redpanda-as-the-kafka-compatible-streaming-platform.md
+    implemented_version: 0.177.114
   - adr: 0291
     title: JupyterHub As The Interactive Notebook Environment
     status: Accepted
@@ -5279,7 +5280,7 @@ adr_index:
       - scanning
     summary: We will deploy Syft and Grype as Gitea Actions CI steps and as a
     filename: 0298-syft-and-grype-for-platform-wide-sbom-generation-and-continuous-cve-scanning.md
-    implemented_version: 0.177.114
+    implemented_version: 0.177.117
   - adr: 0299
     title: Ntfy As The Self-Hosted Push Notification Channel For Programmatic Alert Delivery
     status: Accepted

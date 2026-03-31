@@ -1,0 +1,42 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+  windmill_worker_native:
+    image: ghcr.io/windmill-labs/windmill:1.662.0@sha256:13d5456a80500822446ce0154f68d5fd5089628df82e77e2bd9cb24ff898d58d
+    restart: unless-stopped
+    user: "0:0"
+    network_mode: host
+    env_file:
+      - /run/lv3-secrets/windmill/runtime.env
+    environment:
+      MODE: worker
+      WORKER_GROUP: native
+      NATIVE_MODE: "true"
+      NUM_WORKERS: "4"
+      SLEEP_QUEUE: "200"
+      LV3_MUTATION_AUDIT_FILE: /var/log/platform/mutation-audit.jsonl
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      windmill_server:
+        condition: service_started
+    volumes:
+      - /var/log/platform:/var/log/platform
+      - /srv/proxmox_florin_server:/srv/proxmox_florin_server
+      - worker_logs:/tmp/windmill/logs
+
+  windmill_extra:
+    image: ghcr.io/windmill-labs/windmill-extra:1.662.0@sha256:a87f28faa82efca84485752583f07798f863f917893cbbf91ec86d3a254b0b4c
+    restart: unless-stopped
+    environment:
+      ENABLE_LSP: "true"
+      ENABLE_MULTIPLAYER: "false"
+      ENABLE_DEBUGGER: "true"
+      DEBUGGER_PORT: "3003"
+      ENABLE_NSJAIL: "false"
+      REQUIRE_SIGNED_DEBUG_REQUESTS: "false"
+      WINDMILL_BASE_URL: http://10.10.10.20:8000
+    depends_on:
+      - windmill_server
+    volumes:
+      - lsp_cache:/pyls/.cache
+
+volumes:

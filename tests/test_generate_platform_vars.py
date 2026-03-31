@@ -203,6 +203,22 @@ def test_build_platform_vars_includes_piper_private_topology() -> None:
     assert piper["exposure_model"] == "private-only"
     assert platform_vars["piper_port"] == 8100
 
+def test_build_platform_vars_includes_redpanda_private_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    redpanda = platform_vars["platform_service_topology"]["redpanda"]
+
+    assert redpanda["exposure_model"] == "private-only"
+    assert redpanda["ports"]["internal"] == 9092
+    assert redpanda["ports"]["admin"] == 9644
+    assert redpanda["ports"]["http_proxy"] == 8103
+    assert redpanda["ports"]["schema_registry"] == 8104
+    assert redpanda["urls"]["internal"] == "kafka://10.10.10.20:9092"
+    assert redpanda["urls"]["admin"] == "http://10.10.10.20:9644"
+    assert redpanda["urls"]["http_proxy"] == "http://10.10.10.20:8103"
+    assert redpanda["urls"]["schema_registry"] == "http://10.10.10.20:8104"
+    assert platform_vars["redpanda_http_proxy_port"] == 8103
+    assert platform_vars["redpanda_schema_registry_port"] == 8104
+
 
 def test_build_platform_vars_includes_nextcloud_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()

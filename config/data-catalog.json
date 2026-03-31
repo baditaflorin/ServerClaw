@@ -311,6 +311,20 @@
       "notes": "Security scan evidence should remain available across one full patching and review cycle."
     },
     {
+      "id": "redpanda-log-store",
+      "service": "redpanda",
+      "name": "Redpanda durable log store",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "Docker volume lv3-redpanda-data on docker-runtime-lv3"
+      ],
+      "notes": "Topic retention remains per-topic and repo-managed; the named Docker volume must be covered by docker-runtime-lv3 backup evidence whenever the Redpanda runtime contract changes."
+    },
+    {
       "id": "langfuse-object-storage",
       "service": "langfuse",
       "name": "Langfuse event and media object storage",

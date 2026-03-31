@@ -19,8 +19,6 @@ def main(repo_path: str = "/srv/proxmox_florin_server"):
     required_paths = [
         repo_root / "config" / "image-catalog.json",
         repo_root / "config" / "sbom-scanner.json",
-        repo_root / "receipts" / "sbom",
-        repo_root / "receipts" / "cve",
     ]
     missing_paths = [str(path) for path in required_paths if not path.exists()]
     if missing_paths:
@@ -30,6 +28,8 @@ def main(repo_path: str = "/srv/proxmox_florin_server"):
             "missing_paths": missing_paths,
             "expected_repo_path": str(repo_root),
         }
+    for output_dir in (repo_root / "receipts" / "sbom", repo_root / "receipts" / "cve"):
+        output_dir.mkdir(parents=True, exist_ok=True)
 
     command = [
         "uv",

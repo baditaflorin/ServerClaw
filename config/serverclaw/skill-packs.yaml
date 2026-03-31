@@ -1,0 +1,18 @@
+schema_version: 1.0.0
+default_workspace_id: ops
+skill_roots:
+  bundled: config/serverclaw/skills/bundled
+  shared: config/serverclaw/skills/shared
+  imported: config/serverclaw/skills/imported
+  workspaces: config/serverclaw/workspaces
+workspaces:
+  - id: ops
+    title: Operations
+    description: Workspace-local overrides for platform operators managing the LV3 estate.
+imported_skill_packs:
+  - skill_id: openclaw-mirror-observe
+    provider: openclaw-mirror
+    source_url: https://docs.openclaw.ai/tools/creating-skills
+    mirror_path: config/serverclaw/skills/imported/openclaw-mirror-observe/SKILL.md
+    review_state: mirrored_unreviewed
+    enabled: false

@@ -4,10 +4,6 @@ portal_display: full
 tags:
   - architecture
   - dependency-graph
-pagefind_section: architecture
-pagefind_audience:
-  - contributors
-  - operators
 ---
 
 !!! note "Sensitivity: INTERNAL"
@@ -21,8 +17,8 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Vaultwarden, Windmill, n8n |
+| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
+| `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway, Woodpecker CI |
 | `4` | Ops Portal |
 
@@ -55,6 +51,7 @@ graph TD
     postgres["Postgres\nTier 1"]
     backup_pbs["Proxmox Backup Server\nTier 1"]
     proxmox_ui["Proxmox UI\nTier 1"]
+    redpanda["Redpanda\nTier 1"]
     searxng["SearXNG\nTier 1"]
     step_ca["step-ca\nTier 1"]
     uptime_kuma["Uptime Kuma\nTier 1"]
@@ -81,7 +78,6 @@ graph TD
     open_webui["Open WebUI\nTier 2"]
     openfga["OpenFGA\nTier 2"]
     outline["Outline\nTier 2"]
-    paperless["Paperless-ngx\nTier 2"]
     plane["Plane\nTier 2"]
     plausible["Plausible Analytics\nTier 2"]
     status_page["Public Status Page\nTier 2"]
@@ -193,12 +189,6 @@ graph TD
     outline -->|soft| nginx_edge
     outline -->|startup_only| openbao
     outline -->|hard| postgres
-    paperless -->|soft| api_gateway
-    paperless -->|hard| docker_runtime
-    paperless -->|soft| keycloak
-    paperless -->|soft| nginx_edge
-    paperless -->|startup_only| openbao
-    paperless -->|hard| postgres
     plane -->|soft| keycloak
     plane -->|soft| nginx_edge
     plane -->|startup_only| openbao
@@ -211,6 +201,7 @@ graph TD
     plausible -->|startup_only| openbao
     realtime -->|soft| keycloak
     realtime -->|soft| nginx_edge
+    redpanda -->|startup_only| openbao
     semaphore -->|startup_only| openbao
     semaphore -->|hard| postgres
     serverclaw -->|soft| keycloak
