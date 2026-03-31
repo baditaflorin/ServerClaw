@@ -264,6 +264,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `headscale.lv3.org` | `headscale` | `edge-published` | `proxmox_florin` |
 | `home.lv3.org` | `homepage` | `edge-published` | `docker-runtime-lv3` |
 | `langfuse.lv3.org` | `langfuse` | `edge-published` | `docker-runtime-lv3` |
+| `livekit.lv3.org` | `livekit` | `edge-published` | `docker-runtime-lv3` |
 | `logs.lv3.org` | `dozzle` | `edge-published` | `docker-runtime-lv3` |
 | `mail.lv3.org` | `mail-platform` | `informational-only` | `docker-runtime-lv3` |
 | `matrix.lv3.org` | `matrix-synapse` | `edge-published` | `docker-runtime-lv3` |
@@ -687,6 +688,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Keycloak](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-keycloak.md)
 - [Configure Lago](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-lago.md)
 - [Configure Langfuse](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-langfuse.md)
+- [Configure LiveKit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-livekit.md)
 - [Configure Mail Platform](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mail-platform.md)
 - [Configure Mailpit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mailpit.md)
 - [Configure Matrix Synapse](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-matrix-synapse.md)
@@ -1515,6 +1517,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0292-live-apply: Live Apply ADR 0292 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-live-apply.md)
 - [Workstream ws-0292-superset-live-apply: Live Apply ADR 0292 Superset From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-superset-live-apply.md)
 - [Workstream WS-0293: Temporal Durable Workflow Engine Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-live-apply.md)
+- [Workstream ws-0293-livekit-live-apply: Live Apply ADR 0293 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-livekit-live-apply.md)
 - [Workstream ws-0295-live-apply: Live Apply ADR 0295 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md)
 - [Workstream WS-0296: Education Repo Refresh And Named Deploy Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-education-refresh.md)
 - [Workstream WS-0296: Dedicated Artifact Cache VM Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-live-apply.md)
