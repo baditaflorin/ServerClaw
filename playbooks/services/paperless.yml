@@ -1,0 +1,9 @@
+---
+# Purpose: Provide the service-scoped live-apply entry point for Paperless-ngx.
+# Use case: Used by make live-apply-service service=paperless env=<environment>.
+# Inputs: The same inputs accepted by playbooks/paperless.yml.
+# Outputs: Imports the full Paperless converge playbook without duplicating service logic.
+# Idempotency: Matches playbooks/paperless.yml.
+# Dependencies: ADR 0285 and playbooks/paperless.yml.
+
+- import_playbook: ../paperless.yml

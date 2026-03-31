@@ -1,0 +1,14 @@
+LV3_SNAPSHOT_SOURCE_COMMIT=b92952af183833040f641a421c2935de20bed3e9 make k6-load K6_ARGS='--service keycloak --service openfga'
+
+Observed outcome:
+- The k6 runtime completed and wrote `receipts/k6/raw/20260331T120412Z-load-summary.json`.
+- The post-run receipt path then entered an unbounded local NATS publish loop while trying to reach `nats://127.0.0.1:4222`.
+- The live process was terminated after it expanded this evidence file into multi-gigabyte repeated `ConnectionRefusedError` tracebacks instead of returning a bounded warning.
+
+Representative stderr tail before termination:
+- `ConnectionRefusedError: [Errno 61] Connect call failed ('127.0.0.1', 4222)`
+- `nats: encountered error`
+
+Follow-up:
+- The exact-main branch now carries the ADR 0305 automation fix that makes the regression-event publication fail fast and preserve receipt generation as a warning instead of hanging.
+- The corrected branch tip replays the load receipt generation again under `2026-03-31-ws-0305-mainline-k6-load-r2-0.177.117.txt`.

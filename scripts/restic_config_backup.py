@@ -131,12 +131,7 @@ def snapshot_id_from_backup_stdout(stdout: str) -> str | None:
     return None
 
 
-def resolve_minio_endpoint(catalog: dict[str, Any]) -> tuple[str, str]:
-    controller_host = catalog.get("controller_host", {})
-    minio = controller_host.get("minio", {})
-    container_name = str(minio.get("container_name") or "").strip()
-    if not container_name:
-        raise ValueError("restic catalog is missing controller_host.minio.container_name")
+def inspect_container_state(container_name: str) -> dict[str, Any]:
     inspect = run_command(
         [
             "docker",
@@ -147,8 +142,22 @@ def resolve_minio_endpoint(catalog: dict[str, Any]) -> tuple[str, str]:
     if inspect.returncode != 0:
         detail = inspect.stderr.strip() or inspect.stdout.strip() or f"failed to inspect {container_name}"
         raise RuntimeError(detail)
-    payload = json.loads(inspect.stdout or "[]")
-    container = payload[0] if payload else {}
+    try:
+        payload = json.loads(inspect.stdout or "[]")
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"unable to parse Docker inspect payload for {container_name}") from exc
+    if not isinstance(payload, list) or not payload or not isinstance(payload[0], dict):
+        raise RuntimeError(f"Docker inspect payload for {container_name} must contain one object")
+    return payload[0]
+
+
+def resolve_minio_endpoint(catalog: dict[str, Any]) -> tuple[str, str]:
+    controller_host = catalog.get("controller_host", {})
+    minio = controller_host.get("minio", {})
+    container_name = str(minio.get("container_name") or "").strip()
+    if not container_name:
+        raise ValueError("restic catalog is missing controller_host.minio.container_name")
+    container = inspect_container_state(container_name)
     state = container.get("State", {})
     status = str(state.get("Status") or "unknown").strip() or "unknown"
     if not state.get("Running"):
@@ -505,6 +514,160 @@ def summarize_latest_snapshots(
         "summary": summary,
         "sources": source_entries,
     }
+
+
+def load_existing_latest_snapshot_receipt(path: Path) -> dict[str, Any] | None:
+    if not path.is_file():
+        return None
+    payload = load_json(path)
+    return payload if isinstance(payload, dict) else None
+
+
+def _render_live_apply_source_entry(
+    *,
+    source: Source,
+    result: dict[str, Any],
+    repo_root: Path,
+    host_name: str,
+    generated_at: datetime,
+    previous_entry: dict[str, Any] | None,
+) -> dict[str, Any]:
+    previous = previous_entry or {}
+    display_paths = [display_path(path, repo_root=repo_root) for path in source.paths]
+    last_restore = previous.get("last_restore_verification")
+    latest_snapshot: dict[str, Any] | None = None
+    reasons: list[str]
+
+    if result.get("result") == "backed_up":
+        latest_snapshot = {
+            "snapshot_id": str(result.get("snapshot_id") or ""),
+            "recorded_at": isoformat(generated_at),
+            "host": host_name,
+            "paths": display_paths,
+            "files": int(result.get("files") or 0),
+        }
+        if source.freshness_policy == "event_driven":
+            reasons = [
+                "Latest snapshot exists and this source is governed by the event-driven "
+                f"'{source.expected_schedule}' policy."
+            ]
+        else:
+            threshold = source.freshness_minutes + DEFAULT_GRACE_MINUTES
+            reasons = [f"Latest snapshot is 0 minutes old and within the {threshold} minute freshness window."]
+        state = "protected"
+    elif result.get("result") == "skipped_optional_missing":
+        state = "inactive"
+        reasons = [f"No live path currently exists for optional source {source.source_id} backup path."]
+    else:
+        state = str(previous.get("state") or ("inactive" if source.optional else "uncovered"))
+        latest_snapshot = previous.get("latest_snapshot")
+        reasons = list(previous.get("reasons") or [f"No new live-apply result was recorded for {source.source_id}."])
+
+    return {
+        "source_id": source.source_id,
+        "label": source.label,
+        "paths": display_paths,
+        "state": state,
+        "expected_schedule": source.expected_schedule,
+        "freshness_minutes": source.freshness_minutes,
+        "freshness_policy": source.freshness_policy,
+        "retention": source.retention,
+        "latest_snapshot": latest_snapshot,
+        "last_restore_verification": last_restore,
+        "reasons": reasons,
+    }
+
+
+def refresh_latest_snapshot_receipt_for_live_apply(
+    *,
+    existing_receipt: dict[str, Any],
+    sources: list[Source],
+    source_results: list[dict[str, Any]],
+    repo_root: Path,
+    endpoint: str,
+    host_name: str,
+    generated_at: datetime,
+    bucket: str,
+) -> dict[str, Any]:
+    existing_entries = {
+        str(entry.get("source_id") or ""): entry
+        for entry in existing_receipt.get("sources", [])
+        if isinstance(entry, dict) and str(entry.get("source_id") or "").strip()
+    }
+    results_by_source = {
+        str(result.get("source_id") or ""): result
+        for result in source_results
+        if isinstance(result, dict) and str(result.get("source_id") or "").strip()
+    }
+
+    source_entries: list[dict[str, Any]] = []
+    summary = {
+        "governed_sources": len(sources),
+        "protected": 0,
+        "uncovered": 0,
+        "inactive": 0,
+        "uncovered_sources": [],
+        "inactive_sources": [],
+    }
+
+    for source in sources:
+        entry = _render_live_apply_source_entry(
+            source=source,
+            result=results_by_source.get(source.source_id, {}),
+            repo_root=repo_root,
+            host_name=host_name,
+            generated_at=generated_at,
+            previous_entry=existing_entries.get(source.source_id),
+        )
+        source_entries.append(entry)
+        state = entry["state"]
+        if state in {"protected", "uncovered", "inactive"}:
+            summary[state] += 1
+        if state == "uncovered":
+            summary["uncovered_sources"].append(source.source_id)
+        elif state == "inactive":
+            summary["inactive_sources"].append(source.source_id)
+
+    return {
+        "schema_version": "1.0.0",
+        "recorded_at": isoformat(generated_at),
+        "recorded_on": generated_at.date().isoformat(),
+        "recorded_by": "codex",
+        "repository": {
+            "bucket": bucket,
+            "endpoint": endpoint,
+        },
+        "summary": summary,
+        "sources": source_entries,
+    }
+
+
+def build_live_apply_latest_snapshot_receipt(
+    *,
+    existing_receipt: dict[str, Any] | None,
+    resolved_sources: list[Source],
+    live_apply_sources: list[Source],
+    source_results: list[dict[str, Any]],
+    repo_root: Path,
+    endpoint: str,
+    host_name: str,
+    generated_at: datetime,
+    bucket: str,
+) -> dict[str, Any]:
+    # Live-apply hooks should never force a repository-wide snapshot scan. If the
+    # cached latest receipt is unavailable, synthesize a narrowed receipt from the
+    # live-apply sources we just backed up and let the scheduled backup refresh the
+    # full repository-wide snapshot view later.
+    return refresh_latest_snapshot_receipt_for_live_apply(
+        existing_receipt=existing_receipt or {},
+        sources=resolved_sources if existing_receipt is not None else live_apply_sources,
+        source_results=source_results,
+        repo_root=repo_root,
+        endpoint=endpoint,
+        host_name=host_name,
+        generated_at=generated_at,
+        bucket=bucket,
+    )
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -910,24 +1073,39 @@ def main(argv: list[str] | None = None) -> int:
             endpoint=endpoint,
             cache_dir=args.cache_dir,
         )
-        latest_receipt = summarize_latest_snapshots(
-            catalog=catalog,
-            sources=resolved_sources,
-            repo_root=repo_root,
-            credentials=credentials,
-            endpoint=endpoint,
-            cache_dir=args.cache_dir,
-            restore_verify_dir=args.restore_verification_dir,
-            generated_at=generated_at,
-        )
+        existing_latest_receipt = load_existing_latest_snapshot_receipt(args.latest_snapshot_receipt)
+        if args.live_apply_trigger:
+            latest_receipt = build_live_apply_latest_snapshot_receipt(
+                existing_receipt=existing_latest_receipt,
+                resolved_sources=resolved_sources,
+                live_apply_sources=selected_sources,
+                source_results=source_results,
+                repo_root=repo_root,
+                endpoint=endpoint,
+                host_name=host_name,
+                generated_at=generated_at,
+                bucket=catalog["controller_host"]["minio"]["bucket"],
+            )
+            notifications = []
+        else:
+            latest_receipt = summarize_latest_snapshots(
+                catalog=catalog,
+                sources=resolved_sources,
+                repo_root=repo_root,
+                credentials=credentials,
+                endpoint=endpoint,
+                cache_dir=args.cache_dir,
+                restore_verify_dir=args.restore_verification_dir,
+                generated_at=generated_at,
+            )
+            notifications = emit_stale_signals(
+                catalog=catalog,
+                credentials=credentials,
+                latest_receipt=latest_receipt,
+                latest_receipt_path=args.latest_snapshot_receipt,
+            )
         ensure_latest_receipt_dir(args.latest_snapshot_receipt)
         write_json(args.latest_snapshot_receipt, latest_receipt)
-        notifications = emit_stale_signals(
-            catalog=catalog,
-            credentials=credentials,
-            latest_receipt=latest_receipt,
-            latest_receipt_path=args.latest_snapshot_receipt,
-        )
         backup_receipt = build_backup_receipt(
             catalog=catalog,
             source_results=source_results,

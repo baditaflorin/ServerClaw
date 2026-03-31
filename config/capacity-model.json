@@ -392,5 +392,23 @@
       },
       "notes": "Protected headroom for restore and disaster-recovery rehearsals. Declared drills may borrow preview_burst before any break-glass use of ha_reserved."
     }
+  ],
+  "service_load_profiles": [
+    {
+      "service_id": "keycloak",
+      "typical_concurrency": 5,
+      "smoke_vus": 2,
+      "request_timeout_seconds": 10,
+      "think_time_seconds": 1,
+      "notes": "Representative concurrent authentication bursts for routine operator and automation login flows."
+    },
+    {
+      "service_id": "openfga",
+      "typical_concurrency": 4,
+      "smoke_vus": 2,
+      "request_timeout_seconds": 10,
+      "think_time_seconds": 1,
+      "notes": "Representative private authorization checks for control-plane and service-policy lookups."
+    }
   ]
 }

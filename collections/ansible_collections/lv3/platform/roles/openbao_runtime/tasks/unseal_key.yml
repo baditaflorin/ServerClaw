@@ -1,0 +1,26 @@
+---
+- name: "Submit OpenBao recovery key {{ openbao_runtime_unseal_step_label }}"
+  vars:
+    openbao_runtime_unseal_step_label: "{{ openbao_unseal_context | default('managed verification') }} #{{ openbao_runtime_unseal_key_index + 1 }}"
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/unseal"
+    method: POST
+    body_format: json
+    body:
+      key: "{{ openbao_runtime_unseal_key }}"
+    return_content: true
+    status_code: 200
+  register: openbao_runtime_unseal_step
+  retries: 6
+  delay: 2
+  until: openbao_runtime_unseal_step.status == 200
+  when: not openbao_runtime_unseal_completed | bool
+  no_log: true
+
+- name: "Record OpenBao unseal progress {{ openbao_runtime_unseal_step_label }}"
+  vars:
+    openbao_runtime_unseal_step_label: "{{ openbao_unseal_context | default('managed verification') }} #{{ openbao_runtime_unseal_key_index + 1 }}"
+  ansible.builtin.set_fact:
+    openbao_runtime_unseal_completed: "{{ not (openbao_runtime_unseal_step.json.sealed | default(true) | bool) }}"
+  when: not openbao_runtime_unseal_completed | bool
+  no_log: true

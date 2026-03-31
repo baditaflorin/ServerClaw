@@ -6,14 +6,23 @@ from __future__ import annotations
 import argparse
 import json
 import shlex
+import subprocess
+from pathlib import Path, PurePosixPath
 
 from controller_automation_toolkit import emit_cli_error
 from drift_lib import build_guest_ssh_command, load_controller_context, run_command
 
 
+LOCAL_REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REMOTE_REPO_ROOT = "/srv/proxmox_florin_server"
 DEFAULT_RUNTIME_CREDENTIAL_FILE = "/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json"
 FALLBACK_REMOTE_REPO_ROOT = "/opt/api-gateway/service"
+REMOTE_RUNTIME_SUPPORT_FILES = (
+    ("scripts/restic_config_backup.py", 0o755),
+    ("scripts/script_bootstrap.py", 0o644),
+    ("scripts/controller_automation_toolkit.py", 0o644),
+    ("config/restic-file-backup-catalog.json", 0o644),
+)
 
 
 def extract_report_json(stdout: str) -> dict | None:
@@ -75,6 +84,49 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def sync_remote_runtime_file(
+    context: dict,
+    *,
+    target: str,
+    local_path: Path,
+    remote_path: str,
+    mode: int,
+) -> None:
+    remote_parent = str(PurePosixPath(remote_path).parent)
+    remote_command = (
+        f"sudo install -d -o root -g root -m 0755 {shlex.quote(remote_parent)}"
+        f" && sudo tee {shlex.quote(remote_path)} >/dev/null"
+        f" && sudo chmod {mode:o} {shlex.quote(remote_path)}"
+    )
+    command = build_guest_ssh_command(context, target, remote_command)
+    completed = subprocess.run(
+        command,
+        input=local_path.read_text(encoding="utf-8"),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        detail = completed.stderr.strip() or completed.stdout.strip() or "remote sync failed"
+        raise RuntimeError(f"{remote_path}: {detail}")
+
+
+def ensure_remote_runtime_support_files(context: dict, *, repo_root: str, target: str = "docker-runtime-lv3") -> None:
+    repo_root_path = PurePosixPath(repo_root)
+    for relative_path, mode in REMOTE_RUNTIME_SUPPORT_FILES:
+        local_path = LOCAL_REPO_ROOT / relative_path
+        if not local_path.is_file():
+            raise ValueError(f"required runtime support file is missing locally: {local_path}")
+        remote_path = str(repo_root_path / relative_path)
+        sync_remote_runtime_file(
+            context,
+            target=target,
+            local_path=local_path,
+            remote_path=remote_path,
+            mode=mode,
+        )
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
@@ -92,6 +144,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0
 
         context = load_controller_context()
+        ensure_remote_runtime_support_files(context, repo_root=args.repo_root)
         remote_command = build_remote_command(
             mode=args.mode,
             triggered_by=args.triggered_by,

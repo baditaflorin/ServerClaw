@@ -82,7 +82,7 @@ That same `LV3_SESSION_ID` will flow into:
 
 ## Cleanup Model
 
-The build gateway prunes stale remote session directories older than two days during normal remote runs.
+The build gateway prunes stale remote session directories older than two days during normal remote runs. It also keeps a bounded number of remote session roots, run namespaces, and uploaded snapshot archives so the shared build VM does not fill up during heavy parallel work.
 
 If you must remove one manually:
 

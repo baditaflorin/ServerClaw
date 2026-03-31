@@ -2486,6 +2486,221 @@ workstreams:
       latest_receipts:
         coolify: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
         repo_deploy_base_image_cache: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
+  - id: ws-0285-live-apply
+    adr: "0285"
+    title: Live apply Paperless-ngx as the document archive API from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0285-main-integration-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0285-live-apply.md
+    depends_on:
+      - adr-0021-public-subdomain-publication
+      - adr-0042-postgresql-as-the-shared-relational-database
+      - adr-0063-keycloak-sso-for-internal-services
+      - adr-0077-compose-secret-injection-pattern
+      - adr-0086-backup-and-recovery-for-stateful-services
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0285-live-apply.md
+      - docs/adr/0285-paperless-ngx-as-the-document-management-and-archive-api.md
+      - docs/adr/.index.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - build/platform-manifest.json
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.121.md
+      - docs/runbooks/configure-paperless.md
+      - docs/runbooks/restic-config-backups.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - scripts/generate_platform_vars.py
+      - scripts/validate_repo.sh
+      - scripts/paperless_sync.py
+      - scripts/restic_config_backup.py
+      - scripts/trigger_restic_live_apply.py
+      - playbooks/paperless.yml
+      - playbooks/services/paperless.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/
+      - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/
+      - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/
+      - collections/ansible_collections/lv3/platform/roles/paperless_postgres/
+      - collections/ansible_collections/lv3/platform/roles/paperless_runtime/
+      - collections/ansible_collections/lv3/platform/roles/restic_config_backup/
+      - roles/paperless_postgres/
+      - roles/paperless_runtime/
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/
+      - config/ansible-role-idempotency.yml
+      - config/ansible-execution-scopes.yaml
+      - config/api-gateway-catalog.json
+      - config/certificate-catalog.json
+      - config/command-catalog.json
+      - config/controller-local-secrets.json
+      - config/data-catalog.json
+      - config/dependency-graph.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/prometheus/file_sd/https_tls_targets.yml
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/https_tls_alerts.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/secret-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
+      - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
+      - config/grafana/dashboards/slo-overview.json
+      - config/uptime-kuma/monitors.json
+      - config/workflow-catalog.json
+      - Makefile
+      - tests/test_generate_platform_vars.py
+      - tests/test_keycloak_runtime_role.py
+      - tests/test_docker_runtime_role.py
+      - tests/test_hetzner_dns_record_role.py
+      - tests/test_mail_platform_runtime_role.py
+      - tests/test_openbao_compose_env_helper.py
+      - tests/test_openbao_runtime_role.py
+      - tests/test_paperless_metadata.py
+      - tests/test_paperless_playbook.py
+      - tests/test_paperless_runtime_role.py
+      - tests/test_paperless_sync.py
+      - tests/test_restic_config_backup.py
+      - tests/test_restic_config_backup_role.py
+      - receipts/image-scans/2026-03-30-paperless-runtime.json
+      - receipts/image-scans/2026-03-30-paperless-runtime.trivy.json
+      - versions/stack.yaml
+      - receipts/live-applies/2026-03-31-adr-0285-paperless-live-apply.json
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: paperless_repo_surface
+          paths:
+            - docs/workstreams/ws-0285-live-apply.md
+            - docs/adr/0285-paperless-ngx-as-the-document-management-and-archive-api.md
+            - docs/runbooks/configure-paperless.md
+            - playbooks/paperless.yml
+            - playbooks/services/paperless.yml
+            - collections/ansible_collections/lv3/platform/roles/paperless_postgres/**
+            - collections/ansible_collections/lv3/platform/roles/paperless_runtime/**
+            - roles/paperless_postgres/**
+            - roles/paperless_runtime/**
+            - scripts/paperless_sync.py
+            - tests/test_paperless_metadata.py
+            - tests/test_paperless_playbook.py
+            - tests/test_paperless_runtime_role.py
+            - tests/test_paperless_sync.py
+            - receipts/image-scans/2026-03-30-paperless-runtime.json
+            - receipts/image-scans/2026-03-30-paperless-runtime.trivy.json
+          mode: exclusive
+        - id: paperless_platform_catalog_contract
+          paths:
+            - docs/site-generated/architecture/dependency-graph.md
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+            - scripts/validate_repo.sh
+            - Makefile
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+            - config/ansible-role-idempotency.yml
+            - config/ansible-execution-scopes.yaml
+            - config/api-gateway-catalog.json
+            - config/certificate-catalog.json
+            - config/command-catalog.json
+            - config/controller-local-secrets.json
+            - config/data-catalog.json
+            - config/dependency-graph.json
+            - config/health-probe-catalog.json
+            - config/image-catalog.json
+            - config/prometheus/file_sd/https_tls_targets.yml
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/https_tls_alerts.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/secret-catalog.json
+            - config/service-capability-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/slo-catalog.json
+            - config/subdomain-catalog.json
+            - config/subdomain-exposure-registry.json
+            - config/grafana/dashboards/slo-overview.json
+            - config/uptime-kuma/monitors.json
+            - config/workflow-catalog.json
+            - tests/test_generate_platform_vars.py
+            - tests/test_keycloak_runtime_role.py
+          mode: shared_contract
+          contract: paperless-platform-catalogs-v1
+        - id: paperless_mainline_release_surfaces
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - build/platform-manifest.json
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.121.md
+            - versions/stack.yaml
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+          mode: shared_contract
+          contract: paperless-mainline-release-v1
+        - id: paperless_recovery_support_surfaces
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/**
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/restic_config_backup/**
+            - docs/runbooks/restic-config-backups.md
+            - receipts/live-applies/2026-03-31-adr-0285-paperless-live-apply.json
+            - receipts/live-applies/evidence/**
+            - scripts/restic_config_backup.py
+            - scripts/trigger_restic_live_apply.py
+            - tests/test_docker_runtime_role.py
+            - tests/test_hetzner_dns_record_role.py
+            - tests/test_mail_platform_runtime_role.py
+            - tests/test_openbao_compose_env_helper.py
+            - tests/test_openbao_runtime_role.py
+            - tests/test_restic_config_backup.py
+            - tests/test_restic_config_backup_role.py
+          mode: shared_contract
+          contract: paperless-recovery-support-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0285 by bringing the Paperless document
+        archive service, its OpenBao and Keycloak recovery hardening, and the
+        corrected public smoke-upload verification path onto main
+      release_bump: patch
+      included_in_repo_version: 0.177.121
+      latest_receipts:
+        paperless: 2026-03-31-adr-0285-paperless-live-apply
   - id: ws-0295-live-apply
     adr: "0295"
     title: Live apply the shared artifact cache plane from latest origin/main
@@ -20015,3 +20230,459 @@ workstreams:
       included_in_repo_version: 0.177.111
       latest_receipts:
         jupyterhub: 2026-03-30-adr-0291-jupyterhub-mainline-live-apply
+  - id: ws-0305-live-apply
+    adr: "0305"
+    title: Live apply ADR 0305 k6 load testing and SLO error-budget burn validation from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0305-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-live-apply.md
+    depends_on:
+      - adr-0096-slo-tracking
+      - adr-0119-budgeted-workflow-scheduler
+      - adr-0123-service-uptime-contracts-and-monitor-backed-health
+      - adr-0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization
+      - adr-0276-nats-jetstream-as-the-platform-event-bus
+      - adr-0297-renovate-bot-as-the-automated-stack-version-upgrade-proposer
+      - adr-0299-ntfy-as-the-push-notification-channel
+      - adr-0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0305-live-apply.md
+      - docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+      - docs/runbooks/k6-load-testing.md
+      - docs/runbooks/configure-openfga.md
+      - docs/schema/k6-receipt.schema.json
+      - docs/schema/capacity-model.schema.json
+      - docs/adr/.index.yaml
+      - Makefile
+      - .gitea/workflows/validate.yml
+      - config/image-catalog.json
+      - config/capacity-model.json
+      - config/k6/scripts/http-slo-probe.js
+      - config/service-capability-catalog.json
+      - config/slo-catalog.json
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/grafana/dashboards/slo-overview.json
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/control-plane-lanes.json
+      - config/api-publication.json
+      - config/event-taxonomy.yaml
+      - config/ntfy/server.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - playbooks/openfga.yml
+      - playbooks/services/guest-log-shipping.yml
+      - collections/ansible_collections/lv3/platform/playbooks/services/guest-log-shipping.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/ensure_unsealed.yml
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+      - scripts/capacity_report.py
+      - scripts/generate_platform_vars.py
+      - scripts/k6_load_testing.py
+      - scripts/promotion_pipeline.py
+      - scripts/serverclaw_authz.py
+      - scripts/slo_tracking.py
+      - scripts/validate_nats_topics.py
+      - scripts/validate_repository_data_models.py
+      - platform/slo.py
+      - docs/site-generated/architecture/dependency-graph.md
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/**
+      - config/windmill/scripts/k6-load-testing.py
+      - tests/test_capacity_report.py
+      - tests/test_k6_load_testing.py
+      - tests/test_k6_load_testing_windmill.py
+      - tests/test_gitea_workflows.py
+      - tests/test_monitoring_vm_role.py
+      - tests/test_openfga_metadata.py
+      - tests/test_openfga_runtime_role.py
+      - tests/test_openbao_compose_env_helper.py
+      - tests/test_openbao_runtime_role.py
+      - tests/test_openbao_systemd_credentials_helper.py
+      - tests/test_proxmox_network_role.py
+      - tests/test_published_artifact_secret_scan.py
+      - tests/test_serverclaw_authz.py
+      - tests/test_windmill_default_operations_surface.py
+      - tests/test_windmill_operator_admin_app.py
+      - tests/test_promotion_pipeline.py
+      - tests/test_guest_log_shipping_playbook.py
+      - tests/test_slo_tracking.py
+      - tests/unit/test_event_taxonomy.py
+      - receipts/image-scans/2026-03-31-k6-runtime.json
+      - receipts/image-scans/2026-03-31-k6-runtime.trivy.json
+      - receipts/k6/**
+      - receipts/live-applies/**
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0305_docs
+          paths:
+            - docs/workstreams/ws-0305-live-apply.md
+            - docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+            - docs/runbooks/k6-load-testing.md
+            - docs/runbooks/configure-openfga.md
+          mode: exclusive
+        - id: adr_0305_repository_automation
+          paths:
+            - Makefile
+            - .gitea/workflows/validate.yml
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - config/control-plane-lanes.json
+            - config/api-publication.json
+            - config/event-taxonomy.yaml
+            - config/ntfy/server.yml
+            - playbooks/openfga.yml
+            - playbooks/services/guest-log-shipping.yml
+            - collections/ansible_collections/lv3/platform/playbooks/services/guest-log-shipping.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/ensure_unsealed.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml
+            - scripts/k6_load_testing.py
+            - scripts/capacity_report.py
+            - scripts/promotion_pipeline.py
+            - scripts/serverclaw_authz.py
+            - scripts/slo_tracking.py
+            - scripts/validate_nats_topics.py
+            - scripts/validate_repository_data_models.py
+            - platform/slo.py
+            - tests/test_k6_load_testing.py
+            - tests/test_k6_load_testing_windmill.py
+            - tests/test_gitea_workflows.py
+            - tests/test_capacity_report.py
+            - tests/test_monitoring_vm_role.py
+            - tests/test_openfga_metadata.py
+            - tests/test_openfga_runtime_role.py
+            - tests/test_openbao_compose_env_helper.py
+            - tests/test_openbao_runtime_role.py
+            - tests/test_openbao_systemd_credentials_helper.py
+            - tests/test_published_artifact_secret_scan.py
+            - tests/test_serverclaw_authz.py
+            - tests/test_windmill_default_operations_surface.py
+            - tests/test_windmill_operator_admin_app.py
+            - tests/test_promotion_pipeline.py
+            - tests/test_guest_log_shipping_playbook.py
+            - tests/test_slo_tracking.py
+            - tests/unit/test_event_taxonomy.py
+          mode: shared_contract
+          contract: repository-automation-v1
+        - id: adr_0305_slo_catalog_contract
+          paths:
+            - config/service-capability-catalog.json
+            - config/slo-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/grafana/dashboards/slo-overview.json
+          mode: shared_contract
+          contract: generated-slo-v1
+        - id: adr_0305_platform_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+            - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/**
+            - config/windmill/scripts/k6-load-testing.py
+            - config/capacity-model.json
+            - config/k6/scripts/http-slo-probe.js
+            - docs/schema/k6-receipt.schema.json
+            - docs/schema/capacity-model.schema.json
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: adr_0305_guest_network_policy
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+            - tests/test_proxmox_network_role.py
+          mode: shared_contract
+          contract: guest-network-policy-v1
+        - id: adr_0305_image_policy
+          paths:
+            - config/image-catalog.json
+            - receipts/image-scans/2026-03-31-k6-runtime.json
+            - receipts/image-scans/2026-03-31-k6-runtime.trivy.json
+          mode: shared_contract
+          contract: image-policy-v1
+        - id: adr_0305_generated_portals
+          paths:
+            - docs/site-generated/architecture/dependency-graph.md
+          mode: shared_contract
+          contract: generated-portals-v1
+        - id: adr_0305_live_receipts
+          paths:
+            - receipts/k6/**
+            - receipts/live-applies/**
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: integrates ADR 0305 into main by replaying the repo-managed k6 smoke, load, and soak validation path on the latest realistic origin/main baseline, preserving Prometheus remote-write, Windmill scheduling, and truthful non-zero receipts when the live Keycloak and OpenFGA SLO budgets are already exhausted
+      release_bump: patch
+      included_in_repo_version: 0.177.120
+      latest_receipts:
+        k6_load_testing: 2026-03-31-adr-0305-k6-mainline-live-apply
+  - id: ws-0305-main-integration
+    adr: "0305"
+    title: Integrate ADR 0305 k6 exact-main replay onto origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0305-mainline-final
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md
+    depends_on:
+      - ws-0305-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - .config-locations.yaml
+      - workstreams.yaml
+      - docs/workstreams/ws-0305-main-integration.md
+      - docs/workstreams/ws-0305-live-apply.md
+      - docs/workstreams/ws-0306-live-apply.md
+      - docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+      - docs/adr/.index.yaml
+      - docs/adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md
+      - docs/runbooks/k6-load-testing.md
+      - docs/runbooks/configure-openfga.md
+      - docs/runbooks/iac-policy-scanning.md
+      - docs/runbooks/agent-session-workspace-isolation.md
+      - docs/runbooks/remote-build-gateway.md
+      - docs/runbooks/validate-repository-automation.md
+      - docs/runbooks/validation-gate.md
+      - docs/schema/capacity-model.schema.json
+      - docs/schema/k6-receipt.schema.json
+      - Makefile
+      - .gitea/workflows/validate.yml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
+      - config/build-server.json
+      - config/check-runner-manifest.json
+      - config/checkov/**
+      - config/validation-gate.json
+      - config/validation-lanes.yaml
+      - config/validation-runner-contracts.json
+      - scripts/workstream_surface_ownership.py
+      - scripts/iac_policy_scan.py
+      - scripts/run_gate_fallback.py
+      - tests/test_workstream_surface_ownership.py
+      - tests/test_iac_policy_scan.py
+      - tests/test_run_gate_fallback.py
+      - tests/test_validate_repo_cache.py
+      - tests/test_validation_lanes.py
+      - config/image-catalog.json
+      - config/capacity-model.json
+      - config/k6/scripts/http-slo-probe.js
+      - config/service-capability-catalog.json
+      - config/slo-catalog.json
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/grafana/dashboards/slo-overview.json
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/control-plane-lanes.json
+      - config/api-publication.json
+      - config/event-taxonomy.yaml
+      - config/ntfy/server.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - playbooks/openfga.yml
+      - playbooks/services/guest-log-shipping.yml
+      - collections/ansible_collections/lv3/platform/playbooks/services/guest-log-shipping.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/ensure_unsealed.yml
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/**
+      - scripts/capacity_report.py
+      - scripts/generate_platform_vars.py
+      - scripts/k6_load_testing.py
+      - scripts/promotion_pipeline.py
+      - scripts/remote_exec.sh
+      - scripts/serverclaw_authz.py
+      - scripts/slo_tracking.py
+      - scripts/validate_nats_topics.py
+      - scripts/validate_repository_data_models.py
+      - platform/slo.py
+      - config/windmill/scripts/k6-load-testing.py
+      - tests/test_capacity_report.py
+      - tests/test_k6_load_testing.py
+      - tests/test_k6_load_testing_windmill.py
+      - tests/test_gitea_workflows.py
+      - tests/test_guest_log_shipping_playbook.py
+      - tests/test_monitoring_vm_role.py
+      - tests/test_openbao_compose_env_helper.py
+      - tests/test_openbao_runtime_role.py
+      - tests/test_openbao_systemd_credentials_helper.py
+      - tests/test_openfga_metadata.py
+      - tests/test_openfga_runtime_role.py
+      - tests/test_proxmox_network_role.py
+      - tests/test_promotion_pipeline.py
+      - tests/test_published_artifact_secret_scan.py
+      - tests/test_remote_exec.py
+      - tests/test_serverclaw_authz.py
+      - tests/test_slo_tracking.py
+      - tests/test_windmill_default_operations_surface.py
+      - tests/test_windmill_operator_admin_app.py
+      - tests/unit/test_event_taxonomy.py
+      - receipts/image-scans/2026-03-31-k6-runtime.json
+      - receipts/image-scans/2026-03-31-k6-runtime.trivy.json
+      - receipts/checkov/**
+      - receipts/k6/**
+      - receipts/live-applies/**
+      - receipts/sbom/**
+    ownership_manifest:
+      owned_surfaces:
+        - id: ws_0305_main_integration_bundle
+          paths:
+            - .config-locations.yaml
+            - workstreams.yaml
+            - docs/workstreams/ws-0305-main-integration.md
+            - docs/workstreams/ws-0305-live-apply.md
+            - docs/workstreams/ws-0306-live-apply.md
+            - docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+            - docs/adr/.index.yaml
+            - docs/adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md
+            - docs/runbooks/k6-load-testing.md
+            - docs/runbooks/configure-openfga.md
+            - docs/runbooks/iac-policy-scanning.md
+            - docs/runbooks/agent-session-workspace-isolation.md
+            - docs/runbooks/remote-build-gateway.md
+            - docs/runbooks/validate-repository-automation.md
+            - docs/runbooks/validation-gate.md
+            - docs/schema/capacity-model.schema.json
+            - docs/schema/k6-receipt.schema.json
+            - Makefile
+            - .gitea/workflows/validate.yml
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/*.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/site-generated/architecture/dependency-graph.md
+            - config/build-server.json
+            - config/check-runner-manifest.json
+            - config/checkov/**
+            - config/validation-gate.json
+            - config/validation-lanes.yaml
+            - config/validation-runner-contracts.json
+            - scripts/workstream_surface_ownership.py
+            - scripts/iac_policy_scan.py
+            - scripts/run_gate_fallback.py
+            - tests/test_workstream_surface_ownership.py
+            - tests/test_iac_policy_scan.py
+            - tests/test_run_gate_fallback.py
+            - tests/test_validate_repo_cache.py
+            - tests/test_validation_lanes.py
+            - config/image-catalog.json
+            - config/capacity-model.json
+            - config/k6/scripts/http-slo-probe.js
+            - config/service-capability-catalog.json
+            - config/slo-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/grafana/dashboards/slo-overview.json
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - config/control-plane-lanes.json
+            - config/api-publication.json
+            - config/event-taxonomy.yaml
+            - config/ntfy/server.yml
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - playbooks/openfga.yml
+            - playbooks/services/guest-log-shipping.yml
+            - collections/ansible_collections/lv3/platform/playbooks/services/guest-log-shipping.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/ensure_unsealed.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml
+            - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/**
+            - scripts/capacity_report.py
+            - scripts/generate_platform_vars.py
+            - scripts/k6_load_testing.py
+            - scripts/promotion_pipeline.py
+            - scripts/remote_exec.sh
+            - scripts/serverclaw_authz.py
+            - scripts/slo_tracking.py
+            - scripts/validate_nats_topics.py
+            - scripts/validate_repository_data_models.py
+            - platform/slo.py
+            - config/windmill/scripts/k6-load-testing.py
+            - tests/test_capacity_report.py
+            - tests/test_k6_load_testing.py
+            - tests/test_k6_load_testing_windmill.py
+            - tests/test_gitea_workflows.py
+            - tests/test_guest_log_shipping_playbook.py
+            - tests/test_monitoring_vm_role.py
+            - tests/test_openbao_compose_env_helper.py
+            - tests/test_openbao_runtime_role.py
+            - tests/test_openbao_systemd_credentials_helper.py
+            - tests/test_openfga_metadata.py
+            - tests/test_openfga_runtime_role.py
+            - tests/test_proxmox_network_role.py
+            - tests/test_promotion_pipeline.py
+            - tests/test_published_artifact_secret_scan.py
+            - tests/test_remote_exec.py
+            - tests/test_serverclaw_authz.py
+            - tests/test_slo_tracking.py
+            - tests/test_windmill_default_operations_surface.py
+            - tests/test_windmill_operator_admin_app.py
+            - tests/unit/test_event_taxonomy.py
+            - receipts/image-scans/2026-03-31-k6-runtime.json
+            - receipts/image-scans/2026-03-31-k6-runtime.trivy.json
+            - receipts/checkov/**
+            - receipts/k6/**
+            - receipts/live-applies/**
+            - receipts/sbom/**
+          mode: shared_contract
+          contract: ws-0305-main-integration-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: integrates ADR 0305 into main by re-verifying the latest realistic origin/main exact-main smoke and load paths for Keycloak and OpenFGA, preserving truthful k6 receipts and bounded notification warnings while recording the remaining live Keycloak load-test failure
+      release_bump: patch
+      included_in_repo_version: 0.177.120
+      latest_receipts:
+        k6_load_testing: 2026-03-31-adr-0305-k6-mainline-live-apply

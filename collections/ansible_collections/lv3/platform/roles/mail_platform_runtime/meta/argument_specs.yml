@@ -1,4 +1,11 @@
 ---
+# Purpose: Declare the supported inputs for the mail_platform_runtime role so repo automation can validate the managed mail stack contract.
+# Use case: Evaluated during role execution, syntax checks, and repo validation for the mail platform runtime.
+# Inputs: The role's declared runtime, secret, port, and notification-profile variables.
+# Outputs: A validated argument specification for the Stalwart and gateway runtime converge path.
+# Idempotency: Fully idempotent because the argument spec constrains inputs without mutating managed systems.
+# Dependencies: ADR 0165 and the mail_platform_runtime role interface contract.
+
 argument_specs:
   main:
     short_description: Converge the managed Stalwart and gateway mail platform stack.
@@ -53,6 +60,16 @@ argument_specs:
         required: false
         description:
           - Private SMTP submission port exposed only for local platform workloads on docker-runtime-lv3.
+      mail_platform_submission_auth_retries:
+        type: int
+        required: false
+        description:
+          - Number of retries for the private submission SMTP authentication verification while Stalwart finishes startup.
+      mail_platform_submission_auth_delay_seconds:
+        type: int
+        required: false
+        description:
+          - Delay between private submission SMTP authentication verification attempts.
       mail_platform_gateway_bind_port:
         type: int
         required: false

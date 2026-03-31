@@ -455,6 +455,8 @@
         import subprocess
         import sys
         import time
+        import urllib.error
+        import urllib.request
 
         TRANSIENT_DOCKER_NETWORK_ERRORS = (
             "No chain/target/match by that name",
@@ -464,6 +466,8 @@
             "failed to create endpoint",
             "does not exist",
         )
+        OPENBAO_HEALTH_URL = "http://127.0.0.1:8201/v1/sys/health"
+        OPENBAO_READY_STATUS_CODES = {200, 429}
 
 
         def combined_output(stdout, stderr):
@@ -501,6 +505,28 @@
                     )
 
                 time.sleep(delay_seconds)
+
+
+        def wait_for_local_openbao(*, timeout_seconds=60, delay_seconds=2):
+            deadline = time.monotonic() + timeout_seconds
+            last_error = ""
+            while time.monotonic() < deadline:
+                try:
+                    with urllib.request.urlopen(OPENBAO_HEALTH_URL, timeout=5) as response:
+                        if response.status in OPENBAO_READY_STATUS_CODES:
+                            return
+                        last_error = f"unexpected HTTP {response.status}"
+                except urllib.error.HTTPError as exc:
+                    if exc.code in OPENBAO_READY_STATUS_CODES:
+                        return
+                    last_error = f"HTTP {exc.code}"
+                except OSError as exc:
+                    last_error = str(exc)
+                time.sleep(delay_seconds)
+
+            raise RuntimeError(
+                f"local OpenBao did not become ready at {OPENBAO_HEALTH_URL}: {last_error or 'timed out'}"
+            )
 
         containers = json.load(sys.stdin)
 
@@ -540,6 +566,8 @@
                 command.extend(["--file", config_file])
             services = sorted(compose_group["services"])
             container_names = sorted(compose_group["container_names"])
+            if "openbao-agent" in services:
+                wait_for_local_openbao()
             command.extend(["up", "-d", "--force-recreate", *services])
 
             try:
@@ -587,6 +615,8 @@
                 recovery_command = ["docker", "compose"]
                 for config_file in config_file_list:
                     recovery_command.extend(["--file", config_file])
+                if "openbao-agent" in services:
+                    wait_for_local_openbao()
                 recovery_command.extend(["up", "-d", "--force-recreate", *services])
                 try:
                     run_with_retry(
@@ -627,6 +657,8 @@
                 final_up_command = ["docker", "compose"]
                 for config_file in config_file_list:
                     final_up_command.extend(["--file", config_file])
+                if "openbao-agent" in services:
+                    wait_for_local_openbao()
                 final_up_command.extend(["up", "-d", *services])
                 run_with_retry(
                     final_up_command,

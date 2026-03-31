@@ -5697,6 +5697,139 @@
         "make weekly-capacity-report NO_LIVE_METRICS=true"
       ]
     },
+    "k6-smoke": {
+      "description": "Run the governed ADR 0305 k6 smoke probe against the declared latency-SLO services and fail if the smoke budget or latency threshold is exceeded.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "k6-smoke",
+        "command": "make k6-smoke"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/k6-load-testing.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/k6_load_testing.py",
+        "config/windmill/scripts/k6-load-testing.py",
+        "config/k6/scripts/http-slo-probe.js",
+        "config/capacity-model.json",
+        "config/image-catalog.json",
+        "docs/schema/k6-receipt.schema.json",
+        "docs/runbooks/k6-load-testing.md",
+        ".gitea/workflows/validate.yml"
+      ],
+      "outputs": [
+        "One k6 smoke receipt per targeted service under receipts/k6 together with the raw summary export captured under receipts/k6/raw."
+      ],
+      "verification_commands": [
+        "make k6-smoke K6_ARGS=\"--service keycloak --service openfga\"",
+        "python3 scripts/k6_load_testing.py --validate"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 600,
+        "max_steps": 80,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 0,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "k6-load": {
+      "description": "Run the governed ADR 0305 weekly k6 load probe, record structured receipts, and publish regression and warning notifications when the latest run exceeds the governed thresholds.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "k6-load",
+        "command": "make k6-load"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/k6-load-testing.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/k6_load_testing.py",
+        "config/windmill/scripts/k6-load-testing.py",
+        "config/k6/scripts/http-slo-probe.js",
+        "config/capacity-model.json",
+        "config/image-catalog.json",
+        "docs/schema/k6-receipt.schema.json",
+        "docs/runbooks/k6-load-testing.md"
+      ],
+      "outputs": [
+        "A dated set of k6 load receipts, raw summary export, optional platform.slo.k6_regression NATS publication, and ntfy warning publication when the remaining error budget drops below 20 percent."
+      ],
+      "verification_commands": [
+        "make k6-load K6_ARGS=\"--service keycloak --service openfga\"",
+        "python3 scripts/k6_load_testing.py --validate"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 120,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 0,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "k6-soak": {
+      "description": "Run the governed ADR 0305 monthly k6 soak probe so extended-duration latency and error-budget drift are captured as receipts and surfaced through the platform notification paths.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "k6-soak",
+        "command": "make k6-soak"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/k6-load-testing.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/k6_load_testing.py",
+        "config/windmill/scripts/k6-load-testing.py",
+        "config/k6/scripts/http-slo-probe.js",
+        "config/capacity-model.json",
+        "config/image-catalog.json",
+        "docs/schema/k6-receipt.schema.json",
+        "docs/runbooks/k6-load-testing.md"
+      ],
+      "outputs": [
+        "A dated set of k6 soak receipts, raw summary export, optional regression events, and warning notifications for long-running latency or error-budget degradation."
+      ],
+      "verification_commands": [
+        "make k6-soak K6_ARGS=\"--service keycloak --service openfga --soak-duration 5m\"",
+        "python3 scripts/k6_load_testing.py --validate"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 3600,
+        "max_steps": 140,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 0,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "deploy-and-promote": {
       "description": "Validate a staged service change, enforce the ADR 0073 promotion gate, and then apply the approved production promotion.",
       "lifecycle_status": "active",
@@ -7104,6 +7237,65 @@
         "max_concurrent_instances": 1,
         "max_touched_hosts": 3,
         "max_restarts": 2,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-paperless": {
+      "description": "Deploy the public Paperless-ngx archive on docker-runtime-lv3, refresh the governed API gateway route, and reconcile the repo-managed taxonomy and smoke verification path.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-paperless",
+        "command": "make converge-paperless"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-paperless"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-paperless.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/paperless.yml",
+        "playbooks/services/paperless.yml",
+        "roles/paperless_postgres",
+        "roles/paperless_runtime",
+        "roles/keycloak_runtime",
+        "roles/api_gateway_runtime",
+        "scripts/paperless_sync.py",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/api-gateway-catalog.json",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/slo-catalog.json",
+        "config/data-catalog.json"
+      ],
+      "outputs": [
+        "A public Paperless runtime on docker-runtime-lv3 with repo-managed taxonomy, durable API token, authenticated `/v1/paperless` gateway access, and end-to-end smoke upload verification."
+      ],
+      "verification_commands": [
+        "make syntax-check-paperless",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/paperless/docker-compose.yml ps && curl -I http://127.0.0.1:8018/'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8018/api/documents/?page_size=1 -H \"Authorization: Token $(sudo cat /etc/lv3/paperless/api-token)\"'",
+        "python3 scripts/paperless_sync.py verify --base-url https://paperless.lv3.org --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/api-token.txt --desired-state-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/taxonomy.json --report-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/sync-report.json",
+        "python3 scripts/paperless_sync.py smoke-upload --base-url https://paperless.lv3.org --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/api-token.txt --report-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/smoke-upload-report.json"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 1,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
       }

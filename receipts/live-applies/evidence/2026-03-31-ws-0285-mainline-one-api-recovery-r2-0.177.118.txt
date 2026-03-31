@@ -1,0 +1,3 @@
+NAME                    IMAGE                                                                                                        COMMAND                  SERVICE         CREATED          STATUS                    PORTS
+one-api                 docker.io/justsong/one-api:v0.6.10@sha256:18324b85189be50c9f889f61d1723973dd088ef56f24670d6aab076ac0a044b8   "/one-api"               one-api         11 seconds ago   Up Less than a second     3000/tcp, 0.0.0.0:8101->8101/tcp, [::]:8101->8101/tcp
+one-api-openbao-agent   docker.io/openbao/openbao:2.5.1@sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b      "docker-entrypoint.s…"   openbao-agent   11 seconds ago   Up 10 seconds (healthy)

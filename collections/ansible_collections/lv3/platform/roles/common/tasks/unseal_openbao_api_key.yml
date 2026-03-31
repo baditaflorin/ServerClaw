@@ -1,0 +1,26 @@
+---
+- name: "Submit OpenBao recovery key {{ common_openbao_unseal_step_label }}"
+  vars:
+    common_openbao_unseal_step_label: "{{ common_openbao_unseal_context }} #{{ common_openbao_unseal_key_index + 1 }}"
+  ansible.builtin.uri:
+    url: "{{ common_openbao_unseal_api_url }}/v1/sys/unseal"
+    method: POST
+    body_format: json
+    body:
+      key: "{{ common_openbao_unseal_key }}"
+    return_content: true
+    status_code: 200
+  register: common_openbao_unseal_step
+  retries: 6
+  delay: 2
+  until: common_openbao_unseal_step.status == 200
+  when: not common_openbao_unseal_completed | bool
+  no_log: true
+
+- name: "Record OpenBao unseal progress {{ common_openbao_unseal_step_label }}"
+  vars:
+    common_openbao_unseal_step_label: "{{ common_openbao_unseal_context }} #{{ common_openbao_unseal_key_index + 1 }}"
+  ansible.builtin.set_fact:
+    common_openbao_unseal_completed: "{{ not (common_openbao_unseal_step.json.sealed | default(true) | bool) }}"
+  when: not common_openbao_unseal_completed | bool
+  no_log: true

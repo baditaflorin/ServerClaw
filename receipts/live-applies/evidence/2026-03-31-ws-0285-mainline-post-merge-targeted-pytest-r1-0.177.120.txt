@@ -1,0 +1,17 @@
+.........F.............................................................. [100%]
+=================================== FAILURES ===================================
+________ test_openbao_runtime_retries_seal_status_during_restart_window ________
+
+    def test_openbao_runtime_retries_seal_status_during_restart_window() -> None:
+        tasks = read_openbao_runtime_tasks_text()
+
+        assert "- name: Read OpenBao initialization status" in tasks
+        assert "register: openbao_init_status" in tasks
+        assert "until: openbao_init_status.status == 200" in tasks
+>       assert "- name: Read OpenBao seal status" in tasks
+E       assert '- name: Read OpenBao seal status' in '# Purpose: Converge the OpenBao runtime, initialization flow, unseal artifacts, and repo-managed auth/bootstrap contr...{{ openbao_refreshed_secret_ids.results | default([]) }}"\n  delegate_to: localhost\n  become: false\n  no_log: true\n'
+
+tests/test_openbao_runtime_role.py:162: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_openbao_runtime_role.py::test_openbao_runtime_retries_seal_status_during_restart_window
+1 failed, 71 passed in 1.09s

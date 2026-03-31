@@ -58,3 +58,11 @@ def test_single_record_role_reports_provider_error_details_after_retries() -> No
     assert "Fail with provider details when DNS record creation did not complete" in tasks
     assert "Fail with provider details when DNS record update did not complete" in tasks
     assert "Fail with provider details when DNS record deletion did not complete" in tasks
+
+
+def test_single_record_role_rechecks_provider_state_after_create_attempts() -> None:
+    tasks = ROLE_TASKS.read_text(encoding="utf-8")
+
+    assert "Query Hetzner DNS records for the zone after a create attempt" in tasks
+    assert "hetzner_dns_records_post_create_query" in tasks
+    assert "selectattr('value', 'equalto', hetzner_dns_record_value)" in tasks

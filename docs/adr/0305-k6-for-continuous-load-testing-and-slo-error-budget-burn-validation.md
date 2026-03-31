@@ -1,9 +1,10 @@
 # ADR 0305: k6 For Continuous Load Testing And SLO Error Budget Burn Validation
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.120
+- Implemented In Platform Version: 0.130.75
+- Implemented On: 2026-03-31
 - Date: 2026-03-29
 
 ## Context
@@ -92,6 +93,102 @@ Three k6 test scenario types are defined:
   `platform.slo.warn` notification (ADR 0299) and block Renovate version bump
   PRs for that service (via a Gitea Actions check that reads the latest k6 receipt)
 
+### Implemented live replay
+
+- the branch-local live apply on 2026-03-31 replayed the monitoring, guest
+  network policy, Windmill, and OpenFGA surfaces needed for the ADR 0305
+  execution path, with the successful corrective runs preserved under
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-monitoring-r7.txt`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-openfga-r5.txt`,
+  and `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-windmill-r4.txt`
+- the authoritative build-server smoke replay passed from
+  `docker-build-lv3`, producing synced receipts
+  `receipts/k6/smoke-keycloak-20260331T103411Z.json` and
+  `receipts/k6/smoke-openfga-20260331T103411Z.json` plus the raw summary
+  export, as captured in
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-smoke-r9.txt` and
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-receipt-sync-r2.txt`
+- the authoritative build-server load replay now preserves failed receipts and
+  returns a non-zero exit when thresholds are crossed instead of dropping the
+  evidence path; the final run is captured in
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-load-r6.txt` and
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-receipt-sync-r3.txt`
+- the live platform did not meet the configured 1% error-rate objective during
+  that final load replay: Keycloak recorded `1725` requests with `400` failures
+  (`23.19%` error rate) and OpenFGA recorded `995` requests with `42` failures
+  (`4.22%` error rate), both with error budget remaining reduced to `0.0%` in
+  the synced receipts
+- the first exact-main closeout rebased the workstream onto latest realistic
+  `origin/main` commit `5c7e07235f7b0da1f756148e145397f0ac6ceb10` and used
+  committed source `0d6e8c9eb5d9d086e74cf92d8165248295baa076` for the initial
+  canonical replay, as recorded in
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-candidate-source-commit-r3-0.177.118.txt`
+- the first exact-main smoke attempt exposed live drift rather than a repo
+  regression: `monitoring-lv3` still had Prometheus bound to `127.0.0.1:9090`
+  and `docker-runtime-lv3` was concurrently churning the OpenFGA container;
+  the repair path is preserved under
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-k6-smoke-r5-0.177.118.txt`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-converge-monitoring-r8-0.177.118.txt`,
+  and
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-prometheus-bind-manual-r1-0.177.118.txt`
+- after that correction loop, the exact-main smoke replay passed from
+  committed source and produced
+  `receipts/k6/smoke-keycloak-20260331T133226Z.json` plus
+  `receipts/k6/smoke-openfga-20260331T133226Z.json`; Keycloak recorded `110`
+  requests with `0` failures and OpenFGA recorded `112` requests with `0`
+  failures, as captured in
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-k6-smoke-r6-0.177.118.txt`
+- the exact-main load replay completed from committed source without the
+  earlier NATS deadlock and preserved the truthful load outcome in
+  `receipts/k6/load-keycloak-20260331T133416Z.json`,
+  `receipts/k6/load-openfga-20260331T133416Z.json`, and
+  `receipts/k6/raw/20260331T133416Z-load-summary.json`, as captured in
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-k6-load-r3-0.177.118.txt`;
+  Keycloak recorded `1585` requests with `441` failures (`27.82%` error rate)
+  and failed the 1% objective, while OpenFGA recorded `1184` requests with `8`
+  failures (`0.68%`) and passed the run even though its warning path still
+  reported `error_budget_remaining_pct: 0.0`
+- repository automation gaps discovered during live apply were fixed in-repo on
+  this workstream: gitless snapshot commit capture, relative repo-root handling,
+  k6 summary parsing, failure-path receipt generation, non-fatal ntfy warning
+  handling, remote build workspace retention cleanup, and bounded exact-main
+  notification publication when controller-local NATS or ntfy are unavailable,
+  plus synced remote gate status handoff and unresolved-only local fallback
+  reruns when the build host loses runner availability after partial success,
+  together with a widened shared `packer-validate` timeout budget so the
+  controller-local arm64 fallback can finish the emulated x86 runner image
+- `origin/main` then advanced again to commit
+  `2411a7cd428e0eba17168aa5eed66f04c4ed48dd`, carrying repository version
+  `0.177.118` and platform version `0.130.77`, so the exact-main closeout was
+  first recut on that newer baseline
+- `origin/main` later advanced again to commit
+  `97f05802253cbb8fb4640249fdb8485fd7ecdde6`, which still carried repository
+  version `0.177.119` and platform version `0.130.77` after ADR 0306 landed,
+  so the final merge-to-main closeout for ADR 0305 was recut as repository
+  release `0.177.120` while preserving the latest realistic `0.177.119` k6
+  evidence
+- the latest-main smoke replay from committed source
+  `6d476f01e75a2ecf31d8ce13df1250bc6aec193e` preserved current live Keycloak
+  degradation instead of masking it: direct probing of
+  `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration` returned
+  `502 Bad Gateway`, the synced smoke receipt
+  `receipts/k6/smoke-keycloak-20260331T145155Z.json` recorded `110` requests
+  with `110` failures, and `receipts/k6/smoke-openfga-20260331T145155Z.json`
+  still passed with `112` requests and `0` failures
+- the latest-main load replay from the same committed source also preserved the
+  truthful degraded platform outcome under the latest realistic `0.177.119`
+  baseline: Keycloak
+  recorded `1600` requests with `1184` failures (`74.00%` error rate) in
+  `receipts/k6/load-keycloak-20260331T145555Z.json`, OpenFGA recorded `1182`
+  requests with `14` failures (`1.18%`) in
+  `receipts/k6/load-openfga-20260331T145555Z.json`, Prometheus remote-write
+  repeatedly timed out, and the warning-only ntfy publication path returned
+  `404 Not Found` without hanging the run
+- the canonical exact-main closeout receipt is
+  `receipts/live-applies/2026-03-31-adr-0305-k6-mainline-live-apply.json`,
+  published in repository release `0.177.120` while keeping the first verified
+  platform implementation version at `0.130.75`
+
 ## Consequences
 
 **Positive**
@@ -112,9 +209,13 @@ Three k6 test scenario types are defined:
 - k6 JavaScript scripts require operator skill to write and maintain; poorly
   written scripts (missing sleep between iterations, unrealistic request
   patterns) produce misleading results
-- the Prometheus remote-write endpoint must be reachable from the build host or
-  the Windmill worker; this requires a network path from `docker-build-lv3` to
-  `monitoring-lv3` that is currently unused
+- the implemented live replay proved the dependent telemetry path is itself an
+  operational risk surface: during the 2026-03-31 exact-main closeout,
+  Prometheus remote-write calls from the k6 runner to `monitoring-lv3`
+  repeatedly timed out until Prometheus was rebound to the guest-reachable
+  address, and the later latest-main `0.177.119` rerun still preserved public
+  Keycloak `502 Bad Gateway`, OpenFGA threshold breach, and warning-only
+  notification failures without hiding the underlying smoke/load result
 
 ## Boundaries
 

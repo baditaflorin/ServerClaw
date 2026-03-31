@@ -176,6 +176,21 @@ argument_specs:
         required: true
         description:
           - External Docker network name Keycloak joins so it can reach the configured SMTP relay directly.
+      keycloak_mail_platform_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file used to recover the private SMTP relay when the shared Docker host restarts and the relay is no longer reachable from Keycloak.
+      keycloak_mail_platform_submission_service_name:
+        type: str
+        required: true
+        description:
+          - Compose service name that exposes the private SMTP relay consumed by Keycloak.
+      keycloak_mail_platform_submission_recovery_enabled:
+        type: bool
+        required: true
+        description:
+          - Whether the role should recover the private SMTP relay locally when the initial in-container DNS probe fails.
       keycloak_mail_platform_from_address:
         type: str
         required: true

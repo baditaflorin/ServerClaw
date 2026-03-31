@@ -87,6 +87,12 @@
       "items": {
         "$ref": "#/$defs/reservationEntry"
       }
+    },
+    "service_load_profiles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/serviceLoadProfileEntry"
+      }
     }
   },
   "additionalProperties": false,
@@ -242,6 +248,40 @@
         "max_concurrent_vms": {
           "type": "integer",
           "minimum": 1
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "serviceLoadProfileEntry": {
+      "type": "object",
+      "required": [
+        "service_id",
+        "typical_concurrency"
+      ],
+      "properties": {
+        "service_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "typical_concurrency": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "smoke_vus": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "request_timeout_seconds": {
+          "type": "number",
+          "minimum": 1
+        },
+        "think_time_seconds": {
+          "type": "number",
+          "minimum": 0
         },
         "notes": {
           "type": "string"

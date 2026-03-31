@@ -1,0 +1,53 @@
+# Purpose: Safely drive a local or remote OpenBao API to an unsealed state before helper-managed secret delivery continues.
+# Use case: Included by common helpers after OpenBao runtime recovery or health probing when the target API may still be sealed.
+# Inputs: OpenBao API URL, unseal context string, and the controller-local init payload containing recovery keys.
+# Outputs: Reads seal status, submits recovery keys only while needed, and confirms the API is unsealed before returning.
+# Idempotency: Yes, because it only submits recovery keys when the API is sealed and stops after the first successful unseal response.
+# Dependencies: ADR 0165, ADR 0043, ADR 0077, and ADR 0231.
+---
+- name: Read OpenBao seal status before {{ common_openbao_unseal_context }}
+  ansible.builtin.uri:
+    url: "{{ common_openbao_unseal_api_url }}/v1/sys/seal-status"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: common_openbao_unseal_status
+  retries: 12
+  delay: 2
+  until: common_openbao_unseal_status.status == 200
+  changed_when: false
+
+- name: Record whether OpenBao is already unsealed before {{ common_openbao_unseal_context }}
+  ansible.builtin.set_fact:
+    common_openbao_unseal_completed: "{{ not (common_openbao_unseal_status.json.sealed | bool) }}"
+  no_log: true
+
+- name: Submit OpenBao recovery keys until the API becomes unsealed during {{ common_openbao_unseal_context }}
+  ansible.builtin.include_tasks: unseal_openbao_api_key.yml
+  loop: "{{ common_openbao_unseal_init_payload.keys_base64 }}"
+  loop_control:
+    loop_var: common_openbao_unseal_key
+    index_var: common_openbao_unseal_key_index
+  no_log: true
+
+- name: Confirm OpenBao is unsealed before {{ common_openbao_unseal_context }}
+  ansible.builtin.uri:
+    url: "{{ common_openbao_unseal_api_url }}/v1/sys/seal-status"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: common_openbao_unsealed_status
+  retries: 12
+  delay: 2
+  until:
+    - common_openbao_unsealed_status.status == 200
+    - not (common_openbao_unsealed_status.json.sealed | bool)
+  changed_when: false
+
+- name: Assert OpenBao is unsealed before {{ common_openbao_unseal_context }}
+  ansible.builtin.assert:
+    that:
+      - not (common_openbao_unsealed_status.json.sealed | bool)
+    fail_msg: >-
+      OpenBao remained sealed on the runtime host while preparing
+      {{ common_openbao_unseal_context }}.

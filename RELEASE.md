@@ -1,12 +1,12 @@
-# Release 0.177.120
+# Release 0.177.121
 
 - Date: 2026-03-31
 
 ## Summary
-- integrates ADR 0279 into main by replaying Grist on the latest 0.177.119 mainline, carrying forward the local/public auth-shell verification fixes, the restic live-apply trigger hardening, and the Docker post-restart compose recovery safeguards needed for the final exact-head live apply
+- implemented ADR 0285 by bringing the Paperless document archive service, its OpenBao and Keycloak recovery hardening, and the corrected public smoke-upload verification path onto main
 
 ## Platform Impact
-- platform version advances to 0.130.78 after the latest-main ADR 0279 replay re-verifies the Grist runtime, dedicated grist.lv3.org certificate, split static-plus-secret OIDC env contract, and Keycloak-gated document flow on top of the 0.130.77 baseline
+- verifies the exact-main Paperless replay on the latest realistic `origin/main` baseline and advances the integrated platform truth to `0.130.78` while preserving the original first-live milestone at `0.130.75`
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

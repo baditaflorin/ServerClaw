@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.120
-platform_version: 0.130.77
+repo_version: 0.177.121
+platform_version: 0.130.78
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -148,7 +148,8 @@ live_apply_evidence:
     redpanda: 2026-03-31-adr-0290-redpanda-mainline-live-apply
     serverclaw_skills: 2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply
     sbom_cve_scanning: 2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply
-    grist: 2026-03-31-adr-0279-grist-mainline-live-apply
+    paperless: 2026-03-31-adr-0285-paperless-live-apply
+    k6_load_testing: 2026-03-31-adr-0305-k6-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -1083,8 +1084,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.120
+    current: 0.177.121
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.77
+    current: 0.130.78
     meaning: intended platform release for the actual server configuration

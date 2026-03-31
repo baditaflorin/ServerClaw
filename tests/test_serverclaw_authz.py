@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import urllib.error
 from datetime import timedelta
 from pathlib import Path
@@ -161,3 +162,16 @@ def test_repo_path_prefers_the_worktree_for_tracked_repo_files(monkeypatch, tmp_
     monkeypatch.setattr(serverclaw_authz, "COMMON_REPO_ROOT", shared_root)
 
     assert serverclaw_authz.repo_path("config/serverclaw-authz/bootstrap.json") == tracked_file
+
+
+def test_cli_help_bootstraps_repo_platform_package_when_run_directly(tmp_path: Path) -> None:
+    result = subprocess.run(
+        ["uv", "run", "--with", "pyyaml", "python3", str(REPO_ROOT / "scripts" / "serverclaw_authz.py"), "--help"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "usage:" in result.stdout.lower()
