@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.111",
-  "platform_version": "0.130.73",
-  "generated_at": "2026-03-31T00:53:05Z",
-  "next_refresh_at": "2026-03-31T01:53:05Z",
+  "repo_version": "0.177.112",
+  "platform_version": "0.130.74",
+  "generated_at": "2026-03-31T04:27:52Z",
+  "next_refresh_at": "2026-03-31T05:27:52Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -418,7 +418,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:8013",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-31T00:00:00Z"
       },
       "ntfy": {
         "service_name": "ntfy",
@@ -5285,10 +5285,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.110",
+    "last_version": "0.177.111",
     "deployed_at": "2026-03-31",
-    "summary": "integrates ADR 0291 into main by replaying JupyterHub as the authenticated interactive notebook environment on the latest realistic origin/main baseline, preserving the verified notebooks.lv3.org, Keycloak, Ollama, platform-context, and smoke-user contract without inventing a new branch-local truth source",
-    "release_notes_url": "docs/release-notes/0.177.111.md"
+    "summary": "implements ADR 0297 by deploying the repo-managed Renovate proposal path through private Gitea Actions, OpenBao-minted short-lived tokens, and the Harbor-pinned runtime while preserving exact-main dashboard and governed update PR creation",
+    "release_notes_url": "docs/release-notes/0.177.112.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

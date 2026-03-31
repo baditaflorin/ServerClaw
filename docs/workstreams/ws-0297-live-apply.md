@@ -2,7 +2,13 @@
 
 - ADR: [ADR 0297](../adr/0297-renovate-bot-as-the-automated-stack-version-upgrade-proposer.md)
 - Title: Deploy the repo-managed Renovate proposal path through Gitea Actions, OpenBao, and Harbor
-- Status: in_progress
+- Status: live_applied
+- Included In Repo Version: 0.177.112
+- Branch-Local Receipt: `receipts/live-applies/2026-03-31-adr-0297-renovate-live-apply.json`
+- Canonical Mainline Receipt: `receipts/live-applies/2026-03-31-adr-0297-renovate-mainline-live-apply.json`
+- Live Applied In Platform Version: 0.130.74
+- Implemented On: 2026-03-31
+- Live Applied On: 2026-03-31
 - Branch: `codex/ws-0297-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-live-apply`
 - Owner: codex
@@ -86,23 +92,26 @@
 - `docker-build-lv3` runs the managed Gitea runner with a mounted OpenBao-rendered Renovate bootstrap env file
 - a manual or scheduled Gitea Actions run executes Renovate successfully from the Harbor-pinned image using a short-lived token minted at job runtime
 
-## Current Branch State
+## Verification
 
-- the repo-managed Renovate config, workflow, token helper, and validation hooks are implemented on this branch
-- the Gitea/OpenBao/runner plumbing is now live on the current platform: `make converge-openbao` succeeded after publishing the private OpenBao HTTP listener on `10.10.10.20:8201`, and `make converge-gitea` then completed successfully with the Renovate bot account plus runner credential bundle in place
-- the live replay uncovered and repaired shared dependency drift outside the narrow ADR 0297 surface: Docker worktree path handling, PostgreSQL reserved connection budgeting, Keycloak realm-object retries, mail-platform stale-network recovery, and OpenBao credential helper recovery now match the settled live estate on this branch
-- branch-local evidence already proves the runner host renders `/opt/gitea-runner/credentials/renovate/renovate.env`, the runner container sees `/var/run/lv3/renovate/renovate.env`, and the Gitea admin API returns an active `renovate-bot` identity
-- the synchronized validation rerun also refreshed shared generated surfaces and one repo-local typing affordance that now belong to this documented branch boundary: the README document index picked up the Renovate runbook and workstream entries, the platform manifest and agent-coordination map refreshed to current truth, and `platform/repo.py` now carries the explicit untyped `yaml` import annotation required by the latest mainline type-check lane
-- the first governed private Gitea push and manual Renovate dispatch both reached the live internal repo, but the resulting `validate.yml` and `renovate.yml` runs failed immediately on `docker-build-lv3` because the default job runtime lacked `node` for `actions/checkout` and lacked `python3` in the same execution surface; the branch now carries the workflow-side fix by pinning those jobs to the Python runner image, replacing `actions/checkout` with a token-authenticated `git fetch`, and bootstrapping the Docker CLI only for Renovate
-- the second repository-boundary replay on that workflow baseline fix initially still failed before checkout because Harbor regressed to `502 Bad Gateway` on the pinned `registry.lv3.org/check-runner/python:3.12.10@sha256:46d204...` job image pull even though the Harbor converge itself reported success; branch-local evidence now preserves both the Gitea job logs and the failed public, runtime-local, and build-host probes
-- the shared recovery path is now live again: `make converge-docker-publication-assurance env=production` repaired the stale Docker publication drift, `https://registry.lv3.org/api/v2.0/ping` returns `Pong`, `https://registry.lv3.org/v2/` and `http://127.0.0.1:8095/v2/` both answer with the expected registry auth challenge, and `docker-build-lv3` can once again pull `registry.lv3.org/check-runner/python:3.12.10`
-- the branch also now carries a Harbor runtime regression guard for this exact failure mode by asserting that the OIDC readiness recycle restored both the Harbor compose network membership and the published registry port binding before the role treats the recycle as healthy
-- the hosted `validate.yml` replay on a clean Gitea checkout also exposed a shared receipt durability gap: branch-local live-apply receipts can outlive the fetchable reachability of their original workstream commits, so this branch now updates `scripts/live_apply_receipts.py`, its regression tests, and the paired runbooks to require exact git-hash syntax by default while preserving an opt-in strict object audit through `LV3_REQUIRE_RECEIPT_SOURCE_COMMIT_OBJECTS=1`
-- the remaining end-to-end proof is now to re-push the updated branch into the private Gitea repo on top of the recovered Harbor path, verify the push-triggered `validate.yml` and `release-bundle.yml` runs succeed on the live runner, and re-dispatch the Renovate workflow until the short-lived token path succeeds end to end
+- The integrated `0.177.112 / 0.130.74` tree passes the direct release-tree validation bundle: `uv run --with pytest --with pyyaml --with jsonschema --with jinja2 pytest -q tests/test_gitea_workflows.py tests/test_renovate_automation.py tests/test_gitea_runtime_role.py` returned `23 passed in 0.81s`, `uv run --with pyyaml python3 scripts/validate_renovate_contract.py` passed, `npx --yes --package renovate@42.76.4 renovate-config-validator renovate.json` reported `Config validated successfully`, `uv run --with pyyaml --with jsonschema python3 scripts/live_apply_receipts.py --validate` passed, `uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate` passed after syncing `versions/stack.yaml.release_tracks.platform_versioning.current`, `./scripts/validate_repo.sh agent-standards` passed, and `git diff --check` stayed clean.
+- The focused repo automation slice passed after the final hosted-runtime repairs: `uv run --with pytest --with pyyaml --with jsonschema --with jinja2 pytest -q tests/test_gitea_workflows.py tests/test_renovate_automation.py tests/test_gitea_runtime_role.py` returned `23 passed in 0.83s`, `uv run --with pyyaml python3 scripts/validate_renovate_contract.py` passed, and the pinned runtime validator `npx --yes --package renovate@42.76.4 renovate-config-validator renovate.json` reported `Config validated successfully`.
+- The runner bootstrap and credential path remain live on production: the branch evidence proves `/opt/gitea-runner/credentials/renovate/renovate.env` is rendered on `docker-build-lv3`, the runner container sees `/var/run/lv3/renovate/renovate.env`, and the Gitea admin API returns an active `renovate-bot` identity.
+- Branch-local hosted validation now succeeds from the latest `origin/main` lineage on the private Gitea branch snapshot: `release-bundle.yml` run `162` and `validate.yml` run `163` both concluded `success` on `codex/ws-0297-live-apply`.
+- Branch-local hosted Renovate is now live end to end: `renovate.yml` run `165` / job `219` concluded `success`, created the `Renovate Dashboard` issue (`#3`), and opened governed PRs `#1` and `#2` against the private `ops/proxmox_florin_server` repo.
+- The exact-main publication step then replayed the verified source tree onto the private Gitea `main` snapshot and re-verified the hosted mainline paths that matter for ADR 0297: `validate.yml` run `169` concluded `success`, `renovate.yml` run `170` concluded `success`, and the mainline replay kept the Renovate dashboard plus governed update PR creation live after the protected integration step.
+- `make remote-validate` from the released tree passed every selected lane after the `versions/stack.yaml` release-track sync except the intentional `workstream-surfaces` guard, which rejects a branch once its owning workstream is terminal.
+- `make pre-push-gate` from the released tree showed the same repo-content result on its remote primary-branch leg: every lane passed except the intentional `workstream-surfaces` guard. The local fallback then repeated that terminal-branch ownership failure and also timed out `ansible-lint` after `600` seconds on the local arm64 wrapper path.
+- The exact-main replay also surfaced two shared follow-ups outside ADR 0297's success boundary: `release-bundle.yml` run `168` failed because Gitea attachments storage returned `no space left on device`, and one refreshed Renovate PR-sync validation run (`validate.yml` run `171`) still saw an incomplete checkout workspace on a stale pre-existing PR branch.
 
-## Pending Verification
+## Results
 
-- refresh this worktree onto the latest `origin/main`, rerun the repo validation contract from the settled branch state, and preserve the outputs in branch-local receipts
-- re-publish the updated source commit into the private Gitea repo so the workflow baseline fix plus the Harbor regression guard are present in the live internal snapshot
-- verify the push-triggered `validate.yml` and `release-bundle.yml` runs now succeed on `docker-build-lv3`, then re-dispatch the Renovate workflow against the pushed Gitea ref and preserve the successful run plus dashboard or PR evidence in receipts
-- update ADR 0297 metadata, the ADR index, and the workstream registry with the final implemented and live-applied facts once the branch-local and exact-main proofs are both complete
+- ADR 0297 is now implemented in repository version `0.177.112` and first verified live on platform version `0.130.74`.
+- The private Gitea Actions path on `docker-build-lv3` now runs the Harbor-pinned Renovate runtime with a short-lived scoped token minted at job start from the OpenBao-rendered bootstrap bundle.
+- The private Gitea `main` snapshot now has a verified Renovate dashboard plus governed update-PR creation path on top of the exact source tree that settled this ADR's workflow contract.
+- The branch-local receipt remains the pre-integration audit trail, while the canonical mainline receipt records the exact-main hosted verification that backs the protected release and canonical-truth updates.
+
+## Mainline Closeout
+
+- None for ADR 0297 itself. The protected release and canonical-truth surfaces are refreshed, and the canonical mainline receipt now records the first verified platform version for the ADR.
+- Shared platform follow-up remains after merge: expand Gitea attachment storage so `release-bundle` asset uploads can succeed again, and recycle stale Renovate PR branches so every `pull_request_sync` validation run starts from a complete checkout workspace.

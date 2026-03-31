@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-31'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 269
+  Implemented: 271
   Partial: 6
-  Not Implemented: 48
+  Not Implemented: 46
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5098,7 +5098,7 @@ adr_index:
   - adr: 0291
     title: JupyterHub As The Interactive Notebook Environment
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -5109,6 +5109,7 @@ adr_index:
       - environment
     summary: We will deploy JupyterHub as the shared interactive notebook environment.
     filename: 0291-jupyterhub-as-the-interactive-notebook-environment.md
+    implemented_version: 0.177.111
   - adr: 0291
     title: SFTPGo As The Managed File Transfer Service With REST Provisioning
     status: Accepted
@@ -5243,7 +5244,7 @@ adr_index:
   - adr: 0297
     title: Renovate Bot As The Automated Stack Version Upgrade Proposer
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: release
     keywords:
@@ -5257,6 +5258,7 @@ adr_index:
       - proposer
     summary: We will deploy Renovate Bot as a scheduled Gitea Actions job on
     filename: 0297-renovate-bot-as-the-automated-stack-version-upgrade-proposer.md
+    implemented_version: 0.177.112
   - adr: 0298
     title: Syft And Grype For Platform-Wide SBOM Generation And Continuous CVE Scanning
     status: Accepted

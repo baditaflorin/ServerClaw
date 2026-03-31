@@ -1,0 +1,2 @@
+ INFO: Validating renovate.json
+ INFO: Config validated successfully

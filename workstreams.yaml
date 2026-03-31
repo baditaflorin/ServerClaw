@@ -16870,7 +16870,7 @@ workstreams:
   - id: ws-0297-live-apply
     adr: "0297"
     title: Live apply Renovate as the automated stack version upgrade proposer from latest origin/main
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0297-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-live-apply
@@ -16890,6 +16890,12 @@ workstreams:
       - docs/adr/0297-renovate-bot-as-the-automated-stack-version-upgrade-proposer.md
       - docs/adr/.index.yaml
       - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
       - build/platform-manifest.json
       - docs/diagrams/agent-coordination-map.excalidraw
       - docs/runbooks/configure-gitea.md
@@ -16940,7 +16946,9 @@ workstreams:
       - tests/test_postgres_vm_role.py
       - tests/test_renovate_automation.py
       - tests/test_validate_repo_cache.py
-      - receipts/live-applies/
+      - receipts/live-applies/2026-03-31-adr-0297-renovate-live-apply.json
+      - receipts/live-applies/2026-03-31-adr-0297-renovate-mainline-live-apply.json
+      - receipts/live-applies/evidence/*ws-0297-*
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -16971,7 +16979,8 @@ workstreams:
             - platform/repo.py
             - tests/test_live_apply_receipts.py
             - tests/test_renovate_automation.py
-            - receipts/live-applies/2026-03-30-adr-0297-renovate-live-apply.json
+            - receipts/live-applies/2026-03-31-adr-0297-renovate-live-apply.json
+            - receipts/live-applies/2026-03-31-adr-0297-renovate-mainline-live-apply.json
             - receipts/live-applies/evidence/*ws-0297-*
           mode: exclusive
         - id: adr_0297_generated_truth_support
@@ -16981,6 +16990,21 @@ workstreams:
             - docs/diagrams/agent-coordination-map.excalidraw
           mode: shared_contract
           contract: latest-main-generated-truth-v1
+        - id: release_management_surfaces
+          paths:
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: platform_truth_generation
+          paths:
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: canonical-truth-v1
         - id: gitea_openbao_runner_shared_contract
           paths:
             - inventory/host_vars/proxmox_florin.yml
@@ -17024,8 +17048,14 @@ workstreams:
             - tests/test_postgres_vm_role.py
           mode: shared_contract
           contract: live-replay-recovery-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0297 by deploying the repo-managed Renovate proposal path through private Gitea Actions, OpenBao-minted short-lived tokens, and the Harbor-pinned runtime while preserving exact-main dashboard and governed update PR creation
+      release_bump: patch
+      included_in_repo_version: 0.177.112
+      latest_receipts:
+        renovate: 2026-03-31-adr-0297-renovate-mainline-live-apply
   - id: ws-0301-live-apply
     adr: "0301"
     title: Live apply ADR 0301 from latest origin/main

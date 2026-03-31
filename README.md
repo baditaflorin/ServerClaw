@@ -70,6 +70,8 @@ Harbor is now live on `docker-runtime-lv3` and published at `https://registry.lv
 
 Signed release bundles are now live through that private Gitea path: the repo-managed `release-bundle` workflow publishes tarball, checksum, and Sigstore bundle assets into private Gitea Releases, and controller-side replay now verifies those assets with Cosign against the committed public key before treating them as eligible runtime input.
 
+Renovate is now live through that same private Gitea Actions path on `docker-build-lv3`: the Harbor-pinned `registry.lv3.org/check-runner/renovate:42.76.4` runtime mints a short-lived scoped Gitea token from the OpenBao-rendered bootstrap bundle at job start, maintains the private `Renovate Dashboard`, and now opens governed `main`-targeted update PRs against `ops/proxmox_florin_server`.
+
 Dozzle is now live on `docker-runtime-lv3` and published at `https://logs.lv3.org`, with repo-managed agents on `docker-build-lv3` and `monitoring-lv3`, shared-edge Keycloak auth, and verified remote agent reachability over the guest network.
 
 Homepage is now live on `docker-runtime-lv3` and published at `https://home.lv3.org`, with repo-generated service and bookmark catalogs, shared-edge Keycloak auth, and a verified public redirect to the oauth2-proxy sign-in flow.
@@ -196,8 +198,8 @@ ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-l
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.111` |
-| Platform version | `0.130.73` |
+| Repository version | `0.177.112` |
+| Platform version | `0.130.74` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -360,6 +362,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `public_endpoint_admission_control` | `2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply` |
 | `realtime` | `2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply` |
 | `remote_build_gateway` | `2026-03-29-adr-0265-immutable-validation-snapshots-mainline-live-apply` |
+| `renovate` | `2026-03-31-adr-0297-renovate-mainline-live-apply` |
 | `repo_deploy_base_image_cache` | `2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply` |
 | `restore_verification` | `2026-03-29-adr-0272-restore-readiness-mainline-live-apply` |
 | `route_dns_assertion_ledger` | `2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply` |
@@ -1452,8 +1455,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.111` |
-| Platform version | `0.130.73` |
+| Repository version | `0.177.112` |
+| Platform version | `0.130.74` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1772,6 +1775,7 @@ This repository is intentionally opinionated:
 | `0295` | Shared artifact cache plane and dedicated cache VM roadmap | `live_applied` | [adr-0295-artifact-cache-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `merged` | [ws-0295-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md) |
 | `0296` | Live apply the dedicated artifact cache VM from latest origin/main | `live_applied` | [ws-0296-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-live-apply.md) |
+| `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `live_applied` | [ws-0297-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md) |
 | `0301` | Live apply ADR 0301 from latest origin/main | `merged` | [ws-0301-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0301-live-apply.md) |
 <!-- END GENERATED: merged-workstreams -->
 
