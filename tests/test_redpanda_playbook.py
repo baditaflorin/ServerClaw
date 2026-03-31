@@ -17,8 +17,8 @@ ROOT_PLAYBOOK = REPO_ROOT / "playbooks" / "redpanda.yml"
 SERVICE_PLAYBOOK = REPO_ROOT / "playbooks" / "services" / "redpanda.yml"
 
 
-def test_collection_playbook_targets_runtime_host_and_roles() -> None:
-    plays = yaml.safe_load(COLLECTION_PLAYBOOK.read_text())
+def test_root_playbook_targets_runtime_host_and_roles() -> None:
+    plays = yaml.safe_load(ROOT_PLAYBOOK.read_text())
     play = plays[0]
 
     assert play["hosts"] == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
@@ -35,11 +35,11 @@ def test_collection_playbook_targets_runtime_host_and_roles() -> None:
     assert post_verify["vars"]["service_health_probe_id"] == "redpanda"
 
 
-def test_root_and_service_wrappers_import_redpanda_playbooks() -> None:
-    root = yaml.safe_load(ROOT_PLAYBOOK.read_text())
+def test_collection_and_service_wrappers_import_redpanda_playbooks() -> None:
+    collection = yaml.safe_load(COLLECTION_PLAYBOOK.read_text())
     service = yaml.safe_load(SERVICE_PLAYBOOK.read_text())
 
-    assert root == [{"import_playbook": "../collections/ansible_collections/lv3/platform/playbooks/redpanda.yml"}]
+    assert collection == [{"import_playbook": "../../../../../playbooks/redpanda.yml"}]
     assert service == [{"import_playbook": "../redpanda.yml"}]
 
 

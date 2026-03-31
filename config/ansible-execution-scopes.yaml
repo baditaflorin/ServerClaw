@@ -49,6 +49,12 @@ playbooks:
     shared_surfaces:
       - service:dify
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/redpanda.yml:
+    playbook_id: redpanda
+    mutation_scope: platform
+    shared_surfaces:
+      - service:redpanda
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/database-dns.yml:
     playbook_id: database-dns
     mutation_scope: platform
