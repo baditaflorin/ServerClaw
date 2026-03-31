@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.119",
+  "repo_version": "0.177.120",
   "platform_version": "0.130.77",
-  "generated_at": "2026-03-31T15:15:59Z",
-  "next_refresh_at": "2026-03-31T16:15:59Z",
+  "generated_at": "2026-03-31T16:58:45Z",
+  "next_refresh_at": "2026-03-31T17:58:45Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -243,6 +243,18 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://grafana.lv3.org",
+        "last_live_apply": "2026-03-31T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "grist": {
+        "service_name": "Grist",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://grist.lv3.org",
         "last_live_apply": "2026-03-31T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -5554,10 +5566,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.118",
+    "last_version": "0.177.119",
     "deployed_at": "2026-03-31",
-    "summary": "integrates ADR 0306 into main by adding repo-managed Checkov IaC policy scanning to the shared validation gate, build-server remote validation, and the self-hosted validate workflow while preserving the already-current platform baseline 0.130.77 and the earlier exact-main hosted verification proof first established on 0.130.75",
-    "release_notes_url": "docs/release-notes/0.177.119.md"
+    "summary": "integrates ADR 0279 into main by replaying Grist on the latest 0.177.119 mainline, carrying forward the local/public auth-shell verification fixes, the restic live-apply trigger hardening, and the Docker post-restart compose recovery safeguards needed for the final exact-head live apply",
+    "release_notes_url": "docs/release-notes/0.177.120.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

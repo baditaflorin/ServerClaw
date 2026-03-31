@@ -2099,7 +2099,7 @@ workstreams:
   - id: ws-0279-main-merge
     adr: "0279"
     title: Integrate ADR 0279 exact-main replay onto current origin/main
-    status: in_progress
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0279-main-publish-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1
@@ -2265,18 +2265,16 @@ workstreams:
             - receipts/live-applies/evidence/2026-03-31-ws-0279-mainline-*
           mode: shared_contract
           contract: live-apply-receipts-v1
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: true
     canonical_truth:
-      changelog_entry: integrates ADR 0279 into main by replaying the Grist
-        service on the synchronized 0.177.112 / 0.130.74 baseline, landing the
-        Grist persist-ownership repair plus the Docker bridge-chain, Keycloak,
-        and mail-platform recovery hardening discovered during the latest-main
-        run, restoring the split static-plus-secret Grist OIDC runtime
-        configuration, and advancing platform_version to 0.130.75 after the
-        successful March 31 r5 live apply
+      changelog_entry: integrates ADR 0279 into main by replaying Grist on the
+        latest 0.177.119 mainline, carrying forward the local/public auth-shell
+        verification fixes, the restic live-apply trigger hardening, and the
+        Docker post-restart compose recovery safeguards needed for the final
+        exact-head live apply
       release_bump: patch
-      included_in_repo_version: 0.177.113
+      included_in_repo_version: 0.177.120
       latest_receipts:
         grist: 2026-03-31-adr-0279-grist-mainline-live-apply
   - id: ws-0283-live-apply
