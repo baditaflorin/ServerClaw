@@ -36,6 +36,12 @@ Inspect the configured checks and the last recorded outcomes:
 make gate-status
 ```
 
+Run just the governed IaC policy slice:
+
+```bash
+python3 scripts/parallel_check.py iac-policy-scan
+```
+
 Inspect the lane catalog and the current lane selection for this checkout:
 
 ```bash
@@ -93,6 +99,9 @@ The `integration-tests` stage runs [scripts/integration_suite.py](/Users/live/Do
 The `artifact-secret-scan` stage runs [scripts/published_artifact_secret_scan.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/published_artifact_secret_scan.py) in the security runner image so published receipts and generated portal/search artifacts are checked with `gitleaks` before merge.
 
 The `semgrep-sast` stage runs [scripts/semgrep_gate.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/semgrep_gate.py) in the published Python runner image, installs the pinned `semgrep==1.155.0` package with a pip cache mount, and then scans the repo-managed rule packs under `config/semgrep/rules/` across Python automation, Dockerfiles, and governed executable surfaces. The wrapper writes SARIF output under `receipts/sast/`, writes a JSON summary under `.local/validation-gate/semgrep-summary.json`, forces Semgrep into no-git traversal mode when the checkout is an immutable snapshot or worker mirror, and emits best-effort `sast_finding_introduced` mutation-audit events only when a comparable baseline can actually be resolved.
+
+ADR 0306 adds `iac-policy-scan`, which runs [scripts/iac_policy_scan.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/iac_policy_scan.py) in the security runner image. That wrapper uses offline Checkov against the repo's real OpenTofu and Ansible surfaces, emits JSON plus SARIF receipts under [receipts/checkov](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/checkov), applies the repo-managed suppression catalog in [config/checkov/skip-checks.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/checkov/skip-checks.yaml), and records the current Docker Compose template gap explicitly because the pinned offline Checkov build does not expose `docker_compose`.
+The blocking ADR 0306 invariants are repo-managed rule ids `CKV_LV3_1` through `CKV_LV3_3`; the current `provider "proxmox" { insecure = true }` state is preserved as warning `CKV_LV3_4` and therefore does not fail the gate.
 
 When the push starts from a Git worktree checkout, [scripts/remote_exec.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/remote_exec.sh) now builds one immutable content-addressed repository snapshot, uploads that archive into the active build-server session workspace, and unpacks it into a fresh `.lv3-runs/<run_id>/repo` namespace before running remote checks. The remote gate therefore validates one consistent repository image without depending on mirrored `.git/worktrees/...` metadata.
 [scripts/run_python_with_packages.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/run_python_with_packages.sh) now keeps Python-based gate checks runnable inside the registry-backed runner images even when those images do not ship `uv`; the helper uses `uv` when present and otherwise falls back to the runner's native Python plus pip-installed dependencies only when imports are missing.

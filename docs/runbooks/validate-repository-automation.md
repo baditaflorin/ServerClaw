@@ -56,6 +56,7 @@ runner `docker-build-lv3`.
 - repo-managed Semgrep rules scan governed code surfaces and emit SARIF receipts under `receipts/sast/`
 - service-owning roles ship and import explicit `tasks/verify.yml` contracts
 - canonical repository data models pass schema validation
+- the ADR 0306 IaC policy scan runs Checkov across the governed OpenTofu and Ansible surfaces, emits JSON plus SARIF receipts under `receipts/checkov/`, and records the current Docker Compose template gap explicitly
 - declared-to-live attestation contracts stay covered by the focused runtime, API gateway, and ops-portal regression slice
 - architecture fitness functions verify the governed replaceability scorecards and vendor exit plans for critical product ADRs
 - provider-boundary anti-corruption guards keep raw provider payload selectors confined to the declared boundary translation step
@@ -76,6 +77,7 @@ runner `docker-build-lv3`.
 - the mirrored Windmill worker checkout must include `README.md`, `VERSION`, `changelog.md`, `mkdocs.yml`, `roles/`, `versions/`, and `workstreams.yaml` because the worker-safe `generated-docs` and `generated-portals` checks read those canonical inputs even when the checkout has no `.git` metadata
 - repo-scoped `playbooks/windmill.yml` replays now mirror the active git worktree automatically because the worker-checkout archive dereferences the scoped-runner shard symlinks before upload
 - the build-server `remote-validate` and `remote-pre-push` paths now stage one immutable content-addressed repository snapshot per run and execute from a fresh `.lv3-runs/<run_id>/repo` namespace instead of a mutable remote mirror
+- ADR 0306 runs the IaC policy slice through the `check-runner/security` image so Checkov stays pinned to the same offline version across controller-local, build-server, and workflow replays
 - `make converge-windmill` now pins `/srv/proxmox_florin_server` to the active repo worktree automatically via `windmill_worker_checkout_repo_root_local_dir=$(REPO_ROOT)`
 - if a Windmill replay starts from an out-of-tree or temporary playbook path instead of the Makefile wrapper, pass `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` explicitly
 - validation resolves tracked JSON files against the repo root, falls back to `python3` when `jq` is unavailable, and skips rsync-excluded generated JSON artifacts that are intentionally absent from mirrored remote workspaces
@@ -119,6 +121,7 @@ Focused declared-to-live validation can also be replayed directly:
 ```bash
 uv run --with pytest --with fastapi==0.116.1 --with httpx==0.28.1 --with uvicorn==0.35.0 --with pyyaml==6.0.2 --with cryptography==45.0.6 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest -q tests/test_declared_live_attestation.py tests/test_api_gateway.py tests/test_interactive_ops_portal.py
 uv run --with pyyaml python3 scripts/declared_live_attestation.py --repo-root . --service api_gateway --format json --timeout-seconds 5
+python3 scripts/parallel_check.py iac-policy-scan
 ```
 
 `make validate-dependency-direction` enforces ADR 0208. It scans `platform/`

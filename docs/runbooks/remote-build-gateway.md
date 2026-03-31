@@ -68,6 +68,10 @@ That run now records `.local/validation-gate/remote-validate-last-run.json` in t
 - the declared capability contract for that runner
 - the per-run environment attestation for architecture, tooling, container runtime, network class, and scratch-space guarantees
 
+The `remote-validate` path now also includes ADR 0306 `iac-policy-scan`, so the
+build server proves the same Checkov-backed IaC policy contract that the local
+pre-push gate uses.
+
 Run the full pre-push gate remotely, but allow local fallback if the build server is offline:
 
 ```bash
