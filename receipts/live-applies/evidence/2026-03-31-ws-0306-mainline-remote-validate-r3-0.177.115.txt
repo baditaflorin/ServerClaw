@@ -1,0 +1,21 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh remote-validate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Validation lane selection
+  mode: explicit_checks
+  branch: HEAD
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder
+  blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, policy-validation, iac-policy-scan, alert-rule-validation, type-check, dependency-graph
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 0.75
+alert-rule-validation passed 1.39
+ansible-syntax        passed 102.92
+dependency-graph      passed 2.25
+iac-policy-scan       passed 27.81
+policy-validation     passed 1.02
+schema-validation     passed 13.93
+type-check            passed 3.00
+workstream-surfaces   passed 3.09

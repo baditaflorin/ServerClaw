@@ -103,20 +103,21 @@ does not yet have.
   passed end to end on the remote build-server path with
   `.local/validation-gate/remote-validate-last-run.json` recording
   `"source": "build-server-validate"` and is captured in
-  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-remote-validate-r2-0.177.114.txt`
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-remote-validate-r3-0.177.115.txt`;
+  the first `0.177.115` retries exposed active-workstream ownership overlaps on
+  `.gitea/workflows/validate.yml` and `.config-locations.yaml`, which were then
+  moved under shared contracts before the clean remote pass
 - `make pre-push-gate`
   passed end to end on the remote build-server path with
   `.local/validation-gate/last-run.json` recording `"source": "build-server"`
   and is captured in
-  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-pre-push-gate-r1-0.177.114.txt`
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-pre-push-gate-r1-0.177.115.txt`
 - the current release-candidate baseline is `0` blocking errors, `2`
   warning-level `CKV_LV3_4` findings for `provider.proxmox insecure = true`,
-  and `876` note-level upstream Ansible findings
+  and `876` note-level upstream Ansible findings at repo version `0.177.115`
 
 ## Remaining Verification Before Mainline Closeout
 
-- rebase the candidate onto the latest `origin/main` before hosted validation
-  and final publication
 - push the rebased branch and confirm the self-hosted `validate` workflow runs
   the new `iac-policy-scan` step successfully on the hosted mirror
 - validate the exact-main tree on the hosted mainline path, then update ADR

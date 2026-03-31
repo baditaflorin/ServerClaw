@@ -82,12 +82,16 @@ workstreams:
           paths:
             - docs/workstreams/ws-0306-live-apply.md
             - docs/adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md
-            - .config-locations.yaml
             - docs/runbooks/iac-policy-scanning.md
             - docs/runbooks/remote-build-gateway.md
             - docs/runbooks/validate-repository-automation.md
             - docs/runbooks/validation-gate.md
           mode: exclusive
+        - id: adr_0306_config_locations_contract
+          paths:
+            - .config-locations.yaml
+          mode: shared_contract
+          contract: repository-automation-v1
         - id: adr_0306_generated_truth_support
           paths:
             - README.md
@@ -121,7 +125,6 @@ workstreams:
           contract: latest-main-integration-v1
         - id: adr_0306_ci_surface
           paths:
-            - .gitea/workflows/validate.yml
             - config/checkov/*
             - config/checkov/**/*
             - config/build-server.json
@@ -130,6 +133,11 @@ workstreams:
             - config/validation-lanes.yaml
             - config/validation-runner-contracts.json
           mode: exclusive
+        - id: adr_0306_validate_workflow_contract
+          paths:
+            - .gitea/workflows/validate.yml
+          mode: shared_contract
+          contract: repository-automation-v1
         - id: adr_0306_runtime
           paths:
             - scripts/iac_policy_scan.py
@@ -158,7 +166,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0306 by adding repo-managed Checkov IaC policy scanning to the shared validation gate, build-server remote validation, and the self-hosted validate workflow while recording the current Docker Compose template gap and the warning-only Proxmox TLS baseline explicitly
       release_bump: patch
-      included_in_repo_version: 0.177.114
+      included_in_repo_version: 0.177.115
       latest_receipts:
         iac_policy_scanning: 2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply
   - id: ws-0302-live-apply
