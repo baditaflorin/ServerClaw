@@ -1,0 +1,35 @@
+# Purpose: Set the default paths, image, ports, resource limits, and verification fixtures for the private Crawl4AI runtime.
+# Use case: Load when converging the Crawl4AI service so the role can render config, compose state, and health checks consistently.
+# Inputs: Platform topology, image catalog, and optional role overrides.
+# Outputs: Default variables consumed by the crawl4ai_runtime tasks, templates, and verification steps.
+# Idempotency: Fully idempotent; defaults describe desired values only.
+# Dependencies: ADR 0165 metadata standard, ADR 0288, and the crawl4ai_runtime role.
+---
+crawl4ai_runtime_site_dir: /opt/crawl4ai
+crawl4ai_runtime_config_dir: /etc/lv3/crawl4ai
+crawl4ai_runtime_compose_file: "{{ crawl4ai_runtime_site_dir }}/docker-compose.yml"
+crawl4ai_runtime_config_file: "{{ crawl4ai_runtime_config_dir }}/config.yml"
+crawl4ai_runtime_container_name: crawl4ai
+crawl4ai_runtime_container_port: 11235
+crawl4ai_runtime_image: "{{ container_image_catalog.images.crawl4ai_runtime.ref }}"
+crawl4ai_runtime_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('crawl4ai', 'internal') }}"
+crawl4ai_runtime_internal_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('crawl4ai', 'internal') }}"
+crawl4ai_runtime_local_base_url: "http://127.0.0.1:{{ crawl4ai_runtime_port }}"
+crawl4ai_runtime_healthcheck_path: /health
+crawl4ai_runtime_monitor_health_path: /monitor/health
+crawl4ai_runtime_playground_path: /playground
+crawl4ai_runtime_config_version: "0.8.0"
+crawl4ai_runtime_rate_limit: 120/minute
+crawl4ai_runtime_pull_retries: 4
+crawl4ai_runtime_pull_delay_seconds: 10
+crawl4ai_runtime_pool_max_pages: 10
+crawl4ai_runtime_pool_idle_ttl_seconds: 300
+crawl4ai_runtime_crawler_base_delay:
+  - 1.0
+  - 3.0
+crawl4ai_runtime_memory_threshold_percent: 90.0
+crawl4ai_runtime_memory_limit: 4g
+crawl4ai_runtime_cpu_limit: "2.0"
+crawl4ai_runtime_shm_size: 1g
+crawl4ai_runtime_verify_url: https://example.com/
+crawl4ai_runtime_verify_expected_substring: Example Domain

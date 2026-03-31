@@ -1,0 +1,90 @@
+# Purpose: Declare the argument contract for the Crawl4AI runtime role.
+# Use case: Run during syntax and argument validation before converging the Crawl4AI runtime.
+# Inputs: crawl4ai_runtime_* variables required by the role.
+# Outputs: Machine-readable argument specs for the crawl4ai_runtime role.
+# Idempotency: Fully idempotent; metadata only validates role inputs.
+# Dependencies: ADR 0165 metadata standard, ADR 0288, and the crawl4ai_runtime role tasks.
+---
+argument_specs:
+  main:
+    short_description: Converge the private Crawl4AI LLM-optimized web crawler runtime.
+    options:
+      crawl4ai_runtime_site_dir:
+        type: path
+        required: true
+      crawl4ai_runtime_config_dir:
+        type: path
+        required: true
+      crawl4ai_runtime_compose_file:
+        type: path
+        required: true
+      crawl4ai_runtime_config_file:
+        type: path
+        required: true
+      crawl4ai_runtime_container_name:
+        type: str
+        required: true
+      crawl4ai_runtime_container_port:
+        type: int
+        required: true
+      crawl4ai_runtime_image:
+        type: str
+        required: true
+      crawl4ai_runtime_port:
+        type: int
+        required: true
+      crawl4ai_runtime_internal_base_url:
+        type: str
+        required: true
+      crawl4ai_runtime_local_base_url:
+        type: str
+        required: true
+      crawl4ai_runtime_healthcheck_path:
+        type: str
+        required: true
+      crawl4ai_runtime_monitor_health_path:
+        type: str
+        required: true
+      crawl4ai_runtime_playground_path:
+        type: str
+        required: true
+      crawl4ai_runtime_config_version:
+        type: str
+        required: true
+      crawl4ai_runtime_rate_limit:
+        type: str
+        required: true
+      crawl4ai_runtime_pull_retries:
+        type: int
+        required: true
+      crawl4ai_runtime_pull_delay_seconds:
+        type: int
+        required: true
+      crawl4ai_runtime_pool_max_pages:
+        type: int
+        required: true
+      crawl4ai_runtime_pool_idle_ttl_seconds:
+        type: int
+        required: true
+      crawl4ai_runtime_crawler_base_delay:
+        type: list
+        elements: float
+        required: true
+      crawl4ai_runtime_memory_threshold_percent:
+        type: float
+        required: true
+      crawl4ai_runtime_memory_limit:
+        type: str
+        required: true
+      crawl4ai_runtime_cpu_limit:
+        type: str
+        required: true
+      crawl4ai_runtime_shm_size:
+        type: str
+        required: true
+      crawl4ai_runtime_verify_url:
+        type: str
+        required: true
+      crawl4ai_runtime_verify_expected_substring:
+        type: str
+        required: true

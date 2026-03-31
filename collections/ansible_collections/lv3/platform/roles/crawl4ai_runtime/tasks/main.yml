@@ -1,0 +1,289 @@
+---
+# Purpose: Converge the private Crawl4AI runtime on docker-runtime-lv3 with repo-managed rate-limit and observability settings.
+# Inputs: Pinned image catalog entry, private service URL, config/compose paths, and runtime resource limits.
+# Outputs: Rendered config and compose files plus a running Crawl4AI container that serves health, monitoring, and markdown crawl endpoints.
+# Idempotency: Partially idempotent; reruns reconcile the same compose stack, config, and host port binding.
+# Dependencies: ADR 0288 and ADR 0165; requires docker_runtime and linux_guest_firewall outputs.
+- name: Validate Crawl4AI runtime inputs
+  ansible.builtin.assert:
+    that:
+      - crawl4ai_runtime_site_dir | length > 0
+      - crawl4ai_runtime_config_dir | length > 0
+      - crawl4ai_runtime_compose_file | length > 0
+      - crawl4ai_runtime_config_file | length > 0
+      - crawl4ai_runtime_container_name | length > 0
+      - crawl4ai_runtime_container_port | int > 0
+      - crawl4ai_runtime_image | length > 0
+      - crawl4ai_runtime_port | int > 0
+      - crawl4ai_runtime_internal_base_url | length > 0
+      - crawl4ai_runtime_local_base_url | length > 0
+      - crawl4ai_runtime_healthcheck_path | length > 0
+      - crawl4ai_runtime_monitor_health_path | length > 0
+      - crawl4ai_runtime_playground_path | length > 0
+      - crawl4ai_runtime_config_version | length > 0
+      - crawl4ai_runtime_rate_limit | length > 0
+      - crawl4ai_runtime_pull_retries | int > 0
+      - crawl4ai_runtime_pull_delay_seconds | int >= 0
+      - crawl4ai_runtime_pool_max_pages | int > 0
+      - crawl4ai_runtime_pool_idle_ttl_seconds | int >= 0
+      - crawl4ai_runtime_crawler_base_delay | length == 2
+      - crawl4ai_runtime_memory_threshold_percent | float > 0
+      - crawl4ai_runtime_memory_limit | length > 0
+      - crawl4ai_runtime_cpu_limit | length > 0
+      - crawl4ai_runtime_shm_size | length > 0
+      - crawl4ai_runtime_verify_url | length > 0
+      - crawl4ai_runtime_verify_expected_substring | length > 0
+    fail_msg: >-
+      crawl4ai_runtime requires config and compose paths, the pinned image reference, a private runtime
+      port, resource limits, and verification inputs for the health, monitor, and markdown endpoints.
+
+- name: Ensure the Crawl4AI runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ crawl4ai_runtime_site_dir }}"
+      mode: "0755"
+    - path: "{{ crawl4ai_runtime_config_dir }}"
+      mode: "0755"
+
+- name: Render the Crawl4AI config file
+  ansible.builtin.template:
+    src: config.yml.j2
+    dest: "{{ crawl4ai_runtime_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: crawl4ai_runtime_config_template
+
+- name: Render the Crawl4AI compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ crawl4ai_runtime_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: crawl4ai_runtime_compose_template
+
+- name: Pull the Crawl4AI image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ crawl4ai_runtime_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ crawl4ai_runtime_site_dir }}"
+  register: crawl4ai_runtime_pull
+  changed_when: >-
+    'Pulling' in ((crawl4ai_runtime_pull.stdout | default('')) ~ ' ' ~ (crawl4ai_runtime_pull.stderr | default('')))
+    or 'Downloaded newer image' in ((crawl4ai_runtime_pull.stdout | default('')) ~ ' ' ~ (crawl4ai_runtime_pull.stderr | default('')))
+    or 'Pull complete' in ((crawl4ai_runtime_pull.stdout | default('')) ~ ' ' ~ (crawl4ai_runtime_pull.stderr | default('')))
+  retries: "{{ crawl4ai_runtime_pull_retries }}"
+  delay: "{{ crawl4ai_runtime_pull_delay_seconds }}"
+  until: crawl4ai_runtime_pull.rc == 0
+
+- name: Record whether Crawl4AI startup needs a force recreate
+  ansible.builtin.set_fact:
+    crawl4ai_runtime_force_recreate: >-
+      {{
+        crawl4ai_runtime_config_template.changed
+        or crawl4ai_runtime_compose_template.changed
+        or crawl4ai_runtime_pull.changed
+      }}
+
+- name: Build the Crawl4AI compose startup command
+  ansible.builtin.set_fact:
+    crawl4ai_runtime_compose_up_argv: >-
+      {{
+        [
+          'docker',
+          'compose',
+          '--file',
+          crawl4ai_runtime_compose_file,
+          'up',
+          '-d',
+          '--remove-orphans',
+        ] + (['--force-recreate'] if crawl4ai_runtime_force_recreate else [])
+      }}
+
+- name: Ensure the Crawl4AI runtime is running
+  block:
+    - name: Start the Crawl4AI runtime
+      ansible.builtin.command:
+        argv: "{{ crawl4ai_runtime_compose_up_argv }}"
+      args:
+        chdir: "{{ crawl4ai_runtime_site_dir }}"
+      register: crawl4ai_runtime_up
+      changed_when: >-
+        'Creating' in crawl4ai_runtime_up.stdout
+        or 'Recreating' in crawl4ai_runtime_up.stdout
+        or 'Starting' in crawl4ai_runtime_up.stdout
+  rescue:
+    - name: Flag stale Crawl4AI Docker bridge-network startup failures
+      ansible.builtin.set_fact:
+        crawl4ai_runtime_bridge_network_missing: >-
+          {{
+            (
+              'failed to set up container networking' in (
+                (ansible_failed_result.stderr | default(''))
+                ~ ' '
+                ~ (ansible_failed_result.stdout | default(''))
+              )
+              or 'failed to create endpoint' in (
+                (ansible_failed_result.stderr | default(''))
+                ~ ' '
+                ~ (ansible_failed_result.stdout | default(''))
+              )
+            )
+            and 'does not exist' in (
+              (ansible_failed_result.stderr | default(''))
+              ~ ' '
+              ~ (ansible_failed_result.stdout | default(''))
+            )
+          }}
+
+    - name: Surface unexpected Crawl4AI startup failures
+      ansible.builtin.fail:
+        msg: >-
+          {{
+            ansible_failed_result.stderr
+            | default(ansible_failed_result.stdout)
+            | default('Unknown Crawl4AI compose startup failure.')
+          }}
+      when: not crawl4ai_runtime_bridge_network_missing
+
+    - name: Reset stale Crawl4AI compose resources after bridge-network startup failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ crawl4ai_runtime_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ crawl4ai_runtime_site_dir }}"
+      register: crawl4ai_runtime_down_retry
+      changed_when: >-
+        'Stopping' in (crawl4ai_runtime_down_retry.stdout | default(''))
+        or 'Removing' in (crawl4ai_runtime_down_retry.stdout | default(''))
+        or 'Removing' in (crawl4ai_runtime_down_retry.stderr | default(''))
+      failed_when: false
+      when: crawl4ai_runtime_bridge_network_missing
+
+    - name: Restart Docker to restore bridge networking before retrying Crawl4AI startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: crawl4ai_runtime_bridge_network_missing
+
+    - name: Ensure Docker bridge networking chains are present before retrying Crawl4AI startup
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+      when: crawl4ai_runtime_bridge_network_missing
+
+    - name: Wait for the Docker daemon to answer after Crawl4AI bridge-network recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - info
+          - --format
+          - '{{ "{{.ServerVersion}}" }}'
+      register: crawl4ai_runtime_docker_info
+      changed_when: false
+      retries: 10
+      delay: 2
+      until: crawl4ai_runtime_docker_info.rc == 0
+      when: crawl4ai_runtime_bridge_network_missing
+
+    - name: Remove the broken Crawl4AI container before retrying startup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - rm
+          - -f
+          - "{{ crawl4ai_runtime_container_name }}"
+      register: crawl4ai_runtime_remove_broken_container
+      changed_when: >-
+        crawl4ai_runtime_remove_broken_container.rc == 0
+        and (crawl4ai_runtime_remove_broken_container.stdout | default('') | trim) != ''
+      failed_when: false
+      when: crawl4ai_runtime_bridge_network_missing
+
+    - name: Retry Crawl4AI startup after stale bridge-network cleanup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ crawl4ai_runtime_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ crawl4ai_runtime_site_dir }}"
+      register: crawl4ai_runtime_up
+      changed_when: true
+      when: crawl4ai_runtime_bridge_network_missing
+
+- name: Check whether Crawl4AI publishes the expected host port
+  ansible.builtin.command:
+    argv:
+      - docker
+      - port
+      - "{{ crawl4ai_runtime_container_name }}"
+      - "{{ crawl4ai_runtime_container_port }}/tcp"
+  register: crawl4ai_runtime_port_binding_check
+  changed_when: false
+  failed_when: false
+
+- name: Force-recreate Crawl4AI when the host port binding is missing
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ crawl4ai_runtime_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ crawl4ai_runtime_site_dir }}"
+  register: crawl4ai_runtime_force_recreate
+  changed_when: true
+  when: crawl4ai_runtime_port_binding_check.stdout | trim == ""
+
+- name: Wait for Crawl4AI to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ crawl4ai_runtime_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the Crawl4AI health endpoint
+  ansible.builtin.uri:
+    url: "{{ crawl4ai_runtime_local_base_url }}{{ crawl4ai_runtime_healthcheck_path }}"
+    method: GET
+    status_code:
+      - 200
+    return_content: false
+    timeout: 30
+  register: crawl4ai_runtime_healthcheck
+  retries: 24
+  delay: 5
+  until: crawl4ai_runtime_healthcheck.status == 200
+  changed_when: false
+
+- name: Verify the Crawl4AI runtime
+  ansible.builtin.import_tasks: verify.yml

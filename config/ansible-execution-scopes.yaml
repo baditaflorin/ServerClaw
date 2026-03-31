@@ -105,6 +105,12 @@ playbooks:
     shared_surfaces:
       - service:changedetection
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/crawl4ai.yml:
+    playbook_id: crawl4ai
+    mutation_scope: host
+    shared_surfaces:
+      - service:crawl4ai
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/directus.yml:
     playbook_id: directus
     mutation_scope: platform

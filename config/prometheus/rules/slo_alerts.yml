@@ -85,6 +85,46 @@ groups:
             docker-runtime-lv3 for governed upstream release, advisory, and API change
             monitoring.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_crawl4ai_availability
+        expr: (slo:crawl4ai_availability:error_rate_5m > (14 * 0.010000)) and (slo:crawl4ai_availability:error_rate_1h
+          > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: crawl4ai
+          slo_id: crawl4ai-availability
+          indicator: availability
+        annotations:
+          summary: crawl4ai-availability is burning its error budget at 14x
+          description: The private Crawl4AI runtime remains reachable on docker-runtime-lv3
+            for LLM-oriented Markdown extraction and bounded browser-assisted fetches.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_crawl4ai_availability
+        expr: slo:crawl4ai_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: crawl4ai
+          slo_id: crawl4ai-availability
+          indicator: availability
+        annotations:
+          summary: crawl4ai-availability is burning its error budget at 3x
+          description: The private Crawl4AI runtime remains reachable on docker-runtime-lv3
+            for LLM-oriented Markdown extraction and bounded browser-assisted fetches.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_crawl4ai_availability
+        expr: slo:crawl4ai_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: crawl4ai
+          slo_id: crawl4ai-availability
+          indicator: availability
+        annotations:
+          summary: crawl4ai-availability has less than 10% error budget remaining
+          description: The private Crawl4AI runtime remains reachable on docker-runtime-lv3
+            for LLM-oriented Markdown extraction and bounded browser-assisted fetches.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_directus_availability
         expr: (slo:directus_availability:error_rate_5m > (14 * 0.005000)) and (slo:directus_availability:error_rate_1h
           > (14 * 0.005000))

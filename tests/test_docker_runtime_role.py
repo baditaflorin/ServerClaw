@@ -119,6 +119,8 @@ def test_common_docker_bridge_chains_warms_control_socket_before_restarting() ->
     restart_task = next(task for task in tasks if task["name"] == "Restart Docker when required bridge chains are missing")
     nat_recheck = next(task for task in tasks if task["name"] == "Recheck Docker nat chain after health evaluation")
     forward_recheck = next(task for task in tasks if task["name"] == "Recheck Docker forward chain after health evaluation")
+    nat_verify = next(task for task in tasks if task["name"] == "Verify Docker nat chain after retry loop")
+    forward_verify = next(task for task in tasks if task["name"] == "Verify Docker forward chain after retry loop")
     nat_assert = next(task for task in tasks if task["name"] == "Assert Docker nat chain is present after health evaluation")
     forward_assert = next(
         task for task in tasks if task["name"] == "Assert Docker forward chain is present after health evaluation"
@@ -144,6 +146,12 @@ def test_common_docker_bridge_chains_warms_control_socket_before_restarting() ->
     assert forward_recheck["retries"] == "{{ common_docker_bridge_chains_retries }}"
     assert forward_recheck["delay"] == "{{ common_docker_bridge_chains_delay }}"
     assert forward_recheck["until"] == "common_docker_bridge_chains_forward_recheck.rc == 0"
+    assert nat_verify["retries"] == "{{ common_docker_bridge_chains_retries }}"
+    assert nat_verify["delay"] == "{{ common_docker_bridge_chains_delay }}"
+    assert nat_verify["until"] == "common_docker_bridge_chains_nat_verify.rc == 0"
+    assert forward_verify["retries"] == "{{ common_docker_bridge_chains_retries }}"
+    assert forward_verify["delay"] == "{{ common_docker_bridge_chains_delay }}"
+    assert forward_verify["until"] == "common_docker_bridge_chains_forward_verify.rc == 0"
     assert nat_assert["ansible.builtin.assert"]["that"] == ["common_docker_bridge_chains_nat_verify.rc == 0"]
     assert forward_assert["ansible.builtin.assert"]["that"] == ["common_docker_bridge_chains_forward_verify.rc == 0"]
 

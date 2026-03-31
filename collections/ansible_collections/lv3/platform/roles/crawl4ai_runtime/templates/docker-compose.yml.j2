@@ -1,0 +1,28 @@
+services:
+  crawl4ai:
+    image: {{ crawl4ai_runtime_image }}
+    container_name: {{ crawl4ai_runtime_container_name }}
+    restart: unless-stopped
+    networks:
+      - runtime
+    ports:
+      - "{{ crawl4ai_runtime_port }}:{{ crawl4ai_runtime_container_port }}"
+    volumes:
+      - {{ crawl4ai_runtime_config_file }}:/app/config.yml:ro
+    shm_size: {{ crawl4ai_runtime_shm_size }}
+    mem_limit: {{ crawl4ai_runtime_memory_limit }}
+    cpus: "{{ crawl4ai_runtime_cpu_limit }}"
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:{{ crawl4ai_runtime_container_port }}{{ crawl4ai_runtime_healthcheck_path }}', timeout=10).read()
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+networks:
+  runtime:
+    driver: bridge

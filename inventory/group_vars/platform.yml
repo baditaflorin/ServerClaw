@@ -188,6 +188,7 @@ platform_ports:
   flagsmith_port: 8017
   dify_port: 8094
   changedetection_port: 5000
+  crawl4ai_port: 11235
   browser_runner_port: 8096
   outline_port: 3006
   directus_port: 8055
@@ -270,6 +271,7 @@ platform_port_assignments:
   flagsmith_port: 8017
   dify_port: 8094
   changedetection_port: 5000
+  crawl4ai_port: 11235
   browser_runner_port: 8096
   outline_port: 3006
   directus_port: 8055
@@ -2099,6 +2101,19 @@ platform_service_topology:
       internal: 5000
     urls:
       internal: http://10.10.10.20:5000
+  crawl4ai:
+    service_name: crawl4ai
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: crawl4ai
+    ports:
+      internal: 11235
+    urls:
+      internal: http://10.10.10.20:11235
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3
@@ -3750,6 +3765,19 @@ public_edge_service_topology:
       internal: 5000
     urls:
       internal: http://10.10.10.20:5000
+  crawl4ai:
+    service_name: crawl4ai
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: crawl4ai
+    ports:
+      internal: 11235
+    urls:
+      internal: http://10.10.10.20:11235
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3
@@ -4239,6 +4267,7 @@ plausible_port: 8016
 flagsmith_port: 8017
 dify_port: 8094
 changedetection_port: 5000
+crawl4ai_port: 11235
 browser_runner_port: 8096
 outline_port: 3006
 directus_port: 8055

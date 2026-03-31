@@ -1,0 +1,85 @@
+app:
+  title: "Crawl4AI API"
+  version: "{{ crawl4ai_runtime_config_version }}"
+  host: "0.0.0.0"
+  port: {{ crawl4ai_runtime_container_port }}
+  reload: false
+  workers: 1
+  timeout_keep_alive: 300
+
+llm:
+  provider: "openai/gpt-4o-mini"
+
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: ""
+  ssl: false
+  ssl_cert_reqs: null
+  ssl_ca_certs: null
+  ssl_certfile: null
+  ssl_keyfile: null
+
+rate_limiting:
+  enabled: true
+  default_limit: "{{ crawl4ai_runtime_rate_limit }}"
+  trusted_proxies: []
+  storage_uri: "memory://"
+
+security:
+  enabled: false
+  jwt_enabled: false
+  https_redirect: false
+  trusted_hosts:
+    - "*"
+  headers:
+    x_content_type_options: "nosniff"
+    x_frame_options: "DENY"
+    content_security_policy: "default-src 'self'"
+    strict_transport_security: "max-age=63072000; includeSubDomains"
+
+crawler:
+  base_config:
+    simulate_user: true
+  memory_threshold_percent: {{ crawl4ai_runtime_memory_threshold_percent }}
+  rate_limiter:
+    enabled: true
+    base_delay:
+{% for item in crawl4ai_runtime_crawler_base_delay %}
+      - {{ item }}
+{% endfor %}
+  timeouts:
+    stream_init: 30.0
+    batch_process: 300.0
+  pool:
+    max_pages: {{ crawl4ai_runtime_pool_max_pages }}
+    idle_ttl_sec: {{ crawl4ai_runtime_pool_idle_ttl_seconds }}
+  browser:
+    kwargs:
+      headless: true
+      text_mode: true
+    extra_args: []
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+observability:
+  prometheus:
+    enabled: true
+    endpoint: "/metrics"
+  health_check:
+    endpoint: "{{ crawl4ai_runtime_healthcheck_path }}"
+
+webhooks:
+  enabled: true
+  default_url: null
+  data_in_payload: false
+  retry:
+    max_attempts: 5
+    initial_delay_ms: 1000
+    max_delay_ms: 32000
+  timeout_ms: 30000
+  headers:
+    User-Agent: "Crawl4AI-Webhook/1.0"

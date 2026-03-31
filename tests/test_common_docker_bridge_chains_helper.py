@@ -34,6 +34,12 @@ def test_docker_bridge_chain_helper_asserts_on_retry_task_success_state() -> Non
     assert "common_docker_bridge_chains_expect_forward_chain" in expect_forward["ansible.builtin.set_fact"]
     assert nat_verify["register"] == "common_docker_bridge_chains_nat_verify"
     assert forward_verify["register"] == "common_docker_bridge_chains_forward_verify"
+    assert nat_verify["retries"] == "{{ common_docker_bridge_chains_retries }}"
+    assert nat_verify["delay"] == "{{ common_docker_bridge_chains_delay }}"
+    assert nat_verify["until"] == "common_docker_bridge_chains_nat_verify.rc == 0"
+    assert forward_verify["retries"] == "{{ common_docker_bridge_chains_retries }}"
+    assert forward_verify["delay"] == "{{ common_docker_bridge_chains_delay }}"
+    assert forward_verify["until"] == "common_docker_bridge_chains_forward_verify.rc == 0"
     assert forward_verify["when"] == [
         "common_docker_bridge_chains_active_state.rc == 0",
         "common_docker_bridge_chains_expect_forward_chain | default(false)",

@@ -191,6 +191,9 @@
   register: common_docker_bridge_chains_nat_verify
   changed_when: false
   failed_when: common_docker_bridge_chains_nat_verify.rc not in [0, 1]
+  retries: "{{ common_docker_bridge_chains_retries }}"
+  delay: "{{ common_docker_bridge_chains_delay }}"
+  until: common_docker_bridge_chains_nat_verify.rc == 0
   when:
     - common_docker_bridge_chains_require_nat_chain | bool
     - common_docker_bridge_chains_active_state.rc == 0
@@ -206,6 +209,9 @@
   register: common_docker_bridge_chains_forward_verify
   changed_when: false
   failed_when: common_docker_bridge_chains_forward_verify.rc not in [0, 1]
+  retries: "{{ common_docker_bridge_chains_retries }}"
+  delay: "{{ common_docker_bridge_chains_delay }}"
+  until: common_docker_bridge_chains_forward_verify.rc == 0
   when:
     - common_docker_bridge_chains_active_state.rc == 0
     - common_docker_bridge_chains_expect_forward_chain | default(false)

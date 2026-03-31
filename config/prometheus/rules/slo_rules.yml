@@ -114,6 +114,62 @@ groups:
           slo_id: changedetection-availability
           service_id: changedetection
           indicator: availability
+      - record: slo:crawl4ai_availability:success_ratio_5m
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="crawl4ai-availability"}[5m])
+        labels:
+          slo_id: crawl4ai-availability
+          service_id: crawl4ai
+          indicator: availability
+      - record: slo:crawl4ai_availability:success_ratio_1h
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="crawl4ai-availability"}[1h])
+        labels:
+          slo_id: crawl4ai-availability
+          service_id: crawl4ai
+          indicator: availability
+      - record: slo:crawl4ai_availability:success_ratio_30d
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="crawl4ai-availability"}[30d])
+        labels:
+          slo_id: crawl4ai-availability
+          service_id: crawl4ai
+          indicator: availability
+      - record: slo:crawl4ai_availability:error_rate_5m
+        expr: 1 - slo:crawl4ai_availability:success_ratio_5m
+        labels:
+          slo_id: crawl4ai-availability
+          service_id: crawl4ai
+          indicator: availability
+      - record: slo:crawl4ai_availability:error_rate_1h
+        expr: 1 - slo:crawl4ai_availability:success_ratio_1h
+        labels:
+          slo_id: crawl4ai-availability
+          service_id: crawl4ai
+          indicator: availability
+      - record: slo:crawl4ai_availability:error_rate_30d
+        expr: 1 - slo:crawl4ai_availability:success_ratio_30d
+        labels:
+          slo_id: crawl4ai-availability
+          service_id: crawl4ai
+          indicator: availability
+      - record: slo:crawl4ai_availability:budget_remaining
+        expr: clamp_min(1 - (slo:crawl4ai_availability:error_rate_30d / 0.010000),
+          0)
+        labels:
+          slo_id: crawl4ai-availability
+          service_id: crawl4ai
+          indicator: availability
+      - record: slo:crawl4ai_availability:burn_rate_1h
+        expr: slo:crawl4ai_availability:error_rate_1h / 0.010000
+        labels:
+          slo_id: crawl4ai-availability
+          service_id: crawl4ai
+          indicator: availability
+      - record: slo:crawl4ai_availability:time_to_budget_exhaustion_days
+        expr: (slo:crawl4ai_availability:budget_remaining * 30) / clamp_min(slo:crawl4ai_availability:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: crawl4ai-availability
+          service_id: crawl4ai
+          indicator: availability
       - record: slo:directus_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="directus-availability"}[5m])
         labels:
