@@ -17,7 +17,7 @@ workstreams:
   - id: ws-0303-live-apply
     adr: "0303"
     title: Live apply PostgreSQL pgaudit query and privilege audit logging from latest origin/main
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0303-main-integration
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration
@@ -96,11 +96,17 @@ workstreams:
             - tests/test_alertmanager_runtime_role.py
             - tests/unit/test_event_taxonomy.py
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
+      changelog_entry: implements ADR 0303 by enabling PostgreSQL pgaudit query
+        and privilege audit logging, shipping structured audit and connection
+        signals into Loki and Prometheus, and routing unknown-role alerts to ntfy
+        plus NATS with recorded exact-main live-apply evidence
+      release_bump: patch
       included_in_repo_version: null
-      latest_receipts: {}
+      latest_receipts:
+        postgres_audit: 2026-03-31-adr-0303-pgaudit-mainline-live-apply
   - id: ws-0302-live-apply
     adr: "0302"
     title: ADR 0302 live apply from latest origin/main

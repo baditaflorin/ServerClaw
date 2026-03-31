@@ -74,6 +74,14 @@ Check the guest-local Alloy metrics endpoint:
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o 'ProxyCommand=ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ops@100.64.0.1 -W %h:%p' ops@10.10.10.50 "curl -fsS http://127.0.0.1:12345/metrics | rg 'postgres_(audit_events|connection_authorized|unknown_connection_events)_total'"
 ```
 
+Those metric families are event-driven. After an Alloy restart or a
+`guest-log-shipping` replay, seed one deterministic ROLE audit event before
+treating a missing metric family as a failure:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o 'ProxyCommand=ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ops@100.64.0.1 -W %h:%p' ops@10.10.10.50 "sudo -u postgres psql -v ON_ERROR_STOP=1 postgres -c \"DROP ROLE IF EXISTS guest_log_shipping_metrics_probe; CREATE ROLE guest_log_shipping_metrics_probe NOLOGIN; DROP ROLE guest_log_shipping_metrics_probe;\""
+```
+
 Check the monitoring-side scrape and relay health:
 
 ```bash
@@ -128,6 +136,10 @@ PY
 
 - If `SHOW shared_preload_libraries` does not include `pgaudit`, inspect `/etc/postgresql/17/main/conf.d/90-lv3-postgres.conf` and the last PostgreSQL restart on `postgres-lv3`.
 - If the metrics endpoint is down, inspect `/etc/default/alloy`, `/etc/alloy/config.alloy`, and `journalctl -u alloy`.
+- If the endpoint is up but the PostgreSQL metric families are missing right
+  after a replay, generate the deterministic probe role above so Alloy ingests a
+  fresh ROLE audit line and a fresh connection-authorized line before retrying
+  the scrape check.
 - If Prometheus is not scraping the target, confirm `monitoring-lv3` can reach `postgres-lv3:12345` and that the guest firewall still permits `monitoring-lv3`.
 - If alerts fire but no NATS event appears, inspect `systemctl status pgaudit-alert-relay` and `journalctl -u pgaudit-alert-relay` on `monitoring-lv3`.
 - If Alloy sees connection lines but the unknown-role counter stays flat, compare the live role against [config/pgaudit/approved-roles.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/pgaudit/approved-roles.yaml) and make sure the role name matches exactly.

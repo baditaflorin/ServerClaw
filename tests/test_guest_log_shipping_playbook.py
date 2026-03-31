@@ -64,6 +64,9 @@ def test_guest_log_shipping_enables_postgres_audit_pipeline_from_repo_catalog() 
 def test_guest_log_shipping_verifies_postgres_audit_scrape_after_guest_converge() -> None:
     playbook = load_yaml(PLAYBOOK_PATH)
     verify_play = playbook[1]
+    assert verify_play["vars"]["monitoring_stack_postgres_audit_host"] == (
+        "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+    )
     verify_task = next(
         task
         for task in verify_play["tasks"]
@@ -74,9 +77,18 @@ def test_guest_log_shipping_verifies_postgres_audit_scrape_after_guest_converge(
         "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
     )
     assert verify_play["vars"]["monitoring_stack_postgres_audit_metrics_job_name"] == "postgres-audit-alloy"
-    assert "postgres-lv3" in verify_play["vars"]["monitoring_stack_postgres_audit_metrics_target"]
+    assert "monitoring_stack_postgres_audit_host" in verify_play["vars"]["monitoring_stack_postgres_audit_metrics_target"]
     assert '\\"' not in verify_task["ansible.builtin.uri"]["url"]
     assert "monitoring_stack_postgres_audit_metrics_target" in verify_task["failed_when"]
+
+    seed_task = next(
+        task
+        for task in verify_play["tasks"]
+        if task.get("name") == "Seed deterministic PostgreSQL audit lines after guest log shipping"
+    )
+    assert seed_task["delegate_to"] == "{{ monitoring_stack_postgres_audit_host }}"
+    assert seed_task["become_user"] == "postgres"
+    assert "CREATE ROLE {{ monitoring_stack_postgres_audit_metrics_probe_role }} NOLOGIN" in seed_task["ansible.builtin.command"]["argv"][-1]
 
     endpoint_task = next(
         task
@@ -87,5 +99,6 @@ def test_guest_log_shipping_verifies_postgres_audit_scrape_after_guest_converge(
     assert endpoint_task["ansible.builtin.uri"]["url"] == (
         "http://{{ monitoring_stack_postgres_audit_metrics_target }}/metrics"
     )
+    assert "loki_process_custom_postgres_audit_events_total" in endpoint_task["failed_when"]
     assert "loki_process_custom_postgres_connection_authorized_total" in endpoint_task["failed_when"]
-    assert "loki_process_custom_postgres_unknown_connection_events_total" in endpoint_task["failed_when"]
+    assert "loki_process_custom_postgres_unknown_connection_events_total" not in endpoint_task["failed_when"]
