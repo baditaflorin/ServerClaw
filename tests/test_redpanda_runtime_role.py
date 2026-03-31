@@ -93,6 +93,9 @@ def test_templates_define_bootstrap_env_and_host_network_runtime() -> None:
 
     assert "network_mode: host" in compose_template
     assert "name: {{ redpanda_volume_name }}" in compose_template
+    assert "entrypoint:" in compose_template
+    assert "      - /bin/bash" in compose_template
+    assert "      - /etc/redpanda/start-redpanda.sh" in compose_template
     assert "REDPANDA_ADMIN_PASSWORD" in env_template
     assert "REDPANDA_PLATFORM_PASSWORD" in env_template
     assert "http_authentication:" in bootstrap_template

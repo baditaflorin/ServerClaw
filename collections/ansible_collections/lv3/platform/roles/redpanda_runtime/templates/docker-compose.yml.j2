@@ -31,8 +31,9 @@ services:
         condition: service_healthy
     env_file:
       - {{ redpanda_compose_env_file }}
-    command:
+    entrypoint:
       - /bin/bash
+    command:
       - /etc/redpanda/start-redpanda.sh
     healthcheck:
       test:
