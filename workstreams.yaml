@@ -16972,7 +16972,7 @@ workstreams:
             - tests/test_live_apply_receipts.py
             - tests/test_renovate_automation.py
             - receipts/live-applies/2026-03-30-adr-0297-renovate-live-apply.json
-            - receipts/live-applies/evidence/2026-03-30-ws-0297-*
+            - receipts/live-applies/evidence/*ws-0297-*
           mode: exclusive
         - id: adr_0297_generated_truth_support
           paths:
