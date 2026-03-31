@@ -36,6 +36,8 @@ jobs:
           if git show-ref --verify --quiet refs/remotes/origin/main; then
             echo "LV3_VALIDATION_BASE_REF=origin/main" >> "$GITHUB_ENV"
           fi
+      - name: Run managed image gate
+        run: python3 scripts/managed_image_gate.py --baseline-revision origin/main
 
       - name: Run repository validation
         run: make validate

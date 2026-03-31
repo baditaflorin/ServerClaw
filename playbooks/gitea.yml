@@ -92,3 +92,7 @@
     - role: lv3.platform.docker_runtime
     - role: lv3.platform.build_server
     - role: lv3.platform.gitea_runner
+
+  post_tasks:
+    - name: Refresh the build runner host SBOM after the Gitea runner converge
+      ansible.builtin.import_tasks: tasks/generate-host-sbom.yml

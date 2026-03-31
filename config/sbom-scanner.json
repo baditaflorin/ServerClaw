@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "docker_network": "host",
+  "syft": {
+    "version": "1.41.2",
+    "container_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
+    "linux_amd64_tarball": "https://github.com/anchore/syft/releases/download/v1.41.2/syft_1.41.2_linux_amd64.tar.gz"
+  },
+  "grype": {
+    "version": "0.110.0",
+    "container_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
+    "linux_amd64_tarball": "https://github.com/anchore/grype/releases/download/v0.110.0/grype_0.110.0_linux_amd64.tar.gz",
+    "database_schema": 6
+  },
+  "artifact_cache": {
+    "host": "10.10.10.80",
+    "mirrors": {
+      "docker.io": 5001,
+      "ghcr.io": 5002,
+      "artifacts.plane.so": 5003,
+      "docker.n8n.io": 5004
+    }
+  },
+  "ntfy": {
+    "username": "alertmanager",
+    "host": "10.10.10.20",
+    "port": 2586,
+    "topic": "platform-alerts"
+  }
+}

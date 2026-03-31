@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
+from __future__ import annotations
+
 import argparse
-import datetime as dt
 import json
 import subprocess
 import sys
@@ -14,11 +15,20 @@ from container_image_policy import (
     resolve_remote_digest,
     validate_image_catalog,
 )
-from controller_automation_toolkit import emit_cli_error, write_json
+from controller_automation_toolkit import emit_cli_error, repo_path, write_json
+from sbom_scanner import (
+    CVE_RECEIPTS_DIR,
+    SBOM_RECEIPTS_DIR,
+    DEFAULT_GRYPE_DB_CACHE_DIR,
+    DEFAULT_SYFT_CACHE_DIR,
+    load_scanner_config,
+    now_utc,
+    relpath,
+    scan_catalog_image,
+)
 
 
-TRIVY_IMAGE = "docker.io/aquasec/trivy:0.63.0"
-TRIVY_CACHE_DIR = IMAGE_CATALOG_PATH.parent.parent / ".cache" / "trivy"
+DEFAULT_WORKING_ROOT = repo_path(".local", "image-upgrade-scans")
 
 
 def build_ref(registry_ref: str, tag: str, digest: str) -> str:
@@ -29,70 +39,32 @@ def run_command(command: list[str], *, cwd: Path | None = None) -> subprocess.Co
     return subprocess.run(command, cwd=cwd, text=True, capture_output=True, check=False)
 
 
-def scan_image(image_ref: str, image_id: str, scanned_on: str) -> tuple[dict, Path]:
-    receipt_path = IMAGE_SCAN_RECEIPTS_DIR / f"{scanned_on}-{image_id.replace('_', '-')}.json"
-    raw_path = receipt_path.with_suffix(".trivy.json")
-    TRIVY_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    IMAGE_SCAN_RECEIPTS_DIR.mkdir(parents=True, exist_ok=True)
+def image_receipt_name(image_id: str, scanned_on: str) -> str:
+    return f"{scanned_on}-{image_id.replace('_', '-')}.json"
 
-    command = [
-        "docker",
-        "run",
-        "--rm",
-        "-v",
-        f"{TRIVY_CACHE_DIR}:/root/.cache/",
-        "-v",
-        f"{IMAGE_SCAN_RECEIPTS_DIR}:/work",
-        TRIVY_IMAGE,
-        "image",
-        "--scanners",
-        "vuln",
-        "--skip-version-check",
-        "--severity",
-        "CRITICAL,HIGH",
-        "--format",
-        "json",
-        "--output",
-        f"/work/{raw_path.name}",
-        image_ref,
-    ]
-    result = run_command(command)
-    if result.returncode != 0:
-        raise ValueError(f"trivy scan failed for {image_ref}: {result.stderr.strip() or result.stdout.strip()}")
 
-    raw_payload = json.loads(raw_path.read_text())
-    critical = 0
-    high = 0
-    targets_with_findings = []
-    for item in raw_payload.get("Results", []):
-        vulnerabilities = item.get("Vulnerabilities", []) or []
-        target_critical = sum(1 for vuln in vulnerabilities if vuln.get("Severity") == "CRITICAL")
-        target_high = sum(1 for vuln in vulnerabilities if vuln.get("Severity") == "HIGH")
-        critical += target_critical
-        high += target_high
-        if target_critical or target_high:
-            targets_with_findings.append(
-                {
-                    "target": item.get("Target"),
-                    "class": item.get("Class"),
-                    "type": item.get("Type"),
-                    "critical": target_critical,
-                    "high": target_high,
-                }
-            )
-
-    receipt = {
+def build_scan_receipt(
+    *,
+    image_id: str,
+    image_ref: str,
+    scanned_on: str,
+    scanner_config: dict,
+    sbom_path: Path,
+    cve_path: Path,
+    cve_receipt: dict,
+) -> dict:
+    return {
         "schema_version": "1.0.0",
         "image_id": image_id,
         "image_ref": image_ref,
-        "scanner": "trivy",
-        "scanner_image": TRIVY_IMAGE,
+        "scanner": "grype",
+        "scanner_image": scanner_config["grype"]["container_image"],
+        "sbom_generator_image": scanner_config["syft"]["container_image"],
         "scanned_on": scanned_on,
-        "summary": {"critical": critical, "high": high},
-        "targets_with_findings": targets_with_findings,
-        "raw_report": str(raw_path.relative_to(IMAGE_CATALOG_PATH.parent.parent)),
+        "sbom_receipt": relpath(sbom_path),
+        "cve_receipt": relpath(cve_path),
+        "summary": cve_receipt["summary"],
     }
-    return receipt, receipt_path
 
 
 def update_catalog(
@@ -149,6 +121,11 @@ def main() -> int:
     parser.add_argument("--write", action="store_true", help="Persist the updated catalog and scan receipt.")
     parser.add_argument("--exception-justification", help="Justification for allowing a digest with open vulnerability budget exceptions.")
     parser.add_argument("--exception-reason", help="Deprecated alias for --exception-justification.")
+    parser.add_argument("--working-root", type=Path, default=DEFAULT_WORKING_ROOT)
+    parser.add_argument("--skip-db-update", action="store_true")
+    parser.add_argument("--skip-artifact-cache", action="store_true")
+    parser.add_argument("--syft-cache-dir", type=Path, default=DEFAULT_SYFT_CACHE_DIR)
+    parser.add_argument("--grype-db-cache-dir", type=Path, default=DEFAULT_GRYPE_DB_CACHE_DIR)
     parser.add_argument("--exception-owner", help="Owner of the critical-finding exception.")
     parser.add_argument("--exception-expires-on", help="YYYY-MM-DD expiry date for the active exception.")
     parser.add_argument("--exception-review-by", help="Deprecated alias for --exception-expires-on.")
@@ -169,17 +146,64 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
+        if args.apply and not args.write:
+            raise ValueError("--apply requires --write so the updated catalog is persisted before converge targets run")
+
         catalog = load_image_catalog()
         validate_image_catalog(catalog)
         if args.image_id not in catalog["images"]:
             raise ValueError(f"unknown image id '{args.image_id}'")
 
-        scanned_on = dt.date.today().isoformat()
+        scanner_config = load_scanner_config()
+        scanned_at = now_utc()
+        scanned_on = scanned_at.date().isoformat()
         entry = catalog["images"][args.image_id]
         tag = args.tag or entry["tag"]
         digest = resolve_remote_digest(entry["registry_ref"], tag, entry["platform"])
         image_ref = build_ref(entry["registry_ref"], tag, digest)
-        receipt, receipt_path = scan_image(image_ref, args.image_id, scanned_on)
+
+        if args.write:
+            sbom_dir = SBOM_RECEIPTS_DIR
+            cve_dir = CVE_RECEIPTS_DIR
+            receipt_path = IMAGE_SCAN_RECEIPTS_DIR / image_receipt_name(args.image_id, scanned_on)
+        else:
+            working_root = args.working_root / args.image_id
+            sbom_dir = working_root / "sbom"
+            cve_dir = working_root / "cve"
+            receipt_path = working_root / image_receipt_name(args.image_id, scanned_on)
+
+        sbom_path, cve_path, cve_receipt = scan_catalog_image(
+            image_id=args.image_id,
+            image_ref=image_ref,
+            runtime_host=entry.get("runtime_host"),
+            platform_name=entry["platform"],
+            sbom_dir=sbom_dir,
+            cve_dir=cve_dir,
+            config=scanner_config,
+            scanned_at=scanned_at,
+            syft_cache_dir=args.syft_cache_dir,
+            grype_db_cache_dir=args.grype_db_cache_dir,
+            update_grype_db=not args.skip_db_update,
+            use_artifact_cache=not args.skip_artifact_cache,
+        )
+        receipt = build_scan_receipt(
+            image_id=args.image_id,
+            image_ref=image_ref,
+            scanned_on=scanned_on,
+            scanner_config=scanner_config,
+            sbom_path=sbom_path,
+            cve_path=cve_path,
+            cve_receipt=cve_receipt,
+        )
+        write_json(receipt_path, receipt)
+
+        blocking_findings = receipt["summary"]["blocking_findings_with_fix"]
+        if blocking_findings != 0:
+            raise ValueError(
+                f"{image_ref} has {blocking_findings} HIGH/CRITICAL findings with an available fix; "
+                "choose a different digest before updating the managed catalog"
+            )
+
         exception = None
         if receipt["summary"]["critical"] != 0:
             justification = args.exception_justification or args.exception_reason
@@ -220,7 +244,6 @@ def main() -> int:
         )
 
         if args.write:
-            write_json(receipt_path, receipt)
             validate_image_catalog(updated_catalog)
             write_json(IMAGE_CATALOG_PATH, updated_catalog)
             if args.apply:
@@ -233,7 +256,9 @@ def main() -> int:
                     "image_ref": image_ref,
                     "write": args.write,
                     "apply": args.apply,
-                    "scan_receipt": str(receipt_path.relative_to(IMAGE_CATALOG_PATH.parent.parent)),
+                    "scan_receipt": relpath(receipt_path),
+                    "sbom_receipt": relpath(sbom_path),
+                    "cve_receipt": relpath(cve_path),
                     "summary": receipt["summary"],
                     "exception": exception,
                     "apply_results": apply_results,
@@ -242,7 +267,7 @@ def main() -> int:
             )
         )
         return 0
-    except (OSError, json.JSONDecodeError, ValueError) as exc:
+    except (OSError, json.JSONDecodeError, RuntimeError, ValueError) as exc:
         return emit_cli_error("Upgrade container image", exc)
 
 

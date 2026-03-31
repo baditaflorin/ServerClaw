@@ -81,3 +81,25 @@ def test_build_envelope_supports_config_merge_topics() -> None:
 
     assert envelope["topic"] == "platform.config.merge_conflict"
     assert envelope["payload"]["reason"] == "duplicate_key"
+
+
+def test_build_envelope_supports_cve_delta_topics() -> None:
+    envelope = build_envelope(
+        "platform.security.cve_delta",
+        {
+            "event": "platform.security.cve_delta",
+            "generated_at": "2026-03-30T15:29:34Z",
+            "image_id": "step_ca_runtime",
+            "image_ref": "docker.io/smallstep/step-ca:latest",
+            "runtime_host": "docker-runtime-lv3",
+            "finding": {
+                "id": "CVE-2026-0001",
+                "severity": "critical",
+            },
+        },
+        actor_id="agent/sbom-refresh",
+    )
+
+    assert envelope["topic"] == "platform.security.cve_delta"
+    assert envelope["actor_id"] == "agent/sbom-refresh"
+    assert envelope["payload"]["image_id"] == "step_ca_runtime"

@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.111
-platform_version: 0.130.73
+repo_version: 0.177.115
+platform_version: 0.130.74
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -140,6 +140,8 @@ live_apply_evidence:
     directus: 2026-03-30-adr-0289-directus-mainline-live-apply
     temporal: 2026-03-30-adr-0293-temporal-mainline-live-apply
     jupyterhub: 2026-03-30-adr-0291-jupyterhub-mainline-live-apply
+    renovate: 2026-03-31-adr-0297-renovate-mainline-live-apply
+    piper: 2026-03-31-adr-0284-piper-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -1058,8 +1060,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.111
+    current: 0.177.115
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.73
+    current: 0.130.74
     meaning: intended platform release for the actual server configuration

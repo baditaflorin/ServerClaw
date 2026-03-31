@@ -66,11 +66,19 @@ ansible -i inventory/hosts.yml docker-build-lv3 -m shell \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
-Check the build host mirror wiring:
+Check the build host registry mirror wiring:
 
 ```bash
 ansible -i inventory/hosts.yml docker-build-lv3 -m shell \
   -a 'docker buildx inspect lv3-cache --bootstrap >/dev/null && sudo cat /etc/docker/daemon.json && ! docker ps --format "{{.Names}}" | grep -q "^artifact-cache-"' \
+  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+```
+
+Check the registry mirrors from the shared runtime consumer host:
+
+```bash
+ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell \
+  -a 'for port in 5001 5002 5003 5004; do curl -fsS "http://10.10.10.80:${port}/v2/" >/dev/null; done' \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
@@ -114,5 +122,7 @@ python3 config/windmill/scripts/build-cache-maintenance.py
   `docker-build-lv3` in place under the documented ADR 0191 exception.
 - Verify the managed BuildKit daemon through `lv3-buildkitd.service`; the guest
   does not ship a separate `buildkit.service`.
+- Verify the cache plane from `docker-runtime-lv3` as well as `docker-build-lv3`
+  so private consumer reachability is covered, not only local host listeners.
 - Do not commit runtime cache contents; only the manifest belongs in git.
 - The first full warm run is expected to be slow. The value is in subsequent reuse.

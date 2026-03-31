@@ -6,6 +6,7 @@ policy_out: ACCEPT
 {% set policy = network_policy %}
 {% set guest_ip_map = dict(proxmox_guests | map(attribute='name') | zip(proxmox_guests | map(attribute='ipv4'))) %}
 {% set guest_policy = policy.guests[guest.name] %}
+{% set guest_local_only_sources = ['172.16.0.0/12', '192.168.0.0/16'] %}
 {% macro render_line(rule, source=None, port=None) -%}
 IN ACCEPT{% if source %} -source {{ source }}{% endif %} -p {{ rule.protocol }}{% if port is not none %} -dport {{ port }}{% endif %}
 {%- endmacro %}
@@ -55,12 +56,17 @@ IN ACCEPT{% if source %} -source {{ source }}{% endif %} -p {{ rule.protocol }}{
 {% endfor %}
 {% endif %}
 {% else %}
+{% if not (guest_policy.allow_container_forwarding | default(false) and rule.source in guest_local_only_sources) %}
+{# Docker bridge CIDRs are enforced inside the guest nftables policy. Proxmox's
+   VM firewall compiler drops these broad cache-plane rules for VM 130, so keep
+   the outer firewall focused on concrete guest sources. #}
 {% if rule.protocol == 'vrrp' %}
 {{ render_line(rule, source=rule.source) }}
 {% else %}
 {% for port in rule.ports %}
 {{ render_line(rule, source=rule.source, port=port) }}
 {% endfor %}
+{% endif %}
 {% endif %}
 {% endif %}
 {%- endmacro %}

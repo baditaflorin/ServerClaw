@@ -1,0 +1,75 @@
+# Purpose: Verify the private Piper runtime contract after converge.
+# Use case: Run after Piper startup to prove the local health, voice-catalog, and WAV synthesis paths work as declared.
+# Inputs: Piper base URL, default voice, and verification text fixture.
+# Outputs: Assertions proving the Piper health payload, voices payload, and `/api/tts` WAV response are valid.
+# Idempotency: Fully idempotent; verification only reads runtime state and asserts the declared contract.
+# Dependencies: ADR 0165 metadata standard, ADR 0284, and a running piper_runtime deployment.
+---
+- name: Verify the Piper health endpoint responds locally
+  ansible.builtin.uri:
+    url: "{{ piper_runtime_health_url }}"
+    method: GET
+    status_code: 200
+  register: piper_runtime_verify_health
+  retries: 24
+  delay: 5
+  until: piper_runtime_verify_health.status == 200
+  changed_when: false
+
+- name: Assert the Piper health payload declares the default voice
+  ansible.builtin.assert:
+    that:
+      - piper_runtime_verify_health.json.status == "ok"
+      - piper_runtime_verify_health.json.default_voice == piper_runtime_default_voice
+      - piper_runtime_default_voice in piper_runtime_verify_health.json.voices
+    fail_msg: "Piper started, but the health payload does not expose the expected voice contract."
+
+- name: Verify the Piper voices endpoint reports the declared voices
+  ansible.builtin.uri:
+    url: "{{ piper_runtime_base_url }}/api/voices"
+    method: GET
+    status_code: 200
+  register: piper_runtime_verify_voices
+  changed_when: false
+
+- name: Assert the Piper voices endpoint includes the declared default voice
+  ansible.builtin.assert:
+    that:
+      - piper_runtime_default_voice in piper_runtime_verify_voices.json.voices
+    fail_msg: "Piper did not report the default voice through /api/voices."
+
+- name: Verify Piper synthesizes WAV audio from the ADR contract
+  ansible.builtin.shell: |
+    python3 - <<'PY'
+    import json
+    import urllib.parse
+    import urllib.request
+
+    url = "{{ piper_runtime_base_url }}/api/tts?voice={{ piper_runtime_default_voice | urlencode }}"
+    request = urllib.request.Request(
+        url,
+        data={{ piper_runtime_test_text | to_json }}.encode("utf-8"),
+        headers={"Content-Type": "text/plain; charset=utf-8"},
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=180) as response:
+        payload = response.read()
+        content_type = response.headers.get("Content-Type", "")
+
+    assert content_type.startswith("audio/wav"), content_type
+    assert payload[:4] == b"RIFF", payload[:8]
+    assert payload[8:12] == b"WAVE", payload[:16]
+    assert len(payload) > 1024, len(payload)
+    print(json.dumps({"verified": True, "bytes": len(payload)}))
+    PY
+  args:
+    executable: /bin/bash
+  register: piper_runtime_verify_tts
+  changed_when: false
+
+- name: Assert Piper returned WAV audio for the verification text
+  ansible.builtin.assert:
+    that:
+      - (piper_runtime_verify_tts.stdout | from_json).verified
+      - (piper_runtime_verify_tts.stdout | from_json).bytes > 1024
+    fail_msg: "Piper did not return a valid WAV payload for the verification text."

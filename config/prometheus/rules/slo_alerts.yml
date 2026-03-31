@@ -913,6 +913,46 @@ groups:
           description: JupyterHub remains reachable through the public LV3 edge for
             interactive exploratory notebook sessions.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_piper_availability
+        expr: (slo:piper_availability:error_rate_5m > (14 * 0.010000)) and (slo:piper_availability:error_rate_1h
+          > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: piper
+          slo_id: piper-availability
+          indicator: availability
+        annotations:
+          summary: piper-availability is burning its error budget at 14x
+          description: The private Piper TTS health endpoint remains reachable on
+            docker-runtime-lv3 for real-time voice synthesis workflows.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_piper_availability
+        expr: slo:piper_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: piper
+          slo_id: piper-availability
+          indicator: availability
+        annotations:
+          summary: piper-availability is burning its error budget at 3x
+          description: The private Piper TTS health endpoint remains reachable on
+            docker-runtime-lv3 for real-time voice synthesis workflows.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_piper_availability
+        expr: slo:piper_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: piper
+          slo_id: piper-availability
+          indicator: availability
+        annotations:
+          summary: piper-availability has less than 10% error budget remaining
+          description: The private Piper TTS health endpoint remains reachable on
+            docker-runtime-lv3 for real-time voice synthesis workflows.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_plane_availability
         expr: (slo:plane_availability:error_rate_5m > (14 * 0.010000)) and (slo:plane_availability:error_rate_1h
           > (14 * 0.010000))

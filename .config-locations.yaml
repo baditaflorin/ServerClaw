@@ -67,6 +67,26 @@ infrastructure_state:
     validation: "python3 scripts/semgrep_gate.py --print-summary-json"
     naming_convention: "<git-sha>.sarif.json"
 
+  receipts/sbom/:
+    purpose: Immutable ADR 0298 CycloneDX SBOM receipts for managed image digests and host package inventories
+    owner: automation
+    format: JSON
+    use_for: Tracking package inventory snapshots for the managed image catalog and for host-level post-verify evidence
+    update_when: After ADR 0298 image refreshes, managed image upgrades, security scans, or post-verify converges
+    update_by: "scripts/sbom_refresh.py, scripts/upgrade_container_image.py, playbooks/tasks/generate-host-sbom.yml"
+    validation: Manual review
+    naming_convention: "<digest-short>.cdx.json or host-<hostname>-<date>.cdx.json"
+
+  receipts/cve/:
+    purpose: Immutable ADR 0298 Grype CVE receipts for managed image refreshes
+    owner: automation
+    format: JSON
+    use_for: Auditing vulnerability findings over time and detecting net-new HIGH or CRITICAL findings per image id
+    update_when: After ADR 0298 daily refreshes or managed image gate scans
+    update_by: "scripts/sbom_refresh.py, scripts/managed_image_gate.py, scripts/upgrade_container_image.py"
+    validation: Manual review
+    naming_convention: "<digest-short>-<timestamp>.grype.json"
+
   receipts/backup-coverage/:
     purpose: Durable ADR 0271 backup coverage ledger receipts derived from live Proxmox backup jobs, storage listings, and restore-verification evidence
     owner: automation
@@ -171,6 +191,19 @@ infrastructure_state:
       - "receipts/image-scans/: Latest image scan evidence"
       - "docs/schema/vulnerability-budget-policy.schema.json: Schema for the ADR 0269 policy document"
       - "docs/runbooks/vulnerability-budget-gates.md: Operator procedure"
+
+  config/sbom-scanner.json:
+    purpose: Canonical ADR 0298 scanner pinset and transport defaults for Syft, Grype, artifact-cache mirrors, and ntfy publication
+    owner: human
+    format: JSON
+    use_for: Declaring the pinned scanner images, digest-verified tarballs, and shared runtime defaults used by controller and worker scan paths
+    update_when: Upgrading Syft or Grype, changing shared cache defaults, or rotating scan publication endpoints
+    update_by: Agent or human implementing ADR 0298 follow-up work
+    validation: "python3 -m json.tool config/sbom-scanner.json >/dev/null"
+    related_files:
+      - "scripts/sbom_scanner.py: Shared Syft and Grype execution helpers"
+      - "scripts/sbom_refresh.py: Daily catalog-wide refresh entry point"
+      - "config/windmill/scripts/sbom-refresh.py: Worker-side wrapper"
 
   receipts/preview-environments/:
     purpose: Durable branch-local evidence for completed preview create/validate/destroy cycles
@@ -329,6 +362,29 @@ automation:
       - "docs/schema/gate-bypass-waiver-receipt.schema.json: JSON schema for governed waiver receipts"
       - "scripts/gate_bypass_waivers.py: Loader, validator, and summary helper"
       - "docs/runbooks/validation-gate.md: operator procedure"
+
+  config/checkov/policy-gate.yaml:
+    purpose: Canonical ADR 0306 policy-level contract for the repo-managed IaC policy scan
+    owner: human
+    format: YAML
+    use_for: Declaring which IaC surfaces the Checkov wrapper scans, which rule ids are blocking, and how the current Compose-template gap is recorded
+    update_when: Adjusting Checkov gating levels, adding or removing governed scan groups, or changing the documented Compose handling boundary
+    validation: "python3 scripts/iac_policy_scan.py"
+    related_files:
+      - "config/checkov/skip-checks.yaml: repo-managed suppression catalog"
+      - "scripts/iac_policy_scan.py: Checkov wrapper, summary writer, and SARIF emitter"
+      - "docs/runbooks/iac-policy-scanning.md: operator procedure"
+
+  config/checkov/skip-checks.yaml:
+    purpose: Canonical ADR 0306 suppression catalog for path-scoped Checkov findings
+    owner: human
+    format: YAML
+    use_for: Recording governed Checkov suppressions with explicit path scope, reason, and decision reference instead of inline source comments
+    update_when: Adding or removing a justified IaC policy suppression
+    validation: "python3 scripts/iac_policy_scan.py"
+    related_files:
+      - "config/checkov/policy-gate.yaml: gate levels and scan groups"
+      - "docs/runbooks/iac-policy-scanning.md: suppression governance procedure"
 
   keys/gitea-release-bundle-cosign.pub:
     purpose: Committed ADR 0233 Cosign public verifier for signed private Gitea release bundles
@@ -554,14 +610,17 @@ service_configuration:
     purpose: Validation gate configuration for local, remote, and worker post-merge checks
     owner: human
     format: JSON
-    use_for: Controlling which validation checks are active, including ADR 0230 policy-validation, ADR 0251 smoke-catalog validation, and ADR 0301 Semgrep SAST on controller, build-server, and Windmill worker paths
+    use_for: Controlling which validation checks are active, including ADR 0230 policy-validation, ADR 0251 smoke-catalog validation, ADR 0301 Semgrep SAST, and ADR 0306 IaC policy scanning on controller, build-server, and Windmill worker paths
     validation: "python3 scripts/gate_status.py --repo-path ."
     related_files:
       - "config/build-server.json: remote-validate and remote-pre-push command wiring"
       - "config/validation-lanes.yaml: ADR 0264 lane-to-surface catalog that selects blocking checks"
       - "config/check-runner-manifest.json: runner-image check definitions"
       - "config/semgrep/rules/: local Semgrep rule packs for the semgrep-sast gate"
+      - "config/checkov/policy-gate.yaml: ADR 0306 blocking levels and scan surfaces"
+      - "config/checkov/skip-checks.yaml: ADR 0306 suppression governance catalog"
       - "scripts/run_gate.py: gate orchestrator"
+      - "scripts/iac_policy_scan.py: ADR 0306 Checkov wrapper and SARIF emitter"
       - "scripts/semgrep_gate.py: shared Semgrep wrapper"
       - "scripts/validation_lanes.py: lane catalog loader and selector"
       - "scripts/policy_checks.py: ADR 0230 policy-validation stage"
@@ -604,8 +663,20 @@ service_configuration:
     related_files:
       - "config/build-server.json: remote-validate entrypoint that invokes the manifest"
       - "config/semgrep/rules/: local rule packs mounted into the semgrep-sast check"
+      - "config/checkov/policy-gate.yaml: ADR 0306 scan-group and severity mapping contract"
       - "scripts/policy_checks.py: ADR 0230 policy-validation check command"
+      - "scripts/iac_policy_scan.py: ADR 0306 runner-backed Checkov wrapper"
       - "docs/runbooks/validation-gate.md: remote gate procedure"
+
+  receipts/checkov/:
+    purpose: Repo-managed Checkov JSON and SARIF outputs from ADR 0306 IaC policy scans
+    owner: automation
+    format: JSON and SARIF
+    use_for: Inspecting the latest repo-local IaC policy findings and the emitted SARIF artifact from a governed scan
+    update_when: After every `iac-policy-scan` runner execution or direct `scripts/iac_policy_scan.py` replay
+    update_by: "scripts/iac_policy_scan.py"
+    validation: Manual review
+    naming_convention: "<git-sha>.json and <git-sha>.sarif.json"
 
   docker/docker-compose.yml:
     purpose: Docker Compose reference for services on docker-runtime-lv3

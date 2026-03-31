@@ -336,6 +336,12 @@ playbooks:
     shared_surfaces:
       - service:step-ca
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/piper.yml:
+    playbook_id: piper
+    mutation_scope: host
+    shared_surfaces:
+      - service:piper
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/tika.yml:
     playbook_id: tika
     mutation_scope: host
@@ -421,6 +427,12 @@ playbooks:
     mutation_scope: platform
     shared_surfaces:
       - service:mailpit
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/piper.yml:
+    playbook_id: piper
+    mutation_scope: host
+    shared_surfaces:
+      - service:piper
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/jupyterhub.yml:
     playbook_id: jupyterhub

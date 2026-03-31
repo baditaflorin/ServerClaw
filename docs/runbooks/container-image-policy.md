@@ -17,17 +17,19 @@ Each entry records:
 - the scan receipt path
 - the converge targets that make the new pin live
 
-Current scan receipts live under [receipts/image-scans](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/image-scans).
+Current catalog summary receipts live under [receipts/image-scans](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/image-scans).
+Underlying Syft and Grype artifacts live under [receipts/sbom](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/sbom) and [receipts/cve](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/cve).
 
 ## Policy
 
 1. Managed runtime images must use `image: repo:tag@sha256:digest`.
 2. Managed build bases must use `FROM repo:tag@sha256:digest`.
 3. `latest` is not allowed in the catalog or managed Compose inputs.
-4. A new digest must have a Trivy receipt before it is committed.
-5. Zero critical findings is the default gate. If the current official upstream image still reports critical CVEs, the catalog entry must carry a time-bounded exception with an owner and review date.
-6. Managed converges read image refs from the catalog instead of hand-maintained per-role strings.
-7. ADR 0269 exceptions must also record a justification, compensating controls,
+4. A new digest must have a Syft SBOM, a Grype CVE receipt, and a catalog summary receipt before it is committed.
+5. Zero critical findings is the default catalog state. If the current official upstream image still reports critical CVEs, the catalog entry must carry a time-bounded exception with an owner and review date.
+6. HIGH or CRITICAL findings with an available fix fail the managed-image gate and must be resolved before merge.
+7. Managed converges read image refs from the catalog instead of hand-maintained per-role strings.
+8. ADR 0269 exceptions must also record a justification, compensating controls,
    an expiry date, and an explicit remediation plan.
 
 ## Verification
@@ -61,10 +63,11 @@ make upgrade-container-image IMAGE_ID=windmill_runtime
 The upgrade workflow does this:
 
 1. resolves the current upstream digest for the catalog tag
-2. scans the candidate ref with Trivy
-3. writes a receipt under `receipts/image-scans/`
-4. updates `config/image-catalog.json`
-5. optionally runs the catalog's converge targets if `APPLY=true`
+2. generates a CycloneDX SBOM with Syft
+3. scans the SBOM with Grype
+4. writes immutable receipts under `receipts/sbom/` and `receipts/cve/`, plus a catalog summary receipt under `receipts/image-scans/`
+5. updates `config/image-catalog.json`
+6. optionally runs the catalog's converge targets if `APPLY=true`
 
 Dry-run example:
 
@@ -103,9 +106,11 @@ Each receipt records:
 
 - the exact scanned image ref
 - the scan date
-- the Trivy image used for scanning
+- the Grype scanner image and Syft generator image used for scanning
+- the immutable SBOM and CVE receipt paths for the candidate digest
 - the count of critical findings
 - the count of high findings still present for operator review
+- the count of blocking HIGH or CRITICAL findings with an available fix
 
 Catalog exceptions record:
 
@@ -117,6 +122,7 @@ Catalog exceptions record:
 
 ## Failure Rules
 
-- If `make check-image-freshness` shows drift, do not update the digest without a new scan receipt.
-- If Trivy reports any critical findings, do not commit the new digest without an explicit exception update in the catalog.
+- If `make check-image-freshness` shows drift, do not update the digest without fresh Syft and Grype receipts.
+- If Grype reports any critical findings, do not commit the new digest without an explicit exception update in the catalog.
+- If the managed-image gate reports HIGH or CRITICAL findings with an available fix, do not commit the new digest.
 - If an apply target fails after a catalog update, revert the catalog change or complete the rollout before merging to `main`.

@@ -1,0 +1,31 @@
+# Purpose: Set the default paths, ports, voice catalog, and build inputs for the private Piper runtime.
+# Use case: Load when converging Piper so the role can render compose state and verify the `/api/tts` contract consistently.
+# Inputs: Platform topology, pinned base image, and optional Piper runtime overrides.
+# Outputs: Default variables consumed by the piper_runtime tasks and templates.
+# Idempotency: Fully idempotent; defaults describe desired values only.
+# Dependencies: ADR 0165 metadata standard, ADR 0284, and the piper_runtime role.
+---
+piper_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('piper') }}"
+piper_runtime_site_dir: /opt/piper
+piper_runtime_service_dir: "{{ piper_runtime_site_dir }}/service"
+piper_runtime_compose_file: "{{ piper_runtime_site_dir }}/docker-compose.yml"
+piper_runtime_compose_project_name: "{{ piper_runtime_site_dir | basename }}"
+piper_runtime_dockerfile: "{{ piper_runtime_service_dir }}/Dockerfile"
+piper_runtime_requirements_file: "{{ piper_runtime_service_dir }}/requirements.txt"
+piper_runtime_service_script: "{{ piper_runtime_service_dir }}/piper_service.py"
+piper_runtime_container_name: piper
+piper_runtime_image_name: lv3-piper
+piper_runtime_base_image: docker.io/library/python:3.12-slim-bookworm@sha256:38f794ff7afccc577d6b4beb6ab5fae2dff155e5a6f038aa7f13d6dd8487ce82
+piper_runtime_port: "{{ piper_service_topology.ports.internal }}"
+piper_runtime_base_url: "{{ piper_service_topology.urls.internal }}"
+piper_runtime_health_url: "{{ piper_runtime_base_url }}/healthz"
+piper_runtime_bind_host: "{{ ansible_host }}"
+piper_runtime_loopback_bind_host: 127.0.0.1
+piper_runtime_container_port: 5000
+piper_runtime_model_volume_name: piper-models
+piper_runtime_model_dir: /data
+piper_runtime_default_voice: en_US-ryan-medium
+piper_runtime_voice_models:
+  - en_US-ryan-medium
+piper_runtime_sentence_silence: 0.0
+piper_runtime_test_text: "LV3 Piper runtime verification."

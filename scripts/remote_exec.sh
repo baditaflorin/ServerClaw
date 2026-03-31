@@ -74,6 +74,18 @@ fail() {
   exit 1
 }
 
+load_lines_into_array() {
+  local target_name="$1"
+  local line=""
+  local quoted=""
+
+  eval "$target_name=()"
+  while IFS= read -r line; do
+    printf -v quoted '%q' "$line"
+    eval "$target_name+=( $quoted )"
+  done
+}
+
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -669,8 +681,8 @@ run_remote_command() {
     local docker_cache_args=()
     local image_ready_cmd=""
 
-    mapfile -t docker_env_args < <(remote_docker_env_args)
-    mapfile -t docker_cache_args < <(remote_runner_cache_args)
+    load_lines_into_array docker_env_args < <(remote_docker_env_args)
+    load_lines_into_array docker_cache_args < <(remote_runner_cache_args)
     if [[ -n "$DOCKER_SOCKET" && "$MOUNT_DOCKER_SOCKET" == "true" ]]; then
       docker_socket_path="${DOCKER_SOCKET#unix://}"
       docker_cmd+=("-v" "$docker_socket_path:$docker_socket_path" "-e" "DOCKER_HOST=$DOCKER_SOCKET")

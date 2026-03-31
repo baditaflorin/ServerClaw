@@ -146,6 +146,7 @@ def test_build_platform_vars_includes_tika_private_topology() -> None:
     assert tika["urls"]["internal"] == "http://10.10.10.20:9998"
     assert tika["exposure_model"] == "private-only"
 
+
 def test_build_platform_vars_includes_tesseract_ocr_private_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     tesseract_ocr = platform_vars["platform_service_topology"]["tesseract_ocr"]
@@ -154,6 +155,7 @@ def test_build_platform_vars_includes_tesseract_ocr_private_topology() -> None:
     assert tesseract_ocr["urls"]["internal"] == "http://10.10.10.20:3008"
     assert tesseract_ocr["exposure_model"] == "private-only"
     assert platform_vars["tesseract_ocr_port"] == 3008
+
 
 def test_build_platform_vars_includes_jupyterhub_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
@@ -165,6 +167,16 @@ def test_build_platform_vars_includes_jupyterhub_publication_topology() -> None:
     assert jupyterhub["urls"]["public"] == "https://notebooks.lv3.org"
     assert jupyterhub["urls"]["internal"] == "http://10.10.10.20:8097"
     assert jupyterhub["edge"]["client_max_body_size"] == "2g"
+
+
+def test_build_platform_vars_includes_piper_private_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    piper = platform_vars["platform_service_topology"]["piper"]
+
+    assert piper["ports"]["internal"] == 8100
+    assert piper["urls"]["internal"] == "http://10.10.10.20:8100"
+    assert piper["exposure_model"] == "private-only"
+    assert platform_vars["piper_port"] == 8100
 
 
 def test_build_platform_vars_includes_nextcloud_publication_topology() -> None:
@@ -337,6 +349,26 @@ def test_build_service_urls_resolves_jupyterhub_internal_url() -> None:
         "public": "https://notebooks.lv3.org",
         "internal": "http://10.10.10.20:8097",
     }
+
+
+def test_build_service_urls_resolves_piper_internal_url() -> None:
+    ports = {"piper_port": 8100}
+    service = {"owning_vm": "docker-runtime-lv3"}
+    host_vars = {"management_tailscale_ipv4": "100.118.189.95"}
+    guest_ipv4_by_name = {"docker-runtime-lv3": "10.10.10.20"}
+    stack = {"desired_state": {"host_id": "proxmox_florin"}}
+
+    port_map, urls = generate_platform_vars.build_service_urls(
+        "piper",
+        service,
+        host_vars,
+        guest_ipv4_by_name,
+        ports,
+        stack,
+    )
+
+    assert port_map == {"internal": 8100}
+    assert urls == {"internal": "http://10.10.10.20:8100"}
 
 
 def test_build_platform_vars_renders_service_topology_without_unresolved_templates() -> None:

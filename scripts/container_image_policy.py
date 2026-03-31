@@ -21,6 +21,7 @@ DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 IDENTIFIER_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_]*$")
 ALLOWED_KINDS = {"runtime", "build_base"}
 ALLOWED_SCAN_STATUSES = {"pass_no_critical", "exception_open"}
+ALLOWED_SCANNERS = {"grype", "trivy"}
 
 
 def require_mapping(value: Any, path: str) -> dict:
@@ -191,8 +192,9 @@ def validate_scan_receipt(receipt: dict, path: Path, image_id: str, ref: str) ->
         raise ValueError(f"{path}: image_id must equal '{image_id}'")
     if receipt.get("image_ref") != ref:
         raise ValueError(f"{path}: image_ref must equal '{ref}'")
-    if receipt.get("scanner") != "trivy":
-        raise ValueError(f"{path}: scanner must be 'trivy'")
+    scanner = require_str(receipt.get("scanner"), f"{path}.scanner")
+    if scanner not in ALLOWED_SCANNERS:
+        raise ValueError(f"{path}.scanner must be one of {sorted(ALLOWED_SCANNERS)}")
 
     require_date(receipt.get("scanned_on"), f"{path}.scanned_on")
     summary = require_mapping(receipt.get("summary"), f"{path}.summary")
@@ -202,6 +204,24 @@ def validate_scan_receipt(receipt: dict, path: Path, image_id: str, ref: str) ->
         raise ValueError(f"{path}.summary.critical must be a non-negative integer")
     if not isinstance(high, int) or high < 0:
         raise ValueError(f"{path}.summary.high must be a non-negative integer")
+    if scanner != "grype":
+        return
+
+    sbom_receipt_rel = require_str(receipt.get("sbom_receipt"), f"{path}.sbom_receipt")
+    cve_receipt_rel = require_str(receipt.get("cve_receipt"), f"{path}.cve_receipt")
+    sbom_receipt_path = repo_path(*Path(sbom_receipt_rel).parts)
+    cve_receipt_path = repo_path(*Path(cve_receipt_rel).parts)
+    if not sbom_receipt_path.is_file():
+        raise ValueError(f"{path}.sbom_receipt references missing file '{sbom_receipt_rel}'")
+    if not cve_receipt_path.is_file():
+        raise ValueError(f"{path}.cve_receipt references missing file '{cve_receipt_rel}'")
+
+    blocking_findings = summary.get("blocking_findings_with_fix", None)
+    total_matches = summary.get("total_matches", None)
+    if not isinstance(blocking_findings, int) or blocking_findings < 0:
+        raise ValueError(f"{path}.summary.blocking_findings_with_fix must be a non-negative integer")
+    if not isinstance(total_matches, int) or total_matches < 0:
+        raise ValueError(f"{path}.summary.total_matches must be a non-negative integer")
 
 
 def split_image_reference(registry_ref: str) -> tuple[str, str]:

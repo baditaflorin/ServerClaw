@@ -1,0 +1,44 @@
+validation gate: validating canonical NATS topics
+NATS topic taxonomy and routing OK
+validation gate: running remote pre-push gate
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: .ansible-lint-ignore, .gitea/workflows/release-bundle.yml, .gitea/workflows/renovate.yml, .gitea/workflows/validate.yml, README.md, build/platform-manifest.json, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 2.44
+alert-rule-validation passed 2.75
+ansible-lint          passed 181.96
+ansible-syntax        passed 109.66
+artifact-secret-scan  passed 2.98
+dependency-direction  passed 2.59
+dependency-graph      passed 3.30
+documentation-index   passed 2.19
+generated-docs        passed 8.84
+generated-portals     passed 29.54
+integration-tests     passed 1.73
+packer-validate       passed 5.70
+policy-validation     passed 2.52
+schema-validation     passed 16.19
+security-scan         passed 15.33
+semgrep-sast          passed 55.75
+service-completeness  passed 1.96
+tofu-validate         passed 2.24
+type-check            passed 4.07
+workstream-surfaces   passed 4.21
+yaml-lint             passed 15.38
+remote:
+remote: Create a new pull request for 'codex/ws-0297-live-apply':
+remote:   http://git.lv3.org:3009/ops/proxmox_florin_server/pulls/new/codex/ws-0297-live-apply
+remote:
+remote: . Processing 1 references
+remote: Processed 1 references in total
+To http://100.64.0.1:3009/ops/proxmox_florin_server.git
+ + 72d5e40e0...ba43d0da5 HEAD -> codex/ws-0297-live-apply (forced update)

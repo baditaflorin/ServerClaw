@@ -30,9 +30,17 @@ sudo rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin
 sudo journalctl --vacuum-size=500M
 docker image prune -af
 docker builder prune -af
+docker ps -a --filter status=exited --size
+# Remove only reviewed stopped scratch or superseded service containers if space is still critically low.
+docker rm <container-id>...
 df -h /
 sudo apt-get update -o Acquire::Retries=0
 ```
+
+If Docker image and builder pruning are not enough, review `docker ps -a` and
+remove only clearly stopped scratch containers or superseded non-running service
+containers. Re-check `docker system df` after each cleanup step so the recovery
+stays deliberate.
 
 ## Observed Example
 
