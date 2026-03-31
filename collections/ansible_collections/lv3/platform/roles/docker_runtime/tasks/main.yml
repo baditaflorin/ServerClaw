@@ -487,12 +487,11 @@
                 time.sleep(delay_seconds)
 
         containers = json.load(sys.stdin)
-        stopped = [container for container in containers if not container.get("State", {}).get("Running")]
 
         direct_start = []
         compose_groups = {}
 
-        for container in stopped:
+        for container in containers:
             name = (container.get("Name") or "").lstrip("/")
             labels = container.get("Config", {}).get("Labels") or {}
             working_dir = labels.get("com.docker.compose.project.working_dir") or ""
