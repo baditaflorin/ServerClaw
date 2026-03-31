@@ -2,14 +2,15 @@
 
 - ADR: [ADR 0284](../adr/0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md)
 - Title: Deploy the private Piper text-to-speech runtime and verify the live `/api/tts` path
-- Status: ready_for_merge
+- Status: live_applied
 - Included In Repo Version: 0.177.113
 - Branch-Local Receipt: `receipts/live-applies/2026-03-31-adr-0284-piper-live-apply.json`
-- Canonical Mainline Receipt: pending exact-main integration
+- Canonical Mainline Receipt: `receipts/live-applies/2026-03-31-adr-0284-piper-mainline-live-apply.json`
 - Live Applied In Platform Version: 0.130.74
 - Implemented On: 2026-03-31
 - Live Applied On: 2026-03-31
-- Branch: `codex/ws-0284-main-merge`
+- Release Date: 2026-03-31
+- Branch: `codex/ws-0284-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0284-live-apply`
 - Owner: codex
 - Depends On: `adr-0107`, `adr-0165`, `adr-0293`
@@ -22,7 +23,7 @@ Implement ADR 0284 from the current `origin/main` baseline by delivering the
 private Piper runtime on `docker-runtime-lv3`, correcting the live port
 assignment after collision with Temporal UI, preserving the recovery hardening
 discovered during the replay, and recording enough branch-local evidence for a
-safe exact-main merge.
+safe exact-main replay.
 
 ## Branch-Local Delivery
 
@@ -81,21 +82,33 @@ safe exact-main merge.
   `receipts/live-applies/evidence/2026-03-31-ws-0284-live-apply-wrapper-r1.txt`
   shows the expected branch-local stop on stale canonical truth because
   `README.md` is intentionally protected until the exact-main integration step.
-
-## Merge-To-Main Remaining
-
-- Rerun the governed `live-apply-service` wrapper from the exact-main tree so
-  the canonical mainline receipt captures committed `0.177.113` source instead
-  of only the earlier branch-local replay evidence.
-- Replace the pending canonical-mainline receipt placeholder with the exact
-  mainline replay receipt, flip this workstream to its terminal integrated
-  state, and then push `origin/main`.
+- The exact-main release preparation is preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0284-mainline-release-status-r1.txt`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0284-mainline-release-dry-run-r1.txt`,
+  and
+  `receipts/live-applies/evidence/2026-03-31-ws-0284-mainline-release-write-r1.txt`;
+  the dry run planned `0.177.113` from `0.177.112`, and the write run then
+  prepared release `0.177.113` while preserving `platform_version: 0.130.74`.
+- The governed exact-main replay from committed source `521597584` is preserved
+  in `receipts/live-applies/evidence/2026-03-31-ws-0284-mainline-live-apply-r1.txt`
+  and completed with final recap
+  `docker-runtime-lv3 : ok=116 changed=3 unreachable=0 failed=0 skipped=9 rescued=0 ignored=0`.
+- Fresh exact-main guest-local verification is preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0284-mainline-local-http-r1.txt`
+  and confirmed both published bindings for `5000/tcp`, the healthy `/healthz`
+  payload, and the declared default voice `en_US-ryan-medium`.
+- Fresh exact-main host-path synthesis verification is preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0284-mainline-host-path-tts-r1.txt`
+  and returned the valid WAV summary
+  `{"content_type":"audio/wav","riff":"RIFF","wave":"WAVE","bytes":109612}`.
 
 ## Outcome
 
-- ADR 0284 is now live on the current verified platform baseline `0.130.74`
-  from the dedicated workstream branch.
-- The branch-local evidence proves both the recovery hardening and the `8100`
-  port correction were necessary latest-main fixes, not speculative cleanup.
-- No unresolved Piper runtime defect remains on the workstream branch; the
-  remaining work is the protected exact-main integration and receipt refresh.
+- ADR 0284 is now implemented on integrated repo version `0.177.113`.
+- Piper first became true on platform version `0.130.74`, and the synchronized
+  exact-main replay preserves that already-current baseline without advancing
+  `platform_version` again.
+- `receipts/live-applies/2026-03-31-adr-0284-piper-mainline-live-apply.json`
+  supersedes the branch-local receipt as the canonical proof for `piper` while
+  preserving the earlier branch-local replay, the Docker recovery hardening,
+  and the `8100` port correction in the audit trail.

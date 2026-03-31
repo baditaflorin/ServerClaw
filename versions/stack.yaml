@@ -141,6 +141,7 @@ live_apply_evidence:
     temporal: 2026-03-30-adr-0293-temporal-mainline-live-apply
     jupyterhub: 2026-03-30-adr-0291-jupyterhub-mainline-live-apply
     renovate: 2026-03-31-adr-0297-renovate-mainline-live-apply
+    piper: 2026-03-31-adr-0284-piper-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated

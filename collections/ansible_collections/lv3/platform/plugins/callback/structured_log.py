@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+try:
+    from datetime import UTC
+except ImportError:  # pragma: no cover - Python <3.11 compatibility
+    UTC = timezone.utc
 
 from ansible.plugins.callback import CallbackBase
 

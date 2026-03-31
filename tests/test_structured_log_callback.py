@@ -8,7 +8,10 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-PLUGIN_PATH = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "plugins" / "callback" / "structured_log.py"
+PLUGIN_PATHS = [
+    REPO_ROOT / "callback_plugins" / "structured_log.py",
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "plugins" / "callback" / "structured_log.py",
+]
 
 
 class DisplayRecorder:
@@ -43,7 +46,7 @@ class FakeResult:
         self._result = payload
 
 
-def load_plugin_module() -> types.ModuleType:
+def load_plugin_module(plugin_path: Path) -> types.ModuleType:
     ansible_module = types.ModuleType("ansible")
     ansible_plugins_module = types.ModuleType("ansible.plugins")
     ansible_callback_module = types.ModuleType("ansible.plugins.callback")
@@ -62,7 +65,7 @@ def load_plugin_module() -> types.ModuleType:
         sys.modules["ansible"] = ansible_module
         sys.modules["ansible.plugins"] = ansible_plugins_module
         sys.modules["ansible.plugins.callback"] = ansible_callback_module
-        spec = importlib.util.spec_from_file_location("test_structured_log_callback_plugin", PLUGIN_PATH)
+        spec = importlib.util.spec_from_file_location("test_structured_log_callback_plugin", plugin_path)
         assert spec is not None
         assert spec.loader is not None
         module = importlib.util.module_from_spec(spec)
@@ -78,28 +81,29 @@ def load_plugin_module() -> types.ModuleType:
 
 
 def test_structured_log_callback_emits_required_fields() -> None:
-    module = load_plugin_module()
-    callback = module.CallbackModule()
-    callback._display = DisplayRecorder()
-    task = FakeTask(
-        "Render API gateway config",
-        {
-            "platform_trace_id": "trace-123",
-            "platform_intent_id": "intent-123",
-            "playbook_execution_notification_service": "api_gateway",
-            "playbook_execution_audit_target": "api_gateway",
-            "playbook_name": "api-gateway",
-        },
-    )
-    result = FakeResult(task, FakeHost("docker-runtime-lv3"), {"changed": True})
+    for plugin_path in PLUGIN_PATHS:
+        module = load_plugin_module(plugin_path)
+        callback = module.CallbackModule()
+        callback._display = DisplayRecorder()
+        task = FakeTask(
+            "Render API gateway config",
+            {
+                "platform_trace_id": "trace-123",
+                "platform_intent_id": "intent-123",
+                "playbook_execution_notification_service": "api_gateway",
+                "playbook_execution_audit_target": "api_gateway",
+                "playbook_name": "api-gateway",
+            },
+        )
+        result = FakeResult(task, FakeHost("docker-runtime-lv3"), {"changed": True})
 
-    callback.v2_runner_on_ok(result)
+        callback.v2_runner_on_ok(result)
 
-    payload = json.loads(callback._display.messages[0])
-    assert payload["service_id"] == "api_gateway"
-    assert payload["component"] == "ansible.task"
-    assert payload["trace_id"] == "trace-123"
-    assert payload["intent_id"] == "intent-123"
-    assert payload["vm"] == "docker-runtime-lv3"
-    assert payload["task_status"] == "ok"
-    assert payload["changed"] is True
+        payload = json.loads(callback._display.messages[0])
+        assert payload["service_id"] == "api_gateway", plugin_path
+        assert payload["component"] == "ansible.task", plugin_path
+        assert payload["trace_id"] == "trace-123", plugin_path
+        assert payload["intent_id"] == "intent-123", plugin_path
+        assert payload["vm"] == "docker-runtime-lv3", plugin_path
+        assert payload["task_status"] == "ok", plugin_path
+        assert payload["changed"] is True, plugin_path
