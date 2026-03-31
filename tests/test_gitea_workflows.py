@@ -1,3 +1,4 @@
+import subprocess
 from pathlib import Path
 
 
@@ -21,6 +22,25 @@ VALIDATE_MAIN_FETCH = (
     'git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" '
     "fetch origin main"
 )
+
+
+def extract_run_block(workflow: str, *, step_name: str) -> str:
+    marker = f"      - name: {step_name}\n"
+    start = workflow.index(marker)
+    sub = workflow[start:]
+    run_marker = "        run: |\n"
+    run_start = sub.index(run_marker) + len(run_marker)
+    body: list[str] = []
+    for line in sub[run_start:].splitlines():
+        if line.startswith("      - name: "):
+            break
+        if line.startswith("          "):
+            body.append(line[10:])
+        elif line == "":
+            body.append("")
+        else:
+            body.append(line)
+    return "\n".join(body) + "\n"
 
 
 def test_validate_workflow_uses_pinned_python_runner_and_manual_checkout() -> None:
@@ -95,3 +115,21 @@ def test_renovate_workflow_bootstraps_inside_pinned_python_runner() -> None:
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
     assert '"${docker_bin}" run --rm \\' in workflow
     assert '"${docker_bin}" pull "${RENOVATE_IMAGE}"' in workflow
+
+
+def test_renovate_workflow_run_block_is_shell_syntax_valid(tmp_path: Path) -> None:
+    workflow = RENOVATE_WORKFLOW.read_text(encoding="utf-8")
+    script_path = tmp_path / "renovate-run.sh"
+    script_path.write_text(
+        extract_run_block(workflow, step_name="Run Renovate through the pinned Harbor image"),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        ["bash", "-n", str(script_path)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr

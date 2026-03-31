@@ -275,7 +275,7 @@ jobs:
 
               with ThreadedTCPServer((listen_host, listen_port), Relay) as server:
                   server.serve_forever()
-              PY
+          PY
             renovate_clone_proxy_pid=$!
             python3 - <<'PY'
               import os
@@ -292,7 +292,7 @@ jobs:
                   except OSError:
                       time.sleep(0.2)
               raise SystemExit("Renovate clone relay did not become ready.")
-              PY
+          PY
           fi
           "${docker_bin}" pull "${RENOVATE_IMAGE}"
           "${docker_bin}" run --rm \
