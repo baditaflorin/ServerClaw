@@ -58,7 +58,7 @@ def test_lago_playbook_converges_dns_postgres_runtime_edge_and_public_verify() -
     )
 
     assert public_smoke_task["ansible.builtin.uri"]["url"] == "{{ lago_public_ingest_url }}"
-    assert public_smoke_task["retries"] == 24
+    assert public_smoke_task["retries"] == 48
     assert public_smoke_task["delay"] == 5
     assert public_smoke_task["until"] == "lago_public_smoke_event.status == 200"
     assert (

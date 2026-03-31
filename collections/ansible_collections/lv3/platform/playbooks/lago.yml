@@ -221,7 +221,7 @@
         status_code: 200
         return_content: true
       register: lago_public_smoke_event
-      retries: 24
+      retries: 48
       delay: 5
       until: lago_public_smoke_event.status == 200
       changed_when: false
