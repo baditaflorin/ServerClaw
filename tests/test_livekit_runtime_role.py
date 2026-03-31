@@ -76,6 +76,8 @@ def test_main_tasks_generate_keys_render_openbao_stack_and_verify_runtime() -> N
     assert 'grep -Eq \'^LIVEKIT_KEYS=.+:.+$\'' in env_wait_task["ansible.builtin.shell"]
     up_task = next(task for task in tasks if task["name"] == "Converge the LiveKit runtime stack")
     assert up_task["ansible.builtin.command"]["argv"][-3:] == ["-d", "--remove-orphans", "livekit"]
+    udp_wait_task = next(task for task in tasks if task["name"] == "Wait for the LiveKit UDP media listener")
+    assert "ss -lunH | awk '{print $4}' | grep -Eq '(^|:){{ livekit_media_udp_port }}$'" in udp_wait_task["ansible.builtin.shell"]
     verify_task = next(task for task in tasks if task["name"] == "Verify the LiveKit runtime")
     assert verify_task["ansible.builtin.import_tasks"] == "verify.yml"
 
@@ -88,6 +90,8 @@ def test_verify_tasks_probe_signal_media_and_room_lifecycle() -> None:
     assert "Verify the LiveKit TCP media listener is reachable locally" in names
     assert "Verify the LiveKit UDP media listener is present locally" in names
     assert "Verify the LiveKit room lifecycle locally" in names
+    udp_listener_task = next(task for task in tasks if task["name"] == "Verify the LiveKit UDP media listener is present locally")
+    assert "ss -lunH | awk '{print $4}' | grep -Eq '(^|:){{ livekit_media_udp_port }}$'" in udp_listener_task["ansible.builtin.shell"]
     lifecycle_task = next(task for task in tasks if task["name"] == "Verify the LiveKit room lifecycle locally")
     assert lifecycle_task["ansible.builtin.command"]["argv"][:3] == ["python3", "{{ livekit_remote_helper_script }}", "verify-room-lifecycle"]
     assert "--runtime-env-file" in lifecycle_task["ansible.builtin.command"]["argv"]

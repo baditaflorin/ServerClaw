@@ -24,7 +24,7 @@
 - name: Verify the LiveKit UDP media listener is present locally
   ansible.builtin.shell: |
     set -euo pipefail
-    ss -lunH | awk '{print $5}' | grep -Eq '(^|:){{ livekit_media_udp_port }}$'
+    ss -lunH | awk '{print $4}' | grep -Eq '(^|:){{ livekit_media_udp_port }}$'
   args:
     executable: /bin/bash
   register: livekit_verify_udp_listener

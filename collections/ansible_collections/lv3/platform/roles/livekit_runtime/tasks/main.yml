@@ -221,7 +221,7 @@
 - name: Wait for the LiveKit UDP media listener
   ansible.builtin.shell: |
     set -euo pipefail
-    ss -lunH | awk '{print $5}' | grep -Eq '(^|:){{ livekit_media_udp_port }}$'
+    ss -lunH | awk '{print $4}' | grep -Eq '(^|:){{ livekit_media_udp_port }}$'
   args:
     executable: /bin/bash
   register: livekit_udp_listener
