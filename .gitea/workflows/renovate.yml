@@ -44,19 +44,33 @@ jobs:
       - name: Bootstrap Docker CLI and discover runner host paths
         run: |
           set -euo pipefail
+          resolve_docker_bin() {
+            for candidate in \
+              "$(cat .tmp/docker-bin.path 2>/dev/null || true)" \
+              "$(command -v docker 2>/dev/null || true)" \
+              "$(command -v docker.io 2>/dev/null || true)" \
+              /usr/bin/docker \
+              /usr/bin/docker.io \
+              /usr/local/bin/docker \
+              /usr/local/bin/docker.io; do
+              if [ -n "${candidate}" ] && [ -x "${candidate}" ]; then
+                docker_bin="${candidate}"
+                return 0
+              fi
+            done
+            docker_bin=""
+            return 1
+          }
           ensure_docker_bin() {
-            docker_bin="$(cat .tmp/docker-bin.path 2>/dev/null || true)"
-            if [ -n "${docker_bin}" ] && [ -x "${docker_bin}" ]; then
+            if resolve_docker_bin; then
+              printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
               return 0
             fi
-            docker_bin="$(command -v docker || command -v docker.io || true)"
-            if [ -z "${docker_bin}" ]; then
-              export DEBIAN_FRONTEND=noninteractive
-              apt-get update >&2
-              apt-get install -y --no-install-recommends docker.io >&2
-              docker_bin="$(command -v docker || command -v docker.io || true)"
-            fi
-            if [ -z "${docker_bin}" ]; then
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update >&2
+            apt-get install -y --no-install-recommends docker-cli >&2
+            hash -r
+            if ! resolve_docker_bin; then
               echo "Docker CLI is unavailable after bootstrap." >&2
               return 1
             fi
@@ -98,19 +112,33 @@ jobs:
       - name: Mint a short-lived Renovate token
         run: |
           set -euo pipefail
+          resolve_docker_bin() {
+            for candidate in \
+              "$(cat .tmp/docker-bin.path 2>/dev/null || true)" \
+              "$(command -v docker 2>/dev/null || true)" \
+              "$(command -v docker.io 2>/dev/null || true)" \
+              /usr/bin/docker \
+              /usr/bin/docker.io \
+              /usr/local/bin/docker \
+              /usr/local/bin/docker.io; do
+              if [ -n "${candidate}" ] && [ -x "${candidate}" ]; then
+                docker_bin="${candidate}"
+                return 0
+              fi
+            done
+            docker_bin=""
+            return 1
+          }
           ensure_docker_bin() {
-            docker_bin="$(cat .tmp/docker-bin.path 2>/dev/null || true)"
-            if [ -n "${docker_bin}" ] && [ -x "${docker_bin}" ]; then
+            if resolve_docker_bin; then
+              printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
               return 0
             fi
-            docker_bin="$(command -v docker || command -v docker.io || true)"
-            if [ -z "${docker_bin}" ]; then
-              export DEBIAN_FRONTEND=noninteractive
-              apt-get update >&2
-              apt-get install -y --no-install-recommends docker.io >&2
-              docker_bin="$(command -v docker || command -v docker.io || true)"
-            fi
-            if [ -z "${docker_bin}" ]; then
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update >&2
+            apt-get install -y --no-install-recommends docker-cli >&2
+            hash -r
+            if ! resolve_docker_bin; then
               echo "Docker CLI is unavailable after bootstrap." >&2
               return 1
             fi
@@ -143,19 +171,33 @@ jobs:
       - name: Run Renovate through the pinned Harbor image
         run: |
           set -euo pipefail
+          resolve_docker_bin() {
+            for candidate in \
+              "$(cat .tmp/docker-bin.path 2>/dev/null || true)" \
+              "$(command -v docker 2>/dev/null || true)" \
+              "$(command -v docker.io 2>/dev/null || true)" \
+              /usr/bin/docker \
+              /usr/bin/docker.io \
+              /usr/local/bin/docker \
+              /usr/local/bin/docker.io; do
+              if [ -n "${candidate}" ] && [ -x "${candidate}" ]; then
+                docker_bin="${candidate}"
+                return 0
+              fi
+            done
+            docker_bin=""
+            return 1
+          }
           ensure_docker_bin() {
-            docker_bin="$(cat .tmp/docker-bin.path 2>/dev/null || true)"
-            if [ -n "${docker_bin}" ] && [ -x "${docker_bin}" ]; then
+            if resolve_docker_bin; then
+              printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
               return 0
             fi
-            docker_bin="$(command -v docker || command -v docker.io || true)"
-            if [ -z "${docker_bin}" ]; then
-              export DEBIAN_FRONTEND=noninteractive
-              apt-get update >&2
-              apt-get install -y --no-install-recommends docker.io >&2
-              docker_bin="$(command -v docker || command -v docker.io || true)"
-            fi
-            if [ -z "${docker_bin}" ]; then
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update >&2
+            apt-get install -y --no-install-recommends docker-cli >&2
+            hash -r
+            if ! resolve_docker_bin; then
               echo "Docker CLI is unavailable after bootstrap." >&2
               return 1
             fi
@@ -184,19 +226,33 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
+          resolve_docker_bin() {
+            for candidate in \
+              "$(cat .tmp/docker-bin.path 2>/dev/null || true)" \
+              "$(command -v docker 2>/dev/null || true)" \
+              "$(command -v docker.io 2>/dev/null || true)" \
+              /usr/bin/docker \
+              /usr/bin/docker.io \
+              /usr/local/bin/docker \
+              /usr/local/bin/docker.io; do
+              if [ -n "${candidate}" ] && [ -x "${candidate}" ]; then
+                docker_bin="${candidate}"
+                return 0
+              fi
+            done
+            docker_bin=""
+            return 1
+          }
           ensure_docker_bin() {
-            docker_bin="$(cat .tmp/docker-bin.path 2>/dev/null || true)"
-            if [ -n "${docker_bin}" ] && [ -x "${docker_bin}" ]; then
+            if resolve_docker_bin; then
+              printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
               return 0
             fi
-            docker_bin="$(command -v docker || command -v docker.io || true)"
-            if [ -z "${docker_bin}" ]; then
-              export DEBIAN_FRONTEND=noninteractive
-              apt-get update >&2
-              apt-get install -y --no-install-recommends docker.io >&2
-              docker_bin="$(command -v docker || command -v docker.io || true)"
-            fi
-            if [ -z "${docker_bin}" ]; then
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update >&2
+            apt-get install -y --no-install-recommends docker-cli >&2
+            hash -r
+            if ! resolve_docker_bin; then
               return 1
             fi
             printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path

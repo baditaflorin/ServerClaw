@@ -65,7 +65,8 @@ def test_renovate_workflow_bootstraps_inside_pinned_python_runner() -> None:
     assert SHALLOW_MANUAL_CHECKOUT_FETCH in workflow
     assert 'git checkout --force "${WORKFLOW_SHA}"' in workflow
     assert "/var/run/docker.sock:/var/run/docker.sock" not in workflow
-    assert "apt-get install -y --no-install-recommends docker.io" in workflow
+    assert "apt-get install -y --no-install-recommends docker-cli" in workflow
+    assert "hash -r" in workflow
     assert "Bootstrap Docker CLI and discover runner host paths" in workflow
     assert 'current_container_id="${HOSTNAME:-$(hostname)}"' in workflow
     assert "cgroup_container_id" in workflow
@@ -75,6 +76,7 @@ def test_renovate_workflow_bootstraps_inside_pinned_python_runner() -> None:
     assert ".tmp/docker-bin.path" in workflow
     assert 'docker_bin="$(ensure_docker_bin)"' not in workflow
     assert workflow.count("ensure_docker_bin") >= 8
+    assert workflow.count("resolve_docker_bin") >= 8
     assert '.tmp/workspace-host.path' in workflow
     assert '.tmp/bootstrap-host.path' in workflow
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
