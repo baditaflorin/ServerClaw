@@ -8872,6 +8872,11 @@ workstreams:
           contract: makefile-validation-targets-v1
     ready_to_merge: false
     live_applied: false
+    blockers:
+      - "the branch-side validation stack now passes against origin/main bd9f92ea90ee07df43caaafcf979701d4a9ccb41 / repo version 0.177.123 (27 passed across the LiveKit-targeted pytest lanes, make syntax-check-livekit, scripts/validate_repo.sh agent-standards, and scripts/ansible_scope_runner.py validate), but the live replay window is still blocked by shared-runtime contention rather than remaining repo defects"
+      - "a stale agent:codex/ws-0275-main-closeout-r3 vm:120/service:tika lease was explicitly released after verifying the holder worktree was idle, so the remaining ADR 0153 blockers are only agent:codex/ws-0277-live-apply on vm:120/service:api_gateway and vm:120/service:typesense through 2026-04-01T00:15:42Z"
+      - "codex/ws-0277-live-apply advanced to commit 894bb6e3048a4f4d4e4e44d7f84a8628438c4f64 during this investigation while its registered worktree remained detached at bd9f92ea90ee07df43caaafcf979701d4a9ccb41, so those remaining locks are treated as live and were not force-cleared"
+      - "controller-local quiet-window monitoring still sees concurrent monitoring-stack, vaultwarden, windmill, openbao, and lago replays mutating proxmox_florin, docker-runtime-lv3, nginx-lv3, and postgres-lv3, so the next safe step is a fresh full LiveKit replay only after both the vm:120 parent lock and the shared-host activity drain"
 
   - id: adr-0176-inventory-sharding
     adr: "0176"

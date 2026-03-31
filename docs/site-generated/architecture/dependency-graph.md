@@ -77,6 +77,7 @@ graph TD
     keycloak["Keycloak\nTier 2"]
     lago["Lago\nTier 2"]
     langfuse["Langfuse\nTier 2"]
+    livekit["LiveKit\nTier 2"]
     matrix_synapse["Matrix Synapse\nTier 2"]
     mattermost["Mattermost\nTier 2"]
     n8n["n8n\nTier 2"]
@@ -175,6 +176,9 @@ graph TD
     langfuse -->|soft| nginx_edge
     langfuse -->|startup_only| openbao
     langfuse -->|hard| postgres
+    livekit -->|hard| docker_runtime
+    livekit -->|soft| nginx_edge
+    livekit -->|startup_only| openbao
     mail_platform -->|soft| nginx_edge
     mail_platform -->|startup_only| openbao
     matrix_synapse -->|soft| nginx_edge
