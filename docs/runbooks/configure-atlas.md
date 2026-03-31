@@ -101,6 +101,13 @@ python3 scripts/windmill_run_wait_result.py \
 
 - `make atlas-refresh-snapshots` is the only supported path for refreshing the
   committed `config/atlas/*.hcl` files. Do not hand-edit those HCL snapshots.
+- If `make atlas-refresh-snapshots` or `make atlas-drift-check` fails with
+  `HTTP Error 500` and the OpenBao response reports
+  `"postgres-atlas-readonly" is not an allowed role`, rerun
+  `make converge-openbao` from a tree that includes the ADR 0304 OpenBao
+  backend allowed-role reconciliation task. The AppRole and policy can be
+  present while the database backend config still lags the expected
+  `allowed_roles` list.
 - The current implementation pins the Atlas image by digest in
   `config/atlas/catalog.json`. If Harbor is not serving the mirror yet, record
   that temporary exception in the live-apply receipt instead of silently
