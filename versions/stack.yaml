@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.177.121
+repo_version: 0.177.122
 platform_version: 0.130.78
 
 live_apply_evidence:
@@ -150,6 +150,7 @@ live_apply_evidence:
     sbom_cve_scanning: 2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply
     paperless: 2026-03-31-adr-0285-paperless-live-apply
     k6_load_testing: 2026-03-31-adr-0305-k6-mainline-live-apply
+    postgres_audit: 2026-03-31-adr-0303-pgaudit-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -1084,7 +1085,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.121
+    current: 0.177.122
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.78
