@@ -13,6 +13,7 @@ from drift_lib import build_guest_ssh_command, load_controller_context, run_comm
 
 DEFAULT_REMOTE_REPO_ROOT = "/srv/proxmox_florin_server"
 DEFAULT_RUNTIME_CREDENTIAL_FILE = "/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json"
+FALLBACK_REMOTE_REPO_ROOT = "/opt/api-gateway/service"
 
 
 def extract_report_json(stdout: str) -> dict | None:
@@ -30,10 +31,12 @@ def build_remote_command(
     credential_file: str,
     live_apply_trigger: bool,
 ) -> str:
+    script_path = f"{repo_root}/scripts/restic_config_backup.py"
+    fallback_script_path = f"{FALLBACK_REMOTE_REPO_ROOT}/scripts/restic_config_backup.py"
     command = [
         "sudo",
         "python3",
-        f"{repo_root}/scripts/restic_config_backup.py",
+        '"$script_path"',
         "--repo-root",
         repo_root,
         "--credential-file",
@@ -46,7 +49,19 @@ def build_remote_command(
     ]
     if live_apply_trigger:
         command.append("--live-apply-trigger")
-    return " ".join(shlex.quote(item) for item in command)
+    rendered_command = " ".join(command)
+    shell_lines = [
+        f'primary_script={shlex.quote(script_path)}',
+        f'fallback_script={shlex.quote(fallback_script_path)}',
+        'script_path="$primary_script"',
+        'if [ ! -f "$script_path" ] && [ -f "$fallback_script" ]; then script_path="$fallback_script"; fi',
+        'if [ ! -f "$script_path" ]; then',
+        '  echo "restic_config_backup.py is missing from both $primary_script and $fallback_script" >&2',
+        "  exit 2",
+        "fi",
+        rendered_command,
+    ]
+    return "sh -lc " + shlex.quote("\n".join(shell_lines))
 
 
 def build_parser() -> argparse.ArgumentParser:
