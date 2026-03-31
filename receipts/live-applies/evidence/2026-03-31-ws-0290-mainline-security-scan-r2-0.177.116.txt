@@ -1,0 +1,72 @@
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+2026-03-31T10:11:46Z	INFO	[misconfig] Misconfiguration scanning is enabled
+2026-03-31T10:11:47Z	INFO	[secret] Secret scanning is enabled
+2026-03-31T10:11:47Z	INFO	[secret] If your scanning is slow, please try '--scanners misconfig' to disable secret scanning
+2026-03-31T10:11:47Z	INFO	[secret] Please see https://trivy.dev/docs/v0.68/guide/scanner/secret#recommendation for faster secret detection
+2026-03-31T10:11:57Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="receipts/image-scans/2026-03-28-dify-plugin-daemon-runtime.trivy.json" size (MB)=12
+2026-03-31T10:12:05Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="receipts/sbom/host-docker-runtime-lv3-2026-03-30.cdx.json" size (MB)=21
+2026-03-31T10:12:11Z	INFO	[npm] To collect the license information of packages, "npm install" needs to be performed beforehand	dir="config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules"
+2026-03-31T10:12:11Z	INFO	[python] Licenses acquired from one or more METADATA files may be subject to additional terms. Use `--debug` flag to see all affected packages.
+2026-03-31T10:12:16Z	INFO	[terraform scanner] Scanning root module	file_path=".local/tofu-plans/runtime/tofu/environments/production"
+2026-03-31T10:12:16Z	WARN	[terraform parser] Variable values were not found in the environment or variable files. Evaluating may not work correctly.	module="root" variables="bridge, ci_user, cloud_init_datastore_id, datastore_id, nameserver, node_name, proxmox_api_token, proxmox_endpoint, search_domain, template_node_name, template_vmid"
+2026-03-31T10:12:16Z	INFO	[terraform scanner] Scanning root module	file_path=".local/tofu-plans/runtime/tofu/environments/staging"
+2026-03-31T10:12:16Z	WARN	[terraform parser] Variable values were not found in the environment or variable files. Evaluating may not work correctly.	module="root" variables="bridge, ci_user, cloud_init_datastore_id, datastore_id, nameserver, node_name, proxmox_api_token, proxmox_endpoint, search_domain, template_node_name, template_vmid"
+2026-03-31T10:12:16Z	INFO	[terraform scanner] Scanning root module	file_path=".local/tofu-plans/runtime/tofu/modules/proxmox-fixture"
+2026-03-31T10:12:16Z	WARN	[terraform parser] Variable values were not found in the environment or variable files. Evaluating may not work correctly.	module="root" variables="bridge, ci_user, cloud_init_datastore_id, cores, datastore_id, description, disk_gb, fixture_id, gateway, ip_address, ip_cidr, lifetime_minutes, mac_address, memory_mb, name, nameserver, node_name, search_domain, ssh_authorized_keys, tags, template_node_name, template_vmid, vm_id, vmid_range"
+2026-03-31T10:12:16Z	INFO	[terraform scanner] Scanning root module	file_path="tofu/environments/production"
+2026-03-31T10:12:16Z	WARN	[terraform parser] Variable values were not found in the environment or variable files. Evaluating may not work correctly.	module="root" variables="bridge, ci_user, cloud_init_datastore_id, datastore_id, nameserver, node_name, proxmox_api_token, proxmox_endpoint, search_domain, template_node_name, template_vmid"
+2026-03-31T10:12:16Z	INFO	[terraform scanner] Scanning root module	file_path="tofu/environments/staging"
+2026-03-31T10:12:16Z	WARN	[terraform parser] Variable values were not found in the environment or variable files. Evaluating may not work correctly.	module="root" variables="bridge, ci_user, cloud_init_datastore_id, datastore_id, nameserver, node_name, proxmox_api_token, proxmox_endpoint, search_domain, template_node_name, template_vmid"
+2026-03-31T10:12:16Z	INFO	[terraform scanner] Scanning root module	file_path="tofu/modules/proxmox-fixture"
+2026-03-31T10:12:16Z	WARN	[terraform parser] Variable values were not found in the environment or variable files. Evaluating may not work correctly.	module="root" variables="bridge, ci_user, cloud_init_datastore_id, cores, datastore_id, description, disk_gb, fixture_id, gateway, ip_address, ip_cidr, lifetime_minutes, mac_address, memory_mb, name, nameserver, node_name, search_domain, ssh_authorized_keys, tags, template_node_name, template_vmid, vm_id, vmid_range"
+2026-03-31T10:12:18Z	ERROR	[dockerfile scanner] Failed to parse file	file_path="collections/ansible_collections/lv3/platform/roles/browser_runner_runtime/templates/Dockerfile.j2" err="parse dockerfile instruction: parse instruction \"from\": FROM requires either one or three arguments"
+2026-03-31T10:12:18Z	ERROR	[dockerfile scanner] Failed to parse file	file_path="collections/ansible_collections/lv3/platform/roles/piper_runtime/templates/Dockerfile.j2" err="parse dockerfile instruction: parse instruction \"from\": FROM requires either one or three arguments"
+2026-03-31T10:12:18Z	ERROR	[dockerfile scanner] Failed to parse file	file_path="collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/templates/Dockerfile.j2" err="parse dockerfile instruction: parse instruction \"from\": FROM requires either one or three arguments"
+2026-03-31T10:12:18Z	INFO	Suppressing dependencies for development and testing. To display them, try the '--include-dev-deps' flag.
+2026-03-31T10:12:18Z	INFO	Number of language-specific files	num=5
+2026-03-31T10:12:18Z	INFO	Detected config files	num=7
+
+Report Summary
+
+┌──────────────────────────────────────────────────────────────────────────────────┬────────────┬───────────────────┬─────────┐
+│                                      Target                                      │    Type    │ Misconfigurations │ Secrets │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/files/- │    pip     │         -         │    -    │
+│ mail-gateway/requirements.txt                                                    │            │                   │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ collections/ansible_collections/lv3/platform/roles/piper_runtime/files/requirem- │    pip     │         -         │    -    │
+│ ents.txt                                                                         │            │                   │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ config/windmill/apps/f/lv3/operator_access_admin.raw_app/package-lock.json       │    npm     │         -         │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ docker/check-runners/ansible/requirements.txt                                    │    pip     │         -         │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ docker/check-runners/python/requirements.txt                                     │    pip     │         -         │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ .local/tofu-plans/runtime/tofu/environments/production                           │ terraform  │         0         │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ .local/tofu-plans/runtime/tofu/environments/staging                              │ terraform  │         0         │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ .local/tofu-plans/runtime/tofu/modules/proxmox-fixture                           │ terraform  │         0         │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates- │ dockerfile │         0         │    -    │
+│ /Dockerfile.j2                                                                   │            │                   │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ tofu/environments/production                                                     │ terraform  │         0         │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ tofu/environments/staging                                                        │ terraform  │         0         │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ tofu/modules/proxmox-fixture                                                     │ terraform  │         0         │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ receipts/live-applies/evidence/2026-03-29-adr-0261-0262-mainline-serverclaw-run- │    text    │         -         │    0    │
+│ time-token.json                                                                  │            │                   │         │
+└──────────────────────────────────────────────────────────────────────────────────┴────────────┴───────────────────┴─────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
+
+📣 [34mNotices:[0m
+  - Version 0.69.3 of Trivy is now available, current version is 0.68.2
+
+To suppress version checks, run Trivy scans with the --skip-version-check flag

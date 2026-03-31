@@ -3,7 +3,7 @@
 - ADR: [ADR 0290](../adr/0290-redpanda-as-the-kafka-compatible-streaming-platform.md)
 - Title: Deploy Redpanda as the private Kafka-compatible durable streaming platform
 - Status: live_applied
-- Included In Repo Version: 0.177.114
+- Included In Repo Version: 0.177.116
 - Canonical Mainline Receipt: `receipts/live-applies/2026-03-31-adr-0290-redpanda-mainline-live-apply.json`
 - Live Applied In Platform Version: 0.130.75
 - Implemented On: 2026-03-31
@@ -14,7 +14,7 @@
 - Owner: codex
 - Depends On: `adr-0077`, `adr-0086`, `adr-0153`, `adr-0165`, `adr-0191`, `adr-0276`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0290`, `docs/workstreams/ws-0290-live-apply.md`, `docs/runbooks/configure-redpanda.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `playbooks/redpanda.yml`, `playbooks/services/redpanda.yml`, `collections/ansible_collections/lv3/platform/playbooks/redpanda.yml`, `roles/redpanda_runtime/`, `collections/ansible_collections/lv3/platform/roles/redpanda_runtime/`, `config/*catalog*.json`, `config/ansible-role-idempotency.yml`, `Makefile`, `tests/test_ansible_role_idempotency.py`, `tests/test_generate_platform_vars.py`, `tests/test_redpanda_playbook.py`, `tests/test_redpanda_runtime_role.py`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/0.177.114.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `docs/site-generated/architecture/dependency-graph.md`, `receipts/ops-portal-snapshot.html`, `workstreams.yaml`, `receipts/live-applies/`
+- Shared Surfaces: `docs/adr/0290`, `docs/workstreams/ws-0290-live-apply.md`, `docs/runbooks/configure-redpanda.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `playbooks/redpanda.yml`, `playbooks/services/redpanda.yml`, `collections/ansible_collections/lv3/platform/playbooks/redpanda.yml`, `roles/redpanda_runtime/`, `collections/ansible_collections/lv3/platform/roles/redpanda_runtime/`, `config/*catalog*.json`, `config/ansible-role-idempotency.yml`, `Makefile`, `tests/test_ansible_role_idempotency.py`, `tests/test_generate_platform_vars.py`, `tests/test_redpanda_playbook.py`, `tests/test_redpanda_runtime_role.py`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/0.177.116.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `docs/site-generated/architecture/dependency-graph.md`, `receipts/ops-portal-snapshot.html`, `workstreams.yaml`, `receipts/live-applies/`
 
 ## Scope
 
@@ -43,7 +43,7 @@
 - `VERSION`
 - `changelog.md`
 - `docs/release-notes/README.md`
-- `docs/release-notes/0.177.114.md`
+- `docs/release-notes/0.177.116.md`
 - `versions/stack.yaml`
 - `build/platform-manifest.json`
 - `docs/diagrams/agent-coordination-map.excalidraw`
@@ -99,6 +99,13 @@
   `receipts/live-applies/evidence/2026-03-31-ws-0290-mainline-release-write-r1.txt`;
   the write step prepared repo version `0.177.114` and platform version
   `0.130.75` from the latest realistic `origin/main` baseline.
+- The protected mainline integration is preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0290-mainline-release-status-r2-0.177.116.json`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0290-mainline-release-dry-run-r2-0.177.116.txt`,
+  and
+  `receipts/live-applies/evidence/2026-03-31-ws-0290-mainline-release-write-r2-0.177.116.txt`;
+  the write step promoted the verified Redpanda change onto `main` as repo
+  version `0.177.116` while keeping platform version `0.130.75`.
 - The governed exact-main Redpanda replay from committed source
   `aafea88c9bee78e14372f40b94bc62d3abb79433` is preserved in
   `receipts/live-applies/evidence/2026-03-31-ws-0290-mainline-live-apply-r1-0.177.114.txt`
@@ -134,7 +141,7 @@
 
 ## Outcome
 
-- ADR 0290 is implemented in integrated repo version `0.177.114`.
+- ADR 0290 first became true in exact-main repo version `0.177.114` and is integrated on `main` in repo version `0.177.116`.
 - Redpanda first became true on platform version `0.130.75`.
 - `receipts/live-applies/2026-03-31-adr-0290-redpanda-mainline-live-apply.json`
   is the canonical proof for the exact-main Redpanda replay that backed the

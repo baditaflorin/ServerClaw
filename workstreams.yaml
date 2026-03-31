@@ -1568,7 +1568,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0290 by bringing the private Redpanda Kafka-compatible streaming platform, topic reconciliation, and authenticated Admin API, HTTP Proxy, and Schema Registry runtime onto main after the exact-main governed replay on docker-runtime-lv3
       release_bump: patch
-      included_in_repo_version: 0.177.114
+      included_in_repo_version: 0.177.116
       latest_receipts:
         redpanda: 2026-03-31-adr-0290-redpanda-mainline-live-apply
   - id: ws-0266-validation-runner-capability-contracts
