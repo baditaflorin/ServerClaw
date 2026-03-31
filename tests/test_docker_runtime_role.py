@@ -103,6 +103,10 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert "Ensure Docker bridge networking chains are present" in task_names
     assert "Re-inspect pre-restart containers after Docker restarts" in task_names
     assert "Record pre-restart containers that remained stopped after Docker restarts" in task_names
+    assert "Record whether Docker recovery needs the local OpenBao API unsealed" in task_names
+    assert "Flag OpenBao-backed compose services before Docker container recovery" in task_names
+    assert "Load the OpenBao init payload before Docker container recovery touches OpenBao-backed services" in task_names
+    assert "Ensure the local OpenBao API is unsealed before Docker container recovery touches OpenBao-backed services" in task_names
     assert "Recover pre-restart containers that remained stopped after Docker restarts" in task_names
     assert "Confirm pre-restart containers recovered after Docker restarts" in task_names
     inspect_pre_restart = next(task for task in tasks if task["name"] == "Inspect running containers before Docker restarts")
@@ -111,6 +115,20 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     recheck_pre_restart = next(task for task in tasks if task["name"] == "Re-inspect pre-restart containers after Docker restarts")
     record_stopped = next(
         task for task in tasks if task["name"] == "Record pre-restart containers that remained stopped after Docker restarts"
+    )
+    record_openbao_requirement = next(
+        task for task in tasks if task["name"] == "Record whether Docker recovery needs the local OpenBao API unsealed"
+    )
+    flag_openbao_requirement = next(
+        task for task in tasks if task["name"] == "Flag OpenBao-backed compose services before Docker container recovery"
+    )
+    load_openbao_init = next(
+        task for task in tasks if task["name"] == "Load the OpenBao init payload before Docker container recovery touches OpenBao-backed services"
+    )
+    ensure_openbao_unsealed = next(
+        task
+        for task in tasks
+        if task["name"] == "Ensure the local OpenBao API is unsealed before Docker container recovery touches OpenBao-backed services"
     )
     recover_containers = next(task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts")
     confirm_recovery = next(task for task in tasks if task["name"] == "Confirm pre-restart containers recovered after Docker restarts")
@@ -143,6 +161,27 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     )
     assert '["docker", "inspect", container_name]' in recheck_pre_restart["ansible.builtin.command"]["argv"][2]
     assert "docker_runtime_stopped_pre_restart_container_details" in record_stopped["ansible.builtin.set_fact"]
+    assert record_openbao_requirement["ansible.builtin.set_fact"] == {
+        "docker_runtime_recovery_requires_openbao_unseal": False
+    }
+    assert flag_openbao_requirement["loop"] == "{{ docker_runtime_stopped_pre_restart_container_details | default([]) }}"
+    assert any(
+        "item.Config.Labels['com.docker.compose.service']" in condition
+        for condition in flag_openbao_requirement["when"]
+    )
+    assert load_openbao_init["ansible.builtin.set_fact"] == {
+        "docker_runtime_openbao_init_payload": "{{ lookup('ansible.builtin.file', openbao_init_local_file) | from_json }}"
+    }
+    assert load_openbao_init["when"] == "docker_runtime_recovery_requires_openbao_unseal | bool"
+    assert load_openbao_init["no_log"] is True
+    assert ensure_openbao_unsealed["ansible.builtin.include_role"] == {
+        "name": "lv3.platform.openbao_runtime",
+        "tasks_from": "ensure_unsealed",
+    }
+    assert ensure_openbao_unsealed["vars"]["openbao_unseal_context"] == "Docker container recovery after Docker restarts"
+    assert ensure_openbao_unsealed["vars"]["openbao_unseal_init_payload"] == "{{ docker_runtime_openbao_init_payload }}"
+    assert ensure_openbao_unsealed["when"] == "docker_runtime_recovery_requires_openbao_unseal | bool"
+    assert ensure_openbao_unsealed["no_log"] is True
     assert recover_containers["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
     assert "".join(recover_containers["ansible.builtin.command"]["stdin"].split()) == (
         "{{(docker_runtime_stopped_pre_restart_container_details|default([]))|to_json}}"
@@ -164,6 +203,7 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert '"http://127.0.0.1:8201/v1/sys/health"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert '"http://127.0.0.1:8201/v1/sys/seal-status"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert '"http://127.0.0.1:8201/v1/sys/unseal"' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "OPENBAO_READY_STATUS_CODES = {200, 429, 472, 473, 501, 503}" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def compose_group_sort_key(item):" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "No chain/target/match by that name" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "failed to create endpoint" in recover_containers["ansible.builtin.command"]["argv"][2]

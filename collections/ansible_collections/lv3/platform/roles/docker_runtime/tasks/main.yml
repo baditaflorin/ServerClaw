@@ -465,6 +465,35 @@
     - docker_runtime_stopped_pre_restart_container_names | default([]) | length > 0
     - docker_runtime_stopped_pre_restart_requires_local_openbao | default(false) | bool
 
+- name: Record whether Docker recovery needs the local OpenBao API unsealed
+  ansible.builtin.set_fact:
+    docker_runtime_recovery_requires_openbao_unseal: false
+
+- name: Flag OpenBao-backed compose services before Docker container recovery
+  ansible.builtin.set_fact:
+    docker_runtime_recovery_requires_openbao_unseal: true
+  loop: "{{ docker_runtime_stopped_pre_restart_container_details | default([]) }}"
+  when:
+    - item.Config is defined
+    - item.Config.Labels is defined
+    - (item.Config.Labels['com.docker.compose.service'] | default('')) == 'openbao-agent'
+
+- name: Load the OpenBao init payload before Docker container recovery touches OpenBao-backed services
+  ansible.builtin.set_fact:
+    docker_runtime_openbao_init_payload: "{{ lookup('ansible.builtin.file', openbao_init_local_file) | from_json }}"
+  no_log: true
+  when: docker_runtime_recovery_requires_openbao_unseal | bool
+
+- name: Ensure the local OpenBao API is unsealed before Docker container recovery touches OpenBao-backed services
+  ansible.builtin.include_role:
+    name: lv3.platform.openbao_runtime
+    tasks_from: ensure_unsealed
+  vars:
+    openbao_unseal_context: Docker container recovery after Docker restarts
+    openbao_unseal_init_payload: "{{ docker_runtime_openbao_init_payload }}"
+  no_log: true
+  when: docker_runtime_recovery_requires_openbao_unseal | bool
+
 - name: Recover pre-restart containers that remained stopped after Docker restarts
   ansible.builtin.command:
     argv:
@@ -532,7 +561,6 @@
             except urllib.error.HTTPError as exc:
                 payload = exc.read().decode()
                 return exc.code, json.loads(payload or "{}")
-
 
         def submit_local_openbao_unseal_key(key):
             request = urllib.request.Request(
