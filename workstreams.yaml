@@ -322,7 +322,7 @@ workstreams:
         signals into Loki and Prometheus, and routing unknown-role alerts to ntfy
         plus NATS with recorded exact-main live-apply evidence
       release_bump: patch
-      included_in_repo_version: 0.177.121
+      included_in_repo_version: 0.177.122
       latest_receipts:
         postgres_audit: 2026-03-31-adr-0303-pgaudit-mainline-live-apply
   - id: ws-0302-live-apply

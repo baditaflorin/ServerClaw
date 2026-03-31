@@ -3,7 +3,7 @@
 - ADR: [ADR 0303](../adr/0303-pgaudit-for-postgresql-query-and-privilege-change-audit-logging.md)
 - Title: Enable PostgreSQL pgaudit, ship structured audit signals to Loki and Prometheus, and route unknown-role alerts to ntfy plus NATS
 - Status: live_applied
-- Included In Repo Version: 0.177.121
+- Included In Repo Version: 0.177.122
 - Branch-Local Receipt: `receipts/live-applies/2026-03-31-adr-0303-pgaudit-live-apply.json`
 - Canonical Mainline Receipt: `receipts/live-applies/2026-03-31-adr-0303-pgaudit-mainline-live-apply.json`
 - Live Applied In Platform Version: 0.130.77
@@ -75,22 +75,23 @@
 
 ## Verification
 
-- `uv run --with pytest --with pyyaml pytest -q tests/test_guest_log_shipping_playbook.py tests/test_monitoring_vm_role.py tests/unit/test_event_taxonomy.py`
-  passed with `25 passed in 0.72s`.
-- `make converge-postgres-vm env=production`
-  passed and is captured in `receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-converge-postgres-vm-r4-0.177.120.txt`.
-- `make live-apply-service service=guest-log-shipping env=production ALLOW_IN_PLACE_MUTATION=true`
-  is re-verified during the final exact-main closeout after canonical truth refresh so the guarded wrapper path, not just the direct playbook path, stays proven.
-- `make converge-guest-log-shipping env=production`
-  passed after stabilizing the metrics verification path and is captured in `receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-converge-guest-log-shipping-r8-0.177.120.txt`.
-- `make converge-grafana env=production`
-  passed and is captured in `receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-converge-grafana-r1-0.177.120.txt`.
-- `make converge-nats-jetstream env=production`
-  passed and is captured in `receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-converge-nats-jetstream-r1-0.177.120.txt`.
-- The final unknown-role smoke now passes end to end: Alertmanager exposed `PostgresUnknownRoleConnection` for role `adr0303_smoke_9279c7f7`, the monitoring relay logged a successful `POST /alerts/pgaudit-unknown-role`, and JetStream advanced to seq `10972` on `platform.security.pgaudit_unknown_role`, preserved in `receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-pgaudit-unknown-role-smoke-r11-0.177.120.txt`.
+- `uv run --with pyyaml python3 scripts/release_manager.py --bump patch ...`
+  cut release `0.177.122` and refreshed the canonical truth surfaces, captured in `receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-release-write-r2-0.177.122.txt`.
+- `uv run --with pytest --with pyyaml python3 -m pytest -q tests/test_guest_log_shipping_playbook.py tests/test_monitoring_vm_role.py tests/unit/test_event_taxonomy.py tests/test_service_id_resolver.py`
+  passed with `29 passed in 0.75s`, captured in `receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-targeted-pytest-r4-0.177.122.txt`.
+- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=guest-log-shipping env=production`
+  passed on the released candidate and re-verified the guarded wrapper path, Prometheus scrape assertions, and the post-apply Restic trigger. The final recap reported `docker-runtime-lv3 : ok=17 changed=2 unreachable=0 failed=0`, and the backup trigger recorded `receipts/restic-backups/20260331T192735Z.json` with config snapshot `1ad975dcc1b3be1be5b48d2ea3f7ae8b730571e840317f53498bb7467b099f78` plus `versions/stack.yaml` snapshot `68960faae1f91e15d644b7d93adcd279953de9acb561f9e494968c37a726bc3c`, preserved in `receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-live-apply-service-guest-log-shipping-r5-0.177.122.txt`.
+- `make check-build-server`
+  passed from committed source `99b51ba1572be6df3411d4b4ef499e660a1dd7e0` and re-verified the immutable snapshot upload path on `docker-build-lv3`, captured in `receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-check-build-server-r2-0.177.122.txt`.
+- `make remote-validate`
+  passed on the released candidate, with the remote lane selecting `repository-structure-and-schema`, `generated-artifact-and-canonical-truth`, `service-syntax-and-unit`, and `remote-builder`, captured in `receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-remote-validate-r2-0.177.122.txt`.
+- `make pre-push-gate`
+  passed on the released candidate. The remote runner truthfully reported transient `502 Bad Gateway` pulls for `registry.lv3.org/check-runner/infra:2026.03.23`, then `run_gate_fallback` reran only `packer-validate` and `tofu-validate` locally and merged the passing result back into `.local/validation-gate/last-run.json`, captured in `receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-pre-push-gate-r3-0.177.122.txt`.
+- The earlier final unknown-role smoke remains the end-to-end proof for the alert path: Alertmanager exposed `PostgresUnknownRoleConnection` for role `adr0303_smoke_9279c7f7`, the monitoring relay logged a successful `POST /alerts/pgaudit-unknown-role`, and JetStream advanced to seq `10972` on `platform.security.pgaudit_unknown_role`, preserved in `receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-pgaudit-unknown-role-smoke-r11-0.177.120.txt`.
 
 ## Results
 
-- ADR 0303 is now implemented in repository version `0.177.121` and verified live on platform version `0.130.77`.
-- The branch-local receipt records the focused PostgreSQL, log-shipping, monitoring, and smoke evidence gathered before the release cut; the canonical mainline receipt records the released `main` integration on top of latest `origin/main`.
-- During the final smoke closeout, the repo-managed `guest-network-policy` replay corrected a missing live `monitoring-lv3 -> docker-runtime-lv3:4222` firewall allow that was preventing the relay from reaching NATS. The broad play still surfaced an unrelated existing `postgres-replica-lv3` SSH reachability failure, which remains outside ADR 0303 scope and is preserved as evidence instead of being hidden.
+- ADR 0303 is now implemented in repository version `0.177.122` and first verified live on platform version `0.130.77`.
+- The exact-main release closeout preserved the already-current platform baseline `0.130.78` while proving the released `0.177.122` candidate end to end through the guarded `live-apply-service`, remote validation, and full pre-push gate paths.
+- The branch-local receipt records the first live rollout and smoke evidence gathered before the release cut; the canonical mainline receipt records the released `main` integration on top of latest `origin/main`.
+- During the earlier final smoke closeout, the repo-managed `guest-network-policy` replay corrected a missing live `monitoring-lv3 -> docker-runtime-lv3:4222` firewall allow that was preventing the relay from reaching NATS. The broad play still surfaced an unrelated existing `postgres-replica-lv3` SSH reachability failure, which remains outside ADR 0303 scope and is preserved as evidence instead of being hidden.
