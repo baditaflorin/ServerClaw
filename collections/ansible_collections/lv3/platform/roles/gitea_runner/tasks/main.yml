@@ -19,6 +19,9 @@
       - gitea_runner_renovate_token_scopes | length > 0
       - gitea_runner_renovate_clone_host | length > 0
       - gitea_runner_renovate_clone_host_address | length > 0
+      - gitea_runner_renovate_clone_host_port | string | length > 0
+      - gitea_runner_renovate_clone_target_host | length > 0
+      - gitea_runner_renovate_clone_target_port | string | length > 0
       - gitea_runner_renovate_openbao_address | length > 0
       - gitea_runner_renovate_secret_path | length > 0
       - gitea_runner_renovate_policy_name | length > 0
@@ -116,6 +119,9 @@
       RENOVATE_REPOSITORY: "{{ gitea_runner_renovate_repository }}"
       RENOVATE_GIT_CLONE_HOST: "{{ gitea_runner_renovate_clone_host }}"
       RENOVATE_GIT_CLONE_HOST_ADDRESS: "{{ gitea_runner_renovate_clone_host_address }}"
+      RENOVATE_GIT_CLONE_HOST_PORT: "{{ gitea_runner_renovate_clone_host_port }}"
+      RENOVATE_GIT_CLONE_TARGET_HOST: "{{ gitea_runner_renovate_clone_target_host }}"
+      RENOVATE_GIT_CLONE_TARGET_PORT: "{{ gitea_runner_renovate_clone_target_port }}"
     common_openbao_systemd_credentials_policy_name: "{{ gitea_runner_renovate_policy_name }}"
     common_openbao_systemd_credentials_policy_rules: |
       path "sys/health" {
@@ -140,6 +146,9 @@
       RENOVATE_REPOSITORY=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_REPOSITORY ]][[ end ]]
       RENOVATE_GIT_CLONE_HOST=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_GIT_CLONE_HOST ]][[ end ]]
       RENOVATE_GIT_CLONE_HOST_ADDRESS=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_GIT_CLONE_HOST_ADDRESS ]][[ end ]]
+      RENOVATE_GIT_CLONE_HOST_PORT=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_GIT_CLONE_HOST_PORT ]][[ end ]]
+      RENOVATE_GIT_CLONE_TARGET_HOST=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_GIT_CLONE_TARGET_HOST ]][[ end ]]
+      RENOVATE_GIT_CLONE_TARGET_PORT=[[ with secret "kv/data/{{ gitea_runner_renovate_secret_path }}" ]][[ .Data.data.RENOVATE_GIT_CLONE_TARGET_PORT ]][[ end ]]
     common_openbao_systemd_credentials_role_id_file: "{{ gitea_runner_renovate_role_id_file }}"
     common_openbao_systemd_credentials_secret_id_file: "{{ gitea_runner_renovate_secret_id_file }}"
     common_openbao_systemd_credentials_image: "{{ openbao_agent_image }}"

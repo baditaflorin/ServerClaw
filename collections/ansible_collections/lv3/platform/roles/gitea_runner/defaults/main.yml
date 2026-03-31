@@ -1,6 +1,7 @@
 ---
 gitea_runner_openbao_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('openbao') }}"
 gitea_runner_gitea_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('gitea') }}"
+gitea_runner_platform_gitea_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology.gitea }}"
 gitea_runner_site_dir: /opt/gitea-runner
 gitea_runner_data_dir: "{{ gitea_runner_site_dir }}/data"
 gitea_runner_compose_file: "{{ gitea_runner_site_dir }}/docker-compose.yml"
@@ -20,7 +21,10 @@ gitea_runner_renovate_password_local_file: /Users/live/Documents/GITHUB_PROJECTS
 gitea_runner_renovate_repository: ops/proxmox_florin_server
 gitea_runner_renovate_token_scopes: write:repository,read:user,write:issue,read:organization
 gitea_runner_renovate_clone_host: "{{ gitea_runner_gitea_service_topology.public_hostname }}"
-gitea_runner_renovate_clone_host_address: "{{ gitea_runner_gitea_service_topology.private_ip }}"
+gitea_runner_renovate_clone_host_address: 127.0.0.1
+gitea_runner_renovate_clone_host_port: "{{ gitea_runner_platform_gitea_service_topology.ports.controller }}"
+gitea_runner_renovate_clone_target_host: "{{ gitea_runner_platform_gitea_service_topology.private_ip }}"
+gitea_runner_renovate_clone_target_port: "{{ gitea_runner_platform_gitea_service_topology.ports.internal }}"
 gitea_runner_renovate_openbao_address: "http://{{ gitea_runner_openbao_service_topology.private_ip }}:{{ hostvars['proxmox_florin'].platform_port_assignments.openbao_http_port }}"
 gitea_runner_renovate_secret_path: services/gitea-runner/renovate-runtime
 gitea_runner_renovate_policy_name: lv3-service-gitea-runner-renovate

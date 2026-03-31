@@ -60,10 +60,15 @@ def test_runner_defaults_use_mirrored_registration_token() -> None:
     assert "docker-build-lv3" in defaults
     assert "service_topology_get('openbao')" in defaults
     assert "service_topology_get('gitea')" in defaults
+    assert "platform_service_topology.gitea" in defaults
     assert ".local/gitea/renovate-password.txt" in defaults
     assert "services/gitea-runner/renovate-runtime" in defaults
     assert "gitea_runner_renovate_clone_host" in defaults
     assert "gitea_runner_renovate_clone_host_address" in defaults
+    assert "gitea_runner_renovate_clone_host_port" in defaults
+    assert "gitea_runner_renovate_clone_target_host" in defaults
+    assert "gitea_runner_renovate_clone_target_port" in defaults
+    assert "gitea_runner_renovate_clone_host_address: 127.0.0.1" in defaults
 
 
 def test_runner_compose_uses_registration_token_env() -> None:
@@ -120,6 +125,9 @@ def test_runner_tasks_render_the_openbao_backed_renovate_bundle() -> None:
     secret_payload = prepare_task["vars"]["common_openbao_systemd_credentials_secret_payload"]
     assert secret_payload["RENOVATE_GIT_CLONE_HOST"] == "{{ gitea_runner_renovate_clone_host }}"
     assert secret_payload["RENOVATE_GIT_CLONE_HOST_ADDRESS"] == "{{ gitea_runner_renovate_clone_host_address }}"
+    assert secret_payload["RENOVATE_GIT_CLONE_HOST_PORT"] == "{{ gitea_runner_renovate_clone_host_port }}"
+    assert secret_payload["RENOVATE_GIT_CLONE_TARGET_HOST"] == "{{ gitea_runner_renovate_clone_target_host }}"
+    assert secret_payload["RENOVATE_GIT_CLONE_TARGET_PORT"] == "{{ gitea_runner_renovate_clone_target_port }}"
 
 
 def test_gitea_waits_on_the_published_service_address() -> None:

@@ -94,6 +94,9 @@ def create_runtime_token(*, state_file: Path, env_file: Path) -> None:
     repository = require_env("RENOVATE_REPOSITORY")
     clone_host = os.environ.get("RENOVATE_GIT_CLONE_HOST", "").strip()
     clone_host_address = os.environ.get("RENOVATE_GIT_CLONE_HOST_ADDRESS", "").strip()
+    clone_host_port = os.environ.get("RENOVATE_GIT_CLONE_HOST_PORT", "").strip()
+    clone_target_host = os.environ.get("RENOVATE_GIT_CLONE_TARGET_HOST", "").strip()
+    clone_target_port = os.environ.get("RENOVATE_GIT_CLONE_TARGET_PORT", "").strip()
     scope_names = [
         scope.strip()
         for scope in require_env("RENOVATE_GITEA_TOKEN_SCOPES").split(",")
@@ -138,6 +141,14 @@ def create_runtime_token(*, state_file: Path, env_file: Path) -> None:
             [
                 f"RENOVATE_GIT_CLONE_HOST={clone_host}",
                 f"RENOVATE_GIT_CLONE_HOST_ADDRESS={clone_host_address}",
+            ]
+        )
+    if clone_host_port and clone_target_host and clone_target_port:
+        env_lines.extend(
+            [
+                f"RENOVATE_GIT_CLONE_HOST_PORT={clone_host_port}",
+                f"RENOVATE_GIT_CLONE_TARGET_HOST={clone_target_host}",
+                f"RENOVATE_GIT_CLONE_TARGET_PORT={clone_target_port}",
             ]
         )
     env_file.parent.mkdir(parents=True, exist_ok=True)

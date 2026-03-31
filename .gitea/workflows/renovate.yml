@@ -219,8 +219,80 @@ jobs:
           . "${RENOVATE_RUNTIME_ENV}"
           set +a
           renovate_add_host_arg=""
-          if [ -n "${RENOVATE_GIT_CLONE_HOST:-}" ] && [ -n "${RENOVATE_GIT_CLONE_HOST_ADDRESS:-}" ]; then
+          renovate_clone_proxy_pid=""
+          cleanup_clone_proxy() {
+            if [ -n "${renovate_clone_proxy_pid}" ]; then
+              kill "${renovate_clone_proxy_pid}" 2>/dev/null || true
+              wait "${renovate_clone_proxy_pid}" 2>/dev/null || true
+            fi
+          }
+          trap cleanup_clone_proxy EXIT
+          if [ -n "${RENOVATE_GIT_CLONE_HOST:-}" ] \
+            && [ -n "${RENOVATE_GIT_CLONE_HOST_ADDRESS:-}" ] \
+            && [ -n "${RENOVATE_GIT_CLONE_HOST_PORT:-}" ] \
+            && [ -n "${RENOVATE_GIT_CLONE_TARGET_HOST:-}" ] \
+            && [ -n "${RENOVATE_GIT_CLONE_TARGET_PORT:-}" ]; then
             renovate_add_host_arg="--add-host=${RENOVATE_GIT_CLONE_HOST}:${RENOVATE_GIT_CLONE_HOST_ADDRESS}"
+            python3 - <<'PY' &
+              import os
+              import select
+              import socket
+              import socketserver
+
+              listen_host = os.environ["RENOVATE_GIT_CLONE_HOST_ADDRESS"]
+              listen_port = int(os.environ["RENOVATE_GIT_CLONE_HOST_PORT"])
+              target_host = os.environ["RENOVATE_GIT_CLONE_TARGET_HOST"]
+              target_port = int(os.environ["RENOVATE_GIT_CLONE_TARGET_PORT"])
+
+
+              class Relay(socketserver.BaseRequestHandler):
+                  def handle(self) -> None:
+                      with socket.create_connection((target_host, target_port), timeout=30) as upstream:
+                          upstream.setblocking(False)
+                          self.request.setblocking(False)
+                          sockets = [self.request, upstream]
+                          while True:
+                              readable, _, exceptional = select.select(sockets, [], sockets, 1)
+                              if exceptional:
+                                  return
+                              if not readable:
+                                  continue
+                              for current in readable:
+                                  try:
+                                      payload = current.recv(65536)
+                                  except BlockingIOError:
+                                      continue
+                                  if not payload:
+                                      return
+                                  peer = upstream if current is self.request else self.request
+                                  peer.sendall(payload)
+
+
+              class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+                  allow_reuse_address = True
+                  daemon_threads = True
+
+
+              with ThreadedTCPServer((listen_host, listen_port), Relay) as server:
+                  server.serve_forever()
+              PY
+            renovate_clone_proxy_pid=$!
+            python3 - <<'PY'
+              import os
+              import socket
+              import time
+
+              listen_host = os.environ["RENOVATE_GIT_CLONE_HOST_ADDRESS"]
+              listen_port = int(os.environ["RENOVATE_GIT_CLONE_HOST_PORT"])
+              deadline = time.time() + 10
+              while time.time() < deadline:
+                  try:
+                      with socket.create_connection((listen_host, listen_port), timeout=1):
+                          raise SystemExit(0)
+                  except OSError:
+                      time.sleep(0.2)
+              raise SystemExit("Renovate clone relay did not become ready.")
+              PY
           fi
           "${docker_bin}" pull "${RENOVATE_IMAGE}"
           "${docker_bin}" run --rm \
