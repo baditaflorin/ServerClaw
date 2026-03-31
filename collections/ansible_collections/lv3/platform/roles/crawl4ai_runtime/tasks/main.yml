@@ -140,10 +140,17 @@
                 ~ (ansible_failed_result.stdout | default(''))
               )
             )
-            and 'does not exist' in (
-              (ansible_failed_result.stderr | default(''))
-              ~ ' '
-              ~ (ansible_failed_result.stdout | default(''))
+            and (
+              'does not exist' in (
+                (ansible_failed_result.stderr | default(''))
+                ~ ' '
+                ~ (ansible_failed_result.stdout | default(''))
+              )
+              or 'No chain/target/match by that name' in (
+                (ansible_failed_result.stderr | default(''))
+                ~ ' '
+                ~ (ansible_failed_result.stdout | default(''))
+              )
             )
           }}
 

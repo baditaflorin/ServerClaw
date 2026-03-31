@@ -1,0 +1,9 @@
+BEFORE
+UID          PID    PPID  C STIME TTY      STAT   TIME CMD
+root     2957465 2957455  0 07:16 ?        S      0:00 /bin/sh -c echo BECOME-SUCCESS-suurhjebcxozwpbglfpdklvaykqypdur ; /usr/bin/python3.13
+root     2957466 2957465 37 07:16 ?        S      1:12 /usr/bin/python3.13
+LOCK
+ 2966525AFTER
+UID          PID    PPID  C STIME TTY      STAT   TIME CMD
+LOCK_AFTER
+ 2966525

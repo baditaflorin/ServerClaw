@@ -1,0 +1,20 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-crawl4ai-main-merge-r2/scripts/remote_exec.sh remote-validate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Validation lane selection
+  mode: explicit_checks
+  branch: HEAD
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit
+  blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, policy-validation, alert-rule-validation, type-check, dependency-graph
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 0.79
+alert-rule-validation passed 1.47
+ansible-syntax        passed 109.48
+dependency-graph      passed 2.45
+policy-validation     passed 1.16
+schema-validation     passed 14.19
+type-check            passed 3.12
+workstream-surfaces   passed 3.15

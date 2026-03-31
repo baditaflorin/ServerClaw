@@ -122,6 +122,7 @@ def test_main_tasks_render_config_compose_and_verify_runtime() -> None:
     assert "failed to set up container networking" in recovery_fact["ansible.builtin.set_fact"]["crawl4ai_runtime_bridge_network_missing"]
     assert "failed to create endpoint" in recovery_fact["ansible.builtin.set_fact"]["crawl4ai_runtime_bridge_network_missing"]
     assert "does not exist" in recovery_fact["ansible.builtin.set_fact"]["crawl4ai_runtime_bridge_network_missing"]
+    assert "No chain/target/match by that name" in recovery_fact["ansible.builtin.set_fact"]["crawl4ai_runtime_bridge_network_missing"]
     assert reset_task["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
     assert reset_task["failed_when"] is False
     assert restart_docker["ansible.builtin.service"] == {"name": "docker", "state": "restarted"}

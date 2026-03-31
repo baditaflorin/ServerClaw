@@ -1,0 +1,8 @@
+BEFORE
+3030812 3030107       00:03 Ss   /bin/sh -c sudo -H -S -n  -u root /bin/sh -c 'echo BECOME-SUCCESS-adyrouykcldoyisjelkxqjbacotksoku ; /usr/bin/python3.13' && sleep 0
+3030817 3030812       00:03 S    sudo -H -S -n -u root /bin/sh -c echo BECOME-SUCCESS-adyrouykcldoyisjelkxqjbacotksoku ; /usr/bin/python3.13
+3030822 3030817       00:03 S    /bin/sh -c echo BECOME-SUCCESS-adyrouykcldoyisjelkxqjbacotksoku ; /usr/bin/python3.13
+3030823 3030822       00:03 S    /usr/bin/python3.13
+KILLING 3030812 3030817 3030822 3030823 3030896 3031372
+AFTER
+LOCK
