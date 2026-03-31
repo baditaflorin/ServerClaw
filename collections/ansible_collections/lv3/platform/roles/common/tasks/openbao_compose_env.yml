@@ -248,7 +248,11 @@
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     return_content: true
-    status_code: 200
+    status_code:
+      - 200
+      - 500
+      - 502
+      - 503
   register: common_openbao_compose_env_role_id
   retries: "{{ common_openbao_api_operation_retries }}"
   delay: "{{ common_openbao_api_operation_delay }}"
@@ -280,7 +284,11 @@
     body_format: json
     body: {}
     return_content: true
-    status_code: 200
+    status_code:
+      - 200
+      - 500
+      - 502
+      - 503
   register: common_openbao_compose_env_secret_id
   retries: "{{ common_openbao_api_operation_retries }}"
   delay: "{{ common_openbao_api_operation_delay }}"
