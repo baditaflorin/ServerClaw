@@ -331,7 +331,7 @@ def test_custom_proxmox_checks_cover_current_invariants() -> None:
     pytest = __import__("pytest")
     pytest.importorskip("checkov.common.models.enums")
     custom_checks = load_module("lv3_proxmox_checks", CUSTOM_CHECKS_PATH)
-    from checkov.common.models.enums import CheckResult
+    from checkov.common.models.enums import CheckResult  # type: ignore[import-not-found]
 
     disk_check = custom_checks.EnsureProxmoxVmDisksParticipateInBackup()
     mac_check = custom_checks.EnsureProxmoxVmMacAddressIsPinned()

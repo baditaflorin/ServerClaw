@@ -433,7 +433,7 @@ def scan_tofu_custom_findings(
     suppressions: tuple[Suppression, ...],
 ) -> list[Finding]:
     try:
-        import hcl2  # type: ignore[import-untyped]
+        import hcl2  # type: ignore[import-not-found, import-untyped]
     except ModuleNotFoundError:
         return [
             build_synthetic_finding(

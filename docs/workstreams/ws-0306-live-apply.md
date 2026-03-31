@@ -2,14 +2,14 @@
 
 - ADR: [ADR 0306](../adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md)
 - Title: Land the repo-managed Checkov IaC policy gate on the live validation automation path and verify it end to end
-- Status: ready_for_merge
-- Branch-Local Receipt: `receipts/live-applies/2026-03-30-adr-0306-checkov-iac-policy-scan-live-apply.json`
+- Status: in_progress
+- Branch-Local Receipt: `receipts/live-applies/2026-03-31-adr-0306-checkov-iac-policy-scan-live-apply.json`
 - Branch: `codex/ws-0306-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-live-apply`
 - Owner: codex
 - Depends On: `adr-0083-docker-check-runner`, `adr-0087-validation-gate`, `adr-0264-failure-domain-isolated-validation-lanes`, `adr-0266-validation-runner-capability-contracts-and-environment-attestation`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0306-live-apply.md`, `docs/adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md`, `docs/adr/.index.yaml`, `.config-locations.yaml`, `.gitea/workflows/validate.yml`, `docs/runbooks/iac-policy-scanning.md`, `docs/runbooks/remote-build-gateway.md`, `docs/runbooks/validate-repository-automation.md`, `docs/runbooks/validation-gate.md`, `config/checkov/`, `config/build-server.json`, `config/check-runner-manifest.json`, `config/validation-gate.json`, `config/validation-lanes.yaml`, `config/validation-runner-contracts.json`, `scripts/iac_policy_scan.py`, `tests/test_iac_policy_scan.py`, `tests/test_validation_lanes.py`, `receipts/checkov/`, `receipts/live-applies/2026-03-30-adr-0306-checkov-iac-policy-scan-live-apply.json`, `receipts/live-applies/evidence/2026-03-30-adr-0306-*`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0306-live-apply.md`, `docs/adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md`, `docs/adr/.index.yaml`, `.config-locations.yaml`, `.gitea/workflows/validate.yml`, `docs/runbooks/iac-policy-scanning.md`, `docs/runbooks/remote-build-gateway.md`, `docs/runbooks/validate-repository-automation.md`, `docs/runbooks/validation-gate.md`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/diagrams/service-dependency-graph.excalidraw`, `docs/site-generated/architecture/dependency-graph.md`, `config/checkov/`, `config/build-server.json`, `config/check-runner-manifest.json`, `config/validation-gate.json`, `config/validation-lanes.yaml`, `config/validation-runner-contracts.json`, `scripts/iac_policy_scan.py`, `tests/test_iac_policy_scan.py`, `tests/test_validation_lanes.py`, `receipts/checkov/`, `receipts/live-applies/2026-03-31-adr-0306-checkov-iac-policy-scan-live-apply.json`, `receipts/live-applies/evidence/2026-03-31-adr-0306-*`
 
 ## Purpose
 
@@ -40,6 +40,9 @@ does not yet have.
 - `docs/runbooks/validation-gate.md`
 - `.config-locations.yaml`
 - `.gitea/workflows/validate.yml`
+- `docs/diagrams/agent-coordination-map.excalidraw`
+- `docs/diagrams/service-dependency-graph.excalidraw`
+- `docs/site-generated/architecture/dependency-graph.md`
 - `config/checkov/policy-gate.yaml`
 - `config/checkov/skip-checks.yaml`
 - `config/checkov/checks/terraform/lv3_proxmox_checks.py`
@@ -73,23 +76,32 @@ does not yet have.
 
 - `python3 -m py_compile scripts/iac_policy_scan.py config/checkov/checks/terraform/lv3_proxmox_checks.py`
   passed
-- `uv run --with pytest --with pyyaml --with checkov==3.2.469 pytest -q tests/test_iac_policy_scan.py tests/test_validation_lanes.py`
-  returned `10 passed in 10.40s`
+- `uv run --with pytest --with pyyaml --with jsonschema --with checkov==3.2.469 pytest -q tests/test_iac_policy_scan.py tests/test_validation_lanes.py tests/test_validation_gate.py tests/test_validation_runner_contracts.py tests/test_remote_exec.py`
+  returned `38 passed in 99.51s`
 - `uv run --with checkov==3.2.469 --with pyyaml python scripts/iac_policy_scan.py`
   passed on the latest rebased branch tree and wrote
-  `receipts/checkov/9ce18e9c35cd4c8e97411c92e6dada5c3a2c3dd7.json` plus
-  `receipts/checkov/9ce18e9c35cd4c8e97411c92e6dada5c3a2c3dd7.sarif.json`
+  `receipts/checkov/725158e3025de99777b4c1540b320a25bc47f5b2.json` plus
+  `receipts/checkov/725158e3025de99777b4c1540b320a25bc47f5b2.sarif.json`
+- `python3 scripts/parallel_check.py type-check iac-policy-scan`
+  passed with `type-check` in `56.16s` and `iac-policy-scan` in `218.23s`
+- `make remote-validate`
+  passed end to end on the build-server path and is captured in
+  `receipts/live-applies/evidence/2026-03-31-adr-0306-remote-validate.txt`
+- `make pre-push-gate`
+  exercised the full remote-first push gate and failed only at
+  `generated-docs` because the canonical `README.md` truth on the branch is
+  intentionally left untouched until the exact-main integration step
 - the current branch-local baseline is `0` blocking errors, `2` warning-level
   `CKV_LV3_4` findings for `provider.proxmox insecure = true`, and `799`
   note-level upstream Ansible findings
 
 ## Remaining Verification Before Mainline Closeout
 
-- run the contract validators and the focused gate test slice with the final
-  workstream registration and ADR index updates in place
-- run `make remote-validate` and `make pre-push-gate` from this worktree so the
-  build-server and controller-local fallback paths both prove the new check
 - push the branch and confirm the self-hosted `validate` workflow runs the new
   `iac-policy-scan` step successfully
-- after the exact-main integration, update ADR metadata, protected release
-  surfaces, and the final live-apply receipt for the canonical merged state
+- during the exact-main integration, update the protected `README.md`,
+  `VERSION`, `changelog.md`, and `versions/stack.yaml` surfaces together so
+  `make pre-push-gate` can pass without the current branch-local README
+  exception
+- after the exact-main integration, update ADR metadata and write the final
+  live-apply receipt for the canonical merged state

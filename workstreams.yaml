@@ -17,7 +17,7 @@ workstreams:
   - id: ws-0306-live-apply
     adr: "0306"
     title: Live apply Checkov IaC policy scanning from latest origin/main
-    status: in-progress
+    status: in_progress
     owner: codex
     branch: codex/ws-0306-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-live-apply
@@ -39,6 +39,9 @@ workstreams:
       - docs/runbooks/remote-build-gateway.md
       - docs/runbooks/validate-repository-automation.md
       - docs/runbooks/validation-gate.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
       - config/checkov/
       - config/build-server.json
       - config/check-runner-manifest.json
@@ -49,8 +52,8 @@ workstreams:
       - tests/test_iac_policy_scan.py
       - tests/test_validation_lanes.py
       - receipts/checkov/
-      - receipts/live-applies/2026-03-30-adr-0306-checkov-iac-policy-scan-live-apply.json
-      - receipts/live-applies/evidence/2026-03-30-adr-0306-*
+      - receipts/live-applies/2026-03-31-adr-0306-checkov-iac-policy-scan-live-apply.json
+      - receipts/live-applies/evidence/2026-03-31-adr-0306-*
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -73,6 +76,13 @@ workstreams:
             - docs/runbooks/validate-repository-automation.md
             - docs/runbooks/validation-gate.md
           mode: exclusive
+        - id: adr_0306_generated_artifacts
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - docs/site-generated/architecture/dependency-graph.md
+          mode: shared_contract
+          contract: latest-main-integration-v1
         - id: adr_0306_ci_surface
           paths:
             - .gitea/workflows/validate.yml
@@ -96,8 +106,8 @@ workstreams:
           mode: exclusive
         - id: adr_0306_live_apply_evidence
           paths:
-            - receipts/live-applies/2026-03-30-adr-0306-checkov-iac-policy-scan-live-apply.json
-            - receipts/live-applies/evidence/2026-03-30-adr-0306-*
+            - receipts/live-applies/2026-03-31-adr-0306-checkov-iac-policy-scan-live-apply.json
+            - receipts/live-applies/evidence/2026-03-31-adr-0306-*
           mode: exclusive
     ready_to_merge: false
     live_applied: false
