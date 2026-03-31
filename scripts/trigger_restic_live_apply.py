@@ -12,7 +12,15 @@ from drift_lib import build_guest_ssh_command, load_controller_context, run_comm
 
 
 DEFAULT_REMOTE_REPO_ROOT = "/srv/proxmox_florin_server"
+DEFAULT_REMOTE_CATALOG_PATH = f"{DEFAULT_REMOTE_REPO_ROOT}/config/restic-file-backup-catalog.json"
+DEFAULT_REMOTE_BACKUP_RECEIPTS_DIR = f"{DEFAULT_REMOTE_REPO_ROOT}/receipts/restic-backups"
+DEFAULT_REMOTE_LATEST_SNAPSHOT_RECEIPT = f"{DEFAULT_REMOTE_REPO_ROOT}/receipts/restic-snapshots-latest.json"
+DEFAULT_REMOTE_RESTORE_VERIFY_DIR = f"{DEFAULT_REMOTE_REPO_ROOT}/receipts/restic-restore-verifications"
+DEFAULT_REMOTE_RUNTIME_STATE_DIR = "/var/lib/lv3/restic-config-backup"
+DEFAULT_REMOTE_CACHE_DIR = f"{DEFAULT_REMOTE_RUNTIME_STATE_DIR}/cache"
 DEFAULT_RUNTIME_CREDENTIAL_FILE = "/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json"
+DEFAULT_FALLBACK_REMOTE_SCRIPT_PATH = "/opt/api-gateway/service/scripts/restic_config_backup.py"
+DEFAULT_FALLBACK_REMOTE_CATALOG_PATH = "/etc/lv3/restic-config-backup/restic-file-backup-catalog.json"
 
 
 def extract_report_json(stdout: str) -> dict | None:
@@ -29,13 +37,22 @@ def build_remote_command(
     repo_root: str,
     credential_file: str,
     live_apply_trigger: bool,
+    fallback_script_path: str = DEFAULT_FALLBACK_REMOTE_SCRIPT_PATH,
+    fallback_catalog_path: str = DEFAULT_FALLBACK_REMOTE_CATALOG_PATH,
 ) -> str:
+    primary_script_path = f"{repo_root}/scripts/restic_config_backup.py"
+    primary_catalog_path = f"{repo_root}/config/restic-file-backup-catalog.json"
     command = [
-        "sudo",
-        "python3",
-        f"{repo_root}/scripts/restic_config_backup.py",
-        "--repo-root",
-        repo_root,
+        "--backup-receipts-dir",
+        f"{repo_root}/receipts/restic-backups",
+        "--latest-snapshot-receipt",
+        f"{repo_root}/receipts/restic-snapshots-latest.json",
+        "--restore-verification-dir",
+        f"{repo_root}/receipts/restic-restore-verifications",
+        "--runtime-state-dir",
+        DEFAULT_REMOTE_RUNTIME_STATE_DIR,
+        "--cache-dir",
+        DEFAULT_REMOTE_CACHE_DIR,
         "--credential-file",
         credential_file,
         "--mode",
@@ -46,7 +63,43 @@ def build_remote_command(
     ]
     if live_apply_trigger:
         command.append("--live-apply-trigger")
-    return " ".join(shlex.quote(item) for item in command)
+    rendered_args = " ".join(shlex.quote(item) for item in command)
+    shell_script = "\n".join(
+        [
+            "set -euo pipefail",
+            f"script_path={shlex.quote(primary_script_path)}",
+            f"fallback_script_path={shlex.quote(fallback_script_path)}",
+            f"catalog_path={shlex.quote(primary_catalog_path)}",
+            f"fallback_catalog_path={shlex.quote(fallback_catalog_path)}",
+            'if [ ! -f "$script_path" ] && [ -f "$fallback_script_path" ]; then',
+            '  script_path="$fallback_script_path"',
+            "fi",
+            'if [ ! -f "$script_path" ]; then',
+            '  echo "restic_config_backup.py is missing from both $script_path and $fallback_script_path" >&2',
+            "  exit 2",
+            "fi",
+            'if [ ! -f "$catalog_path" ] && [ -f "$fallback_catalog_path" ]; then',
+            '  catalog_path="$fallback_catalog_path"',
+            "fi",
+            'if [ ! -f "$catalog_path" ]; then',
+            '  echo "restic-file-backup-catalog.json is missing from both $catalog_path and $fallback_catalog_path" >&2',
+            "  exit 2",
+            "fi",
+            (
+                f'exec python3 "$script_path" --repo-root {shlex.quote(repo_root)} '
+                f'--catalog "$catalog_path" {rendered_args}'
+            ),
+        ]
+    )
+    return " ".join(
+        shlex.quote(item)
+        for item in [
+            "sudo",
+            "/bin/bash",
+            "-lc",
+            shell_script,
+        ]
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:

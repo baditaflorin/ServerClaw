@@ -492,6 +492,9 @@
       - 404
     return_content: true
   register: lago_billable_metric_get
+  retries: 12
+  delay: 5
+  until: lago_billable_metric_get.status | default(0) in [200, 404]
   changed_when: false
   no_log: true
 
@@ -513,6 +516,9 @@
     status_code: 200
     return_content: true
   register: lago_billable_metric_create
+  retries: 12
+  delay: 5
+  until: lago_billable_metric_create.status | default(0) == 200
   when: lago_billable_metric_get.status == 404
   no_log: true
 
@@ -539,6 +545,9 @@
       - 404
     return_content: true
   register: lago_plan_get
+  retries: 12
+  delay: 5
+  until: lago_plan_get.status | default(0) in [200, 404]
   changed_when: false
   no_log: true
 
@@ -572,6 +581,9 @@
     status_code: 200
     return_content: true
   register: lago_plan_create
+  retries: 12
+  delay: 5
+  until: lago_plan_create.status | default(0) == 200
   when: lago_plan_get.status == 404
   no_log: true
 
@@ -592,6 +604,9 @@
     status_code: 200
     return_content: true
   register: lago_customer_upsert
+  retries: 12
+  delay: 5
+  until: lago_customer_upsert.status | default(0) == 200
   no_log: true
 
 - name: Upsert the Lago smoke subscription
@@ -611,6 +626,9 @@
     status_code: 200
     return_content: true
   register: lago_subscription_upsert
+  retries: 12
+  delay: 5
+  until: lago_subscription_upsert.status | default(0) == 200
   no_log: true
 
 - name: Generate a direct Lago smoke transaction id

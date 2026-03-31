@@ -205,6 +205,22 @@ def test_trigger_remote_command_includes_live_apply_flag() -> None:
     assert "--live-apply-trigger" in command
 
 
+def test_trigger_remote_command_falls_back_to_api_gateway_script_and_keeps_repo_surfaces() -> None:
+    command = trigger.build_remote_command(
+        mode="backup",
+        triggered_by="manual",
+        repo_root="/srv/proxmox_florin_server",
+        credential_file="/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json",
+        live_apply_trigger=False,
+    )
+
+    assert "/opt/api-gateway/service/scripts/restic_config_backup.py" in command
+    assert "/srv/proxmox_florin_server/config/restic-file-backup-catalog.json" in command
+    assert "/etc/lv3/restic-config-backup/restic-file-backup-catalog.json" in command
+    assert "/srv/proxmox_florin_server/receipts/restic-backups" in command
+    assert "/srv/proxmox_florin_server/receipts/restic-restore-verifications" in command
+
+
 def test_make_live_apply_targets_bootstrap_pyyaml_for_restic_trigger() -> None:
     makefile = MAKEFILE_PATH.read_text(encoding="utf-8")
 

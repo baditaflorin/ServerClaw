@@ -51,15 +51,20 @@ make backup-coverage-ledger
 
 - `systemctl status lv3-restic-config-backup.timer --no-pager`
 - `systemctl start lv3-restic-config-backup.service`
-- `python3 /srv/proxmox_florin_server/scripts/restic_config_backup.py --repo-root /srv/proxmox_florin_server --mode restore-verify --credential-file /run/lv3-systemd-credentials/restic-config-backup/runtime-config.json`
+- `make restic-config-restore-verify env=production`
 - Confirm `receipts/restic-snapshots-latest.json` shows the latest source state.
 - Confirm `make backup-coverage-ledger` reports the ADR 0302 file-level assets.
 
 ## Notes
 
-- The manual and Windmill paths both execute the mirrored worker checkout at
-  `/srv/proxmox_florin_server`; keep the Windmill checkout current before
-  relying on the live backup helpers.
+- The host-side service, live-apply trigger, and Windmill wrapper keep
+  `/srv/proxmox_florin_server` as the backup source of truth, but they now
+  fall back to `/opt/api-gateway/service/scripts/restic_config_backup.py` and
+  `/etc/lv3/restic-config-backup/restic-file-backup-catalog.json` when the
+  worker checkout mirror is missing ADR 0302's executable or catalog surface.
+- `make converge-restic-config-backup env=production` now auto-starts the
+  shared `outline-minio` container when it exists but was left stopped after
+  Docker/runtime recovery.
 - The MinIO endpoint is resolved from the live `outline-minio` container IP
   instead of assuming a host-published port.
 - Stale notifications are best-effort: NATS publication and ntfy delivery are

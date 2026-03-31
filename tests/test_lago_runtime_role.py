@@ -172,10 +172,32 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
     assert redis_persistence_task["until"] == (
         "'rdb_last_bgsave_status:ok' in (lago_redis_persistence_info.stdout | default(''))"
     )
+    metric_get_task = next(
+        task for task in tasks if task["name"] == "Check whether the Lago smoke billable metric already exists"
+    )
     assert metric_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_api_local_base_url }}/api/v1/billable_metrics"
+    assert metric_get_task["retries"] == 12
+    assert metric_get_task["delay"] == 5
+    assert metric_get_task["until"] == "lago_billable_metric_get.status | default(0) in [200, 404]"
+    assert metric_task["retries"] == 12
+    assert metric_task["delay"] == 5
+    assert metric_task["until"] == "lago_billable_metric_create.status | default(0) == 200"
+    plan_get_task = next(task for task in tasks if task["name"] == "Check whether the Lago smoke plan already exists")
     assert plan_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_api_local_base_url }}/api/v1/plans"
+    assert plan_get_task["retries"] == 12
+    assert plan_get_task["delay"] == 5
+    assert plan_get_task["until"] == "lago_plan_get.status | default(0) in [200, 404]"
+    assert plan_task["retries"] == 12
+    assert plan_task["delay"] == 5
+    assert plan_task["until"] == "lago_plan_create.status | default(0) == 200"
     assert customer_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_api_local_base_url }}/api/v1/customers"
+    assert customer_task["retries"] == 12
+    assert customer_task["delay"] == 5
+    assert customer_task["until"] == "lago_customer_upsert.status | default(0) == 200"
     assert subscription_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_api_local_base_url }}/api/v1/subscriptions"
+    assert subscription_task["retries"] == 12
+    assert subscription_task["delay"] == 5
+    assert subscription_task["until"] == "lago_subscription_upsert.status | default(0) == 200"
     assert event_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_api_local_base_url }}/api/v1/events"
     assert event_task["retries"] == 12
     assert event_task["delay"] == 5
