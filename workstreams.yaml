@@ -17640,10 +17640,10 @@ workstreams:
   - id: ws-0298-main-merge
     adr: "0298"
     title: Integrate ADR 0298 exact-main replay onto current origin/main
-    status: in_progress
+    status: merged
     owner: codex
-    branch: codex/ws-0298-main-merge-r1
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-merge-r1
+    branch: codex/ws-0298-main-publish-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0298-main-merge.md
     depends_on:
       - ws-0298-live-apply

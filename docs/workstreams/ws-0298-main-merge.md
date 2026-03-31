@@ -2,13 +2,13 @@
 
 - ADR: [ADR 0298](../adr/0298-syft-and-grype-for-platform-wide-sbom-generation-and-continuous-cve-scanning.md)
 - Title: Integrate ADR 0298 exact-main replay onto `origin/main`
-- Status: ready_for_merge
+- Status: merged
 - Included In Repo Version: 0.177.114
 - Platform Version Observed During Integration: 0.130.74
 - Release Date: 2026-03-31
 - Live Applied On: not yet
-- Branch: `codex/ws-0298-main-merge-r1`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-merge-r1`
+- Branch: `codex/ws-0298-main-publish-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2`
 - Owner: codex
 - Depends On: `ws-0298-live-apply`
 
