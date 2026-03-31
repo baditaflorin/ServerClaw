@@ -67,6 +67,10 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     keycloak_discovery = next(task for task in tasks if task.get("name") == "Wait for the Keycloak issuer discovery document before Grist startup")
     local_port_probe = next(task for task in tasks if task.get("name") == "Check whether the Grist local port is already published")
     status_probe = next(task for task in tasks if task.get("name") == "Check whether the current Grist local status endpoint is healthy before startup")
+    force_recreate_fact = next(task for task in tasks if task.get("name") == "Record whether the Grist startup needs a force recreate")
+    replace_cleanup = next(task for task in tasks if task.get("name") == "Remove stale Grist compose replacement containers before recovery")
+    openbao_recreate = next(task for task in tasks if task.get("name") == "Force-recreate the Grist OpenBao agent after Docker networking recovery")
+    runtime_env_contract = next(task for task in tasks if task.get("name") == "Wait for the Grist runtime env file after OpenBao agent recovery")
     force_recreate = next(task for task in tasks if task.get("name") == "Force-recreate the Grist runtime stack after Docker networking recovery")
     network_flag = next(task for task in tasks if task.get("name") == "Flag stale Grist compose-network failures during force-recreate")
     network_reset = next(task for task in tasks if task.get("name") == "Reset stale Grist compose resources before retrying force-recreate")
@@ -90,7 +94,12 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     assert "grist_keycloak_discovery.status == 200" in keycloak_discovery["until"]
     assert local_port_probe["ansible.builtin.wait_for"]["port"] == "{{ grist_internal_port }}"
     assert status_probe["ansible.builtin.uri"]["url"] == "{{ grist_internal_base_url }}/status"
-    assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
+    assert "com.docker.compose.replace" in replace_cleanup["ansible.builtin.shell"]
+    assert openbao_recreate["ansible.builtin.command"]["argv"][-2:] == ["--force-recreate", "openbao-agent"]
+    assert "GRIST_SESSION_SECRET=" in runtime_env_contract["ansible.builtin.shell"]
+    assert runtime_env_contract["retries"] == 24
+    assert runtime_env_contract["no_log"] is True
+    assert "--force-recreate --no-deps grist" in force_recreate["ansible.builtin.shell"]
     assert force_recreate["register"] == "grist_force_recreate_up"
     assert force_recreate["failed_when"] is False
     assert "failed to create endpoint" in network_flag["ansible.builtin.set_fact"]["grist_force_recreate_network_missing"]
@@ -100,7 +109,7 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     assert bridge_chain_helper["vars"]["common_docker_bridge_chains_service_name"] == "docker"
     assert bridge_chain_helper["vars"]["common_docker_bridge_chains_require_nat_chain"] is True
     assert network_retry["ansible.builtin.command"]["argv"][-2:] == ["--force-recreate", "--remove-orphans"]
-    force_recreate_expression = tasks[tasks.index(force_recreate) - 1]["ansible.builtin.set_fact"]["grist_force_recreate"]
+    force_recreate_expression = force_recreate_fact["ansible.builtin.set_fact"]["grist_force_recreate"]
     assert "grist_env_template.changed" in force_recreate_expression
     assert "grist_compose_template.changed" in force_recreate_expression
     assert "grist_pull.changed" in force_recreate_expression
