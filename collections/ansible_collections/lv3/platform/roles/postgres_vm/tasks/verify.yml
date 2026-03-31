@@ -17,3 +17,42 @@
   register: postgres_vm_sql_probe
   changed_when: false
   failed_when: postgres_vm_sql_probe.stdout | trim != "1"
+
+- name: Verify PostgreSQL shared_preload_libraries includes pgaudit
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - SHOW shared_preload_libraries
+  register: postgres_vm_pgaudit_preload_probe
+  changed_when: false
+  failed_when: "'pgaudit' not in (postgres_vm_pgaudit_preload_probe.stdout | trim)"
+  when: postgres_vm_pgaudit_enabled | bool
+
+- name: Verify PostgreSQL pgaudit session classes are configured
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - SHOW pgaudit.log
+  register: postgres_vm_pgaudit_log_probe
+  changed_when: false
+  failed_when: postgres_vm_pgaudit_log_probe.stdout | trim != postgres_vm_pgaudit_log
+  when: postgres_vm_pgaudit_enabled | bool
+
+- name: Verify PostgreSQL connection logging is enabled
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - SHOW log_connections
+  register: postgres_vm_log_connections_probe
+  changed_when: false
+  failed_when: postgres_vm_log_connections_probe.stdout | trim != "on"
+  when: postgres_vm_pgaudit_enabled | bool

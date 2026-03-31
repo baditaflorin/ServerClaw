@@ -26,6 +26,16 @@ The legacy top-level playbooks remain in place and still work. They now either i
 
 Before the generic `live-apply-group`, `live-apply-service`, `live-apply-site`, and `live-apply-waves` wrappers enter their interface, redundancy, or Ansible execution checks, they now call the controller-local bootstrap preflight. That bootstrap step can materialize declared generated artifacts such as the shared edge portal directories before the live replay starts.
 
+For `live-apply-service`, the vulnerability-budget, standby-capacity,
+service-redundancy, and immutable-guest-replacement gates apply only when the
+requested `service=<id>` resolves to an entry in
+[config/service-capability-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/service-capability-catalog.json).
+Repo-managed infrastructure playbooks under
+[playbooks/services/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/services)
+that are intentionally not product-catalog services still run through
+preflight, canonical-truth, interface-contract, Ansible, and live-backup
+trigger checks, but they skip those product-service-only gates.
+
 ## Environment Resolution
 
 `env` defaults to `production`.

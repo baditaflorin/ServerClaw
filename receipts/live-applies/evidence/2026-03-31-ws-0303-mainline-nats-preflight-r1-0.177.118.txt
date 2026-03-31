@@ -1,0 +1,209 @@
+== docker ps -a nats ==
+## docker ps -a --filter name=lv3-nats-jetstream --format "{{.Names}} {{.Status}}"
+lv3-nats-jetstream Exited (0) 2 minutes ago
+
+## docker logs --tail 200 lv3-nats-jetstream 2>&1 || true
+[1] 2026/03/31 15:06:39.903829 [INF]   Starting restore for stream '$G > SECRET_ROTATION'
+[1] 2026/03/31 15:06:39.903930 [INF]   Restored 3 messages for stream '$G > SECRET_ROTATION' in 0s
+[1] 2026/03/31 15:06:39.903981 [INF]   Starting restore for stream '$G > lv3_agent_events'
+[1] 2026/03/31 15:06:39.904088 [INF]   Restored 0 messages for stream '$G > lv3_agent_events' in 0s
+[1] 2026/03/31 15:06:39.904101 [INF]   Recovering 1 consumers for stream - '$G > lv3_agent_events'
+[1] 2026/03/31 15:06:39.904363 [INF]   Starting restore for stream '$G > lv3_alert_events'
+[1] 2026/03/31 15:06:39.908124 [INF]   Starting restore for stream '$G > PLATFORM_EVENTS'
+[1] 2026/03/31 15:06:39.909901 [INF]   Restored 10,394 messages for stream '$G > PLATFORM_EVENTS' in 2ms
+[1] 2026/03/31 15:06:39.909972 [INF]   Recovering 2 consumers for stream - '$G > PLATFORM_EVENTS'
+[1] 2026/03/31 15:06:39.911186 [INF]   Restored 0 messages for stream '$G > KV_maintenance-windows' in 8ms
+[1] 2026/03/31 15:06:39.911283 [INF]   Starting restore for stream '$G > lv3_receipt_events'
+[1] 2026/03/31 15:06:39.911551 [INF]   Restored 0 messages for stream '$G > lv3_receipt_events' in 0s
+[1] 2026/03/31 15:06:39.916484 [INF]   Recovering 1 consumers for stream - '$G > lv3_receipt_events'
+[1] 2026/03/31 15:06:39.919576 [INF]   Restored 0 messages for stream '$G > lv3_alert_events' in 15ms
+[1] 2026/03/31 15:06:39.919609 [INF]   Recovering 1 consumers for stream - '$G > lv3_alert_events'
+[1] 2026/03/31 15:06:39.925316 [INF]   Starting restore for stream '$G > lv3_workflow_events'
+[1] 2026/03/31 15:06:39.925507 [INF]   Restored 0 messages for stream '$G > lv3_workflow_events' in 0s
+[1] 2026/03/31 15:06:39.925525 [INF]   Recovering 1 consumers for stream - '$G > lv3_workflow_events'
+[1] 2026/03/31 15:06:39.925768 [INF]   Starting restore for stream '$G > KV_platform-circuits'
+[1] 2026/03/31 15:06:39.925923 [INF]   Restored 0 messages for stream '$G > KV_platform-circuits' in 0s
+[1] 2026/03/31 15:06:39.997959 [INF] Took 96.197141ms to start JetStream
+[1] 2026/03/31 15:06:39.998057 [INF] Listening for client connections on 0.0.0.0:4222
+[1] 2026/03/31 15:06:40.122561 [INF] Server is ready
+[1] 2026/03/31 15:08:16.862046 [INF] Trapped "terminated" signal
+[1] 2026/03/31 15:08:16.862158 [INF] Initiating Shutdown...
+[1] 2026/03/31 15:08:16.862164 [INF] Initiating JetStream Shutdown...
+[1] 2026/03/31 15:08:16.862338 [INF] JetStream Shutdown
+[1] 2026/03/31 15:08:16.862566 [INF] Server Exiting..
+[1] 2026/03/31 15:08:34.975356 [INF] Starting nats-server
+[1] 2026/03/31 15:08:34.975391 [INF]   Version:  2.11.15
+[1] 2026/03/31 15:08:34.975393 [INF]   Git:      [bef17e1]
+[1] 2026/03/31 15:08:34.975394 [INF]   Name:     lv3-nats-jetstream
+[1] 2026/03/31 15:08:34.975397 [INF]   Node:     48lMitZd
+[1] 2026/03/31 15:08:34.975398 [INF]   ID:       NBZ7FGPLSPXLK4A7XXW7FO4ODEYCFNEYUVK7UATP3RUHIHN4DFRDXJZX
+[1] 2026/03/31 15:08:34.975402 [WRN] Plaintext passwords detected, use nkeys or bcrypt
+[1] 2026/03/31 15:08:34.975412 [INF] Using configuration file: /etc/nats/nats-server.conf (sha256:a66b2b153533ad71db757c0a257ca48360f16d0db51d86ac511ffc43031b2bc0)
+[1] 2026/03/31 15:08:34.975755 [INF] Starting http monitor on 127.0.0.1:8222
+[1] 2026/03/31 15:08:34.975821 [INF] Starting JetStream
+[1] 2026/03/31 15:08:34.975903 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+[1] 2026/03/31 15:08:34.975905 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+[1] 2026/03/31 15:08:34.975906 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+[1] 2026/03/31 15:08:34.975907 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+[1] 2026/03/31 15:08:34.975908 [INF]
+[1] 2026/03/31 15:08:34.975909 [INF]          https://docs.nats.io/jetstream
+[1] 2026/03/31 15:08:34.975910 [INF]
+[1] 2026/03/31 15:08:34.975911 [INF] ---------------- JETSTREAM ----------------
+[1] 2026/03/31 15:08:34.975915 [INF]   Max Memory:      256.00 MB
+[1] 2026/03/31 15:08:34.975917 [INF]   Max Storage:     2.00 GB
+[1] 2026/03/31 15:08:34.975918 [INF]   Store Directory: "/data/jetstream/jetstream"
+[1] 2026/03/31 15:08:34.975919 [INF]   API Level:       1
+[1] 2026/03/31 15:08:34.975920 [INF] -------------------------------------------
+[1] 2026/03/31 15:08:34.976196 [INF]   Starting restore for stream '$G > KV_maintenance-windows'
+[1] 2026/03/31 15:08:34.976377 [INF]   Restored 0 messages for stream '$G > KV_maintenance-windows' in 0s
+[1] 2026/03/31 15:08:34.976448 [INF]   Starting restore for stream '$G > KV_platform-circuits'
+[1] 2026/03/31 15:08:34.976560 [INF]   Restored 0 messages for stream '$G > KV_platform-circuits' in 0s
+[1] 2026/03/31 15:08:34.976620 [INF]   Starting restore for stream '$G > KV_platform-locks'
+[1] 2026/03/31 15:08:34.976734 [INF]   Restored 0 messages for stream '$G > KV_platform-locks' in 0s
+[1] 2026/03/31 15:08:34.976786 [INF]   Starting restore for stream '$G > PLATFORM_EVENTS'
+[1] 2026/03/31 15:08:34.976892 [INF]   Restored 10,394 messages for stream '$G > PLATFORM_EVENTS' in 0s
+[1] 2026/03/31 15:08:34.976904 [INF]   Recovering 2 consumers for stream - '$G > PLATFORM_EVENTS'
+[1] 2026/03/31 15:08:34.991132 [INF]   Starting restore for stream '$G > lv3_agent_events'
+[1] 2026/03/31 15:08:34.998357 [INF]   Starting restore for stream '$G > RAG_DOCUMENT'
+[1] 2026/03/31 15:08:34.999015 [INF]   Restored 0 messages for stream '$G > lv3_agent_events' in 8ms
+[1] 2026/03/31 15:08:34.999030 [INF]   Recovering 1 consumers for stream - '$G > lv3_agent_events'
+[1] 2026/03/31 15:08:34.999187 [INF]   Starting restore for stream '$G > lv3_alert_events'
+[1] 2026/03/31 15:08:35.004088 [INF]   Starting restore for stream '$G > SECRET_ROTATION'
+[1] 2026/03/31 15:08:35.006020 [INF]   Restored 0 messages for stream '$G > lv3_alert_events' in 7ms
+[1] 2026/03/31 15:08:35.006041 [INF]   Recovering 1 consumers for stream - '$G > lv3_alert_events'
+[1] 2026/03/31 15:08:35.006234 [INF]   Starting restore for stream '$G > lv3_receipt_events'
+[1] 2026/03/31 15:08:35.016115 [WRN] Healthcheck failed: "failed to be ready for connections after 1ms: server"
+[1] 2026/03/31 15:08:35.025762 [INF]   Restored 0 messages for stream '$G > lv3_receipt_events' in 20ms
+[1] 2026/03/31 15:08:35.025785 [INF]   Recovering 1 consumers for stream - '$G > lv3_receipt_events'
+[1] 2026/03/31 15:08:35.025824 [INF]   Starting restore for stream '$G > lv3_workflow_events'
+[1] 2026/03/31 15:08:35.025957 [INF]   Restored 3 messages for stream '$G > SECRET_ROTATION' in 22ms
+[1] 2026/03/31 15:08:35.025980 [INF]   Restored 0 messages for stream '$G > lv3_workflow_events' in 0s
+[1] 2026/03/31 15:08:35.025985 [INF]   Restored 3 messages for stream '$G > RAG_DOCUMENT' in 28ms
+[1] 2026/03/31 15:08:35.025995 [INF]   Recovering 1 consumers for stream - '$G > lv3_workflow_events'
+[1] 2026/03/31 15:08:35.026142 [INF] Took 50.319079ms to start JetStream
+[1] 2026/03/31 15:08:35.026192 [INF] Listening for client connections on 0.0.0.0:4222
+[1] 2026/03/31 15:08:35.629992 [INF] Server is ready
+[1] 2026/03/31 15:13:08.381706 [INF] Trapped "terminated" signal
+[1] 2026/03/31 15:13:08.381877 [INF] Initiating Shutdown...
+[1] 2026/03/31 15:13:08.381884 [INF] Initiating JetStream Shutdown...
+[1] 2026/03/31 15:13:08.382264 [INF] JetStream Shutdown
+[1] 2026/03/31 15:13:08.382528 [INF] Server Exiting..
+[1] 2026/03/31 15:13:32.083090 [INF] Starting nats-server
+[1] 2026/03/31 15:13:32.083418 [INF]   Version:  2.11.15
+[1] 2026/03/31 15:13:32.083428 [INF]   Git:      [bef17e1]
+[1] 2026/03/31 15:13:32.083436 [INF]   Name:     lv3-nats-jetstream
+[1] 2026/03/31 15:13:32.083445 [INF]   Node:     48lMitZd
+[1] 2026/03/31 15:13:32.083452 [INF]   ID:       NAZXSXEOLCJLLSMAHIYAGO4QGQBGNMWHM6F2FASANBLMEN5VVBRD6B5R
+[1] 2026/03/31 15:13:32.083464 [WRN] Plaintext passwords detected, use nkeys or bcrypt
+[1] 2026/03/31 15:13:32.083494 [INF] Using configuration file: /etc/nats/nats-server.conf (sha256:a66b2b153533ad71db757c0a257ca48360f16d0db51d86ac511ffc43031b2bc0)
+[1] 2026/03/31 15:13:32.083858 [INF] Starting http monitor on 127.0.0.1:8222
+[1] 2026/03/31 15:13:32.085035 [INF] Starting JetStream
+[1] 2026/03/31 15:13:32.085292 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+[1] 2026/03/31 15:13:32.085332 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+[1] 2026/03/31 15:13:32.085388 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+[1] 2026/03/31 15:13:32.085404 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+[1] 2026/03/31 15:13:32.085438 [INF]
+[1] 2026/03/31 15:13:32.085448 [INF]          https://docs.nats.io/jetstream
+[1] 2026/03/31 15:13:32.085455 [INF]
+[1] 2026/03/31 15:13:32.085463 [INF] ---------------- JETSTREAM ----------------
+[1] 2026/03/31 15:13:32.085486 [INF]   Max Memory:      256.00 MB
+[1] 2026/03/31 15:13:32.085494 [INF]   Max Storage:     2.00 GB
+[1] 2026/03/31 15:13:32.085520 [INF]   Store Directory: "/data/jetstream/jetstream"
+[1] 2026/03/31 15:13:32.085554 [INF]   API Level:       1
+[1] 2026/03/31 15:13:32.088626 [INF] -------------------------------------------
+[1] 2026/03/31 15:13:32.092972 [INF]   Starting restore for stream '$G > KV_platform-locks'
+[1] 2026/03/31 15:13:32.093227 [INF]   Restored 0 messages for stream '$G > KV_platform-locks' in 0s
+[1] 2026/03/31 15:13:32.093290 [INF]   Starting restore for stream '$G > RAG_DOCUMENT'
+[1] 2026/03/31 15:13:32.093741 [INF]   Restored 3 messages for stream '$G > RAG_DOCUMENT' in 0s
+[1] 2026/03/31 15:13:32.093800 [INF]   Starting restore for stream '$G > SECRET_ROTATION'
+[1] 2026/03/31 15:13:32.093916 [INF]   Restored 3 messages for stream '$G > SECRET_ROTATION' in 0s
+[1] 2026/03/31 15:13:32.093976 [INF]   Starting restore for stream '$G > lv3_agent_events'
+[1] 2026/03/31 15:13:32.094087 [INF]   Restored 0 messages for stream '$G > lv3_agent_events' in 0s
+[1] 2026/03/31 15:13:32.094099 [INF]   Recovering 1 consumers for stream - '$G > lv3_agent_events'
+[1] 2026/03/31 15:13:32.094399 [INF]   Starting restore for stream '$G > lv3_alert_events'
+[1] 2026/03/31 15:13:32.094521 [INF]   Restored 0 messages for stream '$G > lv3_alert_events' in 0s
+[1] 2026/03/31 15:13:32.094541 [INF]   Recovering 1 consumers for stream - '$G > lv3_alert_events'
+[1] 2026/03/31 15:13:32.094725 [INF]   Starting restore for stream '$G > lv3_receipt_events'
+[1] 2026/03/31 15:13:32.094833 [INF]   Restored 0 messages for stream '$G > lv3_receipt_events' in 0s
+[1] 2026/03/31 15:13:32.094846 [INF]   Recovering 1 consumers for stream - '$G > lv3_receipt_events'
+[1] 2026/03/31 15:13:32.092965 [INF]   Starting restore for stream '$G > KV_maintenance-windows'
+[1] 2026/03/31 15:13:32.095040 [INF]   Starting restore for stream '$G > PLATFORM_EVENTS'
+[1] 2026/03/31 15:13:32.095254 [INF]   Starting restore for stream '$G > KV_platform-circuits'
+[1] 2026/03/31 15:13:32.095266 [INF]   Restored 0 messages for stream '$G > KV_maintenance-windows' in 0s
+[1] 2026/03/31 15:13:32.095491 [INF]   Restored 10,404 messages for stream '$G > PLATFORM_EVENTS' in 0s
+[1] 2026/03/31 15:13:32.095495 [INF]   Restored 0 messages for stream '$G > KV_platform-circuits' in 0s
+[1] 2026/03/31 15:13:32.095504 [INF]   Recovering 2 consumers for stream - '$G > PLATFORM_EVENTS'
+[1] 2026/03/31 15:13:32.101048 [INF]   Starting restore for stream '$G > lv3_workflow_events'
+[1] 2026/03/31 15:13:32.101318 [INF]   Restored 0 messages for stream '$G > lv3_workflow_events' in 0s
+[1] 2026/03/31 15:13:32.101332 [INF]   Recovering 1 consumers for stream - '$G > lv3_workflow_events'
+[1] 2026/03/31 15:13:32.193113 [INF] Took 107.956659ms to start JetStream
+[1] 2026/03/31 15:13:32.196045 [INF] Listening for client connections on 0.0.0.0:4222
+[1] 2026/03/31 15:13:32.473730 [INF] Server is ready
+[1] 2026/03/31 15:14:23.266435 [INF] Trapped "terminated" signal
+[1] 2026/03/31 15:14:23.266548 [INF] Initiating Shutdown...
+[1] 2026/03/31 15:14:23.266556 [INF] Initiating JetStream Shutdown...
+[1] 2026/03/31 15:14:23.266850 [INF] JetStream Shutdown
+[1] 2026/03/31 15:14:23.267040 [INF] Server Exiting..
+[1] 2026/03/31 15:14:41.360473 [INF] Starting nats-server
+[1] 2026/03/31 15:14:41.360513 [INF]   Version:  2.11.15
+[1] 2026/03/31 15:14:41.360515 [INF]   Git:      [bef17e1]
+[1] 2026/03/31 15:14:41.360517 [INF]   Name:     lv3-nats-jetstream
+[1] 2026/03/31 15:14:41.360521 [INF]   Node:     48lMitZd
+[1] 2026/03/31 15:14:41.360522 [INF]   ID:       NAPPZBBV2XUUCXN4NM363BJ7XG4V2S62Q3OUCKWJXWHEL6GSOBPRTX7U
+[1] 2026/03/31 15:14:41.360527 [WRN] Plaintext passwords detected, use nkeys or bcrypt
+[1] 2026/03/31 15:14:41.360546 [INF] Using configuration file: /etc/nats/nats-server.conf (sha256:a66b2b153533ad71db757c0a257ca48360f16d0db51d86ac511ffc43031b2bc0)
+[1] 2026/03/31 15:14:41.363320 [INF] Starting http monitor on 127.0.0.1:8222
+[1] 2026/03/31 15:14:41.363410 [INF] Starting JetStream
+[1] 2026/03/31 15:14:41.363553 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+[1] 2026/03/31 15:14:41.363556 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+[1] 2026/03/31 15:14:41.363557 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+[1] 2026/03/31 15:14:41.363558 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+[1] 2026/03/31 15:14:41.363558 [INF]
+[1] 2026/03/31 15:14:41.363559 [INF]          https://docs.nats.io/jetstream
+[1] 2026/03/31 15:14:41.363560 [INF]
+[1] 2026/03/31 15:14:41.363561 [INF] ---------------- JETSTREAM ----------------
+[1] 2026/03/31 15:14:41.363566 [INF]   Max Memory:      256.00 MB
+[1] 2026/03/31 15:14:41.363567 [INF]   Max Storage:     2.00 GB
+[1] 2026/03/31 15:14:41.363568 [INF]   Store Directory: "/data/jetstream/jetstream"
+[1] 2026/03/31 15:14:41.363569 [INF]   API Level:       1
+[1] 2026/03/31 15:14:41.363570 [INF] -------------------------------------------
+[1] 2026/03/31 15:14:41.364015 [INF]   Starting restore for stream '$G > KV_maintenance-windows'
+[1] 2026/03/31 15:14:41.364197 [INF]   Restored 0 messages for stream '$G > KV_maintenance-windows' in 0s
+[1] 2026/03/31 15:14:41.364254 [INF]   Starting restore for stream '$G > RAG_DOCUMENT'
+[1] 2026/03/31 15:14:41.365189 [INF]   Starting restore for stream '$G > KV_platform-locks'
+[1] 2026/03/31 15:14:41.365371 [INF]   Restored 0 messages for stream '$G > KV_platform-locks' in 0s
+[1] 2026/03/31 15:14:41.365427 [INF]   Starting restore for stream '$G > SECRET_ROTATION'
+[1] 2026/03/31 15:14:41.365527 [INF]   Restored 3 messages for stream '$G > SECRET_ROTATION' in 0s
+[1] 2026/03/31 15:14:41.368520 [INF]   Restored 3 messages for stream '$G > RAG_DOCUMENT' in 4ms
+[1] 2026/03/31 15:14:41.368667 [INF]   Starting restore for stream '$G > lv3_alert_events'
+[1] 2026/03/31 15:14:41.368865 [INF]   Restored 0 messages for stream '$G > lv3_alert_events' in 0s
+[1] 2026/03/31 15:14:41.368897 [INF]   Recovering 1 consumers for stream - '$G > lv3_alert_events'
+[1] 2026/03/31 15:14:41.369233 [INF]   Starting restore for stream '$G > lv3_receipt_events'
+[1] 2026/03/31 15:14:41.369379 [INF]   Restored 0 messages for stream '$G > lv3_receipt_events' in 0s
+[1] 2026/03/31 15:14:41.369392 [INF]   Recovering 1 consumers for stream - '$G > lv3_receipt_events'
+[1] 2026/03/31 15:14:41.369558 [INF]   Starting restore for stream '$G > lv3_workflow_events'
+[1] 2026/03/31 15:14:41.371945 [INF]   Starting restore for stream '$G > lv3_agent_events'
+[1] 2026/03/31 15:14:41.372105 [INF]   Restored 0 messages for stream '$G > lv3_agent_events' in 0s
+[1] 2026/03/31 15:14:41.372117 [INF]   Recovering 1 consumers for stream - '$G > lv3_agent_events'
+[1] 2026/03/31 15:14:41.372326 [INF]   Starting restore for stream '$G > PLATFORM_EVENTS'
+[1] 2026/03/31 15:14:41.382554 [INF]   Starting restore for stream '$G > KV_platform-circuits'
+[1] 2026/03/31 15:14:41.382830 [INF]   Restored 0 messages for stream '$G > KV_platform-circuits' in 0s
+[1] 2026/03/31 15:14:41.383020 [INF]   Restored 10,409 messages for stream '$G > PLATFORM_EVENTS' in 11ms
+[1] 2026/03/31 15:14:41.383079 [INF]   Recovering 2 consumers for stream - '$G > PLATFORM_EVENTS'
+[1] 2026/03/31 15:14:41.383173 [INF]   Restored 0 messages for stream '$G > lv3_workflow_events' in 14ms
+[1] 2026/03/31 15:14:41.383635 [INF]   Recovering 1 consumers for stream - '$G > lv3_workflow_events'
+[1] 2026/03/31 15:14:41.454717 [INF] Took 91.30379ms to start JetStream
+[1] 2026/03/31 15:14:41.454821 [INF] Listening for client connections on 0.0.0.0:4222
+[1] 2026/03/31 15:14:41.700507 [INF] Server is ready
+[1] 2026/03/31 15:21:57.742063 [ERR] 127.0.0.1:53700 - cid:106 - authentication error - User "jetstream-admin"
+[1] 2026/03/31 15:22:00.670628 [ERR] 127.0.0.1:53704 - cid:107 - authentication error - User "jetstream-admin"
+[1] 2026/03/31 15:23:09.327422 [ERR] 127.0.0.1:52358 - cid:108 - authentication error - User "jetstream-admin"
+[1] 2026/03/31 15:23:49.916881 [INF] Trapped "terminated" signal
+[1] 2026/03/31 15:23:49.916990 [INF] Initiating Shutdown...
+[1] 2026/03/31 15:23:49.916997 [INF] Initiating JetStream Shutdown...
+[1] 2026/03/31 15:23:49.917180 [INF] JetStream Shutdown
+[1] 2026/03/31 15:23:49.918768 [INF] Server Exiting..
+
+## curl -fsS http://127.0.0.1:8222/healthz || true
+
+curl: (7) Failed to connect to 127.0.0.1 port 8222 after 0 ms: Could not connect to server

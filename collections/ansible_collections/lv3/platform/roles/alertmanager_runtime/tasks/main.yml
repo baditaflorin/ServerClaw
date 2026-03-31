@@ -4,6 +4,7 @@
     that:
       - alertmanager_runtime_package | length > 0
       - alertmanager_runtime_service_name | length > 0
+      - alertmanager_runtime_env_file | length > 0
       - alertmanager_runtime_config_template | length > 0
       - alertmanager_runtime_config_file | length > 0
       - alertmanager_runtime_data_dir | length > 0
@@ -11,6 +12,16 @@
       - alertmanager_runtime_platform_rules_source | length > 0
       - alertmanager_runtime_ntfy_password_local_file | length > 0
       - alertmanager_runtime_mattermost_webhook_manifest_local_file | length > 0
+      - not alertmanager_runtime_pgaudit_relay_enabled or alertmanager_runtime_pgaudit_relay_service_name | length > 0
+      - not alertmanager_runtime_pgaudit_relay_enabled or alertmanager_runtime_pgaudit_relay_service_file | length > 0
+      - not alertmanager_runtime_pgaudit_relay_enabled or alertmanager_runtime_pgaudit_relay_script_file | length > 0
+      - not alertmanager_runtime_pgaudit_relay_enabled or alertmanager_runtime_pgaudit_relay_env_file | length > 0
+      - not alertmanager_runtime_pgaudit_relay_enabled or alertmanager_runtime_pgaudit_relay_webhook_url | length > 0
+      - not alertmanager_runtime_pgaudit_relay_enabled or alertmanager_runtime_pgaudit_relay_health_url | length > 0
+      - not alertmanager_runtime_pgaudit_relay_enabled or alertmanager_runtime_pgaudit_relay_nats_url | length > 0
+      - not alertmanager_runtime_pgaudit_relay_enabled or alertmanager_runtime_pgaudit_relay_nats_subject | length > 0
+      - not alertmanager_runtime_pgaudit_relay_enabled or alertmanager_runtime_pgaudit_relay_nats_username | length > 0
+      - not alertmanager_runtime_pgaudit_relay_enabled or alertmanager_runtime_pgaudit_relay_nats_password_local_file | length > 0
     fail_msg: "alertmanager_runtime requires package, config, rules, and controller-local secret inputs."
 
 - name: Ensure controller-local ntfy password exists
@@ -41,6 +52,23 @@
       Converge Mattermost first so Alertmanager can route to repo-managed incoming webhooks.
   when: not alertmanager_runtime_mattermost_manifest_local.stat.exists
 
+- name: Ensure controller-local NATS relay password exists
+  ansible.builtin.stat:
+    path: "{{ alertmanager_runtime_pgaudit_relay_nats_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: alertmanager_runtime_pgaudit_relay_nats_password_local
+  when: alertmanager_runtime_pgaudit_relay_enabled | bool
+
+- name: Fail if controller-local NATS relay password is missing
+  ansible.builtin.fail:
+    msg: >-
+      {{ alertmanager_runtime_pgaudit_relay_nats_password_local_file }} is missing on the control machine.
+      Materialize the JetStream admin password before converging the pgaudit alert relay.
+  when:
+    - alertmanager_runtime_pgaudit_relay_enabled | bool
+    - not alertmanager_runtime_pgaudit_relay_nats_password_local.stat.exists
+
 - name: Ensure Alertmanager package is present
   ansible.builtin.apt:
     name:
@@ -66,6 +94,9 @@
     - path: "{{ alertmanager_runtime_rules_dir }}"
       group: prometheus
       mode: "0755"
+    - path: "{{ alertmanager_runtime_pgaudit_relay_script_file | dirname }}"
+      group: root
+      mode: "0755"
 
 - name: Read controller-local ntfy password
   ansible.builtin.slurp:
@@ -75,10 +106,25 @@
   register: alertmanager_runtime_ntfy_password_raw
   no_log: true
 
+- name: Read controller-local NATS relay password
+  ansible.builtin.slurp:
+    src: "{{ alertmanager_runtime_pgaudit_relay_nats_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: alertmanager_runtime_pgaudit_relay_nats_password_raw
+  no_log: true
+  when: alertmanager_runtime_pgaudit_relay_enabled | bool
+
 - name: Load controller-local Mattermost webhook manifest
   ansible.builtin.set_fact:
     alertmanager_runtime_ntfy_password: "{{ alertmanager_runtime_ntfy_password_raw.content | b64decode | trim }}"
     alertmanager_runtime_mattermost_webhooks: "{{ lookup('ansible.builtin.file', alertmanager_runtime_mattermost_webhook_manifest_local_file) | from_json }}"
+    alertmanager_runtime_pgaudit_relay_nats_password: >-
+      {{
+        (alertmanager_runtime_pgaudit_relay_nats_password_raw.content | b64decode | trim)
+        if alertmanager_runtime_pgaudit_relay_enabled | bool
+        else ''
+      }}
   no_log: true
 
 - name: Persist Alertmanager ntfy password
@@ -133,6 +179,48 @@
       critical, warning, and informational notifications.
   no_log: true
 
+- name: Render pgaudit alert relay environment file
+  ansible.builtin.template:
+    src: pgaudit-alert-relay.env.j2
+    dest: "{{ alertmanager_runtime_pgaudit_relay_env_file }}"
+    owner: root
+    group: prometheus
+    mode: "0640"
+  no_log: true
+  notify: Restart pgaudit alert relay
+  when: alertmanager_runtime_pgaudit_relay_enabled | bool
+
+- name: Render pgaudit alert relay script
+  ansible.builtin.template:
+    src: pgaudit-alert-relay.py.j2
+    dest: "{{ alertmanager_runtime_pgaudit_relay_script_file }}"
+    owner: root
+    group: prometheus
+    mode: "0750"
+  notify: Restart pgaudit alert relay
+  when: alertmanager_runtime_pgaudit_relay_enabled | bool
+
+- name: Render pgaudit alert relay systemd service
+  ansible.builtin.template:
+    src: pgaudit-alert-relay.service.j2
+    dest: "{{ alertmanager_runtime_pgaudit_relay_service_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart pgaudit alert relay
+  when: alertmanager_runtime_pgaudit_relay_enabled | bool
+
+- name: Render Alertmanager package environment file
+  ansible.builtin.template:
+    src: prometheus-alertmanager.env.j2
+    dest: "{{ alertmanager_runtime_env_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Alertmanager
+
 - name: Render Alertmanager configuration
   ansible.builtin.template:
     src: "{{ alertmanager_runtime_config_template }}"
@@ -152,14 +240,21 @@
     mode: "0644"
   notify: Restart Prometheus
 
+- name: Flush Alertmanager handlers before service enablement
+  ansible.builtin.meta: flush_handlers
+
 - name: Enable and start Alertmanager
   ansible.builtin.systemd:
     name: "{{ alertmanager_runtime_service_name }}"
     enabled: true
     state: started
 
-- name: Flush Alertmanager handlers
-  ansible.builtin.meta: flush_handlers
+- name: Enable and start pgaudit alert relay
+  ansible.builtin.systemd:
+    name: "{{ alertmanager_runtime_pgaudit_relay_service_name }}"
+    enabled: true
+    state: started
+  when: alertmanager_runtime_pgaudit_relay_enabled | bool
 
 - name: Verify Alertmanager runtime health probes
   ansible.builtin.import_tasks: verify.yml

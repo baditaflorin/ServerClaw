@@ -62,3 +62,24 @@ argument_specs:
         required: true
         description:
           - Client source CIDRs allowed to connect to PostgreSQL.
+      postgres_vm_pgaudit_enabled:
+        type: bool
+        required: false
+        description:
+          - Enables the cluster-local pgaudit package, settings, and object-audit grants.
+      postgres_vm_shared_preload_libraries:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Shared preload libraries rendered into the managed PostgreSQL config.
+      postgres_vm_pgaudit_audit_role:
+        type: str
+        required: false
+        description:
+          - Dedicated audit role used by pgaudit object logging.
+      postgres_vm_pgaudit_sensitive_tables_file:
+        type: path
+        required: false
+        description:
+          - Controller-local YAML catalog that declares the sensitive tables granted to the audit role.

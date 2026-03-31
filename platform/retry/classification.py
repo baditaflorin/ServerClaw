@@ -142,6 +142,21 @@ def _classify_httpx_error(exc: object) -> ClassifiedError:
     return classify_code(f"python:{exc.__class__.__name__.lower()}")
 
 
+def _classify_nats_error(exc: BaseException) -> ClassifiedError | None:
+    module_name = exc.__class__.__module__.lower()
+    if not module_name.startswith("nats."):
+        return None
+
+    message = str(exc).lower()
+    if "empty response from server when expecting info message" in message:
+        return classify_code("net:connection_timeout")
+    if "connection refused" in message:
+        return classify_code("net:connection_refused")
+    if "timed out" in message or "timeout" in message:
+        return classify_code("net:read_timeout")
+    return None
+
+
 def classify_error(exc: BaseException) -> ClassifiedError:
     if isinstance(exc, PlatformRetryError):
         if exc.retry_class is not None:
@@ -152,6 +167,11 @@ def classify_error(exc: BaseException) -> ClassifiedError:
             )
         if exc.code is not None:
             return classify_code(exc.code, retry_after=exc.retry_after)
+
+    if isinstance(exc, BaseException):
+        nats_classification = _classify_nats_error(exc)
+        if nats_classification is not None:
+            return nats_classification
 
     if isinstance(exc, urllib.error.HTTPError):
         return classify_code(

@@ -8,6 +8,7 @@ postgres_vm_postgresql_service_name: postgresql
 postgres_vm_max_connections: 200
 postgres_vm_nftables_config_file: /etc/nftables.conf
 postgres_vm_admin_role: "{{ proxmox_guest_ci_user }}"
+postgres_vm_repo_root: "{{ lookup('env', 'PWD') }}"
 postgres_vm_superuser_reserved_connections: 3
 postgres_vm_reserved_connections: 5
 postgres_vm_listen_addresses:
@@ -22,3 +23,15 @@ postgres_vm_client_allowed_sources: >-
     (postgres_vm_client_allowed_sources_default + postgres_vm_client_allowed_sources_extra)
     | unique
   }}
+postgres_vm_pgaudit_enabled: true
+postgres_vm_log_connections: true
+postgres_vm_log_disconnections: true
+postgres_vm_log_line_prefix: "%m [%p] %q%u@%d "
+postgres_vm_shared_preload_libraries:
+  - pgaudit
+postgres_vm_pgaudit_log: ddl,role
+postgres_vm_pgaudit_log_catalog: false
+postgres_vm_pgaudit_log_parameter: false
+postgres_vm_pgaudit_audit_role: pgaudit_auditor
+postgres_vm_pgaudit_extension_databases: []
+postgres_vm_pgaudit_sensitive_tables_file: "{{ postgres_vm_repo_root }}/config/pgaudit/sensitive-tables.yaml"

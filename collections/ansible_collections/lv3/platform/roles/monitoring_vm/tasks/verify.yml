@@ -234,7 +234,7 @@
 
 - name: Verify Prometheus scrapes the Loki Canary target
   ansible.builtin.uri:
-    url: "{{ monitoring_prometheus_url }}/api/v1/query?query={{ 'up{job=\"loki-canary\"}' | urlencode }}"
+    url: '{{ monitoring_prometheus_url }}/api/v1/query?query={{ ''up{job="loki-canary"}'' | urlencode }}'
     method: GET
     status_code: 200
     return_content: true

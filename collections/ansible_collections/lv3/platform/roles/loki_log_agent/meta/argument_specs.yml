@@ -15,6 +15,16 @@ argument_specs:
         required: true
         description:
           - Rendered Alloy configuration file path.
+      loki_log_agent_env_file:
+        type: path
+        required: false
+        description:
+          - Managed environment file used by the packaged Alloy systemd service.
+      loki_log_agent_http_listen_address:
+        type: str
+        required: false
+        description:
+          - HTTP listen address for Alloy metrics and debug endpoints.
       loki_log_agent_loki_push_url:
         type: str
         required: true
@@ -25,3 +35,14 @@ argument_specs:
         required: true
         description:
           - Service name for the managed Alloy agent.
+      loki_log_agent_postgres_audit_enabled:
+        type: bool
+        required: false
+        description:
+          - Enables the PostgreSQL audit and connection-log parsing pipeline.
+      loki_log_agent_postgres_audit_approved_roles:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Approved PostgreSQL login roles used to classify unknown connection events.

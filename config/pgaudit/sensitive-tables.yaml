@@ -1,0 +1,107 @@
+audit_role: pgaudit_auditor
+table_grants:
+  - database: windmill
+    service_roles:
+      - windmill
+      - windmill_admin
+    schema: public
+    table: audit_partitioned
+    privileges:
+      - select
+      - insert
+      - update
+      - delete
+  - database: windmill
+    service_roles:
+      - windmill
+      - windmill_admin
+    schema: public
+    table: password
+    privileges:
+      - select
+      - insert
+      - update
+      - delete
+  - database: windmill
+    service_roles:
+      - windmill
+      - windmill_admin
+    schema: public
+    table: resource
+    privileges:
+      - select
+      - insert
+      - update
+      - delete
+  - database: windmill
+    service_roles:
+      - windmill
+      - windmill_admin
+    schema: public
+    table: token
+    privileges:
+      - select
+      - insert
+      - update
+      - delete
+  - database: windmill
+    service_roles:
+      - windmill
+      - windmill_admin
+    schema: public
+    table: variable
+    privileges:
+      - select
+      - insert
+      - update
+      - delete
+  - database: n8n
+    service_roles:
+      - n8n
+    schema: public
+    table: credentials_entity
+    privileges:
+      - select
+      - insert
+      - update
+      - delete
+  - database: n8n
+    service_roles:
+      - n8n
+    schema: public
+    table: oauth_access_tokens
+    privileges:
+      - select
+      - insert
+      - update
+      - delete
+  - database: n8n
+    service_roles:
+      - n8n
+    schema: public
+    table: oauth_refresh_tokens
+    privileges:
+      - select
+      - insert
+      - update
+      - delete
+  - database: n8n
+    service_roles:
+      - n8n
+    schema: public
+    table: user_api_keys
+    privileges:
+      - select
+      - insert
+      - update
+      - delete
+  - database: n8n
+    service_roles:
+      - n8n
+    schema: public
+    table: variables
+    privileges:
+      - select
+      - insert
+      - update
+      - delete

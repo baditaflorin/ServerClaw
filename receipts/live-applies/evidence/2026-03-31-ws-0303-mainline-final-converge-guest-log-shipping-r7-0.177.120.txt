@@ -1,0 +1,20 @@
+/Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=live-apply-service
+Preflight workflow: live-apply-service
+Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
+Bootstrap manifest: controller-local-base
+Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
+INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/.local/packer-plugin-cache
+Bootstrap manifest: shared-edge-generated-portals
+Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
+PASS bootstrap artifact ops_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/build/ops-portal via `make generate-ops-portal`
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/build/changelog-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/build/docs-portal
+Result: PASS (live-apply-service)
+/Applications/Xcode.app/Contents/Developer/usr/bin/make check-canonical-truth
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/scripts/canonical_truth.py --check
+Canonical truth is stale. Run `uvx --from pyyaml python scripts/canonical_truth.py --write`.
+- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/changelog.md
+- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/versions/stack.yaml
+make[1]: *** [check-canonical-truth] Error 2
+make: *** [live-apply-service] Error 2

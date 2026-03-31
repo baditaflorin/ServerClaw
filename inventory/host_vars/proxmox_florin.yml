@@ -853,6 +853,11 @@ network_policy:
         - source: monitoring-lv3
           protocol: tcp
           ports:
+            - 4222
+          description: Alertmanager pgaudit relay access to the private NATS JetStream listener
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
             - 4647
           description: Nomad server RPC to docker-runtime-lv3
     docker-build-lv3:
@@ -1065,9 +1070,10 @@ network_policy:
         - source: monitoring-lv3
           protocol: tcp
           ports:
+            - 12345
             - 2379
             - 2380
-          description: etcd quorum traffic from the monitoring quorum member
+          description: PostgreSQL audit metrics plus etcd quorum traffic from the monitoring quorum member
     postgres-replica-lv3:
       allowed_inbound:
         - source: management

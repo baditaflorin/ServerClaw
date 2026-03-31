@@ -4,3 +4,13 @@ max_connections = {{ postgres_vm_max_connections }}
 superuser_reserved_connections = {{ postgres_vm_superuser_reserved_connections }}
 reserved_connections = {{ postgres_vm_reserved_connections }}
 password_encryption = 'scram-sha-256'
+log_line_prefix = '{{ postgres_vm_log_line_prefix }}'
+log_connections = {{ 'on' if postgres_vm_log_connections else 'off' }}
+log_disconnections = {{ 'on' if postgres_vm_log_disconnections else 'off' }}
+{% if postgres_vm_pgaudit_enabled %}
+shared_preload_libraries = '{{ postgres_vm_shared_preload_libraries | join(",") }}'
+pgaudit.log = '{{ postgres_vm_pgaudit_log }}'
+pgaudit.log_catalog = {{ 'on' if postgres_vm_pgaudit_log_catalog else 'off' }}
+pgaudit.log_parameter = {{ 'on' if postgres_vm_pgaudit_log_parameter else 'off' }}
+pgaudit.role = '{{ postgres_vm_pgaudit_audit_role }}'
+{% endif %}

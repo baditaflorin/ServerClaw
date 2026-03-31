@@ -75,6 +75,50 @@ groups:
           runbook_url: https://docs.lv3.org/runbooks/cert-expired/
           dashboard_url: https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview
 
+  - name: postgres-audit
+    rules:
+      - alert: PostgresPrivilegeChangeBurst
+        expr: |
+          sum by (host, db, db_role) (
+            increase(postgres_audit_events_total{job="postgres-audit-alloy",component="pgaudit",command_class="ROLE"}[5m])
+          ) > 10
+        for: 0m
+        labels:
+          severity: warning
+          service: postgres
+          component: pgaudit
+        annotations:
+          summary: PostgreSQL privilege changes are spiking for {{ $labels.db_role }}.
+          description: The pgaudit pipeline on {{ $labels.host }} observed more than 10 ROLE-class audit events in five minutes for role {{ $labels.db_role }} against database {{ $labels.db }}.
+          runbook_url: https://docs.lv3.org/runbooks/postgres-audit/
+          dashboard_url: https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3
+
+      - alert: PostgresUnknownRoleConnection
+        expr: |
+          (
+            sum by (host, db, db_role) (
+              increase(postgres_unknown_connection_events_total{job="postgres-audit-alloy",component="pgaudit"}[5m])
+            ) > 0
+          )
+          or
+          (
+            sum by (host, db, db_role) (
+              postgres_unknown_connection_events_total{job="postgres-audit-alloy",component="pgaudit"}
+              unless
+              postgres_unknown_connection_events_total{job="postgres-audit-alloy",component="pgaudit"} offset 5m
+            ) > 0
+          )
+        for: 0m
+        labels:
+          severity: critical
+          service: postgres
+          component: pgaudit
+        annotations:
+          summary: PostgreSQL accepted a connection for an unapproved login role.
+          description: The PostgreSQL audit pipeline on {{ $labels.host }} observed an authorized connection for role {{ $labels.db_role }} against database {{ $labels.db }} outside the approved login-role catalog.
+          runbook_url: https://docs.lv3.org/runbooks/postgres-audit/
+          dashboard_url: https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3
+
   - name: lv3-platform-capacity
     rules:
       - alert: HostRamCommittedHigh

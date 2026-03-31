@@ -11,11 +11,13 @@ loki_log_agent_repo_key_url: "{{ monitoring_grafana_repo_key_url }}"
 loki_log_agent_repo_keyring: "{{ monitoring_grafana_repo_keyring }}"
 loki_log_agent_repo_file: "{{ monitoring_grafana_repo_file }}"
 loki_log_agent_config_file: /etc/alloy/config.alloy
+loki_log_agent_env_file: /etc/default/alloy
 loki_log_agent_service_name: alloy
 loki_log_agent_hostname: "{{ inventory_hostname }}"
 loki_log_agent_role: "{{ inventory_hostname }}"
 loki_log_agent_environment: lv3
 loki_log_agent_lane: private
+loki_log_agent_http_listen_address: 127.0.0.1:12345
 loki_log_agent_loki_push_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('grafana', 'loki_push') }}"
 loki_log_agent_journal_enabled: true
 loki_log_agent_journal_max_age: 24h
@@ -27,6 +29,10 @@ loki_log_agent_nginx_error_logs:
 loki_log_agent_docker_logs_enabled: false
 loki_log_agent_docker_host: unix:///var/run/docker.sock
 loki_log_agent_docker_refresh_interval: 30s
+loki_log_agent_postgres_audit_enabled: false
+loki_log_agent_postgres_audit_paths:
+  - /var/log/postgresql/postgresql-*-main.log
+loki_log_agent_postgres_audit_approved_roles: []
 loki_log_agent_file_scrapes: []
 loki_log_agent_additional_groups:
   - adm

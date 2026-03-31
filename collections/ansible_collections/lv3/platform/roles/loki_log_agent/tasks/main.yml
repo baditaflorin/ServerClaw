@@ -15,6 +15,9 @@
       - loki_log_agent_environment | length > 0
       - loki_log_agent_lane | length > 0
       - loki_log_agent_loki_push_url | length > 0
+      - loki_log_agent_env_file | length > 0
+      - loki_log_agent_http_listen_address | length > 0
+      - not loki_log_agent_postgres_audit_enabled or loki_log_agent_postgres_audit_approved_roles | length > 0
     fail_msg: "loki_log_agent requires package, config, and target Loki inputs."
 
 - name: Ensure Loki log agent prerequisite packages are present
@@ -80,8 +83,28 @@
     mode: "0640"
     access_time: preserve
     modification_time: preserve
-  loop: "{{ loki_log_agent_file_scrapes | map(attribute='paths') | flatten | list }}"
+  loop: >-
+    {{
+      loki_log_agent_file_scrapes
+      | map(attribute='paths')
+      | flatten
+      | reject('search', '[*?\\[]')
+      | list
+    }}
   when: loki_log_agent_file_scrapes | length > 0
+
+- name: Render Alloy environment file
+  ansible.builtin.copy:
+    dest: "{{ loki_log_agent_env_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      ## Managed by Ansible.
+      CONFIG_FILE="{{ loki_log_agent_config_file }}"
+      CUSTOM_ARGS="--server.http.listen-addr={{ loki_log_agent_http_listen_address }}"
+      RESTART_ON_UPGRADE=true
+  notify: Restart Alloy
 
 - name: Render Alloy Loki log agent configuration
   ansible.builtin.template:
