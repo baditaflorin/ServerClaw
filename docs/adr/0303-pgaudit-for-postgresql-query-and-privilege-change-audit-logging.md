@@ -8,7 +8,7 @@
 
 ## Context
 
-PostgreSQL on `postgres-lv3` (ADR 0042) is the platform's shared relational
+PostgreSQL on `postgres-lv3` (ADR 0026) is the platform's shared relational
 database. It stores application data for Keycloak, Gitea, Langfuse, Plane,
 Outline, n8n, NetBox, Windmill, One-API, Superset, and several other services.
 All of those services share the same PostgreSQL instance with per-service
@@ -32,13 +32,10 @@ statement and when**. Without this:
   not possible without a query log
 
 pgaudit (`pgaudit/pgaudit`) is the de facto PostgreSQL audit extension. It is
-maintained by the PostgreSQL Audit Extension maintainers, is included in the
-official `postgres` Docker image as an installable extension, and is used in
-PCI-DSS, SOC 2, and HIPAA-regulated PostgreSQL deployments. It does not add a
-new process; it hooks into the existing PostgreSQL logging infrastructure and emits
-structured log lines tagged with session identity, object type, command tag,
-statement text, and parameter values. Those log lines are machine-parseable and
-ship directly to Loki via the existing Alloy agent on `postgres-lv3`.
+maintained by the PostgreSQL Audit Extension maintainers and emits structured
+audit log lines through PostgreSQL's existing logging path. Those log lines are
+machine-parseable and ship directly to Loki via the existing Alloy agent on
+`postgres-lv3`.
 
 ## Decision
 
@@ -49,8 +46,8 @@ to emit structured session and object audit logs routed to Loki.
 
 - pgaudit is enabled by adding `shared_preload_libraries = 'pgaudit'` to
   `postgresql.conf` managed by the Ansible role for `postgres-lv3`
-- the pgaudit version is pinned to the extension version compatible with the
-  deployed PostgreSQL major version; both are tracked in `versions/stack.yaml`
+- the pgaudit package version follows the extension build compatible with the
+  deployed PostgreSQL major version
 - enabling pgaudit requires a PostgreSQL restart; this is coordinated as a
   maintenance-window operation (ADR 0080) with a pre-restart health probe
   verification
@@ -62,13 +59,19 @@ pgaudit is configured at two levels:
 **Global session audit** (`pgaudit.log` in `postgresql.conf`):
 - `DDL`: all CREATE, ALTER, DROP, TRUNCATE statements
 - `ROLE`: all GRANT, REVOKE, CREATE ROLE, ALTER ROLE, DROP ROLE statements
-- `CONNECT`: all connection and disconnection events
 
-**Per-object audit** (via `ALTER ROLE ... SET pgaudit.log_relation`):
-- the `windmill` and `n8n` database roles are assigned per-object audit for
-  `READ` and `WRITE` operations on sensitive tables defined in
-  `config/pgaudit/sensitive-tables.yaml`; this enables fine-grained tracing of
-  automation-initiated queries without logging every query for every service
+**Connection visibility** (standard PostgreSQL logging):
+- `log_connections = on`: every successful connection is logged with user and database
+- `log_disconnections = on`: every disconnection is logged with session duration
+- connection events are not a separate `pgaudit.log` class; they are captured
+  by PostgreSQL's native connection logging and parsed alongside pgaudit lines
+
+**Per-object audit** (via `pgaudit.role` plus object grants):
+- a dedicated no-login audit role is configured in `pgaudit.role`
+- the `windmill` and `n8n` sensitive tables listed in
+  `config/pgaudit/sensitive-tables.yaml` grant object-audit privileges to that
+  role; this enables fine-grained tracing of automation-initiated access
+  without logging every query for every service
 
 ### Log format and routing
 
@@ -76,20 +79,28 @@ pgaudit is configured at two levels:
   `AUDIT: SESSION,<count>,<count>,<class>,<command>,<object_type>,<object>,<statement>,<param>`
 - the Alloy agent on `postgres-lv3` is configured with a pipeline stage that
   parses pgaudit-tagged lines into structured Loki labels:
-  `{job="pgaudit", db="<db>", role="<role>", command_class="<class>"}`
+  `{job="postgres-audit", db="<db>", db_role="<role>", command_class="<class>"}`
+- the same pipeline parses `connection authorized:` lines from PostgreSQL's
+  standard connection logging and turns them into Prometheus counters labeled
+  by database and role
 - the structured labels enable Loki queries such as "all DDL statements in the
   last 24 hours by the `keycloak` role" without a full-text scan
-- pgaudit log lines are excluded from the standard PostgreSQL slow-query
-  Prometheus metric to prevent double-counting
+- the Prometheus scrape of Alloy on `postgres-lv3` exposes:
+  - `postgres_audit_events_total`
+  - `postgres_connection_authorized_total`
+  - `postgres_unknown_connection_events_total`
 
 ### Alert rules
 
 - a Prometheus rule alerts if more than 10 ROLE-class events (privilege changes)
   occur within 5 minutes from a single role; this is a signal of either a
   runaway automation loop or a privilege escalation attempt
-- any CONNECT event from a database role that is not in the `config/pgaudit/approved-roles.yaml`
-  list triggers a NATS `platform.security.pgaudit_unknown_role` event and an ntfy
-  notification (ADR 0299)
+- any successful connection event from a database role that is not in the
+  `config/pgaudit/approved-roles.yaml` list triggers:
+  - the `PostgresUnknownRoleConnection` alert
+  - an ntfy critical notification (ADR 0299)
+  - a NATS `platform.security.pgaudit_unknown_role` event published by a local
+    Alertmanager relay on `monitoring-lv3`
 
 ## Consequences
 
@@ -99,8 +110,8 @@ pgaudit is configured at two levels:
   session identity and statement text; post-incident forensics becomes feasible
 - the Loki structured labels enable fast targeted queries without exporting logs to
   an external system
-- pgaudit is a zero-overhead addition for the non-audited query classes; only the
-  explicitly configured classes produce log lines
+- the operational overhead remains bounded because only `DDL`, `ROLE`, and the
+  explicitly granted sensitive objects are audited
 - per-object audit for high-risk automation roles (Windmill, n8n) provides
   fine-grained traceability without logging every service's routine SELECT
 
@@ -129,9 +140,7 @@ pgaudit is configured at two levels:
 
 ## Related ADRs
 
-- ADR 0042: PostgreSQL as the shared relational database (step-ca note: ADR 0042
-  is listed as step-ca but the PostgreSQL VM ADR is 0026; reference the correct
-  ADR for the PostgreSQL VM)
+- ADR 0026: Dedicated PostgreSQL VM baseline
 - ADR 0056: Keycloak for operator and agent SSO
 - ADR 0066: Structured mutation audit log
 - ADR 0080: Maintenance window and change suppression protocol

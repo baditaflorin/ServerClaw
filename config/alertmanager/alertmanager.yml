@@ -11,6 +11,10 @@ route:
   receiver: mattermost-warning
   routes:
     - matchers:
+        - alertname="PostgresUnknownRoleConnection"
+      receiver: pgaudit-unknown-role-relay
+      continue: true
+    - matchers:
         - severity="critical"
       receiver: ntfy-critical
       continue: true
@@ -22,6 +26,11 @@ route:
       receiver: mattermost-info
 
 receivers:
+  - name: pgaudit-unknown-role-relay
+    webhook_configs:
+      - url: "{{ alertmanager_runtime_pgaudit_relay_webhook_url }}"
+        send_resolved: false
+
   - name: ntfy-critical
     webhook_configs:
       - url: "{{ alertmanager_runtime_ntfy_publish_url }}?title=LV3%20critical%20alert&priority=5&tags=warning%2Crotating_light"

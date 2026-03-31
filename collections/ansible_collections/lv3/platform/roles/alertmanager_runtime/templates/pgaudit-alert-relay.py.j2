@@ -1,0 +1,220 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
+import json
+import logging
+import os
+import socket
+import uuid
+from datetime import UTC, datetime
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from typing import Any
+from urllib.parse import urlparse
+
+
+def env(name: str, default: str = "") -> str:
+    return os.environ.get(name, default).strip()
+
+
+LISTEN_HOST = env("PGAUDIT_RELAY_LISTEN_HOST", "127.0.0.1")
+LISTEN_PORT = int(env("PGAUDIT_RELAY_LISTEN_PORT", "19094"))
+WEBHOOK_PATH = env("PGAUDIT_RELAY_WEBHOOK_PATH", "/alerts/pgaudit-unknown-role")
+NATS_URL = env("PGAUDIT_RELAY_NATS_URL")
+NATS_SUBJECT = env("PGAUDIT_RELAY_NATS_SUBJECT", "platform.security.pgaudit_unknown_role")
+NATS_USERNAME = env("PGAUDIT_RELAY_NATS_USERNAME")
+NATS_PASSWORD = env("PGAUDIT_RELAY_NATS_PASSWORD")
+ACTOR_ID = env("PGAUDIT_RELAY_ACTOR_ID", "service/pgaudit-alert-relay")
+EVENT_SCHEMA_VERSION = env("PGAUDIT_RELAY_EVENT_SCHEMA_VERSION", "1.0")
+CLIENT_NAME = env("PGAUDIT_RELAY_CLIENT_NAME", "pgaudit-alert-relay")
+
+
+def utc_now() -> str:
+    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def parse_nats_target(url: str) -> tuple[str, int]:
+    parsed = urlparse(url)
+    if parsed.scheme not in {"", "nats"}:
+        raise ValueError(f"unsupported NATS URL scheme: {parsed.scheme}")
+    if not parsed.hostname:
+        raise ValueError("NATS URL must include a hostname")
+    return parsed.hostname, parsed.port or 4222
+
+
+def read_nats_line(connection: socket.socket) -> bytes:
+    chunks: list[bytes] = []
+    while True:
+        chunk = connection.recv(1)
+        if not chunk:
+            raise RuntimeError("NATS connection closed unexpectedly")
+        chunks.append(chunk)
+        if len(chunks) >= 2 and chunks[-2:] == [b"\r", b"\n"]:
+            return b"".join(chunks[:-2])
+
+
+def write_nats_line(connection: socket.socket, line: bytes) -> None:
+    connection.sendall(line + b"\r\n")
+
+
+def await_nats_pong(connection: socket.socket) -> None:
+    while True:
+        line = read_nats_line(connection)
+        if line.startswith(b"PING"):
+            write_nats_line(connection, b"PONG")
+            continue
+        if line.startswith(b"INFO") or line.startswith(b"+OK"):
+            continue
+        if line.startswith(b"-ERR"):
+            raise RuntimeError(line.decode("utf-8", errors="replace"))
+        if line == b"PONG":
+            return
+
+
+def build_envelope(payload: dict[str, Any]) -> dict[str, Any]:
+    timestamp = str(payload.get("generated_at") or utc_now())
+    envelope = {
+        "event_id": str(uuid.uuid4()),
+        "topic": NATS_SUBJECT,
+        "schema_ver": EVENT_SCHEMA_VERSION,
+        "ts": timestamp,
+        "payload": payload,
+        "actor_id": ACTOR_ID,
+    }
+    fingerprint = str(payload.get("fingerprint") or "").strip()
+    if fingerprint:
+        envelope["context_id"] = fingerprint
+    return envelope
+
+
+def publish_envelopes(envelopes: list[dict[str, Any]]) -> None:
+    host, port = parse_nats_target(NATS_URL)
+    connect_payload = {
+        "verbose": False,
+        "pedantic": False,
+        "name": CLIENT_NAME,
+    }
+    if NATS_USERNAME:
+        connect_payload["user"] = NATS_USERNAME
+        connect_payload["pass"] = NATS_PASSWORD
+
+    with socket.create_connection((host, port), timeout=5) as connection:
+        connection.settimeout(5)
+        line = read_nats_line(connection)
+        if not line.startswith(b"INFO"):
+            raise RuntimeError(f"expected INFO from NATS, got {line!r}")
+
+        write_nats_line(
+            connection,
+            b"CONNECT " + json.dumps(connect_payload, separators=(",", ":")).encode("utf-8"),
+        )
+        write_nats_line(connection, b"PING")
+        await_nats_pong(connection)
+
+        for envelope in envelopes:
+            encoded = json.dumps(envelope, separators=(",", ":")).encode("utf-8")
+            write_nats_line(connection, f"PUB {NATS_SUBJECT} {len(encoded)}".encode("utf-8"))
+            connection.sendall(encoded + b"\r\n")
+
+        write_nats_line(connection, b"PING")
+        await_nats_pong(connection)
+        write_nats_line(connection, b"QUIT")
+
+
+def build_unknown_role_payload(alert: dict[str, Any], batch_status: str) -> dict[str, Any]:
+    labels = alert.get("labels") if isinstance(alert.get("labels"), dict) else {}
+    annotations = alert.get("annotations") if isinstance(alert.get("annotations"), dict) else {}
+    return {
+        "event": NATS_SUBJECT,
+        "generated_at": str(alert.get("startsAt") or utc_now()),
+        "alert_name": str(labels.get("alertname") or "PostgresUnknownRoleConnection"),
+        "status": str(alert.get("status") or batch_status or "firing"),
+        "role": str(labels.get("db_role") or labels.get("role") or ""),
+        "database": str(labels.get("db") or labels.get("database") or ""),
+        "host": str(labels.get("host") or labels.get("instance") or ""),
+        "summary": str(
+            annotations.get("summary")
+            or "PostgreSQL accepted a connection for a role outside the approved login-role catalog."
+        ),
+        "fingerprint": str(alert.get("fingerprint") or ""),
+        "runbook_url": str(annotations.get("runbook_url") or ""),
+        "dashboard_url": str(annotations.get("dashboard_url") or ""),
+    }
+
+
+class RelayHandler(BaseHTTPRequestHandler):
+    server_version = "PGAuditAlertRelay/1.0"
+
+    def log_message(self, format: str, *args: Any) -> None:  # noqa: A003
+        logging.info("%s - %s", self.address_string(), format % args)
+
+    def respond(self, status_code: int, payload: dict[str, Any]) -> None:
+        encoded = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+        self.send_response(status_code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(encoded)))
+        self.end_headers()
+        self.wfile.write(encoded)
+
+    def do_GET(self) -> None:  # noqa: N802
+        if self.path != "/healthz":
+            self.respond(404, {"status": "not_found"})
+            return
+        self.respond(200, {"status": "ok"})
+
+    def do_POST(self) -> None:  # noqa: N802
+        if self.path != WEBHOOK_PATH:
+            self.respond(404, {"status": "not_found"})
+            return
+
+        content_length = int(self.headers.get("Content-Length", "0"))
+        raw_body = self.rfile.read(content_length)
+        try:
+            body = json.loads(raw_body.decode("utf-8"))
+        except json.JSONDecodeError as exc:
+            self.respond(400, {"status": "invalid_json", "error": str(exc)})
+            return
+
+        alerts = body.get("alerts")
+        if not isinstance(alerts, list):
+            self.respond(400, {"status": "invalid_payload", "error": "alerts must be a list"})
+            return
+
+        batch_status = str(body.get("status") or "firing")
+        envelopes: list[dict[str, Any]] = []
+        for alert in alerts:
+            if not isinstance(alert, dict):
+                continue
+            labels = alert.get("labels") if isinstance(alert.get("labels"), dict) else {}
+            if str(labels.get("alertname") or "") != "PostgresUnknownRoleConnection":
+                continue
+            if str(alert.get("status") or batch_status) != "firing":
+                continue
+            envelopes.append(build_envelope(build_unknown_role_payload(alert, batch_status)))
+
+        if not envelopes:
+            self.respond(202, {"status": "ignored", "published": 0})
+            return
+
+        try:
+            publish_envelopes(envelopes)
+        except Exception as exc:  # noqa: BLE001
+            logging.exception("failed to publish pgaudit unknown-role event")
+            self.respond(502, {"status": "publish_failed", "error": str(exc)})
+            return
+
+        self.respond(200, {"status": "published", "published": len(envelopes)})
+
+
+def main() -> None:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
+    )
+    server = ThreadingHTTPServer((LISTEN_HOST, LISTEN_PORT), RelayHandler)
+    logging.info("starting pgaudit alert relay on %s:%s", LISTEN_HOST, LISTEN_PORT)
+    server.serve_forever()
+
+
+if __name__ == "__main__":
+    main()

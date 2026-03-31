@@ -1017,9 +1017,10 @@ network_policy:
         - source: monitoring-lv3
           protocol: tcp
           ports:
+            - 12345
             - 2379
             - 2380
-          description: etcd quorum traffic from the monitoring quorum member
+          description: PostgreSQL audit metrics plus etcd quorum traffic from the monitoring quorum member
     postgres-replica-lv3:
       allowed_inbound:
         - source: management

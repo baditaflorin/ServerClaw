@@ -11,6 +11,8 @@
       - postgres_vm_superuser_reserved_connections | int >= 0
       - postgres_vm_reserved_connections | int >= 0
       - (postgres_vm_superuser_reserved_connections | int) + (postgres_vm_reserved_connections | int) < (postgres_vm_max_connections | int)
+      - not postgres_vm_pgaudit_enabled or postgres_vm_shared_preload_libraries | length > 0
+      - not postgres_vm_pgaudit_enabled or postgres_vm_pgaudit_audit_role is match('^[a-z_][a-z0-9_]*$')
     fail_msg: "postgres_vm requires PostgreSQL package and listener inputs, and postgres_vm_admin_role must be a safe identifier."
 
 - name: Install PostgreSQL guest packages
@@ -45,8 +47,17 @@
 - name: Record PostgreSQL cluster paths
   ansible.builtin.set_fact:
     postgres_vm_cluster_conf_dir: "{{ postgres_vm_config_files.files[0].path | dirname }}"
+    postgres_vm_cluster_version: "{{ postgres_vm_config_files.files[0].path | dirname | dirname | basename }}"
     postgres_vm_managed_conf_path: "{{ (postgres_vm_config_files.files[0].path | dirname) ~ '/conf.d/90-lv3-postgres.conf' }}"
     postgres_vm_hba_path: "{{ (postgres_vm_config_files.files[0].path | dirname) ~ '/pg_hba.conf' }}"
+
+- name: Ensure PostgreSQL pgaudit package is present
+  ansible.builtin.apt:
+    name: "postgresql-{{ postgres_vm_cluster_version }}-pgaudit"
+    state: present
+    update_cache: true
+    force_apt_get: true
+  when: postgres_vm_pgaudit_enabled | bool
 
 - name: Ensure PostgreSQL conf.d directory exists
   ansible.builtin.file:
@@ -69,6 +80,9 @@
     group: postgres
     mode: "0640"
   notify: Restart PostgreSQL
+
+- name: Flush PostgreSQL handlers before database audit provisioning
+  ansible.builtin.meta: flush_handlers
 
 - name: Check whether PostgreSQL admin role already exists
   become: true
@@ -93,6 +107,180 @@
       - "CREATE ROLE {{ postgres_vm_admin_role }} LOGIN CREATEDB CREATEROLE"
   when: postgres_vm_admin_role_check.stdout != "1"
   changed_when: true
+
+- name: Load controller-local pgaudit sensitive-table catalog
+  ansible.builtin.slurp:
+    src: "{{ postgres_vm_pgaudit_sensitive_tables_file }}"
+  delegate_to: localhost
+  become: false
+  register: postgres_vm_pgaudit_sensitive_tables_raw
+  when: postgres_vm_pgaudit_enabled | bool
+
+- name: Decode pgaudit sensitive-table catalog
+  ansible.builtin.set_fact:
+    postgres_vm_pgaudit_sensitive_tables: "{{ postgres_vm_pgaudit_sensitive_tables_raw.content | b64decode | from_yaml }}"
+  when: postgres_vm_pgaudit_enabled | bool
+
+- name: Assert pgaudit catalog matches the configured audit role
+  ansible.builtin.assert:
+    that:
+      - postgres_vm_pgaudit_sensitive_tables.audit_role == postgres_vm_pgaudit_audit_role
+      - postgres_vm_pgaudit_sensitive_tables.table_grants | length > 0
+    fail_msg: "postgres_vm pgaudit catalog must define one audit_role matching postgres_vm_pgaudit_audit_role plus at least one sensitive table grant."
+  when: postgres_vm_pgaudit_enabled | bool
+
+- name: Check whether the pgaudit audit role already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_roles WHERE rolname = '{{ postgres_vm_pgaudit_audit_role }}'"
+  register: postgres_vm_pgaudit_role_check
+  changed_when: false
+  when: postgres_vm_pgaudit_enabled | bool
+
+- name: Create the pgaudit audit role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "CREATE ROLE {{ postgres_vm_pgaudit_audit_role }} NOLOGIN"
+  when:
+    - postgres_vm_pgaudit_enabled | bool
+    - postgres_vm_pgaudit_role_check.stdout != "1"
+  changed_when: true
+
+- name: Discover writable PostgreSQL databases for pgaudit extension management
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - SELECT datname FROM pg_database WHERE datallowconn AND NOT datistemplate ORDER BY datname
+  register: postgres_vm_pgaudit_database_discovery
+  changed_when: false
+  when: postgres_vm_pgaudit_enabled | bool
+
+- name: Record pgaudit extension databases
+  ansible.builtin.set_fact:
+    postgres_vm_pgaudit_target_databases: >-
+      {{
+        postgres_vm_pgaudit_extension_databases
+        if postgres_vm_pgaudit_extension_databases | length > 0
+        else postgres_vm_pgaudit_database_discovery.stdout_lines
+      }}
+  when: postgres_vm_pgaudit_enabled | bool
+
+- name: Check whether pgaudit extension already exists in each writable database
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ item }}"
+      - -Atqc
+      - "SELECT 1 FROM pg_extension WHERE extname = 'pgaudit'"
+  loop: "{{ postgres_vm_pgaudit_target_databases }}"
+  loop_control:
+    label: "{{ item }}"
+  register: postgres_vm_pgaudit_extension_check
+  changed_when: false
+  when: postgres_vm_pgaudit_enabled | bool
+
+- name: Create pgaudit extension in writable databases
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ item.item }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - CREATE EXTENSION IF NOT EXISTS pgaudit
+  loop: "{{ postgres_vm_pgaudit_extension_check.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - postgres_vm_pgaudit_enabled | bool
+    - item.stdout != "1"
+  changed_when: true
+
+- name: Assert pgaudit sensitive-table grants point at existing databases
+  ansible.builtin.assert:
+    that:
+      - item.database in postgres_vm_pgaudit_database_discovery.stdout_lines
+      - item.schema is match('^[a-z_][a-z0-9_]*$')
+      - item.table is match('^[a-z_][a-z0-9_]*$')
+      - item.privileges | length > 0
+    fail_msg: "Every pgaudit sensitive-table grant must reference one existing database plus safe schema and table identifiers."
+  loop: "{{ postgres_vm_pgaudit_sensitive_tables.table_grants }}"
+  loop_control:
+    label: "{{ item.database }}.{{ item.schema }}.{{ item.table }}"
+  when: postgres_vm_pgaudit_enabled | bool
+
+- name: Assert pgaudit sensitive tables exist before grants are applied
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ item.database }}"
+      - -Atqc
+      - "SELECT to_regclass('{{ item.schema }}.{{ item.table }}') IS NOT NULL"
+  loop: "{{ postgres_vm_pgaudit_sensitive_tables.table_grants }}"
+  loop_control:
+    label: "{{ item.database }}.{{ item.schema }}.{{ item.table }}"
+  register: postgres_vm_pgaudit_relation_checks
+  changed_when: false
+  failed_when: postgres_vm_pgaudit_relation_checks.stdout | trim != "t"
+  when: postgres_vm_pgaudit_enabled | bool
+
+- name: Grant schema usage to the pgaudit audit role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ item.database }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "GRANT USAGE ON SCHEMA {{ item.schema }} TO {{ postgres_vm_pgaudit_audit_role }}"
+  loop: "{{ postgres_vm_pgaudit_sensitive_tables.table_grants }}"
+  loop_control:
+    label: "{{ item.database }}.{{ item.schema }}"
+  changed_when: false
+  when: postgres_vm_pgaudit_enabled | bool
+
+- name: Grant sensitive-table privileges to the pgaudit audit role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ item.database }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "GRANT {{ item.privileges | map('upper') | join(', ') }} ON TABLE {{ item.schema }}.{{ item.table }} TO {{ postgres_vm_pgaudit_audit_role }}"
+  loop: "{{ postgres_vm_pgaudit_sensitive_tables.table_grants }}"
+  loop_control:
+    label: "{{ item.database }}.{{ item.schema }}.{{ item.table }}"
+  changed_when: false
+  when: postgres_vm_pgaudit_enabled | bool
 
 - name: Verify PostgreSQL health probes
   ansible.builtin.import_tasks: verify.yml

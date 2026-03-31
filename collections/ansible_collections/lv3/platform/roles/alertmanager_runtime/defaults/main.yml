@@ -13,3 +13,22 @@ alertmanager_runtime_ntfy_publish_url: "http://{{ hostvars['proxmox_florin'].pla
 alertmanager_runtime_ntfy_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/alertmanager-password.txt
 alertmanager_runtime_ntfy_password_file: /etc/alertmanager/ntfy-password
 alertmanager_runtime_mattermost_webhook_manifest_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/incoming-webhooks.json
+alertmanager_runtime_pgaudit_relay_enabled: true
+alertmanager_runtime_pgaudit_relay_service_name: pgaudit-alert-relay
+alertmanager_runtime_pgaudit_relay_service_file: /etc/systemd/system/pgaudit-alert-relay.service
+alertmanager_runtime_pgaudit_relay_script_file: /usr/local/libexec/pgaudit-alert-relay.py
+alertmanager_runtime_pgaudit_relay_env_file: /etc/alertmanager/pgaudit-alert-relay.env
+alertmanager_runtime_pgaudit_relay_listen_host: 127.0.0.1
+alertmanager_runtime_pgaudit_relay_listen_port: 19094
+alertmanager_runtime_pgaudit_relay_webhook_path: /alerts/pgaudit-unknown-role
+alertmanager_runtime_pgaudit_relay_webhook_url: >-
+  http://{{ alertmanager_runtime_pgaudit_relay_listen_host }}:{{ alertmanager_runtime_pgaudit_relay_listen_port }}{{ alertmanager_runtime_pgaudit_relay_webhook_path }}
+alertmanager_runtime_pgaudit_relay_health_url: >-
+  http://{{ alertmanager_runtime_pgaudit_relay_listen_host }}:{{ alertmanager_runtime_pgaudit_relay_listen_port }}/healthz
+alertmanager_runtime_pgaudit_relay_nats_url: >-
+  nats://{{ hostvars['proxmox_florin'].platform_guest_catalog.by_name['docker-runtime-lv3'].ipv4 }}:4222
+alertmanager_runtime_pgaudit_relay_nats_subject: platform.security.pgaudit_unknown_role
+alertmanager_runtime_pgaudit_relay_nats_username: jetstream-admin
+alertmanager_runtime_pgaudit_relay_nats_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt
+alertmanager_runtime_pgaudit_relay_actor_id: service/pgaudit-alert-relay
+alertmanager_runtime_pgaudit_relay_event_schema_version: "1.0"

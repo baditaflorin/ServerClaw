@@ -1,0 +1,6 @@
+EXIT=0
+---ERR---
+*   Trying 10.10.10.50:12345...
+* Connection timed out after 5002 milliseconds
+* closing connection #0
+---OUT---

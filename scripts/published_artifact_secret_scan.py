@@ -9,10 +9,14 @@ import re
 import shutil
 import subprocess
 import tempfile
-import tomllib
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - exercised on Python < 3.11
+    import tomli as tomllib
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]

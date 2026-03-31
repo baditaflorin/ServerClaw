@@ -17,6 +17,7 @@ critical
 ## Diagnosis
 
 - Inspect PostgreSQL logs and the guest dashboard for CPU, memory, and disk saturation.
+- Confirm the managed pgaudit preload settings still match the repo if the outage followed an ADR 0303 replay or restart.
 - Confirm the VM is reachable over SSH and that nftables did not block the listener.
 - Validate that dependent services are not flooding the database with failed connection loops.
 
@@ -33,3 +34,4 @@ If the service remains unreachable after 15 minutes, halt downstream writes and 
 ## Post-Incident
 
 Document whether the failure was process, host, storage, or network related and record any recovery commands used.
+If the outage involved PostgreSQL audit configuration or log routing, continue with [docs/runbooks/postgres-audit.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/postgres-audit.md).

@@ -22,6 +22,7 @@ def test_guest_log_shipping_lane_map_covers_all_production_guest_roles() -> None
         "nginx",
         "docker-runtime",
         "docker-build",
+        "artifact-cache",
         "monitoring",
         "postgres",
         "postgres-replica",
@@ -40,9 +41,51 @@ def test_guest_log_shipping_lane_map_covers_all_production_guest_roles() -> None
         "nginx",
         "docker-runtime",
         "docker-build",
+        "artifact-cache",
         "monitoring",
         "postgres",
         "postgres-replica",
         "backup",
         "coolify",
     }
+
+
+def test_guest_log_shipping_enables_postgres_audit_pipeline_from_repo_catalog() -> None:
+    playbook = load_yaml(PLAYBOOK_PATH)
+    role_vars = playbook[0]["roles"][0]["vars"]
+
+    assert role_vars["loki_log_agent_postgres_audit_enabled"] == (
+        "{{ monitoring_stack_guest_role == 'postgres' and inventory_hostname == 'postgres-lv3' }}"
+    )
+    assert "config/pgaudit/approved-roles.yaml" in role_vars["loki_log_agent_postgres_audit_approved_roles"]
+    assert "ansible_host ~ ':12345'" in role_vars["loki_log_agent_http_listen_address"]
+
+
+def test_guest_log_shipping_verifies_postgres_audit_scrape_after_guest_converge() -> None:
+    playbook = load_yaml(PLAYBOOK_PATH)
+    verify_play = playbook[1]
+    verify_task = next(
+        task
+        for task in verify_play["tasks"]
+        if task.get("name") == "Verify Prometheus scrapes the PostgreSQL audit Alloy target after guest log shipping"
+    )
+
+    assert verify_play["hosts"] == (
+        "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+    )
+    assert verify_play["vars"]["monitoring_stack_postgres_audit_metrics_job_name"] == "postgres-audit-alloy"
+    assert "postgres-lv3" in verify_play["vars"]["monitoring_stack_postgres_audit_metrics_target"]
+    assert '\\"' not in verify_task["ansible.builtin.uri"]["url"]
+    assert "monitoring_stack_postgres_audit_metrics_target" in verify_task["failed_when"]
+
+    endpoint_task = next(
+        task
+        for task in verify_play["tasks"]
+        if task.get("name")
+        == "Verify the PostgreSQL audit Alloy endpoint exposes the expected metric families after guest log shipping"
+    )
+    assert endpoint_task["ansible.builtin.uri"]["url"] == (
+        "http://{{ monitoring_stack_postgres_audit_metrics_target }}/metrics"
+    )
+    assert "loki_process_custom_postgres_connection_authorized_total" in endpoint_task["failed_when"]
+    assert "loki_process_custom_postgres_unknown_connection_events_total" in endpoint_task["failed_when"]

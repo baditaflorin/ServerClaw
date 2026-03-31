@@ -192,6 +192,23 @@ domains:
             - image_ref
             - runtime_host
             - finding
+      - name: platform.security.pgaudit_unknown_role
+        description: One critical PostgreSQL connection event from a login role outside the approved audit catalog.
+        status: active
+        delivery: at_least_once
+        retention: 90d
+        producers:
+          - adr-0303-pgaudit-for-postgresql-query-and-privilege-change-audit-logging
+        payload:
+          required:
+            - event
+            - generated_at
+            - alert_name
+            - status
+            - role
+            - database
+            - host
+            - summary
   maintenance:
     description: Planned maintenance-window state transitions.
     topics:

@@ -1,0 +1,1318 @@
+/Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=converge-monitoring
+Preflight workflow: converge-monitoring
+Description: Converge the monitoring VM, guest telemetry paths, Grafana dashboards, Prometheus service-graph metrics, Tempo tracing, and centralized Loki log shipping.
+INFO no bootstrap manifest configured for this workflow
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+INFO generated monitoring_proxmox_writer_token: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/proxmox-writer.token
+INFO generated monitoring_guest_writer_token: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token
+Result: PASS (converge-monitoring)
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=a6da2f38900b4ec0a1d40bcb3b65b0de ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/inventory/hosts.yml --run-id 744262af0e77429d81e9da43d754009b --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/playbooks/monitoring-stack.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+PLAY [Converge monitoring VM stack] ********************************************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:26.400Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:30.095Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert the requested execution environment is supported] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert the requested execution environment is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:30.101Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the requested execution environment is supported","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:30.131Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Load the controller secret manifest] *************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load the controller secret manifest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:30.135Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the controller secret manifest","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:30.191Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required controller-local secret ids are declared] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required controller-local secret ids are declared","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:30.196Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required controller-local secret ids are declared","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:30.221Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required host selectors resolve in the inventory] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:30.225Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost] => (item=monitoring-lv3) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "monitoring-lv3",
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:30.258Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Initialize resolved required host list] **********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Initialize resolved required host list","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:30.261Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Initialize resolved required host list","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:30.279Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Expand required host selectors into concrete inventory hosts] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:30.283Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost] => (item=monitoring-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:30.307Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Verify SSH connectivity to required hosts] *******************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify SSH connectivity to required hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:30.312Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => (item=monitoring-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify SSH connectivity to required hosts","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:32.387Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure the current target is Debian when required] ***********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the current target is Debian when required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:32.391Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:32.436Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Stat the mutation audit helper] ******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stat the mutation audit helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:32.440Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the mutation audit helper","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:32.759Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Emit a best-effort playbook start audit event] ***************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Emit a best-effort playbook start audit event","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:32.765Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Emit a best-effort playbook start audit event","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:33.214Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Validating arguments against arg spec 'main' - Install and configure the monitoring VM service stack.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Validating arguments against arg spec 'main' - Install and configure the monitoring VM service stack.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:33.220Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Validating arguments against arg spec 'main' - Install and configure the monitoring VM service stack.","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:33.370Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Validate monitoring VM inputs] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Validate monitoring VM inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:33.373Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Validate monitoring VM inputs","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:33.438Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Ensure monitoring prerequisite packages are present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Ensure monitoring prerequisite packages are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:33.442Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Ensure monitoring prerequisite packages are present","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:34.682Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Ensure APT keyring directory exists] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Ensure APT keyring directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:34.689Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Ensure APT keyring directory exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:35.346Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Install Grafana repository key] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Install Grafana repository key","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:35.351Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Install Grafana repository key","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:36.362Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Install Grafana repository definition] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Install Grafana repository definition","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:36.367Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Install Grafana repository definition","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:37.665Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Install InfluxData repository key] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Install InfluxData repository key","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:37.670Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Install InfluxData repository key","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:38.343Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Convert InfluxData repository key into a gpg keyring] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Convert InfluxData repository key into a gpg keyring","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:38.347Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Convert InfluxData repository key into a gpg keyring","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:38.843Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Install InfluxData repository definition] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Install InfluxData repository definition","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:38.847Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Install InfluxData repository definition","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:40.142Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Install monitoring stack packages] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Install monitoring stack packages","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:40.147Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Install monitoring stack packages","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:41.815Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Ensure monitoring secret directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Ensure monitoring secret directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:41.822Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Ensure monitoring secret directory exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:42.341Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Ensure Grafana datasource provisioning directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Ensure Grafana datasource provisioning directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:42.344Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Ensure Grafana datasource provisioning directory exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:42.799Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Ensure Grafana dashboard provisioning directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Ensure Grafana dashboard provisioning directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:42.803Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Ensure Grafana dashboard provisioning directory exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:43.281Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Ensure Grafana dashboard storage directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Ensure Grafana dashboard storage directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:43.287Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Ensure Grafana dashboard storage directory exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:43.731Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Ensure Grafana VM dashboard storage directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Ensure Grafana VM dashboard storage directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:43.735Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Ensure Grafana VM dashboard storage directory exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:44.178Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Ensure Prometheus rules directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Ensure Prometheus rules directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:44.183Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Ensure Prometheus rules directory exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:44.639Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Ensure Prometheus file_sd directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Ensure Prometheus file_sd directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:44.642Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Ensure Prometheus file_sd directory exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:45.087Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Include tracing infrastructure tasks] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Include tracing infrastructure tasks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:45.090Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Include tracing infrastructure tasks","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:45.100Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/tracing.yml for monitoring-lv3
+
+TASK [lv3.platform.monitoring_vm : Download Tempo Debian package] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Download Tempo Debian package","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:45.128Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Download Tempo Debian package","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:45.743Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Install Tempo from pinned Debian package] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Install Tempo from pinned Debian package","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:45.746Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Install Tempo from pinned Debian package","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:47.011Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Download OpenTelemetry Collector Debian package] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Download OpenTelemetry Collector Debian package","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:47.017Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Download OpenTelemetry Collector Debian package","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:47.655Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Install OpenTelemetry Collector from pinned Debian package] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Install OpenTelemetry Collector from pinned Debian package","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:47.659Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Install OpenTelemetry Collector from pinned Debian package","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:49.055Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Ensure Tempo storage directories exist] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Ensure Tempo storage directories exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:49.059Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => (item={'path': '/var/lib/tempo', 'mode': '0755'})
+ok: [monitoring-lv3] => (item={'path': '/var/lib/tempo/wal', 'mode': '0750'})
+ok: [monitoring-lv3] => (item={'path': '/var/lib/tempo/blocks', 'mode': '0750'})
+ok: [monitoring-lv3] => (item={'path': '/var/lib/tempo/generator', 'mode': '0750'})
+ok: [monitoring-lv3] => (item={'path': '/var/lib/tempo/generator/wal', 'mode': '0750'})
+ok: [monitoring-lv3] => (item={'path': '/var/lib/tempo/generator/traces', 'mode': '0750'})
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Ensure Tempo storage directories exist","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:51.679Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Ensure Prometheus data directory exists] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Ensure Prometheus data directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:51.686Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Ensure Prometheus data directory exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:52.228Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Ensure Prometheus rules directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Ensure Prometheus rules directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:52.232Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Ensure Prometheus rules directory exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:52.741Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Load the health probe catalog for blackbox scrape generation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Load the health probe catalog for blackbox scrape generation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:52.745Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Load the health probe catalog for blackbox scrape generation","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:52.872Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Render blackbox exporter configuration] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Render blackbox exporter configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:52.876Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Render blackbox exporter configuration","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:54.224Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Render Prometheus configuration] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Render Prometheus configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:54.228Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [monitoring-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Render Prometheus configuration","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:56.583Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Render managed Prometheus service unit] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Render managed Prometheus service unit","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:56.588Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Render managed Prometheus service unit","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:57.945Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Disable Debian Prometheus service in favor of the managed unit] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Disable Debian Prometheus service in favor of the managed unit","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:57.951Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Disable Debian Prometheus service in favor of the managed unit","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:35:58.752Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Render Tempo configuration] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Render Tempo configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:35:58.756Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Render Tempo configuration","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:00.125Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Render OpenTelemetry Collector configuration] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Render OpenTelemetry Collector configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:00.129Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Render OpenTelemetry Collector configuration","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:01.441Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Enable and start Prometheus] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Enable and start Prometheus","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:01.445Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Enable and start Prometheus","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:02.350Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Enable and start the blackbox exporter] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Enable and start the blackbox exporter","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:02.354Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Enable and start the blackbox exporter","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:03.010Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Enable and start Tempo] *********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Enable and start Tempo","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:03.014Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Enable and start Tempo","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:03.659Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Enable and start OpenTelemetry Collector] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Enable and start OpenTelemetry Collector","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:03.664Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Enable and start OpenTelemetry Collector","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:04.294Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Flush monitoring infrastructure handlers] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Flush monitoring infrastructure handlers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:04.298Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+RUNNING HANDLER [lv3.platform.alertmanager_runtime : Restart Prometheus] *******
+changed: [monitoring-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Restart Prometheus","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:05.197Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Wait for Prometheus readiness] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Wait for Prometheus readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:05.201Z","vm":"controller","workflow_id":"ansible-playbook"}
+FAILED - RETRYING: [monitoring-lv3]: Wait for Prometheus readiness (20 retries left).
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Wait for Prometheus readiness","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:10.176Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Wait for blackbox exporter readiness] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Wait for blackbox exporter readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:10.181Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Wait for blackbox exporter readiness","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:11.176Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Wait for Tempo readiness] *******************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Wait for Tempo readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:11.181Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Wait for Tempo readiness","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:12.176Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Wait for OpenTelemetry Collector health] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Wait for OpenTelemetry Collector health","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:12.180Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Wait for OpenTelemetry Collector health","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:13.160Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Render blackbox exporter environment] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Render blackbox exporter environment","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:13.164Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Render blackbox exporter environment","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:14.496Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Copy Prometheus SLO recording rules] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Copy Prometheus SLO recording rules","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:14.500Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Copy Prometheus SLO recording rules","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:15.791Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Copy Prometheus SLO alert rules] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Copy Prometheus SLO alert rules","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:15.795Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Copy Prometheus SLO alert rules","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:17.132Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Copy Prometheus SLO probe targets] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Copy Prometheus SLO probe targets","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:17.135Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Copy Prometheus SLO probe targets","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:19.610Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Copy Prometheus HTTPS/TLS assurance alert rules] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Copy Prometheus HTTPS/TLS assurance alert rules","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:19.613Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Copy Prometheus HTTPS/TLS assurance alert rules","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:20.931Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Copy Prometheus HTTPS/TLS assurance probe targets] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Copy Prometheus HTTPS/TLS assurance probe targets","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:20.935Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Copy Prometheus HTTPS/TLS assurance probe targets","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:22.300Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Generate Grafana admin password] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Generate Grafana admin password","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:22.306Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Generate Grafana admin password","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:22.807Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Generate InfluxDB admin password] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Generate InfluxDB admin password","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:22.811Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Generate InfluxDB admin password","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:23.317Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read Grafana admin password] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read Grafana admin password","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:23.321Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read Grafana admin password","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:23.895Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read InfluxDB admin password] ***************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read InfluxDB admin password","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:23.901Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read InfluxDB admin password","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:24.386Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Set monitoring secret facts] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Set monitoring secret facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:24.431Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Set monitoring secret facts","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:24.471Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Configure Grafana server binding] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Configure Grafana server binding","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:24.474Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Configure Grafana server binding","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:24.990Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Disable Grafana self-service signup] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Disable Grafana self-service signup","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:24.995Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Disable Grafana self-service signup","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:25.444Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Disable anonymous Grafana access] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Disable anonymous Grafana access","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:25.448Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Disable anonymous Grafana access","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:25.900Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Keep the Grafana login form available for recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Keep the Grafana login form available for recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:25.904Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Keep the Grafana login form available for recovery","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:26.391Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Disable Grafana public dashboards] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Disable Grafana public dashboards","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:26.397Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Disable Grafana public dashboards","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:26.852Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Disable Grafana embedding] ******************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Disable Grafana embedding","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:26.858Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Disable Grafana embedding","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:27.353Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Bound Grafana annotation retention] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Bound Grafana annotation retention","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:27.357Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Bound Grafana annotation retention","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:27.812Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Enable and start InfluxDB] ******************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Enable and start InfluxDB","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:27.816Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Enable and start InfluxDB","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:28.416Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Wait for InfluxDB API] **********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Wait for InfluxDB API","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:28.420Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Wait for InfluxDB API","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:29.386Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Check whether InfluxDB setup is still allowed] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Check whether InfluxDB setup is still allowed","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:29.390Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Check whether InfluxDB setup is still allowed","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:30.357Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Check whether the local InfluxDB operator token exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Check whether the local InfluxDB operator token exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:30.361Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Check whether the local InfluxDB operator token exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:30.849Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Fail if InfluxDB is initialized without the local operator token] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Fail if InfluxDB is initialized without the local operator token","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:30.856Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Fail if InfluxDB is initialized without the local operator token","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:36:30.870Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Generate InfluxDB operator token seed] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Generate InfluxDB operator token seed","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:30.873Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Generate InfluxDB operator token seed","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:31.324Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read InfluxDB operator token] ***************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read InfluxDB operator token","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:31.327Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read InfluxDB operator token","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:31.792Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Set InfluxDB operator token fact] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Set InfluxDB operator token fact","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:31.796Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Set InfluxDB operator token fact","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:31.848Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Initialize InfluxDB v2] *********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Initialize InfluxDB v2","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:31.853Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Initialize InfluxDB v2","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:36:31.866Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read InfluxDB organization metadata] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read InfluxDB organization metadata","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:31.871Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read InfluxDB organization metadata","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:32.347Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Set InfluxDB organization fact] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Set InfluxDB organization fact","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:32.352Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Set InfluxDB organization fact","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:32.394Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read InfluxDB bucket metadata] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read InfluxDB bucket metadata","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:32.398Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read InfluxDB bucket metadata","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:32.842Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Set InfluxDB bucket fact] *******************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Set InfluxDB bucket fact","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:32.846Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Set InfluxDB bucket fact","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:32.891Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read existing InfluxDB auth records] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read existing InfluxDB auth records","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:32.895Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read existing InfluxDB auth records","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:33.387Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Set InfluxDB auth facts] ********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Set InfluxDB auth facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:33.391Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Set InfluxDB auth facts","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:33.437Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Check whether proxmox writer token file exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Check whether proxmox writer token file exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:33.440Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Check whether proxmox writer token file exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:33.888Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Delete existing proxmox writer auth if token file is missing] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Delete existing proxmox writer auth if token file is missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:33.892Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Delete existing proxmox writer auth if token file is missing","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:36:33.906Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Create proxmox writer auth] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Create proxmox writer auth","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:33.910Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Create proxmox writer auth","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:36:33.924Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Persist proxmox writer token] ***************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Persist proxmox writer token","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:33.928Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Persist proxmox writer token","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:36:33.943Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Check whether Grafana reader token file exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Check whether Grafana reader token file exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:33.947Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Check whether Grafana reader token file exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:34.390Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Check whether guest writer token file exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Check whether guest writer token file exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:34.395Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Check whether guest writer token file exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:34.842Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Delete existing guest writer auth if token file is missing] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Delete existing guest writer auth if token file is missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:34.846Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Delete existing guest writer auth if token file is missing","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:36:34.863Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Create guest writer auth] *******************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Create guest writer auth","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:34.867Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Create guest writer auth","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:36:34.883Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Persist guest writer token] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Persist guest writer token","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:34.886Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Persist guest writer token","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:36:34.899Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Delete existing Grafana reader auth if token file is missing] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Delete existing Grafana reader auth if token file is missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:34.903Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Delete existing Grafana reader auth if token file is missing","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:36:34.916Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Create Grafana reader auth] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Create Grafana reader auth","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:34.921Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Create Grafana reader auth","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:36:34.933Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Persist Grafana reader token] ***************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Persist Grafana reader token","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:34.938Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Persist Grafana reader token","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:36:34.967Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read Grafana reader token] ******************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read Grafana reader token","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:34.971Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read Grafana reader token","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:35.442Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Render Grafana InfluxDB datasource provisioning] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Render Grafana InfluxDB datasource provisioning","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:35.446Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Render Grafana InfluxDB datasource provisioning","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:36.724Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Render Grafana Loki datasource provisioning] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Render Grafana Loki datasource provisioning","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:36.729Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Render Grafana Loki datasource provisioning","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:38.023Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Render Grafana Prometheus datasource provisioning] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Render Grafana Prometheus datasource provisioning","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:38.026Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Render Grafana Prometheus datasource provisioning","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:39.356Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Render Grafana Tempo datasource provisioning] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Render Grafana Tempo datasource provisioning","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:39.360Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Render Grafana Tempo datasource provisioning","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:40.650Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Remove Grafana file-provider dashboard provisioning] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Remove Grafana file-provider dashboard provisioning","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:40.655Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Remove Grafana file-provider dashboard provisioning","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:41.118Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Render LV3 platform dashboard] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Render LV3 platform dashboard","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:41.121Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Render LV3 platform dashboard","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:42.486Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Render LV3 mail platform dashboard] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Render LV3 mail platform dashboard","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:42.490Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Render LV3 mail platform dashboard","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:43.822Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Copy LV3 SLO overview dashboard] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Copy LV3 SLO overview dashboard","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:43.827Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Copy LV3 SLO overview dashboard","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:45.126Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Copy LV3 capacity overview dashboard] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Copy LV3 capacity overview dashboard","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:45.130Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Copy LV3 capacity overview dashboard","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:46.380Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Copy LV3 log canary overview dashboard] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Copy LV3 log canary overview dashboard","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:46.385Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Copy LV3 log canary overview dashboard","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:47.651Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Render Loki Canary systemd unit] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Render Loki Canary systemd unit","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:47.654Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Render Loki Canary systemd unit","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:48.979Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Enable and start blackbox exporter] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Enable and start blackbox exporter","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:48.984Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Enable and start blackbox exporter","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:49.595Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Enable and start Grafana] *******************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Enable and start Grafana","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:49.599Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Enable and start Grafana","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:50.200Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Enable and start Loki Canary] ***************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Enable and start Loki Canary","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:50.203Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Enable and start Loki Canary","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:51.062Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Flush monitoring service handlers] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Flush monitoring service handlers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:51.066Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Wait for Grafana health endpoint] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Wait for Grafana health endpoint","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:51.070Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Wait for Grafana health endpoint","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:52.048Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Wait for blackbox exporter metrics endpoint] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Wait for blackbox exporter metrics endpoint","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:52.051Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Wait for blackbox exporter metrics endpoint","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:53.008Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Check current Grafana admin password hash marker] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Check current Grafana admin password hash marker","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:53.012Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Check current Grafana admin password hash marker","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:53.508Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read Grafana admin password hash marker] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read Grafana admin password hash marker","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:53.511Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read Grafana admin password hash marker","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:53.953Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Reset Grafana admin password when the managed secret changes] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Reset Grafana admin password when the managed secret changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:53.957Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Reset Grafana admin password when the managed secret changes","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:36:53.974Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Persist Grafana admin password hash marker] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Persist Grafana admin password hash marker","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:53.978Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Persist Grafana admin password hash marker","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:55.253Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Ensure local monitoring artifact directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Ensure local monitoring artifact directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:55.256Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Ensure local monitoring artifact directory exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:55.534Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read proxmox writer token] ******************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read proxmox writer token","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:55.537Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read proxmox writer token","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:55.992Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read guest writer token] ********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read guest writer token","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:55.996Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read guest writer token","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:56.488Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Mirror proxmox writer token to the control machine] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Mirror proxmox writer token to the control machine","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:56.492Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Mirror proxmox writer token to the control machine","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:57.003Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Mirror guest writer token to the control machine] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Mirror guest writer token to the control machine","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:57.008Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Mirror guest writer token to the control machine","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:57.637Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify Grafana datasource is provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify Grafana datasource is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:57.640Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify Grafana datasource is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:58.654Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify Grafana Loki datasource is provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify Grafana Loki datasource is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:58.658Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify Grafana Loki datasource is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:36:59.675Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify Grafana Prometheus datasource is provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify Grafana Prometheus datasource is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:36:59.678Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify Grafana Prometheus datasource is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:00.640Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify Grafana Tempo datasource is provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify Grafana Tempo datasource is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:00.644Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify Grafana Tempo datasource is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:01.637Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Ensure LV3 Grafana folder exists] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Ensure LV3 Grafana folder exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:01.641Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Ensure LV3 Grafana folder exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:02.621Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Create LV3 Grafana folder when missing] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Create LV3 Grafana folder when missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:02.625Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Create LV3 Grafana folder when missing","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:37:02.638Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Check whether LV3 platform dashboard already exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Check whether LV3 platform dashboard already exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:02.641Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Check whether LV3 platform dashboard already exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:03.660Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Check whether LV3 mail platform dashboard already exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Check whether LV3 mail platform dashboard already exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:03.665Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Check whether LV3 mail platform dashboard already exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:04.638Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Check whether LV3 SLO dashboard already exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Check whether LV3 SLO dashboard already exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:04.642Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Check whether LV3 SLO dashboard already exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:05.680Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Check whether LV3 capacity dashboard already exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Check whether LV3 capacity dashboard already exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:05.688Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Check whether LV3 capacity dashboard already exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:06.671Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Check whether LV3 log canary dashboard already exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Check whether LV3 log canary dashboard already exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:06.675Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Check whether LV3 log canary dashboard already exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:07.658Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Check whether VM detail dashboards already exist] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Check whether VM detail dashboards already exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:07.662Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Check whether VM detail dashboards already exist","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:16.283Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read rendered LV3 platform dashboard] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read rendered LV3 platform dashboard","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:16.291Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read rendered LV3 platform dashboard","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:16.751Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read rendered LV3 mail platform dashboard] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read rendered LV3 mail platform dashboard","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:16.756Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read rendered LV3 mail platform dashboard","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:17.207Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read rendered LV3 SLO overview dashboard] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read rendered LV3 SLO overview dashboard","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:17.211Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read rendered LV3 SLO overview dashboard","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:17.668Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read rendered LV3 capacity overview dashboard] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read rendered LV3 capacity overview dashboard","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:17.673Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read rendered LV3 capacity overview dashboard","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:18.153Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read rendered LV3 log canary overview dashboard] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read rendered LV3 log canary overview dashboard","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:18.157Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read rendered LV3 log canary overview dashboard","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:18.612Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Render VM detail dashboards] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Render VM detail dashboards","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:18.616Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => (item=nginx-lv3)
+ok: [monitoring-lv3] => (item=docker-runtime-lv3)
+ok: [monitoring-lv3] => (item=docker-build-lv3)
+ok: [monitoring-lv3] => (item=monitoring-lv3)
+ok: [monitoring-lv3] => (item=postgres-lv3)
+ok: [monitoring-lv3] => (item=postgres-replica-lv3)
+ok: [monitoring-lv3] => (item=backup-lv3)
+ok: [monitoring-lv3] => (item=coolify-lv3)
+ok: [monitoring-lv3] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Render VM detail dashboards","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:30.418Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Read rendered VM detail dashboards] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Read rendered VM detail dashboards","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:30.423Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Read rendered VM detail dashboards","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:34.322Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Import LV3 platform dashboard into Grafana] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Import LV3 platform dashboard into Grafana","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:34.328Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Import LV3 platform dashboard into Grafana","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:37:34.347Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Import LV3 mail platform dashboard into Grafana] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Import LV3 mail platform dashboard into Grafana","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:34.352Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Import LV3 mail platform dashboard into Grafana","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:37:34.368Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Import LV3 SLO dashboard into Grafana] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Import LV3 SLO dashboard into Grafana","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:34.372Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Import LV3 SLO dashboard into Grafana","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:37:34.393Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Import LV3 capacity dashboard into Grafana] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Import LV3 capacity dashboard into Grafana","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:34.397Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Import LV3 capacity dashboard into Grafana","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:37:34.411Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Import LV3 log canary dashboard into Grafana] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Import LV3 log canary dashboard into Grafana","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:34.416Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Import LV3 log canary dashboard into Grafana","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:37:34.434Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Import VM detail dashboards into Grafana] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Import VM detail dashboards into Grafana","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:34.437Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3] => (item=None)
+skipping: [monitoring-lv3] => (item=None)
+skipping: [monitoring-lv3] => (item=None)
+skipping: [monitoring-lv3] => (item=None)
+skipping: [monitoring-lv3] => (item=None)
+skipping: [monitoring-lv3] => (item=None)
+skipping: [monitoring-lv3] => (item=None)
+skipping: [monitoring-lv3] => (item=None)
+skipping: [monitoring-lv3] => (item=None)
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.monitoring_vm : Import VM detail dashboards into Grafana","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:37:34.574Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify Grafana dashboard is provisioned] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify Grafana dashboard is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:34.577Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify Grafana dashboard is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:35.582Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify LV3 mail platform dashboard is provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify LV3 mail platform dashboard is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:35.588Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify LV3 mail platform dashboard is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:36.564Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify LV3 SLO dashboard is provisioned] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify LV3 SLO dashboard is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:36.569Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify LV3 SLO dashboard is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:37.606Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify LV3 capacity dashboard is provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify LV3 capacity dashboard is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:37.614Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify LV3 capacity dashboard is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:38.590Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify LV3 log canary dashboard is provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify LV3 log canary dashboard is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:38.595Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify LV3 log canary dashboard is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:39.550Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify VM detail dashboards are provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify VM detail dashboards are provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:39.554Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify VM detail dashboards are provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:48.031Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify Grafana health endpoint responds] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify Grafana health endpoint responds","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:48.038Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify Grafana health endpoint responds","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:49.098Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify blackbox exporter health endpoint responds] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify blackbox exporter health endpoint responds","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:49.105Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify blackbox exporter health endpoint responds","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:50.090Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify blackbox exporter metrics endpoint responds] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify blackbox exporter metrics endpoint responds","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:50.093Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify blackbox exporter metrics endpoint responds","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:51.084Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify Grafana datasource is provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify Grafana datasource is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:51.088Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify Grafana datasource is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:52.060Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify Grafana Loki datasource is provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify Grafana Loki datasource is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:52.067Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify Grafana Loki datasource is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:53.019Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify Grafana Prometheus datasource is provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify Grafana Prometheus datasource is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:53.023Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify Grafana Prometheus datasource is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:53.986Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify Grafana Tempo datasource is provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify Grafana Tempo datasource is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:53.990Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify Grafana Tempo datasource is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:54.971Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify LV3 platform dashboard is provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify LV3 platform dashboard is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:54.977Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify LV3 platform dashboard is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:56.047Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify LV3 mail platform dashboard is provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify LV3 mail platform dashboard is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:56.052Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify LV3 mail platform dashboard is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:57.068Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify LV3 SLO dashboard is provisioned] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify LV3 SLO dashboard is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:57.072Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify LV3 SLO dashboard is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:58.160Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify LV3 capacity dashboard is provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify LV3 capacity dashboard is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:58.170Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify LV3 capacity dashboard is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:37:59.170Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify LV3 log canary dashboard is provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify LV3 log canary dashboard is provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:37:59.174Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify LV3 log canary dashboard is provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:00.177Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify public Grafana dashboard URLs redirect unauthenticated viewers to login] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify public Grafana dashboard URLs redirect unauthenticated viewers to login","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:00.183Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify public Grafana dashboard URLs redirect unauthenticated viewers to login","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:00.920Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Assert the public Grafana dashboard redirect points at login] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Assert the public Grafana dashboard redirect points at login","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:00.925Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Assert the public Grafana dashboard redirect points at login","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:00.970Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify the public Grafana health endpoint is not exposed] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify the public Grafana health endpoint is not exposed","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:00.973Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify the public Grafana health endpoint is not exposed","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:01.622Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify Grafana version headers are stripped at the public edge] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify Grafana version headers are stripped at the public edge","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:01.626Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify Grafana version headers are stripped at the public edge","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:02.212Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify Prometheus SLO rules are loaded] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify Prometheus SLO rules are loaded","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:02.217Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify Prometheus SLO rules are loaded","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:03.374Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify Loki Canary metrics endpoint responds] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify Loki Canary metrics endpoint responds","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:03.386Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify Loki Canary metrics endpoint responds","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:04.413Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify Prometheus scrapes the Loki Canary target] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify Prometheus scrapes the Loki Canary target","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:04.419Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify Prometheus scrapes the Loki Canary target","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:05.410Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify Loki Canary log stream is queryable from Loki] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify Loki Canary log stream is queryable from Loki","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:05.417Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify Loki Canary log stream is queryable from Loki","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:05.947Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.monitoring_vm : Verify VM detail dashboards are provisioned] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Verify VM detail dashboards are provisioned","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:05.952Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3] => (item=None)
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Verify VM detail dashboards are provisioned","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:14.625Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Validating arguments against arg spec 'main' - Converge Alertmanager routing and Prometheus rule files on monitoring-lv3.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Validating arguments against arg spec 'main' - Converge Alertmanager routing and Prometheus rule files on monitoring-lv3.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:14.638Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Validating arguments against arg spec 'main' - Converge Alertmanager routing and Prometheus rule files on monitoring-lv3.","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:14.687Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Validate Alertmanager runtime inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Validate Alertmanager runtime inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:14.691Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Validate Alertmanager runtime inputs","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:14.756Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Ensure controller-local ntfy password exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Ensure controller-local ntfy password exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:14.760Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Ensure controller-local ntfy password exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:15.091Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Fail if controller-local ntfy password is missing] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Fail if controller-local ntfy password is missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:15.097Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.alertmanager_runtime : Fail if controller-local ntfy password is missing","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:15.109Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Ensure controller-local Mattermost webhook manifest exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Ensure controller-local Mattermost webhook manifest exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:15.114Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Ensure controller-local Mattermost webhook manifest exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:15.356Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Fail if controller-local Mattermost webhook manifest is missing] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Fail if controller-local Mattermost webhook manifest is missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:15.360Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.alertmanager_runtime : Fail if controller-local Mattermost webhook manifest is missing","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:15.374Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Ensure controller-local NATS relay password exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Ensure controller-local NATS relay password exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:15.379Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Ensure controller-local NATS relay password exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:15.631Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Fail if controller-local NATS relay password is missing] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Fail if controller-local NATS relay password is missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:15.635Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.alertmanager_runtime : Fail if controller-local NATS relay password is missing","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:15.649Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Ensure Alertmanager package is present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Ensure Alertmanager package is present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:15.652Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Ensure Alertmanager package is present","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:17.227Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Ensure Alertmanager directories exist] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Ensure Alertmanager directories exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:17.233Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => (item={'path': '/etc/alertmanager', 'group': 'root', 'mode': '0755'})
+ok: [monitoring-lv3] => (item={'path': '/var/lib/prometheus/alertmanager', 'group': 'root', 'mode': '0755'})
+ok: [monitoring-lv3] => (item={'path': '/etc/prometheus/rules', 'group': 'prometheus', 'mode': '0755'})
+ok: [monitoring-lv3] => (item={'path': '/usr/local/libexec', 'group': 'root', 'mode': '0755'})
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Ensure Alertmanager directories exist","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:19.000Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Read controller-local ntfy password] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Read controller-local ntfy password","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:19.006Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Read controller-local ntfy password","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:19.265Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Read controller-local NATS relay password] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Read controller-local NATS relay password","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:19.269Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Read controller-local NATS relay password","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:19.540Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Load controller-local Mattermost webhook manifest] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Load controller-local Mattermost webhook manifest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:19.544Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Load controller-local Mattermost webhook manifest","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:19.594Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Persist Alertmanager ntfy password] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Persist Alertmanager ntfy password","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:19.600Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Persist Alertmanager ntfy password","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:20.934Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Derive Alertmanager Mattermost webhook URLs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Derive Alertmanager Mattermost webhook URLs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:20.941Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Derive Alertmanager Mattermost webhook URLs","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:20.994Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Assert Alertmanager Mattermost webhook URLs are available] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Assert Alertmanager Mattermost webhook URLs are available","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:20.999Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Assert Alertmanager Mattermost webhook URLs are available","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:21.064Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Render pgaudit alert relay environment file] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Render pgaudit alert relay environment file","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:21.068Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Render pgaudit alert relay environment file","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:22.358Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Render pgaudit alert relay script] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Render pgaudit alert relay script","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:22.365Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Render pgaudit alert relay script","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:23.675Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Render pgaudit alert relay systemd service] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Render pgaudit alert relay systemd service","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:23.681Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Render pgaudit alert relay systemd service","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:24.983Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Render Alertmanager configuration] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Render Alertmanager configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:24.988Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Render Alertmanager configuration","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:26.348Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Copy platform alert rules] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Copy platform alert rules","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:26.352Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Copy platform alert rules","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:27.609Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Flush Alertmanager handlers before service enablement] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Flush Alertmanager handlers before service enablement","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:27.614Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Enable and start Alertmanager] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Enable and start Alertmanager","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:27.618Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Enable and start Alertmanager","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:28.272Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Enable and start pgaudit alert relay] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Enable and start pgaudit alert relay","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:28.277Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Enable and start pgaudit alert relay","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:28.882Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Verify Alertmanager health endpoint responds] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Verify Alertmanager health endpoint responds","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:28.887Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Verify Alertmanager health endpoint responds","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:29.851Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Verify Alertmanager readiness endpoint responds] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Verify Alertmanager readiness endpoint responds","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:29.855Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Verify Alertmanager readiness endpoint responds","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:30.817Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Verify pgaudit alert relay health endpoint responds] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Verify pgaudit alert relay health endpoint responds","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:30.821Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Verify pgaudit alert relay health endpoint responds","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:31.784Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Verify Prometheus Loki Canary rules are loaded] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Verify Prometheus Loki Canary rules are loaded","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:31.788Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Verify Prometheus Loki Canary rules are loaded","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:33.029Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.alertmanager_runtime : Verify Prometheus PostgreSQL audit rules are loaded] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.alertmanager_runtime : Verify Prometheus PostgreSQL audit rules are loaded","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:33.041Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.alertmanager_runtime : Verify Prometheus PostgreSQL audit rules are loaded","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:34.236Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Load the health probe catalog] *******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load the health probe catalog","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:34.249Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the health probe catalog","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:34.335Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert the requested service health probe exists] ************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert the requested service health probe exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:34.338Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the requested service health probe exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:34.389Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Record the active service health probe contract] *************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Record the active service health probe contract","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:34.393Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Record the active service health probe contract","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:34.438Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run startup verification] ************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run startup verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:34.442Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run startup verification","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:34.459Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run liveness verification] ***********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run liveness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:34.464Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run liveness verification","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:34.476Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/playbooks/services/../tasks/verify-probe.yml for monitoring-lv3
+
+TASK [Run HTTP probe liveness] *************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:34.489Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run HTTP probe liveness","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:35.469Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run TCP probe liveness] **************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run TCP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:35.474Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run TCP probe liveness","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:35.490Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run command probe liveness] **********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run command probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:35.494Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run command probe liveness","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:35.508Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run systemd probe liveness] **********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run systemd probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:35.514Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run systemd probe liveness","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:35.529Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Repair Docker publication before readiness verification] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Repair Docker publication before readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:35.534Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Repair Docker publication before readiness verification","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:35.554Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run readiness verification] **********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:35.557Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run readiness verification","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:35.573Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/playbooks/services/../tasks/verify-probe.yml for monitoring-lv3
+
+TASK [Run HTTP probe readiness] ************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:35.587Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run HTTP probe readiness","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:36.565Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run TCP probe readiness] *************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run TCP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:36.570Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run TCP probe readiness","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:36.583Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run command probe readiness] *********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run command probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:36.588Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run command probe readiness","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:36.602Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run systemd probe readiness] *********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run systemd probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:36.607Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run systemd probe readiness","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:36.620Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Emit a best-effort playbook completion audit event] **********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Emit a best-effort playbook completion audit event","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:36.624Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Emit a best-effort playbook completion audit event","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:36.938Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Load the health probe catalog] *******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load the health probe catalog","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:36.942Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the health probe catalog","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:37.029Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert the requested service health probe exists] ************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert the requested service health probe exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:37.032Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the requested service health probe exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:37.085Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Record the active service health probe contract] *************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Record the active service health probe contract","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:37.089Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Record the active service health probe contract","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:37.137Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run startup verification] ************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run startup verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:37.140Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run startup verification","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:37.158Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run liveness verification] ***********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run liveness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:37.162Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run liveness verification","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:37.174Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/playbooks/services/../tasks/verify-probe.yml for monitoring-lv3
+
+TASK [Run HTTP probe liveness] *************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:37.186Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run HTTP probe liveness","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:38.150Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run TCP probe liveness] **************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run TCP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:38.155Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run TCP probe liveness","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:38.170Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run command probe liveness] **********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run command probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:38.174Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run command probe liveness","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:38.193Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run systemd probe liveness] **********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run systemd probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:38.201Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run systemd probe liveness","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:38.216Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Repair Docker publication before readiness verification] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Repair Docker publication before readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:38.220Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Repair Docker publication before readiness verification","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:38.240Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run readiness verification] **********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:38.244Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run readiness verification","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:38.259Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/playbooks/services/../tasks/verify-probe.yml for monitoring-lv3
+
+TASK [Run HTTP probe readiness] ************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:38.272Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run HTTP probe readiness","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:39.254Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run TCP probe readiness] *************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run TCP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:39.261Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run TCP probe readiness","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:39.275Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run command probe readiness] *********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run command probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:39.281Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run command probe readiness","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:39.294Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run systemd probe readiness] *********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run systemd probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:39.299Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run systemd probe readiness","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:39.314Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Emit a best-effort playbook completion audit event] **********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Emit a best-effort playbook completion audit event","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:39.319Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Emit a best-effort playbook completion audit event","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:39.638Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Build the shared playbook notification payload] **************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Build the shared playbook notification payload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:39.644Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Build the shared playbook notification payload","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:39.669Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Publish a best-effort Mattermost completion notification] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Publish a best-effort Mattermost completion notification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:39.673Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Publish a best-effort Mattermost completion notification","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:39.696Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Publish a best-effort NATS completion notification command] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Publish a best-effort NATS completion notification command","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:39.700Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Publish a best-effort NATS completion notification command","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T06:38:39.719Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+PLAY [Publish Netdata through the shared NGINX edge] ***************************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:39.737Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T06:38:42.708Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Build shared generated portal artifacts required by edge publication] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: Build shared generated portal artifacts required by edge publication","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T06:38:42.713Z","vm":"controller","workflow_id":"ansible-playbook"}
+fatal: [nginx-lv3 -> localhost]: FAILED! => {"changed": false, "cmd": ["make", "generate-changelog-portal", "docs"], "delta": "0:00:02.513278", "end": "2026-03-31 09:38:45.432505", "msg": "non-zero return code", "rc": 2, "start": "2026-03-31 09:38:42.919227", "stderr": "Traceback (most recent call last):\n  File \"/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/scripts/published_artifact_secret_scan.py\", line 12, in <module>\n    import tomllib\nModuleNotFoundError: No module named 'tomllib'\nmake[1]: *** [generate-changelog-portal] Error 1", "stderr_lines": ["Traceback (most recent call last):", "  File \"/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/scripts/published_artifact_secret_scan.py\", line 12, in <module>", "    import tomllib", "ModuleNotFoundError: No module named 'tomllib'", "make[1]: *** [generate-changelog-portal] Error 1"], "stdout": "uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/scripts/generate_changelog_portal.py --write\npython3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration --path build/changelog-portal", "stdout_lines": ["uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/scripts/generate_changelog_portal.py --write", "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration --path build/changelog-portal"]}
+{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"non-zero return code","ignored":false,"level":"ERROR","msg":"Task failed: Build shared generated portal artifacts required by edge publication","service_id":"ansible","target":"nginx-lv3","task_status":"failed","trace_id":"background","ts":"2026-03-31T06:38:45.471Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+monitoring-lv3             : ok=198  changed=2    unreachable=0    failed=0    skipped=40   rescued=0    ignored=0
+nginx-lv3                  : ok=1    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0
+
+make: *** [converge-monitoring] Error 2
