@@ -63,11 +63,12 @@ def main() -> int:
     except urllib.error.HTTPError as exc:
         sys.stderr.write(exc.read().decode("utf-8"))
         return 1
-    except (RuntimeError, TimeoutError, urllib.error.URLError) as exc:
+    except (RuntimeError, TimeoutError, OSError, urllib.error.URLError) as exc:
         sys.stderr.write(f"{exc}\n")
         return 1
-    if result is None:
-        return 0
+    if result is None or (isinstance(result, str) and not result.strip()):
+        sys.stderr.write(f"Windmill workflow {args.path} returned an empty result\n")
+        return 1
     if isinstance(result, str):
         sys.stdout.write(result)
     else:

@@ -79,16 +79,23 @@ def parse_datetime(value: str) -> datetime:
     return parsed
 
 
+def _path_exists(path: Path) -> bool:
+    try:
+        return path.exists()
+    except OSError:
+        return False
+
+
 def resolve_repo_local_path(path_value: str | Path, *, repo_root: Path = REPO_ROOT) -> Path:
     path = Path(path_value).expanduser()
-    if path.exists():
+    if _path_exists(path):
         return path
     marker = ".local"
     if marker not in path.parts:
         return path
     marker_index = path.parts.index(marker)
     candidate = repo_root.joinpath(*path.parts[marker_index:])
-    return candidate if candidate.exists() else path
+    return candidate if _path_exists(candidate) else path
 
 
 def load_controller_context() -> dict[str, Any]:

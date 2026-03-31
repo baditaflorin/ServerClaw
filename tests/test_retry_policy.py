@@ -48,6 +48,28 @@ def test_with_retry_raises_max_retries_with_last_error() -> None:
     assert isinstance(exc_info.value.last_error, urllib.error.URLError)
 
 
+def test_with_retry_retries_connection_reset_errors() -> None:
+    calls = {"count": 0}
+    sleeps: list[float] = []
+
+    def flaky() -> str:
+        calls["count"] += 1
+        if calls["count"] == 1:
+            raise ConnectionResetError(54, "Connection reset by peer")
+        return "ok"
+
+    result = with_retry(
+        flaky,
+        policy=RetryPolicy(max_attempts=3, base_delay_s=0.25, max_delay_s=1.0, multiplier=2.0, jitter=False, transient_max=0),
+        error_context="connection reset",
+        sleep_fn=sleeps.append,
+    )
+
+    assert result == "ok"
+    assert calls["count"] == 2
+    assert sleeps == [0.25]
+
+
 def test_async_with_retry_honours_retry_after() -> None:
     sleeps: list[float] = []
     calls = {"count": 0}

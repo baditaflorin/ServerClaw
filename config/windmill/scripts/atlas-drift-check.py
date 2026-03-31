@@ -5,8 +5,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 from pathlib import Path
+
+
+def set_default_env(env: dict[str, str], name: str, value: str) -> None:
+    if not env.get(name, "").strip():
+        env[name] = value
 
 
 def main(
@@ -45,15 +51,20 @@ def main(
     if publish_ntfy:
         command.append("--publish-ntfy")
 
+    command_env = os.environ.copy()
+    # Windmill workers run on the private runtime guest and can talk to Atlas dependencies directly.
+    set_default_env(command_env, "LV3_ATLAS_FORCE_DIRECT_ENDPOINTS", "1")
+    set_default_env(command_env, "LV3_NATS_URL", "nats://127.0.0.1:4222")
     completed = subprocess.run(
         command,
         cwd=repo_root,
         text=True,
         capture_output=True,
         check=False,
+        env=command_env,
     )
     payload: dict[str, object] = {
-        "status": "ok" if completed.returncode == 0 else "drift" if completed.returncode == 2 else "error",
+        "status": "ok" if completed.returncode == 0 else "error",
         "command": " ".join(command),
         "returncode": completed.returncode,
         "stdout": completed.stdout.strip(),
@@ -65,6 +76,13 @@ def main(
         except json.JSONDecodeError:
             payload["status"] = "error"
             payload["reason"] = "Atlas drift command did not return valid JSON"
+    report = payload.get("report")
+    if completed.returncode == 2 and isinstance(report, dict):
+        report_status = str(report.get("status") or "").strip().lower()
+        if report_status == "drift_detected":
+            payload["status"] = "drift"
+        elif report_status == "clean":
+            payload["status"] = "ok"
     return payload
 
 

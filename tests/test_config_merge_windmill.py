@@ -212,6 +212,44 @@ def test_sync_helper_uses_configured_http_timeout(monkeypatch: pytest.MonkeyPatc
     assert captured["url"] == "http://windmill.internal/api/w/lv3/scripts/get/p/f%2Flv3%2Foperator_onboard"
 
 
+def test_sync_helper_request_json_or_text_retries_connection_reset(monkeypatch: pytest.MonkeyPatch) -> None:
+    module = load_module("sync_helper_request_retry", SYNC_HELPER_PATH)
+    calls = {"count": 0}
+
+    class FakeResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self) -> bytes:
+            return b'{"path":"f/lv3/operator_onboard","content":"print(\\"ok\\")"}'
+
+    def fake_urlopen(_request, timeout=None):
+        calls["count"] += 1
+        if calls["count"] == 1:
+            raise ConnectionResetError(54, "Connection reset by peer")
+        return FakeResponse()
+
+    monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
+
+    status, body = module.request_json_or_text(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        path="scripts/get/p/f%2Flv3%2Foperator_onboard",
+        method="GET",
+        expected_statuses=(200,),
+    )
+
+    assert status == 200
+    assert json.loads(body)["path"] == "f/lv3/operator_onboard"
+    assert calls["count"] == 2
+
+
 def test_sync_helper_retries_connection_reset_during_create(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -229,6 +267,7 @@ def test_sync_helper_retries_connection_reset_during_create(
     attempts = {"count": 0}
 
     monkeypatch.setattr(module, "delete_script", lambda **kwargs: None)
+    monkeypatch.setattr(module, "get_script", lambda **kwargs: (404, None))
     monkeypatch.setattr(module, "wait_for_absent", lambda **kwargs: None)
     monkeypatch.setattr(module, "wait_for_content", lambda **kwargs: None)
 
@@ -252,6 +291,109 @@ def test_sync_helper_retries_connection_reset_during_create(
     assert payload == {"path": "f/lv3/operator_onboard", "attempts": 2, "status": "synced"}
 
 
+def test_sync_helper_treats_delete_transport_error_as_converged_when_remote_content_matches(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = load_module("sync_helper_delete_transport_already_converged", SYNC_HELPER_PATH)
+    local_file = tmp_path / "script.py"
+    local_file.write_text("print('ok')\n", encoding="utf-8")
+    spec = {
+        "path": "f/lv3/runbook_executor",
+        "local_file": str(local_file),
+        "language": "python3",
+        "summary": "Repo-managed runbook executor",
+        "description": "Repo-managed sync test",
+    }
+
+    def fake_delete_script(**kwargs):
+        raise module.SyncTransportError("POST scripts/delete/p/f%2Flv3%2Frunbook_executor transport error: [Errno 54] Connection reset by peer")
+
+    monkeypatch.setattr(module, "delete_script", fake_delete_script)
+    monkeypatch.setattr(
+        module,
+        "get_script",
+        lambda **kwargs: (
+            200,
+            {
+                "path": "f/lv3/runbook_executor",
+                "content": "print('ok')\n",
+                "language": "python3",
+                "summary": "Repo-managed runbook executor",
+                "description": "Repo-managed sync test",
+            },
+        ),
+    )
+
+    def fail_if_called(**kwargs):
+        raise AssertionError("create or settle helpers should not run when the remote script already matches")
+
+    monkeypatch.setattr(module, "wait_for_absent", fail_if_called)
+    monkeypatch.setattr(module, "create_script", fail_if_called)
+    monkeypatch.setattr(module, "wait_for_content", fail_if_called)
+
+    payload = module.sync_script(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        spec=spec,
+        max_attempts=3,
+        settle_interval_s=0.0,
+    )
+
+    assert payload == {"path": "f/lv3/runbook_executor", "attempts": 1, "status": "synced"}
+
+
+def test_sync_helper_skips_delete_when_remote_script_already_matches(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = load_module("sync_helper_remote_precheck_match", SYNC_HELPER_PATH)
+    local_file = tmp_path / "script.py"
+    local_file.write_text("print('ok')\n", encoding="utf-8")
+    spec = {
+        "path": "f/lv3/stage-smoke-suites",
+        "local_file": str(local_file),
+        "language": "python3",
+        "summary": "Stage smoke suites",
+        "description": "Repo-managed sync test",
+    }
+
+    monkeypatch.setattr(
+        module,
+        "get_script",
+        lambda **kwargs: (
+            200,
+            {
+                "path": "f/lv3/stage-smoke-suites",
+                "content": "print('ok')\n",
+                "language": "python3",
+                "summary": "Stage smoke suites",
+                "description": "Repo-managed sync test",
+            },
+        ),
+    )
+
+    def fail_if_called(**kwargs):
+        raise AssertionError("delete or create helpers should not run when the remote script already matches")
+
+    monkeypatch.setattr(module, "delete_script", fail_if_called)
+    monkeypatch.setattr(module, "wait_for_absent", fail_if_called)
+    monkeypatch.setattr(module, "create_script", fail_if_called)
+    monkeypatch.setattr(module, "wait_for_content", fail_if_called)
+
+    payload = module.sync_script(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        spec=spec,
+        max_attempts=3,
+        settle_interval_s=0.0,
+    )
+
+    assert payload == {"path": "f/lv3/stage-smoke-suites", "attempts": 1, "status": "synced"}
+
+
 def test_sync_helper_uses_extended_settle_timeouts(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -269,6 +411,7 @@ def test_sync_helper_uses_extended_settle_timeouts(
     captured: dict[str, float] = {}
 
     monkeypatch.setattr(module, "delete_script", lambda **kwargs: None)
+    monkeypatch.setattr(module, "get_script", lambda **kwargs: (404, None))
 
     def fake_wait_for_absent(**kwargs):
         captured["absent_timeout_s"] = kwargs["timeout_s"]
@@ -583,6 +726,7 @@ def test_sync_helper_retries_retryable_create_failures(tmp_path: Path, monkeypat
     calls = {"create": 0}
 
     monkeypatch.setattr(module, "delete_script", lambda **kwargs: None)
+    monkeypatch.setattr(module, "get_script", lambda **kwargs: (404, None))
     monkeypatch.setattr(module, "wait_for_absent", lambda **kwargs: None)
     monkeypatch.setattr(module, "wait_for_content", lambda **kwargs: None)
 
@@ -623,6 +767,7 @@ def test_sync_helper_retries_when_delete_settle_times_out(tmp_path: Path, monkey
     attempts = {"count": 0}
 
     monkeypatch.setattr(module, "delete_script", lambda **kwargs: None)
+    monkeypatch.setattr(module, "get_script", lambda **kwargs: (404, None))
     monkeypatch.setattr(module, "create_script", lambda **kwargs: (201, "created"))
     monkeypatch.setattr(module, "wait_for_content", lambda **kwargs: None)
 
@@ -665,6 +810,7 @@ def test_sync_helper_retries_when_created_script_is_not_immediately_visible(
     attempts = {"count": 0}
 
     monkeypatch.setattr(module, "delete_script", lambda **kwargs: None)
+    monkeypatch.setattr(module, "get_script", lambda **kwargs: (404, None))
     monkeypatch.setattr(module, "wait_for_absent", lambda **kwargs: None)
     monkeypatch.setattr(module, "create_script", lambda **kwargs: (201, "created"))
 
@@ -710,6 +856,7 @@ def test_sync_helper_retries_remote_disconnect(monkeypatch: pytest.MonkeyPatch, 
     attempts = {"count": 0}
 
     monkeypatch.setattr(module, "delete_script", lambda **kwargs: None)
+    monkeypatch.setattr(module, "get_script", lambda **kwargs: (404, None))
     monkeypatch.setattr(module, "wait_for_absent", lambda **kwargs: None)
     monkeypatch.setattr(module, "wait_for_content", lambda **kwargs: None)
     monkeypatch.setattr(module.time, "sleep", lambda *_args, **_kwargs: None)
@@ -747,6 +894,7 @@ def test_sync_helper_retries_wait_for_content_timeout(monkeypatch: pytest.Monkey
     attempts = {"count": 0}
 
     monkeypatch.setattr(module, "delete_script", lambda **kwargs: None)
+    monkeypatch.setattr(module, "get_script", lambda **kwargs: (404, None))
     monkeypatch.setattr(module, "wait_for_absent", lambda **kwargs: None)
     monkeypatch.setattr(module, "create_script", lambda **kwargs: (201, ""))
     monkeypatch.setattr(module.time, "sleep", lambda *_args, **_kwargs: None)
@@ -768,6 +916,56 @@ def test_sync_helper_retries_wait_for_content_timeout(monkeypatch: pytest.Monkey
     )
 
     assert payload == {"path": "f/lv3/deploy_and_promote", "attempts": 2, "status": "synced"}
+
+
+def test_sync_helper_treats_create_conflict_as_converged_when_remote_script_matches(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = load_module("sync_helper_create_conflict_match", SYNC_HELPER_PATH)
+    script_path = tmp_path / "script.py"
+    script_path.write_text("print('ok')\n", encoding="utf-8")
+    spec = {
+        "path": "f/lv3/stage-smoke-suites",
+        "language": "python3",
+        "summary": "Stage smoke suites",
+        "description": "Repo-managed sync test",
+        "local_file": str(script_path),
+    }
+    get_calls = {"count": 0}
+
+    monkeypatch.setattr(module, "delete_script", lambda **kwargs: None)
+    monkeypatch.setattr(module, "wait_for_absent", lambda **kwargs: None)
+    monkeypatch.setattr(module, "create_script", lambda **kwargs: (400, "already exists"))
+    monkeypatch.setattr(module, "wait_for_content", lambda **kwargs: None)
+
+    def fake_get_script(**kwargs):
+        get_calls["count"] += 1
+        if get_calls["count"] == 1:
+            return 404, None
+        return (
+            200,
+            {
+                "path": "f/lv3/stage-smoke-suites",
+                "content": "print('ok')\n",
+                "language": "python3",
+                "summary": "Stage smoke suites",
+                "description": "Repo-managed sync test",
+            },
+        )
+
+    monkeypatch.setattr(module, "get_script", fake_get_script)
+
+    payload = module.sync_script(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        spec=spec,
+        max_attempts=3,
+        settle_interval_s=0.0,
+    )
+
+    assert payload == {"path": "f/lv3/stage-smoke-suites", "attempts": 1, "status": "synced"}
 
 
 def test_sync_helper_marks_remote_disconnect_as_transport_error(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -1093,6 +1291,120 @@ def test_run_wait_result_helper_writes_polled_result(
             "poll_interval_seconds": 0.25,
         },
     }
+
+
+def test_run_wait_result_helper_rejects_empty_results(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    module = load_module("run_wait_result_helper_empty_result", RUN_WAIT_RESULT_HELPER_PATH)
+    monkeypatch.setattr(
+        module.sys,
+        "argv",
+        [
+            "windmill_run_wait_result.py",
+            "--base-url",
+            "http://windmill.internal",
+            "--workspace",
+            "lv3",
+            "--path",
+            "f/lv3/gate-status",
+        ],
+    )
+    monkeypatch.setenv("WINDMILL_TOKEN", "managed-secret")
+
+    class FakeClient:
+        def __init__(
+            self,
+            *,
+            base_url: str,
+            token: str,
+            workspace: str,
+            bootstrap_secret: str,
+            request_timeout_seconds: int,
+        ) -> None:
+            assert base_url == "http://windmill.internal"
+            assert token == "managed-secret"
+            assert workspace == "lv3"
+            assert bootstrap_secret == "managed-secret"
+            assert request_timeout_seconds == 120
+
+        def run_workflow_wait_result(
+            self,
+            workflow_id: str,
+            payload: dict[str, object],
+            *,
+            timeout_seconds: int | None = None,
+            poll_interval_seconds: float = 1.0,
+        ) -> None:
+            assert workflow_id == "f/lv3/gate-status"
+            assert payload == {}
+            assert timeout_seconds == 120
+            assert poll_interval_seconds == 1.0
+            return None
+
+    monkeypatch.setattr(module, "HttpWindmillClient", FakeClient)
+
+    assert module.main() == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "Windmill workflow f/lv3/gate-status returned an empty result" in captured.err
+
+
+def test_run_wait_result_helper_reports_connection_reset(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    module = load_module("run_wait_result_helper_connection_reset", RUN_WAIT_RESULT_HELPER_PATH)
+    monkeypatch.setattr(
+        module.sys,
+        "argv",
+        [
+            "windmill_run_wait_result.py",
+            "--base-url",
+            "http://windmill.internal",
+            "--workspace",
+            "lv3",
+            "--path",
+            "f/lv3/gate-status",
+        ],
+    )
+    monkeypatch.setenv("WINDMILL_TOKEN", "managed-secret")
+
+    class FakeClient:
+        def __init__(
+            self,
+            *,
+            base_url: str,
+            token: str,
+            workspace: str,
+            bootstrap_secret: str,
+            request_timeout_seconds: int,
+        ) -> None:
+            assert base_url == "http://windmill.internal"
+            assert token == "managed-secret"
+            assert workspace == "lv3"
+            assert bootstrap_secret == "managed-secret"
+            assert request_timeout_seconds == 120
+
+        def run_workflow_wait_result(
+            self,
+            workflow_id: str,
+            payload: dict[str, object],
+            *,
+            timeout_seconds: int | None = None,
+            poll_interval_seconds: float = 1.0,
+        ) -> None:
+            assert workflow_id == "f/lv3/gate-status"
+            assert payload == {}
+            assert timeout_seconds == 120
+            assert poll_interval_seconds == 1.0
+            raise ConnectionResetError(54, "Connection reset by peer")
+
+    monkeypatch.setattr(module, "HttpWindmillClient", FakeClient)
+
+    assert module.main() == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "Connection reset by peer" in captured.err
 
 
 def test_run_wait_result_helper_polls_completed_result_for_hash_submissions(

@@ -1,0 +1,90 @@
+---
+- name: Ensure OpenBao remains unsealed before seeding rotation metadata for {{ openbao_rotation_contract.key }}
+  ansible.builtin.include_role:
+    name: lv3.platform.openbao_runtime
+    tasks_from: ensure_unsealed.yml
+  vars:
+    openbao_unseal_context: "seeding rotation metadata for {{ openbao_rotation_contract.key }}"
+    openbao_unseal_init_payload: "{{ openbao_seed_rotation_init_payload }}"
+
+- name: Seed rotation metadata for {{ openbao_rotation_contract.key }}
+  block:
+    - name: Update the OpenBao rotation metadata for {{ openbao_rotation_contract.key }}
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/metadata/{{ openbao_rotation_contract.value.openbao_path }}"
+        method: POST
+        headers:
+          X-Vault-Token: "{{ openbao_seed_rotation_init_payload.root_token }}"
+        body_format: json
+        body: >-
+          {{
+            {
+              'custom_metadata': {
+                'secret_id': openbao_rotation_contract.key,
+                'service': openbao_rotation_contract.value.service,
+                'owner': openbao_rotation_contract.value.owner,
+                'risk_level': openbao_rotation_contract.value.risk_level,
+                'approval_mode': openbao_rotation_contract.value.approval_mode,
+                'command_contract': openbao_rotation_contract.value.command_contract,
+                'rotation_period_days': (openbao_rotation_contract.value.rotation_period_days | string),
+                'warning_window_days': (openbao_rotation_contract.value.warning_window_days | string),
+                (openbao_rotation_metadata.last_rotated_metadata_key): (openbao_rotation_contract.value.last_rotated | default('unrotated', true)),
+                (openbao_rotation_metadata.rotated_by_metadata_key): 'openbao-seed'
+              }
+            }
+          }}
+        status_code:
+          - 200
+          - 204
+          - 500
+          - 502
+          - 503
+      register: openbao_seed_rotation_metadata_item_result
+      retries: 12
+      delay: 5
+      until: openbao_seed_rotation_metadata_item_result.status in [200, 204]
+      no_log: true
+  rescue:
+    - name: Re-ensure OpenBao remains unsealed before retrying rotation metadata for {{ openbao_rotation_contract.key }}
+      ansible.builtin.include_role:
+        name: lv3.platform.openbao_runtime
+        tasks_from: ensure_unsealed.yml
+      vars:
+        openbao_unseal_context: "retrying rotation metadata for {{ openbao_rotation_contract.key }}"
+        openbao_unseal_init_payload: "{{ openbao_seed_rotation_init_payload }}"
+
+    - name: Retry the OpenBao rotation metadata update for {{ openbao_rotation_contract.key }} after runtime recovery
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/metadata/{{ openbao_rotation_contract.value.openbao_path }}"
+        method: POST
+        headers:
+          X-Vault-Token: "{{ openbao_seed_rotation_init_payload.root_token }}"
+        body_format: json
+        body: >-
+          {{
+            {
+              'custom_metadata': {
+                'secret_id': openbao_rotation_contract.key,
+                'service': openbao_rotation_contract.value.service,
+                'owner': openbao_rotation_contract.value.owner,
+                'risk_level': openbao_rotation_contract.value.risk_level,
+                'approval_mode': openbao_rotation_contract.value.approval_mode,
+                'command_contract': openbao_rotation_contract.value.command_contract,
+                'rotation_period_days': (openbao_rotation_contract.value.rotation_period_days | string),
+                'warning_window_days': (openbao_rotation_contract.value.warning_window_days | string),
+                (openbao_rotation_metadata.last_rotated_metadata_key): (openbao_rotation_contract.value.last_rotated | default('unrotated', true)),
+                (openbao_rotation_metadata.rotated_by_metadata_key): 'openbao-seed'
+              }
+            }
+          }}
+        status_code:
+          - 200
+          - 204
+          - 500
+          - 502
+          - 503
+      register: openbao_seed_rotation_metadata_item_result
+      retries: 12
+      delay: 5
+      until: openbao_seed_rotation_metadata_item_result.status in [200, 204]
+      no_log: true

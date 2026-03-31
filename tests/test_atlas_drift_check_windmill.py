@@ -37,6 +37,7 @@ def test_wrapper_executes_repo_script_and_parses_clean_json(monkeypatch, tmp_pat
     def fake_run(command, **kwargs):
         captured["command"] = command
         captured["cwd"] = kwargs["cwd"]
+        captured["env"] = kwargs["env"]
         return subprocess.CompletedProcess(
             command,
             0,
@@ -51,8 +52,39 @@ def test_wrapper_executes_repo_script_and_parses_clean_json(monkeypatch, tmp_pat
     assert payload["status"] == "ok"
     assert captured["cwd"] == repo_root
     assert captured["command"][1:4] == ["docker", "nats-py", "pyyaml"]
+    assert captured["env"]["LV3_ATLAS_FORCE_DIRECT_ENDPOINTS"] == "1"
+    assert captured["env"]["LV3_NATS_URL"] == "nats://127.0.0.1:4222"
     assert "scripts/atlas_schema.py" in captured["command"]
     assert payload["report"] == {"status": "clean", "drift_count": 0}
+
+
+def test_wrapper_overrides_blank_direct_endpoint_env_values(monkeypatch, tmp_path: Path) -> None:
+    module = load_module("atlas_drift_blank_env")
+    repo_root = tmp_path
+    (repo_root / "scripts").mkdir(parents=True)
+    (repo_root / "scripts" / "atlas_schema.py").write_text("# placeholder\n", encoding="utf-8")
+    (repo_root / "scripts" / "run_python_with_packages.sh").write_text("#!/bin/sh\n", encoding="utf-8")
+    (repo_root / "scripts" / "run_python_with_packages.sh").chmod(0o755)
+    captured: dict[str, object] = {}
+
+    def fake_run(command, **kwargs):
+        captured["env"] = kwargs["env"]
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            json.dumps({"status": "clean", "drift_count": 0}),
+            "",
+        )
+
+    monkeypatch.setenv("LV3_ATLAS_FORCE_DIRECT_ENDPOINTS", "")
+    monkeypatch.setenv("LV3_NATS_URL", "   ")
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    payload = module.main(repo_path=str(repo_root))
+
+    assert payload["status"] == "ok"
+    assert captured["env"]["LV3_ATLAS_FORCE_DIRECT_ENDPOINTS"] == "1"
+    assert captured["env"]["LV3_NATS_URL"] == "nats://127.0.0.1:4222"
 
 
 def test_wrapper_surfaces_drift_without_treating_it_as_runner_error(monkeypatch, tmp_path: Path) -> None:
@@ -77,3 +109,27 @@ def test_wrapper_surfaces_drift_without_treating_it_as_runner_error(monkeypatch,
 
     assert payload["status"] == "drift"
     assert payload["report"]["drift_count"] == 2
+
+
+def test_wrapper_treats_exit_code_two_without_structured_drift_report_as_error(monkeypatch, tmp_path: Path) -> None:
+    module = load_module("atlas_drift_runner_error")
+    repo_root = tmp_path
+    (repo_root / "scripts").mkdir(parents=True)
+    (repo_root / "scripts" / "atlas_schema.py").write_text("# placeholder\n", encoding="utf-8")
+    (repo_root / "scripts" / "run_python_with_packages.sh").write_text("#!/bin/sh\n", encoding="utf-8")
+    (repo_root / "scripts" / "run_python_with_packages.sh").chmod(0o755)
+
+    def fake_run(command, **kwargs):
+        return subprocess.CompletedProcess(
+            command,
+            2,
+            "",
+            "Atlas schema automation error: permission denied",
+        )
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    payload = module.main(repo_path=str(repo_root))
+
+    assert payload["status"] == "error"
+    assert payload["stderr"] == "Atlas schema automation error: permission denied"

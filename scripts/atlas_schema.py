@@ -59,6 +59,10 @@ CLI_SUBCOMMANDS = ("validate", "lint", "snapshot", "drift")
 CLI_GLOBAL_OPTIONS_WITH_VALUES = ("--repo-root", "--catalog", "--format")
 
 
+def env_flag(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def require_mapping(value: Any, path: str) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError(f"{path} must be an object")
@@ -420,6 +424,9 @@ def resolve_openbao_url(catalog: dict[str, Any], context: dict[str, Any]):
     guest_name = require_str(runtime.get("openbao_guest"), "config/atlas/catalog.json.runtime.openbao_guest")
     guest_host = require_str(context["guests"][guest_name], f"controller context guest '{guest_name}'")
     direct_guest_url = replace_loopback_host(openbao_url, guest_host)
+    if env_flag("LV3_ATLAS_FORCE_DIRECT_ENDPOINTS"):
+        yield direct_guest_url
+        return
     if direct_guest_url != openbao_url and http_reachable(direct_guest_url):
         yield direct_guest_url
         return
@@ -437,6 +444,9 @@ def resolve_postgres_endpoint(catalog: dict[str, Any], context: dict[str, Any]):
         "config/atlas/catalog.json.runtime.postgres_port",
     )
     guest_host = context["guests"][guest_name]
+    if env_flag("LV3_ATLAS_FORCE_DIRECT_ENDPOINTS"):
+        yield guest_host, postgres_port
+        return
     if host_reachable(guest_host, postgres_port):
         yield guest_host, postgres_port
         return
@@ -867,12 +877,13 @@ def run_drift(
         require_mapping(catalog.get("receipts"), "config/atlas/catalog.json.receipts").get("drift_dir"),
         "config/atlas/catalog.json.receipts.drift_dir",
     )
-    receipt_dir.mkdir(parents=True, exist_ok=True)
 
     checked: list[dict[str, Any]] = []
     drifted: list[dict[str, Any]] = []
     event_records: list[dict[str, Any]] = []
     receipt_paths: list[str] = []
+    receipt_errors: list[str] = []
+    receipt_writes_enabled = write_receipts
     with resolve_openbao_url(catalog, context) as openbao_url:
         token = openbao_login(context, openbao_url, catalog)
         credentials = request_dynamic_credentials(openbao_url, token=token, role_name=database_role)
@@ -923,10 +934,26 @@ def run_drift(
                     "diff_preview": diff_preview(snapshot_content, live_content, label=database_id),
                 }
                 drifted.append(record)
-                if write_receipts:
-                    receipt_path = receipt_dir / f"{database_id}-{time.strftime('%Y-%m-%d', time.gmtime())}.json"
-                    write_json(receipt_path, record, indent=2, sort_keys=True)
-                    receipt_paths.append(str(receipt_path.relative_to(repo_root)))
+                if receipt_writes_enabled:
+                    if not receipt_dir.exists():
+                        try:
+                            receipt_dir.mkdir(parents=True, exist_ok=True)
+                        except OSError as exc:
+                            receipt_writes_enabled = False
+                            receipt_errors.append(
+                                f"could not create Atlas drift receipt directory {receipt_dir}: {exc}"
+                            )
+                    if receipt_writes_enabled:
+                        receipt_path = receipt_dir / f"{database_id}-{time.strftime('%Y-%m-%d', time.gmtime())}.json"
+                        try:
+                            write_json(receipt_path, record, indent=2, sort_keys=True)
+                        except OSError as exc:
+                            receipt_writes_enabled = False
+                            receipt_errors.append(
+                                f"could not write Atlas drift receipt {receipt_path}: {exc}"
+                            )
+                        else:
+                            receipt_paths.append(str(receipt_path.relative_to(repo_root)))
                 event_records.append(
                     {
                         "subject": require_str(
@@ -975,6 +1002,7 @@ def run_drift(
         "drifted_databases": drifted,
         "drift_count": len(drifted),
         "receipt_paths": receipt_paths,
+        "receipt_errors": receipt_errors,
         "notifications": {
             "nats": nats_result,
             "ntfy": ntfy_result,

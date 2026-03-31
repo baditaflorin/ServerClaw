@@ -20,8 +20,10 @@ except ModuleNotFoundError:
 
 try:
     from platform.retry import policy_for_surface as _policy_for_surface
+    from platform.retry import MaxRetriesExceeded as _MaxRetriesExceeded
     from platform.retry import with_retry as _with_retry
 except ModuleNotFoundError:
+    _MaxRetriesExceeded = None
     _policy_for_surface = None
     _with_retry = None
 
@@ -158,18 +160,18 @@ class HttpWindmillClient:
                 request,
                 timeout=_compute_request_timeout_seconds(timeout or self._request_timeout_seconds),
             )
-            use_internal_retry = (
-                retry
-                and self._internal_api_retry_policy is not None
-                and _with_retry is not None
-                and self._circuit_breaker is None
-            )
+            use_internal_retry = retry and self._internal_api_retry_policy is not None and _with_retry is not None
             if use_internal_retry:
-                response_cm = _with_retry(
-                    open_request,
-                    policy=self._internal_api_retry_policy,
-                    error_context=f"windmill {method} {path}",
-                )
+                try:
+                    response_cm = _with_retry(
+                        open_request,
+                        policy=self._internal_api_retry_policy,
+                        error_context=f"windmill {method} {path}",
+                    )
+                except Exception as exc:
+                    if _MaxRetriesExceeded is not None and isinstance(exc, _MaxRetriesExceeded) and exc.last_error is not None:
+                        raise exc.last_error from exc
+                    raise
             else:
                 response_cm = open_request()
             with response_cm as response:

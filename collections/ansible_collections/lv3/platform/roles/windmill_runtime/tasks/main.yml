@@ -905,6 +905,8 @@
         )
       }}
     state: directory
+    owner: "{{ proxmox_host_admin_user }}"
+    group: "{{ proxmox_host_admin_user }}"
     mode: "0700"
   loop: "{{ windmill_worker_secret_mirror_ids }}"
   when:
@@ -925,6 +927,8 @@
           | regex_replace('^.*?/.local/', '')
         )
       }}
+    owner: "{{ proxmox_host_admin_user }}"
+    group: "{{ proxmox_host_admin_user }}"
     mode: "0600"
   loop: "{{ windmill_worker_secret_mirror_ids }}"
   when:

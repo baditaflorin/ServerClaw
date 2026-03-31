@@ -50,7 +50,6 @@ ENSURE_UNSEALED_TASKS_PATH = (
     / "ensure_unsealed.yml"
 )
 UNSEAL_KEY_TASKS_PATH = (
-OPENBAO_POSTGRES_BACKEND_TASKS_PATH = (
     REPO_ROOT
     / "collections"
     / "ansible_collections"
@@ -74,6 +73,9 @@ OPENBAO_POSTGRES_BACKEND_TASKS_PATH = (
 )
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "openbao.yml"
 PLAYBOOK_REFRESH_APPROLE_TASKS_PATH = REPO_ROOT / "playbooks" / "tasks" / "openbao-refresh-approle-artifact.yml"
+PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH = (
+    REPO_ROOT / "playbooks" / "tasks" / "openbao-seed-rotation-metadata.yml"
+)
 GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "all.yml"
 
 
@@ -299,6 +301,8 @@ def test_openbao_runtime_rechecks_seal_state_before_auth_verification() -> None:
     assert "include_tasks: unseal_key.yml" in ensure_unsealed_tasks
     assert "/v1/sys/unseal" in unseal_key_tasks
     assert "openbao_runtime_unseal_completed" in unseal_key_tasks
+    assert "- openbao_runtime_unsealed_status.status == 200" in ensure_unsealed_tasks
+    assert "- not (openbao_runtime_unsealed_status.json.sealed | bool)" in ensure_unsealed_tasks
     assert "Wait for OpenBao to become active before" in ensure_unsealed_tasks
 
 
@@ -349,15 +353,46 @@ def test_openbao_runtime_renders_rotatable_secret_keys_dynamically() -> None:
     assert "(item.value.openbao_field):" in tasks
     assert "register: openbao_seed_rotatable_secret_result" in tasks
     assert "until: openbao_seed_rotatable_secret_result.status == 200" in tasks
-    assert "- name: Seed rotation metadata for dedicated rotatable secrets" in tasks
-    assert "register: openbao_seed_rotation_metadata_result" in tasks
-    assert "until: openbao_seed_rotation_metadata_result.status in [200, 204]" in tasks
+    assert "- name: Seed rotation metadata for dedicated rotatable secrets one at a time through recovery-aware retries" in tasks
+    assert 'ansible.builtin.include_tasks: "{{ playbook_dir }}/tasks/openbao-seed-rotation-metadata.yml"' in tasks
+    assert "loop_var: openbao_rotation_contract" in tasks
     assert "\"{{ item.value.openbao_field }}\":" not in tasks
-    assert "(openbao_rotation_metadata.last_rotated_metadata_key):" in tasks
-    assert "(openbao_rotation_metadata.rotated_by_metadata_key): 'openbao-seed'" in tasks
-    assert "register: openbao_rotatable_secret_metadata_seed" in tasks
-    assert "until: openbao_rotatable_secret_metadata_seed.status in [200, 204]" in tasks
-    assert "- name: Assert rotation metadata for dedicated rotatable secrets was seeded successfully" in tasks
+    assert "(openbao_rotation_metadata.last_rotated_metadata_key):" in PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH.read_text(
+        encoding="utf-8"
+    )
+    assert "(openbao_rotation_metadata.rotated_by_metadata_key): 'openbao-seed'" in PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+
+def test_openbao_seed_rotation_metadata_task_recovers_each_secret_through_unseal_checks() -> None:
+    metadata_tasks = yaml.safe_load(PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH.read_text(encoding="utf-8"))
+    task_names = [task["name"] for task in metadata_tasks]
+
+    assert (
+        "Ensure OpenBao remains unsealed before seeding rotation metadata for {{ openbao_rotation_contract.key }}"
+        in task_names
+    )
+    assert "Seed rotation metadata for {{ openbao_rotation_contract.key }}" in task_names
+
+    seed_task = next(
+        task for task in metadata_tasks if task["name"] == "Seed rotation metadata for {{ openbao_rotation_contract.key }}"
+    )
+    update_task = seed_task["block"][0]
+    update_module = update_task["ansible.builtin.uri"]
+
+    assert update_module["url"] == (
+        "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/metadata/{{ openbao_rotation_contract.value.openbao_path }}"
+    )
+    assert update_module["status_code"] == [200, 204, 500, 502, 503]
+    assert update_task["register"] == "openbao_seed_rotation_metadata_item_result"
+    assert update_task["until"] == "openbao_seed_rotation_metadata_item_result.status in [200, 204]"
+
+    retry_task = seed_task["rescue"][1]
+    assert (
+        retry_task["name"]
+        == "Retry the OpenBao rotation metadata update for {{ openbao_rotation_contract.key }} after runtime recovery"
+    )
 
 
 def test_openbao_runtime_retries_other_read_side_api_checks_after_restart() -> None:

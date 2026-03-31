@@ -42,6 +42,16 @@ if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"
 from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
 
 
+REQUEST_RETRY_POLICY = RetryPolicy(
+    max_attempts=4,
+    base_delay_s=0.25,
+    max_delay_s=2.0,
+    multiplier=2.0,
+    jitter=False,
+    transient_max=0,
+)
+
+
 class SyncError(RuntimeError):
     pass
 
@@ -114,36 +124,51 @@ def request_json_or_text(
     timeout_s: float = DEFAULT_HTTP_TIMEOUT_S,
 ) -> tuple[int, str]:
     url = f"{base_url}/api/w/{urllib.parse.quote(workspace, safe='')}/{path}"
-    request = build_request(url, token, method, payload)
+
+    def execute_request(session_token: str) -> tuple[int, str]:
+        request = build_request(url, session_token, method, payload)
+        try:
+            with urllib.request.urlopen(request, timeout=timeout_s) as response:
+                return response.status, response.read().decode("utf-8")
+        except urllib.error.HTTPError as exc:
+            return exc.code, exc.read().decode("utf-8")
+        except (urllib.error.URLError, http.client.HTTPException, OSError, TimeoutError) as exc:
+            raise SyncTransportError(f"{method} {path} transport error: {exc}") from exc
+
+    def request_attempt() -> tuple[int, str]:
+        try:
+            status, body = execute_request(token)
+            if status == 401:
+                session_token = login_with_bootstrap_secret(base_url, token, timeout_s=timeout_s)
+                status, body = execute_request(session_token)
+            if status not in expected_statuses:
+                error_cls = (
+                    RetryableSyncError
+                    if status >= 500 or status in (408, 429) or is_retryable_windmill_backend_error(body)
+                    else SyncError
+                )
+                raise error_cls(f"{method} {path} returned {status}: {body[:500]}")
+            return status, body
+        except SyncTransportError as exc:
+            raise PlatformRetryError(
+                str(exc),
+                code="platform:windmill_seed_sync_transport",
+                retry_class=RetryClass.BACKOFF,
+            ) from exc
+
     try:
-        with urllib.request.urlopen(request, timeout=timeout_s) as response:
-            status = response.status
-            body = response.read().decode("utf-8")
-    except urllib.error.HTTPError as exc:
-        status = exc.code
-        body = exc.read().decode("utf-8")
-        if status == 401:
-            session_token = login_with_bootstrap_secret(base_url, token, timeout_s=timeout_s)
-            request = build_request(url, session_token, method, payload)
-            try:
-                with urllib.request.urlopen(request, timeout=timeout_s) as response:
-                    status = response.status
-                    body = response.read().decode("utf-8")
-            except urllib.error.HTTPError as retry_exc:
-                status = retry_exc.code
-                body = retry_exc.read().decode("utf-8")
-            except (urllib.error.URLError, http.client.HTTPException, OSError, TimeoutError) as retry_exc:
-                raise SyncTransportError(f"{method} {path} transport error: {retry_exc}") from retry_exc
-    except (urllib.error.URLError, http.client.HTTPException, OSError, TimeoutError) as exc:
-        raise SyncTransportError(f"{method} {path} transport error: {exc}") from exc
-    if status not in expected_statuses:
-        error_cls = (
-            RetryableSyncError
-            if status >= 500 or status in (408, 429) or is_retryable_windmill_backend_error(body)
-            else SyncError
+        return with_retry(
+            request_attempt,
+            policy=REQUEST_RETRY_POLICY,
+            error_context=f"{method} {path}",
         )
-        raise error_cls(f"{method} {path} returned {status}: {body[:500]}")
-    return status, body
+    except MaxRetriesExceeded as exc:
+        last_error = exc.last_error
+        if isinstance(last_error, SyncTransportError):
+            raise last_error
+        if isinstance(last_error, PlatformRetryError) and isinstance(last_error.__cause__, SyncTransportError):
+            raise last_error.__cause__
+        raise
 
 
 def delete_script(
@@ -272,6 +297,17 @@ def settle_timeout(settle_interval_s: float, multiplier: float) -> float:
     return max(MIN_SETTLE_TIMEOUT_S, settle_interval_s * multiplier)
 
 
+def remote_script_matches_spec(remote_payload: dict | None, spec: dict, content: str) -> bool:
+    if not remote_payload:
+        return False
+    return (
+        remote_payload.get("content") == content
+        and remote_payload.get("language") == spec["language"]
+        and remote_payload.get("summary") == spec["summary"]
+        and remote_payload.get("description") == spec["description"]
+    )
+
+
 def sync_script(
     *,
     base_url: str,
@@ -291,6 +327,15 @@ def sync_script(
         nonlocal attempts
         attempts += 1
         script_absent_after_delete = False
+        status, remote_payload = get_script(
+            base_url=base_url,
+            workspace=workspace,
+            token=token,
+            script_path=spec["path"],
+            timeout_s=request_timeout_s,
+        )
+        if status == 200 and remote_script_matches_spec(remote_payload, spec, content):
+            return {"path": spec["path"], "attempts": attempts, "status": "synced"}
         try:
             delete_script(
                 base_url=base_url,
@@ -301,7 +346,7 @@ def sync_script(
             )
         except SyncTransportError as exc:
             try:
-                status, _ = get_script(
+                status, remote_payload = get_script(
                     base_url=base_url,
                     workspace=workspace,
                     token=token,
@@ -316,6 +361,8 @@ def sync_script(
                 ) from exc
             if status == 404:
                 script_absent_after_delete = True
+            elif remote_script_matches_spec(remote_payload, spec, content):
+                return {"path": spec["path"], "attempts": attempts, "status": "synced"}
             else:
                 raise PlatformRetryError(
                     str(exc),
@@ -361,6 +408,15 @@ def sync_script(
                 retry_class=RetryClass.BACKOFF,
             ) from exc
         if status != 201:
+            status, remote_payload = get_script(
+                base_url=base_url,
+                workspace=workspace,
+                token=token,
+                script_path=spec["path"],
+                timeout_s=request_timeout_s,
+            )
+            if status == 200 and remote_script_matches_spec(remote_payload, spec, content):
+                return {"path": spec["path"], "attempts": attempts, "status": "synced"}
             raise PlatformRetryError(
                 f"failed to sync {spec['path']}: {body[:500]}",
                 code="platform:windmill_seed_sync_pending",

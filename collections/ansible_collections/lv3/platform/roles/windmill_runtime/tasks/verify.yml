@@ -99,6 +99,16 @@
 - name: Assert the Windmill validation gate status result
   ansible.builtin.assert:
     that:
+      - windmill_verify_validation_gate_status.rc == 0
+      - (windmill_verify_validation_gate_status.stdout | default('') | trim | length) > 0
+    fail_msg: >-
+      Windmill validation gate status did not return structured output after retries.
+      rc={{ windmill_verify_validation_gate_status.rc }}
+      stderr={{ windmill_verify_validation_gate_status.stderr | default('') | trim }}
+
+- name: Assert the Windmill validation gate status result
+  ansible.builtin.assert:
+    that:
       - (windmill_verify_validation_gate_status.stdout | from_json).status == "ok"
       - (windmill_verify_validation_gate_status.stdout | from_json).gate_status.manifest_path | length > 0
       - ((windmill_verify_validation_gate_status.stdout | from_json).gate_status.enabled_checks | length) >= 1

@@ -58,6 +58,7 @@ ERROR_TAXONOMY: dict[str, RetryClass] = {
     "http:503": RetryClass.BACKOFF,
     "http:504": RetryClass.BACKOFF,
     "net:connection_refused": RetryClass.BACKOFF,
+    "net:connection_reset": RetryClass.BACKOFF,
     "net:connection_timeout": RetryClass.TRANSIENT,
     "net:read_timeout": RetryClass.BACKOFF,
     "net:ssl_error": RetryClass.PERMANENT,
@@ -105,11 +106,15 @@ def _classify_os_error(exc: BaseException) -> str:
         return "net:ssl_error"
     if isinstance(exc, socket.gaierror):
         return "net:dns_resolution_failed"
+    if isinstance(exc, ConnectionResetError):
+        return "net:connection_reset"
     if isinstance(exc, ConnectionRefusedError):
         return "net:connection_refused"
     if isinstance(exc, (socket.timeout, TimeoutError)):
         return "net:connection_timeout"
     if isinstance(exc, OSError):
+        if exc.errno == errno.ECONNRESET:
+            return "net:connection_reset"
         if exc.errno == errno.ECONNREFUSED:
             return "net:connection_refused"
         if exc.errno in {errno.ETIMEDOUT, errno.EHOSTUNREACH, errno.ENETUNREACH}:

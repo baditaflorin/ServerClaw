@@ -133,6 +133,103 @@ def test_validate_catalog_allows_bootstrap_snapshot_creation(tmp_path: Path) -> 
     atlas_schema.validate_catalog(catalog, repo_root=tmp_path, require_snapshot_files=False)
 
 
+def test_run_drift_does_not_create_receipt_dir_when_schema_is_clean(monkeypatch, tmp_path: Path) -> None:
+    atlas_schema = load_module()
+    repo_root = tmp_path / "repo"
+    snapshot_path = repo_root / "config" / "atlas" / "windmill.hcl"
+    snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+    snapshot_path.write_text('table "users" {}\n', encoding="utf-8")
+    catalog = {
+        "schema_version": "1.0.0",
+        "atlas_image_ref": "docker.io/arigaio/atlas:test",
+        "dev_postgres_image": "docker.io/library/postgres:16",
+        "runtime": {
+            "openbao_guest": "docker-runtime-lv3",
+            "openbao_url": "http://127.0.0.1:8201",
+            "postgres_guest": "postgres-lv3",
+            "postgres_port": 5432,
+        },
+        "openbao": {
+            "approle_secret_id": "openbao_atlas_approle",
+            "database_role": "postgres-atlas-readonly",
+        },
+        "notifications": {
+            "nats_subject": "platform.db.schema_drift",
+            "ntfy": {
+                "url": "http://10.10.10.20:2586/platform.db.warn",
+                "username": "alertmanager",
+                "password_secret_id": "ntfy_alertmanager_password",
+            },
+        },
+        "receipts": {
+            "drift_dir": "receipts/atlas-drift",
+        },
+        "lint_targets": [
+            {
+                "id": "platform-control-plane",
+                "path": "migrations",
+                "latest": 1,
+                "triggers": ["migrations/"],
+                "dev_database": "atlas_lint",
+            }
+        ],
+        "databases": [
+            {
+                "id": "windmill",
+                "database": "windmill",
+                "snapshot_path": "config/atlas/windmill.hcl",
+            }
+        ],
+    }
+    receipt_dir = repo_root / "receipts" / "atlas-drift"
+    original_mkdir = Path.mkdir
+
+    @contextmanager
+    def fake_openbao_url(_catalog, _context):
+        yield "http://10.10.10.20:8201"
+
+    @contextmanager
+    def fake_postgres_endpoint(_catalog, _context):
+        yield "10.10.10.50", 5432
+
+    def guarded_mkdir(self, *args, **kwargs):
+        if self == receipt_dir:
+            raise AssertionError("clean drift runs should not create the receipt directory")
+        return original_mkdir(self, *args, **kwargs)
+
+    monkeypatch.setattr(atlas_schema, "load_catalog", lambda _path: catalog)
+    monkeypatch.setattr(atlas_schema, "validate_catalog", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(atlas_schema, "load_docker_sdk", lambda: type("Docker", (), {"from_env": staticmethod(lambda: object())}))
+    monkeypatch.setattr(atlas_schema, "load_controller_context", lambda: {"guests": {}})
+    monkeypatch.setattr(atlas_schema, "resolve_openbao_url", fake_openbao_url)
+    monkeypatch.setattr(atlas_schema, "resolve_postgres_endpoint", fake_postgres_endpoint)
+    monkeypatch.setattr(atlas_schema, "openbao_login", lambda *_args, **_kwargs: "token")
+    monkeypatch.setattr(
+        atlas_schema,
+        "request_dynamic_credentials",
+        lambda *_args, **_kwargs: {"username": "atlas", "password": "secret"},
+    )
+    monkeypatch.setattr(
+        atlas_schema,
+        "inspect_live_schema",
+        lambda *_args, **_kwargs: 'table "users" {}\n',
+    )
+    monkeypatch.setattr(Path, "mkdir", guarded_mkdir)
+
+    exit_code, payload = atlas_schema.run_drift(
+        repo_root=repo_root,
+        catalog_path=repo_root / "config" / "atlas" / "catalog.json",
+        write_receipts=True,
+        publish_nats=True,
+        publish_ntfy=True,
+    )
+
+    assert exit_code == 0
+    assert payload["status"] == "clean"
+    assert payload["receipt_paths"] == []
+    assert payload["receipt_errors"] == []
+
+
 def test_normalize_global_option_order_moves_repo_flags_before_subcommand() -> None:
     atlas_schema = load_module()
 
@@ -321,6 +418,64 @@ def test_resolve_openbao_url_prefers_direct_guest_ip_before_ssh_tunnel(monkeypat
         "http://127.0.0.1:8201",
         "http://10.10.10.20:8201",
     ]
+
+
+def test_resolve_openbao_url_can_force_direct_guest_ip_without_reachability_probe(monkeypatch) -> None:
+    atlas_schema = load_module()
+    checked_urls: list[str] = []
+
+    def fake_http_reachable(url: str, *, timeout_seconds: float = 2.0) -> bool:
+        checked_urls.append(url)
+        return False
+
+    @contextmanager
+    def fake_guest_tunnel(context, guest_name, *, remote_bind):
+        raise AssertionError("guest_tunnel should not be used when direct endpoints are forced")
+        yield 0
+
+    monkeypatch.setenv("LV3_ATLAS_FORCE_DIRECT_ENDPOINTS", "1")
+    monkeypatch.setattr(atlas_schema, "http_reachable", fake_http_reachable)
+    monkeypatch.setattr(atlas_schema, "guest_tunnel", fake_guest_tunnel)
+
+    catalog = {
+        "runtime": {
+            "openbao_guest": "docker-runtime-lv3",
+            "openbao_url": "http://127.0.0.1:8201",
+        }
+    }
+    context = {"guests": {"docker-runtime-lv3": "10.10.10.20"}}
+
+    with atlas_schema.resolve_openbao_url(catalog, context) as resolved_url:
+        assert resolved_url == "http://10.10.10.20:8201"
+
+    assert checked_urls == ["http://127.0.0.1:8201"]
+
+
+def test_resolve_postgres_endpoint_can_force_direct_guest_ip_without_reachability_probe(monkeypatch) -> None:
+    atlas_schema = load_module()
+
+    def fake_host_reachable(host: str, port: int, *, timeout_seconds: float = 1.0) -> bool:
+        raise AssertionError("host_reachable should not be used when direct endpoints are forced")
+
+    @contextmanager
+    def fake_guest_tunnel(context, guest_name, *, remote_bind):
+        raise AssertionError("guest_tunnel should not be used when direct endpoints are forced")
+        yield 0
+
+    monkeypatch.setenv("LV3_ATLAS_FORCE_DIRECT_ENDPOINTS", "1")
+    monkeypatch.setattr(atlas_schema, "host_reachable", fake_host_reachable)
+    monkeypatch.setattr(atlas_schema, "guest_tunnel", fake_guest_tunnel)
+
+    catalog = {
+        "runtime": {
+            "postgres_guest": "postgres-lv3",
+            "postgres_port": 5432,
+        }
+    }
+    context = {"guests": {"postgres-lv3": "10.10.10.50"}}
+
+    with atlas_schema.resolve_postgres_endpoint(catalog, context) as (host, port):
+        assert (host, port) == ("10.10.10.50", 5432)
 
 
 def test_dev_postgres_force_removes_ephemeral_container_on_cleanup(monkeypatch) -> None:

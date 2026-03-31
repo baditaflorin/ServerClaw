@@ -9,6 +9,7 @@ import pytest
 import platform.scheduler.windmill_client as windmill_client_module
 import runbook_executor as executor_module
 from platform.circuit import CircuitBreaker, CircuitOpenError, CircuitPolicy, MemoryCircuitStateBackend, should_count_urllib_exception
+from platform.retry import RetryPolicy
 from platform.scheduler import HttpWindmillClient
 
 
@@ -47,7 +48,7 @@ def test_runbook_windmill_runner_stops_retrying_after_circuit_opens(monkeypatch:
     with pytest.raises(CircuitOpenError):
         runner.run_workflow("deploy-and-promote", {"service": "netbox"})
 
-    assert len(calls) == 1
+    assert len(calls) == 4
 
 
 def test_scheduler_windmill_client_stops_retrying_after_circuit_opens(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -69,7 +70,7 @@ def test_scheduler_windmill_client_stops_retrying_after_circuit_opens(monkeypatc
     with pytest.raises(CircuitOpenError):
         client.submit_workflow("deploy-and-promote", {"service": "netbox"})
 
-    assert len(calls) == 1
+    assert len(calls) == 4
 
 
 def test_scheduler_windmill_client_retries_401_with_bootstrap_login(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -242,3 +243,63 @@ def test_scheduler_windmill_client_waits_for_job_result(monkeypatch: pytest.Monk
     ) == {"status": "ok"}
     assert poll_count["count"] == 2
     assert sleep_calls == [0.25]
+
+
+def test_scheduler_windmill_client_retries_connection_reset_with_active_circuit_breaker(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class FakeResponse:
+        def __init__(self, body: str) -> None:
+            self._body = body.encode("utf-8")
+
+        def read(self) -> bytes:
+            return self._body
+
+        def close(self) -> None:
+            return None
+
+        def __enter__(self) -> "FakeResponse":
+            return self
+
+        def __exit__(self, exc_type, exc, tb) -> None:
+            return None
+
+    calls: list[str] = []
+    attempts = {"script_get": 0}
+
+    def fake_urlopen(request: urllib.request.Request, timeout: float | None = None):
+        calls.append(request.full_url)
+        if request.full_url.endswith("/api/w/lv3/scripts/get/p/f%2Flv3%2Fdeploy-and-promote"):
+            attempts["script_get"] += 1
+            if attempts["script_get"] == 1:
+                raise ConnectionResetError(54, "Connection reset by peer")
+            return FakeResponse('{"path":"f/lv3/deploy-and-promote","hash":"abc123"}')
+        if request.full_url.endswith("/api/w/lv3/jobs/run/h/abc123"):
+            return FakeResponse('"job-123"')
+        raise AssertionError(request.full_url)
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+
+    client = HttpWindmillClient(
+        base_url="https://windmill.example.test",
+        token="managed-secret",
+        circuit_breaker=build_windmill_breaker(),
+    )
+    client._internal_api_retry_policy = RetryPolicy(
+        max_attempts=2,
+        base_delay_s=0.0,
+        max_delay_s=0.0,
+        multiplier=2.0,
+        jitter=False,
+        transient_max=0,
+    )
+
+    assert client.submit_workflow("deploy-and-promote", {"service": "netbox"}) == {
+        "job_id": "job-123",
+        "running": True,
+    }
+    assert calls == [
+        "https://windmill.example.test/api/w/lv3/scripts/get/p/f%2Flv3%2Fdeploy-and-promote",
+        "https://windmill.example.test/api/w/lv3/scripts/get/p/f%2Flv3%2Fdeploy-and-promote",
+        "https://windmill.example.test/api/w/lv3/jobs/run/h/abc123",
+    ]

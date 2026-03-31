@@ -839,6 +839,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks
     assert "Assert the Windmill validation gate status result" in verify_tasks
+    assert "Windmill validation gate status did not return structured output after retries." in verify_tasks
     assert "gate_status.waiver_summary.totals.compliant_receipts" in verify_tasks
     assert "gate_status.waiver_summary.release_blockers" in verify_tasks
     assert "Run the Windmill Atlas drift check script" in verify_tasks
@@ -945,3 +946,14 @@ def test_windmill_verify_remirrors_atlas_surfaces_immediately_before_atlas_drift
 
     assert stage_smoke_assert_index < atlas_helper_collect_index < atlas_helper_mirror_index < atlas_snapshot_mirror_index
     assert atlas_snapshot_mirror_index < atlas_helper_assert_index < atlas_drift_check_index
+
+
+def test_windmill_worker_secret_mirror_uses_ops_ownership() -> None:
+    tasks = (
+        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
+    ).read_text(encoding="utf-8")
+
+    assert "Ensure the mirrored worker secret directories exist" in tasks
+    assert "Mirror the worker-executed controller-local secrets into the repo checkout" in tasks
+    assert "owner: \"{{ proxmox_host_admin_user }}\"" in tasks
+    assert "group: \"{{ proxmox_host_admin_user }}\"" in tasks
