@@ -56,6 +56,12 @@ the registry and workstream docs stay merge-safe.
   the mirrored `release_tracks.platform_versioning.current` stack field, and
   the Crawl4AI startup failure classifier for missing Docker `DOCKER`
   iptables chains.
+- During the protected `main` push on 2026-03-31, the build-server snapshot
+  upload failed because `/home/ops/builds/proxmox_florin_server` on
+  `docker-build-lv3` was full; the recovery was a bounded `sudo rm -rf` of only
+  stale remote `ws-0288-*` session workspaces under
+  `.lv3-session-workspaces/`, which restored `6.4G` free and kept the cleanup
+  within the runbook guidance for remote snapshot failures.
 - This workstream is now merged on `main`; the branch-local exact-main
   evidence remains the audit trail for replaying ADR 0288 onto the latest
   realistic `origin/main` baseline `0.177.114 / 0.130.74` and promoting the
