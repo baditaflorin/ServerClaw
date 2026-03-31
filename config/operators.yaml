@@ -33,3 +33,36 @@ operators:
     audit:
       onboarded_at: "2026-03-23T00:00:00Z"
       onboarded_by: adr-0108-bootstrap
+
+  - id: florin-tmp-001
+    name: Florin Badita (Temporary)
+    email: florin@badita.org
+    role: admin
+    status: active
+    notes: |
+      Temporary 72-hour admin account. Expires 2026-04-03T00:00:00Z.
+      Created per ADR 0307. Full service login access (Keycloak SSO, Grafana, OpenBao, Tailscale, SSH).
+      MUST be offboarded at expiry: set status=inactive and run operator-offboard workflow.
+    keycloak:
+      username: florin.badita-tmp
+      realm_roles:
+        - platform-admin
+      groups:
+        - lv3-platform-admins
+        - grafana-admins
+      enabled: true
+    ssh:
+      principal: florin.badita-tmp
+      certificate_ttl_hours: 24
+      public_keys: []
+    openbao:
+      entity_name: florin.badita-tmp
+      policies:
+        - platform-admin
+    tailscale:
+      login_email: florin@badita.org
+      tags:
+        - tag:platform-operator
+    audit:
+      onboarded_at: "2026-03-31T00:00:00Z"
+      onboarded_by: adr-0307-tmp-user

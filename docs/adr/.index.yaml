@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 1
-generated: '2026-03-31'
-total_adrs: 334
+generated: '2026-04-01'
+total_adrs: 336
 implementation_status_summary:
-  Implemented: 281
-  Partial: 6
+  Implemented: 282
+  Partial: 7
   Not Implemented: 46
   Deprecated: 1
 concerns:
@@ -366,6 +366,8 @@ concerns:
     - 0284
     - 0291
     - 0296
+    - '0307'
+    - 0308
 discovery_queries:
   how do we bootstrap:
     - '0001'
@@ -5448,6 +5450,22 @@ adr_index:
       - frame
     summary: We will treat the platform's human-facing experience as one cohesive
     filename: 0307-platform-workbench-as-the-cohesive-first-party-app-frame.md
+  - adr: '0307'
+    title: Temporary Guest Operator Accounts With 72-Hour Expiry
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-31'
+    concern: vm-topology
+    keywords:
+      - temporary
+      - guest
+      - operator
+      - accounts
+      - hour
+      - expiry
+    summary: Temporary operators are full participants in the ADR 0108 onboarding model — same Keycloak SSO, step-ca SSH certificates
+    filename: 0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
+    implemented_version: 0.0.0
   - adr: 0308
     title: Journey-Aware Entry Routing And Saved Home Selection
     status: Accepted
@@ -5463,6 +5481,24 @@ adr_index:
       - selection
     summary: We will use a journey-aware entry router and a saved home model for
     filename: 0308-journey-aware-entry-routing-and-saved-home-selection.md
+  - adr: 0308
+    title: LLM Agent Execution Surface and Connectivity Contracts for Operator Provisioning
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-31'
+    concern: vm-topology
+    keywords:
+      - llm
+      - agent
+      - execution
+      - surface
+      - connectivity
+      - contracts
+      - operator
+      - provisioning
+    summary: The operatormanager.py onboard command must run from within the Docker network on VM 120
+    filename: 0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
+    implemented_version: 0.0.0
   - adr: 0309
     title: Task-Oriented Information Architecture Across The Platform Workbench
     status: Accepted
