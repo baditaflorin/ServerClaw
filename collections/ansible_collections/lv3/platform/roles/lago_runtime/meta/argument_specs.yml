@@ -1,0 +1,59 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the Lago runtime, seed catalog, and local verification path.
+    options:
+      lago_site_dir:
+        type: path
+        required: true
+      lago_secret_dir:
+        type: path
+        required: true
+      lago_compose_file:
+        type: path
+        required: true
+      lago_env_file:
+        type: path
+        required: true
+      lago_database_password_local_file:
+        type: path
+        required: true
+      lago_local_artifact_dir:
+        type: path
+        required: true
+      lago_api_image:
+        type: str
+        required: true
+      lago_front_image:
+        type: str
+        required: true
+      lago_pdf_image:
+        type: str
+        required: true
+      lago_redis_image:
+        type: str
+        required: true
+      lago_public_base_url:
+        type: str
+        required: true
+      lago_public_api_base_url:
+        type: str
+        required: true
+      lago_api_local_base_url:
+        type: str
+        required: true
+      lago_direct_api_local_base_url:
+        type: str
+        required: true
+      lago_smoke_metric_code:
+        type: str
+        required: true
+      lago_smoke_plan_code:
+        type: str
+        required: true
+      lago_smoke_external_customer_id:
+        type: str
+        required: true
+      lago_smoke_external_subscription_id:
+        type: str
+        required: true

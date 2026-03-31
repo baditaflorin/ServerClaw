@@ -448,6 +448,18 @@
         "alert_rules": "2026-09-30"
       }
     },
+    "lago": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "suppressed_checks": {
+        "grafana_dashboard": "2026-09-30",
+        "alert_rules": "2026-09-30",
+        "slo_definition": "2026-09-30"
+      }
+    },
     "plane": {
       "service_type": "compose",
       "requires_subdomain": true,

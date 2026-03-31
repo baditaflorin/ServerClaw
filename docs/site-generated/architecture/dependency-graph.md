@@ -4,6 +4,10 @@ portal_display: full
 tags:
   - architecture
   - dependency-graph
+pagefind_section: architecture
+pagefind_audience:
+  - contributors
+  - operators
 ---
 
 !!! note "Sensitivity: INTERNAL"
@@ -18,7 +22,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Vaultwarden, Windmill, n8n |
+| `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Lago, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway, Woodpecker CI |
 | `4` | Ops Portal |
 
@@ -67,6 +71,7 @@ graph TD
     gitea["Gitea\nTier 2"]
     gotenberg["Gotenberg\nTier 2"]
     keycloak["Keycloak\nTier 2"]
+    lago["Lago\nTier 2"]
     langfuse["Langfuse\nTier 2"]
     matrix_synapse["Matrix Synapse\nTier 2"]
     mattermost["Mattermost\nTier 2"]
@@ -150,6 +155,11 @@ graph TD
     keycloak -->|startup_only| openbao
     keycloak -->|hard| postgres
     keycloak -->|startup_only| step_ca
+    lago -->|soft| api_gateway
+    lago -->|hard| docker_runtime
+    lago -->|soft| keycloak
+    lago -->|soft| nginx_edge
+    lago -->|hard| postgres
     langfuse -->|soft| keycloak
     langfuse -->|soft| nginx_edge
     langfuse -->|startup_only| openbao

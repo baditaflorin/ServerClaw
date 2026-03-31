@@ -62,6 +62,8 @@ platform_port_assignments:
   langfuse_port: 3002
   plausible_port: 8016
   flagsmith_port: 8017
+  lago_api_port: 8099
+  lago_front_port: 8100
   dify_port: 8094
   changedetection_port: 5000
   browser_runner_port: 8096
@@ -1623,6 +1625,31 @@ lv3_service_topology:
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plausible_port }}"
       security_headers_enabled: false
       preserve_upstream_security_headers: true
+  lago:
+    service_name: lago
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: billing.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: billing
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.lago_front_port }}"
+      prefix_proxy_routes:
+        - path: /api/
+          upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.lago_api_port }}"
   dify:
     service_name: dify
     owning_vm: docker-runtime-lv3

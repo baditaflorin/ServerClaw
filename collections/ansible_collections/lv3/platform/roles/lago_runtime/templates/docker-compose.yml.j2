@@ -1,0 +1,110 @@
+services:
+  redis:
+    image: {{ lago_redis_image }}
+    container_name: {{ lago_redis_container_name }}
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - {{ lago_redis_password }}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - redis-cli -a "{{ lago_redis_password }}" ping | grep PONG
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - {{ lago_redis_data_dir }}:/data
+
+  migrate:
+    image: {{ lago_api_image }}
+    container_name: {{ lago_migrate_container_name }}
+    depends_on:
+      redis:
+        condition: service_healthy
+    command:
+      - ./scripts/migrate.sh
+    env_file:
+      - {{ lago_env_file }}
+    volumes:
+      - {{ lago_storage_dir }}:/app/storage
+
+  api:
+    image: {{ lago_api_image }}
+    container_name: {{ lago_api_container_name }}
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    command:
+      - ./scripts/start.api.sh
+    env_file:
+      - {{ lago_env_file }}
+    volumes:
+      - {{ lago_storage_dir }}:/app/storage
+    ports:
+      - "{{ ansible_host }}:{{ platform_service_topology.lago.ports.api }}:3000"
+      - "127.0.0.1:{{ platform_service_topology.lago.ports.api }}:3000"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -fsS http://127.0.0.1:3000/health || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+
+  front:
+    image: {{ lago_front_image }}
+    container_name: {{ lago_front_container_name }}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    env_file:
+      - {{ lago_env_file }}
+    ports:
+      - "{{ ansible_host }}:{{ platform_service_topology.lago.ports.internal }}:80"
+      - "127.0.0.1:{{ platform_service_topology.lago.ports.internal }}:80"
+
+  worker:
+    image: {{ lago_api_image }}
+    container_name: {{ lago_worker_container_name }}
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    command:
+      - ./scripts/start.worker.sh
+    env_file:
+      - {{ lago_env_file }}
+    volumes:
+      - {{ lago_storage_dir }}:/app/storage
+
+  clock:
+    image: {{ lago_api_image }}
+    container_name: {{ lago_clock_container_name }}
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    command:
+      - ./scripts/start.clock.sh
+    env_file:
+      - {{ lago_env_file }}
+    volumes:
+      - {{ lago_storage_dir }}:/app/storage
+
+  pdf:
+    image: {{ lago_pdf_image }}
+    container_name: {{ lago_pdf_container_name }}
+    restart: unless-stopped

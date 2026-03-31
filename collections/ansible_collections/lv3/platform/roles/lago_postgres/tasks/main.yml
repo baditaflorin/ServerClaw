@@ -1,0 +1,235 @@
+---
+# Purpose: Provision the shared PostgreSQL role, database, and controller-local password mirror required by Lago.
+# Use case: Run before the Lago runtime converges so the billing API stack can use the shared PostgreSQL cluster on postgres-lv3.
+# Inputs: Database names, usernames, remote password path, and controller-local mirror path.
+# Outputs: A repo-managed `lago` PostgreSQL role and database plus mirrored password files on the guest and controller.
+# Idempotency: Fully idempotent because the role/database checks guard creation and the mirrored password is stable once generated.
+# Dependencies: ADR 0165, ADR 0042, and ADR 0292.
+- name: Validate Lago PostgreSQL inputs
+  ansible.builtin.assert:
+    that:
+      - lago_database_name | length > 0
+      - lago_database_user | length > 0
+      - lago_postgres_secret_dir | length > 0
+      - lago_postgres_password_file | length > 0
+      - lago_database_password_local_file | length > 0
+    fail_msg: "lago_postgres requires database names and local or remote password paths."
+
+- name: Ensure the Lago PostgreSQL secret directory exists
+  ansible.builtin.file:
+    path: "{{ lago_postgres_secret_dir }}"
+    state: directory
+    owner: root
+    group: postgres
+    mode: "0750"
+
+- name: Ensure the local Lago artifact directory exists
+  ansible.builtin.file:
+    path: "{{ lago_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the Lago database password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ lago_database_password_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ lago_database_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: lago_postgres_password_generation
+  changed_when: "'changed' in lago_postgres_password_generation.stdout"
+  no_log: true
+
+- name: Read the Lago database password
+  ansible.builtin.slurp:
+    src: "{{ lago_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: lago_postgres_password_raw
+  no_log: true
+
+- name: Record the Lago database password
+  ansible.builtin.set_fact:
+    lago_database_password: "{{ lago_postgres_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Mirror the Lago database password to the control machine
+  ansible.builtin.copy:
+    dest: "{{ lago_database_password_local_file }}"
+    content: "{{ lago_database_password }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Persist the Lago database password on the current guest
+  ansible.builtin.copy:
+    dest: "{{ lago_postgres_password_file }}"
+    content: "{{ lago_database_password }}\n"
+    owner: root
+    group: postgres
+    mode: "0640"
+  no_log: true
+
+- name: Record PostgreSQL server version number
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SHOW server_version_num"
+  register: lago_postgres_server_version_num
+  changed_when: false
+
+- name: Derive the PostgreSQL server major version
+  ansible.builtin.set_fact:
+    lago_postgres_server_major_version: "{{ ((lago_postgres_server_version_num.stdout | trim | int) // 10000) | string }}"
+
+- name: Install the Lago PostgreSQL extension packages
+  ansible.builtin.apt:
+    name: "{{ lago_postgres_extension_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Check whether required Lago PostgreSQL extensions are available
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - postgres
+      - -Atqc
+      - "SELECT 1 FROM pg_available_extensions WHERE name = '{{ item }}'"
+  loop: "{{ lago_postgres_required_extensions }}"
+  register: lago_postgres_required_extensions_check
+  changed_when: false
+
+- name: Assert required Lago PostgreSQL extensions are available
+  ansible.builtin.assert:
+    that:
+      - item.stdout | trim == "1"
+    fail_msg: "Required Lago PostgreSQL extension {{ item.item }} is not available on this PostgreSQL member."
+  loop: "{{ lago_postgres_required_extensions_check.results }}"
+
+- name: Check whether the local PostgreSQL member is writable
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT CASE WHEN pg_is_in_recovery() THEN 0 ELSE 1 END"
+  register: lago_postgres_writable_check
+  changed_when: false
+
+- name: Check whether the Lago database role already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_roles WHERE rolname = '{{ lago_database_user }}'"
+  register: lago_postgres_role_check
+  changed_when: false
+  when: lago_postgres_writable_check.stdout | trim == "1"
+
+- name: Check whether the Lago database role can create databases
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT CASE WHEN rolcreatedb THEN 1 ELSE 0 END FROM pg_roles WHERE rolname = '{{ lago_database_user }}'"
+  register: lago_postgres_role_createdb_check
+  changed_when: false
+  when:
+    - lago_postgres_writable_check.stdout | trim == "1"
+    - lago_postgres_role_check.stdout == "1"
+
+- name: Create the Lago database role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        CREATE ROLE {{ lago_database_user }} LOGIN
+        {% if lago_database_user_createdb | bool %} CREATEDB{% endif %}
+        PASSWORD '{{ lago_database_password }}'
+  changed_when: true
+  no_log: true
+  when:
+    - lago_postgres_writable_check.stdout | trim == "1"
+    - lago_postgres_role_check.stdout != "1"
+
+- name: Ensure the Lago database role can create databases for upstream migrations
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER ROLE {{ lago_database_user }} CREATEDB"
+  changed_when: true
+  when:
+    - lago_postgres_writable_check.stdout | trim == "1"
+    - lago_database_user_createdb | bool
+    - lago_postgres_role_check.stdout == "1"
+    - lago_postgres_role_createdb_check.stdout | trim != "1"
+
+- name: Check whether the Lago PostgreSQL database already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_database WHERE datname = '{{ lago_database_name }}'"
+  register: lago_postgres_database_check
+  changed_when: false
+  when: lago_postgres_writable_check.stdout | trim == "1"
+
+- name: Create the Lago PostgreSQL database
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "CREATE DATABASE {{ lago_database_name }} OWNER {{ lago_database_user }}"
+  when:
+    - lago_postgres_writable_check.stdout | trim == "1"
+    - lago_postgres_database_check.stdout != "1"
+  changed_when: true
+
+- name: Ensure the Lago database owner is correct
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER DATABASE {{ lago_database_name }} OWNER TO {{ lago_database_user }}"
+  changed_when: false
+  when: lago_postgres_writable_check.stdout | trim == "1"

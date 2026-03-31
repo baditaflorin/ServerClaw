@@ -198,6 +198,18 @@ class RunbookExecuteRequest(BaseModel):
     delivery_surface: str = Field(default="api_gateway")
 
 
+class BillingEventInput(BaseModel):
+    transaction_id: str = Field(min_length=1)
+    external_subscription_id: str = Field(min_length=1)
+    code: str = Field(min_length=1)
+    timestamp: str | None = None
+    properties: dict[str, Any] = Field(default_factory=dict)
+
+
+class BillingEventRequest(BaseModel):
+    event: BillingEventInput
+
+
 @dataclass(frozen=True)
 class GatewayService:
     id: str
@@ -212,6 +224,15 @@ class GatewayService:
     healthcheck_path: str = "/"
     openapi_path: str | None = None
     upstream_auth_env_var: str | None = None
+
+
+@dataclass(frozen=True)
+class BillingProducer:
+    id: str
+    name: str
+    token: str
+    allowed_metric_codes: frozenset[str]
+    allowed_external_subscription_ids: frozenset[str]
 
 
 @dataclass(frozen=True)
@@ -245,6 +266,10 @@ class GatewayConfig:
     keycloak_retry_after_seconds: int = 30
     dify_tools_api_key: str | None = None
     dify_tools_api_key_header: str = "X-LV3-Dify-Api-Key"
+    billing_api_base_url: str | None = None
+    billing_ingest_producers_path: Path = Path("/config/billing-ingest-producers.json")
+    billing_rejection_subject: str = "billing.events.rejected"
+    billing_org_api_key: str | None = None
 
 
 class KeycloakJWTVerifier:
@@ -571,6 +596,7 @@ class GatewayRuntime:
         self._service_catalog = json_file(config.service_catalog_path, {"services": []})
         self.services = [GatewayService(**service) for service in normalized_catalog]
         self.service_by_prefix = sorted(self.services, key=lambda service: len(service.gateway_prefix), reverse=True)
+        self.billing_producers = self._load_billing_producers(config.billing_ingest_producers_path)
         self.http_client = httpx.AsyncClient(follow_redirects=False)
         self.search_client = SearchClient(config.repo_root)
         self.degradation_store = DegradationStateStore(config.degradation_state_path)
@@ -631,6 +657,39 @@ class GatewayRuntime:
             ledger_dsn=config.world_state_dsn or config.graph_dsn,
         )
         self._runbook_service: RunbookUseCaseService | None = None
+
+    @staticmethod
+    def _load_billing_producers(path: Path) -> list[BillingProducer]:
+        payload = json_file(path, {"producers": []})
+        raw_producers = payload.get("producers", [])
+        if not isinstance(raw_producers, list):
+            return []
+        producers: list[BillingProducer] = []
+        for item in raw_producers:
+            if not isinstance(item, dict):
+                continue
+            producer_id = str(item.get("id") or "").strip()
+            token = str(item.get("token") or "").strip()
+            if not producer_id or not token:
+                continue
+            producers.append(
+                BillingProducer(
+                    id=producer_id,
+                    name=str(item.get("name") or producer_id).strip() or producer_id,
+                    token=token,
+                    allowed_metric_codes=frozenset(
+                        str(code).strip()
+                        for code in item.get("allowed_metric_codes", [])
+                        if isinstance(code, str) and code.strip()
+                    ),
+                    allowed_external_subscription_ids=frozenset(
+                        str(external_id).strip()
+                        for external_id in item.get("allowed_external_subscription_ids", [])
+                        if isinstance(external_id, str) and external_id.strip()
+                    ),
+                )
+            )
+        return producers
 
     def service_circuit(self, service_id: str) -> Any | None:
         if not self.circuit_registry.has_policy(service_id):
@@ -707,6 +766,18 @@ class GatewayRuntime:
             return None
         value = os.environ.get(service.upstream_auth_env_var, "").strip()
         return value or None
+
+    def billing_service(self) -> GatewayService | None:
+        return next((service for service in self.services if service.id == "lago"), None)
+
+    def billing_enabled(self) -> bool:
+        return bool((self.config.billing_api_base_url or "").strip()) and bool((self.config.billing_org_api_key or "").strip())
+
+    def find_billing_producer(self, token: str) -> BillingProducer | None:
+        for producer in self.billing_producers:
+            if hmac.compare_digest(token, producer.token):
+                return producer
+        return None
 
     def match_service(self, path: str) -> tuple[GatewayService, str] | None:
         full_path = "/" + path.lstrip("/")
@@ -937,6 +1008,12 @@ def build_config() -> GatewayConfig:
         keycloak_retry_after_seconds=int(os.environ.get("LV3_GATEWAY_KEYCLOAK_RETRY_AFTER_SECONDS", "30")),
         dify_tools_api_key=os.environ.get("LV3_DIFY_TOOLS_API_KEY") or None,
         dify_tools_api_key_header=os.environ.get("LV3_DIFY_TOOLS_API_KEY_HEADER", "X-LV3-Dify-Api-Key"),
+        billing_api_base_url=os.environ.get("LV3_GATEWAY_BILLING_API_BASE_URL") or None,
+        billing_ingest_producers_path=Path(
+            os.environ.get("LV3_GATEWAY_BILLING_INGEST_PRODUCERS_PATH", "/config/billing-ingest-producers.json")
+        ),
+        billing_rejection_subject=os.environ.get("LV3_GATEWAY_BILLING_REJECTION_SUBJECT", "billing.events.rejected"),
+        billing_org_api_key=os.environ.get("LV3_GATEWAY_BILLING_ORG_API_KEY") or None,
     )
 
 
@@ -1005,6 +1082,42 @@ def require_dify_tools_identity(request: Request) -> dict[str, Any]:
     return identity
 
 
+async def require_billing_producer_identity(request: Request) -> dict[str, Any]:
+    runtime: GatewayRuntime = request.app.state.runtime
+    header = request.headers.get("Authorization", "").strip()
+    if not header.startswith("Bearer "):
+        await emit_billing_rejection(
+            runtime,
+            request,
+            reason_code="missing_producer_token",
+            reason="Billing producer token is required.",
+            payload={},
+        )
+        raise HTTPException(status_code=401, detail="missing billing producer token")
+
+    token = header.split(" ", 1)[1].strip()
+    producer = runtime.find_billing_producer(token)
+    if producer is None:
+        await emit_billing_rejection(
+            runtime,
+            request,
+            reason_code="invalid_producer_token",
+            reason="Billing producer token is invalid.",
+            payload={},
+        )
+        raise HTTPException(status_code=401, detail="invalid billing producer token")
+
+    identity = {
+        "claims": {"sub": f"billing-producer:{producer.id}"},
+        "roles": {"billing-producer"},
+        "subject": f"billing-producer:{producer.id}",
+        "producer": producer,
+    }
+    set_context(actor_id=identity["subject"])
+    request.state.identity = identity
+    return identity
+
+
 async def emit_request_event(
     request: Request,
     *,
@@ -1036,6 +1149,63 @@ def request_trace_id(request: Request) -> str:
     return getattr(request.state, "trace_id", "") or getattr(request.state, "request_id", "") or generate_trace_id()
 
 
+def dump_model(model: BaseModel) -> dict[str, Any]:
+    if hasattr(model, "model_dump"):
+        return model.model_dump(exclude_none=True)
+    return model.dict(exclude_none=True)
+
+
+def registry_error_response(
+    runtime: GatewayRuntime,
+    request: Request,
+    code: str,
+    *,
+    message: str | None = None,
+    context: dict[str, Any] | None = None,
+    retry_after: int | None = None,
+) -> JSONResponse:
+    error = runtime.error_registry.create(
+        code,
+        trace_id=request_trace_id(request),
+        message=message,
+        context=context or {},
+        retry_after_s=retry_after,
+    )
+    response = JSONResponse(status_code=error.http_status, content=error.to_response())
+    if error.retry_after_s is not None:
+        response.headers["Retry-After"] = str(error.retry_after_s)
+    return response
+
+
+async def emit_billing_rejection(
+    runtime: GatewayRuntime,
+    request: Request,
+    *,
+    reason_code: str,
+    reason: str,
+    payload: dict[str, Any],
+    producer: BillingProducer | None = None,
+    context: dict[str, Any] | None = None,
+) -> None:
+    envelope = {
+        "request_id": getattr(request.state, "request_id", ""),
+        "trace_id": request_trace_id(request),
+        "path": request.url.path,
+        "producer_id": producer.id if producer else None,
+        "reason_code": reason_code,
+        "reason": reason,
+        "context": context or {},
+        "payload": payload,
+    }
+    try:
+        await asyncio.wait_for(
+            runtime.event_emitter.emit(runtime.config.billing_rejection_subject, envelope),
+            timeout=REQUEST_EVENT_TIMEOUT_SECONDS,
+        )
+    except Exception:  # noqa: BLE001
+        return
+
+
 def validation_error_context(exc: RequestValidationError) -> dict[str, Any]:
     errors = exc.errors()
     if not errors:
@@ -1061,6 +1231,20 @@ def canonical_error_from_http_exception(request: Request, exc: HTTPException) ->
             retry_after = None
 
     if exc.status_code == 401:
+        if "billing producer token" in detail_lower:
+            if "missing" in detail_lower:
+                return (
+                    "AUTH_TOKEN_MISSING",
+                    "Billing producer token is required for this endpoint.",
+                    {"header": "Authorization"},
+                    retry_after,
+                )
+            return (
+                "AUTH_TOKEN_INVALID",
+                "Billing producer token could not be validated.",
+                {"header": "Authorization", "reason": "token_validation"},
+                retry_after,
+            )
         if "dify tools api key" in detail_lower:
             header = "X-LV3-Dify-Api-Key"
             if "missing" in detail_lower:
@@ -1834,6 +2018,292 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
 
         await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
         return result.get("structuredContent", {})
+
+    @app.get("/v1/billing/health")
+    async def billing_health(request: Request) -> Response:
+        started_at = time.perf_counter()
+        runtime: GatewayRuntime = request.app.state.runtime
+        if not (runtime.config.billing_api_base_url or "").strip():
+            return registry_error_response(
+                runtime,
+                request,
+                "INFRA_CONFIGURATION_ERROR",
+                message="Billing health routing is not configured.",
+                context={"dependency": "lago", "detail": "missing billing api base url"},
+            )
+
+        url = urljoin(runtime.config.billing_api_base_url.rstrip("/") + "/", "health")
+
+        async def fetch() -> httpx.Response:
+            response = await async_with_retry(
+                lambda: runtime.http_client.get(
+                    url,
+                    timeout=runtime.api_call_context(15).timeout_for(
+                        "http_request",
+                        15,
+                        reserve_seconds=1.0,
+                    ),
+                ),
+                policy=runtime.internal_api_retry_policy,
+                error_context="gateway billing health",
+            )
+            response.raise_for_status()
+            return response
+
+        try:
+            circuit = runtime.service_circuit("lago")
+            if circuit is not None:
+                upstream_response = await circuit.call(fetch)
+            else:
+                upstream_response = await fetch()
+        except CircuitOpenError as exc:
+            await emit_request_event(request, identity=None, status_code=503, started_at=started_at)
+            return registry_error_response(
+                runtime,
+                request,
+                "INFRA_RUNTIME_UNAVAILABLE",
+                message="Lago is temporarily unavailable.",
+                context={"dependency": "lago", "detail": "circuit_open"},
+                retry_after=exc.retry_after,
+            )
+        except httpx.HTTPError as exc:
+            await emit_request_event(request, identity=None, status_code=503, started_at=started_at)
+            return registry_error_response(
+                runtime,
+                request,
+                "INFRA_DEPENDENCY_DOWN",
+                message="Billing health probe could not reach Lago.",
+                context={"dependency": "lago", "detail": str(exc)},
+            )
+
+        await emit_request_event(
+            request,
+            identity=None,
+            status_code=upstream_response.status_code,
+            started_at=started_at,
+        )
+        excluded = {"content-encoding", "content-length", "transfer-encoding", "connection"}
+        response_headers = {
+            key: value for key, value in upstream_response.headers.items() if key.lower() not in excluded
+        }
+        return Response(
+            content=upstream_response.content,
+            status_code=upstream_response.status_code,
+            headers=response_headers,
+            media_type=upstream_response.headers.get("content-type"),
+        )
+
+    @app.post("/v1/billing/events")
+    async def billing_events(
+        body: BillingEventRequest,
+        request: Request,
+        identity: dict[str, Any] = Depends(require_billing_producer_identity),
+    ) -> Response:
+        started_at = time.perf_counter()
+        runtime: GatewayRuntime = request.app.state.runtime
+        producer: BillingProducer = identity["producer"]
+        payload = dump_model(body)
+        event = payload["event"]
+
+        if not runtime.billing_enabled():
+            await emit_request_event(request, identity=identity, status_code=500, started_at=started_at)
+            return registry_error_response(
+                runtime,
+                request,
+                "INFRA_CONFIGURATION_ERROR",
+                message="Billing event routing is not configured.",
+                context={"dependency": "lago", "detail": "missing billing api base url or org api key"},
+            )
+
+        try:
+            uuid.UUID(event["transaction_id"])
+        except ValueError:
+            await emit_billing_rejection(
+                runtime,
+                request,
+                reason_code="invalid_transaction_id",
+                reason="Billing event transaction_id must be a valid UUID.",
+                payload=payload,
+                producer=producer,
+                context={"field_path": "event.transaction_id"},
+            )
+            await emit_request_event(request, identity=identity, status_code=422, started_at=started_at)
+            return registry_error_response(
+                runtime,
+                request,
+                "INPUT_SCHEMA_INVALID",
+                message="Billing event transaction_id must be a valid UUID.",
+                context={
+                    "field_path": "event.transaction_id",
+                    "error_type": "uuid",
+                    "validation_message": "transaction_id must be a valid UUID.",
+                },
+            )
+
+        if producer.allowed_metric_codes and event["code"] not in producer.allowed_metric_codes:
+            await emit_billing_rejection(
+                runtime,
+                request,
+                reason_code="metric_not_allowed",
+                reason="Billing producer is not allowed to emit this metric code.",
+                payload=payload,
+                producer=producer,
+                context={"field_path": "event.code", "metric_code": event["code"]},
+            )
+            await emit_request_event(request, identity=identity, status_code=422, started_at=started_at)
+            return registry_error_response(
+                runtime,
+                request,
+                "INPUT_SCHEMA_INVALID",
+                message="Billing producer is not allowed to emit this metric code.",
+                context={
+                    "field_path": "event.code",
+                    "error_type": "producer_scope",
+                    "validation_message": f"producer {producer.id} is not allowed to emit metric code {event['code']}",
+                },
+            )
+
+        if (
+            producer.allowed_external_subscription_ids
+            and event["external_subscription_id"] not in producer.allowed_external_subscription_ids
+        ):
+            await emit_billing_rejection(
+                runtime,
+                request,
+                reason_code="subscription_not_allowed",
+                reason="Billing producer is not allowed to emit this external subscription id.",
+                payload=payload,
+                producer=producer,
+                context={
+                    "field_path": "event.external_subscription_id",
+                    "external_subscription_id": event["external_subscription_id"],
+                },
+            )
+            await emit_request_event(request, identity=identity, status_code=422, started_at=started_at)
+            return registry_error_response(
+                runtime,
+                request,
+                "INPUT_SCHEMA_INVALID",
+                message="Billing producer is not allowed to emit this external subscription id.",
+                context={
+                    "field_path": "event.external_subscription_id",
+                    "error_type": "producer_scope",
+                    "validation_message": (
+                        f"producer {producer.id} is not allowed to emit external subscription id "
+                        f"{event['external_subscription_id']}"
+                    ),
+                },
+            )
+
+        url = urljoin(runtime.config.billing_api_base_url.rstrip("/") + "/", "api/v1/events")
+        headers = {
+            "Authorization": f"Bearer {runtime.config.billing_org_api_key}",
+            "X-Gateway-Request-ID": request.state.request_id,
+            "X-Trace-Id": request.state.trace_id,
+            "X-Caller-Identity": identity["subject"],
+        }
+
+        async def forward() -> httpx.Response:
+            return await runtime.http_client.post(
+                url,
+                json=payload,
+                headers=headers,
+                timeout=runtime.api_call_context(20).timeout_for(
+                    "http_request",
+                    20,
+                    reserve_seconds=1.0,
+                ),
+            )
+
+        try:
+            circuit = runtime.service_circuit("lago")
+            if circuit is not None:
+                upstream_response = await circuit.call(forward)
+            else:
+                upstream_response = await forward()
+        except CircuitOpenError as exc:
+            await emit_billing_rejection(
+                runtime,
+                request,
+                reason_code="upstream_circuit_open",
+                reason="Lago is temporarily unavailable.",
+                payload=payload,
+                producer=producer,
+            )
+            await emit_request_event(request, identity=identity, status_code=503, started_at=started_at)
+            return registry_error_response(
+                runtime,
+                request,
+                "INFRA_RUNTIME_UNAVAILABLE",
+                message="Lago is temporarily unavailable.",
+                context={"dependency": "lago", "detail": "circuit_open"},
+                retry_after=exc.retry_after,
+            )
+        except httpx.HTTPError as exc:
+            await emit_billing_rejection(
+                runtime,
+                request,
+                reason_code="upstream_transport_error",
+                reason="Billing event forwarding to Lago failed.",
+                payload=payload,
+                producer=producer,
+                context={"detail": str(exc)},
+            )
+            await emit_request_event(request, identity=identity, status_code=503, started_at=started_at)
+            return registry_error_response(
+                runtime,
+                request,
+                "INFRA_DEPENDENCY_DOWN",
+                message="Billing event forwarding to Lago failed.",
+                context={"dependency": "lago", "detail": str(exc)},
+            )
+
+        if upstream_response.status_code >= 400:
+            await emit_billing_rejection(
+                runtime,
+                request,
+                reason_code="upstream_rejected",
+                reason="Lago rejected the billing event.",
+                payload=payload,
+                producer=producer,
+                context={"status_code": upstream_response.status_code},
+            )
+            await emit_request_event(
+                request,
+                identity=identity,
+                status_code=upstream_response.status_code,
+                started_at=started_at,
+            )
+            return registry_error_response(
+                runtime,
+                request,
+                "INFRA_DEPENDENCY_DOWN",
+                message="Lago rejected the billing event.",
+                context={
+                    "dependency": "lago",
+                    "detail": {
+                        "status_code": upstream_response.status_code,
+                        "body": upstream_response.text[:500],
+                    },
+                },
+            )
+
+        await emit_request_event(
+            request,
+            identity=identity,
+            status_code=upstream_response.status_code,
+            started_at=started_at,
+        )
+        excluded = {"content-encoding", "content-length", "transfer-encoding", "connection"}
+        response_headers = {
+            key: value for key, value in upstream_response.headers.items() if key.lower() not in excluded
+        }
+        return Response(
+            content=upstream_response.content,
+            status_code=upstream_response.status_code,
+            headers=response_headers,
+            media_type=upstream_response.headers.get("content-type"),
+        )
 
     @app.get("/v1/openapi.json")
     async def gateway_openapi(

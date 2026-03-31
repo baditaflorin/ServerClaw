@@ -70,6 +70,14 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             self.defaults["public_edge_generated_build_root"],
             "{{ inventory_dir | dirname }}/build",
         )
+        self.assertIn(
+            "public_edge_service_topology.get('api_gateway', {})",
+            self.defaults["public_edge_api_gateway_upstream"],
+        )
+        self.assertIn(
+            "'internal',",
+            self.defaults["public_edge_api_gateway_upstream"],
+        )
         self.assertIn("User-agent: *", self.defaults["public_edge_robots_txt_content"])
         self.assertIn("Disallow: /", self.defaults["public_edge_robots_txt_content"])
 
@@ -83,6 +91,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             [
                 "agents.lv3.org",
                 "analytics.lv3.org",
+                "billing.lv3.org",
                 "changelog.lv3.org",
                 "coolify.lv3.org",
                 "docs.lv3.org",
@@ -114,6 +123,13 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         )
         self.assertEqual(protected_sites["flags.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
         self.assertEqual(protected_sites["flags.lv3.org"]["unauthenticated_paths"], ["/health"])
+        self.assertEqual(
+            protected_sites["billing.lv3.org"]["unauthenticated_proxy_routes"],
+            [
+                {"path": "/api/health", "upstream": "{{ public_edge_api_gateway_upstream }}/v1/billing/health"},
+                {"path": "/api/v1/events", "upstream": "{{ public_edge_api_gateway_upstream }}/v1/billing/events"},
+            ],
+        )
         self.assertEqual(protected_sites["agents.lv3.org"]["unauthenticated_paths"], ["/healthz"])
         self.assertEqual(protected_sites["agents.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
         self.assertNotIn("unauthenticated_paths", protected_sites["coolify.lv3.org"])
@@ -246,6 +262,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("site.root_proxy_path is defined", self.template)
         self.assertIn("location = / {", self.template)
         self.assertIn("site.hostname in public_edge_authenticated_sites", self.template)
+        self.assertIn("protected_site.unauthenticated_proxy_routes | default([])", self.template)
         self.assertIn('add_header X-Robots-Tag "{{ public_edge_robots_meta_content }}" always;', self.template)
         self.assertIn("location = /robots.txt {", self.template)
         self.assertIn("server_name {{ public_edge_apex_hostname }};", self.template)

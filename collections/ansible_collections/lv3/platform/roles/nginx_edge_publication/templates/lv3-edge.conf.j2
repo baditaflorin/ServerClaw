@@ -367,6 +367,22 @@ server {
 {% endfor %}
     }
 {% endfor %}
+{% for route in protected_site.unauthenticated_proxy_routes | default([]) %}
+    location = {{ route.path }} {
+        proxy_pass {{ route.upstream }};
+        proxy_http_version 1.1;
+{{ hide_upstream_security_headers(site) }}
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+{% for header_name in proxy_hide_headers %}
+        proxy_hide_header {{ header_name }};
+{% endfor %}
+    }
+{% endfor %}
 {% for path in protected_site.unauthenticated_prefix_paths | default([]) %}
     location ^~ {{ path }} {
         proxy_pass {{ site.upstream }};

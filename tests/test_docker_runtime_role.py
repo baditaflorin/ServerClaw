@@ -110,9 +110,12 @@ def test_common_docker_bridge_chains_warms_control_socket_before_restarting() ->
     tasks = load_common_docker_bridge_chains()
     task_names = {task["name"] for task in tasks}
     assert "Warm the Docker control socket before chain health checks" in task_names
+    assert "Reset SSH connection before Docker bridge-chain recovery checks" in task_names
+    assert "Wait for SSH before Docker bridge-chain recovery checks" in task_names
     assert "Wait briefly for Docker bridge chains to recover after daemon activation" in task_names
     assert "Restart Docker when required bridge chains are missing" in task_names
     info_ready = next(task for task in tasks if task["name"] == "Warm the Docker control socket before chain health checks")
+    wait_for_ssh = next(task for task in tasks if task["name"] == "Wait for SSH before Docker bridge-chain recovery checks")
     chain_wait = next(
         task for task in tasks if task["name"] == "Wait briefly for Docker bridge chains to recover after daemon activation"
     )
@@ -133,6 +136,13 @@ def test_common_docker_bridge_chains_warms_control_socket_before_restarting() ->
     assert info_ready["retries"] == "{{ common_docker_bridge_chains_retries }}"
     assert info_ready["delay"] == "{{ common_docker_bridge_chains_delay }}"
     assert info_ready["until"] == "common_docker_bridge_chains_info_ready.rc == 0"
+    assert wait_for_ssh["ansible.builtin.wait_for_connection"]["timeout"] == (
+        "{{ ((common_docker_bridge_chains_retries | int) * (common_docker_bridge_chains_delay | int)) + 60 }}"
+    )
+    assert wait_for_ssh["ansible.builtin.wait_for_connection"]["connect_timeout"] == 5
+    assert wait_for_ssh["ansible.builtin.wait_for_connection"]["sleep"] == (
+        "{{ [common_docker_bridge_chains_delay | int, 1] | max }}"
+    )
     assert "iptables -t nat -S DOCKER" in chain_wait["ansible.builtin.shell"]
     assert "iptables -t filter -S DOCKER-FORWARD" in chain_wait["ansible.builtin.shell"]
     assert "sleep {{ common_docker_bridge_chains_delay }}" in chain_wait["ansible.builtin.shell"]
@@ -224,6 +234,7 @@ def test_docker_runtime_installs_publication_assurance_helper_before_chain_check
 
 def test_docker_runtime_waits_out_background_apt_maintenance() -> None:
     tasks = load_tasks()
+    defaults = load_defaults()
     prereq_task = next(task for task in tasks if task["name"] == "Install Docker repository prerequisites")
     remove_conflicts_task = next(task for task in tasks if task["name"] == "Remove conflicting Docker packages")
     install_runtime_task = next(task for task in tasks if task["name"] == "Install Docker runtime packages")
@@ -232,20 +243,22 @@ def test_docker_runtime_waits_out_background_apt_maintenance() -> None:
     remove_conflicts_apt = remove_conflicts_task["ansible.builtin.apt"]
     install_runtime_apt = install_runtime_task["ansible.builtin.apt"]
 
+    assert defaults["docker_runtime_apt_lock_timeout"] == 1200
+
     assert prereq_apt["name"] == "{{ docker_runtime_prereq_packages }}"
     assert prereq_apt["state"] == "present"
     assert prereq_apt["update_cache"] is True
-    assert prereq_apt["lock_timeout"] == 300
+    assert prereq_apt["lock_timeout"] == "{{ docker_runtime_apt_lock_timeout }}"
     assert prereq_apt["force_apt_get"] is True
 
     assert remove_conflicts_apt["name"] == "{{ docker_runtime_conflicting_packages }}"
     assert remove_conflicts_apt["state"] == "absent"
-    assert remove_conflicts_apt["lock_timeout"] == 300
+    assert remove_conflicts_apt["lock_timeout"] == "{{ docker_runtime_apt_lock_timeout }}"
 
     assert install_runtime_apt["name"] == "{{ docker_runtime_engine_packages }}"
     assert install_runtime_apt["state"] == "present"
     assert install_runtime_apt["update_cache"] is True
-    assert install_runtime_apt["lock_timeout"] == 300
+    assert install_runtime_apt["lock_timeout"] == "{{ docker_runtime_apt_lock_timeout }}"
     assert install_runtime_apt["force_apt_get"] is True
 
 

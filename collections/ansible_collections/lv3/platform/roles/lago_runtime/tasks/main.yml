@@ -1,0 +1,512 @@
+---
+- name: Validate Lago runtime inputs
+  ansible.builtin.assert:
+    that:
+      - lago_site_dir | length > 0
+      - lago_data_dir | length > 0
+      - lago_storage_dir | length > 0
+      - lago_redis_data_dir | length > 0
+      - lago_secret_dir | length > 0
+      - lago_compose_file | length > 0
+      - lago_env_file | length > 0
+      - lago_local_artifact_dir | length > 0
+      - lago_database_password_local_file | length > 0
+      - lago_api_image | length > 0
+      - lago_front_image | length > 0
+      - lago_pdf_image | length > 0
+      - lago_redis_image | length > 0
+      - lago_public_base_url | length > 0
+      - lago_public_api_base_url | length > 0
+      - lago_direct_api_local_base_url | length > 0
+      - lago_direct_front_local_base_url | length > 0
+      - lago_smoke_metric_code | length > 0
+      - lago_smoke_plan_code | length > 0
+      - lago_smoke_external_customer_id | length > 0
+      - lago_smoke_external_subscription_id | length > 0
+    fail_msg: >-
+      lago_runtime requires compose paths, pinned images, publication URLs,
+      shared PostgreSQL credentials, and the repo-managed smoke identifiers.
+
+- name: Check whether the Lago database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ lago_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: lago_database_password_local
+
+- name: Fail if the Lago database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ lago_database_password_local_file }} is missing on the control machine.
+      Converge lago_postgres before deploying Lago.
+  when: not lago_database_password_local.stat.exists
+
+- name: Ensure the Lago runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - openssl
+      - python3
+    state: present
+    update_cache: true
+    lock_timeout: "{{ lago_runtime_apt_lock_timeout }}"
+    force_apt_get: true
+
+- name: Ensure the Lago runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ lago_site_dir }}"
+      mode: "0755"
+    - path: "{{ lago_data_dir }}"
+      mode: "0755"
+    - path: "{{ lago_storage_dir }}"
+      mode: "0755"
+    - path: "{{ lago_redis_data_dir }}"
+      owner: "{{ lago_redis_data_owner }}"
+      group: "{{ lago_redis_data_group }}"
+      mode: "{{ lago_redis_data_mode }}"
+    - path: "{{ lago_secret_dir }}"
+      mode: "0700"
+    - path: "{{ lago_env_file | dirname }}"
+      mode: "0700"
+
+- name: Ensure the local Lago artifact directory exists
+  ansible.builtin.file:
+    path: "{{ lago_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the Lago runtime secrets
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      {{ item.command }} > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - path: "{{ lago_redis_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\n'"
+    - path: "{{ lago_secret_key_base_remote_file }}"
+      command: "openssl rand -hex 64"
+    - path: "{{ lago_rsa_private_key_remote_file }}"
+      command: "openssl genrsa 2048"
+    - path: "{{ lago_encryption_primary_key_remote_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ lago_encryption_deterministic_key_remote_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ lago_encryption_key_derivation_salt_remote_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ lago_bootstrap_user_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\n'"
+    - path: "{{ lago_org_api_key_remote_file }}"
+      command: "python3 -c \"import secrets; print(secrets.token_urlsafe(32))\""
+    - path: "{{ lago_smoke_producer_token_remote_file }}"
+      command: "python3 -c \"import secrets; print(secrets.token_urlsafe(32))\""
+  register: lago_secret_generation
+  changed_when: "'changed' in lago_secret_generation.stdout"
+  no_log: true
+
+- name: Read the Lago runtime secrets
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  register: lago_secret_reads
+  loop:
+    - "{{ lago_redis_password_remote_file }}"
+    - "{{ lago_secret_key_base_remote_file }}"
+    - "{{ lago_rsa_private_key_remote_file }}"
+    - "{{ lago_encryption_primary_key_remote_file }}"
+    - "{{ lago_encryption_deterministic_key_remote_file }}"
+    - "{{ lago_encryption_key_derivation_salt_remote_file }}"
+    - "{{ lago_bootstrap_user_password_remote_file }}"
+    - "{{ lago_org_api_key_remote_file }}"
+    - "{{ lago_smoke_producer_token_remote_file }}"
+  no_log: true
+
+- name: Record the Lago runtime secrets
+  ansible.builtin.set_fact:
+    lago_database_password: "{{ lookup('ansible.builtin.file', lago_database_password_local_file) | trim }}"
+    lago_redis_password: "{{ lago_secret_reads.results[0].content | b64decode | trim }}"
+    lago_secret_key_base: "{{ lago_secret_reads.results[1].content | b64decode | trim }}"
+    lago_rsa_private_key: "{{ lago_secret_reads.results[2].content | b64decode }}"
+    lago_rsa_private_key_b64: "{{ lago_secret_reads.results[2].content | b64decode | b64encode }}"
+    lago_encryption_primary_key: "{{ lago_secret_reads.results[3].content | b64decode | trim }}"
+    lago_encryption_deterministic_key: "{{ lago_secret_reads.results[4].content | b64decode | trim }}"
+    lago_encryption_key_derivation_salt: "{{ lago_secret_reads.results[5].content | b64decode | trim }}"
+    lago_bootstrap_user_password: "{{ lago_secret_reads.results[6].content | b64decode | trim }}"
+    lago_org_api_key: "{{ lago_secret_reads.results[7].content | b64decode | trim }}"
+    lago_smoke_producer_token: "{{ lago_secret_reads.results[8].content | b64decode | trim }}"
+  no_log: true
+
+- name: Mirror the Lago runtime secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  loop:
+    - dest: "{{ lago_redis_password_local_file }}"
+      content: "{{ lago_redis_password }}\n"
+    - dest: "{{ lago_secret_key_base_local_file }}"
+      content: "{{ lago_secret_key_base }}\n"
+    - dest: "{{ lago_rsa_private_key_local_file }}"
+      content: "{{ lago_rsa_private_key }}"
+    - dest: "{{ lago_encryption_primary_key_local_file }}"
+      content: "{{ lago_encryption_primary_key }}\n"
+    - dest: "{{ lago_encryption_deterministic_key_local_file }}"
+      content: "{{ lago_encryption_deterministic_key }}\n"
+    - dest: "{{ lago_encryption_key_derivation_salt_local_file }}"
+      content: "{{ lago_encryption_key_derivation_salt }}\n"
+    - dest: "{{ lago_bootstrap_user_password_local_file }}"
+      content: "{{ lago_bootstrap_user_password }}\n"
+    - dest: "{{ lago_org_api_key_local_file }}"
+      content: "{{ lago_org_api_key }}\n"
+    - dest: "{{ lago_smoke_producer_token_local_file }}"
+      content: "{{ lago_smoke_producer_token }}\n"
+  no_log: true
+
+- name: Render the controller-local Lago producer catalog
+  ansible.builtin.template:
+    src: producer-catalog.json.j2
+    dest: "{{ lago_producer_catalog_local_file }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Render the Lago environment file
+  ansible.builtin.template:
+    src: lago.env.j2
+    dest: "{{ lago_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the Lago compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ lago_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Lago images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ lago_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ lago_site_dir }}"
+  register: lago_pull
+  changed_when: >-
+    'Pulling' in lago_pull.stdout
+    or 'Downloaded newer image' in lago_pull.stdout
+    or 'Pull complete' in lago_pull.stdout
+
+- name: Start the Lago runtime and recover Docker bridge-chain failures
+  block:
+    - name: Start the Lago stack
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ lago_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ lago_site_dir }}"
+      register: lago_up
+      changed_when: >-
+        'Creating' in lago_up.stdout
+        or 'Recreating' in lago_up.stdout
+        or 'Starting' in lago_up.stdout
+  rescue:
+    - name: Flag Docker bridge-chain failures during Lago startup
+      ansible.builtin.set_fact:
+        lago_docker_bridge_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable ACCEPT OUTGOING rule' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected Lago startup failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('lago compose up failed')) }}"
+      when: not lago_docker_bridge_chain_missing
+
+    - name: Restart Docker to restore bridge chains before retrying Lago startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: lago_docker_bridge_chain_missing
+
+    - name: Ensure Docker bridge chains are present before retrying Lago startup
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+      when: lago_docker_bridge_chain_missing
+
+    - name: Retry Lago startup after Docker bridge-chain recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ lago_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ lago_site_dir }}"
+      register: lago_up_retry
+      changed_when: >-
+        'Creating' in lago_up_retry.stdout
+        or 'Recreating' in lago_up_retry.stdout
+        or 'Starting' in lago_up_retry.stdout
+      when: lago_docker_bridge_chain_missing
+
+- name: Wait for Lago to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ platform_service_topology.lago.ports.api }}"
+    delay: 0
+    timeout: 300
+
+- name: Wait for the Lago local health endpoint
+  ansible.builtin.uri:
+    url: "{{ lago_direct_api_local_base_url }}/health"
+    method: GET
+    status_code: 200
+  register: lago_health_ready
+  retries: 60
+  delay: 5
+  until: lago_health_ready.status == 200
+  changed_when: false
+
+- name: Trigger a Lago Redis background save
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ lago_redis_container_name }}"
+      - redis-cli
+      - -a
+      - "{{ lago_redis_password }}"
+      - BGSAVE
+  register: lago_redis_bgsave_trigger
+  changed_when: false
+  failed_when:
+    - lago_redis_bgsave_trigger.rc != 0
+    - "'Background save already in progress' not in (lago_redis_bgsave_trigger.stdout | default(''))"
+  no_log: true
+
+- name: Wait for Lago Redis background save to succeed
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ lago_redis_container_name }}"
+      - redis-cli
+      - -a
+      - "{{ lago_redis_password }}"
+      - INFO
+      - persistence
+  register: lago_redis_persistence_info
+  retries: 30
+  delay: 2
+  until: "'rdb_last_bgsave_status:ok' in (lago_redis_persistence_info.stdout | default(''))"
+  changed_when: false
+  no_log: true
+
+- name: Wait for the Lago bootstrap organization API key to become active
+  ansible.builtin.uri:
+    url: "{{ lago_direct_api_local_base_url }}/api/v1/billable_metrics"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ lago_org_api_key }}"
+    status_code: 200
+    return_content: true
+  register: lago_api_ready
+  retries: 60
+  delay: 5
+  until: lago_api_ready.status == 200
+  changed_when: false
+  no_log: true
+
+- name: Check whether the Lago smoke billable metric already exists
+  ansible.builtin.uri:
+    url: "{{ lago_direct_api_local_base_url }}/api/v1/billable_metrics/{{ lago_smoke_metric_code }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ lago_org_api_key }}"
+    status_code:
+      - 200
+      - 404
+    return_content: true
+  register: lago_billable_metric_get
+  changed_when: false
+  no_log: true
+
+- name: Create the Lago smoke billable metric
+  ansible.builtin.uri:
+    url: "{{ lago_direct_api_local_base_url }}/api/v1/billable_metrics"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ lago_org_api_key }}"
+    body_format: json
+    body:
+      billable_metric:
+        name: "{{ lago_smoke_metric_name }}"
+        code: "{{ lago_smoke_metric_code }}"
+        description: "{{ lago_smoke_metric_description }}"
+        aggregation_type: count_agg
+        recurring: false
+        group: {}
+    status_code: 200
+    return_content: true
+  register: lago_billable_metric_create
+  when: lago_billable_metric_get.status == 404
+  no_log: true
+
+- name: Record the Lago smoke billable metric id
+  ansible.builtin.set_fact:
+    lago_smoke_billable_metric_id: >-
+      {{
+        (
+          lago_billable_metric_create.json.billable_metric.lago_id
+          if lago_billable_metric_get.status == 404
+          else lago_billable_metric_get.json.billable_metric.lago_id
+        )
+      }}
+  no_log: true
+
+- name: Check whether the Lago smoke plan already exists
+  ansible.builtin.uri:
+    url: "{{ lago_direct_api_local_base_url }}/api/v1/plans/{{ lago_smoke_plan_code }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ lago_org_api_key }}"
+    status_code:
+      - 200
+      - 404
+    return_content: true
+  register: lago_plan_get
+  changed_when: false
+  no_log: true
+
+- name: Create the Lago smoke plan
+  ansible.builtin.uri:
+    url: "{{ lago_direct_api_local_base_url }}/api/v1/plans"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ lago_org_api_key }}"
+    body_format: json
+    body:
+      plan:
+        name: "{{ lago_smoke_plan_name }}"
+        code: "{{ lago_smoke_plan_code }}"
+        interval: monthly
+        amount_cents: "{{ lago_smoke_plan_amount_cents | int }}"
+        amount_currency: "{{ lago_smoke_plan_amount_currency }}"
+        pay_in_advance: false
+        invoice_display_name: "{{ lago_smoke_plan_name }}"
+        description: "{{ lago_smoke_plan_description }}"
+        charges:
+          - billable_metric_id: "{{ lago_smoke_billable_metric_id }}"
+            charge_model: standard
+            invoiceable: true
+            invoice_display_name: "{{ lago_smoke_metric_name }}"
+            pay_in_advance: false
+            prorated: false
+            min_amount_cents: 0
+            properties:
+              amount: "{{ lago_smoke_charge_unit_amount }}"
+    status_code: 200
+    return_content: true
+  register: lago_plan_create
+  when: lago_plan_get.status == 404
+  no_log: true
+
+- name: Upsert the Lago smoke customer
+  ansible.builtin.uri:
+    url: "{{ lago_direct_api_local_base_url }}/api/v1/customers"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ lago_org_api_key }}"
+    body_format: json
+    body:
+      customer:
+        external_id: "{{ lago_smoke_external_customer_id }}"
+        name: "{{ lago_smoke_customer_name }}"
+        email: "{{ lago_smoke_customer_email }}"
+        currency: "{{ lago_customer_currency }}"
+        timezone: "{{ lago_customer_timezone }}"
+    status_code: 200
+    return_content: true
+  register: lago_customer_upsert
+  no_log: true
+
+- name: Upsert the Lago smoke subscription
+  ansible.builtin.uri:
+    url: "{{ lago_direct_api_local_base_url }}/api/v1/subscriptions"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ lago_org_api_key }}"
+    body_format: json
+    body:
+      subscription:
+        external_customer_id: "{{ lago_smoke_external_customer_id }}"
+        plan_code: "{{ lago_smoke_plan_code }}"
+        name: "{{ lago_smoke_subscription_name }}"
+        external_id: "{{ lago_smoke_external_subscription_id }}"
+        billing_time: "{{ lago_subscription_billing_time }}"
+    status_code: 200
+    return_content: true
+  register: lago_subscription_upsert
+  no_log: true
+
+- name: Generate a direct Lago smoke transaction id
+  ansible.builtin.set_fact:
+    lago_direct_smoke_transaction_id: "{{ lookup('ansible.builtin.pipe', 'python3 -c \"import uuid; print(uuid.uuid4())\"') | trim }}"
+
+- name: Submit a direct Lago smoke event
+  ansible.builtin.uri:
+    url: "{{ lago_direct_api_local_base_url }}/api/v1/events"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ lago_org_api_key }}"
+    body_format: json
+    body:
+      event:
+        transaction_id: "{{ lago_direct_smoke_transaction_id }}"
+        external_subscription_id: "{{ lago_smoke_external_subscription_id }}"
+        code: "{{ lago_smoke_metric_code }}"
+        properties: "{{ lago_smoke_event_properties | default({}) }}"
+    status_code: 200
+    return_content: true
+  register: lago_direct_smoke_event
+  no_log: true
+
+- name: Verify the Lago runtime
+  ansible.builtin.import_tasks: verify.yml

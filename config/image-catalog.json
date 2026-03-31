@@ -530,6 +530,106 @@
         "converge-langfuse"
       ]
     },
+    "lago_api_runtime": {
+      "kind": "runtime",
+      "service_id": "lago",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "lago-api",
+      "registry_ref": "docker.io/getlago/api",
+      "tag": "v1.44.0",
+      "digest": "sha256:68facf646392276a762b15fef1bebe914665510d37ff35435e3ebe402152e538",
+      "ref": "docker.io/getlago/api:v1.44.0@sha256:68facf646392276a762b15fef1bebe914665510d37ff35435e3ebe402152e538",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-31",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-31-lago-api-runtime.json",
+      "consumers": [
+        "roles/lago_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-lago"
+      ]
+    },
+    "lago_front_runtime": {
+      "kind": "runtime",
+      "service_id": "lago",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "lago-front",
+      "registry_ref": "docker.io/getlago/front",
+      "tag": "v1.44.0",
+      "digest": "sha256:7551e9498391433b1958f478bccdbfb5d7b8706a0f563427ea0b296e7749a30c",
+      "ref": "docker.io/getlago/front:v1.44.0@sha256:7551e9498391433b1958f478bccdbfb5d7b8706a0f563427ea0b296e7749a30c",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-31",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-31-lago-front-runtime.json",
+      "consumers": [
+        "roles/lago_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-lago"
+      ]
+    },
+    "lago_pdf_runtime": {
+      "kind": "runtime",
+      "service_id": "lago",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "lago-pdf",
+      "registry_ref": "docker.io/getlago/lago-gotenberg",
+      "tag": "7.8.2",
+      "digest": "sha256:e8eef6fb4a92a3440c70d06598b385e7eb2ec7fb2d9b908ca4aa028741a0b270",
+      "ref": "docker.io/getlago/lago-gotenberg:7.8.2@sha256:e8eef6fb4a92a3440c70d06598b385e7eb2ec7fb2d9b908ca4aa028741a0b270",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-31",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-31-lago-pdf-runtime.json",
+      "exception": {
+        "reason": "The pinned official Lago PDF sidecar image `getlago/lago-gotenberg:7.8.2` still reports critical and high Trivy findings; keep it digest-pinned behind the internal Lago network boundary and review it at the next image rotation window.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-31",
+        "review_by": "2026-04-14"
+      },
+      "consumers": [
+        "roles/lago_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-lago"
+      ]
+    },
+    "lago_redis_runtime": {
+      "kind": "runtime",
+      "service_id": "lago",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "lago-redis",
+      "registry_ref": "docker.io/library/redis",
+      "tag": "7-alpine",
+      "digest": "sha256:4bfd9eca23339865dc14fe75f6d9ae643f714924623978dd2798f1a673b08f43",
+      "ref": "docker.io/library/redis:7-alpine@sha256:4bfd9eca23339865dc14fe75f6d9ae643f714924623978dd2798f1a673b08f43",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-31",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-31-lago-redis-runtime.json",
+      "exception": {
+        "reason": "The pinned official Lago Redis sidecar image `redis:7-alpine` still reports critical and high Trivy findings; keep it digest-pinned behind the internal Lago network boundary and review it at the next image rotation window.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-31",
+        "review_by": "2026-04-14"
+      },
+      "consumers": [
+        "roles/lago_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-lago"
+      ]
+    },
     "mail_platform_gateway_python_base": {
       "kind": "build_base",
       "registry_ref": "docker.io/library/python",

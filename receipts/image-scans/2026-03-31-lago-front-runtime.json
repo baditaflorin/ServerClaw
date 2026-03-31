@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "lago_front_runtime",
+  "image_ref": "docker.io/getlago/front:v1.44.0@sha256:7551e9498391433b1958f478bccdbfb5d7b8706a0f563427ea0b296e7749a30c",
+  "scanner": "trivy",
+  "scanner_image": "binary:trivy-0.69.3-macOS-ARM64",
+  "scanned_on": "2026-03-31",
+  "summary": {
+    "critical": 0,
+    "high": 6
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.io/getlago/front:v1.44.0@sha256:7551e9498391433b1958f478bccdbfb5d7b8706a0f563427ea0b296e7749a30c (alpine 3.23.3)",
+      "class": "os-pkgs",
+      "type": "alpine",
+      "critical": 0,
+      "high": 6
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-31-lago-front-runtime.trivy.json"
+}

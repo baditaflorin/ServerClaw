@@ -147,6 +147,12 @@ playbooks:
     shared_surfaces:
       - service:keycloak
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/lago.yml:
+    playbook_id: lago
+    mutation_scope: platform
+    shared_surfaces:
+      - service:lago
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/langfuse.yml:
     playbook_id: langfuse
     mutation_scope: platform
@@ -446,6 +452,12 @@ playbooks:
     mutation_scope: platform
     shared_surfaces:
       - service:jupyterhub
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/lago.yml:
+    playbook_id: lago
+    mutation_scope: platform
+    shared_surfaces:
+      - service:lago
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/guest-log-shipping.yml:
     playbook_id: guest-log-shipping

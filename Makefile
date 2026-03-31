@@ -97,6 +97,7 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 .PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-jupyterhub converge-jupyterhub
 .PHONY: syntax-check-tesseract-ocr converge-tesseract-ocr
 .PHONY: syntax-check-flagsmith converge-flagsmith
+.PHONY: syntax-check-lago converge-lago
 .PHONY: syntax-check-matrix-synapse converge-matrix-synapse
 .PHONY: syntax-check-nextcloud converge-nextcloud
 .PHONY: syntax-check-nomad converge-nomad
@@ -612,6 +613,9 @@ syntax-check-langfuse:
 syntax-check-flagsmith:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/flagsmith.yml --syntax-check
 
+syntax-check-lago:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/lago.yml --syntax-check
+
 syntax-check-plausible:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/plausible.yml --syntax-check
 
@@ -937,6 +941,13 @@ converge-flagsmith:
 	$(MAKE) generate-edge-static-sites
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/flagsmith.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
+
+converge-lago:
+	$(MAKE) preflight WORKFLOW=converge-lago
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
+	$(MAKE) generate-edge-static-sites
+	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/lago.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
 
 converge-plausible:
 	$(MAKE) preflight WORKFLOW=converge-plausible

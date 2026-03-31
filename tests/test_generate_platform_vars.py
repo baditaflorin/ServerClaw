@@ -138,6 +138,22 @@ def test_build_platform_vars_includes_flagsmith_publication_topology() -> None:
     assert platform_vars["flagsmith_port"] == 8017
 
 
+def test_build_platform_vars_includes_lago_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    lago = platform_vars["platform_service_topology"]["lago"]
+
+    assert lago["public_hostname"] == "billing.lv3.org"
+    assert lago["dns"]["name"] == "billing"
+    assert lago["ports"]["internal"] == 8100
+    assert lago["ports"]["api"] == 8099
+    assert lago["urls"]["public"] == "https://billing.lv3.org"
+    assert lago["urls"]["internal"] == "http://10.10.10.20:8100"
+    assert lago["urls"]["api"] == "http://10.10.10.20:8099"
+    assert lago["edge"]["prefix_proxy_routes"] == [{"path": "/api/", "upstream": "http://10.10.10.20:8099"}]
+    assert platform_vars["lago_api_port"] == 8099
+    assert platform_vars["lago_front_port"] == 8100
+
+
 def test_build_platform_vars_includes_tika_private_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     tika = platform_vars["platform_service_topology"]["tika"]
