@@ -6,15 +6,16 @@
 - Included In Repo Version: 0.177.112
 - Branch-Local Receipt: `receipts/live-applies/2026-03-31-adr-0297-renovate-live-apply.json`
 - Canonical Mainline Receipt: `receipts/live-applies/2026-03-31-adr-0297-renovate-mainline-live-apply.json`
+- Follow-up Receipt: `receipts/live-applies/2026-03-31-adr-0297-renovate-followups-live-apply.json`
 - Live Applied In Platform Version: 0.130.74
 - Implemented On: 2026-03-31
 - Live Applied On: 2026-03-31
-- Branch: `codex/ws-0297-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-live-apply`
+- Branch: `codex/ws-0297-live-apply-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-live-apply-r2`
 - Owner: codex
 - Depends On: `adr-0068`, `adr-0077`, `adr-0083`, `adr-0087`, `adr-0119`, `adr-0143`, `adr-0229`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0297`, `docs/workstreams/ws-0297-live-apply.md`, `docs/runbooks/configure-gitea.md`, `docs/runbooks/configure-openbao.md`, `docs/runbooks/configure-renovate.md`, `docs/runbooks/configure-harbor.md`, `docs/runbooks/live-apply-receipts-and-verification-evidence.md`, `docs/runbooks/validate-repository-automation.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `.gitea/workflows/renovate.yml`, `.gitea/workflows/release-bundle.yml`, `.gitea/workflows/validate.yml`, `renovate.json`, `scripts/live_apply_receipts.py`, `scripts/parallel_check.py`, `scripts/validate_repo.sh`, `scripts/validate_renovate_contract.py`, `scripts/renovate_runtime_token.py`, `scripts/renovate_stack_digest_guard.py`, `platform/repo.py`, `README.md`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `collections/ansible_collections/lv3/platform/roles/common/`, `collections/ansible_collections/lv3/platform/roles/harbor_runtime/`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `tests/`, `tests/test_live_apply_receipts.py`, `tests/test_parallel_check.py`, `receipts/live-applies/`, `workstreams.yaml`
+- Shared Surfaces: `docs/adr/0297`, `docs/workstreams/ws-0297-live-apply.md`, `docs/runbooks/configure-gitea.md`, `docs/runbooks/configure-openbao.md`, `docs/runbooks/configure-renovate.md`, `docs/runbooks/configure-harbor.md`, `docs/runbooks/live-apply-receipts-and-verification-evidence.md`, `docs/runbooks/validate-repository-automation.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `.gitea/workflows/renovate.yml`, `.gitea/workflows/release-bundle.yml`, `.gitea/workflows/validate.yml`, `renovate.json`, `scripts/live_apply_receipts.py`, `scripts/parallel_check.py`, `scripts/validate_repo.sh`, `scripts/validate_renovate_contract.py`, `scripts/renovate_runtime_token.py`, `scripts/renovate_stack_digest_guard.py`, `scripts/sbom_scanner.py`, `platform/repo.py`, `README.md`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `collections/ansible_collections/lv3/platform/roles/common/`, `collections/ansible_collections/lv3/platform/roles/harbor_runtime/`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `tests/`, `tests/test_live_apply_receipts.py`, `tests/test_parallel_check.py`, `tests/test_sbom_scanner.py`, `receipts/live-applies/`, `workstreams.yaml`
 
 ## Scope
 
@@ -53,6 +54,7 @@
 - `scripts/validate_renovate_contract.py`
 - `scripts/renovate_runtime_token.py`
 - `scripts/renovate_stack_digest_guard.py`
+- `scripts/sbom_scanner.py`
 - `platform/repo.py`
 - `README.md`
 - `build/platform-manifest.json`
@@ -81,6 +83,7 @@
 - `tests/test_openbao_compose_env_helper.py`
 - `tests/test_openbao_postgres_backend_role.py`
 - `tests/test_parallel_check.py`
+- `tests/test_sbom_scanner.py`
 - `tests/test_postgres_vm_role.py`
 - `receipts/live-applies/`
 - `workstreams.yaml`
@@ -102,16 +105,19 @@
 - The exact-main publication step then replayed the verified source tree onto the private Gitea `main` snapshot and re-verified the hosted mainline paths that matter for ADR 0297: `validate.yml` run `169` concluded `success`, `renovate.yml` run `170` concluded `success`, and the mainline replay kept the Renovate dashboard plus governed update PR creation live after the protected integration step.
 - `make remote-validate` from the released tree passed every selected lane after the `versions/stack.yaml` release-track sync except the intentional `workstream-surfaces` guard, which rejects a branch once its owning workstream is terminal.
 - `make pre-push-gate` from the released tree showed the same repo-content result on its remote primary-branch leg: every lane passed except the intentional `workstream-surfaces` guard. The local fallback then repeated that terminal-branch ownership failure and also timed out `ansible-lint` after `600` seconds on the local arm64 wrapper path.
-- The exact-main replay also surfaced two shared follow-ups outside ADR 0297's success boundary: `release-bundle.yml` run `168` failed because Gitea attachments storage returned `no space left on device`, and one refreshed Renovate PR-sync validation run (`validate.yml` run `171`) still saw an incomplete checkout workspace on a stale pre-existing PR branch.
+- Follow-up remediation recovered docker-runtime capacity (`df -h /` shows 14G free), restarted the OpenBao, Gitea, and Harbor stacks, and verified OpenBao is unsealed, Gitea `/api/healthz` returns `pass`, and Harbor `/v2/` returns the expected 401 auth challenge.
+- The SBOM scanner host-path update passed `pytest -q tests/test_sbom_scanner.py`, the Renovate automation slice remained green, `./scripts/validate_repo.sh agent-standards` passed, and `release-bundle.yml` run `190` concluded `success` on the private `main` snapshot.
+- One stale Renovate PR-sync validation run still needs a fresh replay after mainline updates so the legacy PR branch checkout can be rebuilt.
 
 ## Results
 
 - ADR 0297 is now implemented in repository version `0.177.112` and first verified live on platform version `0.130.74`.
 - The private Gitea Actions path on `docker-build-lv3` now runs the Harbor-pinned Renovate runtime with a short-lived scoped token minted at job start from the OpenBao-rendered bootstrap bundle.
 - The private Gitea `main` snapshot now has a verified Renovate dashboard plus governed update-PR creation path on top of the exact source tree that settled this ADR's workflow contract.
+- The validation gate now maps SBOM paths through the runner host workspace, restoring grype scan success on pull request workflows.
 - The branch-local receipt remains the pre-integration audit trail, while the canonical mainline receipt records the exact-main hosted verification that backs the protected release and canonical-truth updates.
 
 ## Mainline Closeout
 
 - None for ADR 0297 itself. The protected release and canonical-truth surfaces are refreshed, and the canonical mainline receipt now records the first verified platform version for the ADR.
-- Shared platform follow-up remains after merge: expand Gitea attachment storage so `release-bundle` asset uploads can succeed again, and recycle stale Renovate PR branches so every `pull_request_sync` validation run starts from a complete checkout workspace.
+- Shared platform follow-up remains after merge: recycle stale Renovate PR branches so every `pull_request_sync` validation run starts from a complete checkout workspace.
