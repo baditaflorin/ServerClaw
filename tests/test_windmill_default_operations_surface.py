@@ -70,6 +70,7 @@ def test_default_operations_surface_verification_paths_are_declared() -> None:
         "f/lv3/continuous_drift_detection",
         "f/lv3/subdomain_exposure_audit",
         "f/lv3/weekly_capacity_report",
+        "f/lv3/k6_load_testing",
         "f/lv3/weekly_security_scan",
         "f/lv3/security_posture_scan",
         "f/lv3/sbom_refresh",

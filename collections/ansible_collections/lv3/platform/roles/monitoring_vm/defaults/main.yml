@@ -130,7 +130,9 @@ monitoring_prometheus_retention_time: 15d
 monitoring_prometheus_enable_features:
   - exemplar-storage
   - native-histograms
-monitoring_prometheus_remote_write_url: http://127.0.0.1:9090/api/v1/write
+monitoring_prometheus_listen_address: 0.0.0.0:9090
+monitoring_prometheus_remote_write_url: >-
+  http://{{ hostvars[groups['proxmox_hosts'][0]].lv3_service_topology.grafana.private_ip }}:9090/api/v1/write
 monitoring_prometheus_url: http://127.0.0.1:9090
 monitoring_blackbox_exporter_service_name: prometheus-blackbox-exporter
 monitoring_blackbox_exporter_env_file: /etc/default/prometheus-blackbox-exporter

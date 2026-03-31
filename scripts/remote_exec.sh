@@ -12,6 +12,12 @@ PYTHON_BIN="${REMOTE_EXEC_PYTHON_BIN:-python3}"
 TAILSCALE_BIN="${REMOTE_EXEC_TAILSCALE_BIN:-/Applications/Tailscale.app/Contents/MacOS/Tailscale}"
 CONNECT_TIMEOUT="${REMOTE_EXEC_CONNECT_TIMEOUT:-5}"
 VERBOSE="${REMOTE_EXEC_VERBOSE:-0}"
+SESSION_RETENTION_DAYS="${REMOTE_EXEC_SESSION_RETENTION_DAYS:-2}"
+SESSION_KEEP_COUNT="${REMOTE_EXEC_SESSION_KEEP_COUNT:-256}"
+RUN_RETENTION_DAYS="${REMOTE_EXEC_RUN_RETENTION_DAYS:-2}"
+RUN_KEEP_COUNT="${REMOTE_EXEC_RUN_KEEP_COUNT:-32}"
+SNAPSHOT_RETENTION_DAYS="${REMOTE_EXEC_SNAPSHOT_RETENTION_DAYS:-2}"
+SNAPSHOT_KEEP_COUNT="${REMOTE_EXEC_SNAPSHOT_KEEP_COUNT:-16}"
 LOCAL_FALLBACK=false
 COMMAND_LABEL=""
 
@@ -535,9 +541,31 @@ sync_remote_gate_status_back() {
 
 ensure_remote_workspace() {
   local session_root="$WORKSPACE_ROOT_BASE/.lv3-session-workspaces"
-  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" \
-    "mkdir -p $(quote_shell "$WORKSPACE_ROOT") $(quote_shell "$WORKSPACE_ROOT/.lv3-snapshots") $(quote_shell "$WORKSPACE_ROOT/.lv3-runs") $(quote_shell "$session_root") && find $(quote_shell "$session_root") -mindepth 1 -maxdepth 1 -type d ! -name $(quote_shell "$LV3_SESSION_SLUG") -mtime +2 -exec rm -rf {} + >/dev/null 2>&1 || true && find $(quote_shell "$WORKSPACE_ROOT/.lv3-runs") -mindepth 1 -maxdepth 1 -type d -mtime +2 -exec rm -rf {} + >/dev/null 2>&1 || true && find $(quote_shell "$WORKSPACE_ROOT/.lv3-snapshots") -mindepth 1 -maxdepth 1 -type f -mtime +2 -delete >/dev/null 2>&1 || true" \
-    >/dev/null
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "bash -s" >/dev/null <<EOF
+set -euo pipefail
+mkdir -p $(quote_shell "$WORKSPACE_ROOT") $(quote_shell "$WORKSPACE_ROOT/.lv3-snapshots") $(quote_shell "$WORKSPACE_ROOT/.lv3-runs") $(quote_shell "$session_root")
+find $(quote_shell "$session_root") -mindepth 1 -maxdepth 1 -type d ! -name $(quote_shell "$LV3_SESSION_SLUG") -mtime +$SESSION_RETENTION_DAYS -exec rm -rf {} + >/dev/null 2>&1 || true
+if [ "$SESSION_KEEP_COUNT" -gt 0 ]; then
+  mapfile -t stale_session_dirs < <(find $(quote_shell "$session_root") -mindepth 1 -maxdepth 1 -type d ! -name $(quote_shell "$LV3_SESSION_SLUG") -printf '%T@ %p\n' | sort -n | head -n -$SESSION_KEEP_COUNT | cut -d' ' -f2-)
+  if [ "\${#stale_session_dirs[@]}" -gt 0 ]; then
+    rm -rf "\${stale_session_dirs[@]}" >/dev/null 2>&1 || true
+  fi
+fi
+find $(quote_shell "$WORKSPACE_ROOT/.lv3-runs") -mindepth 1 -maxdepth 1 -type d -mtime +$RUN_RETENTION_DAYS -exec rm -rf {} + >/dev/null 2>&1 || true
+if [ "$RUN_KEEP_COUNT" -gt 0 ]; then
+  mapfile -t stale_run_dirs < <(find $(quote_shell "$WORKSPACE_ROOT/.lv3-runs") -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' | sort -n | head -n -$RUN_KEEP_COUNT | cut -d' ' -f2-)
+  if [ "\${#stale_run_dirs[@]}" -gt 0 ]; then
+    rm -rf "\${stale_run_dirs[@]}" >/dev/null 2>&1 || true
+  fi
+fi
+find $(quote_shell "$WORKSPACE_ROOT/.lv3-snapshots") -mindepth 1 -maxdepth 1 -type f -mtime +$SNAPSHOT_RETENTION_DAYS -delete >/dev/null 2>&1 || true
+if [ "$SNAPSHOT_KEEP_COUNT" -gt 0 ]; then
+  mapfile -t stale_snapshot_files < <(find $(quote_shell "$WORKSPACE_ROOT/.lv3-snapshots") -mindepth 1 -maxdepth 1 -type f -printf '%T@ %p\n' | sort -n | head -n -$SNAPSHOT_KEEP_COUNT | cut -d' ' -f2-)
+  if [ "\${#stale_snapshot_files[@]}" -gt 0 ]; then
+    rm -f "\${stale_snapshot_files[@]}" >/dev/null 2>&1 || true
+  fi
+fi
+EOF
 }
 
 remote_remove_paths() {
@@ -591,6 +619,12 @@ run_local_command() {
   fi
   if [[ -n "$LOCAL_FALLBACK_RUNNER_ID" ]]; then
     env_args+=("LV3_VALIDATION_RUNNER_ID=$LOCAL_FALLBACK_RUNNER_ID")
+  fi
+  if [[ -n "$LV3_VALIDATION_BASE_REF" ]]; then
+    env_args+=("LV3_VALIDATION_BASE_REF=$LV3_VALIDATION_BASE_REF")
+  fi
+  if [[ -n "$LV3_VALIDATION_CHANGED_FILES_JSON" ]]; then
+    env_args+=("LV3_VALIDATION_CHANGED_FILES_JSON=$LV3_VALIDATION_CHANGED_FILES_JSON")
   fi
   if [[ -n "$validate_python_bin" ]]; then
     env_args+=("LV3_VALIDATE_PYTHON_BIN=$validate_python_bin")
@@ -707,8 +741,8 @@ run_remote_command() {
   fi
 
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "$remote_payload" || rc=$?
+  sync_remote_gate_status_back
   if [[ "$rc" -eq 0 ]]; then
-    sync_remote_gate_status_back
     return 0
   fi
   if [[ "$rc" -ne 0 && "$LOCAL_FALLBACK" == "true" ]]; then

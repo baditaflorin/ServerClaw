@@ -596,6 +596,141 @@
         "timeout_seconds": 1800
       }
     },
+    "run-k6-smoke": {
+      "description": "Run the ADR 0305 governed k6 smoke probe against the declared latency-SLO services and record the resulting receipts before merge or promotion decisions depend on the outcome.",
+      "workflow_id": "k6-smoke",
+      "scope": "external_service",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "service",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "make k6-smoke K6_ARGS or Windmill payload",
+          "description": "Optional service id filter when operators only need to replay the smoke probe for one governed latency-SLO service."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes before the smoke receipts are used as blocking evidence",
+        "docker-build-lv3 or the current execution host can reach the declared target URLs and the private Prometheus remote-write endpoint",
+        "Operators understand the smoke probe is intended to remain lightweight and should stay scoped to the declared latency-SLO services"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the generated k6 smoke receipt paths, the raw summary export, and any threshold failures that blocked the intended change."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the k6 runner cannot reach the target service, Prometheus remote-write, or the pinned k6 image digest.",
+          "Stop if any smoke receipt reports a failed result because that evidence is intended to block the dependent release or apply decision."
+        ],
+        "rollback_guidance": [
+          "Do not merge or promote the affected change until the failing service is stabilized and the smoke probe passes from the repo-managed runner.",
+          "If the failure follows another live mutation, revert or repair that mutation through its owning workflow before rerunning the smoke probe."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
+      }
+    },
+    "run-k6-load": {
+      "description": "Run the ADR 0305 governed k6 load probe so weekly regression evidence, NATS publications, and ntfy warning signals are produced through the canonical repo-managed path.",
+      "workflow_id": "k6-load",
+      "scope": "external_service",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "service",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "make k6-load K6_ARGS or Windmill payload",
+          "description": "Optional service id filter when operators need to replay the load probe for one governed latency-SLO service."
+        },
+        {
+          "name": "ntfy_alertmanager_password",
+          "kind": "controller_secret",
+          "required": false,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local ntfy password used when the load probe publishes error-budget warnings to the private platform.slo.warn topic."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes before treating the resulting load receipts as operational evidence",
+        "The execution host can reach the declared service URLs, the private Prometheus remote-write endpoint, and the private ntfy topic when warning publication is enabled",
+        "Operators confirm the targeted services are healthy enough that a representative diagnostic load probe will not mask an unrelated incident"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the generated k6 load receipts, the raw summary export, any platform.slo.k6_regression event publication, and any platform.slo.warn notification that was emitted."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the load probe cannot write receipts, remote-write metrics, or required warning publications because the diagnostic evidence would be incomplete.",
+          "Stop if the receipts show a failed result or a regression that should block the dependent release or service upgrade decision."
+        ],
+        "rollback_guidance": [
+          "Treat the failing or regressed service as degraded and investigate before scheduling the next weekly probe or approving a dependent version change.",
+          "If the degraded result follows a recent deployment, revert or repair that deployment through its owning workflow before rerunning the governed load probe."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
+    "run-k6-soak": {
+      "description": "Run the ADR 0305 governed k6 soak probe so extended-duration latency drift, regression events, and warning signals are captured through the canonical repo-managed path.",
+      "workflow_id": "k6-soak",
+      "scope": "external_service",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "service",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "make k6-soak K6_ARGS or Windmill payload",
+          "description": "Optional service id filter when operators need to replay the soak probe for one governed latency-SLO service."
+        },
+        {
+          "name": "soak_duration",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "make k6-soak K6_ARGS or Windmill payload",
+          "description": "Optional duration override for a shorter investigative soak replay outside the scheduled monthly window."
+        },
+        {
+          "name": "ntfy_alertmanager_password",
+          "kind": "controller_secret",
+          "required": false,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local ntfy password used when the soak probe publishes error-budget warnings to the private platform.slo.warn topic."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes before the soak evidence is used for long-running capacity or release decisions",
+        "The execution host can reach the declared service URLs, the private Prometheus remote-write endpoint, and the private ntfy topic when warning publication is enabled",
+        "Operators confirm the targeted services can tolerate the longer diagnostic window or that a maintenance window is active before replaying the soak manually"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the generated k6 soak receipts, the raw summary export, any platform.slo.k6_regression event publication, and any platform.slo.warn notification that was emitted."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the soak probe cannot maintain a complete receipt and remote-write evidence trail for the full run window.",
+          "Stop if the resulting receipts show failed status, extended latency drift, or warning publication that indicates the service should not absorb more change."
+        ],
+        "rollback_guidance": [
+          "Pause the scheduled soak until the affected service returns to a healthy baseline and the shorter load probe is clean again.",
+          "If the degraded result follows a recent deployment, revert or repair that deployment through its owning workflow before rerunning the governed soak probe."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 3600
+      }
+    },
     "subdomain-exposure-audit": {
       "description": "Run the ADR 0139 subdomain exposure audit against the governed public catalog and record one receipt.",
       "workflow_id": "subdomain-exposure-audit",

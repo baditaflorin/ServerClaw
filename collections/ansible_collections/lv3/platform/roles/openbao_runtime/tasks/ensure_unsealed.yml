@@ -18,30 +18,17 @@
   until: openbao_runtime_seal_status.status == 200
   changed_when: false
 
-- name: Record the available OpenBao unseal keys before {{ openbao_unseal_context | default('managed verification') }}
+- name: Record whether OpenBao is already unsealed before {{ openbao_unseal_context | default('managed verification') }}
   ansible.builtin.set_fact:
-    openbao_runtime_unseal_keys: >-
-      {{
-        openbao_unseal_init_payload.keys_base64[
-          :
-          (
-            openbao_unseal_init_payload.secret_threshold
-            | default(openbao_unseal_init_payload.keys_base64 | length, true)
-            | int
-          )
-        ]
-      }}
-    openbao_unseal_progress: "{{ openbao_runtime_seal_status }}"
+    openbao_runtime_unseal_completed: "{{ not (openbao_runtime_seal_status.json.sealed | bool) }}"
   no_log: true
 
-- name: Unseal OpenBao when it becomes sealed during {{ openbao_unseal_context | default('managed verification') }}
-  ansible.builtin.include_tasks: unseal_progress_step.yml
-  loop: "{{ openbao_runtime_unseal_keys }}"
+- name: Submit OpenBao recovery keys until the instance becomes unsealed during {{ openbao_unseal_context | default('managed verification') }}
+  ansible.builtin.include_tasks: unseal_key.yml
+  loop: "{{ openbao_unseal_init_payload.keys_base64 }}"
   loop_control:
-    loop_var: openbao_unseal_key
-  vars:
-    openbao_unseal_api_url: "http://127.0.0.1:{{ openbao_http_port }}"
-  when: openbao_unseal_progress.json.sealed | bool
+    loop_var: openbao_runtime_unseal_key
+    index_var: openbao_runtime_unseal_key_index
   no_log: true
 
 - name: Confirm OpenBao is unsealed before {{ openbao_unseal_context | default('managed verification') }}

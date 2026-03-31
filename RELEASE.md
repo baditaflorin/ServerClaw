@@ -1,12 +1,13 @@
-# Release 0.177.119
+# Release 0.177.120
 
 - Date: 2026-03-31
 
 ## Summary
-- integrates ADR 0306 into main by adding repo-managed Checkov IaC policy scanning to the shared validation gate, build-server remote validation, and the self-hosted validate workflow while preserving the already-current platform baseline 0.130.77 and the earlier exact-main hosted verification proof first established on 0.130.75
+- integrates ADR 0305 into main by replaying the repo-managed k6 smoke, load, and soak validation path on the latest realistic origin/main baseline, preserving Prometheus remote-write, Windmill scheduling, and truthful non-zero receipts when the live Keycloak and OpenFGA SLO budgets are already exhausted
+- integrates ADR 0305 into main by re-verifying the latest realistic origin/main exact-main smoke and load paths for Keycloak and OpenFGA, preserving truthful k6 receipts and bounded notification warnings while recording the remaining live Keycloak load-test failure
 
 ## Platform Impact
-- Platform version remains 0.130.77 while ADR 0306 is integrated on main with repo-managed Checkov IaC policy scanning and the earlier exact-main hosted verification proof first established on 0.130.75.
+- No additional platform_version bump: this release records ADR 0305 latest-main closeout atop platform version 0.130.77, carries the exact-main k6 smoke/load replay and bounded notification handling, and preserves the remaining live Keycloak load-test failure with current Prometheus and remote-builder evidence.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

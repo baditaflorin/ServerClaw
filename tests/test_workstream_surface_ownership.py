@@ -175,3 +175,15 @@ def test_validate_branch_uses_snapshot_env_without_git_metadata(
     changed_files = ownership.validate_branch_ownership(repo_root=repo)
 
     assert changed_files == ["scripts/workstream_surface_ownership.py"]
+
+
+def test_validate_branch_allows_terminal_workstream_with_manifest(tmp_path: Path) -> None:
+    repo = init_repo(tmp_path)
+    registry = build_registry()
+    registry["workstreams"][0]["status"] = "live_applied"
+    write(repo / "scripts" / "workstream_surface_ownership.py", "print('changed')\n")
+    write(repo / "workstreams.yaml", yaml.safe_dump(registry, sort_keys=False))
+
+    changed_files = ownership.validate_branch_ownership(repo_root=repo, base_ref="main")
+
+    assert changed_files == ["scripts/workstream_surface_ownership.py", "workstreams.yaml"]

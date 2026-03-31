@@ -96,12 +96,18 @@ jobs:
           fi
           python3 scripts/run_gate.py --workspace . --docker-binary "${DOCKER_BIN}" --status-file .local/validation-gate/gitea-last-run.json --source gitea-actions --all-lanes
 
+      - name: Run k6 smoke gate
+        run: |
+          set -euo pipefail
+          export LV3_DOCKER_WORKSPACE_PATH="$(cat .local/validation-gate/workspace-host.path)"
+          make k6-smoke K6_ARGS="--runner-context gitea-actions --environment production --service keycloak --service openfga"
+
       - name: Bundle validation artifacts
         if: always()
         run: |
           set -euo pipefail
           artifact_list="$(mktemp)"
-          for artifact_dir in receipts/sast receipts/checkov .local/validation-gate; do
+          for artifact_dir in receipts/sast receipts/checkov .local/validation-gate receipts/k6 receipts/k6/raw; do
             if [ -d "${artifact_dir}" ]; then
               find "${artifact_dir}" -maxdepth 1 -type f \( -name '*.sarif.json' -o -name '*.json' \) >> "${artifact_list}"
             fi

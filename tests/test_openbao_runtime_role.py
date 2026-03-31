@@ -49,6 +49,17 @@ ENSURE_UNSEALED_TASKS_PATH = (
     / "tasks"
     / "ensure_unsealed.yml"
 )
+UNSEAL_KEY_TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "openbao_runtime"
+    / "tasks"
+    / "unseal_key.yml"
+)
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "openbao.yml"
 
 
@@ -144,16 +155,23 @@ def test_openbao_runtime_recovers_detached_empty_default_network_before_compose_
 
 def test_openbao_runtime_retries_seal_status_during_restart_window() -> None:
     tasks = read_openbao_runtime_tasks_text()
+    ensure_unsealed_tasks = ENSURE_UNSEALED_TASKS_PATH.read_text(encoding="utf-8")
 
     assert "- name: Read OpenBao initialization status" in tasks
     assert "register: openbao_init_status" in tasks
     assert "until: openbao_init_status.status == 200" in tasks
-    assert "- name: Read OpenBao seal status" in tasks
-    assert "register: openbao_seal_status" in tasks
-    assert "until: openbao_seal_status.status == 200" in tasks
-    assert "register: openbao_unsealed_status" in tasks
-    assert "until: openbao_unsealed_status.status == 200" in tasks
     assert "changed_when: false" in tasks
+    assert "- name: Ensure OpenBao is unsealed after bootstrap or restart" in tasks
+    assert "include_tasks: ensure_unsealed.yml" in tasks
+    assert "openbao_unseal_context: bootstrap or restart recovery" in tasks
+    assert "Read OpenBao seal status before" in ensure_unsealed_tasks
+    assert "register: openbao_runtime_seal_status" in ensure_unsealed_tasks
+    assert "until: openbao_runtime_seal_status.status == 200" in ensure_unsealed_tasks
+    assert "register: openbao_runtime_unsealed_status" in ensure_unsealed_tasks
+    assert "until:" in ensure_unsealed_tasks
+    assert "openbao_runtime_unsealed_status.status == 200" in ensure_unsealed_tasks
+    assert "not (openbao_runtime_unsealed_status.json.sealed | bool)" in ensure_unsealed_tasks
+    assert "changed_when: false" in ensure_unsealed_tasks
 
 
 def test_openbao_runtime_continues_after_docker_chain_recheck_when_compose_health_checks_guard_recovery() -> None:
@@ -191,13 +209,16 @@ def test_openbao_runtime_persisted_approles_use_reusable_secret_ids() -> None:
 def test_openbao_runtime_rechecks_seal_state_before_auth_verification() -> None:
     tasks = read_openbao_runtime_tasks_text()
     ensure_unsealed_tasks = ENSURE_UNSEALED_TASKS_PATH.read_text(encoding="utf-8")
+    unseal_key_tasks = UNSEAL_KEY_TASKS_PATH.read_text(encoding="utf-8")
 
     assert "Ensure OpenBao remains unsealed before authentication verification" in tasks
     assert "import_tasks: seeded_secrets_and_verification.yml" in TASKS_PATH.read_text(encoding="utf-8")
     assert "include_tasks: ensure_unsealed.yml" in tasks
     assert "Read OpenBao seal status before" in ensure_unsealed_tasks
-    assert "/v1/sys/unseal" in ensure_unsealed_tasks
-    assert "until: openbao_runtime_reseal_recovery.status == 200" not in ensure_unsealed_tasks
+    assert "openbao_runtime_unseal_completed" in ensure_unsealed_tasks
+    assert "include_tasks: unseal_key.yml" in ensure_unsealed_tasks
+    assert "/v1/sys/unseal" in unseal_key_tasks
+    assert "openbao_runtime_unseal_completed" in unseal_key_tasks
     assert "Wait for OpenBao to become active before" in ensure_unsealed_tasks
 
 

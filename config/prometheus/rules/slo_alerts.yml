@@ -804,8 +804,8 @@ groups:
           indicator: availability
         annotations:
           summary: openfga-availability is burning its error budget at 14x
-          description: The private OpenFGA controller endpoint remains reachable for
-            delegated authorization queries and bootstrap replay.
+          description: The private OpenFGA runtime remains reachable on docker-runtime-lv3
+            for delegated authorization queries from the platform guest network.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_openfga_availability
         expr: slo:openfga_availability:error_rate_1h > (3 * 0.005000)
@@ -817,8 +817,8 @@ groups:
           indicator: availability
         annotations:
           summary: openfga-availability is burning its error budget at 3x
-          description: The private OpenFGA controller endpoint remains reachable for
-            delegated authorization queries and bootstrap replay.
+          description: The private OpenFGA runtime remains reachable on docker-runtime-lv3
+            for delegated authorization queries from the platform guest network.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_openfga_availability
         expr: slo:openfga_availability:budget_remaining < 0.10
@@ -830,8 +830,8 @@ groups:
           indicator: availability
         annotations:
           summary: openfga-availability has less than 10% error budget remaining
-          description: The private OpenFGA controller endpoint remains reachable for
-            delegated authorization queries and bootstrap replay.
+          description: The private OpenFGA runtime remains reachable on docker-runtime-lv3
+            for delegated authorization queries from the platform guest network.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_openfga_latency
         expr: (slo:openfga_latency:error_rate_5m > (14 * 0.050000)) and (slo:openfga_latency:error_rate_1h
@@ -844,8 +844,8 @@ groups:
           indicator: latency
         annotations:
           summary: openfga-latency is burning its error budget at 14x
-          description: The private OpenFGA controller endpoint responds in under 500ms
-            for 95% of probes.
+          description: The private OpenFGA runtime responds in under 500ms for 95%
+            of guest-network probes.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_openfga_latency
         expr: slo:openfga_latency:error_rate_1h > (3 * 0.050000)
@@ -857,8 +857,8 @@ groups:
           indicator: latency
         annotations:
           summary: openfga-latency is burning its error budget at 3x
-          description: The private OpenFGA controller endpoint responds in under 500ms
-            for 95% of probes.
+          description: The private OpenFGA runtime responds in under 500ms for 95%
+            of guest-network probes.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_openfga_latency
         expr: slo:openfga_latency:budget_remaining < 0.10
@@ -870,8 +870,8 @@ groups:
           indicator: latency
         annotations:
           summary: openfga-latency has less than 10% error budget remaining
-          description: The private OpenFGA controller endpoint responds in under 500ms
-            for 95% of probes.
+          description: The private OpenFGA runtime responds in under 500ms for 95%
+            of guest-network probes.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_outline_availability
         expr: (slo:outline_availability:error_rate_5m > (14 * 0.005000)) and (slo:outline_availability:error_rate_1h

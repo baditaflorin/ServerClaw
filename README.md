@@ -192,6 +192,14 @@ The repository now also ships ADR 0137 crawl policy automation live on productio
 The repository now also ships the first ADR 0166 canonical error rollout live on production: `config/error-codes.yaml` and `scripts/canonical_errors.py` now normalize repo-managed gateway and platform-context failures behind one trace-id-backed error envelope, and the 2026-03-26 live replay from `main` verified the canonical `AUTH_TOKEN_MISSING` response on both `https://api.lv3.org/v1/health` and `http://100.64.0.1:8010/v1/platform-summary`.
 ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-lv3` now serves the repo-managed private event bus on `10.10.10.20:4222`, the 2026-03-30 exact-main replay re-verified the `PLATFORM_EVENTS`, `RAG_DOCUMENT`, and `SECRET_ROTATION` streams after a short shared Docker-runtime correction loop, and the controller-side check/apply paths plus platform, secret-rotation, and RAG smoke publishes all completed cleanly.
 ADR 0302 Restic file-level backups are now live on production from `main`: `docker-runtime-lv3` now writes encrypted snapshots of `receipts/`, `config/`, `versions/stack.yaml`, and the controller-local secret manifest into the MinIO-backed `restic-config-backup` repository, and the 2026-03-31 exact-main replay re-verified the systemd timer, the event-driven live-apply trigger path, and the governed restore-verification rehearsal end to end.
+ADR 0305 k6 continuous load testing and SLO error-budget burn validation is now
+integrated on `main`: release `0.177.120` carries the repo-managed smoke,
+load, and soak entrypoints together with Windmill scheduling, Prometheus
+remote-write, and bounded notification handling, while the latest realistic
+2026-03-31 exact-main replay truthfully preserved current live degradation on
+platform version `0.130.77`, including public Keycloak OIDC `502 Bad Gateway`,
+Keycloak smoke failure `110/110`, Keycloak load failure `1184/1600` (`74.00%`),
+and OpenFGA load failure `14/1182` (`1.18%`).
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
@@ -199,7 +207,7 @@ ADR 0302 Restic file-level backups are now live on production from `main`: `dock
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.119` |
+| Repository version | `0.177.120` |
 | Platform version | `0.130.77` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
@@ -312,6 +320,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `identity_taxonomy` | `2026-03-22-adr-0046-identity-classes-live-apply` |
 | `immutable_guest_replacement` | `2026-03-27-adr-0191-immutable-guest-replacement-live-apply` |
 | `jupyterhub` | `2026-03-30-adr-0291-jupyterhub-mainline-live-apply` |
+| `k6_load_testing` | `2026-03-31-adr-0305-k6-mainline-live-apply` |
 | `keycloak` | `2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply` |
 | `keycloak_operator_access` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `langfuse` | `2026-03-26-adr-0146-langfuse-live-apply` |
@@ -436,7 +445,7 @@ password SSH disabled on host and guests
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
 | `api` | API Lane | `https` | 15 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
-| `event` | Event Lane | `mixed` | 14 | Event sinks must be documented and intentionally reachable. |
+| `event` | Event Lane | `mixed` | 15 | Event sinks must be documented and intentionally reachable. |
 
 ### Current Governed Surfaces
 | Surface | Lane | Kind | Endpoint |
@@ -467,6 +476,7 @@ password SSH disabled on host and guests
 | `platform-api-request-events` | `event` | `event_subject` | `platform.api.request` |
 | `platform-drift-subjects` | `event` | `event_subject` | `platform.drift.*` |
 | `platform-security-subjects` | `event` | `event_subject` | `platform.security.*` |
+| `platform-slo-subjects` | `event` | `event_subject` | `platform.slo.*` |
 | `maintenance-window-subjects` | `event` | `event_subject` | `platform.maintenance.*` |
 | `platform-backup-subjects` | `event` | `event_subject` | `platform.backup.*` |
 | `platform-world-state-events` | `event` | `event_subject` | `platform.world_state.refreshed` |
@@ -478,7 +488,7 @@ password SSH disabled on host and guests
 ### API Publication Tiers
 | Tier | Title | Surfaces | Summary |
 | --- | --- | --- | --- |
-| `internal-only` | Internal-Only | 18 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
+| `internal-only` | Internal-Only | 19 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
 | `operator-only` | Operator-Only | 8 | Reachable only from approved operator devices over private access such as Tailscale. |
 | `public-edge` | Public Edge | 3 | Intentionally published on a public domain through the named edge model. |
 
@@ -507,6 +517,7 @@ password SSH disabled on host and guests
 | `platform-api-request-events` | `internal-only` | `event` | `platform.api.request` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-drift-subjects` | `internal-only` | `event` | `platform.drift.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-security-subjects` | `internal-only` | `event` | `platform.security.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
+| `platform-slo-subjects` | `internal-only` | `event` | `platform.slo.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `maintenance-window-subjects` | `internal-only` | `event` | `platform.maintenance.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-backup-subjects` | `internal-only` | `event` | `platform.backup.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-world-state-events` | `internal-only` | `event` | `platform.world_state.refreshed` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
@@ -732,6 +743,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Integration Test Suite](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/integration-test-suite.md)
 - [Intent Conflict Resolution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/intent-conflict-resolution.md)
 - [Intent Queue Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/intent-queue.md)
+- [k6 Load Testing](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/k6-load-testing.md)
 - [Runbook: Keycloak Down](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/keycloak-down.md)
 - [Live Apply Merge Train](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-merge-train.md)
 - [Live Apply Receipts And Verification Evidence](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md)
@@ -1468,6 +1480,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0301-live-apply: Live Apply ADR 0301 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0301-live-apply.md)
 - [Workstream ws-0302-live-apply: ADR 0302 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-live-apply.md)
 - [Workstream ws-0302-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-main-integration.md)
+- [Workstream ws-0305-live-apply: Live Apply ADR 0305 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-live-apply.md)
+- [Workstream ws-0305-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md)
 - [Workstream ws-0306-live-apply: Live Apply ADR 0306 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md)
 <!-- END GENERATED: document-index -->
 
@@ -1486,7 +1500,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.119` |
+| Repository version | `0.177.120` |
 | Platform version | `0.130.77` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1818,6 +1832,8 @@ This repository is intentionally opinionated:
 | `0301` | Live apply ADR 0301 from latest origin/main | `merged` | [ws-0301-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0301-live-apply.md) |
 | `0302` | ADR 0302 live apply from latest origin/main | `live_applied` | [ws-0302-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-live-apply.md) |
 | `0302` | Integrate ADR 0302 Restic exact-main replay onto current origin/main | `live_applied` | [ws-0302-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-main-integration.md) |
+| `0305` | Live apply ADR 0305 k6 load testing and SLO error-budget burn validation from latest origin/main | `live_applied` | [ws-0305-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-live-apply.md) |
+| `0305` | Integrate ADR 0305 k6 exact-main replay onto origin/main | `live_applied` | [ws-0305-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md) |
 | `0306` | Live apply Checkov IaC policy scanning from latest origin/main | `live_applied` | [ws-0306-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md) |
 <!-- END GENERATED: merged-workstreams -->
 

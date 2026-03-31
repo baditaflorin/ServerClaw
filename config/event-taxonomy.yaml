@@ -192,6 +192,28 @@ domains:
             - image_ref
             - runtime_host
             - finding
+
+  slo:
+    description: Load-testing regression notifications tied to the canonical SLO workflow surfaces.
+    topics:
+      - name: platform.slo.k6_regression
+        description: A weekly or monthly ADR 0305 k6 run detected a p95 latency regression beyond the governed threshold.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation
+        payload:
+          required:
+            - scenario
+            - service_id
+            - baseline_receipt
+            - current_receipt
+            - baseline_p95_ms
+            - current_p95_ms
+            - regression_ratio
+            - threshold_ratio
+            - recorded_at
   maintenance:
     description: Planned maintenance-window state transitions.
     topics:

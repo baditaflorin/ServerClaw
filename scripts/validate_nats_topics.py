@@ -22,12 +22,14 @@ from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, 
 
 
 CONTROL_PLANE_LANES_PATH = repo_path("config", "control-plane-lanes.json")
+NTFY_SERVER_PATH = repo_path("config", "ntfy", "server.yml")
 SOURCE_ROOTS = (
     repo_path("platform"),
     repo_path("scripts"),
     repo_path("config", "windmill", "scripts"),
 )
 TOPIC_PATTERN = re.compile(r"""["'](platform\.[a-z0-9-]+(?:\.[a-z0-9_.-]+)+)["']""")
+NTFY_TOPIC_PATTERN = re.compile(r"""\b(platform\.[a-z0-9-]+(?:\.[a-z0-9_.-]+)+)\b""")
 
 
 def require_mapping(value: Any, path: str) -> dict[str, Any]:
@@ -73,6 +75,11 @@ def extract_code_topics() -> dict[str, set[str]]:
     return findings
 
 
+def extract_ntfy_topics() -> set[str]:
+    text = NTFY_SERVER_PATH.read_text(encoding="utf-8")
+    return set(NTFY_TOPIC_PATTERN.findall(text))
+
+
 def iter_event_lane_endpoints() -> list[tuple[str, str]]:
     catalog = require_mapping(load_json(CONTROL_PLANE_LANES_PATH), str(CONTROL_PLANE_LANES_PATH))
     lanes = require_mapping(catalog.get("lanes"), "control-plane-lanes.lanes")
@@ -102,11 +109,12 @@ def validate_topic_usage() -> dict[str, Any]:
     topic_index = load_topic_index()
     active_topics = sorted(name for name, spec in topic_index.items() if spec["status"] == "active")
     code_topics = extract_code_topics()
+    ntfy_topics = extract_ntfy_topics()
 
     unknown_topics: list[str] = []
     for path, topics in code_topics.items():
         for topic in sorted(topics):
-            if topic not in topic_index:
+            if topic not in topic_index and topic not in ntfy_topics:
                 unknown_topics.append(f"{path}: {topic}")
 
     endpoint_matches: dict[str, list[str]] = {}
@@ -120,6 +128,7 @@ def validate_topic_usage() -> dict[str, Any]:
         "taxonomy_schema_version": taxonomy["schema_version"],
         "active_topics": active_topics,
         "code_topics": {path: sorted(values) for path, values in sorted(code_topics.items())},
+        "ntfy_topics": sorted(ntfy_topics),
         "endpoint_matches": endpoint_matches,
         "unknown_topics": unknown_topics,
         "uncovered_topics": sorted(uncovered_topics),

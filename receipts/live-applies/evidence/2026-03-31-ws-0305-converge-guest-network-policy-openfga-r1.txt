@@ -1,0 +1,9 @@
+
+PLAY [Converge Proxmox guest network policy enforcement] ***********************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T08:51:24.625Z","vm":"controller","workflow_id":"ansible-playbook"}
+fatal: [proxmox_florin]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: kex_exchange_identification: read: Connection reset by peer\r\nConnection reset by 100.64.0.1 port 22", "unreachable": true}
+
+PLAY RECAP *********************************************************************
+proxmox_florin             : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0

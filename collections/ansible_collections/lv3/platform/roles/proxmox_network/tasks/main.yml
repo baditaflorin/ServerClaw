@@ -144,9 +144,9 @@
       }}
 
 - name: Render per-guest Proxmox firewall policy to staging files
-  ansible.builtin.template:
-    src: vm.fw.j2
+  ansible.builtin.copy:
     dest: "/root/.lv3-vm-{{ guest.vmid }}.fw"
+    content: "{{ lookup('ansible.builtin.template', role_path ~ '/templates/vm.fw.j2') }}"
     mode: "0644"
   loop: "{{ proxmox_network_existing_guests }}"
   loop_control:

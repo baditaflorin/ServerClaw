@@ -181,8 +181,14 @@ def test_openfga_playbook_bootstraps_serverclaw_authz_from_localhost() -> None:
     task = bootstrap_play["tasks"][0]
 
     assert task["name"] == "Bootstrap the ServerClaw authorization store, model, and tuples"
-    assert task["ansible.builtin.command"]["argv"][0] == "python3"
-    assert task["ansible.builtin.command"]["argv"][1] == "{{ openfga_bootstrap_script }}"
+    assert task["ansible.builtin.command"]["argv"][:6] == [
+        "uv",
+        "run",
+        "--with",
+        "pyyaml",
+        "python3",
+        "{{ openfga_bootstrap_script }}",
+    ]
     assert "--openfga-preshared-key-file" in task["ansible.builtin.command"]["argv"]
     assert task["retries"] == 5
     assert task["delay"] == 3

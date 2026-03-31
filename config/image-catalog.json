@@ -415,6 +415,26 @@
         "converge-homepage"
       ]
     },
+    "k6_runtime": {
+      "kind": "runtime",
+      "registry_ref": "docker.io/grafana/k6",
+      "tag": "1.7.1",
+      "digest": "sha256:44bd1d66c2b019327991b95459d78402b0a7a0a055ab52ee088deea1a044e8d5",
+      "ref": "docker.io/grafana/k6:1.7.1@sha256:44bd1d66c2b019327991b95459d78402b0a7a0a055ab52ee088deea1a044e8d5",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-31",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-31-k6-runtime.json",
+      "consumers": [
+        "scripts/k6_load_testing.py",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md",
+        "docs/runbooks/k6-load-testing.md"
+      ],
+      "apply_targets": [
+        "k6-smoke"
+      ]
+    },
     "langfuse_clickhouse_runtime": {
       "kind": "runtime",
       "service_id": "langfuse",

@@ -5,6 +5,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import yaml  # type: ignore[import-untyped]
 
@@ -95,6 +96,14 @@ def fake_checkov_payload(*, check_id: str, path: str, line_range: list[int], sev
     }
 
 
+def install_fake_hcl2(monkeypatch, document_or_loader) -> None:
+    if callable(document_or_loader):
+        loader = document_or_loader
+    else:
+        loader = lambda _handle: document_or_loader
+    monkeypatch.setitem(sys.modules, "hcl2", SimpleNamespace(load=loader))
+
+
 def test_iac_policy_scan_writes_summary_and_sarif(tmp_path: Path, monkeypatch, capsys) -> None:
     module = load_module("iac_policy_scan_module", MODULE_PATH)
     repo_root = tmp_path / "repo"
@@ -132,6 +141,7 @@ def test_iac_policy_scan_writes_summary_and_sarif(tmp_path: Path, monkeypatch, c
 
     monkeypatch.setattr(module.subprocess, "run", fake_run)
     monkeypatch.setattr(module, "detect_source_commit", lambda _repo_root: "abc123def456")
+    monkeypatch.setattr(module, "scan_tofu_custom_findings", lambda **_kwargs: [])
 
     exit_code = module.main(
         [
@@ -211,6 +221,7 @@ def test_iac_policy_scan_applies_suppressions(tmp_path: Path, monkeypatch) -> No
 
     monkeypatch.setattr(module.subprocess, "run", fake_run)
     monkeypatch.setattr(module, "detect_source_commit", lambda _repo_root: "abc123def456")
+    monkeypatch.setattr(module, "scan_tofu_custom_findings", lambda **_kwargs: [])
 
     exit_code = module.main(
         [
@@ -301,6 +312,28 @@ def test_iac_policy_scan_enforces_custom_tofu_invariants(tmp_path: Path, monkeyp
 
     monkeypatch.setattr(module.subprocess, "run", fake_run)
     monkeypatch.setattr(module, "detect_source_commit", lambda _repo_root: "abc123def456")
+    install_fake_hcl2(
+        monkeypatch,
+        lambda handle: (
+            {
+                "provider": [{"proxmox": {"insecure": True}}],
+                "module": [{"docker_runtime": {"source": "../../modules/proxmox-vm"}}],
+            }
+            if "environments/production/main.tf" in Path(handle.name).as_posix()
+            else {
+                "resource": [
+                    {
+                        "proxmox_virtual_environment_vm": {
+                            "this": {
+                                "disk": [{"backup": False}],
+                                "network_device": [{"bridge": "vmbr10"}],
+                            }
+                        }
+                    }
+                ]
+            }
+        ),
+    )
 
     exit_code = module.main(
         [

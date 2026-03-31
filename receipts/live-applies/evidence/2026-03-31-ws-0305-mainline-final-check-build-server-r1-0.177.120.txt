@@ -1,0 +1,16 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/scripts/remote_exec.sh check-build-server
+Checking SSH connectivity to ops@10.10.10.30
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+build-server-ok
+Checking remote workspace root /home/ops/builds/proxmox_florin_server
+Checking remote session workspace /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-mainline-final-723c11c9a0/repo
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-mainline-final-723c11c9a0/repo
+Checking immutable snapshot dry-run upload from codex/ws-0305-mainline-final@7e9b728d556ff419932354c0402cded64e898924
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Transfer starting: 1 files
+repository-snapshot-aa8f482528c819a14ac261580a7a4c983cd66cbef0a7dd71272772a1d8424797.tar.gz
+
+sent 186 bytes  received 26 bytes  1461 bytes/sec
+total size is 40989884  speedup is 193347.60

@@ -1469,7 +1469,7 @@
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "http://100.64.0.1:8014",
+      "internal_url": "http://10.10.10.20:8098",
       "exposure": "private-only",
       "health_probe_id": "openfga",
       "image_catalog_ids": [
@@ -1492,8 +1492,8 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://100.64.0.1:8014",
-          "notes": "Published through the Proxmox host Tailscale proxy and guarded by the repo-managed bearer-key contract."
+          "url": "http://10.10.10.20:8098",
+          "notes": "The guest-reachable runtime stays on docker-runtime-lv3 for SLO probes and k6 smoke/load validation. Controller-local bootstrap and bearer-key verification continue to use the Proxmox host Tailscale proxy at http://100.64.0.1:8014."
         }
       }
     },

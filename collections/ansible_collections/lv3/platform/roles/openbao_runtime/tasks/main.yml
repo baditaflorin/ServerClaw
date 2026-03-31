@@ -607,63 +607,11 @@
     openbao_init_payload: "{{ openbao_init_payload_raw.content | b64decode | from_json }}"
   no_log: true
 
-- name: Read OpenBao seal status
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
-    method: GET
-    return_content: true
-    status_code: 200
-  register: openbao_seal_status
-  retries: 12
-  delay: 2
-  until: openbao_seal_status.status == 200
-  changed_when: false
-
-- name: Record the available OpenBao unseal keys
-  ansible.builtin.set_fact:
-    openbao_unseal_keys: >-
-      {{
-        openbao_init_payload.keys_base64[
-          :
-          (
-            openbao_init_payload.secret_threshold
-            | default(openbao_init_payload.keys_base64 | length, true)
-            | int
-          )
-        ]
-      }}
-    openbao_unseal_progress: "{{ openbao_seal_status }}"
-  no_log: true
-
-- name: Unseal OpenBao with the first threshold of recovery keys
-  ansible.builtin.include_tasks: unseal_progress_step.yml
-  loop: "{{ openbao_unseal_keys }}"
-  loop_control:
-    loop_var: openbao_unseal_key
+- name: Ensure OpenBao is unsealed after bootstrap or restart
+  ansible.builtin.include_tasks: ensure_unsealed.yml
   vars:
-    openbao_unseal_api_url: "http://127.0.0.1:{{ openbao_http_port }}"
-  when: openbao_unseal_progress.json.sealed | bool
-  no_log: true
-
-- name: Confirm that OpenBao is unsealed
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
-    method: GET
-    return_content: true
-    status_code: 200
-  register: openbao_unsealed_status
-  retries: 12
-  delay: 2
-  until:
-    - openbao_unsealed_status.status == 200
-    - not (openbao_unsealed_status.json.sealed | bool)
-  changed_when: false
-
-- name: Assert that OpenBao is unsealed
-  ansible.builtin.assert:
-    that:
-      - not (openbao_unsealed_status.json.sealed | bool)
-    fail_msg: "OpenBao is still sealed after the managed unseal sequence."
+    openbao_unseal_context: bootstrap or restart recovery
+    openbao_unseal_init_payload: "{{ openbao_init_payload }}"
 
 - name: Wait for OpenBao to become the active node
   ansible.builtin.uri:

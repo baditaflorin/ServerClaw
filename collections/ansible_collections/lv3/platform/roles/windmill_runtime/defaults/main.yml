@@ -137,6 +137,7 @@ windmill_default_operations_surface_script_paths:
   - f/lv3/audit_token_inventory
   - f/lv3/token_exposure_response
   - f/lv3/weekly_capacity_report
+  - f/lv3/k6_load_testing
   - f/lv3/collection_publish
   - f/lv3/packer_template_rebuild
   - f/lv3/fixture_expiry_reaper
@@ -310,8 +311,14 @@ windmill_worker_runtime_writable_directories:
     mode: "1777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/cve"
     mode: "1777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/k6"
+    mode: "1777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/k6/raw"
+    mode: "1777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local"
     mode: "0755"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/k6"
+    mode: "1777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures"
     mode: "1777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/reaper-runs"
@@ -529,6 +536,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0105 weekly capacity report
     description: Repo-managed Windmill wrapper that renders the weekly platform capacity summary payload from the committed model.
+  - path: f/lv3/k6_load_testing
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/k6-load-testing.py"
+    language: python3
+    summary: ADR 0305 k6 load testing
+    description: Repo-managed Windmill wrapper that runs the governed k6 smoke, load, or soak workflows from the worker checkout and records receipts.
   - path: f/lv3/collection_publish
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/collection-publish.py"
     language: python3
@@ -856,6 +868,34 @@ windmill_seed_schedules:
     enabled: true
     summary: ADR 0108 quarterly access review
     description: Repo-managed Monday trigger that only delivers the ADR 0108 quarterly access review on the first Monday of January, April, July, and October.
+    no_flow_overlap: true
+  - path: f/lv3/k6_load_weekly
+    schedule: "0 0 5 * * 7"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/k6_load_testing
+    args:
+      scenario: load
+      runner_context: windmill
+      environment: production
+      publish_nats: true
+      notify_ntfy: true
+    enabled: true
+    summary: ADR 0305 weekly k6 load validation
+    description: Repo-managed weekly k6 load probe that exercises the declared latency SLO services, records receipts, emits regression events, and sends error-budget warnings when remaining budget drops below the governed threshold.
+    no_flow_overlap: true
+  - path: f/lv3/k6_soak_monthly
+    schedule: "0 30 5 1 * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/k6_load_testing
+    args:
+      scenario: soak
+      runner_context: windmill
+      environment: production
+      publish_nats: true
+      notify_ntfy: true
+    enabled: true
+    summary: ADR 0305 monthly k6 soak validation
+    description: Repo-managed monthly k6 soak probe that exercises the declared latency SLO services for an extended window and records the resulting receipts plus notification side effects.
     no_flow_overlap: true
   - path: f/lv3/world_state/refresh_proxmox_vms_every_minute
     schedule: "0 * * * * *"

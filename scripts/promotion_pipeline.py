@@ -296,7 +296,7 @@ def recorded_at_for_receipt(receipt: dict[str, Any]) -> dt.datetime:
     return dt.datetime.fromisoformat(f"{receipt['recorded_on']}T00:00:00+00:00")
 
 
-def evaluate_slo_gate(prometheus_url: str | None = None) -> dict[str, Any]:
+def evaluate_slo_gate(prometheus_url: str | None = None, *, service_id: str | None = None) -> dict[str, Any]:
     effective_prometheus_url = prometheus_url or os.environ.get("PROMOTION_PROMETHEUS_URL") or default_prometheus_url()
     if not effective_prometheus_url:
         return {
@@ -304,6 +304,8 @@ def evaluate_slo_gate(prometheus_url: str | None = None) -> dict[str, Any]:
             "prometheus_url": None,
             "entries": [],
             "blocking": [],
+            "blocking_messages": [],
+            "blocking_k6_messages": [],
             "reason": "Prometheus URL is not configured for SLO evaluation",
         }
 
@@ -319,6 +321,8 @@ def evaluate_slo_gate(prometheus_url: str | None = None) -> dict[str, Any]:
             "prometheus_url": effective_prometheus_url,
             "entries": entries,
             "blocking": [],
+            "blocking_messages": [],
+            "blocking_k6_messages": [],
             "reason": "failed to query Prometheus for SLO status: "
             + "; ".join(f"{entry['id']}: {entry['metrics_error']}" for entry in metric_errors),
         }
@@ -328,14 +332,47 @@ def evaluate_slo_gate(prometheus_url: str | None = None) -> dict[str, Any]:
             "prometheus_url": effective_prometheus_url,
             "entries": entries,
             "blocking": [],
+            "blocking_messages": [],
+            "blocking_k6_messages": [],
             "reason": "missing SLO metric samples for: " + ", ".join(entry["id"] for entry in metric_gaps),
         }
     blocking = find_budget_breaches(entries, threshold=0.10)
+    blocking_messages = [
+        f"{entry['id']} ({entry['metrics']['budget_remaining']:.2%} remaining)"
+        for entry in blocking
+    ]
+    blocking_k6_messages: list[str] = []
+    if service_id:
+        matching_entries = [entry for entry in entries if entry["service_id"] == service_id]
+        k6_payload = matching_entries[0].get("k6", {}) if matching_entries else {}
+        latest_load = k6_payload.get("latest_receipts", {}).get("load") if isinstance(k6_payload, dict) else None
+        if any(entry["indicator"] == "latency" for entry in matching_entries) and latest_load is None:
+            return {
+                "checked": False,
+                "prometheus_url": effective_prometheus_url,
+                "entries": entries,
+                "blocking": blocking,
+                "blocking_messages": blocking_messages,
+                "blocking_k6_messages": [],
+                "reason": f"missing k6 load receipt for service '{service_id}'",
+            }
+        if isinstance(latest_load, dict):
+            if latest_load.get("result") != "passed":
+                blocking_k6_messages.append(
+                    f"latest k6 load receipt failed for {service_id} ({latest_load['receipt_path']})"
+                )
+            remaining_pct = latest_load.get("error_budget_remaining_pct")
+            if isinstance(remaining_pct, (int, float)) and remaining_pct < 20.0:
+                blocking_k6_messages.append(
+                    f"latest k6 load receipt for {service_id} shows {remaining_pct:.1f}% remaining ({latest_load['receipt_path']})"
+                )
     return {
         "checked": True,
         "prometheus_url": effective_prometheus_url,
         "entries": entries,
         "blocking": blocking,
+        "blocking_messages": blocking_messages + blocking_k6_messages,
+        "blocking_k6_messages": blocking_k6_messages,
         "reason": None,
     }
 
@@ -409,7 +446,7 @@ def check_promotion_gate(
     capacity_approved, capacity_reasons = check_capacity_gate(capacity_model)
     standby_gate = evaluate_service_standby(service_id, catalog={"services": list(service_index.values())}, model=capacity_model)
 
-    slo_gate = evaluate_slo_gate()
+    slo_gate = evaluate_slo_gate(service_id=service_id)
     policy_input = {
         "service_id": service_id,
         "approval": approval,
@@ -440,7 +477,8 @@ def check_promotion_gate(
         "slo_gate": {
             "checked": slo_gate["checked"],
             "reason": slo_gate.get("reason") or "",
-            "blocking_budget_messages": [
+            "blocking_budget_messages": slo_gate.get("blocking_messages")
+            or [
                 f"{entry['id']} ({entry['metrics']['budget_remaining']:.2%} remaining)"
                 for entry in slo_gate["blocking"]
             ],
