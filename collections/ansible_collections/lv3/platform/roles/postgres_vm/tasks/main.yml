@@ -46,6 +46,7 @@
 
 - name: Record PostgreSQL cluster paths
   ansible.builtin.set_fact:
+    postgres_vm_cluster_conf_path: "{{ postgres_vm_config_files.files[0].path }}"
     postgres_vm_cluster_conf_dir: "{{ postgres_vm_config_files.files[0].path | dirname }}"
     postgres_vm_cluster_version: "{{ postgres_vm_config_files.files[0].path | dirname | dirname | basename }}"
     postgres_vm_managed_conf_path: "{{ (postgres_vm_config_files.files[0].path | dirname) ~ '/conf.d/90-lv3-postgres.conf' }}"
@@ -64,6 +65,17 @@
     path: "{{ postgres_vm_cluster_conf_dir }}/conf.d"
     state: directory
     mode: "0755"
+
+- name: Ensure PostgreSQL includes the managed conf.d directory
+  ansible.builtin.lineinfile:
+    path: "{{ postgres_vm_cluster_conf_path }}"
+    regexp: '^[#\s]*include_dir\s*='
+    line: "include_dir = 'conf.d'"
+    insertafter: EOF
+    owner: root
+    group: postgres
+    mode: "0644"
+  notify: Restart PostgreSQL
 
 - name: Render managed PostgreSQL settings
   ansible.builtin.copy:

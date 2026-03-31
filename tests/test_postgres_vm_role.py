@@ -49,6 +49,17 @@ def test_main_tasks_load_sensitive_table_catalog_and_grant_audit_role() -> None:
     assert "item.privileges" in grant_task["ansible.builtin.command"]["argv"][-1]
 
 
+def test_main_tasks_ensure_managed_conf_d_is_included() -> None:
+    tasks = load_yaml(TASKS_PATH)
+    include_task = next(
+        task for task in tasks if task.get("name") == "Ensure PostgreSQL includes the managed conf.d directory"
+    )
+
+    assert include_task["ansible.builtin.lineinfile"]["path"] == "{{ postgres_vm_cluster_conf_path }}"
+    assert include_task["ansible.builtin.lineinfile"]["regexp"] == r"^[#\s]*include_dir\s*="
+    assert include_task["ansible.builtin.lineinfile"]["line"] == "include_dir = 'conf.d'"
+
+
 def test_template_enables_connection_logging_and_pgaudit_settings() -> None:
     template = TEMPLATE_PATH.read_text()
 
