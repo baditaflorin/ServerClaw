@@ -115,6 +115,11 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert 'api_gateway_world_state_dsn: "{{ api_gateway_graph_dsn }}"' in defaults
     assert "/.local/dify/tools-api-key.txt" in defaults
     assert "api_gateway_dify_tools_api_key_header: X-LV3-Dify-Api-Key" in defaults
+    assert "/.local/lago/producer-catalog.json" in defaults
+    assert "/.local/lago/org-api-key.txt" in defaults
+    assert 'api_gateway_billing_api_base_url: "{{ api_gateway_lago_service_topology.urls.api | default(\'\') }}"' in defaults
+    assert "api_gateway_billing_ingest_producers_path: /config/billing-ingest-producers.json" in defaults
+    assert "api_gateway_billing_rejection_subject: billing.events.rejected" in defaults
 
 
 def test_api_gateway_compose_mounts_config_into_app_root() -> None:
@@ -133,6 +138,10 @@ def test_api_gateway_compose_mounts_config_into_app_root() -> None:
     assert "LV3_GATEWAY_WORLD_STATE_DSN={{ api_gateway_world_state_dsn }}" in env_template
     assert "LV3_DIFY_TOOLS_API_KEY={{ api_gateway_dify_tools_api_key }}" in env_template
     assert "LV3_DIFY_TOOLS_API_KEY_HEADER={{ api_gateway_dify_tools_api_key_header }}" in env_template
+    assert "LV3_GATEWAY_BILLING_API_BASE_URL={{ api_gateway_billing_api_base_url }}" in env_template
+    assert "LV3_GATEWAY_BILLING_INGEST_PRODUCERS_PATH={{ api_gateway_billing_ingest_producers_path }}" in env_template
+    assert "LV3_GATEWAY_BILLING_REJECTION_SUBJECT={{ api_gateway_billing_rejection_subject }}" in env_template
+    assert "LV3_GATEWAY_BILLING_ORG_API_KEY={{ api_gateway_lago_org_api_key }}" in env_template
 
 
 def test_windmill_runtime_templates_export_graph_world_state_and_ledger_dsns() -> None:
@@ -238,6 +247,9 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert 'src: "{{ api_gateway_repo_root }}/receipts/"' not in tasks
     assert 'dest: "{{ api_gateway_service_dir }}/receipts/"' not in tasks
     assert "Remove stale managed API gateway config bundle entries" in tasks
+    assert "Check whether the controller-local Lago billing producer catalog exists" in tasks
+    assert "Sync the controller-local Lago billing producer catalog" in tasks
+    assert "Render an empty Lago billing producer catalog when no controller-local catalog exists" in tasks
     assert "ansible.builtin.meta: reset_connection" in tasks
     assert "Build the API gateway image" in tasks
     assert "mktemp -d /tmp/api-gateway-build." in tasks

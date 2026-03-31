@@ -186,6 +186,8 @@ platform_ports:
   langfuse_port: 3002
   plausible_port: 8016
   flagsmith_port: 8017
+  lago_api_port: 8099
+  lago_front_port: 8100
   dify_port: 8094
   changedetection_port: 5000
   browser_runner_port: 8096
@@ -268,6 +270,8 @@ platform_port_assignments:
   langfuse_port: 3002
   plausible_port: 8016
   flagsmith_port: 8017
+  lago_api_port: 8099
+  lago_front_port: 8100
   dify_port: 8094
   changedetection_port: 5000
   browser_runner_port: 8096
@@ -1648,6 +1652,39 @@ platform_service_topology:
     urls:
       public: https://analytics.lv3.org
       internal: http://10.10.10.20:8016
+  lago:
+    service_name: lago
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: billing.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: billing
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8100
+      prefix_proxy_routes:
+        - path: /api/
+          upstream: http://10.10.10.20:8099
+    service_id: lago
+    ports:
+      internal: 8100
+      api: 8099
+    urls:
+      public: https://billing.lv3.org
+      internal: http://10.10.10.20:8100
+      api: http://10.10.10.20:8099
   dify:
     service_name: dify
     owning_vm: docker-runtime-lv3
@@ -2521,6 +2558,10 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: billing
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: agents
       type: A
       value: 65.108.75.123
@@ -3299,6 +3340,39 @@ public_edge_service_topology:
     urls:
       public: https://analytics.lv3.org
       internal: http://10.10.10.20:8016
+  lago:
+    service_name: lago
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: billing.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: billing
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8100
+      prefix_proxy_routes:
+        - path: /api/
+          upstream: http://10.10.10.20:8099
+    service_id: lago
+    ports:
+      internal: 8100
+      api: 8099
+    urls:
+      public: https://billing.lv3.org
+      internal: http://10.10.10.20:8100
+      api: http://10.10.10.20:8099
   dify:
     service_name: dify
     owning_vm: docker-runtime-lv3
@@ -4237,6 +4311,8 @@ searxng_host_proxy_port: 80
 langfuse_port: 3002
 plausible_port: 8016
 flagsmith_port: 8017
+lago_api_port: 8099
+lago_front_port: 8100
 dify_port: 8094
 changedetection_port: 5000
 browser_runner_port: 8096

@@ -656,6 +656,23 @@
       "notes": "Harbor registry published through the shared NGINX edge with browser sign-in delegated at the Harbor application layer."
     },
     {
+      "fqdn": "billing.lv3.org",
+      "service_id": "lago",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0292",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "The shared edge protects the Lago browser UI while `/api/health` and `/api/v1/events` intentionally stay reachable for probes and governed producer ingest through the API gateway adapter."
+    },
+    {
       "fqdn": "search.lv3.org",
       "service_id": "searxng",
       "environment": "production",

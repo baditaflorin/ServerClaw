@@ -3242,6 +3242,85 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-lago": {
+      "description": "Converge Lago on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish billing.lv3.org through the shared edge, and verify public producer ingest plus current-usage aggregation end to end.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-lago",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-lago"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
+        ],
+        "generated_secret_ids": [
+          "lago_database_password",
+          "lago_redis_password",
+          "lago_secret_key_base",
+          "lago_rsa_private_key",
+          "lago_encryption_primary_key",
+          "lago_encryption_deterministic_key",
+          "lago_encryption_key_derivation_salt",
+          "lago_bootstrap_user_password",
+          "lago_org_api_key",
+          "lago_smoke_producer_token",
+          "lago_producer_catalog"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-lago"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-lago.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/lago.yml",
+        "playbooks/services/lago.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/lago.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/lago.yml",
+        "collections/ansible_collections/lv3/platform/roles/lago_postgres",
+        "collections/ansible_collections/lv3/platform/roles/lago_runtime",
+        "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/api_gateway/main.py",
+        "config/service-capability-catalog.json",
+        "config/subdomain-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/secret-catalog.json",
+        "config/controller-local-secrets.json",
+        "config/api-gateway-catalog.json",
+        "config/dependency-graph.json",
+        "config/data-catalog.json",
+        "config/service-completeness.json"
+      ],
+      "outputs": [
+        "A repo-managed Lago runtime on docker-runtime-lv3 with a shared PostgreSQL backend, protected browser publication at billing.lv3.org, and a governed public producer-ingest adapter that proves current-usage aggregation end to end."
+      ],
+      "verification_commands": [
+        "make syntax-check-lago",
+        "curl -fsS https://billing.lv3.org/api/health",
+        "curl -I https://billing.lv3.org/",
+        "curl -fsS -X POST -H \"Authorization: Bearer $(tr -d '\\n' < .local/lago/smoke-producer-token.txt)\" -H \"Content-Type: application/json\" --data '{\"event\":{\"transaction_id\":\"00000000-0000-4000-8000-000000000001\",\"external_subscription_id\":\"lv3-billing-smoke-subscription\",\"code\":\"api_calls\"}}' https://billing.lv3.org/api/v1/events"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-keycloak": {
       "description": "Converge Keycloak on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at sso.lv3.org, and wire Grafana through the shared SSO broker.",
       "lifecycle_status": "active",

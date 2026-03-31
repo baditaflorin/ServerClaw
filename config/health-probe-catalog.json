@@ -1080,6 +1080,76 @@
         }
       }
     },
+    "lago": {
+      "service_name": "lago",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "lago_runtime",
+      "verify_file": "roles/lago_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Lago startup completes once the local API health endpoint responds on the private runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8099/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local Lago API health endpoint continues to answer on docker-runtime-lv3.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8099/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public Lago health endpoint answers through the shared NGINX edge and API-gateway-backed `/api/health` publication while the browser UI remains protected by the shared auth boundary.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "https://billing.lv3.org/api/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "docker_publication": {
+          "container_name": "lago-api",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8099
+            }
+          ],
+          "required_networks": [
+            "lago_default"
+          ]
+        }
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Lago Public Health",
+          "type": "http",
+          "url": "https://billing.lv3.org/api/health",
+          "description": "Public Lago health endpoint published through the shared NGINX edge and billing adapter path.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "langfuse": {
       "service_name": "langfuse",
       "owning_vm": "docker-runtime-lv3",

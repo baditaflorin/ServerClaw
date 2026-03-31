@@ -1,0 +1,32 @@
+---
+# Purpose: Default inputs for provisioning the shared PostgreSQL role and database used by Lago.
+# Use case: Loaded whenever the Lago billing runtime needs its database role, database, or mirrored password reconciled on postgres-lv3.
+#
+# Inputs (required):
+#   - postgres-lv3 access (required): Writable PostgreSQL primary access on the selected database VM.
+#
+# Inputs (optional):
+#   - lago_database_name (str, optional, default=lago): Database name for the Lago runtime.
+#   - lago_database_user (str, optional, default=lago): PostgreSQL login role for the Lago runtime.
+#
+# Outputs:
+#   - Stable defaults for the repo-managed Lago PostgreSQL role, database, remote password mirror, and controller-local password mirror.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0292: Declares Lago as the usage metering and billing API layer.
+#   - ADR 0042: Shared PostgreSQL cluster hosts the application database.
+#
+# Related ADRs: 0042, 0165, 0292
+# Related Runbooks: docs/runbooks/configure-lago.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+lago_database_name: lago
+lago_database_user: lago
+lago_postgres_secret_dir: /etc/lv3/lago
+lago_postgres_password_file: "{{ lago_postgres_secret_dir }}/database-password"
+lago_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago
+lago_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/database-password.txt

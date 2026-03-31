@@ -162,6 +162,33 @@
   loop_control:
     label: "{{ item.dest }}"
 
+- name: Check whether the controller-local Lago billing producer catalog exists
+  ansible.builtin.stat:
+    path: "{{ api_gateway_billing_ingest_producers_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: api_gateway_billing_ingest_producers_stat
+
+- name: Sync the controller-local Lago billing producer catalog
+  ansible.builtin.copy:
+    src: "{{ api_gateway_billing_ingest_producers_local_file }}"
+    dest: "{{ api_gateway_config_dir }}/billing-ingest-producers.json"
+    owner: root
+    group: root
+    mode: "0600"
+  when: api_gateway_billing_ingest_producers_stat.stat.exists
+  no_log: true
+
+- name: Render an empty Lago billing producer catalog when no controller-local catalog exists
+  ansible.builtin.copy:
+    dest: "{{ api_gateway_config_dir }}/billing-ingest-producers.json"
+    owner: root
+    group: root
+    mode: "0600"
+    content: |
+      {"producers":[]}
+  when: not api_gateway_billing_ingest_producers_stat.stat.exists
+
 - name: Discover committed drift receipts to bundle with the gateway
   ansible.builtin.set_fact:
     api_gateway_drift_receipts: "{{ lookup('ansible.builtin.fileglob', api_gateway_drift_receipts_glob, wantlist=True) }}"

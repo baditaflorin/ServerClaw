@@ -408,6 +408,15 @@
       "adr": "0291"
     },
     {
+      "id": "lago",
+      "service": "lago",
+      "name": "Lago",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0292"
+    },
+    {
       "id": "plane",
       "service": "plane",
       "name": "Plane",
@@ -1134,6 +1143,36 @@
       "to": "platform_context_api",
       "type": "soft",
       "description": "Spawned notebook servers expose the private platform-context API for exploratory repository and platform lookups."
+    },
+    {
+      "from": "lago",
+      "to": "api_gateway",
+      "type": "soft",
+      "description": "Public producer ingest at billing.lv3.org/api/v1/events is brokered by the platform API gateway adapter and canonical error-handling path."
+    },
+    {
+      "from": "lago",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Lago API, front end, worker, clock, Redis, and PDF sidecar run on docker-runtime-lv3."
+    },
+    {
+      "from": "lago",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Operator browser access to billing.lv3.org is gated by the shared oauth2-proxy and Keycloak edge-auth path."
+    },
+    {
+      "from": "lago",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public reachability for billing.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "lago",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Lago stores billable metrics, plans, customers, subscriptions, invoices, and aggregated usage state in the shared PostgreSQL cluster."
     },
     {
       "from": "plane",

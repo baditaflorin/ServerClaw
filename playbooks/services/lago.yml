@@ -1,0 +1,28 @@
+---
+# Playbook: services/lago.yml
+# Purpose: Provide the stable live-apply service wrapper for Lago.
+# Use case: Run `make live-apply-service service=lago` so the generic service lane can invoke the canonical Lago converge playbook.
+#
+# Inputs (required):
+#   - env (str, required): Environment selector passed by the live-apply wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH connection strategy.
+#
+# Outputs:
+#   - Imports the canonical Lago converge playbook.
+#
+# Idempotency: Fully idempotent
+#              The wrapper only imports the canonical playbook and adds no extra mutation.
+#
+# Dependencies:
+#   - ADR 0292: Lago is the usage metering and billing API layer.
+#   - Requires: playbooks/lago.yml
+#
+# Related ADRs: 0292
+# Related Runbooks: docs/runbooks/configure-lago.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- import_playbook: ../lago.yml

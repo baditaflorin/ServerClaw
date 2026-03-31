@@ -619,6 +619,34 @@
       "notes": "The service-local MinIO bucket stores shared notebook assets and collaborative exploratory artifacts exchanged between operators."
     },
     {
+      "id": "lago-billing-control-plane-state",
+      "service": "lago",
+      "name": "Lago billing catalog and usage state",
+      "class": "confidential",
+      "retention_days": 1825,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "Lago PostgreSQL database on postgres-lv3"
+      ],
+      "notes": "Lago stores billable metrics, plans, customers, subscriptions, invoices, credit notes, and aggregated usage records that may include tenant identifiers and billing contacts."
+    },
+    {
+      "id": "lago-generated-billing-artifacts",
+      "service": "lago",
+      "name": "Lago generated billing artifacts",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/lago/data/storage on docker-runtime-lv3"
+      ],
+      "notes": "The Lago storage directory retains generated invoice exports, PDF-ready billing artifacts, and other runtime files needed for billing-history reconstruction."
+    },
+    {
       "id": "plane-object-storage",
       "service": "plane",
       "name": "Plane attachment object storage",

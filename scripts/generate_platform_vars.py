@@ -60,6 +60,8 @@ PORT_KEYS = (
     "langfuse_port",
     "plausible_port",
     "flagsmith_port",
+    "lago_api_port",
+    "lago_front_port",
     "dify_port",
     "changedetection_port",
     "browser_runner_port",
@@ -511,6 +513,11 @@ def build_service_urls(
     elif service_id == "plausible":
         urls["internal"] = service_url("http", private_ip, ports["plausible_port"])
         port_map["internal"] = ports["plausible_port"]
+    elif service_id == "lago":
+        urls["internal"] = service_url("http", private_ip, ports["lago_front_port"])
+        urls["api"] = service_url("http", private_ip, ports["lago_api_port"])
+        port_map["internal"] = ports["lago_front_port"]
+        port_map["api"] = ports["lago_api_port"]
     elif service_id == "mailpit":
         urls["internal"] = service_url("http", private_ip, ports["mailpit_http_port"])
         urls["smtp"] = service_url("smtp", private_ip, ports["mailpit_smtp_port"])

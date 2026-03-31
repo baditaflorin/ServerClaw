@@ -1,0 +1,28 @@
+---
+# Playbook: lago.yml
+# Purpose: Expose the canonical Lago converge workflow through the root playbook entrypoint.
+# Use case: Run during deployment, upgrade, or recovery when the billing runtime, gateway adapter, and shared edge publication must match repo truth.
+#
+# Inputs (required):
+#   - env (str, required): Deployment environment selector passed through to the collection playbook.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the live apply.
+#
+# Outputs:
+#   - Imports the collection-scoped Lago playbook used by live-apply wrappers and syntax checks.
+#
+# Idempotency: Fully idempotent
+#              This wrapper only imports the collection playbook and does not mutate state on its own.
+#
+# Dependencies:
+#   - ADR 0292: Defines Lago as the usage metering and billing API layer.
+#   - Requires: collections/ansible_collections/lv3/platform/playbooks/lago.yml.
+#
+# Related ADRs: 0042, 0077, 0292
+# Related Runbooks: docs/runbooks/configure-lago.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- import_playbook: ../collections/ansible_collections/lv3/platform/playbooks/lago.yml

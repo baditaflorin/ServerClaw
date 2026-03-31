@@ -236,6 +236,13 @@ public_edge_authenticated_sites:
     auth_proxy_upstream: http://127.0.0.1:4180
   coolify.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
+  billing.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+    unauthenticated_proxy_routes:
+      - path: /api/health
+        upstream: http://127.0.0.1:8083/v1/billing/health
+      - path: /api/v1/events
+        upstream: http://127.0.0.1:8083/v1/billing/events
   docs.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   draw.lv3.org:

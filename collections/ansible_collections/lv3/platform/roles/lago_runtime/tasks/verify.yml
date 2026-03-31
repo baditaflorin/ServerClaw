@@ -1,0 +1,44 @@
+---
+- name: Verify the Lago local health endpoint
+  ansible.builtin.uri:
+    url: "{{ lago_direct_api_local_base_url }}/health"
+    method: GET
+    status_code: 200
+  register: lago_verify_health
+  retries: 30
+  delay: 5
+  until: lago_verify_health.status == 200
+  changed_when: false
+
+- name: Verify the Lago direct current usage endpoint returns the smoke metric
+  ansible.builtin.uri:
+    url: "{{ lago_direct_api_local_base_url }}/api/v1/customers/{{ lago_smoke_external_customer_id }}/current_usage"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ lago_org_api_key }}"
+    params:
+      external_subscription_id: "{{ lago_smoke_external_subscription_id }}"
+    status_code: 200
+    return_content: true
+  register: lago_verify_current_usage
+  retries: 24
+  delay: 5
+  until: >-
+    lago_verify_current_usage.status == 200
+    and (
+      (lago_verify_current_usage.content | lower)
+      is search(lago_smoke_metric_code | lower)
+    )
+  changed_when: false
+  no_log: true
+
+- name: Verify the Lago front surface listens locally
+  ansible.builtin.uri:
+    url: "{{ lago_direct_front_local_base_url }}/"
+    method: GET
+    status_code: 200
+  register: lago_verify_front
+  retries: 24
+  delay: 5
+  until: lago_verify_front.status == 200
+  changed_when: false

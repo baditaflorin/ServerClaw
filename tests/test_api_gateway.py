@@ -4,6 +4,7 @@ import json
 import sqlite3
 import sys
 import time
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
@@ -69,6 +70,12 @@ def write_json(path: Path, payload: dict) -> None:
 def write_yaml(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content)
+
+
+def write_billing_producer_catalog(tmp_path: Path, payload: dict) -> Path:
+    path = tmp_path / "config" / "billing-ingest-producers.json"
+    write_json(path, payload)
+    return path
 
 
 def test_gateway_runtime_compose_mounts_config_at_app_path() -> None:
@@ -857,6 +864,237 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
                 await runtime.close()
 
     import asyncio
+
+    asyncio.run(run())
+
+
+def test_billing_health_route_proxies_without_platform_auth(tmp_path: Path) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "billing.test":
+            assert request.url.path == "/health"
+            return httpx.Response(200, json={"status": "ok", "service": "lago"})
+        return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+
+    producer_catalog_path = write_billing_producer_catalog(tmp_path, {"producers": []})
+    transport = httpx.MockTransport(handler)
+    config, _token = make_repo(tmp_path, "http://upstream.test")
+    config = replace(
+        config,
+        billing_api_base_url="http://billing.test",
+        billing_ingest_producers_path=producer_catalog_path,
+        billing_org_api_key="lago-org-api-key",
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.get("/v1/billing/health")
+                    assert response.status_code == 200
+                    assert response.json() == {"status": "ok", "service": "lago"}
+            finally:
+                await runtime.close()
+
+    asyncio.run(run())
+
+
+def test_billing_event_route_forwards_valid_events_to_lago(tmp_path: Path) -> None:
+    producer_catalog = {
+        "producers": [
+            {
+                "id": "smoke-producer",
+                "name": "Smoke Producer",
+                "token": "producer-token",
+                "allowed_metric_codes": ["api_calls"],
+                "allowed_external_subscription_ids": ["sub-123"],
+            }
+        ]
+    }
+    producer_catalog_path = write_billing_producer_catalog(tmp_path, producer_catalog)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "billing.test":
+            assert request.url.path == "/api/v1/events"
+            assert request.headers["Authorization"] == "Bearer lago-org-api-key"
+            payload = json.loads(request.content.decode("utf-8"))
+            assert payload["event"]["external_subscription_id"] == "sub-123"
+            assert payload["event"]["code"] == "api_calls"
+            return httpx.Response(200, json={"event": {"status": "accepted"}})
+        return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+
+    transport = httpx.MockTransport(handler)
+    config, _token = make_repo(tmp_path, "http://upstream.test")
+    config = replace(
+        config,
+        billing_api_base_url="http://billing.test",
+        billing_ingest_producers_path=producer_catalog_path,
+        billing_org_api_key="lago-org-api-key",
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.post(
+                        "/v1/billing/events",
+                        headers={"Authorization": "Bearer producer-token"},
+                        json={
+                            "event": {
+                                "transaction_id": str(gateway_main.uuid.uuid4()),
+                                "external_subscription_id": "sub-123",
+                                "code": "api_calls",
+                                "properties": {"count": 1},
+                            }
+                        },
+                    )
+                    assert response.status_code == 200
+                    assert response.json()["event"]["status"] == "accepted"
+            finally:
+                await runtime.close()
+
+    asyncio.run(run())
+
+
+def test_billing_event_route_rejects_invalid_scope_and_publishes_rejection(tmp_path: Path) -> None:
+    producer_catalog = {
+        "producers": [
+            {
+                "id": "smoke-producer",
+                "name": "Smoke Producer",
+                "token": "producer-token",
+                "allowed_metric_codes": ["api_calls"],
+                "allowed_external_subscription_ids": ["sub-123"],
+            }
+        ]
+    }
+    producer_catalog_path = write_billing_producer_catalog(tmp_path, producer_catalog)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "billing.test":
+            return httpx.Response(200, json={"event": {"status": "accepted"}})
+        return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+
+    transport = httpx.MockTransport(handler)
+    config, _token = make_repo(tmp_path, "http://upstream.test")
+    config = replace(
+        config,
+        billing_api_base_url="http://billing.test",
+        billing_ingest_producers_path=producer_catalog_path,
+        billing_org_api_key="lago-org-api-key",
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            rejections: list[tuple[str, dict[str, object]]] = []
+
+            async def fake_emit(subject: str, payload: dict[str, object]) -> None:
+                rejections.append((subject, payload))
+
+            runtime.event_emitter.emit = fake_emit  # type: ignore[method-assign]
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.post(
+                        "/v1/billing/events",
+                        headers={"Authorization": "Bearer producer-token"},
+                        json={
+                            "event": {
+                                "transaction_id": str(gateway_main.uuid.uuid4()),
+                                "external_subscription_id": "sub-123",
+                                "code": "forbidden_metric",
+                                "properties": {"count": 1},
+                            }
+                        },
+                    )
+                    assert response.status_code == 422
+                    assert response.json()["error"]["code"] == "INPUT_SCHEMA_INVALID"
+                    assert rejections[0][0] == "billing.events.rejected"
+                    assert rejections[0][1]["reason_code"] == "metric_not_allowed"
+                    assert rejections[0][1]["producer_id"] == "smoke-producer"
+            finally:
+                await runtime.close()
+
+    asyncio.run(run())
+
+
+def test_billing_event_route_rejects_invalid_token_and_publishes_rejection(tmp_path: Path) -> None:
+    producer_catalog = {
+        "producers": [
+            {
+                "id": "smoke-producer",
+                "name": "Smoke Producer",
+                "token": "producer-token",
+                "allowed_metric_codes": ["api_calls"],
+                "allowed_external_subscription_ids": ["sub-123"],
+            }
+        ]
+    }
+    producer_catalog_path = write_billing_producer_catalog(tmp_path, producer_catalog)
+
+    transport = httpx.MockTransport(lambda request: httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text())))
+    config, _token = make_repo(tmp_path, "http://upstream.test")
+    config = replace(
+        config,
+        billing_api_base_url="http://billing.test",
+        billing_ingest_producers_path=producer_catalog_path,
+        billing_org_api_key="lago-org-api-key",
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            rejections: list[tuple[str, dict[str, object]]] = []
+
+            async def fake_emit(subject: str, payload: dict[str, object]) -> None:
+                rejections.append((subject, payload))
+
+            runtime.event_emitter.emit = fake_emit  # type: ignore[method-assign]
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.post(
+                        "/v1/billing/events",
+                        headers={"Authorization": "Bearer wrong-token"},
+                        json={
+                            "event": {
+                                "transaction_id": str(gateway_main.uuid.uuid4()),
+                                "external_subscription_id": "sub-123",
+                                "code": "api_calls",
+                                "properties": {"count": 1},
+                            }
+                        },
+                    )
+                    assert response.status_code == 401
+                    assert response.json()["error"]["code"] == "AUTH_TOKEN_INVALID"
+                    assert rejections[0][0] == "billing.events.rejected"
+                    assert rejections[0][1]["reason_code"] == "invalid_producer_token"
+            finally:
+                await runtime.close()
 
     asyncio.run(run())
 
