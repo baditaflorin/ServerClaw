@@ -16,7 +16,7 @@
 - Shared Surfaces: `docs/adr/0307-0316`, `docs/adr/.index.yaml`,
   `docs/workstreams/adr-0307-platform-app-cohesion-bundle.md`,
   `workstreams.yaml`, `README.md`, `VERSION`, `changelog.md`, `RELEASE.md`,
-  `docs/release-notes/README.md`, `docs/release-notes/0.177.122.md`,
+  `docs/release-notes/README.md`, `docs/release-notes/0.177.123.md`,
   `versions/stack.yaml`, `build/platform-manifest.json`,
   `docs/diagrams/agent-coordination-map.excalidraw`
 
@@ -55,7 +55,7 @@
 - `changelog.md`
 - `RELEASE.md`
 - `docs/release-notes/README.md`
-- `docs/release-notes/0.177.122.md`
+- `docs/release-notes/0.177.123.md`
 - `versions/stack.yaml`
 - `build/platform-manifest.json`
 - `docs/diagrams/agent-coordination-map.excalidraw`

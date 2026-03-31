@@ -50,7 +50,7 @@ workstreams:
       - changelog.md
       - RELEASE.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.122.md
+      - docs/release-notes/0.177.123.md
       - versions/stack.yaml
       - build/platform-manifest.json
       - docs/diagrams/agent-coordination-map.excalidraw
@@ -87,7 +87,7 @@ workstreams:
             - changelog.md
             - RELEASE.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.122.md
+            - docs/release-notes/0.177.123.md
             - versions/stack.yaml
             - build/platform-manifest.json
           mode: shared_contract
@@ -102,7 +102,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADRs 0307 through 0316 by defining the cohesive platform workbench frame, journey-aware entry routing, task-lane navigation, first-run activation, command palette, notification center, contextual help, resumable task reentry, canonical page-state guidance, and journey scorecards for human onboarding and user flow
       release_bump: patch
-      included_in_repo_version: 0.177.122
+      included_in_repo_version: 0.177.123
   - id: ws-0306-live-apply
     adr: "0306"
     title: Live apply Checkov IaC policy scanning from latest origin/main
