@@ -1764,7 +1764,6 @@ workstreams:
             - docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
             - config/vulnerability-budget-policy.json
             - config/image-catalog.json
-            - config/windmill/scripts/gate-status.py
             - docs/schema/vulnerability-budget-policy.schema.json
             - scripts/vulnerability_budget.py
             - scripts/promotion_pipeline.py
