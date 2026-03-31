@@ -41,24 +41,30 @@ jobs:
       - name: Prepare Renovate runtime files
         run: mkdir -p .tmp
 
-      - name: Install Docker CLI
+      - name: Bootstrap Docker CLI and discover runner host paths
         run: |
           set -euo pipefail
-          if command -v docker >/dev/null 2>&1; then
-            exit 0
-          fi
-          export DEBIAN_FRONTEND=noninteractive
-          apt-get update
-          apt-get install -y --no-install-recommends docker.io
-
-      - name: Discover runner host paths
-        run: |
-          set -euo pipefail
-          docker_bin="$(command -v docker || command -v docker.io || true)"
-          if [ -z "${docker_bin}" ]; then
-            echo "Docker CLI is unavailable after bootstrap." >&2
-            exit 1
-          fi
+          ensure_docker_bin() {
+            docker_bin="$(cat .tmp/docker-bin.path 2>/dev/null || true)"
+            if [ -n "${docker_bin}" ] && [ -x "${docker_bin}" ]; then
+              printf '%s\n' "${docker_bin}"
+              return 0
+            fi
+            docker_bin="$(command -v docker || command -v docker.io || true)"
+            if [ -z "${docker_bin}" ]; then
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get update
+              apt-get install -y --no-install-recommends docker.io
+              docker_bin="$(command -v docker || command -v docker.io || true)"
+            fi
+            if [ -z "${docker_bin}" ]; then
+              echo "Docker CLI is unavailable after bootstrap." >&2
+              return 1
+            fi
+            printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
+            printf '%s\n' "${docker_bin}"
+          }
+          docker_bin="$(ensure_docker_bin)"
           discover_workspace_host_path() {
             current_container_id="${HOSTNAME:-$(hostname)}"
             cgroup_container_id="$(sed -n 's|.*docker[-/]\\([0-9a-f]\\{12,64\\}\\).*|\\1|p' /proc/self/cgroup | head -n1)"
@@ -94,11 +100,32 @@ jobs:
       - name: Mint a short-lived Renovate token
         run: |
           set -euo pipefail
+          ensure_docker_bin() {
+            docker_bin="$(cat .tmp/docker-bin.path 2>/dev/null || true)"
+            if [ -n "${docker_bin}" ] && [ -x "${docker_bin}" ]; then
+              printf '%s\n' "${docker_bin}"
+              return 0
+            fi
+            docker_bin="$(command -v docker || command -v docker.io || true)"
+            if [ -z "${docker_bin}" ]; then
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get update
+              apt-get install -y --no-install-recommends docker.io
+              docker_bin="$(command -v docker || command -v docker.io || true)"
+            fi
+            if [ -z "${docker_bin}" ]; then
+              echo "Docker CLI is unavailable after bootstrap." >&2
+              return 1
+            fi
+            printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
+            printf '%s\n' "${docker_bin}"
+          }
+          docker_bin="$(ensure_docker_bin)"
           workspace_host_path="$(cat .tmp/workspace-host.path)"
           bootstrap_host_dir="$(cat .tmp/bootstrap-host.path)"
           test -d "${workspace_host_path}"
           test -s "${bootstrap_host_dir}/renovate.env"
-          docker run --rm \
+          "${docker_bin}" run --rm \
             --network host \
             -e RENOVATE_BOOTSTRAP_ENV \
             -e RENOVATE_RUNTIME_STATE \
@@ -120,13 +147,34 @@ jobs:
       - name: Run Renovate through the pinned Harbor image
         run: |
           set -euo pipefail
+          ensure_docker_bin() {
+            docker_bin="$(cat .tmp/docker-bin.path 2>/dev/null || true)"
+            if [ -n "${docker_bin}" ] && [ -x "${docker_bin}" ]; then
+              printf '%s\n' "${docker_bin}"
+              return 0
+            fi
+            docker_bin="$(command -v docker || command -v docker.io || true)"
+            if [ -z "${docker_bin}" ]; then
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get update
+              apt-get install -y --no-install-recommends docker.io
+              docker_bin="$(command -v docker || command -v docker.io || true)"
+            fi
+            if [ -z "${docker_bin}" ]; then
+              echo "Docker CLI is unavailable after bootstrap." >&2
+              return 1
+            fi
+            printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
+            printf '%s\n' "${docker_bin}"
+          }
+          docker_bin="$(ensure_docker_bin)"
           workspace_host_path="$(cat .tmp/workspace-host.path)"
           test -d "${workspace_host_path}"
           set -a
           . "${RENOVATE_RUNTIME_ENV}"
           set +a
-          docker pull "${RENOVATE_IMAGE}"
-          docker run --rm \
+          "${docker_bin}" pull "${RENOVATE_IMAGE}"
+          "${docker_bin}" run --rm \
             --network host \
             -e LOG_LEVEL \
             -e RENOVATE_PLATFORM \
@@ -142,10 +190,29 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          workspace_host_path="$(cat .tmp/workspace-host.path)"
-          bootstrap_host_dir="$(cat .tmp/bootstrap-host.path)"
-          if [ -s "${bootstrap_host_dir}/renovate.env" ]; then
-            docker run --rm \
+          ensure_docker_bin() {
+            docker_bin="$(cat .tmp/docker-bin.path 2>/dev/null || true)"
+            if [ -n "${docker_bin}" ] && [ -x "${docker_bin}" ]; then
+              printf '%s\n' "${docker_bin}"
+              return 0
+            fi
+            docker_bin="$(command -v docker || command -v docker.io || true)"
+            if [ -z "${docker_bin}" ]; then
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get update
+              apt-get install -y --no-install-recommends docker.io
+              docker_bin="$(command -v docker || command -v docker.io || true)"
+            fi
+            if [ -z "${docker_bin}" ]; then
+              return 1
+            fi
+            printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
+            printf '%s\n' "${docker_bin}"
+          }
+          workspace_host_path="$(cat .tmp/workspace-host.path 2>/dev/null || true)"
+          bootstrap_host_dir="$(cat .tmp/bootstrap-host.path 2>/dev/null || true)"
+          if [ -n "${workspace_host_path}" ] && [ -s "${bootstrap_host_dir}/renovate.env" ] && docker_bin="$(ensure_docker_bin)"; then
+            "${docker_bin}" run --rm \
               --network host \
               -e RENOVATE_BOOTSTRAP_ENV \
               -e RENOVATE_RUNTIME_STATE \

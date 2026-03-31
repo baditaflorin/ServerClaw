@@ -100,6 +100,11 @@ curl -sS \
 - The bootstrap env mounted into the runner contains the durable Gitea bot
   password and scope list only. The actual PAT used by Renovate is minted at
   workflow runtime and revoked at the end of the run.
+- The workflow now bootstraps Docker lazily in every Docker-using step and
+  persists the discovered executable path in `.tmp/docker-bin.path`, because
+  the live 2026-03-31 replay showed the runner can lose a prior `apt-get
+  install docker.io` state across step boundaries even while the checkout and
+  mounted credential files remain intact.
 - If a Renovate, validate, or release-bundle workflow fails before repo checkout
   while pulling its Harbor-pinned job image, verify `https://registry.lv3.org`
   and a direct `docker-build-lv3` image pull before debugging the workflow

@@ -67,9 +67,13 @@ def validate_workflow() -> None:
     require("scripts/renovate_runtime_token.py create" in workflow_text, "Renovate workflow must mint a short-lived runtime token")
     require("scripts/renovate_runtime_token.py cleanup" in workflow_text, "Renovate workflow must revoke the short-lived runtime token")
     require("RENOVATE_BOOTSTRAP_ENV" in workflow_text, "Renovate workflow must source the mounted OpenBao-rendered credential bundle")
-    require("Discover runner host paths" in workflow_text, "Renovate workflow must discover runner host paths explicitly")
+    require(
+        "Bootstrap Docker CLI and discover runner host paths" in workflow_text,
+        "Renovate workflow must discover runner host paths explicitly",
+    )
     require('current_container_id="${HOSTNAME:-$(hostname)}"' in workflow_text, "Renovate workflow must inspect the active job container to recover its workspace host path")
     require("/var/run/lv3/renovate" in workflow_text, "Renovate workflow must discover the host-side Renovate credential directory from the runner mount")
+    require(".tmp/docker-bin.path" in workflow_text, "Renovate workflow must persist the discovered Docker executable path for later steps")
     require(".tmp/workspace-host.path" in workflow_text, "Renovate workflow must persist the discovered workspace host path for later steps")
     require(".tmp/bootstrap-host.path" in workflow_text, "Renovate workflow must persist the discovered credential host path for later steps")
     require("/var/run/lv3/renovate:ro" in workflow_text, "Renovate workflow must mount the Renovate credential bundle read-only")

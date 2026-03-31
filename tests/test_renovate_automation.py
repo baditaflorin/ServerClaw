@@ -46,10 +46,12 @@ def test_renovate_workflow_uses_harbor_pinned_image_and_runtime_token_helper() -
     assert "ghcr.io/renovatebot/renovate" not in workflow
     assert "scripts/renovate_runtime_token.py create" in workflow
     assert "scripts/renovate_runtime_token.py cleanup" in workflow
-    assert "Discover runner host paths" in workflow
+    assert "Bootstrap Docker CLI and discover runner host paths" in workflow
     assert 'current_container_id="${HOSTNAME:-$(hostname)}"' in workflow
     assert "cgroup_container_id" in workflow
     assert 'name=WORKFLOW-renovate_JOB-renovate' in workflow
+    assert ".tmp/docker-bin.path" in workflow
+    assert 'docker_bin="$(ensure_docker_bin)"' in workflow
     assert '.tmp/workspace-host.path' in workflow
     assert '.tmp/bootstrap-host.path' in workflow
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
