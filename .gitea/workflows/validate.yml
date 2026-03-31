@@ -84,6 +84,14 @@ jobs:
             apt-get update
             apt-get install -y --no-install-recommends make
           fi
+          if ! command -v uv >/dev/null 2>&1; then
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update
+            apt-get install -y --no-install-recommends python3-venv
+            python3 -m venv /opt/uv
+            /opt/uv/bin/python -m pip install --no-cache-dir --upgrade pip uv
+            ln -sf /opt/uv/bin/uv /usr/local/bin/uv
+          fi
 
       - name: Run managed image gate
         run: python3 scripts/managed_image_gate.py --baseline-revision origin/main
