@@ -25,6 +25,7 @@
     url_username: "{{ redpanda_platform_user }}"
     url_password: "{{ redpanda_platform_password }}"
     force_basic_auth: true
+    return_content: true
     headers:
       Content-Type: application/vnd.kafka.json.v2+json
       Accept: application/vnd.kafka.v2+json
@@ -40,15 +41,24 @@
   changed_when: false
   no_log: true
 
+- name: Assert the Redpanda HTTP Proxy smoke produce request succeeded
+  ansible.builtin.assert:
+    that:
+      - ((redpanda_produce_result.content | from_json).offsets | default([]) | length) == 1
+      - (((redpanda_produce_result.content | from_json).offsets[0].error_code | default(0)) | int) == 0
+      - (((redpanda_produce_result.content | from_json).offsets[0].offset | default(-1)) | int) >= 0
+    fail_msg: >-
+      Redpanda acknowledged the HTTP Proxy request itself, but the broker rejected
+      the smoke record before it was committed.
+
 - name: Read Redpanda smoke records through the HTTP Proxy
   ansible.builtin.uri:
-    url: >-
-      {{ redpanda_http_proxy_url }}/topics/{{ redpanda_smoke_topic }}/partitions/0/records
-      ?offset=0&timeout=3000&max_bytes=1048576
+    url: "{{ redpanda_http_proxy_url }}/topics/{{ redpanda_smoke_topic }}/partitions/0/records?offset=0&timeout=3000&max_bytes=1048576"
     method: GET
     url_username: "{{ redpanda_platform_user }}"
     url_password: "{{ redpanda_platform_password }}"
     force_basic_auth: true
+    return_content: true
     headers:
       Accept: application/vnd.kafka.json.v2+json
     status_code: 200
@@ -56,21 +66,26 @@
   retries: 12
   delay: 2
   until: >-
-    (
-      redpanda_records_result.json
-      | selectattr('value.marker', 'defined')
-      | selectattr('value.marker', 'equalto', redpanda_verify_marker)
+    redpanda_verify_marker in (
+      (redpanda_records_result.content | default('[]', true) | from_json)
+      | map(attribute='value')
+      | select('defined')
+      | map(attribute='marker')
+      | select('defined')
       | list
-      | length
-    ) > 0
+    )
   changed_when: false
-  no_log: true
+
+- name: Parse the Redpanda smoke record payload
+  ansible.builtin.set_fact:
+    redpanda_records_payload: "{{ redpanda_records_result.content | default('[]', true) | from_json }}"
 
 - name: Record the matching Redpanda smoke records
   ansible.builtin.set_fact:
     redpanda_matching_records: >-
       {{
-        redpanda_records_result.json
+        redpanda_records_payload
+        | selectattr('value', 'defined')
         | selectattr('value.marker', 'defined')
         | selectattr('value.marker', 'equalto', redpanda_verify_marker)
         | list
@@ -83,6 +98,7 @@
     url_username: "{{ redpanda_platform_user }}"
     url_password: "{{ redpanda_platform_password }}"
     force_basic_auth: true
+    return_content: true
     headers:
       Accept: application/vnd.schemaregistry.v1+json
     status_code: 200
@@ -96,12 +112,11 @@
 - name: Assert the Redpanda runtime contract
   ansible.builtin.assert:
     that:
-      - redpanda_produce_result.json.offsets | default([]) | length == 1
       - redpanda_matching_records | length >= 1
       - redpanda_matching_records[-1].value.marker == redpanda_verify_marker
       - redpanda_matching_records[-1].value.producer == 'ansible-redpanda-runtime'
-      - redpanda_schema_result.json.subject == redpanda_schema_subject
-      - (redpanda_schema_result.json.schema | from_json).title == redpanda_schema_definition.title
+      - (redpanda_schema_result.content | from_json).subject == redpanda_schema_subject
+      - (((redpanda_schema_result.content | from_json).schema) | from_json).title == redpanda_schema_definition.title
     fail_msg: >-
       Redpanda started, but the admin, HTTP Proxy, or Schema Registry smoke contract
       did not verify end to end.

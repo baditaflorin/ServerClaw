@@ -11,7 +11,7 @@ the Kafka API, Admin API, HTTP Proxy, and Schema Registry contract end to end.
 - Redpanda listens privately on `10.10.10.20:9092` for the Kafka API
 - the Admin API listens privately on `10.10.10.20:9644`
 - the HTTP Proxy and Schema Registry listeners are published privately on
-  `10.10.10.20:8097` and `10.10.10.20:8099`
+  `10.10.10.20:8103` and `10.10.10.20:8104`
 - controller-local admin and platform passwords are mirrored under `.local/redpanda/`
 - OpenBao renders the runtime env at `/run/lv3-secrets/redpanda/runtime.env`
 - the repo-managed smoke topic family and schema subject are reconciled on every converge
@@ -111,7 +111,7 @@ payload = json.dumps(
     }
 ).encode("utf-8")
 produce_request = urllib.request.Request(
-    "http://127.0.0.1:8097/topics/platform.redpanda.smoke",
+    "http://127.0.0.1:8103/topics/platform.redpanda.smoke",
     data=payload,
     headers={
         "Authorization": f"Basic {auth('REDPANDA_PLATFORM_USER', 'REDPANDA_PLATFORM_PASSWORD')}",
@@ -123,7 +123,7 @@ produce_request = urllib.request.Request(
 urllib.request.urlopen(produce_request, timeout=30).read()
 
 records_request = urllib.request.Request(
-    "http://127.0.0.1:8097/topics/platform.redpanda.smoke/partitions/0/records?offset=0&timeout=3000&max_bytes=1048576",
+    "http://127.0.0.1:8103/topics/platform.redpanda.smoke/partitions/0/records?offset=0&timeout=3000&max_bytes=1048576",
     headers={
         "Authorization": f"Basic {auth('REDPANDA_PLATFORM_USER', 'REDPANDA_PLATFORM_PASSWORD')}",
         "Accept": "application/vnd.kafka.json.v2+json",
@@ -133,7 +133,7 @@ records = json.loads(urllib.request.urlopen(records_request, timeout=30).read().
 assert any(item.get("value", {}).get("marker") == marker for item in records)
 
 schema_request = urllib.request.Request(
-    "http://127.0.0.1:8099/subjects/platform.redpanda.smoke-value/versions/latest",
+    "http://127.0.0.1:8104/subjects/platform.redpanda.smoke-value/versions/latest",
     headers={
         "Authorization": f"Basic {auth('REDPANDA_PLATFORM_USER', 'REDPANDA_PLATFORM_PASSWORD')}",
         "Accept": "application/vnd.schemaregistry.v1+json",
@@ -148,11 +148,14 @@ PY'
 ## Operating Notes
 
 - Redpanda is intentionally private-only. Do not publish it on the public NGINX edge.
-- The repo-managed deployment uses `8097` and `8099` for the HTTP Proxy and
-  Schema Registry listeners because `8081` and `8082` are already assigned to
-  the mail platform gateway and NetBox on `docker-runtime-lv3`.
+- The repo-managed deployment uses `8103` and `8104` for the HTTP Proxy and
+  Schema Registry listeners because `8097` is already assigned to JupyterHub
+  and `8099` is already assigned to the Temporal UI on `docker-runtime-lv3`.
 - The role reconciles topics programmatically with `rpk` from the declared topic
   list. Manual `rpk topic create` operations outside the role are treated as drift.
+- If a failed rollout leaves `/var/lib/docker/volumes/lv3-redpanda-data/_data/startup_log`
+  behind, the role clears that crash-tracker marker before the next forced
+  recreate so a corrected configuration can start cleanly.
 - The baseline keeps Schema Registry access authenticated over the private
   runtime path, but it does not reconcile per-subject Schema Registry ACLs.
   Redpanda documents Schema Registry authorization as an enterprise feature, so

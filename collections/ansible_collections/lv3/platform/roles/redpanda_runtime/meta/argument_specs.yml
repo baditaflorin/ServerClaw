@@ -60,6 +60,9 @@ argument_specs:
       redpanda_rpc_port:
         type: int
         required: true
+      redpanda_storage_min_free_bytes:
+        type: int
+        required: true
       redpanda_topics:
         type: list
         elements: dict

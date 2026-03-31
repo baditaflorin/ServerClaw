@@ -166,8 +166,8 @@ platform_ports:
   openbao_proxy_port: 8200
   redpanda_kafka_port: 9092
   redpanda_admin_port: 9644
-  redpanda_http_proxy_port: 8097
-  redpanda_schema_registry_port: 8099
+  redpanda_http_proxy_port: 8103
+  redpanda_schema_registry_port: 8104
   semaphore_server_port: 3004
   semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
@@ -253,8 +253,8 @@ platform_port_assignments:
   openbao_proxy_port: 8200
   redpanda_kafka_port: 9092
   redpanda_admin_port: 9644
-  redpanda_http_proxy_port: 8097
-  redpanda_schema_registry_port: 8099
+  redpanda_http_proxy_port: 8103
+  redpanda_schema_registry_port: 8104
   semaphore_server_port: 3004
   semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
@@ -1363,13 +1363,13 @@ platform_service_topology:
     ports:
       internal: 9092
       admin: 9644
-      http_proxy: 8097
-      schema_registry: 8099
+      http_proxy: 8103
+      schema_registry: 8104
     urls:
       internal: kafka://10.10.10.20:9092
       admin: http://10.10.10.20:9644
-      http_proxy: http://10.10.10.20:8097
-      schema_registry: http://10.10.10.20:8099
+      http_proxy: http://10.10.10.20:8103
+      schema_registry: http://10.10.10.20:8104
   step_ca:
     service_name: step-ca
     owning_vm: docker-runtime-lv3
@@ -3046,13 +3046,13 @@ public_edge_service_topology:
     ports:
       internal: 9092
       admin: 9644
-      http_proxy: 8097
-      schema_registry: 8099
+      http_proxy: 8103
+      schema_registry: 8104
     urls:
       internal: kafka://10.10.10.20:9092
       admin: http://10.10.10.20:9644
-      http_proxy: http://10.10.10.20:8097
-      schema_registry: http://10.10.10.20:8099
+      http_proxy: http://10.10.10.20:8103
+      schema_registry: http://10.10.10.20:8104
   step_ca:
     service_name: step-ca
     owning_vm: docker-runtime-lv3
@@ -4302,8 +4302,8 @@ openbao_http_port: 8201
 openbao_proxy_port: 8200
 redpanda_kafka_port: 9092
 redpanda_admin_port: 9644
-redpanda_http_proxy_port: 8097
-redpanda_schema_registry_port: 8099
+redpanda_http_proxy_port: 8103
+redpanda_schema_registry_port: 8104
 windmill_server_port: 8000
 nomad_server_port: 4646
 nomad_rpc_port: 4647

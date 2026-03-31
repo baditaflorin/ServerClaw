@@ -45,9 +45,9 @@ lightweight pub/sub and notification workloads.
 - Redpanda listens on:
   - `9092/tcp` — Kafka wire protocol API (producers and consumers)
   - `9644/tcp` — Redpanda Admin REST API (topic and cluster management)
-  - `8097/tcp` — Pandaproxy HTTP REST API (produce and consume via HTTP
+  - `8103/tcp` — Pandaproxy HTTP REST API (produce and consume via HTTP
     for clients that cannot use the Kafka wire protocol)
-  - `8099/tcp` — Schema Registry API (Confluent-compatible, for Avro/Protobuf
+  - `8104/tcp` — Schema Registry API (Confluent-compatible, for Avro/Protobuf
     schema management)
 - Persistent log data is stored on a named Docker volume on fast local
   storage; recovery currently relies on the governed VM-level backup coverage

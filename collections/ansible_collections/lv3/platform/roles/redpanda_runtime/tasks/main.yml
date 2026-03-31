@@ -195,6 +195,7 @@
     owner: "101"
     group: "101"
     mode: "0640"
+  register: redpanda_bootstrap_template
 
 - name: Render the Redpanda start script
   ansible.builtin.template:
@@ -203,6 +204,7 @@
     owner: "101"
     group: "101"
     mode: "0750"
+  register: redpanda_start_script_template
 
 - name: Render the Redpanda compose file
   ansible.builtin.template:
@@ -211,6 +213,67 @@
     owner: root
     group: root
     mode: "0644"
+  register: redpanda_compose_template
+
+- name: Inspect the existing Redpanda container state
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - --format
+      - >-
+        {% raw %}{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}{% endraw %}
+      - "{{ redpanda_container_name }}"
+  register: redpanda_container_inspect
+  changed_when: false
+  failed_when: false
+
+- name: Inspect the Redpanda data volume mountpoint
+  ansible.builtin.command:
+    argv:
+      - docker
+      - volume
+      - inspect
+      - --format
+      - >-
+        {% raw %}{{.Mountpoint}}{% endraw %}
+      - "{{ redpanda_volume_name }}"
+  register: redpanda_volume_inspect
+  changed_when: false
+  failed_when: false
+
+- name: Check for the Redpanda crash-tracker startup log
+  ansible.builtin.stat:
+    path: "{{ redpanda_volume_inspect.stdout }}/startup_log"
+  register: redpanda_startup_log
+  when: redpanda_volume_inspect.rc == 0
+
+- name: Flag whether Redpanda needs recovery cleanup
+  ansible.builtin.set_fact:
+    redpanda_recovery_required: >-
+      {{
+        redpanda_container_inspect.rc == 0
+        and redpanda_container_inspect.stdout != 'healthy'
+      }}
+
+- name: Flag whether Redpanda requires a forced recreate
+  ansible.builtin.set_fact:
+    redpanda_force_recreate_required: >-
+      {{
+        redpanda_bootstrap_template.changed
+        or redpanda_start_script_template.changed
+        or redpanda_compose_template.changed
+        or redpanda_recovery_required
+        or (redpanda_startup_log.stat.exists | default(false))
+      }}
+
+- name: Build the Redpanda compose startup command
+  ansible.builtin.set_fact:
+    redpanda_compose_up_argv: >-
+      {{
+        ['docker', 'compose', '--file', redpanda_compose_file, 'up', '-d', '--remove-orphans']
+        + (['--force-recreate'] if redpanda_force_recreate_required else [])
+      }}
 
 - name: Pull the Redpanda image
   ansible.builtin.command:
@@ -228,16 +291,34 @@
     or 'Downloaded newer image' in redpanda_pull.stdout
     or 'Pull complete' in redpanda_pull.stdout
 
-- name: Start the Redpanda stack
+- name: Reset the Redpanda compose stack before recovery cleanup
   ansible.builtin.command:
     argv:
       - docker
       - compose
       - --file
       - "{{ redpanda_compose_file }}"
-      - up
-      - -d
+      - down
       - --remove-orphans
+  args:
+    chdir: "{{ redpanda_site_dir }}"
+  register: redpanda_compose_down
+  changed_when: >-
+    'Stopping' in (redpanda_compose_down.stdout | default(''))
+    or 'Removing' in (redpanda_compose_down.stdout | default(''))
+    or 'Removing' in (redpanda_compose_down.stderr | default(''))
+  failed_when: false
+  when: redpanda_recovery_required or (redpanda_startup_log.stat.exists | default(false))
+
+- name: Clear the Redpanda crash-tracker startup log before restart
+  ansible.builtin.file:
+    path: "{{ redpanda_startup_log.stat.path }}"
+    state: absent
+  when: redpanda_startup_log.stat.exists | default(false)
+
+- name: Start the Redpanda stack
+  ansible.builtin.command:
+    argv: "{{ redpanda_compose_up_argv }}"
   args:
     chdir: "{{ redpanda_site_dir }}"
   register: redpanda_up
@@ -286,6 +367,79 @@
   retries: 24
   delay: 5
   until: redpanda_admin_ready.status == 200
+  changed_when: false
+  no_log: true
+
+- name: Read the active Redpanda minimum free storage cluster setting
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ redpanda_container_name }}"
+      - rpk
+      - cluster
+      - config
+      - get
+      - storage_min_free_bytes
+      - -X
+      - "admin.hosts=127.0.0.1:{{ redpanda_admin_port }}"
+      - -X
+      - "user={{ redpanda_admin_user }}"
+      - -X
+      - "pass={{ redpanda_admin_password }}"
+  register: redpanda_storage_min_free_bytes_current
+  changed_when: false
+  no_log: true
+
+- name: Reconcile the Redpanda minimum free storage cluster setting
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ redpanda_container_name }}"
+      - rpk
+      - cluster
+      - config
+      - set
+      - storage_min_free_bytes
+      - "{{ redpanda_storage_min_free_bytes | string }}"
+      - --no-confirm
+      - -X
+      - "admin.hosts=127.0.0.1:{{ redpanda_admin_port }}"
+      - -X
+      - "user={{ redpanda_admin_user }}"
+      - -X
+      - "pass={{ redpanda_admin_password }}"
+  register: redpanda_storage_min_free_bytes_set
+  changed_when: true
+  when: >-
+    redpanda_storage_min_free_bytes_current.stdout | trim
+    != (redpanda_storage_min_free_bytes | string)
+  no_log: true
+
+- name: Confirm the Redpanda minimum free storage cluster setting
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ redpanda_container_name }}"
+      - rpk
+      - cluster
+      - config
+      - get
+      - storage_min_free_bytes
+      - -X
+      - "admin.hosts=127.0.0.1:{{ redpanda_admin_port }}"
+      - -X
+      - "user={{ redpanda_admin_user }}"
+      - -X
+      - "pass={{ redpanda_admin_password }}"
+  register: redpanda_storage_min_free_bytes_effective
+  retries: 12
+  delay: 2
+  until: >-
+    redpanda_storage_min_free_bytes_effective.stdout | trim
+    == (redpanda_storage_min_free_bytes | string)
   changed_when: false
   no_log: true
 

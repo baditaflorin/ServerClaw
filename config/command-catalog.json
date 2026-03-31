@@ -2688,7 +2688,7 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-redpanda passes",
         "make validate passes before the apply",
-        "The private-only Redpanda listener contract and the 8097/8099 HTTP port remap are reviewed before rollout"
+        "The private-only Redpanda listener contract and the 8103/8104 HTTP port remap are reviewed before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,

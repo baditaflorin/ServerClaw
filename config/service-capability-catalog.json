@@ -964,12 +964,12 @@
         "redpanda",
         "private"
       ],
-      "notes": "The private Kafka listener stays on 9092 while the authenticated Admin API, HTTP Proxy, and Schema Registry listeners use 9644, 8097, and 8099 because docker-runtime-lv3 already reserves 8081 and 8082 for the mail platform gateway and NetBox.",
+      "notes": "The private Kafka listener stays on 9092 while the authenticated Admin API, HTTP Proxy, and Schema Registry listeners use 9644, 8103, and 8104 because docker-runtime-lv3 already reserves 8097 for JupyterHub and 8099 for the Temporal UI.",
       "environments": {
         "production": {
           "status": "active",
           "url": "kafka://10.10.10.20:9092",
-          "notes": "Platform callers use the Kafka listener on 9092 while the authenticated Admin API, HTTP Proxy, and Schema Registry listeners remain private on 9644, 8097, and 8099."
+          "notes": "Platform callers use the Kafka listener on 9092 while the authenticated Admin API, HTTP Proxy, and Schema Registry listeners remain private on 9644, 8103, and 8104."
         }
       }
     },

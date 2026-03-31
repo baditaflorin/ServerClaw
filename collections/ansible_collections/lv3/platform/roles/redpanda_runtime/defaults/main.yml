@@ -34,6 +34,7 @@ redpanda_rpc_port: 33145
 redpanda_smp: 1
 redpanda_memory: 2G
 redpanda_log_level: info
+redpanda_storage_min_free_bytes: 1073741824
 redpanda_admin_api_url: "{{ redpanda_service_topology.urls.admin }}"
 redpanda_http_proxy_url: "{{ redpanda_service_topology.urls.http_proxy }}"
 redpanda_schema_registry_url: "{{ redpanda_service_topology.urls.schema_registry }}"
