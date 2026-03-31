@@ -64,3 +64,5 @@ def test_converge_livekit_target_uses_the_canonical_playbook() -> None:
     assert "$(MAKE) generate-edge-static-sites" in converge_block
     assert "$(REPO_ROOT)/playbooks/livekit.yml" in converge_block
     assert "HETZNER_DNS_API_TOKEN" in converge_block
+    assert "$(ANSIBLE_TRACE_ARGS)" in converge_block
+    assert "$(EXTRA_ARGS)" in converge_block
