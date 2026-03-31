@@ -18,7 +18,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Lago, Langfuse, LiveKit, Matrix Synapse, Mattermost, NetBox, Nextcloud, One-API, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n |
+| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Keycloak, Lago, Langfuse, LiveKit, Matrix Synapse, Mattermost, NetBox, Nextcloud, One-API, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Open WebUI, Platform API Gateway, ServerClaw, Woodpecker CI |
 | `4` | Ops Portal |
 
@@ -70,6 +70,7 @@ graph TD
     excalidraw["Excalidraw\nTier 2"]
     flagsmith["Flagsmith\nTier 2"]
     gitea["Gitea\nTier 2"]
+    glitchtip["GlitchTip\nTier 2"]
     gotenberg["Gotenberg\nTier 2"]
     keycloak["Keycloak\nTier 2"]
     lago["Lago\nTier 2"]
@@ -144,6 +145,14 @@ graph TD
     gitea -->|soft| minio
     gitea -->|startup_only| openbao
     gitea -->|hard| postgres
+    glitchtip -->|hard| docker_runtime
+    glitchtip -->|soft| keycloak
+    glitchtip -->|soft| mail_platform
+    glitchtip -->|soft| mattermost
+    glitchtip -->|soft| nginx_edge
+    glitchtip -->|soft| ntfy
+    glitchtip -->|startup_only| openbao
+    glitchtip -->|hard| postgres
     gotenberg -->|soft| api_gateway
     gotenberg -->|hard| docker_runtime
     grafana -->|soft| keycloak

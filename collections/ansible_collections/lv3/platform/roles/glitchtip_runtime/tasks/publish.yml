@@ -35,20 +35,25 @@
       Converge the GlitchTip runtime first so the bootstrap role can export the repo-managed DSNs.
   when: not glitchtip_platform_findings_dsn_local.stat.exists
 
+- name: Select controller-local quiet-window hosts for GlitchTip publication
+  ansible.builtin.set_fact:
+    glitchtip_publication_quiet_hosts: >-
+      {{
+        ['docker-runtime-staging-lv3', 'nginx-staging-lv3']
+        if (env | default('production')) == 'staging'
+        else ['docker-runtime-lv3', 'nginx-lv3']
+      }}
+
 - name: Verify the GlitchTip public surface with a controller-local quiet-window retry
   block:
     - name: Wait for a controller-local quiet window before public GlitchTip verification
-      ansible.builtin.shell: >-
+      ansible.builtin.command: >-
         python3 {{ inventory_dir }}/../scripts/await_ansible_quiet.py
         --label glitchtip-publication
         --wait-seconds 1800
         --quiet-seconds 30
         --poll-seconds 5
-        {% for host in (
-          ['docker-runtime-staging-lv3', 'nginx-staging-lv3']
-          if (env | default('production')) == 'staging'
-          else ['docker-runtime-lv3', 'nginx-lv3']
-        ) %}
+        {% for host in glitchtip_publication_quiet_hosts %}
         --host {{ host }}
         {% endfor %}
       changed_when: false
@@ -57,17 +62,13 @@
       ansible.builtin.include_tasks: publish_verify.yml
   rescue:
     - name: Wait for a controller-local quiet window before retrying public GlitchTip verification
-      ansible.builtin.shell: >-
+      ansible.builtin.command: >-
         python3 {{ inventory_dir }}/../scripts/await_ansible_quiet.py
         --label glitchtip-publication-retry
         --wait-seconds 1800
         --quiet-seconds 30
         --poll-seconds 5
-        {% for host in (
-          ['docker-runtime-staging-lv3', 'nginx-staging-lv3']
-          if (env | default('production')) == 'staging'
-          else ['docker-runtime-lv3', 'nginx-lv3']
-        ) %}
+        {% for host in glitchtip_publication_quiet_hosts %}
         --host {{ host }}
         {% endfor %}
       changed_when: false

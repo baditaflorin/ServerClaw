@@ -146,6 +146,9 @@ def test_glitchtip_publish_tasks_verify_public_settings_and_smoke_script() -> No
     orchestration_task = next(
         task for task in publish_tasks if task.get("name") == "Verify the GlitchTip public surface with a controller-local quiet-window retry"
     )
+    quiet_hosts_task = next(
+        task for task in publish_tasks if task.get("name") == "Select controller-local quiet-window hosts for GlitchTip publication"
+    )
     quiet_task = orchestration_task["block"][0]
     retry_quiet_task = orchestration_task["rescue"][0]
     verify_include_task = orchestration_task["block"][1]
@@ -159,14 +162,19 @@ def test_glitchtip_publish_tasks_verify_public_settings_and_smoke_script() -> No
     )
     smoke_task = next(task for task in verify_tasks if task.get("name") == "Run the GlitchTip event smoke verification")
 
-    quiet_command = quiet_task["ansible.builtin.shell"]
-    retry_quiet_command = retry_quiet_task["ansible.builtin.shell"]
+    quiet_command = quiet_task["ansible.builtin.command"]
+    retry_quiet_command = retry_quiet_task["ansible.builtin.command"]
+    quiet_hosts_expression = quiet_hosts_task["ansible.builtin.set_fact"]["glitchtip_publication_quiet_hosts"]
+    assert "docker-runtime-staging-lv3" in quiet_hosts_expression
+    assert "docker-runtime-lv3" in quiet_hosts_expression
+    assert "nginx-staging-lv3" in quiet_hosts_expression
+    assert "nginx-lv3" in quiet_hosts_expression
     assert "python3 {{ inventory_dir }}/../scripts/await_ansible_quiet.py" in quiet_command
     assert "python3 {{ inventory_dir }}/../scripts/await_ansible_quiet.py" in retry_quiet_command
     assert "--quiet-seconds 30" in quiet_command
     assert "--poll-seconds 5" in quiet_command
-    assert "docker-runtime-lv3" in quiet_command
-    assert "nginx-lv3" in quiet_command
+    assert "--host {{ host }}" in quiet_command
+    assert "--host {{ host }}" in retry_quiet_command
     assert "--label glitchtip-publication-retry" in retry_quiet_command
     assert verify_include_task["ansible.builtin.include_tasks"] == "publish_verify.yml"
     assert retry_verify_task["ansible.builtin.include_tasks"] == "publish_verify.yml"
