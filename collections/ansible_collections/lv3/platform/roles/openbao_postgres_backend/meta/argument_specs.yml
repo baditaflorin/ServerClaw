@@ -8,6 +8,11 @@ argument_specs:
         required: true
         description:
           - PostgreSQL login role that OpenBao uses to mint dynamic credentials.
+      openbao_postgres_connect_role:
+        type: str
+        required: true
+        description:
+          - Shared PostgreSQL role that carries CONNECT grants across managed databases.
       openbao_postgres_admin_password_local_file:
         type: path
         required: true

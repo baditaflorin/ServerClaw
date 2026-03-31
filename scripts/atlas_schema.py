@@ -516,6 +516,19 @@ def postgres_url(*, host: str, port: int, database: str, username: str, password
     )
 
 
+def force_remove_container(container_name: str, *, timeout_seconds: float = 10.0) -> None:
+    try:
+        subprocess.run(
+            ["docker", "rm", "-f", container_name],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=timeout_seconds,
+        )
+    except (OSError, subprocess.SubprocessError):
+        pass
+
+
 @contextmanager
 def dev_postgres(client: Any, image_ref: str, database_name: str):
     ensure_image(client, image_ref)
@@ -552,10 +565,7 @@ def dev_postgres(client: Any, image_ref: str, database_name: str):
             f"ephemeral PostgreSQL dev database did not become ready: {last_output or 'timeout'}"
         )
     finally:
-        try:
-            container.stop(timeout=3)
-        except Exception:  # noqa: BLE001
-            pass
+        force_remove_container(container_name)
 
 
 def inspect_live_schema(

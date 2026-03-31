@@ -321,3 +321,42 @@ def test_resolve_openbao_url_prefers_direct_guest_ip_before_ssh_tunnel(monkeypat
         "http://127.0.0.1:8201",
         "http://10.10.10.20:8201",
     ]
+
+
+def test_dev_postgres_force_removes_ephemeral_container_on_cleanup(monkeypatch) -> None:
+    atlas_schema = load_module()
+    removed: list[tuple[list[str], float]] = []
+
+    class FakeExecResult:
+        exit_code = 0
+        output = b"ready"
+
+    class FakeContainer:
+        def exec_run(self, argv):
+            assert argv == ["pg_isready", "-U", "postgres", "-d", "atlas_lint"]
+            return FakeExecResult()
+
+    class FakeClient:
+        class containers:
+            @staticmethod
+            def run(*args, **kwargs):
+                return FakeContainer()
+
+    monkeypatch.setattr(atlas_schema, "ensure_image", lambda client, image_ref: None)
+    monkeypatch.setattr(atlas_schema, "reserve_local_port", lambda: 55432)
+
+    def fake_subprocess_run(argv, *, check, stdout, stderr, timeout):
+        removed.append((list(argv), timeout))
+        return None
+
+    monkeypatch.setattr(atlas_schema.subprocess, "run", fake_subprocess_run)
+
+    with atlas_schema.dev_postgres(FakeClient(), "docker.io/library/postgres:16", "atlas_lint") as database:
+        assert database["host"] == "host.docker.internal"
+        assert database["port"] == 55432
+
+    assert len(removed) == 1
+    assert removed[0][0][:3] == ["docker", "rm", "-f"]
+    assert removed[0][0][3].startswith("atlas-lint-")
+    assert removed[0][0][3].endswith("-55432")
+    assert removed[0][1] == 10.0

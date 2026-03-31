@@ -25,6 +25,7 @@ def test_openbao_postgres_backend_defaults_reserve_a_managed_connection_path() -
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text(encoding="utf-8"))
 
     assert defaults["openbao_postgres_admin_role"] == "openbao_rotator"
+    assert defaults["openbao_postgres_connect_role"] == "lv3_openbao_connect_all"
     assert defaults["openbao_postgres_reserved_connection_role"] == "pg_use_reserved_connections"
 
 
@@ -38,5 +39,5 @@ def test_openbao_postgres_backend_grants_reserved_connection_capability() -> Non
     )
 
     assert reserved_role_task["ansible.builtin.command"]["argv"][-1] == (
-        "GRANT {{ openbao_postgres_reserved_connection_role }} TO {{ openbao_postgres_admin_role }}"
+        "GRANT {{ openbao_postgres_reserved_connection_role }} TO {{ openbao_postgres_admin_role }} WITH ADMIN OPTION"
     )
