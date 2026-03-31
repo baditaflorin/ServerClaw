@@ -466,22 +466,38 @@
         )
 
 
-        def run_with_retry(command, cwd=None, attempts=3, delay_seconds=3):
+        def combined_output(stdout, stderr):
+            parts = []
+            if stderr:
+                parts.append(stderr)
+            if stdout:
+                parts.append(stdout)
+            return "\n".join(part for part in parts if part)
+
+
+        def exception_output(exc):
+            return combined_output(getattr(exc, "output", ""), getattr(exc, "stderr", ""))
+
+
+        def run_with_retry(command, cwd=None, attempts=3, delay_seconds=3, retry_on_any_error=False):
             for attempt in range(1, attempts + 1):
                 result = subprocess.run(command, cwd=cwd, text=True, capture_output=True)
                 if result.returncode == 0:
                     return
 
-                stderr = result.stderr or ""
+                output = combined_output(result.stdout or "", result.stderr or "")
+                retryable = retry_on_any_error or any(
+                    marker in output for marker in TRANSIENT_DOCKER_NETWORK_ERRORS
+                )
                 if (
                     attempt == attempts
-                    or not any(marker in stderr for marker in TRANSIENT_DOCKER_NETWORK_ERRORS)
+                    or not retryable
                 ):
                     raise subprocess.CalledProcessError(
                         result.returncode,
                         command,
                         output=result.stdout,
-                        stderr=stderr,
+                        stderr=output,
                     )
 
                 time.sleep(delay_seconds)
@@ -527,7 +543,13 @@
             command.extend(["up", "-d", "--force-recreate", *services])
 
             try:
-                run_with_retry(command, cwd=working_dir or None)
+                run_with_retry(
+                    command,
+                    cwd=working_dir or None,
+                    attempts=5,
+                    delay_seconds=5,
+                    retry_on_any_error=True,
+                )
                 actions.append(
                     {
                         "type": "docker_compose_up",
@@ -537,7 +559,7 @@
                     }
                 )
             except subprocess.CalledProcessError as exc:
-                stderr = exc.stderr or ""
+                stderr = exception_output(exc)
                 if not (
                     container_names
                     and all(marker in stderr for marker in STALE_COMPOSE_ENDPOINT_ERRORS)
@@ -567,7 +589,13 @@
                     recovery_command.extend(["--file", config_file])
                 recovery_command.extend(["up", "-d", "--force-recreate", *services])
                 try:
-                    run_with_retry(recovery_command, cwd=working_dir or None)
+                    run_with_retry(
+                        recovery_command,
+                        cwd=working_dir or None,
+                        attempts=5,
+                        delay_seconds=5,
+                        retry_on_any_error=True,
+                    )
                     actions.append(
                         {
                             "type": "docker_compose_up_force_recreate",
@@ -578,7 +606,7 @@
                     )
                     continue
                 except subprocess.CalledProcessError as recovery_exc:
-                    recovery_stderr = recovery_exc.stderr or ""
+                    recovery_stderr = exception_output(recovery_exc)
                     if not all(marker in recovery_stderr for marker in STALE_COMPOSE_ENDPOINT_ERRORS):
                         raise
 
@@ -600,7 +628,13 @@
                 for config_file in config_file_list:
                     final_up_command.extend(["--file", config_file])
                 final_up_command.extend(["up", "-d", *services])
-                run_with_retry(final_up_command, cwd=working_dir or None)
+                run_with_retry(
+                    final_up_command,
+                    cwd=working_dir or None,
+                    attempts=5,
+                    delay_seconds=5,
+                    retry_on_any_error=True,
+                )
                 actions.append(
                     {
                         "type": "docker_compose_up_after_down",
