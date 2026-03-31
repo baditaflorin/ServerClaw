@@ -2,13 +2,13 @@
 
 - ADR: [ADR 0285](../adr/0285-paperless-ngx-as-the-document-management-and-archive-api.md)
 - Title: Deploy Paperless-ngx as the repo-managed document archive API on `docker-runtime-lv3`
-- Status: in_progress
+- Status: live_applied
 - Included In Repo Version: N/A
-- Branch-Local Receipt: pending
+- Branch-Local Receipt: `receipts/live-applies/2026-03-31-adr-0285-paperless-live-apply.json`
 - Canonical Mainline Receipt: pending
-- Live Applied In Platform Version: N/A
-- Implemented On: pending
-- Live Applied On: pending
+- Live Applied In Platform Version: 0.130.75
+- Implemented On: 2026-03-31
+- Live Applied On: 2026-03-31
 - Branch: `codex/ws-0285-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-live-apply`
 - Owner: codex
@@ -97,8 +97,57 @@
 - protected integration files remain deferred on this branch until the final
   exact-main replay and merge step
 
+## Branch-Local Delivery
+
+- `779a8cab0` carried the workstream automation onto the active latest-main
+  baseline by hardening Paperless, Keycloak, mail-platform, OpenBao, and
+  Hetzner DNS recovery paths and by fixing the Paperless smoke-upload verifier
+  so each synthetic PDF now contains unique content instead of only unique
+  metadata.
+- The live replay exposed a transient shared-edge drift where
+  `paperless.lv3.org` briefly served the `nginx.lv3.org` certificate; a narrow
+  `nginx-lv3,localhost` replay restored the correct `paperless.lv3.org` server
+  block and certificate without disturbing unrelated edge publications.
+- The same replay surfaced a real verifier defect: deleted smoke documents stay
+  in Paperless trash, and the old constant PDF bytes made later probes fail as
+  duplicates. The branch tip now embeds the archive serial into the generated
+  PDF so repeated public smoke uploads remain valid.
+
+## Verification
+
+- The focused regression slice preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0285-targeted-pytest-r1.txt`
+  passed with `76 passed in 7.06s`, and the post-fix `uv run --with pytest
+  pytest tests/test_paperless_sync.py` rerun passed with `7 passed in 0.07s`.
+- Repository validation preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0285-validate-service-completeness-r1.txt`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0285-validate-repo-r2.txt`, and
+  `receipts/live-applies/evidence/2026-03-31-ws-0285-git-diff-check-r1.txt`
+  confirmed the service catalog, repo automation gate, and whitespace checks
+  all passed on the settled branch-local tree.
+- Guest-local runtime verification preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0285-guest-runtime-r3.txt`
+  confirmed `paperless`, `paperless-openbao-agent`, and `paperless-redis` all
+  stayed healthy on `docker-runtime-lv3`, and the authenticated local API
+  returned a clean documents listing.
+- Public endpoint verification preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0285-public-head-r2.txt` and
+  `receipts/live-applies/evidence/2026-03-31-ws-0285-public-verify-r3.txt`
+  confirmed the correct `paperless.lv3.org` TLS publication and a no-drift
+  taxonomy verification result through `https://paperless.lv3.org/api/`.
+- Public smoke-upload verification preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0285-public-smoke-r3.txt` and
+  `receipts/live-applies/evidence/2026-03-31-ws-0285-task-log-r1.json`
+  confirmed a fresh uploaded document completed ingestion successfully and was
+  cleaned back out of the archive.
+
 ## Remaining For Merge-To-Main
 
-- branch-local work is still in progress
-- protected release surfaces remain intentionally untouched until the exact-main
-  integration step
+- rebase or merge this workstream onto the current `origin/main` head
+  `ad0050483c76e6eba2f516cbb6d4e4f4a6843476`
+- cut the protected main integration surfaces with the next repo release bump
+  and canonical-truth refresh
+- replay the exact merged `main` tree through the authoritative
+  `make live-apply-service service=paperless env=production` path
+- record the canonical mainline receipt and bump `versions/stack.yaml` to the
+  first exact-main platform version only after that replay passes

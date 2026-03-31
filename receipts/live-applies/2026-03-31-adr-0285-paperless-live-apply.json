@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-31-adr-0285-paperless-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-31",
+  "recorded_on": "2026-03-31",
+  "recorded_at": "2026-03-31T09:47:38Z",
+  "recorded_by": "codex",
+  "source_commit": "779a8cab0c21ebac878104ee9ee373949a447d12",
+  "repo_version_context": "0.177.115",
+  "platform_version_context": "0.130.75",
+  "workflow_id": "adr-0285-paperless-live-apply",
+  "adr": "0285",
+  "summary": "Applied ADR 0285 from source commit `779a8cab0c21ebac878104ee9ee373949a447d12` on top of the latest `origin/main` baseline `0.177.115 / 0.130.75`. The branch-local replay left Paperless live at `paperless.lv3.org`, kept the `docker-runtime-lv3` stack healthy, restored the correct edge certificate after transient drift on the shared NGINX surface, and repaired the smoke-upload verifier so repeated public checks no longer fail Paperless duplicate detection against trashed prior probes.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Paperless public endpoint",
+      "address": "https://paperless.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused Paperless regression slice",
+      "result": "pass",
+      "observed": "The branch-local regression bundle preserved in `receipts/live-applies/evidence/2026-03-31-ws-0285-targeted-pytest-r1.txt` passed with `76 passed in 7.06s`, and the post-fix `uv run --with pytest pytest tests/test_paperless_sync.py` rerun passed with `7 passed in 0.07s`."
+    },
+    {
+      "check": "Repository and service validation bundle",
+      "result": "pass",
+      "observed": "`python3 scripts/validate_service_completeness.py --service paperless`, `./scripts/validate_repo.sh agent-standards health-probes`, and `git diff --check` all passed on the settled branch-local tree."
+    },
+    {
+      "check": "Guest-local Paperless runtime health",
+      "result": "pass",
+      "observed": "The guest probe preserved in `receipts/live-applies/evidence/2026-03-31-ws-0285-guest-runtime-r3.txt` confirmed `paperless`, `paperless-openbao-agent`, and `paperless-redis` were healthy and that the authenticated local documents API returned a clean JSON listing."
+    },
+    {
+      "check": "Public Paperless TLS and taxonomy verification",
+      "result": "pass",
+      "observed": "The public probe preserved in `receipts/live-applies/evidence/2026-03-31-ws-0285-public-head-r2.txt` returned the correct `paperless.lv3.org` certificate plus `HTTP/2 302`, and the verify report preserved in `receipts/live-applies/evidence/2026-03-31-ws-0285-public-verify-r3.txt` confirmed no taxonomy drift through `https://paperless.lv3.org/api/`."
+    },
+    {
+      "check": "Public smoke upload and task completion",
+      "result": "pass",
+      "observed": "The smoke run preserved in `receipts/live-applies/evidence/2026-03-31-ws-0285-public-smoke-r3.txt` created temporary document `2` from task `7e0fb57a-2fe7-421d-bd71-3edf81069c87` and cleaned it up successfully, while the task ledger preserved in `receipts/live-applies/evidence/2026-03-31-ws-0285-task-log-r1.json` shows the corresponding `consume_file` task completed with `SUCCESS`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0285-paperless-ngx-as-the-document-management-and-archive-api.md",
+    "docs/runbooks/configure-paperless.md",
+    "docs/workstreams/ws-0285-live-apply.md",
+    "workstreams.yaml",
+    "scripts/paperless_sync.py",
+    "tests/test_paperless_sync.py",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-origin-main-and-head-r2.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-targeted-pytest-r1.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-validate-service-completeness-r1.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-validate-repo-r2.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-git-diff-check-r1.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-guest-runtime-r3.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-public-head-r2.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-public-verify-r3.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-public-smoke-r3.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-task-log-r1.json"
+  ],
+  "notes": [
+    "This branch-local receipt deliberately stops before the protected main integration surfaces are rewritten. `README.md`, `VERSION`, `changelog.md`, and `versions/stack.yaml` still await the exact-main integration step.",
+    "The replay exposed one repo defect that is fixed in source commit `779a8cab0c21ebac878104ee9ee373949a447d12`: the old smoke-upload verifier generated constant PDF bytes, which Paperless later rejected as duplicates after earlier probes were deleted into the trash."
+  ]
+}

@@ -1298,7 +1298,7 @@ workstreams:
   - id: ws-0285-live-apply
     adr: "0285"
     title: Live apply Paperless-ngx as the document archive API from latest origin/main
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0285-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-live-apply
@@ -1435,8 +1435,16 @@ workstreams:
             - tests/test_keycloak_runtime_role.py
           mode: shared_contract
           contract: paperless-platform-catalogs-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0285 by bringing the Paperless document
+        archive service, its OpenBao and Keycloak recovery hardening, and the
+        corrected public smoke-upload verification path onto main
+      release_bump: patch
+      included_in_repo_version: null
+      latest_receipts:
+        paperless: 2026-03-31-adr-0285-paperless-live-apply
   - id: ws-0295-live-apply
     adr: "0295"
     title: Live apply the shared artifact cache plane from latest origin/main

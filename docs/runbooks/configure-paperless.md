@@ -30,6 +30,17 @@ On `main`, run:
 HETZNER_DNS_API_TOKEN=... make live-apply-service service=paperless env=production
 ```
 
+This is the required path for the authoritative platform-version bump because
+`make live-apply-service` checks canonical truth before mutation and is the
+exact-main replay that should settle the protected release surfaces.
+
+On a non-`main` workstream branch, expect that target to stop at the canonical
+truth gate if protected shared integration files such as `README.md`,
+`VERSION`, `changelog.md`, or `versions/stack.yaml` would need refresh. That
+stop is expected branch-local behavior; use the direct scoped runner below and
+record the evidence in the workstream receipt instead of editing protected
+release truth on the branch.
+
 On a workstream branch where protected integration files must remain untouched, run the service playbook directly:
 
 ```bash
@@ -95,9 +106,17 @@ python3 scripts/paperless_sync.py smoke-upload \
 Guest-side verification through the Proxmox jump path:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
-  -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 \
-  'docker compose --file /opt/paperless/docker-compose.yml ps && curl -fsS http://127.0.0.1:8018/api/documents/?page_size=1 -H "Authorization: Token $(sudo cat /etc/lv3/paperless/api-token)"'
+ANSIBLE_HOST_KEY_CHECKING=False ansible \
+  -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml \
+  docker-runtime-lv3 \
+  -m shell \
+  -a 'docker compose --file /opt/paperless/docker-compose.yml ps && TOKEN=$(sudo cat /etc/lv3/paperless/api-token) && curl -fsS http://127.0.0.1:8018/api/documents/?page_size=1 -H "Authorization: Token ${TOKEN}"' \
+  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 The verify command asserts that the required correspondents, document types, and tags exist. The smoke upload submits a temporary PDF through the public API, waits for ingestion, validates searchability, and then deletes the test document so the archive remains clean.
+
+Paperless validates `Host` headers strictly. For guest-local probing, use the
+loopback listener `127.0.0.1:8018` or send `Host: paperless.lv3.org`; direct
+HTTP requests to `10.10.10.20:8018` return `400 Bad Request` by design.
