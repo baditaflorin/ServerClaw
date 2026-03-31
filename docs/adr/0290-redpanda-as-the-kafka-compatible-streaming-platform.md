@@ -1,9 +1,10 @@
 # ADR 0290: Redpanda As The Kafka-Compatible Streaming Platform
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.177.114
+- Implemented In Platform Version: 0.130.75
+- Implemented On: 2026-03-31
 - Date: 2026-03-29
 
 ## Context
