@@ -1,0 +1,73 @@
+---
+redpanda_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('redpanda') }}"
+redpanda_site_dir: /opt/redpanda
+redpanda_config_dir: "{{ redpanda_site_dir }}/config"
+redpanda_compose_file: "{{ redpanda_site_dir }}/docker-compose.yml"
+redpanda_compose_env_file: "{{ compose_runtime_secret_root }}/redpanda/runtime.env"
+redpanda_legacy_env_file: "{{ redpanda_site_dir }}/runtime.env"
+redpanda_openbao_agent_dir: "{{ redpanda_site_dir }}/openbao"
+redpanda_openbao_agent_image: "{{ openbao_agent_image }}"
+redpanda_openbao_agent_container_name: redpanda-openbao-agent
+redpanda_openbao_secret_path: services/redpanda/runtime-env
+redpanda_openbao_policy_name: lv3-service-redpanda-runtime
+redpanda_openbao_approle_name: redpanda-runtime
+redpanda_image: "{{ container_image_catalog.images.redpanda_runtime.ref }}"
+redpanda_container_name: lv3-redpanda
+redpanda_volume_name: lv3-redpanda-data
+redpanda_bootstrap_file: "{{ redpanda_config_dir }}/.bootstrap.yaml"
+redpanda_start_script_file: "{{ redpanda_config_dir }}/start-redpanda.sh"
+redpanda_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/redpanda
+redpanda_admin_password_local_file: "{{ redpanda_local_artifact_dir }}/admin-password.txt"
+redpanda_platform_password_local_file: "{{ redpanda_local_artifact_dir }}/platform-password.txt"
+redpanda_admin_user: redpanda-admin
+redpanda_platform_user: redpanda-platform
+redpanda_sasl_mechanism: SCRAM-SHA-256
+redpanda_private_ip: "{{ redpanda_service_topology.private_ip }}"
+redpanda_kafka_port: "{{ redpanda_service_topology.ports.internal }}"
+redpanda_admin_port: "{{ redpanda_service_topology.ports.admin }}"
+redpanda_pandaproxy_port: "{{ redpanda_service_topology.ports.http_proxy }}"
+redpanda_schema_registry_port: "{{ redpanda_service_topology.ports.schema_registry }}"
+redpanda_loopback_kafka_port: 19092
+redpanda_loopback_pandaproxy_port: 18097
+redpanda_loopback_schema_registry_port: 18099
+redpanda_rpc_port: 33145
+redpanda_smp: 1
+redpanda_memory: 2G
+redpanda_log_level: info
+redpanda_storage_min_free_bytes: 1073741824
+redpanda_admin_api_url: "{{ redpanda_service_topology.urls.admin }}"
+redpanda_http_proxy_url: "{{ redpanda_service_topology.urls.http_proxy }}"
+redpanda_schema_registry_url: "{{ redpanda_service_topology.urls.schema_registry }}"
+redpanda_smoke_topic: platform.redpanda.smoke
+redpanda_smoke_dlq_topic: "{{ redpanda_smoke_topic }}.dlq"
+redpanda_topics:
+  - name: "{{ redpanda_smoke_topic }}"
+    partitions: 1
+    replication_factor: 1
+    config:
+      retention.ms: 604800000
+      retention.bytes: 268435456
+  - name: "{{ redpanda_smoke_dlq_topic }}"
+    partitions: 1
+    replication_factor: 1
+    config:
+      retention.ms: 604800000
+      retention.bytes: 268435456
+redpanda_acl_topic_prefix: "{{ redpanda_smoke_topic }}"
+redpanda_schema_subject: platform.redpanda.smoke-value
+redpanda_schema_definition:
+  "$schema": "http://json-schema.org/draft-07/schema#"
+  title: PlatformRedpandaSmoke
+  type: object
+  additionalProperties: false
+  properties:
+    marker:
+      type: string
+    created_at:
+      type: string
+    producer:
+      type: string
+  required:
+    - marker
+    - created_at
+    - producer

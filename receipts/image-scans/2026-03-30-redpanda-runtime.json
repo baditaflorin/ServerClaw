@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "redpanda_runtime",
+  "image_ref": "docker.redpanda.com/redpandadata/redpanda:v25.3.11@sha256:c61d4eb370917127ae379b060bdb38b864ff8e4d13bdbe406365559805a0b16f",
+  "scanner": "trivy",
+  "scanner_image": "docker.io/aquasec/trivy:0.63.0",
+  "scanned_on": "2026-03-30",
+  "summary": {
+    "critical": 0,
+    "high": 12
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.redpanda.com/redpandadata/redpanda:v25.3.11@sha256:c61d4eb370917127ae379b060bdb38b864ff8e4d13bdbe406365559805a0b16f (debian 13.4)",
+      "class": "os-pkgs",
+      "type": "debian",
+      "critical": 0,
+      "high": 12
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-30-redpanda-runtime.trivy.json"
+}

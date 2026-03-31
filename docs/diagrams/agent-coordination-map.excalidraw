@@ -339,7 +339,7 @@
       "lineHeight": 1.25
     },
     {
-      "id": "539f885c853a9da1",
+      "id": "589f7ea0bf11bf9c",
       "type": "rectangle",
       "x": 1040,
       "y": 220,
@@ -368,7 +368,7 @@
       "locked": false
     },
     {
-      "id": "3dc1d487e7dcaa4c",
+      "id": "d377ac90040742a8",
       "type": "text",
       "x": 1060,
       "y": 242,
@@ -395,14 +395,14 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "Parallel branch count\n295\nLive-applied workstreams 144",
+      "text": "Parallel branch count\n296\nLive-applied workstreams 145",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "Parallel branch count\n295\nLive-applied workstreams 144",
+      "originalText": "Parallel branch count\n296\nLive-applied workstreams 145",
       "lineHeight": 1.25
     },
     {

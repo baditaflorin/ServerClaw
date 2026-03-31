@@ -1,7 +1,7 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.115",
+  "repo_version": "0.177.116",
   "platform_version": "0.130.75",
   "generated_at": "2026-03-31T10:24:41Z",
   "next_refresh_at": "2026-03-31T11:24:41Z",
@@ -626,6 +626,17 @@
         "primary_url": "https://realtime.lv3.org",
         "last_live_apply": "2026-03-31T00:00:00Z",
         "slo_status": "unknown"
+      },
+      "redpanda": {
+        "service_name": "Redpanda",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "kafka://10.10.10.20:9092",
+        "last_live_apply": "2026-03-31T00:00:00Z"
       },
       "searxng": {
         "service_name": "SearXNG",
@@ -2363,6 +2374,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-netdata.md"
+      },
+      {
+        "id": "converge-redpanda",
+        "description": "Deploy the private Redpanda Kafka-compatible streaming runtime on docker-runtime-lv3 and verify the Admin API, HTTP Proxy, and Schema Registry contract.",
+        "tags": [
+          "converge-redpanda",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-redpanda.md"
       },
       {
         "id": "converge-restic-config-backup",
@@ -4862,6 +4899,16 @@
         ]
       },
       {
+        "id": "configure-redpanda",
+        "title": "Configure Redpanda",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-redpanda.md",
+        "workflow_ids": [
+          "converge-redpanda"
+        ]
+      },
+      {
         "id": "configure-searxng",
         "title": "Configure SearXNG",
         "agent_trust_required": "T3",
@@ -5554,10 +5601,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.114",
+    "last_version": "0.177.115",
     "deployed_at": "2026-03-31",
-    "summary": "Implemented ADR 0302 encrypted Restic file-level backups for platform configuration and state artifacts, including the MinIO-backed repository, systemd timer convergence, live-apply-trigger coverage for `config/` and `versions/stack.yaml`, restore verification receipts, and backup-coverage ledger integration.",
-    "release_notes_url": "docs/release-notes/0.177.115.md"
+    "summary": "implements ADR 0290 by bringing the private Redpanda Kafka-compatible streaming platform, topic reconciliation, and authenticated Admin API, HTTP Proxy, and Schema Registry runtime onto main after the exact-main governed replay on docker-runtime-lv3",
+    "release_notes_url": "docs/release-notes/0.177.116.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -1364,6 +1364,55 @@
         "reason": "Mailpit is intentionally private-only and is verified through role-level HTTP and SMTP probes instead of an always-on public monitor."
       }
     },
+    "redpanda": {
+      "service_name": "redpanda",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "redpanda_runtime",
+      "verify_file": "roles/redpanda_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "command",
+        "description": "Redpanda startup completes once the authenticated Admin API ready endpoint answers with the repo-managed admin principal.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "argv": [
+          "python3",
+          "-c",
+          "from pathlib import Path\nimport base64\nimport urllib.request\n\nenv = {}\nfor line in Path('/run/lv3-secrets/redpanda/runtime.env').read_text(encoding='utf-8').splitlines():\n    if '=' in line:\n        key, value = line.split('=', 1)\n        env[key] = value\n\ntoken = base64.b64encode(\n    f\"{env['REDPANDA_ADMIN_USER']}:{env['REDPANDA_ADMIN_PASSWORD']}\".encode('utf-8')\n).decode('ascii')\nrequest = urllib.request.Request(\n    'http://127.0.0.1:9644/v1/status/ready',\n    headers={'Authorization': f'Basic {token}'},\n)\nwith urllib.request.urlopen(request, timeout=30) as response:\n    raise SystemExit(0 if response.status == 200 else 1)"
+        ],
+        "success_rc": 0
+      },
+      "liveness": {
+        "kind": "command",
+        "description": "The authenticated Redpanda Admin API ready endpoint answers through the rendered runtime env credentials.",
+        "timeout_seconds": 120,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": [
+          "python3",
+          "-c",
+          "from pathlib import Path\nimport base64\nimport urllib.request\n\nenv = {}\nfor line in Path('/run/lv3-secrets/redpanda/runtime.env').read_text(encoding='utf-8').splitlines():\n    if '=' in line:\n        key, value = line.split('=', 1)\n        env[key] = value\n\ntoken = base64.b64encode(\n    f\"{env['REDPANDA_ADMIN_USER']}:{env['REDPANDA_ADMIN_PASSWORD']}\".encode('utf-8')\n).decode('ascii')\nrequest = urllib.request.Request(\n    'http://127.0.0.1:9644/v1/status/ready',\n    headers={'Authorization': f'Basic {token}'},\n)\nwith urllib.request.urlopen(request, timeout=30) as response:\n    raise SystemExit(0 if response.status == 200 else 1)"
+        ],
+        "success_rc": 0
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "Redpanda accepts a smoke record through the HTTP Proxy and returns the registered smoke schema through the Schema Registry.",
+        "timeout_seconds": 180,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": [
+          "python3",
+          "-c",
+          "from pathlib import Path\nimport base64\nimport json\nimport time\nimport urllib.request\n\nenv = {}\nfor line in Path('/run/lv3-secrets/redpanda/runtime.env').read_text(encoding='utf-8').splitlines():\n    if '=' in line:\n        key, value = line.split('=', 1)\n        env[key] = value\n\ndef auth(user_key, password_key):\n    return base64.b64encode(\n        f\"{env[user_key]}:{env[password_key]}\".encode('utf-8')\n    ).decode('ascii')\n\nmarker = f\"health-probe-redpanda-{int(time.time())}\"\npayload = json.dumps(\n    {\n        'records': [\n            {\n                'value': {\n                    'marker': marker,\n                    'created_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),\n                    'producer': 'health-probe',\n                }\n            }\n        ]\n    }\n).encode('utf-8')\nproduce_request = urllib.request.Request(\n    'http://127.0.0.1:8103/topics/platform.redpanda.smoke',\n    data=payload,\n    headers={\n        'Authorization': f\"Basic {auth('REDPANDA_PLATFORM_USER', 'REDPANDA_PLATFORM_PASSWORD')}\",\n        'Content-Type': 'application/vnd.kafka.json.v2+json',\n        'Accept': 'application/vnd.kafka.v2+json',\n    },\n    method='POST',\n)\nurllib.request.urlopen(produce_request, timeout=30).read()\n\nrecords_request = urllib.request.Request(\n    'http://127.0.0.1:8103/topics/platform.redpanda.smoke/partitions/0/records?offset=0&timeout=3000&max_bytes=1048576',\n    headers={\n        'Authorization': f\"Basic {auth('REDPANDA_PLATFORM_USER', 'REDPANDA_PLATFORM_PASSWORD')}\",\n        'Accept': 'application/vnd.kafka.json.v2+json',\n    },\n)\nrecords = json.loads(urllib.request.urlopen(records_request, timeout=30).read().decode('utf-8'))\nif not any(item.get('value', {}).get('marker') == marker for item in records):\n    raise SystemExit(1)\n\nschema_request = urllib.request.Request(\n    'http://127.0.0.1:8104/subjects/platform.redpanda.smoke-value/versions/latest',\n    headers={\n        'Authorization': f\"Basic {auth('REDPANDA_PLATFORM_USER', 'REDPANDA_PLATFORM_PASSWORD')}\",\n        'Accept': 'application/vnd.schemaregistry.v1+json',\n    },\n)\nschema_payload = json.loads(urllib.request.urlopen(schema_request, timeout=30).read().decode('utf-8'))\nraise SystemExit(0 if schema_payload.get('subject') == 'platform.redpanda.smoke-value' else 1)"
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Redpanda is intentionally private-only and its Admin API, HTTP Proxy, and Schema Registry listeners require credentials, so governed role verification remains the authoritative health signal."
+      }
+    },
     "matrix_synapse": {
       "service_name": "matrix-synapse",
       "owning_vm": "docker-runtime-lv3",

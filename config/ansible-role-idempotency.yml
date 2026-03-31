@@ -336,6 +336,9 @@ roles:
   restic_config_backup:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  redpanda_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   searxng_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

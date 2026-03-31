@@ -199,7 +199,7 @@ ADR 0302 Restic file-level backups are now live on production from `main`: `dock
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.115` |
+| Repository version | `0.177.116` |
 | Platform version | `0.130.75` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
@@ -365,6 +365,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `public_edge_publication` | `2026-03-29-adr-0255-matrix-synapse-mainline-live-apply` |
 | `public_endpoint_admission_control` | `2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply` |
 | `realtime` | `2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply` |
+| `redpanda` | `2026-03-31-adr-0290-redpanda-mainline-live-apply` |
 | `remote_build_gateway` | `2026-03-29-adr-0265-immutable-validation-snapshots-mainline-live-apply` |
 | `renovate` | `2026-03-31-adr-0297-renovate-mainline-live-apply` |
 | `repo_deploy_base_image_cache` | `2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply` |
@@ -674,6 +675,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure PostgreSQL VM Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-postgres-vm.md)
 - [Configure Proxmox Network Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-proxmox-network.md)
 - [Configure Public Ingress Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md)
+- [Configure Redpanda](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-redpanda.md)
 - [Configure Renovate](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-renovate.md)
 - [Configure SearXNG](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-searxng.md)
 - [Configure Semaphore](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-semaphore.md)
@@ -1444,6 +1446,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0288-live-apply: ADR 0288 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0288-live-apply.md)
 - [Workstream ws-0288-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0288-main-merge.md)
 - [Workstream ws-0289-live-apply: Live Apply ADR 0289 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0289-live-apply.md)
+- [Workstream ws-0290-live-apply: Live Apply ADR 0290 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0290-live-apply.md)
 - [Workstream ws-0291-live-apply: Live Apply ADR 0291 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0291-live-apply.md)
 - [Workstream ws-0291-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0291-main-merge.md)
 - [Workstream ws-0292-live-apply: Live Apply ADR 0292 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-live-apply.md)
@@ -1474,7 +1477,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.115` |
+| Repository version | `0.177.116` |
 | Platform version | `0.130.75` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1791,6 +1794,7 @@ This repository is intentionally opinionated:
 | `0288` | ADR 0288 live apply from latest origin/main | `live_applied` | [ws-0288-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0288-live-apply.md) |
 | `0288` | Integrate ADR 0288 Flagsmith exact-main replay onto current origin/main | `merged` | [ws-0288-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0288-main-merge.md) |
 | `0289` | Live apply ADR 0289 Directus from latest origin/main | `live_applied` | [ws-0289-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0289-live-apply.md) |
+| `0290` | Live apply Redpanda as the Kafka-compatible streaming platform from latest origin/main | `live_applied` | [ws-0290-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0290-live-apply.md) |
 | `0291` | Live apply ADR 0291 from the latest realistic origin/main | `live_applied` | [ws-0291-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0291-live-apply.md) |
 | `0293` | Live apply Temporal as the durable workflow and task queue engine from latest origin/main | `live_applied` | [ws-0293-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-live-apply.md) |
 | `0295` | Shared artifact cache plane and dedicated cache VM roadmap | `live_applied` | [adr-0295-artifact-cache-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md) |

@@ -1,12 +1,12 @@
-# Release 0.177.115
+# Release 0.177.116
 
 - Date: 2026-03-31
 
 ## Summary
-- Implemented ADR 0302 encrypted Restic file-level backups for platform configuration and state artifacts, including the MinIO-backed repository, systemd timer convergence, live-apply-trigger coverage for `config/` and `versions/stack.yaml`, restore verification receipts, and backup-coverage ledger integration.
+- implements ADR 0290 by bringing the private Redpanda Kafka-compatible streaming platform, topic reconciliation, and authenticated Admin API, HTTP Proxy, and Schema Registry runtime onto main after the exact-main governed replay on docker-runtime-lv3
 
 ## Platform Impact
-- ADR 0302 is now live on production: docker-runtime-lv3 writes encrypted Restic file-level backups into the MinIO-backed restic-config-backup repository and the managed backup plus restore verification paths are now evidenced in-repo.
+- Platform version remains 0.130.75 while release 0.177.116 records the already-verified ADR 0290 Redpanda runtime and canonical mainline receipt on top of the current origin/main baseline.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

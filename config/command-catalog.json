@@ -2716,6 +2716,44 @@
         "timeout_seconds": 900
       }
     },
+    "converge-redpanda": {
+      "description": "Converge the private Redpanda streaming runtime and its repo-managed smoke topics, ACLs, and schema contract on docker-runtime-lv3.",
+      "workflow_id": "converge-redpanda",
+      "scope": "guest_runtime",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-redpanda passes",
+        "make validate passes before the apply",
+        "The private-only Redpanda listener contract and the 8103/8104 HTTP port remap are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the Admin API ready check, the HTTP Proxy smoke record, the Schema Registry smoke subject, and the repo validation path coverage."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if Redpanda fails to start, the guest firewall no longer preserves the private-only listener boundary, or the authenticated Admin API, HTTP Proxy, and Schema Registry contract does not verify end to end.",
+          "Stop if the rollout would reuse docker-runtime-lv3 ports 8081 or 8082 that remain reserved for the mail platform gateway and NetBox."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Redpanda runtime and firewall state before retrying.",
+          "Do not leave behind ad hoc Docker, topic, or ACL changes after a failed rollout."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
+      }
+    },
     "converge-excalidraw": {
       "description": "Converge the private Excalidraw runtime, collaboration room, and authenticated edge publication at draw.lv3.org.",
       "workflow_id": "converge-excalidraw",

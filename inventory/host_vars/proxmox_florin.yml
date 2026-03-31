@@ -40,6 +40,10 @@ platform_port_assignments:
   openfga_host_proxy_port: 8014
   openbao_http_port: 8201
   openbao_proxy_port: 8200
+  redpanda_kafka_port: 9092
+  redpanda_admin_port: 9644
+  redpanda_http_proxy_port: 8103
+  redpanda_schema_registry_port: 8104
   semaphore_server_port: 3004
   semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
@@ -531,6 +535,35 @@ network_policy:
             - 8025
             - 8100
           description: Local Docker workloads using the private Mailpit SMTP and UI listeners plus the Piper TTS API
+        - source: management
+          protocol: tcp
+          ports:
+            - 9092
+            - 9644
+            - 8103
+            - 8104
+          description: Operator access to the private Redpanda Kafka, Admin API, HTTP Proxy, and Schema Registry listeners
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 9092
+            - 8103
+            - 8104
+          description: Guest-network access to the private Redpanda Kafka, HTTP Proxy, and Schema Registry listeners
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 9092
+            - 8103
+            - 8104
+          description: Local Docker workloads using the private Redpanda Kafka, HTTP Proxy, and Schema Registry listeners
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 9092
+            - 8103
+            - 8104
+          description: Local Docker workloads using the private Redpanda Kafka, HTTP Proxy, and Schema Registry listeners
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
@@ -1410,6 +1443,14 @@ lv3_service_topology:
       meta: Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.
   mailpit:
     service_name: mailpit
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+  redpanda:
+    service_name: redpanda
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
     exposure_model: private-only

@@ -991,6 +991,41 @@
       }
     },
     {
+      "id": "redpanda",
+      "name": "Redpanda",
+      "description": "Private Kafka-compatible streaming platform for durable, replayable event logs and schema-managed topics.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "kafka://10.10.10.20:9092",
+      "exposure": "private-only",
+      "health_probe_id": "redpanda",
+      "image_catalog_ids": [
+        "redpanda_runtime"
+      ],
+      "secret_catalog_ids": [
+        "redpanda_admin_password",
+        "redpanda_platform_password"
+      ],
+      "adr": "0290",
+      "runbook": "docs/runbooks/configure-redpanda.md",
+      "tags": [
+        "streaming",
+        "kafka",
+        "redpanda",
+        "private"
+      ],
+      "notes": "The private Kafka listener stays on 9092 while the authenticated Admin API, HTTP Proxy, and Schema Registry listeners use 9644, 8103, and 8104 because docker-runtime-lv3 already reserves 8097 for JupyterHub and 8099 for the Temporal UI.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "kafka://10.10.10.20:9092",
+          "notes": "Platform callers use the Kafka listener on 9092 while the authenticated Admin API, HTTP Proxy, and Schema Registry listeners remain private on 9644, 8103, and 8104."
+        }
+      }
+    },
+    {
       "id": "matrix_synapse",
       "name": "Matrix Synapse",
       "description": "Repo-managed Matrix Synapse runtime with Discord and WhatsApp mautrix bridges that serves as the canonical ServerClaw conversation hub.",
