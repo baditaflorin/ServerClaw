@@ -76,12 +76,6 @@ roles:
   dify_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
-  directus_postgres:
-    policy: tracked
-    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
-  directus_runtime:
-    policy: tracked
-    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   dozzle_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

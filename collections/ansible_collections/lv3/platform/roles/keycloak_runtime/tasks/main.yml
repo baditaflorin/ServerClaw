@@ -669,10 +669,6 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
-      register: keycloak_realm_group_reconcile
-      retries: "{{ keycloak_admin_reconciliation_retries }}"
-      delay: "{{ keycloak_admin_reconciliation_delay }}"
-      until: keycloak_realm_group_reconcile is succeeded
       loop: "{{ keycloak_realm_groups }}"
       loop_control:
         label: "{{ item.name }}"
@@ -695,10 +691,6 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
-      register: keycloak_realm_role_reconcile
-      retries: "{{ keycloak_admin_reconciliation_retries }}"
-      delay: "{{ keycloak_admin_reconciliation_delay }}"
-      until: keycloak_realm_role_reconcile is succeeded
       loop: "{{ keycloak_realm_roles }}"
       loop_control:
         label: "{{ item.name }}"
@@ -719,10 +711,6 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
-      register: keycloak_group_realm_rolemapping_reconcile
-      retries: "{{ keycloak_admin_reconciliation_retries }}"
-      delay: "{{ keycloak_admin_reconciliation_delay }}"
-      until: keycloak_group_realm_rolemapping_reconcile is succeeded
       loop: "{{ keycloak_group_realm_role_mappings }}"
       loop_control:
         label: "{{ item.group_name }}"
@@ -1200,10 +1188,6 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
-      register: keycloak_service_account_realm_rolemapping_reconcile
-      retries: "{{ keycloak_admin_reconciliation_retries }}"
-      delay: "{{ keycloak_admin_reconciliation_delay }}"
-      until: keycloak_service_account_realm_rolemapping_reconcile is succeeded
       loop: "{{ keycloak_service_account_realm_role_mappings }}"
       loop_control:
         label: "{{ item.service_account_user_client_id }}"
