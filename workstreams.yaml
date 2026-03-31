@@ -1770,8 +1770,6 @@ workstreams:
             - scripts/security_posture_report.py
             - scripts/container_image_policy.py
             - scripts/upgrade_container_image.py
-            - scripts/validate_repository_data_models.py
-            - scripts/gate_status.py
             - policy/decisions/release_promotion.rego
             - policy/tests/release_promotion_test.rego
             - Makefile

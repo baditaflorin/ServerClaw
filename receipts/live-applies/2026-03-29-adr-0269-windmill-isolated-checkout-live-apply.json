@@ -7,7 +7,7 @@
   "recorded_at": "2026-03-29T20:00:38Z",
   "recorded_by": "codex",
   "source_commit": "working-tree+5f28f2404",
-  "repo_version_context": "branch-local ADR 0269 replay after the 0.177.81 exact-main proof",
+  "repo_version_context": "0.177.89",
   "platform_version_context": "current production Windmill runtime after the ADR 0269 exact-main replay",
   "workflow_id": "adr-0269-windmill-isolated-checkout-live-apply",
   "adr": "0269",
