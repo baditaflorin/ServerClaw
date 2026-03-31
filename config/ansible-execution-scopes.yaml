@@ -447,6 +447,12 @@ playbooks:
     shared_surfaces:
       - service:piper
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/redpanda.yml:
+    playbook_id: redpanda
+    mutation_scope: platform
+    shared_surfaces:
+      - service:redpanda
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/services/jupyterhub.yml:
     playbook_id: jupyterhub
     mutation_scope: platform

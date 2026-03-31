@@ -27,9 +27,9 @@ capabilities that JetStream is not designed to provide:
 
 Redpanda is a CPU-only, open-source streaming platform that implements the
 Kafka wire protocol exactly, stores data in a C++ log engine without JVM
-overhead, and ships an HTTP Admin REST API that covers all cluster management
-operations (topic CRUD, partition reassignment, consumer group management,
-broker configuration) without requiring the Kafka CLI or a GUI session.
+overhead, and exposes Kafka, HTTP Proxy, Schema Registry, and Admin API
+surfaces that fit the platform's private-only service model without needing a
+GUI session.
 
 ## Decision
 
@@ -45,31 +45,34 @@ lightweight pub/sub and notification workloads.
 - Redpanda listens on:
   - `9092/tcp` — Kafka wire protocol API (producers and consumers)
   - `9644/tcp` — Redpanda Admin REST API (topic and cluster management)
-  - `8082/tcp` — Pandaproxy HTTP REST API (produce and consume via HTTP
+  - `8097/tcp` — Pandaproxy HTTP REST API (produce and consume via HTTP
     for clients that cannot use the Kafka wire protocol)
-  - `8081/tcp` — Schema Registry API (Confluent-compatible, for Avro/Protobuf
+  - `8099/tcp` — Schema Registry API (Confluent-compatible, for Avro/Protobuf
     schema management)
 - Persistent log data is stored on a named Docker volume on fast local
-  storage; this volume is included in the backup scope (ADR 0086) via
-  Redpanda's partition snapshot API
+  storage; recovery currently relies on the governed VM-level backup coverage
+  for `docker-runtime-lv3` under ADR 0086, while finer-grained Redpanda
+  partition snapshot automation remains a follow-on hardening step
 - Secrets (SASL credentials for authenticated topics) are stored in OpenBao
   (ADR 0077) and injected at startup
 
-### API-first operation rules
+### Reconciliation and API operation rules
 
-- Topics are created and configured exclusively via the Redpanda Admin REST
-  API (`POST /v1/topics`); manual `rpk topic create` commands and GUI
-  operations are treated as drift and reconciled by the Ansible role on
-  converge
+- Topics are declared in the Ansible role and reconciled automatically on
+  converge; out-of-band topic creation is treated as drift
 - The Ansible role declares the canonical topic list (name, partition count,
-  replication factor, retention policy) in `defaults/main.yml`; the seed
-  task applies the list idempotently via the Admin API on every converge
-- Consumer group lag is queried via the Admin REST API
-  (`GET /v1/consumer_groups`) from Windmill monitoring flows; no separate
-  Kafka manager GUI is deployed
+  replication factor, retention policy) in `defaults/main.yml`; the converge
+  path applies that list idempotently with `rpk topic create --if-not-exists`
+  plus explicit retention reconciliation on every run
+- Consumer group lag and cluster state may be queried through the Admin API
+  and `rpk`; no separate Kafka manager GUI is deployed
 - The Schema Registry API (`POST /subjects/{subject}/versions`) is used to
   register and evolve Avro schemas; schema registration is part of the
   producer's deployment pipeline, not a manual step
+- Fine-grained Schema Registry authorization is out of scope for the initial
+  deployment because Redpanda documents Schema Registry authorization as an
+  enterprise feature. The baseline relies on private network reachability and
+  HTTP basic authentication instead of subject-level ACL reconciliation.
 
 ### Topic naming and governance rules
 
@@ -92,8 +95,8 @@ lightweight pub/sub and notification workloads.
   any Kafka client library) work without modification because Redpanda
   speaks the Kafka wire protocol exactly.
 - The Admin REST API provides a complete management surface with JSON
-  responses; Windmill flows can inspect consumer lag and topic metadata
-  without a GUI or CLI session.
+  responses for readiness and management checks, while the platform can still
+  use `rpk` non-interactively for converge-safe topic reconciliation.
 - Redpanda's C++ engine has no JVM warm-up overhead; it is ready to serve
   the Kafka API within seconds of container start.
 

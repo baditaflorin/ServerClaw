@@ -1,0 +1,8 @@
+---
+# Purpose: Service-scoped wrapper for the Redpanda runtime playbook.
+# Use case: Used by the generic live-apply and syntax-check entrypoints with service=redpanda.
+# Inputs: env (optional) plus any redpanda_* overrides accepted by playbooks/redpanda.yml.
+# Outputs: Delegates service-scoped execution to the canonical Redpanda playbook.
+# Idempotency: Yes; inherits the idempotent runtime converge behaviour from playbooks/redpanda.yml.
+# Dependencies: playbooks/redpanda.yml and ADR 0290.
+- import_playbook: ../redpanda.yml

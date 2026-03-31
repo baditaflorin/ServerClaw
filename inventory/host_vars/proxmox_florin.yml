@@ -529,6 +529,35 @@ network_policy:
             - 8025
             - 8100
           description: Local Docker workloads using the private Mailpit SMTP and UI listeners plus the Piper TTS API
+        - source: management
+          protocol: tcp
+          ports:
+            - 9092
+            - 9644
+            - 8097
+            - 8099
+          description: Operator access to the private Redpanda Kafka, Admin API, HTTP Proxy, and Schema Registry listeners
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 9092
+            - 8097
+            - 8099
+          description: Guest-network access to the private Redpanda Kafka, HTTP Proxy, and Schema Registry listeners
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 9092
+            - 8097
+            - 8099
+          description: Local Docker workloads using the private Redpanda Kafka, HTTP Proxy, and Schema Registry listeners
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 9092
+            - 8097
+            - 8099
+          description: Local Docker workloads using the private Redpanda Kafka, HTTP Proxy, and Schema Registry listeners
         - source: 172.16.0.0/12
           protocol: tcp
           ports:

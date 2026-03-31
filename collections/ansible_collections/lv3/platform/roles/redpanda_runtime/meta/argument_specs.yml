@@ -1,0 +1,72 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the private Redpanda runtime and verify Kafka-compatible streaming primitives.
+    options:
+      redpanda_service_topology:
+        type: dict
+        required: true
+      redpanda_site_dir:
+        type: path
+        required: true
+      redpanda_config_dir:
+        type: path
+        required: true
+      redpanda_compose_file:
+        type: path
+        required: true
+      redpanda_compose_env_file:
+        type: path
+        required: true
+      redpanda_bootstrap_file:
+        type: path
+        required: true
+      redpanda_start_script_file:
+        type: path
+        required: true
+      redpanda_image:
+        type: str
+        required: true
+      redpanda_container_name:
+        type: str
+        required: true
+      redpanda_admin_password_local_file:
+        type: path
+        required: true
+      redpanda_platform_password_local_file:
+        type: path
+        required: true
+      redpanda_admin_user:
+        type: str
+        required: true
+      redpanda_platform_user:
+        type: str
+        required: true
+      redpanda_kafka_port:
+        type: int
+        required: true
+      redpanda_admin_port:
+        type: int
+        required: true
+      redpanda_pandaproxy_port:
+        type: int
+        required: true
+      redpanda_schema_registry_port:
+        type: int
+        required: true
+      redpanda_loopback_kafka_port:
+        type: int
+        required: true
+      redpanda_rpc_port:
+        type: int
+        required: true
+      redpanda_topics:
+        type: list
+        elements: dict
+        required: true
+      redpanda_schema_subject:
+        type: str
+        required: true
+      redpanda_schema_definition:
+        type: dict
+        required: true

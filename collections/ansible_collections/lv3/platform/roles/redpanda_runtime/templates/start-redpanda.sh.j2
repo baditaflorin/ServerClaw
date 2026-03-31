@@ -1,0 +1,104 @@
+#!/bin/bash
+set -euo pipefail
+
+required_vars=(
+  REDPANDA_ADMIN_USER
+  REDPANDA_ADMIN_PASSWORD
+  REDPANDA_PLATFORM_USER
+  REDPANDA_PLATFORM_PASSWORD
+  REDPANDA_SASL_MECHANISM
+)
+
+for variable_name in "${required_vars[@]}"; do
+  if [[ -z "${!variable_name:-}" ]]; then
+    echo "missing required Redpanda runtime variable: ${variable_name}" >&2
+    exit 1
+  fi
+done
+
+cat > /etc/redpanda/redpanda.yaml <<EOF
+redpanda:
+  data_directory: /var/lib/redpanda/data
+  node_id: 0
+  empty_seed_starts_cluster: true
+  kafka_enable_authorization: true
+  kafka_api:
+    - name: internal
+      address: 0.0.0.0
+      port: {{ redpanda_kafka_port }}
+      authentication_method: sasl
+    - name: loopback
+      address: 127.0.0.1
+      port: {{ redpanda_loopback_kafka_port }}
+      authentication_method: sasl
+  advertised_kafka_api:
+    - name: internal
+      address: {{ redpanda_private_ip }}
+      port: {{ redpanda_kafka_port }}
+    - name: loopback
+      address: 127.0.0.1
+      port: {{ redpanda_loopback_kafka_port }}
+  admin:
+    - name: internal
+      address: 0.0.0.0
+      port: {{ redpanda_admin_port }}
+  rpc_server:
+    address: 127.0.0.1
+    port: {{ redpanda_rpc_port }}
+  advertised_rpc_api:
+    address: 127.0.0.1
+    port: {{ redpanda_rpc_port }}
+pandaproxy:
+  pandaproxy_api:
+    - name: internal
+      address: 0.0.0.0
+      port: {{ redpanda_pandaproxy_port }}
+      authentication_method: http_basic
+    - name: loopback
+      address: 127.0.0.1
+      port: {{ redpanda_loopback_pandaproxy_port }}
+      authentication_method: http_basic
+  client_cache_max_size: 10
+  client_keep_alive: 300000
+  consumer_instance_timeout_ms: 300000
+schema_registry:
+  schema_registry_api:
+    - name: internal
+      address: 0.0.0.0
+      port: {{ redpanda_schema_registry_port }}
+      authentication_method: http_basic
+    - name: loopback
+      address: 127.0.0.1
+      port: {{ redpanda_loopback_schema_registry_port }}
+      authentication_method: http_basic
+  schema_registry_replication_factor: 1
+  mode_mutability: true
+pandaproxy_client:
+  brokers:
+    - address: 127.0.0.1
+      port: {{ redpanda_loopback_kafka_port }}
+  sasl_mechanism: \${REDPANDA_SASL_MECHANISM}
+  scram_username: \${REDPANDA_ADMIN_USER}
+  scram_password: \${REDPANDA_ADMIN_PASSWORD}
+  produce_ack_level: -1
+  retries: 5
+schema_registry_client:
+  brokers:
+    - address: 127.0.0.1
+      port: {{ redpanda_loopback_kafka_port }}
+  sasl_mechanism: \${REDPANDA_SASL_MECHANISM}
+  scram_username: \${REDPANDA_ADMIN_USER}
+  scram_password: \${REDPANDA_ADMIN_PASSWORD}
+  produce_batch_delay_ms: 0
+  produce_batch_record_count: 0
+EOF
+
+export RP_BOOTSTRAP_USER="${REDPANDA_ADMIN_USER}:${REDPANDA_ADMIN_PASSWORD}"
+
+exec redpanda start \
+  --check=false \
+  --overprovisioned \
+  --smp {{ redpanda_smp }} \
+  --memory {{ redpanda_memory }} \
+  --reserve-memory 0M \
+  --default-log-level={{ redpanda_log_level }}

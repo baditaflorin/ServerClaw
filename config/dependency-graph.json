@@ -246,6 +246,15 @@
       "adr": "0282"
     },
     {
+      "id": "redpanda",
+      "service": "redpanda",
+      "name": "Redpanda",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "data",
+      "adr": "0290"
+    },
+    {
       "id": "matrix_synapse",
       "service": "matrix_synapse",
       "name": "Matrix Synapse",
@@ -927,6 +936,12 @@
       "to": "openbao",
       "type": "startup_only",
       "description": "The mail gateway runtime is rendered from secrets mirrored locally by the OpenBao sidecar."
+    },
+    {
+      "from": "redpanda",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Redpanda loads its mirrored admin and platform principal secrets through the OpenBao agent before startup."
     },
     {
       "from": "matrix_synapse",

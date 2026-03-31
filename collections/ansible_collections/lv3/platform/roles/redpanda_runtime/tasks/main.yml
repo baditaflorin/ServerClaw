@@ -1,0 +1,482 @@
+---
+# Purpose: Converge the private Redpanda runtime that backs ADR 0290 durable Kafka-compatible streaming.
+# Use case: Run during initial deployment, recovery of the stopped runtime, or drift reconciliation on docker-runtime-lv3.
+# Inputs: redpanda_* role variables plus controller-local password files for the admin and platform principals.
+# Outputs: /opt/redpanda compose/config assets, a running lv3-redpanda container, seeded smoke topics, and a verified schema-registry + HTTP proxy path.
+# Idempotency: Yes; the role replays docker compose safely, preserves generated passwords, and reapplies topic/auth contracts deterministically.
+# Dependencies: ADR 0077, ADR 0165, ADR 0290, local OpenBao, and docker-runtime-lv3.
+- name: Validate Redpanda runtime inputs
+  ansible.builtin.assert:
+    that:
+      - redpanda_site_dir | length > 0
+      - redpanda_config_dir | length > 0
+      - redpanda_compose_file | length > 0
+      - redpanda_compose_env_file | length > 0
+      - redpanda_bootstrap_file | length > 0
+      - redpanda_start_script_file | length > 0
+      - redpanda_image | length > 0
+      - redpanda_container_name | length > 0
+      - redpanda_admin_password_local_file | length > 0
+      - redpanda_platform_password_local_file | length > 0
+      - redpanda_admin_user | length > 0
+      - redpanda_platform_user | length > 0
+      - redpanda_kafka_port | int > 0
+      - redpanda_admin_port | int > 0
+      - redpanda_pandaproxy_port | int > 0
+      - redpanda_schema_registry_port | int > 0
+      - redpanda_loopback_kafka_port | int > 0
+      - redpanda_loopback_pandaproxy_port | int > 0
+      - redpanda_loopback_schema_registry_port | int > 0
+      - redpanda_rpc_port | int > 0
+      - redpanda_topics | length > 0
+    fail_msg: >-
+      redpanda_runtime requires runtime paths, listener ports, controller-local
+      passwords, and a declared smoke topic contract.
+
+- name: Ensure the controller-local Redpanda artifact directory exists
+  ansible.builtin.file:
+    path: "{{ redpanda_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the controller-local Redpanda passwords exist
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - path: "{{ redpanda_admin_password_local_file }}"
+      label: admin
+    - path: "{{ redpanda_platform_password_local_file }}"
+      label: platform
+  loop_control:
+    label: "{{ item.label }}"
+  delegate_to: localhost
+  become: false
+  register: redpanda_password_generation
+  changed_when: >-
+    (
+      redpanda_password_generation.results | default([])
+      | selectattr('stdout', 'defined')
+      | selectattr('stdout', 'search', 'changed')
+      | list
+      | length
+    ) > 0
+  no_log: true
+
+- name: Read the controller-local Redpanda passwords
+  ansible.builtin.slurp:
+    src: "{{ item.path }}"
+  loop:
+    - path: "{{ redpanda_admin_password_local_file }}"
+      key: admin
+    - path: "{{ redpanda_platform_password_local_file }}"
+      key: platform
+  loop_control:
+    label: "{{ item.key }}"
+  delegate_to: localhost
+  become: false
+  register: redpanda_password_reads
+  no_log: true
+
+- name: Record the Redpanda runtime secrets
+  ansible.builtin.set_fact:
+    redpanda_admin_password: >-
+      {{
+        (
+          redpanda_password_reads.results
+          | selectattr('item.key', 'equalto', 'admin')
+          | map(attribute='content')
+          | first
+        ) | b64decode | trim
+      }}
+    redpanda_platform_password: >-
+      {{
+        (
+          redpanda_password_reads.results
+          | selectattr('item.key', 'equalto', 'platform')
+          | map(attribute='content')
+          | first
+        ) | b64decode | trim
+      }}
+    redpanda_runtime_secret_payload:
+      REDPANDA_ADMIN_PASSWORD: >-
+        {{
+          (
+            redpanda_password_reads.results
+            | selectattr('item.key', 'equalto', 'admin')
+            | map(attribute='content')
+            | first
+          ) | b64decode | trim
+        }}
+      REDPANDA_PLATFORM_PASSWORD: >-
+        {{
+          (
+            redpanda_password_reads.results
+            | selectattr('item.key', 'equalto', 'platform')
+            | map(attribute='content')
+            | first
+          ) | b64decode | trim
+        }}
+  no_log: true
+
+- name: Ensure the Redpanda runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ redpanda_site_dir }}"
+      mode: "0755"
+    - path: "{{ redpanda_config_dir }}"
+      mode: "0700"
+
+- name: Prepare OpenBao agent runtime secret injection for Redpanda
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: redpanda
+    common_openbao_compose_env_agent_dir: "{{ redpanda_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ redpanda_compose_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ redpanda_compose_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ redpanda_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ redpanda_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ redpanda_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ redpanda_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ redpanda_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ redpanda_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ redpanda_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ redpanda_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: runtime.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ redpanda_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ redpanda_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ redpanda_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ redpanda_legacy_env_file }}"
+  no_log: true
+
+- name: Ensure the Redpanda runtime env file exists before compose evaluation
+  ansible.builtin.copy:
+    dest: "{{ redpanda_compose_env_file }}"
+    content: ""
+    owner: root
+    group: root
+    mode: "0600"
+    force: false
+
+- name: Render the Redpanda bootstrap cluster properties
+  ansible.builtin.template:
+    src: bootstrap.yml.j2
+    dest: "{{ redpanda_bootstrap_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Render the Redpanda start script
+  ansible.builtin.template:
+    src: start-redpanda.sh.j2
+    dest: "{{ redpanda_start_script_file }}"
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Render the Redpanda compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ redpanda_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Redpanda image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ redpanda_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ redpanda_site_dir }}"
+  register: redpanda_pull
+  changed_when: >-
+    'Pulling' in redpanda_pull.stdout
+    or 'Downloaded newer image' in redpanda_pull.stdout
+    or 'Pull complete' in redpanda_pull.stdout
+
+- name: Start the Redpanda stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ redpanda_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ redpanda_site_dir }}"
+  register: redpanda_up
+  changed_when: >-
+    'Creating' in redpanda_up.stdout
+    or 'Recreating' in redpanda_up.stdout
+    or 'Starting' in redpanda_up.stdout
+
+- name: Wait for the Redpanda Kafka listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ redpanda_kafka_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the Redpanda Admin API listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ redpanda_admin_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the Redpanda HTTP Proxy listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ redpanda_pandaproxy_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the Redpanda Schema Registry listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ redpanda_schema_registry_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the Redpanda admin ready endpoint
+  ansible.builtin.uri:
+    url: "{{ redpanda_admin_api_url }}/v1/status/ready"
+    method: GET
+    url_username: "{{ redpanda_admin_user }}"
+    url_password: "{{ redpanda_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: redpanda_admin_ready
+  retries: 24
+  delay: 5
+  until: redpanda_admin_ready.status == 200
+  changed_when: false
+  no_log: true
+
+- name: List the current Redpanda users
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ redpanda_container_name }}"
+      - rpk
+      - security
+      - user
+      - list
+      - -X
+      - "admin.hosts=127.0.0.1:{{ redpanda_admin_port }}"
+      - -X
+      - "user={{ redpanda_admin_user }}"
+      - -X
+      - "pass={{ redpanda_admin_password }}"
+  register: redpanda_user_list
+  changed_when: false
+  no_log: true
+
+- name: Create the Redpanda platform principal
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ redpanda_container_name }}"
+      - rpk
+      - security
+      - user
+      - create
+      - "{{ redpanda_platform_user }}"
+      - -p
+      - "{{ redpanda_platform_password }}"
+      - --mechanism
+      - "{{ redpanda_sasl_mechanism }}"
+      - -X
+      - "admin.hosts=127.0.0.1:{{ redpanda_admin_port }}"
+      - -X
+      - "user={{ redpanda_admin_user }}"
+      - -X
+      - "pass={{ redpanda_admin_password }}"
+  register: redpanda_platform_user_create
+  changed_when: true
+  when: redpanda_platform_user not in redpanda_user_list.stdout_lines
+  no_log: true
+
+- name: Create the declared Redpanda topics when missing
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ redpanda_container_name }}"
+      - rpk
+      - topic
+      - create
+      - "{{ item.name }}"
+      - --if-not-exists
+      - --partitions
+      - "{{ item.partitions | string }}"
+      - --replicas
+      - "{{ item.replication_factor | string }}"
+      - -X
+      - "brokers=127.0.0.1:{{ redpanda_loopback_kafka_port }}"
+      - -X
+      - "user={{ redpanda_admin_user }}"
+      - -X
+      - "pass={{ redpanda_admin_password }}"
+      - -X
+      - "sasl.mechanism={{ redpanda_sasl_mechanism }}"
+  loop: "{{ redpanda_topics }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: redpanda_topic_create
+  changed_when: >-
+    (
+      redpanda_topic_create.results | default([])
+      | selectattr('stdout', 'defined')
+      | selectattr('stdout', 'search', '(?i)created')
+      | list
+      | length
+    ) > 0
+  no_log: true
+
+- name: Reapply the Redpanda topic retention contract
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker exec "{{ redpanda_container_name }}" \
+      rpk topic alter-config "{{ item.name }}" \
+      --set retention.ms="{{ item.config['retention.ms'] }}" \
+      --set retention.bytes="{{ item.config['retention.bytes'] }}" \
+      -X "brokers=127.0.0.1:{{ redpanda_loopback_kafka_port }}" \
+      -X "user={{ redpanda_admin_user }}" \
+      -X "pass={{ redpanda_admin_password }}" \
+      -X "sasl.mechanism={{ redpanda_sasl_mechanism }}"
+  args:
+    executable: /bin/bash
+  loop: "{{ redpanda_topics }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: redpanda_topic_config_apply
+  changed_when: false
+  no_log: true
+
+- name: List the current Redpanda ACLs for the platform principal
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ redpanda_container_name }}"
+      - rpk
+      - security
+      - acl
+      - list
+      - --allow-principal
+      - "{{ redpanda_platform_user }}"
+      - -X
+      - "admin.hosts=127.0.0.1:{{ redpanda_admin_port }}"
+      - -X
+      - "user={{ redpanda_admin_user }}"
+      - -X
+      - "pass={{ redpanda_admin_password }}"
+  register: redpanda_acl_list
+  changed_when: false
+  no_log: true
+
+- name: Grant the Redpanda platform principal access to the smoke topic family
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ redpanda_container_name }}"
+      - rpk
+      - security
+      - acl
+      - create
+      - --allow-principal
+      - "{{ redpanda_platform_user }}"
+      - --operation
+      - all
+      - --topic
+      - "{{ redpanda_acl_topic_prefix }}"
+      - --resource-pattern-type
+      - prefixed
+      - -X
+      - "admin.hosts=127.0.0.1:{{ redpanda_admin_port }}"
+      - -X
+      - "user={{ redpanda_admin_user }}"
+      - -X
+      - "pass={{ redpanda_admin_password }}"
+  register: redpanda_acl_create
+  changed_when: true
+  when: redpanda_acl_topic_prefix not in redpanda_acl_list.stdout
+  no_log: true
+
+- name: Read the current Redpanda smoke schema
+  ansible.builtin.uri:
+    url: "{{ redpanda_schema_registry_url }}/subjects/{{ redpanda_schema_subject | urlencode }}/versions/latest"
+    method: GET
+    url_username: "{{ redpanda_platform_user }}"
+    url_password: "{{ redpanda_platform_password }}"
+    force_basic_auth: true
+    return_content: true
+    status_code:
+      - 200
+      - 404
+  register: redpanda_schema_current
+  changed_when: false
+  no_log: true
+
+- name: Register the Redpanda smoke schema when missing or outdated
+  ansible.builtin.uri:
+    url: "{{ redpanda_schema_registry_url }}/subjects/{{ redpanda_schema_subject | urlencode }}/versions"
+    method: POST
+    url_username: "{{ redpanda_platform_user }}"
+    url_password: "{{ redpanda_platform_password }}"
+    force_basic_auth: true
+    headers:
+      Content-Type: application/vnd.schemaregistry.v1+json
+      Accept: application/vnd.schemaregistry.v1+json
+    body_format: json
+    body:
+      schemaType: JSON
+      schema: "{{ redpanda_schema_definition | to_json }}"
+    status_code: 200
+  when: >-
+    redpanda_schema_current.status == 404
+    or (
+      (
+        redpanda_schema_current.json.schema | default('{}')
+      ) | from_json
+    ) != redpanda_schema_definition
+  no_log: true
+
+- name: Verify the Redpanda runtime
+  ansible.builtin.import_tasks: verify.yml

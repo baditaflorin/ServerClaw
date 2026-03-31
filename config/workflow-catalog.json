@@ -1817,6 +1817,59 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-redpanda": {
+      "description": "Deploy the private Redpanda Kafka-compatible streaming runtime on docker-runtime-lv3 and verify the Admin API, HTTP Proxy, and Schema Registry contract.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-redpanda",
+        "command": "make converge-redpanda"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "redpanda_admin_password",
+          "redpanda_platform_password"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-redpanda"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-redpanda.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/redpanda.yml",
+        "playbooks/services/redpanda.yml",
+        "roles/redpanda_runtime",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json"
+      ],
+      "outputs": [
+        "A private Redpanda runtime on docker-runtime-lv3 with repo-managed users, smoke topics, ACLs, Schema Registry state, and end-to-end HTTP Proxy verification."
+      ],
+      "verification_commands": [
+        "make syntax-check-redpanda",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/redpanda/docker-compose.yml ps'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 - <<'\"'\"'PY'\"'\"'\nfrom pathlib import Path\nimport base64\nimport urllib.request\n\nenv = {}\nfor line in Path('\"'\"'/run/lv3-secrets/redpanda/runtime.env'\"'\"').read_text(encoding='\"'\"'utf-8'\"'\"').splitlines():\n    if '\"'\"'='\"'\"' in line:\n        key, value = line.split('\"'\"'='\"'\"', 1)\n        env[key] = value\n\ntoken = base64.b64encode(\n    f\"{env['\"'\"'REDPANDA_ADMIN_USER'\"'\"']}:{env['\"'\"'REDPANDA_ADMIN_PASSWORD'\"'\"']}\".encode('\"'\"'utf-8'\"'\"')\n).decode('\"'\"'ascii'\"'\"')\nrequest = urllib.request.Request(\n    '\"'\"'http://127.0.0.1:9644/v1/status/ready'\"'\"',\n    headers={'\"'\"'Authorization'\"'\"': f'\"'\"'Basic {token}'\"'\"'},\n)\nwith urllib.request.urlopen(request, timeout=30) as response:\n    assert response.status == 200\nprint('\"'\"'ready'\"'\"')\nPY'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 - <<'\"'\"'PY'\"'\"'\nfrom pathlib import Path\nimport base64\nimport json\nimport time\nimport urllib.request\n\nenv = {}\nfor line in Path('\"'\"'/run/lv3-secrets/redpanda/runtime.env'\"'\"').read_text(encoding='\"'\"'utf-8'\"'\"').splitlines():\n    if '\"'\"'='\"'\"' in line:\n        key, value = line.split('\"'\"'='\"'\"', 1)\n        env[key] = value\n\ndef auth(user_key, password_key):\n    return base64.b64encode(\n        f\"{env[user_key]}:{env[password_key]}\".encode('\"'\"'utf-8'\"'\"')\n    ).decode('\"'\"'ascii'\"'\"')\n\nmarker = f\"workflow-redpanda-{int(time.time())}\"\npayload = json.dumps(\n    {\n        '\"'\"'records'\"'\"': [\n            {\n                '\"'\"'value'\"'\"': {\n                    '\"'\"'marker'\"'\"': marker,\n                    '\"'\"'created_at'\"'\"': time.strftime('\"'\"'%Y-%m-%dT%H:%M:%SZ'\"'\"', time.gmtime()),\n                    '\"'\"'producer'\"'\"': '\"'\"'workflow-check'\"'\"',\n                }\n            }\n        ]\n    }\n).encode('\"'\"'utf-8'\"'\"')\nproduce_request = urllib.request.Request(\n    '\"'\"'http://127.0.0.1:8097/topics/platform.redpanda.smoke'\"'\"',\n    data=payload,\n    headers={\n        '\"'\"'Authorization'\"'\"': f\"Basic {auth('\"'\"'REDPANDA_PLATFORM_USER'\"'\"', '\"'\"'REDPANDA_PLATFORM_PASSWORD'\"'\"')}\",\n        '\"'\"'Content-Type'\"'\"': '\"'\"'application/vnd.kafka.json.v2+json'\"'\"',\n        '\"'\"'Accept'\"'\"': '\"'\"'application/vnd.kafka.v2+json'\"'\"',\n    },\n    method='\"'\"'POST'\"'\"',\n)\nurllib.request.urlopen(produce_request, timeout=30).read()\n\nrecords_request = urllib.request.Request(\n    '\"'\"'http://127.0.0.1:8097/topics/platform.redpanda.smoke/partitions/0/records?offset=0&timeout=3000&max_bytes=1048576'\"'\"',\n    headers={\n        '\"'\"'Authorization'\"'\"': f\"Basic {auth('\"'\"'REDPANDA_PLATFORM_USER'\"'\"', '\"'\"'REDPANDA_PLATFORM_PASSWORD'\"'\"')}\",\n        '\"'\"'Accept'\"'\"': '\"'\"'application/vnd.kafka.json.v2+json'\"'\"',\n    },\n)\nrecords = json.loads(urllib.request.urlopen(records_request, timeout=30).read().decode('\"'\"'utf-8'\"'\"'))\nassert any(item.get('\"'\"'value'\"'\"', {}).get('\"'\"'marker'\"'\"') == marker for item in records)\n\nschema_request = urllib.request.Request(\n    '\"'\"'http://127.0.0.1:8099/subjects/platform.redpanda.smoke-value/versions/latest'\"'\"',\n    headers={\n        '\"'\"'Authorization'\"'\"': f\"Basic {auth('\"'\"'REDPANDA_PLATFORM_USER'\"'\"', '\"'\"'REDPANDA_PLATFORM_PASSWORD'\"'\"')}\",\n        '\"'\"'Accept'\"'\"': '\"'\"'application/vnd.schemaregistry.v1+json'\"'\"',\n    },\n)\nschema_payload = json.loads(urllib.request.urlopen(schema_request, timeout=30).read().decode('\"'\"'utf-8'\"'\"'))\nassert schema_payload['\"'\"'subject'\"'\"'] == '\"'\"'platform.redpanda.smoke-value'\"'\"'\nprint('\"'\"'verified'\"'\"')\nPY'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-openbao": {
       "description": "Deploy private OpenBao on docker-runtime-lv3, seed scoped secrets, configure Transit, and enable PostgreSQL dynamic credentials.",
       "lifecycle_status": "active",

@@ -1,0 +1,29 @@
+---
+# Playbook: redpanda.yml
+# Purpose: Expose the repo-managed Redpanda converge path through the root playbook entrypoint.
+# Use case: Run via `make converge-redpanda` or service wrappers that target the Redpanda runtime.
+#
+# Inputs (required):
+#   - env (str, required): Deployment environment selector passed through to the collection playbook.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the live apply.
+#
+# Outputs:
+#   - Imports the collection-scoped Redpanda playbook used by live-apply wrappers and syntax checks.
+#
+# Idempotency: Fully idempotent
+#              This wrapper only imports the collection playbook and does not mutate state on its own.
+#
+# Dependencies:
+#   - ADR 0290: Defines Redpanda as the Kafka-compatible streaming platform.
+#   - Requires: collections/ansible_collections/lv3/platform/playbooks/redpanda.yml.
+#   - Role: lv3.platform.redpanda_runtime — owned by the imported playbook.
+#
+# Related ADRs: 0077, 0079, 0165, 0290
+# Related Runbooks: docs/runbooks/configure-redpanda.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- import_playbook: ../collections/ansible_collections/lv3/platform/playbooks/redpanda.yml
