@@ -2,7 +2,20 @@
 - name: Restart Docker
   ansible.builtin.shell: |
     set -euo pipefail
+    restart_rc=0
     systemctl reset-failed docker.service
-    systemctl restart docker.service
+    if systemctl restart docker.service; then
+      restart_rc=0
+    else
+      restart_rc=$?
+    fi
+    for attempt in $(seq 1 15); do
+      if systemctl is-active --quiet docker.service; then
+        exit 0
+      fi
+      sleep 2
+    done
+    systemctl status docker.service --no-pager -l || true
+    exit "${restart_rc:-1}"
   args:
     executable: /bin/bash
