@@ -2,9 +2,13 @@
 
 - ADR: [ADR 0306](../adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md)
 - Title: Land the repo-managed Checkov IaC policy gate on the live validation automation path and verify it end to end
-- Status: ready_for_merge
+- Status: live_applied
+- Included In Repo Version: 0.177.115
 - Branch-Local Receipt: `receipts/live-applies/2026-03-31-adr-0306-checkov-iac-policy-scan-live-apply.json`
 - Canonical Mainline Receipt: `receipts/live-applies/2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply.json`
+- Live Applied In Platform Version: 0.130.75
+- Implemented On: 2026-03-31
+- Live Applied On: 2026-03-31
 - Branch: `codex/ws-0306-mainline-v2`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2`
 - Owner: codex
@@ -75,7 +79,7 @@ does not yet have.
   build-server `remote-validate` path, the validation-lane catalog, the runner
   capability contracts, and the self-hosted `validate` workflow
 
-## Current Verification
+## Verification
 
 - `python3 -m py_compile scripts/iac_policy_scan.py config/checkov/checks/terraform/lv3_proxmox_checks.py`
   passed
@@ -112,14 +116,71 @@ does not yet have.
   `.local/validation-gate/last-run.json` recording `"source": "build-server"`
   and is captured in
   `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-pre-push-gate-r1-0.177.115.txt`
+- Branch-local hosted validation now succeeds on the private Gitea branch
+  snapshot: the branch publish completed in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-branch-push-r1-0.177.115.txt`,
+  `validate.yml` run `177` / job `234` concluded `success`, and the hosted run
+  metadata is preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-validate-run-r1-0.177.115.json`
+  and
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-validate-jobs-r1-0.177.115.json`.
+- A shared Gitea runtime outage was recovered through the repo-managed path:
+  host evidence in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-gitea-proxy-recovery-r1-0.177.115.txt`
+  captured the host proxy serving connection refusals, the runtime converge in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-runtime-converge-r1-0.177.115.txt`
+  restored the private Gitea listener on `10.10.10.20:3003`, and the runner
+  converge in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-runner-converge-r2-0.177.115.txt`
+  reasserted the `lv3-gitea-runner` container on `docker-build-lv3` before both
+  plays hit the shared non-blocking SBOM tail.
+- The exact-main hosted replay is now complete on the private `main` snapshot.
+  Source commit `ef2803b3830cf05bb22128dcfa7860f9002b75b0` was published as
+  snapshot commit `8d17ace04285790b0eca9de5415b75967cdfecf8` on top of prior
+  private-main head `a10101240780d755f27988ee7352ac4f7cc74a7c`, preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-origin-main-candidate-source-r2.txt`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-gitea-main-head-before-r2.txt`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-gitea-main-snapshot-commit-r2.txt`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-gitea-main-push-r2.txt`,
+  and
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-gitea-main-head-after-r2.txt`.
+- Hosted private-main verification then completed cleanly: `release-bundle.yml`
+  run `178` / jobs `235` and `236` concluded `success`, and `validate.yml` run
+  `179` / job `237` concluded `success`, preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-main-gitea-runs-r1.json`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-main-run-178-status-r1.json`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-main-run-178-jobs-r1.json`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-main-run-179-status-r1.json`,
+  and
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-main-run-179-jobs-r1.json`.
+- The canonical-truth refresh is now validated on the settled branch: `uv run
+  --with pyyaml --with jsonschema python3 scripts/live_apply_receipts.py --validate`,
+  `uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate`,
+  `uvx --from pyyaml python3 scripts/canonical_truth.py --check`,
+  `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --check`,
+  `git diff --check`, and
+  `LV3_SNAPSHOT_BRANCH=main ./scripts/validate_repo.sh agent-standards generated-docs generated-portals`
+  all passed after refreshing stale diagrams with
+  `uvx --from pyyaml python3 scripts/generate_diagrams.py --write`, preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-live-apply-receipts-validate-r1-0.177.115.txt`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-data-models-r1-0.177.115.txt`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-canonical-truth-check-r1-0.177.115.txt`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-platform-manifest-check-r1-0.177.115.txt`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-git-diff-check-r1-0.177.115.txt`,
+  and
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-agent-standards-generated-r2-0.177.115.txt`.
 - the current release-candidate baseline is `0` blocking errors, `2`
   warning-level `CKV_LV3_4` findings for `provider.proxmox insecure = true`,
   and `876` note-level upstream Ansible findings at repo version `0.177.115`
 
-## Remaining Verification Before Mainline Closeout
+## Results
 
-- push the rebased branch and confirm the self-hosted `validate` workflow runs
-  the new `iac-policy-scan` step successfully on the hosted mirror
-- validate the exact-main tree on the hosted mainline path, then update ADR
-  metadata, `versions/stack.yaml`, and the final live-apply receipts for the
-  canonical merged state
+- ADR 0306 is now implemented in repository version `0.177.115` and first
+  verified live on platform version `0.130.75`.
+- The branch-local receipt remains the pre-integration audit trail for the live
+  replay from the latest `origin/main` lineage, while the canonical mainline
+  receipt records the exact-main hosted success boundary and the protected
+  canonical-truth updates for merge to `main`.
+- No merge-to-main follow-up remains for ADR 0306 itself; the settled exact-main
+  replay, receipts, and canonical-truth surfaces are now ready to be carried
+  onto `origin/main`.

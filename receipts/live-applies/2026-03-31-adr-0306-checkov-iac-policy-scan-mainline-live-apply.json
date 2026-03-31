@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-31",
+  "recorded_on": "2026-03-31",
+  "recorded_at": "2026-03-31T09:30:23Z",
+  "recorded_by": "codex",
+  "source_commit": "ef2803b3830cf05bb22128dcfa7860f9002b75b0",
+  "repo_version_context": "0.177.115",
+  "platform_version_context": "0.130.74",
+  "integrated_repo_version": "0.177.115",
+  "integrated_platform_version": "0.130.75",
+  "workflow_id": "adr-0306-checkov-iac-policy-scan-mainline-live-apply",
+  "adr": "0306",
+  "summary": "Promoted ADR 0306 into canonical mainline truth as repository version `0.177.115` and platform version `0.130.75` after replaying the exact-main private Gitea snapshot derived from source commit `ef2803b3830cf05bb22128dcfa7860f9002b75b0`. The private main `validate.yml` and `release-bundle.yml` workflows both concluded `success`, the repo-managed Gitea runtime and runner recovery re-established the hosted controller path, and the final integration step refreshes the ADR metadata, receipts, release note, and canonical platform truth around that settled exact-main success boundary.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-build-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Private Gitea main validate run 179",
+      "address": "http://100.64.0.1:3009/ops/proxmox_florin_server/actions/runs/175"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Private Gitea main release-bundle run 178",
+      "address": "http://100.64.0.1:3009/ops/proxmox_florin_server/actions/runs/174"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Exact-main private repository publication",
+      "result": "pass",
+      "observed": "The settled `0.177.115` source tree was published onto the private Gitea `main` snapshot by creating snapshot commit `8d17ace04285790b0eca9de5415b75967cdfecf8` on top of prior private-main head `a10101240780d755f27988ee7352ac4f7cc74a7c`, preserving an exact hosted copy of source commit `ef2803b3830cf05bb22128dcfa7860f9002b75b0` for mainline verification."
+    },
+    {
+      "check": "Exact-main hosted validation path",
+      "result": "pass",
+      "observed": "Private Gitea `validate.yml` run `179` / job `237` concluded `success` on `main` after the exact-main snapshot publication."
+    },
+    {
+      "check": "Exact-main hosted release bundle path",
+      "result": "pass",
+      "observed": "Private Gitea `release-bundle.yml` run `178` / jobs `235` and `236` concluded `success` on `main` after the exact-main snapshot publication."
+    },
+    {
+      "check": "Released-tree automation and validation bundle",
+      "result": "pass",
+      "observed": "The integrated tree retains the earlier direct validation bundle from the settled source commit: targeted pytest (`58 passed in 309.49s`), direct Checkov wrapper scan, `make check-build-server`, `make remote-validate`, and `make pre-push-gate` all passed before the canonical-truth refresh, and the final canonical surfaces then passed `scripts/live_apply_receipts.py --validate`, `scripts/validate_repository_data_models.py --validate`, `scripts/canonical_truth.py --check`, `scripts/platform_manifest.py --check`, `git diff --check`, and `./scripts/validate_repo.sh agent-standards generated-docs generated-portals` after regenerating stale diagrams."
+    },
+    {
+      "check": "Hosted-control-plane recovery and exact-main readiness",
+      "result": "pass",
+      "observed": "The repo-managed host proxy, Gitea runtime, and Gitea runner recovery path restored the private controller listener and runner container before the exact-main hosted replay, so ADR 0306 is now recorded as first verified live in platform version `0.130.75`."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "changelog.md",
+    "versions/stack.yaml",
+    "build/platform-manifest.json",
+    "docs/adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md",
+    "docs/release-notes/0.177.115.md",
+    "docs/release-notes/README.md",
+    "docs/workstreams/ws-0306-live-apply.md",
+    "workstreams.yaml",
+    "receipts/live-applies/2026-03-31-adr-0306-checkov-iac-policy-scan-live-apply.json",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-origin-main-candidate-source-r2.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-gitea-main-head-before-r2.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-gitea-main-snapshot-commit-r2.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-gitea-main-push-r2.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-gitea-main-head-after-r2.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-main-gitea-runs-r1.json",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-main-run-178-status-r1.json",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-main-run-178-jobs-r1.json",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-main-run-179-status-r1.json",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-main-run-179-jobs-r1.json",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-targeted-pytest-r3-0.177.114.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-checkov-scan-r3-0.177.114.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-check-build-server-r2-0.177.114.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-remote-validate-r3-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-pre-push-gate-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-live-apply-receipts-validate-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-data-models-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-canonical-truth-check-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-platform-manifest-check-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-git-diff-check-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-agent-standards-generated-r2-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-gitea-proxy-recovery-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-runtime-converge-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-runner-converge-r2-0.177.115.txt"
+  ],
+  "notes": [
+    "ADR 0306 is now recorded as implemented in repository version `0.177.115` and first verified live in platform version `0.130.75`.",
+    "The exact-main hosted success boundary is anchored to source commit `ef2803b3830cf05bb22128dcfa7860f9002b75b0`; the final integration commit refreshes canonical truth, receipts, and release metadata around that verified replay rather than changing the settled Checkov automation surfaces."
+  ]
+}

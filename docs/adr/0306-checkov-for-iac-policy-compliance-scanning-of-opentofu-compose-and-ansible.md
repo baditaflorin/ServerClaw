@@ -1,9 +1,10 @@
 # ADR 0306: Checkov For IaC Policy Compliance Scanning Of OpenTofu, Compose, And Ansible
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.115
+- Implemented In Platform Version: 0.130.75
+- Implemented On: 2026-03-31
 - Date: 2026-03-29
 
 ## Context

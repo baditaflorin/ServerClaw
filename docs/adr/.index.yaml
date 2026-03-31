@@ -5404,7 +5404,7 @@ adr_index:
   - adr: '0306'
     title: Checkov For IaC Policy Compliance Scanning Of OpenTofu, Compose, And Ansible
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: automation
     keywords:
@@ -5418,3 +5418,4 @@ adr_index:
       - ansible
     summary: We will integrate Checkov as a required CI gate step for all IaC surfaces in
     filename: 0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md
+    implemented_version: 0.177.115
