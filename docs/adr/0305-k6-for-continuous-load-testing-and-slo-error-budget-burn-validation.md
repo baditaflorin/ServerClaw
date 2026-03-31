@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: not yet
+- Implemented In Repo Version: 0.177.118
 - Implemented In Platform Version: 0.130.75
 - Implemented On: 2026-03-31
 - Date: 2026-03-29
@@ -118,10 +118,45 @@ Three k6 test scenario types are defined:
   (`23.19%` error rate) and OpenFGA recorded `995` requests with `42` failures
   (`4.22%` error rate), both with error budget remaining reduced to `0.0%` in
   the synced receipts
+- the exact-main closeout rebased the workstream onto latest realistic
+  `origin/main` commit `5c7e07235f7b0da1f756148e145397f0ac6ceb10` and used
+  committed source `0d6e8c9eb5d9d086e74cf92d8165248295baa076` for the final
+  replay, as recorded in
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-candidate-source-commit-r3-0.177.118.txt`
+- the first exact-main smoke attempt exposed live drift rather than a repo
+  regression: `monitoring-lv3` still had Prometheus bound to `127.0.0.1:9090`
+  and `docker-runtime-lv3` was concurrently churning the OpenFGA container;
+  the repair path is preserved under
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-k6-smoke-r5-0.177.118.txt`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-converge-monitoring-r8-0.177.118.txt`,
+  and
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-prometheus-bind-manual-r1-0.177.118.txt`
+- after that correction loop, the exact-main smoke replay passed from
+  committed source and produced
+  `receipts/k6/smoke-keycloak-20260331T133226Z.json` plus
+  `receipts/k6/smoke-openfga-20260331T133226Z.json`; Keycloak recorded `110`
+  requests with `0` failures and OpenFGA recorded `112` requests with `0`
+  failures, as captured in
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-k6-smoke-r6-0.177.118.txt`
+- the exact-main load replay completed from committed source without the
+  earlier NATS deadlock and preserved the truthful load outcome in
+  `receipts/k6/load-keycloak-20260331T133416Z.json`,
+  `receipts/k6/load-openfga-20260331T133416Z.json`, and
+  `receipts/k6/raw/20260331T133416Z-load-summary.json`, as captured in
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-k6-load-r3-0.177.118.txt`;
+  Keycloak recorded `1585` requests with `441` failures (`27.82%` error rate)
+  and failed the 1% objective, while OpenFGA recorded `1184` requests with `8`
+  failures (`0.68%`) and passed the run even though its warning path still
+  reported `error_budget_remaining_pct: 0.0`
 - repository automation gaps discovered during live apply were fixed in-repo on
   this workstream: gitless snapshot commit capture, relative repo-root handling,
   k6 summary parsing, failure-path receipt generation, non-fatal ntfy warning
-  handling, and remote build workspace retention cleanup
+  handling, remote build workspace retention cleanup, and bounded exact-main
+  notification publication when controller-local NATS or ntfy are unavailable
+- the canonical exact-main closeout receipt is
+  `receipts/live-applies/2026-03-31-adr-0305-k6-mainline-live-apply.json`,
+  published in repository release `0.177.118` while keeping the first verified
+  platform implementation version at `0.130.75`
 
 ## Consequences
 
@@ -144,10 +179,12 @@ Three k6 test scenario types are defined:
   written scripts (missing sleep between iterations, unrealistic request
   patterns) produce misleading results
 - the implemented live replay proved the dependent telemetry path is itself an
-  operational risk surface: during the final 2026-03-31 load run, Prometheus
-  remote-write calls from `docker-build-lv3` to `monitoring-lv3` repeatedly hit
-  request timeouts and the build host lacked the ntfy warning secret; the
-  receipt path now records those failures without hiding the load-test result
+  operational risk surface: during the 2026-03-31 exact-main closeout,
+  Prometheus remote-write calls from the k6 runner to `monitoring-lv3`
+  repeatedly timed out until Prometheus was rebound to the guest-reachable
+  address, and the final controller-side load replay still recorded warning-only
+  notification failures when local NATS or ntfy were unavailable; the receipt
+  path now preserves those conditions without hiding the load-test result
 
 ## Boundaries
 

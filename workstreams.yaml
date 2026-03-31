@@ -19737,13 +19737,13 @@ workstreams:
     canonical_truth:
       changelog_entry: integrates ADR 0305 into main by replaying the repo-managed k6 smoke, load, and soak validation path on the latest realistic origin/main baseline, preserving Prometheus remote-write, Windmill scheduling, and truthful non-zero receipts when the live Keycloak and OpenFGA SLO budgets are already exhausted
       release_bump: patch
-      included_in_repo_version: 0.177.117
+      included_in_repo_version: 0.177.118
       latest_receipts:
         k6_load_testing: 2026-03-31-adr-0305-k6-mainline-live-apply
   - id: ws-0305-main-integration
     adr: "0305"
     title: Integrate ADR 0305 k6 exact-main replay onto origin/main
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0305-mainline-final
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final
@@ -19775,6 +19775,8 @@ workstreams:
       - build/platform-manifest.json
       - docs/diagrams/agent-coordination-map.excalidraw
       - docs/site-generated/architecture/dependency-graph.md
+      - scripts/workstream_surface_ownership.py
+      - tests/test_workstream_surface_ownership.py
       - config/image-catalog.json
       - config/capacity-model.json
       - config/k6/scripts/http-slo-probe.js
@@ -19839,6 +19841,7 @@ workstreams:
       - receipts/image-scans/2026-03-31-k6-runtime.trivy.json
       - receipts/k6/**
       - receipts/live-applies/**
+      - receipts/sbom/**
     ownership_manifest:
       owned_surfaces:
         - id: ws_0305_main_integration_bundle
@@ -19865,6 +19868,8 @@ workstreams:
             - build/platform-manifest.json
             - docs/diagrams/agent-coordination-map.excalidraw
             - docs/site-generated/architecture/dependency-graph.md
+            - scripts/workstream_surface_ownership.py
+            - tests/test_workstream_surface_ownership.py
             - config/image-catalog.json
             - config/capacity-model.json
             - config/k6/scripts/http-slo-probe.js
@@ -19929,5 +19934,14 @@ workstreams:
             - receipts/image-scans/2026-03-31-k6-runtime.trivy.json
             - receipts/k6/**
             - receipts/live-applies/**
+            - receipts/sbom/**
           mode: shared_contract
           contract: ws-0305-main-integration-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: integrates ADR 0305 into main by re-verifying the latest realistic origin/main exact-main smoke and load paths for Keycloak and OpenFGA, preserving truthful k6 receipts and bounded notification warnings while recording the remaining live Keycloak load-test failure
+      release_bump: patch
+      included_in_repo_version: 0.177.118
+      latest_receipts:
+        k6_load_testing: 2026-03-31-adr-0305-k6-mainline-live-apply

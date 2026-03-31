@@ -1,0 +1,64 @@
+{
+  "$schema": "docs/schema/k6-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-31-smoke-openfga-133226Z",
+  "scenario": "smoke",
+  "service_id": "openfga",
+  "service_name": "OpenFGA",
+  "target_url": "http://10.10.10.20:8098/healthz",
+  "environment": "production",
+  "runner_context": "manual",
+  "recorded_on": "2026-03-31",
+  "recorded_at": "2026-03-31T13:32:26Z",
+  "recorded_by": "live",
+  "source_commit": "0d6e8c9eb5d9d086e74cf92d8165248295baa076",
+  "repo_version_context": "0.177.117",
+  "k6_image_ref": "docker.io/grafana/k6:1.7.1@sha256:44bd1d66c2b019327991b95459d78402b0a7a0a055ab52ee088deea1a044e8d5",
+  "summary_export": "receipts/k6/raw/20260331T133226Z-smoke-summary.json",
+  "prometheus_remote_write_url": "http://10.10.10.40:9090/api/v1/write",
+  "scenario_config": {
+    "vus": 2,
+    "duration": "60s",
+    "ramp_up_duration": null,
+    "hold_duration": null,
+    "max_error_rate": 0.01,
+    "think_time_seconds": 1.0,
+    "request_timeout_seconds": 10.0,
+    "latency_threshold_ms": 500.0
+  },
+  "metrics": {
+    "request_count": 112,
+    "success_count": 112,
+    "failed_count": 0,
+    "error_rate": 0.0,
+    "http_req_duration_p95_ms": 84.37935404999999,
+    "http_req_duration_avg_ms": 78.35179433928572,
+    "http_req_duration_max_ms": 89.1385
+  },
+  "slo_assessment": {
+    "availability_slo_id": "openfga-availability",
+    "latency_slo_id": "openfga-latency",
+    "latency_threshold_ms": 500.0,
+    "availability_objective_percent": 99.5,
+    "error_budget_consumed_pct": 0.0,
+    "error_budget_remaining_pct": 100.0,
+    "error_budget_warning_threshold_pct": 20.0,
+    "within_error_budget": true,
+    "latency_threshold_passed": true
+  },
+  "regression": {
+    "checked": true,
+    "baseline_receipt": "receipts/k6/smoke-openfga-20260331T131522Z.json",
+    "baseline_p95_ms": 74.72337104999995,
+    "current_p95_ms": 84.37935404999999,
+    "regression_ratio": 0.12922306454213484,
+    "threshold_ratio": 0.2,
+    "regressed": false
+  },
+  "notifications": {
+    "nats_event_published": false,
+    "ntfy_topic_notified": null
+  },
+  "result": "passed",
+  "failure_reasons": []
+}

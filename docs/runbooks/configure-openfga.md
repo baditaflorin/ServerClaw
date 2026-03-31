@@ -98,6 +98,10 @@ Expected results:
 - If the authz checks fail after runtime-client recreation, re-run the OpenFGA
   converge so the latest Keycloak runtime client and tuple seed are replayed
   together.
+- During shared `docker-runtime-lv3` converges, verify
+  `http://10.10.10.20:8098/healthz` from the build host before re-running k6
+  smoke/load probes; brief container restart churn can present as transient
+  connection refusals without indicating repository drift.
 - Re-run `make converge-api-gateway env=production` after modifying
   `config/api-gateway-catalog.json` so the routed `/v1/openfga` surface matches
   the repo-managed private service contract.

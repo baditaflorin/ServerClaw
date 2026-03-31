@@ -2,9 +2,12 @@
 
 - ADR: [ADR 0305](../adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md)
 - Title: Live apply k6 smoke, load, and soak validation with Prometheus remote-write, Windmill schedules, and promotion-gate burn checks from latest `origin/main`
-- Status: ready_to_merge
+- Status: live_applied
+- Included In Repo Version: 0.177.118
 - Live Applied On: 2026-03-31
 - Platform Version Observed During Live Apply: 0.130.75
+- Canonical Mainline Receipt: `receipts/live-applies/2026-03-31-adr-0305-k6-mainline-live-apply.json`
+- Exact-Main Integration Workstream: [ws-0305-main-integration](ws-0305-main-integration.md)
 - Branch: `codex/ws-0305-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-live-apply`
 - Owner: codex
@@ -76,9 +79,13 @@
 - With the OpenBao helper fix in place, `make converge-windmill` completed successfully on replay `r4`, and the live Windmill API now shows `f/lv3/k6_load_testing`, `f/lv3/k6_load_weekly`, and `f/lv3/k6_soak_monthly`; see `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-windmill-r4.txt` and `receipts/live-applies/evidence/2026-03-31-ws-0305-windmill-api-r1.txt`.
 - `make converge-openfga` completed successfully on replay `r5`, after the earlier apt-lock drift on `docker-runtime-lv3` cleared; the successful replay is preserved in `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-openfga-r5.txt`.
 - `make check-build-server` now prunes stale remote session workspaces via the branch-local retention policy, recorded in `receipts/live-applies/evidence/2026-03-31-ws-0305-check-build-server-r2.txt` and `r3.txt`. The live build host still required one operator cleanup of unused Docker images and build cache to recover from full-disk drift; that manual intervention is recorded in `receipts/live-applies/evidence/2026-03-31-ws-0305-build-server-docker-prune-r1.txt`.
-- The authoritative smoke replay passed from `docker-build-lv3`, producing synced receipts `receipts/k6/smoke-keycloak-20260331T103411Z.json` and `receipts/k6/smoke-openfga-20260331T103411Z.json` with real metrics (`120` requests and `0` failures for each service), as captured in `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-smoke-r9.txt` and `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-receipt-sync-r2.txt`.
-- The authoritative load replay now returns the real non-zero threshold failure while still emitting synced receipts and the raw summary export, captured in `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-load-r6.txt` and `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-receipt-sync-r3.txt`. Keycloak recorded `1725` requests with `400` failures (`23.19%` error rate) and OpenFGA recorded `995` requests with `42` failures (`4.22%` error rate); both receipts show `error_budget_remaining_pct: 0.0`.
-- The final load replay also proved two live operational findings that are now recorded, not hidden: Prometheus remote-write from the build host to `monitoring-lv3` timed out repeatedly (`receipts/live-applies/evidence/2026-03-31-ws-0305-prometheus-build-server-r1.txt`), and the build host does not currently have `ntfy_alertmanager_password`, so warning delivery is unavailable there. The branch now treats those notification failures as receipt warnings rather than aborting receipt generation.
+- The branch-local authoritative smoke replay passed from `docker-build-lv3`, producing synced receipts `receipts/k6/smoke-keycloak-20260331T103411Z.json` and `receipts/k6/smoke-openfga-20260331T103411Z.json` with real metrics (`120` requests and `0` failures for each service), as captured in `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-smoke-r9.txt` and `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-receipt-sync-r2.txt`.
+- The branch-local authoritative load replay now returns the real non-zero threshold failure while still emitting synced receipts and the raw summary export, captured in `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-load-r6.txt` and `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-receipt-sync-r3.txt`. Keycloak recorded `1725` requests with `400` failures (`23.19%` error rate) and OpenFGA recorded `995` requests with `42` failures (`4.22%` error rate); both receipts show `error_budget_remaining_pct: 0.0`.
+- The exact-main integration branch then rebased the workstream onto `origin/main` commit `5c7e07235f7b0da1f756148e145397f0ac6ceb10` and used committed source `0d6e8c9eb5d9d086e74cf92d8165248295baa076` for the authoritative closeout replay, recorded in `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-candidate-source-commit-r3-0.177.118.txt`.
+- The first exact-main smoke attempt exposed live drift rather than a repo regression: Prometheus on `monitoring-lv3` was still bound to `127.0.0.1:9090`, and `docker-runtime-lv3` was concurrently restarting OpenFGA. The correction loop is preserved under `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-k6-smoke-r5-0.177.118.txt`, `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-converge-monitoring-r8-0.177.118.txt`, and `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-prometheus-bind-manual-r1-0.177.118.txt`.
+- After that repair, the exact-main smoke replay passed from committed source and produced `receipts/k6/smoke-keycloak-20260331T133226Z.json` plus `receipts/k6/smoke-openfga-20260331T133226Z.json`; Keycloak recorded `110` requests with `0` failures and OpenFGA recorded `112` requests with `0` failures, as captured in `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-k6-smoke-r6-0.177.118.txt`.
+- The exact-main load replay completed without the earlier NATS deadlock and preserved the truthful final outcome in `receipts/k6/load-keycloak-20260331T133416Z.json`, `receipts/k6/load-openfga-20260331T133416Z.json`, and `receipts/k6/raw/20260331T133416Z-load-summary.json`, as captured in `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-k6-load-r3-0.177.118.txt`. Keycloak recorded `1585` requests with `441` failures (`27.82%` error rate) and failed the 1% objective; OpenFGA recorded `1184` requests with `8` failures (`0.68%`) and passed the run while still reporting `error_budget_remaining_pct: 0.0`.
+- The exact-main closeout also proved that controller-local notification publication is now bounded instead of blocking the run: the final load receipts preserved warning-only failures when `nats://127.0.0.1:4222` refused connections and ntfy timed out, and the canonical closeout receipt is `receipts/live-applies/2026-03-31-adr-0305-k6-mainline-live-apply.json`.
 
 ## Merge Criteria
 
@@ -86,7 +93,7 @@
 - Real `make k6-smoke` and `make k6-load` runs are replayed against the live platform with synced receipts committed under `receipts/k6/`; smoke must pass, and load must either pass or preserve a truthful non-zero threshold-failure receipt when the live platform breaches the declared SLO budget.
 - The mainline integration replay updates ADR metadata, release/canonical-truth surfaces, and the final live-apply receipt before `origin/main` is pushed.
 
-## Notes For The Next Assistant
+## Mainline Integration Notes
 
 - The private Gitea smoke gate needs `LV3_DOCKER_WORKSPACE_PATH`; the runner fix is branch-local here and should be kept when replaying the exact-main integration.
 - The public GitHub validation workflow intentionally stays unchanged because it cannot reach the private OpenFGA and Prometheus endpoints required by the smoke gate.
@@ -94,4 +101,5 @@
 - The corrective replay succeeded end to end, including the guest-log-shipping stage that previously failed on `artifact-cache-lv3`.
 - The live Windmill replay also exposed a repo bug in the OpenBao helper path: the old helper tried to submit the full unseal key list each time, which causes a 500 once the service is already unsealed. This branch splits the helper into per-key includes so the role stops as soon as the API reports `sealed: false`.
 - The live smoke replay exposed a repo bug in `scripts/k6_load_testing.py`: Docker wrote the summary export as the container user, which is not always permitted in the remote build workspace. This branch now runs the container as the local workspace UID:GID so `receipts/k6/**` stays writable on `docker-build-lv3`.
-- The branch is now live-applied and ready for exact-main integration. The remaining work before `origin/main` moves is to refresh from the latest mainline, rerun the final repo gates plus the authoritative exact-main smoke/load replay from committed source, update the protected integration surfaces on `main`, and publish the canonical mainline receipt.
+- Exact-main integration completed on `codex/ws-0305-mainline-final`, cut repository version `0.177.118`, and published the canonical mainline receipt `receipts/live-applies/2026-03-31-adr-0305-k6-mainline-live-apply.json`.
+- No additional shared-surface work remains outside the normal post-merge audit trail; this branch-local document intentionally preserves the earlier branch-only receipt history for comparison with the exact-main closeout.

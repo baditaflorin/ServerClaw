@@ -42,10 +42,18 @@ The Windmill worker seeds `f/lv3/k6_load_testing` and schedules:
 
 - Prometheus remote-write must be reachable on the private monitoring address
   from `docker-build-lv3` and `docker-runtime-lv3`.
+- On `monitoring-lv3`, Prometheus must listen on the guest-reachable private
+  interface (`0.0.0.0:9090` for the current unit) rather than `127.0.0.1:9090`
+  or the build-host smoke/load path will time out even when the local service
+  is healthy.
 - Private OpenFGA smoke and load probes must target the guest-reachable runtime
   listener on `http://10.10.10.20:8098/healthz`; the
   `http://100.64.0.1:8014` controller proxy is Tailscale-bound and is only for
   controller-local bootstrap and verification.
+- During `docker-runtime-lv3` redeploys, OpenFGA health can flap briefly while
+  the container restarts; if the first k6 smoke run hits connection refusals,
+  re-check `http://10.10.10.20:8098/healthz` from the build host before
+  concluding the repo change regressed the service.
 - The private Gitea `validate.yml` smoke gate runs inside a containerized runner,
   so it must export `LV3_DOCKER_WORKSPACE_PATH` before calling `make k6-smoke`
   or the nested `docker run` cannot mount the checkout from the runner host.
@@ -63,6 +71,10 @@ The Windmill worker seeds `f/lv3/k6_load_testing` and schedules:
   preserve the receipts with a warning instead of hanging in the post-run
   notification path; set `LV3_NATS_URL` explicitly when running from a machine
   that needs a different NATS route than the repo-managed service catalog.
+- For controller-local validation runs, expect warning-only notification
+  evidence unless the machine running `make k6-load` also has working access to
+  the intended NATS and ntfy endpoints; those warnings should not hide or
+  rewrite the actual k6 smoke/load result.
 
 ## Verification
 

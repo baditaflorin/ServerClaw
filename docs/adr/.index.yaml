@@ -5401,7 +5401,7 @@ adr_index:
       - burn
     summary: We will integrate k6 as the platform's load testing and SLO budget burn
     filename: 0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
-    implemented_version: 0.130.75
+    implemented_version: 0.177.118
   - adr: '0306'
     title: Checkov For IaC Policy Compliance Scanning Of OpenTofu, Compose, And Ansible
     status: Accepted
