@@ -4863,7 +4863,7 @@ adr_index:
   - adr: 0281
     title: GlitchTip As The Sentry-Compatible Application Error Tracker
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -4875,6 +4875,7 @@ adr_index:
       - tracker
     summary: We will deploy GlitchTip as the platform's application error tracking
     filename: 0281-glitchtip-as-the-sentry-compatible-application-error-tracker.md
+    implemented_version: 0.177.104
   - adr: 0282
     title: Mailpit As The SMTP Development Mail Interceptor
     status: Accepted

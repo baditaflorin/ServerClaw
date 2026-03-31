@@ -4,12 +4,12 @@
 - Title: Replace the partial ad hoc GlitchTip install with a repo-managed Sentry-compatible error tracking service, instrument first-party producers, and verify the live stack end to end
 - Status: in_progress
 - Included In Repo Version: 0.177.104
-- Branch-Local Receipt: pending fresh latest-main quiet-window replay; historical receipt `receipts/live-applies/2026-03-30-adr-0281-glitchtip-live-apply.json`
+- Branch-Local Receipt: pending fresh `0.177.121` quiet-window replay; historical receipt `receipts/live-applies/2026-03-30-adr-0281-glitchtip-live-apply.json`
 - Canonical Mainline Receipt: pending final `main` integration
 - Live Applied In Platform Version: historical branch-local replay `0.130.69`; latest-main re-verification pending
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
-- Latest origin/main Base: `0.177.118` at `2411a7cd428e0eba17168aa5eed66f04c4ed48dd`
+- Latest origin/main Base: `0.177.121` at `dc3a969e7c8de8fd727cca034418a4b49d6e2b64`
 - Branch: `codex/ws-0281-mainline-v2`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2`
 - Owner: codex
@@ -72,13 +72,14 @@
 
 ## Latest-Main Replay Status
 
-- ADR 0281 has now been replayed onto the current fetched `origin/main` base `2411a7cd428e0eba17168aa5eed66f04c4ed48dd` (`0.177.118`) with commits `9f1a5cedc`, `6d532e5bd`, `7068ec2ed`, `1796ff0a5`, and the committed repo-validation refresh `0451522e8`.
-- Fresh latest-main targeted validation passed from this worktree: `101 passed` across the replayed and hardening-adjacent pytest surfaces, captured in `receipts/live-applies/evidence/2026-03-31-adr-0281-targeted-latest-main-tests-r2-0.177.118.txt`.
-- Latest-main repo validation is green through `make syntax-check-glitchtip`, `./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json role-argument-specs data-models`, `./scripts/validate_repo.sh ansible-syntax`, `./scripts/validate_repo.sh ansible-lint`, `scripts/platform_manifest.py --check`, `scripts/generate_slo_rules.py --check`, and `git diff --check`; summary evidence is in `receipts/live-applies/evidence/2026-03-31-adr-0281-repo-validation-summary-r1-0.177.118.txt`.
-- Non-README generated checks also pass on the rebased tree: `scripts/generate_dependency_diagram.py --check`, `scripts/generate_diagrams.py --check`, and `./scripts/validate_repo.sh generated-portals`; see `receipts/live-applies/evidence/2026-03-31-adr-0281-generated-non-readme-checks-r2-0.177.118.txt`.
-- `scripts/canonical_truth.py --check` and `scripts/generate_status_docs.py --check` still fail only because they want to refresh the protected top-level `README.md`; that protected-file integration remains intentionally deferred until this workstream finishes the latest-main live apply. Evidence is in `receipts/live-applies/evidence/2026-03-31-adr-0281-generated-surfaces-except-canonical-r2-0.177.118.txt`.
-- A fresh quiet-window probe on `0.177.118` is still blocked by concurrent live applies touching the same shared hosts. `receipts/live-applies/evidence/2026-03-31-adr-0281-quiet-window-blocked-r2-0.177.118.txt` captures a blocked check against `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`, and the longer waiter has continued to fluctuate instead of producing a stable 30-second quiet window.
-- Read-only public-surface observation still shows shared-edge drift: `errors.lv3.org` resolves to `65.108.75.123`, but the edge is serving `CN=nginx.lv3.org` and returning `308` redirects to `https://nginx.lv3.org/...` for both the GlitchTip health and auth endpoints. Evidence is in `receipts/live-applies/evidence/2026-03-31-adr-0281-current-public-surface-r2-0.177.118.txt`.
+- ADR 0281 has now been replayed onto the current fetched `origin/main` base `dc3a969e7c8de8fd727cca034418a4b49d6e2b64` (`0.177.121`) with rebased commits `7a0de0ff2`, `db60e666e`, `485a80f57`, `4f0ef071f`, `cd269c9e6`, and `ef1719e96`.
+- Fresh latest-main targeted validation passed from this worktree: `109 passed` across the replayed and hardening-adjacent pytest surfaces, captured in `receipts/live-applies/evidence/2026-03-31-adr-0281-targeted-latest-main-tests-r3-0.177.121.txt`.
+- Latest-main repo validation is green through `make syntax-check-glitchtip`, `./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json role-argument-specs data-models`, `./scripts/validate_repo.sh ansible-syntax`, `./scripts/validate_repo.sh ansible-lint`, `scripts/platform_manifest.py --check`, `scripts/generate_slo_rules.py --check`, `scripts/generate_dependency_diagram.py --check`, `scripts/generate_diagrams.py --check`, `./scripts/validate_repo.sh generated-portals`, and `git diff --check`; the raw bundle is preserved in `receipts/live-applies/evidence/2026-03-31-adr-0281-latest-main-validation-r3-0.177.121.txt`.
+- `config/subdomain-exposure-registry.json` needed a fresh `scripts/subdomain_exposure_audit.py --write-registry` refresh on top of `0.177.121` before the data-model validation bundle would pass; that generated registry refresh is now part of this branch truth.
+- After refreshing ADR metadata, the workstream note, `workstreams.yaml`, and `docs/adr/.index.yaml`, the branch-local contract checks still pass through `./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json role-argument-specs data-models` and `git diff --check`; see `receipts/live-applies/evidence/2026-03-31-adr-0281-repo-contract-refresh-r1-0.177.121.txt`.
+- `scripts/canonical_truth.py --check` and `scripts/generate_status_docs.py --check` still fail only because they want to refresh the protected top-level `README.md` and generated status docs; that protected-file integration remains intentionally deferred until this workstream finishes the latest-main live apply. Evidence is in `receipts/live-applies/evidence/2026-03-31-adr-0281-generated-surfaces-except-canonical-r3-0.177.121.txt`.
+- A fresh quiet-window probe on `0.177.121` is still blocked by concurrent live applies touching the same shared hosts. `receipts/live-applies/evidence/2026-03-31-adr-0281-quiet-window-blocked-r3-0.177.121.txt` captures a blocked check against `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3` with 11 conflicting controller-local `ansible-playbook` processes.
+- Read-only public-surface observation still shows shared-edge drift: `errors.lv3.org` resolves to `65.108.75.123`, but the edge is serving `CN=nginx.lv3.org` and returning `308` redirects to `https://nginx.lv3.org/...` for both the GlitchTip health and auth endpoints. Evidence is in `receipts/live-applies/evidence/2026-03-31-adr-0281-current-public-surface-r3-0.177.121.txt`.
 - Because the shared hosts are not quiet and the public edge is presently drifted, the latest-main GlitchTip live apply has not yet been rerun safely from this worktree.
 
 ## Verification
@@ -145,7 +146,7 @@
 
 ## Outcome
 
-- The latest-main replay, recovery hardening, and repo-validation refresh are now integrated in this worktree and committed through `0451522e8` on top of `0.177.118`.
+- The latest-main replay, recovery hardening, and repo-validation refresh are now integrated in this worktree on top of `0.177.121`, with fresh receipts for targeted tests, repo validation, protected-surface blockers, quiet-window contention, and current public-surface drift.
 - The live rerun remains blocked by external concurrent controller activity and current shared-edge drift, so this workstream is not yet ready for final protected-surface integration onto `main`.
 - Merge to `main` must wait for a fresh quiet window, a successful latest-main `make converge-glitchtip`, renewed public health/auth/smoke verification, and then the protected-file updates (`VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, ADR metadata, and canonical mainline receipt).
 
