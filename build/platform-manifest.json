@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.117",
-  "platform_version": "0.130.76",
-  "generated_at": "2026-03-31T12:14:02Z",
-  "next_refresh_at": "2026-03-31T13:14:02Z",
+  "repo_version": "0.177.118",
+  "platform_version": "0.130.77",
+  "generated_at": "2026-03-31T13:48:20Z",
+  "next_refresh_at": "2026-03-31T14:48:20Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5554,10 +5554,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.116",
+    "last_version": "0.177.117",
     "deployed_at": "2026-03-31",
-    "summary": "implements ADR 0257 by carrying the governed ServerClaw SKILL.md skill-pack contract onto the current mainline baseline, hardening exact-main OpenBao replay stability, and recording the verified controller, API gateway, and Windmill workspace-precedence proof set",
-    "release_notes_url": "docs/release-notes/0.177.117.md"
+    "summary": "implements ADR 0298 by live-applying exact-main Syft and Grype SBOM generation and continuous CVE scanning on docker-runtime-lv3, including native worker tooling, repo-local Syft temp extraction, and the verified 62-image refresh path integrates ADR 0298 into main by carrying the final Syft and Grype SBOM/CVE scanning surfaces, the native Windmill worker tooling contract, and the exact-main 62-image live refresh proof from docker-runtime-lv3",
+    "release_notes_url": "docs/release-notes/0.177.118.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -199,8 +199,8 @@ ADR 0302 Restic file-level backups are now live on production from `main`: `dock
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.117` |
-| Platform version | `0.130.76` |
+| Repository version | `0.177.118` |
+| Platform version | `0.130.77` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -373,6 +373,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `route_dns_assertion_ledger` | `2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
 | `runtime_state_semantics` | `2026-03-28-adr-0246-runtime-state-semantics-live-apply` |
+| `sbom_cve_scanning` | `2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply` |
 | `searxng` | `2026-03-26-adr-0148-searxng-live-apply` |
 | `secret_rotation` | `2026-03-23-adr-0065-secret-rotation-live-apply` |
 | `security_posture_reporting` | `2026-03-26-adr-0102-security-posture-live-apply` |
@@ -1478,8 +1479,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.117` |
-| Platform version | `0.130.76` |
+| Repository version | `0.177.118` |
+| Platform version | `0.130.77` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1804,7 +1805,8 @@ This repository is intentionally opinionated:
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `merged` | [ws-0295-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md) |
 | `0296` | Live apply the dedicated artifact cache VM from latest origin/main | `live_applied` | [ws-0296-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-live-apply.md) |
 | `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `live_applied` | [ws-0297-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md) |
-| `0298` | Integrate ADR 0298 exact-main replay onto current origin/main | `merged` | [ws-0298-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0298-main-merge.md) |
+| `0298` | Live apply Syft and Grype for platform-wide SBOM generation and continuous CVE scanning from latest origin/main | `live_applied` | [ws-0298-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0298-live-apply.md) |
+| `0298` | Integrate ADR 0298 exact-main replay onto current origin/main | `live_applied` | [ws-0298-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0298-main-merge.md) |
 | `0301` | Live apply ADR 0301 from latest origin/main | `merged` | [ws-0301-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0301-live-apply.md) |
 | `0302` | ADR 0302 live apply from latest origin/main | `live_applied` | [ws-0302-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-live-apply.md) |
 | `0302` | Integrate ADR 0302 Restic exact-main replay onto current origin/main | `live_applied` | [ws-0302-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-main-integration.md) |

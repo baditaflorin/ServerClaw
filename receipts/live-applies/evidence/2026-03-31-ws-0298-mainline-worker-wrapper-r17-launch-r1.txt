@@ -1,0 +1,2 @@
+wrapper_pid=2379046
+2379046 2379021       00:01 bash -lc docker exec windmill-windmill_worker_native-1 sh -lc "cd /srv/proxmox_florin_server && export LV3_NTFY_TOPIC=platform-alerts-sbom-verify && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/proxmox_florin_server" > /tmp/ws-0298-full-wrapper-r17.out 2>&1; rc=$?; printf "%s\n" "$rc" > /tmp/ws-0298-full-wrapper-r17.rc

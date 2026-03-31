@@ -1,12 +1,13 @@
-# Release 0.177.117
+# Release 0.177.118
 
 - Date: 2026-03-31
 
 ## Summary
-- implements ADR 0257 by carrying the governed ServerClaw SKILL.md skill-pack contract onto the current mainline baseline, hardening exact-main OpenBao replay stability, and recording the verified controller, API gateway, and Windmill workspace-precedence proof set
+- implements ADR 0298 by live-applying exact-main Syft and Grype SBOM generation and continuous CVE scanning on docker-runtime-lv3, including native worker tooling, repo-local Syft temp extraction, and the verified 62-image refresh path
+- integrates ADR 0298 into main by carrying the final Syft and Grype SBOM/CVE scanning surfaces, the native Windmill worker tooling contract, and the exact-main 62-image live refresh proof from docker-runtime-lv3
 
 ## Platform Impact
-- Platform version advances to 0.130.76 by promoting the ADR 0257 exact-main live-apply receipt for the governed ServerClaw SKILL.md skill-pack contract, with verified controller, API gateway, Windmill, OpenBao, and step-ca evidence on docker-runtime-lv3.
+- Platform version advances to 0.130.77 after the exact-main ADR 0298 replay re-verifies Syft and Grype SBOM generation and continuous CVE scanning from the live Windmill native worker on docker-runtime-lv3, including native tooling mounts, repo-local Syft temp extraction, and a successful 62-image refresh.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
