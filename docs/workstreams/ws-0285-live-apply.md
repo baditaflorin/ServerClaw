@@ -3,9 +3,9 @@
 - ADR: [ADR 0285](../adr/0285-paperless-ngx-as-the-document-management-and-archive-api.md)
 - Title: Deploy Paperless-ngx as the repo-managed document archive API on `docker-runtime-lv3`
 - Status: live_applied
-- Included In Repo Version: N/A
+- Included In Repo Version: 0.177.121
 - Branch-Local Receipt: `receipts/live-applies/2026-03-31-adr-0285-paperless-live-apply.json`
-- Canonical Mainline Receipt: pending
+- Canonical Mainline Receipt: `receipts/live-applies/2026-03-31-adr-0285-paperless-live-apply.json`
 - Live Applied In Platform Version: 0.130.75
 - Implemented On: 2026-03-31
 - Live Applied On: 2026-03-31
@@ -14,7 +14,7 @@
 - Owner: codex
 - Depends On: `adr-0021-public-subdomain-publication`, `adr-0042-postgresql-as-the-shared-relational-database`, `adr-0063-keycloak-sso-for-internal-services`, `adr-0077-compose-secret-injection-pattern`, `adr-0086-backup-and-recovery-for-stateful-services`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0285`, `docs/workstreams/ws-0285-live-apply.md`, `docs/runbooks/configure-paperless.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `playbooks/paperless.yml`, `playbooks/services/paperless.yml`, `roles/paperless_postgres/`, `roles/paperless_runtime/`, `roles/keycloak_runtime/`, `config/*catalog*.json`, `config/prometheus/**`, `config/grafana/dashboards/`, `config/alertmanager/rules/`, `scripts/generate_platform_vars.py`, `scripts/paperless_sync.py`, `tests/`, `receipts/image-scans/`, `receipts/live-applies/`, `workstreams.yaml`
+- Shared Surfaces: `docs/adr/0285`, `docs/adr/.index.yaml`, `docs/workstreams/ws-0285-live-apply.md`, `docs/runbooks/configure-paperless.md`, `docs/runbooks/restic-config-backups.md`, `docs/release-notes/`, `docs/diagrams/*.excalidraw`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `playbooks/paperless.yml`, `playbooks/services/paperless.yml`, `roles/paperless_postgres/`, `roles/paperless_runtime/`, `collections/ansible_collections/lv3/platform/roles/common/tasks/*.yml`, `collections/ansible_collections/lv3/platform/roles/docker_runtime/**`, `collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/**`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/**`, `collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/**`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/**`, `collections/ansible_collections/lv3/platform/roles/restic_config_backup/**`, `config/*catalog*.json`, `config/prometheus/**`, `config/grafana/dashboards/`, `config/alertmanager/rules/`, `scripts/generate_platform_vars.py`, `scripts/paperless_sync.py`, `scripts/restic_config_backup.py`, `scripts/trigger_restic_live_apply.py`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `build/platform-manifest.json`, `versions/stack.yaml`, `tests/`, `receipts/image-scans/`, `receipts/live-applies/`, `workstreams.yaml`
 
 ## Scope
 
@@ -178,14 +178,22 @@
   `docker-runtime-lv3`, so the final exact-main replay is waiting for a quiet
   window to avoid another false-negative verification failure.
 
-## Remaining For Mainline Completion
+## Mainline Completion
 
-- wait for concurrent automation on `docker-runtime-lv3` to drain, then take
-  the Paperless service lock and rerun the authoritative exact-main wrapper on
-  latest `origin/main`
-- record the clean canonical mainline Paperless receipt on the settled replay
-- update ADR 0285 metadata with the final repo integration version and confirm
-  the first live platform version remains `0.130.75`
-- refresh the protected release surfaces, cut the next release, and verify the
-  committed exact candidate through the repo automation gates before pushing
-  `HEAD:main`
+- The authoritative exact-main replay from release `0.177.121` completed
+  cleanly on `2026-03-31` from the latest realistic `origin/main` baseline
+  `0.177.120 / 0.130.77`, and the full wrapper preserved successful Paperless
+  runtime recovery, taxonomy reconciliation, public publication, public smoke
+  upload verification, API gateway bundle sync, and shared NGINX edge checks in
+  `receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-final-live-apply-r1-0.177.121.txt`.
+- The post-apply restic trigger succeeded immediately after the replay and
+  recorded snapshot `0ea3c5176e2e123d8e56cc9e6b398e8a49d190d8e25f0c2587838850a7b3692c`
+  for `config/` plus snapshot
+  `64fa6fc807fb63c6c057c82e67a4abe7ca803b2662ab6548f75a3bb2983340f5` for
+  `versions/stack.yaml`.
+- ADR 0285 first became true on platform version `0.130.75`; this exact-main
+  closeout keeps that first-live milestone intact while advancing the integrated
+  platform truth to `0.130.78` alongside repository version `0.177.121`.
+- Protected release surfaces and canonical metadata were refreshed on the same
+  exact candidate so `main` can fast-forward without any additional Paperless
+  integration-only follow-up.

@@ -355,6 +355,7 @@
       }}
 
 - name: Force-recreate the Paperless runtime stack and recover Docker bridge-chain loss after networking recovery
+  when: paperless_force_recreate
   block:
     - name: Force-recreate the Paperless runtime stack after Docker networking recovery
       ansible.builtin.command:
@@ -469,15 +470,12 @@
         or 'Starting' in paperless_force_recreate_up.stdout
       failed_when: paperless_force_recreate_up.rc != 0
       when: paperless_force_recreate_bridge_chains_missing
-  when: paperless_force_recreate
 
 - name: Assert the Paperless force-recreate succeeded
   ansible.builtin.assert:
     that:
       - paperless_force_recreate_up.rc == 0
     fail_msg: "{{ paperless_force_recreate_up.stderr | default(paperless_force_recreate_up.msg | default('paperless compose force-recreate failed')) }}"
-  when: paperless_force_recreate
-
 - name: Start the Paperless runtime stack
   ansible.builtin.command:
     argv:

@@ -422,6 +422,7 @@
   when: keycloak_force_recreate
 
 - name: Force-recreate the Keycloak service and recover Docker bridge-chain loss after networking recovery
+  when: keycloak_force_recreate
   block:
     - name: Force-recreate the Keycloak service after Docker networking recovery
       ansible.builtin.shell: |
@@ -590,8 +591,6 @@
         or 'Starting' in keycloak_up.stdout
       failed_when: keycloak_up.rc != 0
       when: keycloak_force_recreate_bridge_chains_missing
-  when: keycloak_force_recreate
-
 - name: Assert the Keycloak force-recreate succeeded
   ansible.builtin.assert:
     that:
