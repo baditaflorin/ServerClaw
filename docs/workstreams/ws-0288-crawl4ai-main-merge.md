@@ -6,8 +6,8 @@
 - Included In Repo Version: pending
 - Canonical Mainline Receipt: pending
 - Live Applied In Platform Version: pending
-- Branch: `codex/ws-0288-crawl4ai-main-merge-r1`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-crawl4ai-main-merge-r1`
+- Branch: `codex/ws-0288-crawl4ai-main-merge-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-crawl4ai-main-merge-r2`
 - Owner: codex
 - Depends On: none
 - Conflicts With: `ws-0288-live-apply`, `ws-0288-main-merge`
