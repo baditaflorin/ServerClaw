@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.120",
+  "repo_version": "0.177.121",
   "platform_version": "0.130.77",
-  "generated_at": "2026-03-31T16:57:52Z",
-  "next_refresh_at": "2026-03-31T17:57:52Z",
+  "generated_at": "2026-03-31T18:37:09Z",
+  "next_refresh_at": "2026-03-31T19:37:09Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5641,10 +5641,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.119",
+    "last_version": "0.177.120",
     "deployed_at": "2026-03-31",
-    "summary": "integrates ADR 0305 into main by replaying the repo-managed k6 smoke, load, and soak validation path on the latest realistic origin/main baseline, preserving Prometheus remote-write, Windmill scheduling, and truthful non-zero receipts when the live Keycloak and OpenFGA SLO budgets are already exhausted integrates ADR 0305 into main by re-verifying the latest realistic origin/main exact-main smoke and load paths for Keycloak and OpenFGA, preserving truthful k6 receipts and bounded notification warnings while recording the remaining live Keycloak load-test failure",
-    "release_notes_url": "docs/release-notes/0.177.120.md"
+    "summary": "implements ADR 0303 by enabling PostgreSQL pgaudit query and privilege audit logging, shipping structured audit and connection signals into Loki and Prometheus, and routing unknown-role alerts to ntfy plus NATS with recorded exact-main live-apply evidence",
+    "release_notes_url": "docs/release-notes/0.177.121.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -170,6 +170,7 @@
             CREATE ROLE {{ monitoring_stack_postgres_audit_metrics_probe_role }} NOLOGIN;
             DROP ROLE {{ monitoring_stack_postgres_audit_metrics_probe_role }};
       delegate_to: "{{ monitoring_stack_postgres_audit_host }}"
+      become: true
       become_user: postgres
       changed_when: false
 

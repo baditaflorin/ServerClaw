@@ -174,8 +174,8 @@ workstreams:
     title: Live apply PostgreSQL pgaudit query and privilege audit logging from latest origin/main
     status: live_applied
     owner: codex
-    branch: codex/ws-0303-main-integration
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration
+    branch: codex/ws-0303-main-final
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0303-live-apply.md
     depends_on:
       - adr-0026-dedicated-postgresql-vm-for-shared-state
@@ -192,26 +192,54 @@ workstreams:
       - docs/adr/.index.yaml
       - docs/runbooks/postgres-audit.md
       - docs/runbooks/postgres-down.md
+      - docs/runbooks/playbook-execution-model.md
+      - docs/runbooks/vulnerability-budget-gates.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
       - inventory/host_vars/proxmox_florin.yml
+      - Makefile
       - playbooks/postgres-vm.yml
       - playbooks/monitoring-stack.yml
+      - playbooks/nats-jetstream.yml
       - playbooks/services/guest-log-shipping.yml
       - collections/ansible_collections/lv3/platform/roles/postgres_vm/**
       - collections/ansible_collections/lv3/platform/roles/loki_log_agent/**
       - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
       - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/**
+      - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/**
       - config/pgaudit/**
       - config/alertmanager/alertmanager.yml
       - config/alertmanager/rules/platform.yml
       - config/controller-local-secrets.json
       - config/event-taxonomy.yaml
+      - platform/events/publisher.py
+      - platform/retry/classification.py
+      - scripts/drift_lib.py
+      - scripts/published_artifact_secret_scan.py
+      - scripts/service_id_resolver.py
       - receipts/live-applies/
+      - receipts/live-applies/2026-03-31-adr-0303-*.json
+      - receipts/live-applies/evidence/2026-03-31-adr-0303-*
+      - receipts/live-applies/evidence/2026-03-31-ws-0303-*
+      - receipts/ops-portal-snapshot.html
+      - receipts/sbom/**
       - tests/test_postgres_vm_role.py
       - tests/test_pgaudit_repo_contract.py
       - tests/test_loki_log_agent_role.py
       - tests/test_guest_log_shipping_playbook.py
       - tests/test_monitoring_vm_role.py
       - tests/test_alertmanager_runtime_role.py
+      - tests/test_nats_connect_retry.py
+      - tests/test_nats_jetstream_runtime_role.py
+      - tests/test_postgres_vm_access_policy.py
+      - tests/test_service_id_resolver.py
       - tests/unit/test_event_taxonomy.py
     ownership_manifest:
       owned_surfaces:
@@ -231,26 +259,61 @@ workstreams:
             - docs/adr/0303-pgaudit-for-postgresql-query-and-privilege-change-audit-logging.md
             - docs/runbooks/postgres-audit.md
             - docs/runbooks/postgres-down.md
+            - docs/runbooks/playbook-execution-model.md
+            - docs/runbooks/vulnerability-budget-gates.md
             - collections/ansible_collections/lv3/platform/roles/postgres_vm/**
             - collections/ansible_collections/lv3/platform/roles/loki_log_agent/**
             - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
             - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/**
             - config/pgaudit/**
             - config/alertmanager/alertmanager.yml
             - config/alertmanager/rules/platform.yml
             - config/controller-local-secrets.json
             - config/event-taxonomy.yaml
             - inventory/host_vars/proxmox_florin.yml
+            - Makefile
+            - playbooks/nats-jetstream.yml
             - playbooks/services/guest-log-shipping.yml
             - receipts/live-applies/2026-03-31-adr-0303-*
+            - receipts/live-applies/evidence/2026-03-31-adr-0303-*
+            - receipts/live-applies/evidence/2026-03-31-ws-0303-*
+            - receipts/ops-portal-snapshot.html
+            - receipts/sbom/**
+            - platform/events/publisher.py
+            - platform/retry/classification.py
+            - scripts/drift_lib.py
+            - scripts/published_artifact_secret_scan.py
+            - scripts/service_id_resolver.py
             - tests/test_postgres_vm_role.py
             - tests/test_pgaudit_repo_contract.py
             - tests/test_loki_log_agent_role.py
             - tests/test_guest_log_shipping_playbook.py
             - tests/test_monitoring_vm_role.py
             - tests/test_alertmanager_runtime_role.py
+            - tests/test_nats_connect_retry.py
+            - tests/test_nats_jetstream_runtime_role.py
+            - tests/test_postgres_vm_access_policy.py
+            - tests/test_service_id_resolver.py
             - tests/unit/test_event_taxonomy.py
           mode: exclusive
+        - id: release_management_surfaces
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: platform_truth_generation
+          paths:
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: canonical-truth-v1
     ready_to_merge: true
     live_applied: true
     canonical_truth:
@@ -259,7 +322,7 @@ workstreams:
         signals into Loki and Prometheus, and routing unknown-role alerts to ntfy
         plus NATS with recorded exact-main live-apply evidence
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.121
       latest_receipts:
         postgres_audit: 2026-03-31-adr-0303-pgaudit-mainline-live-apply
   - id: ws-0302-live-apply

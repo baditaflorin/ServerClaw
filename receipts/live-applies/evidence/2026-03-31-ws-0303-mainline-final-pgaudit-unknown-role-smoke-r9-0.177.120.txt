@@ -1,0 +1,1441 @@
+role=adr0303_smoke_1ff286d9
+start_ts=2026-03-31T18:02:50Z
+== pre_nats ==
+{
+  "envelope": {
+    "actor_id": "service/pgaudit-alert-relay",
+    "context_id": "d0ddec0aed682713",
+    "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+    "payload": {
+      "alert_name": "PostgresUnknownRoleConnection",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+      "database": "postgres",
+      "event": "platform.security.pgaudit_unknown_role",
+      "fingerprint": "d0ddec0aed682713",
+      "generated_at": "2026-03-31T18:01:26.671Z",
+      "host": "postgres-lv3",
+      "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+      "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+      "status": "firing",
+      "summary": "PostgreSQL accepted a connection for an unapproved login role."
+    },
+    "schema_ver": "1.0",
+    "topic": "platform.security.pgaudit_unknown_role",
+    "ts": "2026-03-31T18:01:26.671Z"
+  },
+  "seq": 10956,
+  "subject": "platform.security.pgaudit_unknown_role"
+}
+== create_role ==
+== trigger ==
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 0.0,
+  "metric": {
+    "data": {
+      "result": [],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 0.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 0.0,
+  "metric": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "postgres_unknown_connection_events_total",
+            "component": "pgaudit",
+            "component_id": "loki.process.postgres_audit",
+            "component_path": "/",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "environment": "lv3",
+            "exported_job": "postgres-audit",
+            "exported_service": "postgres",
+            "filename": "/var/log/postgresql/postgresql-17-main.log",
+            "host": "postgres-lv3",
+            "instance": "10.10.10.50:12345",
+            "job": "postgres-audit-alloy",
+            "lane": "data",
+            "log_type": "postgresql",
+            "node_role": "postgres",
+            "service": "postgres",
+            "source": "file"
+          },
+          "value": [
+            1774980188.12,
+            "2"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 2.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "ALERTS",
+            "alertname": "PostgresUnknownRoleConnection",
+            "alertstate": "firing",
+            "component": "pgaudit",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "host": "postgres-lv3",
+            "service": "postgres",
+            "severity": "critical"
+          },
+          "value": [
+            1774980200.233,
+            "1"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 1.0,
+  "metric": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "postgres_unknown_connection_events_total",
+            "component": "pgaudit",
+            "component_id": "loki.process.postgres_audit",
+            "component_path": "/",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "environment": "lv3",
+            "exported_job": "postgres-audit",
+            "exported_service": "postgres",
+            "filename": "/var/log/postgresql/postgresql-17-main.log",
+            "host": "postgres-lv3",
+            "instance": "10.10.10.50:12345",
+            "job": "postgres-audit-alloy",
+            "lane": "data",
+            "log_type": "postgresql",
+            "node_role": "postgres",
+            "service": "postgres",
+            "source": "file"
+          },
+          "value": [
+            1774980198.464,
+            "2"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 2.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "ALERTS",
+            "alertname": "PostgresUnknownRoleConnection",
+            "alertstate": "firing",
+            "component": "pgaudit",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "host": "postgres-lv3",
+            "service": "postgres",
+            "severity": "critical"
+          },
+          "value": [
+            1774980210.571,
+            "1"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 1.0,
+  "metric": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "postgres_unknown_connection_events_total",
+            "component": "pgaudit",
+            "component_id": "loki.process.postgres_audit",
+            "component_path": "/",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "environment": "lv3",
+            "exported_job": "postgres-audit",
+            "exported_service": "postgres",
+            "filename": "/var/log/postgresql/postgresql-17-main.log",
+            "host": "postgres-lv3",
+            "instance": "10.10.10.50:12345",
+            "job": "postgres-audit-alloy",
+            "lane": "data",
+            "log_type": "postgresql",
+            "node_role": "postgres",
+            "service": "postgres",
+            "source": "file"
+          },
+          "value": [
+            1774980208.797,
+            "2"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 2.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "ALERTS",
+            "alertname": "PostgresUnknownRoleConnection",
+            "alertstate": "firing",
+            "component": "pgaudit",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "host": "postgres-lv3",
+            "service": "postgres",
+            "severity": "critical"
+          },
+          "value": [
+            1774980220.93,
+            "1"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 1.0,
+  "metric": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "postgres_unknown_connection_events_total",
+            "component": "pgaudit",
+            "component_id": "loki.process.postgres_audit",
+            "component_path": "/",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "environment": "lv3",
+            "exported_job": "postgres-audit",
+            "exported_service": "postgres",
+            "filename": "/var/log/postgresql/postgresql-17-main.log",
+            "host": "postgres-lv3",
+            "instance": "10.10.10.50:12345",
+            "job": "postgres-audit-alloy",
+            "lane": "data",
+            "log_type": "postgresql",
+            "node_role": "postgres",
+            "service": "postgres",
+            "source": "file"
+          },
+          "value": [
+            1774980219.162,
+            "2"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 2.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "ALERTS",
+            "alertname": "PostgresUnknownRoleConnection",
+            "alertstate": "firing",
+            "component": "pgaudit",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "host": "postgres-lv3",
+            "service": "postgres",
+            "severity": "critical"
+          },
+          "value": [
+            1774980231.243,
+            "1"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 1.0,
+  "metric": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "postgres_unknown_connection_events_total",
+            "component": "pgaudit",
+            "component_id": "loki.process.postgres_audit",
+            "component_path": "/",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "environment": "lv3",
+            "exported_job": "postgres-audit",
+            "exported_service": "postgres",
+            "filename": "/var/log/postgresql/postgresql-17-main.log",
+            "host": "postgres-lv3",
+            "instance": "10.10.10.50:12345",
+            "job": "postgres-audit-alloy",
+            "lane": "data",
+            "log_type": "postgresql",
+            "node_role": "postgres",
+            "service": "postgres",
+            "source": "file"
+          },
+          "value": [
+            1774980229.479,
+            "2"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 2.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "ALERTS",
+            "alertname": "PostgresUnknownRoleConnection",
+            "alertstate": "firing",
+            "component": "pgaudit",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "host": "postgres-lv3",
+            "service": "postgres",
+            "severity": "critical"
+          },
+          "value": [
+            1774980241.63,
+            "1"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 1.0,
+  "metric": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "postgres_unknown_connection_events_total",
+            "component": "pgaudit",
+            "component_id": "loki.process.postgres_audit",
+            "component_path": "/",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "environment": "lv3",
+            "exported_job": "postgres-audit",
+            "exported_service": "postgres",
+            "filename": "/var/log/postgresql/postgresql-17-main.log",
+            "host": "postgres-lv3",
+            "instance": "10.10.10.50:12345",
+            "job": "postgres-audit-alloy",
+            "lane": "data",
+            "log_type": "postgresql",
+            "node_role": "postgres",
+            "service": "postgres",
+            "source": "file"
+          },
+          "value": [
+            1774980239.853,
+            "2"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 2.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "ALERTS",
+            "alertname": "PostgresUnknownRoleConnection",
+            "alertstate": "firing",
+            "component": "pgaudit",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "host": "postgres-lv3",
+            "service": "postgres",
+            "severity": "critical"
+          },
+          "value": [
+            1774980251.971,
+            "1"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 1.0,
+  "metric": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "postgres_unknown_connection_events_total",
+            "component": "pgaudit",
+            "component_id": "loki.process.postgres_audit",
+            "component_path": "/",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "environment": "lv3",
+            "exported_job": "postgres-audit",
+            "exported_service": "postgres",
+            "filename": "/var/log/postgresql/postgresql-17-main.log",
+            "host": "postgres-lv3",
+            "instance": "10.10.10.50:12345",
+            "job": "postgres-audit-alloy",
+            "lane": "data",
+            "log_type": "postgresql",
+            "node_role": "postgres",
+            "service": "postgres",
+            "source": "file"
+          },
+          "value": [
+            1774980250.203,
+            "2"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 2.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "ALERTS",
+            "alertname": "PostgresUnknownRoleConnection",
+            "alertstate": "firing",
+            "component": "pgaudit",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "host": "postgres-lv3",
+            "service": "postgres",
+            "severity": "critical"
+          },
+          "value": [
+            1774980262.28,
+            "1"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 1.0,
+  "metric": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "postgres_unknown_connection_events_total",
+            "component": "pgaudit",
+            "component_id": "loki.process.postgres_audit",
+            "component_path": "/",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "environment": "lv3",
+            "exported_job": "postgres-audit",
+            "exported_service": "postgres",
+            "filename": "/var/log/postgresql/postgresql-17-main.log",
+            "host": "postgres-lv3",
+            "instance": "10.10.10.50:12345",
+            "job": "postgres-audit-alloy",
+            "lane": "data",
+            "log_type": "postgresql",
+            "node_role": "postgres",
+            "service": "postgres",
+            "source": "file"
+          },
+          "value": [
+            1774980260.519,
+            "2"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 2.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "ALERTS",
+            "alertname": "PostgresUnknownRoleConnection",
+            "alertstate": "firing",
+            "component": "pgaudit",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "host": "postgres-lv3",
+            "service": "postgres",
+            "severity": "critical"
+          },
+          "value": [
+            1774980287.744,
+            "1"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 1.0,
+  "metric": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "postgres_unknown_connection_events_total",
+            "component": "pgaudit",
+            "component_id": "loki.process.postgres_audit",
+            "component_path": "/",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "environment": "lv3",
+            "exported_job": "postgres-audit",
+            "exported_service": "postgres",
+            "filename": "/var/log/postgresql/postgresql-17-main.log",
+            "host": "postgres-lv3",
+            "instance": "10.10.10.50:12345",
+            "job": "postgres-audit-alloy",
+            "lane": "data",
+            "log_type": "postgresql",
+            "node_role": "postgres",
+            "service": "postgres",
+            "source": "file"
+          },
+          "value": [
+            1774980285.972,
+            "2"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 2.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "ALERTS",
+            "alertname": "PostgresUnknownRoleConnection",
+            "alertstate": "firing",
+            "component": "pgaudit",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "host": "postgres-lv3",
+            "service": "postgres",
+            "severity": "critical"
+          },
+          "value": [
+            1774980298.155,
+            "1"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 1.0,
+  "metric": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "postgres_unknown_connection_events_total",
+            "component": "pgaudit",
+            "component_id": "loki.process.postgres_audit",
+            "component_path": "/",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "environment": "lv3",
+            "exported_job": "postgres-audit",
+            "exported_service": "postgres",
+            "filename": "/var/log/postgresql/postgresql-17-main.log",
+            "host": "postgres-lv3",
+            "instance": "10.10.10.50:12345",
+            "job": "postgres-audit-alloy",
+            "lane": "data",
+            "log_type": "postgresql",
+            "node_role": "postgres",
+            "service": "postgres",
+            "source": "file"
+          },
+          "value": [
+            1774980296.379,
+            "2"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 2.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "ALERTS",
+            "alertname": "PostgresUnknownRoleConnection",
+            "alertstate": "firing",
+            "component": "pgaudit",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "host": "postgres-lv3",
+            "service": "postgres",
+            "severity": "critical"
+          },
+          "value": [
+            1774980308.544,
+            "1"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 1.0,
+  "metric": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "postgres_unknown_connection_events_total",
+            "component": "pgaudit",
+            "component_id": "loki.process.postgres_audit",
+            "component_path": "/",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "environment": "lv3",
+            "exported_job": "postgres-audit",
+            "exported_service": "postgres",
+            "filename": "/var/log/postgresql/postgresql-17-main.log",
+            "host": "postgres-lv3",
+            "instance": "10.10.10.50:12345",
+            "job": "postgres-audit-alloy",
+            "lane": "data",
+            "log_type": "postgresql",
+            "node_role": "postgres",
+            "service": "postgres",
+            "source": "file"
+          },
+          "value": [
+            1774980306.746,
+            "2"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 2.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "ALERTS",
+            "alertname": "PostgresUnknownRoleConnection",
+            "alertstate": "firing",
+            "component": "pgaudit",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "host": "postgres-lv3",
+            "service": "postgres",
+            "severity": "critical"
+          },
+          "value": [
+            1774980318.908,
+            "1"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 1.0,
+  "metric": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "postgres_unknown_connection_events_total",
+            "component": "pgaudit",
+            "component_id": "loki.process.postgres_audit",
+            "component_path": "/",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "environment": "lv3",
+            "exported_job": "postgres-audit",
+            "exported_service": "postgres",
+            "filename": "/var/log/postgresql/postgresql-17-main.log",
+            "host": "postgres-lv3",
+            "instance": "10.10.10.50:12345",
+            "job": "postgres-audit-alloy",
+            "lane": "data",
+            "log_type": "postgresql",
+            "node_role": "postgres",
+            "service": "postgres",
+            "source": "file"
+          },
+          "value": [
+            1774980317.13,
+            "2"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 2.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "ALERTS",
+            "alertname": "PostgresUnknownRoleConnection",
+            "alertstate": "firing",
+            "component": "pgaudit",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "host": "postgres-lv3",
+            "service": "postgres",
+            "severity": "critical"
+          },
+          "value": [
+            1774980329.298,
+            "1"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 1.0,
+  "metric": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "postgres_unknown_connection_events_total",
+            "component": "pgaudit",
+            "component_id": "loki.process.postgres_audit",
+            "component_path": "/",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "environment": "lv3",
+            "exported_job": "postgres-audit",
+            "exported_service": "postgres",
+            "filename": "/var/log/postgresql/postgresql-17-main.log",
+            "host": "postgres-lv3",
+            "instance": "10.10.10.50:12345",
+            "job": "postgres-audit-alloy",
+            "lane": "data",
+            "log_type": "postgresql",
+            "node_role": "postgres",
+            "service": "postgres",
+            "source": "file"
+          },
+          "value": [
+            1774980327.521,
+            "2"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 2.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "ALERTS",
+            "alertname": "PostgresUnknownRoleConnection",
+            "alertstate": "firing",
+            "component": "pgaudit",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "host": "postgres-lv3",
+            "service": "postgres",
+            "severity": "critical"
+          },
+          "value": [
+            1774980339.648,
+            "1"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 1.0,
+  "metric": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "postgres_unknown_connection_events_total",
+            "component": "pgaudit",
+            "component_id": "loki.process.postgres_audit",
+            "component_path": "/",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "environment": "lv3",
+            "exported_job": "postgres-audit",
+            "exported_service": "postgres",
+            "filename": "/var/log/postgresql/postgresql-17-main.log",
+            "host": "postgres-lv3",
+            "instance": "10.10.10.50:12345",
+            "job": "postgres-audit-alloy",
+            "lane": "data",
+            "log_type": "postgresql",
+            "node_role": "postgres",
+            "service": "postgres",
+            "source": "file"
+          },
+          "value": [
+            1774980337.877,
+            "2"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 2.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== poll ==
+{
+  "alert": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "ALERTS",
+            "alertname": "PostgresUnknownRoleConnection",
+            "alertstate": "firing",
+            "component": "pgaudit",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "host": "postgres-lv3",
+            "service": "postgres",
+            "severity": "critical"
+          },
+          "value": [
+            1774980350.025,
+            "1"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "alert_value": 1.0,
+  "metric": {
+    "data": {
+      "result": [
+        {
+          "metric": {
+            "__name__": "postgres_unknown_connection_events_total",
+            "component": "pgaudit",
+            "component_id": "loki.process.postgres_audit",
+            "component_path": "/",
+            "db": "postgres",
+            "db_role": "adr0303_smoke_1ff286d9",
+            "environment": "lv3",
+            "exported_job": "postgres-audit",
+            "exported_service": "postgres",
+            "filename": "/var/log/postgresql/postgresql-17-main.log",
+            "host": "postgres-lv3",
+            "instance": "10.10.10.50:12345",
+            "job": "postgres-audit-alloy",
+            "lane": "data",
+            "log_type": "postgresql",
+            "node_role": "postgres",
+            "service": "postgres",
+            "source": "file"
+          },
+          "value": [
+            1774980348.231,
+            "2"
+          ]
+        }
+      ],
+      "resultType": "vector"
+    },
+    "status": "success"
+  },
+  "metric_value": 2.0,
+  "nats": {
+    "envelope": {
+      "actor_id": "service/pgaudit-alert-relay",
+      "context_id": "d0ddec0aed682713",
+      "event_id": "9754279e-efe6-4f5b-9615-b34a1247b47f",
+      "payload": {
+        "alert_name": "PostgresUnknownRoleConnection",
+        "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+        "database": "postgres",
+        "event": "platform.security.pgaudit_unknown_role",
+        "fingerprint": "d0ddec0aed682713",
+        "generated_at": "2026-03-31T18:01:26.671Z",
+        "host": "postgres-lv3",
+        "role": "v-approle-postgres-stNWkd9vZOSJWAnrZT4n-1774967253",
+        "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+        "status": "firing",
+        "summary": "PostgreSQL accepted a connection for an unapproved login role."
+      },
+      "schema_ver": "1.0",
+      "topic": "platform.security.pgaudit_unknown_role",
+      "ts": "2026-03-31T18:01:26.671Z"
+    },
+    "seq": 10956,
+    "subject": "platform.security.pgaudit_unknown_role"
+  }
+}
+== alertmanager_active ==
+[
+  {
+    "annotations": {
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+      "description": "The PostgreSQL audit pipeline on postgres-lv3 observed an authorized connection for role adr0303_smoke_1ff286d9 against database postgres outside the approved login-role catalog.",
+      "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
+      "summary": "PostgreSQL accepted a connection for an unapproved login role."
+    },
+    "endsAt": "2026-03-31T18:09:41.671Z",
+    "fingerprint": "c2135621612ad380",
+    "generatorURL": "http://monitoring-lv3:9090/graph?g0.expr=%28sum+by+%28host%2C+db%2C+db_role%29+%28increase%28postgres_unknown_connection_events_total%7Bcomponent%3D%22pgaudit%22%2Cjob%3D%22postgres-audit-alloy%22%7D%5B5m%5D%29%29+%3E+0%29+or+%28sum+by+%28host%2C+db%2C+db_role%29+%28postgres_unknown_connection_events_total%7Bcomponent%3D%22pgaudit%22%2Cjob%3D%22postgres-audit-alloy%22%7D+unless+postgres_unknown_connection_events_total%7Bcomponent%3D%22pgaudit%22%2Cjob%3D%22postgres-audit-alloy%22%7D+offset+5m%29+%3E+0%29&g0.tab=1",
+    "labels": {
+      "alertname": "PostgresUnknownRoleConnection",
+      "cluster": "lv3",
+      "component": "pgaudit",
+      "db": "postgres",
+      "db_role": "adr0303_smoke_1ff286d9",
+      "environment": "lv3",
+      "host": "postgres-lv3",
+      "service": "postgres",
+      "severity": "critical"
+    },
+    "receivers": [
+      {
+        "name": "pgaudit-unknown-role-relay"
+      },
+      {
+        "name": "ntfy-critical"
+      },
+      {
+        "name": "mattermost-critical"
+      }
+    ],
+    "startsAt": "2026-03-31T18:03:11.671Z",
+    "status": {
+      "inhibitedBy": [],
+      "mutedBy": [],
+      "silencedBy": [],
+      "state": "active"
+    },
+    "updatedAt": "2026-03-31T18:05:41.676Z"
+  }
+]
+== relay_journal ==
+Warning: Permanently added '100.64.0.1' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.40' (ED25519) to the list of known hosts.
+
+smoke_status=failed
+== cleanup ==

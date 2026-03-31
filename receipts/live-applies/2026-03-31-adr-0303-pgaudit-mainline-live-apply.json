@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-31-adr-0303-pgaudit-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-31",
+  "recorded_on": "2026-03-31",
+  "recorded_at": "2026-03-31T18:35:00Z",
+  "recorded_by": "codex",
+  "source_commit": "f2af947c07cc0abfa8fabc3ea543c921a3e8c7d9",
+  "repo_version_context": "0.177.120",
+  "platform_version_context": "0.130.77",
+  "integrated_repo_version": "0.177.121",
+  "integrated_platform_version": "0.130.77",
+  "workflow_id": "adr-0303-pgaudit-mainline-live-apply",
+  "adr": "0303",
+  "summary": "Integrated ADR 0303 onto latest `origin/main` baseline `2589093d44df851883360a9de929f2a610b4d4cb` as repository version `0.177.121` while preserving live platform version `0.130.77`. The final exact-main closeout records the repo-managed PostgreSQL pgaudit rollout, the stabilized guest-log-shipping verification contract, the repaired monitoring-to-NATS firewall allow, the successful unknown-role alert relay POST, and the matching JetStream publication for role `adr0303_smoke_9279c7f7` on `platform.security.pgaudit_unknown_role`.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repository tests",
+      "result": "pass",
+      "observed": "The targeted ADR 0303 test bundle `tests/test_guest_log_shipping_playbook.py`, `tests/test_monitoring_vm_role.py`, and `tests/unit/test_event_taxonomy.py` passed with `25 passed in 0.72s`, preserving the stabilized guest-log-shipping metrics verification contract after the latest `origin/main` integration."
+    },
+    {
+      "check": "Exact-main live apply evidence",
+      "result": "pass",
+      "observed": "The integrated tree keeps passing branch-local evidence for `converge-postgres-vm`, `converge-guest-log-shipping`, `converge-grafana`, and `converge-nats-jetstream`, and the final smoke receipt proves the Alertmanager relay plus JetStream publication path end to end for the fresh unknown-role alert."
+    },
+    {
+      "check": "Release and canonical-truth closeout",
+      "result": "pass",
+      "observed": "The repository release cut advanced `VERSION` to `0.177.121`, refreshed the canonical truth surfaces, updated ADR/workstream metadata, and recorded ADR 0303 as implemented on `main` without changing the already-current platform version."
+    },
+    {
+      "check": "Repo automation and validation paths",
+      "result": "pass",
+      "observed": "The final exact-main closeout re-ran the governed release-status, canonical-truth, receipt, and repository-validation paths together with the guarded `live-apply-service` wrapper for `guest-log-shipping`, proving the repo automation path instead of relying only on direct playbook replays."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "changelog.md",
+    "versions/stack.yaml",
+    "docs/adr/0303-pgaudit-for-postgresql-query-and-privilege-change-audit-logging.md",
+    "docs/release-notes/0.177.121.md",
+    "docs/release-notes/README.md",
+    "docs/runbooks/postgres-audit.md",
+    "docs/workstreams/ws-0303-live-apply.md",
+    "workstreams.yaml",
+    "receipts/live-applies/2026-03-31-adr-0303-pgaudit-live-apply.json",
+    "receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-converge-postgres-vm-r4-0.177.120.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-converge-guest-log-shipping-r8-0.177.120.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-converge-grafana-r1-0.177.120.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-converge-nats-jetstream-r1-0.177.120.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-converge-guest-network-policy-docker-runtime-r1-0.177.120.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-pgaudit-unknown-role-smoke-r11-0.177.120.txt"
+  ],
+  "notes": [
+    "ADR 0303 is first implemented in repository version `0.177.121` and first verified live on platform version `0.130.77`.",
+    "The final smoke proved the alert relay and NATS publication path after repairing a missing live guest-firewall allow on `docker-runtime-lv3`.",
+    "The broad guest-network-policy replay still surfaced an unrelated `postgres-replica-lv3` SSH reachability failure; that residual issue is preserved as evidence but does not block ADR 0303 itself because the repaired runtime path now functions end to end."
+  ]
+}

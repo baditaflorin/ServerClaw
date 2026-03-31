@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-31'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 279
+  Implemented: 280
   Partial: 6
-  Not Implemented: 38
+  Not Implemented: 37
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5354,7 +5354,7 @@ adr_index:
   - adr: '0303'
     title: pgaudit For PostgreSQL Query And Privilege Change Audit Logging
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -5367,6 +5367,7 @@ adr_index:
       - logging
     summary: We will enable pgaudit on the production PostgreSQL instance and configure it
     filename: 0303-pgaudit-for-postgresql-query-and-privilege-change-audit-logging.md
+    implemented_version: 0.177.121
   - adr: '0304'
     title: Atlas For Declarative Database Schema Migration Versioning And Pre-Migration Linting
     status: Accepted

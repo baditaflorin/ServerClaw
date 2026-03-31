@@ -1,13 +1,12 @@
-# Release 0.177.120
+# Release 0.177.121
 
 - Date: 2026-03-31
 
 ## Summary
-- integrates ADR 0305 into main by replaying the repo-managed k6 smoke, load, and soak validation path on the latest realistic origin/main baseline, preserving Prometheus remote-write, Windmill scheduling, and truthful non-zero receipts when the live Keycloak and OpenFGA SLO budgets are already exhausted
-- integrates ADR 0305 into main by re-verifying the latest realistic origin/main exact-main smoke and load paths for Keycloak and OpenFGA, preserving truthful k6 receipts and bounded notification warnings while recording the remaining live Keycloak load-test failure
+- implements ADR 0303 by enabling PostgreSQL pgaudit query and privilege audit logging, shipping structured audit and connection signals into Loki and Prometheus, and routing unknown-role alerts to ntfy plus NATS with recorded exact-main live-apply evidence
 
 ## Platform Impact
-- No additional platform_version bump: this release records ADR 0305 latest-main closeout atop platform version 0.130.77, carries the exact-main k6 smoke/load replay and bounded notification handling, and preserves the remaining live Keycloak load-test failure with current Prometheus and remote-builder evidence.
+- no live platform version bump; this release integrates ADR 0303 onto main, keeps platform version 0.130.77, and records the repaired PostgreSQL unknown-role alert relay path through Alertmanager and JetStream
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -114,6 +114,12 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
    - a NATS consumer can read one `platform.security.pgaudit_unknown_role` envelope
 5. Drop the temporary login role and remove any temporary grant.
 
+If Alertmanager is already tracking another firing `PostgresUnknownRoleConnection`
+group for the same `alertname` and `service`, allow up to the configured
+`group_interval` (`5m`) for the relay webhook to publish the next NATS event.
+Prometheus can show the new role-specific alert immediately while the relay POST
+appears on the next grouped notification boundary.
+
 Suggested verification query on `monitoring-lv3`:
 
 ```bash
@@ -141,5 +147,5 @@ PY
   fresh ROLE audit line and a fresh connection-authorized line before retrying
   the scrape check.
 - If Prometheus is not scraping the target, confirm `monitoring-lv3` can reach `postgres-lv3:12345` and that the guest firewall still permits `monitoring-lv3`.
-- If alerts fire but no NATS event appears, inspect `systemctl status pgaudit-alert-relay` and `journalctl -u pgaudit-alert-relay` on `monitoring-lv3`.
+- If alerts fire but no NATS event appears, inspect `systemctl status pgaudit-alert-relay` and `journalctl -u pgaudit-alert-relay` on `monitoring-lv3`, then allow for the current Alertmanager `group_interval` before treating the missing event as a relay failure.
 - If Alloy sees connection lines but the unknown-role counter stays flat, compare the live role against [config/pgaudit/approved-roles.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/pgaudit/approved-roles.yaml) and make sure the role name matches exactly.
