@@ -198,7 +198,7 @@ ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-l
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.113` |
+| Repository version | `0.177.114` |
 | Platform version | `0.130.74` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
@@ -775,6 +775,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Runbook Automation Executor](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/runbook-automation-executor.md)
 - [Runtime Assurance Matrix](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/runtime-assurance-matrix.md)
 - [Runtime Assurance Scoreboard](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/runtime-assurance-scoreboard.md)
+- [SBOM And CVE Scanning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/sbom-cve-scanning.md)
 - [Scaffold A New Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/scaffold-new-service.md)
 - [Search Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/search-indexing-fabric.md)
 - [Secret Rotation And Lifecycle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/secret-rotation-and-lifecycle.md)
@@ -1441,6 +1442,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream WS-0296: Education Repo Refresh And Named Deploy Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-education-refresh.md)
 - [Workstream WS-0296: Dedicated Artifact Cache VM Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-live-apply.md)
 - [Workstream ws-0297-live-apply: Live Apply ADR 0297 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md)
+- [Workstream ws-0298-live-apply: Live Apply ADR 0298 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0298-live-apply.md)
+- [Workstream ws-0298-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0298-main-merge.md)
 - [Workstream ws-0301-live-apply: Live Apply ADR 0301 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0301-live-apply.md)
 <!-- END GENERATED: document-index -->
 
@@ -1459,7 +1462,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.113` |
+| Repository version | `0.177.114` |
 | Platform version | `0.130.74` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1760,7 +1763,6 @@ This repository is intentionally opinionated:
 | `0272` | Restore readiness ladders and stateful warm-up verification profiles | `live_applied` | [ws-0272-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md) |
 | `0273` | Live apply ADR 0273 public endpoint admission control | `live_applied` | [adr-0273-public-endpoint-admission-control.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md) |
 | `0274` | Live apply governed repo-deploy base image warming from latest origin/main | `live_applied` | [ws-0274-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0274-live-apply.md) |
-| `0275` | ADR 0275 live apply from latest origin/main | `merged` | [ws-0275-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0275-live-apply.md) |
 | `0276` | Live apply the NATS JetStream platform event bus from latest origin/main | `live_applied` | [ws-0276-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0276-live-apply.md) |
 | `0278` | ADR 0278 live apply from latest origin/main | `live_applied` | [ws-0278-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-live-apply.md) |
 | `0278` | Integrate ADR 0278 exact-main replay onto current origin/main | `merged` | [ws-0278-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-main-integration.md) |

@@ -630,6 +630,11 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "BASE_INTERNAL_URL" in tasks
     assert "windmill_runtime_api_base_url" in tasks
     assert "Build the local staging archive for the Windmill worker checkout" in tasks
+    assert compose_template.count("/var/run/docker.sock:/var/run/docker.sock") == 2
+    native_worker_compose = compose_template.split("  windmill_worker_native:", 1)[1].split(
+        "  windmill_extra:", 1
+    )[0]
+    assert "- /var/run/docker.sock:/var/run/docker.sock" in native_worker_compose
     assert "python3 - <<'PY'" in tasks
     assert "gzip.GzipFile" in tasks
     assert "mtime=0" in tasks

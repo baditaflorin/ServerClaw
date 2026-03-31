@@ -17,7 +17,7 @@ workstreams:
   - id: ws-0275-live-apply
     adr: "0275"
     title: ADR 0275 live apply from latest origin/main
-    status: merged
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0275-live-apply-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0275-live-apply-r2
@@ -17480,7 +17480,7 @@ workstreams:
   - id: ws-0298-live-apply
     adr: "0298"
     title: Live apply Syft and Grype for platform-wide SBOM generation and continuous CVE scanning from latest origin/main
-    status: in_progress
+    status: implemented
     owner: codex
     branch: codex/ws-0298-live-apply-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-live-apply-r2
@@ -17509,6 +17509,7 @@ workstreams:
       - Makefile
       - .gitea/workflows/validate.yml
       - .github/workflows/validate.yml
+      - callback_plugins/structured_log.py
       - .config-locations.yaml
       - config/ansible-role-idempotency.yml
       - config/event-taxonomy.yaml
@@ -17519,8 +17520,10 @@ workstreams:
       - inventory/host_vars/proxmox_florin.yml
       - receipts/ops-portal-snapshot.html
       - collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml
+      - collections/ansible_collections/lv3/platform/plugins/callback/structured_log.py
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2
       - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/ntfy_runtime/handlers/main.yml
@@ -17582,6 +17585,7 @@ workstreams:
             - Makefile
             - .gitea/workflows/validate.yml
             - .github/workflows/validate.yml
+            - callback_plugins/structured_log.py
             - .config-locations.yaml
             - config/ansible-role-idempotency.yml
             - config/event-taxonomy.yaml
@@ -17592,8 +17596,10 @@ workstreams:
             - inventory/host_vars/proxmox_florin.yml
             - receipts/ops-portal-snapshot.html
             - collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml
+            - collections/ansible_collections/lv3/platform/plugins/callback/structured_log.py
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2
             - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
             - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
             - collections/ansible_collections/lv3/platform/roles/ntfy_runtime/handlers/main.yml
@@ -17655,10 +17661,12 @@ workstreams:
       - docs/runbooks/container-image-policy.md
       - docs/runbooks/docker-runtime-disk-pressure.md
       - docs/runbooks/security-posture-reporting.md
+      - docs/diagrams/agent-coordination-map.excalidraw
       - docs/site-generated/architecture/dependency-graph.md
       - Makefile
       - .gitea/workflows/validate.yml
       - .github/workflows/validate.yml
+      - callback_plugins/structured_log.py
       - .config-locations.yaml
       - config/ansible-role-idempotency.yml
       - config/event-taxonomy.yaml
@@ -17669,8 +17677,10 @@ workstreams:
       - inventory/host_vars/proxmox_florin.yml
       - receipts/ops-portal-snapshot.html
       - collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml
+      - collections/ansible_collections/lv3/platform/plugins/callback/structured_log.py
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2
       - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/ntfy_runtime/handlers/main.yml
@@ -17738,10 +17748,12 @@ workstreams:
             - docs/runbooks/docker-runtime-disk-pressure.md
             - docs/runbooks/network-policy-reference.md
             - docs/runbooks/security-posture-reporting.md
+            - docs/diagrams/agent-coordination-map.excalidraw
             - docs/site-generated/architecture/dependency-graph.md
             - Makefile
             - .gitea/workflows/validate.yml
             - .github/workflows/validate.yml
+            - callback_plugins/structured_log.py
             - .config-locations.yaml
             - config/ansible-role-idempotency.yml
             - config/event-taxonomy.yaml
@@ -17752,8 +17764,10 @@ workstreams:
             - inventory/host_vars/proxmox_florin.yml
             - receipts/ops-portal-snapshot.html
             - collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml
+            - collections/ansible_collections/lv3/platform/plugins/callback/structured_log.py
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2
             - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
             - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
             - collections/ansible_collections/lv3/platform/roles/ntfy_runtime/handlers/main.yml
@@ -17815,8 +17829,15 @@ workstreams:
           paths:
             - docs/workstreams/ws-0298-main-merge.md
           mode: exclusive
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
+    canonical_truth:
+      changelog_entry: integrates ADR 0298 into main by carrying the Syft and Grype SBOM/CVE scanning surfaces, the native Windmill worker Docker socket contract, and the exact-main build-host refresh evidence while the platform baseline remains 0.130.74 because docker-runtime-lv3 and the cache plane were unstable during runtime revalidation
+      release_bump: patch
+      included_in_repo_version: 0.177.114
+      latest_receipts:
+        sbom_cve_scanning: 2026-03-31-ws-0298-main-merge-sbom-refresh-full-r3-build-host
+        windmill_runtime_drift: 2026-03-31-ws-0298-main-merge-runtime-compose-state-r1
   - id: ws-0288-live-apply
     adr: "0288"
     title: ADR 0288 live apply from latest origin/main

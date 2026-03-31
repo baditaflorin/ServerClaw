@@ -4,10 +4,6 @@ portal_display: full
 tags:
   - architecture
   - dependency-graph
-pagefind_section: architecture
-pagefind_audience:
-  - contributors
-  - operators
 ---
 
 !!! note "Sensitivity: INTERNAL"

@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 try:
     from datetime import UTC
 except ImportError:  # pragma: no cover - Python <3.11 compatibility
+except ImportError:  # pragma: no cover - Python < 3.11 fallback for ansible-lint/idempotency lanes
     UTC = timezone.utc
 
 from ansible.plugins.callback import CallbackBase

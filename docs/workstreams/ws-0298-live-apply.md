@@ -3,11 +3,12 @@
 - ADR: [ADR 0298](../adr/0298-syft-and-grype-for-platform-wide-sbom-generation-and-continuous-cve-scanning.md)
 - Title: Live apply platform-wide SBOM generation and continuous CVE scanning with Syft and Grype
 - Status: blocked
-- Included In Repo Version: pending main integration
-- Canonical Mainline Receipt: pending
+- Included In Repo Version: 0.177.114
+- Branch-Local Receipt: `receipts/live-applies/2026-03-30-adr-0298-sbom-cve-scanning-branch-live-apply.json`
+- Canonical Mainline Receipt: `receipts/live-applies/evidence/2026-03-31-ws-0298-main-merge-sbom-refresh-full-r3-build-host.txt`
 - Live Applied In Platform Version: not yet
-- Implemented On: 2026-03-30
-- Live Applied On: partial verification only on 2026-03-30
+- Implemented On: 2026-03-31
+- Live Applied On: branch-local partial verification on 2026-03-30; exact-main build-host verification on 2026-03-31
 - Branch: `codex/ws-0298-live-apply-r2`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-live-apply-r2`
 - Owner: codex
@@ -41,6 +42,9 @@ making host SBOM generation part of the live converge and security-scan paths.
 - `./scripts/validate_repo.sh agent-standards`
 - live replay of the affected converge paths plus targeted worker-side
   `sbom_refresh.py` runs
+- exact-main isolated refresh verification from `docker-build-lv3`, including a
+  successful `open_webui_runtime` replay and a full catalog refresh of
+  60 managed images from committed source on the synchronized mainline tree
 
 ## Live Evidence
 
@@ -57,6 +61,12 @@ making host SBOM generation part of the live converge and security-scan paths.
 - `receipts/live-applies/evidence/2026-03-30-ws-0298-sbom-refresh-full-r1.txt`
   and `receipts/live-applies/evidence/2026-03-30-ws-0298-sbom-refresh-full-r2.txt`
   show the remaining blocker during full-platform refresh attempts.
+- `receipts/live-applies/evidence/2026-03-31-ws-0298-main-merge-sbom-refresh-open-webui-r10-build-host.txt`
+  shows the exact-main isolated package refreshed `open_webui_runtime`
+  successfully from `docker-build-lv3`.
+- `receipts/live-applies/evidence/2026-03-31-ws-0298-main-merge-sbom-refresh-full-r3-build-host.txt`
+  records the full exact-main catalog refresh succeeding with
+  `Scanned 60 managed images`.
 
 ## Blocker
 
@@ -75,21 +85,34 @@ blocked by unstable runtime-to-artifact-cache connectivity:
   restored runtime mirror reachability for the relevant hosts, but the governed
   replay later failed on an unrelated `postgres-replica-lv3` SSH problem after
   the runtime/build/proxmox sections had already succeeded.
+- `receipts/live-applies/evidence/2026-03-31-ws-0298-main-merge-windmill-worker-native-docker-socket-r1.txt`
+  proves the native worker can execute with a live Docker socket when the
+  compose file reflects the current repo template.
+- `receipts/live-applies/evidence/2026-03-31-ws-0298-main-merge-runtime-compose-state-r1.txt`
+  later shows the live `/opt/windmill/docker-compose.yml` on
+  `docker-runtime-lv3` no longer included that Docker socket mount, which means
+  a concurrent replay overwrote the runtime compose file after the targeted
+  fix.
+- `receipts/live-applies/evidence/2026-03-31-ws-0298-main-merge-controller-reachability-r1.txt`
+  shows the controller could still reach `docker-runtime-lv3` while
+  `docker-build-lv3` and `artifact-cache-lv3` timed out entirely, so the
+  remaining failure mode was broader guest-network/control-plane instability
+  rather than an ADR 0298 scanner regression.
 
 Until the ADR 0295 cache plane stays stable for a full catalog refresh from
 `docker-runtime-lv3`, this workstream should not be marked live-applied.
 
 ## Validation Notes
 
-- `make validate` is still blocked by the pre-existing `retry-guard` findings in
-  `scripts/matrix_admin_register.py` and `scripts/matrix_bridge_smoke.py`; this
-  workstream did not introduce those failures.
+- The exact-main merge tree exercised `make validate` and showed that the
+  remaining repository-level follow-up was a Python 3.10 compatibility fix for
+  the structured-log callback plus regeneration of stale canonical-truth and
+  architecture surfaces, not an ADR 0298 scanner regression.
 
 ## Merge Notes
 
-- The exact-main integration still needs the protected release and canonical
-  truth surfaces updated from a synchronized `origin/main` replay.
-- The merge step must not claim ADR 0298 is live-applied until a full
-  `scripts/sbom_refresh.py --skip-db-update --print-report-json` run completes
-  from `docker-runtime-lv3` with the artifact-cache plane remaining stable for
-  the entire catalog.
+- Release `0.177.114` now carries ADR 0298 onto `main` as an implemented repo
+  surface without bumping `platform_version`.
+- The remaining live-apply step is a stable main-based replay from
+  `docker-runtime-lv3` once the shared Windmill compose/checkout drift and the
+  controller-to-build/cache guest reachability are stable again.
