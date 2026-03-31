@@ -439,21 +439,52 @@
                     }
                 )
 
-                recovery_command = ["docker", "compose"]
-                for config_file in config_file_list:
-                    recovery_command.extend(["--file", config_file])
-                recovery_command.extend(["up", "-d", "--force-recreate", *services])
-                run_with_retry(recovery_command, cwd=working_dir or None)
-                actions.append(
-                    {
-                        "type": "docker_compose_up_force_recreate",
-                        "working_dir": working_dir,
-                        "config_files": config_file_list,
-                        "services": services,
-                    }
-                )
+        recovery_command = ["docker", "compose"]
+        for config_file in config_file_list:
+            recovery_command.extend(["--file", config_file])
+        recovery_command.extend(["up", "-d", "--force-recreate", *services])
+        try:
+            run_with_retry(recovery_command, cwd=working_dir or None)
+            actions.append(
+                {
+                    "type": "docker_compose_up_force_recreate",
+                    "working_dir": working_dir,
+                    "config_files": config_file_list,
+                    "services": services,
+                }
+            )
+        except subprocess.CalledProcessError as recovery_exc:
+            recovery_stderr = recovery_exc.stderr or ""
+            if not all(marker in recovery_stderr for marker in STALE_COMPOSE_ENDPOINT_ERRORS):
+                raise
 
-        json.dump({"actions": actions}, sys.stdout)
+            down_command = ["docker", "compose"]
+            for config_file in config_file_list:
+                down_command.extend(["--file", config_file])
+            down_command.extend(["down", "--remove-orphans"])
+            run_with_retry(down_command, cwd=working_dir or None)
+            actions.append(
+                {
+                    "type": "docker_compose_down_remove_orphans",
+                    "working_dir": working_dir,
+                    "config_files": config_file_list,
+                    "services": services,
+                }
+            )
+
+            final_up_command = ["docker", "compose"]
+            for config_file in config_file_list:
+                final_up_command.extend(["--file", config_file])
+            final_up_command.extend(["up", "-d", *services])
+            run_with_retry(final_up_command, cwd=working_dir or None)
+            actions.append(
+                {
+                    "type": "docker_compose_up_after_down",
+                    "working_dir": working_dir,
+                    "config_files": config_file_list,
+                    "services": services,
+                }
+            )
     stdin: >-
       {{
         (
