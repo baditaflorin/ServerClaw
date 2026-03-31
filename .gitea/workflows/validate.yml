@@ -76,6 +76,7 @@ jobs:
             exit 1
           fi
           printf '%s\n' "${workspace_host_path}" > .local/validation-gate/workspace-host.path
+          printf 'LV3_DOCKER_WORKSPACE_PATH=%s\n' "${workspace_host_path}" >> "${GITHUB_ENV}"
           "${docker_bin}" --version
 
       - name: Run managed image gate
