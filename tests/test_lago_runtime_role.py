@@ -101,7 +101,7 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
     recovery_fact_task = next(
         task
         for task in startup_task["rescue"]
-        if task["name"] == "Flag Docker bridge-chain, Lago compose dependency-race, and migrate failures during startup"
+        if task["name"] == "Flag Docker bridge-chain, Lago compose dependency, and migrate failures during startup"
     )
     migrate_logs_task = next(
         task for task in startup_task["rescue"] if task["name"] == "Capture Lago migrate logs after startup failure"
@@ -116,7 +116,7 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
         task for task in startup_task["rescue"] if task["name"] == "Retry Lago startup after Docker bridge-chain recovery"
     )
     dependency_retry_task = next(
-        task for task in startup_task["rescue"] if task["name"] == "Retry Lago startup after compose dependency race"
+        task for task in startup_task["rescue"] if task["name"] == "Retry Lago startup after compose dependency failure"
     )
     migrate_wait_retry_task = next(
         task
@@ -134,6 +134,12 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
     ]
     assert "dependency failed to start" in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_dependency_race"]
     assert "No such container:" in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_dependency_race"]
+    assert "dependency failed to start" in recovery_fact_task["ansible.builtin.set_fact"][
+        "lago_compose_dependency_api_restart"
+    ]
+    assert "'container ' ~ lago_api_container_name ~ ' exited (1)'" in recovery_fact_task["ansible.builtin.set_fact"][
+        "lago_compose_dependency_api_restart"
+    ]
     assert 'service "migrate"' in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_migrate_failed"]
     assert "complete successfully" in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_migrate_failed"]
     assert migrate_logs_task["when"] == "lago_compose_migrate_failed"
@@ -143,13 +149,14 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
     assert "failed: Connection refused" in migrate_race_fact_task["ansible.builtin.set_fact"]["lago_migrate_database_race"]
     assert "not lago_docker_bridge_chain_missing" in unexpected_failure_task["when"]
     assert "not lago_compose_dependency_race" in unexpected_failure_task["when"]
+    assert "not lago_compose_dependency_api_restart" in unexpected_failure_task["when"]
     assert "not (lago_migrate_database_race | default(false))" in unexpected_failure_task["when"]
     assert bridge_retry_task["when"] == "lago_docker_bridge_chain_missing"
     assert dependency_retry_task["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "--remove-orphans"]
-    assert dependency_retry_task["retries"] == 3
+    assert dependency_retry_task["retries"] == 12
     assert dependency_retry_task["delay"] == 5
     assert dependency_retry_task["until"] == "lago_up_dependency_retry.rc == 0"
-    assert dependency_retry_task["when"] == "lago_compose_dependency_race"
+    assert dependency_retry_task["when"] == "lago_compose_dependency_race or lago_compose_dependency_api_restart"
     assert migrate_wait_retry_task["ansible.builtin.wait_for"]["host"] == "{{ lago_database_host }}"
     assert migrate_wait_retry_task["ansible.builtin.wait_for"]["port"] == "{{ lago_database_port }}"
     assert migrate_wait_retry_task["when"] == "lago_migrate_database_race | default(false)"

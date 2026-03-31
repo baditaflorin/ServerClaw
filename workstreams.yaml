@@ -2616,7 +2616,7 @@ workstreams:
   - id: ws-0292-live-apply
     adr: "0292"
     title: Live apply Lago as the usage metering and billing API layer from latest origin/main
-    status: live_applied
+    status: in_progress
     owner: codex
     branch: codex/ws-0292-main-integration-r1
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2
@@ -2802,8 +2802,8 @@ workstreams:
             - receipts/ops-portal-snapshot.html
           mode: shared_contract
           contract: generated-views-v1
-    ready_to_merge: true
-    live_applied: true
+    ready_to_merge: false
+    live_applied: false
     canonical_truth:
       changelog_entry: implements ADR 0292 by hardening exact-main Lago replay
         recovery, verifying the protected billing.lv3.org surface plus public
@@ -2811,9 +2811,12 @@ workstreams:
         restoring the governed Restic live-apply backup trigger for the service
         wrapper
       release_bump: patch
-      included_in_repo_version: 0.177.119
       latest_receipts:
         lago: 2026-03-31-adr-0292-lago-mainline-live-apply
+    blockers:
+      - "Latest `origin/main` is `14b18869a2ff421ec12596bd199af0adb09a95b8` (repo version still `0.177.123` on that baseline), so ADR 0292 must be refreshed onto that newer mainline before final merge."
+      - "Final ADR 0292 verification is still blocked by concurrent shared applies on `docker-runtime-lv3` and `nginx-lv3`: `r24` lost `billing.lv3.org` to a shared edge overwrite, and `r26` lost the Lago containers after a Docker daemon restart logged at `2026-03-31T22:13:47Z`; see `docs/workstreams/ws-0292-live-apply.md` and the `r24`/`r26` evidence bundles before merging."
+      - "Rewrite `receipts/live-applies/2026-03-31-adr-0292-lago-mainline-live-apply.json` only after a clean or targeted latest-main replay re-verifies public ingest and current usage on `billing.lv3.org`."
   - id: ws-0295-live-apply
     adr: "0295"
     title: Live apply the shared artifact cache plane from latest origin/main

@@ -298,16 +298,21 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Mark the Keycloak verification token request as unavailable" in verify_tasks
     assert "Record the API gateway verification bearer token from the legacy platform context" in verify_tasks
     assert "API gateway verification requires either the Keycloak client secret or the" in verify_tasks
+    assert "Default the local Keycloak discovery endpoint as unavailable for API gateway verification" in verify_tasks
     assert "tar --no-same-owner --no-same-permissions" in sync_tree_tasks
     assert "api_gateway_keycloak_retry_after_seconds: 30" in defaults
     assert "Request a Keycloak bearer token for API gateway verification" in verify_tasks
     assert "Wait for the local Keycloak realm discovery endpoint used by API gateway verification" in verify_tasks
+    assert "Record the local Keycloak discovery endpoint as available for API gateway verification" in verify_tasks
+    assert "Mark the local Keycloak discovery endpoint as unavailable for API gateway verification" in verify_tasks
+    assert "API gateway verification could not reach the local Keycloak discovery endpoint" in verify_tasks
     assert "/realms/lv3/.well-known/openid-configuration" in verify_tasks
     assert "api_gateway_keycloak_verify_discovery.json.issuer == api_gateway_keycloak_issuer_url" in verify_tasks
+    assert "api_gateway_keycloak_verify_discovery_available" in verify_tasks
+    assert "if api_gateway_platform_context_token_stat.stat.exists" in verify_tasks
     assert 'retries: "{{ api_gateway_runtime_recovery_probe_retries }}"' in verify_tasks
     assert 'delay: "{{ api_gateway_runtime_recovery_probe_delay }}"' in verify_tasks
     assert "until: api_gateway_auth_check.status == 401" in verify_tasks
-    assert 'retries: "{{ api_gateway_keycloak_verify_ready_retries }}"' in verify_tasks
     assert 'delay: "{{ api_gateway_keycloak_verify_ready_delay }}"' in verify_tasks
     assert 'retries: "{{ api_gateway_keycloak_verify_token_retries }}"' in verify_tasks
     assert 'delay: "{{ api_gateway_keycloak_verify_token_delay }}"' in verify_tasks

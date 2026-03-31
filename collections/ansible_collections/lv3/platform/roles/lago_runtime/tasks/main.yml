@@ -245,7 +245,7 @@
         or 'Recreating' in lago_up.stdout
         or 'Starting' in lago_up.stdout
   rescue:
-    - name: Flag Docker bridge-chain, Lago compose dependency-race, and migrate failures during startup
+    - name: Flag Docker bridge-chain, Lago compose dependency, and migrate failures during startup
       ansible.builtin.set_fact:
         lago_docker_bridge_chain_missing: >-
           {{
@@ -257,6 +257,11 @@
           {{
             'dependency failed to start' in (ansible_failed_result.stderr | default(''))
             and 'No such container:' in (ansible_failed_result.stderr | default(''))
+          }}
+        lago_compose_dependency_api_restart: >-
+          {{
+            'dependency failed to start' in (ansible_failed_result.stderr | default(''))
+            and ('container ' ~ lago_api_container_name ~ ' exited (1)' in (ansible_failed_result.stderr | default('')))
           }}
         lago_compose_migrate_failed: >-
           {{
@@ -311,6 +316,7 @@
       when: >-
         not lago_docker_bridge_chain_missing
         and not lago_compose_dependency_race
+        and not lago_compose_dependency_api_restart
         and not (lago_migrate_database_race | default(false))
 
     - name: Restart Docker to restore bridge chains before retrying Lago startup
@@ -347,7 +353,7 @@
         or 'Starting' in lago_up_retry.stdout
       when: lago_docker_bridge_chain_missing
 
-    - name: Retry Lago startup after compose dependency race
+    - name: Retry Lago startup after compose dependency failure
       ansible.builtin.command:
         argv:
           - docker
@@ -364,10 +370,10 @@
         'Creating' in lago_up_dependency_retry.stdout
         or 'Recreating' in lago_up_dependency_retry.stdout
         or 'Starting' in lago_up_dependency_retry.stdout
-      retries: 3
+      retries: 12
       delay: 5
       until: lago_up_dependency_retry.rc == 0
-      when: lago_compose_dependency_race
+      when: lago_compose_dependency_race or lago_compose_dependency_api_restart
 
     - name: Wait for the Lago PostgreSQL endpoint before retrying startup after migrate failure
       ansible.builtin.wait_for:

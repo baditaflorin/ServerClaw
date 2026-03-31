@@ -3272,12 +3272,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 44,
-    "active_total": 40,
-    "active_public_total": 36,
+    "catalog_total": 45,
+    "active_total": 41,
+    "active_public_total": 37,
     "active_private_total": 4,
     "planned_total": 4,
-    "shared_edge_total": 35,
+    "shared_edge_total": 36,
     "platform_sso_total": 16
   }
 }

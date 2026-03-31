@@ -491,7 +491,7 @@
                 time.sleep(delay_seconds)
 
 
-        def wait_for_local_openbao(*, timeout_seconds=60, delay_seconds=2):
+        def wait_for_local_openbao(*, timeout_seconds=120, delay_seconds=2):
             deadline = time.monotonic() + timeout_seconds
             last_error = ""
             while time.monotonic() < deadline:
@@ -511,6 +511,17 @@
             raise RuntimeError(
                 f"local OpenBao did not become ready at {OPENBAO_HEALTH_URL}: {last_error or 'timed out'}"
             )
+
+
+        def services_need_local_openbao(services):
+            return any(
+                service == "openbao-agent" or service.endswith("-openbao-agent")
+                for service in services
+            )
+
+
+        def services_provide_local_openbao(services):
+            return any(service == "openbao" for service in services)
 
         containers = json.load(sys.stdin)
 
@@ -543,14 +554,22 @@
             run_with_retry(["docker", "start", *direct_start])
             actions.append({"type": "docker_start", "containers": direct_start})
 
-        for (working_dir, config_files), compose_group in sorted(compose_groups.items()):
+        for (working_dir, config_files), compose_group in sorted(
+            compose_groups.items(),
+            key=lambda compose_item: (
+                0 if services_provide_local_openbao(compose_item[1]["services"]) else 1,
+                1 if services_need_local_openbao(compose_item[1]["services"]) else 0,
+                compose_item[0][0],
+                compose_item[0][1],
+            ),
+        ):
             command = ["docker", "compose"]
             config_file_list = [value for value in config_files.split(",") if value]
             for config_file in config_file_list:
                 command.extend(["--file", config_file])
             services = sorted(compose_group["services"])
             container_names = sorted(compose_group["container_names"])
-            if "openbao-agent" in services:
+            if services_need_local_openbao(services):
                 wait_for_local_openbao()
             command.extend(["up", "-d", "--force-recreate", *services])
 
@@ -593,7 +612,7 @@
                 recovery_command = ["docker", "compose"]
                 for config_file in config_file_list:
                     recovery_command.extend(["--file", config_file])
-                if "openbao-agent" in services:
+                if services_need_local_openbao(services):
                     wait_for_local_openbao()
                 recovery_command.extend(["up", "-d", "--force-recreate", *services])
                 try:
@@ -629,7 +648,7 @@
                 final_up_command = ["docker", "compose"]
                 for config_file in config_file_list:
                     final_up_command.extend(["--file", config_file])
-                if "openbao-agent" in services:
+                if services_need_local_openbao(services):
                     wait_for_local_openbao()
                 final_up_command.extend(["up", "-d", *services])
                 run_with_retry(final_up_command, cwd=working_dir or None)
