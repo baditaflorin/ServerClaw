@@ -115,6 +115,7 @@ jobs:
         run: |
           set -euo pipefail
           export LV3_DOCKER_WORKSPACE_PATH="$(cat .local/validation-gate/workspace-host.path)"
+          export LV3_K6_TARGET_URL_OVERRIDES='{"openfga":"http://100.64.0.1:8014/healthz"}'
           make k6-smoke K6_ARGS="--runner-context gitea-actions --environment production --service keycloak --service openfga"
 
       - name: Bundle validation artifacts

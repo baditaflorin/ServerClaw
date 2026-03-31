@@ -195,6 +195,25 @@ def relative_repo_path(path: Path, repo_root: Path) -> str:
         return str(path)
 
 
+def load_target_url_overrides() -> dict[str, str]:
+    raw = os.environ.get("LV3_K6_TARGET_URL_OVERRIDES", "").strip()
+    if not raw:
+        return {}
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError as exc:  # noqa: PERF203
+        raise ValueError("LV3_K6_TARGET_URL_OVERRIDES must be valid JSON") from exc
+    if not isinstance(parsed, dict):
+        raise ValueError("LV3_K6_TARGET_URL_OVERRIDES must be a JSON object")
+    overrides: dict[str, str] = {}
+    for key, value in parsed.items():
+        if not isinstance(key, str) or not isinstance(value, str):
+            raise ValueError("LV3_K6_TARGET_URL_OVERRIDES keys and values must be strings")
+        if value.strip():
+            overrides[key] = value.strip()
+    return overrides
+
+
 def build_targets(
     *,
     repo_root: Path,
@@ -204,6 +223,7 @@ def build_targets(
     load_ramp_up_duration: str,
     load_hold_duration: str,
     soak_duration: str,
+    target_url_overrides: dict[str, str] | None = None,
 ) -> list[dict[str, Any]]:
     slo_catalog = load_slo_catalog(repo_root=repo_root)
     service_index = load_service_index(repo_root)
@@ -246,6 +266,9 @@ def build_targets(
                 "scenario_type": "smoke",
             },
         )
+        override = (target_url_overrides or {}).get(service_id)
+        if override:
+            target["target_url"] = override
         if entry["indicator"] == "latency":
             target["latency_threshold_ms"] = float(entry["latency_threshold_ms"])
 
@@ -268,30 +291,32 @@ def build_targets(
         if service_id not in load_profiles:
             continue
         profile = load_profiles[service_id]
-        targets.append(
-            {
-                "service_id": service_id,
-                "service_name": require_str(service_index[service_id].get("name"), f"service '{service_id}'.name"),
-                "target_url": latency_slo["target_url"],
-                "expected_status": [200],
-                "method": "GET",
-                "headers": {},
-                "body": None,
-                "follow_redirects": True,
-                "max_error_rate": DEFAULT_MAX_ERROR_RATE,
-                "latency_threshold_ms": float(latency_slo["latency_threshold_ms"]),
-                "availability_slo_id": availability_slos.get(service_id, {}).get("id"),
-                "availability_objective_percent": availability_slos.get(service_id, {}).get("objective_percent"),
-                "latency_slo_id": latency_slo["id"],
-                "scenario_type": scenario,
-                "vus": int(profile["typical_concurrency"]),
-                "request_timeout_seconds": float(profile.get("request_timeout_seconds", DEFAULT_REQUEST_TIMEOUT_SECONDS)),
-                "think_time_seconds": float(profile.get("think_time_seconds", DEFAULT_THINK_TIME_SECONDS)),
-                "ramp_up_duration": load_ramp_up_duration,
-                "hold_duration": load_hold_duration,
-                "duration": load_hold_duration,
-            }
-        )
+        target = {
+            "service_id": service_id,
+            "service_name": require_str(service_index[service_id].get("name"), f"service '{service_id}'.name"),
+            "target_url": latency_slo["target_url"],
+            "expected_status": [200],
+            "method": "GET",
+            "headers": {},
+            "body": None,
+            "follow_redirects": True,
+            "max_error_rate": DEFAULT_MAX_ERROR_RATE,
+            "latency_threshold_ms": float(latency_slo["latency_threshold_ms"]),
+            "availability_slo_id": availability_slos.get(service_id, {}).get("id"),
+            "availability_objective_percent": availability_slos.get(service_id, {}).get("objective_percent"),
+            "latency_slo_id": latency_slo["id"],
+            "scenario_type": scenario,
+            "vus": int(profile["typical_concurrency"]),
+            "request_timeout_seconds": float(profile.get("request_timeout_seconds", DEFAULT_REQUEST_TIMEOUT_SECONDS)),
+            "think_time_seconds": float(profile.get("think_time_seconds", DEFAULT_THINK_TIME_SECONDS)),
+            "ramp_up_duration": load_ramp_up_duration,
+            "hold_duration": load_hold_duration,
+            "duration": load_hold_duration,
+        }
+        override = (target_url_overrides or {}).get(service_id)
+        if override:
+            target["target_url"] = override
+        targets.append(target)
     if not targets:
         raise ValueError(f"no k6 targets are configured for scenario '{scenario}'")
     return sorted(targets, key=lambda item: item["service_id"])
@@ -778,6 +803,7 @@ def main(argv: list[str] | None = None) -> int:
 
     recorded_at = utc_now()
     run_id = recorded_at.strftime("%Y%m%dT%H%M%SZ")
+    target_url_overrides = load_target_url_overrides()
     targets = build_targets(
         repo_root=repo_root,
         scenario=args.scenario,
@@ -786,6 +812,7 @@ def main(argv: list[str] | None = None) -> int:
         load_ramp_up_duration=args.load_ramp_up_duration,
         load_hold_duration=args.load_hold_duration,
         soak_duration=args.soak_duration,
+        target_url_overrides=target_url_overrides,
     )
     config_path = write_run_config(repo_root=repo_root, run_id=run_id, scenario=args.scenario, targets=targets)
     summary_path = output_dir / "raw" / f"{run_id}-{args.scenario}-summary.json"
