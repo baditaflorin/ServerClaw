@@ -1419,10 +1419,10 @@ workstreams:
   - id: ws-0290-live-apply
     adr: "0290"
     title: Live apply Redpanda as the Kafka-compatible streaming platform from latest origin/main
-    status: in_progress
+    status: ready_for_merge
     owner: codex
-    branch: codex/ws-0290-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0290-live-apply
+    branch: codex/ws-0290-mainline
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0290-mainline
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0290-live-apply.md
     depends_on:
       - adr-0153-distributed-resource-lock-registry
@@ -1501,8 +1501,8 @@ workstreams:
             - tests/test_redpanda_runtime_role.py
             - receipts/image-scans/2026-03-30-redpanda-runtime.json
             - receipts/image-scans/2026-03-30-redpanda-runtime.trivy.json
-            - receipts/live-applies/2026-03-30-adr-0290-redpanda-live-apply.json
-            - receipts/live-applies/evidence/2026-03-30-adr-0290-redpanda-live-apply.txt
+            - receipts/live-applies/2026-03-31-adr-0290-redpanda-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-31-ws-0290-mainline-*
           mode: exclusive
         - id: topology_contract
           paths:
@@ -1536,8 +1536,14 @@ workstreams:
             - Makefile
           mode: shared_contract
           contract: repository-automation-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0290 by bringing the private Redpanda Kafka-compatible streaming platform, topic reconciliation, and authenticated Admin API, HTTP Proxy, and Schema Registry runtime onto main after the exact-main governed replay on docker-runtime-lv3
+      release_bump: patch
+      included_in_repo_version: 0.177.114
+      latest_receipts:
+        redpanda: 2026-03-31-adr-0290-redpanda-mainline-live-apply
   - id: ws-0266-validation-runner-capability-contracts
     adr: "0266"
     title: Validation runner capability contracts and environment attestation
