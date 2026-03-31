@@ -830,7 +830,12 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert 'WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"' in verify_tasks
     assert "Ensure Windmill validation gate integrity file parent directories exist on the guest" in verify_tasks
     assert "Mirror Windmill validation gate integrity files to the guest before verification" in verify_tasks
-    assert "Mirror Windmill Atlas schema snapshots to the guest before verification" in verify_tasks
+    assert "Collect controller-side checksums for Windmill Atlas verification helper files" in verify_tasks
+    assert "Ensure Windmill Atlas verification helper parent directories exist on the guest" in verify_tasks
+    assert "Mirror Windmill Atlas verification helper files to the guest immediately before Atlas verification" in verify_tasks
+    assert "Mirror Windmill Atlas schema snapshots to the guest immediately before Atlas verification" in verify_tasks
+    assert "Collect guest-side checksums for Windmill Atlas verification helper files" in verify_tasks
+    assert "Assert the Windmill Atlas verification helper files match controller state immediately before Atlas verification" in verify_tasks
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks
     assert "Assert the Windmill validation gate status result" in verify_tasks
@@ -862,6 +867,14 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert 'Authorization: "Bearer {{ windmill_runtime_api_token }}"' in verify_tasks
     assert "windmill_verify_healthcheck.rc == 0" in verify_tasks
     assert "windmill_verify_validation_gate_status.rc == 0" in verify_tasks
+    assert "until:\n    - windmill_verify_healthcheck.rc == 0" in verify_tasks
+    assert "(windmill_verify_healthcheck.stdout | default('') | trim | length) > 0" in verify_tasks
+    assert "until:\n    - windmill_verify_validation_gate_status.rc == 0" in verify_tasks
+    assert "(windmill_verify_validation_gate_status.stdout | default('') | trim | length) > 0" in verify_tasks
+    assert '(windmill_verify_stage_smoke_suites.stdout | from_json).status == "ok"' in verify_tasks
+    assert '(windmill_verify_stage_smoke_suites.stdout | from_json).result.status == "passed"' in verify_tasks
+    assert "scripts/atlas_schema.py" in verify_tasks
+    assert "scripts/run_python_with_packages.sh" in verify_tasks
     assert "failed_when: false" in verify_tasks
     assert "retries: 6" in verify_tasks
     assert "windmill_verify_default_operations_scripts.status == 200" in verify_tasks
@@ -897,3 +910,38 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "TF_VAR_proxmox_api_token" in runtime_ctmpl_template
     assert 'LV3_WINDMILL_TOKEN=[[ with secret "kv/data/{{ windmill_openbao_secret_path }}" ]][[ .Data.data.LV3_WINDMILL_TOKEN ]][[ end ]]' in runtime_ctmpl_template
     assert "{% for item in windmill_operator_manager_env" in runtime_ctmpl_template
+
+
+def test_windmill_verify_remirrors_atlas_surfaces_immediately_before_atlas_drift_check() -> None:
+    verify_tasks = yaml.safe_load(
+        (
+            REPO_ROOT
+            / "collections"
+            / "ansible_collections"
+            / "lv3"
+            / "platform"
+            / "roles"
+            / "windmill_runtime"
+            / "tasks"
+            / "verify.yml"
+        ).read_text()
+    )
+    task_names = [task["name"] for task in verify_tasks]
+
+    stage_smoke_assert_index = task_names.index("Assert the Windmill stage smoke suites result")
+    atlas_helper_collect_index = task_names.index(
+        "Collect controller-side checksums for Windmill Atlas verification helper files"
+    )
+    atlas_helper_mirror_index = task_names.index(
+        "Mirror Windmill Atlas verification helper files to the guest immediately before Atlas verification"
+    )
+    atlas_snapshot_mirror_index = task_names.index(
+        "Mirror Windmill Atlas schema snapshots to the guest immediately before Atlas verification"
+    )
+    atlas_helper_assert_index = task_names.index(
+        "Assert the Windmill Atlas verification helper files match controller state immediately before Atlas verification"
+    )
+    atlas_drift_check_index = task_names.index("Run the Windmill Atlas drift check script")
+
+    assert stage_smoke_assert_index < atlas_helper_collect_index < atlas_helper_mirror_index < atlas_snapshot_mirror_index
+    assert atlas_snapshot_mirror_index < atlas_helper_assert_index < atlas_drift_check_index

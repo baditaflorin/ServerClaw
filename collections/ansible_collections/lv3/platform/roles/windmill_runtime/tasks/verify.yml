@@ -71,18 +71,6 @@
   loop_control:
     label: "{{ item }}"
 
-- name: Ensure the Windmill Atlas snapshot directory exists on the guest
-  ansible.builtin.file:
-    path: "{{ windmill_worker_repo_checkout_host_path }}/config/atlas"
-    state: directory
-    mode: "0755"
-
-- name: Mirror Windmill Atlas schema snapshots to the guest before verification
-  ansible.builtin.copy:
-    src: "{{ windmill_worker_checkout_repo_root_local_dir }}/config/atlas/"
-    dest: "{{ windmill_worker_repo_checkout_host_path }}/config/atlas/"
-    mode: preserve
-
 - name: Run the Windmill validation gate status script
   ansible.builtin.shell: >
     python3 {{ (playbook_dir | dirname ~ '/scripts/windmill_run_wait_result.py') | quote }}
@@ -146,6 +134,86 @@
       - ((windmill_verify_stage_smoke_suites.stdout | from_json).result.receipt_smoke_suites | length) >= 1
     fail_msg: >-
       Windmill API responded, but the seeded stage smoke suites script did not return a passing structured result.
+
+- name: Collect controller-side checksums for Windmill Atlas verification helper files
+  ansible.builtin.stat:
+    path: "{{ windmill_worker_checkout_repo_root_local_dir }}/{{ item }}"
+    checksum_algorithm: sha256
+  delegate_to: localhost
+  become: false
+  loop:
+    - scripts/atlas_schema.py
+    - scripts/run_python_with_packages.sh
+  register: windmill_verify_atlas_helper_files_local
+  changed_when: false
+
+- name: Assert controller-side Windmill Atlas verification helper files exist
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists | bool
+    fail_msg: >-
+      Windmill Atlas verification helper {{ item.item }} is missing from the controller workspace.
+  loop: "{{ windmill_verify_atlas_helper_files_local.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Ensure Windmill Atlas verification helper parent directories exist on the guest
+  ansible.builtin.file:
+    path: "{{ (windmill_worker_repo_checkout_host_path ~ '/' ~ item) | dirname }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - scripts/atlas_schema.py
+    - scripts/run_python_with_packages.sh
+  loop_control:
+    label: "{{ item }}"
+
+- name: Mirror Windmill Atlas verification helper files to the guest immediately before Atlas verification
+  ansible.builtin.copy:
+    src: "{{ windmill_worker_checkout_repo_root_local_dir }}/{{ item.item }}"
+    dest: "{{ windmill_worker_repo_checkout_host_path }}/{{ item.item }}"
+    mode: preserve
+  loop: "{{ windmill_verify_atlas_helper_files_local.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Ensure the Windmill Atlas snapshot directory exists on the guest immediately before Atlas verification
+  ansible.builtin.file:
+    path: "{{ windmill_worker_repo_checkout_host_path }}/config/atlas"
+    state: directory
+    mode: "0755"
+
+- name: Mirror Windmill Atlas schema snapshots to the guest immediately before Atlas verification
+  ansible.builtin.copy:
+    src: "{{ windmill_worker_checkout_repo_root_local_dir }}/config/atlas/"
+    dest: "{{ windmill_worker_repo_checkout_host_path }}/config/atlas/"
+    mode: preserve
+
+- name: Collect guest-side checksums for Windmill Atlas verification helper files
+  ansible.builtin.stat:
+    path: "{{ windmill_worker_repo_checkout_host_path }}/{{ item.item }}"
+    checksum_algorithm: sha256
+  loop: "{{ windmill_verify_atlas_helper_files_local.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  register: windmill_verify_atlas_helper_files_remote
+  changed_when: false
+
+- name: Assert the Windmill Atlas verification helper files match controller state immediately before Atlas verification
+  ansible.builtin.assert:
+    that:
+      - windmill_verify_atlas_helper_files_remote.results[item].stat.exists | default(false)
+      - >-
+        (windmill_verify_atlas_helper_files_remote.results[item].stat.checksum | default(''))
+        ==
+        (windmill_verify_atlas_helper_files_local.results[item].stat.checksum | default(''))
+    fail_msg: >-
+      Windmill Atlas verification helper
+      {{ windmill_verify_atlas_helper_files_local.results[item].item }}
+      does not match the controller workspace immediately before Atlas verification.
+  loop: "{{ range(0, windmill_verify_atlas_helper_files_local.results | length) | list }}"
+  loop_control:
+    label: "{{ windmill_verify_atlas_helper_files_local.results[item].item }}"
 
 - name: Run the Windmill Atlas drift check script
   ansible.builtin.shell: >

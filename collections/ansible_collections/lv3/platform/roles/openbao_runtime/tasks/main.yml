@@ -1020,6 +1020,33 @@
   tags:
     - mutation
 
+- name: Reconcile PostgreSQL dynamic credential backend allowed roles after role upserts
+  vars:
+    mutation_audit_action: configure.openbao_database_backend_allowed_roles
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/{{ openbao_database_mount_path }}/config/{{ openbao_database_name }}"
+    method: POST
+    headers:
+      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
+    body_format: json
+    body:
+      plugin_name: "{{ openbao_database_plugin_name }}"
+      allowed_roles: "{{ openbao_database_allowed_roles | join(',') }}"
+      connection_url: "{{ openbao_database_connection_url }}"
+      username: "{{ openbao_postgres_admin_role }}"
+      password: "{{ openbao_postgres_rotator_password }}"
+      password_authentication: "{{ openbao_database_password_authentication }}"
+    status_code: 204
+  register: openbao_database_backend_allowed_roles_result
+  retries: 6
+  delay: 2
+  until: openbao_database_backend_allowed_roles_result.status == 204
+  no_log: true
+  tags:
+    - mutation
+
 - name: Seed controller secrets and verify OpenBao auth flows
   ansible.builtin.import_tasks: seeded_secrets_and_verification.yml
 

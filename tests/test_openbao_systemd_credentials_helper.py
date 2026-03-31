@@ -64,6 +64,9 @@ def test_openbao_systemd_credentials_helper_supports_remote_api_targets() -> Non
     assert "common_openbao_systemd_credentials_manage_local_openbao_runtime | bool" in tasks
     assert "include_tasks: unseal_openbao_api.yml" in tasks
     assert "common_openbao_unseal_api_url: \"{{ common_openbao_systemd_credentials_api_url }}\"" in tasks
+    assert "register: common_openbao_systemd_credentials_unsealed_status" in tasks
+    assert "common_openbao_systemd_credentials_unsealed_status.status == 200" in tasks
+    assert "not (common_openbao_systemd_credentials_unsealed_status.json.sealed | bool)" in tasks
     assert "{{ common_openbao_systemd_credentials_api_url }}/v1/auth/approle/role/{{ common_openbao_systemd_credentials_approle_name }}/secret-id" in tasks
     assert 'retries: "{{ common_openbao_api_operation_retries }}"' in tasks
     assert 'delay: "{{ common_openbao_api_operation_delay }}"' in tasks

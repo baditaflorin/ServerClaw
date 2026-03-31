@@ -21,6 +21,10 @@ def test_common_openbao_agent_helper_exists() -> None:
     assert "kv/data/" in helper
     assert 'static_secret_render_interval = "5m"' in template
     assert 'destination          = "{{ common_openbao_compose_env_env_file }}"' in template
+    assert "register: common_openbao_compose_env_approle_upsert" in helper
+    assert "until: common_openbao_compose_env_approle_upsert.status == 204" in helper
+    assert "register: common_openbao_compose_env_unsealed_status" in helper
+    assert "not (common_openbao_compose_env_unsealed_status.json.sealed | bool)" in helper
 
 
 def test_validate_repo_checks_for_unexpected_env_files() -> None:
@@ -134,6 +138,8 @@ def test_control_plane_recovery_uses_dedicated_windmill_backup_dsn() -> None:
     assert 'retries: "{{ common_openbao_api_operation_retries }}"' in helper_text
     assert 'delay: "{{ common_openbao_api_operation_delay }}"' in helper_text
     assert "until: common_openbao_systemd_credentials_approle_upsert.status == 204" in helper_text
+    assert "register: common_openbao_systemd_credentials_unsealed_status" in helper_text
+    assert "not (common_openbao_systemd_credentials_unsealed_status.json.sealed | bool)" in helper_text
 
 
 def test_mail_gateway_image_includes_telemetry_module() -> None:

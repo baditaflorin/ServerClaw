@@ -73,6 +73,7 @@ OPENBAO_POSTGRES_BACKEND_TASKS_PATH = (
     / "main.yml"
 )
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "openbao.yml"
+PLAYBOOK_REFRESH_APPROLE_TASKS_PATH = REPO_ROOT / "playbooks" / "tasks" / "openbao-refresh-approle-artifact.yml"
 GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "all.yml"
 
 
@@ -262,6 +263,29 @@ def test_openbao_runtime_verifies_the_atlas_approle_path() -> None:
     assert "postgres-atlas-readonly" in tasks
 
 
+def test_openbao_runtime_reconciles_allowed_roles_after_database_role_upserts() -> None:
+    tasks = yaml.safe_load(TASKS_PATH.read_text(encoding="utf-8"))
+    task_names = [task["name"] for task in tasks]
+
+    backend_index = task_names.index("Configure the PostgreSQL dynamic credential backend")
+    roles_index = task_names.index("Configure OpenBao database roles")
+    reconcile_index = task_names.index(
+        "Reconcile PostgreSQL dynamic credential backend allowed roles after role upserts"
+    )
+
+    assert backend_index < roles_index < reconcile_index
+
+    reconcile_task = tasks[reconcile_index]
+    uri_module = reconcile_task["ansible.builtin.uri"]
+
+    assert uri_module["body"]["allowed_roles"] == "{{ openbao_database_allowed_roles | join(',') }}"
+    assert reconcile_task["register"] == "openbao_database_backend_allowed_roles_result"
+    assert (
+        reconcile_task["until"]
+        == "openbao_database_backend_allowed_roles_result.status == 204"
+    )
+
+
 def test_openbao_runtime_rechecks_seal_state_before_auth_verification() -> None:
     tasks = read_openbao_runtime_tasks_text()
     ensure_unsealed_tasks = ENSURE_UNSEALED_TASKS_PATH.read_text(encoding="utf-8")
@@ -440,23 +464,61 @@ def test_openbao_playbook_refreshes_secret_ids_from_local_artifacts() -> None:
     assert "Read the persisted AppRole artifacts before refreshing secret IDs" in task_names
     assert "Record persisted AppRole artifact facts before refreshing secret IDs" in task_names
     assert "Ensure OpenBao remains unsealed before refreshing controller-local AppRole artifacts" in task_names
-    assert "Assert refreshed AppRole secret IDs were generated successfully after end-to-end verification" in task_names
+    assert "Refresh persisted AppRole artifacts one at a time after end-to-end verification" in task_names
     assert "Read AppRole role IDs for refreshed controller-local artifacts" not in task_names
+    assert "Generate refreshed AppRole secret IDs after end-to-end verification" not in task_names
+    assert "Persist refreshed AppRole artifacts locally after end-to-end verification" not in task_names
 
-    refresh_task = next(
-        task for task in tasks if task["name"] == "Generate refreshed AppRole secret IDs after end-to-end verification"
+    include_task = next(
+        task
+        for task in tasks
+        if task["name"] == "Refresh persisted AppRole artifacts one at a time after end-to-end verification"
     )
-    assert refresh_task["retries"] == 6
-    assert refresh_task["delay"] == 2
-    assert refresh_task["until"] == "openbao_refresh_secret_ids.status == 200"
-
-    persist_task = next(
-        task for task in tasks if task["name"] == "Persist refreshed AppRole artifacts locally after end-to-end verification"
-    )
-    assert "openbao_refresh_existing_artifacts[item.item.name].role_id" in persist_task["ansible.builtin.copy"]["content"]
+    assert include_task["ansible.builtin.include_tasks"] == "tasks/openbao-refresh-approle-artifact.yml"
+    assert include_task["loop_control"]["loop_var"] == "openbao_refresh_approle"
     assert {"name": "atlas", "local_file": "{{ openbao_atlas_approle_local_file }}"} in refresh_play["vars"][
         "openbao_verification_approles"
     ]
+
+
+def test_openbao_playbook_refresh_task_recovers_each_approle_through_unseal_checks() -> None:
+    refresh_tasks = yaml.safe_load(PLAYBOOK_REFRESH_APPROLE_TASKS_PATH.read_text(encoding="utf-8"))
+    task_names = [task["name"] for task in refresh_tasks]
+
+    assert (
+        "Ensure OpenBao remains unsealed before refreshing the {{ openbao_refresh_approle.name }} controller-local AppRole artifact"
+        in task_names
+    )
+    assert (
+        "Persist the refreshed {{ openbao_refresh_approle.name }} AppRole artifact locally after end-to-end verification"
+        in task_names
+    )
+
+    request_task = next(
+        task
+        for task in refresh_tasks
+        if task["name"] == "Generate the refreshed {{ openbao_refresh_approle.name }} AppRole secret ID after end-to-end verification"
+    )
+    request_block = request_task["block"][0]
+    request_module = request_block["ansible.builtin.uri"]
+
+    assert request_module["url"] == (
+        "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ openbao_refresh_approle.name }}/secret-id"
+    )
+    assert request_block["retries"] == 12
+    assert request_block["delay"] == 5
+    assert request_block["changed_when"] is False
+    assert request_task["rescue"][0]["ansible.builtin.include_role"]["tasks_from"] == "ensure_unsealed.yml"
+
+    persist_task = next(
+        task
+        for task in refresh_tasks
+        if task["name"] == "Persist the refreshed {{ openbao_refresh_approle.name }} AppRole artifact locally after end-to-end verification"
+    )
+    assert (
+        "openbao_refresh_existing_artifacts[openbao_refresh_approle.name].role_id"
+        in persist_task["ansible.builtin.copy"]["content"]
+    )
 
 
 def test_openbao_playbook_verifies_dynamic_credentials_with_env_and_retries() -> None:

@@ -314,43 +314,9 @@
           }}
       no_log: true
 
-    - name: Generate refreshed AppRole secret IDs after end-to-end verification
-      ansible.builtin.uri:
-        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ item.name }}/secret-id"
-        method: POST
-        headers:
-          X-Vault-Token: "{{ openbao_refresh_init_payload.root_token }}"
-        body_format: json
-        body: {}
-        return_content: true
-        status_code: 200
+    - name: Refresh persisted AppRole artifacts one at a time after end-to-end verification
+      ansible.builtin.include_tasks: tasks/openbao-refresh-approle-artifact.yml
       loop: "{{ openbao_verification_approles }}"
-      register: openbao_refresh_secret_ids
-      retries: 6
-      delay: 2
-      until: openbao_refresh_secret_ids.status == 200
-      failed_when: false
-      no_log: true
-
-    - name: Assert refreshed AppRole secret IDs were generated successfully after end-to-end verification
-      ansible.builtin.assert:
-        that:
-          - >-
-            (
-              openbao_refresh_secret_ids.results
-              | rejectattr('status', 'equalto', 200)
-              | list
-              | length
-            ) == 0
-        fail_msg: "OpenBao failed to refresh one or more AppRole secret IDs after end-to-end verification."
-      no_log: true
-
-    - name: Persist refreshed AppRole artifacts locally after end-to-end verification
-      ansible.builtin.copy:
-        dest: "{{ item.item.local_file }}"
-        content: "{{ {'role_name': item.item.name, 'auth_path': 'approle', 'role_id': openbao_refresh_existing_artifacts[item.item.name].role_id, 'secret_id': item.json.data.secret_id, 'secret_id_accessor': item.json.data.secret_id_accessor, 'generated_at': ansible_date_time.iso8601} | to_nice_json }}\n"
-        mode: "0600"
-      loop: "{{ openbao_refresh_secret_ids.results | default([]) }}"
-      delegate_to: localhost
-      become: false
-      no_log: true
+      loop_control:
+        loop_var: openbao_refresh_approle
+        label: "{{ openbao_refresh_approle.name }}"

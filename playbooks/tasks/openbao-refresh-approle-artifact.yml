@@ -1,0 +1,65 @@
+---
+- name: Ensure OpenBao remains unsealed before refreshing the {{ openbao_refresh_approle.name }} controller-local AppRole artifact
+  ansible.builtin.include_role:
+    name: lv3.platform.openbao_runtime
+    tasks_from: ensure_unsealed.yml
+  vars:
+    openbao_unseal_context: "refreshing the {{ openbao_refresh_approle.name }} controller-local AppRole artifact"
+    openbao_unseal_init_payload: "{{ openbao_refresh_init_payload }}"
+
+- name: Generate the refreshed {{ openbao_refresh_approle.name }} AppRole secret ID after end-to-end verification
+  block:
+    - name: Request the refreshed {{ openbao_refresh_approle.name }} AppRole secret ID
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ openbao_refresh_approle.name }}/secret-id"
+        method: POST
+        headers:
+          X-Vault-Token: "{{ openbao_refresh_init_payload.root_token }}"
+        body_format: json
+        body: {}
+        return_content: true
+        status_code: 200
+      register: openbao_refresh_secret_id
+      retries: 12
+      delay: 5
+      until:
+        - openbao_refresh_secret_id.status | default(0) == 200
+        - openbao_refresh_secret_id.json.data.secret_id | default('') | length > 0
+      changed_when: false
+      no_log: true
+  rescue:
+    - name: Re-ensure OpenBao remains unsealed before retrying the {{ openbao_refresh_approle.name }} controller-local AppRole artifact refresh
+      ansible.builtin.include_role:
+        name: lv3.platform.openbao_runtime
+        tasks_from: ensure_unsealed.yml
+      vars:
+        openbao_unseal_context: "retrying the {{ openbao_refresh_approle.name }} controller-local AppRole artifact refresh"
+        openbao_unseal_init_payload: "{{ openbao_refresh_init_payload }}"
+
+    - name: Retry the refreshed {{ openbao_refresh_approle.name }} AppRole secret ID request after runtime recovery
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ openbao_refresh_approle.name }}/secret-id"
+        method: POST
+        headers:
+          X-Vault-Token: "{{ openbao_refresh_init_payload.root_token }}"
+        body_format: json
+        body: {}
+        return_content: true
+        status_code: 200
+      register: openbao_refresh_secret_id
+      retries: 12
+      delay: 5
+      until:
+        - openbao_refresh_secret_id.status | default(0) == 200
+        - openbao_refresh_secret_id.json.data.secret_id | default('') | length > 0
+      changed_when: false
+      no_log: true
+
+- name: Persist the refreshed {{ openbao_refresh_approle.name }} AppRole artifact locally after end-to-end verification
+  ansible.builtin.copy:
+    dest: "{{ openbao_refresh_approle.local_file }}"
+    content: "{{ {'role_name': openbao_refresh_approle.name, 'auth_path': 'approle', 'role_id': openbao_refresh_existing_artifacts[openbao_refresh_approle.name].role_id, 'secret_id': openbao_refresh_secret_id.json.data.secret_id, 'secret_id_accessor': openbao_refresh_secret_id.json.data.secret_id_accessor, 'generated_at': ansible_date_time.iso8601} | to_nice_json }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
