@@ -100,6 +100,11 @@ curl -sS \
 - The bootstrap env mounted into the runner contains the durable Gitea bot
   password and scope list only. The actual PAT used by Renovate is minted at
   workflow runtime and revoked at the end of the run.
+- The runner-side bootstrap bundle also carries `RENOVATE_GIT_CLONE_HOST` and
+  `RENOVATE_GIT_CLONE_HOST_ADDRESS`, and the workflow injects them into the
+  Renovate container as a `--add-host` mapping. This keeps Gitea's
+  private-only public clone URL (`git.lv3.org`) usable from `docker-build-lv3`
+  without widening external DNS or changing `ROOT_URL`.
 - The workflow now bootstraps Docker lazily in every Docker-using step and
   persists the discovered executable path in `.tmp/docker-bin.path`, because
   the live 2026-03-31 replay showed the runner can lose a prior `apt-get

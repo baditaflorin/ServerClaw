@@ -59,8 +59,11 @@ def test_runner_defaults_use_mirrored_registration_token() -> None:
     assert ".local/gitea/runner-registration-token.txt" in defaults
     assert "docker-build-lv3" in defaults
     assert "service_topology_get('openbao')" in defaults
+    assert "service_topology_get('gitea')" in defaults
     assert ".local/gitea/renovate-password.txt" in defaults
     assert "services/gitea-runner/renovate-runtime" in defaults
+    assert "gitea_runner_renovate_clone_host" in defaults
+    assert "gitea_runner_renovate_clone_host_address" in defaults
 
 
 def test_runner_compose_uses_registration_token_env() -> None:
@@ -111,6 +114,12 @@ def test_runner_tasks_render_the_openbao_backed_renovate_bundle() -> None:
     assert "Ensure the Gitea Renovate bot password exists on the control machine" in names
     assert "Prepare the Renovate credential bundle for the Gitea runner" in names
     assert "Confirm the Renovate credential bundle rendered successfully" in names
+    prepare_task = next(
+        task for task in runner_tasks if task["name"] == "Prepare the Renovate credential bundle for the Gitea runner"
+    )
+    secret_payload = prepare_task["vars"]["common_openbao_systemd_credentials_secret_payload"]
+    assert secret_payload["RENOVATE_GIT_CLONE_HOST"] == "{{ gitea_runner_renovate_clone_host }}"
+    assert secret_payload["RENOVATE_GIT_CLONE_HOST_ADDRESS"] == "{{ gitea_runner_renovate_clone_host_address }}"
 
 
 def test_gitea_waits_on_the_published_service_address() -> None:

@@ -60,6 +60,10 @@ def test_renovate_workflow_uses_harbor_pinned_image_and_runtime_token_helper() -
     assert 'test -s "${bootstrap_host_dir}/renovate.env"' not in workflow
     assert '.tmp/workspace-host.path' in workflow
     assert '.tmp/bootstrap-host.path' in workflow
+    assert 'renovate_add_host_arg=""' in workflow
+    assert 'RENOVATE_GIT_CLONE_HOST:-' in workflow
+    assert 'RENOVATE_GIT_CLONE_HOST_ADDRESS:-' in workflow
+    assert '--add-host=${RENOVATE_GIT_CLONE_HOST}:${RENOVATE_GIT_CLONE_HOST_ADDRESS}' in workflow
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
     assert 'RENOVATE_HELPER_IMAGE: registry.lv3.org/check-runner/python:3.12.10@sha256:' in workflow
 
@@ -79,6 +83,8 @@ def test_renovate_runtime_token_writes_runtime_env(monkeypatch: pytest.MonkeyPat
     monkeypatch.setenv("RENOVATE_GITEA_PASSWORD", "secret")
     monkeypatch.setenv("RENOVATE_GITEA_TOKEN_SCOPES", "write:repository,read:user")
     monkeypatch.setenv("RENOVATE_REPOSITORY", "ops/proxmox_florin_server")
+    monkeypatch.setenv("RENOVATE_GIT_CLONE_HOST", "git.lv3.org")
+    monkeypatch.setenv("RENOVATE_GIT_CLONE_HOST_ADDRESS", "10.10.10.20")
 
     def fake_request_json(**kwargs):  # type: ignore[no-untyped-def]
         assert kwargs["method"] == "POST"
@@ -96,6 +102,8 @@ def test_renovate_runtime_token_writes_runtime_env(monkeypatch: pytest.MonkeyPat
     assert "RENOVATE_ENDPOINT=http://10.10.10.20:3003/api/v1/" in env_payload
     assert "RENOVATE_REPOSITORIES=ops/proxmox_florin_server" in env_payload
     assert "RENOVATE_TOKEN=token-value" in env_payload
+    assert "RENOVATE_GIT_CLONE_HOST=git.lv3.org" in env_payload
+    assert "RENOVATE_GIT_CLONE_HOST_ADDRESS=10.10.10.20" in env_payload
 
 
 def test_renovate_stack_digest_guard_flags_missing_catalog_update(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

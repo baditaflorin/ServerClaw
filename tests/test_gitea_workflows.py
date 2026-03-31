@@ -81,6 +81,10 @@ def test_renovate_workflow_bootstraps_inside_pinned_python_runner() -> None:
     assert 'test -s "${bootstrap_host_dir}/renovate.env"' not in workflow
     assert '.tmp/workspace-host.path' in workflow
     assert '.tmp/bootstrap-host.path' in workflow
+    assert 'renovate_add_host_arg=""' in workflow
+    assert 'RENOVATE_GIT_CLONE_HOST:-' in workflow
+    assert 'RENOVATE_GIT_CLONE_HOST_ADDRESS:-' in workflow
+    assert '--add-host=${RENOVATE_GIT_CLONE_HOST}:${RENOVATE_GIT_CLONE_HOST_ADDRESS}' in workflow
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
     assert '"${docker_bin}" run --rm \\' in workflow
     assert '"${docker_bin}" pull "${RENOVATE_IMAGE}"' in workflow

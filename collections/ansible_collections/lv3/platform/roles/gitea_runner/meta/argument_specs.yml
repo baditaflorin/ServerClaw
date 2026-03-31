@@ -51,6 +51,12 @@ argument_specs:
       gitea_runner_renovate_token_scopes:
         type: str
         required: true
+      gitea_runner_renovate_clone_host:
+        type: str
+        required: true
+      gitea_runner_renovate_clone_host_address:
+        type: str
+        required: true
       gitea_runner_renovate_openbao_address:
         type: str
         required: true

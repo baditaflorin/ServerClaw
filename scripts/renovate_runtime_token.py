@@ -92,6 +92,8 @@ def create_runtime_token(*, state_file: Path, env_file: Path) -> None:
     username = require_env("RENOVATE_GITEA_USERNAME")
     password = require_env("RENOVATE_GITEA_PASSWORD")
     repository = require_env("RENOVATE_REPOSITORY")
+    clone_host = os.environ.get("RENOVATE_GIT_CLONE_HOST", "").strip()
+    clone_host_address = os.environ.get("RENOVATE_GIT_CLONE_HOST_ADDRESS", "").strip()
     scope_names = [
         scope.strip()
         for scope in require_env("RENOVATE_GITEA_TOKEN_SCOPES").split(",")
@@ -131,6 +133,13 @@ def create_runtime_token(*, state_file: Path, env_file: Path) -> None:
         f"RENOVATE_REPOSITORIES={repository}",
         f"RENOVATE_TOKEN={token}",
     ]
+    if clone_host and clone_host_address:
+        env_lines.extend(
+            [
+                f"RENOVATE_GIT_CLONE_HOST={clone_host}",
+                f"RENOVATE_GIT_CLONE_HOST_ADDRESS={clone_host_address}",
+            ]
+        )
     env_file.parent.mkdir(parents=True, exist_ok=True)
     env_file.write_text("\n".join(env_lines) + "\n", encoding="utf-8")
 
