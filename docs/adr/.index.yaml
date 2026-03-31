@@ -5280,7 +5280,7 @@ adr_index:
       - scanning
     summary: We will deploy Syft and Grype as Gitea Actions CI steps and as a
     filename: 0298-syft-and-grype-for-platform-wide-sbom-generation-and-continuous-cve-scanning.md
-    implemented_version: 0.177.117
+    implemented_version: 0.177.118
   - adr: 0299
     title: Ntfy As The Self-Hosted Push Notification Channel For Programmatic Alert Delivery
     status: Accepted
@@ -5401,7 +5401,7 @@ adr_index:
       - burn
     summary: We will integrate k6 as the platform's load testing and SLO budget burn
     filename: 0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
-    implemented_version: 0.177.118
+    implemented_version: 0.177.119
   - adr: '0306'
     title: Checkov For IaC Policy Compliance Scanning Of OpenTofu, Compose, And Ansible
     status: Accepted

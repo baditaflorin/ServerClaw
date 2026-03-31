@@ -50,6 +50,15 @@ The Windmill worker seeds `f/lv3/k6_load_testing` and schedules:
   listener on `http://10.10.10.20:8098/healthz`; the
   `http://100.64.0.1:8014` controller proxy is Tailscale-bound and is only for
   controller-local bootstrap and verification.
+- If the public Keycloak smoke probe fails, check
+  `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration` directly
+  before treating the result as a repo regression. The 2026-03-31 latest-main
+  replay returned `502 Bad Gateway` from that exact URL, which confirmed a live
+  edge/runtime failure rather than a k6-runner contract break.
+- If the public Keycloak OIDC probe and the guest-local
+  `http://10.10.10.20:8091/health/ready` check both time out or fail, preserve
+  the k6 receipts and outage evidence as live-service degradation; do not
+  rewrite the run into a repository-only failure.
 - During `docker-runtime-lv3` redeploys, OpenFGA health can flap briefly while
   the container restarts; if the first k6 smoke run hits connection refusals,
   re-check `http://10.10.10.20:8098/healthz` from the build host before

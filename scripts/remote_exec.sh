@@ -608,6 +608,12 @@ run_local_command() {
   if [[ -n "$LOCAL_FALLBACK_RUNNER_ID" ]]; then
     env_args+=("LV3_VALIDATION_RUNNER_ID=$LOCAL_FALLBACK_RUNNER_ID")
   fi
+  if [[ -n "$LV3_VALIDATION_BASE_REF" ]]; then
+    env_args+=("LV3_VALIDATION_BASE_REF=$LV3_VALIDATION_BASE_REF")
+  fi
+  if [[ -n "$LV3_VALIDATION_CHANGED_FILES_JSON" ]]; then
+    env_args+=("LV3_VALIDATION_CHANGED_FILES_JSON=$LV3_VALIDATION_CHANGED_FILES_JSON")
+  fi
   if [[ -n "$validate_python_bin" ]]; then
     env_args+=("LV3_VALIDATE_PYTHON_BIN=$validate_python_bin")
   fi
@@ -723,8 +729,8 @@ run_remote_command() {
   fi
 
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "$remote_payload" || rc=$?
+  sync_remote_gate_status_back
   if [[ "$rc" -eq 0 ]]; then
-    sync_remote_gate_status_back
     return 0
   fi
   if [[ "$rc" -ne 0 && "$LOCAL_FALLBACK" == "true" ]]; then

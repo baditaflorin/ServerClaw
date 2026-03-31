@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.177.118
+- Implemented In Repo Version: 0.177.119
 - Implemented In Platform Version: 0.130.75
 - Implemented On: 2026-03-31
 - Date: 2026-03-29
@@ -118,10 +118,10 @@ Three k6 test scenario types are defined:
   (`23.19%` error rate) and OpenFGA recorded `995` requests with `42` failures
   (`4.22%` error rate), both with error budget remaining reduced to `0.0%` in
   the synced receipts
-- the exact-main closeout rebased the workstream onto latest realistic
+- the first exact-main closeout rebased the workstream onto latest realistic
   `origin/main` commit `5c7e07235f7b0da1f756148e145397f0ac6ceb10` and used
-  committed source `0d6e8c9eb5d9d086e74cf92d8165248295baa076` for the final
-  replay, as recorded in
+  committed source `0d6e8c9eb5d9d086e74cf92d8165248295baa076` for the initial
+  canonical replay, as recorded in
   `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-candidate-source-commit-r3-0.177.118.txt`
 - the first exact-main smoke attempt exposed live drift rather than a repo
   regression: `monitoring-lv3` still had Prometheus bound to `127.0.0.1:9090`
@@ -152,10 +152,34 @@ Three k6 test scenario types are defined:
   this workstream: gitless snapshot commit capture, relative repo-root handling,
   k6 summary parsing, failure-path receipt generation, non-fatal ntfy warning
   handling, remote build workspace retention cleanup, and bounded exact-main
-  notification publication when controller-local NATS or ntfy are unavailable
+  notification publication when controller-local NATS or ntfy are unavailable,
+  plus synced remote gate status handoff and unresolved-only local fallback
+  reruns when the build host loses runner availability after partial success,
+  together with a widened shared `packer-validate` timeout budget so the
+  controller-local arm64 fallback can finish the emulated x86 runner image
+- `origin/main` then advanced again to commit
+  `2411a7cd428e0eba17168aa5eed66f04c4ed48dd`, carrying repository version
+  `0.177.118` and platform version `0.130.77`, so the exact-main closeout was
+  recut on that newer baseline and published as release `0.177.119`
+- the latest-main smoke replay from committed source
+  `6d476f01e75a2ecf31d8ce13df1250bc6aec193e` preserved current live Keycloak
+  degradation instead of masking it: direct probing of
+  `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration` returned
+  `502 Bad Gateway`, the synced smoke receipt
+  `receipts/k6/smoke-keycloak-20260331T145155Z.json` recorded `110` requests
+  with `110` failures, and `receipts/k6/smoke-openfga-20260331T145155Z.json`
+  still passed with `112` requests and `0` failures
+- the latest-main load replay from the same committed source also preserved the
+  truthful degraded platform outcome under release `0.177.119`: Keycloak
+  recorded `1600` requests with `1184` failures (`74.00%` error rate) in
+  `receipts/k6/load-keycloak-20260331T145555Z.json`, OpenFGA recorded `1182`
+  requests with `14` failures (`1.18%`) in
+  `receipts/k6/load-openfga-20260331T145555Z.json`, Prometheus remote-write
+  repeatedly timed out, and the warning-only ntfy publication path returned
+  `404 Not Found` without hanging the run
 - the canonical exact-main closeout receipt is
   `receipts/live-applies/2026-03-31-adr-0305-k6-mainline-live-apply.json`,
-  published in repository release `0.177.118` while keeping the first verified
+  published in repository release `0.177.119` while keeping the first verified
   platform implementation version at `0.130.75`
 
 ## Consequences
@@ -182,9 +206,9 @@ Three k6 test scenario types are defined:
   operational risk surface: during the 2026-03-31 exact-main closeout,
   Prometheus remote-write calls from the k6 runner to `monitoring-lv3`
   repeatedly timed out until Prometheus was rebound to the guest-reachable
-  address, and the final controller-side load replay still recorded warning-only
-  notification failures when local NATS or ntfy were unavailable; the receipt
-  path now preserves those conditions without hiding the load-test result
+  address, and the later latest-main `0.177.119` rerun still preserved public
+  Keycloak `502 Bad Gateway`, OpenFGA threshold breach, and warning-only
+  notification failures without hiding the underlying smoke/load result
 
 ## Boundaries
 

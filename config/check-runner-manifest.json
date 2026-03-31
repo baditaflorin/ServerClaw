@@ -58,7 +58,7 @@
     "image": "registry.lv3.org/check-runner/infra:2026.03.23",
     "command": "if [ -d packer ] && find packer -name '*.pkr.hcl' -print -quit | grep -q .; then packer validate packer; else echo 'No packer templates present'; fi",
     "working_dir": "/workspace",
-    "timeout_seconds": 120,
+    "timeout_seconds": 300,
     "cache_mounts": ["packer_plugins"]
   }
 }

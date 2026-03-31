@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-31",
   "recorded_on": "2026-03-31",
-  "recorded_at": "2026-03-31T13:46:47Z",
+  "recorded_at": "2026-03-31T16:28:13Z",
   "recorded_by": "codex",
-  "source_commit": "0d6e8c9eb5d9d086e74cf92d8165248295baa076",
-  "repo_version_context": "0.177.118",
-  "platform_version_context": "0.130.76",
+  "source_commit": "6d476f01e75a2ecf31d8ce13df1250bc6aec193e",
+  "repo_version_context": "0.177.119",
+  "platform_version_context": "0.130.77",
   "workflow_id": "adr-0305-k6-mainline-live-apply",
   "adr": "0305",
-  "summary": "Integrated ADR 0305 onto the latest realistic origin/main baseline by replaying the exact-main k6 smoke and load paths from committed source 0d6e8c9eb5d9d086e74cf92d8165248295baa076 after rebasing onto origin/main commit 5c7e07235f7b0da1f756148e145397f0ac6ceb10. The mainline closeout corrected a stale Prometheus private-bind drift on monitoring-lv3, re-verified passing Keycloak and OpenFGA smoke receipts from docker-build-lv3, and confirmed that the controller-side load path now finishes and preserves truthful receipts instead of hanging when notification publication is unavailable. The final load replay still recorded a real live-platform failure for Keycloak while OpenFGA passed the run but reported a depleted remaining error budget warning.",
+  "summary": "Integrated ADR 0305 onto the latest realistic origin/main baseline by recutting the exact-main closeout as repository version 0.177.119 from committed source 6d476f01e75a2ecf31d8ce13df1250bc6aec193e after origin/main advanced to commit 2411a7cd428e0eba17168aa5eed66f04c4ed48dd. The canonical mainline receipt preserves both the earlier repaired 0.177.118 comparison baseline and the newer latest-main truthful degradation on platform version 0.130.77: public Keycloak OIDC returned 502 Bad Gateway, Keycloak smoke failed 110 of 110 requests, Keycloak load failed 1184 of 1600 requests (74.00%), and OpenFGA load failed 14 of 1182 requests (1.18%). The closeout also fully re-verified the hardened repository automation path: focused run_gate_fallback and remote_exec regression tests passed, make remote-validate passed on docker-build-lv3, and the final make pre-push-gate recovered from transient 502 Bad Gateway pulls of registry.lv3.org/check-runner/infra:2026.03.23 by syncing the partial remote status back, rerunning only unresolved packer-validate and tofu-validate checks locally, and widening the shared packer-validate timeout budget so the controller-local arm64 fallback can finish the emulated x86 check-runner image.",
   "targets": [
     {
       "kind": "guest",
@@ -33,39 +33,39 @@
     {
       "check": "Latest realistic mainline baseline",
       "result": "pass",
-      "observed": "The ADR 0305 stack was rebased onto origin/main commit 5c7e07235f7b0da1f756148e145397f0ac6ceb10, which carried repository version 0.177.117 and platform version 0.130.76 before the release cut."
+      "observed": "The final ADR 0305 closeout targeted origin/main commit 2411a7cd428e0eba17168aa5eed66f04c4ed48dd, which already carried repository version 0.177.118 and platform version 0.130.77. The earlier exact-main comparison baseline at origin/main commit 5c7e07235f7b0da1f756148e145397f0ac6ceb10 and repository version 0.177.118 remains committed for audit comparison."
     },
     {
-      "check": "Monitoring correction loop",
+      "check": "Exact-main comparison baseline",
       "result": "pass",
-      "observed": "The first exact-main smoke attempt failed while Prometheus on monitoring-lv3 was still loopback-bound and OpenFGA was restarting on docker-runtime-lv3. After make converge-monitoring completed and the bind correction was documented, Prometheus listened on 0.0.0.0:9090 and the build host could reach http://10.10.10.40:9090/-/ready."
+      "observed": "The first exact-main closeout from committed source 0d6e8c9eb5d9d086e74cf92d8165248295baa076 repaired the Prometheus private-bind drift, then produced passing smoke receipts with Keycloak 110/0 and OpenFGA 112/0 plus the truthful 0.177.118 load comparison receipts with Keycloak 1585/441 and OpenFGA 1184/8."
     },
     {
-      "check": "Exact-main smoke replay",
+      "check": "Latest-main smoke replay truth",
       "result": "pass",
-      "observed": "make k6-smoke from committed source produced receipts/k6/smoke-keycloak-20260331T133226Z.json and receipts/k6/smoke-openfga-20260331T133226Z.json. Keycloak recorded 110 requests with 0 failures and p95 95.03 ms; OpenFGA recorded 112 requests with 0 failures and p95 84.38 ms."
+      "observed": "The latest-main smoke replay from committed source 6d476f01e75a2ecf31d8ce13df1250bc6aec193e preserved current live-platform truth instead of hiding it: https://sso.lv3.org/realms/lv3/.well-known/openid-configuration returned 502 Bad Gateway, receipts/k6/smoke-keycloak-20260331T145155Z.json recorded 110 requests with 110 failures, receipts/k6/smoke-openfga-20260331T145155Z.json still recorded 112 requests with 0 failures, and guest-local probing timed out on http://10.10.10.20:8091/health/ready."
     },
     {
-      "check": "Exact-main load replay",
+      "check": "Latest-main load replay truth",
       "result": "pass",
-      "observed": "make k6-load completed from the same committed source without the earlier NATS deadlock and preserved receipts plus raw summary export. Keycloak recorded 1585 requests with 441 failures (27.82% error rate) and failed the declared 1% objective; OpenFGA recorded 1184 requests with 8 failures (0.68%) and passed the run while still reporting error_budget_remaining_pct 0.0."
+      "observed": "The latest-main load replay from the same committed source preserved the degraded platform outcome in receipts/k6/load-keycloak-20260331T145555Z.json, receipts/k6/load-openfga-20260331T145555Z.json, and receipts/k6/raw/20260331T145555Z-load-summary.json. Keycloak recorded 1600 requests with 1184 failures (74.00% error rate), OpenFGA recorded 1182 requests with 14 failures (1.18%), Prometheus remote-write repeatedly timed out, and the warning-only ntfy publication path returned 404 Not Found without hanging the run."
     },
     {
-      "check": "Notification-failure handling",
+      "check": "Focused automation regression tests",
       "result": "pass",
-      "observed": "The final controller-side load replay recorded warning-only notification failures when the local NATS endpoint nats://127.0.0.1:4222 refused connections and ntfy timed out, proving the bounded post-run path preserves truthful receipts instead of hanging or dropping the evidence."
+      "observed": "uv run --with pytest pytest tests/test_run_gate_fallback.py passed 2 tests, and uv run --with pytest pytest tests/test_remote_exec.py passed 16 tests, proving the synced remote status handoff, validation-lane context preservation, and unresolved-only local fallback reruns."
     },
     {
       "check": "Terminal repo automation gates",
       "result": "pass",
-      "observed": "make remote-validate passed on docker-build-lv3, and the final make pre-push-gate also passed after remote_exec.sh transparently fell back locally when the build host hit transient 502 Bad Gateway errors pulling registry.lv3.org/check-runner/infra:2026.03.23 for the packer-validate and tofu-validate lanes."
+      "observed": "make remote-validate passed with workstream-surfaces, agent-standards, ansible-syntax, schema-validation, policy-validation, alert-rule-validation, type-check, and dependency-graph all marked passed. The final make pre-push-gate then synced the partial remote status file back after transient 502 Bad Gateway pulls of registry.lv3.org/check-runner/infra:2026.03.23 left packer-validate and tofu-validate runner_unavailable, preserved one post-edit controller-local packer timeout proof in r5, widened packer-validate from 120 to 300 seconds in config/validation-gate.json and config/check-runner-manifest.json, reran only those unresolved checks locally via scripts/run_gate_fallback.py, and passed cleanly on r6."
     }
   ],
   "correction_loop": {
     "loop_id": "2026-03-31-adr-0305-mainline-prometheus-private-bind-repair",
     "surface": "monitoring-lv3:/etc/systemd/system/lv3-prometheus.service",
     "repair_action": "Completed make converge-monitoring from the rebased exact-main tree and documented the final Prometheus bind correction so the service listened on 0.0.0.0:9090 instead of 127.0.0.1:9090.",
-    "verification": "systemctl cat lv3-prometheus showed --web.listen-address=0.0.0.0:9090, ss -ltnp showed Prometheus listening on *:9090, and the build host reached http://10.10.10.40:9090/-/ready before the passing smoke rerun.",
+    "verification": "systemctl cat lv3-prometheus showed --web.listen-address=0.0.0.0:9090, ss -ltnp showed Prometheus listening on *:9090, and the build host reached http://10.10.10.40:9090/-/ready before the repaired 0.177.118 smoke rerun that now remains committed as the comparison baseline.",
     "diagnosis": "transient_failure"
   },
   "evidence_refs": [
@@ -80,23 +80,48 @@
     "docs/workstreams/ws-0305-main-integration.md",
     "docs/runbooks/k6-load-testing.md",
     "docs/runbooks/configure-openfga.md",
+    "config/build-server.json",
+    "config/check-runner-manifest.json",
+    "config/validation-gate.json",
+    "scripts/remote_exec.sh",
+    "scripts/run_gate_fallback.py",
+    "tests/test_remote_exec.py",
+    "tests/test_run_gate_fallback.py",
     "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-candidate-source-commit-r3-0.177.118.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-k6-smoke-r5-0.177.118.txt",
     "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-converge-monitoring-r8-0.177.118.txt",
     "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-prometheus-bind-manual-r1-0.177.118.txt",
     "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-k6-smoke-r6-0.177.118.txt",
     "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-k6-load-r3-0.177.118.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-keycloak-public-oidc-r1-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-keycloak-openfga-health-r1-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-k6-smoke-r7-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-k6-load-r4-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-run-gate-fallback-tests-r2-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-remote-exec-tests-r5-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-remote-validate-r5-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-pre-push-gate-r4-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-pre-push-gate-r5-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-pre-push-gate-r6-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-adr-index-r3-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-live-apply-receipts-validate-r5-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-git-diff-check-r6-0.177.119.txt",
     "receipts/k6/smoke-keycloak-20260331T133226Z.json",
     "receipts/k6/smoke-openfga-20260331T133226Z.json",
     "receipts/k6/load-keycloak-20260331T133416Z.json",
     "receipts/k6/load-openfga-20260331T133416Z.json",
+    "receipts/k6/smoke-keycloak-20260331T145155Z.json",
+    "receipts/k6/smoke-openfga-20260331T145155Z.json",
+    "receipts/k6/load-keycloak-20260331T145555Z.json",
+    "receipts/k6/load-openfga-20260331T145555Z.json",
     "receipts/k6/raw/20260331T133226Z-smoke-summary.json",
-    "receipts/k6/raw/20260331T133416Z-load-summary.json"
+    "receipts/k6/raw/20260331T133416Z-load-summary.json",
+    "receipts/k6/raw/20260331T145155Z-smoke-summary.json",
+    "receipts/k6/raw/20260331T145555Z-load-summary.json"
   ],
   "notes": [
-    "This receipt records the exact-main integration closeout for ADR 0305; the first verified live platform implementation still occurred earlier on platform version 0.130.75.",
-    "Platform version remains 0.130.76 for this merge because the ADR was already live before the mainline closeout; repository version advances to 0.177.118.",
-    "The branch-local receipt trail under receipts/live-applies/evidence/2026-03-31-ws-0305-* remains part of the audit history and was not discarded when the exact-main replay replaced the stale release candidate.",
-    "The final pre-push proof set intentionally preserves the transient Harbor-backed runner-image pull failure on docker-build-lv3 alongside the successful local-fallback gate so the branch documents both the repo pass and the remaining build-host registry wrinkle."
+    "This receipt records the latest-main exact-main integration closeout for ADR 0305; the first verified live platform implementation still occurred earlier on platform version 0.130.75.",
+    "Platform version context now records the newest realistic integration baseline, 0.130.77, but no additional platform_version bump is taken because ADR 0305 was already live before the mainline closeout; repository version advances to 0.177.119.",
+    "The repaired 0.177.118 smoke-pass and load-fail receipts remain committed beside the 0.177.119 latest-main degradation receipts so the audit trail preserves both the restored comparison baseline and the current live-platform truth.",
+    "The final pre-push proof set intentionally preserves the transient runner-image pull failures on docker-build-lv3 together with the first post-edit controller-local packer timeout and the later successful unresolved-only local fallback so the branch documents both the repository pass and the remaining build-host registry wrinkle."
   ]
 }
