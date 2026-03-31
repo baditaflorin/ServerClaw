@@ -21,6 +21,7 @@ SBOM_RECEIPTS_DIR = repo_path("receipts", "sbom")
 CVE_RECEIPTS_DIR = repo_path("receipts", "cve")
 DEFAULT_SYFT_CACHE_DIR = Path(os.environ.get("LV3_SYFT_CACHE_DIR", "/var/tmp/lv3-syft-cache"))
 DEFAULT_GRYPE_DB_CACHE_DIR = Path(os.environ.get("LV3_GRYPE_DB_CACHE_DIR", "/var/tmp/lv3-grype-db"))
+DEFAULT_SYFT_TMP_DIR = Path(os.environ.get("LV3_SYFT_TMP_DIR", str(REPO_ROOT / ".local" / "syft-tmp")))
 SEVERITY_BUCKETS = ("CRITICAL", "HIGH", "MEDIUM", "LOW")
 
 
@@ -63,6 +64,15 @@ def ensure_dir(path: Path) -> Path:
     return path
 
 
+def temp_env(temp_dir: Path) -> dict[str, str]:
+    resolved = str(temp_dir.resolve())
+    return {
+        "TMPDIR": resolved,
+        "TMP": resolved,
+        "TEMP": resolved,
+    }
+
+
 def docker_network_mode(config: dict[str, Any]) -> str | None:
     configured = os.environ.get("LV3_SCANNER_DOCKER_NETWORK", "").strip() or config.get("docker_network", "")
     if configured == "host" and platform.system() != "Linux":
@@ -85,6 +95,21 @@ def find_native_syft_binary() -> str | None:
     if override:
         candidates.append(override)
     candidates.extend(("/usr/local/bin/syft", "syft"))
+    for candidate in candidates:
+        resolved = shutil.which(candidate)
+        if resolved:
+            return resolved
+    return None
+
+
+def find_native_grype_binary() -> str | None:
+    if platform.system() != "Linux":
+        return None
+    candidates: list[str] = []
+    override = os.environ.get("LV3_GRYPE_BINARY", "").strip()
+    if override:
+        candidates.append(override)
+    candidates.extend(("/usr/local/bin/grype", "grype"))
     for candidate in candidates:
         resolved = shutil.which(candidate)
         if resolved:
@@ -117,14 +142,17 @@ def syft_scan_image(
     config: dict[str, Any],
     use_artifact_cache: bool = True,
     syft_cache_dir: Path = DEFAULT_SYFT_CACHE_DIR,
+    syft_tmp_dir: Path = DEFAULT_SYFT_TMP_DIR,
 ) -> dict[str, Any]:
     syft_cache_dir = ensure_dir(syft_cache_dir)
+    syft_tmp_dir = ensure_dir(syft_tmp_dir)
     ensure_dir(sbom_path.parent)
     source_ref = artifact_cache_ref(image_ref, config) if use_artifact_cache else image_ref
     registry_env = {
         **os.environ,
         "SYFT_CACHE_DIR": str(syft_cache_dir.resolve()),
         "SYFT_REGISTRY_INSECURE_USE_HTTP": "true" if source_ref != image_ref else "false",
+        **temp_env(syft_tmp_dir),
     }
     native_syft_binary = find_native_syft_binary()
     if native_syft_binary:
@@ -149,8 +177,16 @@ def syft_scan_image(
             [
                 "-v",
                 f"{syft_cache_dir.resolve()}:/syft-cache",
+                "-v",
+                f"{syft_tmp_dir.resolve()}:/syft-tmp",
                 "-e",
                 "SYFT_CACHE_DIR=/syft-cache",
+                "-e",
+                "TMPDIR=/syft-tmp",
+                "-e",
+                "TMP=/syft-tmp",
+                "-e",
+                "TEMP=/syft-tmp",
                 "-e",
                 f"SYFT_REGISTRY_INSECURE_USE_HTTP={'true' if source_ref != image_ref else 'false'}",
                 str(config["syft"]["container_image"]),
@@ -182,20 +218,34 @@ def ensure_grype_database(
     grype_db_cache_dir: Path = DEFAULT_GRYPE_DB_CACHE_DIR,
 ) -> None:
     grype_db_cache_dir = ensure_dir(grype_db_cache_dir)
-    network_mode = docker_network_mode(config)
-    command = docker_run_prefix(network_mode)
-    command.extend(
-        [
-            "-v",
-            f"{grype_db_cache_dir.resolve()}:/grype-db",
-            "-e",
-            "GRYPE_DB_CACHE_DIR=/grype-db",
-            str(config["grype"]["container_image"]),
-            "db",
-            "update",
-        ]
-    )
-    result = subprocess.run(command, text=True, capture_output=True, check=False)
+    native_grype_binary = find_native_grype_binary()
+    if native_grype_binary:
+        command = [native_grype_binary, "db", "update"]
+        result = subprocess.run(
+            command,
+            text=True,
+            capture_output=True,
+            check=False,
+            env={
+                **os.environ,
+                "GRYPE_DB_CACHE_DIR": str(grype_db_cache_dir.resolve()),
+            },
+        )
+    else:
+        network_mode = docker_network_mode(config)
+        command = docker_run_prefix(network_mode)
+        command.extend(
+            [
+                "-v",
+                f"{grype_db_cache_dir.resolve()}:/grype-db",
+                "-e",
+                "GRYPE_DB_CACHE_DIR=/grype-db",
+                str(config["grype"]["container_image"]),
+                "db",
+                "update",
+            ]
+        )
+        result = subprocess.run(command, text=True, capture_output=True, check=False)
     if result.returncode == 0:
         return
     if grype_cache_has_data(grype_db_cache_dir):
@@ -314,26 +364,44 @@ def grype_scan_sbom(
 ) -> dict[str, Any]:
     grype_db_cache_dir = ensure_dir(grype_db_cache_dir)
     ensure_dir(cve_path.parent)
-    network_mode = docker_network_mode(config)
-    command = docker_run_prefix(network_mode)
-    command.extend(
-        [
-            "-v",
-            f"{grype_db_cache_dir.resolve()}:/grype-db",
-            "-v",
-            f"{sbom_path.parent.resolve()}:/sbom",
-            "-e",
-            "GRYPE_DB_CACHE_DIR=/grype-db",
-            "-e",
-            "GRYPE_DB_AUTO_UPDATE=false",
-            str(config["grype"]["container_image"]),
-            f"sbom:/sbom/{sbom_path.name}",
+    native_grype_binary = find_native_grype_binary()
+    if native_grype_binary:
+        command = [
+            native_grype_binary,
+            f"sbom:{sbom_path}",
             "--add-cpes-if-none",
             "-o",
             "json",
         ]
-    )
-    result = run_command(command)
+        result = run_command(
+            command,
+            env={
+                **os.environ,
+                "GRYPE_DB_CACHE_DIR": str(grype_db_cache_dir.resolve()),
+                "GRYPE_DB_AUTO_UPDATE": "false",
+            },
+        )
+    else:
+        network_mode = docker_network_mode(config)
+        command = docker_run_prefix(network_mode)
+        command.extend(
+            [
+                "-v",
+                f"{grype_db_cache_dir.resolve()}:/grype-db",
+                "-v",
+                f"{sbom_path.parent.resolve()}:/sbom",
+                "-e",
+                "GRYPE_DB_CACHE_DIR=/grype-db",
+                "-e",
+                "GRYPE_DB_AUTO_UPDATE=false",
+                str(config["grype"]["container_image"]),
+                f"sbom:/sbom/{sbom_path.name}",
+                "--add-cpes-if-none",
+                "-o",
+                "json",
+            ]
+        )
+        result = run_command(command)
     raw_payload = json.loads(result.stdout)
     normalized_matches = [
         normalize_grype_match(item)

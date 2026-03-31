@@ -644,6 +644,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
         "  windmill_extra:", 1
     )[0]
     assert "- /var/run/docker.sock:/var/run/docker.sock" in native_worker_compose
+    assert "- /usr/local/bin/grype:/usr/local/bin/grype:ro" in native_worker_compose
+    assert "- /usr/local/bin/syft:/usr/local/bin/syft:ro" in native_worker_compose
     assert "python3 - <<'PY'" in tasks
     assert "gzip.GzipFile" in tasks
     assert "mtime=0" in tasks

@@ -98,6 +98,17 @@ def test_find_native_syft_binary_prefers_linux_install(monkeypatch) -> None:
     assert scanner.find_native_syft_binary() == "/usr/local/bin/syft"
 
 
+def test_find_native_grype_binary_prefers_linux_install(monkeypatch) -> None:
+    monkeypatch.setattr(scanner.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(
+        scanner.shutil,
+        "which",
+        lambda candidate: "/usr/local/bin/grype" if candidate == "/usr/local/bin/grype" else None,
+    )
+
+    assert scanner.find_native_grype_binary() == "/usr/local/bin/grype"
+
+
 def test_syft_scan_image_uses_native_syft_on_linux(monkeypatch, tmp_path: Path) -> None:
     recorded: dict[str, object] = {}
     expected_payload = {"bomFormat": "CycloneDX"}
@@ -124,6 +135,7 @@ def test_syft_scan_image_uses_native_syft_on_linux(monkeypatch, tmp_path: Path) 
             "syft": {"container_image": "docker.io/anchore/syft:latest"},
         },
         syft_cache_dir=tmp_path / "receipts",
+        syft_tmp_dir=tmp_path / "syft-tmp",
     )
 
     assert payload == expected_payload
@@ -144,6 +156,9 @@ def test_syft_scan_image_uses_native_syft_on_linux(monkeypatch, tmp_path: Path) 
     assert isinstance(env, dict)
     assert env["SYFT_REGISTRY_INSECURE_USE_HTTP"] == "true"
     assert env["SYFT_CACHE_DIR"] == str((tmp_path / "receipts").resolve())
+    assert env["TMPDIR"] == str((tmp_path / "syft-tmp").resolve())
+    assert env["TMP"] == str((tmp_path / "syft-tmp").resolve())
+    assert env["TEMP"] == str((tmp_path / "syft-tmp").resolve())
     assert json.loads(sbom_path.read_text(encoding="utf-8")) == expected_payload
 
 
@@ -174,6 +189,7 @@ def test_syft_scan_image_falls_back_to_container_when_native_syft_missing(monkey
             "syft": {"container_image": "docker.io/anchore/syft:latest"},
         },
         syft_cache_dir=tmp_path / "receipts",
+        syft_tmp_dir=tmp_path / "syft-tmp",
     )
 
     assert recorded["command"] == [
@@ -184,8 +200,16 @@ def test_syft_scan_image_falls_back_to_container_when_native_syft_missing(monkey
         "host",
         "-v",
         f"{(tmp_path / 'receipts').resolve()}:/syft-cache",
+        "-v",
+        f"{(tmp_path / 'syft-tmp').resolve()}:/syft-tmp",
         "-e",
         "SYFT_CACHE_DIR=/syft-cache",
+        "-e",
+        "TMPDIR=/syft-tmp",
+        "-e",
+        "TMP=/syft-tmp",
+        "-e",
+        "TEMP=/syft-tmp",
         "-e",
         "SYFT_REGISTRY_INSECURE_USE_HTTP=true",
         "docker.io/anchore/syft:latest",
@@ -199,5 +223,131 @@ def test_syft_scan_image_falls_back_to_container_when_native_syft_missing(monkey
         "linux/amd64",
         "-o",
         "cyclonedx-json",
+    ]
+    assert recorded["env"] is None
+
+
+def test_ensure_grype_database_uses_native_grype_on_linux(monkeypatch, tmp_path: Path) -> None:
+    recorded: dict[str, object] = {}
+
+    def fake_run(command, text, capture_output, check, env=None):  # noqa: ANN001
+        recorded["command"] = command
+        recorded["env"] = env
+        return type("Result", (), {"returncode": 0, "stdout": "", "stderr": ""})()
+
+    monkeypatch.setattr(scanner.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(scanner, "find_native_grype_binary", lambda: "/usr/local/bin/grype")
+    monkeypatch.setattr(scanner.subprocess, "run", fake_run)
+
+    scanner.ensure_grype_database(
+        {"grype": {"container_image": "docker.io/anchore/grype:latest"}},
+        grype_db_cache_dir=tmp_path / "grype-db",
+    )
+
+    assert recorded["command"] == ["/usr/local/bin/grype", "db", "update"]
+    env = recorded["env"]
+    assert isinstance(env, dict)
+    assert env["GRYPE_DB_CACHE_DIR"] == str((tmp_path / "grype-db").resolve())
+
+
+def test_grype_scan_sbom_uses_native_grype_on_linux(monkeypatch, tmp_path: Path) -> None:
+    recorded: dict[str, object] = {}
+    expected_payload = {"matches": []}
+
+    monkeypatch.setattr(scanner.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(scanner, "find_native_grype_binary", lambda: "/usr/local/bin/grype")
+    monkeypatch.setattr(scanner, "relpath", lambda path: str(path))
+    monkeypatch.setattr(
+        scanner,
+        "run_command",
+        lambda command, env=None: recorded.update({"command": command, "env": env})
+        or type("Result", (), {"stdout": json.dumps(expected_payload)})(),
+    )
+
+    sbom_path = tmp_path / "receipts" / "image.cdx.json"
+    sbom_path.parent.mkdir(parents=True, exist_ok=True)
+    sbom_path.write_text("{}", encoding="utf-8")
+    cve_path = tmp_path / "receipts" / "image.grype.json"
+
+    scanner.grype_scan_sbom(
+        image_id="example",
+        image_ref="ghcr.io/example/service:1.0.0@sha256:deadbeef",
+        runtime_host="docker-runtime-lv3",
+        sbom_path=sbom_path,
+        cve_path=cve_path,
+        scanned_at=scanner.now_utc(),
+        config={
+            "grype": {"container_image": "docker.io/anchore/grype:latest"},
+            "syft": {"container_image": "docker.io/anchore/syft:latest"},
+        },
+        grype_db_cache_dir=tmp_path / "grype-db",
+    )
+
+    assert recorded["command"] == [
+        "/usr/local/bin/grype",
+        f"sbom:{sbom_path}",
+        "--add-cpes-if-none",
+        "-o",
+        "json",
+    ]
+    env = recorded["env"]
+    assert isinstance(env, dict)
+    assert env["GRYPE_DB_CACHE_DIR"] == str((tmp_path / "grype-db").resolve())
+    assert env["GRYPE_DB_AUTO_UPDATE"] == "false"
+
+
+def test_grype_scan_sbom_falls_back_to_container_when_native_grype_missing(monkeypatch, tmp_path: Path) -> None:
+    recorded: dict[str, object] = {}
+    expected_payload = {"matches": []}
+
+    monkeypatch.setattr(scanner.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(scanner, "find_native_grype_binary", lambda: None)
+    monkeypatch.setattr(scanner, "relpath", lambda path: str(path))
+    monkeypatch.setattr(
+        scanner,
+        "run_command",
+        lambda command, env=None: recorded.update({"command": command, "env": env})
+        or type("Result", (), {"stdout": json.dumps(expected_payload)})(),
+    )
+
+    sbom_path = tmp_path / "receipts" / "image.cdx.json"
+    sbom_path.parent.mkdir(parents=True, exist_ok=True)
+    sbom_path.write_text("{}", encoding="utf-8")
+    cve_path = tmp_path / "receipts" / "image.grype.json"
+
+    scanner.grype_scan_sbom(
+        image_id="example",
+        image_ref="ghcr.io/example/service:1.0.0@sha256:deadbeef",
+        runtime_host="docker-runtime-lv3",
+        sbom_path=sbom_path,
+        cve_path=cve_path,
+        scanned_at=scanner.now_utc(),
+        config={
+            "docker_network": "host",
+            "grype": {"container_image": "docker.io/anchore/grype:latest"},
+            "syft": {"container_image": "docker.io/anchore/syft:latest"},
+        },
+        grype_db_cache_dir=tmp_path / "grype-db",
+    )
+
+    assert recorded["command"] == [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "host",
+        "-v",
+        f"{(tmp_path / 'grype-db').resolve()}:/grype-db",
+        "-v",
+        f"{sbom_path.parent.resolve()}:/sbom",
+        "-e",
+        "GRYPE_DB_CACHE_DIR=/grype-db",
+        "-e",
+        "GRYPE_DB_AUTO_UPDATE=false",
+        "docker.io/anchore/grype:latest",
+        f"sbom:/sbom/{sbom_path.name}",
+        "--add-cpes-if-none",
+        "-o",
+        "json",
     ]
     assert recorded["env"] is None
