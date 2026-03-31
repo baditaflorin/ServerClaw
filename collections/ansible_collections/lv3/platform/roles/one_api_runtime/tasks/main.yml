@@ -1,0 +1,331 @@
+# Purpose: Converge the private One-API runtime, OpenBao-backed secrets, and bootstrap configuration artifacts.
+# Use case: Run during One-API deploys, updates, and exact-main replays for the unified LLM proxy.
+# Inputs: Runtime paths, database credentials, repo-managed bootstrap secrets, and controller URLs.
+# Outputs: Configures the One-API runtime, compose stack, runtime secrets, and bootstrap material on the target host.
+# Idempotency: Partially idempotent because bootstrap assets and runtime secrets may be created or refreshed intentionally.
+# Dependencies: ADR 0165, ADR 0023, ADR 0101, and ADR 0294.
+---
+- name: Validate One-API runtime inputs
+  ansible.builtin.assert:
+    that:
+      - one_api_site_dir | length > 0
+      - one_api_compose_file | length > 0
+      - one_api_env_file | length > 0
+      - one_api_database_name | length > 0
+      - one_api_database_user | length > 0
+      - one_api_database_host | length > 0
+      - one_api_database_password_local_file | length > 0
+      - one_api_session_secret_local_file | length > 0
+      - one_api_root_access_token_local_file | length > 0
+      - one_api_root_password_local_file | length > 0
+      - one_api_controller_url | length > 0
+    fail_msg: "one_api_runtime requires runtime paths, database credentials, and bootstrap secrets."
+
+- name: Ensure the One-API database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ one_api_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: one_api_database_password_local
+
+- name: Fail if the One-API database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ one_api_database_password_local_file }} is missing on the control machine.
+      Converge the One-API PostgreSQL role first so the runtime can connect to postgres-lv3.
+  when: not one_api_database_password_local.stat.exists
+
+- name: Ensure the local One-API artifact directory exists
+  ansible.builtin.file:
+    path: "{{ one_api_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the One-API session secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ one_api_session_secret_local_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 | tr -d '\n' > "{{ one_api_session_secret_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: one_api_session_secret_generation
+  changed_when: "'changed' in one_api_session_secret_generation.stdout"
+  no_log: true
+
+- name: Generate the One-API root access token
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ one_api_root_access_token_local_file }}" ]; then
+      umask 077
+      openssl rand -hex 16 | tr -d '\n' > "{{ one_api_root_access_token_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: one_api_root_access_token_generation
+  changed_when: "'changed' in one_api_root_access_token_generation.stdout"
+  no_log: true
+
+- name: Generate the One-API root password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ one_api_root_password_local_file }}" ]; then
+      umask 077
+      openssl rand -hex 8 | tr -d '\n' > "{{ one_api_root_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: one_api_root_password_generation
+  changed_when: "'changed' in one_api_root_password_generation.stdout"
+  no_log: true
+
+- name: Record the One-API runtime secrets
+  ansible.builtin.set_fact:
+    one_api_database_password: "{{ lookup('ansible.builtin.file', one_api_database_password_local_file) | trim }}"
+    one_api_session_secret: "{{ lookup('ansible.builtin.file', one_api_session_secret_local_file) | trim }}"
+    one_api_root_access_token: "{{ lookup('ansible.builtin.file', one_api_root_access_token_local_file) | trim }}"
+    one_api_root_password: "{{ lookup('ansible.builtin.file', one_api_root_password_local_file) | trim }}"
+    one_api_runtime_secret_payload:
+      SQL_DSN: >-
+        postgres://{{ one_api_database_user }}:{{
+          lookup('ansible.builtin.file', one_api_database_password_local_file) | trim | urlencode
+        }}@{{ one_api_database_host }}:5432/{{ one_api_database_name }}?sslmode=disable
+      INITIAL_ROOT_ACCESS_TOKEN: "{{ lookup('ansible.builtin.file', one_api_root_access_token_local_file) | trim }}"
+      SESSION_SECRET: "{{ lookup('ansible.builtin.file', one_api_session_secret_local_file) | trim }}"
+      PORT: "{{ one_api_internal_http_port | string }}"
+      MEMORY_CACHE_ENABLED: "true"
+  no_log: true
+
+- name: Ensure the One-API site directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ one_api_site_dir }}"
+      mode: "0755"
+    - path: "{{ one_api_secret_dir }}"
+      mode: "0700"
+    - path: "{{ one_api_openbao_agent_dir }}"
+      mode: "0700"
+
+- name: Prepare OpenBao agent runtime secret injection for One-API
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: one-api
+    common_openbao_compose_env_agent_dir: "{{ one_api_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ one_api_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ one_api_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ one_api_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ one_api_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ one_api_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ one_api_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ one_api_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ one_api_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ one_api_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ one_api_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: one-api.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ one_api_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ one_api_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ one_api_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ one_api_legacy_env_file }}"
+  no_log: true
+
+- name: Render the One-API compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ one_api_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the One-API image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ one_api_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ one_api_site_dir }}"
+  register: one_api_pull
+  changed_when: >-
+    'Pulling' in one_api_pull.stdout
+    or 'Downloaded newer image' in one_api_pull.stdout
+    or 'Pull complete' in one_api_pull.stdout
+
+- name: Start the One-API OpenBao agent
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ one_api_compose_file }}"
+      - up
+      - -d
+      - openbao-agent
+  args:
+    chdir: "{{ one_api_site_dir }}"
+  register: one_api_openbao_agent_up
+  changed_when: >-
+    'Creating' in one_api_openbao_agent_up.stdout
+    or 'Recreating' in one_api_openbao_agent_up.stdout
+    or 'Starting' in one_api_openbao_agent_up.stdout
+    or 'Running' in one_api_openbao_agent_up.stdout
+
+- name: Wait for the One-API runtime env file
+  ansible.builtin.shell: |
+    set -euo pipefail
+    test -s "{{ one_api_env_file }}"
+    grep -Fqx "PORT={{ one_api_internal_http_port }}" "{{ one_api_env_file }}"
+    grep -Fq "SQL_DSN=postgres://" "{{ one_api_env_file }}"
+    grep -Fq "INITIAL_ROOT_ACCESS_TOKEN=" "{{ one_api_env_file }}"
+  args:
+    executable: /bin/bash
+  register: one_api_runtime_env_contract
+  retries: 24
+  delay: 5
+  until: one_api_runtime_env_contract.rc == 0
+  changed_when: false
+  no_log: true
+
+- name: Ensure Docker bridge chains are healthy before One-API startup
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: true
+
+- name: Start One-API and wait for the local socket
+  block:
+    - name: Converge the One-API runtime stack
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ one_api_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ one_api_site_dir }}"
+      register: one_api_up
+      changed_when: >-
+        'Creating' in one_api_up.stdout
+        or 'Recreating' in one_api_up.stdout
+        or 'Starting' in one_api_up.stdout
+        or 'Running' in one_api_up.stdout
+
+    - name: Wait for One-API to listen locally
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ one_api_internal_http_port }}"
+        delay: 0
+        timeout: 180
+
+    - name: Wait for the One-API status endpoint
+      ansible.builtin.uri:
+        url: "{{ one_api_local_url }}/api/status"
+        method: GET
+        return_content: true
+        status_code: 200
+      register: one_api_status_ready
+      retries: 24
+      delay: 5
+      until: >-
+        one_api_status_ready.status == 200
+        and (one_api_status_ready.json.success | default(false))
+      changed_when: false
+  rescue:
+    - name: Remove stale One-API compose resources before force recreate
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ one_api_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ one_api_site_dir }}"
+      register: one_api_down
+      changed_when: >-
+        'Stopping' in one_api_down.stdout
+        or 'Removing' in one_api_down.stdout
+        or 'Removed' in one_api_down.stdout
+        or 'Network' in one_api_down.stdout
+      failed_when: false
+
+    - name: Force-recreate the One-API runtime stack
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ one_api_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+          - --force-recreate
+      args:
+        chdir: "{{ one_api_site_dir }}"
+      register: one_api_force_recreate_up
+      changed_when: >-
+        'Creating' in one_api_force_recreate_up.stdout
+        or 'Recreating' in one_api_force_recreate_up.stdout
+        or 'Starting' in one_api_force_recreate_up.stdout
+        or 'Running' in one_api_force_recreate_up.stdout
+
+    - name: Wait for One-API to listen locally after force recreate
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ one_api_internal_http_port }}"
+        delay: 0
+        timeout: 180
+
+    - name: Wait for the One-API status endpoint after force recreate
+      ansible.builtin.uri:
+        url: "{{ one_api_local_url }}/api/status"
+        method: GET
+        return_content: true
+        status_code: 200
+      register: one_api_status_ready
+      retries: 24
+      delay: 5
+      until: >-
+        one_api_status_ready.status == 200
+        and (one_api_status_ready.json.success | default(false))
+      changed_when: false
+
+- name: Verify the repo-managed One-API runtime contract
+  ansible.builtin.include_tasks: verify.yml

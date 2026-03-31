@@ -3069,6 +3069,44 @@
         "timeout_seconds": 1500
       }
     },
+    "converge-one-api": {
+      "description": "Converge the private One-API runtime, its PostgreSQL backend, the Proxmox host controller proxy, repo-managed channels and tokens, and consumer provider env files for governed local LLM access.",
+      "workflow_id": "converge-one-api",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-one-api passes",
+        "make validate passes before the apply",
+        "OpenBao, PostgreSQL, docker-runtime, and Ollama are already healthy before the change"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record source commit, image scan receipt, controller proxy reachability, One-API admin and data-plane verification, provider env regeneration, and one successful chat plus embedding request."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the PostgreSQL backend, OpenBao runtime secret contract, One-API runtime startup, or bootstrap verification fails.",
+          "Stop if the rollout would leave the admin API reachable without the documented root-token contract or the consumer provider env files pointing at an unverified endpoint."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good repo-managed One-API runtime and bootstrap state before retrying instead of hand-editing channels, tokens, or runtime env files in the UI.",
+          "Replay dependent consumer converges after rollback so Open WebUI and ServerClaw do not keep stale provider configuration."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "converge-open-webui": {
       "description": "Converge the private Open WebUI runtime, host-side proxy, and repo-managed bootstrap auth state.",
       "workflow_id": "converge-open-webui",

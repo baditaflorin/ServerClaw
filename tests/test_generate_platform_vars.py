@@ -175,6 +175,21 @@ def test_build_platform_vars_includes_openbao_extra_bind_addresses() -> None:
     assert platform_vars["openbao_http_extra_bind_addresses"] == ["10.10.10.20"]
 
 
+def test_build_platform_vars_includes_one_api_private_controller_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    one_api = platform_vars["platform_service_topology"]["one_api"]
+
+    assert one_api["ports"]["internal"] == 8101
+    assert one_api["ports"]["controller"] == 8018
+    assert one_api["urls"]["internal"] == "http://10.10.10.20:8101"
+    assert one_api["urls"]["controller"] == "http://100.64.0.1:8018"
+    assert one_api["urls"]["openai"] == "http://10.10.10.20:8101/v1"
+    assert one_api["urls"]["controller_openai"] == "http://100.64.0.1:8018/v1"
+    assert one_api["access"]["url"] == "http://100.64.0.1:8018"
+    assert platform_vars["one_api_controller_url"] == "http://100.64.0.1:8018"
+    assert platform_vars["one_api_openai_base_url"] == "http://10.10.10.20:8101/v1"
+
+
 def test_build_platform_vars_includes_plausible_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     plausible = platform_vars["platform_service_topology"]["plausible"]

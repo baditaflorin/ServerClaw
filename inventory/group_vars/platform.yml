@@ -114,6 +114,11 @@ platform_host:
         listen_port: 8014
         upstream_host: 10.10.10.20
         upstream_port: 8098
+      - name: one-api
+        listen_address: 100.64.0.1
+        listen_port: 8018
+        upstream_host: 10.10.10.20
+        upstream_port: 8101
       - name: semaphore
         listen_address: 100.64.0.1
         listen_port: 8020
@@ -174,6 +179,8 @@ platform_ports:
   ntfy_port: 2586
   openfga_http_port: 8098
   openfga_host_proxy_port: 8014
+  one_api_port: 8101
+  one_api_host_proxy_port: 8018
   openbao_http_port: 8201
   openbao_proxy_port: 8200
   redpanda_kafka_port: 9092
@@ -273,6 +280,8 @@ platform_port_assignments:
   ntfy_port: 2586
   openfga_http_port: 8098
   openfga_host_proxy_port: 8014
+  one_api_port: 8101
+  one_api_host_proxy_port: 8018
   openbao_http_port: 8201
   openbao_proxy_port: 8200
   redpanda_kafka_port: 9092
@@ -2097,6 +2106,26 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.64.0.1:8008
+  one_api:
+    service_name: one-api
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8018
+    service_id: one_api
+    ports:
+      internal: 8101
+      controller: 8018
+    urls:
+      internal: http://10.10.10.20:8101
+      controller: http://100.64.0.1:8018
+      openai: http://10.10.10.20:8101/v1
+      controller_openai: http://100.64.0.1:8018/v1
   gotenberg:
     service_name: gotenberg
     owning_vm: docker-runtime-lv3
@@ -2966,6 +2995,7 @@ platform_management_allowed_tcp_ports:
   - 9443
   - 8200
   - 8014
+  - 8018
   - 8020
   - 8080
   - 8005
@@ -4026,6 +4056,26 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.64.0.1:8008
+  one_api:
+    service_name: one-api
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8018
+    service_id: one_api
+    ports:
+      internal: 8101
+      controller: 8018
+    urls:
+      internal: http://10.10.10.20:8101
+      controller: http://100.64.0.1:8018
+      openai: http://10.10.10.20:8101/v1
+      controller_openai: http://100.64.0.1:8018/v1
   gotenberg:
     service_name: gotenberg
     owning_vm: docker-runtime-lv3
@@ -4705,6 +4755,12 @@ openbao_controller_url: https://100.64.0.1:8200
 openfga_http_port: 8098
 openfga_host_proxy_port: 8014
 openfga_controller_url: http://100.64.0.1:8014
+one_api_port: 8101
+one_api_host_proxy_port: 8018
+one_api_internal_url: http://10.10.10.20:8101
+one_api_controller_url: http://100.64.0.1:8018
+one_api_openai_base_url: http://10.10.10.20:8101/v1
+one_api_controller_openai_base_url: http://100.64.0.1:8018/v1
 semaphore_server_port: 3004
 semaphore_host_proxy_port: 8020
 semaphore_private_base_url: http://10.10.10.20:3004

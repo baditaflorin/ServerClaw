@@ -324,6 +324,12 @@ playbooks:
     shared_surfaces:
       - service:openfga
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/one-api.yml:
+    playbook_id: one-api
+    mutation_scope: platform
+    shared_surfaces:
+      - service:one-api
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/temporal.yml:
     playbook_id: temporal
     canonical_service_id: temporal

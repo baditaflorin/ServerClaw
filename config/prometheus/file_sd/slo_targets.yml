@@ -146,6 +146,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - http://10.10.10.20:8101/api/status
+  labels:
+    service_id: one_api
+    slo_id: one-api-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://grist.lv3.org/status
   labels:
     service_id: grist

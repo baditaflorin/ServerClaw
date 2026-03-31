@@ -1,0 +1,34 @@
+services:
+  openbao-agent:
+    image: {{ one_api_openbao_agent_image }}
+    container_name: {{ one_api_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ one_api_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ one_api_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ one_api_env_file | dirname }}:{{ one_api_env_file | dirname }}
+
+  one-api:
+    image: {{ one_api_image }}
+    container_name: {{ one_api_container_name }}
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+    env_file:
+      - {{ one_api_env_file }}
+    ports:
+      - "{{ one_api_internal_http_port }}:{{ one_api_internal_http_port }}"

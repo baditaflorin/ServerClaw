@@ -216,6 +216,21 @@ windmill_env_file: /run/lv3-secrets/windmill/runtime.env
 ollama_version: 0.18.2
 ollama_image: "{{ container_image_catalog.images.ollama_runtime.ref }}"
 ollama_default_model: llama3.2:3b
+one_api_image: "{{ container_image_catalog.images.one_api_runtime.ref }}"
+one_api_database_name: oneapi
+one_api_database_user: oneapi
+one_api_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api
+one_api_database_password_local_file: "{{ one_api_local_artifact_dir }}/database-password.txt"
+one_api_session_secret_local_file: "{{ one_api_local_artifact_dir }}/session-secret.txt"
+one_api_root_access_token_local_file: "{{ one_api_local_artifact_dir }}/root-access-token.txt"
+one_api_root_password_local_file: "{{ one_api_local_artifact_dir }}/root-password.txt"
+one_api_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ one_api_host_proxy_port }}"
+one_api_internal_url: "http://{{ hostvars['docker-runtime-lv3'].ansible_host }}:{{ one_api_port }}"
+one_api_openai_base_url: "{{ one_api_internal_url }}/v1"
+one_api_controller_openai_base_url: "{{ one_api_controller_url }}/v1"
+one_api_default_chat_model_alias: gpt-4o-mini
+one_api_fallback_chat_model_alias: gpt-4.1-mini
+one_api_embedding_model_alias: text-embedding-3-small
 searxng_version: 2026.3.24-02ba38786
 searxng_image: "{{ container_image_catalog.images.searxng_runtime.ref }}"
 searxng_controller_url: http://search.lv3.org
@@ -224,12 +239,13 @@ open_webui_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
 open_webui_admin_email: ops@lv3.org
 open_webui_admin_name: Florin Badita
 open_webui_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ open_webui_host_proxy_port }}"
-open_webui_enable_ollama_api: true
+open_webui_enable_openai_api: true
+open_webui_enable_ollama_api: false
 open_webui_ollama_base_url: "http://host.docker.internal:11434"
 open_webui_enable_web_search: true
 open_webui_searxng_query_url: "http://host.docker.internal:8881/search?q=<query>&format=json"
-open_webui_default_models: "{{ ollama_default_model }}"
-open_webui_default_pinned_models: "{{ ollama_default_model }}"
+open_webui_default_models: "{{ one_api_default_chat_model_alias }}"
+open_webui_default_pinned_models: "{{ one_api_default_chat_model_alias }}"
 serverclaw_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
 serverclaw_admin_email: ops@lv3.org
 serverclaw_admin_name: Florin Badita
@@ -240,12 +256,13 @@ serverclaw_enable_login_form: true
 serverclaw_enable_password_auth: true
 serverclaw_oidc_client_id: serverclaw
 serverclaw_oidc_provider_url: https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
-serverclaw_enable_ollama_api: true
+serverclaw_enable_openai_api: true
+serverclaw_enable_ollama_api: false
 serverclaw_ollama_base_url: http://10.10.10.20:11434
 serverclaw_enable_web_search: true
 serverclaw_searxng_query_url: http://10.10.10.20:8881/search?q=<query>&format=json
-serverclaw_default_models: "{{ ollama_default_model }}"
-serverclaw_default_pinned_models: "{{ ollama_default_model }}"
+serverclaw_default_models: "{{ one_api_default_chat_model_alias }}"
+serverclaw_default_pinned_models: "{{ one_api_default_chat_model_alias }}"
 serverclaw_default_user_role: user
 serverclaw_workspace_knowledge_access: true
 serverclaw_workspace_prompts_access: true

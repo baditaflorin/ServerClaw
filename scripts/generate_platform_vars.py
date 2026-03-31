@@ -39,6 +39,8 @@ PORT_KEYS = (
     "ntfy_port",
     "openfga_http_port",
     "openfga_host_proxy_port",
+    "one_api_port",
+    "one_api_host_proxy_port",
     "openbao_http_port",
     "openbao_proxy_port",
     "redpanda_kafka_port",
@@ -695,6 +697,13 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["openfga_host_proxy_port"])
         port_map["internal"] = ports["openfga_http_port"]
         port_map["controller"] = ports["openfga_host_proxy_port"]
+    elif service_id == "one_api":
+        urls["internal"] = service_url("http", private_ip, ports["one_api_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["one_api_host_proxy_port"])
+        urls["openai"] = service_url("http", private_ip, ports["one_api_port"], "/v1")
+        urls["controller_openai"] = service_url("http", tailscale_ipv4, ports["one_api_host_proxy_port"], "/v1")
+        port_map["internal"] = ports["one_api_port"]
+        port_map["controller"] = ports["one_api_host_proxy_port"]
     elif service_id == "platform_context_api":
         urls["internal"] = service_url("http", private_ip, ports["platform_context_internal_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["platform_context_host_proxy_port"])
@@ -929,6 +938,7 @@ def build_platform_vars(
     headscale_service = service_topology["headscale"]
     openbao_service = service_topology["openbao"]
     openfga_service = service_topology["openfga"]
+    one_api_service = service_topology["one_api"]
     platform_context_service = service_topology["platform_context_api"]
     portainer_service = service_topology["portainer"]
     vaultwarden_service = service_topology["vaultwarden"]
@@ -1029,6 +1039,7 @@ def build_platform_vars(
             resolved_ports["step_ca_proxy_port"],
             resolved_ports["openbao_proxy_port"],
             resolved_ports["openfga_host_proxy_port"],
+            resolved_ports["one_api_host_proxy_port"],
             resolved_ports["semaphore_host_proxy_port"],
             resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
@@ -1063,6 +1074,12 @@ def build_platform_vars(
         "openfga_http_port": resolved_ports["openfga_http_port"],
         "openfga_host_proxy_port": resolved_ports["openfga_host_proxy_port"],
         "openfga_controller_url": openfga_service["urls"]["controller"],
+        "one_api_port": resolved_ports["one_api_port"],
+        "one_api_host_proxy_port": resolved_ports["one_api_host_proxy_port"],
+        "one_api_internal_url": one_api_service["urls"]["internal"],
+        "one_api_controller_url": one_api_service["urls"]["controller"],
+        "one_api_openai_base_url": one_api_service["urls"]["openai"],
+        "one_api_controller_openai_base_url": one_api_service["urls"]["controller_openai"],
         "semaphore_server_port": resolved_ports["semaphore_server_port"],
         "semaphore_host_proxy_port": resolved_ports["semaphore_host_proxy_port"],
         "semaphore_private_base_url": semaphore_service["urls"]["internal"],

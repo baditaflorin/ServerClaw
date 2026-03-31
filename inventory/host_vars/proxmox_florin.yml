@@ -41,6 +41,8 @@ platform_port_assignments:
   ntfy_port: 2586
   openfga_http_port: 8098
   openfga_host_proxy_port: 8014
+  one_api_port: 8101
+  one_api_host_proxy_port: 8018
   openbao_http_port: 8201
   openbao_proxy_port: 8200
   redpanda_kafka_port: 9092
@@ -695,11 +697,12 @@ network_policy:
             - 3007
             - 3008
             - 8055
+            - 8101
             - 11235
             - 8881
             - 9998
             - 11434
-          description: Private guest-to-guest document rendering, extraction, OCR, crawl extraction, agent API, and governed data API traffic
+          description: Private guest-to-guest document rendering, extraction, OCR, crawl extraction, One-API, agent API, and governed data API traffic
         - source: all_guests
           protocol: tcp
           ports:
@@ -749,11 +752,12 @@ network_policy:
             - 3008
             - 5000
             - 8055
+            - 8101
             - 11235
             - 8881
             - 9998
             - 11434
-          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Directus, Crawl4AI, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Directus, Crawl4AI, One-API, Ollama, and SearXNG APIs
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
@@ -771,11 +775,12 @@ network_policy:
             - 3008
             - 5000
             - 8055
+            - 8101
             - 11235
             - 8881
             - 9998
             - 11434
-          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Directus, Crawl4AI, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Directus, Crawl4AI, One-API, Ollama, and SearXNG APIs
         - source: docker-build-lv3
           protocol: tcp
           ports:
@@ -880,8 +885,9 @@ network_policy:
             - 5000
             - 8089
             - 8100
+            - 8101
             - 9998
-          description: Private monitoring probes for the OpenFGA, Tesseract OCR, Changedetection, Dozzle, Piper, and Tika runtimes
+          description: Private monitoring probes for the OpenFGA, Tesseract OCR, Changedetection, Dozzle, Piper, One-API, and Tika runtimes
         - source: monitoring-lv3
           protocol: tcp
           ports:

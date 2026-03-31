@@ -1,0 +1,14 @@
+groups:
+  - name: open-webui-alerts
+    rules:
+      - alert: OpenWebUIDown
+        expr: probe_success{service="open_webui",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: open_webui
+        annotations:
+          summary: Open WebUI is unreachable on the private controller endpoint.
+          description: The Open WebUI readiness probe through the managed private contract has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/configure-open-webui/
+          dashboard_url: https://grafana.lv3.org/d/lv3-open-webui/lv3-open-webui

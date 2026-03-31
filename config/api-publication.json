@@ -25,7 +25,9 @@
       "lane": "api",
       "lane_surface_ref": "platform-api-gateway",
       "publication_tier": "public-edge",
-      "public_hostnames": ["api.lv3.org"],
+      "public_hostnames": [
+        "api.lv3.org"
+      ],
       "reachability": "Reachable on https://api.lv3.org through the NGINX edge, with Keycloak bearer-token authentication enforced by the gateway itself.",
       "approval_notes": "ADR 0092 approves this single public-edge gateway surface so downstream service APIs can stay internal implementation detail."
     },
@@ -35,7 +37,9 @@
       "lane": "api",
       "lane_surface_ref": "headscale-control-plane",
       "publication_tier": "public-edge",
-      "public_hostnames": ["headscale.lv3.org"],
+      "public_hostnames": [
+        "headscale.lv3.org"
+      ],
       "reachability": "Reachable on https://headscale.lv3.org through the shared NGINX edge, with node-registration keys and API keys enforcing access to the mesh control plane.",
       "approval_notes": "ADR 0144 explicitly approves this public hostname because the mesh control plane must be reachable for client registration while node-to-node traffic stays private."
     },
@@ -126,7 +130,9 @@
       "lane": "api",
       "lane_surface_ref": "langfuse-observability-api",
       "publication_tier": "public-edge",
-      "public_hostnames": ["langfuse.lv3.org"],
+      "public_hostnames": [
+        "langfuse.lv3.org"
+      ],
       "reachability": "Reachable on https://langfuse.lv3.org/api/public through the shared NGINX edge, authenticated with project-scoped API keys for ingestion and Keycloak-backed browser login for operators.",
       "approval_notes": "ADR 0146 approves this public-edge observability surface so agent traces can be emitted without relying on private network paths."
     },
@@ -138,6 +144,15 @@
       "publication_tier": "operator-only",
       "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8008.",
       "approval_notes": "This conversational operator surface stays private and requires approved operator credentials; do not publish it through the public edge."
+    },
+    {
+      "id": "one-api-unified-llm-api",
+      "title": "One-API unified LLM API",
+      "lane": "api",
+      "lane_surface_ref": "one-api-unified-llm-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8018 and the LV3 private guest network.",
+      "approval_notes": "This OpenAI-compatible local model router remains private-first for repo-managed consumers and operator verification; do not publish it through public DNS or the NGINX edge."
     },
     {
       "id": "ollama-local-inference-api",

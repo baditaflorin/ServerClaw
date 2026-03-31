@@ -1,0 +1,14 @@
+groups:
+  - name: one-api-alerts
+    rules:
+      - alert: OneAPIDown
+        expr: probe_success{service="one_api",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: one_api
+        annotations:
+          summary: One-API is unreachable on the private controller endpoint.
+          description: The One-API readiness probe through the managed private contract has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/configure-one-api/
+          dashboard_url: https://grafana.lv3.org/d/lv3-one-api/lv3-one-api

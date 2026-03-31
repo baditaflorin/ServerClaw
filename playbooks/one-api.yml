@@ -1,0 +1,155 @@
+---
+# Playbook: one-api.yml
+# Purpose: Converge the private One-API runtime, its PostgreSQL backend, the Proxmox host proxy, and the repo-managed channel/token bootstrap for governed LLM consumers.
+# Use case: Run during ADR 0294 rollout, recovery, or replay when the unified LLM API proxy and router must match repo truth.
+#
+# Inputs (required):
+#   - env (string, required): Target environment selector used to choose the postgres and docker-runtime guests.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
+#
+# Outputs:
+#   - One-API runtime state, PostgreSQL access, Proxmox host proxying, and the initial repo-managed channels, tokens, and consumer provider env files are reconciled to the declared platform state.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0294: One-API as the unified LLM API proxy and router.
+#   - Requires: OpenBao, PostgreSQL, docker-runtime, and the Proxmox host Tailscale proxy lane to already exist.
+#
+# Related ADRs: 0042, 0077, 0095, 0145, 0254, 0294
+# Related Runbooks: docs/runbooks/configure-one-api.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- name: Converge private One-API access on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - access
+    - service-one-api
+
+  roles:
+    - role: lv3.platform.proxmox_tailscale_proxy
+    - role: lv3.platform.proxmox_security
+
+- name: Prepare PostgreSQL for One-API
+  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - data
+    - service-one-api
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.postgres_vm
+    - role: lv3.platform.one_api_postgres
+
+- name: Converge One-API on docker-runtime-lv3
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - access
+    - service-one-api
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.one_api
+        playbook_execution_audit_target: one_api
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.one_api_runtime
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: one_api
+        playbook_execution_post_verify_audit_action: playbook.verify.one_api
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: one_api
+
+- name: Bootstrap One-API channels, tokens, and consumer provider env files from the controller
+  hosts: localhost
+  become: false
+  gather_facts: false
+  tags:
+    - tier-3
+    - access
+    - service-one-api
+  vars:
+    one_api_bootstrap_config_file: "{{ playbook_dir }}/../config/one-api/bootstrap.json"
+    one_api_bootstrap_script: "{{ playbook_dir }}/../scripts/one_api_bootstrap.py"
+    one_api_bootstrap_report_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api/bootstrap-report.json
+    one_api_bootstrap_url: >-
+      http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{
+        hostvars['proxmox_florin'].platform_port_assignments.one_api_host_proxy_port
+      }}
+    one_api_bootstrap_root_access_token_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api/root-access-token.txt
+    one_api_bootstrap_root_password_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api/root-password.txt
+
+  tasks:
+    - name: Bootstrap the One-API root profile, channels, tokens, and provider env files
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ one_api_bootstrap_script }}"
+          - apply
+          - --config
+          - "{{ one_api_bootstrap_config_file }}"
+          - --one-api-url
+          - "{{ one_api_bootstrap_url }}"
+          - --root-access-token-file
+          - "{{ one_api_bootstrap_root_access_token_file }}"
+          - --root-password-file
+          - "{{ one_api_bootstrap_root_password_file }}"
+          - --write-report
+          - "{{ one_api_bootstrap_report_file }}"
+      register: one_api_bootstrap
+      retries: 5
+      delay: 3
+      until: >-
+        one_api_bootstrap.rc == 0 and
+        (one_api_bootstrap.stdout | length > 0) and
+        ((one_api_bootstrap.stdout | from_json).verification_passed)
+      changed_when: >-
+        one_api_bootstrap.rc == 0 and
+        (one_api_bootstrap.stdout | length > 0) and
+        ((one_api_bootstrap.stdout | from_json).changed)
+      failed_when: >-
+        one_api_bootstrap.rc != 0 or
+        (one_api_bootstrap.stdout | length == 0) or
+        (not (one_api_bootstrap.stdout | from_json).verification_passed)
+
+    - name: Assert the One-API bootstrap passed verification
+      ansible.builtin.assert:
+        that:
+          - (one_api_bootstrap.stdout | from_json).verification_passed
+        fail_msg: "The One-API bootstrap did not pass verification."

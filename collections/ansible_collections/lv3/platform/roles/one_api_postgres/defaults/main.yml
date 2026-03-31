@@ -1,0 +1,13 @@
+# Purpose: Define default PostgreSQL database names, users, and secret paths required by the One-API stack.
+# Use case: Loaded whenever the One-API PostgreSQL helper role provisions or validates database prerequisites.
+# Inputs: Repo-local secret paths and One-API database naming defaults.
+# Outputs: Supplies stable defaults consumed by the One-API PostgreSQL role tasks.
+# Idempotency: Fully idempotent because this file only declares role defaults.
+# Dependencies: ADR 0165 and ADR 0294.
+---
+one_api_database_name: oneapi
+one_api_database_user: oneapi
+one_api_postgres_secret_dir: /etc/lv3/one-api
+one_api_postgres_password_file: "{{ one_api_postgres_secret_dir }}/database-password"
+one_api_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api
+one_api_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api/database-password.txt

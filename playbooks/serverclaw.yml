@@ -156,6 +156,7 @@
         open_webui_default_user_role: "{{ serverclaw_default_user_role }}"
         open_webui_oidc_client_id: "{{ serverclaw_oidc_client_id }}"
         open_webui_oidc_provider_url: "{{ serverclaw_oidc_provider_url }}"
+        open_webui_enable_openai_api: "{{ serverclaw_enable_openai_api }}"
         open_webui_enable_ollama_api: "{{ serverclaw_enable_ollama_api }}"
         open_webui_ollama_base_url: "{{ serverclaw_ollama_base_url }}"
         open_webui_enable_web_search: "{{ serverclaw_enable_web_search }}"

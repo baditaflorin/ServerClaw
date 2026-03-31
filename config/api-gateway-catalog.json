@@ -180,6 +180,17 @@
       "healthcheck_path": "/healthz"
     },
     {
+      "id": "one_api",
+      "name": "One-API",
+      "upstream": "http://10.10.10.20:8101",
+      "gateway_prefix": "/v1/one-api",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 60,
+      "healthcheck_path": "/api/status"
+    },
+    {
       "id": "ops_portal",
       "name": "Ops Portal",
       "upstream": "http://10.10.10.20:8092",

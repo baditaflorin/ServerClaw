@@ -1,0 +1,39 @@
+# Purpose: Verify the deployed One-API runtime health, admin API contract, and repo-managed root identity.
+# Use case: Run after One-API converges or during validation to prove the unified LLM proxy is live.
+# Inputs: Local One-API URLs, root access token, and expected root display-name settings exposed by the runtime role.
+# Outputs: Confirms the local status endpoint and authenticated admin API contract without mutating service state.
+# Idempotency: Fully idempotent because these tasks only read state and assert expected behavior.
+# Dependencies: ADR 0165 and ADR 0294.
+---
+- name: Verify One-API responds on the local status endpoint
+  ansible.builtin.uri:
+    url: "{{ one_api_local_url }}/api/status"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: one_api_verify_status
+  changed_when: false
+
+- name: Verify the One-API admin API accepts the repo-managed root access token
+  ansible.builtin.uri:
+    url: "{{ one_api_local_url }}/api/user/self"
+    method: GET
+    headers:
+      Authorization: "{{ one_api_root_access_token }}"
+    return_content: true
+    status_code: 200
+  register: one_api_verify_root_user
+  changed_when: false
+  no_log: true
+
+- name: Assert One-API status and authenticated admin access are working
+  ansible.builtin.assert:
+    that:
+      - one_api_verify_status.status == 200
+      - one_api_verify_status.json.success | default(false)
+      - one_api_verify_root_user.status == 200
+      - one_api_verify_root_user.json.success | default(false)
+      - one_api_verify_root_user.json.data.username == 'root'
+      - one_api_verify_root_user.json.data.display_name == one_api_root_user_display_name
+    fail_msg: "One-API answered locally, but the authenticated admin API path did not validate."
+  no_log: true

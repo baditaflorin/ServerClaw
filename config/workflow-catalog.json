@@ -4585,6 +4585,65 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-one-api": {
+      "description": "Converge One-API on docker-runtime-lv3, publish the Proxmox host controller proxy, and bootstrap the repo-managed routing and consumer-token contract for local LLM access.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-one-api",
+        "command": "make converge-one-api"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "one_api_database_password",
+          "one_api_session_secret",
+          "one_api_root_access_token",
+          "one_api_root_password",
+          "open_webui_provider_env",
+          "serverclaw_provider_env"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-one-api"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-one-api.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/one-api.yml",
+        "playbooks/services/one-api.yml",
+        "collections/ansible_collections/lv3/platform/roles/one_api_postgres",
+        "collections/ansible_collections/lv3/platform/roles/one_api_runtime",
+        "inventory/group_vars/all.yml",
+        "inventory/group_vars/platform.yml",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/one-api/bootstrap.json",
+        "scripts/one_api_bootstrap.py"
+      ],
+      "outputs": [
+        "A private One-API runtime on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a Proxmox-host controller proxy, repo-managed routing channels, per-consumer API tokens, and verified provider env files for Open WebUI and ServerClaw."
+      ],
+      "verification_commands": [
+        "make syntax-check-one-api",
+        "curl -fsS http://100.64.0.1:8018/api/status",
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/one_api_bootstrap.py verify --config /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/one-api/bootstrap.json --one-api-url http://100.64.0.1:8018 --root-access-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api/root-access-token.txt"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-open-webui": {
       "description": "Deploy private Open WebUI on docker-runtime-lv3 with repo-managed bootstrap auth and an operator-only Tailscale proxy on the Proxmox host.",
       "lifecycle_status": "active",

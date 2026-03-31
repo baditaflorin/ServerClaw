@@ -19,4 +19,14 @@ models:
       - json_generation
     max_context: 8192
     ram_requirement_gb: 6
-    pull_on_startup: false
+    pull_on_startup: true
+
+  - name: nomic-embed-text
+    provider: ollama
+    use_cases:
+      - embeddings
+      - semantic_search
+      - retrieval_augmented_generation
+    max_context: 8192
+    ram_requirement_gb: 2
+    pull_on_startup: true

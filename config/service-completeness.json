@@ -433,7 +433,20 @@
       "requires_oidc": false,
       "requires_secrets": true,
       "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service"
+      "suppression_preset": "legacy-service",
+      "dashboard_file": "config/grafana/dashboards/open-webui.json",
+      "alert_rule_file": "config/alertmanager/rules/open-webui.yml",
+      "suppressed_checks": {}
+    },
+    "one_api": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "dashboard_file": "config/grafana/dashboards/one-api.json",
+      "alert_rule_file": "config/alertmanager/rules/one-api.yml",
+      "suppressed_checks": {}
     },
     "openbao": {
       "service_type": "compose",
@@ -612,7 +625,10 @@
       "requires_oidc": true,
       "requires_secrets": true,
       "requires_compose_secrets": true,
-      "keycloak_client_generated": true
+      "keycloak_client_generated": true,
+      "dashboard_file": "config/grafana/dashboards/serverclaw.json",
+      "alert_rule_file": "config/alertmanager/rules/serverclaw.yml",
+      "suppressed_checks": {}
     },
     "status_page": {
       "service_type": "compose",

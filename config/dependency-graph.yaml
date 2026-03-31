@@ -30,13 +30,29 @@ extra_nodes:
 
 extra_edges:
   - from: service:open_webui
+    to: service:one_api
+    edge_kind: depends_on
+    metadata:
+      source: manifest
+      relationship: unified_llm_api
+      strength: hard
+      description: Open WebUI uses the private One-API runtime for repo-managed local model access.
+  - from: service:serverclaw
+    to: service:one_api
+    edge_kind: depends_on
+    metadata:
+      source: manifest
+      relationship: unified_llm_api
+      strength: hard
+      description: ServerClaw uses the private One-API runtime for repo-managed local model access.
+  - from: service:one_api
     to: service:ollama
     edge_kind: depends_on
     metadata:
       source: manifest
       relationship: local_inference
       strength: hard
-      description: Open WebUI uses the private Ollama runtime for repo-managed local model access.
+      description: One-API forwards local chat and embedding aliases to the private Ollama runtime.
   - from: service:grafana
     to: service:loki
     edge_kind: depends_on

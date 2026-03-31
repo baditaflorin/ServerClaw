@@ -635,6 +635,35 @@
       "notes": "Temporal persists workflow event history, timers, and visibility records for the repo-managed `lv3` namespace using the declared retention window."
     },
     {
+      "id": "one-api-routing-state",
+      "service": "one_api",
+      "name": "One-API routing state and usage ledger",
+      "class": "confidential",
+      "retention_days": 90,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "PostgreSQL oneapi database on postgres-lv3"
+      ],
+      "notes": "One-API persists channel definitions, consumer token metadata, quotas, and aggregate local LLM usage records in PostgreSQL so the proxy contract and audit trail survive restarts."
+    },
+    {
+      "id": "open-webui-workbench-state",
+      "service": "open_webui",
+      "name": "Open WebUI workbench state",
+      "class": "confidential",
+      "retention_days": 90,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/open-webui/data",
+        "http://100.64.0.1:8008"
+      ],
+      "notes": "Open WebUI persists conversations, workspace artifacts, prompt history, and user-specific workbench settings in its local runtime data volume on docker-runtime-lv3."
+    },
+    {
       "id": "outline-attachment-storage",
       "service": "outline",
       "name": "Outline attachment storage",
