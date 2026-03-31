@@ -23,6 +23,9 @@
     status_code: 401
     return_content: true
   register: api_gateway_auth_check
+  retries: "{{ api_gateway_runtime_recovery_probe_retries }}"
+  delay: "{{ api_gateway_runtime_recovery_probe_delay }}"
+  until: api_gateway_auth_check.status == 401
   changed_when: false
 
 - name: Assert the anonymous health rejection uses the canonical error envelope

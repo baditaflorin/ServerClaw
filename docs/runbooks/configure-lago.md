@@ -52,6 +52,10 @@ This is the authoritative exact-main replay path because
 `make live-apply-service` is what updates the canonical release and platform
 truth surfaces.
 
+On a successful live apply, the wrapper now also triggers the governed Restic
+live-apply backup flow through the repo-managed Python environment. Treat the
+run as incomplete unless the final JSON summary reports `status: ok`.
+
 On a non-`main` workstream branch where protected release files must remain
 untouched, prefer the service-scoped converge target:
 

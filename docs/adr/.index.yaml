@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-31'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 277
+  Implemented: 278
   Partial: 6
-  Not Implemented: 40
+  Not Implemented: 39
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5150,7 +5150,7 @@ adr_index:
   - adr: 0292
     title: Lago As The Usage Metering And Billing API Layer
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: api
     keywords:
@@ -5163,6 +5163,7 @@ adr_index:
       - layer
     summary: We will deploy Lago as the usage metering and billing API layer for
     filename: 0292-lago-as-the-usage-metering-and-billing-api-layer.md
+    implemented_version: 0.177.118
   - adr: 0293
     title: Livekit As The Real-Time Audio And Voice Channel For Agents
     status: Accepted

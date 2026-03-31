@@ -1,12 +1,12 @@
-# Release 0.177.117
+# Release 0.177.118
 
 - Date: 2026-03-31
 
 ## Summary
-- implements ADR 0257 by carrying the governed ServerClaw SKILL.md skill-pack contract onto the current mainline baseline, hardening exact-main OpenBao replay stability, and recording the verified controller, API gateway, and Windmill workspace-precedence proof set
+- implements ADR 0292 by hardening exact-main Lago replay recovery, verifying the protected billing.lv3.org surface plus public event-ingest and current-usage smoke contracts on merged mainline, and restoring the governed Restic live-apply backup trigger for the service wrapper
 
 ## Platform Impact
-- Platform version advances to 0.130.76 by promoting the ADR 0257 exact-main live-apply receipt for the governed ServerClaw SKILL.md skill-pack contract, with verified controller, API gateway, Windmill, OpenBao, and step-ca evidence on docker-runtime-lv3.
+- Platform version advances to 0.130.77 by promoting the ADR 0292 exact-main Lago replay, with verified billing.lv3.org publication, public ingest, current-usage aggregation, and the governed restic live-apply backup trigger on top of the 0.130.76 baseline
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

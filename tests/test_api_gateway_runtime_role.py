@@ -304,6 +304,9 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Wait for the local Keycloak realm discovery endpoint used by API gateway verification" in verify_tasks
     assert "/realms/lv3/.well-known/openid-configuration" in verify_tasks
     assert "api_gateway_keycloak_verify_discovery.json.issuer == api_gateway_keycloak_issuer_url" in verify_tasks
+    assert 'retries: "{{ api_gateway_runtime_recovery_probe_retries }}"' in verify_tasks
+    assert 'delay: "{{ api_gateway_runtime_recovery_probe_delay }}"' in verify_tasks
+    assert "until: api_gateway_auth_check.status == 401" in verify_tasks
     assert 'retries: "{{ api_gateway_keycloak_verify_ready_retries }}"' in verify_tasks
     assert 'delay: "{{ api_gateway_keycloak_verify_ready_delay }}"' in verify_tasks
     assert 'retries: "{{ api_gateway_keycloak_verify_token_retries }}"' in verify_tasks

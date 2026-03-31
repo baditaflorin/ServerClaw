@@ -68,6 +68,8 @@ Gitea is now live on `docker-runtime-lv3` at `http://100.64.0.1:3009`, with Keyc
 
 Harbor is now live on `docker-runtime-lv3` and published at `https://registry.lv3.org`, with Trivy-backed CVE scanning, Keycloak-backed operator login, a repo-managed `check-runner` project, and verified pull access from `docker-build-lv3` through the exact-main replay on 2026-03-29.
 
+Lago is now live on `docker-runtime-lv3` and published at `https://billing.lv3.org`, with the browser and operator paths still protected by the shared Keycloak-backed edge-auth flow, the public `/api/v1/events` path terminating at the governed API-gateway billing adapter, and the exact-main replay on 2026-03-31 proving public smoke-event ingest plus seeded current-period usage aggregation end to end.
+
 Signed release bundles are now live through that private Gitea path: the repo-managed `release-bundle` workflow publishes tarball, checksum, and Sigstore bundle assets into private Gitea Releases, and controller-side replay now verifies those assets with Cosign against the committed public key before treating them as eligible runtime input.
 
 Renovate is now live through that same private Gitea Actions path on `docker-build-lv3`: the Harbor-pinned `registry.lv3.org/check-runner/renovate:42.76.4` runtime mints a short-lived scoped Gitea token from the OpenBao-rendered bootstrap bundle at job start, maintains the private `Renovate Dashboard`, and now opens governed `main`-targeted update PRs against `ops/proxmox_florin_server`.
@@ -199,8 +201,8 @@ ADR 0302 Restic file-level backups are now live on production from `main`: `dock
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.117` |
-| Platform version | `0.130.76` |
+| Repository version | `0.177.118` |
+| Platform version | `0.130.77` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -313,6 +315,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `jupyterhub` | `2026-03-30-adr-0291-jupyterhub-mainline-live-apply` |
 | `keycloak` | `2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply` |
 | `keycloak_operator_access` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
+| `lago` | `2026-03-31-adr-0292-lago-mainline-live-apply` |
 | `langfuse` | `2026-03-26-adr-0146-langfuse-live-apply` |
 | `local_search_and_indexing_fabric` | `2026-03-29-adr-0239-browser-local-search-post-merge-replay` |
 | `log_queryability_canary` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
@@ -1481,8 +1484,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.117` |
-| Platform version | `0.130.76` |
+| Repository version | `0.177.118` |
+| Platform version | `0.130.77` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1802,6 +1805,7 @@ This repository is intentionally opinionated:
 | `0289` | Live apply ADR 0289 Directus from latest origin/main | `live_applied` | [ws-0289-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0289-live-apply.md) |
 | `0290` | Live apply Redpanda as the Kafka-compatible streaming platform from latest origin/main | `live_applied` | [ws-0290-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0290-live-apply.md) |
 | `0291` | Live apply ADR 0291 from the latest realistic origin/main | `live_applied` | [ws-0291-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0291-live-apply.md) |
+| `0292` | Live apply Lago as the usage metering and billing API layer from latest origin/main | `live_applied` | [ws-0292-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-live-apply.md) |
 | `0293` | Live apply Temporal as the durable workflow and task queue engine from latest origin/main | `live_applied` | [ws-0293-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-live-apply.md) |
 | `0295` | Shared artifact cache plane and dedicated cache VM roadmap | `live_applied` | [adr-0295-artifact-cache-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `merged` | [ws-0295-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md) |
