@@ -60,6 +60,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
     assert defaults["windmill_worker_checkout_integrity_files"] == [
         "Makefile",
+        "config/sbom-scanner.json",
         "config/validation-gate.json",
         "config/validation-lanes.yaml",
         "config/gate-bypass-waiver-catalog.json",
@@ -68,13 +69,17 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "scripts/policy_toolchain.py",
         "scripts/command_catalog.py",
         "scripts/controller_automation_toolkit.py",
+        "scripts/validate_repo.sh",
         "scripts/gate_bypass_waivers.py",
         "scripts/gate_status.py",
+        "scripts/sbom_scanner.py",
+        "scripts/sbom_refresh.py",
         "scripts/stage_smoke_suites.py",
         "scripts/validation_lanes.py",
         "scripts/run_python_with_packages.sh",
         "config/windmill/scripts/gate-status.py",
         "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+        "config/windmill/scripts/sbom-refresh.py",
         "config/windmill/scripts/stage-smoke-suites.py",
     ]
     assert defaults["windmill_seed_repo_root_local_dir"] == "{{ windmill_worker_checkout_repo_root_local_dir }}"

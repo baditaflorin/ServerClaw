@@ -1,0 +1,12 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+gate-status.py
+post-merge-gate.py
+sbom-refresh.py
+stage-smoke-suites.py
+weekly-capacity-report.py
+weekly-security-scan.py
+---
+c03ba4bdae0e718597e249c0d98399e4d8075c1d85b1ee81ec1944e9ffb8a9a8  /srv/proxmox_florin_server/scripts/validate_repo.sh
+bd93c83f3e6dcf4a319e2839f295e5b66208c829b8697be302247293f0400b33  /srv/proxmox_florin_server/scripts/sbom_refresh.py
+3678900cd0300f93f1cbd59c8777ba7bf6a280e2d923389c1a9cd9895c4bb443  /srv/proxmox_florin_server/scripts/sbom_scanner.py
+96f1b29c98571e3368961849fcac458709133677111c0c8c77655e772691f181  /srv/proxmox_florin_server/config/windmill/scripts/sbom-refresh.py
