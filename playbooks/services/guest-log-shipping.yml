@@ -173,25 +173,37 @@
       changed_when: false
 
     - name: Verify the PostgreSQL audit Alloy endpoint exposes the expected metric families after guest log shipping
-      ansible.builtin.uri:
-        url: "http://{{ monitoring_stack_postgres_audit_metrics_target }}/metrics"
-        method: GET
-        timeout: 10
-        status_code: 200
-        return_content: true
+      ansible.builtin.command:
+        argv:
+          - python3
+          - -c
+          - |
+            import urllib.request
+
+            target = "http://{{ monitoring_stack_postgres_audit_metrics_target }}/metrics"
+            needles = {
+                "# HELP loki_process_custom_postgres_audit_events_total ": False,
+                "# HELP loki_process_custom_postgres_connection_authorized_total ": False,
+            }
+
+            with urllib.request.urlopen(target, timeout=10) as response:
+                for raw_line in response:
+                    line = raw_line.decode("utf-8", "replace")
+                    for needle in needles:
+                        if needle in line:
+                            needles[needle] = True
+                    if all(needles.values()):
+                        break
+
+            missing = [needle.strip() for needle, present in needles.items() if not present]
+            if missing:
+                raise SystemExit(
+                    "missing expected PostgreSQL audit Alloy metrics: " + ", ".join(missing)
+                )
+      delegate_to: "{{ monitoring_stack_postgres_audit_host }}"
       register: monitoring_stack_verify_postgres_audit_metrics_endpoint
       retries: 20
       delay: 3
-      until: >
-        monitoring_stack_verify_postgres_audit_metrics_endpoint.status == 200
-        and 'loki_process_custom_postgres_audit_events_total'
-        in (monitoring_stack_verify_postgres_audit_metrics_endpoint.content | default(''))
-        and 'loki_process_custom_postgres_connection_authorized_total'
-        in (monitoring_stack_verify_postgres_audit_metrics_endpoint.content | default(''))
+      until: monitoring_stack_verify_postgres_audit_metrics_endpoint.rc == 0
       changed_when: false
-      failed_when: >
-        monitoring_stack_verify_postgres_audit_metrics_endpoint.status != 200
-        or 'loki_process_custom_postgres_audit_events_total'
-        not in (monitoring_stack_verify_postgres_audit_metrics_endpoint.content | default(''))
-        or 'loki_process_custom_postgres_connection_authorized_total'
-        not in (monitoring_stack_verify_postgres_audit_metrics_endpoint.content | default(''))
+      failed_when: monitoring_stack_verify_postgres_audit_metrics_endpoint.rc != 0

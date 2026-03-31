@@ -96,9 +96,14 @@ def test_guest_log_shipping_verifies_postgres_audit_scrape_after_guest_converge(
         if task.get("name")
         == "Verify the PostgreSQL audit Alloy endpoint exposes the expected metric families after guest log shipping"
     )
-    assert endpoint_task["ansible.builtin.uri"]["url"] == (
-        "http://{{ monitoring_stack_postgres_audit_metrics_target }}/metrics"
-    )
-    assert "loki_process_custom_postgres_audit_events_total" in endpoint_task["failed_when"]
-    assert "loki_process_custom_postgres_connection_authorized_total" in endpoint_task["failed_when"]
-    assert "loki_process_custom_postgres_unknown_connection_events_total" not in endpoint_task["failed_when"]
+    command_argv = endpoint_task["ansible.builtin.command"]["argv"]
+    command_script = command_argv[-1]
+
+    assert command_argv[0] == "python3"
+    assert endpoint_task["delegate_to"] == "{{ monitoring_stack_postgres_audit_host }}"
+    assert "http://{{ monitoring_stack_postgres_audit_metrics_target }}/metrics" in command_script
+    assert "# HELP loki_process_custom_postgres_audit_events_total " in command_script
+    assert "# HELP loki_process_custom_postgres_connection_authorized_total " in command_script
+    assert "loki_process_custom_postgres_unknown_connection_events_total" not in command_script
+    assert endpoint_task["until"] == "monitoring_stack_verify_postgres_audit_metrics_endpoint.rc == 0"
+    assert endpoint_task["failed_when"] == "monitoring_stack_verify_postgres_audit_metrics_endpoint.rc != 0"
