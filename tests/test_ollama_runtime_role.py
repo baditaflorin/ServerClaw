@@ -20,15 +20,34 @@ def test_role_defaults_pin_private_model_storage() -> None:
     assert defaults["ollama_runtime_default_model"] == "llama3.2:3b"
 
 
-def test_role_only_pulls_missing_startup_models_via_api() -> None:
+def test_role_only_pulls_missing_startup_models_inside_container() -> None:
     tasks = load_tasks()
     check_task = next(
         task for task in tasks if task.get("name") == "Check whether declared startup Ollama models are already present"
     )
-    pull_task = next(task for task in tasks if task.get("name") == "Pull the missing startup Ollama models")
+    partial_find_task = next(
+        task for task in tasks if task.get("name") == "Find stale Ollama partial blobs before pulling missing startup models"
+    )
+    partial_remove_task = next(
+        task for task in tasks if task.get("name") == "Remove stale Ollama partial blobs before pulling missing startup models"
+    )
+    pull_task = next(
+        task for task in tasks if task.get("name") == "Pull the missing startup Ollama models from inside the container"
+    )
     assert check_task["ansible.builtin.command"]["argv"][-2:] == ["show", "{{ item }}"]
-    assert pull_task["ansible.builtin.uri"]["url"] == "{{ ollama_runtime_base_url }}/api/pull"
-    assert pull_task["ansible.builtin.uri"]["body"]["model"] == "{{ item }}"
+    assert partial_find_task["ansible.builtin.find"]["paths"] == "{{ ollama_runtime_model_dir }}/models/blobs"
+    assert partial_find_task["ansible.builtin.find"]["patterns"] == "sha256-*-partial*"
+    assert partial_remove_task["ansible.builtin.file"]["state"] == "absent"
+    assert pull_task["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "exec",
+        "{{ ollama_runtime_container_name }}",
+        "ollama",
+        "pull",
+        "{{ item }}",
+    ]
+    assert pull_task["retries"] == 3
+    assert pull_task["delay"] == 10
 
 
 def test_role_verifies_default_model_inside_container() -> None:

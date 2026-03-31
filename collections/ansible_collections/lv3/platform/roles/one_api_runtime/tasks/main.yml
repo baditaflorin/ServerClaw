@@ -246,6 +246,122 @@
         or 'Starting' in one_api_up.stdout
         or 'Running' in one_api_up.stdout
 
+    - name: Check whether One-API publishes the expected host port
+      ansible.builtin.command:
+        argv:
+          - docker
+          - port
+          - "{{ one_api_container_name }}"
+          - "{{ one_api_internal_http_port }}"
+      register: one_api_port_binding_check
+      changed_when: false
+      failed_when: false
+
+    - name: Check whether One-API has an attached Docker network
+      ansible.builtin.shell: |
+        set -euo pipefail
+        docker inspect "{{ one_api_container_name }}" --format '{{ "{{json .NetworkSettings.Networks}}" }}'
+      args:
+        executable: /bin/bash
+      register: one_api_network_attachment_check
+      changed_when: false
+      failed_when: false
+
+    - name: Force-recreate One-API when the host port binding or Docker network attachment is missing
+      when: >-
+        one_api_port_binding_check.stdout | trim == ''
+        or one_api_network_attachment_check.stdout | trim in ['', '{}', 'null']
+      block:
+        - name: Reset stale One-API compose resources after missing network attachment detection
+          ansible.builtin.command:
+            argv:
+              - docker
+              - compose
+              - --file
+              - "{{ one_api_compose_file }}"
+              - down
+              - --remove-orphans
+          args:
+            chdir: "{{ one_api_site_dir }}"
+          register: one_api_network_recovery_down
+          changed_when: >-
+            'Stopping' in (one_api_network_recovery_down.stdout | default(''))
+            or 'Removing' in (one_api_network_recovery_down.stdout | default(''))
+            or 'Removing' in (one_api_network_recovery_down.stderr | default(''))
+          failed_when: false
+
+        - name: Remove the stale One-API compose network before retrying startup
+          ansible.builtin.shell: |
+            set -euo pipefail
+            stale_networks="$(docker network ls -q --filter name=^{{ one_api_site_dir | basename }}_default$)"
+            if [ -n "${stale_networks}" ]; then
+              docker network rm ${stale_networks}
+              echo changed
+            fi
+          args:
+            chdir: "{{ one_api_site_dir }}"
+            executable: /bin/bash
+          register: one_api_network_cleanup
+          changed_when: "'changed' in one_api_network_cleanup.stdout"
+
+        - name: Restart Docker to restore bridge networking before retrying One-API startup
+          ansible.builtin.service:
+            name: docker
+            state: restarted
+
+        - name: Repair Docker bridge chains before retrying One-API startup
+          ansible.builtin.include_role:
+            name: lv3.platform.common
+            tasks_from: docker_bridge_chains
+          vars:
+            common_docker_bridge_chains_service_name: docker
+            common_docker_bridge_chains_require_nat_chain: true
+
+        - name: Force-recreate One-API after host port and network recovery
+          ansible.builtin.command:
+            argv:
+              - docker
+              - compose
+              - --file
+              - "{{ one_api_compose_file }}"
+              - up
+              - -d
+              - --force-recreate
+              - --remove-orphans
+          args:
+            chdir: "{{ one_api_site_dir }}"
+          register: one_api_network_recovery_up
+          changed_when: >-
+            'Creating' in one_api_network_recovery_up.stdout
+            or 'Recreating' in one_api_network_recovery_up.stdout
+            or 'Starting' in one_api_network_recovery_up.stdout
+            or 'Running' in one_api_network_recovery_up.stdout
+
+    - name: Recheck One-API host port binding
+      ansible.builtin.command:
+        argv:
+          - docker
+          - port
+          - "{{ one_api_container_name }}"
+          - "{{ one_api_internal_http_port }}"
+      register: one_api_port_binding_recheck
+      changed_when: false
+      retries: 5
+      delay: 2
+      until: one_api_port_binding_recheck.stdout | trim != ''
+
+    - name: Recheck One-API Docker network attachment
+      ansible.builtin.shell: |
+        set -euo pipefail
+        docker inspect "{{ one_api_container_name }}" --format '{{ "{{json .NetworkSettings.Networks}}" }}'
+      args:
+        executable: /bin/bash
+      register: one_api_network_attachment_recheck
+      changed_when: false
+      retries: 5
+      delay: 2
+      until: one_api_network_attachment_recheck.stdout | trim not in ['', '{}', 'null']
+
     - name: Wait for One-API to listen locally
       ansible.builtin.wait_for:
         host: 127.0.0.1
@@ -267,6 +383,43 @@
         and (one_api_status_ready.json.success | default(false))
       changed_when: false
   rescue:
+    - name: Flag Docker nat-chain failures during One-API startup
+      ansible.builtin.set_fact:
+        one_api_docker_nat_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Detect stale Docker networking drift during One-API startup
+      ansible.builtin.set_fact:
+        one_api_compose_network_missing: >-
+          {{
+            'failed to create endpoint' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+            and 'does not exist' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+          }}
+
+    - name: Surface unexpected One-API startup failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('one-api compose up failed')) }}"
+      when:
+        - not one_api_docker_nat_chain_missing
+        - not one_api_compose_network_missing
+
+    - name: Restart Docker to restore nat chain before retrying One-API startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: one_api_docker_nat_chain_missing
+
+    - name: Repair Docker bridge chains before force recreate
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+
     - name: Remove stale One-API compose resources before force recreate
       ansible.builtin.command:
         argv:

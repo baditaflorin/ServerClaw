@@ -75,5 +75,7 @@ grep -E '^(OPENAI_API_KEY|OPENAI_API_BASE_URL)=' /Users/live/Documents/GITHUB_PR
 
 - Keep One-API private-only. The supported operator path is the Proxmox host controller proxy, not a public edge route.
 - Treat `.local/one-api/`, `.local/open-webui/provider.env`, and `.local/serverclaw/provider.env` as sensitive controller-only material.
+- `make converge-one-api` is the authoritative replay for the unified LLM lane on this platform shape: it now converges the repo-managed Ollama dependency before One-API, then rewrites the downstream Open WebUI and ServerClaw provider env contracts from the settled bootstrap state.
 - Re-run `make converge-one-api` after changing `config/one-api/bootstrap.json` or the Ollama startup model catalog so the channel and token contract stays in sync with repo truth.
+- Upstream One-API does not expose a native Prometheus `/metrics` endpoint here; rely on the bootstrap verification report, service health probes, and downstream consumer checks instead of undocumented scrape assumptions.
 - Open WebUI and ServerClaw should consume One-API rather than talking directly to Ollama on this platform shape.

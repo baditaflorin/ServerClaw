@@ -1130,6 +1130,11 @@ network_policy:
           ports:
             - 5432
           description: Docker bridge-backed application databases and secret rotation
+        - source: 10.200.0.0/16
+          protocol: tcp
+          ports:
+            - 5432
+          description: Docker bridge-backed application databases and secret rotation
         - source: postgres-replica-lv3
           protocol: tcp
           ports:

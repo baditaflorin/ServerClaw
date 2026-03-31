@@ -164,6 +164,8 @@
   ansible.builtin.systemd_service:
     name: "{{ common_docker_bridge_chains_service_name }}"
     state: restarted
+    no_block: true
+  register: common_docker_bridge_chains_restart
   when:
     - common_docker_bridge_chains_active_state.rc == 0
     - ((common_docker_bridge_chains_wait | default({})).get('rc', 1)) != 0
@@ -176,6 +178,17 @@
         (common_docker_bridge_chains_require_nat_chain | bool)
         and common_docker_bridge_chains_nat_check.rc != 0
       )
+
+- name: Reset SSH connection after Docker bridge recovery restart
+  ansible.builtin.meta: reset_connection
+  when: common_docker_bridge_chains_restart is changed
+
+- name: Wait for Docker host SSH after bridge-chain recovery restart
+  ansible.builtin.wait_for_connection:
+    timeout: 120
+    connect_timeout: 5
+    sleep: 2
+  when: common_docker_bridge_chains_restart is changed
 
 - name: Recheck Docker nat chain after health evaluation
   ansible.builtin.command:

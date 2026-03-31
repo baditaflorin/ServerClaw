@@ -1,9 +1,10 @@
 # ADR 0294: One-API As The Unified LLM API Proxy And Router
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: not yet
+- Implemented In Platform Version: 0.130.74
+- Implemented On: 2026-03-31
 - Date: 2026-03-29
 
 ## Context
@@ -72,8 +73,10 @@ ADR 0287.
 
 - One-API's built-in usage logging writes token counts per consumer key to its
   PostgreSQL tables; a Windmill job exports these to Langfuse (ADR 0146) daily
-- One-API's `/metrics` endpoint (Prometheus format) is scraped by Alloy for
-  aggregate request rate and error rate visibility in Grafana
+- Operator and consumer-path health is verified through the repo-managed health
+  probes, bootstrap verification, and downstream consumer checks; upstream
+  One-API does not expose a native Prometheus `/metrics` endpoint on this
+  platform shape
 
 ## Consequences
 

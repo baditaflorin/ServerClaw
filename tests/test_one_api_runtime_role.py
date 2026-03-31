@@ -100,7 +100,20 @@ def test_one_api_runtime_bootstraps_openbao_env_and_root_contract() -> None:
     openbao_agent_up_task = find_task(tasks, "Start the One-API OpenBao agent")
     runtime_env_wait_task = find_task(tasks, "Wait for the One-API runtime env file")
     bridge_helper = find_task(tasks, "Ensure Docker bridge chains are healthy before One-API startup")
+    nat_chain_flag = find_task(tasks, "Flag Docker nat-chain failures during One-API startup")
+    unexpected_failure = find_task(tasks, "Surface unexpected One-API startup failures")
+    nat_chain_restart = find_task(tasks, "Restart Docker to restore nat chain before retrying One-API startup")
+    rescue_bridge_helper = find_task(tasks, "Repair Docker bridge chains before force recreate")
     up_task = find_task(tasks, "Converge the One-API runtime stack")
+    port_binding_check = find_task(tasks, "Check whether One-API publishes the expected host port")
+    network_attachment_check = find_task(tasks, "Check whether One-API has an attached Docker network")
+    network_recovery = find_task(
+        tasks,
+        "Force-recreate One-API when the host port binding or Docker network attachment is missing",
+    )
+    network_cleanup = find_task(tasks, "Remove the stale One-API compose network before retrying startup")
+    port_binding_recheck = find_task(tasks, "Recheck One-API host port binding")
+    network_attachment_recheck = find_task(tasks, "Recheck One-API Docker network attachment")
     force_recreate_task = find_task(tasks, "Force-recreate the One-API runtime stack")
 
     runtime_secret_payload = secret_payload_task["ansible.builtin.set_fact"]["one_api_runtime_secret_payload"]
@@ -116,7 +129,22 @@ def test_one_api_runtime_bootstraps_openbao_env_and_root_contract() -> None:
     assert runtime_env_wait_task["ansible.builtin.shell"].startswith("set -euo pipefail")
     assert 'grep -Fqx "PORT={{ one_api_internal_http_port }}" "{{ one_api_env_file }}"' in runtime_env_wait_task["ansible.builtin.shell"]
     assert bridge_helper["ansible.builtin.include_role"]["tasks_from"] == "docker_bridge_chains"
+    assert "Unable to enable DNAT rule" in nat_chain_flag["ansible.builtin.set_fact"]["one_api_docker_nat_chain_missing"]
+    assert "one-api compose up failed" in unexpected_failure["ansible.builtin.fail"]["msg"]
+    assert nat_chain_restart["ansible.builtin.service"]["name"] == "docker"
+    assert rescue_bridge_helper["ansible.builtin.include_role"]["tasks_from"] == "docker_bridge_chains"
     assert up_task["ansible.builtin.command"]["argv"][-2:] == ["-d", "--remove-orphans"]
+    assert port_binding_check["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "port",
+        "{{ one_api_container_name }}",
+        "{{ one_api_internal_http_port }}",
+    ]
+    assert "{{json .NetworkSettings.Networks}}" in network_attachment_check["ansible.builtin.shell"]
+    assert "one_api_port_binding_check.stdout | trim == ''" in network_recovery["when"]
+    assert "^{{ one_api_site_dir | basename }}_default$" in network_cleanup["ansible.builtin.shell"]
+    assert port_binding_recheck["retries"] == 5
+    assert "{{json .NetworkSettings.Networks}}" in network_attachment_recheck["ansible.builtin.shell"]
     assert force_recreate_task["ansible.builtin.command"]["argv"][-1] == "--force-recreate"
 
 
@@ -131,8 +159,13 @@ def test_one_api_verify_task_checks_status_and_authenticated_admin_api() -> None
 
     assert status_task["ansible.builtin.uri"]["url"] == "{{ one_api_local_url }}/api/status"
     assert admin_task["ansible.builtin.uri"]["headers"]["Authorization"] == "{{ one_api_root_access_token }}"
+    assert admin_task["retries"] == 12
+    assert admin_task["delay"] == 2
+    assert "one_api_verify_root_user.status == 200" in admin_task["until"]
+    assert "one_api_verify_root_user.json.data.username | default('')" in admin_task["until"]
     assert "one_api_verify_status.status == 200" in assert_task["ansible.builtin.assert"]["that"]
     assert "one_api_verify_root_user.json.data.username == 'root'" in assert_task["ansible.builtin.assert"]["that"]
+    assert not any("display_name" in condition for condition in assert_task["ansible.builtin.assert"]["that"])
 
 
 def test_one_api_compose_template_uses_openbao_agent_and_runtime_env() -> None:
@@ -156,12 +189,16 @@ def test_one_api_env_template_renders_expected_runtime_keys() -> None:
 def test_one_api_playbook_bootstraps_channels_and_tokens_from_localhost() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text(encoding="utf-8"))
 
+    runtime_play = next(
+        play for play in plays if play["name"] == "Converge One-API on docker-runtime-lv3"
+    )
     bootstrap_play = next(
         play
         for play in plays
         if play["name"] == "Bootstrap One-API channels, tokens, and consumer provider env files from the controller"
     )
     task = bootstrap_play["tasks"][0]
+    bootstrap_assert = bootstrap_play["tasks"][2]
 
     assert task["ansible.builtin.command"]["argv"][0] == "python3"
     assert task["ansible.builtin.command"]["argv"][1] == "{{ one_api_bootstrap_script }}"
@@ -169,6 +206,14 @@ def test_one_api_playbook_bootstraps_channels_and_tokens_from_localhost() -> Non
     assert "--root-password-file" in task["ansible.builtin.command"]["argv"]
     assert task["retries"] == 5
     assert task["delay"] == 3
+    assert [role["role"] for role in runtime_play["roles"]] == [
+        "lv3.platform.linux_guest_firewall",
+        "lv3.platform.docker_runtime",
+        "lv3.platform.ollama_runtime",
+        "lv3.platform.one_api_runtime",
+    ]
+    assert bootstrap_assert["name"] == "Assert the One-API bootstrap reconciled the managed root profile"
+    assert "verification.root_user.display_name" in bootstrap_assert["ansible.builtin.assert"]["that"][1]
 
 
 def test_one_api_bootstrap_config_declares_chat_fallback_embedding_and_consumer_tokens() -> None:

@@ -1,3 +1,7 @@
 ---
 linux_guest_firewall_config_file: /etc/nftables.conf
 linux_guest_firewall_host_id: proxmox_florin
+linux_guest_firewall_container_forward_source_cidrs:
+  - 172.16.0.0/12
+  - 192.168.0.0/16
+  - 10.200.0.0/16

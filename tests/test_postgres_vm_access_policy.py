@@ -29,7 +29,11 @@ def test_postgres_guest_group_vars_allow_docker_runtime_bridge_sources() -> None
 
     assert "playbook_execution_host_patterns.docker_runtime[playbook_execution_env]" in host_source
     assert host_source.endswith("}}/32")
-    assert group_vars["postgres_vm_client_allowed_sources_extra"][1:] == ["172.16.0.0/12", "192.168.0.0/16"]
+    assert group_vars["postgres_vm_client_allowed_sources_extra"][1:] == [
+        "172.16.0.0/12",
+        "192.168.0.0/16",
+        "10.200.0.0/16",
+    ]
 
 
 def test_postgres_network_policy_allows_docker_runtime_bridge_sources() -> None:
@@ -37,7 +41,12 @@ def test_postgres_network_policy_allows_docker_runtime_bridge_sources() -> None:
     postgres_rules = host_vars["network_policy"]["guests"]["postgres-lv3"]["allowed_inbound"]
     postgres_5432_sources = {rule["source"] for rule in postgres_rules if 5432 in rule.get("ports", [])}
 
-    assert {"docker-runtime-lv3", "172.16.0.0/12", "192.168.0.0/16"} <= postgres_5432_sources
+    assert {
+        "docker-runtime-lv3",
+        "172.16.0.0/12",
+        "192.168.0.0/16",
+        "10.200.0.0/16",
+    } <= postgres_5432_sources
 
 
 def test_postgres_network_policy_allows_monitoring_to_scrape_alloy_metrics() -> None:

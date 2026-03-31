@@ -5231,7 +5231,7 @@ adr_index:
   - adr: 0294
     title: One-API As The Unified LLM API Proxy And Router
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: api
     keywords:
@@ -5244,6 +5244,7 @@ adr_index:
       - router
     summary: We will deploy One-API as the unified LLM API proxy and router, superseding
     filename: 0294-one-api-as-the-unified-llm-api-proxy-and-router.md
+    implemented_version: 0.130.74
   - adr: 0295
     title: Shared Artifact Cache Plane For Container And Package Dependencies
     status: Accepted

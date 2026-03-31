@@ -8,3 +8,4 @@ postgres_vm_client_allowed_sources_extra:
     }}/32
   - 172.16.0.0/12
   - 192.168.0.0/16
+  - 10.200.0.0/16

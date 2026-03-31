@@ -18,7 +18,7 @@
   changed_when: false
   failed_when: postgres_vm_sql_probe.stdout | trim != "1"
 
-- name: Verify PostgreSQL shared_preload_libraries includes pgaudit
+- name: Verify configured PostgreSQL preload libraries are active
   become: true
   become_user: postgres
   ansible.builtin.command:
@@ -26,10 +26,29 @@
       - psql
       - -Atqc
       - SHOW shared_preload_libraries
-  register: postgres_vm_pgaudit_preload_probe
+  register: postgres_vm_shared_preload_libraries_show
   changed_when: false
-  failed_when: "'pgaudit' not in (postgres_vm_pgaudit_preload_probe.stdout | trim)"
-  when: postgres_vm_pgaudit_enabled | bool
+  when: postgres_vm_shared_preload_libraries | length > 0
+
+- name: Assert configured PostgreSQL preload libraries are active
+  ansible.builtin.assert:
+    that:
+      - >-
+        (
+          postgres_vm_shared_preload_libraries
+          | difference(
+              (
+                postgres_vm_shared_preload_libraries_show.stdout
+                | trim
+                | split(',')
+                | map('trim')
+                | reject('equalto', '')
+                | list
+              )
+            )
+          | length
+        ) == 0
+  when: postgres_vm_shared_preload_libraries | length > 0
 
 - name: Verify PostgreSQL pgaudit session classes are configured
   become: true

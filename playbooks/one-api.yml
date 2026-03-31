@@ -16,7 +16,7 @@
 #
 # Dependencies:
 #   - ADR 0294: One-API as the unified LLM API proxy and router.
-#   - Requires: OpenBao, PostgreSQL, docker-runtime, and the Proxmox host Tailscale proxy lane to already exist.
+#   - Requires: OpenBao, PostgreSQL, docker-runtime, Ollama, and the Proxmox host Tailscale proxy lane to already exist or converge in the same run.
 #
 # Related ADRs: 0042, 0077, 0095, 0145, 0254, 0294
 # Related Runbooks: docs/runbooks/configure-one-api.md
@@ -82,6 +82,7 @@
   roles:
     - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.docker_runtime
+    - role: lv3.platform.ollama_runtime
     - role: lv3.platform.one_api_runtime
 
   post_tasks:
@@ -153,3 +154,14 @@
         that:
           - (one_api_bootstrap.stdout | from_json).verification_passed
         fail_msg: "The One-API bootstrap did not pass verification."
+
+    - name: Assert the One-API bootstrap reconciled the managed root profile
+      ansible.builtin.assert:
+        that:
+          - >-
+            (one_api_bootstrap.stdout | from_json).verification.root_user.username
+            == ((lookup('ansible.builtin.file', one_api_bootstrap_config_file) | from_json).root_user.username)
+          - >-
+            (one_api_bootstrap.stdout | from_json).verification.root_user.display_name
+            == ((lookup('ansible.builtin.file', one_api_bootstrap_config_file) | from_json).root_user.display_name)
+        fail_msg: "The One-API bootstrap did not reconcile the managed root profile."

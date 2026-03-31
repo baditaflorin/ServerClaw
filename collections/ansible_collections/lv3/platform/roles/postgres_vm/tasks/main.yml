@@ -49,16 +49,19 @@
     postgres_vm_cluster_conf_path: "{{ postgres_vm_config_files.files[0].path }}"
     postgres_vm_cluster_conf_dir: "{{ postgres_vm_config_files.files[0].path | dirname }}"
     postgres_vm_cluster_version: "{{ postgres_vm_config_files.files[0].path | dirname | dirname | basename }}"
+    postgres_vm_cluster_major_version: "{{ postgres_vm_config_files.files[0].path | dirname | dirname | basename }}"
     postgres_vm_managed_conf_path: "{{ (postgres_vm_config_files.files[0].path | dirname) ~ '/conf.d/90-lv3-postgres.conf' }}"
     postgres_vm_hba_path: "{{ (postgres_vm_config_files.files[0].path | dirname) ~ '/pg_hba.conf' }}"
 
 - name: Ensure PostgreSQL pgaudit package is present
   ansible.builtin.apt:
-    name: "postgresql-{{ postgres_vm_cluster_version }}-pgaudit"
+    name: "postgresql-{{ postgres_vm_cluster_major_version }}-pgaudit"
     state: present
     update_cache: true
     force_apt_get: true
-  when: postgres_vm_pgaudit_enabled | bool
+  when:
+    - postgres_vm_pgaudit_enabled | bool
+    - "'pgaudit' in postgres_vm_shared_preload_libraries"
 
 - name: Ensure PostgreSQL conf.d directory exists
   ansible.builtin.file:
@@ -85,9 +88,9 @@
   notify: Restart PostgreSQL
 
 - name: Render PostgreSQL host-based authentication policy
-  ansible.builtin.template:
-    src: pg_hba.conf.j2
+  ansible.builtin.copy:
     dest: "{{ postgres_vm_hba_path }}"
+    content: "{{ lookup('ansible.builtin.template', role_path ~ '/templates/pg_hba.conf.j2') }}"
     owner: root
     group: postgres
     mode: "0640"
@@ -96,6 +99,39 @@
 - name: Flush PostgreSQL handlers before database audit provisioning
   ansible.builtin.meta: flush_handlers
 
+- name: Check active PostgreSQL preload libraries before verify
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - SHOW shared_preload_libraries
+  register: postgres_vm_active_shared_preload_libraries
+  changed_when: false
+  when: postgres_vm_shared_preload_libraries | length > 0
+
+- name: Restart PostgreSQL when configured preload libraries are not yet active
+  ansible.builtin.service:
+    name: "{{ postgres_vm_postgresql_service_name }}"
+    state: restarted
+  when:
+    - postgres_vm_shared_preload_libraries | length > 0
+    - >-
+      (
+        postgres_vm_shared_preload_libraries
+        | difference(
+            (
+              postgres_vm_active_shared_preload_libraries.stdout
+              | trim
+              | split(',')
+              | map('trim')
+              | reject('equalto', '')
+              | list
+            )
+          )
+        | length
+      ) > 0
 - name: Check whether PostgreSQL admin role already exists
   become: true
   become_user: postgres

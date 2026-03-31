@@ -15,10 +15,25 @@ ROLE_TASKS = (
     / "tasks"
     / "main.yml"
 )
+ROLE_DEFAULTS = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "linux_guest_firewall"
+    / "defaults"
+    / "main.yml"
+)
 
 
 def load_tasks() -> list[dict]:
     return yaml.safe_load(ROLE_TASKS.read_text())
+
+
+def load_defaults() -> dict:
+    return yaml.safe_load(ROLE_DEFAULTS.read_text())
 
 
 def test_linux_guest_firewall_reasserts_docker_bridge_chains_after_firewall_evaluation() -> None:
@@ -56,6 +71,18 @@ def test_container_forwarding_guests_use_the_source_only_forward_path() -> None:
     template = TEMPLATE_PATH.read_text()
 
     assert "guest_policy.allow_container_forwarding | default(false)" in template
+    assert "docker_runtime_container_forward_source_cidrs" in template
+    assert "linux_guest_firewall_container_forward_source_cidrs" in template
+
+
+def test_linux_guest_firewall_defaults_cover_all_governed_docker_bridge_cidrs() -> None:
+    defaults = load_defaults()
+
+    assert defaults["linux_guest_firewall_container_forward_source_cidrs"] == [
+        "172.16.0.0/12",
+        "192.168.0.0/16",
+        "10.200.0.0/16",
+    ]
 
 
 def test_coolify_guest_policy_enables_container_forwarding_for_published_ports() -> None:

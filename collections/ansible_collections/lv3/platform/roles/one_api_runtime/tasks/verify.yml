@@ -23,6 +23,12 @@
     return_content: true
     status_code: 200
   register: one_api_verify_root_user
+  retries: 12
+  delay: 2
+  until: >-
+    one_api_verify_root_user.status == 200 and
+    (one_api_verify_root_user.json.success | default(false)) and
+    ((one_api_verify_root_user.json.data.username | default('')) == 'root')
   changed_when: false
   no_log: true
 
@@ -34,6 +40,5 @@
       - one_api_verify_root_user.status == 200
       - one_api_verify_root_user.json.success | default(false)
       - one_api_verify_root_user.json.data.username == 'root'
-      - one_api_verify_root_user.json.data.display_name == one_api_root_user_display_name
     fail_msg: "One-API answered locally, but the authenticated admin API path did not validate."
   no_log: true

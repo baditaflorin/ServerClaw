@@ -37,6 +37,7 @@ docker_runtime_apt_keyring_path: /etc/apt/keyrings/docker.asc
 docker_runtime_apt_repo_file: /etc/apt/sources.list.d/docker.sources
 docker_runtime_apt_repo_uri: https://download.docker.com/linux/debian
 docker_runtime_apt_repo_component: stable
+docker_runtime_apt_lock_timeout_seconds: 900
 
 docker_runtime_engine_packages:
   - docker-ce
@@ -108,3 +109,4 @@ docker_runtime_publication_assurance_helper_source: "{{ inventory_dir ~ '/../scr
 docker_runtime_container_forward_source_cidrs:
   - 172.16.0.0/12
   - 192.168.0.0/16
+  - 10.200.0.0/16
