@@ -47,6 +47,8 @@ def test_minio_bucket_bootstrap_keeps_mc_alias_and_commands_in_one_exec_session(
 
     assert shell.count("docker exec") == 1
     assert "{{ restic_config_backup_minio_container_name | quote }} sh -ceu" in shell
+    assert "docker inspect --format '{% raw %}{{.State.Running}}{% endraw %}' outline-minio" in shell
+    assert "docker start outline-minio >/dev/null" in shell
     assert "mc alias set local http://127.0.0.1:9000 minio \"$MINIO_ROOT_PASSWORD\"" in shell
     assert "mc mb --ignore-existing --with-lock local/restic-config-backup" in shell
     assert "mc version enable local/restic-config-backup" in shell

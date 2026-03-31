@@ -144,3 +144,19 @@ def test_gitleaks_mode_detects_dummy_secret(tmp_path: Path) -> None:
     assert result.mode == "gitleaks"
     assert len(result.findings) == 1
     assert result.findings[0].path == "build/search-index/documents.json"
+
+
+def test_makefile_runs_published_artifact_secret_scan_via_uv_python() -> None:
+    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+
+    assert (
+        "search-index-rebuild:\n"
+        "\tpython3 $(REPO_ROOT)/config/windmill/scripts/rebuild-search-index.py --repo-path $(REPO_ROOT)\n"
+        "\tuv run python $(REPO_ROOT)/scripts/published_artifact_secret_scan.py --repo-root $(REPO_ROOT) --path build/search-index\n"
+    ) in makefile
+    assert (
+        "generate-changelog-portal:\n"
+        "\tuv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_changelog_portal.py --write\n"
+        "\tuv run python $(REPO_ROOT)/scripts/published_artifact_secret_scan.py --repo-root $(REPO_ROOT) --path build/changelog-portal\n"
+    ) in makefile
+    assert "scan-published-artifacts:\n\tuv run python $(REPO_ROOT)/scripts/published_artifact_secret_scan.py --repo-root $(REPO_ROOT)\n" in makefile

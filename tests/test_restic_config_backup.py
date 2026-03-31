@@ -160,6 +160,214 @@ def test_summarize_latest_snapshots_clamps_negative_interval_age(tmp_path: Path)
     assert receipt["sources"][0]["reasons"][0].startswith("Latest snapshot is 0 minutes old")
 
 
+def test_refresh_latest_snapshot_receipt_for_live_apply_updates_cached_entries(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    (repo_root / "config").mkdir(parents=True)
+    (repo_root / "versions").mkdir(parents=True)
+    (repo_root / "config" / "service.yml").write_text("service: value\n", encoding="utf-8")
+    (repo_root / "versions" / "stack.yaml").write_text("platform_version: 0.130.75\n", encoding="utf-8")
+
+    config_source = restic_backup.Source(
+        "config",
+        "config",
+        (repo_root / "config",),
+        1440,
+        "event_driven",
+        "successful_live_apply",
+        {"keep_daily": 30},
+        True,
+        False,
+        None,
+    )
+    versions_source = restic_backup.Source(
+        "versions_stack",
+        "versions_stack",
+        (repo_root / "versions" / "stack.yaml",),
+        1440,
+        "event_driven",
+        "successful_live_apply",
+        {"keep_daily": 30},
+        True,
+        False,
+        None,
+    )
+    receipts_source = restic_backup.Source(
+        "receipts",
+        "receipts",
+        (repo_root / "receipts",),
+        360,
+        "interval",
+        "every_6_hours",
+        {"keep_daily": 90},
+        False,
+        False,
+        {"path": "receipts", "expected_minimum_files": 1},
+    )
+
+    existing = {
+        "schema_version": "1.0.0",
+        "recorded_at": "2026-03-31T06:01:31Z",
+        "recorded_on": "2026-03-31",
+        "recorded_by": "codex",
+        "repository": {"bucket": "restic-config-backup", "endpoint": "http://10.200.18.3:9000"},
+        "summary": {
+            "governed_sources": 3,
+            "protected": 3,
+            "uncovered": 0,
+            "inactive": 0,
+            "uncovered_sources": [],
+            "inactive_sources": [],
+        },
+        "sources": [
+            {
+                "source_id": "receipts",
+                "label": "receipts",
+                "paths": ["receipts"],
+                "state": "protected",
+                "expected_schedule": "every_6_hours",
+                "freshness_minutes": 360,
+                "freshness_policy": "interval",
+                "retention": {"keep_daily": 90},
+                "latest_snapshot": {
+                    "snapshot_id": "receipts-old",
+                    "recorded_at": "2026-03-31T06:01:31Z",
+                    "host": "docker-runtime-lv3",
+                    "paths": ["receipts"],
+                    "files": 10,
+                },
+                "last_restore_verification": None,
+                "reasons": ["Latest snapshot is 0 minutes old and within the 390 minute freshness window."],
+            },
+            {
+                "source_id": "config",
+                "label": "config",
+                "paths": ["config"],
+                "state": "protected",
+                "expected_schedule": "successful_live_apply",
+                "freshness_minutes": 1440,
+                "freshness_policy": "event_driven",
+                "retention": {"keep_daily": 30},
+                "latest_snapshot": {
+                    "snapshot_id": "config-old",
+                    "recorded_at": "2026-03-31T05:53:48Z",
+                    "host": "docker-runtime-lv3",
+                    "paths": ["config"],
+                    "files": 230,
+                },
+                "last_restore_verification": None,
+                "reasons": ["Latest snapshot exists and this source is governed by the event-driven 'successful_live_apply' policy."],
+            },
+            {
+                "source_id": "versions_stack",
+                "label": "versions_stack",
+                "paths": ["versions/stack.yaml"],
+                "state": "protected",
+                "expected_schedule": "successful_live_apply",
+                "freshness_minutes": 1440,
+                "freshness_policy": "event_driven",
+                "retention": {"keep_daily": 30},
+                "latest_snapshot": {
+                    "snapshot_id": "versions-old",
+                    "recorded_at": "2026-03-31T05:53:49Z",
+                    "host": "docker-runtime-lv3",
+                    "paths": ["versions/stack.yaml"],
+                    "files": 1,
+                },
+                "last_restore_verification": None,
+                "reasons": ["Latest snapshot exists and this source is governed by the event-driven 'successful_live_apply' policy."],
+            },
+        ],
+    }
+
+    refreshed = restic_backup.refresh_latest_snapshot_receipt_for_live_apply(
+        existing_receipt=existing,
+        sources=[receipts_source, config_source, versions_source],
+        source_results=[
+            {"source_id": "config", "result": "backed_up", "snapshot_id": "config-new", "files": 239},
+            {"source_id": "versions_stack", "result": "backed_up", "snapshot_id": "versions-new", "files": 1},
+        ],
+        repo_root=repo_root,
+        endpoint="http://10.200.35.3:9000",
+        host_name="docker-runtime-lv3",
+        generated_at=datetime(2026, 3, 31, 10, 47, 15, tzinfo=UTC),
+        bucket="restic-config-backup",
+    )
+
+    assert refreshed["repository"]["endpoint"] == "http://10.200.35.3:9000"
+    assert refreshed["summary"]["protected"] == 3
+    refreshed_sources = {entry["source_id"]: entry for entry in refreshed["sources"]}
+    assert refreshed_sources["receipts"]["latest_snapshot"]["snapshot_id"] == "receipts-old"
+    assert refreshed_sources["config"]["latest_snapshot"]["snapshot_id"] == "config-new"
+    assert refreshed_sources["versions_stack"]["latest_snapshot"]["snapshot_id"] == "versions-new"
+
+
+def test_build_live_apply_latest_snapshot_receipt_without_cache_only_reports_live_apply_sources(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    (repo_root / "config").mkdir(parents=True)
+    (repo_root / "versions").mkdir(parents=True)
+    (repo_root / "config" / "service.yml").write_text("service: value\n", encoding="utf-8")
+    (repo_root / "versions" / "stack.yaml").write_text("platform_version: 0.130.77\n", encoding="utf-8")
+
+    config_source = restic_backup.Source(
+        "config",
+        "config",
+        (repo_root / "config",),
+        1440,
+        "event_driven",
+        "successful_live_apply",
+        {"keep_daily": 30},
+        True,
+        False,
+        None,
+    )
+    versions_source = restic_backup.Source(
+        "versions_stack",
+        "versions_stack",
+        (repo_root / "versions" / "stack.yaml",),
+        1440,
+        "event_driven",
+        "successful_live_apply",
+        {"keep_daily": 30},
+        True,
+        False,
+        None,
+    )
+    receipts_source = restic_backup.Source(
+        "receipts",
+        "receipts",
+        (repo_root / "receipts",),
+        360,
+        "interval",
+        "every_6_hours",
+        {"keep_daily": 90},
+        False,
+        False,
+        {"path": "receipts", "expected_minimum_files": 1},
+    )
+
+    refreshed = restic_backup.build_live_apply_latest_snapshot_receipt(
+        existing_receipt=None,
+        resolved_sources=[receipts_source, config_source, versions_source],
+        live_apply_sources=[config_source, versions_source],
+        source_results=[
+            {"source_id": "config", "result": "backed_up", "snapshot_id": "config-new", "files": 239},
+            {"source_id": "versions_stack", "result": "backed_up", "snapshot_id": "versions-new", "files": 1},
+        ],
+        repo_root=repo_root,
+        endpoint="http://10.200.35.3:9000",
+        host_name="docker-runtime-lv3",
+        generated_at=datetime(2026, 3, 31, 10, 47, 15, tzinfo=UTC),
+        bucket="restic-config-backup",
+    )
+
+    assert refreshed["summary"]["governed_sources"] == 2
+    assert refreshed["summary"]["protected"] == 2
+    assert refreshed["summary"]["uncovered"] == 0
+    assert [entry["source_id"] for entry in refreshed["sources"]] == ["config", "versions_stack"]
+
+
 def test_snapshot_id_from_backup_stdout_reads_restic_json_stream() -> None:
     stdout = "\n".join(
         [
@@ -169,6 +377,46 @@ def test_snapshot_id_from_backup_stdout_reads_restic_json_stream() -> None:
     )
 
     assert restic_backup.snapshot_id_from_backup_stdout(stdout) == "abc123"
+
+
+def test_resolve_minio_endpoint_starts_stopped_container_and_ignores_invalid_tokens(monkeypatch) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run_command(argv, **kwargs):
+        calls.append(argv)
+        if argv == ["docker", "inspect", "outline-minio", "--format", "{{json .State}}"]:
+            return types.SimpleNamespace(returncode=0, stdout='{"Running": false}', stderr="")
+        if argv == ["docker", "start", "outline-minio"]:
+            return types.SimpleNamespace(returncode=0, stdout="outline-minio\n", stderr="")
+        if argv == [
+            "docker",
+            "inspect",
+            "outline-minio",
+            "--format",
+            "{{range .NetworkSettings.Networks}}{{if .IPAddress}}{{.IPAddress}} {{end}}{{end}}",
+        ]:
+            return types.SimpleNamespace(returncode=0, stdout="invalid IP 10.200.18.2 \n", stderr="")
+        raise AssertionError(f"unexpected command: {argv}")
+
+    monkeypatch.setattr(restic_backup, "run_command", fake_run_command)
+
+    host, endpoint = restic_backup.resolve_minio_endpoint(
+        {"controller_host": {"minio": {"container_name": "outline-minio"}}}
+    )
+
+    assert host == "10.200.18.2"
+    assert endpoint == "http://10.200.18.2:9000"
+    assert calls == [
+        ["docker", "inspect", "outline-minio", "--format", "{{json .State}}"],
+        ["docker", "start", "outline-minio"],
+        [
+            "docker",
+            "inspect",
+            "outline-minio",
+            "--format",
+            "{{range .NetworkSettings.Networks}}{{if .IPAddress}}{{.IPAddress}} {{end}}{{end}}",
+        ],
+    ]
 
 
 def test_repo_surfaces_register_restic_backup_contract() -> None:
@@ -219,6 +467,83 @@ def test_trigger_remote_command_falls_back_to_api_gateway_script_and_keeps_repo_
     assert "/etc/lv3/restic-config-backup/restic-file-backup-catalog.json" in command
     assert "/srv/proxmox_florin_server/receipts/restic-backups" in command
     assert "/srv/proxmox_florin_server/receipts/restic-restore-verifications" in command
+
+def test_ensure_remote_runtime_support_files_uploads_required_bundle(tmp_path: Path, monkeypatch) -> None:
+    scripts_dir = tmp_path / "scripts"
+    config_dir = tmp_path / "config"
+    scripts_dir.mkdir(parents=True)
+    config_dir.mkdir(parents=True)
+    (scripts_dir / "restic_config_backup.py").write_text("#!/usr/bin/env python3\nprint('restic')\n", encoding="utf-8")
+    (scripts_dir / "script_bootstrap.py").write_text("print('bootstrap')\n", encoding="utf-8")
+    (scripts_dir / "controller_automation_toolkit.py").write_text("print('toolkit')\n", encoding="utf-8")
+    (config_dir / "restic-file-backup-catalog.json").write_text('{"schema_version":"1.0.0"}\n', encoding="utf-8")
+
+    captured: list[tuple[str, str]] = []
+
+    monkeypatch.setattr(trigger, "LOCAL_REPO_ROOT", tmp_path)
+
+    def fake_build_guest_ssh_command(context, target, remote_command):
+        captured.append((target, remote_command))
+        return ["ssh", target]
+
+    def fake_run(command, input=None, text=None, capture_output=None, check=None):
+        captured.append(("stdin", input))
+        return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr(trigger, "build_guest_ssh_command", fake_build_guest_ssh_command)
+    monkeypatch.setattr(trigger.subprocess, "run", fake_run)
+
+    trigger.ensure_remote_runtime_support_files({"controller": "context"}, repo_root="/srv/proxmox_florin_server")
+
+    remote_commands = [entry for entry in captured if entry[0] != "stdin"]
+    stdin_payloads = [entry[1] for entry in captured if entry[0] == "stdin"]
+
+    assert len(remote_commands) == 4
+    assert len(stdin_payloads) == 4
+    assert any("/srv/proxmox_florin_server/scripts/restic_config_backup.py" in command for _, command in remote_commands)
+    assert any("/srv/proxmox_florin_server/scripts/script_bootstrap.py" in command for _, command in remote_commands)
+    assert any("/srv/proxmox_florin_server/scripts/controller_automation_toolkit.py" in command for _, command in remote_commands)
+    assert any("/srv/proxmox_florin_server/config/restic-file-backup-catalog.json" in command for _, command in remote_commands)
+    assert all("sudo tee" in command for _, command in remote_commands)
+    assert stdin_payloads[0].startswith("#!/usr/bin/env python3")
+
+
+def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(trigger, "load_controller_context", lambda: {"controller": "context"})
+    monkeypatch.setattr(
+        trigger,
+        "ensure_remote_runtime_support_files",
+        lambda context, repo_root, target="docker-runtime-lv3": captured.update(
+            {"context": context, "repo_root": repo_root, "target": target}
+        ),
+    )
+    monkeypatch.setattr(trigger, "build_guest_ssh_command", lambda context, target, remote_command: ["ssh", target, remote_command])
+    monkeypatch.setattr(
+        trigger,
+        "run_command",
+        lambda command: types.SimpleNamespace(returncode=0, stdout='REPORT_JSON={"summary":{"protected":1}}', stderr=""),
+    )
+
+    assert (
+        trigger.main(
+            [
+                "--env",
+                "production",
+                "--mode",
+                "backup",
+                "--repo-root",
+                "/srv/proxmox_florin_server",
+            ]
+        )
+        == 0
+    )
+    assert captured == {
+        "context": {"controller": "context"},
+        "repo_root": "/srv/proxmox_florin_server",
+        "target": "docker-runtime-lv3",
+    }
 
 
 def test_make_live_apply_targets_bootstrap_pyyaml_for_restic_trigger() -> None:

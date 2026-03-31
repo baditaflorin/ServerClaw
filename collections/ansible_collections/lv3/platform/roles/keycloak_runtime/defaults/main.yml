@@ -55,6 +55,13 @@ keycloak_mail_platform_submission_port: "{{ smtp_port }}"
 keycloak_mail_platform_submission_starttls: "{{ smtp_starttls }}"
 keycloak_mail_platform_submission_auth_enabled: "{{ smtp_auth_enabled }}"
 keycloak_mail_platform_docker_network_name: "{{ smtp_docker_network_name }}"
+keycloak_mail_platform_compose_file: "{{ mail_platform_compose_file | default('/opt/mail-platform/docker-compose.yml') }}"
+keycloak_mail_platform_submission_service_name: stalwart
+keycloak_mail_platform_submission_recovery_enabled: >-
+  {{
+    (keycloak_mail_platform_docker_network_name | length > 0)
+    and (keycloak_mail_platform_compose_file | length > 0)
+  }}
 keycloak_mail_platform_from_address: "{{ smtp_from_address }}"
 keycloak_mail_platform_reply_to_address: "{{ smtp_reply_to_address }}"
 keycloak_realm_smtp_server:
@@ -89,6 +96,8 @@ keycloak_jupyterhub_client_id: jupyterhub
 keycloak_jupyterhub_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/jupyterhub-client-secret.txt
 keycloak_outline_client_id: outline
 keycloak_outline_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline-client-secret.txt
+keycloak_paperless_client_id: paperless
+keycloak_paperless_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/paperless-client-secret.txt
 keycloak_serverclaw_client_id: serverclaw
 keycloak_serverclaw_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-client-secret.txt
 keycloak_grafana_groups:
@@ -145,6 +154,7 @@ keycloak_langfuse_root_url: https://langfuse.lv3.org
 keycloak_directus_root_url: https://data.lv3.org
 keycloak_jupyterhub_root_url: https://notebooks.lv3.org
 keycloak_outline_root_url: https://wiki.lv3.org
+keycloak_paperless_root_url: https://paperless.lv3.org
 keycloak_serverclaw_root_url: https://chat.lv3.org
 keycloak_gitea_root_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('gitea', 'public') }}"
 keycloak_ops_portal_root_url: https://ops.lv3.org
@@ -162,6 +172,10 @@ keycloak_outline_post_logout_redirect_uris:
 keycloak_jupyterhub_post_logout_redirect_uris:
   - "{{ keycloak_jupyterhub_root_url }}"
   - "{{ keycloak_jupyterhub_root_url }}/"
+  - "{{ keycloak_session_authority.shared_proxy_cleanup_url }}"
+keycloak_paperless_post_logout_redirect_uris:
+  - "{{ keycloak_paperless_root_url }}"
+  - "{{ keycloak_paperless_root_url }}/"
   - "{{ keycloak_session_authority.shared_proxy_cleanup_url }}"
 keycloak_serverclaw_post_logout_redirect_uris:
   - "{{ keycloak_serverclaw_root_url }}"

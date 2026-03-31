@@ -74,6 +74,7 @@ PORT_KEYS = (
     "directus_port",
     "jupyterhub_port",
     "piper_port",
+    "paperless_port",
     "dozzle_http_port",
     "dozzle_agent_port",
     "excalidraw_port",
@@ -558,6 +559,9 @@ def build_service_urls(
     elif service_id == "jupyterhub":
         urls["internal"] = service_url("http", private_ip, ports["jupyterhub_port"])
         port_map["internal"] = ports["jupyterhub_port"]
+    elif service_id == "paperless":
+        urls["internal"] = service_url("http", private_ip, ports["paperless_port"])
+        port_map["internal"] = ports["paperless_port"]
     elif service_id == "harbor":
         urls["internal"] = service_url("http", private_ip, ports["harbor_port"])
         port_map["internal"] = ports["harbor_port"]

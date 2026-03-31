@@ -1,0 +1,196 @@
+{
+    "metrics": {
+        "http_req_receiving": {
+            "p(90)": 0.133131,
+            "p(95)": 0.16743375,
+            "avg": 0.08257521009771984,
+            "min": 0,
+            "med": 0.0634145,
+            "max": 3.617458
+        },
+        "lv3_successful_requests": {
+            "count": 1562,
+            "rate": 3.9973039401107515
+        },
+        "data_received": {
+            "count": 7592793,
+            "rate": 19430.666693562955
+        },
+        "checks": {
+            "passes": 1562,
+            "fails": 894,
+            "value": 0.6359934853420195
+        },
+        "http_req_connecting": {
+            "max": 4102.975238,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 1.6779849466612378,
+            "min": 0,
+            "med": 0
+        },
+        "iterations": {
+            "rate": 6.285133467933423,
+            "count": 2456
+        },
+        "checks{service_id:openfga}": {
+            "passes": 615,
+            "fails": 118,
+            "thresholds": {
+                "rate>0.99": true
+            },
+            "value": 0.8390177353342428
+        },
+        "http_req_duration": {
+            "max": 2733.461615,
+            "p(90)": 7.7790444999999995,
+            "p(95)": 10.65870325,
+            "avg": 7.79834392956026,
+            "min": 0,
+            "med": 1.7654375
+        },
+        "http_reqs": {
+            "count": 2456,
+            "rate": 6.285133467933423
+        },
+        "http_req_blocked": {
+            "max": 4103.059236,
+            "p(90)": 0.006603,
+            "p(95)": 0.00762425,
+            "avg": 1.713481099348522,
+            "min": 0,
+            "med": 0.00031
+        },
+        "data_sent": {
+            "rate": 500.16713391986303,
+            "count": 195447
+        },
+        "http_req_duration{expected_response:true}": {
+            "med": 3.4884505,
+            "max": 2733.461615,
+            "p(90)": 9.499533100000011,
+            "p(95)": 12.834624249999997,
+            "avg": 11.727461371959041,
+            "min": 0.553445
+        },
+        "iteration_duration": {
+            "p(95)": 1016.3635995,
+            "avg": 1278.398455126223,
+            "min": 1000.554054,
+            "med": 1003.0097705000001,
+            "max": 11002.313099,
+            "p(90)": 1009.989205
+        },
+        "http_req_sending": {
+            "avg": 0.07090326221498383,
+            "min": 0,
+            "med": 0.0769855,
+            "max": 1.106929,
+            "p(90)": 0.11478650000000001,
+            "p(95)": 0.12792175
+        },
+        "vus_max": {
+            "value": 9,
+            "min": 9,
+            "max": 9
+        },
+        "checks{service_id:keycloak}": {
+            "passes": 947,
+            "fails": 776,
+            "thresholds": {
+                "rate>0.99": true
+            },
+            "value": 0.5496227510156704
+        },
+        "http_req_failed{service_id:openfga}": {
+            "passes": 118,
+            "fails": 615,
+            "thresholds": {
+                "rate<=0.01": true
+            },
+            "value": 0.16098226466575716
+        },
+        "http_req_waiting": {
+            "med": 1.636565,
+            "max": 2733.232772,
+            "p(90)": 7.5947565,
+            "p(95)": 10.52740125,
+            "avg": 7.644865457247572,
+            "min": 0
+        },
+        "http_req_duration{service_id:keycloak}": {
+            "avg": 10.255710697040053,
+            "min": 0.5617,
+            "med": 2.641506,
+            "max": 2733.461615,
+            "p(90)": 8.782635999999998,
+            "p(95)": 12.194362899999966,
+            "thresholds": {
+                "p(95)<=500": false
+            }
+        },
+        "http_req_failed{service_id:keycloak}": {
+            "passes": 776,
+            "fails": 947,
+            "thresholds": {
+                "rate<=0.01": true
+            },
+            "value": 0.4503772489843297
+        },
+        "http_req_tls_handshaking": {
+            "avg": 0.0322381404723127,
+            "min": 0,
+            "med": 0,
+            "max": 7.05126,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "vus": {
+            "min": 2,
+            "max": 9,
+            "value": 2
+        },
+        "http_req_duration{service_id:openfga}": {
+            "p(90)": 4.538433200000001,
+            "p(95)": 6.155022799999994,
+            "avg": 2.022023410641203,
+            "min": 0,
+            "med": 1.422435,
+            "max": 24.454904,
+            "thresholds": {
+                "p(95)<=500": false
+            }
+        },
+        "http_req_failed": {
+            "passes": 894,
+            "fails": 1562,
+            "value": 0.36400651465798045
+        },
+        "lv3_failed_requests": {
+            "count": 894,
+            "rate": 2.287829527822671
+        }
+    },
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "openfga expected status": {
+                    "path": "::openfga expected status",
+                    "id": "78576fba45c6cc6aec72abfd9eec532b",
+                    "passes": 615,
+                    "fails": 118,
+                    "name": "openfga expected status"
+                },
+                "keycloak expected status": {
+                    "name": "keycloak expected status",
+                    "path": "::keycloak expected status",
+                    "id": "d17b7c4e1e8183ed6ca6932c881f393f",
+                    "passes": 947,
+                    "fails": 776
+                }
+            }
+    }
+}

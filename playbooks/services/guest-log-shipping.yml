@@ -36,6 +36,7 @@
               'monitoring': 'monitoring',
               'postgres': 'data',
               'postgres-replica': 'data',
+              'artifact-cache': 'cache',
               'backup': 'backup',
               'coolify': 'paas'
             }[

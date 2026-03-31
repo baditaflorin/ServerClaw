@@ -1,4 +1,11 @@
 ---
+# Purpose: Declare the canonical mail-platform runtime defaults, secrets, ports, and policy metadata used by the managed Stalwart and gateway stack.
+# Use case: Loaded whenever the mail_platform_runtime role converges or verifies the live mail platform.
+# Inputs: Inventory-derived platform port assignments, container image catalog entries, OpenBao defaults, and controller-local artifact paths.
+# Outputs: Stable role defaults for the mail platform runtime, bootstrap artifacts, notification profiles, and verification settings.
+# Idempotency: Fully idempotent because these defaults describe desired state only and do not mutate targets on their own.
+# Dependencies: ADR 0165, ADR 0077, and the shared mail platform runtime contract.
+
 mail_platform_domain: lv3.org
 mail_platform_hostname: mail.lv3.org
 mail_platform_mailbox_localpart: server
@@ -31,6 +38,8 @@ mail_platform_gateway_base_image: "{{ container_image_catalog.images.mail_platfo
 mail_platform_gateway_port: 8081
 mail_platform_stalwart_http_port: 8080
 mail_platform_internal_submission_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.mail_platform_internal_submission_port | default(1587) }}"
+mail_platform_submission_auth_retries: 12
+mail_platform_submission_auth_delay_seconds: 5
 mail_platform_secret_dir: /etc/lv3/mail-platform
 mail_platform_profile_secret_dir: "{{ mail_platform_secret_dir }}/profiles"
 mail_platform_admin_password_file: "{{ mail_platform_secret_dir }}/stalwart-admin-password"

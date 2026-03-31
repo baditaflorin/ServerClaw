@@ -21,6 +21,12 @@ def test_defaults_define_private_submission_port() -> None:
     )
 
 
+def test_defaults_define_submission_auth_retry_budget() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    assert defaults["mail_platform_submission_auth_retries"] == 12
+    assert defaults["mail_platform_submission_auth_delay_seconds"] == 5
+
+
 def test_stalwart_template_adds_private_submission_listener() -> None:
     template = STALWART_TEMPLATE_PATH.read_text()
     assert "[server.listener.internal_submission]" in template
@@ -67,6 +73,10 @@ def test_mail_platform_runtime_verifies_plaintext_private_submission_auth() -> N
     assert "starttls" in shell
     assert 'mail_platform_mailbox_password_file' in shell
     assert 'mail_platform_mailbox_login' in shell
+    assert verify_task["register"] == "mail_platform_submission_auth_check"
+    assert verify_task["retries"] == "{{ mail_platform_submission_auth_retries }}"
+    assert verify_task["delay"] == "{{ mail_platform_submission_auth_delay_seconds }}"
+    assert verify_task["until"] == "mail_platform_submission_auth_check.rc == 0"
 
 
 def test_mail_platform_verify_role_checks_plaintext_private_submission_auth() -> None:
@@ -79,6 +89,123 @@ def test_mail_platform_verify_role_checks_plaintext_private_submission_auth() ->
     shell = verify_task["ansible.builtin.shell"]
     assert "starttls" in shell
     assert 'mail_platform_mailbox_password_file' in shell
+    assert verify_task["register"] == "mail_platform_verify_submission_auth"
+    assert verify_task["retries"] == "{{ mail_platform_submission_auth_retries }}"
+    assert verify_task["delay"] == "{{ mail_platform_submission_auth_delay_seconds }}"
+    assert verify_task["until"] == "mail_platform_verify_submission_auth.rc == 0"
+
+
+def test_mail_platform_runtime_bootstraps_mail_principals_through_gateway_crud_api() -> None:
+    tasks = yaml.safe_load(TASKS_PATH.read_text())
+    readiness_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Wait for the mail gateway CRUD API to answer before bootstrapping mail principals"
+    )
+    domain_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Upsert the managed mail domain through the mail gateway CRUD API"
+    )
+    mailbox_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Upsert the managed mailbox accounts through the mail gateway CRUD API"
+    )
+    assert readiness_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/domains"
+    assert readiness_task["retries"] == "{{ mail_platform_submission_auth_retries }}"
+    assert readiness_task["delay"] == "{{ mail_platform_submission_auth_delay_seconds }}"
+    assert readiness_task["until"] == "mail_platform_gateway_catalog_ready.status == 200"
+    assert domain_task["ansible.builtin.uri"]["method"] == "PUT"
+    assert "/v1/domains/" in domain_task["ansible.builtin.uri"]["url"]
+    assert domain_task["ansible.builtin.uri"]["headers"]["X-API-Key"] == "{{ mail_platform_gateway_api_key }}"
+    assert domain_task["changed_when"] == "mail_platform_domain_bootstrap.json.status != 'unchanged'"
+    assert mailbox_task["ansible.builtin.uri"]["method"] == "PUT"
+    assert "/v1/mailboxes/" in mailbox_task["ansible.builtin.uri"]["url"]
+    assert mailbox_task["ansible.builtin.uri"]["body"]["password"] == "{{ item.password }}"
+    assert mailbox_task["register"] == "mail_platform_mailbox_bootstrap"
+    assert mailbox_task["changed_when"] == "mail_platform_mailbox_bootstrap.json.status != 'unchanged'"
+
+
+def test_mail_platform_runtime_verifies_managed_catalog_through_gateway_crud_api() -> None:
+    tasks = yaml.safe_load(TASKS_PATH.read_text())
+    mailboxes_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Verify the mail gateway CRUD API can list managed mailboxes"
+    )
+    domain_assert = next(task for task in tasks if task.get("name") == "Assert the managed mail domain is present")
+    mailbox_assert = next(task for task in tasks if task.get("name") == "Assert the managed mailbox accounts are present")
+    assert mailboxes_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/mailboxes"
+    assert "mail_platform_gateway_domains.json['items']" in domain_assert["ansible.builtin.assert"]["that"][0]
+    assert "mail_platform_gateway_mailboxes.json['items']" in mailbox_assert["ansible.builtin.assert"]["that"][0]
+
+
+def test_mail_platform_verify_role_checks_managed_catalog_through_gateway_crud_api() -> None:
+    verify_tasks = yaml.safe_load((REPO_ROOT / "roles" / "mail_platform_runtime" / "tasks" / "verify.yml").read_text())
+    mailboxes_task = next(
+        task
+        for task in verify_tasks
+        if task.get("name") == "Verify the mail gateway CRUD API can list managed mailboxes"
+    )
+    domain_assert = next(task for task in verify_tasks if task.get("name") == "Assert the managed mail domain is present")
+    mailbox_assert = next(task for task in verify_tasks if task.get("name") == "Assert the managed mailbox accounts are present")
+    assert mailboxes_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/mailboxes"
+    assert "mail_platform_verify_gateway_domains.json['items']" in domain_assert["ansible.builtin.assert"]["that"][0]
+    assert "mail_platform_verify_gateway_mailboxes.json['items']" in mailbox_assert["ansible.builtin.assert"]["that"][0]
+
+
+def test_mail_platform_runtime_recovers_gateway_publication_after_bridge_chain_loss() -> None:
+    tasks = yaml.safe_load(TASKS_PATH.read_text())
+    inspect_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Inspect the mail gateway startup state before waiting on the API"
+    )
+    detect_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Detect Docker bridge-chain loss during the mail gateway startup"
+    )
+    remove_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Remove the stalled mail gateway container after Docker bridge-chain loss"
+    )
+    restart_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Restart Docker to restore bridge networking before retrying the mail gateway startup"
+    )
+    bridge_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Ensure Docker bridge networking chains are present before retrying the mail gateway startup"
+    )
+    retry_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Retry the mail gateway startup after Docker networking recovery"
+    )
+    assert inspect_task["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "inspect",
+        "--format",
+        "{% raw %}{{.State.Status}}|{{.State.Error}}{% endraw %}",
+        "{{ mail_platform_gateway_container_name }}",
+    ]
+    assert inspect_task["register"] == "mail_platform_gateway_start_state"
+    assert "failed programming external connectivity" in detect_task["ansible.builtin.set_fact"][
+        "mail_platform_gateway_bridge_chains_missing"
+    ]
+    assert "No chain/target/match by that name" in detect_task["ansible.builtin.set_fact"][
+        "mail_platform_gateway_bridge_chains_missing"
+    ]
+    assert remove_task["ansible.builtin.command"]["argv"][-2:] == ["-f", "{{ mail_platform_gateway_container_name }}"]
+    assert restart_task["ansible.builtin.service"]["name"] == "docker"
+    assert bridge_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert retry_task["ansible.builtin.command"]["argv"][-5:] == ["up", "-d", "--force-recreate", "--no-deps", "mail-gateway"]
+    assert retry_task["until"] == "mail_platform_gateway_retry.rc == 0"
 
 
 def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rotation() -> None:

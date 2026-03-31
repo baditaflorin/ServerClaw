@@ -2289,6 +2289,67 @@
         }
       }
     },
+    "paperless": {
+      "service_name": "paperless",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "paperless_runtime",
+      "verify_file": "roles/paperless_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Paperless startup completes once the shared-edge root renders through the public publication path.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "https://paperless.lv3.org/",
+        "method": "GET",
+        "expected_status": [
+          200,
+          302
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local Paperless root responds on the runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8018/",
+        "method": "GET",
+        "expected_status": [
+          200,
+          302
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "Paperless accepts the durable token and returns authenticated document plus taxonomy data from the live runtime.",
+        "timeout_seconds": 120,
+        "retries": 3,
+        "delay_seconds": 5,
+        "argv": [
+          "/bin/bash",
+          "-lc",
+          "set -euo pipefail; token=$(cat /etc/lv3/paperless/api-token); documents=$(mktemp); tags=$(mktemp); trap 'rm -f \"${documents}\" \"${tags}\"' EXIT; curl -fsS http://127.0.0.1:8018/api/documents/?page_size=1 -H \"Authorization: Token ${token}\" > \"${documents}\"; curl -fsS http://127.0.0.1:8018/api/tags/?page_size=200 -H \"Authorization: Token ${token}\" > \"${tags}\"; python3 -c 'import json, pathlib, sys; documents=json.loads(pathlib.Path(sys.argv[1]).read_text()); tags=json.loads(pathlib.Path(sys.argv[2]).read_text()); assert \"results\" in documents; assert len(tags.get(\"results\", [])) >= 1' \"${documents}\" \"${tags}\""
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Paperless Public Health",
+          "type": "http",
+          "url": "https://paperless.lv3.org/",
+          "description": "Public Paperless root published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-399"
+          ]
+        }
+      }
+    },
     "plane": {
       "service_name": "plane",
       "owning_vm": "docker-runtime-lv3",

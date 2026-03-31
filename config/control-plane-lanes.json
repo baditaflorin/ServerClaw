@@ -432,6 +432,20 @@
           "notes": "Scheduled security workflows publish summary events plus high or critical findings so operators and future automation can react without polling the receipt directories."
         },
         {
+          "id": "platform-slo-subjects",
+          "kind": "event_subject",
+          "endpoint": "platform.slo.*",
+          "auth": "Internal NATS publication from ADR 0305 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "k6-load",
+            "k6-soak"
+          ],
+          "notes": "The k6 load-testing workflows publish regression events on the canonical platform.slo.* namespace so SLO consumers react to empirical latency drift without polling receipt directories."
+        },
+        {
           "id": "maintenance-window-subjects",
           "kind": "event_subject",
           "endpoint": "platform.maintenance.*",

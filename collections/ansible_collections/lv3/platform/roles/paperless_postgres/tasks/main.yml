@@ -1,0 +1,161 @@
+---
+# Purpose: Create and maintain the PostgreSQL role and database used by Paperless.
+
+- name: Validate Paperless PostgreSQL inputs
+  ansible.builtin.assert:
+    that:
+      - paperless_database_name | length > 0
+      - paperless_database_user | length > 0
+      - paperless_postgres_secret_dir | length > 0
+      - paperless_postgres_password_file | length > 0
+      - paperless_database_password_local_file | length > 0
+    fail_msg: "paperless_postgres requires database names and password paths."
+
+- name: Ensure the Paperless PostgreSQL secret directory exists
+  ansible.builtin.file:
+    path: "{{ paperless_postgres_secret_dir }}"
+    state: directory
+    owner: root
+    group: postgres
+    mode: "0750"
+
+- name: Ensure the local Paperless artifact directory exists
+  ansible.builtin.file:
+    path: "{{ paperless_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the Paperless database password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ paperless_database_password_local_file }}" ]; then
+      umask 077
+      openssl rand -hex 24 > "{{ paperless_database_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: paperless_postgres_password_generation
+  changed_when: "'changed' in paperless_postgres_password_generation.stdout"
+  no_log: true
+
+- name: Read the Paperless database password
+  ansible.builtin.slurp:
+    src: "{{ paperless_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: paperless_postgres_password_raw
+  no_log: true
+
+- name: Record the Paperless database password
+  ansible.builtin.set_fact:
+    paperless_database_password: "{{ paperless_postgres_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Persist the Paperless database password on the PostgreSQL member
+  ansible.builtin.copy:
+    dest: "{{ paperless_postgres_password_file }}"
+    content: "{{ paperless_database_password }}\n"
+    owner: root
+    group: postgres
+    mode: "0640"
+  no_log: true
+
+- name: Check whether the local PostgreSQL member is writable
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT CASE WHEN pg_is_in_recovery() THEN 0 ELSE 1 END"
+  register: paperless_postgres_writable_check
+  changed_when: false
+
+- name: Check whether the Paperless role already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_roles WHERE rolname = '{{ paperless_database_user }}'"
+  register: paperless_postgres_role_check
+  changed_when: false
+  when: paperless_postgres_writable_check.stdout | trim == "1"
+
+- name: Create the Paperless role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        CREATE ROLE {{ paperless_database_user }} LOGIN
+        PASSWORD '{{ paperless_database_password }}'
+  changed_when: true
+  no_log: true
+  when:
+    - paperless_postgres_writable_check.stdout | trim == "1"
+    - paperless_postgres_role_check.stdout != "1"
+
+- name: Ensure the Paperless role password matches the managed secret
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER ROLE {{ paperless_database_user }} PASSWORD '{{ paperless_database_password }}'"
+  changed_when: false
+  no_log: true
+  when: paperless_postgres_writable_check.stdout | trim == "1"
+
+- name: Check whether the Paperless PostgreSQL database already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_database WHERE datname = '{{ paperless_database_name }}'"
+  register: paperless_postgres_database_check
+  changed_when: false
+  when: paperless_postgres_writable_check.stdout | trim == "1"
+
+- name: Create the Paperless PostgreSQL database
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "CREATE DATABASE {{ paperless_database_name }} OWNER {{ paperless_database_user }}"
+  changed_when: true
+  when:
+    - paperless_postgres_writable_check.stdout | trim == "1"
+    - paperless_postgres_database_check.stdout != "1"
+
+- name: Ensure the Paperless database owner is correct
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER DATABASE {{ paperless_database_name }} OWNER TO {{ paperless_database_user }}"
+  changed_when: false
+  when: paperless_postgres_writable_check.stdout | trim == "1"

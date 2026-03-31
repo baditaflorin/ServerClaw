@@ -1521,7 +1521,7 @@
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "http://100.64.0.1:8014",
+      "internal_url": "http://10.10.10.20:8098",
       "exposure": "private-only",
       "health_probe_id": "openfga",
       "image_catalog_ids": [
@@ -1544,8 +1544,8 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://100.64.0.1:8014",
-          "notes": "Published through the Proxmox host Tailscale proxy and guarded by the repo-managed bearer-key contract."
+          "url": "http://10.10.10.20:8098",
+          "notes": "The guest-reachable runtime stays on docker-runtime-lv3 for SLO probes and k6 smoke/load validation. Controller-local bootstrap and bearer-key verification continue to use the Proxmox host Tailscale proxy at http://100.64.0.1:8014."
         }
       }
     },
@@ -1699,6 +1699,51 @@
           "status": "active",
           "url": "https://notebooks.lv3.org",
           "subdomain": "notebooks.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "paperless",
+      "name": "Paperless-ngx",
+      "description": "Self-hosted document archive and metadata API with OCR, taxonomy reconciliation, and Keycloak-backed operator sign-in.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8018",
+      "public_url": "https://paperless.lv3.org",
+      "subdomain": "paperless.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Paperless Public Health",
+      "health_probe_id": "paperless",
+      "image_catalog_ids": [
+        "paperless_runtime",
+        "langfuse_redis_runtime"
+      ],
+      "secret_catalog_ids": [
+        "paperless_database_password",
+        "paperless_secret_key",
+        "paperless_redis_password",
+        "paperless_admin_password",
+        "paperless_api_token",
+        "keycloak_paperless_client_secret"
+      ],
+      "adr": "0285",
+      "runbook": "docs/runbooks/configure-paperless.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=paperless-availability",
+      "tags": [
+        "documents",
+        "archive",
+        "paperless",
+        "oidc"
+      ],
+      "notes": "Live-apply evidence is tracked on the workstream branch; merge-to-main still must update the integrated README, VERSION, changelog, and versions/stack.yaml surfaces once the final mainline apply is complete.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://paperless.lv3.org",
+          "subdomain": "paperless.lv3.org",
+          "notes": "docs.lv3.org remains reserved for the developer portal, so Paperless publishes at paperless.lv3.org."
         }
       }
     },

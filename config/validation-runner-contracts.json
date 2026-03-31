@@ -380,6 +380,26 @@
       ],
       "require_scratch_cleanup_guarantee": true
     },
+    "iac-policy-scan": {
+      "description": "Run the repo-managed Checkov IaC policy scan inside the security runner container.",
+      "requires_container_runtime": true,
+      "required_tools": [
+        "docker",
+        "git",
+        "python3",
+        "tar"
+      ],
+      "allowed_network_reachability_classes": [
+        "controller_local",
+        "private_build_fabric",
+        "private_worker_checkout"
+      ],
+      "allowed_cpu_architectures": [
+        "arm64",
+        "x86_64"
+      ],
+      "require_scratch_cleanup_guarantee": true
+    },
     "tofu-validate": {
       "description": "Run OpenTofu validation on a runner with the required local toolchain.",
       "requires_container_runtime": false,
@@ -456,6 +476,7 @@
         "integration-tests",
         "security-scan",
         "semgrep-sast",
+        "iac-policy-scan",
         "artifact-secret-scan",
         "service-completeness",
         "tofu-validate",
@@ -501,6 +522,7 @@
         "integration-tests",
         "security-scan",
         "semgrep-sast",
+        "iac-policy-scan",
         "artifact-secret-scan",
         "service-completeness",
         "tofu-validate",
@@ -543,6 +565,7 @@
         "integration-tests",
         "security-scan",
         "semgrep-sast",
+        "iac-policy-scan",
         "artifact-secret-scan",
         "service-completeness",
         "tofu-validate",

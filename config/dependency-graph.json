@@ -435,6 +435,15 @@
       "adr": "0292"
     },
     {
+      "id": "paperless",
+      "service": "paperless",
+      "name": "Paperless-ngx",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "data",
+      "adr": "0285"
+    },
+    {
       "id": "plane",
       "service": "plane",
       "name": "Plane",
@@ -1089,6 +1098,42 @@
       "to": "postgres",
       "type": "hard",
       "description": "OpenFGA stores authorization stores, models, and relationship tuples in PostgreSQL."
+    },
+    {
+      "from": "paperless",
+      "to": "api_gateway",
+      "type": "soft",
+      "description": "Governed operator API access to Paperless flows through the shared platform API gateway."
+    },
+    {
+      "from": "paperless",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "Paperless runs as a compose-managed workload on docker-runtime-lv3."
+    },
+    {
+      "from": "paperless",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Paperless delegates routine browser sign-in to the shared Keycloak OIDC broker."
+    },
+    {
+      "from": "paperless",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to paperless.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "paperless",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Paperless starts from OpenBao-rendered runtime secrets mirrored into its compose environment."
+    },
+    {
+      "from": "paperless",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Paperless stores document metadata, workflow state, and taxonomy in Postgres."
     },
     {
       "from": "temporal",

@@ -25,10 +25,14 @@ def make_fake_ssh(path: Path) -> None:
         """#!/usr/bin/env bash
 set -euo pipefail
 printf '%s\n' "$*" >> "${REMOTE_EXEC_SSH_LOG:?}"
+stdin_payload="$(cat || true)"
+if [[ -n "$stdin_payload" ]]; then
+  printf 'STDIN<<EOF\n%s\nEOF\n' "$stdin_payload" >> "${REMOTE_EXEC_SSH_LOG:?}"
+fi
 if [[ "${REMOTE_EXEC_SSH_FAIL:-0}" == "1" ]]; then
   exit 255
 fi
-if [[ "${REMOTE_EXEC_REMOTE_FAIL:-0}" == "1" && "$*" != *" true" && "$*" != *"mkdir -p"* && "$*" != *"tar -xzf"* && "$*" != *"test -f"* ]]; then
+if [[ "${REMOTE_EXEC_REMOTE_FAIL:-0}" == "1" && "$*" != *" true" && "$*" != *"bash -s"* && "$*" != *"mkdir -p"* && "$*" != *"tar -xzf"* && "$*" != *"test -f"* && "$*" != *".local/validation-gate/last-run.json"* && "$*" != *".local/validation-gate/remote-validate-last-run.json"* ]]; then
   exit 1
 fi
 if [[ "$*" == *"docker run"* ]]; then
@@ -304,6 +308,29 @@ def test_remote_exec_exports_validate_python_bin_for_local_fallback(tmp_path: Pa
     assert completed.marker.read_text() == (shutil.which("python3") or "")  # type: ignore[attr-defined]
 
 
+def test_remote_exec_preserves_validation_lane_context_for_local_fallback(tmp_path: Path) -> None:
+    completed = run_remote_exec(
+        tmp_path,
+        "pre-push-gate",
+        "--local-fallback",
+        extra_env={
+            "REMOTE_EXEC_SSH_FAIL": "1",
+            "LV3_VALIDATION_BASE_REF": "origin/main",
+            "LV3_VALIDATION_CHANGED_FILES_JSON": '["README.md","workstreams.yaml"]',
+        },
+        local_command=(
+            'printf "%s\\n%s" "${LV3_VALIDATION_BASE_REF:-}" '
+            '"${LV3_VALIDATION_CHANGED_FILES_JSON:-}" > "$REMOTE_EXEC_MARKER"'
+        ),
+    )
+
+    assert completed.returncode == 0
+    recorded_base_ref, recorded_changed_files = completed.marker.read_text().splitlines()  # type: ignore[attr-defined]
+    assert recorded_base_ref == "origin/main"
+    assert "README.md" in json.loads(recorded_changed_files)
+    assert "workstreams.yaml" in json.loads(recorded_changed_files)
+
+
 def test_remote_exec_falls_back_locally_when_remote_command_fails(tmp_path: Path) -> None:
     completed = run_remote_exec(
         tmp_path,
@@ -315,6 +342,40 @@ def test_remote_exec_falls_back_locally_when_remote_command_fails(tmp_path: Path
     assert completed.returncode == 0
     assert "remote command failed" in completed.stderr
     assert completed.marker.read_text() == "local-fallback"  # type: ignore[attr-defined]
+
+
+def test_remote_exec_syncs_remote_gate_status_before_local_fallback(tmp_path: Path) -> None:
+    completed = run_remote_exec(
+        tmp_path,
+        "pre-push-gate",
+        "--local-fallback",
+        extra_env={
+            "REMOTE_EXEC_REMOTE_FAIL": "1",
+            "REMOTE_EXEC_STATUS_PAYLOAD": json.dumps(
+                {
+                    "status": "failed",
+                    "source": "build-server",
+                    "checks": [
+                        {"id": "policy-validation", "status": "passed"},
+                        {"id": "packer-validate", "status": "runner_unavailable"},
+                    ],
+                    "requested_checks": ["policy-validation", "packer-validate"],
+                }
+            ),
+        },
+        local_command=(
+            'python3 - <<\'PY\' > "$REMOTE_EXEC_MARKER"\n'
+            "import json\n"
+            "from pathlib import Path\n"
+            "payload = json.loads(Path('.local/validation-gate/last-run.json').read_text())\n"
+            "print(','.join(check['id'] for check in payload['checks'] if check['status'] != 'passed'))\n"
+            "PY"
+        ),
+    )
+
+    assert completed.returncode == 0
+    assert "remote command failed" in completed.stderr
+    assert completed.marker.read_text().strip() == "packer-validate"  # type: ignore[attr-defined]
 
 
 def test_check_build_server_uses_rsync_dry_run(tmp_path: Path) -> None:
@@ -435,6 +496,31 @@ def test_remote_exec_materializes_worktree_git_metadata_for_remote_workspace(tmp
     assert "--delete" not in rsync_log
     assert "repository-snapshot-" in rsync_log
     assert ".lv3-snapshots" in rsync_log
+
+
+def test_remote_exec_prunes_remote_workspace_by_retention_policy(tmp_path: Path) -> None:
+    completed = run_remote_exec(
+        tmp_path,
+        "remote-lint",
+        extra_env={
+            "REMOTE_EXEC_SESSION_RETENTION_DAYS": "1",
+            "REMOTE_EXEC_SESSION_KEEP_COUNT": "64",
+            "REMOTE_EXEC_RUN_RETENTION_DAYS": "3",
+            "REMOTE_EXEC_RUN_KEEP_COUNT": "12",
+            "REMOTE_EXEC_SNAPSHOT_RETENTION_DAYS": "4",
+            "REMOTE_EXEC_SNAPSHOT_KEEP_COUNT": "5",
+        },
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    ssh_log = completed.ssh_log.read_text()  # type: ignore[attr-defined]
+    assert "-mtime +1" in ssh_log
+    assert "head -n -64" in ssh_log
+    assert "head -n -12" in ssh_log
+    assert "head -n -5" in ssh_log
+    assert ".lv3-session-workspaces" in ssh_log
+    assert ".lv3-runs" in ssh_log
+    assert ".lv3-snapshots" in ssh_log
 
 
 def test_remote_exec_syncs_remote_gate_status_back_to_local_checkout(tmp_path: Path) -> None:

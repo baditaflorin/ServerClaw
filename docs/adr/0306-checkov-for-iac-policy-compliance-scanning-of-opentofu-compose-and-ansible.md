@@ -1,9 +1,10 @@
 # ADR 0306: Checkov For IaC Policy Compliance Scanning Of OpenTofu, Compose, And Ansible
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.119
+- Implemented In Platform Version: 0.130.75
+- Implemented On: 2026-03-31
 - Date: 2026-03-29
 
 ## Context
@@ -55,24 +56,42 @@ the repository, running on `docker-build-lv3` alongside the existing Semgrep ste
   policies are evaluated using the bundled policy set and the custom platform
   overrides in `config/checkov/`
 
+### Live implementation note
+
+The pinned offline Checkov build currently used by the repository is
+`3.2.469`. Two practical limits matter for this implementation:
+
+- the offline CLI does not currently expose the `docker_compose` framework
+- the repository stores Docker Compose as Jinja templates rather than static
+  committed Compose YAML
+
+The live implementation therefore scans the repo's actual OpenTofu and Ansible
+surfaces directly, emits the Compose gap as an explicit bounded note, and uses
+repo-managed rule levels from `config/checkov/policy-gate.yaml` because offline
+Checkov output does not populate severity values consistently without the SaaS
+backend.
+
 ### Scanned surfaces and policy sets
 
 | Surface | Path pattern | Checkov framework |
 |---|---|---|
 | OpenTofu resources | `tofu/**/*.tf` | `terraform` |
-| Docker Compose services | `roles/*/files/docker-compose.yml` | `dockerfile`, `docker_compose` |
+| Docker Compose services | `collections/ansible_collections/lv3/platform/roles/*/templates/docker-compose*.j2` | bounded gap recorded by the wrapper until rendered Compose becomes a governed repo surface |
 | Ansible playbooks and roles | `playbooks/**/*.yml`, `roles/**/*.yml` | `ansible` |
 | Kubernetes/Nomad job files | `config/nomad/**/*.hcl` | `terraform` (HCL parser) |
 
 ### Severity and gate behaviour
 
-- findings are classified by Checkov's built-in severity: `CRITICAL`, `HIGH`,
-  `MEDIUM`, `LOW`, `INFO`
-- `CRITICAL` and `HIGH` findings are blocking CI gate failures; the merge is
-  halted and a SARIF report is posted as a Gitea PR comment
-- `MEDIUM` findings produce a non-blocking PR annotation
-- `LOW` and `INFO` findings are written to the SARIF receipt only; they do not
-  appear in the PR comment to prevent annotation noise
+- findings are classified by the repo-managed level map in
+  `config/checkov/policy-gate.yaml`; this preserves deterministic blocking
+  behaviour even when offline Checkov does not populate severities
+- the current blocking levels are the custom Proxmox OpenTofu invariants
+  `CKV_LV3_1` through `CKV_LV3_3`
+- the current provider TLS finding `CKV_LV3_4` is warning-level and does not
+  fail the gate
+- all upstream built-in Ansible findings are currently preserved as note-level
+  evidence unless they are later promoted or suppressed through the repo-managed
+  policy catalog
 
 ### Skip list governance
 

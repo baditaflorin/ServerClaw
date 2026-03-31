@@ -224,6 +224,17 @@
       "healthcheck_path": "/health"
     },
     {
+      "id": "paperless",
+      "name": "Paperless-ngx",
+      "upstream": "http://10.10.10.20:8018",
+      "gateway_prefix": "/v1/paperless",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 60,
+      "healthcheck_path": "/"
+    },
+    {
       "id": "plane",
       "name": "Plane",
       "upstream": "http://10.10.10.20:8093",

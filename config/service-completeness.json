@@ -485,6 +485,17 @@
         "slo_definition": "2026-09-30"
       }
     },
+    "paperless": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "dashboard_file": "config/grafana/dashboards/slo-overview.json",
+      "alert_rule_file": "config/prometheus/rules/slo_alerts.yml",
+      "keycloak_client_generated": true,
+      "suppressed_checks": {}
+    },
     "plane": {
       "service_type": "compose",
       "requires_subdomain": true,

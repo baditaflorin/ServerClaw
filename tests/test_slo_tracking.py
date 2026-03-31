@@ -1,4 +1,5 @@
 import sys
+import json
 from pathlib import Path
 
 
@@ -36,3 +37,93 @@ def test_slo_status_entries_map_budget_to_health() -> None:
     assert entries
     assert entries[0]["metrics_available"] is True
     assert entries[0]["status"] == "healthy"
+
+
+def test_slo_status_entries_include_latest_k6_receipt_signal(tmp_path: Path) -> None:
+    (tmp_path / "config").mkdir(parents=True)
+    (tmp_path / "versions").mkdir(parents=True)
+    (tmp_path / "receipts" / "k6").mkdir(parents=True)
+    (tmp_path / "config" / "slo-catalog.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "review_note": "test",
+                "slos": [
+                    {
+                        "id": "keycloak-latency",
+                        "service_id": "keycloak",
+                        "indicator": "latency",
+                        "objective_percent": 95.0,
+                        "window_days": 30,
+                        "target_url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
+                        "probe_module": "http_2xx_follow_redirects",
+                        "latency_threshold_ms": 500,
+                        "description": "Latency SLO",
+                    }
+                ],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "config" / "service-capability-catalog.json").write_text(
+        json.dumps(
+            {
+                "services": [
+                    {
+                        "id": "keycloak",
+                        "name": "Keycloak",
+                    },
+                    {
+                        "id": "grafana",
+                        "name": "Grafana",
+                        "public_url": "https://grafana.lv3.org",
+                    },
+                ]
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "versions" / "stack.yaml").write_text("platform_version: 0.0.1\nobserved_state: {}\n", encoding="utf-8")
+    (tmp_path / "receipts" / "k6" / "load-keycloak-20260331T070000Z.json").write_text(
+        json.dumps(
+            {
+                "service_id": "keycloak",
+                "scenario": "load",
+                "recorded_on": "2026-03-31",
+                "recorded_at": "2026-03-31T07:00:00Z",
+                "result": "passed",
+                "metrics": {
+                    "request_count": 40,
+                    "error_rate": 0.0,
+                    "http_req_duration_p95_ms": 210.0,
+                    "http_req_duration_avg_ms": 120.0,
+                },
+                "slo_assessment": {
+                    "error_budget_remaining_pct": 92.0,
+                    "error_budget_consumed_pct": 8.0,
+                    "latency_threshold_passed": True,
+                },
+                "regression": {
+                    "checked": True,
+                    "regressed": False,
+                    "regression_ratio": 0.05,
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    entries = build_slo_status_entries(
+        prometheus_url="",
+        grafana_url="https://grafana.lv3.org",
+        catalog_path=tmp_path / "config" / "slo-catalog.json",
+        service_catalog_path=tmp_path / "config" / "service-capability-catalog.json",
+        stack_path=tmp_path / "versions" / "stack.yaml",
+    )
+
+    assert entries[0]["k6"]["current_signal"]["scenario"] == "load"
+    assert entries[0]["k6"]["current_signal"]["receipt_path"] == "receipts/k6/load-keycloak-20260331T070000Z.json"
+    assert entries[0]["k6"]["current_signal"]["error_budget_remaining_pct"] == 92.0

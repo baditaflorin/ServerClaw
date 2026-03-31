@@ -62,6 +62,7 @@ from stage_smoke_suites import load_stage_smoke_catalog, validate_stage_smoke_ca
 from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
 from generate_slo_rules import outputs_match as slo_outputs_match
 from immutable_guest_replacement import load_guest_replacement_catalog, validate_guest_replacement_catalog
+from k6_load_testing import validate_k6_receipts
 from replaceability_scorecards import (
     load_replaceability_review_catalog,
     validate_replaceability_review_catalog,
@@ -117,6 +118,7 @@ MAINTENANCE_WINDOW_SCHEMA_PATH = repo_path("docs", "schema", "maintenance-window
 VM_TEMPLATE_MANIFEST_PATH = repo_path("config", "vm-template-manifest.json")
 CAPACITY_MODEL_PATH = repo_path("config", "capacity-model.json")
 CAPACITY_MODEL_SCHEMA_PATH = repo_path("docs", "schema", "capacity-model.schema.json")
+K6_RECEIPT_SCHEMA_PATH = repo_path("docs", "schema", "k6-receipt.schema.json")
 EPHEMERAL_POOL_CATALOG_PATH = repo_path("config", "ephemeral-capacity-pools.json")
 EPHEMERAL_POOL_SCHEMA_PATH = repo_path("docs", "schema", "ephemeral-capacity-pools.schema.json")
 RESTORE_READINESS_PROFILE_PATH = repo_path("config", "restore-readiness-profiles.json")
@@ -1503,9 +1505,40 @@ def validate_capacity_model_schema() -> None:
         schema.get("properties"),
         "docs/schema/capacity-model.schema.json.properties",
     )
-    for field in ("$schema", "schema_version", "host", "guests", "reservations"):
+    for field in ("$schema", "schema_version", "host", "guests", "reservations", "service_load_profiles"):
         if field not in properties:
             raise ValueError(f"docs/schema/capacity-model.schema.json.properties must include '{field}'")
+
+
+def validate_k6_receipt_schema() -> None:
+    schema = require_mapping(load_json(K6_RECEIPT_SCHEMA_PATH), str(K6_RECEIPT_SCHEMA_PATH))
+    require_str(schema.get("$schema"), "docs/schema/k6-receipt.schema.json.$schema")
+    require_str(schema.get("$id"), "docs/schema/k6-receipt.schema.json.$id")
+    require_str(schema.get("title"), "docs/schema/k6-receipt.schema.json.title")
+    properties = require_mapping(
+        schema.get("properties"),
+        "docs/schema/k6-receipt.schema.json.properties",
+    )
+    for field in (
+        "$schema",
+        "schema_version",
+        "receipt_id",
+        "scenario",
+        "service_id",
+        "summary_export",
+        "metrics",
+        "slo_assessment",
+        "regression",
+        "notifications",
+        "result",
+        "failure_reasons",
+    ):
+        if field not in properties:
+            raise ValueError(f"docs/schema/k6-receipt.schema.json.properties must include '{field}'")
+
+
+def validate_k6_receipt_data() -> None:
+    validate_k6_receipts(REPO_ROOT, quiet=True)
 
 
 def validate_shared_policy_packs() -> None:
@@ -2742,6 +2775,8 @@ def validate_repository_data_models() -> int:
     validate_guest_replacement_catalog(load_guest_replacement_catalog())
     validate_mutation_audit_schema(load_mutation_audit_schema())
     validate_receipts()
+    validate_k6_receipt_schema()
+    validate_k6_receipt_data()
     validate_promotion_receipts()
     validate_stage_smoke_catalog(load_stage_smoke_catalog())
     validate_uptime_monitors()

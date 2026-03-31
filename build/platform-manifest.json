@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.119",
-  "platform_version": "0.130.77",
-  "generated_at": "2026-03-31T15:37:23Z",
-  "next_refresh_at": "2026-03-31T16:37:23Z",
+  "repo_version": "0.177.121",
+  "platform_version": "0.130.78",
+  "generated_at": "2026-03-31T18:18:17Z",
+  "next_refresh_at": "2026-03-31T19:18:17Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -507,7 +507,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "http://100.64.0.1:8014",
+        "primary_url": "http://10.10.10.20:8098",
         "last_live_apply": "2026-03-31T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -531,6 +531,18 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://wiki.lv3.org",
+        "last_live_apply": "2026-03-31T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "paperless": {
+        "service_name": "Paperless-ngx",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://paperless.lv3.org",
         "last_live_apply": "2026-03-31T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -2194,6 +2206,32 @@
         "runbook": "docs/runbooks/platform-operations-portal.md"
       },
       {
+        "id": "converge-paperless",
+        "description": "Deploy the public Paperless-ngx archive on docker-runtime-lv3, refresh the governed API gateway route, and reconcile the repo-managed taxonomy and smoke verification path.",
+        "tags": [
+          "converge-paperless",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-paperless.md"
+      },
+      {
         "id": "converge-piper",
         "description": "Deploy the private Piper text-to-speech runtime on docker-runtime-lv3, load the repo-managed default voice, and verify the `/api/tts` WAV contract.",
         "tags": [
@@ -3118,6 +3156,81 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/install-proxmox.md"
+      },
+      {
+        "id": "k6-load",
+        "description": "Run the governed ADR 0305 weekly k6 load probe, record structured receipts, and publish regression and warning notifications when the latest run exceeds the governed thresholds.",
+        "tags": [
+          "diagnostic",
+          "guest-live",
+          "k6-load",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 120,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 0,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/k6-load-testing.md"
+      },
+      {
+        "id": "k6-smoke",
+        "description": "Run the governed ADR 0305 k6 smoke probe against the declared latency-SLO services and fail if the smoke budget or latency threshold is exceeded.",
+        "tags": [
+          "diagnostic",
+          "guest-live",
+          "k6-smoke",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 600,
+          "max_steps": 80,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 0,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/k6-load-testing.md"
+      },
+      {
+        "id": "k6-soak",
+        "description": "Run the governed ADR 0305 monthly k6 soak probe so extended-duration latency and error-budget drift are captured as receipts and surfaced through the platform notification paths.",
+        "tags": [
+          "diagnostic",
+          "guest-live",
+          "k6-soak",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 3600,
+          "max_steps": 140,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 0,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/k6-load-testing.md"
       },
       {
         "id": "live-apply-group",
@@ -4826,6 +4939,16 @@
         ]
       },
       {
+        "id": "configure-paperless",
+        "title": "Configure Paperless",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-paperless.md",
+        "workflow_ids": [
+          "converge-paperless"
+        ]
+      },
+      {
         "id": "configure-piper",
         "title": "Configure Piper",
         "agent_trust_required": "T3",
@@ -5164,6 +5287,18 @@
         "workflow_ids": [
           "nightly-integration-tests",
           "stage-smoke-suites"
+        ]
+      },
+      {
+        "id": "k6-load-testing",
+        "title": "k6 Load Testing",
+        "agent_trust_required": "T2",
+        "steps": 5,
+        "path": "docs/runbooks/k6-load-testing.md",
+        "workflow_ids": [
+          "k6-load",
+          "k6-smoke",
+          "k6-soak"
         ]
       },
       {
@@ -5601,10 +5736,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.118",
+    "last_version": "0.177.120",
     "deployed_at": "2026-03-31",
-    "summary": "implements ADR 0292 by hardening exact-main Lago replay recovery, verifying the protected billing.lv3.org surface plus public event-ingest and current-usage smoke contracts on merged mainline, and restoring the governed Restic live-apply backup trigger for the service wrapper",
-    "release_notes_url": "docs/release-notes/0.177.119.md"
+    "summary": "implemented ADR 0285 by bringing the Paperless document archive service, its OpenBao and Keycloak recovery hardening, and the corrected public smoke-upload verification path onto main",
+    "release_notes_url": "docs/release-notes/0.177.121.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

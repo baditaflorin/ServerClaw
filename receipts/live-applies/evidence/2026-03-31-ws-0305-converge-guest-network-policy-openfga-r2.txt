@@ -1,0 +1,9 @@
+
+PLAY [Converge Proxmox guest network policy enforcement] ***********************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T08:52:25.810Z","vm":"controller","workflow_id":"ansible-playbook"}
+fatal: [proxmox_florin]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: no such identity: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-live-apply/.local/ssh/hetzner_llm_agents_ed25519: No such file or directory\r\nops@100.64.0.1: Permission denied (publickey).", "unreachable": true}
+
+PLAY RECAP *********************************************************************
+proxmox_florin             : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0

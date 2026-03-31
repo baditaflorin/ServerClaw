@@ -5,6 +5,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 VALIDATE_REPO_SCRIPT = REPO_ROOT / "scripts" / "validate_repo.sh"
 CHECK_ROLE_ARGUMENT_SPECS_SCRIPT = REPO_ROOT / "scripts" / "check_role_argument_specs.sh"
+REMOTE_EXEC_SCRIPT = REPO_ROOT / "scripts" / "remote_exec.sh"
 PYTHON_WITH_PACKAGES_SCRIPT = REPO_ROOT / "scripts" / "run_python_with_packages.sh"
 
 
@@ -118,6 +119,13 @@ def test_check_role_argument_specs_avoids_bash4_only_mapfile() -> None:
 
     assert "changed_roles=()" in script
     assert "while IFS= read -r line;" in script
+    assert "mapfile" not in script
+
+
+def test_remote_exec_avoids_bash4_only_mapfile() -> None:
+    script = REMOTE_EXEC_SCRIPT.read_text()
+
+    assert "load_lines_into_array()" in script
     assert "mapfile" not in script
 
 
