@@ -66,6 +66,7 @@ PORT_KEYS = (
     "outline_port",
     "directus_port",
     "jupyterhub_port",
+    "piper_port",
     "dozzle_http_port",
     "dozzle_agent_port",
     "excalidraw_port",
@@ -555,6 +556,9 @@ def build_service_urls(
     elif service_id == "ollama":
         urls["internal"] = service_url("http", private_ip, ports["ollama_api_port"])
         port_map["internal"] = ports["ollama_api_port"]
+    elif service_id == "piper":
+        urls["internal"] = service_url("http", private_ip, ports["piper_port"])
+        port_map["internal"] = ports["piper_port"]
     elif service_id == "n8n":
         urls["internal"] = service_url("http", private_ip, ports["n8n_port"])
         port_map["internal"] = ports["n8n_port"]

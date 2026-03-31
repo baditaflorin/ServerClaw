@@ -1,0 +1,14 @@
+FROM {{ piper_runtime_base_image }}
+
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1
+
+COPY requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY piper_service.py ./piper_service.py
+
+EXPOSE {{ piper_runtime_container_port }}
+
+CMD ["python3", "/app/piper_service.py"]

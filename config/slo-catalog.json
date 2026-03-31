@@ -236,6 +236,16 @@
       "description": "JupyterHub remains reachable through the public LV3 edge for interactive exploratory notebook sessions."
     },
     {
+      "id": "piper-availability",
+      "service_id": "piper",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:8099/healthz",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private Piper TTS health endpoint remains reachable on docker-runtime-lv3 for real-time voice synthesis workflows."
+    },
+    {
       "id": "plane-availability",
       "service_id": "plane",
       "indicator": "availability",

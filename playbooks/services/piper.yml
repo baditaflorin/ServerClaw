@@ -1,0 +1,28 @@
+# Playbook: services/piper.yml
+# Purpose: Provide the service-scoped live-apply entrypoint for Piper.
+# Use case: Run through `make live-apply-service service=piper env=<environment>`.
+#
+# Inputs (required):
+#   - env (str, required): Deployment environment selector passed through to the imported playbook.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the live apply.
+#
+# Outputs:
+#   - Imports the root Piper playbook used by the governed service live-apply wrapper.
+#
+# Idempotency: Fully idempotent
+#              This wrapper only imports the root Piper playbook and does not mutate state on its own.
+#
+# Dependencies:
+#   - ADR 0284: Defines Piper as the canonical CPU neural text-to-speech runtime.
+#   - Requires: playbooks/piper.yml.
+#   - Role: lv3.platform.piper_runtime — owned by the imported playbook.
+#
+# Related ADRs: 0086, 0107, 0284
+# Related Runbooks: docs/runbooks/configure-piper.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-31
+---
+- import_playbook: ../piper.yml

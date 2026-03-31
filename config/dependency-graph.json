@@ -336,6 +336,15 @@
       "adr": "0145"
     },
     {
+      "id": "piper",
+      "service": "piper",
+      "name": "Piper",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "communication",
+      "adr": "0284"
+    },
+    {
       "id": "open_webui",
       "service": "open_webui",
       "name": "Open WebUI",

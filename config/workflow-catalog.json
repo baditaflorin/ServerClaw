@@ -4182,6 +4182,59 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-piper": {
+      "description": "Deploy the private Piper text-to-speech runtime on docker-runtime-lv3, load the repo-managed default voice, and verify the `/api/tts` WAV contract.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-piper",
+        "command": "make converge-piper"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-piper"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-piper.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/piper.yml",
+        "playbooks/services/piper.yml",
+        "roles/piper_runtime",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/service-completeness.json",
+        "config/data-catalog.json",
+        "config/slo-catalog.json"
+      ],
+      "outputs": [
+        "A private Piper runtime on docker-runtime-lv3 with the repo-managed default voice loaded and the health, voices, and WAV synthesis contracts verified."
+      ],
+      "verification_commands": [
+        "make syntax-check-piper",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8099/healthz'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8099/api/voices'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 -c '\"'\"'import json, urllib.request; request=urllib.request.Request(\"http://127.0.0.1:8099/api/tts?voice=en_US-ryan-medium\", data=b\"LV3 Piper workflow verification\", headers={\"Content-Type\": \"text/plain; charset=utf-8\"}, method=\"POST\"); response=urllib.request.urlopen(request, timeout=180); payload=response.read(); content_type=response.headers.get(\"Content-Type\", \"\"); assert content_type.startswith(\"audio/wav\"); assert payload[:4] == b\"RIFF\"; assert payload[8:12] == b\"WAVE\"; assert len(payload) > 1024; print(json.dumps({\"verified\": True, \"bytes\": len(payload)}))'\"'\"''"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 260,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-dozzle": {
       "description": "Deploy the Dozzle hub on docker-runtime-lv3, join remote log agents from docker-build-lv3 and monitoring-lv3, and publish logs.lv3.org through the shared authenticated edge.",
       "lifecycle_status": "active",
