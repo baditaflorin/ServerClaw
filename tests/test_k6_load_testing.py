@@ -270,3 +270,5 @@ def test_run_k6_uses_host_workspace_override(monkeypatch, tmp_path: Path) -> Non
     command = captured["command"]
     assert isinstance(command, list)
     assert f"/host/gitea-runner/workspace:{tmp_path}" in command
+    assert "--user" in command
+    assert f"{k6_load_testing.os.getuid()}:{k6_load_testing.os.getgid()}" in command

@@ -19568,6 +19568,13 @@ workstreams:
       - inventory/group_vars/platform.yml
       - playbooks/services/guest-log-shipping.yml
       - collections/ansible_collections/lv3/platform/playbooks/services/guest-log-shipping.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/ensure_unsealed.yml
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml
       - scripts/capacity_report.py
       - scripts/generate_platform_vars.py
       - scripts/k6_load_testing.py
@@ -19584,6 +19591,9 @@ workstreams:
       - tests/test_k6_load_testing_windmill.py
       - tests/test_gitea_workflows.py
       - tests/test_monitoring_vm_role.py
+      - tests/test_openbao_compose_env_helper.py
+      - tests/test_openbao_runtime_role.py
+      - tests/test_openbao_systemd_credentials_helper.py
       - tests/test_windmill_default_operations_surface.py
       - tests/test_windmill_operator_admin_app.py
       - tests/test_promotion_pipeline.py
@@ -19624,6 +19634,13 @@ workstreams:
             - config/ntfy/server.yml
             - playbooks/services/guest-log-shipping.yml
             - collections/ansible_collections/lv3/platform/playbooks/services/guest-log-shipping.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/ensure_unsealed.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml
             - scripts/k6_load_testing.py
             - scripts/capacity_report.py
             - scripts/promotion_pipeline.py
@@ -19636,6 +19653,9 @@ workstreams:
             - tests/test_gitea_workflows.py
             - tests/test_capacity_report.py
             - tests/test_monitoring_vm_role.py
+            - tests/test_openbao_compose_env_helper.py
+            - tests/test_openbao_runtime_role.py
+            - tests/test_openbao_systemd_credentials_helper.py
             - tests/test_windmill_default_operations_surface.py
             - tests/test_windmill_operator_admin_app.py
             - tests/test_promotion_pipeline.py

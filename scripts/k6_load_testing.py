@@ -289,6 +289,10 @@ def docker_workspace_mount_source(repo_root: Path) -> str:
     return str(repo_root.resolve())
 
 
+def docker_workspace_user() -> str:
+    return f"{os.getuid()}:{os.getgid()}"
+
+
 def run_k6(
     *,
     repo_root: Path,
@@ -314,6 +318,8 @@ def run_k6(
         f"{workspace_mount_source}:{repo_root}",
         "--workdir",
         str(repo_root),
+        "--user",
+        docker_workspace_user(),
         "--env",
         f"LV3_K6_CONFIG_PATH={config_path}",
         "--env",

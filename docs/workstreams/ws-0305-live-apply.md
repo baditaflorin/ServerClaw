@@ -44,6 +44,7 @@
 - `docker-build-lv3` can run the pinned `k6_runtime` smoke gate against Keycloak and OpenFGA while remote-writing into Prometheus on `monitoring-lv3`
 - `docker-runtime-lv3` seeds `f/lv3/k6_load_testing`, `f/lv3/k6_load_weekly`, and `f/lv3/k6_soak_monthly` through the Windmill replay
 - `monitoring-lv3` listens on the private Prometheus address needed by the build host and Windmill worker
+- `docker-runtime-lv3` unseals the Windmill/OpenBao helper path without requiring a full quorum on every compose-env or credentials render
 
 ## Ownership Notes
 
@@ -56,7 +57,12 @@
 - Local Trivy scanning of `docker.io/grafana/k6:1.7.1@sha256:44bd1d66c2b019327991b95459d78402b0a7a0a055ab52ee088deea1a044e8d5` returned `critical=0` and `high=1`, recorded in `receipts/image-scans/2026-03-31-k6-runtime.json` with the raw report beside it.
 - The branch already carries the focused pytest and contract coverage for the k6 runner, Windmill wrapper, monitoring role, event taxonomy, SLO tracking, and promotion gate surfaces; those checks are rerun before live apply and before merge.
 - `make converge-monitoring` now completes successfully from this worktree after the lane-map repair, with the failed first replay preserved in `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-monitoring-r1.txt` and the successful corrective replay recorded in `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-monitoring-r2.txt`.
-- Remaining work before merge: exact live replay, real smoke/load receipts, final ADR metadata updates, final canonical-truth integration, and the push to `origin/main`.
+- `make converge-ntfy` completed successfully and is recorded in `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-ntfy-r1.txt`.
+- The first two `make converge-windmill` replays exposed live drift rather than ADR 0305 model gaps: an unexpected `pgaudit` extension in the Windmill database and an OpenBao partial-unseal helper path that retried the whole keyset even after the service was already unsealed. The manual pgaudit cleanup and unseal evidence are committed under `receipts/live-applies/evidence/2026-03-31-ws-0305-windmill-pgaudit-drop-r1.txt` plus `receipts/live-applies/evidence/2026-03-31-ws-0305-openbao-unseal-r1.txt`/`r2.txt`, and the branch now carries the repo fix that stops replaying unnecessary OpenBao unseal attempts.
+- With the OpenBao helper fix in place, `make converge-windmill` completed successfully on replay `r4`, and the live Windmill API now shows `f/lv3/k6_load_testing`, `f/lv3/k6_load_weekly`, and `f/lv3/k6_soak_monthly`; see `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-windmill-r4.txt` and `receipts/live-applies/evidence/2026-03-31-ws-0305-windmill-api-r1.txt`.
+- The first real build-server smoke replay (`receipts/live-applies/evidence/2026-03-31-ws-0305-k6-smoke-r5.txt`) proved the private execution path end to end but failed on live platform drift: OpenFGA was down, Prometheus on `monitoring-lv3` was only listening on `127.0.0.1:9090`, and the k6 container could not write its summary export into the mounted workspace as rootless Docker on the build host. The branch now fixes the repo side of that last issue by running the container as the host workspace UID:GID.
+- `make converge-openfga` replay `r1` is preserved in `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-openfga-r1.txt`; it failed on a transient apt lock held by `unattended-upgrades` on `docker-runtime-lv3`, so the remaining work is a replay once the live host is clear rather than a repo change.
+- Remaining work before merge: refresh from the latest `origin/main`, restore the Prometheus private listen path and OpenFGA runtime on the live platform, rerun real `k6-smoke` and `k6-load` receipts with the fixed container user mapping, then finish the final ADR metadata updates, canonical-truth integration, and push to `origin/main`.
 
 ## Merge Criteria
 
@@ -70,3 +76,5 @@
 - The public GitHub validation workflow intentionally stays unchanged because it cannot reach the private OpenFGA and Prometheus endpoints required by the smoke gate.
 - The first `make converge-monitoring` replay exposed an unrelated shared-contract bug in `playbooks/services/guest-log-shipping.yml`: the lane map did not cover the `artifact-cache` guest role, so the replay failed late on `artifact-cache-lv3` after the ADR 0305 monitoring surfaces had already converged. This branch carries the corrective lane-map patch and reruns the monitoring replay with fresh evidence.
 - The corrective replay succeeded end to end, including the guest-log-shipping stage that previously failed on `artifact-cache-lv3`.
+- The live Windmill replay also exposed a repo bug in the OpenBao helper path: the old helper tried to submit the full unseal key list each time, which causes a 500 once the service is already unsealed. This branch splits the helper into per-key includes so the role stops as soon as the API reports `sealed: false`.
+- The live smoke replay exposed a repo bug in `scripts/k6_load_testing.py`: Docker wrote the summary export as the container user, which is not always permitted in the remote build workspace. This branch now runs the container as the local workspace UID:GID so `receipts/k6/**` stays writable on `docker-build-lv3`.
