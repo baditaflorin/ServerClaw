@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.123",
   "platform_version": "0.130.78",
-  "generated_at": "2026-03-31T20:13:42Z",
-  "next_refresh_at": "2026-03-31T21:13:42Z",
+  "generated_at": "2026-03-31T21:51:51Z",
+  "next_refresh_at": "2026-03-31T22:51:51Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5445,7 +5445,7 @@
         "id": "security-posture-reporting",
         "title": "Security Posture Reporting",
         "agent_trust_required": "T1",
-        "steps": 7,
+        "steps": 6,
         "path": "docs/runbooks/security-posture-reporting.md",
         "workflow_ids": [
           "security-posture-scan"
