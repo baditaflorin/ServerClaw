@@ -302,6 +302,22 @@ def test_openbao_runtime_retries_other_read_side_api_checks_after_restart() -> N
     assert "retries: 12" in tasks
     assert "changed_when: false" in tasks
     assert "until: openbao_rotatable_secret_current.status in [200, 404]" in tasks
+
+
+def test_openbao_runtime_verification_requests_skip_become_on_loopback() -> None:
+    tasks = read_openbao_runtime_tasks_text()
+
+    ops_login_section = tasks.split("- name: Verify userpass login for the ops operator", 1)[1].split(
+        "- name: Assert that the ops userpass login succeeded",
+        1,
+    )[0]
+    dynamic_credential_section = tasks.split(
+        "- name: Request a PostgreSQL dynamic credential through the controller AppRole",
+        1,
+    )[1].split("- name: Assert that a PostgreSQL dynamic credential was issued", 1)[0]
+
+    assert "become: false" in ops_login_section
+    assert "become: false" in dynamic_credential_section
     assert "- name: Read AppRole role IDs" in tasks
     assert "until: openbao_approle_role_ids.status == 200" in tasks
     assert "- name: Generate fresh short-lived AppRole secret IDs" in tasks
