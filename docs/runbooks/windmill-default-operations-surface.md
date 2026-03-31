@@ -23,6 +23,7 @@ These scripts are part of the default operations surface after ADR 0228:
 
 - `f/lv3/post_merge_gate`
 - `f/lv3/nightly_integration_tests`
+- `f/lv3/serverclaw_skills`
 - `f/lv3/runbook_executor`
 - `f/lv3/continuous_drift_detection`
 - `f/lv3/subdomain_exposure_audit`
@@ -81,11 +82,13 @@ Focused repo validation:
 uv run --with pytest --with pyyaml pytest \
   tests/test_nightly_integration_tests.py \
   tests/test_weekly_capacity_report_windmill.py \
+  tests/test_serverclaw_skills_windmill.py \
   tests/test_ansible_collection_packaging.py \
   tests/test_windmill_default_operations_surface.py -q
 python3 -m py_compile \
   config/windmill/scripts/nightly-integration-tests.py \
   config/windmill/scripts/weekly-capacity-report.py \
+  config/windmill/scripts/serverclaw-skills.py \
   config/windmill/scripts/collection-publish.py
 make syntax-check-windmill
 ```
@@ -95,6 +98,13 @@ Representative live checks:
 ```bash
 curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
   http://100.64.0.1:8005/api/w/lv3/scripts/get/p/f%2Flv3%2Fpost_merge_gate | jq '{path, summary}'
+
+WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+  python3 scripts/windmill_run_wait_result.py \
+    --base-url http://100.64.0.1:8005 \
+    --workspace lv3 \
+    --path f/lv3/serverclaw_skills \
+    --payload-json '{"workspace_id":"ops"}'
 
 WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
   python3 scripts/windmill_run_wait_result.py \

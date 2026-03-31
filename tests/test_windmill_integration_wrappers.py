@@ -74,16 +74,17 @@ def test_stage_smoke_wrapper_exports_worker_local_windmill_url(monkeypatch, tmp_
     assert payload["status"] == "ok"
     assert captured["cwd"] == tmp_path
     assert captured["env"]["LV3_INTEGRATION_WINDMILL_URL"] == "http://127.0.0.1:8000"
-    assert captured["command"][:5] == [
+    assert payload["report_file"] == wrapper.default_report_file("windmill", "production")
+    assert captured["command"] == [
         "python3",
         str(tmp_path / "scripts" / "stage_smoke_suites.py"),
         "--service",
         "windmill",
         "--environment",
+        "production",
+        "--report-file",
+        wrapper.default_report_file("windmill", "production"),
     ]
-    assert captured["command"][5] == "production"
-    assert captured["command"][6] == "--report-file"
-    assert Path(captured["command"][7]).name.startswith("stage-smoke-windmill-production-")
 
 
 def test_nightly_wrapper_sets_worker_local_windmill_url_before_run_suite(monkeypatch, tmp_path: Path) -> None:

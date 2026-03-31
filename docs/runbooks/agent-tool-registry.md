@@ -100,6 +100,14 @@ scripts/agent_tool_registry.py \
   --args-json '{"url":"https://example.com","selectors":[{"name":"heading","selector":"h1"}],"capture_screenshot":true}'
 ```
 
+Resolve the repo-managed ServerClaw skill packs:
+
+```bash
+scripts/agent_tool_registry.py \
+  --call list-serverclaw-skills \
+  --args-json '{"workspace_id":"ops","include_prompt_manifest":true}'
+```
+
 ## Audit Events
 
 Every tool call appends one governed-tool-call audit event to the controller-local JSON-lines stream:

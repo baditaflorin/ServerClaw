@@ -41,10 +41,11 @@ The workflow manages these live surfaces:
 - seeded script `f/lv3/scheduler_watchdog_loop`
 - seeded script `f/lv3/rotate_credentials`
 - seeded script `f/lv3/deploy_and_promote`
-- seeded default operations surface documented in `docs/runbooks/windmill-default-operations-surface.md`, including `f/lv3/post_merge_gate`, `f/lv3/nightly_integration_tests`, `f/lv3/continuous_drift_detection`, `f/lv3/weekly_capacity_report`, `f/lv3/weekly_security_scan`, `f/lv3/runbook_executor`, and `f/lv3/maintenance_window`
+- seeded default operations surface documented in `docs/runbooks/windmill-default-operations-surface.md`, including `f/lv3/post_merge_gate`, `f/lv3/nightly_integration_tests`, `f/lv3/serverclaw_skills`, `f/lv3/continuous_drift_detection`, `f/lv3/weekly_capacity_report`, `f/lv3/weekly_security_scan`, `f/lv3/runbook_executor`, and `f/lv3/maintenance_window`
 - seeded helper `f/lv3/mutation_audit_emit`
 - seeded helper `f/lv3/lane_scheduler`
 - seeded helper `f/lv3/scheduler_watchdog`
+- seeded helper `f/lv3/serverclaw_skills`
 - seeded helper `f/lv3/ephemeral_vm_reaper`
 - enabled schedule `f/lv3/ephemeral_vm_reaper_every_30m`
 - seeded helper `f/lv3/operator_onboard`
@@ -97,6 +98,7 @@ Run these checks after converge:
 18. `WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" python3 scripts/windmill_run_wait_result.py --base-url http://100.64.0.1:8005 --workspace lv3 --path f/lv3/platform_observation_loop --payload-json '{"findings":[{"severity":"critical","check":"manual-self-correction-contract","service_id":"windmill"}],"source":"adr-0204-manual-verify"}' | jq '.correction_loop_id, .processed_runs[0].correction_loop_id'`
 19. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'cd /srv/proxmox_florin_server && python3 scripts/policy_checks.py --validate && python3 scripts/command_catalog.py --check-approval --command converge-windmill --requester-class human_operator --approver-classes human_operator --validation-passed --preflight-passed --receipt-planned && python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
 20. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'find /srv/proxmox_florin_server/policy -type f \( -name "._*" -o -name ".DS_Store" \) -print' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+21. `WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" python3 scripts/windmill_run_wait_result.py --base-url http://100.64.0.1:8005 --workspace lv3 --path f/lv3/serverclaw_skills --payload-json '{"workspace_id":"ops"}'`
 
 ## Notes
 

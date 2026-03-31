@@ -8,6 +8,10 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
+def load_tasks(path: Path) -> list[dict]:
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
 def test_windmill_defaults_seed_ephemeral_vm_reaper_script_and_schedule() -> None:
     defaults = yaml.safe_load(
         (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
@@ -25,32 +29,69 @@ def test_windmill_defaults_seed_ephemeral_vm_reaper_script_and_schedule() -> Non
     assert schedule_map["f/lv3/ephemeral_pool_reconciler_every_15m"]["script_path"] == "f/lv3/ephemeral_pool_reconciler"
 
 
-def test_windmill_runtime_only_rechecks_nat_chain_when_port_publishing_is_enabled() -> None:
+def test_windmill_runtime_recovers_missing_docker_bridge_chains_before_startup() -> None:
     defaults = yaml.safe_load(
         (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
     )
-    tasks = (
-        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
-    ).read_text(encoding="utf-8")
+    tasks = load_tasks(REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml")
     compose_template = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2"
     ).read_text(encoding="utf-8")
+    windmill_extra_section = compose_template.split("windmill_extra:", 1)[1].split("\nvolumes:", 1)[0]
+
+    nat_check = next(task for task in tasks if task.get("name") == "Check whether the Docker nat chain exists before Windmill startup")
+    forward_check = next(task for task in tasks if task.get("name") == "Check whether the Docker forward chain exists before Windmill startup")
+    restart = next(
+        task for task in tasks if task.get("name") == "Restart Docker when the nat or forward chain is missing before Windmill startup"
+    )
+    nat_recheck = next(task for task in tasks if task.get("name") == "Recheck the Docker nat chain before Windmill startup")
+    forward_recheck = next(task for task in tasks if task.get("name") == "Recheck the Docker forward chain before Windmill startup")
+    assert_task = next(task for task in tasks if task.get("name") == "Assert Docker bridge chains are present before Windmill startup")
+    startup = next(task for task in tasks if task.get("name") == "Start Windmill and wait for the API socket")
+    rescue_restart = next(
+        task for task in startup["rescue"] if task.get("name") == "Restart Docker to restore bridge chains before retrying Windmill startup"
+    )
+    retry_task = next(
+        task
+        for task in startup["rescue"]
+        if task.get("name") == "Recreate the full Windmill stack after stale-network cleanup or Docker bridge-chain recovery"
+    )
 
     assert defaults["windmill_server_network_mode"] == "host"
     assert defaults["windmill_server_requires_docker_nat"] == "{{ windmill_server_network_mode != 'host' }}"
     assert defaults["windmill_worker_network_mode"] == "{{ windmill_server_network_mode }}"
+    assert defaults["windmill_requires_docker_bridge_chains"] is True
     assert "127.0.0.1" in defaults["windmill_worker_api_base_url"]
     assert "network_mode: {{ windmill_server_network_mode }}" in compose_template
     assert "network_mode: {{ windmill_worker_network_mode }}" in compose_template
-    assert 'ports:' not in compose_template
+    assert "windmill_extra:" in compose_template
+    assert "network_mode:" not in windmill_extra_section
     assert "WINDMILL_BASE_URL: {{ windmill_private_base_url }}" in compose_template
-    assert "Recheck Docker nat chain before Windmill startup" in tasks
-    assert "Wait for the Windmill worker containers to be running" in tasks
-    assert "failed_when: windmill_docker_nat_chain_recheck.rc not in [0, 1]" in tasks
-    assert "retries: 5" in tasks
-    assert "delay: 2" in tasks
-    assert "until: windmill_docker_nat_chain_recheck.rc == 0" in tasks
-    assert "when: windmill_server_requires_docker_nat | bool" in tasks
+    assert nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
+    assert forward_check["ansible.builtin.command"]["argv"] == ["iptables", "-S", "DOCKER-FORWARD"]
+    assert nat_check["when"] == "windmill_requires_docker_bridge_chains | bool"
+    assert forward_check["when"] == "windmill_requires_docker_bridge_chains | bool"
+    assert restart["when"] == (
+        "windmill_requires_docker_bridge_chains | bool and (windmill_docker_nat_chain_check.rc == 1 or "
+        "windmill_docker_forward_chain_check.rc == 1)"
+    )
+    assert nat_recheck["retries"] == 6
+    assert forward_recheck["retries"] == 6
+    assert nat_recheck["when"] == "windmill_requires_docker_bridge_chains | bool"
+    assert forward_recheck["when"] == "windmill_requires_docker_bridge_chains | bool"
+    assert assert_task["when"] == "windmill_requires_docker_bridge_chains | bool"
+    assert assert_task["ansible.builtin.assert"]["that"] == [
+        "windmill_docker_nat_chain_recheck.rc == 0",
+        "windmill_docker_forward_chain_recheck.rc == 0",
+    ]
+    rescue_fact = next(task for task in startup["rescue"] if task.get("name") == "Detect stale Windmill compose-network startup failures")
+    assert "No chain/target/match by that name" in rescue_fact["ansible.builtin.set_fact"]["windmill_docker_bridge_chain_missing"]
+    assert "Unable to enable ACCEPT OUTGOING rule" in rescue_fact["ansible.builtin.set_fact"]["windmill_docker_bridge_chain_missing"]
+    assert rescue_restart["when"] == (
+        "windmill_requires_docker_bridge_chains | bool and (windmill_missing_network_failure | bool or "
+        "windmill_docker_bridge_chain_missing | bool)"
+    )
+    assert retry_task["when"] == "windmill_missing_network_failure | bool or windmill_docker_bridge_chain_missing | bool"
 
 
 def test_windmill_runtime_exports_proxmox_api_credentials_for_ephemeral_reaper() -> None:

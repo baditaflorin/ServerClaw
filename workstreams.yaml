@@ -6028,6 +6028,137 @@ workstreams:
       included_in_repo_version: 0.177.79
       latest_receipts:
         n8n: 2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply
+  - id: ws-0257-live-apply
+    adr: "0257"
+    title: ServerClaw skill packs live apply
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0257-openclaw-skills-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-openclaw-skills
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0257-serverclaw-skill-packs-live-apply.md
+    depends_on:
+      - adr-0069-agent-tool-registry
+      - adr-0156-agent-session-workspace-isolation
+      - adr-0228-windmill-default-operations-surface
+      - adr-0254-serverclaw-product-surface
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/adr/0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md
+      - docs/workstreams/adr-0257-serverclaw-skill-packs-live-apply.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/serverclaw-skills.md
+      - docs/runbooks/agent-tool-registry.md
+      - docs/runbooks/configure-windmill.md
+      - docs/runbooks/windmill-default-operations-surface.md
+      - config/agent-tool-registry.json
+      - config/serverclaw/
+      - platform/use_cases/serverclaw_skills.py
+      - scripts/serverclaw_skill_packs.py
+      - scripts/agent_tool_registry.py
+      - scripts/validate_repository_data_models.py
+      - config/windmill/scripts/serverclaw-skills.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - tests/test_serverclaw_skill_packs.py
+      - tests/test_serverclaw_skills_windmill.py
+      - tests/test_agent_tool_registry.py
+      - tests/test_windmill_default_operations_surface.py
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: agent_tool_registry_contract
+          paths:
+            - config/agent-tool-registry.json
+            - scripts/agent_tool_registry.py
+          mode: shared_contract
+          contract: agent-tool-registry-v1
+        - id: windmill_seed_contract
+          paths:
+            - config/windmill/scripts/serverclaw-skills.py
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - docs/runbooks/configure-windmill.md
+            - docs/runbooks/windmill-default-operations-surface.md
+            - tests/test_windmill_default_operations_surface.py
+          mode: shared_contract
+          contract: windmill-seed-scripts-v1
+        - id: serverclaw_skill_pack_repo_surface
+          paths:
+            - docs/adr/0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md
+            - docs/workstreams/adr-0257-serverclaw-skill-packs-live-apply.md
+            - docs/runbooks/serverclaw-skills.md
+            - config/serverclaw/
+            - platform/use_cases/serverclaw_skills.py
+            - scripts/serverclaw_skill_packs.py
+            - scripts/validate_repository_data_models.py
+            - tests/test_serverclaw_skill_packs.py
+            - tests/test_serverclaw_skills_windmill.py
+            - tests/test_agent_tool_registry.py
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      latest_receipts:
+        serverclaw_skills: 2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply
+  - id: ws-0257-main-merge
+    adr: "0257"
+    title: Integrate ADR 0257 exact-main replay onto current origin/main
+    status: ready_for_merge
+    owner: codex
+    branch: codex/ws-0257-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-main-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0257-main-merge.md
+    depends_on:
+      - ws-0257-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0257-main-merge.md
+      - docs/workstreams/adr-0257-serverclaw-skill-packs-live-apply.md
+      - docs/adr/0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md
+      - docs/adr/.index.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0257_main_merge
+          paths:
+            - docs/workstreams/ws-0257-main-merge.md
+            - docs/adr/.index.yaml
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - receipts/live-applies/
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0257 by carrying the governed ServerClaw SKILL.md skill-pack contract onto the current mainline baseline, hardening exact-main OpenBao replay stability, and recording the verified controller, API gateway, and Windmill workspace-precedence proof set
+      release_bump: patch
   - id: ws-0259-main-merge
     adr: "0259"
     title: Integrate ADR 0259 exact-main replay onto current origin/main

@@ -66,6 +66,7 @@ class AgentToolRegistryTests(unittest.TestCase):
         self.assertIn("get-deployment-history", tool_names)
         self.assertIn("get-platform-status", tool_names)
         self.assertIn("get-maintenance-windows", tool_names)
+        self.assertIn("list-serverclaw-skills", tool_names)
         self.assertIn("query-platform-context", tool_names)
         self.assertIn("run-governed-command", tool_names)
 
@@ -216,6 +217,27 @@ class AgentToolRegistryTests(unittest.TestCase):
             events = self.read_audit_events(audit_path)
             self.assertEqual(events[0]["tool"], "export-mcp-tools")
             self.assertEqual(events[0]["category"], "report")
+
+    def test_serverclaw_skills_call_returns_workspace_resolution_and_audit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            audit_path = Path(temp_dir) / "audit.jsonl"
+            process = self.run_registry_with_pyyaml(
+                "--call",
+                "list-serverclaw-skills",
+                "--args-json",
+                json.dumps({"workspace_id": "ops", "include_prompt_manifest": True}),
+                env={"LV3_AGENT_TOOL_AUDIT_LOG_PATH": str(audit_path)},
+            )
+            self.assertEqual(process.returncode, 0, process.stderr)
+            payload = json.loads(process.stdout)
+            result = payload["result"]["structuredContent"]
+            self.assertEqual(result["workspace_id"], "ops")
+            active = {entry["skill_id"]: entry for entry in result["active_skills"]}
+            self.assertEqual(active["platform-observe"]["source_tier"], "workspace")
+            self.assertTrue(any(entry["skill_id"] == "platform-observe" for entry in result["prompt_manifest"]))
+            events = self.read_audit_events(audit_path)
+            self.assertEqual(events[0]["tool"], "list-serverclaw-skills")
+            self.assertEqual(events[0]["outcome"], "success")
 
     def test_deployment_history_call_returns_filtered_entries(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

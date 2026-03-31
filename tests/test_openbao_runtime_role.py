@@ -64,9 +64,11 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     assert "postgres_ha.initial_primary" in defaults
     assert "ansible_host" in defaults
     assert "@{{ openbao_postgres_host }}:5432/postgres?sslmode=disable" in defaults
-    assert 'CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD \'{{ password }}\' VALID UNTIL \'{{ expiration }}\';' in defaults
-    assert 'GRANT pg_read_all_data TO "{{ name }}";' in defaults
-    assert 'DROP ROLE IF EXISTS "{{ name }}";' in defaults
+    assert "creation_statements:" in defaults
+    assert "- !unsafe 'CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD ''{{password}}'' VALID UNTIL ''{{expiration}}'';'" in defaults
+    assert '- !unsafe \'GRANT pg_read_all_data TO "{{name}}";\'' in defaults
+    assert "revocation_statements:" in defaults
+    assert '- !unsafe \'DROP ROLE IF EXISTS "{{name}}";\'' in defaults
     assert "openbao_http_extra_bind_addresses: []" in defaults
 
 
@@ -143,6 +145,9 @@ def test_openbao_runtime_recovers_detached_empty_default_network_before_compose_
 def test_openbao_runtime_retries_seal_status_during_restart_window() -> None:
     tasks = read_openbao_runtime_tasks_text()
 
+    assert "- name: Read OpenBao initialization status" in tasks
+    assert "register: openbao_init_status" in tasks
+    assert "until: openbao_init_status.status == 200" in tasks
     assert "- name: Read OpenBao seal status" in tasks
     assert "register: openbao_seal_status" in tasks
     assert "until: openbao_seal_status.status == 200" in tasks
@@ -209,6 +214,19 @@ def test_openbao_runtime_retries_policy_reads_during_post_restart_recovery() -> 
     assert "changed_when: false" in tasks
 
 
+def test_openbao_runtime_sends_database_role_statements_to_openbao_as_lists() -> None:
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "openbao_database_role_creation_statements" in tasks
+    assert "openbao_database_role_revocation_statements" in tasks
+    assert "openbao_database_role_rollback_statements" in tasks
+    assert "openbao_database_role_renew_statements" in tasks
+    assert "item.creation_statements is not string" in tasks
+    assert "(item.rollback_statements | default([])) is not string" in tasks
+    assert "creation_statements: \"{{ openbao_database_role_creation_statements }}\"" in tasks
+    assert "revocation_statements: \"{{ openbao_database_role_revocation_statements }}\"" in tasks
+
+
 def test_openbao_runtime_waits_out_background_apt_maintenance() -> None:
     tasks = yaml.safe_load(TASKS_PATH.read_text(encoding="utf-8"))
     apt_task = next(task for task in tasks if task["name"] == "Ensure OpenBao runtime prerequisite packages are present")
@@ -232,6 +250,9 @@ def test_openbao_runtime_renders_rotatable_secret_keys_dynamically() -> None:
     assert "\"{{ item.value.openbao_field }}\":" not in tasks
     assert "(openbao_rotation_metadata.last_rotated_metadata_key):" in tasks
     assert "(openbao_rotation_metadata.rotated_by_metadata_key): 'openbao-seed'" in tasks
+    assert "register: openbao_rotatable_secret_metadata_seed" in tasks
+    assert "until: openbao_rotatable_secret_metadata_seed.status in [200, 204]" in tasks
+    assert "- name: Assert rotation metadata for dedicated rotatable secrets was seeded successfully" in tasks
 
 
 def test_openbao_runtime_retries_other_read_side_api_checks_after_restart() -> None:
@@ -253,7 +274,34 @@ def test_openbao_runtime_retries_other_read_side_api_checks_after_restart() -> N
     assert "- name: Read current mail platform runtime secret" in tasks
     assert "until: openbao_mail_platform_runtime_current.status in [200, 404]" in tasks
     assert "- name: Read current dedicated rotatable secrets from OpenBao" in tasks
+    assert "      - 500" in tasks
+    assert "      - 502" in tasks
+    assert "      - 503" in tasks
+    assert "retries: 12" in tasks
+    assert "changed_when: false" in tasks
     assert "until: openbao_rotatable_secret_current.status in [200, 404]" in tasks
+    assert "- name: Read AppRole role IDs" in tasks
+    assert "until: openbao_approle_role_ids.status == 200" in tasks
+    assert "- name: Generate fresh short-lived AppRole secret IDs" in tasks
+    assert "until: openbao_generated_secret_ids.status == 200" in tasks
+    assert "- name: Assert fresh short-lived AppRole secret IDs were generated successfully" in tasks
+    assert "- name: Verify userpass login for the ops operator" in tasks
+    assert "until: openbao_ops_login.status == 200" in tasks
+    assert "- name: Login with the controller AppRole" in tasks
+    assert "until: openbao_controller_login.status == 200" in tasks
+    assert "- name: Read the controller Proxmox API secret through the AppRole" in tasks
+    assert "until: openbao_controller_secret_read.status == 200" in tasks
+    assert "- name: Encrypt test material with the controller transit key" in tasks
+    assert "until: openbao_controller_transit_encrypt.status == 200" in tasks
+    assert "- name: Decrypt test material with the controller transit key" in tasks
+    assert "until: openbao_controller_transit_decrypt.status == 200" in tasks
+    assert "- name: Login with the mail-platform AppRole" in tasks
+    assert "until: openbao_mail_platform_login.status == 200" in tasks
+    assert "- name: Read the mail-platform runtime secret through the AppRole" in tasks
+    assert "until: openbao_mail_platform_secret_read.status == 200" in tasks
+    assert "- name: Refresh short-lived AppRole secret IDs after managed verification" in tasks
+    assert "until: openbao_refreshed_secret_ids.status == 200" in tasks
+    assert "- name: Assert refreshed short-lived AppRole secret IDs were generated successfully" in tasks
 
 
 def test_openbao_compose_template_supports_private_extra_http_bindings() -> None:
@@ -295,7 +343,15 @@ def test_openbao_playbook_refreshes_secret_ids_from_local_artifacts() -> None:
     assert "Read the persisted AppRole artifacts before refreshing secret IDs" in task_names
     assert "Record persisted AppRole artifact facts before refreshing secret IDs" in task_names
     assert "Ensure OpenBao remains unsealed before refreshing controller-local AppRole artifacts" in task_names
+    assert "Assert refreshed AppRole secret IDs were generated successfully after end-to-end verification" in task_names
     assert "Read AppRole role IDs for refreshed controller-local artifacts" not in task_names
+
+    refresh_task = next(
+        task for task in tasks if task["name"] == "Generate refreshed AppRole secret IDs after end-to-end verification"
+    )
+    assert refresh_task["retries"] == 6
+    assert refresh_task["delay"] == 2
+    assert refresh_task["until"] == "openbao_refresh_secret_ids.status == 200"
 
     persist_task = next(
         task for task in tasks if task["name"] == "Persist refreshed AppRole artifacts locally after end-to-end verification"

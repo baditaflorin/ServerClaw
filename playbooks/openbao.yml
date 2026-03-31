@@ -205,6 +205,23 @@
         status_code: 200
       loop: "{{ openbao_verification_approles }}"
       register: openbao_refresh_secret_ids
+      retries: 6
+      delay: 2
+      until: openbao_refresh_secret_ids.status == 200
+      failed_when: false
+      no_log: true
+
+    - name: Assert refreshed AppRole secret IDs were generated successfully after end-to-end verification
+      ansible.builtin.assert:
+        that:
+          - >-
+            (
+              openbao_refresh_secret_ids.results
+              | rejectattr('status', 'equalto', 200)
+              | list
+              | length
+            ) == 0
+        fail_msg: "OpenBao failed to refresh one or more AppRole secret IDs after end-to-end verification."
       no_log: true
 
     - name: Persist refreshed AppRole artifacts locally after end-to-end verification

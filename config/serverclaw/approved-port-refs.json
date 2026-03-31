@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0.0",
+  "connector_refs": [
+    {
+      "id": "n8n:incident-enrichment",
+      "description": "Repo-managed n8n flow used for bounded incident enrichment and webhook-driven case context."
+    }
+  ],
+  "browser_refs": [
+    {
+      "id": "playwright:browser-runner",
+      "description": "Approved browser-action runner surface for future ServerClaw web tasks."
+    }
+  ],
+  "memory_refs": [
+    {
+      "id": "memory:platform-context",
+      "description": "Private platform-context memory surface backed by the repo-managed RAG API."
+    }
+  ],
+  "search_refs": [
+    {
+      "id": "search:local-search",
+      "description": "Repo-managed local search fabric for committed ADRs, runbooks, and receipts."
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-31",
+  "recorded_on": "2026-03-31",
+  "recorded_at": "2026-03-31T12:08:01Z",
+  "recorded_by": "codex",
+  "source_commit": "808b924df84dd7fdfd3f3871b5cfe1225b6b22a4",
+  "repo_version_context": "0.177.116",
+  "platform_version_context": "0.130.75",
+  "workflow_id": "adr-0257-serverclaw-skill-packs-mainline-live-apply",
+  "adr": "0257",
+  "summary": "Verified ADR 0257 on the latest realistic `origin/main` baseline by replaying the governed ServerClaw `SKILL.md` pack contract through the controller CLI, the governed tool registry, the public API gateway, and the seeded Windmill wrapper for workspace `ops`. The exact-main replay ran on top of `origin/main` commit `0b86b8ac4e2c868bab2b489ecff1e44a3913a10c` with repo version context `0.177.116`, repaired adjacent certificate/runtime drift by re-establishing `step-ca` health, stabilized the OpenBao rotatable-secret verification path with transient `500/502/503` retries, and completed clean API gateway, OpenBao, and Windmill converges on `docker-runtime-lv3`.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "service",
+      "name": "api-gateway",
+      "address": "https://api.lv3.org"
+    },
+    {
+      "kind": "service",
+      "name": "windmill",
+      "address": "http://100.64.0.1:8005"
+    },
+    {
+      "kind": "service",
+      "name": "step-ca",
+      "address": "https://10.10.10.20:9000"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repository validation bundle",
+      "result": "pass",
+      "observed": "The latest-main branch passed the targeted ADR 0257 pytest slice (`52 passed`), the OpenBao role regression slice (`19 passed`), `make syntax-check-windmill`, `make syntax-check-api-gateway`, `./scripts/validate_repo.sh agent-standards`, and `uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate`."
+    },
+    {
+      "check": "Controller and governed tool-registry skill resolution",
+      "result": "pass",
+      "observed": "The controller proof and the tool-registry proof both returned two active skills for workspace `ops`, with the workspace-local `platform-observe` override shadowing the bundled pack while the mirrored third-party example remained disabled."
+    },
+    {
+      "check": "Public API gateway workspace-precedence proof",
+      "result": "pass",
+      "observed": "`make converge-api-gateway` succeeded and the public `list-serverclaw-skills` proof returned HTTP `200`, matching the controller output and preserving the `ops` workspace-local `platform-observe` override."
+    },
+    {
+      "check": "Adjacent step-ca and OpenBao replay recovery",
+      "result": "pass",
+      "observed": "A fresh `step-ca` guest-local health probe returned `{\"status\":\"ok\"}`, and the exact-main OpenBao replay then completed with recap `docker-runtime-lv3 ok=176 changed=9 failed=0`, `postgres-lv3 ok=49 changed=2 failed=0` after the rotatable-secret read path was hardened to retry transient `500/502/503` responses."
+    },
+    {
+      "check": "Windmill exact-main replay and seeded wrapper proof",
+      "result": "pass",
+      "observed": "`make converge-windmill` completed with recap `docker-runtime-lv3 ok=328 changed=54 failed=0`, `postgres-lv3 ok=72 changed=0 failed=0`, `proxmox_florin ok=41 changed=4 failed=0`, and the direct `f/lv3/serverclaw_skills` run returned the same active and shadowed skill set as the controller and public API gateway proofs."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md",
+    "docs/runbooks/serverclaw-skills.md",
+    "docs/workstreams/adr-0257-serverclaw-skill-packs-live-apply.md",
+    "docs/workstreams/ws-0257-main-merge.md",
+    "workstreams.yaml",
+    "collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/seeded_secrets_and_verification.yml",
+    "tests/test_openbao_runtime_role.py",
+    "receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-controller-skill-packs-r7-0.177.116.json",
+    "receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-tool-registry-list-serverclaw-skills-r7-0.177.116.json",
+    "receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-converge-api-gateway-r14-0.177.116.txt",
+    "receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-api-gateway-list-serverclaw-skills-r7-0.177.116.curl.txt",
+    "receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-api-gateway-list-serverclaw-skills-r7-0.177.116.json",
+    "receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-converge-step-ca-r1-0.177.116.txt",
+    "receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-step-ca-health-r2-0.177.116.txt",
+    "receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-converge-openbao-r20-0.177.116.txt",
+    "receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-converge-windmill-r27-0.177.116.txt",
+    "receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-windmill-serverclaw-skills-r4-0.177.116.json",
+    "receipts/sbom/host-docker-runtime-lv3-2026-03-31.cdx.json"
+  ],
+  "notes": [
+    "This receipt records the latest-main live replay and proof set before the protected integration files are refreshed on `main`.",
+    "The final merge-to-main step still needs to update ADR 0257 metadata, cut the next repository release, and advance `versions/stack.yaml.platform_version` from the current integrated baseline once the mainline promotion is complete.",
+    "The OpenBao retry hardening was the only code change required during this exact-main replay; the controller, gateway, and Windmill skill-resolution contract itself remained stable."
+  ]
+}
