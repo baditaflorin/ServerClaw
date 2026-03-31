@@ -117,6 +117,7 @@ def test_windmill_postgres_support_role_enforces_bypassrls() -> None:
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_postgres/tasks/main.yml"
     ).read_text()
 
+    assert "ansible.builtin.meta: flush_handlers" in tasks
     assert "CREATE ROLE {{ windmill_database_support_role }} BYPASSRLS" in tasks
     assert "ALTER ROLE {{ windmill_database_support_role }} BYPASSRLS" in tasks
     assert "Wait for local PostgreSQL SQL readiness before Windmill role reconciliation" in tasks

@@ -6,6 +6,9 @@
 # Dependencies: ADR 0098, ADR 0113, ADR 0165; requires a writable postgres member and local artifact storage.
 # Related Runbooks: docs/runbooks/configure-postgres-vm.md, docs/runbooks/world-state-materializer.md
 
+- name: Flush any pending PostgreSQL configuration handlers before Windmill SQL reconciliation
+  ansible.builtin.meta: flush_handlers
+
 - name: Validate Windmill PostgreSQL inputs
   ansible.builtin.assert:
     that:
