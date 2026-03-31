@@ -1,0 +1,64 @@
+---
+# Purpose: Describe the required runtime variables for Paperless.
+
+argument_specs:
+  main:
+    short_description: Converge the Paperless runtime, bootstrap the API token, and reconcile taxonomy.
+    options:
+      paperless_service_topology:
+        type: dict
+        required: true
+      paperless_site_dir:
+        type: path
+        required: true
+      paperless_secret_dir:
+        type: path
+        required: true
+      paperless_compose_file:
+        type: path
+        required: true
+      paperless_openbao_runtime_compose_file:
+        type: path
+        required: true
+      paperless_openbao_runtime_service_name:
+        type: str
+        required: true
+      paperless_openbao_runtime_recovery_enabled:
+        type: bool
+        required: true
+      paperless_env_file:
+        type: path
+        required: true
+      paperless_internal_port:
+        type: int
+        required: true
+      paperless_internal_base_url:
+        type: str
+        required: true
+      paperless_public_base_url:
+        type: str
+        required: true
+      paperless_image_pull_retries:
+        type: int
+        required: true
+      paperless_image_pull_delay_seconds:
+        type: int
+        required: true
+      paperless_database_password_local_file:
+        type: path
+        required: true
+      paperless_keycloak_client_secret_local_file:
+        type: path
+        required: true
+      paperless_sync_script:
+        type: path
+        required: true
+      paperless_taxonomy_manifest:
+        type: dict
+        required: true
+      paperless_api_token_file:
+        type: path
+        required: true
+      paperless_api_token_local_file:
+        type: path
+        required: true

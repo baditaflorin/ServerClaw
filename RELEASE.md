@@ -3,10 +3,10 @@
 - Date: 2026-03-31
 
 ## Summary
-- implements ADR 0303 by enabling PostgreSQL pgaudit query and privilege audit logging, shipping structured audit and connection signals into Loki and Prometheus, and routing unknown-role alerts to ntfy plus NATS with recorded exact-main live-apply evidence
+- implemented ADR 0285 by bringing the Paperless document archive service, its OpenBao and Keycloak recovery hardening, and the corrected public smoke-upload verification path onto main
 
 ## Platform Impact
-- no live platform version bump; this release integrates ADR 0303 onto main, keeps platform version 0.130.77, and records the repaired PostgreSQL unknown-role alert relay path through Alertmanager and JetStream
+- verifies the exact-main Paperless replay on the latest realistic `origin/main` baseline and advances the integrated platform truth to `0.130.78` while preserving the original first-live milestone at `0.130.75`
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

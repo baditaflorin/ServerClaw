@@ -1324,6 +1324,52 @@ groups:
           description: https://wiki.lv3.org:443/_health has less than 14 days remaining
             before certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_paperless_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="paperless-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: paperless
+          assurance_id: paperless-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: paperless-public HTTPS probe is failing.
+          description: https://paperless.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_paperless_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="paperless-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: paperless
+          assurance_id: paperless-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: paperless-public TLS certificate is approaching expiry.
+          description: https://paperless.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_paperless_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="paperless-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: paperless
+          assurance_id: paperless-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: paperless-public TLS certificate is within the critical expiry
+            window.
+          description: https://paperless.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_plane_public
         expr: probe_success{job="https-tls-blackbox",assurance_id="plane-public"}
           == 0

@@ -1095,6 +1095,34 @@
         "live-apply-service service=outline env=production"
       ]
     },
+    "paperless_runtime": {
+      "kind": "runtime",
+      "service_id": "paperless",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "paperless",
+      "registry_ref": "ghcr.io/paperless-ngx/paperless-ngx",
+      "tag": "2.20.4",
+      "digest": "sha256:0dd610e06781c9ffafe413eaccdacd7305bcba54ab3457fe080ed3071315e27c",
+      "ref": "ghcr.io/paperless-ngx/paperless-ngx:2.20.4@sha256:0dd610e06781c9ffafe413eaccdacd7305bcba54ab3457fe080ed3071315e27c",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-30-paperless-runtime.json",
+      "exception": {
+        "reason": "The pinned upstream Paperless image is approved for rollout but still awaits the next vulnerability review receipt; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-30",
+        "review_by": "2026-04-13"
+      },
+      "consumers": [
+        "roles/paperless_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-paperless"
+      ]
+    },
     "plane_admin_runtime": {
       "kind": "runtime",
       "service_id": "plane",

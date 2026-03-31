@@ -74,6 +74,7 @@ platform_port_assignments:
   directus_port: 8055
   jupyterhub_port: 8097
   piper_port: 8100
+  paperless_port: 8018
   plane_port: 8093
   plane_host_proxy_port: 8011
   woodpecker_http_port: 8102
@@ -582,6 +583,7 @@ network_policy:
             - 8000
             - 8008
             - 8010
+            - 8018
             - 8082
             - 8088
             - 8102
@@ -601,6 +603,11 @@ network_policy:
           ports:
             - 8017
           description: Reverse proxy access to Flagsmith edge publication and public health checks
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 8018
+          description: Reverse proxy access to the Paperless document archive
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -643,11 +650,21 @@ network_policy:
           ports:
             - 8017
           description: Private guest-to-guest access to Flagsmith environment evaluation and management APIs
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 8018
+          description: Private guest-to-guest access to the Paperless document archive API
         - source: host
           protocol: tcp
           ports:
             - 8017
           description: Proxmox host verification and controller-side access to the private Flagsmith runtime
+        - source: host
+          protocol: tcp
+          ports:
+            - 8018
+          description: Proxmox host verification and controller-side access to the private Paperless runtime
         - source: host
           protocol: tcp
           ports:
@@ -660,6 +677,11 @@ network_policy:
           ports:
             - 8017
           description: Local Docker workloads that evaluate flags or fetch remote configuration from the private Flagsmith API
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 8018
+          description: Local Docker workloads that reach the private Paperless document archive API
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
@@ -677,6 +699,11 @@ network_policy:
           ports:
             - 8017
           description: Local Docker workloads that evaluate flags or fetch remote configuration from the private Flagsmith API
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 8018
+          description: Local Docker workloads that reach the private Paperless document archive API
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
@@ -795,6 +822,11 @@ network_policy:
           ports:
             - 8017
           description: Private monitoring probes for the Flagsmith runtime
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 8018
+          description: Private monitoring probes for the Paperless runtime
         - source: monitoring-lv3
           protocol: tcp
           ports:
@@ -1782,6 +1814,34 @@ lv3_service_topology:
       noindex: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port }}"
+  paperless:
+    service_name: paperless
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: paperless.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: paperless
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.paperless_port }}"
+      client_max_body_size: 256m
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3

@@ -4907,7 +4907,7 @@ adr_index:
   - adr: 0285
     title: Paperless-ngx As The Document Management And Archive API
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: api
     keywords:
@@ -4919,6 +4919,7 @@ adr_index:
       - api
     summary: We will deploy Paperless-ngx as the document management and archive API
     filename: 0285-paperless-ngx-as-the-document-management-and-archive-api.md
+    implemented_version: 0.177.121
   - adr: 0285
     title: Whisper ASR As The CPU Speech-To-Text Service
     status: Accepted

@@ -33,6 +33,12 @@ runtime.
    systemd units.
 4. The MinIO bucket `restic-config-backup` with Object Lock and versioning.
 
+When `docker-runtime-lv3` has gone through a broad Docker recovery, `outline-minio`
+may exist but remain stopped. The repo-managed converge task and live-apply trigger
+now treat that as recoverable and start the container before bucket bootstrap or
+Restic endpoint discovery instead of failing on the stale `invalid IP` inspect
+result.
+
 ## Verification
 
 ```bash

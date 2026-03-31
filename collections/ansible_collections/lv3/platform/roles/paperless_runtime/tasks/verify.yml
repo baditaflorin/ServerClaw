@@ -1,0 +1,40 @@
+---
+# Purpose: Verify the local Paperless runtime health and taxonomy drift state.
+
+- name: Verify the Paperless local root endpoint
+  ansible.builtin.uri:
+    url: "{{ paperless_internal_base_url }}/"
+    method: GET
+    status_code:
+      - 200
+      - 302
+  register: paperless_verify_local_root
+  retries: 12
+  delay: 5
+  until: paperless_verify_local_root.status in [200, 302]
+  changed_when: false
+
+- name: Verify the Paperless authenticated documents endpoint
+  ansible.builtin.uri:
+    url: "{{ paperless_internal_base_url }}/api/documents/?page_size=1"
+    method: GET
+    headers:
+      Authorization: "Token {{ paperless_api_token }}"
+    status_code: 200
+  register: paperless_verify_documents
+  retries: 12
+  delay: 5
+  until: paperless_verify_documents.status == 200
+  changed_when: false
+  no_log: true
+
+- name: Verify the Paperless taxonomy matches the declared manifest
+  ansible.builtin.script: >-
+    {{ paperless_sync_script | quote }}
+    verify
+    --base-url {{ paperless_internal_base_url | quote }}
+    --api-token-file {{ paperless_api_token_file | quote }}
+    --desired-state-file {{ paperless_taxonomy_manifest_file | quote }}
+    --report-file {{ paperless_sync_report_file | quote }}
+  register: paperless_verify_taxonomy
+  changed_when: false

@@ -39,7 +39,9 @@
   register: common_openbao_unsealed_status
   retries: 12
   delay: 2
-  until: common_openbao_unsealed_status.status == 200
+  until:
+    - common_openbao_unsealed_status.status == 200
+    - not (common_openbao_unsealed_status.json.sealed | bool)
   changed_when: false
 
 - name: Assert OpenBao is unsealed before {{ common_openbao_unseal_context }}
