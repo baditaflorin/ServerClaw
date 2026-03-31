@@ -137,14 +137,19 @@ def test_publish_tasks_wait_for_public_status_and_verify_login_gating() -> None:
 def test_verify_task_checks_the_local_status_endpoint() -> None:
     verify = load_yaml(VERIFY_PATH)
     health_task = next(task for task in verify if task.get("name") == "Verify the Grist local status endpoint")
-    auth_task = next(task for task in verify if task.get("name") == "Verify the Grist local document route reaches the auth-controlled surface")
-    assert_task = next(task for task in verify if task.get("name") == "Assert the Grist local document route is login-gated")
+    auth_tasks = [task for task in verify if task.get("name") == "Verify the Grist local document route reaches the auth-controlled surface"]
+    assert_tasks = [task for task in verify if task.get("name") == "Assert the Grist local document route is login-gated"]
+    assert len(auth_tasks) == 1
+    assert len(assert_tasks) == 1
+    auth_task = auth_tasks[0]
+    assert_task = assert_tasks[0]
     assert health_task["ansible.builtin.uri"]["url"] == "{{ grist_internal_base_url }}/status"
     assert auth_task["ansible.builtin.uri"]["url"] == "{{ grist_internal_base_url }}/o/docs/"
     assert auth_task["ansible.builtin.uri"]["headers"]["Host"] == "{{ grist_service_topology.public_hostname }}"
+    assert 400 in auth_task["ansible.builtin.uri"]["status_code"]
     local_gate_expression = assert_task["ansible.builtin.assert"]["that"][0]
     assert "grist_verify_local_auth_surface.location is defined" in local_gate_expression
-    assert "(grist_verify_local_auth_surface.status | int) == 200" in local_gate_expression
+    assert "(grist_verify_local_auth_surface.status | int) in [200, 400]" in local_gate_expression
 
 
 def test_grist_templates_enable_persistent_oidc_runtime() -> None:
