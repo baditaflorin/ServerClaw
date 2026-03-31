@@ -274,6 +274,11 @@ def test_openbao_runtime_retries_other_read_side_api_checks_after_restart() -> N
     assert "- name: Read current mail platform runtime secret" in tasks
     assert "until: openbao_mail_platform_runtime_current.status in [200, 404]" in tasks
     assert "- name: Read current dedicated rotatable secrets from OpenBao" in tasks
+    assert "      - 500" in tasks
+    assert "      - 502" in tasks
+    assert "      - 503" in tasks
+    assert "retries: 12" in tasks
+    assert "changed_when: false" in tasks
     assert "until: openbao_rotatable_secret_current.status in [200, 404]" in tasks
     assert "- name: Read AppRole role IDs" in tasks
     assert "until: openbao_approle_role_ids.status == 200" in tasks
