@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.113",
+  "repo_version": "0.177.114",
   "platform_version": "0.130.74",
-  "generated_at": "2026-03-31T06:36:14Z",
-  "next_refresh_at": "2026-03-31T07:36:14Z",
+  "generated_at": "2026-03-31T07:43:35Z",
+  "next_refresh_at": "2026-03-31T08:43:35Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3723,6 +3723,32 @@
         "runbook": "docs/runbooks/runbook-automation-executor.md"
       },
       {
+        "id": "sbom-refresh",
+        "description": "Run the ADR 0298 Syft and Grype refresh across the managed image catalog, persist immutable receipts, and emit alerts for net-new HIGH or CRITICAL findings.",
+        "tags": [
+          "diagnostic",
+          "preflight",
+          "repo-only",
+          "sbom-refresh",
+          "validated"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 3600,
+          "max_steps": 200,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/sbom-cve-scanning.md"
+      },
+      {
         "id": "scheduler-watchdog-loop",
         "description": "Run one ADR 0172 watchdog pass over running mutation jobs, abort stale executions, and emit a heartbeat.",
         "tags": [
@@ -5076,6 +5102,16 @@
         ]
       },
       {
+        "id": "sbom-cve-scanning",
+        "title": "SBOM And CVE Scanning",
+        "agent_trust_required": "T1",
+        "steps": 7,
+        "path": "docs/runbooks/sbom-cve-scanning.md",
+        "workflow_ids": [
+          "sbom-refresh"
+        ]
+      },
+      {
         "id": "secret-rotation-and-lifecycle",
         "title": "Secret Rotation And Lifecycle",
         "agent_trust_required": "T3",
@@ -5089,7 +5125,7 @@
         "id": "security-posture-reporting",
         "title": "Security Posture Reporting",
         "agent_trust_required": "T1",
-        "steps": 6,
+        "steps": 7,
         "path": "docs/runbooks/security-posture-reporting.md",
         "workflow_ids": [
           "security-posture-scan"
@@ -5333,10 +5369,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.112",
+    "last_version": "0.177.113",
     "deployed_at": "2026-03-31",
-    "summary": "implements ADR 0284 by bringing the private Piper text-to-speech runtime, the verified 8100 private voice path, and the recorded live-apply recovery evidence onto main while preserving the already-current 0.130.74 platform baseline",
-    "release_notes_url": "docs/release-notes/0.177.113.md"
+    "summary": "implements ADR 0298 on main by carrying the repo-managed Syft and Grype SBOM/CVE scanning surfaces, the Windmill native-worker Docker socket contract, and the exact-main full-catalog verification evidence onto the latest realistic `origin/main` baseline at release `0.177.113`",
+    "release_notes_url": "docs/release-notes/0.177.114.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
