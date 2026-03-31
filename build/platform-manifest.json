@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.123",
   "platform_version": "0.130.78",
-  "generated_at": "2026-03-31T20:28:14Z",
-  "next_refresh_at": "2026-03-31T21:28:14Z",
+  "generated_at": "2026-03-31T21:51:51Z",
+  "next_refresh_at": "2026-03-31T22:51:51Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -362,18 +362,6 @@
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8066",
         "last_live_apply": "2026-03-31T00:00:00Z"
-      },
-      "minio": {
-        "service_name": "MinIO",
-        "status": "healthy",
-        "score": 0.95,
-        "safe_to_act": true,
-        "source": "repo_evidence",
-        "reason": "Repository evidence is complete enough for normal automation.",
-        "lifecycle_status": "active",
-        "primary_url": "https://minio.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z",
-        "slo_status": "unknown"
       },
       "n8n": {
         "service_name": "n8n",
@@ -1867,32 +1855,6 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-mattermost.md"
-      },
-      {
-        "id": "converge-minio",
-        "description": "Deploy the shared MinIO runtime on docker-runtime-lv3, publish the public S3 API and authenticated console, and verify the launch buckets and policies.",
-        "tags": [
-          "converge-minio",
-          "guest-live",
-          "mutation",
-          "preflight",
-          "validated"
-        ],
-        "risk_class": "HIGH",
-        "automation_eligible": true,
-        "agent_trust_required": "T3",
-        "execution_class": "mutation",
-        "live_impact": "guest_live",
-        "budget": {
-          "max_duration_seconds": 1800,
-          "max_steps": 350,
-          "max_concurrent_instances": 1,
-          "max_touched_hosts": 2,
-          "max_restarts": 0,
-          "max_rollback_depth": 1,
-          "escalation_action": "notify_and_abort"
-        },
-        "runbook": "docs/runbooks/minio-object-storage.md"
       },
       {
         "id": "converge-monitoring",
@@ -4683,7 +4645,7 @@
         "id": "configure-gitea",
         "title": "Configure Gitea",
         "agent_trust_required": "T3",
-        "steps": 9,
+        "steps": 8,
         "path": "docs/runbooks/configure-gitea.md",
         "workflow_ids": [
           "converge-gitea"
@@ -5304,20 +5266,10 @@
         ]
       },
       {
-        "id": "minio-object-storage",
-        "title": "MinIO Object Storage",
-        "agent_trust_required": "T3",
-        "steps": 0,
-        "path": "docs/runbooks/minio-object-storage.md",
-        "workflow_ids": [
-          "converge-minio"
-        ]
-      },
-      {
         "id": "monitoring-stack",
         "title": "Monitoring Stack Runbook",
         "agent_trust_required": "T3",
-        "steps": 23,
+        "steps": 22,
         "path": "docs/runbooks/monitoring-stack.md",
         "workflow_ids": [
           "converge-monitoring"
@@ -5441,7 +5393,7 @@
         "id": "rag-platform-context",
         "title": "RAG Platform Context",
         "agent_trust_required": "T3",
-        "steps": 13,
+        "steps": 12,
         "path": "docs/runbooks/rag-platform-context.md",
         "workflow_ids": [
           "converge-rag-context"
@@ -5493,7 +5445,7 @@
         "id": "security-posture-reporting",
         "title": "Security Posture Reporting",
         "agent_trust_required": "T1",
-        "steps": 7,
+        "steps": 6,
         "path": "docs/runbooks/security-posture-reporting.md",
         "workflow_ids": [
           "security-posture-scan"
