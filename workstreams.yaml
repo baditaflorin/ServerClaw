@@ -19,8 +19,8 @@ workstreams:
     title: Live apply Checkov IaC policy scanning from latest origin/main
     status: live_applied
     owner: codex
-    branch: codex/ws-0306-mainline-v2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2
+    branch: codex/ws-0306-mainline-final-r3
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-main-context-v2
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md
     depends_on:
       - adr-0083-docker-check-runner
@@ -164,9 +164,9 @@ workstreams:
     ready_to_merge: true
     live_applied: true
     canonical_truth:
-      changelog_entry: implements ADR 0306 by adding repo-managed Checkov IaC policy scanning to the shared validation gate, build-server remote validation, and the self-hosted validate workflow, then records the first verified exact-main hosted replay on platform version 0.130.75
+      changelog_entry: integrates ADR 0306 into main by adding repo-managed Checkov IaC policy scanning to the shared validation gate, build-server remote validation, and the self-hosted validate workflow while preserving the already-current platform baseline 0.130.77 and the earlier exact-main hosted verification proof first established on 0.130.75
       release_bump: patch
-      included_in_repo_version: 0.177.115
+      included_in_repo_version: 0.177.119
       latest_receipts:
         iac_policy_scanning: 2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply
   - id: ws-0302-live-apply

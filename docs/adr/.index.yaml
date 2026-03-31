@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-31'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 277
+  Implemented: 278
   Partial: 6
-  Not Implemented: 40
+  Not Implemented: 39
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5280,7 +5280,7 @@ adr_index:
       - scanning
     summary: We will deploy Syft and Grype as Gitea Actions CI steps and as a
     filename: 0298-syft-and-grype-for-platform-wide-sbom-generation-and-continuous-cve-scanning.md
-    implemented_version: 0.177.117
+    implemented_version: 0.177.118
   - adr: 0299
     title: Ntfy As The Self-Hosted Push Notification Channel For Programmatic Alert Delivery
     status: Accepted
@@ -5418,4 +5418,4 @@ adr_index:
       - ansible
     summary: We will integrate Checkov as a required CI gate step for all IaC surfaces in
     filename: 0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md
-    implemented_version: 0.177.115
+    implemented_version: 0.177.119
