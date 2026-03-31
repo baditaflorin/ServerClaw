@@ -8,6 +8,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "livekit.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "livekit.yml"
 MAKEFILE_PATH = REPO_ROOT / "Makefile"
+ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
+DEPENDENCY_WAVE_PLAYBOOKS_PATH = REPO_ROOT / "config" / "dependency-wave-playbooks.yaml"
 
 
 def test_livekit_dns_stage_converges_only_the_livekit_subdomain_record() -> None:
@@ -66,3 +68,41 @@ def test_converge_livekit_target_uses_the_canonical_playbook() -> None:
     assert "HETZNER_DNS_API_TOKEN" in converge_block
     assert "$(ANSIBLE_TRACE_ARGS)" in converge_block
     assert "$(EXTRA_ARGS)" in converge_block
+
+
+def test_livekit_execution_scope_advertises_the_shared_vm_and_edge_surfaces() -> None:
+    scopes = yaml.safe_load(ANSIBLE_EXECUTION_SCOPES_PATH.read_text(encoding="utf-8"))
+    direct = scopes["playbooks"]["playbooks/livekit.yml"]
+
+    assert direct["playbook_id"] == "livekit"
+    assert direct["mutation_scope"] == "platform"
+    assert "service:livekit" in direct["shared_surfaces"]
+    assert "host:proxmox_florin/service:proxmox_network" in direct["shared_surfaces"]
+    assert "vm:110/service:nginx_edge_publication" in direct["shared_surfaces"]
+    assert "vm:120" in direct["shared_surfaces"]
+
+
+def test_livekit_dependency_wave_metadata_locks_the_full_runtime_vm_and_shared_edge() -> None:
+    catalog = yaml.safe_load(DEPENDENCY_WAVE_PLAYBOOKS_PATH.read_text(encoding="utf-8"))
+    entries = {
+        entry["path"]: entry
+        for entry in catalog["playbooks"]
+        if entry["path"] in {"playbooks/livekit.yml", "playbooks/services/livekit.yml"}
+    }
+
+    assert set(entries) == {"playbooks/livekit.yml", "playbooks/services/livekit.yml"}
+
+    direct = entries["playbooks/livekit.yml"]
+    wrapper = entries["playbooks/services/livekit.yml"]
+
+    assert direct["make_target"] == "converge-livekit"
+    assert "vm:120" in direct["lock_resources"]
+    assert "vm:120/service:livekit" in direct["lock_resources"]
+    assert "vm:110" in direct["lock_resources"]
+    assert "vm:110/service:nginx_edge_publication" in direct["lock_resources"]
+    assert "host:proxmox_florin" in direct["lock_resources"]
+    assert "host:proxmox_florin/service:proxmox_network" in direct["lock_resources"]
+
+    assert wrapper["make_target"] == "live-apply-service"
+    assert wrapper["make_vars"] == {"service": "livekit"}
+    assert wrapper["lock_resources"] == direct["lock_resources"]
