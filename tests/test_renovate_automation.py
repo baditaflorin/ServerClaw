@@ -27,14 +27,15 @@ def load_module(path: Path, name: str):
     return module
 
 
-def test_renovate_config_targets_gitea_and_custom_repo_surfaces() -> None:
+def test_renovate_config_targets_main_and_custom_repo_surfaces() -> None:
     config = json.loads(RENOVATE_CONFIG_PATH.read_text(encoding="utf-8"))
 
-    assert config["platform"] == "gitea"
+    assert "platform" not in config
     assert config["dependencyDashboard"] is True
     assert config["automerge"] is False
     assert config["platformAutomerge"] is False
     assert config["gitAuthor"] == "Renovate Bot <renovate-bot@lv3.internal>"
+    assert config["baseBranchPatterns"] == ["main"]
     assert any("image-catalog" in "".join(manager["managerFilePatterns"]) for manager in config["customManagers"])
     assert any("versions" in "".join(manager["managerFilePatterns"]) and "stack" in "".join(manager["managerFilePatterns"]) for manager in config["customManagers"])
 
@@ -71,6 +72,9 @@ def test_renovate_workflow_uses_harbor_pinned_image_and_runtime_token_helper() -
     assert "cleanup_clone_proxy()" in workflow
     assert "ThreadedTCPServer" in workflow
     assert "Renovate clone relay did not become ready." in workflow
+    assert '-e RENOVATE_GIT_AUTHOR \\' in workflow
+    assert '-e RENOVATE_REQUIRE_CONFIG \\' in workflow
+    assert '-e RENOVATE_ONBOARDING \\' in workflow
     assert 'RENOVATE_X_STATIC_REPO_CONFIG_FILE=/workspace/renovate.json' in workflow
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
     assert 'RENOVATE_HELPER_IMAGE: registry.lv3.org/check-runner/python:3.12.10@sha256:' in workflow
@@ -113,6 +117,9 @@ def test_renovate_runtime_token_writes_runtime_env(monkeypatch: pytest.MonkeyPat
     assert "RENOVATE_ENDPOINT=http://10.10.10.20:3003/api/v1/" in env_payload
     assert "RENOVATE_REPOSITORIES=ops/proxmox_florin_server" in env_payload
     assert "RENOVATE_TOKEN=token-value" in env_payload
+    assert "RENOVATE_GIT_AUTHOR=Renovate Bot <renovate-bot@lv3.internal>" in env_payload
+    assert "RENOVATE_REQUIRE_CONFIG=optional" in env_payload
+    assert "RENOVATE_ONBOARDING=false" in env_payload
     assert "RENOVATE_GIT_CLONE_HOST=git.lv3.org" in env_payload
     assert "RENOVATE_GIT_CLONE_HOST_ADDRESS=127.0.0.1" in env_payload
     assert "RENOVATE_GIT_CLONE_HOST_PORT=3009" in env_payload

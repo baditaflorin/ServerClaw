@@ -318,6 +318,9 @@ jobs:
             -e RENOVATE_ENDPOINT \
             -e RENOVATE_REPOSITORIES \
             -e RENOVATE_TOKEN \
+            -e RENOVATE_GIT_AUTHOR \
+            -e RENOVATE_REQUIRE_CONFIG \
+            -e RENOVATE_ONBOARDING \
             -e RENOVATE_X_STATIC_REPO_CONFIG_FILE=/workspace/renovate.json \
             -v "${workspace_host_path}:/workspace" \
             -w /workspace \

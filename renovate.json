@@ -1,6 +1,5 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "platform": "gitea",
   "extends": [
     "config:recommended"
   ],
@@ -9,7 +8,7 @@
   "automerge": false,
   "platformAutomerge": false,
   "gitAuthor": "Renovate Bot <renovate-bot@lv3.internal>",
-  "baseBranches": [
+  "baseBranchPatterns": [
     "main"
   ],
   "labels": [

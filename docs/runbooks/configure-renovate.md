@@ -100,14 +100,23 @@ curl -sS \
 - The bootstrap env mounted into the runner contains the durable Gitea bot
   password and scope list only. The actual PAT used by Renovate is minted at
   workflow runtime and revoked at the end of the run.
-- `renovate.json` sets `gitAuthor` to the dedicated bot identity so hosted
-  Renovate runs can create branches and commits even when the platform API does
-  not return a non-empty human display name for the bot account.
+- `renovate.json` must keep only repository-scope settings. Do not add the
+  global-only `platform` option there; the workflow exports `RENOVATE_PLATFORM`
+  instead, while the repo config uses `baseBranchPatterns: ["main"]` for PR
+  targeting.
+- `renovate.json` still sets `gitAuthor`, and the workflow exports the same
+  identity as `RENOVATE_GIT_AUTHOR`. This keeps hosted branch-local replays
+  commit-capable even when the private Gitea default branch does not yet carry
+  the branch-local config under test.
 - The workflow also passes `RENOVATE_X_STATIC_REPO_CONFIG_FILE=/workspace/renovate.json`
   into the Renovate container. This is an official experimental Renovate
   variable and is used here specifically so a workstream branch can validate
   the branch-local `renovate.json` before that config lands on the private
   repo's unrelated default-branch history.
+- The workflow also exports `RENOVATE_REQUIRE_CONFIG=optional` and
+  `RENOVATE_ONBOARDING=false` for these branch-local live replays so Renovate
+  processes the injected branch config directly instead of trying to author an
+  onboarding PR against the private repo's unrelated default-branch history.
 - The runner-side bootstrap bundle also carries `RENOVATE_GIT_CLONE_HOST`,
   `RENOVATE_GIT_CLONE_HOST_ADDRESS`, `RENOVATE_GIT_CLONE_HOST_PORT`,
   `RENOVATE_GIT_CLONE_TARGET_HOST`, and `RENOVATE_GIT_CLONE_TARGET_PORT`.

@@ -29,10 +29,14 @@ def validate_renovate_config() -> None:
         config.get("$schema") == "https://docs.renovatebot.com/renovate-schema.json",
         "renovate.json must declare the canonical Renovate schema",
     )
-    require(config.get("platform") == "gitea", "renovate.json must target the gitea platform")
+    require("platform" not in config, "renovate.json must not declare the global-only platform option")
     require(config.get("dependencyDashboard") is True, "renovate.json must enable the dependency dashboard")
     require(config.get("automerge") is False, "renovate.json must disable automerge")
     require(config.get("platformAutomerge") is False, "renovate.json must disable platform automerge")
+    require(
+        config.get("baseBranchPatterns") == ["main"],
+        "renovate.json must target the main branch with baseBranchPatterns",
+    )
     labels = config.get("labels", [])
     require("dependencies" in labels and "renovate" in labels, "renovate.json must label Renovate PRs clearly")
 
@@ -67,6 +71,9 @@ def validate_workflow() -> None:
     require("scripts/renovate_runtime_token.py create" in workflow_text, "Renovate workflow must mint a short-lived runtime token")
     require("scripts/renovate_runtime_token.py cleanup" in workflow_text, "Renovate workflow must revoke the short-lived runtime token")
     require("RENOVATE_BOOTSTRAP_ENV" in workflow_text, "Renovate workflow must source the mounted OpenBao-rendered credential bundle")
+    require("-e RENOVATE_GIT_AUTHOR \\" in workflow_text, "Renovate workflow must pass the global git author into the runtime container")
+    require("-e RENOVATE_REQUIRE_CONFIG \\" in workflow_text, "Renovate workflow must force optional config handling for branch-local validation")
+    require("-e RENOVATE_ONBOARDING \\" in workflow_text, "Renovate workflow must disable onboarding during branch-local validation")
     require(
         "Bootstrap Docker CLI and discover runner host paths" in workflow_text,
         "Renovate workflow must discover runner host paths explicitly",

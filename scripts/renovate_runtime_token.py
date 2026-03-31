@@ -15,6 +15,11 @@ from pathlib import Path
 from typing import Any
 
 
+DEFAULT_GIT_AUTHOR = "Renovate Bot <renovate-bot@lv3.internal>"
+DEFAULT_REQUIRE_CONFIG = "optional"
+DEFAULT_ONBOARDING = "false"
+
+
 def require_env(name: str) -> str:
     value = os.environ.get(name, "").strip()
     if not value:
@@ -135,6 +140,9 @@ def create_runtime_token(*, state_file: Path, env_file: Path) -> None:
         f"RENOVATE_ENDPOINT={endpoint}",
         f"RENOVATE_REPOSITORIES={repository}",
         f"RENOVATE_TOKEN={token}",
+        f"RENOVATE_GIT_AUTHOR={os.environ.get('RENOVATE_GIT_AUTHOR', DEFAULT_GIT_AUTHOR).strip() or DEFAULT_GIT_AUTHOR}",
+        f"RENOVATE_REQUIRE_CONFIG={os.environ.get('RENOVATE_REQUIRE_CONFIG', DEFAULT_REQUIRE_CONFIG).strip() or DEFAULT_REQUIRE_CONFIG}",
+        f"RENOVATE_ONBOARDING={os.environ.get('RENOVATE_ONBOARDING', DEFAULT_ONBOARDING).strip() or DEFAULT_ONBOARDING}",
     ]
     if clone_host and clone_host_address:
         env_lines.extend(
