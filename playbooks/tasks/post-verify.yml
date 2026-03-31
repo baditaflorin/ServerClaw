@@ -14,7 +14,7 @@
 #   - playbook_execution_audit_evidence_ref (string, optional)
 #
 # Outputs:
-#   - Service health probes executed in order, optional Docker publication recovery applied, and a best-effort completion audit emitted.
+#   - Service health probes executed in order, optional Docker publication recovery applied, a fresh host SBOM fetched for the owning VM, and a best-effort completion audit emitted.
 #
 # Idempotency: Fully idempotent
 #              Verification is read-only except for delegated Docker publication recovery when the declared contract is broken.
@@ -82,6 +82,10 @@
   when:
     - playbook_execution_verify_readiness | default(true)
     - inventory_hostname == playbook_execution_service_probe.owning_vm
+
+- name: Generate a fresh host SBOM after successful readiness verification
+  ansible.builtin.import_tasks: generate-host-sbom.yml
+  when: inventory_hostname == playbook_execution_service_probe.owning_vm
 
 - name: Emit a best-effort playbook completion audit event
   ansible.builtin.command:

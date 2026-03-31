@@ -1,0 +1,131 @@
+---
+# Purpose: Generate and fetch a Syft CycloneDX SBOM for one managed host after a security or converge step.
+# Use case: Included by repo-managed security scans and post-verify flows when host package inventory evidence must be refreshed.
+#
+# Inputs (required):
+#   - inventory_dir
+#
+# Inputs (optional):
+#   - security_sbom_output_dir (path, optional, default=repo receipts/sbom)
+#   - security_sbom_report_date (string, optional, default=controller UTC date)
+#   - security_sbom_remote_dir (path, optional, default=/var/tmp/lv3-security-posture)
+#
+# Outputs:
+#   - A fetched host SBOM under receipts/sbom/host-<hostname>-<date>.cdx.json and a pinned Syft binary on the managed host.
+#
+# Idempotency: Fully idempotent
+#              Re-runs preserve the pinned Syft binary and replace the same date-scoped local SBOM receipt.
+#
+# Dependencies:
+#   - ADR 0298: Syft And Grype For Platform-Wide SBOM Generation And Continuous CVE Scanning.
+#   - Config: config/sbom-scanner.json
+- name: Load the shared SBOM scanner config
+  ansible.builtin.set_fact:
+    security_sbom_scanner_config: >-
+      {{
+        lookup(
+          'ansible.builtin.file',
+          (inventory_dir | dirname) ~ '/config/sbom-scanner.json'
+        ) | from_json
+      }}
+    security_sbom_output_dir: >-
+      {{
+        security_sbom_output_dir
+        | default((inventory_dir | dirname) ~ '/receipts/sbom', true)
+      }}
+    security_sbom_report_date: >-
+      {{
+        security_sbom_report_date
+        | default(lookup('ansible.builtin.pipe', 'date -u +%F'), true)
+      }}
+    security_sbom_remote_dir: >-
+      {{
+        security_sbom_remote_dir
+        | default('/var/tmp/lv3-security-posture', true)
+      }}
+  changed_when: false
+
+- name: Ensure the remote SBOM working directory exists
+  ansible.builtin.file:
+    path: "{{ security_sbom_remote_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Check the installed Syft version
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/syft
+      - version
+  register: security_sbom_syft_version
+  changed_when: false
+  failed_when: false
+
+- name: Install the pinned Syft release when required
+  when: security_sbom_scanner_config.syft.version not in security_sbom_syft_version.stdout
+  block:
+    - name: Create a temporary directory for the Syft archive
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: lv3-syft-
+      register: security_sbom_syft_archive_dir
+
+    - name: Download and unpack the pinned Syft archive
+      ansible.builtin.unarchive:
+        src: "{{ security_sbom_scanner_config.syft.linux_amd64_tarball }}"
+        dest: "{{ security_sbom_syft_archive_dir.path }}"
+        remote_src: true
+      register: security_sbom_syft_unpack
+
+    - name: Install the pinned Syft binary
+      ansible.builtin.copy:
+        src: "{{ security_sbom_syft_archive_dir.path }}/syft"
+        dest: /usr/local/bin/syft
+        owner: root
+        group: root
+        mode: "0755"
+        remote_src: true
+
+    - name: Remove the temporary Syft archive directory
+      ansible.builtin.file:
+        path: "{{ security_sbom_syft_archive_dir.path }}"
+        state: absent
+
+- name: Generate the host CycloneDX SBOM
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/syft
+      - scan
+      - dir:/
+      - --base-path
+      - /
+      - --exclude
+      - ./dev/**
+      - --exclude
+      - ./proc/**
+      - --exclude
+      - ./run/**
+      - --exclude
+      - ./sys/**
+      - --exclude
+      - ./var/lib/containerd/**
+      - --exclude
+      - ./var/lib/docker/**
+      - --source-name
+      - "{{ inventory_hostname }}"
+      - -o
+      - "cyclonedx-json={{ security_sbom_remote_dir }}/{{ inventory_hostname }}-host-sbom.cdx.json"
+  changed_when: false
+
+- name: Ensure the local SBOM receipt directory exists
+  ansible.builtin.file:
+    path: "{{ security_sbom_output_dir }}"
+    state: directory
+    mode: "0755"
+  delegate_to: localhost
+  become: false
+
+- name: Fetch the generated host SBOM
+  ansible.builtin.fetch:
+    src: "{{ security_sbom_remote_dir }}/{{ inventory_hostname }}-host-sbom.cdx.json"
+    dest: "{{ security_sbom_output_dir }}/host-{{ inventory_hostname }}-{{ security_sbom_report_date }}.cdx.json"
+    flat: true

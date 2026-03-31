@@ -1,0 +1,6 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          97        86        57.47GB   56.3GB (97%)
+Containers      140       84        9.36GB    8.375GB (89%)
+Local Volumes   950       80        1.134GB   1.162MB (0%)
+Build Cache     16        0         71.11MB   25.78kB

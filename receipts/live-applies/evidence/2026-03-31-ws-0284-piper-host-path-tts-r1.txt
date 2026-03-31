@@ -1,0 +1,2 @@
+proxmox_florin | CHANGED | rc=0 >>
+{"content_type": "audio/wav", "riff": "RIFF", "wave": "WAVE", "bytes": 104492}

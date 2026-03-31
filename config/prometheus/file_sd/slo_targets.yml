@@ -160,6 +160,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - http://10.10.10.20:8100/healthz
+  labels:
+    service_id: piper
+    slo_id: piper-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://tasks.lv3.org/
   labels:
     service_id: plane

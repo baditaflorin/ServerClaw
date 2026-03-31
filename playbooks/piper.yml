@@ -1,0 +1,49 @@
+---
+# Playbook: piper.yml
+# Purpose: Converge the private Piper text-to-speech runtime on docker-runtime-lv3.
+# Use case: Run when the Piper runtime image, declared voice model set, firewall exposure, or verification contract changes.
+#
+# Inputs (required):
+#   - env (str, required): Deployment environment selector used by the shared preflight helpers.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH path used by the shared scoped runner.
+#
+# Outputs:
+#   - A private Piper runtime on docker-runtime-lv3 with the repo-managed default voice downloaded into a named model volume
+#   - Local verification proving /healthz, /api/voices, and /api/tts return the expected health and WAV contracts
+#
+# Idempotency: Fully idempotent
+#              Re-running the playbook preserves the declared model set, rebuilds the runtime image only when repo sources changed, and verifies the same synthesis contract.
+#
+# Dependencies:
+#   - ADR 0284: Defines Piper as the canonical CPU neural text-to-speech runtime.
+#   - Requires: docker-runtime-lv3 is reachable through the governed Proxmox jump path.
+#   - Role: lv3.platform.piper_runtime — builds the repo-managed runtime image and verifies the WAV synthesis contract.
+#
+# Related ADRs: 0086, 0107, 0284
+# Related Runbooks: docs/runbooks/configure-piper.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- name: Converge Piper on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - communication
+    - service-piper
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.piper_runtime

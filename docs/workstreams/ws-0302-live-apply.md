@@ -3,6 +3,12 @@
 - ADR: [ADR 0302](../adr/0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts.md)
 - Title: deploy Restic-backed encrypted file-level backups for platform configuration and state artifacts
 - Status: live_applied
+- Included In Repo Version: 0.177.115
+- Canonical Mainline Receipt: `receipts/live-applies/2026-03-31-adr-0302-restic-config-backup-mainline-live-apply.json`
+- Live Applied In Platform Version: 0.130.75
+- Implemented On: 2026-03-31
+- Live Applied On: 2026-03-31
+- Release Date: 2026-03-31
 - Branch: `codex/ws-0302-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply`
 - Owner: codex

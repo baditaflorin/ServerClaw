@@ -1,3 +1,29 @@
+# Purpose: Run the shared Lynis-based security scan workflow and refresh host SBOM evidence for the selected hosts.
+# Use case: Included by security-posture and exact-main verification flows when host-level hardening evidence must be refreshed.
+#
+# Inputs (required):
+#   - inventory_hostname (implicit Ansible host target): Host to audit with Lynis.
+#
+# Inputs (optional):
+#   - security_scan_output_dir (string, optional): Controller-local output directory for fetched Lynis artifacts.
+#   - security_scan_remote_dir (string, optional, default=/var/tmp/lv3-security-posture): Remote working directory for the scan.
+#
+# Outputs:
+#   - Fresh Lynis report data, exit-code artifacts, and a refreshed host SBOM for each selected host.
+#
+# Idempotency: Partially idempotent
+#              The scan itself is read-mostly, but it intentionally refreshes report artifacts and SBOM evidence on each run.
+#
+# Dependencies:
+#   - ADR 0102: Security posture reporting depends on recurring host scan evidence.
+#   - ADR 0165: Requires metadata headers on shared playbooks and tasks.
+#   - Task: playbooks/tasks/generate-host-sbom.yml — refreshes the host SBOM after the scan completes.
+#
+# Related ADRs: 0102, 0165, 0298
+# Related Runbooks: docs/runbooks/security-posture-reporting.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-31
 ---
 - name: Run Lynis security scans on the selected hosts
   hosts: all
@@ -70,3 +96,6 @@
         mode: "0644"
       delegate_to: localhost
       become: false
+
+    - name: Refresh the host SBOM after the Lynis scan
+      ansible.builtin.import_tasks: generate-host-sbom.yml

@@ -84,3 +84,19 @@ def test_snapshot_id_is_stable_for_same_repo_content(tmp_path: Path) -> None:
 
     assert first["LV3_SNAPSHOT_ID"] == second["LV3_SNAPSHOT_ID"]
     assert first["LV3_SNAPSHOT_ARCHIVE"] != second["LV3_SNAPSHOT_ARCHIVE"]
+
+
+def test_build_snapshot_honors_explicit_branch_override(tmp_path: Path, monkeypatch) -> None:
+    module = load_module()
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    init_git_repo(repo)
+    (repo / "README.md").write_text("override\n", encoding="utf-8")
+    commit_all(repo, "initial")
+
+    monkeypatch.setenv("LV3_SNAPSHOT_BRANCH", "main")
+    payload = module.build_snapshot(repo, exclude_file=None, output_dir=tmp_path / "out")
+
+    manifest = json.loads(Path(payload["LV3_SNAPSHOT_MANIFEST"]).read_text(encoding="utf-8"))
+    assert payload["LV3_SNAPSHOT_BRANCH"] == "main"
+    assert manifest["branch"] == "main"

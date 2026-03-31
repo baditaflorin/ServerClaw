@@ -37,6 +37,7 @@ def test_fault_injection_windmill_runtime_manages_uv() -> None:
     )
 
     assert defaults["windmill_uv_download_url"].endswith("/uv-x86_64-unknown-linux-gnu.tar.gz")
+    assert defaults["windmill_uv_archive_path"] == "{{ windmill_site_dir }}/windmill-uv.tar.gz"
     assert defaults["windmill_uv_binary_path"].endswith("/uv")
     assert defaults["windmill_uvx_binary_path"].endswith("/uvx")
 

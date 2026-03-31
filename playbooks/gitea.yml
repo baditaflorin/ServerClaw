@@ -1,3 +1,32 @@
+# Playbook: gitea.yml
+# Purpose: Converge the private Gitea service, its PostgreSQL backend, the Proxmox host proxy path, and the build-host Actions runner.
+# Use case: Run for Gitea deploys, upgrades, or exact-main replays that must keep the private Git control plane aligned with repo truth.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (path, required via make targets): SSH private key used for the Proxmox host and guest jump paths.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Deployment environment selector for production or staging inventory targets.
+#   - platform_trace_id (string, optional): Mutation-audit trace identifier propagated by the make wrapper.
+#
+# Outputs:
+#   - Proxmox host proxying, PostgreSQL state, the private Gitea runtime, and the Gitea Actions runner are converged on their declared hosts.
+#
+# Idempotency: Partially idempotent
+#              The converged roles are idempotent, while runtime migrations, client bootstrap, and runner registration may refresh managed state intentionally.
+#
+# Dependencies:
+#   - ADR 0143: Defines Gitea as the private Git forge for the platform.
+#   - ADR 0165: Requires playbook metadata for governed automation surfaces.
+#   - Role: lv3.platform.gitea_postgres — provisions the PostgreSQL backend and credentials.
+#   - Role: lv3.platform.gitea_runtime — converges the private Gitea runtime and Keycloak integration.
+#   - Role: lv3.platform.gitea_actions_runner — converges the private Actions runner on docker-build-lv3.
+#
+# Related ADRs: 0143, 0165, 0229
+# Related Runbooks: docs/runbooks/configure-gitea.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-31
 ---
 - name: Converge private Gitea access on the Proxmox host
   hosts: proxmox_hosts
@@ -92,3 +121,7 @@
     - role: lv3.platform.docker_runtime
     - role: lv3.platform.build_server
     - role: lv3.platform.gitea_runner
+
+  post_tasks:
+    - name: Refresh the build runner host SBOM after the Gitea runner converge
+      ansible.builtin.import_tasks: tasks/generate-host-sbom.yml

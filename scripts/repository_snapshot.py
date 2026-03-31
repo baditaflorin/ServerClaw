@@ -234,7 +234,8 @@ def build_snapshot(repo_root: Path, *, exclude_file: Path | None, output_dir: Pa
     patterns = load_exclude_patterns(exclude_file.resolve() if exclude_file else None)
     entries = build_entries(repo_root, patterns)
     source_commit = git_value(repo_root, "rev-parse", "HEAD", default="unknown")
-    branch = git_value(repo_root, "rev-parse", "--abbrev-ref", "HEAD", default="detached")
+    branch_override = os.environ.get("LV3_SNAPSHOT_BRANCH", "").strip()
+    branch = branch_override or git_value(repo_root, "rev-parse", "--abbrev-ref", "HEAD", default="detached")
     snapshot_id = snapshot_id_for(source_commit=source_commit, branch=branch, entries=entries)
     generated_at = datetime.now(timezone.utc).isoformat()
     manifest = SnapshotManifest(

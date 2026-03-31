@@ -59,6 +59,10 @@
     - playbook_execution_verify_readiness | default(true)
     - inventory_hostname == playbook_execution_service_probe.owning_vm
 
+- name: Generate a fresh host SBOM after successful readiness verification
+  ansible.builtin.import_tasks: generate-host-sbom.yml
+  when: inventory_hostname == playbook_execution_service_probe.owning_vm
+
 - name: Emit a best-effort playbook completion audit event
   ansible.builtin.command:
     argv:

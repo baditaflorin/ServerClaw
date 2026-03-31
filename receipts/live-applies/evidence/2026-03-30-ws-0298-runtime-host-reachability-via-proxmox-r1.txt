@@ -1,0 +1,5 @@
+proxmox_florin | FAILED | rc=1 >>
+PING 10.10.10.20 (10.10.10.20) 56(84) bytes of data.
+
+--- 10.10.10.20 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1055msnon-zero return code

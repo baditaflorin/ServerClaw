@@ -76,6 +76,23 @@ def test_post_verify_repairs_docker_publication_before_readiness() -> None:
     ]
 
 
+def test_post_verify_refreshes_host_sbom_after_readiness() -> None:
+    tasks = load_tasks(COLLECTION_POST_VERIFY_TASKS)
+    task_names = [task["name"] for task in tasks]
+    sbom_task = next(
+        task for task in tasks if task["name"] == "Generate a fresh host SBOM after successful readiness verification"
+    )
+
+    assert task_names.index("Run readiness verification") < task_names.index(
+        "Generate a fresh host SBOM after successful readiness verification"
+    )
+    assert task_names.index("Generate a fresh host SBOM after successful readiness verification") < task_names.index(
+        "Emit a best-effort playbook completion audit event"
+    )
+    assert sbom_task["ansible.builtin.import_tasks"] == "generate-host-sbom.yml"
+    assert sbom_task["when"] == "inventory_hostname == playbook_execution_service_probe.owning_vm"
+
+
 def test_docker_publication_assert_retries_empty_helper_output() -> None:
     tasks = load_tasks(COLLECTION_DOCKER_PUBLICATION_ASSERT_TASKS)
     helper_path_task = next(
@@ -95,10 +112,12 @@ def test_docker_publication_assert_retries_empty_helper_output() -> None:
 
     assert helper_path_task["when"] == "playbook_execution_docker_publication_command is not defined"
     assert helper_path_task["changed_when"] is False
-    helper_content = stage_task["ansible.builtin.copy"]["content"]
-    assert "rev-parse --show-toplevel" in helper_content
-    assert "/scripts/docker_publication_assurance.py" in helper_content
-    assert "playbook_dir ~ '/../scripts/docker_publication_assurance.py'" not in helper_content
+    stage_content = stage_task["ansible.builtin.copy"]["content"]
+    assert "ansible.builtin.file" in stage_content
+    assert "ansible.builtin.pipe" in stage_content
+    assert "git -C " in stage_content
+    assert "rev-parse --show-toplevel" in stage_content
+    assert "/scripts/docker_publication_assurance.py" in stage_content
     assert stage_task["ansible.builtin.copy"]["dest"] == "{{ playbook_execution_docker_publication_helper_tempfile.path }}"
     assert stage_task["when"] == "playbook_execution_docker_publication_command is not defined"
     assert stage_task["changed_when"] is False
@@ -117,3 +136,16 @@ def test_docker_publication_assert_retries_empty_helper_output() -> None:
     assert cleanup_task["ansible.builtin.file"]["path"] == "{{ playbook_execution_docker_publication_helper_tempfile.path }}"
     assert cleanup_task["when"] == "playbook_execution_docker_publication_command is not defined"
     assert cleanup_task["changed_when"] is False
+
+
+def test_docker_publication_assert_resolves_helper_from_active_worktree_root() -> None:
+    tasks = load_tasks(COLLECTION_DOCKER_PUBLICATION_ASSERT_TASKS)
+    stage_task = next(
+        task for task in tasks if task["name"] == "Stage the repo-managed Docker publication assurance helper for verification"
+    )
+
+    content = stage_task["ansible.builtin.copy"]["content"]
+
+    assert "git -C " in content
+    assert "rev-parse --show-toplevel" in content
+    assert "playbook_dir ~ '/../scripts" not in content

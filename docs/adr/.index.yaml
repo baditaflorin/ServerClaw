@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-31'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 272
+  Implemented: 274
   Partial: 6
-  Not Implemented: 45
+  Not Implemented: 43
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4889,7 +4889,7 @@ adr_index:
   - adr: 0284
     title: Piper TTS As The CPU Neural Text-To-Speech Service
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -4902,6 +4902,7 @@ adr_index:
       - service
     summary: We will deploy Piper TTS as the canonical CPU neural text-to-speech service.
     filename: 0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md
+    implemented_version: 0.177.113
   - adr: 0285
     title: Paperless-ngx As The Document Management And Archive API
     status: Accepted
@@ -5262,7 +5263,7 @@ adr_index:
   - adr: 0298
     title: Syft And Grype For Platform-Wide SBOM Generation And Continuous CVE Scanning
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -5276,6 +5277,7 @@ adr_index:
       - scanning
     summary: We will deploy Syft and Grype as Gitea Actions CI steps and as a
     filename: 0298-syft-and-grype-for-platform-wide-sbom-generation-and-continuous-cve-scanning.md
+    implemented_version: 0.177.114
   - adr: 0299
     title: Ntfy As The Self-Hosted Push Notification Channel For Programmatic Alert Delivery
     status: Accepted
@@ -5345,7 +5347,7 @@ adr_index:
       - artifacts
     summary: We will deploy Restic as a scheduled backup agent for platform configuration
     filename: 0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts.md
-    implemented_version: 0.177.113
+    implemented_version: 0.177.115
   - adr: '0303'
     title: pgaudit For PostgreSQL Query And Privilege Change Audit Logging
     status: Accepted

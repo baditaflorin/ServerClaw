@@ -1,3 +1,9 @@
+# Purpose: Converge the private ntfy runtime, controller-local password material, and compose-managed service artifacts.
+# Use case: Run during ntfy deploys, updates, and exact-main replays for the private alerting endpoint.
+# Inputs: Runtime paths, controller-local password artifacts, image and port settings, and the repo-managed ntfy configuration template.
+# Outputs: Installs ntfy prerequisites, renders the config and compose inputs, and keeps the ntfy runtime running on the target host.
+# Idempotency: Partially idempotent because password generation and compose restarts only occur when required state is missing or changed.
+# Dependencies: ADR 0165, ADR 0023, and lv3.platform.ntfy_runtime defaults.
 ---
 - name: Validate ntfy runtime inputs
   ansible.builtin.assert:
@@ -111,6 +117,7 @@
     owner: root
     group: root
     mode: "0644"
+  notify: Restart ntfy stack
   no_log: true
 
 - name: Render ntfy compose file
@@ -134,6 +141,7 @@
           volumes:
             - {{ ntfy_runtime_config_file }}:/etc/ntfy/server.yml:ro
             - {{ ntfy_runtime_data_dir }}:{{ ntfy_runtime_data_dir }}
+  notify: Restart ntfy stack
 
 - name: Pull the ntfy image
   ansible.builtin.command:
@@ -168,6 +176,54 @@
     'Creating' in ntfy_runtime_up.stdout
     or 'Recreating' in ntfy_runtime_up.stdout
     or 'Starting' in ntfy_runtime_up.stdout
+
+- name: Read the host ntfy config for drift detection
+  ansible.builtin.slurp:
+    src: "{{ ntfy_runtime_config_file }}"
+  register: ntfy_runtime_host_config_raw
+  changed_when: false
+  no_log: true
+
+- name: Read the container ntfy config for drift detection
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ ntfy_runtime_container_name }}"
+      - cat
+      - /etc/ntfy/server.yml
+  register: ntfy_runtime_container_config_raw
+  changed_when: false
+  failed_when: false
+  no_log: true
+
+- name: Recreate ntfy stack when mounted config drifts
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ ntfy_runtime_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ ntfy_runtime_site_dir }}"
+  register: ntfy_runtime_drift_recreate
+  changed_when: >-
+    'Creating' in ntfy_runtime_drift_recreate.stdout
+    or 'Recreating' in ntfy_runtime_drift_recreate.stdout
+    or 'Starting' in ntfy_runtime_drift_recreate.stdout
+  when: >-
+    ntfy_runtime_container_config_raw.rc != 0
+    or (
+      ntfy_runtime_host_config_raw.content | b64decode | trim
+      != ntfy_runtime_container_config_raw.stdout | trim
+    )
+
+- name: Flush ntfy restart handlers before verification
+  ansible.builtin.meta: flush_handlers
 
 - name: Verify ntfy runtime health probes
   ansible.builtin.import_tasks: verify.yml

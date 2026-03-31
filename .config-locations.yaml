@@ -67,6 +67,26 @@ infrastructure_state:
     validation: "python3 scripts/semgrep_gate.py --print-summary-json"
     naming_convention: "<git-sha>.sarif.json"
 
+  receipts/sbom/:
+    purpose: Immutable ADR 0298 CycloneDX SBOM receipts for managed image digests and host package inventories
+    owner: automation
+    format: JSON
+    use_for: Tracking package inventory snapshots for the managed image catalog and for host-level post-verify evidence
+    update_when: After ADR 0298 image refreshes, managed image upgrades, security scans, or post-verify converges
+    update_by: "scripts/sbom_refresh.py, scripts/upgrade_container_image.py, playbooks/tasks/generate-host-sbom.yml"
+    validation: Manual review
+    naming_convention: "<digest-short>.cdx.json or host-<hostname>-<date>.cdx.json"
+
+  receipts/cve/:
+    purpose: Immutable ADR 0298 Grype CVE receipts for managed image refreshes
+    owner: automation
+    format: JSON
+    use_for: Auditing vulnerability findings over time and detecting net-new HIGH or CRITICAL findings per image id
+    update_when: After ADR 0298 daily refreshes or managed image gate scans
+    update_by: "scripts/sbom_refresh.py, scripts/managed_image_gate.py, scripts/upgrade_container_image.py"
+    validation: Manual review
+    naming_convention: "<digest-short>-<timestamp>.grype.json"
+
   receipts/backup-coverage/:
     purpose: Durable ADR 0271 backup coverage ledger receipts derived from live Proxmox backup jobs, storage listings, and restore-verification evidence
     owner: automation
@@ -209,6 +229,19 @@ infrastructure_state:
       - "receipts/image-scans/: Latest image scan evidence"
       - "docs/schema/vulnerability-budget-policy.schema.json: Schema for the ADR 0269 policy document"
       - "docs/runbooks/vulnerability-budget-gates.md: Operator procedure"
+
+  config/sbom-scanner.json:
+    purpose: Canonical ADR 0298 scanner pinset and transport defaults for Syft, Grype, artifact-cache mirrors, and ntfy publication
+    owner: human
+    format: JSON
+    use_for: Declaring the pinned scanner images, digest-verified tarballs, and shared runtime defaults used by controller and worker scan paths
+    update_when: Upgrading Syft or Grype, changing shared cache defaults, or rotating scan publication endpoints
+    update_by: Agent or human implementing ADR 0298 follow-up work
+    validation: "python3 -m json.tool config/sbom-scanner.json >/dev/null"
+    related_files:
+      - "scripts/sbom_scanner.py: Shared Syft and Grype execution helpers"
+      - "scripts/sbom_refresh.py: Daily catalog-wide refresh entry point"
+      - "config/windmill/scripts/sbom-refresh.py: Worker-side wrapper"
 
   receipts/preview-environments/:
     purpose: Durable branch-local evidence for completed preview create/validate/destroy cycles

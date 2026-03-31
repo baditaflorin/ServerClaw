@@ -177,6 +177,21 @@ domains:
             - event
             - kind
             - generated_at
+      - name: platform.security.cve_delta
+        description: One newly detected high or critical CVE finding emitted by the SBOM refresh workflow.
+        status: active
+        delivery: at_least_once
+        retention: 90d
+        producers:
+          - adr-0298-syft-and-grype-for-platform-wide-sbom-generation-and-continuous-cve-scanning
+        payload:
+          required:
+            - event
+            - generated_at
+            - image_id
+            - image_ref
+            - runtime_host
+            - finding
   maintenance:
     description: Planned maintenance-window state transitions.
     topics:

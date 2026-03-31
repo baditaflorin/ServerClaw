@@ -1,3 +1,9 @@
+# Purpose: Restart the ntfy compose stack after a managed runtime change.
+# Use case: Triggered by the ntfy runtime role when image, compose, or config inputs change.
+# Inputs: ntfy_runtime_compose_file and ntfy_runtime_site_dir.
+# Outputs: Recreates the ntfy service from the declared compose file on the target host.
+# Idempotency: Partially idempotent because the handler intentionally forces container recreation when notified.
+# Dependencies: ADR 0165 and lv3.platform.ntfy_runtime.
 ---
 - name: Restart ntfy stack
   ansible.builtin.command:
@@ -8,6 +14,7 @@
       - "{{ ntfy_runtime_compose_file }}"
       - up
       - -d
+      - --force-recreate
       - --remove-orphans
   args:
     chdir: "{{ ntfy_runtime_site_dir }}"

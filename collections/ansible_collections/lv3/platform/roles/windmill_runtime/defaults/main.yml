@@ -34,6 +34,7 @@ windmill_extra_image: "{{ container_image_catalog.images.windmill_extra_runtime.
 windmill_uv_version: "0.9.21"
 windmill_uv_download_url: >-
   https://github.com/astral-sh/uv/releases/download/{{ windmill_uv_version }}/uv-x86_64-unknown-linux-gnu.tar.gz
+windmill_uv_archive_path: "{{ windmill_site_dir }}/windmill-uv.tar.gz"
 windmill_uv_install_dir: /usr/local/bin
 windmill_uv_binary_path: "{{ windmill_uv_install_dir }}/uv"
 windmill_uvx_binary_path: "{{ windmill_uv_install_dir }}/uvx"
@@ -129,6 +130,7 @@ windmill_default_operations_surface_script_paths:
   - f/lv3/restore_verification
   - f/lv3/security_posture_scan
   - f/lv3/weekly_https_tls_assurance
+  - f/lv3/sbom_refresh
   - f/lv3/weekly_security_scan
   - f/lv3/audit_token_inventory
   - f/lv3/token_exposure_response
@@ -162,6 +164,7 @@ windmill_worker_secret_manifest_path: "{{ playbook_execution_controller_secret_m
 windmill_worker_secret_mirror_ids:
   - bootstrap_ssh_private_key
   - nats_jetstream_admin_password
+  - ntfy_alertmanager_password
 windmill_worker_proxmox_api_token_payload_dir: "{{ windmill_worker_repo_checkout_host_path }}/.local/proxmox-api"
 windmill_worker_proxmox_api_token_payload_file: "{{ windmill_worker_proxmox_api_token_payload_dir }}/lv3-automation-primary.json"
 windmill_worker_superadmin_secret_dir: "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill"
@@ -295,6 +298,10 @@ windmill_worker_checkout_prune_preserve_paths: >-
   }}
 windmill_worker_runtime_writable_directories:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/fixtures"
+    mode: "1777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/sbom"
+    mode: "1777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/cve"
     mode: "1777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local"
     mode: "0755"
@@ -475,6 +482,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0249 HTTPS/TLS assurance
     description: Repo-managed Windmill wrapper that runs the HTTPS/TLS assurance scan and stores one receipt.
+  - path: f/lv3/sbom_refresh
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/sbom-refresh.py"
+    language: python3
+    summary: ADR 0298 SBOM and CVE refresh
+    description: Repo-managed Windmill wrapper that scans the managed image catalog with Syft and Grype and emits structured SBOM and CVE delta output.
   - path: f/lv3/weekly_security_scan
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/weekly-security-scan.py"
     language: python3
@@ -742,6 +754,15 @@ windmill_seed_schedules:
     enabled: false
     summary: Disabled ADR 0089 weekly cache maintenance placeholder
     description: Repo-managed weekly cache maintenance definition that purges the shared pip cache and checks apt-cacher-ng after the cache host is applied live from main.
+    no_flow_overlap: true
+  - path: f/lv3/sbom_refresh_daily
+    schedule: "0 30 2 * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/sbom_refresh
+    args: {}
+    enabled: true
+    summary: ADR 0298 daily SBOM and CVE refresh
+    description: Repo-managed daily image-catalog scan that refreshes immutable Syft and Grype receipts and emits delta alerts for net-new HIGH or CRITICAL findings.
     no_flow_overlap: true
   - path: f/lv3/restic_config_backup_every_6h
     schedule: "0 0 2,8,14,20 * * *"

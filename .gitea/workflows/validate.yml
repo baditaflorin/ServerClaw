@@ -78,6 +78,9 @@ jobs:
           printf '%s\n' "${workspace_host_path}" > .local/validation-gate/workspace-host.path
           "${docker_bin}" --version
 
+      - name: Run managed image gate
+        run: python3 scripts/managed_image_gate.py --baseline-revision origin/main
+
       - name: Run authoritative validation gate
         run: |
           mkdir -p .local/validation-gate .local/policy-toolchain .local/trivy-cache .local/packer-plugin-cache .ansible/validation/collections receipts/sast

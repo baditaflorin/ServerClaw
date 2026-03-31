@@ -2,9 +2,10 @@
 
 - ADR: [ADR 0302](../adr/0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts.md)
 - Title: Integrate ADR 0302 Restic exact-main replay onto `origin/main`
-- Status: in_progress
-- Target Repo Version: 0.177.113
-- Verified Platform Version: 0.130.75
+- Status: live_applied
+- Included In Repo Version: 0.177.115
+- Platform Version Observed During Integration: 0.130.75
+- Release Date: 2026-03-31
 - Live Applied On: 2026-03-31
 - Branch: `codex/ws-0302-main-integration`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-main-integration`
@@ -69,13 +70,16 @@ backup protection for repo-managed configuration and state artifacts.
 
 ## Verification
 
-- `git fetch origin --prune` confirmed that `origin/main` remained at commit `58dad5d37ae16ceb3a73bc2fe4554b2a449e8f83`, already carrying repo version `0.177.112`, so the verified live-apply branch stayed synchronized with the latest realistic mainline baseline throughout integration.
+- `git fetch origin --prune` confirmed that the newest realistic `origin/main`
+  commit advanced to `51fc3a47358da12a272fe559a13e120e63a351b1`, carrying repo
+  version `0.177.114` and platform version `0.130.74` before the final ADR
+  0302 integration pass.
 - The live platform proof remains the successful Restic interval backup receipt `receipts/restic-backups/20260331T060131Z.json`, the event-driven live-apply backup receipt `receipts/restic-backups/20260331T055348Z.json`, the restore-verification receipt `receipts/restic-restore-verifications/20260331T055701Z.json`, and the refreshed snapshot manifest `receipts/restic-snapshots-latest.json`.
-- Repository automation passed on the integrated tree with `make syntax-check-restic-config-backup`, focused pytest for the Restic and ledger coverage (`17 passed`), `make preflight WORKFLOW=restic-config-backup`, `make preflight WORKFLOW=restic-config-restore-verify`, `scripts/generate_status_docs.py --check`, `scripts/platform_manifest.py`, `scripts/generate_adr_index.py --check`, and `scripts/backup_coverage_ledger.py --format text`.
+- Repository automation passed on the integrated tree with `make syntax-check-restic-config-backup`, focused pytest for the Restic and ledger coverage, `make preflight WORKFLOW=restic-config-backup`, `make preflight WORKFLOW=restic-config-restore-verify`, `./scripts/validate_repo.sh workstream-surfaces agent-standards data-models`, `UV_PYTHON=python3.13 make validate`, and `UV_PYTHON=python3.13 make pre-push-gate`.
 - The backup-coverage ledger still reports two unrelated uncovered assets, `monitoring-lv3` and `backup-lv3`, while confirming that the ADR 0302 Restic-backed assets are protected with current receipts and timestamps.
 
 ## Outcome
 
-- Repository version `0.177.113` is the first integrated mainline version that records ADR 0302 as implemented.
+- Repository version `0.177.115` is the first integrated mainline version that records ADR 0302 as implemented.
 - Platform version `0.130.75` is the first verified mainline platform version that records the Restic configuration-backup service as live.
 - `receipts/live-applies/2026-03-31-adr-0302-restic-config-backup-mainline-live-apply.json` is the canonical mainline receipt for this ADR integration.

@@ -1,0 +1,21 @@
+services:
+  piper:
+    build:
+      context: {{ piper_runtime_service_dir }}
+      dockerfile: Dockerfile
+    image: {{ piper_runtime_image_name }}:latest
+    container_name: {{ piper_runtime_container_name }}
+    restart: unless-stopped
+    environment:
+      PIPER_DEFAULT_VOICE: {{ piper_runtime_default_voice }}
+      PIPER_MODEL_DIR: {{ piper_runtime_model_dir }}
+      PIPER_SENTENCE_SILENCE: "{{ piper_runtime_sentence_silence }}"
+      PIPER_VOICES: "{{ piper_runtime_voice_models | join(',') }}"
+    ports:
+      - "{{ piper_runtime_bind_host }}:{{ piper_runtime_port }}:{{ piper_runtime_container_port }}"
+      - "{{ piper_runtime_loopback_bind_host }}:{{ piper_runtime_port }}:{{ piper_runtime_container_port }}"
+    volumes:
+      - {{ piper_runtime_model_volume_name }}:{{ piper_runtime_model_dir }}
+
+volumes:
+  {{ piper_runtime_model_volume_name }}:

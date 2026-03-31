@@ -35,6 +35,7 @@ Anything not listed here is denied by default between guests.
 | Proxmox host | `backup-lv3` | `8007` | Proxmox Backup Server access |
 | Proxmox host | `artifact-cache-lv3` | `5001`, `5002`, `5003`, `5004` | private cache-plane verification and host-side checks |
 | `docker-build-lv3` | `artifact-cache-lv3` | `5001`, `5002`, `5003`, `5004` | private artifact-cache mirrors for build and CI consumers |
+| `docker-runtime-lv3` | `artifact-cache-lv3` | `5001`, `5002`, `5003`, `5004` | private artifact-cache mirrors for Windmill workers and shared runtime scans |
 
 ## Related Surfaces
 

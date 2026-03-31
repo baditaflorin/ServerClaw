@@ -373,6 +373,35 @@
       "notes": "Mailpit intentionally keeps intercepted staging and development messages in ephemeral in-memory storage so assertion traffic is inspectable but lost on restart."
     },
     {
+      "id": "piper-voice-model-cache",
+      "service": "piper",
+      "name": "Piper voice model cache",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "low",
+      "locations": [
+        "Docker volume piper-models on docker-runtime-lv3"
+      ],
+      "notes": "Piper stores downloaded voice models in a named Docker volume so the private TTS runtime can restart without re-fetching the declared model set."
+    },
+    {
+      "id": "piper-transient-synthesis-payloads",
+      "service": "piper",
+      "name": "Piper transient synthesis payloads",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "Transient request and response buffers inside the piper container on docker-runtime-lv3",
+        "Ephemeral synthesized WAV bytes returned synchronously to callers on docker-runtime-lv3"
+      ],
+      "notes": "Piper does not persist input text or synthesized audio after each request completes, but both may contain sensitive operator or agent content while the request is in flight."
+    },
+    {
       "id": "matrix-synapse-event-store",
       "service": "matrix_synapse",
       "name": "Matrix Synapse events and room state",
