@@ -421,38 +421,175 @@
   no_log: true
   when: keycloak_force_recreate
 
-- name: Force-recreate the Keycloak service after Docker networking recovery
-  ansible.builtin.shell: |
-    set -euo pipefail
-    for attempt in $(seq 1 3); do
-      if [ "{{ keycloak_mail_platform_docker_network_name | length }}" -gt 0 ] \
-        && ! docker network inspect "{{ keycloak_mail_platform_docker_network_name }}" >/dev/null 2>&1; then
-        sleep 5
-        continue
-      fi
+- name: Force-recreate the Keycloak service and recover Docker bridge-chain loss after networking recovery
+  block:
+    - name: Force-recreate the Keycloak service after Docker networking recovery
+      ansible.builtin.shell: |
+        set -euo pipefail
+        for attempt in $(seq 1 3); do
+          if [ "{{ keycloak_mail_platform_docker_network_name | length }}" -gt 0 ] \
+            && ! docker network inspect "{{ keycloak_mail_platform_docker_network_name }}" >/dev/null 2>&1; then
+            sleep 5
+            continue
+          fi
 
-      if docker compose --file "{{ keycloak_compose_file }}" up -d --force-recreate --no-deps keycloak; then
-        exit 0
-      fi
+          if docker compose --file "{{ keycloak_compose_file }}" up -d --force-recreate --no-deps keycloak; then
+            exit 0
+          fi
 
-      stale_ids="$(docker ps -aq \
-        --filter label=com.docker.compose.project=keycloak \
-        --filter label=com.docker.compose.service=keycloak)"
-      if [ -n "$stale_ids" ]; then
-        docker rm -f $stale_ids || true
-      fi
-      sleep 5
-    done
-    exit 1
-  args:
-    chdir: "{{ keycloak_site_dir }}"
-    executable: /bin/bash
-  register: keycloak_up
-  changed_when: >-
-    'Creating' in keycloak_up.stdout
-    or 'Recreating' in keycloak_up.stdout
-    or 'Starting' in keycloak_up.stdout
-  failed_when: false
+          stale_ids="$(docker ps -aq \
+            --filter label=com.docker.compose.project=keycloak \
+            --filter label=com.docker.compose.service=keycloak)"
+          if [ -n "$stale_ids" ]; then
+            docker rm -f $stale_ids || true
+          fi
+          sleep 5
+        done
+        exit 1
+      args:
+        chdir: "{{ keycloak_site_dir }}"
+        executable: /bin/bash
+      register: keycloak_up
+      changed_when: >-
+        'Creating' in keycloak_up.stdout
+        or 'Recreating' in keycloak_up.stdout
+        or 'Starting' in keycloak_up.stdout
+      failed_when: keycloak_up.rc != 0
+  rescue:
+    - name: Detect Docker bridge-chain loss during the Keycloak force-recreate
+      ansible.builtin.set_fact:
+        keycloak_force_recreate_bridge_chains_missing: >-
+          {{
+            'Failed to Setup IP tables' in (
+              (ansible_failed_result.stderr | default(''))
+              ~ ' ' ~ (ansible_failed_result.stdout | default(''))
+              ~ ' ' ~ (ansible_failed_result.msg | default(''))
+            )
+            and (
+              'No chain/target/match by that name' in (
+                (ansible_failed_result.stderr | default(''))
+                ~ ' ' ~ (ansible_failed_result.stdout | default(''))
+                ~ ' ' ~ (ansible_failed_result.msg | default(''))
+              )
+              or 'Unable to enable ACCEPT OUTGOING rule' in (
+                (ansible_failed_result.stderr | default(''))
+                ~ ' ' ~ (ansible_failed_result.stdout | default(''))
+                ~ ' ' ~ (ansible_failed_result.msg | default(''))
+              )
+              or 'Unable to enable DNAT rule' in (
+                (ansible_failed_result.stderr | default(''))
+                ~ ' ' ~ (ansible_failed_result.stdout | default(''))
+                ~ ' ' ~ (ansible_failed_result.msg | default(''))
+              )
+            )
+          }}
+
+    - name: Surface unexpected Keycloak force-recreate failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('keycloak compose force-recreate failed')) }}"
+      when: not keycloak_force_recreate_bridge_chains_missing
+
+    - name: Reset the Keycloak stack after Docker bridge-chain loss during force-recreate
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ keycloak_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ keycloak_site_dir }}"
+      register: keycloak_force_recreate_down_retry
+      failed_when: false
+      changed_when: >-
+        'Stopping' in (keycloak_force_recreate_down_retry.stdout | default(''))
+        or 'Removing' in (keycloak_force_recreate_down_retry.stdout | default(''))
+        or 'Network' in (keycloak_force_recreate_down_retry.stdout | default(''))
+        or 'Stopping' in (keycloak_force_recreate_down_retry.stderr | default(''))
+        or 'Removing' in (keycloak_force_recreate_down_retry.stderr | default(''))
+        or 'Network' in (keycloak_force_recreate_down_retry.stderr | default(''))
+      when: keycloak_force_recreate_bridge_chains_missing
+
+    - name: Remove stale Keycloak compose networks after Docker bridge-chain loss during force-recreate
+      ansible.builtin.shell: |
+        set -euo pipefail
+        stale_networks="$(docker network ls -q --filter name={{ keycloak_compose_network_name }})"
+        if [ -n "${stale_networks}" ]; then
+          docker network rm ${stale_networks}
+          echo changed
+        fi
+      args:
+        executable: /bin/bash
+      register: keycloak_force_recreate_network_cleanup_retry
+      changed_when: "'changed' in keycloak_force_recreate_network_cleanup_retry.stdout"
+      when: keycloak_force_recreate_bridge_chains_missing
+
+    - name: Remove stale Keycloak compose replacement containers after Docker bridge-chain loss during force-recreate
+      ansible.builtin.shell: |
+        set -euo pipefail
+        stale_ids="$(docker ps -aq \
+          --filter label=com.docker.compose.project=keycloak \
+          --filter label=com.docker.compose.replace)"
+        if [ -n "$stale_ids" ]; then
+          docker rm -f $stale_ids
+          echo changed
+        fi
+      args:
+        chdir: "{{ keycloak_site_dir }}"
+        executable: /bin/bash
+      register: keycloak_replace_cleanup_retry
+      changed_when: "'changed' in keycloak_replace_cleanup_retry.stdout"
+      when: keycloak_force_recreate_bridge_chains_missing
+
+    - name: Restart Docker to restore bridge networking before retrying the Keycloak force-recreate
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: keycloak_force_recreate_bridge_chains_missing
+
+    - name: Ensure Docker bridge networking chains are present before retrying the Keycloak force-recreate
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+      when: keycloak_force_recreate_bridge_chains_missing
+
+    - name: Retry the Keycloak service force-recreate after Docker networking recovery
+      ansible.builtin.shell: |
+        set -euo pipefail
+        for attempt in $(seq 1 3); do
+          if [ "{{ keycloak_mail_platform_docker_network_name | length }}" -gt 0 ] \
+            && ! docker network inspect "{{ keycloak_mail_platform_docker_network_name }}" >/dev/null 2>&1; then
+            sleep 5
+            continue
+          fi
+
+          if docker compose --file "{{ keycloak_compose_file }}" up -d --force-recreate --no-deps keycloak; then
+            exit 0
+          fi
+
+          stale_ids="$(docker ps -aq \
+            --filter label=com.docker.compose.project=keycloak \
+            --filter label=com.docker.compose.service=keycloak)"
+          if [ -n "$stale_ids" ]; then
+            docker rm -f $stale_ids || true
+          fi
+          sleep 5
+        done
+        exit 1
+      args:
+        chdir: "{{ keycloak_site_dir }}"
+        executable: /bin/bash
+      register: keycloak_up
+      changed_when: >-
+        'Creating' in keycloak_up.stdout
+        or 'Recreating' in keycloak_up.stdout
+        or 'Starting' in keycloak_up.stdout
+      failed_when: keycloak_up.rc != 0
+      when: keycloak_force_recreate_bridge_chains_missing
   when: keycloak_force_recreate
 
 - name: Assert the Keycloak force-recreate succeeded
@@ -594,6 +731,57 @@
   until: keycloak_admin_realm_probe_confirmed.status in [200, 404]
   changed_when: false
   no_log: true
+
+- name: Verify Keycloak resolves the internal mail-platform relay host
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - keycloak-keycloak-1
+      - getent
+      - ahostsv4
+      - "{{ keycloak_mail_platform_submission_host }}"
+  register: keycloak_mail_submission_host_lookup_initial
+  changed_when: false
+  failed_when: false
+  when: keycloak_mail_platform_submission_recovery_enabled
+
+- name: Recover the internal mail-platform submission relay before Keycloak SMTP verification
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ keycloak_mail_platform_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --no-deps
+      - "{{ keycloak_mail_platform_submission_service_name }}"
+  args:
+    chdir: "{{ keycloak_mail_platform_compose_file | dirname }}"
+  register: keycloak_mail_submission_dependency_up
+  changed_when: >-
+    'Creating' in (keycloak_mail_submission_dependency_up.stdout | default(''))
+    or 'Recreating' in (keycloak_mail_submission_dependency_up.stdout | default(''))
+    or 'Starting' in (keycloak_mail_submission_dependency_up.stdout | default(''))
+    or 'Running' in (keycloak_mail_submission_dependency_up.stdout | default(''))
+  retries: 3
+  delay: 5
+  until: keycloak_mail_submission_dependency_up.rc == 0
+  when:
+    - keycloak_mail_platform_submission_recovery_enabled
+    - keycloak_mail_submission_host_lookup_initial.rc != 0
+
+- name: Wait for the internal mail-platform submission listener after dependency recovery
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ keycloak_mail_platform_submission_port }}"
+    delay: 0
+    timeout: 120
+  when:
+    - keycloak_mail_platform_submission_recovery_enabled
+    - keycloak_mail_submission_host_lookup_initial.rc != 0
 
 - name: Verify Keycloak resolves the internal mail-platform relay host
   ansible.builtin.command:
@@ -1005,6 +1193,51 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_outline_client_reconcile is succeeded
 
+    - name: Ensure the Paperless OAuth client exists
+      community.general.keycloak_client:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_paperless_client_id }}"
+        name: Paperless-ngx
+        description: Repo-managed OIDC client for the Paperless document archive and API.
+        enabled: true
+        protocol: openid-connect
+        public_client: false
+        client_authenticator_type: client-secret
+        standard_flow_enabled: true
+        implicit_flow_enabled: false
+        direct_access_grants_enabled: false
+        service_accounts_enabled: false
+        full_scope_allowed: false
+        root_url: "{{ keycloak_paperless_root_url }}"
+        base_url: "{{ keycloak_paperless_root_url }}"
+        admin_url: "{{ keycloak_paperless_root_url }}"
+        redirect_uris:
+          - "{{ keycloak_paperless_root_url }}/accounts/oidc/keycloak/login/callback/"
+        valid_post_logout_redirect_uris: "{{ keycloak_paperless_post_logout_redirect_uris }}"
+        web_origins:
+          - "{{ keycloak_paperless_root_url }}"
+        protocol_mappers:
+          - name: groups
+            protocol: openid-connect
+            protocolMapper: oidc-group-membership-mapper
+            config:
+              claim.name: groups
+              full.path: "true"
+              id.token.claim: "true"
+              access.token.claim: "true"
+              userinfo.token.claim: "true"
+        state: present
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      register: keycloak_paperless_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_paperless_client_reconcile is succeeded
+
     - name: Ensure the JupyterHub OAuth client exists
       community.general.keycloak_client:
         realm: "{{ keycloak_realm_name }}"
@@ -1324,6 +1557,22 @@
       until: keycloak_jupyterhub_client_secret_info is succeeded
       no_log: true
 
+    - name: Read the Paperless client secret
+      community.general.keycloak_clientsecret_info:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_paperless_client_id }}"
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      register: keycloak_paperless_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_paperless_client_secret_info is succeeded
+      no_log: true
+
     - name: Read the ServerClaw client secret
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
@@ -1382,6 +1631,7 @@
     keycloak_directus_client_secret: "{{ keycloak_directus_client_secret_info.clientsecret_info.value }}"
     keycloak_outline_client_secret: "{{ keycloak_outline_client_secret_info.clientsecret_info.value }}"
     keycloak_jupyterhub_client_secret: "{{ keycloak_jupyterhub_client_secret_info.clientsecret_info.value }}"
+    keycloak_paperless_client_secret: "{{ keycloak_paperless_client_secret_info.clientsecret_info.value }}"
     keycloak_serverclaw_client_secret: "{{ keycloak_serverclaw_client_secret_info.clientsecret_info.value }}"
     keycloak_api_gateway_client_secret: "{{ keycloak_api_gateway_client_secret_info.clientsecret_info.value }}"
     keycloak_serverclaw_runtime_client_secret: "{{ keycloak_serverclaw_runtime_client_secret_info.clientsecret_info.value }}"
@@ -1454,6 +1704,15 @@
   ansible.builtin.copy:
     dest: "{{ keycloak_jupyterhub_client_secret_local_file }}"
     content: "{{ keycloak_jupyterhub_client_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the Paperless client secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ keycloak_paperless_client_secret_local_file }}"
+    content: "{{ keycloak_paperless_client_secret }}\n"
     mode: "0600"
   delegate_to: localhost
   become: false

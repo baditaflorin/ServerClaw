@@ -167,6 +167,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://paperless.lv3.org/
+  labels:
+    service_id: paperless
+    slo_id: paperless-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://tasks.lv3.org/
   labels:
     service_id: plane

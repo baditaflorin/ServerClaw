@@ -192,6 +192,7 @@ def test_openbao_runtime_rechecks_seal_state_before_auth_verification() -> None:
     assert "include_tasks: ensure_unsealed.yml" in tasks
     assert "Read OpenBao seal status before" in ensure_unsealed_tasks
     assert "/v1/sys/unseal" in ensure_unsealed_tasks
+    assert "until: openbao_runtime_reseal_recovery.status == 200" not in ensure_unsealed_tasks
     assert "Wait for OpenBao to become active before" in ensure_unsealed_tasks
 
 

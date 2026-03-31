@@ -29,6 +29,16 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_mail_platform_submission_starttls"] == "{{ smtp_starttls }}"
     assert defaults["keycloak_mail_platform_submission_auth_enabled"] == "{{ smtp_auth_enabled }}"
     assert defaults["keycloak_mail_platform_docker_network_name"] == "{{ smtp_docker_network_name }}"
+    assert defaults["keycloak_mail_platform_compose_file"] == (
+        "{{ mail_platform_compose_file | default('/opt/mail-platform/docker-compose.yml') }}"
+    )
+    assert defaults["keycloak_mail_platform_submission_service_name"] == "stalwart"
+    assert "keycloak_mail_platform_docker_network_name | length > 0" in defaults[
+        "keycloak_mail_platform_submission_recovery_enabled"
+    ]
+    assert "keycloak_mail_platform_compose_file | length > 0" in defaults[
+        "keycloak_mail_platform_submission_recovery_enabled"
+    ]
     assert defaults["keycloak_compose_project_name"] == "keycloak"
     assert defaults["keycloak_compose_network_name"] == "{{ keycloak_compose_project_name }}_default"
     assert defaults["keycloak_langfuse_client_id"] == "langfuse"
@@ -58,6 +68,14 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_jupyterhub_post_logout_redirect_uris"] == [
         "{{ keycloak_jupyterhub_root_url }}",
         "{{ keycloak_jupyterhub_root_url }}/",
+        "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
+    ]
+    assert defaults["keycloak_paperless_client_id"] == "paperless"
+    assert defaults["keycloak_paperless_client_secret_local_file"].endswith("/.local/keycloak/paperless-client-secret.txt")
+    assert defaults["keycloak_paperless_root_url"] == "https://paperless.lv3.org"
+    assert defaults["keycloak_paperless_post_logout_redirect_uris"] == [
+        "{{ keycloak_paperless_root_url }}",
+        "{{ keycloak_paperless_root_url }}/",
         "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
     ]
     assert smtp_server["auth"] == "{{ keycloak_mail_platform_submission_auth_enabled }}"
@@ -128,6 +146,11 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
         for task in tasks
         if task.get("name") == "Remove stale Keycloak compose replacement containers before recovery"
     )
+    force_recreate_block = next(
+        task
+        for task in tasks
+        if task.get("name") == "Force-recreate the Keycloak service and recover Docker bridge-chain loss after networking recovery"
+    )
     openbao_agent_recreate = next(
         task
         for task in tasks
@@ -137,11 +160,6 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
         task
         for task in tasks
         if task.get("name") == "Wait for the Keycloak runtime env file after OpenBao agent recovery"
-    )
-    force_recreate = next(
-        task
-        for task in tasks
-        if task.get("name") == "Force-recreate the Keycloak service after Docker networking recovery"
     )
     force_recreate_fact = next(
         task
@@ -195,6 +213,12 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert force_recreate_down["when"] == "keycloak_force_recreate"
     assert "{{ keycloak_compose_network_name }}" in network_cleanup["ansible.builtin.shell"]
     assert network_cleanup["when"] == "keycloak_force_recreate"
+    rescue_names = [task["name"] for task in force_recreate_block["rescue"]]
+    assert "Detect Docker bridge-chain loss during the Keycloak force-recreate" in rescue_names
+    assert "Restart Docker to restore bridge networking before retrying the Keycloak force-recreate" in rescue_names
+    assert "Ensure Docker bridge networking chains are present before retrying the Keycloak force-recreate" in rescue_names
+    assert "Retry the Keycloak service force-recreate after Docker networking recovery" in rescue_names
+    force_recreate = force_recreate_block["block"][0]
     force_recreate_shell = force_recreate["ansible.builtin.shell"]
     assert "docker network inspect" in force_recreate_shell
     assert "{{ keycloak_mail_platform_docker_network_name }}" in force_recreate_shell
@@ -203,6 +227,7 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert "com.docker.compose.service=keycloak" in force_recreate_shell
     assert "docker rm -f $stale_ids || true" in force_recreate_shell
     assert force_recreate["args"]["executable"] == "/bin/bash"
+    assert force_recreate["failed_when"] == "keycloak_up.rc != 0"
     force_recreate_expression = force_recreate_fact["ansible.builtin.set_fact"]["keycloak_force_recreate"]
     assert "keycloak_docker_nat_chain.rc != 0" in force_recreate_expression
     assert "keycloak_local_http_port_probe.failed" in force_recreate_expression
@@ -218,12 +243,46 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
 
 def test_role_verifies_internal_mail_network_connectivity() -> None:
     tasks = load_tasks()
-    resolve_task = next(
+    initial_resolve_task = next(
         task for task in tasks if task.get("name") == "Verify Keycloak resolves the internal mail-platform relay host"
+    )
+    recovery_task = next(
+        task for task in tasks if task.get("name") == "Recover the internal mail-platform submission relay before Keycloak SMTP verification"
+    )
+    recovery_wait_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Wait for the internal mail-platform submission listener after dependency recovery"
+    )
+    resolve_task = next(
+        task
+        for task in tasks[tasks.index(initial_resolve_task) + 1 :]
+        if task.get("name") == "Verify Keycloak resolves the internal mail-platform relay host"
     )
     connect_task = next(
         task for task in tasks if task.get("name") == "Verify Keycloak reaches the internal mail-platform submission listener"
     )
+    assert initial_resolve_task["register"] == "keycloak_mail_submission_host_lookup_initial"
+    assert initial_resolve_task["failed_when"] is False
+    assert initial_resolve_task["when"] == "keycloak_mail_platform_submission_recovery_enabled"
+    assert recovery_task["ansible.builtin.command"]["argv"][-5:] == [
+        "up",
+        "-d",
+        "--force-recreate",
+        "--no-deps",
+        "{{ keycloak_mail_platform_submission_service_name }}",
+    ]
+    assert recovery_task["ansible.builtin.command"]["argv"][3] == "{{ keycloak_mail_platform_compose_file }}"
+    assert recovery_task["when"] == [
+        "keycloak_mail_platform_submission_recovery_enabled",
+        "keycloak_mail_submission_host_lookup_initial.rc != 0",
+    ]
+    assert recovery_wait_task["ansible.builtin.wait_for"]["host"] == "{{ ansible_host }}"
+    assert recovery_wait_task["ansible.builtin.wait_for"]["port"] == "{{ keycloak_mail_platform_submission_port }}"
+    assert recovery_wait_task["when"] == [
+        "keycloak_mail_platform_submission_recovery_enabled",
+        "keycloak_mail_submission_host_lookup_initial.rc != 0",
+    ]
     assert resolve_task["ansible.builtin.command"]["argv"] == [
         "docker",
         "exec",
@@ -350,7 +409,7 @@ def test_all_keycloak_client_secret_reads_retry_reconciliation_until_success() -
         if task.get("name", "").startswith("Read the ") and task.get("name", "").endswith(" client secret")
     ]
 
-    assert len(read_secret_tasks) == 11
+    assert len(read_secret_tasks) == 12
     for task in read_secret_tasks:
         assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
         assert task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
@@ -474,6 +533,30 @@ def test_role_manages_jupyterhub_client_secret() -> None:
     )
     assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_jupyterhub_client_id }}"
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_jupyterhub_client_secret_local_file }}"
+
+
+def test_role_manages_paperless_client_secret() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    tasks = load_tasks()
+    realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
+    paperless_client_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Ensure the Paperless OAuth client exists"
+    )
+    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the Paperless client secret")
+    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Paperless client secret to the control machine")
+
+    assert defaults["keycloak_paperless_client_id"] == "paperless"
+    assert defaults["keycloak_paperless_client_secret_local_file"].endswith("/.local/keycloak/paperless-client-secret.txt")
+    assert defaults["keycloak_paperless_root_url"] == "https://paperless.lv3.org"
+    assert paperless_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_paperless_client_id }}"
+    assert paperless_client_task["community.general.keycloak_client"]["redirect_uris"] == [
+        "{{ keycloak_paperless_root_url }}/accounts/oidc/keycloak/login/callback/"
+    ]
+    assert paperless_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
+        "{{ keycloak_paperless_post_logout_redirect_uris }}"
+    )
+    assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_paperless_client_id }}"
+    assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_paperless_client_secret_local_file }}"
 
 
 def test_role_manages_serverclaw_client_secret() -> None:

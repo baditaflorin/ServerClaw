@@ -1,0 +1,85 @@
+---
+# Purpose: Verify the public Paperless publication and API flow through the shared edge.
+
+- name: Validate Paperless publication inputs
+  ansible.builtin.assert:
+    that:
+      - paperless_public_base_url | length > 0
+      - paperless_api_token_local_file | length > 0
+      - paperless_taxonomy_local_file | length > 0
+      - paperless_sync_script | length > 0
+      - paperless_smoke_report_local_file | length > 0
+    fail_msg: >-
+      paperless_runtime publication requires the public URL, the controller-local API token,
+      the mirrored taxonomy manifest, and the smoke verification report path.
+
+- name: Check whether the Paperless API token exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ paperless_api_token_local_file }}"
+  register: paperless_api_token_local
+
+- name: Fail if the Paperless API token is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ paperless_api_token_local_file }} is missing on the control machine.
+      Converge the Paperless runtime first so the API token can be mirrored locally.
+  when: not paperless_api_token_local.stat.exists
+
+- name: Wait for the Paperless public root endpoint
+  ansible.builtin.uri:
+    url: "{{ paperless_public_base_url }}/"
+    method: GET
+    status_code:
+      - 200
+      - 302
+  register: paperless_publish_public_root
+  retries: 18
+  delay: 5
+  until: paperless_publish_public_root.status in [200, 302]
+  changed_when: false
+
+- name: Verify the Paperless public API with the durable token
+  ansible.builtin.uri:
+    url: "{{ paperless_public_base_url }}/api/documents/?page_size=1"
+    method: GET
+    headers:
+      Authorization: "Token {{ lookup('ansible.builtin.file', paperless_api_token_local_file) | trim }}"
+    status_code: 200
+  register: paperless_publish_public_api
+  retries: 18
+  delay: 5
+  until: paperless_publish_public_api.status == 200
+  changed_when: false
+  no_log: true
+
+- name: Verify the Paperless taxonomy through the public publication
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/paperless_sync.py"
+      - verify
+      - --base-url
+      - "{{ paperless_public_base_url }}"
+      - --api-token-file
+      - "{{ paperless_api_token_local_file }}"
+      - --desired-state-file
+      - "{{ paperless_taxonomy_local_file }}"
+      - --report-file
+      - "{{ paperless_sync_report_local_file }}"
+  register: paperless_publish_verify
+  changed_when: false
+
+- name: Perform the Paperless public smoke upload verification
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/paperless_sync.py"
+      - smoke-upload
+      - --base-url
+      - "{{ paperless_public_base_url }}"
+      - --api-token-file
+      - "{{ paperless_api_token_local_file }}"
+      - --report-file
+      - "{{ paperless_smoke_report_local_file }}"
+  register: paperless_publish_smoke
+  changed_when: false
