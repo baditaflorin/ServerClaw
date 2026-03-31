@@ -177,12 +177,21 @@
 - name: Ensure the MinIO restic bucket exists with object lock
   ansible.builtin.shell: |
     set -euo pipefail
-    if [ "$(docker inspect --format '{% raw %}{{.State.Running}}{% endraw %}' outline-minio)" != "true" ]; then
-      docker start outline-minio >/dev/null
+    container_name={{ restic_config_backup_minio_container_name | quote }}
+    if ! docker inspect "$container_name" >/dev/null 2>&1; then
+      if docker inspect outline-minio >/dev/null 2>&1; then
+        container_name=outline-minio
+      else
+        echo "unable to find MinIO container: tried $container_name and outline-minio" >&2
+        exit 1
+      fi
+    fi
+    if [ "$(docker inspect --format '{% raw %}{{.State.Running}}{% endraw %}' "$container_name")" != "true" ]; then
+      docker start "$container_name" >/dev/null
     fi
     docker exec \
       -e MINIO_ROOT_PASSWORD={{ restic_config_backup_minio_secret_key | quote }} \
-      outline-minio sh -ceu '
+      "$container_name" sh -ceu '
         mc alias set local http://127.0.0.1:9000 minio "$MINIO_ROOT_PASSWORD" >/dev/null
         mc mb --ignore-existing --with-lock local/restic-config-backup >/dev/null
         mc version enable local/restic-config-backup >/dev/null

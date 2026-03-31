@@ -5,18 +5,21 @@ from __future__ import annotations
 
 import argparse
 import base64
+import contextlib
+import fcntl
 import ipaddress
 import json
 import os
 import shlex
 import socket
 import subprocess
+import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 from script_bootstrap import ensure_repo_root_on_path
 
@@ -34,10 +37,14 @@ DEFAULT_RESTORE_VERIFY_DIR = repo_path("receipts", "restic-restore-verifications
 DEFAULT_CACHE_DIR = Path("/var/lib/lv3/restic-config-backup/cache")
 DEFAULT_RUNTIME_STATE_DIR = Path("/var/lib/lv3/restic-config-backup")
 DEFAULT_RUNTIME_CONFIG_NAME = "runtime-config.json"
+DEFAULT_LOCK_FILENAME = "restic-config-backup.lock"
+DEFAULT_LOCK_TIMEOUT_SECONDS = 300
+DEFAULT_LOCK_POLL_SECONDS = 1.0
 DEFAULT_TRIGGER = "manual"
 DEFAULT_GRACE_MINUTES = 30
 NTFY_CRITICAL_TITLE = "Restic backup critical"
 NTFY_STALE_MESSAGE_PREFIX = "Restic backup source is stale"
+FALLBACK_MINIO_CONTAINER_NAMES = ("outline-minio",)
 
 
 @dataclass(frozen=True)
@@ -151,19 +158,60 @@ def inspect_container_state(container_name: str) -> dict[str, Any]:
     return payload[0]
 
 
+def resolve_minio_container(container_name: str) -> tuple[str, dict[str, Any]]:
+    candidates: list[str] = []
+    for candidate in (container_name, *FALLBACK_MINIO_CONTAINER_NAMES):
+        normalized = str(candidate or "").strip()
+        if normalized and normalized not in candidates:
+            candidates.append(normalized)
+
+    errors: list[str] = []
+    for candidate in candidates:
+        try:
+            return candidate, inspect_container_state(candidate)
+        except RuntimeError as exc:
+            detail = str(exc)
+            if "no such object" not in detail.lower():
+                raise
+            errors.append(f"{candidate}: {detail}")
+
+    fallback_list = ", ".join(candidates)
+    error_detail = "; ".join(errors) or "no candidate container was inspectable"
+    raise RuntimeError(f"unable to inspect any configured MinIO container ({fallback_list}): {error_detail}")
+
+
+def ensure_container_running(container_name: str, *, container: dict[str, Any] | None = None) -> dict[str, Any]:
+    current = container or inspect_container_state(container_name)
+    state = current.get("State", {})
+    if state.get("Running"):
+        return current
+
+    status = str(state.get("Status") or "unknown").strip() or "unknown"
+    start = run_command(["docker", "start", container_name])
+    if start.returncode != 0:
+        detail = start.stderr.strip() or start.stdout.strip() or "docker start failed"
+        raise RuntimeError(f"{container_name} is {status} and docker start failed: {detail}")
+
+    recovered = inspect_container_state(container_name)
+    recovered_state = recovered.get("State", {})
+    if recovered_state.get("Running"):
+        return recovered
+
+    recovered_status = str(recovered_state.get("Status") or "unknown").strip() or "unknown"
+    raise RuntimeError(
+        f"{container_name} is {recovered_status} after docker start; "
+        "converge the Outline MinIO runtime before rerunning restic config backup"
+    )
+
+
 def resolve_minio_endpoint(catalog: dict[str, Any]) -> tuple[str, str]:
     controller_host = catalog.get("controller_host", {})
     minio = controller_host.get("minio", {})
     container_name = str(minio.get("container_name") or "").strip()
     if not container_name:
         raise ValueError("restic catalog is missing controller_host.minio.container_name")
-    container = inspect_container_state(container_name)
-    state = container.get("State", {})
-    status = str(state.get("Status") or "unknown").strip() or "unknown"
-    if not state.get("Running"):
-        raise RuntimeError(
-            f"{container_name} is {status}; start the Outline MinIO runtime before rerunning restic config backup"
-        )
+    live_container_name, container = resolve_minio_container(container_name)
+    container = ensure_container_running(live_container_name, container=container)
 
     networks = container.get("NetworkSettings", {}).get("Networks", {}) or {}
     first_valid_ip: str | None = None
@@ -187,8 +235,8 @@ def resolve_minio_endpoint(catalog: dict[str, Any]) -> tuple[str, str]:
 
     if first_valid_ip is None:
         if first_invalid_ip:
-            raise RuntimeError(f"{container_name} reported an invalid container IP: {first_invalid_ip!r}")
-        raise RuntimeError(f"{container_name} has no reachable container IP")
+            raise RuntimeError(f"{live_container_name} reported an invalid container IP: {first_invalid_ip!r}")
+        raise RuntimeError(f"{live_container_name} has no reachable container IP")
 
     host = first_valid_ip if first_valid_version == 4 else f"[{first_valid_ip}]"
     return first_valid_ip, f"http://{host}:9000"
@@ -986,6 +1034,61 @@ def ensure_latest_receipt_dir(path: Path) -> None:
     ensure_directory(path.parent)
 
 
+@contextlib.contextmanager
+def runtime_lock(
+    *,
+    lock_path: Path,
+    mode: str,
+    triggered_by: str,
+    live_apply_trigger: bool,
+    timeout_seconds: int,
+    poll_seconds: float = DEFAULT_LOCK_POLL_SECONDS,
+) -> Iterator[None]:
+    ensure_directory(lock_path.parent)
+    lock_file = lock_path.open("a+", encoding="utf-8")
+    deadline = time.monotonic() + max(timeout_seconds, 0)
+    holder_payload = {
+        "pid": os.getpid(),
+        "hostname": socket.gethostname(),
+        "mode": mode,
+        "triggered_by": triggered_by,
+        "live_apply_trigger": live_apply_trigger,
+        "started_at": isoformat(utc_now()),
+    }
+    try:
+        while True:
+            try:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                lock_file.seek(0)
+                lock_file.truncate()
+                lock_file.write(json.dumps(holder_payload, indent=2) + "\n")
+                lock_file.flush()
+                os.fsync(lock_file.fileno())
+                break
+            except BlockingIOError:
+                lock_file.seek(0)
+                active_holder = lock_file.read().strip() or "unknown"
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise RuntimeError(
+                        "another restic config backup is still running; "
+                        f"waited {timeout_seconds} seconds for {lock_path} (holder={active_holder})"
+                    )
+                time.sleep(min(poll_seconds, remaining))
+        yield
+    finally:
+        try:
+            lock_file.seek(0)
+            lock_file.truncate()
+            lock_file.flush()
+        except OSError:
+            pass
+        try:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+        finally:
+            lock_file.close()
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run ADR 0302 restic backups for platform configuration artifacts.")
     parser.add_argument("--repo-root", type=Path, default=DEFAULT_REPO_ROOT)
@@ -998,6 +1101,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--credential-file", type=Path)
     parser.add_argument("--mode", choices=["backup", "restore-verify"], default="backup")
     parser.add_argument("--triggered-by", default=DEFAULT_TRIGGER)
+    parser.add_argument("--lock-timeout-seconds", type=int, default=DEFAULT_LOCK_TIMEOUT_SECONDS)
     parser.add_argument(
         "--live-apply-trigger",
         action="store_true",
@@ -1019,119 +1123,126 @@ def main(argv: list[str] | None = None) -> int:
         credentials = load_runtime_credentials(args.credential_file)
         ensure_directory(args.cache_dir)
         ensure_directory(args.runtime_state_dir)
-        host_name = str(catalog.get("controller_host", {}).get("inventory_hostname") or "docker-runtime-lv3")
-        _, endpoint = resolve_minio_endpoint(catalog)
-        ensure_restic_repository(
-            catalog=catalog,
-            credentials=credentials,
-            endpoint=endpoint,
-            cache_dir=args.cache_dir,
-        )
-
-        resolved_sources = resolve_source_paths(raw_sources, repo_root)
-
-        if args.mode == "restore-verify":
-            restore_receipt, restore_receipt_path = run_restore_verification(
-                sources=resolved_sources,
+        lock_path = args.runtime_state_dir / DEFAULT_LOCK_FILENAME
+        with runtime_lock(
+            lock_path=lock_path,
+            mode=args.mode,
+            triggered_by=args.triggered_by,
+            live_apply_trigger=args.live_apply_trigger,
+            timeout_seconds=args.lock_timeout_seconds,
+        ):
+            host_name = str(catalog.get("controller_host", {}).get("inventory_hostname") or "docker-runtime-lv3")
+            _, endpoint = resolve_minio_endpoint(catalog)
+            ensure_restic_repository(
+                catalog=catalog,
                 credentials=credentials,
                 endpoint=endpoint,
                 cache_dir=args.cache_dir,
-                repo_root=repo_root,
-                restore_dir=args.restore_verification_dir,
-                runtime_state_dir=args.runtime_state_dir,
-                catalog=catalog,
             )
+            resolved_sources = resolve_source_paths(raw_sources, repo_root)
+
+            if args.mode == "restore-verify":
+                restore_receipt, restore_receipt_path = run_restore_verification(
+                    sources=resolved_sources,
+                    credentials=credentials,
+                    endpoint=endpoint,
+                    cache_dir=args.cache_dir,
+                    repo_root=repo_root,
+                    restore_dir=args.restore_verification_dir,
+                    runtime_state_dir=args.runtime_state_dir,
+                    catalog=catalog,
+                )
+                payload = {
+                    "status": "ok" if restore_receipt["result"] == "pass" else "error",
+                    "mode": "restore-verify",
+                    "result": restore_receipt["result"],
+                    "receipt_path": display_path(restore_receipt_path, repo_root=repo_root),
+                    "report": restore_receipt,
+                }
+                print(json.dumps(payload, indent=2))
+                if args.print_report_json:
+                    print("REPORT_JSON=" + json.dumps(payload, separators=(",", ":")))
+                return 0 if restore_receipt["result"] == "pass" else 1
+
+            selected_sources = filter_sources(resolved_sources, only_live_apply=args.live_apply_trigger)
+            generated_at = utc_now()
+            source_results = [
+                backup_source(
+                    source,
+                    catalog=catalog,
+                    credentials=credentials,
+                    endpoint=endpoint,
+                    cache_dir=args.cache_dir,
+                    host_name=host_name,
+                )
+                for source in selected_sources
+            ]
+            restic_call(
+                ["check", "--read-data-subset=5%"],
+                catalog=catalog,
+                credentials=credentials,
+                endpoint=endpoint,
+                cache_dir=args.cache_dir,
+            )
+            existing_latest_receipt = load_existing_latest_snapshot_receipt(args.latest_snapshot_receipt)
+            if args.live_apply_trigger:
+                latest_receipt = build_live_apply_latest_snapshot_receipt(
+                    existing_receipt=existing_latest_receipt,
+                    resolved_sources=resolved_sources,
+                    live_apply_sources=selected_sources,
+                    source_results=source_results,
+                    repo_root=repo_root,
+                    endpoint=endpoint,
+                    host_name=host_name,
+                    generated_at=generated_at,
+                    bucket=catalog["controller_host"]["minio"]["bucket"],
+                )
+                notifications = []
+            else:
+                latest_receipt = summarize_latest_snapshots(
+                    catalog=catalog,
+                    sources=resolved_sources,
+                    repo_root=repo_root,
+                    credentials=credentials,
+                    endpoint=endpoint,
+                    cache_dir=args.cache_dir,
+                    restore_verify_dir=args.restore_verification_dir,
+                    generated_at=generated_at,
+                )
+                notifications = emit_stale_signals(
+                    catalog=catalog,
+                    credentials=credentials,
+                    latest_receipt=latest_receipt,
+                    latest_receipt_path=args.latest_snapshot_receipt,
+                )
+            ensure_latest_receipt_dir(args.latest_snapshot_receipt)
+            write_json(args.latest_snapshot_receipt, latest_receipt)
+            backup_receipt = build_backup_receipt(
+                catalog=catalog,
+                source_results=source_results,
+                latest_snapshot_receipt=latest_receipt,
+                latest_snapshot_receipt_path=args.latest_snapshot_receipt,
+                repository_endpoint=endpoint,
+                triggered_by=args.triggered_by,
+                repo_root=repo_root,
+                source_commit=repo_source_commit(repo_root),
+                notifications=notifications,
+                generated_at=generated_at,
+            )
+            backup_receipt_path = args.backup_receipts_dir / f"{generated_at.strftime('%Y%m%dT%H%M%SZ')}.json"
+            write_json(backup_receipt_path, backup_receipt)
             payload = {
-                "status": "ok" if restore_receipt["result"] == "pass" else "error",
-                "mode": "restore-verify",
-                "result": restore_receipt["result"],
-                "receipt_path": display_path(restore_receipt_path, repo_root=repo_root),
-                "report": restore_receipt,
+                "status": "ok",
+                "mode": "backup",
+                "summary": latest_receipt["summary"],
+                "receipt_path": display_path(backup_receipt_path, repo_root=repo_root),
+                "latest_snapshot_receipt": display_path(args.latest_snapshot_receipt, repo_root=repo_root),
+                "report": backup_receipt,
             }
             print(json.dumps(payload, indent=2))
             if args.print_report_json:
                 print("REPORT_JSON=" + json.dumps(payload, separators=(",", ":")))
-            return 0 if restore_receipt["result"] == "pass" else 1
-
-        selected_sources = filter_sources(resolved_sources, only_live_apply=args.live_apply_trigger)
-        generated_at = utc_now()
-        source_results = [
-            backup_source(
-                source,
-                catalog=catalog,
-                credentials=credentials,
-                endpoint=endpoint,
-                cache_dir=args.cache_dir,
-                host_name=host_name,
-            )
-            for source in selected_sources
-        ]
-        restic_call(
-            ["check", "--read-data-subset=5%"],
-            catalog=catalog,
-            credentials=credentials,
-            endpoint=endpoint,
-            cache_dir=args.cache_dir,
-        )
-        existing_latest_receipt = load_existing_latest_snapshot_receipt(args.latest_snapshot_receipt)
-        if args.live_apply_trigger:
-            latest_receipt = build_live_apply_latest_snapshot_receipt(
-                existing_receipt=existing_latest_receipt,
-                resolved_sources=resolved_sources,
-                live_apply_sources=selected_sources,
-                source_results=source_results,
-                repo_root=repo_root,
-                endpoint=endpoint,
-                host_name=host_name,
-                generated_at=generated_at,
-                bucket=catalog["controller_host"]["minio"]["bucket"],
-            )
-            notifications = []
-        else:
-            latest_receipt = summarize_latest_snapshots(
-                catalog=catalog,
-                sources=resolved_sources,
-                repo_root=repo_root,
-                credentials=credentials,
-                endpoint=endpoint,
-                cache_dir=args.cache_dir,
-                restore_verify_dir=args.restore_verification_dir,
-                generated_at=generated_at,
-            )
-            notifications = emit_stale_signals(
-                catalog=catalog,
-                credentials=credentials,
-                latest_receipt=latest_receipt,
-                latest_receipt_path=args.latest_snapshot_receipt,
-            )
-        ensure_latest_receipt_dir(args.latest_snapshot_receipt)
-        write_json(args.latest_snapshot_receipt, latest_receipt)
-        backup_receipt = build_backup_receipt(
-            catalog=catalog,
-            source_results=source_results,
-            latest_snapshot_receipt=latest_receipt,
-            latest_snapshot_receipt_path=args.latest_snapshot_receipt,
-            repository_endpoint=endpoint,
-            triggered_by=args.triggered_by,
-            repo_root=repo_root,
-            source_commit=repo_source_commit(repo_root),
-            notifications=notifications,
-            generated_at=generated_at,
-        )
-        backup_receipt_path = args.backup_receipts_dir / f"{generated_at.strftime('%Y%m%dT%H%M%SZ')}.json"
-        write_json(backup_receipt_path, backup_receipt)
-        payload = {
-            "status": "ok",
-            "mode": "backup",
-            "summary": latest_receipt["summary"],
-            "receipt_path": display_path(backup_receipt_path, repo_root=repo_root),
-            "latest_snapshot_receipt": display_path(args.latest_snapshot_receipt, repo_root=repo_root),
-            "report": backup_receipt,
-        }
-        print(json.dumps(payload, indent=2))
-        if args.print_report_json:
-            print("REPORT_JSON=" + json.dumps(payload, separators=(",", ":")))
-        return 0
+            return 0
     except (OSError, ValueError, RuntimeError, json.JSONDecodeError, subprocess.SubprocessError) as exc:
         return emit_cli_error("Restic config backup", exc)
 

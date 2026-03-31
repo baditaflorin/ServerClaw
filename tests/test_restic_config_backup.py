@@ -378,29 +378,110 @@ def test_snapshot_id_from_backup_stdout_reads_restic_json_stream() -> None:
     assert restic_backup.snapshot_id_from_backup_stdout(stdout) == "abc123"
 
 
-def test_resolve_minio_endpoint_requires_running_container() -> None:
-    restic_backup.run_command = lambda argv, **kwargs: types.SimpleNamespace(
-        returncode=0,
-        stdout=json.dumps(
-            [
-                {
-                    "State": {"Running": False, "Status": "exited"},
-                    "NetworkSettings": {"Networks": {"outline_default": {"IPAddress": ""}}},
-                }
-            ]
-        ),
-        stderr="",
+def test_resolve_minio_endpoint_restarts_stopped_container() -> None:
+    commands: list[list[str]] = []
+    inspect_payloads = [
+        {
+            "State": {"Running": False, "Status": "exited"},
+            "NetworkSettings": {"Networks": {"outline_default": {"IPAddress": ""}}},
+        },
+        {
+            "State": {"Running": True, "Status": "running"},
+            "NetworkSettings": {"Networks": {"outline_default": {"IPAddress": "10.200.18.2"}}},
+        },
+    ]
+
+    def fake_run_command(argv, **kwargs):
+        commands.append(argv)
+        if argv[:2] == ["docker", "inspect"]:
+            payload = inspect_payloads.pop(0)
+            return types.SimpleNamespace(returncode=0, stdout=json.dumps([payload]), stderr="")
+        if argv[:2] == ["docker", "start"]:
+            return types.SimpleNamespace(returncode=0, stdout="minio\n", stderr="")
+        raise AssertionError(f"unexpected command: {argv}")
+
+    restic_backup.run_command = fake_run_command
+
+    host, endpoint = restic_backup.resolve_minio_endpoint(
+        {"controller_host": {"minio": {"container_name": "minio", "bucket": "restic-config-backup"}}}
     )
+
+    assert host == "10.200.18.2"
+    assert endpoint == "http://10.200.18.2:9000"
+    assert commands == [
+        ["docker", "inspect", "minio"],
+        ["docker", "start", "minio"],
+        ["docker", "inspect", "minio"],
+    ]
+
+
+def test_resolve_minio_endpoint_falls_back_to_outline_minio_when_dedicated_minio_is_absent() -> None:
+    commands: list[list[str]] = []
+
+    def fake_run_command(argv, **kwargs):
+        commands.append(argv)
+        if argv == ["docker", "inspect", "minio"]:
+            return types.SimpleNamespace(returncode=1, stdout="", stderr="Error: No such object: minio")
+        if argv == ["docker", "inspect", "outline-minio"]:
+            return types.SimpleNamespace(
+                returncode=0,
+                stdout=json.dumps(
+                    [
+                        {
+                            "State": {"Running": True, "Status": "running"},
+                            "NetworkSettings": {"Networks": {"outline_default": {"IPAddress": "10.200.18.2"}}},
+                        }
+                    ]
+                ),
+                stderr="",
+            )
+        raise AssertionError(f"unexpected command: {argv}")
+
+    restic_backup.run_command = fake_run_command
+
+    host, endpoint = restic_backup.resolve_minio_endpoint(
+        {"controller_host": {"minio": {"container_name": "minio", "bucket": "restic-config-backup"}}}
+    )
+
+    assert host == "10.200.18.2"
+    assert endpoint == "http://10.200.18.2:9000"
+    assert commands == [
+        ["docker", "inspect", "minio"],
+        ["docker", "inspect", "outline-minio"],
+    ]
+
+
+def test_resolve_minio_endpoint_reports_failed_container_restart() -> None:
+    def fake_run_command(argv, **kwargs):
+        if argv[:2] == ["docker", "inspect"]:
+            return types.SimpleNamespace(
+                returncode=0,
+                stdout=json.dumps(
+                    [
+                        {
+                            "State": {"Running": False, "Status": "exited"},
+                            "NetworkSettings": {"Networks": {"outline_default": {"IPAddress": ""}}},
+                        }
+                    ]
+                ),
+                stderr="",
+            )
+        if argv[:2] == ["docker", "start"]:
+            return types.SimpleNamespace(returncode=1, stdout="", stderr="permission denied")
+        raise AssertionError(f"unexpected command: {argv}")
+
+    restic_backup.run_command = fake_run_command
 
     try:
         restic_backup.resolve_minio_endpoint(
-            {"controller_host": {"minio": {"container_name": "outline-minio", "bucket": "restic-config-backup"}}}
+            {"controller_host": {"minio": {"container_name": "minio", "bucket": "restic-config-backup"}}}
         )
     except RuntimeError as exc:
-        assert "outline-minio is exited" in str(exc)
-        assert "start the Outline MinIO runtime" in str(exc)
+        assert "minio is exited" in str(exc)
+        assert "docker start failed" in str(exc)
+        assert "permission denied" in str(exc)
     else:
-        raise AssertionError("Expected resolve_minio_endpoint to reject stopped MinIO containers")
+        raise AssertionError("Expected resolve_minio_endpoint to reject containers that cannot be restarted")
 
 
 def test_resolve_minio_endpoint_rejects_invalid_container_ip() -> None:
@@ -419,10 +500,10 @@ def test_resolve_minio_endpoint_rejects_invalid_container_ip() -> None:
 
     try:
         restic_backup.resolve_minio_endpoint(
-            {"controller_host": {"minio": {"container_name": "outline-minio", "bucket": "restic-config-backup"}}}
+            {"controller_host": {"minio": {"container_name": "minio", "bucket": "restic-config-backup"}}}
         )
     except RuntimeError as exc:
-        assert "outline-minio reported an invalid container IP" in str(exc)
+        assert "minio reported an invalid container IP" in str(exc)
     else:
         raise AssertionError("Expected resolve_minio_endpoint to reject invalid MinIO container IPs")
 
@@ -447,11 +528,62 @@ def test_resolve_minio_endpoint_prefers_valid_ipv4_address() -> None:
     )
 
     host, endpoint = restic_backup.resolve_minio_endpoint(
-        {"controller_host": {"minio": {"container_name": "outline-minio", "bucket": "restic-config-backup"}}}
+        {"controller_host": {"minio": {"container_name": "minio", "bucket": "restic-config-backup"}}}
     )
 
     assert host == "10.200.18.4"
     assert endpoint == "http://10.200.18.4:9000"
+
+
+def test_runtime_lock_can_be_reacquired_after_release(tmp_path: Path) -> None:
+    lock_path = tmp_path / "state" / "restic-config-backup.lock"
+
+    with restic_backup.runtime_lock(
+        lock_path=lock_path,
+        mode="backup",
+        triggered_by="manual",
+        live_apply_trigger=False,
+        timeout_seconds=0,
+    ):
+        holder = json.loads(lock_path.read_text(encoding="utf-8"))
+        assert holder["mode"] == "backup"
+        assert holder["triggered_by"] == "manual"
+
+    with restic_backup.runtime_lock(
+        lock_path=lock_path,
+        mode="restore-verify",
+        triggered_by="manual",
+        live_apply_trigger=False,
+        timeout_seconds=0,
+    ):
+        holder = json.loads(lock_path.read_text(encoding="utf-8"))
+        assert holder["mode"] == "restore-verify"
+
+
+def test_runtime_lock_reports_active_holder_when_timeout_elapses(tmp_path: Path) -> None:
+    lock_path = tmp_path / "state" / "restic-config-backup.lock"
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    holder = lock_path.open("w+", encoding="utf-8")
+    holder.write('{"pid":999,"triggered_by":"live-apply-service"}\n')
+    holder.flush()
+    restic_backup.fcntl.flock(holder.fileno(), restic_backup.fcntl.LOCK_EX | restic_backup.fcntl.LOCK_NB)
+
+    try:
+        try:
+            with restic_backup.runtime_lock(
+                lock_path=lock_path,
+                mode="backup",
+                triggered_by="manual",
+                live_apply_trigger=True,
+                timeout_seconds=0,
+            ):
+                raise AssertionError("expected runtime_lock to reject the active holder")
+        except RuntimeError as exc:
+            assert "another restic config backup is still running" in str(exc)
+            assert '"triggered_by":"live-apply-service"' in str(exc)
+    finally:
+        restic_backup.fcntl.flock(holder.fileno(), restic_backup.fcntl.LOCK_UN)
+        holder.close()
 
 
 def test_repo_surfaces_register_restic_backup_contract() -> None:
@@ -600,6 +732,15 @@ def test_makefile_live_apply_targets_invoke_restic_trigger_with_pyyaml() -> None
         'uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env "$(or $(env),production)" --mode backup --triggered-by live-apply-waves --live-apply-trigger'
         in makefile
     )
+
+
+def test_makefile_live_apply_service_catalog_gates_fail_fast() -> None:
+    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+    start = makefile.index("live-apply-service:")
+    end = makefile.index("\nlive-apply-site:", start)
+    section = makefile[start:end]
+
+    assert '\t\tset -e; \\' in section
 
 
 def test_post_ntfy_notification_uses_human_readable_title(monkeypatch) -> None:

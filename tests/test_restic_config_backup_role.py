@@ -31,6 +31,7 @@ def test_defaults_pin_repo_checkout_and_receipt_locations() -> None:
     assert defaults["restic_config_backup_restore_verification_dir"].endswith(
         "/receipts/restic-restore-verifications"
     )
+    assert defaults["restic_config_backup_minio_container_name"] == "minio"
     assert defaults["restic_config_backup_timer_name"] == "lv3-restic-config-backup.timer"
 
 
@@ -40,9 +41,12 @@ def test_minio_bucket_bootstrap_keeps_mc_alias_and_commands_in_one_exec_session(
     shell = bootstrap_task["ansible.builtin.shell"]
 
     assert shell.count("docker exec") == 1
-    assert "docker inspect --format '{% raw %}{{.State.Running}}{% endraw %}' outline-minio" in shell
-    assert "docker start outline-minio >/dev/null" in shell
-    assert "outline-minio sh -ceu" in shell
+    assert 'container_name={{ restic_config_backup_minio_container_name | quote }}' in shell
+    assert 'if docker inspect outline-minio >/dev/null 2>&1; then' in shell
+    assert 'container_name=outline-minio' in shell
+    assert 'docker inspect --format \'{% raw %}{{.State.Running}}{% endraw %}\' "$container_name"' in shell
+    assert 'docker start "$container_name" >/dev/null' in shell
+    assert '"$container_name" sh -ceu' in shell
     assert "mc alias set local http://127.0.0.1:9000 minio \"$MINIO_ROOT_PASSWORD\"" in shell
     assert "mc mb --ignore-existing --with-lock local/restic-config-backup" in shell
     assert "mc version enable local/restic-config-backup" in shell

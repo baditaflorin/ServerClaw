@@ -205,6 +205,76 @@
   changed_when: false
   failed_when: false
 
+- name: Record container ids that are running before the Grist-triggered Docker restart
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - -q
+      - --no-trunc
+  register: grist_pre_restart_container_ids
+  changed_when: false
+  when: grist_docker_nat_chain.rc != 0
+
+- name: Inspect running containers before the Grist-triggered Docker restart
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - |
+        import json
+        import subprocess
+        import sys
+
+        container_ids = json.load(sys.stdin)
+        inspected = []
+
+        for container_id in container_ids:
+            result = subprocess.run(
+                ["docker", "inspect", container_id],
+                text=True,
+                capture_output=True,
+            )
+            if result.returncode == 0:
+                inspected.extend(json.loads(result.stdout or "[]"))
+                continue
+
+            stderr = (result.stderr or "").lower()
+            if "no such object" in stderr:
+                continue
+
+            raise subprocess.CalledProcessError(
+                result.returncode,
+                result.args,
+                output=result.stdout,
+                stderr=result.stderr,
+            )
+
+        print(json.dumps(inspected))
+    stdin: "{{ grist_pre_restart_container_ids.stdout_lines | to_json }}"
+  register: grist_pre_restart_container_inspect
+  changed_when: false
+  when:
+    - grist_docker_nat_chain.rc != 0
+    - grist_pre_restart_container_ids.stdout_lines | length > 0
+
+- name: Record containers that were running before the Grist-triggered Docker restart
+  ansible.builtin.set_fact:
+    grist_pre_restart_container_details: >-
+      {{
+        (grist_pre_restart_container_inspect.stdout | default('[]')) | from_json
+      }}
+    grist_pre_restart_container_names: >-
+      {{
+        (
+          (grist_pre_restart_container_inspect.stdout | default('[]')) | from_json
+        )
+        | map(attribute='Name')
+        | map('regex_replace', '^/', '')
+        | list
+      }}
+  when: grist_docker_nat_chain.rc != 0
+
 - name: Restore Docker networking when the nat chain is missing before Grist startup
   ansible.builtin.service:
     name: docker
@@ -240,6 +310,465 @@
   delay: 2
   until: grist_docker_info.rc == 0
   when: grist_docker_nat_chain.rc != 0
+
+- name: Re-inspect pre-restart containers after the Grist-triggered Docker restart
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - |
+        import json
+        import subprocess
+        import sys
+
+        container_names = json.load(sys.stdin)
+        statuses = []
+
+        for container_name in container_names:
+            result = subprocess.run(
+                ["docker", "inspect", container_name],
+                text=True,
+                capture_output=True,
+            )
+            if result.returncode == 0:
+                payload = json.loads(result.stdout or "[]")
+                container = payload[0] if payload else {}
+                statuses.append(
+                    {
+                        "requested_name": container_name,
+                        "full_name": container.get("Name") or f"/{container_name}",
+                        "exists": True,
+                        "running": bool(container.get("State", {}).get("Running")),
+                    }
+                )
+                continue
+
+            stderr = (result.stderr or "").lower()
+            if "no such object" in stderr:
+                statuses.append(
+                    {
+                        "requested_name": container_name,
+                        "full_name": f"/{container_name}",
+                        "exists": False,
+                        "running": False,
+                    }
+                )
+                continue
+
+            raise subprocess.CalledProcessError(
+                result.returncode,
+                result.args,
+                output=result.stdout,
+                stderr=result.stderr,
+            )
+
+        print(json.dumps(statuses))
+    stdin: "{{ grist_pre_restart_container_names | default([]) | to_json }}"
+  register: grist_post_restart_container_status
+  changed_when: false
+  when:
+    - grist_docker_nat_chain.rc != 0
+    - grist_pre_restart_container_names | default([]) | length > 0
+
+- name: Record pre-restart containers that remained stopped after the Grist-triggered Docker restart
+  ansible.builtin.set_fact:
+    grist_stopped_pre_restart_container_details: >-
+      {{
+        (
+          grist_pre_restart_container_details | default([])
+        )
+        | rejectattr(
+            'Name',
+            'in',
+            (
+              (
+                grist_post_restart_container_status.stdout | default('[]')
+              )
+              | from_json
+              | selectattr('exists')
+              | selectattr('running')
+              | map(attribute='full_name')
+              | list
+            )
+          )
+        | list
+      }}
+    grist_stopped_pre_restart_container_names: >-
+      {{
+        (
+          (
+            grist_pre_restart_container_details | default([])
+          )
+          | rejectattr(
+              'Name',
+              'in',
+              (
+                (
+                  grist_post_restart_container_status.stdout | default('[]')
+                )
+                | from_json
+                | selectattr('exists')
+                | selectattr('running')
+                | map(attribute='full_name')
+                | list
+              )
+            )
+          | list
+        )
+        | map(attribute='Name')
+        | map('regex_replace', '^/', '')
+        | list
+      }}
+  when: grist_docker_nat_chain.rc != 0
+
+- name: Recover pre-restart containers that remained stopped after the Grist-triggered Docker restart
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - |
+        import json
+        import subprocess
+        import sys
+        import time
+        import urllib.error
+        import urllib.request
+
+        TRANSIENT_DOCKER_NETWORK_ERRORS = (
+            "No chain/target/match by that name",
+            "driver failed programming external connectivity",
+        )
+        STALE_COMPOSE_ENDPOINT_ERRORS = (
+            "failed to create endpoint",
+            "does not exist",
+        )
+        OPENBAO_HEALTH_URL = "http://127.0.0.1:8201/v1/sys/health"
+        OPENBAO_READY_STATUS_CODES = {200, 429}
+
+
+        def combined_output(stdout, stderr):
+            parts = []
+            if stderr:
+                parts.append(stderr)
+            if stdout:
+                parts.append(stdout)
+            return "\n".join(part for part in parts if part)
+
+
+        def exception_output(exc):
+            return combined_output(getattr(exc, "output", ""), getattr(exc, "stderr", ""))
+
+
+        def run_with_retry(command, cwd=None, attempts=3, delay_seconds=3, retry_on_any_error=False):
+            for attempt in range(1, attempts + 1):
+                result = subprocess.run(command, cwd=cwd, text=True, capture_output=True)
+                if result.returncode == 0:
+                    return
+
+                output = combined_output(result.stdout or "", result.stderr or "")
+                retryable = retry_on_any_error or any(
+                    marker in output for marker in TRANSIENT_DOCKER_NETWORK_ERRORS
+                )
+                if (
+                    attempt == attempts
+                    or not retryable
+                ):
+                    raise subprocess.CalledProcessError(
+                        result.returncode,
+                        command,
+                        output=result.stdout,
+                        stderr=output,
+                    )
+
+                time.sleep(delay_seconds)
+
+
+        def wait_for_local_openbao(*, timeout_seconds=60, delay_seconds=2):
+            deadline = time.monotonic() + timeout_seconds
+            last_error = ""
+            while time.monotonic() < deadline:
+                try:
+                    with urllib.request.urlopen(OPENBAO_HEALTH_URL, timeout=5) as response:
+                        if response.status in OPENBAO_READY_STATUS_CODES:
+                            return
+                        last_error = f"unexpected HTTP {response.status}"
+                except urllib.error.HTTPError as exc:
+                    if exc.code in OPENBAO_READY_STATUS_CODES:
+                        return
+                    last_error = f"HTTP {exc.code}"
+                except OSError as exc:
+                    last_error = str(exc)
+                time.sleep(delay_seconds)
+
+            raise RuntimeError(
+                f"local OpenBao did not become ready at {OPENBAO_HEALTH_URL}: {last_error or 'timed out'}"
+            )
+
+        containers = json.load(sys.stdin)
+
+        direct_start = []
+        compose_groups = {}
+
+        for container in containers:
+            name = (container.get("Name") or "").lstrip("/")
+            labels = container.get("Config", {}).get("Labels") or {}
+            working_dir = labels.get("com.docker.compose.project.working_dir") or ""
+            config_files = labels.get("com.docker.compose.project.config_files") or ""
+            service = labels.get("com.docker.compose.service") or ""
+
+            if working_dir and service:
+                compose_group = compose_groups.setdefault(
+                    (working_dir, config_files),
+                    {"services": set(), "container_names": set()},
+                )
+                compose_group["services"].add(service)
+                if name:
+                    compose_group["container_names"].add(name)
+                continue
+
+            if name:
+                direct_start.append(name)
+
+        actions = []
+
+        if direct_start:
+            run_with_retry(["docker", "start", *direct_start])
+            actions.append({"type": "docker_start", "containers": direct_start})
+
+        def is_local_openbao_group(working_dir, config_files, services, container_names):
+            normalized_working_dir = (working_dir or "").rstrip("/")
+            config_file_list = [value for value in config_files.split(",") if value]
+            return (
+                normalized_working_dir == "/opt/openbao"
+                or any(
+                    config_file.rstrip("/") == "/opt/openbao/docker-compose.yml"
+                    for config_file in config_file_list
+                )
+                or "openbao" in services
+                or "lv3-openbao" in container_names
+            )
+
+        for (working_dir, config_files), compose_group in sorted(
+            compose_groups.items(),
+            key=lambda item: (
+                0
+                if is_local_openbao_group(
+                    item[0][0],
+                    item[0][1],
+                    item[1]["services"],
+                    item[1]["container_names"],
+                )
+                else 1,
+                item[0][0],
+                item[0][1],
+            ),
+        ):
+            command = ["docker", "compose"]
+            config_file_list = [value for value in config_files.split(",") if value]
+            for config_file in config_file_list:
+                command.extend(["--file", config_file])
+            services = sorted(compose_group["services"])
+            container_names = sorted(compose_group["container_names"])
+            local_openbao_group = is_local_openbao_group(
+                working_dir,
+                config_files,
+                services,
+                container_names,
+            )
+            if "openbao-agent" in services and not local_openbao_group:
+                wait_for_local_openbao()
+            command.extend(["up", "-d", "--force-recreate", *services])
+
+            try:
+                run_with_retry(
+                    command,
+                    cwd=working_dir or None,
+                    attempts=5,
+                    delay_seconds=5,
+                    retry_on_any_error=True,
+                )
+                actions.append(
+                    {
+                        "type": "docker_compose_up",
+                        "working_dir": working_dir,
+                        "config_files": config_file_list,
+                        "services": services,
+                    }
+                )
+            except subprocess.CalledProcessError as exc:
+                stderr = exception_output(exc)
+                if not (
+                    container_names
+                    and all(marker in stderr for marker in STALE_COMPOSE_ENDPOINT_ERRORS)
+                ):
+                    raise
+
+                remove_command = ["docker", "rm", "-f", *container_names]
+                remove_result = subprocess.run(remove_command, text=True, capture_output=True)
+                if remove_result.returncode != 0 and "No such container" not in (remove_result.stderr or ""):
+                    raise subprocess.CalledProcessError(
+                        remove_result.returncode,
+                        remove_command,
+                        output=remove_result.stdout,
+                        stderr=remove_result.stderr,
+                    ) from exc
+                actions.append(
+                    {
+                        "type": "docker_rm_stale_compose_containers",
+                        "working_dir": working_dir,
+                        "config_files": config_file_list,
+                        "containers": container_names,
+                    }
+                )
+
+                recovery_command = ["docker", "compose"]
+                for config_file in config_file_list:
+                    recovery_command.extend(["--file", config_file])
+                if "openbao-agent" in services and not local_openbao_group:
+                    wait_for_local_openbao()
+                recovery_command.extend(["up", "-d", "--force-recreate", *services])
+                try:
+                    run_with_retry(
+                        recovery_command,
+                        cwd=working_dir or None,
+                        attempts=5,
+                        delay_seconds=5,
+                        retry_on_any_error=True,
+                    )
+                    actions.append(
+                        {
+                            "type": "docker_compose_up_force_recreate",
+                            "working_dir": working_dir,
+                            "config_files": config_file_list,
+                            "services": services,
+                        }
+                    )
+                    continue
+                except subprocess.CalledProcessError as recovery_exc:
+                    recovery_stderr = exception_output(recovery_exc)
+                    if not all(marker in recovery_stderr for marker in STALE_COMPOSE_ENDPOINT_ERRORS):
+                        raise
+
+                down_command = ["docker", "compose"]
+                for config_file in config_file_list:
+                    down_command.extend(["--file", config_file])
+                down_command.extend(["down", "--remove-orphans"])
+                run_with_retry(down_command, cwd=working_dir or None)
+                actions.append(
+                    {
+                        "type": "docker_compose_down_remove_orphans",
+                        "working_dir": working_dir,
+                        "config_files": config_file_list,
+                        "services": services,
+                    }
+                )
+
+                final_up_command = ["docker", "compose"]
+                for config_file in config_file_list:
+                    final_up_command.extend(["--file", config_file])
+                if "openbao-agent" in services and not local_openbao_group:
+                    wait_for_local_openbao()
+                final_up_command.extend(["up", "-d", *services])
+                run_with_retry(
+                    final_up_command,
+                    cwd=working_dir or None,
+                    attempts=5,
+                    delay_seconds=5,
+                    retry_on_any_error=True,
+                )
+                actions.append(
+                    {
+                        "type": "docker_compose_up_after_down",
+                        "working_dir": working_dir,
+                        "config_files": config_file_list,
+                        "services": services,
+                    }
+                )
+
+        print(json.dumps({"actions": actions}))
+    stdin: "{{ (grist_stopped_pre_restart_container_details | default([])) | to_json }}"
+  register: grist_recover_stopped_containers
+  changed_when: grist_stopped_pre_restart_container_names | length > 0
+  when:
+    - grist_docker_nat_chain.rc != 0
+    - grist_stopped_pre_restart_container_names | default([]) | length > 0
+
+- name: Confirm pre-restart containers recovered after the Grist-triggered Docker restart
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - |
+        import json
+        import subprocess
+        import sys
+
+        NONPERSISTENT_RESTART_POLICIES = {"", "no"}
+
+        containers = json.load(sys.stdin)
+        statuses = []
+        all_running = True
+
+        for container in containers:
+            container_name = (container.get("Name") or "").lstrip("/")
+            restart_policy = (container.get("HostConfig") or {}).get("RestartPolicy") or {}
+            restart_policy_name = str(restart_policy.get("Name") or "").strip().lower()
+            require_running = restart_policy_name not in NONPERSISTENT_RESTART_POLICIES
+            result = subprocess.run(
+                ["docker", "inspect", container_name],
+                text=True,
+                capture_output=True,
+            )
+            if result.returncode == 0:
+                payload = json.loads(result.stdout or "[]")
+                live_container = payload[0] if payload else {}
+                state = live_container.get("State", {})
+                running = bool(state.get("Running"))
+                status = str(state.get("Status") or "")
+                exit_code = state.get("ExitCode")
+                healthy = running or (
+                    not require_running
+                    and status == "exited"
+                    and exit_code == 0
+                )
+                if require_running and not running:
+                    all_running = False
+                statuses.append(
+                    {
+                        "container": container_name,
+                        "running": running,
+                        "restart_policy": restart_policy_name,
+                        "status": status,
+                        "exit_code": exit_code,
+                        "healthy": healthy,
+                    }
+                )
+                continue
+
+            statuses.append(
+                {
+                    "container": container_name,
+                    "running": False,
+                    "restart_policy": restart_policy_name,
+                    "status": "missing",
+                    "exit_code": None,
+                    "healthy": False,
+                }
+            )
+            if require_running:
+                all_running = False
+
+        print(json.dumps(statuses))
+        sys.exit(0 if all_running else 1)
+    stdin: "{{ grist_pre_restart_container_details | default([]) | to_json }}"
+  register: grist_recovered_container_inspect
+  changed_when: false
+  retries: 12
+  delay: 5
+  until: grist_recovered_container_inspect.rc == 0
+  when:
+    - grist_docker_nat_chain.rc != 0
+    - grist_pre_restart_container_details | default([]) | length > 0
 
 - name: Assert Docker nat chain is present before Grist startup
   ansible.builtin.assert:

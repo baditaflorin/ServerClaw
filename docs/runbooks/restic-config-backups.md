@@ -33,11 +33,11 @@ runtime.
    systemd units.
 4. The MinIO bucket `restic-config-backup` with Object Lock and versioning.
 
-When `docker-runtime-lv3` has gone through a broad Docker recovery, `outline-minio`
-may exist but remain stopped. The repo-managed converge task and live-apply trigger
-now treat that as recoverable and start the container before bucket bootstrap or
-Restic endpoint discovery instead of failing on the stale `invalid IP` inspect
-result.
+The current production baseline resolves the Restic repository through the
+dedicated `minio` runtime on `docker-runtime-lv3`. For backward compatibility,
+the repo-managed converge task and live-apply trigger still fall back to the
+older `outline-minio` container when that legacy runtime exists instead of the
+dedicated service.
 
 ## Verification
 
@@ -66,8 +66,9 @@ make backup-coverage-ledger
 - The manual and Windmill paths both execute the mirrored worker checkout at
   `/srv/proxmox_florin_server`; keep the Windmill checkout current before
   relying on the live backup helpers.
-- The MinIO endpoint is resolved from the live `outline-minio` container IP
-  instead of assuming a host-published port.
+- The MinIO endpoint is resolved from the live `minio` container IP, with a
+  fallback to `outline-minio` when older environments still expose the legacy
+  embedded Outline bucket service instead of the dedicated MinIO runtime.
 - Stale notifications are best-effort: NATS publication and ntfy delivery are
   recorded in the backup receipt, but a notification failure does not discard a
   successful Restic snapshot receipt.

@@ -59,7 +59,12 @@ def test_runtime_role_only_requires_runtime_secrets_before_edge_publish() -> Non
 
 def test_runtime_role_recovers_docker_nat_chain_before_outline_startup() -> None:
     tasks = load_yaml(TASKS_PATH)
+    pull_images = next(task for task in tasks if task.get("name") == "Pull the Outline images")
     nat_check = next(task for task in tasks if task.get("name") == "Check whether the Docker nat chain exists before Outline startup")
+    pre_restart_ids = next(task for task in tasks if task.get("name") == "Record container ids that are running before the Outline-triggered Docker restart")
+    pre_restart_reinspect = next(task for task in tasks if task.get("name") == "Re-inspect pre-restart containers after the Outline-triggered Docker restart")
+    recover_stopped = next(task for task in tasks if task.get("name") == "Recover pre-restart containers that remained stopped after the Outline-triggered Docker restart")
+    confirm_recovered = next(task for task in tasks if task.get("name") == "Confirm pre-restart containers recovered after the Outline-triggered Docker restart")
     nat_restore = next(task for task in tasks if task.get("name") == "Restore Docker networking when the nat chain is missing before Outline startup")
     nat_recheck = next(task for task in tasks if task.get("name") == "Recheck the Docker nat chain before Outline startup")
     docker_info = next(task for task in tasks if task.get("name") == "Wait for the Docker daemon to answer after networking recovery")
@@ -69,7 +74,23 @@ def test_runtime_role_recovers_docker_nat_chain_before_outline_startup() -> None
     health_probe = next(task for task in tasks if task.get("name") == "Check whether the current Outline local health endpoint is healthy before startup")
     force_recreate = next(task for task in tasks if task.get("name") == "Force-recreate the Outline runtime stack after Docker networking recovery")
 
+    assert pull_images["until"] == "outline_pull.rc == 0"
+    assert pull_images["retries"] == 3
     assert nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
+    assert pre_restart_ids["ansible.builtin.command"]["argv"] == ["docker", "ps", "-q", "--no-trunc"]
+    assert pre_restart_ids["when"] == "outline_docker_nat_chain.rc != 0"
+    assert pre_restart_reinspect["register"] == "outline_post_restart_container_status"
+    assert recover_stopped["register"] == "outline_recover_stopped_containers"
+    assert recover_stopped["when"] == [
+        "outline_docker_nat_chain.rc != 0",
+        "outline_stopped_pre_restart_container_names | default([]) | length > 0",
+    ]
+    assert "def is_local_openbao_group(" in recover_stopped["ansible.builtin.command"]["argv"][2]
+    assert 'normalized_working_dir == "/opt/openbao"' in recover_stopped["ansible.builtin.command"]["argv"][2]
+    assert '"lv3-openbao" in container_names' in recover_stopped["ansible.builtin.command"]["argv"][2]
+    assert 'if "openbao-agent" in services and not local_openbao_group:' in recover_stopped["ansible.builtin.command"]["argv"][2]
+    assert confirm_recovered["register"] == "outline_recovered_container_inspect"
+    assert confirm_recovered["until"] == "outline_recovered_container_inspect.rc == 0"
     assert nat_restore["ansible.builtin.service"]["name"] == "docker"
     assert nat_recheck["until"] == "outline_docker_nat_chain_recheck.rc == 0"
     assert docker_info["ansible.builtin.command"]["argv"] == ["docker", "info", "--format", '{{ "{{.ServerVersion}}" }}']

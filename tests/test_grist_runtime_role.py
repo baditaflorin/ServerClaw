@@ -57,9 +57,30 @@ def test_runtime_role_requires_only_the_keycloak_client_secret_before_startup() 
 def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     tasks = load_yaml(TASKS_PATH)
     nat_check = next(task for task in tasks if task.get("name") == "Check whether the Docker nat chain exists before Grist startup")
+    pre_restart_ids = next(
+        task for task in tasks if task.get("name") == "Record container ids that are running before the Grist-triggered Docker restart"
+    )
+    pre_restart_inspect = next(
+        task for task in tasks if task.get("name") == "Inspect running containers before the Grist-triggered Docker restart"
+    )
+    pre_restart_record = next(
+        task for task in tasks if task.get("name") == "Record containers that were running before the Grist-triggered Docker restart"
+    )
     nat_restore = next(task for task in tasks if task.get("name") == "Restore Docker networking when the nat chain is missing before Grist startup")
     nat_recheck = next(task for task in tasks if task.get("name") == "Recheck the Docker nat chain before Grist startup")
     docker_info = next(task for task in tasks if task.get("name") == "Wait for the Docker daemon to answer after networking recovery")
+    post_restart_inspect = next(
+        task for task in tasks if task.get("name") == "Re-inspect pre-restart containers after the Grist-triggered Docker restart"
+    )
+    stopped_record = next(
+        task for task in tasks if task.get("name") == "Record pre-restart containers that remained stopped after the Grist-triggered Docker restart"
+    )
+    recover_containers = next(
+        task for task in tasks if task.get("name") == "Recover pre-restart containers that remained stopped after the Grist-triggered Docker restart"
+    )
+    confirm_recovery = next(
+        task for task in tasks if task.get("name") == "Confirm pre-restart containers recovered after the Grist-triggered Docker restart"
+    )
     persist_dir = next(task for task in tasks if task.get("name") == "Ensure the Grist persist directory is writable by the runtime user")
     persist_recurse = next(task for task in tasks if task.get("name") == "Ensure existing Grist persist content is owned by the runtime user")
     env_render = next(task for task in tasks if task.get("name") == "Render the Grist environment file")
@@ -79,11 +100,56 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
         task for task in tasks if task.get("name") == "Ensure Docker bridge networking chains are present before retrying Grist force-recreate"
     )
     network_retry = next(task for task in tasks if task.get("name") == "Retry Grist force-recreate after Docker networking recovery")
+    task_names = [task.get("name") for task in tasks]
 
     assert nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
+    assert task_names.index("Record container ids that are running before the Grist-triggered Docker restart") < task_names.index(
+        "Restore Docker networking when the nat chain is missing before Grist startup"
+    )
+    assert pre_restart_ids["ansible.builtin.command"]["argv"] == ["docker", "ps", "-q", "--no-trunc"]
+    assert pre_restart_inspect["ansible.builtin.command"]["stdin"] == "{{ grist_pre_restart_container_ids.stdout_lines | to_json }}"
+    assert '["docker", "inspect", container_id]' in pre_restart_inspect["ansible.builtin.command"]["argv"][2]
+    assert "grist_pre_restart_container_details" in pre_restart_record["ansible.builtin.set_fact"]
     assert nat_restore["ansible.builtin.service"]["name"] == "docker"
     assert nat_recheck["until"] == "grist_docker_nat_chain_recheck.rc == 0"
     assert docker_info["ansible.builtin.command"]["argv"] == ["docker", "info", "--format", '{{ "{{.ServerVersion}}" }}']
+    assert post_restart_inspect["ansible.builtin.command"]["stdin"] == "{{ grist_pre_restart_container_names | default([]) | to_json }}"
+    assert "grist_stopped_pre_restart_container_details" in stopped_record["ansible.builtin.set_fact"]
+    assert recover_containers["ansible.builtin.command"]["stdin"] == (
+        "{{ (grist_stopped_pre_restart_container_details | default([])) | to_json }}"
+    )
+    assert "TRANSIENT_DOCKER_NETWORK_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "STALE_COMPOSE_ENDPOINT_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "retry_on_any_error=False" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "def combined_output(stdout, stderr):" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "def exception_output(exc):" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "OPENBAO_HEALTH_URL" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "wait_for_local_openbao" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert '"http://127.0.0.1:8201/v1/sys/health"' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "No chain/target/match by that name" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "failed to create endpoint" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "retry_on_any_error=True" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'attempts=5,' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'delay_seconds=5,' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "run_with_retry(" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "cwd=working_dir or None," in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "def is_local_openbao_group(" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'normalized_working_dir == "/opt/openbao"' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert '"lv3-openbao" in container_names' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'if "openbao-agent" in services and not local_openbao_group:' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'remove_command = ["docker", "rm", "-f", *container_names]' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'recovery_command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'down_command.extend(["down", "--remove-orphans"])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'final_up_command.extend(["up", "-d", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "docker_compose_down_remove_orphans" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "docker_compose_up_after_down" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "com.docker.compose.project.working_dir" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "docker_compose_up" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "NONPERSISTENT_RESTART_POLICIES = {\"\", \"no\"}" in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert confirm_recovery["until"] == "grist_recovered_container_inspect.rc == 0"
+    assert confirm_recovery["retries"] == 12
+    assert confirm_recovery["delay"] == 5
     assert persist_dir["ansible.builtin.file"]["path"] == "{{ grist_persist_dir }}"
     assert persist_dir["ansible.builtin.file"]["owner"] == "{{ grist_runtime_uid }}"
     assert persist_recurse["ansible.builtin.file"]["recurse"] is True

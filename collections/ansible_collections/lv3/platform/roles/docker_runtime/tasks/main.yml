@@ -559,14 +559,47 @@
             run_with_retry(["docker", "start", *direct_start])
             actions.append({"type": "docker_start", "containers": direct_start})
 
-        for (working_dir, config_files), compose_group in sorted(compose_groups.items()):
+        def is_local_openbao_group(working_dir, config_files, services, container_names):
+            normalized_working_dir = (working_dir or "").rstrip("/")
+            config_file_list = [value for value in config_files.split(",") if value]
+            return (
+                normalized_working_dir == "/opt/openbao"
+                or any(
+                    config_file.rstrip("/") == "/opt/openbao/docker-compose.yml"
+                    for config_file in config_file_list
+                )
+                or "openbao" in services
+                or "lv3-openbao" in container_names
+            )
+
+        for (working_dir, config_files), compose_group in sorted(
+            compose_groups.items(),
+            key=lambda item: (
+                0
+                if is_local_openbao_group(
+                    item[0][0],
+                    item[0][1],
+                    item[1]["services"],
+                    item[1]["container_names"],
+                )
+                else 1,
+                item[0][0],
+                item[0][1],
+            ),
+        ):
             command = ["docker", "compose"]
             config_file_list = [value for value in config_files.split(",") if value]
             for config_file in config_file_list:
                 command.extend(["--file", config_file])
             services = sorted(compose_group["services"])
             container_names = sorted(compose_group["container_names"])
-            if "openbao-agent" in services:
+            local_openbao_group = is_local_openbao_group(
+                working_dir,
+                config_files,
+                services,
+                container_names,
+            )
+            if "openbao-agent" in services and not local_openbao_group:
                 wait_for_local_openbao()
             command.extend(["up", "-d", "--force-recreate", *services])
 
@@ -615,7 +648,7 @@
                 recovery_command = ["docker", "compose"]
                 for config_file in config_file_list:
                     recovery_command.extend(["--file", config_file])
-                if "openbao-agent" in services:
+                if "openbao-agent" in services and not local_openbao_group:
                     wait_for_local_openbao()
                 recovery_command.extend(["up", "-d", "--force-recreate", *services])
                 try:
@@ -657,7 +690,7 @@
                 final_up_command = ["docker", "compose"]
                 for config_file in config_file_list:
                     final_up_command.extend(["--file", config_file])
-                if "openbao-agent" in services:
+                if "openbao-agent" in services and not local_openbao_group:
                     wait_for_local_openbao()
                 final_up_command.extend(["up", "-d", *services])
                 run_with_retry(

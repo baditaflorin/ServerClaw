@@ -1267,6 +1267,7 @@ live-apply-service:
 		python3 $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "$(service)" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:service:$(service):$$(date -u +%Y%m%dT%H%M%SZ)"; \
 	fi
 	@if uv run --with pyyaml python $(REPO_ROOT)/scripts/service_id_resolver.py --exists-in-catalog "$(service)" >/dev/null; then \
+		set -e; \
 		if [ "$(env)" = "production" ]; then python3 $(REPO_ROOT)/scripts/vulnerability_budget.py --service "$(service)"; fi; \
 		uv run --with pyyaml python $(REPO_ROOT)/scripts/standby_capacity.py --service "$(service)"; \
 		uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply --service "$(service)"; \
