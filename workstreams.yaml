@@ -3,6 +3,8 @@ schema_version: 1.0.0
 delivery_model:
   mode: parallel_workstreams
   branch_prefix: codex/
+  allowed_extra_prefixes:
+    - claude/
   workstream_doc_root: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams
   registry_owner: main
 
@@ -13020,6 +13022,7 @@ workstreams:
           paths:
             - docs/adr/0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
             - docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
+            - platform/interface_contracts.py
           mode: exclusive
         - id: ws0307_adr_index
           paths:
