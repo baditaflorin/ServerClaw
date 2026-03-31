@@ -27,11 +27,19 @@ def test_lago_runtime_defaults_reference_service_topology_images_and_local_secre
     assert defaults["lago_front_image"] == "{{ container_image_catalog.images.lago_front_runtime.ref }}"
     assert defaults["lago_pdf_image"] == "{{ container_image_catalog.images.lago_pdf_runtime.ref }}"
     assert defaults["lago_redis_image"] == "{{ container_image_catalog.images.lago_redis_runtime.ref }}"
+    assert defaults["lago_redis_url"] == "redis://{{ lago_redis_host }}:{{ lago_redis_port }}/{{ lago_redis_sidekiq_db }}"
+    assert defaults["lago_redis_cache_url"] == "redis://{{ lago_redis_host }}:{{ lago_redis_port }}/{{ lago_redis_cache_db }}"
+    assert defaults["lago_redis_cable_url"] == (
+        "redis://:{{ lago_redis_password | urlencode }}@{{ lago_redis_host }}:{{ lago_redis_port }}/{{ lago_redis_cable_db }}"
+    )
     assert defaults["lago_public_base_url"] == "{{ platform_service_topology.lago.urls.public }}"
     assert defaults["lago_public_api_base_url"] == "{{ platform_service_topology.lago.urls.public }}/api"
     assert defaults["lago_api_local_base_url"] == "{{ platform_service_topology.lago.urls.api }}"
     assert defaults["lago_direct_api_local_base_url"] == "http://127.0.0.1:{{ platform_service_topology.lago.ports.api }}"
     assert defaults["lago_direct_front_local_base_url"] == "http://127.0.0.1:{{ platform_service_topology.lago.ports.internal }}"
+    assert defaults["lago_rails_env"] == "production"
+    assert defaults["lago_rack_env"] == "{{ lago_rails_env }}"
+    assert defaults["lago_annotaterb_skip_on_db_tasks"] == "1"
     assert defaults["lago_database_password_local_file"].endswith("/.local/lago/database-password.txt")
     assert defaults["lago_org_api_key_local_file"].endswith("/.local/lago/org-api-key.txt")
     assert defaults["lago_producer_catalog_local_file"].endswith("/.local/lago/producer-catalog.json")
@@ -111,6 +119,12 @@ def test_lago_templates_bind_private_ports_and_render_public_urls() -> None:
     assert "LAGO_FRONT_URL={{ lago_public_base_url }}" in env_template
     assert "LAGO_API_URL={{ lago_public_api_base_url }}" in env_template
     assert "API_URL={{ lago_public_api_base_url }}" in env_template
+    assert "REDIS_URL={{ lago_redis_url }}" in env_template
+    assert "LAGO_REDIS_CACHE_URL={{ lago_redis_cache_url }}" in env_template
+    assert "LAGO_REDIS_CABLE_URL={{ lago_redis_cable_url }}" in env_template
+    assert "RAILS_ENV={{ lago_rails_env }}" in env_template
+    assert "RACK_ENV={{ lago_rack_env }}" in env_template
+    assert "ANNOTATERB_SKIP_ON_DB_TASKS={{ lago_annotaterb_skip_on_db_tasks }}" in env_template
     assert 'LAGO_RSA_PRIVATE_KEY="{{ lago_rsa_private_key_b64 }}"' in env_template
     assert '"token": "{{ lago_smoke_producer_token }}"' in producer_template
 
@@ -120,7 +134,23 @@ def test_lago_postgres_defaults_and_tasks_manage_the_shared_database_password() 
     tasks = load_tasks(POSTGRES_TASKS_PATH)
 
     assert defaults["lago_database_password_local_file"].endswith("/.local/lago/database-password.txt")
+    assert defaults["lago_database_user_createdb"] is True
+    assert defaults["lago_postgres_required_extensions"] == ["pg_partman"]
+    assert defaults["lago_postgres_extension_packages"] == ["postgresql-{{ lago_postgres_server_major_version }}-partman"]
     assert defaults["lago_postgres_password_file"] == "{{ lago_postgres_secret_dir }}/database-password"
     assert next(task for task in tasks if task["name"] == "Generate the Lago database password")
-    assert next(task for task in tasks if task["name"] == "Create the Lago database role")
+    version_task = next(task for task in tasks if task["name"] == "Record PostgreSQL server version number")
+    extension_package_task = next(task for task in tasks if task["name"] == "Install the Lago PostgreSQL extension packages")
+    extension_check_task = next(
+        task for task in tasks if task["name"] == "Check whether required Lago PostgreSQL extensions are available"
+    )
+    create_role_task = next(task for task in tasks if task["name"] == "Create the Lago database role")
+    ensure_createdb_task = next(
+        task for task in tasks if task["name"] == "Ensure the Lago database role can create databases for upstream migrations"
+    )
     assert next(task for task in tasks if task["name"] == "Create the Lago PostgreSQL database")
+    assert version_task["ansible.builtin.command"]["argv"][-1] == "SHOW server_version_num"
+    assert extension_package_task["ansible.builtin.apt"]["name"] == "{{ lago_postgres_extension_packages }}"
+    assert extension_check_task["loop"] == "{{ lago_postgres_required_extensions }}"
+    assert "CREATEDB" in create_role_task["ansible.builtin.command"]["argv"][-1]
+    assert ensure_createdb_task["ansible.builtin.command"]["argv"][-1] == "ALTER ROLE {{ lago_database_user }} CREATEDB"
