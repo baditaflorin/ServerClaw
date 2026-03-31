@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-31'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 271
+  Implemented: 272
   Partial: 6
-  Not Implemented: 46
+  Not Implemented: 45
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5331,7 +5331,7 @@ adr_index:
   - adr: '0302'
     title: Restic For Encrypted File-Level Backup Of Platform Configuration And State Artifacts
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: storage
     keywords:
@@ -5345,6 +5345,7 @@ adr_index:
       - artifacts
     summary: We will deploy Restic as a scheduled backup agent for platform configuration
     filename: 0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts.md
+    implemented_version: 0.177.113
   - adr: '0303'
     title: pgaudit For PostgreSQL Query And Privilege Change Audit Logging
     status: Accepted

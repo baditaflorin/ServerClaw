@@ -1,0 +1,16 @@
+# Purpose: Declare the supported input contract for the ADR 0302 restic config backup role.
+# Use case: Loaded by Ansible to validate restic backup role variables before execution on docker-runtime-lv3.
+# Inputs: Role variables covering repo checkout mirroring, MinIO repository settings, runtime paths, and controller-local password artifacts.
+# Outputs: Provides argument specifications used by Ansible role validation.
+# Idempotency: Fully idempotent because this file only documents the role interface.
+# Dependencies: ADR 0165 and ADR 0302.
+---
+argument_specs:
+  main:
+    short_description: Converge ADR 0302 restic-backed file-level backup automation.
+    options:
+      restic_config_backup_repo_checkout_host_path:
+        type: str
+        required: true
+        description:
+          - Absolute repo checkout path mirrored onto docker-runtime-lv3.

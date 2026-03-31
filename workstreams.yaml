@@ -14,6 +14,263 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0302-live-apply
+    adr: "0302"
+    title: ADR 0302 live apply from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0302-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-live-apply.md
+    depends_on:
+      - adr-0029-dedicated-backup-vm-with-pbs
+      - adr-0034-controller-local-secret-manifest-and-preflight
+      - adr-0043-openbao-for-secrets-transit-and-dynamic-credentials
+      - adr-0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy
+      - adr-0274-minio-as-the-s3-compatible-object-storage-layer
+      - adr-0276-nats-jetstream-as-the-platform-event-bus
+      - adr-0299-ntfy-as-the-push-notification-channel
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0302-live-apply.md
+      - docs/adr/0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/restic-config-backups.md
+      - docs/runbooks/backup-coverage-ledger.md
+      - .config-locations.yaml
+      - Makefile
+      - config/restic-file-backup-catalog.json
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/ansible-role-idempotency.yml
+      - config/correction-loops.json
+      - config/event-taxonomy.yaml
+      - config/ansible-execution-scopes.yaml
+      - config/controller-local-secrets.json
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+      - collections/ansible_collections/lv3/platform/roles/restic_config_backup/**
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - playbooks/restic-config-backup.yml
+      - config/windmill/scripts/restic-config-backup.py
+      - scripts/restic_config_backup.py
+      - scripts/trigger_restic_live_apply.py
+      - scripts/backup_coverage_ledger.py
+      - tests/test_restic_config_backup.py
+      - tests/test_restic_config_backup_role.py
+      - tests/test_restic_config_backup_windmill.py
+      - tests/test_backup_coverage_ledger.py
+      - receipts/restic-backups/**
+      - receipts/restic-restore-verifications/**
+      - receipts/backup-coverage/**
+      - receipts/restic-snapshots-latest.json
+      - receipts/live-applies/**
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0302_docs
+          paths:
+            - docs/workstreams/ws-0302-live-apply.md
+            - docs/adr/0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts.md
+            - docs/runbooks/restic-config-backups.md
+            - docs/runbooks/backup-coverage-ledger.md
+            - .config-locations.yaml
+          mode: exclusive
+        - id: restic_shared_automation_contract
+          paths:
+            - Makefile
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - config/ansible-role-idempotency.yml
+            - config/correction-loops.json
+            - config/event-taxonomy.yaml
+            - config/ansible-execution-scopes.yaml
+            - config/controller-local-secrets.json
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+          mode: shared_contract
+          contract: repository-automation-v1
+        - id: restic_runtime_surfaces
+          paths:
+            - config/restic-file-backup-catalog.json
+            - collections/ansible_collections/lv3/platform/roles/restic_config_backup/**
+            - playbooks/restic-config-backup.yml
+            - config/windmill/scripts/restic-config-backup.py
+            - scripts/restic_config_backup.py
+            - scripts/trigger_restic_live_apply.py
+            - scripts/backup_coverage_ledger.py
+            - tests/test_restic_config_backup.py
+            - tests/test_restic_config_backup_role.py
+            - tests/test_restic_config_backup_windmill.py
+            - tests/test_backup_coverage_ledger.py
+            - receipts/restic-backups/**
+            - receipts/restic-restore-verifications/**
+            - receipts/backup-coverage/**
+            - receipts/restic-snapshots-latest.json
+            - receipts/live-applies/**
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0302 by deploying Restic-backed encrypted file-level backups for receipts, configuration catalogs, versions stack state, and controller-local secret manifests with MinIO object versioning, restore verification, and backup-coverage ledger evidence
+      release_bump: patch
+      included_in_repo_version: 0.177.113
+      latest_receipts:
+        restic_config_backup: 2026-03-31-adr-0302-restic-config-backup-mainline-live-apply
+  - id: ws-0302-main-integration
+    adr: "0302"
+    title: Integrate ADR 0302 Restic exact-main replay onto current origin/main
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0302-main-integration
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-main-integration
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-main-integration.md
+    depends_on:
+      - ws-0302-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0302-main-integration.md
+      - docs/workstreams/ws-0302-live-apply.md
+      - docs/adr/0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/restic-config-backups.md
+      - docs/runbooks/backup-coverage-ledger.md
+      - .config-locations.yaml
+      - Makefile
+      - config/restic-file-backup-catalog.json
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/ansible-role-idempotency.yml
+      - config/correction-loops.json
+      - config/event-taxonomy.yaml
+      - config/ansible-execution-scopes.yaml
+      - config/controller-local-secrets.json
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+      - collections/ansible_collections/lv3/platform/roles/restic_config_backup/**
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - playbooks/restic-config-backup.yml
+      - config/windmill/scripts/restic-config-backup.py
+      - scripts/restic_config_backup.py
+      - scripts/trigger_restic_live_apply.py
+      - scripts/backup_coverage_ledger.py
+      - tests/test_restic_config_backup.py
+      - tests/test_restic_config_backup_role.py
+      - tests/test_restic_config_backup_windmill.py
+      - tests/test_backup_coverage_ledger.py
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - receipts/restic-backups/**
+      - receipts/restic-restore-verifications/**
+      - receipts/backup-coverage/**
+      - receipts/restic-snapshots-latest.json
+      - receipts/live-applies/2026-03-31-adr-0302-restic-config-backup-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-31-ws-0302-*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0302_main_merge_carryover
+          paths:
+            - docs/workstreams/ws-0302-live-apply.md
+            - docs/adr/0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts.md
+            - docs/runbooks/restic-config-backups.md
+            - docs/runbooks/backup-coverage-ledger.md
+            - .config-locations.yaml
+            - Makefile
+            - config/restic-file-backup-catalog.json
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - config/ansible-role-idempotency.yml
+            - config/correction-loops.json
+            - config/event-taxonomy.yaml
+            - config/ansible-execution-scopes.yaml
+            - config/controller-local-secrets.json
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+            - collections/ansible_collections/lv3/platform/roles/restic_config_backup/**
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - playbooks/restic-config-backup.yml
+            - config/windmill/scripts/restic-config-backup.py
+            - scripts/restic_config_backup.py
+            - scripts/trigger_restic_live_apply.py
+            - scripts/backup_coverage_ledger.py
+            - tests/test_restic_config_backup.py
+            - tests/test_restic_config_backup_role.py
+            - tests/test_restic_config_backup_windmill.py
+            - tests/test_backup_coverage_ledger.py
+            - receipts/restic-backups/**
+            - receipts/restic-restore-verifications/**
+            - receipts/backup-coverage/**
+            - receipts/restic-snapshots-latest.json
+            - receipts/live-applies/evidence/2026-03-31-ws-0302-*
+          mode: shared_contract
+          contract: adr-0302-restic-live-apply-v1
+        - id: integration_readme_surface
+          paths:
+            - README.md
+          mode: shared_contract
+          contract: main-integration-truth-v1
+        - id: release_management_surfaces
+          paths:
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: platform_truth_generation
+          paths:
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: canonical-truth-v1
+        - id: latest_main_integration_generated_surfaces
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: latest-main-integration-v1
+        - id: adr_0302_main_merge
+          paths:
+            - docs/workstreams/ws-0302-main-integration.md
+            - receipts/live-applies/2026-03-31-adr-0302-restic-config-backup-mainline-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0302 by deploying Restic-backed encrypted file-level backups for receipts, configuration catalogs, versions stack state, and controller-local secret manifests with MinIO object versioning, restore verification, and backup-coverage ledger evidence
+      release_bump: patch
+      included_in_repo_version: 0.177.113
+      latest_receipts:
+        restic_config_backup: 2026-03-31-adr-0302-restic-config-backup-mainline-live-apply
   - id: ws-0275-live-apply
     adr: "0275"
     title: ADR 0275 live apply from latest origin/main

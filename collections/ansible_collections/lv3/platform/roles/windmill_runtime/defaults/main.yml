@@ -136,6 +136,7 @@ windmill_default_operations_surface_script_paths:
   - f/lv3/collection_publish
   - f/lv3/packer_template_rebuild
   - f/lv3/fixture_expiry_reaper
+  - f/lv3/restic_config_backup
   - f/lv3/maintenance_window
 windmill_runtime_api_wait_retries: 18
 windmill_runtime_api_wait_delay_seconds: 5
@@ -544,6 +545,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0271 backup coverage ledger
     description: Repo-managed helper that audits governed backup coverage, writes one receipt, and surfaces uncovered assets explicitly in DR readiness reporting.
+  - path: f/lv3/restic_config_backup
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/restic-config-backup.py"
+    language: python3
+    summary: ADR 0302 restic config backup
+    description: Repo-managed helper that runs the ADR 0302 file-level Restic backup or restore-verification workflow from the worker checkout.
   - path: f/lv3/operator_onboard
     local_file: "{{ windmill_seed_script_root_local_dir }}/operator-onboard.py"
     language: python3
@@ -736,6 +742,28 @@ windmill_seed_schedules:
     enabled: false
     summary: Disabled ADR 0089 weekly cache maintenance placeholder
     description: Repo-managed weekly cache maintenance definition that purges the shared pip cache and checks apt-cacher-ng after the cache host is applied live from main.
+    no_flow_overlap: true
+  - path: f/lv3/restic_config_backup_every_6h
+    schedule: "0 0 2,8,14,20 * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/restic_config_backup
+    args:
+      mode: backup
+      triggered_by: windmill-schedule
+    enabled: true
+    summary: ADR 0302 six-hour restic config backup
+    description: Repo-managed six-hour file-level backup schedule for configuration, receipts, and other ADR 0302 governed sources.
+    no_flow_overlap: true
+  - path: f/lv3/restic_config_backup_restore_verify_monthly
+    schedule: "0 0 5 1 * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/restic_config_backup
+    args:
+      mode: restore-verify
+      triggered_by: windmill-monthly-restore-verify
+    enabled: true
+    summary: ADR 0302 monthly restore verification
+    description: Repo-managed monthly restore rehearsal for the receipts snapshot path protected by ADR 0302.
     no_flow_overlap: true
   - path: f/lv3/ephemeral_vm_reaper_every_30m
     schedule: "0 */30 * * * *"

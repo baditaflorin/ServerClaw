@@ -191,6 +191,7 @@ The repository now also ships ADR 0231 local secret delivery live on production:
 The repository now also ships ADR 0137 crawl policy automation live on production: the shared public edge serves a universal `robots.txt`, emits `X-Robots-Tag: noindex, nofollow` across published hostnames, adds robots meta tags to repository-generated HTML surfaces, and includes `lv3.org` in the shared edge certificate definition.
 The repository now also ships the first ADR 0166 canonical error rollout live on production: `config/error-codes.yaml` and `scripts/canonical_errors.py` now normalize repo-managed gateway and platform-context failures behind one trace-id-backed error envelope, and the 2026-03-26 live replay from `main` verified the canonical `AUTH_TOKEN_MISSING` response on both `https://api.lv3.org/v1/health` and `http://100.64.0.1:8010/v1/platform-summary`.
 ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-lv3` now serves the repo-managed private event bus on `10.10.10.20:4222`, the 2026-03-30 exact-main replay re-verified the `PLATFORM_EVENTS`, `RAG_DOCUMENT`, and `SECRET_ROTATION` streams after a short shared Docker-runtime correction loop, and the controller-side check/apply paths plus platform, secret-rotation, and RAG smoke publishes all completed cleanly.
+ADR 0302 Restic file-level backups are now live on production from `main`: `docker-runtime-lv3` now writes encrypted snapshots of `receipts/`, `config/`, `versions/stack.yaml`, and the controller-local secret manifest into the MinIO-backed `restic-config-backup` repository, and the 2026-03-31 exact-main replay re-verified the systemd timer, the event-driven live-apply trigger path, and the governed restore-verification rehearsal end to end.
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
@@ -198,8 +199,8 @@ ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-l
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.112` |
-| Platform version | `0.130.74` |
+| Repository version | `0.177.113` |
+| Platform version | `0.130.75` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -364,6 +365,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `remote_build_gateway` | `2026-03-29-adr-0265-immutable-validation-snapshots-mainline-live-apply` |
 | `renovate` | `2026-03-31-adr-0297-renovate-mainline-live-apply` |
 | `repo_deploy_base_image_cache` | `2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply` |
+| `restic_config_backup` | `2026-03-31-adr-0302-restic-config-backup-mainline-live-apply` |
 | `restore_verification` | `2026-03-29-adr-0272-restore-readiness-mainline-live-apply` |
 | `route_dns_assertion_ledger` | `2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
@@ -565,7 +567,8 @@ backup-lv3 runs Proxmox Backup Server on 10.10.10.60
 PBS datastore proxmox is mounted at /mnt/datastore/proxmox on the dedicated backup disk
 Proxmox storage lv3-backup-pbs points to 10.10.10.60:8007
 nightly job backup-lv3-nightly protects VMIDs 110, 120, 130, 140, 150, and 170 at 02:30
-the backup coverage ledger now shows 6 of 7 governed assets protected; backup-lv3 remains uncovered until lv3-backup-offsite exists
+the backup coverage ledger now shows 10 of 12 governed assets protected; backup-lv3 off-site evidence and monitoring-lv3 freshness remain the visible uncovered gaps
+Restic file-level backups now protect `receipts/`, `config/`, `versions/stack.yaml`, and `config/controller-local-secrets.json` in the `restic-config-backup` MinIO repository, with timer-driven interval runs plus live-apply-trigger snapshots for `config/` and `versions/stack.yaml`
 control-plane recovery archives from docker-runtime-lv3 now land on /srv/control-plane-recovery/runtime/docker-runtime-lv3/latest
 the mirrored controller recovery bundle now lives under /srv/control-plane-recovery/controller
 the scheduled restore drill on backup-lv3 last passed at 2026-03-22T21:29:48Z
@@ -767,6 +770,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Replaceability Scorecards](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/replaceability-scorecards.md)
 - [Repo-Deploy Base Image Cache](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/repo-deploy-base-image-cache.md)
 - [Distributed Resource Lock Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/resource-lock-registry.md)
+- [Restic Config Backups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/restic-config-backups.md)
 - [Retry Taxonomy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/retry-taxonomy.md)
 - [Rotate Certificates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/rotate-certificates.md)
 - [Run Namespace Partitioning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/run-namespace-partitioning.md)
@@ -1438,6 +1442,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream WS-0296: Dedicated Artifact Cache VM Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-live-apply.md)
 - [Workstream ws-0297-live-apply: Live Apply ADR 0297 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md)
 - [Workstream ws-0301-live-apply: Live Apply ADR 0301 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0301-live-apply.md)
+- [Workstream ws-0302-live-apply: ADR 0302 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-live-apply.md)
+- [Workstream ws-0302-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-main-integration.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -1455,8 +1461,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.112` |
-| Platform version | `0.130.74` |
+| Repository version | `0.177.113` |
+| Platform version | `0.130.75` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1777,6 +1783,7 @@ This repository is intentionally opinionated:
 | `0296` | Live apply the dedicated artifact cache VM from latest origin/main | `live_applied` | [ws-0296-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-live-apply.md) |
 | `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `live_applied` | [ws-0297-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md) |
 | `0301` | Live apply ADR 0301 from latest origin/main | `merged` | [ws-0301-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0301-live-apply.md) |
+| `0302` | ADR 0302 live apply from latest origin/main | `live_applied` | [ws-0302-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-live-apply.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

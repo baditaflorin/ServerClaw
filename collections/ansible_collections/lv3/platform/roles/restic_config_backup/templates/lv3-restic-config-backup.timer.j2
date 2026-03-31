@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the LV3 restic config backup on schedule
+
+[Timer]
+OnCalendar={{ restic_config_backup_on_calendar }}
+Persistent=true
+Unit={{ restic_config_backup_service_name }}
+
+[Install]
+WantedBy=timers.target

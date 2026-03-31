@@ -77,6 +77,44 @@ infrastructure_state:
     validation: Manual review
     naming_convention: "YYYYMMDDTHHMMSSZ.json"
 
+  config/restic-file-backup-catalog.json:
+    purpose: Canonical ADR 0302 catalog of file-level sources, schedules, and retention policy for Restic-backed configuration backups
+    owner: human
+    format: JSON
+    use_for: Declaring which repository-backed configuration and receipt paths must be protected by the Restic backup workflow
+    update_when: Adding or changing ADR 0302 governed file-level sources, retention, or notification metadata
+    update_by: Agent or human implementing ADR 0302
+    validation: "python3 -m json.tool config/restic-file-backup-catalog.json"
+
+  receipts/restic-backups/:
+    purpose: Durable ADR 0302 backup receipts emitted after each successful Restic snapshot workflow
+    owner: automation
+    format: JSON
+    use_for: Proving which file-level sources were backed up, from which source commit, and whether stale notifications fired
+    update_when: After every `make restic-config-backup env=production` run or equivalent systemd/Windmill execution
+    update_by: "scripts/restic_config_backup.py --mode backup"
+    validation: Manual review
+    naming_convention: "YYYYMMDDTHHMMSSZ.json"
+
+  receipts/restic-restore-verifications/:
+    purpose: Durable ADR 0302 restore-verification receipts for the latest receipts snapshot rehearsal
+    owner: automation
+    format: JSON
+    use_for: Proving the monthly restore path still restores the receipts tree to a temporary directory and meets the file-count expectation
+    update_when: After every `make restic-config-restore-verify env=production` run or equivalent worker execution
+    update_by: "scripts/restic_config_backup.py --mode restore-verify"
+    validation: Manual review
+    naming_convention: "YYYYMMDDTHHMMSSZ.json"
+
+  receipts/restic-snapshots-latest.json:
+    purpose: Canonical ADR 0302 latest-snapshot summary consumed by the backup-coverage ledger and stale-notification path
+    owner: automation
+    format: JSON
+    use_for: Determining the freshest observed Restic snapshot per governed file-level source
+    update_when: After every successful ADR 0302 backup run
+    update_by: "scripts/restic_config_backup.py --mode backup"
+    validation: Manual review
+
   receipts/gate-bypasses/:
     purpose: Records of --no-verify gate overrides with justification
     owner: automation  # written by pre-push hook bypass

@@ -22,7 +22,8 @@
           "install-proxmox",
           "live-apply-group",
           "live-apply-service",
-          "live-apply-site"
+          "live-apply-site",
+          "restic-config-backup"
         ]
       },
       "invariant": "The governed host or service converge path leaves repo-managed infrastructure aligned with inventory intent and any declared post-verify probe healthy.",

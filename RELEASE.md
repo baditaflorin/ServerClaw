@@ -1,12 +1,12 @@
-# Release 0.177.112
+# Release 0.177.113
 
 - Date: 2026-03-31
 
 ## Summary
-- implements ADR 0297 by deploying the repo-managed Renovate proposal path through private Gitea Actions, OpenBao-minted short-lived tokens, and the Harbor-pinned runtime while preserving exact-main dashboard and governed update PR creation
+- Implemented ADR 0302 encrypted Restic file-level backups for platform configuration and state artifacts, including the MinIO-backed repository, systemd timer convergence, live-apply-trigger coverage for `config/` and `versions/stack.yaml`, restore verification receipts, and backup-coverage ledger integration.
 
 ## Platform Impact
-- platform version advances to 0.130.74 after the exact-main ADR 0297 replay re-verifies the private Gitea Renovate dashboard and governed update PR path through Harbor and OpenBao while the shared Gitea attachment-capacity and stale PR-sync follow-ups stay tracked in the canonical receipt
+- ADR 0302 is now live on production: docker-runtime-lv3 writes encrypted Restic file-level backups into the MinIO-backed restic-config-backup repository and the managed backup plus restore verification paths are now evidenced in-repo.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

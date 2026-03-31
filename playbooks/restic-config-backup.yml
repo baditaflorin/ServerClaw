@@ -1,0 +1,48 @@
+---
+# Playbook: restic-config-backup.yml
+# Purpose: Converge ADR 0302 restic-backed file-level backup automation on docker-runtime-lv3.
+# Use case: Run through make targets, live backup helpers, and guarded automation for the platform configuration backup path.
+#
+# Inputs (required):
+#   - env (str, required): Target environment passed through the shared execution wrapper.
+#
+# Inputs (optional):
+#   - EXTRA_ARGS (str, optional, default=""): Additional ansible arguments passed by the caller.
+#
+# Outputs:
+#   - Installs the repo-managed systemd service and timer that back up configuration and receipt artifacts into MinIO with Restic.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0165: playbook metadata standard
+#   - ADR 0302: Restic file-level backup
+#   - Requires: collections/ansible_collections/lv3/platform/roles/restic_config_backup
+#
+# Related ADRs: 0165, 0302
+# Related Runbooks: docs/runbooks/restic-config-backups.md
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+- name: Converge Restic config backup on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - backup
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.restic-config-backup
+        playbook_execution_audit_target: restic-config-backup
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.restic_config_backup

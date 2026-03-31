@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euo pipefail
+
+cd {{ restic_config_backup_repo_checkout_host_path }}
+
+exec python3 {{ restic_config_backup_repo_checkout_host_path }}/scripts/restic_config_backup.py \
+  --repo-root {{ restic_config_backup_repo_checkout_host_path }} \
+  --catalog {{ restic_config_backup_catalog_repo_path }} \
+  --backup-receipts-dir {{ restic_config_backup_backup_receipts_dir }} \
+  --latest-snapshot-receipt {{ restic_config_backup_latest_snapshot_receipt }} \
+  --restore-verification-dir {{ restic_config_backup_restore_verification_dir }} \
+  --runtime-state-dir {{ restic_config_backup_runtime_state_dir }} \
+  --cache-dir {{ restic_config_backup_runtime_cache_dir }} \
+  --credential-file {{ restic_config_backup_runtime_credential_file }} \
+  --mode backup \
+  --triggered-by systemd-timer

@@ -30,6 +30,13 @@ playbooks:
     shared_surfaces:
       - service:control-plane-recovery
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/restic-config-backup.yml:
+    playbook_id: restic-config-backup
+    mutation_scope: host
+    shared_surfaces:
+      - service:restic-config-backup
+      - config/restic-file-backup-catalog.json
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/coolify.yml:
     playbook_id: coolify
     mutation_scope: platform

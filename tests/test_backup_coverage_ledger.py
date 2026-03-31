@@ -102,3 +102,81 @@ def test_load_restore_evidence_prefers_latest_successful_receipt(tmp_path: Path)
 
     assert evidence[120]["backup_date"] == "2026-03-27T01:30:00Z"
     assert evidence[120]["path"].endswith("2026-03-27.json")
+
+
+def test_restic_file_assets_are_covered_from_latest_snapshot_receipt(tmp_path: Path, monkeypatch) -> None:
+    host_vars_path = tmp_path / "inventory" / "host_vars" / "proxmox_florin.yml"
+    redundancy_catalog_path = tmp_path / "config" / "service-redundancy-catalog.json"
+    dr_targets_path = tmp_path / "config" / "disaster-recovery-targets.json"
+    restic_catalog_path = tmp_path / "config" / "restic-file-backup-catalog.json"
+    restic_latest_path = tmp_path / "receipts" / "restic-snapshots-latest.json"
+    restore_dir = tmp_path / "receipts" / "restore-verifications"
+
+    write_json(host_vars_path, {"proxmox_guests": [{"vmid": 110, "name": "nginx-lv3"}]})
+    write_json(redundancy_catalog_path, {"services": {"homepage": {"backup_sources": ["pbs_vm_110"]}}})
+    write_json(dr_targets_path, {"offsite_backup": {"storage_id": "lv3-backup-offsite", "schedule_utc": "04:00"}})
+    write_json(
+        restic_catalog_path,
+        {
+            "schema_version": "1.0.0",
+            "controller_host": {"minio": {"bucket": "restic-config-backup"}},
+            "sources": [
+                {
+                    "id": "config",
+                    "label": "config",
+                    "paths": ["config"],
+                    "freshness_minutes": 1440,
+                    "freshness_policy": "event_driven",
+                    "expected_schedule": "successful_live_apply",
+                    "retention": {"keep_daily": 30},
+                    "trigger_on_live_apply": True,
+                }
+            ],
+        },
+    )
+    write_json(
+        restic_latest_path,
+        {
+            "recorded_at": "2026-03-30T10:00:00Z",
+            "sources": [
+                {
+                    "source_id": "config",
+                    "state": "protected",
+                    "expected_schedule": "successful_live_apply",
+                    "freshness_policy": "event_driven",
+                    "reasons": ["Latest snapshot exists and this source is event-driven."],
+                    "latest_snapshot": {"snapshot_id": "snap-config", "recorded_at": "2026-03-29T18:00:00Z"},
+                }
+            ],
+        },
+    )
+
+    monkeypatch.setattr(ledger, "load_controller_context", lambda: {})
+    monkeypatch.setattr(ledger, "load_backup_jobs", lambda context: [])
+    monkeypatch.setattr(
+        ledger,
+        "load_storage_listing",
+        lambda context, storage_id: {
+            "storage_id": storage_id,
+            "available": False,
+            "error": "storage unavailable in test",
+            "rows": [],
+        },
+    )
+
+    report = ledger.build_backup_coverage_report(
+        now=datetime(2026, 3, 30, 12, 0, tzinfo=UTC),
+        host_vars_path=host_vars_path,
+        redundancy_catalog_path=redundancy_catalog_path,
+        dr_targets_path=dr_targets_path,
+        restic_catalog_path=restic_catalog_path,
+        restic_latest_path=restic_latest_path,
+        restore_dir=restore_dir,
+    )
+
+    config_asset = next(asset for asset in report["assets"] if asset["source_id"] == "config")
+    assert config_asset["source_kind"] == "restic_file"
+    assert config_asset["coverage_state"] == "protected"
+    assert config_asset["last_successful_backup"]["snapshot_id"] == "snap-config"
+    rendered = ledger.render_text(report)
+    assert "2026-03-29T18:00:00Z" in rendered

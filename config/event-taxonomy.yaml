@@ -255,6 +255,20 @@ domains:
             - summary
             - overall
             - results
+      - name: platform.backup.stale
+        description: One ADR 0302 restic-backed file-level source exceeded its freshness window.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts
+        payload:
+          required:
+            - event
+            - recorded_at
+            - source_id
+            - summary
+            - expected_max_age_minutes
 
   config:
     description: Conflict-free config-merge events for merge-eligible registry files.

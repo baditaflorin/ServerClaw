@@ -2545,14 +2545,22 @@
       "implementation_refs": [
         "Makefile",
         "collections/ansible_collections/lv3/platform/roles/proxmox_backups/defaults/main.yml",
+        "config/restic-file-backup-catalog.json",
         "config/windmill/scripts/backup-coverage-ledger.py",
         "docs/runbooks/backup-coverage-ledger.md",
+        "docs/runbooks/restic-config-backups.md",
         "docs/runbooks/configure-backup-vm.md",
         "docs/runbooks/disaster-recovery.md",
         "receipts/backup-coverage",
+        "receipts/restic-backups",
+        "receipts/restic-restore-verifications",
+        "receipts/restic-snapshots-latest.json",
         "scripts/backup_coverage_ledger.py",
+        "scripts/restic_config_backup.py",
         "scripts/generate_dr_report.py",
         "tests/test_backup_coverage_ledger.py",
+        "tests/test_restic_config_backup.py",
+        "tests/test_restic_config_backup_windmill.py",
         "tests/test_backup_coverage_ledger_windmill.py",
         "tests/test_disaster_recovery.py"
       ],
@@ -2562,13 +2570,173 @@
       ],
       "verification_commands": [
         "python3 -m py_compile scripts/backup_coverage_ledger.py config/windmill/scripts/backup-coverage-ledger.py",
-        "uv run --with pytest --with pyyaml pytest tests/test_backup_coverage_ledger.py tests/test_backup_coverage_ledger_windmill.py tests/test_disaster_recovery.py -q",
+        "uv run --with pytest --with pyyaml pytest tests/test_backup_coverage_ledger.py tests/test_restic_config_backup.py tests/test_restic_config_backup_windmill.py tests/test_backup_coverage_ledger_windmill.py tests/test_disaster_recovery.py -q",
         "uv run --with pyyaml python scripts/backup_coverage_ledger.py --format json"
       ],
       "execution_class": "diagnostic",
       "budget": {
         "max_duration_seconds": 900,
         "max_steps": 80,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-restic-config-backup": {
+      "description": "Converge the ADR 0302 Restic-backed file-level backup runtime on docker-runtime-lv3, including runtime credentials, MinIO repository bootstrap, and the scheduled systemd timer.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-restic-config-backup",
+        "command": "make converge-restic-config-backup env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "outline_minio_root_password",
+          "nats_jetstream_admin_password",
+          "ntfy_alertmanager_password"
+        ],
+        "generated_secret_ids": [
+          "restic_config_backup_repository_password"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-restic-config-backup"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/restic-config-backups.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/restic-config-backup.yml",
+        "collections/ansible_collections/lv3/platform/roles/restic_config_backup",
+        "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
+        "config/restic-file-backup-catalog.json",
+        "config/controller-local-secrets.json",
+        "config/ansible-execution-scopes.yaml",
+        "docs/runbooks/restic-config-backups.md",
+        "scripts/restic_config_backup.py",
+        "scripts/trigger_restic_live_apply.py",
+        "config/windmill/scripts/restic-config-backup.py",
+        "tests/test_restic_config_backup.py",
+        "tests/test_restic_config_backup_windmill.py"
+      ],
+      "outputs": [
+        "A repo-managed Restic runtime on docker-runtime-lv3 with OpenBao-backed runtime credentials, a MinIO-backed repository bucket, an enabled six-hour systemd timer, and seeded Windmill backup plus monthly restore-verification jobs."
+      ],
+      "verification_commands": [
+        "make syntax-check-restic-config-backup",
+        "python3 -m py_compile scripts/restic_config_backup.py scripts/trigger_restic_live_apply.py config/windmill/scripts/restic-config-backup.py",
+        "uv run --with pytest --with pyyaml pytest tests/test_restic_config_backup.py tests/test_restic_config_backup_windmill.py tests/test_backup_coverage_ledger.py -q",
+        "make converge-restic-config-backup env=production"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 220,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "restic-config-backup": {
+      "description": "Run the ADR 0302 Restic file-level backup workflow on docker-runtime-lv3, write one backup receipt, refresh the latest-snapshot ledger, and emit stale-source signals when needed.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "restic-config-backup",
+        "command": "make restic-config-backup env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/restic-config-backups.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/restic-file-backup-catalog.json",
+        "docs/runbooks/restic-config-backups.md",
+        "receipts/restic-backups",
+        "receipts/restic-snapshots-latest.json",
+        "scripts/restic_config_backup.py",
+        "scripts/trigger_restic_live_apply.py",
+        "config/windmill/scripts/restic-config-backup.py",
+        "tests/test_restic_config_backup.py",
+        "tests/test_restic_config_backup_windmill.py"
+      ],
+      "outputs": [
+        "One timestamped Restic backup receipt plus a refreshed `receipts/restic-snapshots-latest.json` summary for every ADR 0302 governed file-level source."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile scripts/restic_config_backup.py scripts/trigger_restic_live_apply.py config/windmill/scripts/restic-config-backup.py",
+        "uv run --with pytest --with pyyaml pytest tests/test_restic_config_backup.py tests/test_restic_config_backup_windmill.py tests/test_backup_coverage_ledger.py -q",
+        "make restic-config-backup env=production"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 160,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "restic-config-restore-verify": {
+      "description": "Run the ADR 0302 restore-verification rehearsal on docker-runtime-lv3 by restoring the latest receipts snapshot into a temporary directory and writing one verification receipt.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "restic-config-restore-verify",
+        "command": "make restic-config-restore-verify env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/restic-config-backups.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/restic-file-backup-catalog.json",
+        "docs/runbooks/restic-config-backups.md",
+        "receipts/restic-restore-verifications",
+        "scripts/restic_config_backup.py",
+        "scripts/trigger_restic_live_apply.py",
+        "config/windmill/scripts/restic-config-backup.py",
+        "tests/test_restic_config_backup.py",
+        "tests/test_restic_config_backup_windmill.py"
+      ],
+      "outputs": [
+        "One timestamped restore-verification receipt that proves the latest governed receipts snapshot can be restored and meets the expected file-count floor."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile scripts/restic_config_backup.py scripts/trigger_restic_live_apply.py config/windmill/scripts/restic-config-backup.py",
+        "uv run --with pytest --with pyyaml pytest tests/test_restic_config_backup.py tests/test_restic_config_backup_windmill.py tests/test_backup_coverage_ledger.py -q",
+        "make restic-config-restore-verify env=production"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 160,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 1,
         "max_restarts": 0,

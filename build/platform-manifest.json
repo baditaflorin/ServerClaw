@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.112",
-  "platform_version": "0.130.74",
-  "generated_at": "2026-03-31T04:27:52Z",
-  "next_refresh_at": "2026-03-31T05:27:52Z",
+  "repo_version": "0.177.113",
+  "platform_version": "0.130.75",
+  "generated_at": "2026-03-31T06:16:34Z",
+  "next_refresh_at": "2026-03-31T07:16:34Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -26,7 +26,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.40:9093",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-31T00:00:00Z"
       },
       "api_gateway": {
         "service_name": "Platform API Gateway",
@@ -48,7 +48,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://10.10.10.60:8007",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-31T00:00:00Z"
       },
       "browser_runner": {
         "service_name": "Browser Runner",
@@ -589,7 +589,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://realtime.lv3.org",
-        "last_live_apply": "2026-03-30T00:00:00Z",
+        "last_live_apply": "2026-03-31T00:00:00Z",
         "slo_status": "unknown"
       },
       "searxng": {
@@ -2252,6 +2252,32 @@
         "runbook": "docs/runbooks/configure-netdata.md"
       },
       {
+        "id": "converge-restic-config-backup",
+        "description": "Converge the ADR 0302 Restic-backed file-level backup runtime on docker-runtime-lv3, including runtime credentials, MinIO repository bootstrap, and the scheduled systemd timer.",
+        "tags": [
+          "converge-restic-config-backup",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 220,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/restic-config-backups.md"
+      },
+      {
         "id": "converge-searxng",
         "description": "Deploy the private SearXNG runtime on docker-runtime-lv3, publish its tailnet-only hostname through the Proxmox host proxy, and re-render Open WebUI to use the local search endpoint.",
         "tags": [
@@ -3457,6 +3483,58 @@
         "runbook": "docs/runbooks/operator-offboarding.md"
       },
       {
+        "id": "restic-config-backup",
+        "description": "Run the ADR 0302 Restic file-level backup workflow on docker-runtime-lv3, write one backup receipt, refresh the latest-snapshot ledger, and emit stale-source signals when needed.",
+        "tags": [
+          "guest-live",
+          "mutation",
+          "preflight",
+          "restic-config-backup",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 160,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/restic-config-backups.md"
+      },
+      {
+        "id": "restic-config-restore-verify",
+        "description": "Run the ADR 0302 restore-verification rehearsal on docker-runtime-lv3 by restoring the latest receipts snapshot into a temporary directory and writing one verification receipt.",
+        "tags": [
+          "diagnostic",
+          "guest-live",
+          "preflight",
+          "restic-config-restore-verify",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 160,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/restic-config-backups.md"
+      },
+      {
         "id": "restore-verification",
         "description": "Run the ADR 0099 backup-restore verification workflow, write one receipt, emit the mutation-audit event, and optionally publish NATS and Mattermost summaries.",
         "tags": [
@@ -4092,7 +4170,7 @@
         "id": "backup-coverage-ledger",
         "title": "Backup Coverage Ledger",
         "agent_trust_required": "T2",
-        "steps": 6,
+        "steps": 8,
         "path": "docs/runbooks/backup-coverage-ledger.md",
         "workflow_ids": [
           "backup-coverage-ledger"
@@ -5018,6 +5096,18 @@
         ]
       },
       {
+        "id": "restic-config-backups",
+        "title": "Restic Config Backups",
+        "agent_trust_required": "T3",
+        "steps": 4,
+        "path": "docs/runbooks/restic-config-backups.md",
+        "workflow_ids": [
+          "converge-restic-config-backup",
+          "restic-config-backup",
+          "restic-config-restore-verify"
+        ]
+      },
+      {
         "id": "runbook-automation-executor",
         "title": "Runbook Automation Executor",
         "agent_trust_required": "T1",
@@ -5285,10 +5375,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.111",
+    "last_version": "0.177.112",
     "deployed_at": "2026-03-31",
-    "summary": "implements ADR 0297 by deploying the repo-managed Renovate proposal path through private Gitea Actions, OpenBao-minted short-lived tokens, and the Harbor-pinned runtime while preserving exact-main dashboard and governed update PR creation",
-    "release_notes_url": "docs/release-notes/0.177.112.md"
+    "summary": "Implemented ADR 0302 encrypted Restic file-level backups for platform configuration and state artifacts, including the MinIO-backed repository, systemd timer convergence, live-apply-trigger coverage for `config/` and `versions/stack.yaml`, restore verification receipts, and backup-coverage ledger integration.",
+    "release_notes_url": "docs/release-notes/0.177.113.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
