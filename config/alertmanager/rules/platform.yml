@@ -95,9 +95,19 @@ groups:
 
       - alert: PostgresUnknownRoleConnection
         expr: |
-          sum by (host, db, db_role) (
-            increase(postgres_unknown_connection_events_total{job="postgres-audit-alloy",component="pgaudit"}[5m])
-          ) > 0
+          (
+            sum by (host, db, db_role) (
+              increase(postgres_unknown_connection_events_total{job="postgres-audit-alloy",component="pgaudit"}[5m])
+            ) > 0
+          )
+          or
+          (
+            sum by (host, db, db_role) (
+              postgres_unknown_connection_events_total{job="postgres-audit-alloy",component="pgaudit"}
+              unless
+              postgres_unknown_connection_events_total{job="postgres-audit-alloy",component="pgaudit"} offset 5m
+            ) > 0
+          )
         for: 0m
         labels:
           severity: critical

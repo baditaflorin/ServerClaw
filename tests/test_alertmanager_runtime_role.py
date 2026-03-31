@@ -64,6 +64,9 @@ def test_platform_alert_rules_cover_postgres_audit_anomalies() -> None:
     assert "name: postgres-audit" in rules
     assert "alert: PostgresPrivilegeChangeBurst" in rules
     assert "alert: PostgresUnknownRoleConnection" in rules
+    assert "increase(postgres_unknown_connection_events_total" in rules
+    assert "postgres_unknown_connection_events_total{job=\"postgres-audit-alloy\",component=\"pgaudit\"} offset 5m" in rules
+    assert "unless" in rules
 
 
 def test_alertmanager_runtime_verifies_loki_canary_rules_after_rule_copy() -> None:

@@ -81,6 +81,7 @@ def test_playbook_and_service_wrapper_point_to_runtime_role() -> None:
     assert [role["role"] for role in playbook[0]["roles"]] == [
         "lv3.platform.docker_runtime",
         "lv3.platform.nats_jetstream_runtime",
+        "lv3.platform.linux_guest_firewall",
     ]
     assert wrapper == [{"import_playbook": "../nats-jetstream.yml"}]
 
