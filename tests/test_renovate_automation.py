@@ -56,6 +56,8 @@ def test_renovate_workflow_uses_harbor_pinned_image_and_runtime_token_helper() -
     assert workflow.count("resolve_docker_bin") >= 8
     assert "apt-get install -y --no-install-recommends docker-cli" in workflow
     assert "hash -r" in workflow
+    assert 'test -d "${workspace_host_path}"' not in workflow
+    assert 'test -s "${bootstrap_host_dir}/renovate.env"' not in workflow
     assert '.tmp/workspace-host.path' in workflow
     assert '.tmp/bootstrap-host.path' in workflow
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow

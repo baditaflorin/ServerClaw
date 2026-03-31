@@ -147,8 +147,14 @@ jobs:
           ensure_docker_bin
           workspace_host_path="$(cat .tmp/workspace-host.path)"
           bootstrap_host_dir="$(cat .tmp/bootstrap-host.path)"
-          test -d "${workspace_host_path}"
-          test -s "${bootstrap_host_dir}/renovate.env"
+          [ -n "${workspace_host_path}" ] || {
+            echo "Workspace host path is empty." >&2
+            exit 1
+          }
+          [ -n "${bootstrap_host_dir}" ] || {
+            echo "Renovate bootstrap host path is empty." >&2
+            exit 1
+          }
           "${docker_bin}" run --rm \
             --network host \
             -e RENOVATE_BOOTSTRAP_ENV \
@@ -205,7 +211,10 @@ jobs:
           }
           ensure_docker_bin
           workspace_host_path="$(cat .tmp/workspace-host.path)"
-          test -d "${workspace_host_path}"
+          [ -n "${workspace_host_path}" ] || {
+            echo "Workspace host path is empty." >&2
+            exit 1
+          }
           set -a
           . "${RENOVATE_RUNTIME_ENV}"
           set +a
@@ -259,7 +268,7 @@ jobs:
           }
           workspace_host_path="$(cat .tmp/workspace-host.path 2>/dev/null || true)"
           bootstrap_host_dir="$(cat .tmp/bootstrap-host.path 2>/dev/null || true)"
-          if [ -n "${workspace_host_path}" ] && [ -s "${bootstrap_host_dir}/renovate.env" ] && ensure_docker_bin; then
+          if [ -n "${workspace_host_path}" ] && [ -n "${bootstrap_host_dir}" ] && ensure_docker_bin; then
             "${docker_bin}" run --rm \
               --network host \
               -e RENOVATE_BOOTSTRAP_ENV \

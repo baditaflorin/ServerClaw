@@ -77,6 +77,8 @@ def test_renovate_workflow_bootstraps_inside_pinned_python_runner() -> None:
     assert 'docker_bin="$(ensure_docker_bin)"' not in workflow
     assert workflow.count("ensure_docker_bin") >= 8
     assert workflow.count("resolve_docker_bin") >= 8
+    assert 'test -d "${workspace_host_path}"' not in workflow
+    assert 'test -s "${bootstrap_host_dir}/renovate.env"' not in workflow
     assert '.tmp/workspace-host.path' in workflow
     assert '.tmp/bootstrap-host.path' in workflow
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
