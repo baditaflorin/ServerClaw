@@ -54,7 +54,10 @@ operators:
     ssh:
       principal: florin.badita-tmp
       certificate_ttl_hours: 24
-      public_keys: []
+      public_keys:
+        - name: florin-tmp-001-ephemeral
+          public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKP4RglsVhDD1m7PaeSkcePUR7wuJTlni5gsQ9AzNc6V florin-tmp-001@lv3 (expires 2026-04-03)
+          fingerprint: SHA256:KyWoKJK5IdVfFvKcgm0RflTeTnQNhwmYmRZnQNIE6VI
     openbao:
       entity_name: florin.badita-tmp
       policies:
