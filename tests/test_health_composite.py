@@ -140,6 +140,22 @@ def test_load_maintenance_windows_skips_missing_script_dependencies(monkeypatch:
     assert composite_module.load_maintenance_windows(tmp_path, world_state=FakeWorldStateClient()) == []
 
 
+def test_load_maintenance_windows_skips_world_state_operational_errors(tmp_path: Path) -> None:
+    class FakeWorldStateClient:
+        def get(self, *_args: object, **_kwargs: object) -> None:
+            raise sqlite3.OperationalError("world-state database unavailable")
+
+    assert composite_module.load_maintenance_windows(tmp_path, world_state=FakeWorldStateClient()) == []
+
+
+def test_load_service_health_snapshot_skips_world_state_operational_errors() -> None:
+    class FakeWorldStateClient:
+        def get(self, *_args: object, **_kwargs: object) -> None:
+            raise sqlite3.OperationalError("world-state database unavailable")
+
+    assert composite_module.load_service_health_snapshot(FakeWorldStateClient()) == {"services": []}
+
+
 def test_load_slo_entries_skips_missing_script_dependencies(monkeypatch: object, tmp_path: Path) -> None:
     (tmp_path / "config").mkdir()
     (tmp_path / "config" / "slo-catalog.json").write_text('{"schema_version":"1.0.0","slos":[]}', encoding="utf-8")

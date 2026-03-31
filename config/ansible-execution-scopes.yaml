@@ -129,6 +129,14 @@ playbooks:
     shared_surfaces:
       - service:gotenberg
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/typesense.yml:
+    playbook_id: typesense
+    mutation_scope: platform
+    shared_surfaces:
+      - service:typesense
+      - service:api-gateway
+      - config/api-gateway-catalog.json
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/guest-access.yml:
     playbook_id: guest-access
     mutation_scope: platform

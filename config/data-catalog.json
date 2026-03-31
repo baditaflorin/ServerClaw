@@ -810,6 +810,21 @@
       "notes": "Runtime keys are rotated with certificate renewal and old material should not persist beyond the overlap window."
     },
     {
+      "id": "typesense-platform-service-index",
+      "service": "typesense",
+      "name": "Typesense platform service index",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "Docker volume typesense-data on docker-runtime-lv3",
+        "Typesense collection platform-services"
+      ],
+      "notes": "The repo-managed platform service catalog is materialized into Typesense as a derived full-text and faceted-search index and can be replayed from git after restore."
+    },
+    {
       "id": "vaultwarden-shared-vault",
       "service": "vaultwarden",
       "name": "Vaultwarden shared credential vault",

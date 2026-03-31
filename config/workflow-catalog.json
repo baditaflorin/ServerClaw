@@ -4837,6 +4837,61 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-typesense": {
+      "description": "Deploy the private Typesense runtime on docker-runtime-lv3, refresh the Proxmox host Tailscale proxy, and repopulate the platform-services structured-search collection used by the shared API gateway.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-typesense",
+        "command": "make converge-typesense"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "typesense_api_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-typesense"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-typesense.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/typesense.yml",
+        "playbooks/services/typesense.yml",
+        "roles/typesense_runtime",
+        "roles/api_gateway_runtime",
+        "scripts/typesense_catalog_sync.py",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/api-gateway-catalog.json",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json"
+      ],
+      "outputs": [
+        "A private Typesense runtime on docker-runtime-lv3 reachable through the Proxmox host proxy, plus a live platform-services collection and authenticated /v1/platform/search/structured API gateway surface."
+      ],
+      "verification_commands": [
+        "make syntax-check-typesense",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8108/health'",
+        "TYPESENSE_API_KEY=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/typesense/api-key.txt) && curl -fsS -H \"X-TYPESENSE-API-KEY: $TYPESENSE_API_KEY\" http://100.64.0.1:8016/collections/platform-services",
+        "LV3_TOKEN=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt) && curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" 'https://api.lv3.org/v1/platform/search/structured?q=api&collection=platform-services'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 280,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-rag-context": {
       "description": "Deploy the private platform context API with Qdrant on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and seed the initial retrieval corpus.",
       "lifecycle_status": "active",

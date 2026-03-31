@@ -59,6 +59,8 @@ PORT_KEYS = (
     "netbox_server_port",
     "netbox_host_proxy_port",
     "gotenberg_port",
+    "typesense_port",
+    "typesense_host_proxy_port",
     "searxng_port",
     "searxng_host_proxy_port",
     "langfuse_port",
@@ -497,6 +499,11 @@ def build_service_urls(
     elif service_id == "gotenberg":
         urls["internal"] = service_url("http", private_ip, ports["gotenberg_port"])
         port_map["internal"] = ports["gotenberg_port"]
+    elif service_id == "typesense":
+        urls["internal"] = service_url("http", private_ip, ports["typesense_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["typesense_host_proxy_port"])
+        port_map["internal"] = ports["typesense_port"]
+        port_map["controller"] = ports["typesense_host_proxy_port"]
     elif service_id == "searxng":
         public_hostname = service.get("public_hostname")
         urls["internal"] = service_url("http", private_ip, ports["searxng_port"])
@@ -860,6 +867,7 @@ def build_platform_vars(
     vaultwarden_service = service_topology["vaultwarden"]
     postgres_service = service_topology["postgres"]
     step_ca_service = service_topology["step_ca"]
+    typesense_service = service_topology["typesense"]
     semaphore_service = service_topology["semaphore"]
     uptime_kuma_service = service_topology["uptime_kuma"]
     windmill_service = service_topology["windmill"]
@@ -950,6 +958,7 @@ def build_platform_vars(
             resolved_ports["ntopng_proxy_port"],
             resolved_ports["gitea_host_proxy_port"],
             resolved_ports["netbox_host_proxy_port"],
+            resolved_ports["typesense_host_proxy_port"],
             resolved_ports["step_ca_proxy_port"],
             resolved_ports["openbao_proxy_port"],
             resolved_ports["openfga_host_proxy_port"],
@@ -993,6 +1002,9 @@ def build_platform_vars(
         "semaphore_controller_url": semaphore_service["urls"]["controller"],
         "netbox_host_proxy_port": resolved_ports["netbox_host_proxy_port"],
         "netbox_controller_url": netbox_service["urls"]["controller"],
+        "typesense_port": resolved_ports["typesense_port"],
+        "typesense_host_proxy_port": resolved_ports["typesense_host_proxy_port"],
+        "typesense_controller_url": typesense_service["urls"]["controller"],
         "open_webui_host_proxy_port": resolved_ports["open_webui_host_proxy_port"],
         "open_webui_controller_url": open_webui_service["urls"]["controller"],
         "plane_port": resolved_ports["plane_port"],
@@ -1046,6 +1058,7 @@ def build_platform_vars(
             resolved_ports["ntopng_proxy_port"],
             resolved_ports["gitea_host_proxy_port"],
             resolved_ports["netbox_host_proxy_port"],
+            resolved_ports["typesense_host_proxy_port"],
             resolved_ports["step_ca_proxy_port"],
             resolved_ports["openbao_proxy_port"],
             resolved_ports["openfga_host_proxy_port"],

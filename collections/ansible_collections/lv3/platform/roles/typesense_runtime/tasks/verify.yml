@@ -1,0 +1,10 @@
+- name: Verify the Typesense health endpoint responds
+  ansible.builtin.uri:
+    url: "{{ typesense_internal_base_url }}/health"
+    method: GET
+    status_code: 200
+  register: typesense_verify_health
+  retries: 12
+  delay: 5
+  until: typesense_verify_health.status == 200
+  changed_when: false

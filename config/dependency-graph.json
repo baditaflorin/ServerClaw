@@ -561,6 +561,15 @@
       "adr": "0286"
     },
     {
+      "id": "typesense",
+      "service": "typesense",
+      "name": "Typesense",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "data",
+      "adr": "0277"
+    },
+    {
       "id": "uptime_kuma",
       "service": "uptime_kuma",
       "name": "Uptime Kuma",
@@ -615,6 +624,12 @@
       "to": "keycloak",
       "type": "hard",
       "description": "The unified API gateway validates caller JWTs against Keycloak before serving authenticated platform routes."
+    },
+    {
+      "from": "api_gateway",
+      "to": "typesense",
+      "type": "soft",
+      "description": "The structured-search endpoints delegate keyword and facet queries to the private Typesense runtime when it is available."
     },
     {
       "from": "api_gateway",
@@ -1089,6 +1104,18 @@
       "to": "postgres",
       "type": "hard",
       "description": "OpenFGA stores authorization stores, models, and relationship tuples in PostgreSQL."
+    },
+    {
+      "from": "typesense",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Typesense runtime and its derived index volume are hosted on docker-runtime-lv3."
+    },
+    {
+      "from": "typesense",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Typesense reads the mirrored API key from the OpenBao-backed runtime secret path before startup."
     },
     {
       "from": "paperless",

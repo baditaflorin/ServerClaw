@@ -1199,6 +1199,39 @@
       }
     },
     {
+      "id": "typesense",
+      "name": "Typesense",
+      "description": "Private full-text search engine for structured internal platform data and faceted operator lookups.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://100.64.0.1:8016",
+      "exposure": "private-only",
+      "health_probe_id": "typesense",
+      "image_catalog_ids": [
+        "typesense_runtime"
+      ],
+      "secret_catalog_ids": [
+        "typesense_api_key"
+      ],
+      "adr": "0277",
+      "runbook": "docs/runbooks/configure-typesense.md",
+      "tags": [
+        "search",
+        "structured-data",
+        "full-text",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://100.64.0.1:8016",
+          "notes": "Private Tailscale controller route published by the Proxmox host proxy."
+        }
+      }
+    },
+    {
       "id": "nginx_edge",
       "name": "NGINX Edge",
       "description": "Public ingress edge that terminates TLS and publishes selected services.",

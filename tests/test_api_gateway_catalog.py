@@ -30,3 +30,12 @@ def test_duplicate_gateway_prefix_fails() -> None:
         assert "duplicate gateway prefix" in str(exc)
     else:  # pragma: no cover
         raise AssertionError("expected duplicate gateway prefix failure")
+
+
+def test_typesense_route_uses_raw_header_auth_contract() -> None:
+    _catalog, normalized = api_gateway_catalog.load_api_gateway_catalog()
+    route = next(service for service in normalized if service["id"] == "typesense")
+
+    assert route["upstream_auth_env_var"] == "LV3_GATEWAY_TYPESENSE_API_KEY"
+    assert route["upstream_auth_header"] == "X-TYPESENSE-API-KEY"
+    assert route["upstream_auth_scheme"] == "raw"

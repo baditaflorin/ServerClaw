@@ -219,6 +219,16 @@ def test_build_platform_vars_includes_redpanda_private_topology() -> None:
     assert platform_vars["redpanda_http_proxy_port"] == 8103
     assert platform_vars["redpanda_schema_registry_port"] == 8104
 
+def test_build_platform_vars_includes_typesense_private_controller_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    typesense = platform_vars["platform_service_topology"]["typesense"]
+
+    assert typesense["ports"]["internal"] == 8108
+    assert typesense["ports"]["controller"] == 8016
+    assert typesense["urls"]["internal"] == "http://10.10.10.20:8108"
+    assert typesense["urls"]["controller"] == "http://100.64.0.1:8016"
+    assert platform_vars["typesense_controller_url"] == "http://100.64.0.1:8016"
+
 
 def test_build_platform_vars_includes_nextcloud_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()

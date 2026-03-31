@@ -136,7 +136,7 @@
 
 - name: Install the Docker publication assurance helper
   ansible.builtin.copy:
-    content: "{{ lookup('ansible.builtin.file', docker_runtime_publication_assurance_helper_local_path) }}"
+    content: "{{ lookup('ansible.builtin.file', docker_runtime_publication_assurance_script_src) }}"
     dest: "{{ docker_runtime_publication_assurance_script_path }}"
     owner: root
     group: root
@@ -468,6 +468,8 @@
         )
         OPENBAO_HEALTH_URL = "http://127.0.0.1:8201/v1/sys/health"
         OPENBAO_READY_STATUS_CODES = {200, 429}
+        OPENBAO_RECOVERY_TIMEOUT_SECONDS = {{ docker_runtime_openbao_recovery_timeout_seconds | int }}
+        OPENBAO_RECOVERY_DELAY_SECONDS = {{ docker_runtime_openbao_recovery_delay_seconds | int }}
 
 
         def run_with_retry(command, cwd=None, attempts=3, delay_seconds=3):
@@ -491,7 +493,11 @@
                 time.sleep(delay_seconds)
 
 
-        def wait_for_local_openbao(*, timeout_seconds=60, delay_seconds=2):
+        def wait_for_local_openbao(
+            *,
+            timeout_seconds=OPENBAO_RECOVERY_TIMEOUT_SECONDS,
+            delay_seconds=OPENBAO_RECOVERY_DELAY_SECONDS,
+        ):
             deadline = time.monotonic() + timeout_seconds
             last_error = ""
             while time.monotonic() < deadline:
@@ -511,6 +517,18 @@
             raise RuntimeError(
                 f"local OpenBao did not become ready at {OPENBAO_HEALTH_URL}: {last_error or 'timed out'}"
             )
+
+
+        def compose_group_sort_key(item):
+            (working_dir, config_files), compose_group = item
+            services = compose_group["services"]
+            if "openbao" in services:
+                priority = 0
+            elif "openbao-agent" in services:
+                priority = 2
+            else:
+                priority = 1
+            return (priority, working_dir, config_files)
 
         containers = json.load(sys.stdin)
 
@@ -543,7 +561,10 @@
             run_with_retry(["docker", "start", *direct_start])
             actions.append({"type": "docker_start", "containers": direct_start})
 
-        for (working_dir, config_files), compose_group in sorted(compose_groups.items()):
+        for (working_dir, config_files), compose_group in sorted(
+            compose_groups.items(),
+            key=compose_group_sort_key,
+        ):
             command = ["docker", "compose"]
             config_file_list = [value for value in config_files.split(",") if value]
             for config_file in config_file_list:

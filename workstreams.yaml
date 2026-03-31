@@ -2340,6 +2340,179 @@ workstreams:
         public_endpoint_admission_control: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
         public_edge_publication: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
         route_dns_assertion_ledger: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
+  - id: ws-0277-live-apply
+    adr: "0277"
+    title: Live apply the private Typesense structured-search plane from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0277-main-closeout-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0277-main-closeout
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0277-live-apply.md
+    depends_on:
+      - adr-0077-compose-runtime-secrets
+      - adr-0092-unified-platform-api-gateway
+      - adr-0153-distributed-resource-lock-registry
+      - adr-0191-immutable-guest-replacement
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0277-live-apply.md
+      - docs/adr/0277-typesense-as-the-full-text-search-engine-for-internal-structured-data.md
+      - docs/adr/.index.yaml
+      - docs/schema/api-gateway-catalog.schema.json
+      - docs/runbooks/configure-typesense.md
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - scripts/generate_platform_vars.py
+      - scripts/api_gateway/main.py
+      - scripts/api_gateway_catalog.py
+      - scripts/restic_config_backup.py
+      - platform/health/composite.py
+      - Makefile
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/api-gateway-catalog.json
+      - config/dependency-graph.json
+      - config/slo-catalog.json
+      - config/data-catalog.json
+      - config/secret-catalog.json
+      - config/controller-local-secrets.json
+      - config/command-catalog.json
+      - config/workflow-catalog.json
+      - config/ansible-execution-scopes.yaml
+      - config/grafana/dashboards/typesense.json
+      - config/grafana/dashboards/slo-overview.json
+      - config/alertmanager/rules/typesense.yml
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - playbooks/typesense.yml
+      - playbooks/services/typesense.yml
+      - collections/ansible_collections/lv3/platform/playbooks/typesense.yml
+      - collections/ansible_collections/lv3/platform/playbooks/services/typesense.yml
+      - collections/ansible_collections/lv3/platform/roles/typesense_runtime/**
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/**
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/**
+      - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/**
+      - scripts/typesense_catalog_sync.py
+      - tests/test_typesense_runtime_role.py
+      - tests/test_typesense_catalog_sync.py
+      - tests/test_api_gateway.py
+      - tests/test_api_gateway_catalog.py
+      - tests/test_api_gateway_runtime_role.py
+      - tests/test_generate_platform_vars.py
+      - tests/test_docker_runtime_role.py
+      - tests/test_health_composite.py
+      - tests/test_proxmox_tailscale_proxy_role.py
+      - tests/test_restic_config_backup.py
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/site-generated/architecture/dependency-graph.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - receipts/ops-portal-snapshot.html
+      - receipts/image-scans/2026-03-30-typesense-runtime.json
+      - receipts/image-scans/2026-03-30-typesense-runtime.trivy.json
+      - receipts/live-applies/2026-03-31-adr-0277-typesense-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-30-ws-0277-*
+      - receipts/live-applies/evidence/2026-03-31-ws-0277-*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0277_live_apply_surfaces
+          paths:
+            - docs/workstreams/ws-0277-live-apply.md
+            - docs/adr/0277-typesense-as-the-full-text-search-engine-for-internal-structured-data.md
+            - docs/adr/.index.yaml
+            - docs/schema/api-gateway-catalog.schema.json
+            - docs/runbooks/configure-typesense.md
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+            - scripts/api_gateway/main.py
+            - scripts/api_gateway_catalog.py
+            - scripts/restic_config_backup.py
+            - platform/health/composite.py
+            - Makefile
+            - config/service-capability-catalog.json
+            - config/health-probe-catalog.json
+            - config/image-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/api-gateway-catalog.json
+            - config/dependency-graph.json
+            - config/slo-catalog.json
+            - config/data-catalog.json
+            - config/secret-catalog.json
+            - config/controller-local-secrets.json
+            - config/command-catalog.json
+            - config/workflow-catalog.json
+            - config/ansible-execution-scopes.yaml
+            - config/grafana/dashboards/typesense.json
+            - config/grafana/dashboards/slo-overview.json
+            - config/alertmanager/rules/typesense.yml
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - playbooks/typesense.yml
+            - playbooks/services/typesense.yml
+            - collections/ansible_collections/lv3/platform/playbooks/typesense.yml
+            - collections/ansible_collections/lv3/platform/playbooks/services/typesense.yml
+            - collections/ansible_collections/lv3/platform/roles/typesense_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/**
+            - scripts/typesense_catalog_sync.py
+            - tests/test_typesense_runtime_role.py
+            - tests/test_typesense_catalog_sync.py
+            - tests/test_api_gateway.py
+            - tests/test_api_gateway_catalog.py
+            - tests/test_api_gateway_runtime_role.py
+            - tests/test_generate_platform_vars.py
+            - tests/test_docker_runtime_role.py
+            - tests/test_health_composite.py
+            - tests/test_proxmox_tailscale_proxy_role.py
+            - tests/test_restic_config_backup.py
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/site-generated/architecture/dependency-graph.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - receipts/ops-portal-snapshot.html
+            - receipts/image-scans/2026-03-30-typesense-runtime.json
+            - receipts/image-scans/2026-03-30-typesense-runtime.trivy.json
+            - receipts/live-applies/evidence/2026-03-30-ws-0277-*
+            - receipts/live-applies/evidence/2026-03-31-ws-0277-*
+            - receipts/live-applies/2026-03-31-adr-0277-typesense-mainline-live-apply.json
+          mode: shared_contract
+          contract: typesense-live-apply-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0277 by bringing the private Typesense structured-search runtime, controller proxy, API gateway search route, and recorded exact-main live-apply evidence onto main while advancing the tracked platform truth to 0.130.79
+      release_bump: patch
+      included_in_repo_version: 0.177.124
+      latest_receipts:
+        typesense: 2026-03-31-adr-0277-typesense-mainline-live-apply
   - id: ws-0254-serverclaw-adrs
     adr: "0254"
     title: ServerClaw architecture bundle

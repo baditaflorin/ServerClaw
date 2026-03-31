@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.123",
-  "platform_version": "0.130.78",
-  "generated_at": "2026-03-31T21:51:51Z",
-  "next_refresh_at": "2026-03-31T22:51:51Z",
+  "repo_version": "0.177.124",
+  "platform_version": "0.130.79",
+  "generated_at": "2026-03-31T22:28:46Z",
+  "next_refresh_at": "2026-03-31T23:28:46Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -729,6 +729,18 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:9998",
+        "last_live_apply": "2026-03-31T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "typesense": {
+        "service_name": "Typesense",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.64.0.1:8016",
         "last_live_apply": "2026-03-31T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -2609,6 +2621,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-tika.md"
+      },
+      {
+        "id": "converge-typesense",
+        "description": "Deploy the private Typesense runtime on docker-runtime-lv3, refresh the Proxmox host Tailscale proxy, and repopulate the platform-services structured-search collection used by the shared API gateway.",
+        "tags": [
+          "converge-typesense",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 280,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-typesense.md"
       },
       {
         "id": "converge-vaultwarden",
@@ -5066,6 +5104,16 @@
         ]
       },
       {
+        "id": "configure-typesense",
+        "title": "Configure Typesense",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-typesense.md",
+        "workflow_ids": [
+          "converge-typesense"
+        ]
+      },
+      {
         "id": "configure-vaultwarden",
         "title": "Configure Vaultwarden",
         "agent_trust_required": "T3",
@@ -5689,10 +5737,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.122",
+    "last_version": "0.177.123",
     "deployed_at": "2026-03-31",
-    "summary": "implemented ADRs 0307 through 0316 by defining the cohesive platform",
-    "release_notes_url": "docs/release-notes/0.177.123.md"
+    "summary": "implements ADR 0277 by deploying Typesense as the private structured-data",
+    "release_notes_url": "docs/release-notes/0.177.124.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

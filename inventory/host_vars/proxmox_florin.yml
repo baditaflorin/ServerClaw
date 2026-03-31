@@ -61,6 +61,8 @@ platform_port_assignments:
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
   gotenberg_port: 3007
+  typesense_port: 8108
+  typesense_host_proxy_port: 8016
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
@@ -193,6 +195,11 @@ proxmox_tailscale_tcp_proxies:
     listen_port: "{{ platform_port_assignments.netbox_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: 8082
+  - name: typesense
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.typesense_host_proxy_port }}"
+    upstream_host: 10.10.10.20
+    upstream_port: "{{ platform_port_assignments.typesense_port }}"
   - name: step-ca
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.step_ca_proxy_port }}"
@@ -584,6 +591,7 @@ network_policy:
             - 8008
             - 8010
             - 8018
+            - 8108
             - 8082
             - 8088
             - 8102
@@ -593,6 +601,21 @@ network_policy:
             - 9000
             - 9443
           description: Host-side private service proxies
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 8108
+          description: Private guest-to-guest access to the Typesense structured-search API
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 8108
+          description: Local Docker workloads that use the private Typesense structured-search API
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 8108
+          description: Local Docker workloads that use the private Typesense structured-search API
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -1633,6 +1656,17 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ netbox_controller_url }}"
+  typesense:
+    service_name: typesense
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: "http://{{ management_tailscale_ipv4 }}:{{ platform_port_assignments.typesense_host_proxy_port }}"
   searxng:
     service_name: searxng
     owning_vm: docker-runtime-lv3

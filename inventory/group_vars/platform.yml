@@ -90,6 +90,11 @@ platform_host:
         listen_port: 8004
         upstream_host: 10.10.10.20
         upstream_port: 8082
+      - name: typesense
+        listen_address: 100.64.0.1
+        listen_port: 8016
+        upstream_host: 10.10.10.20
+        upstream_port: 8108
       - name: step-ca
         listen_address: 100.64.0.1
         listen_port: 9443
@@ -185,6 +190,8 @@ platform_ports:
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
   gotenberg_port: 3007
+  typesense_port: 8108
+  typesense_host_proxy_port: 8016
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
@@ -273,6 +280,8 @@ platform_port_assignments:
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
   gotenberg_port: 3007
+  typesense_port: 8108
+  typesense_host_proxy_port: 8016
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
@@ -1566,6 +1575,24 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8082
       controller: http://100.64.0.1:8004
+  typesense:
+    service_name: typesense
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8016
+    service_id: typesense
+    ports:
+      internal: 8108
+      controller: 8016
+    urls:
+      internal: http://10.10.10.20:8108
+      controller: http://100.64.0.1:8016
   searxng:
     service_name: searxng
     owning_vm: docker-runtime-lv3
@@ -2724,6 +2751,7 @@ platform_management_allowed_tcp_ports:
   - 3001
   - 3009
   - 8004
+  - 8016
   - 9443
   - 8200
   - 8014
@@ -3287,6 +3315,24 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8082
       controller: http://100.64.0.1:8004
+  typesense:
+    service_name: typesense
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8016
+    service_id: typesense
+    ports:
+      internal: 8108
+      controller: 8016
+    urls:
+      internal: http://10.10.10.20:8108
+      controller: http://100.64.0.1:8016
   searxng:
     service_name: searxng
     owning_vm: docker-runtime-lv3
@@ -4289,6 +4335,9 @@ semaphore_private_base_url: http://10.10.10.20:3004
 semaphore_controller_url: http://100.64.0.1:8020
 netbox_host_proxy_port: 8004
 netbox_controller_url: http://100.64.0.1:8004
+typesense_port: 8108
+typesense_host_proxy_port: 8016
+typesense_controller_url: http://100.64.0.1:8016
 open_webui_host_proxy_port: 8008
 open_webui_controller_url: http://100.64.0.1:8008
 plane_port: 8093
@@ -4342,6 +4391,7 @@ proxmox_management_allowed_tcp_ports:
   - 3001
   - 3009
   - 8004
+  - 8016
   - 9443
   - 8200
   - 8014

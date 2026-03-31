@@ -382,6 +382,28 @@
         "converge-gotenberg"
       ]
     },
+    "typesense_runtime": {
+      "kind": "runtime",
+      "service_id": "typesense",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "typesense",
+      "registry_ref": "docker.io/typesense/typesense",
+      "tag": "29.0",
+      "digest": "sha256:3f1d38d0d944d959890fd5d32d6109f18095e1ddf05f8a23d1b4b5cc3a595088",
+      "ref": "docker.io/typesense/typesense:29.0@sha256:3f1d38d0d944d959890fd5d32d6109f18095e1ddf05f8a23d1b4b5cc3a595088",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-30-typesense-runtime.json",
+      "consumers": [
+        "roles/typesense_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-typesense"
+      ]
+    },
     "homepage_runtime": {
       "kind": "runtime",
       "service_id": "homepage",

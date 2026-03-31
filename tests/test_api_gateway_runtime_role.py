@@ -82,6 +82,8 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "api_gateway_keycloak_verify_ready_delay: 5" in defaults
     assert "api_gateway_keycloak_verify_token_retries: 18" in defaults
     assert "api_gateway_keycloak_verify_token_delay: 5" in defaults
+    assert "api_gateway_structured_search_verify_retries: 12" in defaults
+    assert "api_gateway_structured_search_verify_delay: 5" in defaults
     assert "api_gateway_network_mode: host" in defaults
     assert "api_gateway_keycloak_docker_network: keycloak_default" in defaults
     assert "/realms/lv3/protocol/openid-connect/certs" in defaults
@@ -261,6 +263,8 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Check whether the API gateway container sees the packaged runtime probes" in tasks
     assert "Re-check whether the API gateway container sees the packaged runtime probes after startup recovery" in tasks
     assert "Fail when the API gateway runtime still misses required packaged content after recovery" in tasks
+    assert "until: api_gateway_runtime_config_probe_after_recovery.rc == 0" in tasks
+    assert "until: api_gateway_runtime_packaged_probes_after_recovery.rc == 0" in tasks
     assert "database not open" in tasks
     assert "api_gateway_docker_builder_database_missing" in tasks
     assert "api_gateway_docker_recoverable_start_failure" in tasks
@@ -286,6 +290,9 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert 'retries: "{{ api_gateway_keycloak_verify_token_retries }}"' in verify_tasks
     assert 'delay: "{{ api_gateway_keycloak_verify_token_delay }}"' in verify_tasks
     assert "until: api_gateway_verify_token_response.status == 200" in verify_tasks
+    assert 'retries: "{{ api_gateway_structured_search_verify_retries }}"' in verify_tasks
+    assert 'delay: "{{ api_gateway_structured_search_verify_delay }}"' in verify_tasks
+    assert "until: api_gateway_structured_search_check.status == 200" in verify_tasks
     assert "{{ api_gateway_service_dir }}/.githooks" in tasks
     assert "COPY Makefile ./Makefile" in tasks
     assert "COPY .githooks ./.githooks" in tasks
@@ -324,3 +331,33 @@ def test_converge_api_gateway_passes_worktree_repo_root() -> None:
 
     assert "converge-api-gateway:" in makefile
     assert "-e api_gateway_repo_root=$(REPO_ROOT)" in makefile
+
+
+def test_api_gateway_role_syncs_the_typesense_platform_catalog() -> None:
+    defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+    verify_tasks = VERIFY_TASKS_PATH.read_text(encoding="utf-8")
+    env_template = ENV_TEMPLATE_PATH.read_text(encoding="utf-8")
+
+    assert "api_gateway_typesense_service_topology" in defaults
+    assert "api_gateway_typesense_controller_url" in defaults
+    assert "platform_service_topology | service_topology_get('typesense')" in defaults
+    assert "hostvars['proxmox_florin'].typesense_host_proxy_port" in defaults
+    assert "api_gateway_typesense_base_url: http://127.0.0.1:8108" in defaults
+    assert "api_gateway_typesense_collection: platform-services" in defaults
+    assert "api_gateway_typesense_api_key_local_file" in defaults
+    assert "api_gateway_typesense_sync_script" in defaults
+    assert "Resolve the API gateway structured-search Typesense connection settings" in tasks
+    assert "api_gateway_resolved_typesense_base_url" in tasks
+    assert "api_gateway_resolved_typesense_api_key" in tasks
+    assert "Assert the API gateway structured-search Typesense connection settings resolved" in tasks
+    assert "Check whether the controller-local Typesense API key exists" in tasks
+    assert "Wait for the controller-visible Typesense health endpoint" in tasks
+    assert "Sync the Typesense platform-services collection from the service catalog" in tasks
+    assert "register: api_gateway_env_template" in tasks
+    assert "or api_gateway_env_template.changed" in tasks
+    assert "--typesense-url" in tasks
+    assert "LV3_GATEWAY_TYPESENSE_BASE_URL={{ api_gateway_resolved_typesense_base_url }}" in env_template
+    assert "LV3_GATEWAY_TYPESENSE_API_KEY={{ api_gateway_resolved_typesense_api_key }}" in env_template
+    assert "/v1/platform/search/structured?q=api&collection={{ api_gateway_typesense_collection | urlencode }}" in verify_tasks
+    assert "Assert the structured search endpoint returns Typesense-backed platform catalog results" in verify_tasks

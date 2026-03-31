@@ -18,7 +18,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Vaultwarden, Windmill, n8n |
+| `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway, Woodpecker CI |
 | `4` | Ops Portal |
 
@@ -86,6 +86,7 @@ graph TD
     serverclaw["ServerClaw\nTier 2"]
     temporal["Temporal\nTier 2"]
     tesseract_ocr["Tesseract OCR\nTier 2"]
+    typesense["Typesense\nTier 2"]
     vaultwarden["Vaultwarden\nTier 2"]
     windmill["Windmill\nTier 2"]
     homepage["Homepage\nTier 3"]
@@ -96,6 +97,7 @@ graph TD
     alertmanager -->|soft| ntfy
     api_gateway -->|hard| keycloak
     api_gateway -->|soft| nginx_edge
+    api_gateway -->|soft| typesense
     browser_runner -->|soft| api_gateway
     browser_runner -->|hard| docker_runtime
     changedetection -->|soft| api_gateway
@@ -223,6 +225,8 @@ graph TD
     tesseract_ocr -->|hard| docker_runtime
     tesseract_ocr -->|soft| tika
     tika -->|hard| docker_runtime
+    typesense -->|hard| docker_runtime
+    typesense -->|startup_only| openbao
     vaultwarden -->|hard| postgres
     vaultwarden -->|startup_only| step_ca
     windmill -->|startup_only| openbao

@@ -116,6 +116,8 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert defaults["docker_runtime_chain_recheck_delay_seconds"] == 2
     assert defaults["docker_runtime_container_recovery_retries"] == 12
     assert defaults["docker_runtime_container_recovery_delay_seconds"] == 5
+    assert defaults["docker_runtime_openbao_recovery_timeout_seconds"] == 180
+    assert defaults["docker_runtime_openbao_recovery_delay_seconds"] == 5
     assert defaults["docker_runtime_nonpersistent_restart_policies"] == ["", "no"]
     assert ensure_task["vars"]["common_docker_bridge_chains_retries"] == "{{ docker_runtime_chain_recheck_retries }}"
     assert ensure_task["vars"]["common_docker_bridge_chains_delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
@@ -141,12 +143,17 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert "TRANSIENT_DOCKER_NETWORK_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "STALE_COMPOSE_ENDPOINT_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "OPENBAO_HEALTH_URL" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "OPENBAO_RECOVERY_TIMEOUT_SECONDS" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "OPENBAO_RECOVERY_DELAY_SECONDS" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "wait_for_local_openbao" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert '"http://127.0.0.1:8201/v1/sys/health"' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "def compose_group_sort_key(item):" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'if "openbao" in services:' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "No chain/target/match by that name" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "failed to create endpoint" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "run_with_retry(command, cwd=working_dir or None)" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'if "openbao-agent" in services:' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "key=compose_group_sort_key" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'remove_command = ["docker", "rm", "-f", *container_names]' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'recovery_command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'down_command.extend(["down", "--remove-orphans"])' in recover_containers["ansible.builtin.command"]["argv"][2]
@@ -282,6 +289,11 @@ def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() ->
     assert defaults["docker_runtime_publication_assurance_helper_local_path"] == (
         "{{ docker_runtime_controller_repo_root }}/scripts/docker_publication_assurance.py"
     )
+    assert defaults["docker_runtime_repo_root"] == "{{ inventory_dir | dirname }}"
+    assert (
+        defaults["docker_runtime_publication_assurance_script_src"]
+        == "{{ docker_runtime_repo_root }}/scripts/docker_publication_assurance.py"
+    )
     assert defaults["docker_runtime_publication_assurance_script_path"] == "/usr/local/bin/lv3-docker-publication-assurance"
     assert defaults["docker_runtime_publication_assurance_helper_source"] == (
         "{{ inventory_dir ~ '/../scripts/docker_publication_assurance.py' }}"
@@ -305,7 +317,7 @@ def test_docker_runtime_installs_publication_assurance_helper_before_chain_check
 
     assert install_task["ansible.builtin.copy"]["dest"] == "{{ docker_runtime_publication_assurance_script_path }}"
     assert install_task["ansible.builtin.copy"]["content"] == (
-        "{{ lookup('ansible.builtin.file', docker_runtime_publication_assurance_helper_local_path) }}"
+        "{{ lookup('ansible.builtin.file', docker_runtime_publication_assurance_script_src) }}"
     )
     assert tasks.index(install_task) < tasks.index(nftables_check_task)
 

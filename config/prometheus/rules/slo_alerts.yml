@@ -1399,6 +1399,46 @@ groups:
           description: The private Tesseract OCR runtime remains reachable on docker-runtime-lv3
             for scanned-image and image-only document fallback extraction.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_typesense_availability
+        expr: (slo:typesense_availability:error_rate_5m > (14 * 0.010000)) and (slo:typesense_availability:error_rate_1h
+          > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: typesense
+          slo_id: typesense-availability
+          indicator: availability
+        annotations:
+          summary: typesense-availability is burning its error budget at 14x
+          description: The private Typesense controller endpoint remains reachable
+            for repo-managed structured search sync and operator keyword lookups.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_typesense_availability
+        expr: slo:typesense_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: typesense
+          slo_id: typesense-availability
+          indicator: availability
+        annotations:
+          summary: typesense-availability is burning its error budget at 3x
+          description: The private Typesense controller endpoint remains reachable
+            for repo-managed structured search sync and operator keyword lookups.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_typesense_availability
+        expr: slo:typesense_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: typesense
+          slo_id: typesense-availability
+          indicator: availability
+        annotations:
+          summary: typesense-availability has less than 10% error budget remaining
+          description: The private Typesense controller endpoint remains reachable
+            for repo-managed structured search sync and operator keyword lookups.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_uptime_kuma_availability
         expr: (slo:uptime_kuma_availability:error_rate_5m > (14 * 0.001000)) and (slo:uptime_kuma_availability:error_rate_1h
           > (14 * 0.001000))
