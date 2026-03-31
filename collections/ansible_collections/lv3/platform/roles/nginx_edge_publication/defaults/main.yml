@@ -71,6 +71,22 @@ public_edge_generated_build_root: "{{ inventory_dir | dirname }}/build"
 public_edge_static_sites: "{{ public_edge_service_topology | service_topology_edge_static_sites }}"
 public_edge_plausible_service_topology: "{{ public_edge_service_topology.get('plausible', {}) }}"
 public_edge_plausible_base_url: "{{ public_edge_plausible_service_topology.get('urls', {}).get('public', '') }}"
+public_edge_api_gateway_upstream: >-
+  {{
+    public_edge_service_topology.get('api_gateway', {}).get(
+      'urls',
+      {}
+    ).get(
+      'internal',
+      public_edge_service_topology.get('api_gateway', {}).get(
+        'edge',
+        {}
+      ).get(
+        'upstream',
+        'http://127.0.0.1:8083'
+      )
+    )
+  }}
 public_edge_plausible_site_registrations: "{{ hostvars[public_edge_control_plane_host].plausible_site_registrations | default([]) }}"
 public_edge_plausible_tracked_sites: >-
   {{
@@ -240,9 +256,9 @@ public_edge_authenticated_sites:
     auth_proxy_upstream: http://127.0.0.1:4180
     unauthenticated_proxy_routes:
       - path: /api/health
-        upstream: http://127.0.0.1:8083/v1/billing/health
+        upstream: "{{ public_edge_api_gateway_upstream }}/v1/billing/health"
       - path: /api/v1/events
-        upstream: http://127.0.0.1:8083/v1/billing/events
+        upstream: "{{ public_edge_api_gateway_upstream }}/v1/billing/events"
   docs.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   draw.lv3.org:

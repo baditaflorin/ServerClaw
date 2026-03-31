@@ -32,6 +32,9 @@ def test_lago_runtime_defaults_reference_service_topology_images_and_local_secre
     assert defaults["lago_redis_cable_url"] == (
         "redis://:{{ lago_redis_password | urlencode }}@{{ lago_redis_host }}:{{ lago_redis_port }}/{{ lago_redis_cable_db }}"
     )
+    assert defaults["lago_redis_data_owner"] == "999"
+    assert defaults["lago_redis_data_group"] == "1000"
+    assert defaults["lago_redis_data_mode"] == "0770"
     assert defaults["lago_runtime_apt_lock_timeout"] == 1200
     assert defaults["lago_public_base_url"] == "{{ platform_service_topology.lago.urls.public }}"
     assert defaults["lago_public_api_base_url"] == "{{ platform_service_topology.lago.urls.public }}/api"
@@ -65,10 +68,13 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
     tasks = load_tasks(RUNTIME_TASKS_PATH)
 
     packages_task = next(task for task in tasks if task["name"] == "Ensure the Lago runtime packages are present")
+    directories_task = next(task for task in tasks if task["name"] == "Ensure the Lago runtime directories exist")
     secret_task = next(task for task in tasks if task["name"] == "Generate the Lago runtime secrets")
     mirror_task = next(task for task in tasks if task["name"] == "Mirror the Lago runtime secrets to the control machine")
     producer_catalog_task = next(task for task in tasks if task["name"] == "Render the controller-local Lago producer catalog")
     startup_task = next(task for task in tasks if task["name"] == "Start the Lago runtime and recover Docker bridge-chain failures")
+    redis_bgsave_task = next(task for task in tasks if task["name"] == "Trigger a Lago Redis background save")
+    redis_persistence_task = next(task for task in tasks if task["name"] == "Wait for Lago Redis background save to succeed")
     metric_task = next(task for task in tasks if task["name"] == "Create the Lago smoke billable metric")
     plan_task = next(task for task in tasks if task["name"] == "Create the Lago smoke plan")
     customer_task = next(task for task in tasks if task["name"] == "Upsert the Lago smoke customer")
@@ -78,11 +84,20 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
 
     assert "curl" in packages_task["ansible.builtin.apt"]["name"]
     assert packages_task["ansible.builtin.apt"]["lock_timeout"] == "{{ lago_runtime_apt_lock_timeout }}"
+    redis_dir_entry = next(item for item in directories_task["loop"] if item["path"] == "{{ lago_redis_data_dir }}")
+    assert redis_dir_entry["owner"] == "{{ lago_redis_data_owner }}"
+    assert redis_dir_entry["group"] == "{{ lago_redis_data_group }}"
+    assert redis_dir_entry["mode"] == "{{ lago_redis_data_mode }}"
     assert "openssl genrsa 2048" in secret_task["loop"][2]["command"]
     assert mirror_task["delegate_to"] == "localhost"
     assert producer_catalog_task["delegate_to"] == "localhost"
     assert startup_task["block"][0]["name"] == "Start the Lago stack"
     assert startup_task["rescue"][-1]["name"] == "Retry Lago startup after Docker bridge-chain recovery"
+    assert redis_bgsave_task["ansible.builtin.command"]["argv"][-1] == "BGSAVE"
+    assert redis_persistence_task["ansible.builtin.command"]["argv"][-2:] == ["INFO", "persistence"]
+    assert redis_persistence_task["until"] == (
+        "'rdb_last_bgsave_status:ok' in (lago_redis_persistence_info.stdout | default(''))"
+    )
     assert metric_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_api_local_base_url }}/api/v1/billable_metrics"
     assert plan_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_api_local_base_url }}/api/v1/plans"
     assert customer_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_api_local_base_url }}/api/v1/customers"
@@ -99,9 +114,11 @@ def test_lago_verify_tasks_cover_local_health_front_and_current_usage() -> None:
     front_task = next(task for task in tasks if task["name"] == "Verify the Lago front surface listens locally")
 
     assert health_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_api_local_base_url }}/health"
-    assert usage_task["ansible.builtin.uri"]["url"] == (
-        "{{ lago_direct_api_local_base_url }}/api/v1/customers/{{ lago_smoke_external_customer_id }}/current_usage"
+    assert "{{ lago_direct_api_local_base_url }}/api/v1/customers/{{ lago_smoke_external_customer_id }}/current_usage" in (
+        usage_task["ansible.builtin.shell"]
     )
+    assert "external_subscription_id={{ lago_smoke_external_subscription_id }}" in usage_task["ansible.builtin.shell"]
+    assert "grep -q \"{{ lago_smoke_metric_code | lower }}\"" in usage_task["ansible.builtin.shell"]
     assert front_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_front_local_base_url }}/"
 
 

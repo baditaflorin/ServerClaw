@@ -11,24 +11,33 @@
   changed_when: false
 
 - name: Verify the Lago direct current usage endpoint returns the smoke metric
-  ansible.builtin.uri:
-    url: "{{ lago_direct_api_local_base_url }}/api/v1/customers/{{ lago_smoke_external_customer_id }}/current_usage"
-    method: GET
-    headers:
-      Authorization: "Bearer {{ lago_org_api_key }}"
-    params:
-      external_subscription_id: "{{ lago_smoke_external_subscription_id }}"
-    status_code: 200
-    return_content: true
+  ansible.builtin.shell: |
+    set -euo pipefail
+    response_file="$(mktemp)"
+    trap 'rm -f "$response_file"' EXIT
+
+    for _ in $(seq 1 24); do
+      status="$(
+        curl -sS \
+          -o "$response_file" \
+          -w '%{http_code}' \
+          -H "Authorization: Bearer {{ lago_org_api_key }}" \
+          "{{ lago_direct_api_local_base_url }}/api/v1/customers/{{ lago_smoke_external_customer_id }}/current_usage?external_subscription_id={{ lago_smoke_external_subscription_id }}"
+      )"
+
+      if [ "$status" = "200" ] \
+        && tr '[:upper:]' '[:lower:]' <"$response_file" | grep -q "{{ lago_smoke_metric_code | lower }}"; then
+        exit 0
+      fi
+
+      sleep 5
+    done
+
+    cat "$response_file" >&2
+    exit 1
+  args:
+    executable: /bin/bash
   register: lago_verify_current_usage
-  retries: 24
-  delay: 5
-  until: >-
-    lago_verify_current_usage.status == 200
-    and (
-      (lago_verify_current_usage.content | lower)
-      is search(lago_smoke_metric_code | lower)
-    )
   changed_when: false
   no_log: true
 

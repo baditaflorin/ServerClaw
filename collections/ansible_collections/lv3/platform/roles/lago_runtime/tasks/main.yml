@@ -68,7 +68,9 @@
     - path: "{{ lago_storage_dir }}"
       mode: "0755"
     - path: "{{ lago_redis_data_dir }}"
-      mode: "0755"
+      owner: "{{ lago_redis_data_owner }}"
+      group: "{{ lago_redis_data_group }}"
+      mode: "{{ lago_redis_data_mode }}"
     - path: "{{ lago_secret_dir }}"
       mode: "0700"
     - path: "{{ lago_env_file | dirname }}"
@@ -301,6 +303,41 @@
   delay: 5
   until: lago_health_ready.status == 200
   changed_when: false
+
+- name: Trigger a Lago Redis background save
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ lago_redis_container_name }}"
+      - redis-cli
+      - -a
+      - "{{ lago_redis_password }}"
+      - BGSAVE
+  register: lago_redis_bgsave_trigger
+  changed_when: false
+  failed_when:
+    - lago_redis_bgsave_trigger.rc != 0
+    - "'Background save already in progress' not in (lago_redis_bgsave_trigger.stdout | default(''))"
+  no_log: true
+
+- name: Wait for Lago Redis background save to succeed
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ lago_redis_container_name }}"
+      - redis-cli
+      - -a
+      - "{{ lago_redis_password }}"
+      - INFO
+      - persistence
+  register: lago_redis_persistence_info
+  retries: 30
+  delay: 2
+  until: "'rdb_last_bgsave_status:ok' in (lago_redis_persistence_info.stdout | default(''))"
+  changed_when: false
+  no_log: true
 
 - name: Wait for the Lago bootstrap organization API key to become active
   ansible.builtin.uri:

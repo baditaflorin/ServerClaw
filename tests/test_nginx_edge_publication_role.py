@@ -70,6 +70,14 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             self.defaults["public_edge_generated_build_root"],
             "{{ inventory_dir | dirname }}/build",
         )
+        self.assertIn(
+            "public_edge_service_topology.get('api_gateway', {})",
+            self.defaults["public_edge_api_gateway_upstream"],
+        )
+        self.assertIn(
+            "'internal',",
+            self.defaults["public_edge_api_gateway_upstream"],
+        )
         self.assertIn("User-agent: *", self.defaults["public_edge_robots_txt_content"])
         self.assertIn("Disallow: /", self.defaults["public_edge_robots_txt_content"])
 
@@ -118,8 +126,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertEqual(
             protected_sites["billing.lv3.org"]["unauthenticated_proxy_routes"],
             [
-                {"path": "/api/health", "upstream": "http://127.0.0.1:8083/v1/billing/health"},
-                {"path": "/api/v1/events", "upstream": "http://127.0.0.1:8083/v1/billing/events"},
+                {"path": "/api/health", "upstream": "{{ public_edge_api_gateway_upstream }}/v1/billing/health"},
+                {"path": "/api/v1/events", "upstream": "{{ public_edge_api_gateway_upstream }}/v1/billing/events"},
             ],
         )
         self.assertEqual(protected_sites["agents.lv3.org"]["unauthenticated_paths"], ["/healthz"])

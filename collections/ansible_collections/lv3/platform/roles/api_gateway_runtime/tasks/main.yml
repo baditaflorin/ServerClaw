@@ -528,6 +528,9 @@
       - -f
       - "{{ api_gateway_runtime_config_probe_path }}"
   register: api_gateway_runtime_config_probe_after_recovery
+  retries: "{{ api_gateway_runtime_recovery_probe_retries }}"
+  delay: "{{ api_gateway_runtime_recovery_probe_delay }}"
+  until: api_gateway_runtime_config_probe_after_recovery.rc == 0
   changed_when: false
   failed_when: false
 
@@ -542,6 +545,9 @@
       - "{{ item }}"
   loop: "{{ api_gateway_runtime_packaged_probe_paths }}"
   register: api_gateway_runtime_packaged_probes_after_recovery
+  retries: "{{ api_gateway_runtime_recovery_probe_retries }}"
+  delay: "{{ api_gateway_runtime_recovery_probe_delay }}"
+  until: api_gateway_runtime_packaged_probes_after_recovery.rc == 0
   changed_when: false
   failed_when: false
 

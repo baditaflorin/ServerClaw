@@ -1723,8 +1723,10 @@ workstreams:
             - receipts/ops-portal-snapshot.html
           mode: shared_contract
           contract: generated-views-v1
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
+    blockers:
+      - Branch-local `converge-r15` repaired the API-gateway recovery path and reached the final public readiness probe, but the shared API gateway tree on `docker-runtime-lv3` was overwritten during the replay. `api_gateway/main.py` was copied as changed at `2026-03-31 09:17:54 UTC`, yet `/opt/api-gateway/service/api_gateway/main.py` was last modified at `2026-03-31 09:20:18 UTC` and no longer contained `/v1/billing/health`; the branch-local readiness probe then failed on a `billing.lv3.org` certificate mismatch. Replay from merged `main` next.
   - id: ws-0295-live-apply
     adr: "0295"
     title: Live apply the shared artifact cache plane from latest origin/main

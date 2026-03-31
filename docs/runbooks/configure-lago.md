@@ -62,6 +62,13 @@ HETZNER_DNS_API_TOKEN=... make converge-lago env=production
 That entrypoint keeps the protected release files untouched and still refreshes
 the shared edge-generated portal artifacts during `make preflight`.
 
+Because `api_gateway_runtime` and `nginx_edge_publication` are shared live
+surfaces, branch-local converges are best treated as pre-integration evidence.
+If the branch-local replay reaches the shared billing edge but final public
+verification diverges from the branch state, merge to the latest `main` and
+repeat the exact-main replay before recording implementation truth or platform
+version changes.
+
 ## Generated Local Artifacts
 
 The workflow maintains controller-local artifacts under `.local/lago/`:

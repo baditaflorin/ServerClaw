@@ -28,6 +28,9 @@ lago_site_dir: /opt/lago
 lago_data_dir: "{{ lago_site_dir }}/data"
 lago_storage_dir: "{{ lago_data_dir }}/storage"
 lago_redis_data_dir: "{{ lago_data_dir }}/redis"
+lago_redis_data_owner: "999"
+lago_redis_data_group: "1000"
+lago_redis_data_mode: "0770"
 lago_secret_dir: /etc/lv3/lago
 lago_compose_file: "{{ lago_site_dir }}/docker-compose.yml"
 lago_env_file: "{{ compose_runtime_secret_root }}/lago/runtime.env"

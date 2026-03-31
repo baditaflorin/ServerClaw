@@ -92,3 +92,32 @@
 - extend the API gateway with the smallest possible ingest adapter that enforces producer tokens and emits rejected events to NATS
 - run targeted tests, full validation gates, and a governed live apply
 - capture receipts, update ADR metadata and the runbook, and leave exact merge-to-`main` follow-up explicitly documented
+
+## Branch-Local Verification Status (2026-03-31)
+
+- Targeted branch-local automation fixes are in place for Docker bridge-chain recovery, Lago Redis persistence and verification, the billing edge upstream derivation, and API-gateway topology plus startup-recovery handling.
+- Focused validation passed from this worktree:
+  - `receipts/live-applies/evidence/2026-03-31-ws-0292-targeted-tests-r15.txt`
+  - `receipts/live-applies/evidence/2026-03-31-ws-0292-api-gateway-syntax-r1.txt`
+  - `receipts/live-applies/evidence/2026-03-31-ws-0292-syntax-check-r15.txt`
+- `receipts/live-applies/evidence/2026-03-31-ws-0292-converge-r15.txt` proved that the patched API-gateway recovery path now passes:
+  - the post-recreate config and packaged-file probes succeeded
+  - the previous false-negative failure on missing packaged content did not recur
+  - the play reached the final public readiness probe
+- Branch-local live apply did not produce durable shared-surface truth because the shared API gateway tree on `docker-runtime-lv3` was overwritten during the replay:
+  - `converge-r15` copied `api_gateway/main.py` as changed at `2026-03-31 09:17:54 UTC`
+  - the live service tree file at `/opt/api-gateway/service/api_gateway/main.py` was last modified at `2026-03-31 09:20:18 UTC`
+  - the live service tree and running container no longer contained `/v1/billing/health`
+  - the running route table exposed `/v1/health` but no `/v1/billing/*` routes
+- The resulting branch-local public failure is captured in:
+  - `receipts/live-applies/evidence/2026-03-31-ws-0292-branch-concurrency-r1.txt`
+  - `receipts/live-applies/evidence/2026-03-31-ws-0292-billing-health-headers-r5.txt`
+  - `receipts/live-applies/evidence/2026-03-31-ws-0292-billing-health-body-r5.txt`
+  - `receipts/live-applies/evidence/2026-03-31-ws-0292-converge-r15.txt`
+
+## Remaining For Merge-To-Main
+
+- Merge this workstream onto the latest `origin/main` so the shared API gateway and NGINX edge replay from integrated truth instead of a branch-local view that can be overwritten by concurrent applies.
+- Re-run the authoritative exact-main Lago live apply from merged `main`.
+- Verify `https://billing.lv3.org/api/health`, `https://billing.lv3.org/api/v1/events`, and the seeded current-usage path from merged `main`.
+- Only after exact-main verification update ADR 0292 implementation metadata, `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml`.

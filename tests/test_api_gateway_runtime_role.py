@@ -82,6 +82,8 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "api_gateway_keycloak_verify_ready_delay: 5" in defaults
     assert "api_gateway_keycloak_verify_token_retries: 18" in defaults
     assert "api_gateway_keycloak_verify_token_delay: 5" in defaults
+    assert "api_gateway_runtime_recovery_probe_retries: 18" in defaults
+    assert "api_gateway_runtime_recovery_probe_delay: 5" in defaults
     assert "api_gateway_network_mode: host" in defaults
     assert "api_gateway_keycloak_docker_network: keycloak_default" in defaults
     assert "/realms/lv3/protocol/openid-connect/certs" in defaults
@@ -105,6 +107,8 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "/app/.github/workflows/validate.yml" in defaults
     assert "api_gateway_database_name: windmill" in defaults
     assert "api_gateway_database_user: windmill_admin" in defaults
+    assert "api_gateway_service_topology" in defaults
+    assert "hostvars['proxmox_florin'].platform_service_topology.api_gateway" in defaults
     assert "api_gateway_windmill_service_topology" in defaults
     assert "api_gateway_windmill_base_url" in defaults
     assert "api_gateway_windmill_service_topology.private_ip" in defaults
@@ -117,6 +121,7 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "api_gateway_dify_tools_api_key_header: X-LV3-Dify-Api-Key" in defaults
     assert "/.local/lago/producer-catalog.json" in defaults
     assert "/.local/lago/org-api-key.txt" in defaults
+    assert "hostvars['proxmox_florin'].platform_service_topology.lago" in defaults
     assert 'api_gateway_billing_api_base_url: "{{ api_gateway_lago_service_topology.urls.api | default(\'\') }}"' in defaults
     assert "api_gateway_billing_ingest_producers_path: /config/billing-ingest-producers.json" in defaults
     assert "api_gateway_billing_rejection_subject: billing.events.rejected" in defaults
@@ -258,6 +263,10 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Check whether the API gateway container sees the packaged runtime probes" in tasks
     assert "Re-check whether the API gateway container sees the packaged runtime probes after startup recovery" in tasks
     assert "Fail when the API gateway runtime still misses required packaged content after recovery" in tasks
+    assert 'retries: "{{ api_gateway_runtime_recovery_probe_retries }}"' in tasks
+    assert 'delay: "{{ api_gateway_runtime_recovery_probe_delay }}"' in tasks
+    assert "until: api_gateway_runtime_config_probe_after_recovery.rc == 0" in tasks
+    assert "until: api_gateway_runtime_packaged_probes_after_recovery.rc == 0" in tasks
     assert "database not open" in tasks
     assert "api_gateway_docker_builder_database_missing" in tasks
     assert "api_gateway_docker_recoverable_start_failure" in tasks

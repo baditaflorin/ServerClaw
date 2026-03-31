@@ -5,9 +5,21 @@
 # Idempotency: Fully idempotent because this file only declares role defaults.
 # Dependencies: ADR 0165, ADR 0092, ADR 0175, and ADR 0197.
 ---
-api_gateway_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('api_gateway') }}"
+api_gateway_service_topology: >-
+  {{
+    hostvars['proxmox_florin'].platform_service_topology.api_gateway
+    | default(
+        hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('api_gateway')
+      )
+  }}
 api_gateway_windmill_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('windmill') }}"
-api_gateway_lago_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('lago') }}"
+api_gateway_lago_service_topology: >-
+  {{
+    hostvars['proxmox_florin'].platform_service_topology.lago
+    | default(
+        hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('lago')
+      )
+  }}
 api_gateway_repo_root: "{{ inventory_dir | dirname }}"
 api_gateway_site_dir: /opt/api-gateway
 api_gateway_service_dir: "{{ api_gateway_site_dir }}/service"
@@ -227,6 +239,8 @@ api_gateway_keycloak_verify_ready_delay: 5
 api_gateway_keycloak_verify_token_retries: 18
 api_gateway_keycloak_verify_token_delay: 5
 api_gateway_keycloak_docker_network: keycloak_default
+api_gateway_runtime_recovery_probe_retries: 18
+api_gateway_runtime_recovery_probe_delay: 5
 api_gateway_runtime_config_probe_path: /app/config/ledger-event-types.yaml
 api_gateway_runtime_packaged_probe_paths:
   - /app/.gitea/workflows/release-bundle.yml
