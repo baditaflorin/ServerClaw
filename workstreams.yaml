@@ -17503,6 +17503,7 @@ workstreams:
       - docs/runbooks/configure-ntfy.md
       - docs/runbooks/container-image-policy.md
       - docs/runbooks/docker-runtime-disk-pressure.md
+      - docs/runbooks/network-policy-reference.md
       - docs/runbooks/security-posture-reporting.md
       - docs/site-generated/architecture/dependency-graph.md
       - Makefile
@@ -17704,6 +17705,7 @@ workstreams:
       - receipts/cve/**
       - receipts/live-applies/2026-03-30-adr-0298-*
       - receipts/live-applies/evidence/2026-03-30-ws-0298-*
+      - receipts/live-applies/evidence/2026-03-31-ws-0298-main-merge-*
       - README.md
       - RELEASE.md
       - VERSION
@@ -17734,6 +17736,7 @@ workstreams:
             - docs/runbooks/configure-ntfy.md
             - docs/runbooks/container-image-policy.md
             - docs/runbooks/docker-runtime-disk-pressure.md
+            - docs/runbooks/network-policy-reference.md
             - docs/runbooks/security-posture-reporting.md
             - docs/site-generated/architecture/dependency-graph.md
             - Makefile
@@ -17785,6 +17788,7 @@ workstreams:
             - receipts/cve/**
             - receipts/live-applies/2026-03-30-adr-0298-*
             - receipts/live-applies/evidence/2026-03-30-ws-0298-*
+            - receipts/live-applies/evidence/2026-03-31-ws-0298-main-merge-*
           mode: shared_contract
           contract: adr-0298-live-apply-v1
         - id: integration_readme_surface
