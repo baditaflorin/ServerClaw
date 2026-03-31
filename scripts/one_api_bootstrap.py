@@ -15,20 +15,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from script_bootstrap import ensure_repo_root_on_path
+
+REPO_ROOT = ensure_repo_root_on_path(__file__)
+from platform.retry import MaxRetriesExceeded, RetryPolicy, with_retry
 try:
     from datetime import UTC
 except ImportError:  # pragma: no cover
     from datetime import timezone
 
     UTC = timezone.utc
-
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
-    del sys.modules["platform"]
-
 
 def detect_common_repo_root(repo_root: Path) -> Path:
     try:
