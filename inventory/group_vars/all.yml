@@ -194,6 +194,7 @@ smtp_docker_network_name: mail-platform_default
 smtp_from_address: "{{ mail_platform_mailbox_address }}"
 smtp_reply_to_address: "{{ mail_platform_reply_to_email }}"
 openbao_postgres_admin_role: openbao_rotator
+openbao_postgres_connect_role: lv3_openbao_connect_all
 openbao_postgres_database: postgres
 openbao_tls_enabled: true
 openbao_database_mount_path: database
@@ -203,6 +204,7 @@ openbao_ops_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_f
 openbao_breakglass_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/breakglass-password.txt
 openbao_postgres_rotator_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/postgres-rotator-password.txt
 openbao_controller_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/controller-automation-approle.json
+openbao_atlas_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/atlas-approle.json
 openbao_mail_platform_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/mail-platform-approle.json
 openbao_agent_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"
 compose_runtime_secret_root: /run/lv3-secrets

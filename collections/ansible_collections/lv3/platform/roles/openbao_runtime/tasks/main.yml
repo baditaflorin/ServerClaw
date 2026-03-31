@@ -624,6 +624,11 @@
   delay: 2
   until: openbao_active_health.status == 200
 
+- name: Let OpenBao auth and policy backends settle after the node becomes active
+  ansible.builtin.pause:
+    seconds: "{{ openbao_runtime_post_active_settle_seconds }}"
+  when: openbao_runtime_post_active_settle_seconds | int > 0
+
 - name: Discover enabled auth methods
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/auth"
@@ -825,6 +830,10 @@
     body:
       policy: "{{ item.item.content | b64decode }}"
     status_code: 204
+  register: openbao_policy_upsert_result
+  retries: 12
+  delay: 2
+  until: openbao_policy_upsert_result.status == 204
   loop: "{{ openbao_current_policies.results }}"
   when: >-
     item.status == 404
@@ -851,7 +860,7 @@
       token_max_ttl: "{{ item.token_max_ttl }}"
     status_code: 204
   register: openbao_userpass_upsert_result
-  retries: 6
+  retries: 24
   delay: 2
   until: openbao_userpass_upsert_result.status == 204
   loop: "{{ openbao_userpass_users }}"
@@ -879,7 +888,7 @@
       secret_id_num_uses: "{{ item.secret_id_num_uses }}"
     status_code: 204
   register: openbao_approle_upsert_result
-  retries: 6
+  retries: 24
   delay: 2
   until: openbao_approle_upsert_result.status == 204
   loop: "{{ openbao_approles }}"

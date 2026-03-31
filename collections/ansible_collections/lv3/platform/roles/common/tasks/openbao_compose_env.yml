@@ -142,6 +142,71 @@
     - path: "{{ common_openbao_compose_env_runtime_dir }}"
       mode: "0700"
 
+- name: Probe the current runtime secret payload from OpenBao
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
+    method: GET
+    headers:
+      X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
+    return_content: true
+    status_code:
+      - 200
+      - 404
+      - 500
+      - 502
+      - 503
+  register: common_openbao_compose_env_current_secret_probe
+  changed_when: false
+  failed_when: false
+  no_log: true
+
+- name: Read the local OpenBao seal status after a transient runtime secret payload read failure
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: common_openbao_compose_env_secret_recovery_seal_status
+  retries: 12
+  delay: 2
+  until: common_openbao_compose_env_secret_recovery_seal_status.status == 200
+  changed_when: false
+  when: common_openbao_compose_env_current_secret_probe.status == 503
+
+- name: Unseal the local OpenBao API when runtime secret payload reads catch it sealed
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/unseal"
+    method: POST
+    body_format: json
+    body:
+      key: "{{ item }}"
+    status_code: 200
+  loop: "{{ common_openbao_compose_env_init_payload.keys_base64[: (openbao_init_key_threshold | default(2) | int)] }}"
+  register: common_openbao_compose_env_secret_recovery_unseal
+  retries: 6
+  delay: 2
+  until: common_openbao_compose_env_secret_recovery_unseal.status == 200
+  when:
+    - common_openbao_compose_env_current_secret_probe.status == 503
+    - common_openbao_compose_env_secret_recovery_seal_status.json.sealed | bool
+  no_log: true
+
+- name: Wait for the local OpenBao API to become active after runtime secret payload recovery
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
+    method: GET
+    status_code:
+      - 200
+      - 429
+      - 472
+      - 473
+  register: common_openbao_compose_env_secret_recovery_health
+  retries: 24
+  delay: 5
+  until: common_openbao_compose_env_secret_recovery_health.status in [200, 429, 472, 473]
+  changed_when: false
+  when: common_openbao_compose_env_current_secret_probe.status in [500, 502, 503]
+
 - name: Read the current runtime secret payload from OpenBao
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"

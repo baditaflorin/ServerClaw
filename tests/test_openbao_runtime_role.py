@@ -50,6 +50,7 @@ ENSURE_UNSEALED_TASKS_PATH = (
     / "ensure_unsealed.yml"
 )
 UNSEAL_KEY_TASKS_PATH = (
+OPENBAO_POSTGRES_BACKEND_TASKS_PATH = (
     REPO_ROOT
     / "collections"
     / "ansible_collections"
@@ -60,7 +61,19 @@ UNSEAL_KEY_TASKS_PATH = (
     / "tasks"
     / "unseal_key.yml"
 )
+OPENBAO_POSTGRES_BACKEND_TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "openbao_postgres_backend"
+    / "tasks"
+    / "main.yml"
+)
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "openbao.yml"
+GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "all.yml"
 
 
 def read_openbao_runtime_tasks_text() -> str:
@@ -75,11 +88,11 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     assert "postgres_ha.initial_primary" in defaults
     assert "ansible_host" in defaults
     assert "@{{ openbao_postgres_host }}:5432/postgres?sslmode=disable" in defaults
-    assert "creation_statements:" in defaults
-    assert "- !unsafe 'CREATE ROLE \"{{ name }}\" WITH LOGIN PASSWORD ''{{ password }}'' VALID UNTIL ''{{ expiration }}'';'" in defaults
-    assert '- !unsafe \'GRANT pg_read_all_data TO "{{ name }}";\'' in defaults
-    assert "revocation_statements:" in defaults
-    assert '- !unsafe \'DROP ROLE IF EXISTS "{{ name }}";\'' in defaults
+    assert 'CREATE ROLE "{{name}}" WITH LOGIN PASSWORD \'{{password}}\' VALID UNTIL \'{{expiration}}\';' in defaults
+    assert 'GRANT lv3_openbao_connect_all TO "{{name}}";' in defaults
+    assert 'GRANT pg_read_all_data TO "{{name}}";' in defaults
+    assert 'GRANT pg_use_reserved_connections TO "{{name}}";' in defaults
+    assert 'DROP ROLE IF EXISTS "{{name}}";' in defaults
     assert "openbao_http_extra_bind_addresses: []" in defaults
     assert 'openbao_atlas_approle_local_file: "{{ openbao_local_artifact_dir }}/atlas-approle.json"' in defaults
     assert 'path "database/creds/postgres-atlas-readonly"' in (
@@ -219,6 +232,26 @@ def test_openbao_runtime_persisted_approles_use_reusable_secret_ids() -> None:
     assert defaults.count("secret_id_num_uses: 0") >= 4
 
 
+def test_openbao_runtime_pins_a_non_expiring_atlas_secret_id() -> None:
+    defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
+
+    assert "  - name: atlas\n" in defaults
+    assert "    secret_id_ttl: 0\n" in defaults
+
+
+def test_openbao_postgres_backend_grants_reserved_connection_admin_option() -> None:
+    tasks = OPENBAO_POSTGRES_BACKEND_TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "Ensure the shared OpenBao database-connect role exists" in tasks
+    assert "Grant CONNECT on every managed database to the shared OpenBao database-connect role" in tasks
+    assert "GRANT CONNECT ON DATABASE %I TO %I" in tasks
+    assert "Grant the shared OpenBao database-connect role to the rotator with admin option" in tasks
+    assert "GRANT {{ openbao_postgres_connect_role }} TO {{ openbao_postgres_admin_role }} WITH ADMIN OPTION" in tasks
+    assert "Grant pg_read_all_data with admin option to the OpenBao rotator role" in tasks
+    assert "Grant reserved PostgreSQL connection capability to the OpenBao rotator role" in tasks
+    assert "GRANT {{ openbao_postgres_reserved_connection_role }} TO {{ openbao_postgres_admin_role }} WITH ADMIN OPTION" in tasks
+
+
 def test_openbao_runtime_verifies_the_atlas_approle_path() -> None:
     tasks = read_openbao_runtime_tasks_text()
 
@@ -292,6 +325,9 @@ def test_openbao_runtime_renders_rotatable_secret_keys_dynamically() -> None:
     assert "(item.value.openbao_field):" in tasks
     assert "register: openbao_seed_rotatable_secret_result" in tasks
     assert "until: openbao_seed_rotatable_secret_result.status == 200" in tasks
+    assert "- name: Seed rotation metadata for dedicated rotatable secrets" in tasks
+    assert "register: openbao_seed_rotation_metadata_result" in tasks
+    assert "until: openbao_seed_rotation_metadata_result.status in [200, 204]" in tasks
     assert "\"{{ item.value.openbao_field }}\":" not in tasks
     assert "(openbao_rotation_metadata.last_rotated_metadata_key):" in tasks
     assert "(openbao_rotation_metadata.rotated_by_metadata_key): 'openbao-seed'" in tasks
@@ -421,3 +457,39 @@ def test_openbao_playbook_refreshes_secret_ids_from_local_artifacts() -> None:
     assert {"name": "atlas", "local_file": "{{ openbao_atlas_approle_local_file }}"} in refresh_play["vars"][
         "openbao_verification_approles"
     ]
+
+
+def test_openbao_playbook_verifies_dynamic_credentials_with_env_and_retries() -> None:
+    plays = yaml.safe_load(PLAYBOOK_PATH.read_text(encoding="utf-8"))
+    verify_play = next(
+        play
+        for play in plays
+        if play["name"] == "Verify PostgreSQL dynamic credentials end to end"
+    )
+    verify_task = next(
+        task for task in verify_play["tasks"] if task["name"] == "Verify the issued PostgreSQL credential against the local database"
+    )
+
+    assert "PGPASSWORD='" not in verify_task["ansible.builtin.shell"]
+    assert verify_task["environment"]["PGPASSWORD"] == "{{ openbao_verify_postgres_dynamic_credential.json.data.password }}"
+    assert verify_task["retries"] == 6
+    assert verify_task["delay"] == 5
+    assert verify_task["failed_when"] is False
+
+
+def test_openbao_inventory_exports_controller_local_artifact_paths_used_outside_role_scope() -> None:
+    group_vars = yaml.safe_load(GROUP_VARS_PATH.read_text(encoding="utf-8"))
+
+    assert group_vars["openbao_postgres_connect_role"] == "lv3_openbao_connect_all"
+    assert (
+        group_vars["openbao_controller_approle_local_file"]
+        == "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/controller-automation-approle.json"
+    )
+    assert (
+        group_vars["openbao_atlas_approle_local_file"]
+        == "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/atlas-approle.json"
+    )
+    assert (
+        group_vars["openbao_mail_platform_approle_local_file"]
+        == "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/mail-platform-approle.json"
+    )

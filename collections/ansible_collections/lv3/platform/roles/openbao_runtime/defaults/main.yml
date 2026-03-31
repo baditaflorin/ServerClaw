@@ -62,6 +62,7 @@ openbao_tls_renewal_randomized_delay_seconds: 60
 openbao_tls_reload_command: "docker compose --file {{ openbao_compose_file }} restart openbao"
 openbao_runtime_chain_recheck_retries: 30
 openbao_runtime_chain_recheck_delay_seconds: 2
+openbao_runtime_post_active_settle_seconds: 60
 openbao_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao
 openbao_init_local_file: "{{ openbao_local_artifact_dir }}/init.json"
 openbao_ops_password_local_file: "{{ openbao_local_artifact_dir }}/ops-password.txt"
@@ -117,7 +118,7 @@ openbao_approles:
     token_ttl: 15m
     token_max_ttl: 1h
     token_num_uses: 0
-    secret_id_ttl: 15m
+    secret_id_ttl: 0
     secret_id_num_uses: 0
     local_file: "{{ openbao_atlas_approle_local_file }}"
   - name: mail-platform
@@ -153,18 +154,22 @@ openbao_database_password_authentication: scram-sha-256
 openbao_database_roles:
   - name: postgres-readonly
     db_name: "{{ openbao_database_name }}"
-    creation_statements:
-      - !unsafe 'CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD ''{{ password }}'' VALID UNTIL ''{{ expiration }}'';'
-      - !unsafe 'GRANT pg_read_all_data TO "{{ name }}";'
-    revocation_statements:
-      - !unsafe 'DROP ROLE IF EXISTS "{{ name }}";'
+    creation_statements: !unsafe |-
+      CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';
+      GRANT lv3_openbao_connect_all TO "{{name}}";
+      GRANT pg_read_all_data TO "{{name}}";
+      GRANT pg_use_reserved_connections TO "{{name}}";
+    revocation_statements: !unsafe |-
+      DROP ROLE IF EXISTS "{{name}}";
     default_ttl: 1h
     max_ttl: 24h
   - name: postgres-atlas-readonly
     db_name: "{{ openbao_database_name }}"
     creation_statements: !unsafe |-
       CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';
+      GRANT lv3_openbao_connect_all TO "{{name}}";
       GRANT pg_read_all_data TO "{{name}}";
+      GRANT pg_use_reserved_connections TO "{{name}}";
     revocation_statements: !unsafe |-
       DROP ROLE IF EXISTS "{{name}}";
     default_ttl: 1h

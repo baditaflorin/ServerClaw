@@ -55,6 +55,8 @@ SUPPORTED_SCHEMA_VERSION = "1.0.0"
 DEFAULT_DRIFT_EXIT_CODE = 2
 DEFAULT_OPERATION_TIMEOUT_SECONDS = 120
 DEFAULT_DEV_POSTGRES_WAIT_SECONDS = 30
+CLI_SUBCOMMANDS = ("validate", "lint", "snapshot", "drift")
+CLI_GLOBAL_OPTIONS_WITH_VALUES = ("--repo-root", "--catalog", "--format")
 
 
 def require_mapping(value: Any, path: str) -> dict[str, Any]:
@@ -176,6 +178,7 @@ def validate_catalog(
             raise ValueError(f"{target_path}.triggers must not be empty")
         for trigger_index, trigger in enumerate(triggers):
             require_str(trigger, f"{target_path}.triggers[{trigger_index}]")
+        lint_scope_args(target, path=target_path)
 
     databases = require_list(catalog.get("databases"), "config/atlas/catalog.json.databases")
     if not databases:
@@ -253,6 +256,22 @@ def select_lint_targets(
         if any(any(path == trigger or path.startswith(trigger) for trigger in triggers) for path in changed_files):
             selected.append(target)
     return selected
+
+
+def lint_scope_args(
+    target: dict[str, Any],
+    *,
+    path: str = "config/atlas/catalog.json.lint_targets[]",
+) -> list[str]:
+    latest = target.get("latest")
+    git_base = target.get("git_base")
+    if latest is not None and git_base is not None:
+        raise ValueError(f"{path} cannot define both latest and git_base")
+    if latest is None and git_base is None:
+        latest = 1
+    if latest is not None:
+        return ["--latest", str(require_int(latest, f"{path}.latest"))]
+    return ["--git-base", require_str(git_base, f"{path}.git_base")]
 
 
 def normalize_snapshot(content: str) -> str:
@@ -374,6 +393,22 @@ def http_reachable(url: str, *, timeout_seconds: float = 2.0) -> bool:
         return False
 
 
+def replace_loopback_host(url: str, host: str) -> str:
+    parsed = urllib.parse.urlsplit(url)
+    if parsed.hostname not in {"127.0.0.1", "localhost", "::1"}:
+        return url
+    if not parsed.netloc:
+        return url
+    if parsed.port is None:
+        default_port = 443 if parsed.scheme == "https" else 80
+        netloc = host
+        if default_port not in {80, 443}:
+            netloc = f"{host}:{default_port}"
+    else:
+        netloc = f"{host}:{parsed.port}"
+    return urllib.parse.urlunsplit(parsed._replace(netloc=netloc))
+
+
 @contextmanager
 def resolve_openbao_url(catalog: dict[str, Any], context: dict[str, Any]):
     runtime = require_mapping(catalog.get("runtime"), "config/atlas/catalog.json.runtime")
@@ -383,6 +418,12 @@ def resolve_openbao_url(catalog: dict[str, Any], context: dict[str, Any]):
         return
 
     guest_name = require_str(runtime.get("openbao_guest"), "config/atlas/catalog.json.runtime.openbao_guest")
+    guest_host = require_str(context["guests"][guest_name], f"controller context guest '{guest_name}'")
+    direct_guest_url = replace_loopback_host(openbao_url, guest_host)
+    if direct_guest_url != openbao_url and http_reachable(direct_guest_url):
+        yield direct_guest_url
+        return
+
     with guest_tunnel(context, guest_name, remote_bind="127.0.0.1:8201") as local_port:
         yield f"http://127.0.0.1:{local_port}"
 
@@ -531,8 +572,6 @@ def inspect_live_schema(
             "inspect",
             "--url",
             database_url,
-            "--format",
-            "{{ hcl . }}",
         ],
     )
     return normalize_snapshot(output)
@@ -549,6 +588,7 @@ def lint_target(
     target_id = require_str(target.get("id"), "Atlas lint target id")
     migrations_path = require_str(target.get("path"), "Atlas lint target path")
     dev_database = require_str(target.get("dev_database"), "Atlas lint target dev_database")
+    scope_args = lint_scope_args(target, path=f"Atlas lint target '{target_id}'")
     with dev_postgres(client, dev_postgres_image, dev_database) as dev_db:
         dev_url = postgres_url(
             host=dev_db["host"],
@@ -568,6 +608,7 @@ def lint_target(
                 f"file:///workspace/{migrations_path}",
                 "--dev-url",
                 dev_url,
+                *scope_args,
             ],
         )
     return {
@@ -1007,8 +1048,47 @@ def print_text_payload(payload: dict[str, Any]) -> None:
     print(json.dumps(payload, indent=2, sort_keys=True))
 
 
+def normalize_global_option_order(argv: list[str]) -> list[str]:
+    """Allow repo-wide options to appear after the Atlas subcommand.
+
+    The Makefile and Windmill wrapper both emit commands in the form:
+    `atlas_schema.py drift --repo-root <path> --format json ...`
+    while argparse normally expects those global options before the subcommand.
+    Normalize that shape so both invocation styles remain valid.
+    """
+
+    command_index = next((index for index, token in enumerate(argv) if token in CLI_SUBCOMMANDS), None)
+    if command_index is None:
+        return argv
+
+    before = list(argv[:command_index])
+    command = argv[command_index]
+    remainder = argv[command_index + 1 :]
+
+    moved_globals: list[str] = []
+    normalized_remainder: list[str] = []
+    index = 0
+    while index < len(remainder):
+        token = remainder[index]
+        option_name, separator, option_value = token.partition("=")
+        if option_name in CLI_GLOBAL_OPTIONS_WITH_VALUES:
+            moved_globals.append(token)
+            if not separator and index + 1 < len(remainder):
+                moved_globals.append(remainder[index + 1])
+                index += 2
+                continue
+        else:
+            normalized_remainder.append(token)
+            index += 1
+            continue
+        index += 1
+
+    return [*before, *moved_globals, command, *normalized_remainder]
+
+
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    normalized_argv = normalize_global_option_order(list(argv) if argv is not None else sys.argv[1:])
+    args = build_parser().parse_args(normalized_argv)
     repo_root = args.repo_root.resolve()
     catalog_path = args.catalog.resolve()
     try:

@@ -4,6 +4,7 @@ import importlib.util
 import json
 import sys
 from pathlib import Path
+from contextlib import contextmanager
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -115,6 +116,7 @@ def test_validate_catalog_allows_bootstrap_snapshot_creation(tmp_path: Path) -> 
             {
                 "id": "platform-control-plane",
                 "path": "migrations",
+                "latest": 1,
                 "triggers": ["migrations/"],
                 "dev_database": "atlas_lint",
             }
@@ -129,3 +131,193 @@ def test_validate_catalog_allows_bootstrap_snapshot_creation(tmp_path: Path) -> 
     }
 
     atlas_schema.validate_catalog(catalog, repo_root=tmp_path, require_snapshot_files=False)
+
+
+def test_normalize_global_option_order_moves_repo_flags_before_subcommand() -> None:
+    atlas_schema = load_module()
+
+    normalized = atlas_schema.normalize_global_option_order(
+        [
+            "drift",
+            "--repo-root",
+            "/srv/proxmox_florin_server",
+            "--format",
+            "json",
+            "--write-receipts",
+            "--publish-nats",
+        ]
+    )
+
+    assert normalized == [
+        "--repo-root",
+        "/srv/proxmox_florin_server",
+        "--format",
+        "json",
+        "drift",
+        "--write-receipts",
+        "--publish-nats",
+    ]
+
+
+def test_main_accepts_repo_flags_after_the_subcommand(capsys) -> None:
+    atlas_schema = load_module()
+
+    exit_code = atlas_schema.main(
+        [
+            "validate",
+            "--repo-root",
+            str(REPO_ROOT),
+            "--catalog",
+            str(REPO_ROOT / "config" / "atlas" / "catalog.json"),
+            "--format",
+            "json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert '"status": "ok"' in captured.out
+
+
+def test_inspect_live_schema_uses_default_community_compatible_output(monkeypatch) -> None:
+    atlas_schema = load_module()
+    captured: dict[str, object] = {}
+
+    def fake_run_atlas(client, *, image_ref, command, host_repo_root=None):
+        captured["image_ref"] = image_ref
+        captured["command"] = command
+        return "table \"users\" {}\n"
+
+    monkeypatch.setattr(atlas_schema, "run_atlas", fake_run_atlas)
+
+    result = atlas_schema.inspect_live_schema(
+        object(),
+        atlas_image_ref="docker.io/arigaio/atlas:test",
+        database_url="postgres://example",
+    )
+
+    assert result == "table \"users\" {}\n"
+    assert captured["image_ref"] == "docker.io/arigaio/atlas:test"
+    assert captured["command"] == [
+        "schema",
+        "inspect",
+        "--url",
+        "postgres://example",
+    ]
+
+
+def test_lint_scope_args_defaults_to_latest_one() -> None:
+    atlas_schema = load_module()
+
+    assert atlas_schema.lint_scope_args({}) == ["--latest", "1"]
+
+
+def test_lint_target_passes_latest_scope_to_atlas(monkeypatch) -> None:
+    atlas_schema = load_module()
+    commands: list[list[str]] = []
+
+    class FakeDevPostgres:
+        def __enter__(self):
+            return {
+                "host": "host.docker.internal",
+                "port": 57004,
+                "database": "atlas_lint",
+                "username": "postgres",
+                "password": "postgres",
+            }
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fake_dev_postgres(client, image_ref, database_name):
+        assert database_name == "atlas_lint"
+        return FakeDevPostgres()
+
+    def fake_run_atlas(client, *, image_ref, command, host_repo_root=None):
+        commands.append(command)
+        return ""
+
+    monkeypatch.setattr(atlas_schema, "dev_postgres", fake_dev_postgres)
+    monkeypatch.setattr(atlas_schema, "run_atlas", fake_run_atlas)
+
+    result = atlas_schema.lint_target(
+        object(),
+        atlas_image_ref="docker.io/arigaio/atlas:test",
+        dev_postgres_image="docker.io/library/postgres:16",
+        host_repo_root=REPO_ROOT,
+        target={
+            "id": "platform-control-plane",
+            "path": "migrations",
+            "dev_database": "atlas_lint",
+            "latest": 1,
+        },
+    )
+
+    assert result == {
+        "target_id": "platform-control-plane",
+        "path": "migrations",
+        "status": "passed",
+    }
+    assert commands == [
+        [
+            "migrate",
+            "lint",
+            "--dir",
+            "file:///workspace/migrations",
+            "--dev-url",
+            "postgres://postgres:postgres@host.docker.internal:57004/atlas_lint?sslmode=disable",
+            "--latest",
+            "1",
+        ]
+    ]
+
+
+def test_replace_loopback_host_rewrites_local_openbao_url_to_guest_ip() -> None:
+    atlas_schema = load_module()
+
+    assert (
+        atlas_schema.replace_loopback_host("http://127.0.0.1:8201", "10.10.10.20")
+        == "http://10.10.10.20:8201"
+    )
+    assert (
+        atlas_schema.replace_loopback_host("http://localhost:8201/v1/sys/health", "10.10.10.20")
+        == "http://10.10.10.20:8201/v1/sys/health"
+    )
+    assert (
+        atlas_schema.replace_loopback_host("https://10.10.10.20:8200", "10.10.10.20")
+        == "https://10.10.10.20:8200"
+    )
+
+
+def test_resolve_openbao_url_prefers_direct_guest_ip_before_ssh_tunnel(monkeypatch) -> None:
+    atlas_schema = load_module()
+    checked_urls: list[str] = []
+
+    def fake_http_reachable(url: str, *, timeout_seconds: float = 2.0) -> bool:
+        checked_urls.append(url)
+        return url == "http://10.10.10.20:8201"
+
+    @contextmanager
+    def fake_guest_tunnel(context, guest_name, *, remote_bind):
+        raise AssertionError("guest_tunnel should not be used when the guest IP is directly reachable")
+        yield 0
+
+    monkeypatch.setattr(atlas_schema, "http_reachable", fake_http_reachable)
+    monkeypatch.setattr(atlas_schema, "guest_tunnel", fake_guest_tunnel)
+
+    catalog = {
+        "runtime": {
+            "openbao_guest": "docker-runtime-lv3",
+            "openbao_url": "http://127.0.0.1:8201",
+        }
+    }
+    context = {"guests": {"docker-runtime-lv3": "10.10.10.20"}}
+
+    with atlas_schema.resolve_openbao_url(catalog, context) as resolved_url:
+        assert resolved_url == "http://10.10.10.20:8201"
+
+    assert checked_urls == [
+        "http://127.0.0.1:8201",
+        "http://10.10.10.20:8201",
+    ]

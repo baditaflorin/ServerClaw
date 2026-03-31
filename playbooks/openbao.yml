@@ -183,7 +183,6 @@
     - name: Verify the issued PostgreSQL credential against the local database
       ansible.builtin.shell: |
         set -euo pipefail
-        PGPASSWORD='{{ openbao_verify_postgres_dynamic_credential.json.data.password }}' \
         psql \
           --host 127.0.0.1 \
           --username '{{ openbao_verify_postgres_dynamic_credential.json.data.username }}' \
@@ -193,8 +192,16 @@
           --command 'select current_user'
       args:
         executable: /bin/bash
+      environment:
+        PGPASSWORD: "{{ openbao_verify_postgres_dynamic_credential.json.data.password }}"
       register: openbao_verify_postgres_login
+      retries: 6
+      delay: 5
+      until:
+        - openbao_verify_postgres_login.rc == 0
+        - openbao_verify_postgres_login.stdout | trim == openbao_verify_postgres_dynamic_credential.json.data.username
       changed_when: false
+      failed_when: false
       no_log: true
 
     - name: Assert the issued PostgreSQL credential works

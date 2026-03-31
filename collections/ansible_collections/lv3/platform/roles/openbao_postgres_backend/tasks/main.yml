@@ -3,6 +3,7 @@
   ansible.builtin.assert:
     that:
       - openbao_postgres_admin_role is match('^[a-z_][a-z0-9_]*$')
+      - openbao_postgres_connect_role is match('^[a-z_][a-z0-9_]*$')
       - openbao_postgres_admin_password_local_file | length > 0
       - openbao_postgres_database | length > 0
       - openbao_postgres_reserved_connection_role is match('^[a-z_][a-z0-9_]*$')
@@ -94,6 +95,74 @@
   changed_when: false
   when: openbao_postgres_writable_check.stdout | trim == "1"
 
+- name: Ensure the shared OpenBao database-connect role exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        DO $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{{ openbao_postgres_connect_role }}') THEN
+            CREATE ROLE {{ openbao_postgres_connect_role }} NOLOGIN;
+          END IF;
+        END
+        $$;
+  changed_when: false
+  when: openbao_postgres_writable_check.stdout | trim == "1"
+
+- name: Grant CONNECT on every managed database to the shared OpenBao database-connect role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -d
+      - "{{ openbao_postgres_database }}"
+      - -c
+      - >-
+        DO $$
+        DECLARE
+          database_name text;
+        BEGIN
+          FOR database_name IN
+            SELECT datname
+            FROM pg_database
+            WHERE datallowconn
+              AND NOT datistemplate
+          LOOP
+            EXECUTE format(
+              'GRANT CONNECT ON DATABASE %I TO %I',
+              database_name,
+              '{{ openbao_postgres_connect_role }}'
+            );
+          END LOOP;
+        END
+        $$;
+  changed_when: false
+  when: openbao_postgres_writable_check.stdout | trim == "1"
+
+- name: Grant the shared OpenBao database-connect role to the rotator with admin option
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -d
+      - "{{ openbao_postgres_database }}"
+      - -c
+      - "GRANT {{ openbao_postgres_connect_role }} TO {{ openbao_postgres_admin_role }} WITH ADMIN OPTION"
+  changed_when: false
+  when: openbao_postgres_writable_check.stdout | trim == "1"
+
 - name: Grant pg_read_all_data with admin option to the OpenBao rotator role
   become: true
   become_user: postgres
@@ -120,6 +189,6 @@
       - -d
       - "{{ openbao_postgres_database }}"
       - -c
-      - "GRANT {{ openbao_postgres_reserved_connection_role }} TO {{ openbao_postgres_admin_role }}"
+      - "GRANT {{ openbao_postgres_reserved_connection_role }} TO {{ openbao_postgres_admin_role }} WITH ADMIN OPTION"
   changed_when: false
   when: openbao_postgres_writable_check.stdout | trim == "1"

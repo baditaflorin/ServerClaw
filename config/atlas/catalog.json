@@ -27,6 +27,7 @@
     {
       "id": "platform-control-plane",
       "path": "migrations",
+      "latest": 1,
       "triggers": [
         "migrations/",
         "config/atlas/",
