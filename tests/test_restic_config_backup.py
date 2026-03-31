@@ -170,6 +170,82 @@ def test_snapshot_id_from_backup_stdout_reads_restic_json_stream() -> None:
     assert restic_backup.snapshot_id_from_backup_stdout(stdout) == "abc123"
 
 
+def test_resolve_minio_endpoint_requires_running_container() -> None:
+    restic_backup.run_command = lambda argv, **kwargs: types.SimpleNamespace(
+        returncode=0,
+        stdout=json.dumps(
+            [
+                {
+                    "State": {"Running": False, "Status": "exited"},
+                    "NetworkSettings": {"Networks": {"outline_default": {"IPAddress": ""}}},
+                }
+            ]
+        ),
+        stderr="",
+    )
+
+    try:
+        restic_backup.resolve_minio_endpoint(
+            {"controller_host": {"minio": {"container_name": "outline-minio", "bucket": "restic-config-backup"}}}
+        )
+    except RuntimeError as exc:
+        assert "outline-minio is exited" in str(exc)
+        assert "start the Outline MinIO runtime" in str(exc)
+    else:
+        raise AssertionError("Expected resolve_minio_endpoint to reject stopped MinIO containers")
+
+
+def test_resolve_minio_endpoint_rejects_invalid_container_ip() -> None:
+    restic_backup.run_command = lambda argv, **kwargs: types.SimpleNamespace(
+        returncode=0,
+        stdout=json.dumps(
+            [
+                {
+                    "State": {"Running": True, "Status": "running"},
+                    "NetworkSettings": {"Networks": {"outline_default": {"IPAddress": "invalid IP"}}},
+                }
+            ]
+        ),
+        stderr="",
+    )
+
+    try:
+        restic_backup.resolve_minio_endpoint(
+            {"controller_host": {"minio": {"container_name": "outline-minio", "bucket": "restic-config-backup"}}}
+        )
+    except RuntimeError as exc:
+        assert "outline-minio reported an invalid container IP" in str(exc)
+    else:
+        raise AssertionError("Expected resolve_minio_endpoint to reject invalid MinIO container IPs")
+
+
+def test_resolve_minio_endpoint_prefers_valid_ipv4_address() -> None:
+    restic_backup.run_command = lambda argv, **kwargs: types.SimpleNamespace(
+        returncode=0,
+        stdout=json.dumps(
+            [
+                {
+                    "State": {"Running": True, "Status": "running"},
+                    "NetworkSettings": {
+                        "Networks": {
+                            "outline_ipv6": {"GlobalIPv6Address": "2001:db8::10"},
+                            "outline_default": {"IPAddress": "10.200.18.4"},
+                        }
+                    },
+                }
+            ]
+        ),
+        stderr="",
+    )
+
+    host, endpoint = restic_backup.resolve_minio_endpoint(
+        {"controller_host": {"minio": {"container_name": "outline-minio", "bucket": "restic-config-backup"}}}
+    )
+
+    assert host == "10.200.18.4"
+    assert endpoint == "http://10.200.18.4:9000"
+
+
 def test_repo_surfaces_register_restic_backup_contract() -> None:
     workflow_catalog = json.loads(WORKFLOW_CATALOG_PATH.read_text())["workflows"]
     command_catalog = json.loads(COMMAND_CATALOG_PATH.read_text())["commands"]

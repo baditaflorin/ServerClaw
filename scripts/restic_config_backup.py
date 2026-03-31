@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import ipaddress
 import json
 import os
 import shlex
@@ -141,17 +142,47 @@ def resolve_minio_endpoint(catalog: dict[str, Any]) -> tuple[str, str]:
             "docker",
             "inspect",
             container_name,
-            "--format",
-            "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}",
         ]
     )
     if inspect.returncode != 0:
         detail = inspect.stderr.strip() or inspect.stdout.strip() or f"failed to inspect {container_name}"
         raise RuntimeError(detail)
-    host = inspect.stdout.strip()
-    if not host:
+    payload = json.loads(inspect.stdout or "[]")
+    container = payload[0] if payload else {}
+    state = container.get("State", {})
+    status = str(state.get("Status") or "unknown").strip() or "unknown"
+    if not state.get("Running"):
+        raise RuntimeError(
+            f"{container_name} is {status}; start the Outline MinIO runtime before rerunning restic config backup"
+        )
+
+    networks = container.get("NetworkSettings", {}).get("Networks", {}) or {}
+    first_valid_ip: str | None = None
+    first_valid_version: int | None = None
+    first_invalid_ip: str | None = None
+    for network in networks.values():
+        for candidate in (
+            str(network.get("IPAddress") or "").strip(),
+            str(network.get("GlobalIPv6Address") or "").strip(),
+        ):
+            if not candidate:
+                continue
+            try:
+                parsed = ipaddress.ip_address(candidate)
+            except ValueError:
+                first_invalid_ip = first_invalid_ip or candidate
+                continue
+            if first_valid_ip is None or (first_valid_version != 4 and parsed.version == 4):
+                first_valid_ip = candidate
+                first_valid_version = parsed.version
+
+    if first_valid_ip is None:
+        if first_invalid_ip:
+            raise RuntimeError(f"{container_name} reported an invalid container IP: {first_invalid_ip!r}")
         raise RuntimeError(f"{container_name} has no reachable container IP")
-    return host, f"http://{host}:9000"
+
+    host = first_valid_ip if first_valid_version == 4 else f"[{first_valid_ip}]"
+    return first_valid_ip, f"http://{host}:9000"
 
 
 def restic_repository(catalog: dict[str, Any], endpoint: str) -> str:
