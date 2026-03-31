@@ -116,6 +116,9 @@ def test_windmill_postgres_support_role_enforces_bypassrls() -> None:
     tasks = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_postgres/tasks/main.yml"
     ).read_text()
+    defaults = yaml.safe_load(
+        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_postgres/defaults/main.yml").read_text()
+    )
 
     assert "ansible.builtin.meta: flush_handlers" in tasks
     assert "CREATE ROLE {{ windmill_database_support_role }} BYPASSRLS" in tasks
@@ -123,3 +126,7 @@ def test_windmill_postgres_support_role_enforces_bypassrls() -> None:
     assert "Wait for local PostgreSQL SQL readiness before Windmill role reconciliation" in tasks
     assert "windmill_postgres_local_sql_probe.stdout | trim == \"1\"" in tasks
     assert "windmill_postgres_writable_check.rc == 0" in tasks
+    assert "SHOW shared_preload_libraries" in tasks
+    assert "SELECT 1 FROM pg_extension WHERE extname = 'pgaudit'" in tasks
+    assert "DROP EXTENSION IF EXISTS pgaudit CASCADE" in tasks
+    assert defaults["windmill_postgres_cleanup_stale_pgaudit_extension"] is True
