@@ -193,7 +193,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-lv3` now serves the repo-managed private event bus on `10.10.10.20:4222`, the 2026-03-30 exact-main replay re-verified the `PLATFORM_EVENTS`, `RAG_DOCUMENT`, and `SECRET_ROTATION` streams after a short shared Docker-runtime correction loop, and the controller-side check/apply paths plus platform, secret-rotation, and RAG smoke publishes all completed cleanly.
 ADR 0302 Restic file-level backups are now live on production from `main`: `docker-runtime-lv3` now writes encrypted snapshots of `receipts/`, `config/`, `versions/stack.yaml`, and the controller-local secret manifest into the MinIO-backed `restic-config-backup` repository, and the 2026-03-31 exact-main replay re-verified the systemd timer, the event-driven live-apply trigger path, and the governed restore-verification rehearsal end to end.
 ADR 0305 k6 continuous load testing and SLO error-budget burn validation is now
-integrated on `main`: release `0.177.119` carries the repo-managed smoke,
+integrated on `main`: release `0.177.120` carries the repo-managed smoke,
 load, and soak entrypoints together with Windmill scheduling, Prometheus
 remote-write, and bounded notification handling, while the latest realistic
 2026-03-31 exact-main replay truthfully preserved current live degradation on
@@ -207,7 +207,7 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.119` |
+| Repository version | `0.177.120` |
 | Platform version | `0.130.77` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
@@ -315,6 +315,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `homepage` | `2026-03-26-adr-0152-homepage-live-apply` |
 | `host_control_loops` | `2026-03-28-adr-0226-host-control-loops-mainline-live-apply` |
 | `https_tls_assurance` | `2026-03-29-adr-0255-matrix-synapse-mainline-live-apply` |
+| `iac_policy_scanning` | `2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply` |
 | `identity_taxonomy` | `2026-03-22-adr-0046-identity-classes-live-apply` |
 | `immutable_guest_replacement` | `2026-03-27-adr-0191-immutable-guest-replacement-live-apply` |
 | `jupyterhub` | `2026-03-30-adr-0291-jupyterhub-mainline-live-apply` |
@@ -730,6 +731,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Health Probe Contracts Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/health-probe-contracts.md)
 - [HTTP Security Headers](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/http-security-headers.md)
 - [HTTPS And TLS Assurance](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/https-tls-assurance.md)
+- [IaC Policy Scanning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/iac-policy-scanning.md)
 - [Identity Taxonomy And Managed Principals](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/identity-taxonomy-and-managed-principals.md)
 - [Immutable Guest Replacement](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/immutable-guest-replacement.md)
 - [Incident Triage Engine](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/incident-triage-engine.md)
@@ -1476,6 +1478,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0302-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-main-integration.md)
 - [Workstream ws-0305-live-apply: Live Apply ADR 0305 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-live-apply.md)
 - [Workstream ws-0305-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md)
+- [Workstream ws-0306-live-apply: Live Apply ADR 0306 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -1493,7 +1496,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.119` |
+| Repository version | `0.177.120` |
 | Platform version | `0.130.77` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1826,6 +1829,7 @@ This repository is intentionally opinionated:
 | `0302` | Integrate ADR 0302 Restic exact-main replay onto current origin/main | `live_applied` | [ws-0302-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-main-integration.md) |
 | `0305` | Live apply ADR 0305 k6 load testing and SLO error-budget burn validation from latest origin/main | `live_applied` | [ws-0305-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-live-apply.md) |
 | `0305` | Integrate ADR 0305 k6 exact-main replay onto origin/main | `live_applied` | [ws-0305-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md) |
+| `0306` | Live apply Checkov IaC policy scanning from latest origin/main | `live_applied` | [ws-0306-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

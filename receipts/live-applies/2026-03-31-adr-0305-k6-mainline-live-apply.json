@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-31",
   "recorded_on": "2026-03-31",
-  "recorded_at": "2026-03-31T16:28:13Z",
+  "recorded_at": "2026-03-31T17:22:39Z",
   "recorded_by": "codex",
   "source_commit": "6d476f01e75a2ecf31d8ce13df1250bc6aec193e",
-  "repo_version_context": "0.177.119",
+  "repo_version_context": "0.177.120",
   "platform_version_context": "0.130.77",
   "workflow_id": "adr-0305-k6-mainline-live-apply",
   "adr": "0305",
-  "summary": "Integrated ADR 0305 onto the latest realistic origin/main baseline by recutting the exact-main closeout as repository version 0.177.119 from committed source 6d476f01e75a2ecf31d8ce13df1250bc6aec193e after origin/main advanced to commit 2411a7cd428e0eba17168aa5eed66f04c4ed48dd. The canonical mainline receipt preserves both the earlier repaired 0.177.118 comparison baseline and the newer latest-main truthful degradation on platform version 0.130.77: public Keycloak OIDC returned 502 Bad Gateway, Keycloak smoke failed 110 of 110 requests, Keycloak load failed 1184 of 1600 requests (74.00%), and OpenFGA load failed 14 of 1182 requests (1.18%). The closeout also fully re-verified the hardened repository automation path: focused run_gate_fallback and remote_exec regression tests passed, make remote-validate passed on docker-build-lv3, and the final make pre-push-gate recovered from transient 502 Bad Gateway pulls of registry.lv3.org/check-runner/infra:2026.03.23 by syncing the partial remote status back, rerunning only unresolved packer-validate and tofu-validate checks locally, and widening the shared packer-validate timeout budget so the controller-local arm64 fallback can finish the emulated x86 check-runner image.",
+  "summary": "Integrated ADR 0305 onto main as repository version 0.177.120 after origin/main first advanced to commit 2411a7cd428e0eba17168aa5eed66f04c4ed48dd and later to commit 97f05802253cbb8fb4640249fdb8485fd7ecdde6, which still carried repository version 0.177.119 and platform version 0.130.77 after ADR 0306 landed. The canonical mainline receipt preserves both the earlier repaired 0.177.118 comparison baseline and the latest realistic 0.177.119 k6 degradation evidence from committed source 6d476f01e75a2ecf31d8ce13df1250bc6aec193e: public Keycloak OIDC returned 502 Bad Gateway, Keycloak smoke failed 110 of 110 requests, Keycloak load failed 1184 of 1600 requests (74.00%), and OpenFGA load failed 14 of 1182 requests (1.18%). The final integrated 0.177.120 verification then passed end to end: focused pytest for run_gate_fallback, remote_exec, and iac_policy_scan passed with 21 tests and 1 skip, make check-build-server passed, make remote-validate passed with the merged iac-policy-scan lane, and make pre-push-gate recovered from transient 502 Bad Gateway pulls of registry.lv3.org/check-runner/infra:2026.03.23 by syncing the partial remote status back and rerunning only unresolved packer-validate and tofu-validate checks locally.",
   "targets": [
     {
       "kind": "guest",
@@ -33,7 +33,7 @@
     {
       "check": "Latest realistic mainline baseline",
       "result": "pass",
-      "observed": "The final ADR 0305 closeout targeted origin/main commit 2411a7cd428e0eba17168aa5eed66f04c4ed48dd, which already carried repository version 0.177.118 and platform version 0.130.77. The earlier exact-main comparison baseline at origin/main commit 5c7e07235f7b0da1f756148e145397f0ac6ceb10 and repository version 0.177.118 remains committed for audit comparison."
+      "observed": "The final merge-to-main closeout targeted origin/main commit 97f05802253cbb8fb4640249fdb8485fd7ecdde6, which already carried repository version 0.177.119 and platform version 0.130.77 after ADR 0306 landed. The earlier exact-main comparison baselines at origin/main commits 5c7e07235f7b0da1f756148e145397f0ac6ceb10 and 2411a7cd428e0eba17168aa5eed66f04c4ed48dd remain committed for audit comparison."
     },
     {
       "check": "Exact-main comparison baseline",
@@ -59,6 +59,11 @@
       "check": "Terminal repo automation gates",
       "result": "pass",
       "observed": "make remote-validate passed with workstream-surfaces, agent-standards, ansible-syntax, schema-validation, policy-validation, alert-rule-validation, type-check, and dependency-graph all marked passed. The final make pre-push-gate then synced the partial remote status file back after transient 502 Bad Gateway pulls of registry.lv3.org/check-runner/infra:2026.03.23 left packer-validate and tofu-validate runner_unavailable, preserved one post-edit controller-local packer timeout proof in r5, widened packer-validate from 120 to 300 seconds in config/validation-gate.json and config/check-runner-manifest.json, reran only those unresolved checks locally via scripts/run_gate_fallback.py, and passed cleanly on r6."
+    },
+    {
+      "check": "Final integrated mainline release verification",
+      "result": "pass",
+      "observed": "After cutting repository version 0.177.120, uv run --with pytest pytest tests/test_run_gate_fallback.py tests/test_remote_exec.py tests/test_iac_policy_scan.py passed 21 tests with 1 skipped, make check-build-server passed against docker-build-lv3, make remote-validate passed with workstream-surfaces through dependency-graph including iac-policy-scan, and make pre-push-gate passed after the remote builder again hit transient 502 Bad Gateway pulls for registry.lv3.org/check-runner/infra:2026.03.23, synced the partial status back, and reran only packer-validate and tofu-validate locally."
     }
   ],
   "correction_loop": {
@@ -78,6 +83,7 @@
     "docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md",
     "docs/workstreams/ws-0305-live-apply.md",
     "docs/workstreams/ws-0305-main-integration.md",
+    "docs/release-notes/0.177.120.md",
     "docs/runbooks/k6-load-testing.md",
     "docs/runbooks/configure-openfga.md",
     "config/build-server.json",
@@ -105,6 +111,13 @@
     "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-adr-index-r3-0.177.119.txt",
     "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-live-apply-receipts-validate-r5-0.177.119.txt",
     "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-git-diff-check-r6-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-final-targeted-pytest-r1-0.177.120.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-final-check-build-server-r1-0.177.120.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-final-remote-validate-r1-0.177.120.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-final-pre-push-gate-r1-0.177.120.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-final-adr-index-r1-0.177.120.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-final-live-apply-receipts-validate-r1-0.177.120.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-final-git-diff-check-r1-0.177.120.txt",
     "receipts/k6/smoke-keycloak-20260331T133226Z.json",
     "receipts/k6/smoke-openfga-20260331T133226Z.json",
     "receipts/k6/load-keycloak-20260331T133416Z.json",
@@ -120,8 +133,9 @@
   ],
   "notes": [
     "This receipt records the latest-main exact-main integration closeout for ADR 0305; the first verified live platform implementation still occurred earlier on platform version 0.130.75.",
-    "Platform version context now records the newest realistic integration baseline, 0.130.77, but no additional platform_version bump is taken because ADR 0305 was already live before the mainline closeout; repository version advances to 0.177.119.",
-    "The repaired 0.177.118 smoke-pass and load-fail receipts remain committed beside the 0.177.119 latest-main degradation receipts so the audit trail preserves both the restored comparison baseline and the current live-platform truth.",
+    "Platform version context now records the newest realistic integration baseline, 0.130.77, but no additional platform_version bump is taken because ADR 0305 was already live before the mainline closeout; repository version advances to 0.177.120 because origin/main already recorded ADR 0306 on 0.177.119.",
+    "The repaired 0.177.118 smoke-pass and load-fail receipts remain committed beside the 0.177.119 latest-main degradation receipts so the audit trail preserves both the restored comparison baseline and the current live-platform truth, while the final merged repo release becomes 0.177.120.",
+    "The final metadata closeout reran ADR index generation, live-apply receipt validation, and git diff hygiene checks on the 0.177.120 merge tree after the integrated remote gates had already passed.",
     "The final pre-push proof set intentionally preserves the transient runner-image pull failures on docker-build-lv3 together with the first post-edit controller-local packer timeout and the later successful unresolved-only local fallback so the branch documents both the repository pass and the remaining build-host registry wrinkle."
   ]
 }

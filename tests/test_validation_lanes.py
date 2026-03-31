@@ -62,6 +62,46 @@ def test_docs_change_selects_docs_lane_without_remote_builder() -> None:
     assert "semgrep-sast" not in selection.blocking_checks
 
 
+def test_ansible_role_change_selects_iac_policy_scan() -> None:
+    module = load_module("validation_lanes_ansible_iac", "scripts/validation_lanes.py")
+    manifest_checks = module.load_manifest_checks(REPO_ROOT / "config" / "validation-gate.json")
+    catalog = module.load_catalog(
+        catalog_path=REPO_ROOT / "config" / "validation-lanes.yaml",
+        manifest_checks=manifest_checks,
+    )
+
+    selection = module.resolve_selection_from_changed_files(
+        catalog,
+        manifest_checks,
+        changed_files=("collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml",),
+        branch="codex/iac-role-change",
+        base_ref="origin/main",
+    )
+
+    assert "service-syntax-and-unit" in selection.selected_lanes
+    assert "iac-policy-scan" in selection.blocking_checks
+
+
+def test_tofu_change_selects_remote_builder_iac_policy_scan() -> None:
+    module = load_module("validation_lanes_tofu_iac", "scripts/validation_lanes.py")
+    manifest_checks = module.load_manifest_checks(REPO_ROOT / "config" / "validation-gate.json")
+    catalog = module.load_catalog(
+        catalog_path=REPO_ROOT / "config" / "validation-lanes.yaml",
+        manifest_checks=manifest_checks,
+    )
+
+    selection = module.resolve_selection_from_changed_files(
+        catalog,
+        manifest_checks,
+        changed_files=("tofu/modules/proxmox-vm/main.tf",),
+        branch="codex/iac-tofu-change",
+        base_ref="origin/main",
+    )
+
+    assert "remote-builder" in selection.selected_lanes
+    assert "iac-policy-scan" in selection.blocking_checks
+
+
 def test_unknown_surface_widens_to_all_lanes() -> None:
     module = load_module("validation_lanes_unknown", "scripts/validation_lanes.py")
     manifest_checks = module.load_manifest_checks(REPO_ROOT / "config" / "validation-gate.json")

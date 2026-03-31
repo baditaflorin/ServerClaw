@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.177.119
+- Implemented In Repo Version: 0.177.120
 - Implemented In Platform Version: 0.130.75
 - Implemented On: 2026-03-31
 - Date: 2026-03-29
@@ -160,7 +160,13 @@ Three k6 test scenario types are defined:
 - `origin/main` then advanced again to commit
   `2411a7cd428e0eba17168aa5eed66f04c4ed48dd`, carrying repository version
   `0.177.118` and platform version `0.130.77`, so the exact-main closeout was
-  recut on that newer baseline and published as release `0.177.119`
+  first recut on that newer baseline
+- `origin/main` later advanced again to commit
+  `97f05802253cbb8fb4640249fdb8485fd7ecdde6`, which still carried repository
+  version `0.177.119` and platform version `0.130.77` after ADR 0306 landed,
+  so the final merge-to-main closeout for ADR 0305 was recut as repository
+  release `0.177.120` while preserving the latest realistic `0.177.119` k6
+  evidence
 - the latest-main smoke replay from committed source
   `6d476f01e75a2ecf31d8ce13df1250bc6aec193e` preserved current live Keycloak
   degradation instead of masking it: direct probing of
@@ -170,7 +176,8 @@ Three k6 test scenario types are defined:
   with `110` failures, and `receipts/k6/smoke-openfga-20260331T145155Z.json`
   still passed with `112` requests and `0` failures
 - the latest-main load replay from the same committed source also preserved the
-  truthful degraded platform outcome under release `0.177.119`: Keycloak
+  truthful degraded platform outcome under the latest realistic `0.177.119`
+  baseline: Keycloak
   recorded `1600` requests with `1184` failures (`74.00%` error rate) in
   `receipts/k6/load-keycloak-20260331T145555Z.json`, OpenFGA recorded `1182`
   requests with `14` failures (`1.18%`) in
@@ -179,7 +186,7 @@ Three k6 test scenario types are defined:
   `404 Not Found` without hanging the run
 - the canonical exact-main closeout receipt is
   `receipts/live-applies/2026-03-31-adr-0305-k6-mainline-live-apply.json`,
-  published in repository release `0.177.119` while keeping the first verified
+  published in repository release `0.177.120` while keeping the first verified
   platform implementation version at `0.130.75`
 
 ## Consequences

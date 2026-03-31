@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.177.119
+repo_version: 0.177.120
 platform_version: 0.130.77
 
 live_apply_evidence:
@@ -63,6 +63,7 @@ live_apply_evidence:
     openfga: 2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply
     open_webui: 2026-03-25-adr-0145-open-webui-ollama-connector-live-apply
     remote_build_gateway: 2026-03-29-adr-0265-immutable-validation-snapshots-mainline-live-apply
+    iac_policy_scanning: 2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
     security_posture_reporting: 2026-03-26-adr-0102-security-posture-live-apply
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
@@ -1082,7 +1083,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.119
+    current: 0.177.120
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.77

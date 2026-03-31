@@ -33,6 +33,7 @@ lanes:
     checks:
       - ansible-syntax
       - ansible-lint
+      - iac-policy-scan
       - type-check
       - service-completeness
   remote-builder:
@@ -43,6 +44,7 @@ lanes:
       - tofu-validate
       - security-scan
       - semgrep-sast
+      - iac-policy-scan
   live-apply-and-promotion:
     title: Live-apply and promotion lane
     description: Validate promotion-facing runtime verification and post-merge automation entrypoints.
