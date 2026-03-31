@@ -204,6 +204,27 @@ def test_trigger_remote_command_includes_live_apply_flag() -> None:
     assert "--live-apply-trigger" in command
 
 
+def test_makefile_live_apply_targets_invoke_restic_trigger_with_pyyaml() -> None:
+    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+
+    assert (
+        "uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-group --live-apply-trigger"
+        in makefile
+    )
+    assert (
+        "uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-service --live-apply-trigger"
+        in makefile
+    )
+    assert (
+        "uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-site --live-apply-trigger"
+        in makefile
+    )
+    assert (
+        'uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env "$(or $(env),production)" --mode backup --triggered-by live-apply-waves --live-apply-trigger'
+        in makefile
+    )
+
+
 def test_post_ntfy_notification_uses_human_readable_title(monkeypatch) -> None:
     captured: dict[str, object] = {}
 
