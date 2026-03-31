@@ -401,6 +401,29 @@ automation:
       - "scripts/gate_bypass_waivers.py: Loader, validator, and summary helper"
       - "docs/runbooks/validation-gate.md: operator procedure"
 
+  config/checkov/policy-gate.yaml:
+    purpose: Canonical ADR 0306 policy-level contract for the repo-managed IaC policy scan
+    owner: human
+    format: YAML
+    use_for: Declaring which IaC surfaces the Checkov wrapper scans, which rule ids are blocking, and how the current Compose-template gap is recorded
+    update_when: Adjusting Checkov gating levels, adding or removing governed scan groups, or changing the documented Compose handling boundary
+    validation: "python3 scripts/iac_policy_scan.py"
+    related_files:
+      - "config/checkov/skip-checks.yaml: repo-managed suppression catalog"
+      - "scripts/iac_policy_scan.py: Checkov wrapper, summary writer, and SARIF emitter"
+      - "docs/runbooks/iac-policy-scanning.md: operator procedure"
+
+  config/checkov/skip-checks.yaml:
+    purpose: Canonical ADR 0306 suppression catalog for path-scoped Checkov findings
+    owner: human
+    format: YAML
+    use_for: Recording governed Checkov suppressions with explicit path scope, reason, and decision reference instead of inline source comments
+    update_when: Adding or removing a justified IaC policy suppression
+    validation: "python3 scripts/iac_policy_scan.py"
+    related_files:
+      - "config/checkov/policy-gate.yaml: gate levels and scan groups"
+      - "docs/runbooks/iac-policy-scanning.md: suppression governance procedure"
+
   keys/gitea-release-bundle-cosign.pub:
     purpose: Committed ADR 0233 Cosign public verifier for signed private Gitea release bundles
     owner: human
@@ -625,14 +648,17 @@ service_configuration:
     purpose: Validation gate configuration for local, remote, and worker post-merge checks
     owner: human
     format: JSON
-    use_for: Controlling which validation checks are active, including ADR 0230 policy-validation, ADR 0251 smoke-catalog validation, and ADR 0301 Semgrep SAST on controller, build-server, and Windmill worker paths
+    use_for: Controlling which validation checks are active, including ADR 0230 policy-validation, ADR 0251 smoke-catalog validation, ADR 0301 Semgrep SAST, and ADR 0306 IaC policy scanning on controller, build-server, and Windmill worker paths
     validation: "python3 scripts/gate_status.py --repo-path ."
     related_files:
       - "config/build-server.json: remote-validate and remote-pre-push command wiring"
       - "config/validation-lanes.yaml: ADR 0264 lane-to-surface catalog that selects blocking checks"
       - "config/check-runner-manifest.json: runner-image check definitions"
       - "config/semgrep/rules/: local Semgrep rule packs for the semgrep-sast gate"
+      - "config/checkov/policy-gate.yaml: ADR 0306 blocking levels and scan surfaces"
+      - "config/checkov/skip-checks.yaml: ADR 0306 suppression governance catalog"
       - "scripts/run_gate.py: gate orchestrator"
+      - "scripts/iac_policy_scan.py: ADR 0306 Checkov wrapper and SARIF emitter"
       - "scripts/semgrep_gate.py: shared Semgrep wrapper"
       - "scripts/validation_lanes.py: lane catalog loader and selector"
       - "scripts/policy_checks.py: ADR 0230 policy-validation stage"
@@ -675,8 +701,20 @@ service_configuration:
     related_files:
       - "config/build-server.json: remote-validate entrypoint that invokes the manifest"
       - "config/semgrep/rules/: local rule packs mounted into the semgrep-sast check"
+      - "config/checkov/policy-gate.yaml: ADR 0306 scan-group and severity mapping contract"
       - "scripts/policy_checks.py: ADR 0230 policy-validation check command"
+      - "scripts/iac_policy_scan.py: ADR 0306 runner-backed Checkov wrapper"
       - "docs/runbooks/validation-gate.md: remote gate procedure"
+
+  receipts/checkov/:
+    purpose: Repo-managed Checkov JSON and SARIF outputs from ADR 0306 IaC policy scans
+    owner: automation
+    format: JSON and SARIF
+    use_for: Inspecting the latest repo-local IaC policy findings and the emitted SARIF artifact from a governed scan
+    update_when: After every `iac-policy-scan` runner execution or direct `scripts/iac_policy_scan.py` replay
+    update_by: "scripts/iac_policy_scan.py"
+    validation: Manual review
+    naming_convention: "<git-sha>.json and <git-sha>.sarif.json"
 
   docker/docker-compose.yml:
     purpose: Docker Compose reference for services on docker-runtime-lv3

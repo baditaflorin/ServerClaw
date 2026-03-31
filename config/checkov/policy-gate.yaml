@@ -1,0 +1,38 @@
+schema_version: 1.0.0
+default_level: note
+blocking_levels:
+  - error
+scan_groups:
+  - id: tofu
+    title: OpenTofu root and module tree
+    framework: terraform
+    path: tofu
+  - id: playbooks
+    title: Root playbook tree
+    framework: ansible
+    path: playbooks
+  - id: roles
+    title: Legacy root roles
+    framework: ansible
+    path: roles
+  - id: collection-playbooks
+    title: Packaged collection playbooks
+    framework: ansible
+    path: collections/ansible_collections/lv3/platform/playbooks
+  - id: collection-roles
+    title: Packaged collection roles
+    framework: ansible
+    path: collections/ansible_collections/lv3/platform/roles
+level_overrides:
+  CKV_LV3_1: error
+  CKV_LV3_2: error
+  CKV_LV3_3: error
+  CKV_LV3_4: warning
+compose_template_globs:
+  - collections/ansible_collections/lv3/platform/roles/*/templates/docker-compose*.j2
+compose_gap_note: >-
+  The repository stores Docker Compose as Jinja templates, and pinned offline
+  Checkov 3.2.469 does not expose the docker_compose framework. The governed
+  gate therefore scans the repo's actual OpenTofu and Ansible surfaces directly
+  and records Compose as a bounded gap until rendered Compose artifacts become a
+  first-class repository surface.

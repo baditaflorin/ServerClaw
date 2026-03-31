@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.118",
+  "repo_version": "0.177.119",
   "platform_version": "0.130.77",
-  "generated_at": "2026-03-31T13:48:20Z",
-  "next_refresh_at": "2026-03-31T14:48:20Z",
+  "generated_at": "2026-03-31T15:15:59Z",
+  "next_refresh_at": "2026-03-31T16:15:59Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5554,10 +5554,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.117",
+    "last_version": "0.177.118",
     "deployed_at": "2026-03-31",
-    "summary": "implements ADR 0298 by live-applying exact-main Syft and Grype SBOM generation and continuous CVE scanning on docker-runtime-lv3, including native worker tooling, repo-local Syft temp extraction, and the verified 62-image refresh path integrates ADR 0298 into main by carrying the final Syft and Grype SBOM/CVE scanning surfaces, the native Windmill worker tooling contract, and the exact-main 62-image live refresh proof from docker-runtime-lv3",
-    "release_notes_url": "docs/release-notes/0.177.118.md"
+    "summary": "integrates ADR 0306 into main by adding repo-managed Checkov IaC policy scanning to the shared validation gate, build-server remote validation, and the self-hosted validate workflow while preserving the already-current platform baseline 0.130.77 and the earlier exact-main hosted verification proof first established on 0.130.75",
+    "release_notes_url": "docs/release-notes/0.177.119.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -83,7 +83,7 @@ jobs:
 
       - name: Run authoritative validation gate
         run: |
-          mkdir -p .local/validation-gate .local/policy-toolchain .local/trivy-cache .local/packer-plugin-cache .ansible/validation/collections receipts/sast
+          mkdir -p .local/validation-gate .local/policy-toolchain .local/trivy-cache .local/packer-plugin-cache .ansible/validation/collections receipts/sast receipts/checkov
           export DOCKER_BIN="$(cat .local/validation-gate/docker-bin.path)"
           export LV3_DOCKER_WORKSPACE_PATH="$(cat .local/validation-gate/workspace-host.path)"
           export LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections
@@ -101,7 +101,7 @@ jobs:
         run: |
           set -euo pipefail
           artifact_list="$(mktemp)"
-          for artifact_dir in receipts/sast .local/validation-gate; do
+          for artifact_dir in receipts/sast receipts/checkov .local/validation-gate; do
             if [ -d "${artifact_dir}" ]; then
               find "${artifact_dir}" -maxdepth 1 -type f \( -name '*.sarif.json' -o -name '*.json' \) >> "${artifact_list}"
             fi

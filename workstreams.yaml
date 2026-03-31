@@ -14,6 +14,161 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0306-live-apply
+    adr: "0306"
+    title: Live apply Checkov IaC policy scanning from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0306-mainline-final-r3
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-main-context-v2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md
+    depends_on:
+      - adr-0083-docker-check-runner
+      - adr-0087-validation-gate
+      - adr-0264-failure-domain-isolated-validation-lanes
+      - adr-0266-validation-runner-capability-contracts-and-environment-attestation
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0306-live-apply.md
+      - docs/adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md
+      - docs/adr/.index.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - .config-locations.yaml
+      - .gitea/workflows/validate.yml
+      - docs/runbooks/iac-policy-scanning.md
+      - docs/runbooks/remote-build-gateway.md
+      - docs/runbooks/validate-repository-automation.md
+      - docs/runbooks/validation-gate.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
+      - config/checkov/
+      - config/build-server.json
+      - config/check-runner-manifest.json
+      - config/validation-gate.json
+      - config/validation-lanes.yaml
+      - config/validation-runner-contracts.json
+      - scripts/iac_policy_scan.py
+      - scripts/remote_exec.sh
+      - tests/test_iac_policy_scan.py
+      - tests/test_validate_repo_cache.py
+      - tests/test_validation_lanes.py
+      - receipts/checkov/
+      - receipts/live-applies/2026-03-31-adr-0306-checkov-iac-policy-scan-live-apply.json
+      - receipts/live-applies/2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-31-adr-0306-*
+      - receipts/live-applies/evidence/2026-03-31-ws-0306-*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0306_docs
+          paths:
+            - docs/workstreams/ws-0306-live-apply.md
+            - docs/adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md
+            - docs/runbooks/iac-policy-scanning.md
+            - docs/runbooks/remote-build-gateway.md
+            - docs/runbooks/validate-repository-automation.md
+            - docs/runbooks/validation-gate.md
+          mode: exclusive
+        - id: adr_0306_config_locations_contract
+          paths:
+            - .config-locations.yaml
+          mode: shared_contract
+          contract: repository-automation-v1
+        - id: adr_0306_generated_truth_support
+          paths:
+            - README.md
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - docs/site-generated/architecture/dependency-graph.md
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
+        - id: release_management_surfaces
+          paths:
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: platform_truth_generation
+          paths:
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: canonical-truth-v1
+        - id: adr_0306_generated_artifacts
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - docs/site-generated/architecture/dependency-graph.md
+          mode: shared_contract
+          contract: latest-main-integration-v1
+        - id: adr_0306_ci_surface
+          paths:
+            - config/checkov/*
+            - config/checkov/**/*
+            - config/build-server.json
+            - config/check-runner-manifest.json
+            - config/validation-gate.json
+            - config/validation-lanes.yaml
+            - config/validation-runner-contracts.json
+          mode: exclusive
+        - id: adr_0306_validate_workflow_contract
+          paths:
+            - .gitea/workflows/validate.yml
+          mode: shared_contract
+          contract: repository-automation-v1
+        - id: adr_0306_runtime
+          paths:
+            - scripts/iac_policy_scan.py
+            - receipts/checkov/*
+          mode: exclusive
+        - id: adr_0306_shared_validation_contract
+          paths:
+            - scripts/remote_exec.sh
+            - tests/test_validate_repo_cache.py
+          mode: shared_contract
+          contract: repository-automation-v1
+        - id: adr_0306_tests
+          paths:
+            - tests/test_iac_policy_scan.py
+            - tests/test_validation_lanes.py
+          mode: exclusive
+        - id: adr_0306_live_apply_evidence
+          paths:
+            - receipts/live-applies/2026-03-31-adr-0306-checkov-iac-policy-scan-live-apply.json
+            - receipts/live-applies/2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-31-adr-0306-*
+            - receipts/live-applies/evidence/2026-03-31-ws-0306-*
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: integrates ADR 0306 into main by adding repo-managed Checkov IaC policy scanning to the shared validation gate, build-server remote validation, and the self-hosted validate workflow while preserving the already-current platform baseline 0.130.77 and the earlier exact-main hosted verification proof first established on 0.130.75
+      release_bump: patch
+      included_in_repo_version: 0.177.119
+      latest_receipts:
+        iac_policy_scanning: 2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply
   - id: ws-0303-live-apply
     adr: "0303"
     title: Live apply PostgreSQL pgaudit query and privilege audit logging from latest origin/main
