@@ -91,6 +91,7 @@
               },
               {
                 'name': 'openbao_audit',
+                'manage_paths': false,
                 'paths': [openbao_host_audit_log_file],
                 'labels': {
                   'job': 'mutation-audit',

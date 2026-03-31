@@ -58,6 +58,29 @@
     append: true
   notify: Restart Alloy
 
+- name: Resolve managed extra file-scrape targets
+  ansible.builtin.set_fact:
+    loki_log_agent_managed_file_scrape_paths: >-
+      {{
+        (
+          loki_log_agent_file_scrapes
+          | selectattr('manage_paths', 'undefined')
+          | map(attribute='paths')
+          | flatten
+          | list
+        )
+        +
+        (
+          loki_log_agent_file_scrapes
+          | selectattr('manage_paths', 'defined')
+          | rejectattr('manage_paths', 'equalto', false)
+          | map(attribute='paths')
+          | flatten
+          | list
+        )
+      }}
+  when: loki_log_agent_file_scrapes | length > 0
+
 - name: Ensure extra file-scrape parent directories exist
   ansible.builtin.file:
     path: "{{ item }}"
@@ -65,33 +88,38 @@
     mode: "0755"
   loop: >-
     {{
-      loki_log_agent_file_scrapes
-      | map(attribute='paths')
-      | flatten
+      loki_log_agent_managed_file_scrape_paths
       | map('dirname')
       | list
       | unique
     }}
-  when: loki_log_agent_file_scrapes | length > 0
+  when:
+    - loki_log_agent_file_scrapes | length > 0
+    - loki_log_agent_managed_file_scrape_paths | length > 0
 
-- name: Ensure extra file-scrape targets exist
-  ansible.builtin.file:
+- name: Check whether extra file-scrape targets already exist
+  ansible.builtin.stat:
     path: "{{ item }}"
+  loop: "{{ loki_log_agent_managed_file_scrape_paths }}"
+  register: loki_log_agent_file_scrape_target_stats
+  when:
+    - loki_log_agent_file_scrapes | length > 0
+    - loki_log_agent_managed_file_scrape_paths | length > 0
+
+- name: Ensure missing extra file-scrape targets exist
+  ansible.builtin.file:
+    path: "{{ item.stat.path | default(item.item) }}"
     state: touch
     owner: root
     group: adm
     mode: "0640"
     access_time: preserve
     modification_time: preserve
-  loop: >-
-    {{
-      loki_log_agent_file_scrapes
-      | map(attribute='paths')
-      | flatten
-      | reject('search', '[*?\\[]')
-      | list
-    }}
-  when: loki_log_agent_file_scrapes | length > 0
+  loop: "{{ loki_log_agent_file_scrape_target_stats.results }}"
+  when:
+    - loki_log_agent_file_scrapes | length > 0
+    - loki_log_agent_managed_file_scrape_paths | length > 0
+    - not item.stat.exists
 
 - name: Render Alloy environment file
   ansible.builtin.copy:

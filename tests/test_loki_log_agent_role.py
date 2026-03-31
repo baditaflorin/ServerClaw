@@ -40,10 +40,25 @@ def test_defaults_define_managed_alloy_env_and_postgres_audit_pipeline_inputs() 
 
 def test_tasks_manage_alloy_env_file_and_skip_glob_touch_targets() -> None:
     tasks = load_yaml(TASKS_PATH)
-    touch_task = next(task for task in tasks if task.get("name") == "Ensure extra file-scrape targets exist")
+    stat_task = next(task for task in tasks if task.get("name") == "Check whether extra file-scrape targets already exist")
+    create_task = next(task for task in tasks if task.get("name") == "Ensure missing extra file-scrape targets exist")
     env_task = next(task for task in tasks if task.get("name") == "Render Alloy environment file")
+    resolve_task = next(task for task in tasks if task.get("name") == "Resolve managed extra file-scrape targets")
 
-    assert "reject('search', '[*?\\\\[]')" in touch_task["loop"]
+    resolved_paths = resolve_task["ansible.builtin.set_fact"]["loki_log_agent_managed_file_scrape_paths"]
+
+    assert "selectattr('manage_paths', 'undefined')" in resolved_paths
+    assert "rejectattr('manage_paths', 'equalto', false)" in resolved_paths
+    assert stat_task["ansible.builtin.stat"]["path"] == "{{ item }}"
+    assert stat_task["register"] == "loki_log_agent_file_scrape_target_stats"
+    assert stat_task["loop"] == "{{ loki_log_agent_managed_file_scrape_paths }}"
+    assert create_task["ansible.builtin.file"]["path"] == "{{ item.stat.path | default(item.item) }}"
+    assert create_task["loop"] == "{{ loki_log_agent_file_scrape_target_stats.results }}"
+    assert create_task["when"] == [
+        "loki_log_agent_file_scrapes | length > 0",
+        "loki_log_agent_managed_file_scrape_paths | length > 0",
+        "not item.stat.exists",
+    ]
     assert env_task["ansible.builtin.copy"]["dest"] == "{{ loki_log_agent_env_file }}"
     assert "--server.http.listen-addr={{ loki_log_agent_http_listen_address }}" in env_task["ansible.builtin.copy"]["content"]
 
