@@ -13,7 +13,7 @@
     "database_schema": 6
   },
   "artifact_cache": {
-    "host": "10.10.10.30",
+    "host": "10.10.10.80",
     "mirrors": {
       "docker.io": 5001,
       "ghcr.io": 5002,

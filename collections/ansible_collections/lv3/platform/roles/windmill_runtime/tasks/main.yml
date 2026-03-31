@@ -499,11 +499,12 @@
         candidate = repo_root / relative_root
         if not candidate.exists():
             continue
-        files = (
-            [candidate]
-            if (candidate.is_file() or candidate.is_symlink())
-            else sorted(path for path in candidate.rglob("*") if path.is_file())
-        )
+        if candidate.is_symlink():
+            files = [candidate]
+        elif candidate.is_file():
+            files = [candidate]
+        else:
+            files = sorted(path for path in candidate.rglob("*") if path.is_file())
         for child in files:
             relative_path = child.relative_to(repo_root).as_posix()
             if child.name == ".DS_Store" or child.name.startswith("._"):

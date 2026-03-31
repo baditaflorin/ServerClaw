@@ -93,7 +93,7 @@ Check the mirror listeners from the shared runtime consumer host:
 
 ```bash
 ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell \
-  -a 'for port in 5001 5002 5003 5004; do curl -fsS "http://10.10.10.30:${port}/v2/" >/dev/null; done' \
+  -a 'for port in 5001 5002 5003 5004; do curl -fsS "http://10.10.10.80:${port}/v2/" >/dev/null; done' \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 

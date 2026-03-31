@@ -14,7 +14,7 @@ import sbom_scanner as scanner  # noqa: E402
 def test_artifact_cache_ref_rewrites_supported_public_registries() -> None:
     config = {
         "artifact_cache": {
-            "host": "10.10.10.30",
+            "host": "10.10.10.80",
             "mirrors": {
                 "docker.io": 5001,
                 "ghcr.io": 5002,
@@ -27,14 +27,14 @@ def test_artifact_cache_ref_rewrites_supported_public_registries() -> None:
             "docker.io/library/nginx:1.29.1-alpine@sha256:deadbeef",
             config,
         )
-        == "10.10.10.30:5001/library/nginx:1.29.1-alpine@sha256:deadbeef"
+        == "10.10.10.80:5001/library/nginx:1.29.1-alpine@sha256:deadbeef"
     )
     assert (
         scanner.artifact_cache_ref(
             "ghcr.io/dgtlmoon/changedetection.io:0.54.7@sha256:deadbeef",
             config,
         )
-        == "10.10.10.30:5002/dgtlmoon/changedetection.io:0.54.7@sha256:deadbeef"
+        == "10.10.10.80:5002/dgtlmoon/changedetection.io:0.54.7@sha256:deadbeef"
     )
 
 
@@ -118,7 +118,7 @@ def test_syft_scan_image_uses_native_syft_on_linux(monkeypatch, tmp_path: Path) 
         platform_name="linux/amd64",
         config={
             "artifact_cache": {
-                "host": "10.10.10.30",
+                "host": "10.10.10.80",
                 "mirrors": {"ghcr.io": 5002},
             },
             "syft": {"container_image": "docker.io/anchore/syft:latest"},
@@ -132,7 +132,7 @@ def test_syft_scan_image_uses_native_syft_on_linux(monkeypatch, tmp_path: Path) 
         "scan",
         "--from",
         "registry",
-        "10.10.10.30:5002/example/service:1.0.0@sha256:deadbeef",
+        "10.10.10.80:5002/example/service:1.0.0@sha256:deadbeef",
         "--source-name",
         "ghcr.io/example/service:1.0.0@sha256:deadbeef",
         "--platform",
@@ -168,7 +168,7 @@ def test_syft_scan_image_falls_back_to_container_when_native_syft_missing(monkey
         config={
             "docker_network": "host",
             "artifact_cache": {
-                "host": "10.10.10.30",
+                "host": "10.10.10.80",
                 "mirrors": {"docker.io": 5001},
             },
             "syft": {"container_image": "docker.io/anchore/syft:latest"},
@@ -192,7 +192,7 @@ def test_syft_scan_image_falls_back_to_container_when_native_syft_missing(monkey
         "scan",
         "--from",
         "registry",
-        "10.10.10.30:5001/library/nginx:1.29.1@sha256:deadbeef",
+        "10.10.10.80:5001/library/nginx:1.29.1@sha256:deadbeef",
         "--source-name",
         "docker.io/library/nginx:1.29.1@sha256:deadbeef",
         "--platform",
