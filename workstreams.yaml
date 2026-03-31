@@ -19566,6 +19566,8 @@ workstreams:
       - config/ntfy/server.yml
       - inventory/host_vars/proxmox_florin.yml
       - inventory/group_vars/platform.yml
+      - playbooks/services/guest-log-shipping.yml
+      - collections/ansible_collections/lv3/platform/playbooks/services/guest-log-shipping.yml
       - scripts/capacity_report.py
       - scripts/generate_platform_vars.py
       - scripts/k6_load_testing.py
@@ -19585,6 +19587,7 @@ workstreams:
       - tests/test_windmill_default_operations_surface.py
       - tests/test_windmill_operator_admin_app.py
       - tests/test_promotion_pipeline.py
+      - tests/test_guest_log_shipping_playbook.py
       - tests/test_slo_tracking.py
       - tests/unit/test_event_taxonomy.py
       - receipts/image-scans/2026-03-31-k6-runtime.json
@@ -19619,6 +19622,8 @@ workstreams:
             - config/api-publication.json
             - config/event-taxonomy.yaml
             - config/ntfy/server.yml
+            - playbooks/services/guest-log-shipping.yml
+            - collections/ansible_collections/lv3/platform/playbooks/services/guest-log-shipping.yml
             - scripts/k6_load_testing.py
             - scripts/capacity_report.py
             - scripts/promotion_pipeline.py
@@ -19634,6 +19639,7 @@ workstreams:
             - tests/test_windmill_default_operations_surface.py
             - tests/test_windmill_operator_admin_app.py
             - tests/test_promotion_pipeline.py
+            - tests/test_guest_log_shipping_playbook.py
             - tests/test_slo_tracking.py
             - tests/unit/test_event_taxonomy.py
           mode: shared_contract

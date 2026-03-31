@@ -55,6 +55,7 @@
 
 - Local Trivy scanning of `docker.io/grafana/k6:1.7.1@sha256:44bd1d66c2b019327991b95459d78402b0a7a0a055ab52ee088deea1a044e8d5` returned `critical=0` and `high=1`, recorded in `receipts/image-scans/2026-03-31-k6-runtime.json` with the raw report beside it.
 - The branch already carries the focused pytest and contract coverage for the k6 runner, Windmill wrapper, monitoring role, event taxonomy, SLO tracking, and promotion gate surfaces; those checks are rerun before live apply and before merge.
+- `make converge-monitoring` now completes successfully from this worktree after the lane-map repair, with the failed first replay preserved in `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-monitoring-r1.txt` and the successful corrective replay recorded in `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-monitoring-r2.txt`.
 - Remaining work before merge: exact live replay, real smoke/load receipts, final ADR metadata updates, final canonical-truth integration, and the push to `origin/main`.
 
 ## Merge Criteria
@@ -67,3 +68,5 @@
 
 - The private Gitea smoke gate needs `LV3_DOCKER_WORKSPACE_PATH`; the runner fix is branch-local here and should be kept when replaying the exact-main integration.
 - The public GitHub validation workflow intentionally stays unchanged because it cannot reach the private OpenFGA and Prometheus endpoints required by the smoke gate.
+- The first `make converge-monitoring` replay exposed an unrelated shared-contract bug in `playbooks/services/guest-log-shipping.yml`: the lane map did not cover the `artifact-cache` guest role, so the replay failed late on `artifact-cache-lv3` after the ADR 0305 monitoring surfaces had already converged. This branch carries the corrective lane-map patch and reruns the monitoring replay with fresh evidence.
+- The corrective replay succeeded end to end, including the guest-log-shipping stage that previously failed on `artifact-cache-lv3`.
