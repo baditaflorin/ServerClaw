@@ -231,7 +231,7 @@ install_collections() {
   local current_sha_file=""
   local lock_file="${ANSIBLE_COLLECTIONS_SHA_FILE}.lock"
   local lock_fd=""
-  local galaxy_server_args=()
+  local install_cmd=()
 
   [[ -f "$requirements_file" ]] || return 0
   ensure_validation_commands_configured
@@ -288,17 +288,22 @@ PY
     fi
   fi
 
+  install_cmd=(
+    "${ANSIBLE_GALAXY_CMD[@]}"
+    collection
+    install
+  )
   if [[ -n "${LV3_ANSIBLE_GALAXY_SERVER:-}" ]]; then
-    galaxy_server_args=(--server "$LV3_ANSIBLE_GALAXY_SERVER")
+    install_cmd+=(--server "$LV3_ANSIBLE_GALAXY_SERVER")
   fi
+  install_cmd+=(
+    -r "$requirements_file"
+    -p "$ANSIBLE_COLLECTIONS_DIR"
+    --server "$VALIDATION_GALAXY_SERVER"
+    --force-with-deps
+  )
 
-  "${ANSIBLE_GALAXY_CMD[@]}" collection install \
-    "${galaxy_server_args[@]}" \
-    -r "$requirements_file" \
-    -p "$ANSIBLE_COLLECTIONS_DIR" \
-    --server "$VALIDATION_GALAXY_SERVER" \
-    --force-with-deps \
-    >/dev/null
+  "${install_cmd[@]}" >/dev/null
   cp "$current_sha_file" "$ANSIBLE_COLLECTIONS_SHA_FILE"
   rm -f "$current_sha_file"
   if [[ -n "$lock_fd" ]]; then

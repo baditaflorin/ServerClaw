@@ -1166,6 +1166,94 @@
     state: absent
   delegate_to: localhost
   become: false
+
+- name: Load the shared SBOM scanner config for the Windmill native worker
+  ansible.builtin.set_fact:
+    windmill_worker_scanner_config: >-
+      {{
+        lookup(
+          'ansible.builtin.file',
+          (inventory_dir | dirname) ~ '/config/sbom-scanner.json'
+        ) | from_json
+      }}
+  changed_when: false
+
+- name: Check the installed Syft version for the Windmill native worker
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/syft
+      - version
+  register: windmill_worker_native_syft_version
+  changed_when: false
+  failed_when: false
+
+- name: Install the pinned Syft release for the Windmill native worker when required
+  when: windmill_worker_scanner_config.syft.version not in windmill_worker_native_syft_version.stdout
+  block:
+    - name: Create a temporary directory for the Windmill native Syft archive
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: lv3-syft-
+      register: windmill_worker_native_syft_archive_dir
+
+    - name: Download and unpack the pinned Windmill native Syft archive
+      ansible.builtin.unarchive:
+        src: "{{ windmill_worker_scanner_config.syft.linux_amd64_tarball }}"
+        dest: "{{ windmill_worker_native_syft_archive_dir.path }}"
+        remote_src: true
+
+    - name: Install the pinned Syft binary for the Windmill native worker
+      ansible.builtin.copy:
+        src: "{{ windmill_worker_native_syft_archive_dir.path }}/syft"
+        dest: /usr/local/bin/syft
+        owner: root
+        group: root
+        mode: "0755"
+        remote_src: true
+
+    - name: Remove the temporary Windmill native Syft archive directory
+      ansible.builtin.file:
+        path: "{{ windmill_worker_native_syft_archive_dir.path }}"
+        state: absent
+
+- name: Check the installed Grype version for the Windmill native worker
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/grype
+      - version
+  register: windmill_worker_native_grype_version
+  changed_when: false
+  failed_when: false
+
+- name: Install the pinned Grype release for the Windmill native worker when required
+  when: windmill_worker_scanner_config.grype.version not in windmill_worker_native_grype_version.stdout
+  block:
+    - name: Create a temporary directory for the Windmill native Grype archive
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: lv3-grype-
+      register: windmill_worker_native_grype_archive_dir
+
+    - name: Download and unpack the pinned Windmill native Grype archive
+      ansible.builtin.unarchive:
+        src: "{{ windmill_worker_scanner_config.grype.linux_amd64_tarball }}"
+        dest: "{{ windmill_worker_native_grype_archive_dir.path }}"
+        remote_src: true
+
+    - name: Install the pinned Grype binary for the Windmill native worker
+      ansible.builtin.copy:
+        src: "{{ windmill_worker_native_grype_archive_dir.path }}/grype"
+        dest: /usr/local/bin/grype
+        owner: root
+        group: root
+        mode: "0755"
+        remote_src: true
+
+    - name: Remove the temporary Windmill native Grype archive directory
+      ansible.builtin.file:
+        path: "{{ windmill_worker_native_grype_archive_dir.path }}"
+        state: absent
+
 - name: Render the Windmill compose file
   vars:
     mutation_audit_action: render.windmill_compose

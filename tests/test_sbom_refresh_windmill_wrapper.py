@@ -28,8 +28,6 @@ def test_wrapper_accepts_success_with_report_json(monkeypatch, tmp_path: Path) -
     repo_root = tmp_path / "repo"
     (repo_root / "scripts").mkdir(parents=True)
     (repo_root / "config").mkdir(parents=True)
-    (repo_root / "receipts" / "sbom").mkdir(parents=True)
-    (repo_root / "receipts" / "cve").mkdir(parents=True)
     (repo_root / "scripts" / "sbom_refresh.py").write_text("", encoding="utf-8")
     (repo_root / "config" / "image-catalog.json").write_text("{}", encoding="utf-8")
     (repo_root / "config" / "sbom-scanner.json").write_text("{}", encoding="utf-8")
@@ -44,3 +42,5 @@ def test_wrapper_accepts_success_with_report_json(monkeypatch, tmp_path: Path) -
     assert result["status"] == "ok"
     assert result["returncode"] == 0
     assert result["command"].startswith("uv run")
+    assert (repo_root / "receipts" / "sbom").is_dir()
+    assert (repo_root / "receipts" / "cve").is_dir()

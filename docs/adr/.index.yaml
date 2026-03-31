@@ -5281,7 +5281,7 @@ adr_index:
       - scanning
     summary: We will deploy Syft and Grype as Gitea Actions CI steps and as a
     filename: 0298-syft-and-grype-for-platform-wide-sbom-generation-and-continuous-cve-scanning.md
-    implemented_version: 0.177.114
+    implemented_version: 0.177.117
   - adr: 0299
     title: Ntfy As The Self-Hosted Push Notification Channel For Programmatic Alert Delivery
     status: Accepted

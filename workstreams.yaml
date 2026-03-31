@@ -18207,7 +18207,7 @@ workstreams:
   - id: ws-0298-live-apply
     adr: "0298"
     title: Live apply Syft and Grype for platform-wide SBOM generation and continuous CVE scanning from latest origin/main
-    status: implemented
+    status: live_applied
     owner: codex
     branch: codex/ws-0298-live-apply-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-live-apply-r2
@@ -18285,6 +18285,8 @@ workstreams:
       - receipts/cve/**
       - receipts/live-applies/2026-03-30-adr-0298-*
       - receipts/live-applies/evidence/2026-03-30-ws-0298-*
+      - receipts/live-applies/2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-31-ws-0298-mainline-*
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -18361,16 +18363,24 @@ workstreams:
             - receipts/cve/**
             - receipts/live-applies/2026-03-30-adr-0298-*
             - receipts/live-applies/evidence/2026-03-30-ws-0298-*
+            - receipts/live-applies/2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-31-ws-0298-mainline-*
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0298 by live-applying exact-main Syft and Grype SBOM generation and continuous CVE scanning on docker-runtime-lv3, including native worker tooling, repo-local Syft temp extraction, and the verified 62-image refresh path
+      release_bump: patch
+      included_in_repo_version: 0.177.118
+      latest_receipts:
+        sbom_cve_scanning: 2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply
   - id: ws-0298-main-merge
     adr: "0298"
     title: Integrate ADR 0298 exact-main replay onto current origin/main
-    status: merged
+    status: live_applied
     owner: codex
-    branch: codex/ws-0298-main-publish-r2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2
+    branch: codex/ws-0298-main-final-r4
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-final-r4
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0298-main-merge.md
     depends_on:
       - ws-0298-live-apply
@@ -18443,6 +18453,8 @@ workstreams:
       - receipts/live-applies/2026-03-30-adr-0298-*
       - receipts/live-applies/evidence/2026-03-30-ws-0298-*
       - receipts/live-applies/evidence/2026-03-31-ws-0298-main-merge-*
+      - receipts/live-applies/2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-31-ws-0298-mainline-*
       - README.md
       - RELEASE.md
       - VERSION
@@ -18530,6 +18542,8 @@ workstreams:
             - receipts/live-applies/2026-03-30-adr-0298-*
             - receipts/live-applies/evidence/2026-03-30-ws-0298-*
             - receipts/live-applies/evidence/2026-03-31-ws-0298-main-merge-*
+            - receipts/live-applies/2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-31-ws-0298-mainline-*
           mode: shared_contract
           contract: adr-0298-live-apply-v1
         - id: integration_readme_surface
@@ -18557,14 +18571,13 @@ workstreams:
             - docs/workstreams/ws-0298-main-merge.md
           mode: exclusive
     ready_to_merge: true
-    live_applied: false
+    live_applied: true
     canonical_truth:
-      changelog_entry: integrates ADR 0298 into main by carrying the Syft and Grype SBOM/CVE scanning surfaces, the native Windmill worker Docker socket contract, and the exact-main build-host refresh evidence while the platform baseline remains 0.130.74 because docker-runtime-lv3 and the cache plane were unstable during runtime revalidation
+      changelog_entry: integrates ADR 0298 into main by carrying the final Syft and Grype SBOM/CVE scanning surfaces, the native Windmill worker tooling contract, and the exact-main 62-image live refresh proof from docker-runtime-lv3
       release_bump: patch
-      included_in_repo_version: 0.177.114
+      included_in_repo_version: 0.177.118
       latest_receipts:
-        sbom_cve_scanning: 2026-03-31-ws-0298-main-merge-sbom-refresh-full-r3-build-host
-        windmill_runtime_drift: 2026-03-31-ws-0298-main-merge-runtime-compose-state-r1
+        sbom_cve_scanning: 2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply
   - id: ws-0288-live-apply
     adr: "0288"
     title: ADR 0288 live apply from latest origin/main

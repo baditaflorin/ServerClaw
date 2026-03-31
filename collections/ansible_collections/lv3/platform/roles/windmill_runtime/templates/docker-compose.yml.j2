@@ -97,6 +97,8 @@ services:
     volumes:
       - {{ windmill_mutation_audit_dir }}:/var/log/platform
       - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/local/bin/grype:/usr/local/bin/grype:ro
+      - /usr/local/bin/syft:/usr/local/bin/syft:ro
       - {{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}
       - worker_logs:/tmp/windmill/logs
 
