@@ -19,6 +19,38 @@ rerun the exact-main live apply from the synchronized baseline, refresh the
 protected release and canonical-truth surfaces from that result, and publish
 the now-hardened Grist runtime plus its login-gated public surface on `main`.
 
+## Current Continuation State
+
+- The branch now carries the repo-side runtime hardening commit
+  `520177b8e` on top of merged `origin/main` commit `14b18869a`.
+- The hardening work serializes ADR 0302 restic live-apply triggers,
+  prefers the dedicated `minio` container with `outline-minio` as fallback,
+  retries the Outline image pull, and recovers pre-restart compose groups
+  after Docker restarts in the shared `docker_runtime`, `grist_runtime`, and
+  `outline_runtime` paths.
+- The focused compatibility slice still passes on the newer base:
+  `48 passed` across
+  `tests/test_restic_config_backup.py`,
+  `tests/test_restic_config_backup_role.py`,
+  `tests/test_docker_runtime_role.py`,
+  `tests/test_grist_runtime_role.py`, and
+  `tests/test_outline_runtime_role.py`.
+- The exact-main live replay is not yet complete on this newer base.
+  Multiple concurrent workstreams are still running `ansible-playbook`
+  against `docker-runtime-lv3`, `postgres-lv3`, `nginx-lv3`, and
+  `proxmox_florin`, so a fresh replay would not produce trustworthy
+  evidence.
+- Runtime-host journal evidence from `docker-runtime-lv3` at
+  `2026-03-31T22:10:18Z`, `2026-03-31T22:10:38Z`, and `2026-03-31T22:10:50Z`
+  shows unrelated active Ansible traffic still issuing
+  `systemctl restart docker.service`, stopping
+  `lv3-restic-config-backup-openbao-agent.service`, and restarting Docker
+  while other compose groups are being inspected and reconciled.
+- Because the branch base advanced after the earlier `0.177.113` closeout,
+  the protected release-truth surfaces from the older replay were intentionally
+  reset back to the merged `origin/main` state. They must be regenerated only
+  after the final quiet-window replay from this newer baseline succeeds.
+
 ## Shared Surfaces
 
 - `workstreams.yaml`
