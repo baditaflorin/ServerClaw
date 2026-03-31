@@ -67,6 +67,21 @@ def test_main_tasks_prepare_users_topics_and_schema() -> None:
     assert "--resource-pattern-type" in acl_argv
     assert "prefixed" in acl_argv
 
+    directory_task = next(task for task in tasks if task["name"] == "Ensure the Redpanda runtime directories exist")
+    config_dir = next(item for item in directory_task["loop"] if item["path"] == "{{ redpanda_config_dir }}")
+    assert config_dir["owner"] == "101"
+    assert config_dir["group"] == "101"
+    assert config_dir["mode"] == "0750"
+
+    bootstrap_task = next(task for task in tasks if task["name"] == "Render the Redpanda bootstrap cluster properties")
+    assert bootstrap_task["ansible.builtin.template"]["owner"] == "101"
+    assert bootstrap_task["ansible.builtin.template"]["group"] == "101"
+    assert bootstrap_task["ansible.builtin.template"]["mode"] == "0640"
+
+    start_task = next(task for task in tasks if task["name"] == "Render the Redpanda start script")
+    assert start_task["ansible.builtin.template"]["owner"] == "101"
+    assert start_task["ansible.builtin.template"]["group"] == "101"
+
 
 def test_verify_tasks_exercise_http_proxy_and_schema_registry() -> None:
     tasks = yaml.safe_load(ROLE_VERIFY.read_text())

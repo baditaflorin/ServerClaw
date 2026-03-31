@@ -131,14 +131,18 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
-    owner: root
-    group: root
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
     mode: "{{ item.mode }}"
   loop:
     - path: "{{ redpanda_site_dir }}"
+      owner: root
+      group: root
       mode: "0755"
     - path: "{{ redpanda_config_dir }}"
-      mode: "0700"
+      owner: "101"
+      group: "101"
+      mode: "0750"
 
 - name: Prepare OpenBao agent runtime secret injection for Redpanda
   ansible.builtin.include_role:
@@ -188,16 +192,16 @@
   ansible.builtin.template:
     src: bootstrap.yml.j2
     dest: "{{ redpanda_bootstrap_file }}"
-    owner: root
-    group: root
-    mode: "0600"
+    owner: "101"
+    group: "101"
+    mode: "0640"
 
 - name: Render the Redpanda start script
   ansible.builtin.template:
     src: start-redpanda.sh.j2
     dest: "{{ redpanda_start_script_file }}"
-    owner: root
-    group: root
+    owner: "101"
+    group: "101"
     mode: "0750"
 
 - name: Render the Redpanda compose file
