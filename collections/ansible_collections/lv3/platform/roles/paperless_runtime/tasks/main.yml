@@ -259,6 +259,9 @@
   args:
     chdir: "{{ paperless_site_dir }}"
   register: paperless_pull
+  retries: "{{ paperless_image_pull_retries }}"
+  delay: "{{ paperless_image_pull_delay_seconds }}"
+  until: paperless_pull.rc == 0
   changed_when: >-
     'Pulling' in paperless_pull.stdout
     or 'Downloaded newer image' in paperless_pull.stdout
@@ -351,28 +354,121 @@
         or (paperless_root_probe.status | default(0)) not in [200, 302]
       }}
 
-- name: Force-recreate the Paperless runtime stack after Docker networking recovery
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ paperless_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-      - --force-recreate
-  args:
-    chdir: "{{ paperless_site_dir }}"
-  register: paperless_force_recreate_up
-  changed_when: >-
-    'Creating' in paperless_force_recreate_up.stdout
-    or 'Recreating' in paperless_force_recreate_up.stdout
-    or 'Starting' in paperless_force_recreate_up.stdout
-  failed_when: false
-  retries: 3
-  delay: 5
-  until: paperless_force_recreate_up.rc == 0
+- name: Force-recreate the Paperless runtime stack and recover Docker bridge-chain loss after networking recovery
+  block:
+    - name: Force-recreate the Paperless runtime stack after Docker networking recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ paperless_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+          - --force-recreate
+      args:
+        chdir: "{{ paperless_site_dir }}"
+      register: paperless_force_recreate_up
+      changed_when: >-
+        'Creating' in paperless_force_recreate_up.stdout
+        or 'Recreating' in paperless_force_recreate_up.stdout
+        or 'Starting' in paperless_force_recreate_up.stdout
+      failed_when: paperless_force_recreate_up.rc != 0
+      retries: 3
+      delay: 5
+      until: paperless_force_recreate_up.rc == 0
+  rescue:
+    - name: Detect Docker bridge-chain loss during the Paperless force-recreate
+      ansible.builtin.set_fact:
+        paperless_force_recreate_bridge_chains_missing: >-
+          {{
+            'Failed to Setup IP tables' in (
+              (ansible_failed_result.stderr | default(''))
+              ~ ' ' ~ (ansible_failed_result.stdout | default(''))
+              ~ ' ' ~ (ansible_failed_result.msg | default(''))
+            )
+            and (
+              'No chain/target/match by that name' in (
+                (ansible_failed_result.stderr | default(''))
+                ~ ' ' ~ (ansible_failed_result.stdout | default(''))
+                ~ ' ' ~ (ansible_failed_result.msg | default(''))
+              )
+              or 'Unable to enable ACCEPT OUTGOING rule' in (
+                (ansible_failed_result.stderr | default(''))
+                ~ ' ' ~ (ansible_failed_result.stdout | default(''))
+                ~ ' ' ~ (ansible_failed_result.msg | default(''))
+              )
+              or 'Unable to enable DNAT rule' in (
+                (ansible_failed_result.stderr | default(''))
+                ~ ' ' ~ (ansible_failed_result.stdout | default(''))
+                ~ ' ' ~ (ansible_failed_result.msg | default(''))
+              )
+            )
+          }}
+
+    - name: Surface unexpected Paperless force-recreate failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('paperless compose force-recreate failed')) }}"
+      when: not paperless_force_recreate_bridge_chains_missing
+
+    - name: Reset the Paperless stack after Docker bridge-chain loss during force-recreate
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ paperless_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ paperless_site_dir }}"
+      register: paperless_force_recreate_down_retry
+      changed_when: >-
+        'Stopping' in (paperless_force_recreate_down_retry.stdout | default(''))
+        or 'Removing' in (paperless_force_recreate_down_retry.stdout | default(''))
+        or 'Network' in (paperless_force_recreate_down_retry.stdout | default(''))
+        or 'Stopping' in (paperless_force_recreate_down_retry.stderr | default(''))
+        or 'Removing' in (paperless_force_recreate_down_retry.stderr | default(''))
+        or 'Network' in (paperless_force_recreate_down_retry.stderr | default(''))
+      failed_when: false
+      when: paperless_force_recreate_bridge_chains_missing
+
+    - name: Restart Docker to restore bridge networking before retrying the Paperless force-recreate
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: paperless_force_recreate_bridge_chains_missing
+
+    - name: Ensure Docker bridge networking chains are present before retrying the Paperless force-recreate
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+      when: paperless_force_recreate_bridge_chains_missing
+
+    - name: Retry the Paperless runtime force-recreate after Docker networking recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ paperless_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+          - --force-recreate
+      args:
+        chdir: "{{ paperless_site_dir }}"
+      register: paperless_force_recreate_up
+      changed_when: >-
+        'Creating' in paperless_force_recreate_up.stdout
+        or 'Recreating' in paperless_force_recreate_up.stdout
+        or 'Starting' in paperless_force_recreate_up.stdout
+      failed_when: paperless_force_recreate_up.rc != 0
+      when: paperless_force_recreate_bridge_chains_missing
   when: paperless_force_recreate
 
 - name: Assert the Paperless force-recreate succeeded
@@ -460,6 +556,72 @@
   become: false
   no_log: true
 
+- name: Check whether OpenBao answers before persisting the Paperless API token
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: paperless_openbao_seal_status_initial
+  failed_when: false
+  changed_when: false
+
+- name: Recover the OpenBao runtime before persisting the Paperless API token
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ paperless_openbao_runtime_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --no-deps
+      - "{{ paperless_openbao_runtime_service_name }}"
+  args:
+    chdir: "{{ paperless_openbao_runtime_compose_file | dirname }}"
+  register: paperless_openbao_runtime_recovery
+  changed_when: >-
+    'Creating' in (paperless_openbao_runtime_recovery.stdout | default(''))
+    or 'Recreating' in (paperless_openbao_runtime_recovery.stdout | default(''))
+    or 'Starting' in (paperless_openbao_runtime_recovery.stdout | default(''))
+    or 'Running' in (paperless_openbao_runtime_recovery.stdout | default(''))
+  retries: 3
+  delay: 5
+  until: paperless_openbao_runtime_recovery.rc == 0
+  when:
+    - paperless_openbao_runtime_recovery_enabled
+    - paperless_openbao_seal_status_initial.status | default(0) != 200
+
+- name: Wait for OpenBao to answer after runtime recovery
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: paperless_openbao_seal_status_recovered
+  retries: 24
+  delay: 5
+  until: paperless_openbao_seal_status_recovered.status == 200
+  changed_when: false
+  when:
+    - paperless_openbao_runtime_recovery_enabled
+    - paperless_openbao_seal_status_initial.status | default(0) != 200
+
+- name: Load the OpenBao init payload before persisting the Paperless API token
+  ansible.builtin.set_fact:
+    paperless_openbao_init_payload: "{{ lookup('ansible.builtin.file', openbao_init_local_file) | from_json }}"
+  no_log: true
+
+- name: Ensure OpenBao is unsealed before persisting the Paperless API token
+  ansible.builtin.include_role:
+    name: lv3.platform.openbao_runtime
+    tasks_from: ensure_unsealed
+  vars:
+    openbao_unseal_context: persisting the Paperless API token in OpenBao
+    openbao_unseal_init_payload: "{{ paperless_openbao_init_payload }}"
+  no_log: true
+
 - name: Persist the Paperless API token in OpenBao
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ paperless_openbao_api_token_path }}"
@@ -475,6 +637,20 @@
       - 204
   no_log: true
 
+- name: Wait for the Paperless authenticated taxonomy endpoint
+  ansible.builtin.uri:
+    url: "{{ paperless_internal_base_url }}/api/tags/?page_size=1"
+    method: GET
+    headers:
+      Authorization: "Token {{ paperless_api_token }}"
+    status_code: 200
+  register: paperless_taxonomy_endpoint_ready
+  retries: 24
+  delay: 5
+  until: paperless_taxonomy_endpoint_ready.status == 200
+  changed_when: false
+  no_log: true
+
 - name: Reconcile the Paperless taxonomy over the live API
   ansible.builtin.script: >-
     {{ paperless_sync_script | quote }}
@@ -484,7 +660,10 @@
     --desired-state-file {{ paperless_taxonomy_manifest_file | quote }}
     --report-file {{ paperless_sync_report_file | quote }}
   register: paperless_taxonomy_sync
-  changed_when: "(paperless_taxonomy_sync.stdout | from_json).changed"
+  changed_when: >-
+    paperless_taxonomy_sync.rc == 0
+    and ((paperless_taxonomy_sync.stdout | from_json).changed | default(false))
+  failed_when: paperless_taxonomy_sync.rc != 0
 
 - name: Mirror the Paperless sync report to the control machine
   ansible.builtin.slurp:

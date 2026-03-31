@@ -17,6 +17,15 @@ argument_specs:
       paperless_compose_file:
         type: path
         required: true
+      paperless_openbao_runtime_compose_file:
+        type: path
+        required: true
+      paperless_openbao_runtime_service_name:
+        type: str
+        required: true
+      paperless_openbao_runtime_recovery_enabled:
+        type: bool
+        required: true
       paperless_env_file:
         type: path
         required: true
@@ -28,6 +37,12 @@ argument_specs:
         required: true
       paperless_public_base_url:
         type: str
+        required: true
+      paperless_image_pull_retries:
+        type: int
+        required: true
+      paperless_image_pull_delay_seconds:
+        type: int
         required: true
       paperless_database_password_local_file:
         type: path

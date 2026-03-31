@@ -14,6 +14,9 @@ paperless_openbao_secret_path: services/paperless/runtime-env
 paperless_openbao_api_token_path: services/paperless/api-token
 paperless_openbao_policy_name: lv3-service-paperless-runtime
 paperless_openbao_approle_name: paperless-runtime
+paperless_openbao_runtime_compose_file: "{{ openbao_compose_file | default('/opt/openbao/docker-compose.yml') }}"
+paperless_openbao_runtime_service_name: openbao
+paperless_openbao_runtime_recovery_enabled: "{{ paperless_openbao_runtime_compose_file | length > 0 }}"
 paperless_internal_port: "{{ paperless_service_topology.ports.internal }}"
 paperless_internal_base_url: "http://127.0.0.1:{{ paperless_internal_port }}"
 paperless_public_base_url: "https://{{ paperless_service_topology.public_hostname }}"
@@ -27,6 +30,8 @@ paperless_container_name: paperless
 paperless_redis_container_name: paperless-redis
 paperless_image: "{{ container_image_catalog.images.paperless_runtime.ref }}"
 paperless_redis_image: "{{ container_image_catalog.images.langfuse_redis_runtime.ref }}"
+paperless_image_pull_retries: 5
+paperless_image_pull_delay_seconds: 5
 paperless_database_name: paperless
 paperless_database_user: paperless
 paperless_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
@@ -53,7 +58,7 @@ paperless_keycloak_issuer: https://sso.lv3.org/realms/lv3
 paperless_admin_username: admin
 paperless_admin_mail: paperless-admin@lv3.org
 paperless_timezone: Europe/Bucharest
-paperless_ocr_language: eng+ron
+paperless_ocr_language: eng
 paperless_volume_names:
   data: paperless-data
   media: paperless-media

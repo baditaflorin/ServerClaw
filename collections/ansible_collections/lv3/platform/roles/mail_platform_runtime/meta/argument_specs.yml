@@ -53,6 +53,16 @@ argument_specs:
         required: false
         description:
           - Private SMTP submission port exposed only for local platform workloads on docker-runtime-lv3.
+      mail_platform_submission_auth_retries:
+        type: int
+        required: false
+        description:
+          - Number of retries for the private submission SMTP authentication verification while Stalwart finishes startup.
+      mail_platform_submission_auth_delay_seconds:
+        type: int
+        required: false
+        description:
+          - Delay between private submission SMTP authentication verification attempts.
       mail_platform_gateway_bind_port:
         type: int
         required: false

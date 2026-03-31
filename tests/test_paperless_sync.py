@@ -121,7 +121,18 @@ def test_bootstrap_token_writes_file_when_missing(tmp_path: Path, monkeypatch) -
     assert token_file.read_text(encoding="utf-8").strip() == "paperless-token"
 
 
+def test_tiny_pdf_bytes_embeds_the_requested_label() -> None:
+    pdf_one = paperless_sync.tiny_pdf_bytes("LV3 Paperless Smoke 111")
+    pdf_two = paperless_sync.tiny_pdf_bytes("LV3 Paperless Smoke 222")
+
+    assert pdf_one != pdf_two
+    assert b"LV3 Paperless Smoke 111" in pdf_one
+    assert b"LV3 Paperless Smoke 222" in pdf_two
+
+
 def test_smoke_upload_creates_then_cleans_up_document(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
     class StubClient:
         def __init__(self, base_url: str, api_token: str | None = None) -> None:
             self.base_url = base_url
@@ -129,6 +140,7 @@ def test_smoke_upload_creates_then_cleans_up_document(monkeypatch) -> None:
             self.deleted: list[int] = []
 
         def upload_document(self, **kwargs):
+            captured.update(kwargs)
             return {"task_id": "task-1"}
 
         def list_tasks(self, task_id: str):
@@ -147,7 +159,14 @@ def test_smoke_upload_creates_then_cleans_up_document(monkeypatch) -> None:
     report = paperless_sync.smoke_upload("https://paperless.example", "token", cleanup=True)
 
     assert report["document_id"] == 42
+    assert isinstance(report["archive_serial_number"], int)
     assert report["cleanup"] is True
+    assert captured["filename"] == f"lv3-paperless-smoke-{report['archive_serial_number']}.pdf"
+    assert captured["fields"] == [
+        ("title", f"LV3 Paperless Smoke {report['archive_serial_number']}"),
+        ("archive_serial_number", str(report["archive_serial_number"])),
+    ]
+    assert captured["content"] == paperless_sync.tiny_pdf_bytes(f"LV3 Paperless Smoke {report['archive_serial_number']}")
 
 
 def test_main_reads_api_token_file_and_writes_report(tmp_path: Path, monkeypatch) -> None:

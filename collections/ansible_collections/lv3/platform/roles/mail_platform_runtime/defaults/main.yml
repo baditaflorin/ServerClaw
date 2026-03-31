@@ -31,6 +31,8 @@ mail_platform_gateway_base_image: "{{ container_image_catalog.images.mail_platfo
 mail_platform_gateway_port: 8081
 mail_platform_stalwart_http_port: 8080
 mail_platform_internal_submission_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.mail_platform_internal_submission_port | default(1587) }}"
+mail_platform_submission_auth_retries: 12
+mail_platform_submission_auth_delay_seconds: 5
 mail_platform_secret_dir: /etc/lv3/mail-platform
 mail_platform_profile_secret_dir: "{{ mail_platform_secret_dir }}/profiles"
 mail_platform_admin_password_file: "{{ mail_platform_secret_dir }}/stalwart-admin-password"

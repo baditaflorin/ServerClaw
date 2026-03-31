@@ -34,6 +34,16 @@ def test_defaults_define_public_oidc_runtime_and_taxonomy_contract() -> None:
     assert defaults["paperless_internal_base_url"] == "http://127.0.0.1:{{ paperless_internal_port }}"
     assert defaults["paperless_keycloak_client_id"] == "paperless"
     assert defaults["paperless_keycloak_issuer"] == "https://sso.lv3.org/realms/lv3"
+    assert defaults["paperless_ocr_language"] == "eng"
+    assert defaults["paperless_image_pull_retries"] == 5
+    assert defaults["paperless_image_pull_delay_seconds"] == 5
+    assert defaults["paperless_openbao_runtime_compose_file"] == (
+        "{{ openbao_compose_file | default('/opt/openbao/docker-compose.yml') }}"
+    )
+    assert defaults["paperless_openbao_runtime_service_name"] == "openbao"
+    assert defaults["paperless_openbao_runtime_recovery_enabled"] == (
+        "{{ paperless_openbao_runtime_compose_file | length > 0 }}"
+    )
     assert defaults["paperless_api_token_local_file"].endswith("/.local/paperless/api-token.txt")
     assert defaults["paperless_taxonomy_local_file"].endswith("/.local/paperless/taxonomy.json")
     assert defaults["paperless_smoke_report_local_file"].endswith("/.local/paperless/smoke-upload-report.json")
@@ -49,6 +59,11 @@ def test_argument_spec_requires_runtime_and_taxonomy_inputs() -> None:
 
     assert options["paperless_internal_port"]["type"] == "int"
     assert options["paperless_public_base_url"]["type"] == "str"
+    assert options["paperless_image_pull_retries"]["type"] == "int"
+    assert options["paperless_image_pull_delay_seconds"]["type"] == "int"
+    assert options["paperless_openbao_runtime_compose_file"]["type"] == "path"
+    assert options["paperless_openbao_runtime_service_name"]["type"] == "str"
+    assert options["paperless_openbao_runtime_recovery_enabled"]["type"] == "bool"
     assert options["paperless_database_password_local_file"]["type"] == "path"
     assert options["paperless_sync_script"]["type"] == "path"
     assert options["paperless_taxonomy_manifest"]["type"] == "dict"
@@ -64,19 +79,87 @@ def test_main_tasks_render_bootstrap_sync_and_verify_paperless() -> None:
     assert "Render the Paperless compose file" in names
     assert "Pull the Paperless images" in names
     assert "Bootstrap the Paperless API token locally" in names
+    assert "Check whether OpenBao answers before persisting the Paperless API token" in names
+    assert "Recover the OpenBao runtime before persisting the Paperless API token" in names
+    assert "Wait for OpenBao to answer after runtime recovery" in names
+    assert "Load the OpenBao init payload before persisting the Paperless API token" in names
+    assert "Ensure OpenBao is unsealed before persisting the Paperless API token" in names
     assert "Persist the Paperless API token in OpenBao" in names
+    assert "Wait for the Paperless authenticated taxonomy endpoint" in names
     assert "Reconcile the Paperless taxonomy over the live API" in names
     assert "Verify the Paperless runtime" in names
 
-    force_recreate = next(task for task in tasks if task.get("name") == "Force-recreate the Paperless runtime stack after Docker networking recovery")
+    force_recreate_block = next(
+        task
+        for task in tasks
+        if task.get("name") == "Force-recreate the Paperless runtime stack and recover Docker bridge-chain loss after networking recovery"
+    )
+    pull_task = next(task for task in tasks if task.get("name") == "Pull the Paperless images")
     bootstrap_task = next(task for task in tasks if task.get("name") == "Bootstrap the Paperless API token locally")
+    openbao_probe_task = next(
+        task for task in tasks if task.get("name") == "Check whether OpenBao answers before persisting the Paperless API token"
+    )
+    openbao_recovery_task = next(
+        task for task in tasks if task.get("name") == "Recover the OpenBao runtime before persisting the Paperless API token"
+    )
+    openbao_recovery_wait_task = next(
+        task for task in tasks if task.get("name") == "Wait for OpenBao to answer after runtime recovery"
+    )
+    openbao_unseal_task = next(
+        task for task in tasks if task.get("name") == "Ensure OpenBao is unsealed before persisting the Paperless API token"
+    )
+    taxonomy_ready_task = next(
+        task for task in tasks if task.get("name") == "Wait for the Paperless authenticated taxonomy endpoint"
+    )
     sync_task = next(task for task in tasks if task.get("name") == "Reconcile the Paperless taxonomy over the live API")
 
+    rescue_names = [task["name"] for task in force_recreate_block["rescue"]]
+    assert "Detect Docker bridge-chain loss during the Paperless force-recreate" in rescue_names
+    assert "Restart Docker to restore bridge networking before retrying the Paperless force-recreate" in rescue_names
+    assert "Ensure Docker bridge networking chains are present before retrying the Paperless force-recreate" in rescue_names
+    assert "Retry the Paperless runtime force-recreate after Docker networking recovery" in rescue_names
+    force_recreate = force_recreate_block["block"][0]
     assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
+    assert force_recreate["failed_when"] == "paperless_force_recreate_up.rc != 0"
+    assert pull_task["register"] == "paperless_pull"
+    assert pull_task["retries"] == "{{ paperless_image_pull_retries }}"
+    assert pull_task["delay"] == "{{ paperless_image_pull_delay_seconds }}"
+    assert pull_task["until"] == "paperless_pull.rc == 0"
+    assert "'Pull complete' in paperless_pull.stdout" in pull_task["changed_when"]
     assert "bootstrap-token" in bootstrap_task["ansible.builtin.script"]
     assert "--token-file {{ paperless_api_token_file | quote }}" in bootstrap_task["ansible.builtin.script"]
+    assert openbao_probe_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
+    assert openbao_probe_task["register"] == "paperless_openbao_seal_status_initial"
+    assert openbao_probe_task["failed_when"] is False
+    assert openbao_recovery_task["ansible.builtin.command"]["argv"][-5:] == [
+        "up",
+        "-d",
+        "--force-recreate",
+        "--no-deps",
+        "{{ paperless_openbao_runtime_service_name }}",
+    ]
+    assert openbao_recovery_task["ansible.builtin.command"]["argv"][3] == "{{ paperless_openbao_runtime_compose_file }}"
+    assert openbao_recovery_task["when"] == [
+        "paperless_openbao_runtime_recovery_enabled",
+        "paperless_openbao_seal_status_initial.status | default(0) != 200",
+    ]
+    assert openbao_recovery_wait_task["until"] == "paperless_openbao_seal_status_recovered.status == 200"
+    assert openbao_recovery_wait_task["when"] == [
+        "paperless_openbao_runtime_recovery_enabled",
+        "paperless_openbao_seal_status_initial.status | default(0) != 200",
+    ]
+    assert openbao_unseal_task["ansible.builtin.include_role"]["name"] == "lv3.platform.openbao_runtime"
+    assert openbao_unseal_task["ansible.builtin.include_role"]["tasks_from"] == "ensure_unsealed"
+    assert openbao_unseal_task["vars"]["openbao_unseal_context"] == "persisting the Paperless API token in OpenBao"
+    assert taxonomy_ready_task["ansible.builtin.uri"]["url"] == "{{ paperless_internal_base_url }}/api/tags/?page_size=1"
+    assert taxonomy_ready_task["ansible.builtin.uri"]["headers"]["Authorization"] == "Token {{ paperless_api_token }}"
+    assert taxonomy_ready_task["retries"] == 24
+    assert taxonomy_ready_task["delay"] == 5
+    assert taxonomy_ready_task["until"] == "paperless_taxonomy_endpoint_ready.status == 200"
     assert "sync" in sync_task["ansible.builtin.script"]
     assert "--desired-state-file {{ paperless_taxonomy_manifest_file | quote }}" in sync_task["ansible.builtin.script"]
+    assert "paperless_taxonomy_sync.rc == 0" in sync_task["changed_when"]
+    assert sync_task["failed_when"] == "paperless_taxonomy_sync.rc != 0"
 
 
 def test_verify_tasks_check_api_auth_and_taxonomy_drift() -> None:

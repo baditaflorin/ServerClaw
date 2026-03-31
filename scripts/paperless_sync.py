@@ -314,38 +314,53 @@ def extract_document_id(payload: Any) -> int | None:
     return None
 
 
-def tiny_pdf_bytes(label: str) -> bytes:
-    _ = label
-    return (
-        b"%PDF-1.1\n"
-        b"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
-        b"2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj\n"
-        b"3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 200]/Resources<</Font<</F1 5 0 R>>>>/Contents 4 0 R>>endobj\n"
-        b"4 0 obj<</Length 44>>stream\n"
-        b"BT /F1 12 Tf 36 120 Td (LV3 Smoke PDF) Tj ET\n"
-        b"endstream\n"
-        b"endobj\n"
-        b"5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\n"
-        b"xref\n"
-        b"0 6\n"
-        b"0000000000 65535 f \n"
-        b"0000000009 00000 n \n"
-        b"0000000058 00000 n \n"
-        b"0000000115 00000 n \n"
-        b"0000000241 00000 n \n"
-        b"0000000335 00000 n \n"
-        b"trailer<</Size 6/Root 1 0 R>>\n"
-        b"startxref\n405\n"
-        b"%%EOF\n"
+def pdf_literal_string(text: str) -> bytes:
+    return text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)").encode(
+        "ascii",
+        errors="backslashreplace",
     )
+
+
+def tiny_pdf_bytes(label: str) -> bytes:
+    content_stream = b"BT /F1 12 Tf 36 120 Td (" + pdf_literal_string(label) + b") Tj ET\n"
+    objects = [
+        b"1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
+        b"2 0 obj\n<< /Type /Pages /Count 1 /Kids [3 0 R] >>\nendobj\n",
+        b"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>\nendobj\n",
+        (
+            f"4 0 obj\n<< /Length {len(content_stream)} >>\nstream\n".encode("ascii")
+            + content_stream
+            + b"endstream\nendobj\n"
+        ),
+        b"5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n",
+    ]
+
+    pdf = bytearray(b"%PDF-1.4\n")
+    offsets = [0]
+    for obj in objects:
+        offsets.append(len(pdf))
+        pdf.extend(obj)
+
+    xref_start = len(pdf)
+    pdf.extend(f"xref\n0 {len(objects) + 1}\n".encode("ascii"))
+    pdf.extend(b"0000000000 65535 f \n")
+    for offset in offsets[1:]:
+        pdf.extend(f"{offset:010d} 00000 n \n".encode("ascii"))
+    pdf.extend(
+        f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{xref_start}\n%%EOF\n".encode(
+            "ascii"
+        )
+    )
+    return bytes(pdf)
 
 
 def smoke_upload(base_url: str, api_token: str, cleanup: bool = True) -> dict[str, Any]:
     client = PaperlessClient(base_url, api_token=api_token)
-    serial = f"lv3-paperless-smoke-{uuid.uuid4().hex[:12]}"
+    serial_number = (uuid.uuid4().int % 2_000_000_000) + 1
+    serial = str(serial_number)
     title = f"LV3 Paperless Smoke {serial}"
     upload_response = client.upload_document(
-        filename=f"{serial}.pdf",
+        filename=f"lv3-paperless-smoke-{serial}.pdf",
         content=tiny_pdf_bytes(title),
         fields=[("title", title), ("archive_serial_number", serial)],
     )
@@ -388,7 +403,7 @@ def smoke_upload(base_url: str, api_token: str, cleanup: bool = True) -> dict[st
     return {
         "changed": False,
         "base_url": base_url,
-        "archive_serial_number": serial,
+        "archive_serial_number": serial_number,
         "title": title,
         "task_id": task_id,
         "document_id": document_id,

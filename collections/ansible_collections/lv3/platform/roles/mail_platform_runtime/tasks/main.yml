@@ -715,8 +715,104 @@
         if code != 235:
             raise SystemExit(f"unexpected SMTP auth response: {code} {response!r}")
     PY
+  register: mail_platform_submission_auth_check
   changed_when: false
+  retries: "{{ mail_platform_submission_auth_retries }}"
+  delay: "{{ mail_platform_submission_auth_delay_seconds }}"
+  until: mail_platform_submission_auth_check.rc == 0
   no_log: true
+
+- name: Inspect the mail gateway startup state before waiting on the API
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - --format
+      - "{% raw %}{{.State.Status}}|{{.State.Error}}{% endraw %}"
+      - "{{ mail_platform_gateway_container_name }}"
+  register: mail_platform_gateway_start_state
+  changed_when: false
+  failed_when: false
+
+- name: Detect Docker bridge-chain loss during the mail gateway startup
+  ansible.builtin.set_fact:
+    mail_platform_gateway_bridge_chains_missing: >-
+      {{
+        (mail_platform_gateway_start_state.rc | default(1)) == 0
+        and (mail_platform_gateway_start_state.stdout | default('')) is search('^created\\|')
+        and 'failed programming external connectivity' in (mail_platform_gateway_start_state.stdout | default(''))
+        and (
+          'No chain/target/match by that name' in (mail_platform_gateway_start_state.stdout | default(''))
+          or 'Unable to enable DNAT rule' in (mail_platform_gateway_start_state.stdout | default(''))
+        )
+      }}
+
+- name: Surface unexpected mail gateway startup failures
+  ansible.builtin.fail:
+    msg: >-
+      {{
+        mail_platform_gateway_start_state.stdout
+        | default(mail_platform_gateway_start_state.stderr | default('mail gateway failed to reach a running state'))
+      }}
+  when:
+    - (mail_platform_gateway_start_state.rc | default(1)) != 0
+      or (
+        not mail_platform_gateway_bridge_chains_missing
+        and (mail_platform_gateway_start_state.stdout | default('')) is search('^(created|exited|dead)\\|')
+      )
+
+- name: Remove the stalled mail gateway container after Docker bridge-chain loss
+  ansible.builtin.command:
+    argv:
+      - docker
+      - rm
+      - -f
+      - "{{ mail_platform_gateway_container_name }}"
+  register: mail_platform_gateway_remove
+  changed_when: "'{{ mail_platform_gateway_container_name }}' in (mail_platform_gateway_remove.stdout | default(''))"
+  failed_when: false
+  when: mail_platform_gateway_bridge_chains_missing
+
+- name: Restart Docker to restore bridge networking before retrying the mail gateway startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: mail_platform_gateway_bridge_chains_missing
+
+- name: Ensure Docker bridge networking chains are present before retrying the mail gateway startup
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: true
+  when: mail_platform_gateway_bridge_chains_missing
+
+- name: Retry the mail gateway startup after Docker networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mail_platform_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --no-deps
+      - mail-gateway
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_gateway_retry
+  changed_when: >-
+    'Creating' in (mail_platform_gateway_retry.stdout | default(''))
+    or 'Recreating' in (mail_platform_gateway_retry.stdout | default(''))
+    or 'Starting' in (mail_platform_gateway_retry.stdout | default(''))
+    or 'Running' in (mail_platform_gateway_retry.stdout | default(''))
+  failed_when: mail_platform_gateway_retry.rc != 0
+  retries: 3
+  delay: 5
+  until: mail_platform_gateway_retry.rc == 0
+  when: mail_platform_gateway_bridge_chains_missing
 
 - name: Wait for the local mail gateway API to listen
   ansible.builtin.wait_for:
@@ -725,13 +821,52 @@
     delay: 0
     timeout: 120
 
-- name: Bootstrap mail principals inside Stalwart
-  ansible.builtin.command:
-    argv:
-      - python3
-      - "{{ mail_platform_stalwart_bootstrap_file }}"
-  register: mail_platform_bootstrap
-  changed_when: "'changed' in mail_platform_bootstrap.stdout"
+- name: Wait for the mail gateway CRUD API to answer before bootstrapping mail principals
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/domains"
+    method: GET
+    headers:
+      X-API-Key: "{{ mail_platform_gateway_api_key }}"
+    status_code: 200
+  register: mail_platform_gateway_catalog_ready
+  changed_when: false
+  retries: "{{ mail_platform_submission_auth_retries }}"
+  delay: "{{ mail_platform_submission_auth_delay_seconds }}"
+  until: mail_platform_gateway_catalog_ready.status == 200
+  no_log: true
+
+- name: Upsert the managed mail domain through the mail gateway CRUD API
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/domains/{{ mail_platform_domain | urlencode }}"
+    method: PUT
+    headers:
+      X-API-Key: "{{ mail_platform_gateway_api_key }}"
+    body_format: json
+    body:
+      description: "LV3 managed mail domain"
+    status_code: 200
+  register: mail_platform_domain_bootstrap
+  changed_when: mail_platform_domain_bootstrap.json.status != 'unchanged'
+  no_log: true
+
+- name: Upsert the managed mailbox accounts through the mail gateway CRUD API
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/mailboxes/{{ item.localpart | urlencode }}"
+    method: PUT
+    headers:
+      X-API-Key: "{{ mail_platform_gateway_api_key }}"
+    body_format: json
+    body:
+      description: "{{ item.description }}"
+      emails:
+        - "{{ item.address }}"
+      password: "{{ item.password }}"
+    status_code: 200
+  register: mail_platform_mailbox_bootstrap
+  loop: "{{ mail_platform_managed_mailboxes_runtime }}"
+  loop_control:
+    label: "{{ item.localpart }}"
+  changed_when: mail_platform_mailbox_bootstrap.json.status != 'unchanged'
   no_log: true
 
 - name: Verify the mail gateway health endpoint
@@ -753,6 +888,17 @@
   changed_when: false
   no_log: true
 
+- name: Verify the mail gateway CRUD API can list managed mailboxes
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/mailboxes"
+    method: GET
+    headers:
+      X-API-Key: "{{ mail_platform_gateway_api_key }}"
+    status_code: 200
+  register: mail_platform_gateway_mailboxes
+  changed_when: false
+  no_log: true
+
 - name: Verify the mail gateway can list notification profiles
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/profiles"
@@ -764,35 +910,11 @@
   changed_when: false
   no_log: true
 
-- name: Verify the mail domain exists in Stalwart
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ mail_platform_stalwart_http_port }}/api/principal?types=domain"
-    method: GET
-    user: admin
-    password: "{{ mail_platform_admin_password }}"
-    force_basic_auth: true
-    status_code: 200
-  register: mail_platform_domains
-  changed_when: false
-  no_log: true
-
 - name: Assert the managed mail domain is present
   ansible.builtin.assert:
     that:
-      - (mail_platform_domains.json.data['items'] | map(attribute='name') | list) is contains(mail_platform_domain)
+      - (mail_platform_gateway_domains.json['items'] | map(attribute='name') | list) is contains(mail_platform_domain)
     fail_msg: "Managed domain {{ mail_platform_domain }} is not present in Stalwart."
-
-- name: Verify the managed mailbox exists in Stalwart
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ mail_platform_stalwart_http_port }}/api/principal?types=individual"
-    method: GET
-    user: admin
-    password: "{{ mail_platform_admin_password }}"
-    force_basic_auth: true
-    status_code: 200
-  register: mail_platform_accounts
-  changed_when: false
-  no_log: true
 
 - name: Assert the managed mailbox accounts are present
   ansible.builtin.assert:
@@ -801,7 +923,7 @@
         (
           mail_platform_managed_mailboxes_runtime
           | map(attribute='localpart')
-          | difference(mail_platform_accounts.json.data['items'] | map(attribute='name') | list)
+          | difference(mail_platform_gateway_mailboxes.json['items'] | map(attribute='name') | list)
           | length
         ) == 0
     fail_msg: "One or more managed mailboxes are missing from Stalwart."
