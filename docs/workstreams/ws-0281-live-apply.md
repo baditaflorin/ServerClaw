@@ -15,7 +15,7 @@
 - Owner: codex
 - Depends On: `adr-0021-public-subdomain-publication-at-the-nginx-edge`, `adr-0042-postgresql-as-the-shared-relational-database`, `adr-0063-keycloak-sso-for-internal-services`, `adr-0077-compose-secrets-injection-pattern`, `adr-0130-mail-platform-for-transactional-email`, `adr-0191-immutable-guest-replacement`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0281-live-apply.md`, `docs/adr/0281-glitchtip-as-the-sentry-compatible-application-error-tracker.md`, `docs/runbooks/configure-glitchtip.md`, `receipts/live-applies/`, `playbooks/glitchtip.yml`, `playbooks/services/glitchtip.yml`, `collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/`, `collections/ansible_collections/lv3/platform/roles/glitchtip_postgres/`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/`, `collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `config/`, `scripts/`, `tests/`, `Makefile`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0281-live-apply.md`, `docs/adr/0281-glitchtip-as-the-sentry-compatible-application-error-tracker.md`, `docs/runbooks/configure-glitchtip.md`, `receipts/live-applies/`, `playbooks/glitchtip.yml`, `playbooks/services/glitchtip.yml`, `collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/`, `collections/ansible_collections/lv3/platform/roles/glitchtip_postgres/`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/`, `collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `build/platform-manifest.json`, `config/`, `scripts/`, `tests/`, `Makefile`
 
 ## Scope
 
@@ -35,6 +35,7 @@
 
 - `playbooks/glitchtip.yml`
 - `playbooks/services/glitchtip.yml`
+- `build/platform-manifest.json`
 - `collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/`
 - `collections/ansible_collections/lv3/platform/roles/glitchtip_postgres/`
 - `collections/ansible_collections/lv3/platform/roles/docker_runtime/`
@@ -75,6 +76,7 @@
 - Fresh latest-main targeted validation passed from this worktree: `99 passed` across the replayed and hardening-adjacent pytest surfaces, captured in `receipts/live-applies/evidence/2026-03-31-adr-0281-targeted-latest-main-tests-r1-0.177.113.txt`.
 - Latest-main repo validation is green through `make syntax-check-glitchtip`, `scripts/generate_slo_rules.py --check`, `./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json role-argument-specs ansible-syntax data-models`, and `git diff --check`; see `receipts/live-applies/evidence/2026-03-31-adr-0281-latest-main-validation-r1-0.177.113.txt`.
 - Non-README generated checks also pass: `scripts/generate_dependency_diagram.py --check`, `scripts/generate_diagrams.py --check`, and `./scripts/validate_repo.sh generated-portals`; see `receipts/live-applies/evidence/2026-03-31-adr-0281-generated-non-readme-checks-r1-0.177.113.txt`.
+- `scripts/platform_manifest.py --write` was rerun after the remote pre-push gate flagged `build/platform-manifest.json` as stale for this latest-main replay; `scripts/platform_manifest.py --check` now passes locally.
 - `scripts/canonical_truth.py --check` and `scripts/generate_status_docs.py --check` currently fail only because they want to rewrite the protected top-level `README.md` after `ws-0281-live-apply` was returned to `in_progress`; that protected-file integration remains intentionally deferred off this workstream branch.
 - A fresh quiet-window check is currently blocked by concurrent live applies touching the same shared hosts. `receipts/live-applies/evidence/2026-03-31-adr-0281-quiet-window-blocked-r1-0.177.113.txt` shows 15 conflicting `ansible-playbook` controllers against `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`.
 - Read-only public-surface observation currently shows shared-edge drift: `errors.lv3.org` resolves to `65.108.75.123`, but the edge is serving `CN=nginx.lv3.org` and returning `308` redirects to `https://nginx.lv3.org/...` for both the GlitchTip health and auth endpoints. Evidence is in `receipts/live-applies/evidence/2026-03-31-adr-0281-current-public-surface-r1-0.177.113.txt`.
