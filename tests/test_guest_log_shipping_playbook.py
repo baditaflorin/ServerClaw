@@ -26,6 +26,7 @@ def test_guest_log_shipping_lane_map_covers_all_production_guest_roles() -> None
         "monitoring",
         "postgres",
         "postgres-replica",
+        "artifact-cache",
         "backup",
         "coolify",
     ):
@@ -45,6 +46,7 @@ def test_guest_log_shipping_lane_map_covers_all_production_guest_roles() -> None
         "monitoring",
         "postgres",
         "postgres-replica",
+        "artifact-cache",
         "backup",
         "coolify",
     }

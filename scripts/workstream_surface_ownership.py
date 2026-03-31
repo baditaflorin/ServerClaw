@@ -293,7 +293,7 @@ def validate_branch_ownership(
     ownership = next((item for item in ownerships if item.branch == current_branch), None)
     if ownership is None:
         raise ValueError(f"branch '{current_branch}' is not registered in workstreams.yaml")
-    if not ownership.is_active:
+    if not ownership.is_active and not ownership.owned_surfaces:
         raise ValueError(f"branch '{current_branch}' maps to terminal workstream '{ownership.workstream_id}'")
 
     resolved_base_ref = resolve_base_ref(repo_root, registry, base_ref)

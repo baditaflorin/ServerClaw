@@ -142,6 +142,24 @@ def test_capacity_gate_rejects_projected_overcommit(capacity_fixture: Path) -> N
     assert any("disk" in reason for reason in reasons)
 
 
+def test_capacity_model_accepts_service_load_profiles(capacity_fixture: Path) -> None:
+    payload = json.loads(capacity_fixture.read_text(encoding="utf-8"))
+    payload["service_load_profiles"] = [
+        {
+            "service_id": "nginx_edge",
+            "typical_concurrency": 5,
+            "smoke_vus": 2,
+            "request_timeout_seconds": 10,
+            "think_time_seconds": 0.5,
+        }
+    ]
+    capacity_fixture.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+    model = capacity_report.load_capacity_model(capacity_fixture)
+
+    assert model.host.identifier == "proxmox_florin"
+
+
 def test_main_check_gate_emits_json_and_failure_code(
     capacity_fixture: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

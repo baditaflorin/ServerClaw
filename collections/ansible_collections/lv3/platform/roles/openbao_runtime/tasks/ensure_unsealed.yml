@@ -11,20 +11,17 @@
   until: openbao_runtime_seal_status.status == 200
   changed_when: false
 
-- name: Unseal OpenBao when it becomes sealed during {{ openbao_unseal_context | default('managed verification') }}
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/unseal"
-    method: POST
-    body_format: json
-    body:
-      key: "{{ item }}"
-    status_code: 200
-  loop: "{{ openbao_unseal_init_payload.keys_base64[: (openbao_init_key_threshold | int)] }}"
-  register: openbao_runtime_reseal_recovery
-  retries: 6
-  delay: 2
-  until: openbao_runtime_reseal_recovery.status == 200
-  when: openbao_runtime_seal_status.json.sealed | bool
+- name: Record whether OpenBao is already unsealed before {{ openbao_unseal_context | default('managed verification') }}
+  ansible.builtin.set_fact:
+    openbao_runtime_unseal_completed: "{{ not (openbao_runtime_seal_status.json.sealed | bool) }}"
+  no_log: true
+
+- name: Submit OpenBao recovery keys until the instance becomes unsealed during {{ openbao_unseal_context | default('managed verification') }}
+  ansible.builtin.include_tasks: unseal_key.yml
+  loop: "{{ openbao_unseal_init_payload.keys_base64 }}"
+  loop_control:
+    loop_var: openbao_runtime_unseal_key
+    index_var: openbao_runtime_unseal_key_index
   no_log: true
 
 - name: Confirm OpenBao is unsealed before {{ openbao_unseal_context | default('managed verification') }}

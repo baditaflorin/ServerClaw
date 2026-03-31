@@ -13,6 +13,28 @@ HELPER_TASKS_PATH = (
     / "tasks"
     / "openbao_compose_env.yml"
 )
+UNSEAL_HELPER_TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "common"
+    / "tasks"
+    / "unseal_openbao_api.yml"
+)
+UNSEAL_HELPER_STEP_TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "common"
+    / "tasks"
+    / "unseal_openbao_api_key.yml"
+)
 SYSTEMD_HELPER_TASKS_PATH = (
     REPO_ROOT
     / "collections"
@@ -39,6 +61,8 @@ RECOVERY_TASKS_PATH = (
 
 def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     tasks = HELPER_TASKS_PATH.read_text(encoding="utf-8")
+    unseal_tasks = UNSEAL_HELPER_TASKS_PATH.read_text(encoding="utf-8")
+    unseal_step_tasks = UNSEAL_HELPER_STEP_TASKS_PATH.read_text(encoding="utf-8")
 
     assert "include_tasks: ensure_local_openbao_runtime.yml" in tasks
     assert "- name: Ensure the controller-local SSH control path directory exists before OpenBao API retries" in tasks
@@ -48,12 +72,15 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "- name: Wait for the Docker daemon to answer after networking recovery" in tasks
     assert "register: common_openbao_compose_env_docker_info" in tasks
     assert "until: common_openbao_compose_env_docker_info.rc == 0" in tasks
-    assert "- name: Read the local OpenBao seal status" in tasks
-    assert "/v1/sys/seal-status" in tasks
-    assert "- name: Unseal the local OpenBao API when runtime secret injection finds it sealed" in tasks
-    assert "/v1/sys/unseal" in tasks
-    assert "keys_base64[: (openbao_init_key_threshold | default(2) | int)]" in tasks
-    assert "- name: Assert the local OpenBao API is unsealed before runtime secret injection" in tasks
+    assert "- name: Ensure the local OpenBao API is unsealed before runtime secret injection" in tasks
+    assert "include_tasks: unseal_openbao_api.yml" in tasks
+    assert "common_openbao_unseal_context: \"runtime secret injection for {{ common_openbao_compose_env_service_name }}\"" in tasks
+    assert "keys_base64[: (openbao_init_key_threshold | default(2) | int)]" not in tasks
+    assert "Read OpenBao seal status before" in unseal_tasks
+    assert "common_openbao_unseal_completed" in unseal_tasks
+    assert "include_tasks: unseal_openbao_api_key.yml" in unseal_tasks
+    assert "/v1/sys/unseal" in unseal_step_tasks
+    assert "common_openbao_unseal_completed" in unseal_step_tasks
     assert "- name: Wait for the local OpenBao API to become active" in tasks
     assert "- name: Upsert the OpenBao AppRole for the runtime agent" in tasks
     assert "common_openbao_compose_env_agent_template_local_file" in tasks
@@ -66,7 +93,7 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "until: common_openbao_compose_env_current_policy.status in [200, 404]" in tasks
     assert "register: common_openbao_compose_env_approle_upsert" in tasks
     assert "until: common_openbao_compose_env_approle_upsert.status == 204" in tasks
-    assert "retries: 6" in tasks
+    assert "retries: 6" in unseal_step_tasks
 
 
 def test_systemd_helper_reuses_local_openbao_recovery() -> None:
@@ -76,7 +103,8 @@ def test_systemd_helper_reuses_local_openbao_recovery() -> None:
     assert "- name: Ensure the controller-local SSH control path directory exists before OpenBao API retries" in tasks
     assert "path: \"{{ lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') }}\"" in tasks
     assert "- name: Wait for the local OpenBao API to answer" in tasks
-    assert "- name: Unseal the local OpenBao API when host-native secret delivery finds it sealed" in tasks
+    assert "- name: Ensure the configured OpenBao API is unsealed before host-native secret delivery" in tasks
+    assert "include_tasks: unseal_openbao_api.yml" in tasks
 
 
 def test_local_openbao_recovery_helper_recovers_compose_runtime_when_api_is_down() -> None:

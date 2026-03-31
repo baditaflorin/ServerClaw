@@ -4,7 +4,7 @@ import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-ROLE_ROOT = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "monitoring_vm"
+ROLE_ROOT = REPO_ROOT / "roles" / "monitoring_vm"
 DEFAULTS_PATH = ROLE_ROOT / "defaults" / "main.yml"
 TASKS_PATH = ROLE_ROOT / "tasks" / "main.yml"
 VERIFY_PATH = ROLE_ROOT / "tasks" / "verify.yml"
@@ -12,6 +12,7 @@ PLATFORM_DASHBOARD_TEMPLATE = ROLE_ROOT / "templates" / "lv3-platform-overview.j
 MAIL_DASHBOARD_TEMPLATE = ROLE_ROOT / "templates" / "lv3-mail-platform.json.j2"
 VM_DASHBOARD_TEMPLATE = ROLE_ROOT / "templates" / "lv3-vm-detail.json.j2"
 LOKI_CANARY_SERVICE_TEMPLATE = ROLE_ROOT / "templates" / "loki-canary.service.j2"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 
 
 def load_tasks(path: Path) -> list[dict]:
@@ -23,6 +24,23 @@ def test_defaults_define_public_grafana_url_from_service_topology() -> None:
     assert defaults["monitoring_grafana_public_url"] == (
         "https://{{ hostvars[groups['proxmox_hosts'][0]].lv3_service_topology.grafana.public_hostname }}"
     )
+
+
+def test_defaults_expose_private_prometheus_remote_write_endpoint() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    template = (REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "prometheus.service.j2").read_text()
+
+    assert defaults["monitoring_prometheus_listen_address"] == "0.0.0.0:9090"
+    assert defaults["monitoring_prometheus_remote_write_url"] == (
+        "http://{{ hostvars[groups['proxmox_hosts'][0]].lv3_service_topology.grafana.private_ip }}:9090/api/v1/write"
+    )
+    assert "{{ monitoring_prometheus_listen_address }}" in template
+
+
+def test_inventory_explicitly_pins_private_prometheus_bind_for_live_k6_replays() -> None:
+    host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
+
+    assert host_vars["monitoring_prometheus_listen_address"] == "0.0.0.0:9090"
 
 
 def test_main_tasks_explicitly_disable_public_dashboards_and_embedding() -> None:

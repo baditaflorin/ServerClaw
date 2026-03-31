@@ -5697,6 +5697,139 @@
         "make weekly-capacity-report NO_LIVE_METRICS=true"
       ]
     },
+    "k6-smoke": {
+      "description": "Run the governed ADR 0305 k6 smoke probe against the declared latency-SLO services and fail if the smoke budget or latency threshold is exceeded.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "k6-smoke",
+        "command": "make k6-smoke"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/k6-load-testing.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/k6_load_testing.py",
+        "config/windmill/scripts/k6-load-testing.py",
+        "config/k6/scripts/http-slo-probe.js",
+        "config/capacity-model.json",
+        "config/image-catalog.json",
+        "docs/schema/k6-receipt.schema.json",
+        "docs/runbooks/k6-load-testing.md",
+        ".gitea/workflows/validate.yml"
+      ],
+      "outputs": [
+        "One k6 smoke receipt per targeted service under receipts/k6 together with the raw summary export captured under receipts/k6/raw."
+      ],
+      "verification_commands": [
+        "make k6-smoke K6_ARGS=\"--service keycloak --service openfga\"",
+        "python3 scripts/k6_load_testing.py --validate"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 600,
+        "max_steps": 80,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 0,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "k6-load": {
+      "description": "Run the governed ADR 0305 weekly k6 load probe, record structured receipts, and publish regression and warning notifications when the latest run exceeds the governed thresholds.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "k6-load",
+        "command": "make k6-load"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/k6-load-testing.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/k6_load_testing.py",
+        "config/windmill/scripts/k6-load-testing.py",
+        "config/k6/scripts/http-slo-probe.js",
+        "config/capacity-model.json",
+        "config/image-catalog.json",
+        "docs/schema/k6-receipt.schema.json",
+        "docs/runbooks/k6-load-testing.md"
+      ],
+      "outputs": [
+        "A dated set of k6 load receipts, raw summary export, optional platform.slo.k6_regression NATS publication, and ntfy warning publication when the remaining error budget drops below 20 percent."
+      ],
+      "verification_commands": [
+        "make k6-load K6_ARGS=\"--service keycloak --service openfga\"",
+        "python3 scripts/k6_load_testing.py --validate"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 120,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 0,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "k6-soak": {
+      "description": "Run the governed ADR 0305 monthly k6 soak probe so extended-duration latency and error-budget drift are captured as receipts and surfaced through the platform notification paths.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "k6-soak",
+        "command": "make k6-soak"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/k6-load-testing.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/k6_load_testing.py",
+        "config/windmill/scripts/k6-load-testing.py",
+        "config/k6/scripts/http-slo-probe.js",
+        "config/capacity-model.json",
+        "config/image-catalog.json",
+        "docs/schema/k6-receipt.schema.json",
+        "docs/runbooks/k6-load-testing.md"
+      ],
+      "outputs": [
+        "A dated set of k6 soak receipts, raw summary export, optional regression events, and warning notifications for long-running latency or error-budget degradation."
+      ],
+      "verification_commands": [
+        "make k6-soak K6_ARGS=\"--service keycloak --service openfga --soak-duration 5m\"",
+        "python3 scripts/k6_load_testing.py --validate"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 3600,
+        "max_steps": 140,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 0,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "deploy-and-promote": {
       "description": "Validate a staged service change, enforce the ADR 0073 promotion gate, and then apply the approved production promotion.",
       "lifecycle_status": "active",

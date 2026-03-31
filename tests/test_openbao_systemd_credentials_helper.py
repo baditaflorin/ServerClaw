@@ -58,7 +58,8 @@ def test_openbao_systemd_credentials_helper_supports_remote_api_targets() -> Non
     assert "common_openbao_systemd_credentials_api_url" in tasks
     assert "Wait for the configured OpenBao API to answer before host-native secret delivery" in tasks
     assert "common_openbao_systemd_credentials_manage_local_openbao_runtime | bool" in tasks
-    assert "{{ common_openbao_systemd_credentials_api_url }}/v1/sys/seal-status" in tasks
+    assert "include_tasks: unseal_openbao_api.yml" in tasks
+    assert "common_openbao_unseal_api_url: \"{{ common_openbao_systemd_credentials_api_url }}\"" in tasks
     assert "{{ common_openbao_systemd_credentials_api_url }}/v1/auth/approle/role/{{ common_openbao_systemd_credentials_approle_name }}/secret-id" in tasks
 
 

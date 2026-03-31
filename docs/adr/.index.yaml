@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-31'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 278
+  Implemented: 279
   Partial: 6
-  Not Implemented: 39
+  Not Implemented: 38
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5387,7 +5387,7 @@ adr_index:
   - adr: '0305'
     title: k6 For Continuous Load Testing And SLO Error Budget Burn Validation
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: ci-cd
     keywords:
@@ -5401,6 +5401,7 @@ adr_index:
       - burn
     summary: We will integrate k6 as the platform's load testing and SLO budget burn
     filename: 0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+    implemented_version: 0.177.120
   - adr: '0306'
     title: Checkov For IaC Policy Compliance Scanning Of OpenTofu, Compose, And Ansible
     status: Accepted

@@ -80,6 +80,9 @@ def test_validate_workflow_uses_pinned_python_runner_and_manual_checkout() -> No
     assert "Bundle validation artifacts" in workflow
     assert '--docker-binary "${DOCKER_BIN}"' in workflow
     assert 'LV3_DOCKER_WORKSPACE_PATH="$(cat .local/validation-gate/workspace-host.path)"' in workflow
+    assert "Run k6 smoke gate" in workflow
+    assert 'make k6-smoke K6_ARGS="--runner-context gitea-actions --environment production --service keycloak --service openfga"' in workflow
+    assert "receipts/k6/raw" in workflow
     assert "gitea-validation-receipts.tar.gz" in workflow
 
 

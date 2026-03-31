@@ -1,0 +1,6 @@
+Warning: Permanently added '10.10.10.40' (ED25519) to the list of known hosts.
+updated_service_file=false
+active
+LISTEN 0      4096       127.0.0.1:9093       0.0.0.0:*    users:(("prometheus-aler",pid=3920741,fd=7))
+LISTEN 0      4096               *:3000             *:*    users:(("grafana",pid=3918000,fd=21))
+curl: (7) Failed to connect to 127.0.0.1 port 9090 after 0 ms: Could not connect to server

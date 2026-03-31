@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.119",
+  "repo_version": "0.177.120",
   "platform_version": "0.130.77",
-  "generated_at": "2026-03-31T15:15:59Z",
-  "next_refresh_at": "2026-03-31T16:15:59Z",
+  "generated_at": "2026-03-31T16:57:52Z",
+  "next_refresh_at": "2026-03-31T17:57:52Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -496,7 +496,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "http://100.64.0.1:8014",
+        "primary_url": "http://10.10.10.20:8098",
         "last_live_apply": "2026-03-31T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -3083,6 +3083,81 @@
         "runbook": "docs/runbooks/install-proxmox.md"
       },
       {
+        "id": "k6-load",
+        "description": "Run the governed ADR 0305 weekly k6 load probe, record structured receipts, and publish regression and warning notifications when the latest run exceeds the governed thresholds.",
+        "tags": [
+          "diagnostic",
+          "guest-live",
+          "k6-load",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 120,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 0,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/k6-load-testing.md"
+      },
+      {
+        "id": "k6-smoke",
+        "description": "Run the governed ADR 0305 k6 smoke probe against the declared latency-SLO services and fail if the smoke budget or latency threshold is exceeded.",
+        "tags": [
+          "diagnostic",
+          "guest-live",
+          "k6-smoke",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 600,
+          "max_steps": 80,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 0,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/k6-load-testing.md"
+      },
+      {
+        "id": "k6-soak",
+        "description": "Run the governed ADR 0305 monthly k6 soak probe so extended-duration latency and error-budget drift are captured as receipts and surfaced through the platform notification paths.",
+        "tags": [
+          "diagnostic",
+          "guest-live",
+          "k6-soak",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 3600,
+          "max_steps": 140,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 0,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/k6-load-testing.md"
+      },
+      {
         "id": "live-apply-group",
         "description": "Run one grouped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
         "tags": [
@@ -5120,6 +5195,18 @@
         ]
       },
       {
+        "id": "k6-load-testing",
+        "title": "k6 Load Testing",
+        "agent_trust_required": "T2",
+        "steps": 5,
+        "path": "docs/runbooks/k6-load-testing.md",
+        "workflow_ids": [
+          "k6-load",
+          "k6-smoke",
+          "k6-soak"
+        ]
+      },
+      {
         "id": "maintenance-windows",
         "title": "Maintenance Windows",
         "agent_trust_required": "T3",
@@ -5554,10 +5641,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.118",
+    "last_version": "0.177.119",
     "deployed_at": "2026-03-31",
-    "summary": "integrates ADR 0306 into main by adding repo-managed Checkov IaC policy scanning to the shared validation gate, build-server remote validation, and the self-hosted validate workflow while preserving the already-current platform baseline 0.130.77 and the earlier exact-main hosted verification proof first established on 0.130.75",
-    "release_notes_url": "docs/release-notes/0.177.119.md"
+    "summary": "integrates ADR 0305 into main by replaying the repo-managed k6 smoke, load, and soak validation path on the latest realistic origin/main baseline, preserving Prometheus remote-write, Windmill scheduling, and truthful non-zero receipts when the live Keycloak and OpenFGA SLO budgets are already exhausted integrates ADR 0305 into main by re-verifying the latest realistic origin/main exact-main smoke and load paths for Keycloak and OpenFGA, preserving truthful k6 receipts and bounded notification warnings while recording the remaining live Keycloak load-test failure",
+    "release_notes_url": "docs/release-notes/0.177.120.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
