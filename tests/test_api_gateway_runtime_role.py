@@ -78,7 +78,7 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "api_gateway_keycloak_internal_base_url" in defaults
     assert "http://127.0.0.1:18080" in defaults
     assert "api_gateway_keycloak_verify_base_url: http://127.0.0.1:18080" in defaults
-    assert "api_gateway_keycloak_verify_ready_retries: 24" in defaults
+    assert "api_gateway_keycloak_verify_ready_retries: 60" in defaults
     assert "api_gateway_keycloak_verify_ready_delay: 5" in defaults
     assert "api_gateway_keycloak_verify_token_retries: 18" in defaults
     assert "api_gateway_keycloak_verify_token_delay: 5" in defaults
@@ -228,6 +228,16 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert 'remote_archive: "{{ api_gateway_site_dir }}/tests-sync.tar.gz"' in defaults
     assert 'remote_archive: "{{ api_gateway_site_dir }}/tofu-sync.tar.gz"' in defaults
     assert 'remote_archive: "{{ api_gateway_site_dir }}/windmill-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/gitea-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/serverclaw-config-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/serverclaw-skill-packs-script-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/serverclaw-use-case-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/serverclaw-runbook-sync.tar.gz"' in defaults
+    assert "source: .gitea" in defaults
+    assert "source: serverclaw" in defaults
+    assert "source: serverclaw_skill_packs.py" in defaults
+    assert "source: serverclaw_skills.py" in defaults
+    assert "source: serverclaw-skills.md" in defaults
     assert "preserve_destination_root: true" in defaults
     assert "api_gateway_runtime_config_probe_path: /app/config/ledger-event-types.yaml" in defaults
     assert "Sync the staged repo trees required by the API gateway runtime" in tasks
@@ -245,8 +255,13 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert 'apple_double="{{ api_gateway_tree_sync_spec.dest_parent }}/._{{ api_gateway_tree_sync_spec.source | basename }}"' in sync_tree_tasks
     assert "api_gateway_tree_remove_destination" in sync_tree_tasks
     assert 'tar --no-same-owner --no-same-permissions \\' in sync_tree_tasks
-    assert "Remove stale API gateway build-context ignore files" in tasks
+    assert "--no-same-owner" in sync_tree_tasks
+    assert 'export COPYFILE_DISABLE=1' in sync_tree_tasks
+    assert 'export COPY_EXTENDED_ATTRIBUTES_DISABLE=1' in sync_tree_tasks
+    assert "Render the API gateway build-context ignore file" in tasks
+    assert "Remove stale API gateway nested build-context ignore files" in tasks
     assert "{{ api_gateway_service_dir }}/.dockerignore" in tasks
+    assert "**/._*" in tasks
     assert "Ensure the API gateway receipts build-context tree exists" not in tasks
     assert "Sync the API gateway receipts build-context tree explicitly" not in tasks
     assert 'src: "{{ api_gateway_repo_root }}/receipts/"' not in tasks
@@ -322,6 +337,8 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "COPY windmill ./windmill" in tasks
     assert "COPY workstreams.yaml ./workstreams.yaml" in tasks
     assert "--build" not in tasks
+    assert 'DOCKER_BUILDKIT: "0"' in tasks
+    assert 'COMPOSE_DOCKER_CLI_BUILD: "0"' in tasks
     assert "psycopg[binary]==" in requirements
 
 

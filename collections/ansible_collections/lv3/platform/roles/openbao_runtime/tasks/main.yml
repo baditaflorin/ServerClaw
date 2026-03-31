@@ -535,7 +535,12 @@
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/init"
     method: GET
     return_content: true
+    status_code: 200
   register: openbao_init_status
+  retries: 12
+  delay: 2
+  until: openbao_init_status.status == 200
+  changed_when: false
 
 - name: Fail if OpenBao is initialized remotely but the local init payload is missing
   ansible.builtin.fail:
@@ -999,6 +1004,30 @@
     mutation_audit_action: configure.openbao_database_roles
     mutation_audit_target: openbao-runtime
     mutation_audit_emit_on_success: true
+    openbao_database_role_creation_statements: >-
+      {{
+        item.creation_statements
+        if item.creation_statements is not string
+        else [item.creation_statements]
+      }}
+    openbao_database_role_revocation_statements: >-
+      {{
+        item.revocation_statements
+        if item.revocation_statements is not string
+        else [item.revocation_statements]
+      }}
+    openbao_database_role_rollback_statements: >-
+      {{
+        item.rollback_statements | default([])
+        if (item.rollback_statements | default([])) is not string
+        else [item.rollback_statements]
+      }}
+    openbao_database_role_renew_statements: >-
+      {{
+        item.renew_statements | default([])
+        if (item.renew_statements | default([])) is not string
+        else [item.renew_statements]
+      }}
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/{{ openbao_database_mount_path }}/roles/{{ item.name }}"
     method: POST
@@ -1007,8 +1036,10 @@
     body_format: json
     body:
       db_name: "{{ item.db_name }}"
-      creation_statements: "{{ item.creation_statements }}"
-      revocation_statements: "{{ item.revocation_statements }}"
+      creation_statements: "{{ openbao_database_role_creation_statements }}"
+      revocation_statements: "{{ openbao_database_role_revocation_statements }}"
+      rollback_statements: "{{ openbao_database_role_rollback_statements }}"
+      renew_statements: "{{ openbao_database_role_renew_statements }}"
       default_ttl: "{{ item.default_ttl }}"
       max_ttl: "{{ item.max_ttl }}"
     status_code: 204

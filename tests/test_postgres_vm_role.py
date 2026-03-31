@@ -21,7 +21,7 @@ TEMPLATE_PATH = ROLE_ROOT / "templates" / "postgresql-lv3.conf.j2"
 def test_postgres_vm_defaults_reserve_capacity_for_automation() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text(encoding="utf-8"))
 
-    assert defaults["postgres_vm_max_connections"] == 110
+    assert defaults["postgres_vm_max_connections"] == 200
     assert defaults["postgres_vm_superuser_reserved_connections"] == 3
     assert defaults["postgres_vm_reserved_connections"] == 5
 

@@ -88,10 +88,25 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     tasks = load_tasks()
     defaults = load_defaults()
     task_names = {task["name"] for task in tasks}
+    assert "Record container ids that are running before Docker restarts" in task_names
+    assert "Inspect running containers before Docker restarts" in task_names
+    assert "Record containers that were running before Docker restarts" in task_names
     assert "Flush Docker handlers before chain health checks" in task_names
     assert "Reset Docker failed state before nat-chain recovery restart" in task_names
     assert "Ensure Docker bridge networking chains are present" in task_names
+    assert "Re-inspect pre-restart containers after Docker restarts" in task_names
+    assert "Record pre-restart containers that remained stopped after Docker restarts" in task_names
+    assert "Recover pre-restart containers that remained stopped after Docker restarts" in task_names
+    assert "Confirm pre-restart containers recovered after Docker restarts" in task_names
+    inspect_pre_restart = next(task for task in tasks if task["name"] == "Inspect running containers before Docker restarts")
+    record_containers = next(task for task in tasks if task["name"] == "Record containers that were running before Docker restarts")
     ensure_task = next(task for task in tasks if task["name"] == "Ensure Docker bridge networking chains are present")
+    recheck_pre_restart = next(task for task in tasks if task["name"] == "Re-inspect pre-restart containers after Docker restarts")
+    record_stopped = next(
+        task for task in tasks if task["name"] == "Record pre-restart containers that remained stopped after Docker restarts"
+    )
+    recover_containers = next(task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts")
+    confirm_recovery = next(task for task in tasks if task["name"] == "Confirm pre-restart containers recovered after Docker restarts")
     include_role = ensure_task["ansible.builtin.include_role"]
     assert include_role["name"] == "lv3.platform.common"
     assert include_role["tasks_from"] == "docker_bridge_chains"
@@ -99,11 +114,62 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert ensure_task["vars"]["common_docker_bridge_chains_require_nat_chain"] == "{{ docker_runtime_require_nat_chain }}"
     assert defaults["docker_runtime_chain_recheck_retries"] == 30
     assert defaults["docker_runtime_chain_recheck_delay_seconds"] == 2
+    assert defaults["docker_runtime_container_recovery_retries"] == 12
+    assert defaults["docker_runtime_container_recovery_delay_seconds"] == 5
+    assert defaults["docker_runtime_nonpersistent_restart_policies"] == ["", "no"]
     assert ensure_task["vars"]["common_docker_bridge_chains_retries"] == "{{ docker_runtime_chain_recheck_retries }}"
     assert ensure_task["vars"]["common_docker_bridge_chains_delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
     reset_task = next(task for task in tasks if task["name"] == "Reset Docker failed state before nat-chain recovery restart")
     assert reset_task["ansible.builtin.command"] == "systemctl reset-failed docker.service"
     assert reset_task["changed_when"] is False
+    assert inspect_pre_restart["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
+    assert inspect_pre_restart["ansible.builtin.command"]["stdin"] == "{{ docker_runtime_pre_restart_container_ids.stdout_lines | to_json }}"
+    assert '["docker", "inspect", container_id]' in inspect_pre_restart["ansible.builtin.command"]["argv"][2]
+    assert '"no such object" in stderr' in inspect_pre_restart["ansible.builtin.command"]["argv"][2]
+    assert "docker_runtime_pre_restart_container_details" in record_containers["ansible.builtin.set_fact"]
+    assert "RestartPolicy" not in record_containers["ansible.builtin.set_fact"]["docker_runtime_pre_restart_container_names"]
+    assert recheck_pre_restart["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
+    assert recheck_pre_restart["ansible.builtin.command"]["stdin"] == (
+        "{{ docker_runtime_pre_restart_container_names | default([]) | to_json }}"
+    )
+    assert '["docker", "inspect", container_name]' in recheck_pre_restart["ansible.builtin.command"]["argv"][2]
+    assert "docker_runtime_stopped_pre_restart_container_details" in record_stopped["ansible.builtin.set_fact"]
+    assert recover_containers["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
+    assert "".join(recover_containers["ansible.builtin.command"]["stdin"].split()) == (
+        "{{(docker_runtime_stopped_pre_restart_container_details|default([]))|to_json}}"
+    )
+    assert "TRANSIENT_DOCKER_NETWORK_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "STALE_COMPOSE_ENDPOINT_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "No chain/target/match by that name" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "failed to create endpoint" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "run_with_retry(command, cwd=working_dir or None)" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'remove_command = ["docker", "rm", "-f", *container_names]' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'recovery_command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'down_command.extend(["down", "--remove-orphans"])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'final_up_command.extend(["up", "-d", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "docker_compose_down_remove_orphans" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "docker_compose_up_after_down" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "com.docker.compose.project.working_dir" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "docker_compose_up" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'stopped = [container for container in containers if not container.get("State", {}).get("Running")]' not in (
+        recover_containers["ansible.builtin.command"]["argv"][2]
+    )
+    assert "for container in containers:" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert confirm_recovery["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
+    assert confirm_recovery["ansible.builtin.command"]["stdin"] == (
+        "{{ docker_runtime_pre_restart_container_details | default([]) | to_json }}"
+    )
+    assert '["docker", "inspect", container_name]' in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert "NONPERSISTENT_RESTART_POLICIES" in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert "restart_policy_name" in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert "require_running = restart_policy_name not in NONPERSISTENT_RESTART_POLICIES" in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert 'and status == "exited"' in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert '"healthy": healthy' in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert "sys.exit(0 if all_running else 1)" in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert confirm_recovery["retries"] == "{{ docker_runtime_container_recovery_retries }}"
+    assert confirm_recovery["delay"] == "{{ docker_runtime_container_recovery_delay_seconds }}"
+    assert confirm_recovery["until"] == "docker_runtime_recovered_container_inspect.rc == 0"
 
 
 def test_common_docker_bridge_chains_warms_control_socket_before_restarting() -> None:
@@ -168,6 +234,10 @@ def test_common_docker_bridge_chains_warms_control_socket_before_restarting() ->
 
 def test_docker_runtime_patches_nftables_rule_block_once() -> None:
     tasks = load_tasks()
+    daemon_stat = next(task for task in tasks if task["name"] == "Check whether the current Docker daemon config exists")
+    daemon_slurp = next(task for task in tasks if task["name"] == "Read the current Docker daemon config")
+    daemon_fact = next(task for task in tasks if task["name"] == "Record whether Docker currently has live-restore enabled")
+    daemon_render = next(task for task in tasks if task["name"] == "Render Docker daemon configuration")
     build_rules = next(task for task in tasks if task["name"] == "Build the Docker bridge forward-compat rule block")
     patch_rules = next(task for task in tasks if task["name"] == "Patch nftables forward policy for Docker bridge egress")
     assert_rules = next(task for task in tasks if task["name"] == "Assert the Docker bridge forward-compat rule is present")
@@ -175,6 +245,11 @@ def test_docker_runtime_patches_nftables_rule_block_once() -> None:
         task for task in tasks if task["name"] == "Apply Docker bridge forward-compat rules live without reloading nftables"
     )
 
+    assert "docker_runtime_container_forward_rule_lines" in build_rules["ansible.builtin.set_fact"]
+    assert daemon_stat["ansible.builtin.stat"]["path"] == "/etc/docker/daemon.json"
+    assert daemon_slurp["when"] == "docker_runtime_daemon_config_stat.stat.exists"
+    assert "docker_runtime_previous_live_restore_enabled" in daemon_fact["ansible.builtin.set_fact"]
+    assert daemon_render["register"] == "docker_runtime_daemon_config_render"
     assert "docker_runtime_container_forward_rule_lines" in build_rules["ansible.builtin.set_fact"]
     assert "docker_runtime_container_forward_rule_block" in build_rules["ansible.builtin.set_fact"]
     assert patch_rules["ansible.builtin.lineinfile"]["line"] == "    ip saddr {{ item }} accept"
@@ -218,6 +293,7 @@ def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() ->
         "{{ inventory_dir ~ '/../scripts/docker_publication_assurance.py' }}"
     )
     assert defaults["docker_runtime_insecure_registries"] == []
+    assert daemon_config["live-restore"] is False
     assert daemon_config["dns"] == ["1.1.1.1", "8.8.8.8"]
     assert daemon_config["registry-mirrors"] == "{{ docker_runtime_registry_mirrors }}"
     assert daemon_config["insecure-registries"] == "{{ docker_runtime_insecure_registries }}"

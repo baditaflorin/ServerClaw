@@ -23,6 +23,7 @@ from deployment_history import query_deployment_history
 from governed_command import execute_governed_command
 from live_apply_receipts import iter_receipt_paths, load_receipt, validate_receipts
 from maintenance_window_tool import list_active_windows_best_effort
+from platform.use_cases.serverclaw_skills import list_serverclaw_skill_packs
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -525,6 +526,21 @@ def tool_get_maintenance_windows(_tool: dict[str, Any], args: dict[str, Any]) ->
     }
 
 
+def tool_list_serverclaw_skills(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    workspace_id = args.get("workspace_id")
+    if workspace_id is not None:
+        workspace_id = require_str(workspace_id, "arguments.workspace_id")
+    skill_id = args.get("skill_id")
+    if skill_id is not None:
+        skill_id = require_str(skill_id, "arguments.skill_id")
+    return list_serverclaw_skill_packs(
+        workspace_id=workspace_id,
+        skill_id=skill_id,
+        include_imported=bool(args.get("include_imported", True)),
+        include_prompt_manifest=bool(args.get("include_prompt_manifest", False)),
+    )
+
+
 def normalize_approval_args(args: dict[str, Any]) -> dict[str, Any]:
     requester_class = require_str(args.get("requester_class"), "arguments.requester_class")
     if requester_class not in ALLOWED_IDENTITY_CLASSES:
@@ -588,6 +604,7 @@ HANDLERS: Final[dict[str, Any]] = {
     "get_command_contract": tool_get_command_contract,
     "get_api_publication_surface": tool_get_api_publication_surface,
     "get_maintenance_windows": tool_get_maintenance_windows,
+    "list_serverclaw_skills": tool_list_serverclaw_skills,
     "export_mcp_tools": tool_export_mcp_tools,
     "query_platform_context": tool_query_platform_context,
     "browser_run_session": tool_browser_run_session,

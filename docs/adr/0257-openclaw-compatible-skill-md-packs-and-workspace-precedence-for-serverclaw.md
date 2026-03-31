@@ -1,10 +1,11 @@
 # ADR 0257: OpenClaw-Compatible SKILL.md Packs And Workspace Precedence For ServerClaw
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.117
+- Implemented In Platform Version: 0.130.76
 - Date: 2026-03-28
+- Implemented On: 2026-03-31
 
 ## Context
 

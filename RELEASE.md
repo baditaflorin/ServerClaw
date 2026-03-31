@@ -1,12 +1,12 @@
-# Release 0.177.116
+# Release 0.177.117
 
 - Date: 2026-03-31
 
 ## Summary
-- implements ADR 0290 by bringing the private Redpanda Kafka-compatible streaming platform, topic reconciliation, and authenticated Admin API, HTTP Proxy, and Schema Registry runtime onto main after the exact-main governed replay on docker-runtime-lv3
+- implements ADR 0257 by carrying the governed ServerClaw SKILL.md skill-pack contract onto the current mainline baseline, hardening exact-main OpenBao replay stability, and recording the verified controller, API gateway, and Windmill workspace-precedence proof set
 
 ## Platform Impact
-- Platform version remains 0.130.75 while release 0.177.116 records the already-verified ADR 0290 Redpanda runtime and canonical mainline receipt on top of the current origin/main baseline.
+- Platform version advances to 0.130.76 by promoting the ADR 0257 exact-main live-apply receipt for the governed ServerClaw SKILL.md skill-pack contract, with verified controller, API gateway, Windmill, OpenBao, and step-ca evidence on docker-runtime-lv3.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -47,6 +47,7 @@ from operator_manager import ROSTER_PATH, validate_operator_roster
 from platform.execution_lanes import load_execution_lane_catalog
 from promotion_pipeline import validate_promotion_receipts
 from public_surface_scan import load_public_surface_scan_policy
+from platform.use_cases.serverclaw_skills import validate_serverclaw_skill_pack_repository
 from shared_policy_packs import (
     SHARED_POLICY_PACKS_PATH,
     SHARED_POLICY_PACKS_SCHEMA_PATH,
@@ -2769,6 +2770,7 @@ def validate_repository_data_models() -> int:
     validate_merge_eligible_files_contract()
     validate_triage_rule_contracts()
     validate_changelog_redaction_contract()
+    validate_serverclaw_skill_pack_repository()
     validate_platform_finding_schema()
     validate_maintenance_window_schema()
     validate_shared_policy_packs_schema()

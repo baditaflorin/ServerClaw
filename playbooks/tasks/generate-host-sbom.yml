@@ -107,6 +107,10 @@
       - --exclude
       - ./sys/**
       - --exclude
+      - ./tmp/**
+      - --exclude
+      - ./var/tmp/**
+      - --exclude
       - ./var/lib/containerd/**
       - --exclude
       - ./var/lib/docker/**

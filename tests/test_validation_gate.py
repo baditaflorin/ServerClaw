@@ -514,28 +514,35 @@ def test_gate_status_supports_json_output(tmp_path: Path, capsys) -> None:
 def test_gate_status_resolves_default_paths_from_repo_root(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     (repo_root / "scripts").mkdir(parents=True)
-    (repo_root / "config").mkdir()
+    (repo_root / "config").mkdir(parents=True)
     (repo_root / ".local" / "validation-gate").mkdir(parents=True)
-    script_path = repo_root / "scripts" / "gate_status.py"
-    script_path.write_text((REPO_ROOT / "scripts" / "gate_status.py").read_text(encoding="utf-8"), encoding="utf-8")
-    (repo_root / "config" / "validation-gate.json").write_text(
-        json.dumps(
-            {
-                "schema-validation": {
-                    "description": "validate schemas",
-                    "severity": "error",
-                }
-            }
-        ),
+    (repo_root / "receipts" / "gate-bypasses").mkdir(parents=True)
+
+    for relative_path in (
+        "scripts/__init__.py",
+        "scripts/gate_bypass_waivers.py",
+        "scripts/gate_status.py",
+        "scripts/validation_lanes.py",
+        "config/gate-bypass-waiver-catalog.json",
+        "config/validation-gate.json",
+        "config/validation-lanes.yaml",
+    ):
+        destination = repo_root / relative_path
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text((REPO_ROOT / relative_path).read_text(encoding="utf-8"), encoding="utf-8")
+
+    (repo_root / "scripts" / "controller_automation_toolkit.py").write_text(
+        "def emit_cli_error(*args, **kwargs):\n    return None\n",
         encoding="utf-8",
     )
+
     (repo_root / ".local" / "validation-gate" / "post-merge-last-run.json").write_text(
         json.dumps({"status": "passed", "executed_at": "2026-03-29T16:39:41+00:00", "source": "windmill"}),
         encoding="utf-8",
     )
 
     completed = subprocess.run(
-        [sys.executable, str(script_path), "--format", "json"],
+        [sys.executable, str(repo_root / "scripts" / "gate_status.py"), "--format", "json"],
         cwd=tmp_path,
         text=True,
         capture_output=True,
@@ -545,6 +552,8 @@ def test_gate_status_resolves_default_paths_from_repo_root(tmp_path: Path) -> No
     assert completed.returncode == 0, completed.stderr
     payload = json.loads(completed.stdout)
     assert payload["manifest_path"] == str(repo_root / "config" / "validation-gate.json")
+    assert payload["lane_catalog_path"] == str(repo_root / "config" / "validation-lanes.yaml")
+    assert len(payload["enabled_checks"]) >= 1
     assert payload["post_merge_run"] == {
         "status": "passed",
         "executed_at": "2026-03-29T16:39:41+00:00",

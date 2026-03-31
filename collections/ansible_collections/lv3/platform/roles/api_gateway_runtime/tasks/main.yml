@@ -135,12 +135,21 @@
     loop_var: api_gateway_tree_sync_spec
     label: "{{ api_gateway_tree_sync_spec.name }}"
 
-- name: Remove stale API gateway build-context ignore files
+- name: Render the API gateway build-context ignore file
+  ansible.builtin.copy:
+    dest: "{{ api_gateway_service_dir }}/.dockerignore"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      ._*
+      **/._*
+
+- name: Remove stale API gateway nested build-context ignore files
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
-    - "{{ api_gateway_service_dir }}/.dockerignore"
     - "{{ api_gateway_service_dir }}/receipts/.dockerignore"
 
 - name: Remove stale managed API gateway config bundle entries
@@ -227,6 +236,7 @@
       RUN pip install --no-cache-dir -r requirements.txt
       COPY .gitea ./.gitea
       COPY .githooks ./.githooks
+      COPY .gitea ./.gitea
       COPY Makefile ./Makefile
       COPY .github ./.github
       COPY .pre-commit-config.yaml ./.pre-commit-config.yaml
@@ -333,6 +343,9 @@
           - --remove-orphans
       args:
         chdir: "{{ api_gateway_site_dir }}"
+      environment:
+        DOCKER_BUILDKIT: "0"
+        COMPOSE_DOCKER_CLI_BUILD: "0"
       register: api_gateway_up
       changed_when: >-
         'Creating' in api_gateway_up.stdout

@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-31'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 274
+  Implemented: 277
   Partial: 6
-  Not Implemented: 43
+  Not Implemented: 40
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4415,7 +4415,7 @@ adr_index:
   - adr: '0257'
     title: OpenClaw-Compatible SKILL.md Packs And Workspace Precedence For ServerClaw
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4428,6 +4428,7 @@ adr_index:
       - serverclaw
     summary: ServerClaw will adopt OpenClaw-compatible SKILL.md skill packs as its
     filename: 0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md
+    implemented_version: 0.177.117
   - adr: 0258
     title: Temporal As The Durable ServerClaw Session Orchestrator
     status: Accepted
@@ -5002,7 +5003,7 @@ adr_index:
   - adr: 0288
     title: Crawl4AI As The LLM-Optimised Web Content Crawler
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -5014,6 +5015,7 @@ adr_index:
       - crawler
     summary: We will deploy Crawl4AI as the LLM-optimised web content crawler.
     filename: 0288-crawl4ai-as-the-llm-optimised-web-content-crawler.md
+    implemented_version: 0.177.115
   - adr: 0288
     title: Flagsmith As The Feature Flag And Remote Configuration Service
     status: Accepted
