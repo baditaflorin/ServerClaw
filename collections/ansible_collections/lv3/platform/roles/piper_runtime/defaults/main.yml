@@ -9,6 +9,7 @@ piper_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology
 piper_runtime_site_dir: /opt/piper
 piper_runtime_service_dir: "{{ piper_runtime_site_dir }}/service"
 piper_runtime_compose_file: "{{ piper_runtime_site_dir }}/docker-compose.yml"
+piper_runtime_compose_project_name: "{{ piper_runtime_site_dir | basename }}"
 piper_runtime_dockerfile: "{{ piper_runtime_service_dir }}/Dockerfile"
 piper_runtime_requirements_file: "{{ piper_runtime_service_dir }}/requirements.txt"
 piper_runtime_service_script: "{{ piper_runtime_service_dir }}/piper_service.py"

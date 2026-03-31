@@ -39,17 +39,17 @@ def test_service_wrapper_imports_the_canonical_playbook() -> None:
 def test_inventory_exposes_private_piper_port_to_guests_docker_and_monitoring() -> None:
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
 
-    assert host_vars["platform_port_assignments"]["piper_port"] == 8099
+    assert host_vars["platform_port_assignments"]["piper_port"] == 8100
     docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
 
-    management_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "management" and 8099 in rule["ports"])
-    assert 8099 in management_rule["ports"]
-    guest_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 8099 in rule["ports"])
-    assert 8099 in guest_rule["ports"]
-    docker_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "172.16.0.0/12" and 8099 in rule["ports"])
-    assert 8099 in docker_rule["ports"]
-    monitoring_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 8099 in rule["ports"])
-    assert 8099 in monitoring_rule["ports"]
+    management_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "management" and 8100 in rule["ports"])
+    assert 8100 in management_rule["ports"]
+    guest_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 8100 in rule["ports"])
+    assert 8100 in guest_rule["ports"]
+    docker_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "172.16.0.0/12" and 8100 in rule["ports"])
+    assert 8100 in docker_rule["ports"]
+    monitoring_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 8100 in rule["ports"])
+    assert 8100 in monitoring_rule["ports"]
 
 
 def test_workflow_and_command_catalogs_declare_converge_entrypoint() -> None:
@@ -66,6 +66,9 @@ def test_workflow_and_command_catalogs_declare_converge_entrypoint() -> None:
     }
     assert "syntax-check-piper" in workflow["validation_targets"]
     assert workflow["owner_runbook"] == "docs/runbooks/configure-piper.md"
+    assert "http://127.0.0.1:8100/healthz" in workflow["verification_commands"][1]
+    assert "http://127.0.0.1:8100/api/voices" in workflow["verification_commands"][2]
+    assert "http://127.0.0.1:8100/api/tts?voice=en_US-ryan-medium" in workflow["verification_commands"][3]
     assert command["workflow_id"] == "converge-piper"
     assert command["approval_policy"] == "sensitive_live_change"
     assert command["evidence"]["live_apply_receipt_required"] is True

@@ -192,7 +192,7 @@ platform_ports:
   outline_port: 3006
   directus_port: 8055
   jupyterhub_port: 8097
-  piper_port: 8099
+  piper_port: 8100
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
   excalidraw_port: 3095
@@ -274,7 +274,7 @@ platform_port_assignments:
   outline_port: 3006
   directus_port: 8055
   jupyterhub_port: 8097
-  piper_port: 8099
+  piper_port: 8100
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
   excalidraw_port: 3095
@@ -1910,9 +1910,9 @@ platform_service_topology:
       service_telemetry: false
     service_id: piper
     ports:
-      internal: 8099
+      internal: 8100
     urls:
-      internal: http://10.10.10.20:8099
+      internal: http://10.10.10.20:8100
   n8n:
     service_name: n8n
     owning_vm: docker-runtime-lv3
@@ -3561,9 +3561,9 @@ public_edge_service_topology:
       service_telemetry: false
     service_id: piper
     ports:
-      internal: 8099
+      internal: 8100
     urls:
-      internal: http://10.10.10.20:8099
+      internal: http://10.10.10.20:8100
   n8n:
     service_name: n8n
     owning_vm: docker-runtime-lv3
@@ -4243,7 +4243,7 @@ browser_runner_port: 8096
 outline_port: 3006
 directus_port: 8055
 jupyterhub_port: 8097
-piper_port: 8099
+piper_port: 8100
 dozzle_http_port: 8089
 dozzle_agent_port: 7007
 excalidraw_port: 3095

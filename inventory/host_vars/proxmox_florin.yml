@@ -68,7 +68,7 @@ platform_port_assignments:
   outline_port: 3006
   directus_port: 8055
   jupyterhub_port: 8097
-  piper_port: 8099
+  piper_port: 8100
   plane_port: 8093
   plane_host_proxy_port: 8011
   woodpecker_http_port: 8102
@@ -505,28 +505,28 @@ network_policy:
           ports:
             - 1025
             - 8025
-            - 8099
+            - 8100
           description: Operator access to the private Mailpit SMTP and UI listeners plus the Piper TTS API
         - source: all_guests
           protocol: tcp
           ports:
             - 1025
             - 8025
-            - 8099
+            - 8100
           description: Guest-network access to the private Mailpit SMTP and UI listeners plus the Piper TTS API
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
             - 1025
             - 8025
-            - 8099
+            - 8100
           description: Local Docker workloads using the private Mailpit SMTP and UI listeners plus the Piper TTS API
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
             - 1025
             - 8025
-            - 8099
+            - 8100
           description: Local Docker workloads using the private Mailpit SMTP and UI listeners plus the Piper TTS API
         - source: 172.16.0.0/12
           protocol: tcp
@@ -746,7 +746,7 @@ network_policy:
             - 3008
             - 5000
             - 8089
-            - 8099
+            - 8100
             - 9998
           description: Private monitoring probes for the Tesseract OCR, Changedetection, Dozzle, Piper, and Tika runtimes
         - source: monitoring-lv3

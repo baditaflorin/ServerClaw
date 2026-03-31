@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-31'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 271
+  Implemented: 272
   Partial: 6
-  Not Implemented: 46
+  Not Implemented: 45
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4889,7 +4889,7 @@ adr_index:
   - adr: 0284
     title: Piper TTS As The CPU Neural Text-To-Speech Service
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -4902,6 +4902,7 @@ adr_index:
       - service
     summary: We will deploy Piper TTS as the canonical CPU neural text-to-speech service.
     filename: 0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md
+    implemented_version: 0.130.74
   - adr: 0285
     title: Paperless-ngx As The Document Management And Archive API
     status: Accepted

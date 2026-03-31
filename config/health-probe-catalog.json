@@ -1724,7 +1724,7 @@
         "timeout_seconds": 300,
         "retries": 60,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8099/healthz",
+        "url": "http://127.0.0.1:8100/healthz",
         "method": "GET",
         "expected_status": [
           200
@@ -1736,7 +1736,7 @@
         "timeout_seconds": 300,
         "retries": 60,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8099/healthz",
+        "url": "http://127.0.0.1:8100/healthz",
         "method": "GET",
         "expected_status": [
           200
@@ -1751,7 +1751,7 @@
         "argv": [
           "python3",
           "-c",
-          "import json, urllib.request; voices=json.loads(urllib.request.urlopen('http://127.0.0.1:8099/api/voices', timeout=60).read().decode('utf-8')); assert 'en_US-ryan-medium' in voices['voices']; request=urllib.request.Request('http://127.0.0.1:8099/api/tts?voice=en_US-ryan-medium', data=b'LV3 Piper readiness', headers={'Content-Type': 'text/plain; charset=utf-8'}, method='POST'); response=urllib.request.urlopen(request, timeout=180); payload=response.read(); content_type=response.headers.get('Content-Type', ''); assert content_type.startswith('audio/wav'); assert payload[:4] == b'RIFF'; assert payload[8:12] == b'WAVE'; assert len(payload) > 1024"
+          "import json, urllib.request; voices=json.loads(urllib.request.urlopen('http://127.0.0.1:8100/api/voices', timeout=60).read().decode('utf-8')); assert 'en_US-ryan-medium' in voices['voices']; request=urllib.request.Request('http://127.0.0.1:8100/api/tts?voice=en_US-ryan-medium', data=b'LV3 Piper readiness', headers={'Content-Type': 'text/plain; charset=utf-8'}, method='POST'); response=urllib.request.urlopen(request, timeout=180); payload=response.read(); content_type=response.headers.get('Content-Type', ''); assert content_type.startswith('audio/wav'); assert payload[:4] == b'RIFF'; assert payload[8:12] == b'WAVE'; assert len(payload) > 1024"
         ],
         "success_rc": 0
       },
@@ -1959,7 +1959,7 @@
         "timeout_seconds": 60,
         "retries": 12,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8099",
+        "url": "http://127.0.0.1:8100",
         "method": "GET",
         "expected_status": [
           200

@@ -1300,7 +1300,7 @@
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "http://10.10.10.20:8099",
+      "internal_url": "http://10.10.10.20:8100",
       "exposure": "private-only",
       "health_probe_id": "piper",
       "adr": "0284",
@@ -1315,7 +1315,7 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://10.10.10.20:8099",
+          "url": "http://10.10.10.20:8100",
           "notes": "Piper remains private to docker-runtime-lv3 and the managed guest network; there is no public hostname or shared API gateway route."
         }
       }

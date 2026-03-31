@@ -8,7 +8,7 @@ and verifies the guest-network `/api/tts` WAV synthesis contract end to end.
 ## Result
 
 - `docker-runtime-lv3` runs Piper from `/opt/piper`
-- Piper listens privately on `10.10.10.20:8099`
+- Piper listens privately on `10.10.10.20:8100`
 - the repo-managed default voice is downloaded into the named Docker volume `piper-models`
 - callers can POST plain text to `/api/tts` and receive `audio/wav` without publishing a public hostname
 
@@ -44,7 +44,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \
-  'curl -fsS http://127.0.0.1:8099/healthz'
+  'curl -fsS http://127.0.0.1:8100/healthz'
 ```
 
 Verify the declared voice list:
@@ -54,7 +54,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \
-  'curl -fsS http://127.0.0.1:8099/api/voices'
+  'curl -fsS http://127.0.0.1:8100/api/voices'
 ```
 
 Verify Piper synthesizes WAV audio from the ADR contract:
@@ -69,7 +69,7 @@ import json
 import urllib.request
 
 request = urllib.request.Request(
-    "http://127.0.0.1:8099/api/tts?voice=en_US-ryan-medium",
+    "http://127.0.0.1:8100/api/tts?voice=en_US-ryan-medium",
     data=b"LV3 Piper runbook verification",
     headers={"Content-Type": "text/plain; charset=utf-8"},
     method="POST",

@@ -86,22 +86,92 @@
     mode: "0644"
   register: piper_runtime_service_copy
 
-- name: Build the Piper runtime image
-  ansible.builtin.shell: |
-    set -euo pipefail
-    docker build --pull=false -t "{{ piper_runtime_image_name }}:latest" "{{ piper_runtime_service_dir }}"
-  args:
-    executable: /bin/bash
-  register: piper_runtime_build
-  changed_when: >-
-    'writing image' in (piper_runtime_build.stdout | lower)
-    or 'writing image' in (piper_runtime_build.stderr | lower)
-    or 'naming to' in (piper_runtime_build.stdout | lower)
-    or 'naming to' in (piper_runtime_build.stderr | lower)
-    or 'exporting to image' in (piper_runtime_build.stdout | lower)
-    or 'exporting to image' in (piper_runtime_build.stderr | lower)
-    or 'successfully built' in (piper_runtime_build.stdout | lower)
-    or 'successfully tagged' in (piper_runtime_build.stdout | lower)
+- name: Define the Piper image build shell
+  ansible.builtin.set_fact:
+    piper_runtime_build_shell: |
+      set -euo pipefail
+      build_dir="$(mktemp -d /tmp/piper-build.XXXXXX)"
+      log_file="/tmp/piper-build.log"
+      trap 'rm -rf "$build_dir"' EXIT
+      cp -a "{{ piper_runtime_service_dir }}/." "$build_dir/"
+      if DOCKER_BUILDKIT=0 docker build --pull=false --network host -t "{{ piper_runtime_image_name }}:latest" "$build_dir" >"$log_file" 2>&1; then
+        cat "$log_file"
+      else
+        rc="$?"
+        cat "$log_file"
+        exit "$rc"
+      fi
+
+- name: Build the Piper runtime image and recover stale Docker build-network drift
+  block:
+    - name: Build the Piper runtime image
+      ansible.builtin.shell: "{{ piper_runtime_build_shell }}"
+      args:
+        chdir: "{{ piper_runtime_site_dir }}"
+        executable: /bin/bash
+      register: piper_runtime_build
+      retries: 2
+      delay: 5
+      until: piper_runtime_build.rc == 0
+      changed_when: >-
+        'writing image' in (piper_runtime_build.stdout | lower)
+        or 'writing image' in (piper_runtime_build.stderr | lower)
+        or 'naming to' in (piper_runtime_build.stdout | lower)
+        or 'naming to' in (piper_runtime_build.stderr | lower)
+        or 'exporting to image' in (piper_runtime_build.stdout | lower)
+        or 'exporting to image' in (piper_runtime_build.stderr | lower)
+        or 'successfully built' in (piper_runtime_build.stdout | lower)
+        or 'successfully tagged' in (piper_runtime_build.stdout | lower)
+  rescue:
+    - name: Detect stale Docker build-network failures during the Piper image build
+      ansible.builtin.set_fact:
+        piper_runtime_build_network_missing: >-
+          {{
+            'failed to create endpoint' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+            and 'does not exist' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+          }}
+
+    - name: Surface unexpected Piper image build failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('piper image build failed')) }}"
+      when: not piper_runtime_build_network_missing
+
+    - name: Reset Docker failed state before Piper build-network recovery
+      ansible.builtin.command: systemctl reset-failed docker.service
+      changed_when: false
+      when: piper_runtime_build_network_missing
+
+    - name: Restart Docker to restore bridge networking before retrying the Piper image build
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: piper_runtime_build_network_missing
+
+    - name: Ensure Docker bridge networking chains are present before retrying the Piper image build
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+      when: piper_runtime_build_network_missing
+
+    - name: Retry the Piper runtime image build after Docker networking recovery
+      ansible.builtin.shell: "{{ piper_runtime_build_shell }}"
+      args:
+        chdir: "{{ piper_runtime_site_dir }}"
+        executable: /bin/bash
+      register: piper_runtime_build
+      changed_when: >-
+        'writing image' in (piper_runtime_build.stdout | lower)
+        or 'writing image' in (piper_runtime_build.stderr | lower)
+        or 'naming to' in (piper_runtime_build.stdout | lower)
+        or 'naming to' in (piper_runtime_build.stderr | lower)
+        or 'exporting to image' in (piper_runtime_build.stdout | lower)
+        or 'exporting to image' in (piper_runtime_build.stderr | lower)
+        or 'successfully built' in (piper_runtime_build.stdout | lower)
+        or 'successfully tagged' in (piper_runtime_build.stdout | lower)
+      when: piper_runtime_build_network_missing
 
 - name: Check whether Docker nat chain exists before Piper startup
   ansible.builtin.command:
@@ -174,11 +244,12 @@
           piper_runtime_compose_file,
           'up',
           '-d',
+          '--no-build',
           '--remove-orphans',
         ] + (['--force-recreate'] if piper_runtime_force_recreate else [])
       }}
 
-- name: Start the Piper runtime and recover Docker nat-chain failures
+- name: Start the Piper runtime and recover Docker nat-chain or stale compose-network failures
   block:
     - name: Start the Piper runtime
       ansible.builtin.command:
@@ -191,33 +262,88 @@
         or 'Recreating' in piper_runtime_up.stdout
         or 'Starting' in piper_runtime_up.stdout
   rescue:
-    - name: Flag Docker nat-chain failures during Piper startup
+    - name: Flag Docker nat-chain and stale compose-network failures during Piper startup
       ansible.builtin.set_fact:
         piper_runtime_docker_nat_chain_missing: >-
           {{
             'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
             or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
           }}
+        piper_runtime_compose_network_missing: >-
+          {{
+            'failed to create endpoint' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+            and 'does not exist' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+          }}
 
     - name: Surface unexpected Piper startup failures
       ansible.builtin.fail:
         msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('piper compose up failed')) }}"
-      when: not piper_runtime_docker_nat_chain_missing
+      when:
+        - not piper_runtime_docker_nat_chain_missing
+        - not piper_runtime_compose_network_missing
+
+    - name: Reset stale Piper compose resources after startup failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ piper_runtime_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ piper_runtime_site_dir }}"
+      register: piper_runtime_down_retry
+      changed_when: >-
+        'Stopping' in (piper_runtime_down_retry.stdout | default(''))
+        or 'Removing' in (piper_runtime_down_retry.stdout | default(''))
+        or 'Removing' in (piper_runtime_down_retry.stderr | default(''))
+      failed_when: false
+      when: piper_runtime_compose_network_missing
 
     - name: Restart Docker to restore nat chain before retrying Piper startup
+      ansible.builtin.command: systemctl reset-failed docker.service
+      changed_when: false
+      when: piper_runtime_docker_nat_chain_missing
+
+    - name: Remove the stale Piper compose network before retrying startup
+      ansible.builtin.shell: |
+        set -euo pipefail
+        stale_networks="$(docker network ls -q --filter name=^{{ piper_runtime_compose_project_name }}_default$)"
+        if [ -n "${stale_networks}" ]; then
+          docker network rm ${stale_networks}
+          echo changed
+        fi
+      args:
+        chdir: "{{ piper_runtime_site_dir }}"
+        executable: /bin/bash
+      register: piper_runtime_network_cleanup
+      changed_when: "'changed' in piper_runtime_network_cleanup.stdout"
+      when: piper_runtime_compose_network_missing
+
+    - name: Restart Docker to restore bridge networking before retrying Piper startup
       ansible.builtin.service:
         name: docker
         state: restarted
-      when: piper_runtime_docker_nat_chain_missing
+      when: piper_runtime_docker_nat_chain_missing or piper_runtime_compose_network_missing
 
-    - name: Retry Piper startup after Docker nat-chain recovery
+    - name: Ensure Docker bridge networking chains are present before retrying Piper startup
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+      when: piper_runtime_docker_nat_chain_missing or piper_runtime_compose_network_missing
+
+    - name: Retry Piper startup after Docker nat-chain or compose-network recovery
       ansible.builtin.command:
         argv: "{{ piper_runtime_compose_up_argv }}"
       args:
         chdir: "{{ piper_runtime_site_dir }}"
       register: piper_runtime_up
       changed_when: true
-      when: piper_runtime_docker_nat_chain_missing
+      when: piper_runtime_docker_nat_chain_missing or piper_runtime_compose_network_missing
 
 - name: Check whether Piper publishes the expected host port
   ansible.builtin.command:
