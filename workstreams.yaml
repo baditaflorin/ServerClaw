@@ -33,6 +33,7 @@ workstreams:
     conflicts_with: []
     shared_surfaces:
       - workstreams.yaml
+      - README.md
       - docs/adr/0307-platform-workbench-as-the-cohesive-first-party-app-frame.md
       - docs/adr/0308-journey-aware-entry-routing-and-saved-home-selection.md
       - docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md
@@ -50,7 +51,9 @@ workstreams:
       - RELEASE.md
       - docs/release-notes/README.md
       - docs/release-notes/0.177.122.md
+      - versions/stack.yaml
       - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -79,14 +82,21 @@ workstreams:
           mode: exclusive
         - id: release_management_surfaces
           paths:
+            - README.md
             - VERSION
             - changelog.md
             - RELEASE.md
             - docs/release-notes/README.md
             - docs/release-notes/0.177.122.md
+            - versions/stack.yaml
             - build/platform-manifest.json
           mode: shared_contract
           contract: mainline-release-integration-v1
+        - id: generated_truth_support
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
     ready_to_merge: true
     live_applied: false
     canonical_truth:

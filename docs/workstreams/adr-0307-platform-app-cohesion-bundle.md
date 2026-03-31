@@ -15,9 +15,10 @@
 - Conflicts With: none
 - Shared Surfaces: `docs/adr/0307-0316`, `docs/adr/.index.yaml`,
   `docs/workstreams/adr-0307-platform-app-cohesion-bundle.md`,
-  `workstreams.yaml`, `VERSION`, `changelog.md`, `RELEASE.md`,
+  `workstreams.yaml`, `README.md`, `VERSION`, `changelog.md`, `RELEASE.md`,
   `docs/release-notes/README.md`, `docs/release-notes/0.177.122.md`,
-  `build/platform-manifest.json`
+  `versions/stack.yaml`, `build/platform-manifest.json`,
+  `docs/diagrams/agent-coordination-map.excalidraw`
 
 ## Scope
 
@@ -49,12 +50,15 @@
 - `docs/workstreams/adr-0307-platform-app-cohesion-bundle.md`
 - `docs/adr/.index.yaml`
 - `workstreams.yaml`
+- `README.md`
 - `VERSION`
 - `changelog.md`
 - `RELEASE.md`
 - `docs/release-notes/README.md`
 - `docs/release-notes/0.177.122.md`
+- `versions/stack.yaml`
 - `build/platform-manifest.json`
+- `docs/diagrams/agent-coordination-map.excalidraw`
 
 ## Expected Live Surfaces
 
@@ -65,6 +69,9 @@
 - this workstream owns the cohesive-app and onboarding architecture bundle
 - the merge to `main` advances repository truth only; platform version remains
   unchanged on purpose
+- canonical truth regeneration updates the repo-version fields in `README.md`
+  and `versions/stack.yaml`, plus the generated workstream count in the agent
+  coordination diagram
 - the next implementation steps should start with ADR 0308 through ADR 0313 so
   users feel the entry, help, and attention improvements before deeper polish
 
