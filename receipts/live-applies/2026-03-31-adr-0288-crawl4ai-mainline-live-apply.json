@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-31",
   "recorded_on": "2026-03-31",
-  "recorded_at": "2026-03-31T05:46:29Z",
+  "recorded_at": "2026-03-31T09:08:03Z",
   "recorded_by": "codex",
-  "source_commit": "58b38c6219c202f3b10766ae8fca5e87dfbeff51",
-  "repo_version_context": "0.177.114",
+  "source_commit": "2b04836bc154ee415b0e84427973a14ebe15da59",
+  "repo_version_context": "0.177.115",
   "platform_version_context": "0.130.75",
   "workflow_id": "adr-0288-crawl4ai-mainline-live-apply",
   "adr": "0288",
-  "summary": "Replayed ADR 0288 from clean latest-main source `58b38c6219c202f3b10766ae8fca5e87dfbeff51`, converged the private Crawl4AI runtime on `docker-runtime-lv3`, verified local health, monitor, markdown extraction, guest-network reachability from `coolify-lv3`, and the dedicated compose-managed `crawl4ai_runtime` bridge, then rebased the promotion onto the newer Piper-backed `origin/main` baseline, widened the Docker-chain startup recovery classifier after a real missing-iptables-chain failure on the live guest, and re-verified the final repository version `0.177.114` against platform version `0.130.75`.",
+  "summary": "Replayed ADR 0288 from exact latest-main source `2b04836bc154ee415b0e84427973a14ebe15da59`, converged the private Crawl4AI runtime on `docker-runtime-lv3`, restored it through a second governed converge after a concurrent clean stop left the live container exited during receipt capture, verified local health, monitor, markdown extraction, guest-network reachability from `coolify-lv3`, and the dedicated compose-managed `crawl4ai_runtime` bridge, then re-validated the final repository version `0.177.115` against platform version `0.130.75` on top of the latest realistic `origin/main` baseline `0.177.114 / 0.130.74`.",
   "targets": [
     {
       "kind": "host",
@@ -41,27 +41,27 @@
     {
       "check": "Exact-main focused Crawl4AI regression slice",
       "result": "pass",
-      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_crawl4ai_runtime_role.py tests/test_crawl4ai_metadata.py tests/test_docker_runtime_role.py tests/test_common_docker_bridge_chains_helper.py tests/test_generate_platform_vars.py` returned `60 passed in 8.11s` on the rebased `0.177.114` tree, and the post-fix role regression `uv run --with pytest --with pyyaml pytest -q tests/test_crawl4ai_runtime_role.py` returned `11 passed in 0.34s` after broadening the Docker-chain startup recovery classifier."
+      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_crawl4ai_runtime_role.py tests/test_crawl4ai_metadata.py tests/test_docker_runtime_role.py tests/test_common_docker_bridge_chains_helper.py tests/test_generate_platform_vars.py` returned `60 passed in 3.71s` on the exact `0.177.115` tree from source commit `2b04836bc154ee415b0e84427973a14ebe15da59`."
     },
     {
       "check": "Exact-main Crawl4AI syntax coverage",
       "result": "pass",
-      "observed": "`make syntax-check-crawl4ai` passed on the synchronized final `0.177.114` tree before the successful rebased live replay."
+      "observed": "`make syntax-check-crawl4ai` passed on the exact `0.177.115` tree."
     },
     {
       "check": "Authoritative live replay and rebased recovery replay",
       "result": "pass",
-      "observed": "The first governed replay succeeded from committed source `58b38c6219c202f3b10766ae8fca5e87dfbeff51` with recap `docker-runtime-lv3 : ok=107 changed=4 unreachable=0 failed=0 skipped=9 rescued=0 ignored=0`; after rebasing onto the Piper `0.177.113` mainline, a second replay exposed a missing Docker `DOCKER` iptables-chain startup failure, the role's rescue classifier was expanded to treat that message as recoverable drift, and `make converge-crawl4ai` then succeeded on the final `0.177.114` tree with recap `docker-runtime-lv3 : ok=106 changed=4 unreachable=0 failed=0 skipped=10 rescued=0 ignored=0`."
+      "observed": "The exact-main replay succeeded from committed source `2b04836bc154ee415b0e84427973a14ebe15da59`; later, while gathering independent proofs, the live `crawl4ai` container was left cleanly stopped by an external SIGTERM, and a second governed `make converge-crawl4ai` restored service and reran the role-local verification tasks with recap `docker-runtime-lv3 : ok=113 changed=6 unreachable=0 failed=0 skipped=27 rescued=1 ignored=0`."
     },
     {
       "check": "Independent local and guest-network runtime proofs",
       "result": "pass",
-      "observed": "Independent SSH-driven probes returned healthy local `/health` and `/monitor/health` payloads on `docker-runtime-lv3`, a successful markdown extraction for `https://example.com/`, a healthy guest-to-guest `/health` response from `coolify-lv3`, and Docker inspection showed the `crawl4ai` container attached only to the dedicated `crawl4ai_runtime` bridge with host port `11235/tcp` published."
+      "observed": "Independent runbook-style probes returned healthy local `/health` and `/monitor/health` payloads on `docker-runtime-lv3`, a successful markdown extraction for `https://example.com/`, a healthy guest-to-guest `/health` response from `coolify-lv3`, and Docker inspection showed the `crawl4ai` container attached only to the dedicated `crawl4ai_runtime` bridge with host port `11235/tcp` published on both IPv4 and IPv6."
     },
     {
       "check": "Final repository automation and validation bundle",
       "result": "pass",
-      "observed": "The final `0.177.114 / 0.130.75` tree passed `git diff --check`, `scripts/live_apply_receipts.py --validate`, `./scripts/validate_repo.sh agent-standards workstream-surfaces generated-vars generated-docs health-probes`, full `make validate`, hosted `make remote-validate`, and hosted `make pre-push-gate`. During the replay, the branch repaired a Bash 3.2 empty-array expansion in `scripts/validate_repo.sh`, Python 3.9 callback compatibility in `scripts/mutation_audit.py` and the structured-log callback, the mirrored `release_tracks.platform_versioning.current` field, and the Crawl4AI startup failure classifier for Docker `DOCKER` iptables-chain drift before rerunning the full automation bundle to green."
+      "observed": "The final `0.177.115 / 0.130.75` tree passed `git diff --check`, `scripts/live_apply_receipts.py --validate`, `./scripts/validate_repo.sh agent-standards workstream-surfaces generated-vars generated-docs health-probes`, full `make validate`, hosted `make remote-validate`, and hosted `make pre-push-gate`. The integrated change surface keeps the Bash 3.2 empty-array expansion repair in `scripts/validate_repo.sh`, Python 3.9 callback compatibility in `scripts/mutation_audit.py` and the structured-log callback, the mirrored `release_tracks.platform_versioning.current` stack field, and the Crawl4AI startup failure classifier for Docker `DOCKER` iptables-chain drift."
     }
   ],
   "evidence_refs": [
@@ -71,7 +71,7 @@
     "versions/stack.yaml",
     "build/platform-manifest.json",
     "docs/adr/0288-crawl4ai-as-the-llm-optimised-web-content-crawler.md",
-    "docs/release-notes/0.177.114.md",
+    "docs/release-notes/0.177.115.md",
     "docs/release-notes/README.md",
     "docs/runbooks/configure-crawl4ai.md",
     "docs/workstreams/ws-0288-crawl4ai-main-merge.md",
@@ -93,36 +93,27 @@
     "tests/test_docker_runtime_role.py",
     "tests/test_generate_platform_vars.py",
     "tests/test_validate_repo_cache.py",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-converge-r1.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-health-local-r1.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-monitor-local-r1.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-markdown-local-r1.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-guest-network-r1.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-container-network-r1.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-targeted-tests-r2-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-validation-compat-tests-r2-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-syntax-check-r3-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-crawl4ai-role-tests-r3-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-apt-lock-recovery-r1-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-ansible-wrapper-cleanup-r1-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-converge-r4-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-health-local-r2-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-monitor-local-r2-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-markdown-local-r2-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-guest-network-r2-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-container-network-r2-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-git-diff-check-r1-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-live-apply-receipts-validate-r2-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-branch-validate-r3-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-make-validate-r1-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-remote-validate-r1-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-pre-push-gate-r1-0.177.114.txt"
+    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-targeted-tests-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-syntax-check-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-converge-r2-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-health-local-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-monitor-local-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-markdown-local-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-guest-network-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-container-network-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-git-diff-check-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-live-apply-receipts-validate-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-branch-validate-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-make-validate-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-remote-validate-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-pre-push-gate-r1-0.177.115.txt"
   ],
   "notes": [
-    "ADR 0288 is recorded as implemented in repository version `0.177.114` and first verified live in platform version `0.130.75`.",
+    "ADR 0288 is recorded as implemented in repository version `0.177.115` and first verified live in platform version `0.130.75`.",
     "The compose-managed `crawl4ai_runtime` bridge is part of the success boundary because it removes reliance on Docker's legacy default `bridge` after the guest firewall refresh.",
-    "The validation-path repair is part of the committed surface for this workstream: `scripts/validate_repo.sh`, `scripts/mutation_audit.py`, the structured-log callback plugin, `tests/test_validate_repo_cache.py`, and the Crawl4AI runtime startup classifier were updated so the repository's own local and hosted automation gates can execute end to end on the current macOS Bash and Python 3.9/3.12 toolchains.",
-    "A failed rebased replay left orphaned Ansible Python workers holding the apt lists lock on `docker-runtime-lv3`; those transient wrappers were terminated manually, captured in the evidence bundle, and the governed playbook replay was then rerun successfully.",
+    "The latest realistic baseline before this replay was `origin/main` repository version `0.177.114` with platform version `0.130.74`.",
+    "The validation-path repair is part of the committed surface for this workstream: `scripts/validate_repo.sh`, `scripts/mutation_audit.py`, the structured-log callback plugin, the mirrored `release_tracks.platform_versioning.current` field, and the Crawl4AI runtime startup classifier were updated so the repository's own local and hosted automation gates can execute end to end on the current macOS Bash and Python 3.9/3.12 toolchains.",
+    "During independent proof capture, the live `crawl4ai` container received a clean external SIGTERM and remained stopped because Docker treats that path as operator intent even under `restart: unless-stopped`; rerunning the governed playbook from the same exact tree restored service and re-verified the runtime.",
     "The workstream registry remains `ready_for_merge` on the workstream branch so branch-local ownership validation passes; the final fast-forward commit on `main` flips it to `merged`."
   ]
 }
