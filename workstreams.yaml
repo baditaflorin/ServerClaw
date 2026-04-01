@@ -419,7 +419,7 @@ workstreams:
   - id: ws-0313-live-apply
     adr: "0313"
     title: Live apply contextual help, glossary, and escalation drawer across the first-party portal surfaces
-    status: in-progress
+    status: in_progress
     owner: codex
     branch: codex/ws-0313-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0313-live-apply
@@ -448,7 +448,9 @@ workstreams:
       - docs/templates/reference-index.md.j2
       - docs/templates/reference-glossary.md.j2
       - docs/theme-overrides/
+      - docs/site-generated/architecture/dependency-graph.md
       - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+      - receipts/ops-portal-snapshot.html
       - tests/test_ops_portal.py
       - tests/test_interactive_ops_portal.py
       - tests/test_docs_site.py
@@ -492,7 +494,9 @@ workstreams:
             - docs/templates/reference-index.md.j2
             - docs/templates/reference-glossary.md.j2
             - docs/theme-overrides/**
+            - docs/site-generated/architecture/dependency-graph.md
             - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+            - receipts/ops-portal-snapshot.html
             - tests/test_ops_portal.py
             - tests/test_interactive_ops_portal.py
             - tests/test_docs_site.py

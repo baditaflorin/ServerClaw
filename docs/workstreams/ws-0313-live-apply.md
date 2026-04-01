@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0313](../adr/0313-contextual-help-glossary-and-escalation-drawer.md)
 - Title: Ship the shared contextual help, glossary, and escalation drawer across the first-party portal surfaces
-- Status: in-progress
+- Status: in_progress
 - Branch: `codex/ws-0313-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0313-live-apply`
 - Owner: codex
@@ -53,7 +53,9 @@ for a safe exact-main merge.
 - `docs/templates/reference-index.md.j2`
 - `docs/templates/reference-glossary.md.j2`
 - `docs/theme-overrides/`
+- `docs/site-generated/architecture/dependency-graph.md`
 - `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml`
+- `receipts/ops-portal-snapshot.html`
 - `tests/test_ops_portal.py`
 - `tests/test_interactive_ops_portal.py`
 - `tests/test_docs_site.py`
