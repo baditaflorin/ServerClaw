@@ -232,6 +232,19 @@ def test_build_platform_vars_includes_jupyterhub_publication_topology() -> None:
     assert jupyterhub["edge"]["client_max_body_size"] == "2g"
 
 
+def test_build_platform_vars_includes_superset_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    superset = platform_vars["platform_service_topology"]["superset"]
+
+    assert superset["public_hostname"] == "bi.lv3.org"
+    assert superset["dns"]["name"] == "bi"
+    assert superset["ports"]["internal"] == 8099
+    assert superset["urls"]["public"] == "https://bi.lv3.org"
+    assert superset["urls"]["internal"] == "http://10.10.10.20:8099"
+    assert superset["edge"]["upstream"] == superset["urls"]["internal"]
+    assert platform_vars["superset_port"] == 8099
+
+
 def test_build_platform_vars_includes_piper_private_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     piper = platform_vars["platform_service_topology"]["piper"]
@@ -438,6 +451,30 @@ def test_build_service_urls_resolves_jupyterhub_internal_url() -> None:
         "public": "https://notebooks.lv3.org",
         "internal": "http://10.10.10.20:8097",
     }
+
+
+def test_build_service_urls_resolves_superset_internal_url() -> None:
+    ports = {"superset_port": 8099}
+    service = {"owning_vm": "docker-runtime-lv3", "public_hostname": "bi.lv3.org"}
+    host_vars = {"management_tailscale_ipv4": "100.118.189.95"}
+    guest_ipv4_by_name = {"docker-runtime-lv3": "10.10.10.20"}
+    stack = {"desired_state": {"host_id": "proxmox_florin"}}
+
+    port_map, urls = generate_platform_vars.build_service_urls(
+        "superset",
+        service,
+        host_vars,
+        guest_ipv4_by_name,
+        ports,
+        stack,
+    )
+
+    assert port_map == {"internal": 8099}
+    assert urls == {
+        "public": "https://bi.lv3.org",
+        "internal": "http://10.10.10.20:8099",
+    }
+
 
 def test_build_service_urls_resolves_paperless_internal_url() -> None:
     ports = {"paperless_port": 8018}

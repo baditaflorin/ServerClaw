@@ -881,6 +881,20 @@
       "notes": "The repo-managed platform service catalog is materialized into Typesense as a derived full-text and faceted-search index and can be replayed from git after restore."
     },
     {
+      "id": "superset-metadata-and-managed-assets",
+      "service": "superset",
+      "name": "Superset metadata and managed BI assets",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "PostgreSQL database postgres on postgres-lv3, schema superset"
+      ],
+      "notes": "Superset persists datasource definitions, saved queries, charts, dashboards, and user-generated BI metadata in the managed superset schema, so the schema should remain recoverable with the shared PostgreSQL backup policy."
+    },
+    {
       "id": "vaultwarden-shared-vault",
       "service": "vaultwarden",
       "name": "Vaultwarden shared credential vault",

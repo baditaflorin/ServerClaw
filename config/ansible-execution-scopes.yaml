@@ -381,6 +381,12 @@ playbooks:
     shared_surfaces:
       - service:step-ca
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/superset.yml:
+    playbook_id: superset
+    mutation_scope: platform
+    shared_surfaces:
+      - service:superset
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/piper.yml:
     playbook_id: piper
     mutation_scope: host
@@ -531,6 +537,12 @@ playbooks:
     mutation_scope: host
     shared_surfaces:
       - service:proxmox-metrics
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/superset.yml:
+    playbook_id: superset
+    mutation_scope: platform
+    shared_surfaces:
+      - service:superset
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/tika.yml:
     playbook_id: tika

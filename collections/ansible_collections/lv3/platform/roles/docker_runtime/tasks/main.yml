@@ -445,6 +445,26 @@
         | list
       }}
 
+- name: Record whether stopped containers require the local OpenBao runtime
+  ansible.builtin.set_fact:
+    docker_runtime_stopped_pre_restart_requires_local_openbao: >-
+      {{
+        '"openbao-agent"' in (
+          (docker_runtime_stopped_pre_restart_container_details | default([])) | to_json
+        )
+      }}
+  when: docker_runtime_stopped_pre_restart_container_names | default([]) | length > 0
+
+- name: Recover the local OpenBao runtime before restarting OpenBao-backed containers
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: ensure_local_openbao_runtime
+  vars:
+    common_local_openbao_runtime_consumer_name: docker-runtime stopped container recovery
+  when:
+    - docker_runtime_stopped_pre_restart_container_names | default([]) | length > 0
+    - docker_runtime_stopped_pre_restart_requires_local_openbao | default(false) | bool
+
 - name: Recover pre-restart containers that remained stopped after Docker restarts
   ansible.builtin.command:
     argv:
@@ -469,7 +489,7 @@
         OPENBAO_HEALTH_URL = "http://127.0.0.1:8201/v1/sys/health"
         OPENBAO_SEAL_STATUS_URL = "http://127.0.0.1:8201/v1/sys/seal-status"
         OPENBAO_UNSEAL_URL = "http://127.0.0.1:8201/v1/sys/unseal"
-        OPENBAO_READY_STATUS_CODES = {200, 429, 472, 473}
+        OPENBAO_READY_STATUS_CODES = {200, 429, 472, 473, 501, 503}
         OPENBAO_UNSEAL_KEYS = {{
             (
               (
@@ -610,6 +630,7 @@
         containers = json.load(sys.stdin)
 
         direct_start = []
+        openbao_direct_start = []
         compose_groups = {}
 
         for container in containers:
@@ -630,7 +651,10 @@
                 continue
 
             if name:
-                direct_start.append(name)
+                if "openbao-agent" in name:
+                    openbao_direct_start.append(name)
+                else:
+                    direct_start.append(name)
 
         actions = []
 
@@ -739,6 +763,16 @@
                         "services": services,
                     }
                 )
+
+        if openbao_direct_start:
+            wait_for_local_openbao()
+            run_with_retry(["docker", "start", *openbao_direct_start])
+            actions.append(
+                {
+                    "type": "docker_start_openbao_agents",
+                    "containers": openbao_direct_start,
+                }
+            )
     stdin: >-
       {{
         (docker_runtime_stopped_pre_restart_container_details | default([])) | to_json

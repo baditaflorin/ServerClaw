@@ -45,6 +45,8 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_langfuse_client_secret_local_file"].endswith("/.local/keycloak/langfuse-client-secret.txt")
     assert defaults["keycloak_jupyterhub_client_id"] == "jupyterhub"
     assert defaults["keycloak_jupyterhub_client_secret_local_file"].endswith("/.local/keycloak/jupyterhub-client-secret.txt")
+    assert defaults["keycloak_superset_client_id"] == "superset"
+    assert defaults["keycloak_superset_client_secret_local_file"].endswith("/.local/keycloak/superset-client-secret.txt")
     assert defaults["keycloak_serverclaw_runtime_client_id"] == "serverclaw-runtime"
     assert defaults["keycloak_serverclaw_runtime_client_secret_local_file"].endswith(
         "/.local/keycloak/serverclaw-runtime-client-secret.txt"
@@ -69,6 +71,11 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
         "{{ keycloak_jupyterhub_root_url }}",
         "{{ keycloak_jupyterhub_root_url }}/",
         "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
+    ]
+    assert defaults["keycloak_superset_root_url"] == "https://bi.lv3.org"
+    assert defaults["keycloak_superset_post_logout_redirect_uris"] == [
+        "{{ keycloak_superset_root_url }}",
+        "{{ keycloak_superset_root_url }}/",
     ]
     assert defaults["keycloak_paperless_client_id"] == "paperless"
     assert defaults["keycloak_paperless_client_secret_local_file"].endswith("/.local/keycloak/paperless-client-secret.txt")
@@ -375,6 +382,7 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
         "Ensure the Langfuse OAuth client exists",
         "Ensure the Outline OAuth client exists",
         "Ensure the JupyterHub OAuth client exists",
+        "Ensure the Superset OAuth client exists",
         "Ensure the ServerClaw OAuth client exists",
         "Ensure the API gateway client exists",
         "Ensure the obsolete ServerClaw operator CLI direct-grant client is absent",
@@ -388,6 +396,8 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
         "Read the Directus client secret",
         "Read the Outline client secret",
         "Read the JupyterHub client secret",
+        "Read the Paperless client secret",
+        "Read the Superset client secret",
         "Read the ServerClaw client secret",
         "Read the API gateway client secret",
         "Read the ServerClaw runtime client secret",
@@ -409,7 +419,7 @@ def test_all_keycloak_client_secret_reads_retry_reconciliation_until_success() -
         if task.get("name", "").startswith("Read the ") and task.get("name", "").endswith(" client secret")
     ]
 
-    assert len(read_secret_tasks) == 12
+    assert len(read_secret_tasks) == 13
     for task in read_secret_tasks:
         assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
         assert task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
@@ -557,6 +567,35 @@ def test_role_manages_paperless_client_secret() -> None:
     )
     assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_paperless_client_id }}"
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_paperless_client_secret_local_file }}"
+
+
+def test_role_manages_superset_client_secret() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    tasks = load_tasks()
+    realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
+    superset_client_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Ensure the Superset OAuth client exists"
+    )
+    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the Superset client secret")
+    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Superset client secret to the control machine")
+
+    assert defaults["keycloak_superset_client_id"] == "superset"
+    assert defaults["keycloak_superset_client_secret_local_file"].endswith("/.local/keycloak/superset-client-secret.txt")
+    assert defaults["keycloak_superset_root_url"] == "https://bi.lv3.org"
+    assert superset_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_superset_client_id }}"
+    assert superset_client_task["community.general.keycloak_client"]["redirect_uris"] == [
+        "{{ keycloak_superset_root_url }}/oauth-authorized/keycloak"
+    ]
+    assert superset_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
+        "{{ keycloak_superset_post_logout_redirect_uris }}"
+    )
+    assert superset_client_task["community.general.keycloak_client"]["web_origins"] == ["{{ keycloak_superset_root_url }}"]
+    superset_mapper = superset_client_task["community.general.keycloak_client"]["protocol_mappers"][0]
+    assert superset_mapper["name"] == "groups"
+    assert superset_mapper["config"]["claim.name"] == "groups"
+    assert superset_mapper["config"]["full.path"] == "true"
+    assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_superset_client_id }}"
+    assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_superset_client_secret_local_file }}"
 
 
 def test_role_manages_serverclaw_client_secret() -> None:

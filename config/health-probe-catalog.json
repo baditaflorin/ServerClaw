@@ -3136,6 +3136,76 @@
         }
       }
     },
+    "superset": {
+      "service_name": "superset",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "superset_runtime",
+      "verify_file": "roles/superset_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Superset startup completes once the local /health endpoint returns OK on docker-runtime-lv3.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8099/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local Superset health endpoint continues to answer on docker-runtime-lv3.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8099/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public Superset health endpoint answers through the shared NGINX edge with the managed published port bound on docker-runtime-lv3.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "https://bi.lv3.org/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "docker_publication": {
+          "container_name": "superset",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8099
+            }
+          ],
+          "required_networks": [
+            "superset_default"
+          ]
+        }
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Superset Public Health",
+          "type": "http",
+          "url": "https://bi.lv3.org/health",
+          "description": "Public Superset health endpoint published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "tika": {
       "service_name": "tika",
       "owning_vm": "docker-runtime-lv3",

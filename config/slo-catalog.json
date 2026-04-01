@@ -346,6 +346,16 @@
       "description": "The public status page remains externally reachable as the last-resort platform signal."
     },
     {
+      "id": "superset-availability",
+      "service_id": "superset",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://bi.lv3.org/health",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Superset remains reachable through the public LV3 edge for SQL-first BI exploration, dashboard viewing, and governed datasource verification."
+    },
+    {
       "id": "tika-availability",
       "service_id": "tika",
       "indicator": "availability",

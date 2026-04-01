@@ -208,6 +208,7 @@ platform_ports:
   outline_port: 3006
   directus_port: 8055
   jupyterhub_port: 8097
+  superset_port: 8099
   piper_port: 8100
   paperless_port: 8018
   dozzle_http_port: 8089
@@ -302,6 +303,7 @@ platform_port_assignments:
   outline_port: 3006
   directus_port: 8055
   jupyterhub_port: 8097
+  superset_port: 8099
   piper_port: 8100
   paperless_port: 8018
   dozzle_http_port: 8089
@@ -2638,6 +2640,34 @@ platform_service_topology:
     urls:
       public: https://notebooks.lv3.org
       internal: http://10.10.10.20:8097
+  superset:
+    service_name: superset
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: bi.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: bi
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8099
+    service_id: superset
+    ports:
+      internal: 8099
+    urls:
+      public: https://bi.lv3.org
+      internal: http://10.10.10.20:8099
 platform_session_authority:
   authority_hostname: ops.lv3.org
   ops_portal_client_id: ops-portal-oauth
@@ -2800,6 +2830,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: notebooks
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: bi
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -4467,6 +4501,34 @@ public_edge_service_topology:
     urls:
       public: https://notebooks.lv3.org
       internal: http://10.10.10.20:8097
+  superset:
+    service_name: superset
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: bi.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: bi
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8099
+    service_id: superset
+    ports:
+      internal: 8099
+    urls:
+      public: https://bi.lv3.org
+      internal: http://10.10.10.20:8099
 uptime_kuma_service_topology:
   service_name: uptime-kuma
   owning_vm: docker-runtime-lv3
@@ -4626,6 +4688,7 @@ browser_runner_port: 8096
 outline_port: 3006
 directus_port: 8055
 jupyterhub_port: 8097
+superset_port: 8099
 piper_port: 8100
 paperless_port: 8018
 dozzle_http_port: 8089

@@ -1985,6 +1985,81 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-superset": {
+      "description": "Deploy the Superset metadata schema, runtime, Keycloak client, and public edge publication, then verify SQL-first BI access end to end.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-superset",
+        "command": "make converge-superset"
+      },
+      "preflight": {
+        "required": true,
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
+        ],
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "superset_database_password",
+          "superset_reader_password",
+          "superset_secret_key",
+          "superset_admin_password",
+          "keycloak_superset_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-superset"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-superset.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/superset.yml",
+        "playbooks/services/superset.yml",
+        "roles/superset_postgres",
+        "roles/superset_runtime",
+        "roles/keycloak_runtime",
+        "roles/nginx_edge_publication",
+        "scripts/superset_bootstrap.py",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/subdomain-catalog.json",
+        "config/service-completeness.json",
+        "config/dependency-graph.json",
+        "config/slo-catalog.json",
+        "config/data-catalog.json",
+        "config/service-redundancy-catalog.json",
+        "config/secret-catalog.json",
+        "config/controller-local-secrets.json",
+        "config/command-catalog.json",
+        "config/workflow-catalog.json",
+        "config/ansible-execution-scopes.yaml"
+      ],
+      "outputs": [
+        "A published Superset runtime on bi.lv3.org backed by the managed superset schema in the shared postgres database, a repo-managed Keycloak client, read-only PostgreSQL datasource registration, and a seeded landing dashboard."
+      ],
+      "verification_commands": [
+        "make syntax-check-superset",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/superset/docker-compose.yml ps && curl -fsS http://127.0.0.1:8099/health'",
+        "curl -fsS https://bi.lv3.org/health",
+        "python3 scripts/superset_bootstrap.py verify-public --base-url https://bi.lv3.org --expected-postgres-databases-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/superset/postgres-databases.json --database-prefix PostgreSQL --expected-dashboard \"LV3 Platform Database Inventory\" --expected-chart \"PostgreSQL Databases\" --expected-sso-host sso.lv3.org --admin-username admin --admin-password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/superset/admin-password.txt --expected-extra-database \"Plausible ClickHouse\" --report-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/superset/verify-public-report.json"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 280,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 2,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-tika": {
       "description": "Deploy the private Apache Tika runtime on docker-runtime-lv3 and verify the standard `/version`, `/tika`, and `/meta` extraction contracts.",
       "lifecycle_status": "active",

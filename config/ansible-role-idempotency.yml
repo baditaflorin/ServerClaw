@@ -277,6 +277,12 @@ roles:
   portainer_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  superset_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  superset_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   postgres_ha:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

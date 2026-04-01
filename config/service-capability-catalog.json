@@ -2331,6 +2331,46 @@
       }
     },
     {
+      "id": "superset",
+      "name": "Apache Superset",
+      "description": "SQL-first business intelligence surface for governed read-only exploration of operational PostgreSQL data.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8099",
+      "public_url": "https://bi.lv3.org",
+      "subdomain": "bi.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Superset Public Health",
+      "health_probe_id": "superset",
+      "secret_catalog_ids": [
+        "superset_database_password",
+        "superset_reader_password",
+        "superset_secret_key",
+        "superset_admin_password",
+        "keycloak_superset_client_secret"
+      ],
+      "adr": "0292",
+      "runbook": "docs/runbooks/configure-superset.md",
+      "tags": [
+        "analytics",
+        "bi",
+        "postgres",
+        "sql",
+        "oidc"
+      ],
+      "notes": "Superset runs on docker-runtime-lv3, stores metadata in the managed superset schema of the shared postgres database on postgres-lv3, delegates browser sign-in to Keycloak, and seeds a repo-managed PostgreSQL inventory dashboard plus the optional Plausible ClickHouse datasource.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://bi.lv3.org",
+          "subdomain": "bi.lv3.org",
+          "notes": "Public publication terminates on the shared NGINX edge while browser authentication remains upstream in the service-native Keycloak OIDC flow."
+        }
+      }
+    },
+    {
       "id": "tika",
       "name": "Apache Tika",
       "description": "Private stateless document text and metadata extraction service for the RAG and ServerClaw memory ingestion pipelines.",

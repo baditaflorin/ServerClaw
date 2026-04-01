@@ -561,6 +561,15 @@
       "adr": "0042"
     },
     {
+      "id": "superset",
+      "service": "superset",
+      "name": "Apache Superset",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "access",
+      "adr": "0292"
+    },
+    {
       "id": "tika",
       "service": "tika",
       "name": "Apache Tika",
@@ -1380,6 +1389,36 @@
       "to": "openbao",
       "type": "startup_only",
       "description": "Plausible starts from OpenBao-rendered runtime secrets mirrored into its compose environment before the main container launches."
+    },
+    {
+      "from": "superset",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Superset runtime and its OpenBao-backed compose stack run on docker-runtime-lv3."
+    },
+    {
+      "from": "superset",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Superset persists metadata in the managed superset schema of the shared postgres database and registers read-only PostgreSQL datasources from postgres-lv3."
+    },
+    {
+      "from": "superset",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Routine browser sign-in to bi.lv3.org depends on the repo-managed Keycloak OIDC client and realm configuration."
+    },
+    {
+      "from": "superset",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public publication at bi.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "superset",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Superset starts from OpenBao-rendered runtime secrets mirrored into its compose environment before the main container launches."
     },
     {
       "from": "realtime",

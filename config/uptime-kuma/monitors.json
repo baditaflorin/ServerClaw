@@ -522,6 +522,19 @@
     "ignoreTls": true
   },
   {
+    "name": "Superset Public Health",
+    "type": "http",
+    "url": "https://bi.lv3.org/health",
+    "description": "Public Superset health endpoint published through the shared NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
     "name": "Tika Private",
     "type": "http",
     "url": "http://10.10.10.20:9998/version",

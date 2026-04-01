@@ -112,6 +112,13 @@ public_edge_security_headers_overrides:
     content_security_policy: >-
       default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none';
       object-src 'none'
+  bi.lv3.org:
+    content_security_policy: >-
+      default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
+      'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
+      connect-src 'self' https://bi.lv3.org https://sso.lv3.org; worker-src 'self' blob:;
+      child-src 'self' blob:; manifest-src 'self'
   coolify.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';

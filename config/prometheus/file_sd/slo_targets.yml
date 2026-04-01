@@ -237,6 +237,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://bi.lv3.org/health
+  labels:
+    service_id: superset
+    slo_id: superset-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - http://10.10.10.20:9998/version
   labels:
     service_id: tika

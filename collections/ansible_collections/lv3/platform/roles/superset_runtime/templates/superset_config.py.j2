@@ -1,0 +1,39 @@
+import json
+import os
+
+from flask_appbuilder.security.manager import AUTH_OAUTH
+
+
+SECRET_KEY = os.environ["SUPERSET_SECRET_KEY"]
+SQLALCHEMY_DATABASE_URI = os.environ["SUPERSET_DATABASE_URI"]
+TALISMAN_ENABLED = False
+ENABLE_PROXY_FIX = True
+PREFERRED_URL_SCHEME = "https"
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = "Lax"
+FAB_ADD_SECURITY_API = True
+AUTH_API_LOGIN_ALLOW_MULTIPLE_PROVIDERS = True
+
+AUTH_TYPE = AUTH_OAUTH
+AUTH_USER_REGISTRATION = True
+AUTH_USER_REGISTRATION_ROLE = os.environ.get("SUPERSET_AUTH_USER_REGISTRATION_ROLE", "Gamma")
+AUTH_ROLES_SYNC_AT_LOGIN = True
+AUTH_ROLES_MAPPING = json.loads(os.environ.get("SUPERSET_AUTH_ROLES_MAPPING_JSON", "{}"))
+LOGOUT_REDIRECT_URL = os.environ.get("SUPERSET_KEYCLOAK_LOGOUT_URL")
+
+OAUTH_PROVIDERS = [
+    {
+        "name": "keycloak",
+        "icon": "fa-key",
+        "token_key": "access_token",
+        "remote_app": {
+            "client_id": os.environ["SUPERSET_KEYCLOAK_CLIENT_ID"],
+            "client_secret": os.environ["SUPERSET_KEYCLOAK_CLIENT_SECRET"],
+            "api_base_url": os.environ["SUPERSET_KEYCLOAK_API_BASE_URL"],
+            "server_metadata_url": os.environ["SUPERSET_KEYCLOAK_SERVER_METADATA_URL"],
+            "access_token_url": os.environ["SUPERSET_KEYCLOAK_TOKEN_URL"],
+            "authorize_url": os.environ["SUPERSET_KEYCLOAK_AUTHORIZE_URL"],
+            "client_kwargs": {"scope": os.environ["SUPERSET_KEYCLOAK_SCOPES"]},
+        },
+    }
+]

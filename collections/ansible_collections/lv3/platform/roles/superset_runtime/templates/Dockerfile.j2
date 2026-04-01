@@ -1,0 +1,8 @@
+FROM {{ superset_base_image }}
+
+USER root
+
+COPY requirements.txt /tmp/requirements.txt
+RUN /app/.venv/bin/pip install --no-cache-dir -r /tmp/requirements.txt
+
+USER superset

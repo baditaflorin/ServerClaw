@@ -1356,6 +1356,46 @@ groups:
           description: The public status page remains externally reachable as the
             last-resort platform signal.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_superset_availability
+        expr: (slo:superset_availability:error_rate_5m > (14 * 0.005000)) and (slo:superset_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: superset
+          slo_id: superset-availability
+          indicator: availability
+        annotations:
+          summary: superset-availability is burning its error budget at 14x
+          description: Superset remains reachable through the public LV3 edge for
+            SQL-first BI exploration, dashboard viewing, and governed datasource verification.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_superset_availability
+        expr: slo:superset_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: superset
+          slo_id: superset-availability
+          indicator: availability
+        annotations:
+          summary: superset-availability is burning its error budget at 3x
+          description: Superset remains reachable through the public LV3 edge for
+            SQL-first BI exploration, dashboard viewing, and governed datasource verification.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_superset_availability
+        expr: slo:superset_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: superset
+          slo_id: superset-availability
+          indicator: availability
+        annotations:
+          summary: superset-availability has less than 10% error budget remaining
+          description: Superset remains reachable through the public LV3 edge for
+            SQL-first BI exploration, dashboard viewing, and governed datasource verification.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_tika_availability
         expr: (slo:tika_availability:error_rate_5m > (14 * 0.010000)) and (slo:tika_availability:error_rate_1h
           > (14 * 0.010000))

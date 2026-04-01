@@ -79,6 +79,7 @@ platform_port_assignments:
   outline_port: 3006
   directus_port: 8055
   jupyterhub_port: 8097
+  superset_port: 8099
   piper_port: 8100
   paperless_port: 8018
   plane_port: 8093
@@ -695,6 +696,11 @@ network_policy:
         - source: host
           protocol: tcp
           ports:
+            - 8099
+          description: Proxmox host verification and controller-side access to the private Superset runtime
+        - source: host
+          protocol: tcp
+          ports:
             - 8098
             - 3008
             - 9998
@@ -792,6 +798,11 @@ network_policy:
         - source: nginx-lv3
           protocol: tcp
           ports:
+            - 8099
+          description: Reverse proxy access to the Superset BI workspace
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
             - 8095
           description: Edge access to the Harbor registry and operator UI
         - source: nginx-lv3
@@ -854,6 +865,11 @@ network_policy:
           ports:
             - 8018
           description: Private monitoring probes for the Paperless runtime
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 8099
+          description: Private monitoring probes for the Superset runtime
         - source: monitoring-lv3
           protocol: tcp
           ports:
@@ -2446,3 +2462,25 @@ lv3_service_topology:
       proxy_read_timeout_seconds: 3600
       proxy_send_timeout_seconds: 3600
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.jupyterhub_port }}"
+  superset:
+    service_name: superset
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: bi.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: bi
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.superset_port }}"

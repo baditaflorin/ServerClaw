@@ -1,0 +1,112 @@
+# Purpose: Verify the public Superset publication, health contract, and Keycloak redirect path.
+# Use case: Run from localhost after the Superset runtime and shared edge publication are converged.
+# Inputs: Public URL, controller-local admin password, the datasource catalog file, and the verification helper.
+# Outputs: Confirms the public Superset publication is reachable and the managed datasources and landing dashboard are visible through the API.
+# Idempotency: Fully idempotent because these are read-only public verification calls.
+# Dependencies: ADR 0165, ADR 0021, ADR 0063, and ADR 0292.
+---
+- name: Validate Superset publication inputs
+  ansible.builtin.assert:
+    that:
+      - superset_public_base_url | length > 0
+      - superset_admin_password_local_file | length > 0
+      - superset_postgres_database_catalog_local_file | length > 0
+    fail_msg: >-
+      superset_runtime publication requires the public URL, the controller-local
+      admin password path, and the managed PostgreSQL database catalog path.
+
+- name: Check whether the Superset admin password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ superset_admin_password_local_file }}"
+  register: superset_admin_password_publish_local
+
+- name: Check whether the Superset PostgreSQL catalog exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ superset_postgres_database_catalog_local_file }}"
+  register: superset_catalog_publish_local
+
+- name: Fail if the Superset admin password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ superset_admin_password_local_file }} is missing on the control machine.
+      Converge superset_runtime before public verification.
+  when: not superset_admin_password_publish_local.stat.exists
+
+- name: Fail if the Superset PostgreSQL catalog is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ superset_postgres_database_catalog_local_file }} is missing on the control machine.
+      Converge superset_postgres before public verification.
+  when: not superset_catalog_publish_local.stat.exists
+
+- name: Wait for the Superset public health endpoint
+  ansible.builtin.uri:
+    url: "{{ superset_public_base_url }}/health"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: superset_publish_public_health
+  retries: 36
+  delay: 5
+  until:
+    - superset_publish_public_health.status == 200
+    - (superset_publish_public_health.content | trim) == "OK"
+  changed_when: false
+
+- name: Verify the public Superset publication and Keycloak redirect contract
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ superset_controller_bootstrap_script_local_path }}"
+      - verify-public
+      - --base-url
+      - "{{ superset_public_base_url }}"
+      - --expected-postgres-databases-file
+      - "{{ superset_postgres_database_catalog_local_file }}"
+      - --database-prefix
+      - "{{ superset_database_display_name_prefix }}"
+      - --expected-dashboard
+      - "{{ superset_landing_dashboard_title }}"
+      - --expected-chart
+      - "{{ superset_landing_chart_title }}"
+      - --expected-sso-host
+      - sso.lv3.org
+      - --admin-username
+      - "{{ superset_admin_username }}"
+      - --admin-password-file
+      - "{{ superset_admin_password_local_file }}"
+      - --report-file
+      - "{{ superset_verify_report_local_file }}"
+      - --expected-extra-database
+      - "{{ superset_plausible_clickhouse_name }}"
+  register: superset_public_verify
+  changed_when: false
+  when: superset_register_plausible_clickhouse | bool
+
+- name: Verify the public Superset publication and Keycloak redirect contract without optional databases
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ superset_controller_bootstrap_script_local_path }}"
+      - verify-public
+      - --base-url
+      - "{{ superset_public_base_url }}"
+      - --expected-postgres-databases-file
+      - "{{ superset_postgres_database_catalog_local_file }}"
+      - --database-prefix
+      - "{{ superset_database_display_name_prefix }}"
+      - --expected-dashboard
+      - "{{ superset_landing_dashboard_title }}"
+      - --expected-chart
+      - "{{ superset_landing_chart_title }}"
+      - --expected-sso-host
+      - sso.lv3.org
+      - --admin-username
+      - "{{ superset_admin_username }}"
+      - --admin-password-file
+      - "{{ superset_admin_password_local_file }}"
+      - --report-file
+      - "{{ superset_verify_report_local_file }}"
+  register: superset_public_verify_without_optional
+  changed_when: false
+  when: not (superset_register_plausible_clickhouse | bool)

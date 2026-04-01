@@ -605,6 +605,18 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
+    "superset": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "keycloak_client_generated": true,
+      "suppressed_checks": {
+        "alert_rules": "2026-09-30",
+        "grafana_dashboard": "2026-09-30"
+      }
+    },
     "tika": {
       "service_type": "compose",
       "requires_subdomain": false,

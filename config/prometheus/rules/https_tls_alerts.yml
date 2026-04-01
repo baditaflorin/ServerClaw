@@ -1872,6 +1872,51 @@ groups:
           description: https://100.64.0.1:9443/health has less than 2 hours remaining
             before certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_superset_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="superset-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: superset
+          assurance_id: superset-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: superset-public HTTPS probe is failing.
+          description: https://bi.lv3.org:443/health is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_superset_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="superset-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: superset
+          assurance_id: superset-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: superset-public TLS certificate is approaching expiry.
+          description: https://bi.lv3.org:443/health has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_superset_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="superset-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: superset
+          assurance_id: superset-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: superset-public TLS certificate is within the critical expiry window.
+          description: https://bi.lv3.org:443/health has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_uptime_kuma_public
         expr: probe_success{job="https-tls-blackbox",assurance_id="uptime-kuma-public"}
           == 0

@@ -94,6 +94,8 @@ keycloak_directus_client_id: directus
 keycloak_directus_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/directus-client-secret.txt
 keycloak_jupyterhub_client_id: jupyterhub
 keycloak_jupyterhub_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/jupyterhub-client-secret.txt
+keycloak_superset_client_id: superset
+keycloak_superset_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/superset-client-secret.txt
 keycloak_outline_client_id: outline
 keycloak_outline_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline-client-secret.txt
 keycloak_paperless_client_id: paperless
@@ -153,6 +155,7 @@ keycloak_grafana_root_url: "https://{{ hostvars['proxmox_florin'].lv3_service_to
 keycloak_langfuse_root_url: https://langfuse.lv3.org
 keycloak_directus_root_url: https://data.lv3.org
 keycloak_jupyterhub_root_url: https://notebooks.lv3.org
+keycloak_superset_root_url: https://bi.lv3.org
 keycloak_outline_root_url: https://wiki.lv3.org
 keycloak_paperless_root_url: https://paperless.lv3.org
 keycloak_serverclaw_root_url: https://chat.lv3.org
@@ -173,6 +176,9 @@ keycloak_jupyterhub_post_logout_redirect_uris:
   - "{{ keycloak_jupyterhub_root_url }}"
   - "{{ keycloak_jupyterhub_root_url }}/"
   - "{{ keycloak_session_authority.shared_proxy_cleanup_url }}"
+keycloak_superset_post_logout_redirect_uris:
+  - "{{ keycloak_superset_root_url }}"
+  - "{{ keycloak_superset_root_url }}/"
 keycloak_paperless_post_logout_redirect_uris:
   - "{{ keycloak_paperless_root_url }}"
   - "{{ keycloak_paperless_root_url }}/"
