@@ -22,6 +22,10 @@ memory pressure both common and ambiguous:
 The platform needs an explicit memory increase, but it also needs a hard answer
 to how far that increase is allowed to go before a new review is required.
 
+It also needs to avoid inventing a one-off measurement stack when existing
+autoscaling and metrics tooling already knows how to consume API-backed memory
+signals.
+
 ## Decision
 
 We will replace the single shared runtime memory budget with **runtime-pool
@@ -54,6 +58,18 @@ host free-memory floor still remains intact.
 - adding a new service to a runtime pool without a matching envelope update is
   considered capacity drift
 
+### Measurement and control inputs
+
+The preferred first implementation is:
+
+- `Prometheus` as the canonical metrics source for pool-level memory signals
+- `Nomad Autoscaler` policy checks and targets as the first reusable control
+  loop for declared memory envelopes and scale boundaries
+
+Direct custom scripts may still summarize or precompute those metrics, but they
+should feed those standard surfaces rather than becoming a parallel autoscaling
+stack.
+
 ## Consequences
 
 **Positive**
@@ -63,6 +79,8 @@ host free-memory floor still remains intact.
 - operators and autoscalers now share one approved set of pool bounds
 - the host keeps a safety margin for Proxmox, page cache, recovery actions, and
   temporary migration work
+- future agents can inspect one familiar metrics and autoscaling vocabulary
+  instead of repo-specific memory heuristics
 
 **Negative / Trade-offs**
 
@@ -84,3 +102,4 @@ host free-memory floor still remains intact.
 - ADR 0157: Per-VM concurrency budget and resource reservation
 - ADR 0180: Standby capacity reservation and placement rules
 - ADR 0192: Separate capacity classes for standby, recovery, and preview workloads
+- ADR 0232: Nomad for durable batch and long-running internal jobs

@@ -24,6 +24,9 @@ Treating all of them as equally movable would create avoidable risk:
 If the platform wants to decompose the current shared runtime safely, it needs a
 mobility contract and an ordered migration plan.
 
+It also needs a rule for when to reuse mature API-first platforms instead of
+keeping a service coupled to repo-local helper code.
+
 ## Decision
 
 We will classify services into **mobility tiers** and move them through
@@ -52,6 +55,18 @@ The first migration order is:
    their dependencies are declared
 4. revisit any control-plane anchors only after the earlier waves prove stable
 
+### Library-fit guidance by tier
+
+- `anchor`: prefer proven infrastructure components such as `OpenFGA`,
+  `Temporal`, and `NATS JetStream` over repo-local reimplementation of authz,
+  workflow orchestration, or durable messaging
+- `movable_singleton`: prefer `Traefik` and `Dapr` integration surfaces before
+  writing pool-specific routing or service-discovery code
+- `elastic_stateless`: prefer `Nomad` plus `Nomad Autoscaler` as the control
+  plane and `Dapr` for service invocation or pub/sub glue
+- `burst_batch`: prefer `Temporal` for durable orchestration and `Dapr`
+  bindings or pub/sub for adapters before inventing new batch dispatch layers
+
 ### Governance rules
 
 - every service must declare its mobility tier before it is moved out of the
@@ -77,6 +92,8 @@ The first migration order is:
 - every service now needs another piece of metadata
 - some services may remain on the legacy shared runtime longer than operators
   would like because they are anchors or have unresolved dependencies
+- mobility reviews now also need to ask whether an existing OSS surface already
+  solves the problem better than a custom helper
 
 ## Boundaries
 

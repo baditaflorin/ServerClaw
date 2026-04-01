@@ -24,10 +24,15 @@ Manual resizing is too slow for the failure mode we already see:
 The platform needs an autoscaling control loop, but only one that operates
 inside clear bounds and only for pools that are safe to scale.
 
+The platform also wants that control loop to be based on battle-tested OSS with
+clear documentation rather than a homegrown autoscaler.
+
 ## Decision
 
 We will add a **memory-pressure autoscaling control loop** for elastic runtime
 pools.
+
+`Nomad Autoscaler` is the preferred first implementation of that control loop.
 
 ### Eligible pools
 
@@ -50,6 +55,14 @@ The autoscaler must observe, at minimum:
 
 Optional signals such as queue depth, request latency, or worker backlog may
 refine the decision, but they may not replace memory pressure itself.
+
+The preferred source stack is:
+
+- `Prometheus` for memory, pressure, and workload metrics
+- `Nomad Autoscaler` policy checks for bounded scale decisions
+- `Traefik` for replica-aware routing across scaled pool members
+- `Dapr` service invocation ids when pool-local services should address a
+  logical application instead of one concrete replica
 
 ### Scaling sequence
 
@@ -79,6 +92,9 @@ this order:
 - autoscaling may act only on services marked eligible by ADR 0323
 - every scale action must emit a receipt with the trigger metrics, chosen
   action, and resulting pool state
+- Kubernetes-first autoscalers such as `KEDA` are out of scope for the first
+  implementation because these runtime pools are not being modeled as a
+  Kubernetes estate
 
 ## Consequences
 
@@ -89,6 +105,8 @@ this order:
 - scale-out, resize, and scale-in decisions become governed automation instead
   of ad hoc operator improvisation
 - receipts turn scaling behavior into auditable operational history
+- future agents can inspect upstream Nomad Autoscaler, Traefik, Dapr, and
+  Prometheus docs instead of reading a custom autoscaling codebase first
 
 **Negative / Trade-offs**
 
