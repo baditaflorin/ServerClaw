@@ -1,0 +1,120 @@
+---
+# Purpose: Verify the local Vikunja info endpoint, API token contract, and controller/public publication paths.
+# Use case: Run after the Vikunja runtime starts to confirm the standard `/api/v1/info`, `/api/v1/user`, and project synchronization contracts behave as expected.
+# Inputs: Running Vikunja container plus the configured runtime URLs and controller-local auth artifacts.
+# Outputs: Read-only verification results for the runtime, controller, and public publication paths.
+# Idempotency: Fully idempotent; these are read-only HTTP checks against the live service.
+# Dependencies: ADR 0286 and ADR 0165; requires the vikunja_runtime compose stack to be running.
+---
+- name: Read the Vikunja API token from the control machine
+  ansible.builtin.set_fact:
+    vikunja_api_token: "{{ lookup('ansible.builtin.file', vikunja_api_token_local_file) | trim }}"
+  no_log: true
+
+- name: Verify the Vikunja info endpoint responds locally
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ vikunja_internal_port }}/api/v1/info"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: vikunja_verify_info
+  retries: 18
+  delay: 5
+  until: vikunja_verify_info.status == 200
+  changed_when: false
+
+- name: Assert the Vikunja info endpoint returned a version payload
+  ansible.builtin.assert:
+    that:
+      - '"version" in (vikunja_verify_info.content | lower)'
+    fail_msg: "Vikunja info verification did not return the expected version payload."
+
+- name: Verify the Vikunja API token can read the current user locally
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ vikunja_internal_port }}/api/v1/user"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ vikunja_api_token }}"
+    status_code: 200
+    return_content: true
+  register: vikunja_verify_user
+  changed_when: false
+  no_log: true
+
+- name: Decode the Vikunja user response
+  ansible.builtin.set_fact:
+    vikunja_verify_user_payload: "{{ vikunja_verify_user.content | from_json }}"
+
+- name: Assert the Vikunja automation identity is active
+  ansible.builtin.assert:
+    that:
+      - vikunja_verify_user_payload.username == vikunja_automation_username
+      - vikunja_verify_user_payload.email == vikunja_automation_email
+    fail_msg: "Vikunja token verification did not authenticate as the expected automation user."
+
+- name: Verify the Vikunja API token can list projects locally
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ vikunja_internal_port }}/api/v1/projects"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ vikunja_api_token }}"
+    status_code: 200
+    return_content: true
+  register: vikunja_verify_projects
+  changed_when: false
+  no_log: true
+
+- name: Assert the Platform Ops project exists
+  ansible.builtin.assert:
+    that:
+      - "'PLATOPS' in vikunja_verify_projects.content"
+      - "'Platform Ops' in vikunja_verify_projects.content"
+    fail_msg: "Vikunja project synchronization did not create the expected Platform Ops project."
+
+- name: Verify the Vikunja webhook events route answers locally
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ vikunja_internal_port }}/api/v1/webhooks/events"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ vikunja_api_token }}"
+    status_code: 200
+    return_content: true
+  register: vikunja_verify_webhook_events
+  changed_when: false
+  no_log: true
+
+- name: Assert the webhook events payload contains task events
+  ansible.builtin.assert:
+    that:
+      - "'task.created' in vikunja_verify_webhook_events.content"
+      - "'task.updated' in vikunja_verify_webhook_events.content"
+      - "'task.comment.created' in vikunja_verify_webhook_events.content"
+    fail_msg: "Vikunja webhook events verification did not return the expected task event catalogue."
+
+- name: Verify the controller-facing Vikunja info route answers
+  ansible.builtin.uri:
+    url: "{{ vikunja_controller_url }}/api/v1/info"
+    method: GET
+    status_code: 200
+    return_content: true
+  delegate_to: localhost
+  become: false
+  register: vikunja_verify_controller_info
+  retries: 18
+  delay: 5
+  until: vikunja_verify_controller_info.status == 200
+  changed_when: false
+
+- name: Verify the public Vikunja info route answers
+  ansible.builtin.uri:
+    url: "{{ vikunja_public_base_url }}/api/v1/info"
+    method: GET
+    status_code: 200
+    return_content: true
+  delegate_to: localhost
+  become: false
+  register: vikunja_verify_public_info
+  retries: 18
+  delay: 5
+  until: vikunja_verify_public_info.status == 200
+  changed_when: false

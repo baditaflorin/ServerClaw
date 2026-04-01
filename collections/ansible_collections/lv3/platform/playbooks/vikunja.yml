@@ -1,0 +1,141 @@
+---
+# Playbook: vikunja.yml
+# Purpose: Converge the repo-managed Vikunja task API, PostgreSQL backend, host-side Tailscale proxy, and upstream-authenticated edge publication path.
+# Use case: Run during production Vikunja deployment, upgrade, or recovery when the task API, alert bridge, and webhook publication contract must match repo truth.
+#
+# Inputs (required):
+#   - env (str, required): Target environment selector used by the scoped Ansible wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH path to managed guests.
+#
+# Outputs:
+#   - Vikunja runtime converged on docker-runtime-lv3, PostgreSQL access prepared on postgres-lv3, vikunja.lv3.org published through the edge, and controller-local auth artifacts refreshed.
+#
+# Idempotency: Fully idempotent
+#              Runtime secrets and bootstrap artifacts are reused when present, and repeat runs reconcile the same project, label, and webhook contract.
+#
+# Dependencies:
+#   - ADR 0286: Vikunja as the task and project management REST API
+#   - Requires: OpenBao, docker-runtime-lv3, postgres-lv3, Keycloak, Windmill, and the shared NGINX edge to be reachable
+#   - Role: vikunja_postgres — provisions the Vikunja database and login
+#   - Role: vikunja_runtime — deploys Vikunja, bootstraps auth, syncs desired state, and verifies controller workflows
+#
+# Related ADRs: 0063, 0077, 0086, 0096, 0276, 0286
+# Related Runbooks: docs/runbooks/configure-vikunja.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- name: Converge the Tailscale operator proxy for Vikunja
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - automation
+    - service-vikunja
+
+  roles:
+    - role: lv3.platform.proxmox_tailscale_proxy
+    - role: lv3.platform.proxmox_security
+      vars:
+        proxmox_security_manage_acme: false
+
+- name: Ensure Hetzner DNS publication for Vikunja
+  hosts: proxmox_hosts
+  become: false
+  gather_facts: false
+  tags:
+    - tier-1
+    - automation
+    - service-vikunja
+
+  tasks:
+    - name: Ensure Hetzner DNS records are present
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_records
+        apply:
+          delegate_to: localhost
+          become: false
+      run_once: true
+
+- name: Converge PostgreSQL access for Vikunja
+  hosts: postgres-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-vikunja
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - postgres-lv3
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.postgres_vm
+    - role: lv3.platform.vikunja_postgres
+
+- name: Converge Vikunja on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-vikunja
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.vikunja
+        playbook_execution_audit_target: vikunja
+        required_hosts:
+          - docker-runtime-lv3
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.vikunja_runtime
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: vikunja
+        playbook_execution_post_verify_audit_action: playbook.verify.vikunja
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: vikunja
+
+- name: Publish Vikunja through the NGINX edge
+  hosts: nginx-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-vikunja
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - nginx-lv3
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication

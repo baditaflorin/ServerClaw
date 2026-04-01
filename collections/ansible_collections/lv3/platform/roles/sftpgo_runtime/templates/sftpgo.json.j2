@@ -1,0 +1,83 @@
+{
+  "data_provider": {
+    "driver": "pgsql",
+    "name": "{{ sftpgo_database_name }}",
+    "host": "{{ sftpgo_database_host }}",
+    "port": 5432,
+    "username": "{{ sftpgo_database_user }}",
+    "sslmode": 0,
+    "users_base_dir": "/srv/sftpgo/data",
+    "create_default_admin": true
+  },
+  "sftpd": {
+    "bindings": [
+      {
+        "port": {{ sftpgo_sftp_port }},
+        "address": "0.0.0.0"
+      }
+    ]
+  },
+  "webdavd": {
+    "bindings": [
+      {
+        "port": {{ sftpgo_webdav_port }},
+        "address": "0.0.0.0",
+        "enable_https": false
+      }
+    ]
+  },
+  "httpd": {
+    "bindings": [
+      {
+        "port": {{ sftpgo_admin_port }},
+        "address": "0.0.0.0",
+        "enable_web_admin": true,
+        "enable_web_client": false,
+        "enable_rest_api": true,
+        "oidc": {
+          "client_id": "{{ sftpgo_keycloak_client_id }}",
+          "config_url": "{{ sftpgo_keycloak_config_url }}",
+          "redirect_base_url": "{{ sftpgo_controller_url }}",
+          "scopes": [
+            "openid",
+            "profile",
+            "email"
+          ],
+          "username_field": "{{ sftpgo_keycloak_username_field }}",
+          "implicit_roles": true
+        }
+      }
+    ]
+  },
+  "plugins": [
+    {
+      "type": "notifier",
+      "notifier_options": {
+        "fs_events": [
+          "upload",
+          "download",
+          "delete",
+          "rename"
+        ],
+        "provider_events": [
+          "add",
+          "update",
+          "delete"
+        ],
+        "provider_objects": [
+          "user",
+          "admin",
+          "api_key"
+        ],
+        "retry_max_time": 60,
+        "retry_queue_max_size": 1000
+      },
+      "cmd": "{{ sftpgo_plugin_container_path }}",
+      "args": [
+        "nats://{{ sftpgo_event_subject }}"
+      ],
+      "sha256sum": "{{ sftpgo_plugin_pubsub_sha256 }}",
+      "auto_mtls": true
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+---
+# Playbook: vikunja.yml
+# Purpose: Expose the collection Vikunja converge path from the repository root entrypoint.
+# Use case: Run through make targets, service live-apply wrappers, and syntax checks that expect root playbook entrypoints.
+#
+# Inputs (required):
+#   - env (str, required): Target environment passed through the shared execution wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH path to managed guests.
+#
+# Outputs:
+#   - Imports the canonical collection playbook for the Vikunja runtime.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0079: shared playbook execution model
+#   - ADR 0286: Vikunja as the task and project management REST API
+#   - Requires: collections/ansible_collections/lv3/platform/playbooks/vikunja.yml
+#
+# Related ADRs: 0079, 0286
+# Related Runbooks: docs/runbooks/configure-vikunja.md
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+- import_playbook: ../collections/ansible_collections/lv3/platform/playbooks/vikunja.yml

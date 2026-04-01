@@ -1,0 +1,22 @@
+---
+# Purpose: Describe the required PostgreSQL bootstrap variables for the SFTPGo service.
+
+argument_specs:
+  main:
+    short_description: Provision the PostgreSQL role and database required by SFTPGo.
+    options:
+      sftpgo_database_name:
+        type: str
+        required: true
+      sftpgo_database_user:
+        type: str
+        required: true
+      sftpgo_postgres_secret_dir:
+        type: path
+        required: true
+      sftpgo_postgres_password_file:
+        type: path
+        required: true
+      sftpgo_database_password_local_file:
+        type: path
+        required: true

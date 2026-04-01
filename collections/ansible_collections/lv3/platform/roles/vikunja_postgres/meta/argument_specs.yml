@@ -1,0 +1,42 @@
+---
+# Purpose: Declare the validated input contract for the vikunja_postgres role.
+# Use case: Used by Ansible argument validation before the Vikunja PostgreSQL preparation tasks run.
+#
+# Inputs (required):
+#   - vikunja_database_name (str, required): Managed Vikunja database name.
+#   - vikunja_database_user (str, required): Managed Vikunja login role.
+#   - vikunja_database_support_role (str, required): Managed support role granted to the login.
+#   - vikunja_database_password_local_file (path, required): Controller-local password artifact path.
+#
+# Outputs:
+#   - Argument-spec validation metadata for the vikunja_postgres role.
+#
+# Idempotency: Fully idempotent
+#              This file only declares validation metadata.
+#
+# Dependencies:
+#   - ADR 0286: Defines the Vikunja PostgreSQL bootstrap contract.
+#   - Requires: vikunja_postgres role defaults and tasks.
+#   - Role: vikunja_postgres — validates the role inputs before database preparation.
+#
+# Related ADRs: 0165, 0286
+# Related Runbooks: docs/runbooks/configure-vikunja.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+argument_specs:
+  main:
+    short_description: Prepare the Vikunja PostgreSQL database and login on postgres-lv3.
+    options:
+      vikunja_database_name:
+        type: str
+        required: true
+      vikunja_database_user:
+        type: str
+        required: true
+      vikunja_database_support_role:
+        type: str
+        required: true
+      vikunja_database_password_local_file:
+        type: path
+        required: true

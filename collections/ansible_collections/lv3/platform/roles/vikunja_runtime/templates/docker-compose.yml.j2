@@ -1,0 +1,61 @@
+services:
+  openbao-agent:
+    image: {{ vikunja_openbao_agent_image }}
+    container_name: {{ vikunja_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ vikunja_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ vikunja_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ vikunja_env_file | dirname }}:{{ vikunja_env_file | dirname }}
+
+  vikunja:
+    image: {{ vikunja_image }}
+    container_name: {{ vikunja_container_name }}
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+    env_file:
+      - {{ vikunja_env_file }}
+    ports:
+      - "{{ ansible_host }}:{{ vikunja_internal_port }}:{{ vikunja_container_port }}"
+      - "127.0.0.1:{{ vikunja_internal_port }}:{{ vikunja_container_port }}"
+    volumes:
+      - {{ vikunja_files_dir }}:/var/lib/vikunja/files
+
+  vikunja-webhook-bridge:
+    image: {{ vikunja_bridge_image }}
+    container_name: {{ vikunja_bridge_container_name }}
+    restart: unless-stopped
+    depends_on:
+      vikunja:
+        condition: service_started
+      openbao-agent:
+        condition: service_healthy
+    env_file:
+      - {{ vikunja_env_file }}
+    command:
+      - python
+      - /app/vikunja-webhook-bridge.py
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:{{ vikunja_bridge_port }}/healthz', timeout=5).read()"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - {{ vikunja_site_dir }}/vikunja-webhook-bridge.py:/app/vikunja-webhook-bridge.py:ro

@@ -1,0 +1,197 @@
+---
+# Purpose: Bootstrap the SFTPGo admin, controller API, and public smoke-transfer contract.
+
+- name: Validate SFTPGo publication inputs
+  ansible.builtin.assert:
+    that:
+      - sftpgo_controller_url | length > 0
+      - sftpgo_public_base_url | length > 0
+      - sftpgo_bootstrap_admin_username | length > 0
+      - sftpgo_bootstrap_admin_password_local_file | length > 0
+      - sftpgo_api_key_name | length > 0
+      - sftpgo_api_key_local_file | length > 0
+      - sftpgo_oidc_admin_username | length > 0
+      - sftpgo_oidc_admin_password_local_file | length > 0
+      - sftpgo_smoke_user_username | length > 0
+      - sftpgo_smoke_user_password_local_file | length > 0
+      - sftpgo_smoke_user_public_key_local_file | length > 0
+      - sftpgo_smoke_user_private_key_local_file | length > 0
+    fail_msg: >-
+      sftpgo_runtime publication requires controller URLs, bootstrap credentials,
+      and the controller-local smoke-transfer artifacts.
+
+- name: Check whether the SFTPGo bootstrap admin password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ sftpgo_bootstrap_admin_password_local_file }}"
+  register: sftpgo_publish_bootstrap_password
+
+- name: Check whether the SFTPGo OIDC admin password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ sftpgo_oidc_admin_password_local_file }}"
+  register: sftpgo_publish_oidc_admin_password
+
+- name: Check whether the SFTPGo smoke-user password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ sftpgo_smoke_user_password_local_file }}"
+  register: sftpgo_publish_smoke_password
+
+- name: Check whether the SFTPGo smoke-user public key exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ sftpgo_smoke_user_public_key_local_file }}"
+  register: sftpgo_publish_smoke_public_key
+
+- name: Check whether the SFTPGo smoke-user private key exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ sftpgo_smoke_user_private_key_local_file }}"
+  register: sftpgo_publish_smoke_private_key
+
+- name: Fail if the SFTPGo local bootstrap artifacts are missing
+  ansible.builtin.fail:
+    msg: >-
+      The controller-local SFTPGo bootstrap artifacts are incomplete.
+      Converge the SFTPGo runtime before running the publication bootstrap.
+  when:
+    - not sftpgo_publish_bootstrap_password.stat.exists
+      or not sftpgo_publish_oidc_admin_password.stat.exists
+      or not sftpgo_publish_smoke_password.stat.exists
+      or not sftpgo_publish_smoke_public_key.stat.exists
+      or not sftpgo_publish_smoke_private_key.stat.exists
+
+- name: Wait for the private SFTPGo controller health endpoint
+  ansible.builtin.uri:
+    url: "{{ sftpgo_controller_url }}/healthz"
+    method: GET
+    status_code: 200
+  register: sftpgo_publish_controller_health
+  retries: 18
+  delay: 5
+  until: sftpgo_publish_controller_health.status == 200
+  changed_when: false
+
+- name: Wait for the public SFTPGo WebDAV edge route to require authentication
+  ansible.builtin.uri:
+    url: "{{ sftpgo_public_base_url }}/healthz"
+    method: GET
+    status_code: 401
+  register: sftpgo_publish_public_health
+  retries: 18
+  delay: 5
+  until: sftpgo_publish_public_health.status == 401
+  changed_when: false
+
+- name: Bootstrap the SFTPGo admin, API key, and smoke-user contract
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/sftpgo_bootstrap.py"
+      - bootstrap
+      - --base-url
+      - "{{ sftpgo_controller_url }}"
+      - --bootstrap-admin-username
+      - "{{ sftpgo_bootstrap_admin_username }}"
+      - --bootstrap-admin-password-file
+      - "{{ sftpgo_bootstrap_admin_password_local_file }}"
+      - --api-key-name
+      - "{{ sftpgo_api_key_name }}"
+      - --api-key-file
+      - "{{ sftpgo_api_key_local_file }}"
+      - --oidc-admin-username
+      - "{{ sftpgo_oidc_admin_username }}"
+      - --oidc-admin-email
+      - "{{ sftpgo_oidc_admin_email }}"
+      - --oidc-admin-password-file
+      - "{{ sftpgo_oidc_admin_password_local_file }}"
+      - --smoke-user-username
+      - "{{ sftpgo_smoke_user_username }}"
+      - --smoke-user-password-file
+      - "{{ sftpgo_smoke_user_password_local_file }}"
+      - --smoke-user-public-key-file
+      - "{{ sftpgo_smoke_user_public_key_local_file }}"
+      - --smoke-user-home-dir
+      - "{{ sftpgo_smoke_user_home_dir }}"
+      - --smoke-user-quota-bytes
+      - "{{ sftpgo_smoke_user_quota_bytes | string }}"
+      - --smoke-user-quota-files
+      - "{{ sftpgo_smoke_user_quota_files | string }}"
+      - --report-file
+      - "{{ sftpgo_bootstrap_report_local_file }}"
+  register: sftpgo_bootstrap
+  changed_when: (sftpgo_bootstrap.stdout | from_json).changed
+  no_log: true
+
+- name: Verify the durable SFTPGo API key and seeded identities
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/sftpgo_bootstrap.py"
+      - verify
+      - --base-url
+      - "{{ sftpgo_controller_url }}"
+      - --api-key-file
+      - "{{ sftpgo_api_key_local_file }}"
+      - --expected-admin
+      - "{{ sftpgo_oidc_admin_username }}"
+      - --expected-user
+      - "{{ sftpgo_smoke_user_username }}"
+  register: sftpgo_verify_api
+  changed_when: false
+  no_log: true
+
+- name: Verify the SFTPGo admin OIDC redirect path
+  ansible.builtin.uri:
+    url: "{{ sftpgo_controller_url }}/web/admin/oidclogin"
+    method: GET
+    status_code: 302
+    follow_redirects: none
+  register: sftpgo_oidc_redirect
+  changed_when: false
+
+- name: Assert the SFTPGo admin OIDC redirect points to Keycloak
+  ansible.builtin.assert:
+    that:
+      - sftpgo_oidc_redirect.location is defined
+      - hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname in sftpgo_oidc_redirect.location
+      - "'/protocol/openid-connect/auth' in sftpgo_oidc_redirect.location"
+    fail_msg: "SFTPGo admin OIDC login did not redirect to the expected Keycloak authorize endpoint."
+
+- name: Verify the public SFTPGo WebDAV smoke transfer
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/sftpgo_bootstrap.py"
+      - smoke-webdav
+      - --base-url
+      - "{{ sftpgo_public_base_url }}"
+      - --username
+      - "{{ sftpgo_smoke_user_username }}"
+      - --password-file
+      - "{{ sftpgo_smoke_user_password_local_file }}"
+      - --remote-path
+      - .health/sftpgo-webdav-smoke.txt
+      - --content
+      - "LV3 SFTPGo WebDAV smoke verification"
+  register: sftpgo_verify_webdav_smoke
+  changed_when: false
+  no_log: true
+
+- name: Verify the public SFTPGo SFTP smoke transfer
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/sftpgo_bootstrap.py"
+      - smoke-sftp
+      - --host
+      - "{{ sftpgo_service_topology.public_hostname }}"
+      - --port
+      - "{{ sftpgo_sftp_port | string }}"
+      - --username
+      - "{{ sftpgo_smoke_user_username }}"
+      - --identity-file
+      - "{{ sftpgo_smoke_user_private_key_local_file }}"
+      - --remote-path
+      - sftpgo-sftp-smoke.txt
+      - --content
+      - "LV3 SFTPGo SFTP smoke verification"
+  register: sftpgo_verify_sftp_smoke
+  changed_when: false
+  no_log: true

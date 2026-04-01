@@ -1,0 +1,40 @@
+---
+# Purpose: Verify the local SFTPGo runtime health after compose convergence.
+
+- name: Verify the SFTPGo local admin port is listening
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ sftpgo_admin_port }}"
+    delay: 0
+    timeout: 30
+  changed_when: false
+
+- name: Verify the SFTPGo local admin health endpoint
+  ansible.builtin.uri:
+    url: "{{ sftpgo_local_admin_url }}/healthz"
+    method: GET
+    status_code: 200
+  register: sftpgo_verify_admin_health
+  retries: 12
+  delay: 5
+  until: sftpgo_verify_admin_health.status == 200
+  changed_when: false
+
+- name: Verify the SFTPGo local WebDAV listener requires authentication
+  ansible.builtin.uri:
+    url: "{{ sftpgo_local_webdav_url }}/healthz"
+    method: GET
+    status_code: 401
+  register: sftpgo_verify_webdav_health
+  retries: 12
+  delay: 5
+  until: sftpgo_verify_webdav_health.status == 401
+  changed_when: false
+
+- name: Verify the SFTPGo local SFTP port is listening
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ sftpgo_sftp_port }}"
+    delay: 0
+    timeout: 30
+  changed_when: false

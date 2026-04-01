@@ -1,0 +1,401 @@
+---
+# Purpose: Converge the SFTPGo runtime, OpenBao-backed secrets, and repo-managed bootstrap artifacts.
+
+- name: Validate SFTPGo runtime inputs
+  ansible.builtin.assert:
+    that:
+      - sftpgo_site_dir | length > 0
+      - sftpgo_config_dir | length > 0
+      - sftpgo_plugin_dir | length > 0
+      - sftpgo_state_dir | length > 0
+      - sftpgo_data_dir | length > 0
+      - sftpgo_secret_dir | length > 0
+      - sftpgo_compose_file | length > 0
+      - sftpgo_config_file | length > 0
+      - sftpgo_env_file | length > 0
+      - sftpgo_database_password_local_file | length > 0
+      - sftpgo_keycloak_client_secret_local_file | length > 0
+      - sftpgo_nats_password_local_file | length > 0
+      - sftpgo_image | length > 0
+      - sftpgo_controller_url | length > 0
+      - sftpgo_public_base_url | length > 0
+      - sftpgo_admin_port | int > 0
+      - sftpgo_webdav_port | int > 0
+      - sftpgo_sftp_port | int > 0
+    fail_msg: >-
+      sftpgo_runtime requires runtime paths, image refs, controller URLs,
+      database auth, and Keycloak or NATS credentials.
+
+- name: Check whether the SFTPGo database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ sftpgo_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: sftpgo_database_password_local
+
+- name: Check whether the SFTPGo Keycloak client secret exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ sftpgo_keycloak_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: sftpgo_keycloak_client_secret_local
+
+- name: Check whether the NATS JetStream admin password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ sftpgo_nats_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: sftpgo_nats_password_local
+
+- name: Fail if the SFTPGo database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ sftpgo_database_password_local_file }} is missing on the control machine.
+      Converge sftpgo_postgres before deploying SFTPGo.
+  when: not sftpgo_database_password_local.stat.exists
+
+- name: Fail if the SFTPGo Keycloak client secret is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ sftpgo_keycloak_client_secret_local_file }} is missing on the control machine.
+      Converge the Keycloak runtime before deploying SFTPGo.
+  when: not sftpgo_keycloak_client_secret_local.stat.exists
+
+- name: Fail if the NATS JetStream admin password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ sftpgo_nats_password_local_file }} is missing on the control machine.
+      Converge the NATS JetStream runtime before deploying SFTPGo.
+  when: not sftpgo_nats_password_local.stat.exists
+
+- name: Ensure the SFTPGo runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the local SFTPGo artifact directory exists
+  ansible.builtin.file:
+    path: "{{ sftpgo_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the SFTPGo bootstrap passwords
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ item }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - "{{ sftpgo_bootstrap_admin_password_local_file }}"
+    - "{{ sftpgo_oidc_admin_password_local_file }}"
+    - "{{ sftpgo_smoke_user_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: sftpgo_password_generation
+  changed_when: "'changed' in sftpgo_password_generation.stdout"
+  no_log: true
+
+- name: Generate the SFTPGo smoke-user SSH keypair
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ sftpgo_smoke_user_private_key_local_file }}" ]; then
+      umask 077
+      ssh-keygen -q -t ed25519 -N '' -C "{{ sftpgo_smoke_user_username }}@lv3.org" -f "{{ sftpgo_smoke_user_private_key_local_file }}"
+      echo changed
+    fi
+    if [ ! -s "{{ sftpgo_smoke_user_public_key_local_file }}" ]; then
+      ssh-keygen -y -f "{{ sftpgo_smoke_user_private_key_local_file }}" > "{{ sftpgo_smoke_user_public_key_local_file }}"
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: sftpgo_smoke_key_generation
+  changed_when: "'changed' in sftpgo_smoke_key_generation.stdout"
+  no_log: true
+
+- name: Record the SFTPGo runtime secrets
+  ansible.builtin.set_fact:
+    sftpgo_database_password: "{{ lookup('ansible.builtin.file', sftpgo_database_password_local_file) | trim }}"
+    sftpgo_keycloak_client_secret: "{{ lookup('ansible.builtin.file', sftpgo_keycloak_client_secret_local_file) | trim }}"
+    sftpgo_bootstrap_admin_password: "{{ lookup('ansible.builtin.file', sftpgo_bootstrap_admin_password_local_file) | trim }}"
+    sftpgo_nats_password: "{{ lookup('ansible.builtin.file', sftpgo_nats_password_local_file) | trim }}"
+    sftpgo_runtime_secret_payload:
+      SFTPGO_DATA_PROVIDER__PASSWORD: "{{ lookup('ansible.builtin.file', sftpgo_database_password_local_file) | trim }}"
+      SFTPGO_HTTPD__BINDINGS__0__OIDC__CLIENT_SECRET: "{{ lookup('ansible.builtin.file', sftpgo_keycloak_client_secret_local_file) | trim }}"
+      SFTPGO_DEFAULT_ADMIN_USERNAME: "{{ sftpgo_bootstrap_admin_username }}"
+      SFTPGO_DEFAULT_ADMIN_PASSWORD: "{{ lookup('ansible.builtin.file', sftpgo_bootstrap_admin_password_local_file) | trim }}"
+      NATS_SERVER_URL: >-
+        nats://{{ sftpgo_nats_username }}:{{
+          lookup('ansible.builtin.file', sftpgo_nats_password_local_file) | trim | urlencode
+        }}@{{ sftpgo_nats_host }}:{{ sftpgo_nats_port }}
+  no_log: true
+
+- name: Ensure the SFTPGo runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ sftpgo_site_dir }}"
+      mode: "0755"
+    - path: "{{ sftpgo_config_dir }}"
+      mode: "0755"
+    - path: "{{ sftpgo_plugin_dir }}"
+      mode: "0755"
+    - path: "{{ sftpgo_secret_dir }}"
+      mode: "0700"
+    - path: "{{ sftpgo_state_dir }}"
+      owner: "{{ sftpgo_runtime_uid }}"
+      group: "{{ sftpgo_runtime_gid }}"
+      mode: "0750"
+    - path: "{{ sftpgo_data_dir }}"
+      owner: "{{ sftpgo_runtime_uid }}"
+      group: "{{ sftpgo_runtime_gid }}"
+      mode: "0750"
+
+- name: Download the SFTPGo pubsub notifier plugin
+  ansible.builtin.get_url:
+    url: "{{ sftpgo_plugin_pubsub_url }}"
+    dest: "{{ sftpgo_plugin_binary }}"
+    mode: "0755"
+    checksum: "sha256:{{ sftpgo_plugin_pubsub_sha256 }}"
+
+- name: Prepare OpenBao agent runtime secret injection for SFTPGo
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: sftpgo
+    common_openbao_compose_env_agent_dir: "{{ sftpgo_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ sftpgo_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ sftpgo_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ sftpgo_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ sftpgo_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ sftpgo_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ sftpgo_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ sftpgo_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ sftpgo_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ sftpgo_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ sftpgo_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: sftpgo.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ sftpgo_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ sftpgo_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ sftpgo_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ sftpgo_legacy_env_file }}"
+  no_log: true
+
+- name: Render the SFTPGo environment file
+  ansible.builtin.template:
+    src: sftpgo.env.j2
+    dest: "{{ sftpgo_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: sftpgo_env_template
+  no_log: true
+
+- name: Render the SFTPGo config file
+  ansible.builtin.template:
+    src: sftpgo.json.j2
+    dest: "{{ sftpgo_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: sftpgo_config_template
+
+- name: Render the SFTPGo compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ sftpgo_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: sftpgo_compose_template
+
+- name: Pull the SFTPGo image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ sftpgo_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ sftpgo_site_dir }}"
+  register: sftpgo_pull
+  changed_when: >-
+    'Pulling' in sftpgo_pull.stdout
+    or 'Downloaded newer image' in sftpgo_pull.stdout
+    or 'Pull complete' in sftpgo_pull.stdout
+
+- name: Check whether the Docker nat chain exists before SFTPGo startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: sftpgo_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing before SFTPGo startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: sftpgo_docker_nat_chain.rc != 0
+
+- name: Recheck the Docker nat chain before SFTPGo startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: sftpgo_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: sftpgo_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: 10
+  delay: 2
+  until: sftpgo_docker_nat_chain_recheck.rc == 0
+  when: sftpgo_docker_nat_chain.rc != 0
+
+- name: Wait for the Docker daemon to answer after networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: sftpgo_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: sftpgo_docker_info.rc == 0
+  when: sftpgo_docker_nat_chain.rc != 0
+
+- name: Assert Docker nat chain is present before SFTPGo startup
+  ansible.builtin.assert:
+    that:
+      - sftpgo_docker_nat_chain.rc == 0 or sftpgo_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; SFTPGo published ports will fail."
+
+- name: Check whether the current SFTPGo admin port is already published
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ sftpgo_admin_port }}"
+    delay: 0
+    timeout: 1
+  register: sftpgo_admin_port_probe
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the current SFTPGo SFTP port is already published
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ sftpgo_sftp_port }}"
+    delay: 0
+    timeout: 1
+  register: sftpgo_sftp_port_probe
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the current SFTPGo admin health endpoint is healthy before startup
+  ansible.builtin.uri:
+    url: "{{ sftpgo_local_admin_url }}/healthz"
+    method: GET
+    status_code: 200
+  register: sftpgo_admin_health_probe
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the current SFTPGo WebDAV health endpoint requires authentication before startup
+  ansible.builtin.uri:
+    url: "{{ sftpgo_local_webdav_url }}/healthz"
+    method: GET
+    status_code: 401
+  register: sftpgo_webdav_health_probe
+  changed_when: false
+  failed_when: false
+
+- name: Record whether the SFTPGo startup needs a force recreate
+  ansible.builtin.set_fact:
+    sftpgo_force_recreate: >-
+      {{
+        sftpgo_docker_nat_chain.rc != 0
+        or (sftpgo_env_template.changed | default(false))
+        or (sftpgo_config_template.changed | default(false))
+        or (sftpgo_compose_template.changed | default(false))
+        or (sftpgo_pull.changed | default(false))
+        or (sftpgo_admin_port_probe.failed | default(false))
+        or (sftpgo_sftp_port_probe.failed | default(false))
+        or (sftpgo_admin_health_probe.status | default(0)) != 200
+        or (sftpgo_webdav_health_probe.status | default(0)) != 401
+      }}
+
+- name: Force-recreate the SFTPGo runtime stack after Docker networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ sftpgo_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+      - --force-recreate
+  args:
+    chdir: "{{ sftpgo_site_dir }}"
+  register: sftpgo_force_recreate_up
+  changed_when: >-
+    'Creating' in sftpgo_force_recreate_up.stdout
+    or 'Recreating' in sftpgo_force_recreate_up.stdout
+    or 'Starting' in sftpgo_force_recreate_up.stdout
+  when: sftpgo_force_recreate
+
+- name: Start the SFTPGo runtime stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ sftpgo_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ sftpgo_site_dir }}"
+  register: sftpgo_up
+  changed_when: >-
+    'Creating' in sftpgo_up.stdout
+    or 'Recreating' in sftpgo_up.stdout
+    or 'Starting' in sftpgo_up.stdout
+  when: not sftpgo_force_recreate
+
+- name: Verify the SFTPGo runtime
+  ansible.builtin.import_tasks: verify.yml
