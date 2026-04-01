@@ -2,11 +2,15 @@
 
 - ADR: [ADR 0317](../adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md)
 - Title: Keycloak direct-API operator provisioning via SSH proxy
-- Status: ready_for_merge
+- Status: live_applied
+- Included In Repo Version: 0.177.137
 - Branch-Local Receipt: `receipts/live-applies/2026-04-02-adr-0317-keycloak-direct-api-live-apply.json`
 - Canonical Mainline Receipt: `receipts/live-applies/2026-04-02-adr-0317-keycloak-direct-api-mainline-live-apply.json`
-- Branch: `codex/ws-0317-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0317-live-apply`
+- Live Applied In Platform Version: 0.130.86
+- Implemented On: 2026-04-02
+- Live Applied On: 2026-04-02
+- Branch: `codex/ws-0317-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0317-main-integration`
 - Owner: codex
 - Depends On: `adr-0307-temporary-guest-operator-accounts-with-72-hour-expiry`, `adr-0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning`, `adr-0318-repeatable-operator-onboarding-with-cc-audit-trail`
 - Conflicts With: `ws-0318-operator-onboarding-iac`
@@ -58,13 +62,14 @@
 - `python3 scripts/provision_operator.py ... --skip-email` succeeded from the dedicated git worktree and reused the shared `.local/` password state instead of a worktree-local shadow copy
 - `uv run --with pytest python -m pytest -q tests/test_provision_operator.py` passed after the worktree-safe provisioning changes landed
 - `make validate` reached the workstream-surface gate on the updated branch and only failed because this worktree already carried unrelated local churn in `docs/site-generated/architecture/dependency-graph.md` and `receipts/ops-portal-snapshot.html`; the exact-main replay therefore needs a clean integration worktree rather than this dirty one
+- the clean exact-main integration tree then passed `make validate`, `make remote-validate`, and `make pre-push-gate` after the release cut and canonical-truth refresh
 
 ## Merge Criteria
 
 - branch-local receipt records the recovery and direct-API verification evidence
 - `scripts/provision_operator.py` succeeds from the dedicated worktree with `--skip-email`
-- ADR metadata and `docs/adr/.index.yaml` are updated after the exact-main integration replay sets the final repo/platform versions
-- the integrated `main` replay refreshes from latest `origin/main`, reruns validation, and records the canonical mainline receipt
+- ADR metadata and `docs/adr/.index.yaml` are updated with the final repo/platform versions from the exact-main replay
+- the integrated `main` replay reruns validation from the clean tree and records the canonical mainline receipt
 
 ## Notes For The Next Assistant
 

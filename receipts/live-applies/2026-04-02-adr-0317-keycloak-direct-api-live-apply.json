@@ -110,7 +110,7 @@
   "correction_loop": {
     "loop_id": "2026-04-02-ws-0317-worktree-local-root-repair",
     "surface": "scripts/provision_operator.py",
-    "diagnosis": "worktree_path_resolution_drift",
+    "diagnosis": "contract_drift",
     "repair_action": "Preferred the shared repo `.local/` tree for dedicated git worktrees, moved `.local` routing ahead of normal worktree path existence checks, aligned the fallback role/group mapping with the live realm, and added `--skip-email` so the exact-main replay can verify the live user without resending credentials.",
     "verification": "receipts/live-applies/evidence/2026-04-02-ws-0317-worktree-provision-operator-r2.txt"
   }

@@ -1,9 +1,11 @@
 # ADR 0317: Keycloak Direct-API Operator Provisioning via SSH Proxy
 
 - Status: Accepted
-- Implementation Status: Complete
+- Implementation Status: Implemented
 - Date: 2026-04-01
-- Implemented In Repo Version: 0.0.0
+- Implemented In Repo Version: 0.177.137
+- Implemented In Platform Version: 0.130.86
+- Implemented On: 2026-04-02
 - Tags: operator-provisioning, keycloak, llm-agent, identity
 
 ## Context

@@ -9,11 +9,10 @@ schema_version: 1
 generated: '2026-04-02'
 total_adrs: 349
 implementation_status_summary:
-  Implemented: 290
+  Implemented: 291
   Partial: 8
   Not Implemented: 49
   Deprecated: 1
-  Complete: 1
 concerns:
   agent-coordination:
     - '0153'
@@ -5644,7 +5643,7 @@ adr_index:
   - adr: '0317'
     title: Keycloak Direct-API Operator Provisioning via SSH Proxy
     status: Accepted
-    implementation_status: Complete
+    implementation_status: Implemented
     date: '2026-04-01'
     concern: vm-topology
     keywords:
@@ -5656,7 +5655,7 @@ adr_index:
       - proxy
     summary: LLM agents MUST use the Keycloak admin REST API directly for operator provisioning when
     filename: 0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md
-    implemented_version: 0.0.0
+    implemented_version: 0.177.137
   - adr: 0318
     title: Repeatable Operator Onboarding with CC Audit Trail
     status: Accepted

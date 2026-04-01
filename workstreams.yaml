@@ -14754,10 +14754,10 @@ workstreams:
   - id: ws-0317-live-apply
     adr: "0317"
     title: Live apply ADR 0317 Keycloak direct-API operator provisioning via SSH proxy
-    status: ready_for_merge
+    status: live_applied
     owner: codex
-    branch: codex/ws-0317-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0317-live-apply
+    branch: codex/ws-0317-main-integration
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0317-main-integration
     doc: docs/workstreams/ws-0317-live-apply.md
     depends_on:
       - adr-0307-temporary-guest-operator-accounts-with-72-hour-expiry
@@ -14772,6 +14772,8 @@ workstreams:
       - docs/adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md
       - docs/adr/.index.yaml
       - docs/runbooks/operator-onboarding.md
+      - README.md
+      - docs/diagrams/agent-coordination-map.excalidraw
       - scripts/provision_operator.py
       - tests/test_provision_operator.py
       - receipts/live-applies/2026-04-02-adr-0317-keycloak-direct-api-live-apply.json
@@ -14823,6 +14825,12 @@ workstreams:
             - build/platform-manifest.json
           mode: shared_contract
           contract: canonical-truth-v1
+        - id: ws_0317_live_apply_generated_truth
+          paths:
+            - README.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
         - id: ws_0317_live_apply_receipts
           paths:
             - receipts/live-applies/2026-04-02-adr-0317-keycloak-direct-api-live-apply.json
@@ -14832,12 +14840,12 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0317 by restoring the live Keycloak direct-API provisioning path, making the repo-managed fallback safe from dedicated git worktrees, aligning the fallback role mapping with the live realm, and recording exact-main recovery plus direct verification evidence
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.137
       latest_receipts:
         keycloak_direct_api: 2026-04-02-adr-0317-keycloak-direct-api-mainline-live-apply
     blockers: []
-    ready_to_merge: true
-    live_applied: false
+    ready_to_merge: false
+    live_applied: true
   - id: ws-0318-operator-onboarding-iac
     adr: "0318"
     title: Repeatable operator onboarding with provision_operator.py and CC audit trail
