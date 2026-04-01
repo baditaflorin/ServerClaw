@@ -397,6 +397,24 @@
 - targets:
     - https://10.10.10.10:443/
   labels:
+    assurance_id: livekit-public
+    service_id: livekit
+    service_name: LiveKit
+    environment: production
+    scope: public
+    exposure: edge-published
+    auth_requirement: upstream_auth
+    probe_module: http_2xx_follow_redirects
+    probe_hostname: livekit.lv3.org
+    certificate_id: livekit-edge
+    expected_issuer: letsencrypt
+    policy_unit: days
+    policy_warn: '21'
+    policy_critical: '14'
+    display_url: https://livekit.lv3.org:443/
+- targets:
+    - https://10.10.10.10:443/
+  labels:
     assurance_id: mail-platform-public
     service_id: mail_platform
     service_name: Mail Platform

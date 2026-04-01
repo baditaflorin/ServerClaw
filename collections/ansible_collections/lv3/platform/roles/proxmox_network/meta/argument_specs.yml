@@ -1,4 +1,10 @@
 ---
+# Purpose: Declare the supported input contract for the Proxmox host bridge, NAT, and guest firewall policy role.
+# Use case: Loaded by Ansible to validate Proxmox network variables before the role mutates host networking or per-guest firewall files.
+# Inputs: Role variables covering host uplink topology, bridges, guest inventory, forwarding behavior, and the canonical guest allow matrix.
+# Outputs: Provides argument specifications used by Ansible role validation.
+# Idempotency: Fully idempotent because this file only documents the role interface.
+# Dependencies: ADR 0165, ADR 0021, ADR 0067, and ADR 0293.
 argument_specs:
   main:
     short_description: Configure the Proxmox host bridge, NAT, and per-VM firewall policy.
@@ -88,6 +94,13 @@ argument_specs:
         default: []
         description:
           - Explicit host TCP forward definitions for public ingress.
+      proxmox_public_ingress_udp_forwards:
+        type: list
+        elements: raw
+        required: false
+        default: []
+        description:
+          - Explicit host UDP forward definitions for public ingress.
       proxmox_public_edge_ipv4:
         type: str
         required: false

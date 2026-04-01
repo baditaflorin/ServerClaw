@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-04-01'
-total_adrs: 338
+total_adrs: 348
 implementation_status_summary:
-  Implemented: 287
+  Implemented: 288
   Partial: 7
-  Not Implemented: 42
+  Not Implemented: 51
   Deprecated: 1
   Complete: 1
 concerns:
@@ -38,6 +38,9 @@ concerns:
     - '0254'
     - 0293
     - '0313'
+    - '0320'
+    - '0325'
+    - '0327'
   api:
     - 0049
     - '0075'
@@ -49,6 +52,7 @@ concerns:
     - 0289
     - 0292
     - 0294
+    - '0324'
   automation:
     - '0030'
     - '0035'
@@ -293,6 +297,12 @@ concerns:
     - '0315'
     - '0316'
     - 0318
+    - 0319
+    - '0321'
+    - '0322'
+    - '0323'
+    - '0326'
+    - 0328
   release:
     - 0008
     - '0110'
@@ -5187,7 +5197,7 @@ adr_index:
   - adr: 0293
     title: Livekit As The Real-Time Audio And Voice Channel For Agents
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: agent-discovery
     keywords:
@@ -5200,6 +5210,7 @@ adr_index:
       - agents
     summary: We will deploy Livekit as the real-time audio and voice channel for agent
     filename: 0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
+    implemented_version: 0.177.132
   - adr: 0293
     title: Temporal As The Durable Workflow And Task Queue Engine
     status: Accepted
@@ -5660,3 +5671,156 @@ adr_index:
     summary: scripts/provisionoperator.py is the authoritative IaC entry point for operator
     filename: 0318-repeatable-operator-onboarding-with-cc-audit-trail.md
     implemented_version: 0.0.0
+  - adr: 0319
+    title: Runtime Pools As The Service Partition Boundary
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: platform
+    keywords:
+      - runtime
+      - pools
+      - as
+      - service
+      - partition
+      - boundary
+    summary: We will treat the runtime pool as the primary partition boundary for
+    filename: 0319-runtime-pools-as-the-service-partition-boundary.md
+  - adr: '0320'
+    title: Pool-Scoped Deployment Surfaces And Agent Execution Lanes
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: agent-discovery
+    keywords:
+      - pool-scoped
+      - deployment
+      - surfaces
+      - agent
+      - execution
+      - lanes
+    summary: Every runtime pool must have its own deployment surface and its own
+    filename: 0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes.md
+  - adr: '0321'
+    title: Runtime Pool Memory Envelopes And Reserved Host Headroom
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: platform
+    keywords:
+      - runtime
+      - pool
+      - memory
+      - envelopes
+      - reserved
+      - host
+      - headroom
+    summary: We will replace the single shared runtime memory budget with runtime-pool
+    filename: 0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md
+  - adr: '0322'
+    title: Memory-Pressure Autoscaling For Elastic Runtime Pools
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: platform
+    keywords:
+      - memory-pressure
+      - autoscaling
+      - elastic
+      - runtime
+      - pools
+    summary: We will add a memory-pressure autoscaling control loop for elastic runtime
+    filename: 0322-memory-pressure-autoscaling-for-elastic-runtime-pools.md
+  - adr: '0323'
+    title: Service Mobility Tiers And Migration Waves For Runtime Pools
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: platform
+    keywords:
+      - service
+      - mobility
+      - tiers
+      - migration
+      - waves
+      - runtime
+      - pools
+    summary: We will classify services into mobility tiers and move them through
+    filename: 0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md
+  - adr: '0324'
+    title: Service Definition Shards And Generated Service Catalog Assembly
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: api
+    keywords:
+      - service
+      - definition
+      - shards
+      - generated
+      - service
+      - catalog
+      - assembly
+    summary: We will move service-shaped repository truth toward per-service source
+    filename: 0324-service-definition-shards-and-generated-service-catalog-assembly.md
+  - adr: '0325'
+    title: Faceted ADR Index Shards And Reservation Windows
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: agent-discovery
+    keywords:
+      - faceted
+      - adr
+      - index
+      - shards
+      - reservation
+      - windows
+    summary: We will evolve ADR discovery into faceted generated shards and introduce a
+    filename: 0325-faceted-adr-index-shards-and-reservation-windows.md
+  - adr: '0326'
+    title: Workstream Registry Shards With Active And Archive Assembly
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: platform
+    keywords:
+      - workstream
+      - registry
+      - shards
+      - active
+      - archive
+      - assembly
+    summary: We will split workstream metadata into per-workstream shards and keep a
+    filename: 0326-workstream-registry-shards-with-active-and-archive-assembly.md
+  - adr: '0327'
+    title: Sectional Agent Discovery Registries And Generated Onboarding Packs
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: agent-discovery
+    keywords:
+      - sectional
+      - agent
+      - discovery
+      - registries
+      - generated
+      - onboarding
+      - packs
+    summary: We will reorganize discovery metadata into sectional registries with
+    filename: 0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md
+  - adr: 0328
+    title: Size-Budgeted Root Summaries And Automatic Rollover Ledgers
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: platform
+    keywords:
+      - size-budgeted
+      - root
+      - summaries
+      - automatic
+      - rollover
+      - ledgers
+    summary: We will manage root summary surfaces with explicit size budgets and
+    filename: 0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md

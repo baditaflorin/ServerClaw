@@ -1003,6 +1003,51 @@ groups:
           description: https://langfuse.lv3.org:443/api/public/health has less than
             14 days remaining before certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_livekit_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="livekit-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: livekit
+          assurance_id: livekit-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: livekit-public HTTPS probe is failing.
+          description: https://livekit.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_livekit_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="livekit-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: livekit
+          assurance_id: livekit-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: livekit-public TLS certificate is approaching expiry.
+          description: https://livekit.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_livekit_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="livekit-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: livekit
+          assurance_id: livekit-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: livekit-public TLS certificate is within the critical expiry window.
+          description: https://livekit.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_mail_platform_public
         expr: probe_success{job="https-tls-blackbox",assurance_id="mail-platform-public"}
           == 0

@@ -926,6 +926,45 @@
       }
     },
     {
+      "id": "livekit",
+      "name": "LiveKit",
+      "description": "Real-time audio signalling and media relay surface for voice-enabled operator and agent sessions.",
+      "category": "communication",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:7880",
+      "public_url": "https://livekit.lv3.org",
+      "subdomain": "livekit.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "livekit",
+      "image_catalog_ids": [
+        "livekit_runtime"
+      ],
+      "secret_catalog_ids": [
+        "livekit_api_key",
+        "livekit_api_secret"
+      ],
+      "adr": "0293",
+      "adr_file": "docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md",
+      "runbook": "docs/runbooks/configure-livekit.md",
+      "tags": [
+        "agents",
+        "voice",
+        "webrtc",
+        "realtime"
+      ],
+      "notes": "Signal traffic is published through the shared NGINX edge at livekit.lv3.org while media TCP and UDP listeners are forwarded directly by the Proxmox host to docker-runtime-lv3.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://livekit.lv3.org",
+          "subdomain": "livekit.lv3.org",
+          "notes": "Room creation and participant access are governed by repo-managed API credentials and short-lived LiveKit tokens instead of an edge OIDC boundary."
+        }
+      }
+    },
+    {
       "id": "mail_platform",
       "name": "Mail Platform",
       "description": "Managed SMTP, IMAP, and delivery automation surface for platform notifications.",

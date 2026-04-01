@@ -1,0 +1,9 @@
+port: {{ livekit_signal_port }}
+rtc:
+  tcp_port: {{ livekit_media_tcp_port }}
+  udp_port: {{ livekit_media_udp_port }}
+  use_external_ip: {{ 'true' if livekit_use_external_ip | bool else 'false' }}
+room:
+  empty_timeout: {{ livekit_room_empty_timeout_seconds }}
+logging:
+  level: {{ livekit_log_level }}

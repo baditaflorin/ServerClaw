@@ -1,9 +1,10 @@
 # ADR 0293: Livekit As The Real-Time Audio And Voice Channel For Agents
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.177.132
+- Implemented In Platform Version: 0.130.83
+- Implemented On: 2026-04-01
 - Date: 2026-03-29
 
 ## Context

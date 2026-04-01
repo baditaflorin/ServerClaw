@@ -1,12 +1,12 @@
-# Release 0.177.129
+# Release 0.177.132
 
 - Date: 2026-04-01
 
 ## Summary
-- implements ADR 0292 by adding Apache Superset as the SQL-first BI layer, publishing bi.lv3.org through the shared edge, reconciling repo-managed PostgreSQL and Plausible datasources plus the landing dashboard, and preserving exact-main live-apply evidence on the synchronized 0.177.128 baseline before the platform version advances to 0.130.82
+- implements ADR 0293 by introducing LiveKit as the repo-managed real-time audio and voice channel for agents, converging the runtime on docker-runtime-lv3, publishing livekit.lv3.org through the shared edge, and recording the first verified exact-main live-apply evidence
 
 ## Platform Impact
-- platform version advances to 0.130.82 after the exact-main ADR 0292 replay re-verifies Apache Superset on bi.lv3.org, preserves the shared Keycloak, PostgreSQL, MinIO, and backup contracts, and records the canonical SQL-first BI live-apply receipt on top of the 0.130.81 baseline
+- LiveKit is now the repo-managed real-time audio and voice channel for agent sessions at livekit.lv3.org, with exact-main runtime convergence and verified public room-lifecycle automation.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

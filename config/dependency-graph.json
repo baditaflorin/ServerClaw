@@ -228,6 +228,15 @@
       "adr": "0146"
     },
     {
+      "id": "livekit",
+      "service": "livekit",
+      "name": "LiveKit",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "communication",
+      "adr": "0293"
+    },
+    {
       "id": "mail_platform",
       "service": "mail_platform",
       "name": "Mail Platform",
@@ -1002,6 +1011,24 @@
       "to": "postgres",
       "type": "hard",
       "description": "Langfuse stores application metadata, users, projects, and bootstrap state in Postgres."
+    },
+    {
+      "from": "livekit",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "LiveKit runs as a repo-managed Docker Compose workload on docker-runtime-lv3."
+    },
+    {
+      "from": "livekit",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public signalling at livekit.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "livekit",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "LiveKit reads its API key pair from the OpenBao-backed runtime env contract before the service is verified."
     },
     {
       "from": "minio",

@@ -1,0 +1,71 @@
+---
+# Purpose: Default runtime inputs for the LiveKit deployment used by voice-enabled agent sessions.
+# Use case: Consumed whenever the LiveKit runtime, verification helper, or public edge publication must match repo truth.
+#
+# Inputs (required):
+#   - platform_service_topology / hostvars (generated): Shared service topology and port assignments for `livekit`.
+#   - container_image_catalog / openbao defaults (generated): Image pins and OpenBao agent inputs used by runtime secret injection.
+#
+# Inputs (optional):
+#   - livekit_verify_room_prefix (str, optional): Prefix for synthetic verification rooms created during readiness checks.
+#
+# Outputs:
+#   - Stable defaults for the LiveKit compose runtime, runtime config, controller-local credentials, and verification helper paths.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0293: Declares LiveKit as the real-time audio and voice channel for agents.
+#   - ADR 0077: Runtime secrets are injected through OpenBao.
+#   - Requires: docker-runtime, OpenBao, and the shared edge publication path.
+#
+# Related ADRs: 0021, 0077, 0293
+# Related Runbooks: docs/runbooks/configure-livekit.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+livekit_service_topology: "{{ platform_service_topology | service_topology_get('livekit') }}"
+livekit_image: "{{ container_image_catalog.images.livekit_runtime.ref }}"
+livekit_container_name: lv3-livekit
+livekit_site_dir: /opt/livekit
+livekit_compose_file: "{{ livekit_site_dir }}/docker-compose.yml"
+livekit_config_file: "{{ livekit_site_dir }}/livekit.yaml"
+livekit_env_file: "{{ compose_runtime_secret_root }}/livekit/runtime.env"
+livekit_legacy_env_file: "{{ livekit_site_dir }}/livekit.env"
+livekit_openbao_agent_dir: "{{ livekit_site_dir }}/openbao"
+livekit_openbao_agent_image: "{{ openbao_agent_image }}"
+livekit_openbao_agent_container_name: livekit-openbao-agent
+livekit_openbao_secret_path: services/livekit/runtime-env
+livekit_openbao_policy_name: lv3-service-livekit-runtime
+livekit_openbao_approle_name: livekit-runtime
+livekit_repo_root: "{{ inventory_dir | dirname }}"
+livekit_shared_local_root: >-
+  {{
+    (
+      lookup(
+        'ansible.builtin.pipe',
+        'git -C ' ~ (livekit_repo_root | quote) ~ ' rev-parse --path-format=absolute --git-common-dir'
+      )
+      | dirname
+    )
+    ~ '/.local'
+  }}
+livekit_local_artifact_dir: "{{ livekit_shared_local_root }}/livekit"
+livekit_api_key_local_file: "{{ livekit_local_artifact_dir }}/api-key.txt"
+livekit_api_secret_local_file: "{{ livekit_local_artifact_dir }}/api-secret.txt"
+livekit_helper_script_local_file: "{{ livekit_repo_root }}/scripts/livekit_tool.py"
+livekit_remote_helper_script: "{{ livekit_site_dir }}/livekit_tool.py"
+livekit_signal_port: "{{ livekit_service_topology.ports.internal }}"
+livekit_media_tcp_port: "{{ livekit_service_topology.ports.media_tcp }}"
+livekit_media_udp_port: "{{ livekit_service_topology.ports.media_udp }}"
+livekit_public_hostname: "{{ livekit_service_topology.public_hostname }}"
+livekit_public_url: "https://{{ livekit_public_hostname }}"
+livekit_local_url: "http://127.0.0.1:{{ livekit_signal_port }}"
+livekit_bind_address: 0.0.0.0
+livekit_use_external_ip: true
+livekit_room_empty_timeout_seconds: 300
+livekit_log_level: info
+livekit_verify_room_prefix: lv3-livekit-verify
+livekit_verify_identity: livekit-health-probe
+livekit_verify_timeout_seconds: 120

@@ -732,6 +732,28 @@
         "converge-lago"
       ]
     },
+    "livekit_runtime": {
+      "kind": "runtime",
+      "service_id": "livekit",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "lv3-livekit",
+      "registry_ref": "docker.io/livekit/livekit-server",
+      "tag": "v1.10.1",
+      "digest": "sha256:698a13999b4b2285866a32903724884b1e10c03259526391d9b3a72d9b73bbb4",
+      "ref": "docker.io/livekit/livekit-server:v1.10.1@sha256:698a13999b4b2285866a32903724884b1e10c03259526391d9b3a72d9b73bbb4",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-30-livekit-runtime.json",
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/livekit_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-livekit"
+      ]
+    },
     "mail_platform_gateway_python_base": {
       "kind": "build_base",
       "registry_ref": "docker.io/library/python",

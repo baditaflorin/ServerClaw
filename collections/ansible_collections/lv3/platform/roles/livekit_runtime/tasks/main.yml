@@ -1,0 +1,234 @@
+---
+# Purpose: Converge the LiveKit runtime, OpenBao-backed API credentials, and the repo-managed verification helper.
+# Use case: Run during LiveKit deploys, updates, and recovery when livekit.lv3.org and the guest media listeners must match repo truth.
+# Inputs: Runtime paths, image pins, controller-local credential files, and OpenBao integration settings.
+# Outputs: A running LiveKit stack on docker-runtime-lv3 plus controller-local API credentials mirrored for public verification.
+# Idempotency: Partially idempotent because controller-local API credentials are generated once and the runtime may be recreated during updates.
+# Dependencies: ADR 0165, ADR 0021, ADR 0077, and ADR 0293.
+- name: Validate LiveKit runtime inputs
+  ansible.builtin.assert:
+    that:
+      - livekit_site_dir | length > 0
+      - livekit_compose_file | length > 0
+      - livekit_config_file | length > 0
+      - livekit_env_file | length > 0
+      - livekit_openbao_agent_dir | length > 0
+      - livekit_api_key_local_file | length > 0
+      - livekit_api_secret_local_file | length > 0
+      - livekit_helper_script_local_file | length > 0
+      - livekit_remote_helper_script | length > 0
+      - livekit_image | length > 0
+      - livekit_public_hostname | length > 0
+      - livekit_signal_port | int > 0
+      - livekit_media_tcp_port | int > 0
+      - livekit_media_udp_port | int > 0
+    fail_msg: >-
+      livekit_runtime requires runtime paths, pinned image refs, controller-local credential files,
+      and concrete signal plus media ports.
+
+- name: Ensure the local LiveKit artifact directory exists
+  ansible.builtin.file:
+    path: "{{ livekit_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the LiveKit API key pair when it is missing locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ livekit_api_key_local_file }}" ] || [ ! -s "{{ livekit_api_secret_local_file }}" ]; then
+      output="$(docker run --rm {{ livekit_image | quote }} generate-keys)"
+      api_key="$(printf '%s\n' "$output" | awk -F':  *' '/^API Key:/ {print $2}')"
+      api_secret="$(printf '%s\n' "$output" | awk -F':  *' '/^API Secret:/ {print $2}')"
+      test -n "$api_key"
+      test -n "$api_secret"
+      umask 077
+      printf '%s\n' "$api_key" > "{{ livekit_api_key_local_file }}"
+      printf '%s\n' "$api_secret" > "{{ livekit_api_secret_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: livekit_key_generation
+  changed_when: "'changed' in livekit_key_generation.stdout"
+  no_log: true
+
+- name: Record the LiveKit runtime secrets
+  ansible.builtin.set_fact:
+    livekit_runtime_secret_payload:
+      LIVEKIT_API_KEY: "{{ lookup('ansible.builtin.file', livekit_api_key_local_file) | trim }}"
+      LIVEKIT_API_SECRET: "{{ lookup('ansible.builtin.file', livekit_api_secret_local_file) | trim }}"
+      LIVEKIT_KEYS: >-
+        {{ lookup('ansible.builtin.file', livekit_api_key_local_file) | trim }}:
+        {{ lookup('ansible.builtin.file', livekit_api_secret_local_file) | trim }}
+  no_log: true
+
+- name: Ensure the LiveKit site directory exists
+  ansible.builtin.file:
+    path: "{{ livekit_site_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Prepare OpenBao agent runtime secret injection for LiveKit
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: livekit
+    common_openbao_compose_env_agent_dir: "{{ livekit_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ livekit_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ livekit_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ livekit_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ livekit_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ livekit_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ livekit_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ livekit_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ livekit_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ livekit_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ livekit_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: livekit.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ livekit_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ livekit_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ livekit_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ livekit_legacy_env_file }}"
+  no_log: true
+
+- name: Render the LiveKit runtime config
+  ansible.builtin.template:
+    src: livekit.yaml.j2
+    dest: "{{ livekit_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install the LiveKit verification helper on the runtime host
+  ansible.builtin.copy:
+    src: "{{ livekit_helper_script_local_file }}"
+    dest: "{{ livekit_remote_helper_script }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the LiveKit compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ livekit_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the LiveKit image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ livekit_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ livekit_site_dir }}"
+  register: livekit_pull
+  changed_when: >-
+    'Pulling' in livekit_pull.stdout
+    or 'Downloaded newer image' in livekit_pull.stdout
+    or 'Pull complete' in livekit_pull.stdout
+
+- name: Start the LiveKit OpenBao agent
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ livekit_compose_file }}"
+      - up
+      - -d
+      - openbao-agent
+  args:
+    chdir: "{{ livekit_site_dir }}"
+  register: livekit_openbao_agent_up
+  changed_when: >-
+    'Creating' in livekit_openbao_agent_up.stdout
+    or 'Recreating' in livekit_openbao_agent_up.stdout
+    or 'Starting' in livekit_openbao_agent_up.stdout
+    or 'Running' in livekit_openbao_agent_up.stdout
+
+- name: Wait for the LiveKit runtime env file
+  ansible.builtin.shell: |
+    set -euo pipefail
+    test -s "{{ livekit_env_file }}"
+    grep -Eq '^LIVEKIT_API_KEY=.+$' "{{ livekit_env_file }}"
+    grep -Eq '^LIVEKIT_API_SECRET=.+$' "{{ livekit_env_file }}"
+    grep -Eq '^LIVEKIT_KEYS=.+:.+$' "{{ livekit_env_file }}"
+  args:
+    executable: /bin/bash
+  register: livekit_runtime_env_contract
+  retries: 24
+  delay: 5
+  until: livekit_runtime_env_contract.rc == 0
+  changed_when: false
+  no_log: true
+
+- name: Converge the LiveKit runtime stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ livekit_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+      - livekit
+  args:
+    chdir: "{{ livekit_site_dir }}"
+  register: livekit_up
+  changed_when: >-
+    'Creating' in livekit_up.stdout
+    or 'Recreating' in livekit_up.stdout
+    or 'Starting' in livekit_up.stdout
+    or 'Running' in livekit_up.stdout
+
+- name: Wait for the LiveKit signal listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ livekit_signal_port }}"
+    delay: 0
+    timeout: 120
+
+- name: Wait for the LiveKit TCP media listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ livekit_media_tcp_port }}"
+    delay: 0
+    timeout: 120
+
+- name: Wait for the LiveKit UDP media listener
+  ansible.builtin.shell: |
+    set -euo pipefail
+    ss -lunH | awk '{print $4}' | grep -Eq '(^|:){{ livekit_media_udp_port }}$'
+  args:
+    executable: /bin/bash
+  register: livekit_udp_listener
+  retries: 24
+  delay: 5
+  until: livekit_udp_listener.rc == 0
+  changed_when: false
+
+- name: Verify the LiveKit runtime
+  ansible.builtin.import_tasks: verify.yml

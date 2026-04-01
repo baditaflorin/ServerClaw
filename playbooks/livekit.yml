@@ -1,0 +1,207 @@
+---
+# Playbook: livekit.yml
+# Purpose: Converge the LiveKit runtime, Proxmox ingress programming, and the shared edge publication for voice-enabled agent sessions.
+# Use case: Run during ADR 0293 rollout, recovery, or replay when livekit.lv3.org and its media listeners must match repo truth.
+#
+# Inputs (required):
+#   - env (string, required): Target environment selector used to choose the docker-runtime and nginx guests.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
+#
+# Outputs:
+#   - LiveKit is running on docker-runtime-lv3 with repo-managed API credentials, the Proxmox host forwards public TCP/UDP media traffic, and livekit.lv3.org is published through the shared NGINX edge.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0293: LiveKit as the real-time audio and voice channel for agents.
+#   - Requires: docker-runtime, OpenBao, the shared NGINX edge, and Hetzner DNS access for the public hostname.
+#   - Role: lv3.platform.proxmox_network - renders host ingress and forwarding rules for public LiveKit media traffic.
+#   - Role: lv3.platform.livekit_runtime - converges the LiveKit runtime and local verification helper.
+#   - Role: lv3.platform.nginx_edge_publication - publishes livekit.lv3.org through the shared edge certificate and proxy path.
+#
+# Related ADRs: 0021, 0077, 0293
+# Related Runbooks: docs/runbooks/configure-livekit.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- name: Ensure Hetzner DNS publication for LiveKit
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
+    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
+    subdomain_fqdn: livekit.lv3.org
+
+  tasks:
+    - name: Load controller defaults
+      ansible.builtin.include_vars:
+        file: "{{ inventory_defaults_path }}"
+
+    - name: Load the subdomain catalog
+      ansible.builtin.include_vars:
+        file: "{{ subdomain_catalog_path }}"
+        name: subdomain_catalog
+
+    - name: Select the LiveKit subdomain entry
+      ansible.builtin.set_fact:
+        selected_subdomain: >-
+          {{
+            (
+              subdomain_catalog.subdomains
+              | selectattr('fqdn', 'equalto', subdomain_fqdn)
+              | list
+              | first
+            ) | default({})
+          }}
+
+    - name: Assert the LiveKit subdomain is catalogued
+      ansible.builtin.assert:
+        that:
+          - selected_subdomain != {}
+          - selected_subdomain.status in ['active', 'planned']
+          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
+        fail_msg: "livekit.lv3.org must exist in config/subdomain-catalog.json before live apply."
+
+    - name: Derive the managed Hetzner record name
+      ansible.builtin.set_fact:
+        selected_subdomain_record_name: >-
+          {{
+            '@'
+            if selected_subdomain.fqdn == hetzner_dns_zone_name
+            else (
+              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
+            )
+          }}
+
+    - name: Converge the LiveKit Hetzner DNS record
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_record
+      vars:
+        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
+        hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
+        hetzner_dns_record_type: A
+        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
+        hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
+
+- name: Converge Proxmox public ingress forwarding for LiveKit
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.livekit.network
+        playbook_execution_audit_target: livekit
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.proxmox_hosts[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.proxmox_network
+
+- name: Converge LiveKit on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.livekit.runtime
+        playbook_execution_audit_target: livekit
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.livekit_runtime
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: livekit
+        playbook_execution_post_verify_audit_action: playbook.verify.livekit
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: livekit
+
+- name: Publish LiveKit through the NGINX edge
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication
+
+- name: Verify public LiveKit room lifecycle from the controller
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    livekit_repo_root: "{{ playbook_dir | dirname }}"
+    livekit_shared_local_root: >-
+      {{
+        (
+          lookup(
+            'ansible.builtin.pipe',
+            'git -C ' ~ (livekit_repo_root | quote) ~ ' rev-parse --path-format=absolute --git-common-dir'
+          )
+          | dirname
+        )
+        ~ '/.local'
+      }}
+    livekit_tool_script: "{{ livekit_repo_root }}/scripts/livekit_tool.py"
+    livekit_api_key_file: "{{ livekit_shared_local_root }}/livekit/api-key.txt"
+    livekit_api_secret_file: "{{ livekit_shared_local_root }}/livekit/api-secret.txt"
+
+  tasks:
+    - name: Verify the public LiveKit room lifecycle
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ livekit_tool_script }}"
+          - verify-room-lifecycle
+          - --url
+          - https://livekit.lv3.org
+          - --api-key-file
+          - "{{ livekit_api_key_file }}"
+          - --api-secret-file
+          - "{{ livekit_api_secret_file }}"
+          - --room-prefix
+          - livekit-public-verify
+          - --identity
+          - livekit-public-probe
+          - --timeout-seconds
+          - "120"
+      register: livekit_public_verify
+      retries: 12
+      delay: 5
+      until: >-
+        livekit_public_verify.rc == 0 and
+        (livekit_public_verify.stdout | length > 0) and
+        ((livekit_public_verify.stdout | from_json).verification_passed)
+      changed_when: false

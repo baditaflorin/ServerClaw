@@ -503,6 +503,23 @@
         "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Lago converge and public-ingest verification workflow from git."
       }
     },
+    "livekit": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when LiveKit, its public signalling path, or its media listener contract cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the LiveKit converge from git."
+      }
+    },
     "mail_platform": {
       "tier": "R1",
       "recovery_objective": {

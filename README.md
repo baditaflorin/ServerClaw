@@ -219,8 +219,8 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.129` |
-| Platform version | `0.130.82` |
+| Repository version | `0.177.132` |
+| Platform version | `0.130.83` |
 | Observed check date | `2026-03-31` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -264,6 +264,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `headscale.lv3.org` | `headscale` | `edge-published` | `proxmox_florin` |
 | `home.lv3.org` | `homepage` | `edge-published` | `docker-runtime-lv3` |
 | `langfuse.lv3.org` | `langfuse` | `edge-published` | `docker-runtime-lv3` |
+| `livekit.lv3.org` | `livekit` | `edge-published` | `docker-runtime-lv3` |
 | `logs.lv3.org` | `dozzle` | `edge-published` | `docker-runtime-lv3` |
 | `mail.lv3.org` | `mail-platform` | `informational-only` | `docker-runtime-lv3` |
 | `matrix.lv3.org` | `matrix-synapse` | `edge-published` | `docker-runtime-lv3` |
@@ -340,6 +341,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `keycloak_operator_access` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `lago` | `2026-04-01-adr-0292-lago-mainline-live-apply` |
 | `langfuse` | `2026-03-26-adr-0146-langfuse-live-apply` |
+| `livekit` | `2026-04-01-adr-0293-livekit-mainline-live-apply` |
 | `local_search_and_indexing_fabric` | `2026-03-29-adr-0239-browser-local-search-post-merge-replay` |
 | `log_queryability_canary` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
 | `mail_platform` | `2026-03-24-keycloak-password-reset-mail-live-apply` |
@@ -687,6 +689,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Keycloak](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-keycloak.md)
 - [Configure Lago](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-lago.md)
 - [Configure Langfuse](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-langfuse.md)
+- [Configure LiveKit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-livekit.md)
 - [Configure Mail Platform](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mail-platform.md)
 - [Configure Mailpit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mailpit.md)
 - [Configure Matrix Synapse](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-matrix-synapse.md)
@@ -1203,6 +1206,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0316: Journey Analytics And Onboarding Success Scorecards](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0316-journey-analytics-and-onboarding-success-scorecards.md)
 - [ADR 0317: Keycloak Direct-API Operator Provisioning via SSH Proxy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md)
 - [ADR 0318: Repeatable Operator Onboarding with CC Audit Trail](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md)
+- [ADR 0319: Runtime Pools As The Service Partition Boundary](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0319-runtime-pools-as-the-service-partition-boundary.md)
+- [ADR 0320: Pool-Scoped Deployment Surfaces And Agent Execution Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes.md)
+- [ADR 0321: Runtime Pool Memory Envelopes And Reserved Host Headroom](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md)
+- [ADR 0322: Memory-Pressure Autoscaling For Elastic Runtime Pools](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0322-memory-pressure-autoscaling-for-elastic-runtime-pools.md)
+- [ADR 0323: Service Mobility Tiers And Migration Waves For Runtime Pools](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md)
+- [ADR 0324: Service Definition Shards And Generated Service Catalog Assembly](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md)
+- [ADR 0325: Faceted ADR Index Shards And Reservation Windows](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md)
+- [ADR 0326: Workstream Registry Shards With Active And Archive Assembly](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md)
+- [ADR 0327: Sectional Agent Discovery Registries And Generated Onboarding Packs](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md)
+- [ADR 0328: Size-Budgeted Root Summaries And Automatic Rollover Ledgers](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -1388,6 +1401,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0273: Public Endpoint Admission Control](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md)
 - [Workstream ADR 0295: Artifact Cache Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md)
 - [Workstream ADR 0307: Platform App Cohesion, Onboarding, And User-Flow Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0307-platform-app-cohesion-bundle.md)
+- [Workstream ADR 0319: Runtime Pool Partitioning And Memory-Aware Autoscaling Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md)
 - [Workstream ws-0021-edge-cert-repair: Shared Edge Certificate Expansion Repair](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0021-edge-cert-repair.md)
 - [Workstream ws-0101-live-apply: ADR 0101 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0101-live-apply.md)
 - [Workstream ws-0105-live-apply: Live Apply ADR 0105 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md)
@@ -1515,6 +1529,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0292-live-apply: Live Apply ADR 0292 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-live-apply.md)
 - [Workstream ws-0292-superset-live-apply: Live Apply ADR 0292 Superset From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-superset-live-apply.md)
 - [Workstream WS-0293: Temporal Durable Workflow Engine Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-live-apply.md)
+- [Workstream ws-0293-livekit-live-apply: Live Apply ADR 0293 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-livekit-live-apply.md)
+- [Workstream ws-0293-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-main-integration.md)
 - [Workstream ws-0295-live-apply: Live Apply ADR 0295 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md)
 - [Workstream WS-0296: Education Repo Refresh And Named Deploy Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-education-refresh.md)
 - [Workstream WS-0296: Dedicated Artifact Cache VM Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-live-apply.md)
@@ -1530,6 +1546,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0305-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md)
 - [Workstream ws-0306-live-apply: Live Apply ADR 0306 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md)
 - [Workstream ws-0315-gitea-followups: Gitea Release Bundles And Renovate PR Validation Follow-ups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md)
+- [Workstream ws-0324-programmatic-doc-shards: Programmatic Document And Registry Sharding ADR Set](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0324-programmatic-doc-shards.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -1547,8 +1564,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.129` |
-| Platform version | `0.130.82` |
+| Repository version | `0.177.132` |
+| Platform version | `0.130.83` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1837,11 +1854,15 @@ This repository is intentionally opinionated:
 | `0277` | Live apply the private Typesense structured-search plane from latest origin/main | `live_applied` | [ws-0277-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0277-live-apply.md) |
 | `0292` | Live apply Lago as the usage metering and billing API layer from latest origin/main | `merged` | [ws-0292-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-live-apply.md) |
 | `0292` | Live apply ADR 0292 Apache Superset from latest origin/main | `live_applied` | [ws-0292-superset-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-superset-live-apply.md) |
+| `0293` | Live apply LiveKit as the real-time audio and voice channel for agents from latest origin/main | `live_applied` | [ws-0293-livekit-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-livekit-live-apply.md) |
+| `0293` | Integrate ADR 0293 exact-main LiveKit replay onto main | `merged` | [ws-0293-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-main-integration.md) |
 | `0295` | Shared artifact cache plane and dedicated cache VM roadmap | `live_applied` | [adr-0295-artifact-cache-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md) |
 | `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `merged` | [ws-0297-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md) |
 | `0297` | Integrate ADR 0297 live-apply evidence and release updates on main | `merged` | [ws-0297-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-main-merge.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md) |
+| `0319` | Split the overloaded shared runtime into pool-scoped lanes with higher memory headroom and bounded autoscaling | `merged` | [adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md) |
+| `0324` | Programmatic sharding roadmap for oversized service, ADR, discovery, and workstream surfaces | `merged` | [ws-0324-programmatic-doc-shards.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0324-programmatic-doc-shards.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

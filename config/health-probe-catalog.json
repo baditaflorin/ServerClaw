@@ -1279,6 +1279,60 @@
         }
       }
     },
+    "livekit": {
+      "service_name": "livekit",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "livekit_runtime",
+      "verify_file": "roles/livekit_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "tcp",
+        "description": "LiveKit startup completes once the local signalling listener is reachable on docker-runtime-lv3.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "host": "127.0.0.1",
+        "port": 7880
+      },
+      "liveness": {
+        "kind": "tcp",
+        "description": "The LiveKit TCP media listener remains bound on docker-runtime-lv3.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "host": "127.0.0.1",
+        "port": 7881
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "The guest-local LiveKit helper can create, list, and delete a synthetic room using the OpenBao-rendered runtime env contract.",
+        "timeout_seconds": 120,
+        "retries": 12,
+        "delay_seconds": 5,
+        "argv": [
+          "python3",
+          "/opt/livekit/livekit_tool.py",
+          "verify-room-lifecycle",
+          "--url",
+          "http://127.0.0.1:7880",
+          "--runtime-env-file",
+          "/run/lv3-secrets/livekit/runtime.env",
+          "--room-prefix",
+          "lv3-livekit-readiness",
+          "--identity",
+          "livekit-readiness-probe",
+          "--timeout-seconds",
+          "120"
+        ],
+        "success_rc": 0
+      },
+      "tls_certificate_ids": [
+        "livekit-edge"
+      ],
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "LiveKit room access is token-gated and the repo-managed local plus public room-lifecycle probes are the authoritative health contract."
+      }
+    },
     "mail_platform": {
       "service_name": "mail-platform",
       "owning_vm": "docker-runtime-lv3",
