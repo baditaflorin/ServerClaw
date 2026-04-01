@@ -211,6 +211,8 @@ def test_ntfy_runtime_restarts_container_when_auth_config_changes() -> None:
 
     assert defaults["ntfy_runtime_expected_write_topics"] == [
         "platform-alerts",
+        "platform-alerts-sbom-verify",
+        "platform.slo.warn",
         "platform-security-critical",
     ]
     assert render_config["notify"] == "Restart ntfy stack"

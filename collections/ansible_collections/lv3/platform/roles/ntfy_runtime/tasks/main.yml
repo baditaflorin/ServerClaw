@@ -346,7 +346,6 @@
     mode: "0644"
   notify: Restart ntfy stack
   no_log: true
-  notify: Restart ntfy stack
 
 - name: Render ntfy compose file
   ansible.builtin.copy:
@@ -565,7 +564,6 @@
   failed_when: false
   no_log: true
 
-- name: Recreate ntfy stack when mounted config drifts
 - name: Snapshot provisioned ntfy ACL state
   ansible.builtin.command:
     argv:
@@ -611,7 +609,7 @@
   changed_when: false
   failed_when: false
 
-- name: Force-recreate the ntfy stack when provisioned ACL entries are stale
+- name: Recreate ntfy stack when mounted config drifts
   ansible.builtin.command:
     argv:
       - docker

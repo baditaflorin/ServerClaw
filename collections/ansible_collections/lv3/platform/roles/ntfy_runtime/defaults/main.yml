@@ -26,4 +26,6 @@ ntfy_runtime_password_hash_remote_file: "{{ ntfy_runtime_site_dir }}/password.ha
 ntfy_runtime_username: alertmanager
 ntfy_runtime_expected_write_topics:
   - platform-alerts
+  - platform-alerts-sbom-verify
+  - platform.slo.warn
   - platform-security-critical
