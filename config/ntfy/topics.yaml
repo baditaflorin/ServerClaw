@@ -5,6 +5,20 @@ publication:
   internal_base_url: http://10.10.10.20:2586
 
 topics:
+  platform-alerts:
+    description: Legacy compatibility topic for existing repo-managed ntfy publishers pending full ADR 0299 topic migration.
+    default_title: LV3 platform alert
+    default_priority: 5
+    default_tags:
+      - warning
+      - rotating_light
+  platform-alerts-sbom-verify:
+    description: Legacy compatibility topic used by SBOM verification replays until all publishers adopt ADR 0299 topic names.
+    default_title: LV3 SBOM verification
+    default_priority: 4
+    default_tags:
+      - package
+      - warning
   platform.monitoring.critical:
     description: Critical Alertmanager notifications delivered to the operator push channel.
     default_title: LV3 critical alert
@@ -48,6 +62,13 @@ topics:
     default_tags:
       - wrench
       - rotating_light
+  platform.slo.warn:
+    description: Regression or burn-rate warnings emitted by the governed k6 and SLO automation paths.
+    default_title: LV3 SLO warning
+    default_priority: 4
+    default_tags:
+      - chart_with_upwards_trend
+      - warning
   platform.ci.critical:
     description: Gitea validation failures that block a merge.
     default_title: LV3 validation gate failure
@@ -68,7 +89,10 @@ users:
     username: alertmanager
     password_secret_id: ntfy_alertmanager_password
     publish_topics:
+      - platform-alerts
+      - platform-alerts-sbom-verify
       - platform.monitoring.critical
+      - platform.slo.warn
   changedetection:
     username: changedetection
     password_secret_id: ntfy_changedetection_password
@@ -102,12 +126,15 @@ users:
     username: ops
     password_secret_id: ntfy_ops_password
     subscribe_topics:
+      - platform-alerts
+      - platform-alerts-sbom-verify
       - platform.monitoring.critical
       - platform.security.warn
       - platform.security.critical
       - platform.ansible.info
       - platform.ansible.warn
       - platform.ansible.critical
+      - platform.slo.warn
       - platform.ci.critical
       - platform.watchdog.critical
 

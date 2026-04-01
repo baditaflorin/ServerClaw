@@ -3114,10 +3114,23 @@ platform_service_topology:
     service_name: ntfy
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    exposure_model: private-only
+    public_hostname: ntfy.lv3.org
+    exposure_model: edge-published
     observability:
       guest_dashboard: false
       service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: ntfy
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:2586
     service_id: ntfy
     runtime_pool: runtime-general
     deployment_surface: playbooks/ntfy.yml
@@ -3127,6 +3140,7 @@ platform_service_topology:
     ports:
       internal: 2586
     urls:
+      public: https://ntfy.lv3.org
       internal: http://10.10.10.20:2586
   ntopng:
     service_name: ntopng
@@ -3519,6 +3533,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: home
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: ntfy
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -5451,10 +5469,23 @@ public_edge_service_topology:
     service_name: ntfy
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    exposure_model: private-only
+    public_hostname: ntfy.lv3.org
+    exposure_model: edge-published
     observability:
       guest_dashboard: false
       service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: ntfy
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:2586
     service_id: ntfy
     runtime_pool: runtime-general
     deployment_surface: playbooks/ntfy.yml
@@ -5464,6 +5495,7 @@ public_edge_service_topology:
     ports:
       internal: 2586
     urls:
+      public: https://ntfy.lv3.org
       internal: http://10.10.10.20:2586
   ntopng:
     service_name: ntopng

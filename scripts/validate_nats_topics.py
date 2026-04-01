@@ -18,11 +18,12 @@ if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"
     del sys.modules["platform"]
 
 from platform.events import load_event_taxonomy, load_topic_index
-from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, repo_path
+from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
 
 
 CONTROL_PLANE_LANES_PATH = repo_path("config", "control-plane-lanes.json")
 NTFY_SERVER_PATH = repo_path("config", "ntfy", "server.yml")
+NTFY_TOPIC_REGISTRY_PATH = repo_path("config", "ntfy", "topics.yaml")
 SOURCE_ROOTS = (
     repo_path("platform"),
     repo_path("scripts"),
@@ -76,8 +77,19 @@ def extract_code_topics() -> dict[str, set[str]]:
 
 
 def extract_ntfy_topics() -> set[str]:
-    text = NTFY_SERVER_PATH.read_text(encoding="utf-8")
-    return set(NTFY_TOPIC_PATTERN.findall(text))
+    topics = set(NTFY_TOPIC_PATTERN.findall(NTFY_SERVER_PATH.read_text(encoding="utf-8")))
+    payload = load_yaml(NTFY_TOPIC_REGISTRY_PATH)
+    if not isinstance(payload, dict):
+        raise ValueError(f"{NTFY_TOPIC_REGISTRY_PATH} must be a mapping")
+    configured_topics = payload.get("topics", {})
+    if not isinstance(configured_topics, dict):
+        raise ValueError(f"{NTFY_TOPIC_REGISTRY_PATH}.topics must be a mapping")
+    topics.update(
+        topic
+        for topic in configured_topics
+        if isinstance(topic, str) and topic.startswith("platform.")
+    )
+    return topics
 
 
 def iter_event_lane_endpoints() -> list[tuple[str, str]]:
