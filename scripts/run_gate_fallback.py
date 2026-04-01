@@ -89,12 +89,16 @@ def resolve_status_file(path: Path, workspace: Path) -> Path:
 def load_optional_json(path: Path) -> dict[str, Any] | None:
     if not path.is_file():
         return None
-    content = path.read_text(encoding="utf-8").strip()
-    if not content:
+    raw_payload = path.read_text(encoding="utf-8")
+    if not raw_payload.strip():
         return None
     try:
-        return json.loads(content)
-    except json.JSONDecodeError:
+        return json.loads(raw_payload)
+    except json.JSONDecodeError as exc:
+        print(
+            f"run_gate_fallback: ignoring unreadable JSON status payload at {path}: {exc}",
+            file=sys.stderr,
+        )
         return None
 
 

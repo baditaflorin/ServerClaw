@@ -193,3 +193,58 @@ def test_run_gate_fallback_ignores_stale_local_status_and_runs_requested_checks(
 
     assert rc == 0
     assert captured_command[-2:] == ["schema-validation", "policy-validation"]
+
+
+def test_run_gate_fallback_treats_empty_status_payload_as_missing(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    module = load_module("run_gate_fallback_empty_status", "scripts/run_gate_fallback.py")
+    status_path = tmp_path / "last-run.json"
+    status_path.write_text("", encoding="utf-8")
+    captured_command: list[str] = []
+
+    def fake_run(command, cwd, text, capture_output, check):
+        nonlocal captured_command
+        captured_command = command
+        temp_status_path = Path(command[command.index("--status-file") + 1])
+        temp_status_path.write_text(
+            json.dumps(
+                {
+                    "status": "passed",
+                    "source": "local-fallback",
+                    "workspace": str(cwd),
+                    "session_workspace": {"session_id": "local"},
+                    "manifest": str(Path(cwd) / "config" / "validation-gate.json"),
+                    "executed_at": "2026-04-01T10:00:00+00:00",
+                    "runner": {"id": "controller-local-validation"},
+                    "checks": [
+                        {"id": "schema-validation", "status": "passed", "returncode": 0},
+                    ],
+                    "requested_checks": ["schema-validation"],
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    rc = module.main(
+        [
+            "--workspace",
+            str(tmp_path),
+            "--status-file",
+            str(status_path),
+            "--source",
+            "local-fallback",
+            "schema-validation",
+        ]
+    )
+
+    assert rc == 0
+    assert captured_command[-1] == "schema-validation"
+    payload = json.loads(status_path.read_text(encoding="utf-8"))
+    assert payload["status"] == "passed"
+    assert payload["requested_checks"] == ["schema-validation"]

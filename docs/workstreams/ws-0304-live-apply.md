@@ -3,9 +3,9 @@
 - ADR: [ADR 0304](../adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md)
 - Title: Atlas schema validation, snapshot refresh, and Windmill drift detection exact-main replay
 - Status: live_applied
-- Latest `origin/main`: `b7dde631d290474de3200886846217e688e0c16e`
-- Latest `origin/main` Repo Version: `0.177.134`
-- Latest `origin/main` Platform Version: `0.130.84`
+- Exact-main Baseline Commit: `b7dde631d290474de3200886846217e688e0c16e`
+- Exact-main Baseline Repo Version: `0.177.134`
+- Exact-main Baseline Platform Version: `0.130.84`
 - Included In Repo Version: `0.177.135`
 - Live Applied In Platform Version: `0.130.85`
 - Implemented On: `2026-04-01`
@@ -27,6 +27,11 @@
   when the latest-main `scripts/gate_status.py` payload omits it.
 - Fixed a release-automation gap exposed by the final release refresh by
   classifying `platform-db-subjects` in `config/api-publication.json`.
+- Repaired the governed push path that blocked the final mainline fast-forward by
+  adding `atlas-lint` to `config/validation-runner-contracts.json` for the
+  controller, build-server, and Windmill runners, and by hardening
+  `scripts/run_gate_fallback.py` to ignore empty synced status payloads instead
+  of crashing before the local replay can start.
 
 ## Verification
 
@@ -63,6 +68,22 @@
   Result: focused Windmill suite passed (`72 passed`), the first broader slice
   exposed two stale OpenBao helper assertions, and the second broader slice
   passed (`167 passed`)
+- Push-gate regression replay
+  Evidence:
+  - `receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-push-gate-regressions-r1-0.177.135.txt`
+  - `receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-push-gate-regressions-r2-0.177.135.txt`
+  - `receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r1-0.177.135.txt`
+  - `receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r2-0.177.135.txt`
+  Result: the first replay surfaced stale `scripts/gate_status.py` assertions in
+  `tests/test_validation_gate.py`; after aligning those expectations with the
+  current wrapper-only `waiver_summary` contract, the second replay passed
+  (`18 passed`) and the repository runner-contract catalog validated cleanly.
+- Closeout repo integrity checks
+  Evidence:
+  - `receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-agent-standards-r2-0.177.135.txt`
+  - `receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-diff-check-r1-0.177.135.txt`
+  Result: `./scripts/validate_repo.sh agent-standards` passed and `git diff --check`
+  reported no whitespace or conflict-marker defects before the rebased main push.
 
 ## Merge Notes
 

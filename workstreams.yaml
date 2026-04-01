@@ -15525,7 +15525,9 @@ workstreams:
       - versions/stack.yaml
       - build/platform-manifest.json
       - config/api-publication.json
+      - config/validation-runner-contracts.json
       - scripts/atlas_schema.py
+      - scripts/run_gate_fallback.py
       - config/windmill/scripts/atlas-drift-check.py
       - config/windmill/scripts/gate-status.py
       - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
@@ -15536,6 +15538,9 @@ workstreams:
       - playbooks/windmill.yml
       - playbooks/tasks/openbao-refresh-approle-artifact.yml
       - tests/test_validation_gate_windmill.py
+      - tests/test_validation_gate.py
+      - tests/test_validation_runner_contracts.py
+      - tests/test_run_gate_fallback.py
       - tests/test_windmill_operator_admin_app.py
       - tests/test_atlas_drift_check_windmill.py
       - tests/test_atlas_schema.py
@@ -15546,6 +15551,12 @@ workstreams:
       - tests/test_config_merge_windmill.py
       - receipts/live-applies/
       - receipts/live-applies/2026-04-01-adr-0304-atlas-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-push-gate-regressions-r1-0.177.135.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-push-gate-regressions-r2-0.177.135.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r1-0.177.135.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r2-0.177.135.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-agent-standards-r2-0.177.135.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-diff-check-r1-0.177.135.txt
       - receipts/atlas-drift/
     ownership_manifest:
       owned_surfaces:
@@ -15573,7 +15584,9 @@ workstreams:
             - versions/stack.yaml
             - build/platform-manifest.json
             - config/api-publication.json
+            - config/validation-runner-contracts.json
             - scripts/atlas_schema.py
+            - scripts/run_gate_fallback.py
             - config/windmill/scripts/atlas-drift-check.py
             - config/windmill/scripts/gate-status.py
             - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
@@ -15584,6 +15597,9 @@ workstreams:
             - playbooks/windmill.yml
             - playbooks/tasks/openbao-refresh-approle-artifact.yml
             - tests/test_validation_gate_windmill.py
+            - tests/test_validation_gate.py
+            - tests/test_validation_runner_contracts.py
+            - tests/test_run_gate_fallback.py
             - tests/test_windmill_operator_admin_app.py
             - tests/test_atlas_drift_check_windmill.py
             - tests/test_atlas_schema.py
@@ -15594,6 +15610,12 @@ workstreams:
             - tests/test_config_merge_windmill.py
             - receipts/live-applies/
             - receipts/live-applies/2026-04-01-adr-0304-atlas-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-push-gate-regressions-r1-0.177.135.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-push-gate-regressions-r2-0.177.135.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r1-0.177.135.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r2-0.177.135.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-agent-standards-r2-0.177.135.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-diff-check-r1-0.177.135.txt
             - receipts/atlas-drift/
           mode: exclusive
     ready_to_merge: true
