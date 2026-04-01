@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.177.134
+repo_version: 0.177.135
 platform_version: 0.130.85
 
 live_apply_evidence:
@@ -62,10 +62,10 @@ live_apply_evidence:
     netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     keycloak: 2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply
     n8n: 2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply
-    platform_context: 2026-03-28-adr-0198-semantic-rag-mainline-live-apply
+    platform_context: 2026-04-01-adr-0294-one-api-mainline-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
     openfga: 2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply
-    open_webui: 2026-03-25-adr-0145-open-webui-ollama-connector-live-apply
+    open_webui: 2026-04-01-adr-0294-one-api-mainline-live-apply
     remote_build_gateway: 2026-03-29-adr-0265-immutable-validation-snapshots-mainline-live-apply
     iac_policy_scanning: 2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
@@ -122,7 +122,7 @@ live_apply_evidence:
     harbor: 2026-03-29-adr-0201-harbor-mainline-live-apply
     ops_portal_visualizations: 2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply
     nomad_scheduler: 2026-03-29-adr-0232-nomad-mainline-live-apply
-    serverclaw: 2026-03-30-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply
+    serverclaw: 2026-04-01-adr-0294-one-api-mainline-live-apply
     serverclaw_memory: 2026-03-29-adr-0263-serverclaw-memory-substrate-mainline-live-apply
     route_dns_assertion_ledger: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
     session_logout_authority: 2026-03-29-adr-0248-session-logout-authority-mainline-live-apply
@@ -157,6 +157,7 @@ live_apply_evidence:
     postgres_audit: 2026-03-31-adr-0303-pgaudit-mainline-live-apply
     typesense: 2026-03-31-adr-0277-typesense-mainline-live-apply
     superset: 2026-04-01-adr-0292-superset-mainline-live-apply
+    one_api: 2026-04-01-adr-0294-one-api-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -1110,8 +1111,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.134
+    current: 0.177.135
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.84
+    current: 0.130.85
     meaning: intended platform release for the actual server configuration

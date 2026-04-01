@@ -1068,10 +1068,17 @@ workstreams:
     conflicts_with: []
     shared_surfaces:
       - workstreams.yaml
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - build/platform-manifest.json
+      - versions/stack.yaml
       - docs/workstreams/ws-0294-live-apply.md
       - docs/adr/0294-one-api-as-the-unified-llm-api-proxy-and-router.md
       - docs/adr/.index.yaml
       - README.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
       - docs/site-generated/architecture/dependency-graph.md
       - docs/diagrams/agent-coordination-map.excalidraw
       - docs/diagrams/service-dependency-graph.excalidraw
@@ -1156,6 +1163,7 @@ workstreams:
       - tests/test_vulnerability_budget.py
       - receipts/image-scans/
       - receipts/live-applies/
+      - receipts/sbom/
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -1256,10 +1264,18 @@ workstreams:
           contract: adr-0294-live-apply-v1
         - id: adr_0294_generated_truth_support
           paths:
+            - VERSION
+            - changelog.md
+            - RELEASE.md
             - README.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+            - build/platform-manifest.json
+            - versions/stack.yaml
             - docs/site-generated/architecture/dependency-graph.md
             - docs/diagrams/agent-coordination-map.excalidraw
             - docs/diagrams/service-dependency-graph.excalidraw
+            - receipts/sbom/**
           mode: shared_contract
           contract: latest-main-generated-truth-v1
     blockers: []
@@ -1268,6 +1284,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0294 by making One-API the private unified OpenAI-compatible LLM proxy, migrating Open WebUI and ServerClaw onto repo-managed One-API provider contracts, and re-verifying the platform-context memory lane plus docker-runtime recovery from the exact-main replay
       release_bump: patch
+      included_in_repo_version: 0.177.135
       latest_receipts:
         one_api: 2026-04-01-adr-0294-one-api-mainline-live-apply
         open_webui: 2026-04-01-adr-0294-one-api-mainline-live-apply

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.134",
-  "platform_version": "0.130.84",
-  "generated_at": "2026-04-01T17:24:08Z",
-  "next_refresh_at": "2026-04-01T18:24:08Z",
+  "repo_version": "0.177.135",
+  "platform_version": "0.130.85",
+  "generated_at": "2026-04-01T21:32:06Z",
+  "next_refresh_at": "2026-04-01T22:32:06Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -105,7 +105,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://apps.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "crawl4ai": {
         "service_name": "Crawl4AI",
@@ -510,6 +510,18 @@
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:11434",
         "last_live_apply": "2026-04-01T00:00:00Z"
+      },
+      "one_api": {
+        "service_name": "One-API",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.64.0.1:8018/v1",
+        "last_live_apply": "2026-04-01T00:00:00Z",
+        "slo_status": "unknown"
       },
       "open_webui": {
         "service_name": "Open WebUI",
@@ -2211,6 +2223,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-ollama.md"
+      },
+      {
+        "id": "converge-one-api",
+        "description": "Converge One-API on docker-runtime-lv3, publish the Proxmox host controller proxy, and bootstrap the repo-managed routing and consumer-token contract for local LLM access.",
+        "tags": [
+          "converge-one-api",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-one-api.md"
       },
       {
         "id": "converge-open-webui",
@@ -5082,6 +5120,16 @@
         ]
       },
       {
+        "id": "configure-one-api",
+        "title": "Configure One-API",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-one-api.md",
+        "workflow_ids": [
+          "converge-one-api"
+        ]
+      },
+      {
         "id": "configure-open-webui",
         "title": "Configure Open WebUI",
         "agent_trust_required": "T3",
@@ -5939,10 +5987,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.133",
+    "last_version": "0.177.134",
     "deployed_at": "2026-04-01",
-    "summary": "implements ADR 0279 by carrying the repo-managed Grist spreadsheet runtime onto main, reconverging Keycloak-backed login and shared-edge publication for grist.lv3.org, and preserving the Docker plus Restic recovery hardening needed for the exact-main replay on the shared docker-runtime guest",
-    "release_notes_url": "docs/release-notes/0.177.134.md"
+    "summary": "implements ADR 0294 by making One-API the private unified OpenAI-compatible LLM proxy, migrating Open WebUI and ServerClaw onto repo-managed One-API provider contracts, and re-verifying the platform-context memory lane plus docker-runtime recovery from the exact-main replay",
+    "release_notes_url": "docs/release-notes/0.177.135.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
