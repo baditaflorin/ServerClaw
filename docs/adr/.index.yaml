@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-04-02'
 total_adrs: 349
 implementation_status_summary:
-  Implemented: 289
+  Implemented: 290
   Partial: 8
-  Not Implemented: 50
+  Not Implemented: 49
   Deprecated: 1
   Complete: 1
 concerns:
