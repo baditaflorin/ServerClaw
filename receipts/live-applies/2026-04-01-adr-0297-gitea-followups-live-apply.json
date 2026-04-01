@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-01-adr-0297-gitea-followups-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-01",
+  "recorded_on": "2026-04-01",
+  "recorded_at": "2026-04-01T07:40:00Z",
+  "recorded_by": "codex",
+  "source_commit": "",
+  "repo_version_context": "0.177.126",
+  "platform_version_context": "0.130.80",
+  "workflow_id": "adr-0297-gitea-followups-live-apply",
+  "adr": "0297",
+  "summary": "Hardened Gitea Actions checkout steps to remove stale workspace state before pull-request validation, and added release-bundle pruning to delete older bundle releases before uploading new assets so attachment storage exhaustion does not block publishing.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-build-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Release bundle workflow pruning logic",
+      "result": "pass",
+      "observed": "`release_bundle.py publish` now prunes older bundle releases before publishing new assets, with `--retain-count` controlling retention."
+    },
+    {
+      "check": "PR validation checkout cleanup",
+      "result": "pass",
+      "observed": "Gitea validate workflow now wipes workspace contents before checkout to avoid stale PR sync checkouts."
+    },
+    {
+      "check": "Repository validation slice",
+      "result": "pass",
+      "observed": "`pytest -q tests/test_gitea_workflows.py tests/test_renovate_automation.py tests/test_gitea_runtime_role.py` returned `25 passed in 0.91s`."
+    },
+    {
+      "check": "Release bundle contract validation",
+      "result": "pass",
+      "observed": "`python3 scripts/release_bundle.py validate` returned status ok with 2658 tracked files."
+    },
+    {
+      "check": "Repository data models",
+      "result": "pass",
+      "observed": "`python3 scripts/validate_repository_data_models.py --validate` succeeded."
+    }
+  ],
+  "evidence_refs": [
+    "docs/workstreams/ws-0315-gitea-followups.md",
+    "docs/runbooks/configure-renovate.md",
+    "docs/runbooks/signed-release-bundles.md",
+    ".gitea/workflows/validate.yml",
+    ".gitea/workflows/release-bundle.yml",
+    "scripts/release_bundle.py",
+    "receipts/live-applies/evidence/2026-04-01-ws-0315-validate-gitea-workflows-r1.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0315-release-bundle-validate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0315-repository-data-models-r1.txt"
+  ],
+  "notes": [
+    "The private Gitea release-bundle attachment store previously exhausted storage; pruning old bundle releases prevents recurring failures without removing the new release assets.",
+    "A stale Renovate PR validation run reported an incomplete checkout; the checkout now removes leftover workspace contents before fetching to avoid drift."
+  ]
+}
