@@ -3,11 +3,11 @@
 - ADR: [ADR 0279](../adr/0279-grist-as-the-no-code-operational-spreadsheet-database.md)
 - Title: Deploy Grist on `docker-runtime-lv3`, publish `grist.lv3.org`, and verify the OIDC-backed spreadsheet runtime end to end
 - Status: live_applied
-- Included In Repo Version: 0.177.113
-- Canonical Mainline Receipt: `receipts/live-applies/2026-03-31-adr-0279-grist-mainline-live-apply.json`
-- Live Applied In Platform Version: 0.130.75
+- Included In Repo Version: 0.177.134
+- Canonical Mainline Receipt: `receipts/live-applies/2026-04-01-adr-0279-grist-mainline-live-apply.json`
+- Live Applied In Platform Version: 0.130.84
 - Implemented On: 2026-03-30
-- Live Applied On: 2026-03-31
+- Live Applied On: 2026-04-01
 - Branch: `codex/ws-0279-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-live-apply`
 - Owner: codex
@@ -43,36 +43,34 @@ the protected release-truth surfaces safely.
   records the first live platform version where Grist became true:
   `0.130.60`.
 - The current authoritative latest-main proof uses repository version
-  `0.177.113` on top of the synchronized `0.177.112 / 0.130.74` baseline and
+  `0.177.134` on top of the synchronized `0.177.133 / 0.130.83` baseline and
   is preserved in
-  `receipts/live-applies/2026-03-31-adr-0279-grist-mainline-live-apply.json`.
-- The March 31 exact-main chronology is preserved in
-  `receipts/live-applies/evidence/2026-03-31-adr-0279-grist-mainline-live-apply-0.177.113-r1.txt`,
-  `...-r2.txt`, `...-r3.txt`, `...-r4.txt`, and the successful
-  `...-r5.txt`.
-- The focused repo-side validation and syntax proof is preserved in
-  `receipts/live-applies/evidence/2026-03-31-ws-0279-mainline-validation-r1.txt`,
-  which records the Grist playbook syntax check plus `54 passed` across the
-  latest-main role regression slice.
-- Fresh post-success proofs in
-  `receipts/live-applies/evidence/2026-03-31-ws-0279-mainline-host-state-r1.txt`,
-  `receipts/live-applies/evidence/2026-03-31-ws-0279-mainline-runtime-state-r1.txt`,
-  and
-  `receipts/live-applies/evidence/2026-03-31-ws-0279-mainline-public-probes-r1.txt`
-  reconfirm `pve-manager/9.1.6` on kernel `6.17.13-2-pve`, the split static
-  and secret Grist env files on `docker-runtime-lv3`, `/opt/grist/persist`
-  owned by `1001:1001`, `https://grist.lv3.org/status` returning the canonical
-  alive string, `https://grist.lv3.org/o/docs/` redirecting into the Keycloak
-  auth flow, and live Keycloak discovery at
-  `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration`.
+  `receipts/live-applies/2026-04-01-adr-0279-grist-mainline-live-apply.json`.
+- The April 1 exact-main chronology is preserved in
+  `receipts/live-applies/evidence/2026-04-01-ws-0279-grist-mainline-live-apply-r1-0.177.134.txt`,
+  `...-r2-0.177.134.txt`, `...-r3-0.177.134.txt`, and the successful
+  `...-r4-0.177.134.txt`.
+- The final replay records both the pre-start discovery gate and the OIDC
+  bootstrap recovery path succeeding, including the targeted force-recreate of
+  the `grist` container after the role detected the blocked
+  `No login system is configured` auth shell.
+- Fresh external confirmation on 2026-04-01 reconfirmed
+  `https://grist.lv3.org/status` returning the canonical alive string,
+  `https://grist.lv3.org/o/docs/` returning `HTTP/2 302` into the Keycloak
+  auth flow, and the runtime logs advertising
+  `OIDCConfig: initialized with issuer https://sso.lv3.org/realms/lv3` plus
+  `loginMiddlewareComment: oidc`.
+- The live apply also completed the governed Restic follow-up trigger and
+  synced `receipts/restic-backups/20260401T171418Z.json` plus
+  `receipts/restic-snapshots-latest.json` back into the repo.
 
 ## Outcome
 
 - ADR 0279 first became true on integrated repo version `0.177.105` and
   platform version `0.130.60`.
-- The current authoritative latest-main replay is now release `0.177.113` on
-  platform version `0.130.75`.
-- `receipts/live-applies/2026-03-31-adr-0279-grist-mainline-live-apply.json`
-  supersedes the earlier March 30 mainline receipt as the canonical proof for
-  `grist` while preserving both the first branch-local receipt and the March 30
-  mainline replay in the audit trail.
+- The current authoritative latest-main replay is now release `0.177.134` on
+  platform version `0.130.84`.
+- `receipts/live-applies/2026-04-01-adr-0279-grist-mainline-live-apply.json`
+  supersedes the earlier March 31 mainline receipt as the canonical proof for
+  `grist` while preserving the earlier branch-local receipt plus the March 30
+  and March 31 mainline replays in the audit trail.

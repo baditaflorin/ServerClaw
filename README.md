@@ -219,8 +219,8 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.133` |
-| Platform version | `0.130.83` |
+| Repository version | `0.177.134` |
+| Platform version | `0.130.84` |
 | Observed check date | `2026-03-31` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -261,6 +261,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `flags.lv3.org` | `flagsmith` | `edge-published` | `docker-runtime-lv3` |
 | `git.lv3.org` | `gitea` | `private-only` | `docker-runtime-lv3` |
 | `grafana.lv3.org` | `grafana` | `edge-published` | `monitoring-lv3` |
+| `grist.lv3.org` | `grist` | `edge-published` | `docker-runtime-lv3` |
 | `headscale.lv3.org` | `headscale` | `edge-published` | `proxmox_florin` |
 | `home.lv3.org` | `homepage` | `edge-published` | `docker-runtime-lv3` |
 | `langfuse.lv3.org` | `langfuse` | `edge-published` | `docker-runtime-lv3` |
@@ -327,6 +328,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `gitea` | `2026-03-26-adr-0143-gitea-live-apply` |
 | `gitea_actions_runners` | `2026-03-28-adr-0229-gitea-actions-runners-live-apply` |
 | `gotenberg` | `2026-03-30-adr-0278-gotenberg-mainline-live-apply` |
+| `grist` | `2026-04-01-adr-0279-grist-mainline-live-apply` |
 | `guest_network_policy` | `2026-03-22-adr-0067-guest-network-policy-live-apply` |
 | `harbor` | `2026-03-29-adr-0201-harbor-mainline-live-apply` |
 | `homepage` | `2026-03-26-adr-0152-homepage-live-apply` |
@@ -680,6 +682,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Flagsmith](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-flagsmith.md)
 - [Configure Gitea](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-gitea.md)
 - [Configure Gotenberg](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-gotenberg.md)
+- [Configure Grist](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-grist.md)
 - [Configure Guest Network Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-guest-network-policy.md)
 - [Configure Harbor](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-harbor.md)
 - [Configure Headscale](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-headscale.md)
@@ -1509,6 +1512,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0277-live-apply: ADR 0277 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0277-live-apply.md)
 - [Workstream ws-0278-live-apply: ADR 0278 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-live-apply.md)
 - [Workstream ws-0278-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-main-integration.md)
+- [Workstream ws-0279-live-apply: Live Apply ADR 0279 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0279-live-apply.md)
+- [Workstream ws-0279-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0279-main-merge.md)
 - [Workstream ws-0280-live-apply: ADR 0280 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0280-live-apply.md)
 - [Workstream ws-0280-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0280-main-merge.md)
 - [Workstream ws-0282-live-apply: Live Apply ADR 0282 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0282-live-apply.md)
@@ -1565,8 +1570,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.133` |
-| Platform version | `0.130.83` |
+| Repository version | `0.177.134` |
+| Platform version | `0.130.84` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1792,6 +1797,7 @@ This repository is intentionally opinionated:
 | `0214` | HA and replication architecture bundle for production and staging | `merged` | [adr-0214-ha-replication-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0214-ha-replication-architecture-bundle.md) |
 | `0224` | Live apply ADR 0224 server-resident operations as the default control model | `live_applied` | [ws-0224-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0224-live-apply.md) |
 | `0224` | Server-resident operations architecture bundle | `merged` | [adr-0224-server-resident-operations-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md) |
+| `0224` | Refresh education_wemeshup from upstream main through a named repo-deploy profile | `merged` | [ws-0296-education-refresh.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-education-refresh.md) |
 | `0226` | Live apply ADR 0226 systemd host-resident control-loop supervision | `live_applied` | [ws-0226-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-live-apply.md) |
 | `0226` | Finalize ADR 0226 exact-main evidence on origin/main | `merged` | [ws-0226-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-main-merge.md) |
 | `0228` | Integrate ADR 0228 live apply into origin/main | `live_applied` | [ws-0228-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0228-main-merge.md) |

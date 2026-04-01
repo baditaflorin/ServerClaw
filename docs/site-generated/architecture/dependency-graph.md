@@ -17,7 +17,7 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
+| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
 | `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Lago, Langfuse, LiveKit, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway, Woodpecker CI |
 | `4` | Ops Portal |
@@ -32,6 +32,7 @@ graph TD
     docker_runtime["Docker Runtime VM\nTier 1"]
     dozzle["Dozzle\nTier 1"]
     grafana["Grafana\nTier 1"]
+    grist["Grist\nTier 1"]
     harbor["Harbor\nTier 1"]
     headscale["Headscale\nTier 1"]
     jupyterhub["JupyterHub\nTier 1"]
@@ -147,6 +148,9 @@ graph TD
     grafana -->|soft| keycloak
     grafana -->|soft| minio
     grafana -->|soft| nginx_edge
+    grist -->|soft| keycloak
+    grist -->|soft| nginx_edge
+    grist -->|startup_only| openbao
     harbor -->|soft| keycloak
     harbor -->|soft| nginx_edge
     headscale -->|soft| nginx_edge

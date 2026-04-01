@@ -19,7 +19,7 @@ workstreams:
   - id: ws-0296-education-refresh
     adr: "0224"
     title: Refresh education_wemeshup from upstream main through a named repo-deploy profile
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0296-education-refresh
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-education-refresh
@@ -635,7 +635,7 @@ workstreams:
   - id: ws-0279-main-merge
     adr: "0279"
     title: Integrate ADR 0279 exact-main replay onto current origin/main
-    status: in_progress
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0279-main-publish-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1
@@ -643,30 +643,83 @@ workstreams:
     depends_on: []
     conflicts_with: []
     shared_surfaces:
+      - Makefile
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
       - workstreams.yaml
       - docs/workstreams/ws-0279-main-merge.md
       - docs/workstreams/ws-0279-live-apply.md
       - docs/adr/0279-grist-as-the-no-code-operational-spreadsheet-database.md
+      - docs/adr/.index.yaml
       - docs/runbooks/configure-grist.md
       - docs/runbooks/restic-config-backups.md
+      - docs/release-notes/
+      - docs/diagrams/
+      - docs/site-generated/architecture/dependency-graph.md
+      - playbooks/grist.yml
+      - playbooks/services/grist.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
       - collections/ansible_collections/lv3/platform/roles/grist_runtime/
       - collections/ansible_collections/lv3/platform/roles/docker_runtime/
+      - collections/ansible_collections/lv3/platform/roles/gitea_runner/
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/
+      - collections/ansible_collections/lv3/platform/roles/lago_postgres/
+      - collections/ansible_collections/lv3/platform/roles/lago_runtime/
+      - collections/ansible_collections/lv3/platform/roles/langfuse_runtime/
+      - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/
+      - collections/ansible_collections/lv3/platform/roles/ollama_runtime/
+      - collections/ansible_collections/lv3/platform/roles/outline_runtime/
+      - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/
       - collections/ansible_collections/lv3/platform/roles/restic_config_backup/
+      - collections/ansible_collections/lv3/platform/roles/typesense_runtime/
+      - scripts/container_image_policy.py
+      - scripts/generate_platform_vars.py
       - scripts/restic_config_backup.py
       - scripts/trigger_restic_live_apply.py
+      - config/ansible-execution-scopes.yaml
+      - config/api-gateway-catalog.json
+      - config/certificate-catalog.json
+      - config/controller-local-secrets.json
+      - config/data-catalog.json
+      - config/dependency-graph.json
+      - config/grafana/dashboards/grist.json
       - config/image-catalog.json
+      - config/health-probe-catalog.json
       - config/secret-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
+      - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
       - config/grafana/dashboards/slo-overview.json
+      - config/alertmanager/rules/grist.yml
+      - config/prometheus/file_sd/https_tls_targets.yml
       - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/https_tls_alerts.yml
       - config/prometheus/rules/slo_rules.yml
       - config/prometheus/rules/slo_alerts.yml
+      - config/uptime-kuma/monitors.json
       - tests/test_common_docker_bridge_chains_helper.py
       - tests/test_docker_runtime_role.py
+      - tests/test_grist_playbook.py
       - tests/test_keycloak_runtime_role.py
+      - tests/test_mail_platform_runtime_role.py
       - tests/test_restic_config_backup.py
       - tests/test_restic_config_backup_role.py
       - tests/test_grist_runtime_role.py
       - tests/test_outline_runtime_role.py
+      - receipts/image-scans/
+      - receipts/live-applies/
+      - receipts/restic-backups/
+      - receipts/restic-snapshots-latest.json
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -676,37 +729,93 @@ workstreams:
           contract: workstream-registry-v1
         - id: ws_0279_merge_bundle
           paths:
+            - Makefile
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
             - docs/workstreams/ws-0279-main-merge.md
             - docs/workstreams/ws-0279-live-apply.md
+            - docs/adr/.index.yaml
             - docs/adr/0279-grist-as-the-no-code-operational-spreadsheet-database.md
             - docs/runbooks/configure-grist.md
             - docs/runbooks/restic-config-backups.md
+            - docs/release-notes/**
+            - docs/diagrams/**
+            - docs/site-generated/architecture/dependency-graph.md
+            - playbooks/grist.yml
+            - playbooks/services/grist.yml
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
             - collections/ansible_collections/lv3/platform/roles/grist_runtime/**
             - collections/ansible_collections/lv3/platform/roles/docker_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/gitea_runner/**
+            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/lago_postgres/**
+            - collections/ansible_collections/lv3/platform/roles/lago_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/langfuse_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/ollama_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/outline_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/**
             - collections/ansible_collections/lv3/platform/roles/restic_config_backup/**
+            - collections/ansible_collections/lv3/platform/roles/typesense_runtime/**
+            - scripts/container_image_policy.py
+            - scripts/generate_platform_vars.py
             - scripts/restic_config_backup.py
             - scripts/trigger_restic_live_apply.py
+            - config/ansible-execution-scopes.yaml
+            - config/api-gateway-catalog.json
+            - config/certificate-catalog.json
+            - config/controller-local-secrets.json
+            - config/data-catalog.json
+            - config/dependency-graph.json
+            - config/grafana/dashboards/grist.json
             - config/image-catalog.json
+            - config/health-probe-catalog.json
             - config/secret-catalog.json
+            - config/service-capability-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/slo-catalog.json
+            - config/subdomain-catalog.json
+            - config/subdomain-exposure-registry.json
             - config/grafana/dashboards/slo-overview.json
+            - config/alertmanager/rules/grist.yml
+            - config/prometheus/file_sd/https_tls_targets.yml
             - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/https_tls_alerts.yml
             - config/prometheus/rules/slo_rules.yml
             - config/prometheus/rules/slo_alerts.yml
+            - config/uptime-kuma/monitors.json
+            - receipts/image-scans/**
+            - receipts/live-applies/**
+            - receipts/restic-backups/**
+            - receipts/restic-snapshots-latest.json
             - tests/test_common_docker_bridge_chains_helper.py
             - tests/test_docker_runtime_role.py
+            - tests/test_grist_playbook.py
             - tests/test_keycloak_runtime_role.py
+            - tests/test_mail_platform_runtime_role.py
             - tests/test_restic_config_backup.py
             - tests/test_restic_config_backup_role.py
             - tests/test_grist_runtime_role.py
             - tests/test_outline_runtime_role.py
           mode: shared_contract
           contract: adr-0279-main-merge-v1
-    blockers:
-      - Concurrent ansible activity on docker-runtime-lv3 and nginx-lv3 still makes an exact-main replay untrustworthy until the shared hosts quiet down.
-    ready_to_merge: false
-    live_applied: false
+    blockers: []
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
-      included_in_repo_version: 0.177.129
+      changelog_entry: implements ADR 0279 by carrying the repo-managed Grist spreadsheet runtime onto main, reconverging Keycloak-backed login and shared-edge publication for grist.lv3.org, and preserving the Docker plus Restic recovery hardening needed for the exact-main replay on the shared docker-runtime guest
+      release_bump: patch
+      included_in_repo_version: 0.177.134
+      latest_receipts:
+        grist: 2026-04-01-adr-0279-grist-mainline-live-apply
   - id: ws-0292-live-apply
     adr: "0292"
     title: Live apply Lago as the usage metering and billing API layer from latest origin/main

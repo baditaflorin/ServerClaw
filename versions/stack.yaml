@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.133
-platform_version: 0.130.83
+repo_version: 0.177.134
+platform_version: 0.130.84
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -21,6 +21,7 @@ live_apply_evidence:
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     dozzle: 2026-03-26-adr-0150-dozzle-live-apply
     gitea: 2026-03-26-adr-0143-gitea-live-apply
+    grist: 2026-04-01-adr-0279-grist-mainline-live-apply
     homepage: 2026-03-26-adr-0152-homepage-live-apply
     langfuse: 2026-03-26-adr-0146-langfuse-live-apply
     livekit: 2026-04-01-adr-0293-livekit-mainline-live-apply
@@ -1090,8 +1091,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.133
+    current: 0.177.134
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.83
+    current: 0.130.84
     meaning: intended platform release for the actual server configuration

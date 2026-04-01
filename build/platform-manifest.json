@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.133",
-  "platform_version": "0.130.83",
-  "generated_at": "2026-04-01T15:57:22Z",
-  "next_refresh_at": "2026-04-01T16:57:22Z",
+  "repo_version": "0.177.134",
+  "platform_version": "0.130.84",
+  "generated_at": "2026-04-01T17:24:08Z",
+  "next_refresh_at": "2026-04-01T18:24:08Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -244,6 +244,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://grafana.lv3.org",
         "last_live_apply": "2026-03-31T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "grist": {
+        "service_name": "Grist",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://grist.lv3.org",
+        "last_live_apply": "2026-04-01T00:00:00Z",
         "slo_status": "unknown"
       },
       "harbor": {
@@ -5927,10 +5939,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.132",
+    "last_version": "0.177.133",
     "deployed_at": "2026-04-01",
-    "summary": "refines ADRs 0319 through 0323 by explicitly preferring battle-tested API-first OSS such as Nomad Autoscaler, Traefik, Dapr, Microcks, OpenFGA, Temporal, and NATS JetStream over new repo-local runtime orchestration code",
-    "release_notes_url": "docs/release-notes/0.177.133.md"
+    "summary": "implements ADR 0279 by carrying the repo-managed Grist spreadsheet runtime onto main, reconverging Keycloak-backed login and shared-edge publication for grist.lv3.org, and preserving the Docker plus Restic recovery hardening needed for the exact-main replay on the shared docker-runtime guest",
+    "release_notes_url": "docs/release-notes/0.177.134.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

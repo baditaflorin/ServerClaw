@@ -19,6 +19,12 @@ The Grist workflow converges:
 - the Keycloak discovery document answers at `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration`
 - Hetzner DNS API credentials are available when the edge certificate needs expansion
 
+The Grist role now waits for that discovery document through the shared edge
+route before startup and, if the local auth surface still returns
+`"errMessage":"No login system is configured"`, it force-recreates only the
+`grist` container after rechecking discovery. Treat that automated recovery as
+part of the normal convergence path rather than as an exceptional manual fix.
+
 ## Converge
 
 On `main`, run:
@@ -98,9 +104,16 @@ Runtime verification:
 
 ```bash
 curl -fsS https://grist.lv3.org/status
-curl -sS -D /tmp/grist-o-docs.headers https://grist.lv3.org/o/docs/ -o /tmp/grist-o-docs.body
+curl -sS -D /tmp/grist-o-docs.headers https://grist.lv3.org/o/docs/ -o /dev/null
 sed -n '1,20p' /tmp/grist-o-docs.headers
-rg '"supportAnon":false' /tmp/grist-o-docs.body
+rg '^location: https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth' /tmp/grist-o-docs.headers
+ssh -i .local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o StrictHostKeyChecking=no \
+  -o UserKnownHostsFile=/dev/null \
+  -o ProxyCommand='ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' \
+  ops@10.10.10.20 \
+  "sudo docker logs --tail 200 grist 2>&1 | egrep 'OIDCConfig|loginMiddlewareComment' | tail -n 20"
 python3 - <<'PY'
 import urllib.request
 with urllib.request.urlopen("https://grist.lv3.org/status", timeout=10) as resp:
@@ -110,10 +123,10 @@ PY
 
 The public `/status` endpoint should return `200` and the body
 `Grist server(home,docs,static) is alive.` while unauthenticated requests to
-`https://grist.lv3.org/o/docs/` should render the Grist auth shell with
-`"supportAnon":false`. The current public edge returns that auth-controlled
-shell as `HTTP 400` rather than a redirect, so verify the body markers instead
-of assuming `302`.
+`https://grist.lv3.org/o/docs/` should return `HTTP 302` into the Keycloak
+OIDC flow at `https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth...`.
+The container logs should include `OIDCConfig: initialized with issuer
+https://sso.lv3.org/realms/lv3` and `loginMiddlewareComment: oidc`.
 
 ## Operating notes
 
@@ -122,3 +135,4 @@ of assuming `302`.
 - Treat `.local/grist/` and `.local/keycloak/grist-client-secret.txt` as sensitive controller-only material.
 - Keep `grist.lv3.org/status` publicly reachable through the shared edge for health verification, but treat document routes as authenticated operator surfaces.
 - If the first publication run fails before Hetzner DNS state is observable, confirm `grist.lv3.org` resolves to `65.108.75.123` and rerun the scoped playbook; the DNS and edge publication path is idempotent once the record exists.
+- If Grist ever serves the blocked auth page with `No login system is configured`, rerun the repo-managed play first. The current role is expected to recover that startup race automatically by rechecking Keycloak discovery and force-recreating only the Grist container.
