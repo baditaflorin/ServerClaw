@@ -156,8 +156,8 @@
       - 502
       - 503
   register: common_openbao_compose_env_current_secret
-  retries: 12
-  delay: 5
+  retries: "{{ common_openbao_api_operation_retries }}"
+  delay: "{{ common_openbao_api_operation_delay }}"
   until: common_openbao_compose_env_current_secret.status in [200, 404]
   changed_when: false
   no_log: true
@@ -172,6 +172,10 @@
     body:
       data: "{{ common_openbao_compose_env_secret_payload }}"
     status_code: 200
+  register: common_openbao_compose_env_secret_upsert
+  retries: "{{ common_openbao_api_operation_retries }}"
+  delay: "{{ common_openbao_api_operation_delay }}"
+  until: common_openbao_compose_env_secret_upsert.status == 200
   when: >-
     common_openbao_compose_env_current_secret.status == 404
     or (common_openbao_compose_env_current_secret.json.data.data | default({})) != common_openbao_compose_env_secret_payload
@@ -191,8 +195,8 @@
       - 502
       - 503
   register: common_openbao_compose_env_current_policy
-  retries: 12
-  delay: 5
+  retries: "{{ common_openbao_api_operation_retries }}"
+  delay: "{{ common_openbao_api_operation_delay }}"
   until: common_openbao_compose_env_current_policy.status in [200, 404]
   changed_when: false
   no_log: true
@@ -207,6 +211,10 @@
     body:
       policy: "{{ common_openbao_compose_env_policy_rules }}"
     status_code: 204
+  register: common_openbao_compose_env_policy_upsert
+  retries: "{{ common_openbao_api_operation_retries }}"
+  delay: "{{ common_openbao_api_operation_delay }}"
+  until: common_openbao_compose_env_policy_upsert.status == 204
   when: >-
     common_openbao_compose_env_current_policy.status == 404
     or (common_openbao_compose_env_current_policy.json.data.policy | default('')) != common_openbao_compose_env_policy_rules
@@ -228,8 +236,8 @@
       secret_id_num_uses: 0
     status_code: 204
   register: common_openbao_compose_env_approle_upsert
-  retries: 12
-  delay: 2
+  retries: "{{ common_openbao_api_operation_retries }}"
+  delay: "{{ common_openbao_api_operation_delay }}"
   until: common_openbao_compose_env_approle_upsert.status == 204
   no_log: true
 
@@ -242,8 +250,8 @@
     return_content: true
     status_code: 200
   register: common_openbao_compose_env_role_id
-  retries: 12
-  delay: 2
+  retries: "{{ common_openbao_api_operation_retries }}"
+  delay: "{{ common_openbao_api_operation_delay }}"
   until: common_openbao_compose_env_role_id.status == 200
   changed_when: false
   no_log: true
@@ -274,8 +282,8 @@
     return_content: true
     status_code: 200
   register: common_openbao_compose_env_secret_id
-  retries: 12
-  delay: 2
+  retries: "{{ common_openbao_api_operation_retries }}"
+  delay: "{{ common_openbao_api_operation_delay }}"
   until: common_openbao_compose_env_secret_id.status == 200
   when: not common_openbao_compose_env_secret_id_stat.stat.exists
   no_log: true

@@ -2338,7 +2338,7 @@
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "http://10.10.10.20:8099",
+      "internal_url": "http://10.10.10.20:8105",
       "public_url": "https://bi.lv3.org",
       "subdomain": "bi.lv3.org",
       "exposure": "edge-published",

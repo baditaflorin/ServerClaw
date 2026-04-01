@@ -30,6 +30,9 @@ argument_specs:
       superset_compose_file:
         type: path
         required: true
+      superset_static_env_file:
+        type: path
+        required: true
       superset_env_file:
         type: path
         required: true

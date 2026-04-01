@@ -96,7 +96,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \
-  'docker compose --file /opt/superset/docker-compose.yml ps && curl -fsS http://127.0.0.1:8099/health'
+  'docker compose --file /opt/superset/docker-compose.yml ps && curl -fsS http://127.0.0.1:8105/health'
 ```
 
 Public health verification:

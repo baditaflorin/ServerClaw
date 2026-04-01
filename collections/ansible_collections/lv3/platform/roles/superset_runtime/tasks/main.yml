@@ -15,6 +15,7 @@
       - superset_asset_dir | length > 0
       - superset_secret_dir | length > 0
       - superset_compose_file | length > 0
+      - superset_static_env_file | length > 0
       - superset_env_file | length > 0
       - superset_image_name | length > 0
       - superset_base_image | length > 0
@@ -245,7 +246,7 @@
 - name: Render the Superset environment file
   ansible.builtin.template:
     src: runtime.env.j2
-    dest: "{{ superset_env_file }}"
+    dest: "{{ superset_static_env_file }}"
     owner: root
     group: root
     mode: "0600"
@@ -542,12 +543,14 @@
       - "{{ superset_container_name }}"
       - /app/.venv/bin/python
       - -c
-      - >-
-        from superset.app import create_app;
-        app = create_app();
-        from superset.extensions import db;
-        from flask_appbuilder.security.sqla.models import User;
-        with app.app_context(): print(1 if db.session.query(User).filter_by(username='{{ superset_admin_username }}').first() else 0)
+      - |
+        from superset.app import create_app
+        from superset.extensions import db
+        from flask_appbuilder.security.sqla.models import User
+
+        app = create_app()
+        with app.app_context():
+            print(1 if db.session.query(User).filter_by(username='{{ superset_admin_username }}').first() else 0)
   register: superset_admin_user_check
   changed_when: false
 
@@ -608,6 +611,8 @@
     argv:
       - docker
       - exec
+      - -u
+      - "0"
       - "{{ superset_container_name }}"
       - /app/.venv/bin/python
       - "{{ superset_bootstrap_script_container_file }}"
@@ -615,7 +620,10 @@
       - --definition-file
       - "{{ superset_bootstrap_definition_container_file }}"
   register: superset_bootstrap
-  changed_when: "(superset_bootstrap.stdout | trim | from_json).changed"
+  changed_when: >-
+    (superset_bootstrap.rc | default(1)) == 0 and
+    (superset_bootstrap.stdout_lines | default([]) | length) > 0 and
+    (((superset_bootstrap.stdout_lines | last) | trim | from_json).changed | default(false))
 
 - name: Verify the Superset runtime
   ansible.builtin.include_tasks: verify.yml

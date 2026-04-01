@@ -31,6 +31,8 @@
     argv:
       - docker
       - exec
+      - -u
+      - "0"
       - "{{ superset_container_name }}"
       - /app/.venv/bin/python
       - "{{ superset_bootstrap_script_container_file }}"

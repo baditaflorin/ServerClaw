@@ -2045,7 +2045,7 @@
       ],
       "verification_commands": [
         "make syntax-check-superset",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/superset/docker-compose.yml ps && curl -fsS http://127.0.0.1:8099/health'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/superset/docker-compose.yml ps && curl -fsS http://127.0.0.1:8105/health'",
         "curl -fsS https://bi.lv3.org/health",
         "python3 scripts/superset_bootstrap.py verify-public --base-url https://bi.lv3.org --expected-postgres-databases-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/superset/postgres-databases.json --database-prefix PostgreSQL --expected-dashboard \"LV3 Platform Database Inventory\" --expected-chart \"PostgreSQL Databases\" --expected-sso-host sso.lv3.org --admin-username admin --admin-password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/superset/admin-password.txt --expected-extra-database \"Plausible ClickHouse\" --report-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/superset/verify-public-report.json"
       ],

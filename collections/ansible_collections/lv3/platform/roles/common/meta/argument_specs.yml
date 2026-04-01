@@ -304,3 +304,15 @@ argument_specs:
         default: true
         description:
           - Whether the helper may restart and recover a local OpenBao runtime when the configured API address is unavailable.
+      common_openbao_api_operation_retries:
+        type: int
+        required: false
+        default: 36
+        description:
+          - Number of retries used for OpenBao read and write API operations after helper preflight succeeds.
+      common_openbao_api_operation_delay:
+        type: int
+        required: false
+        default: 5
+        description:
+          - Delay in seconds between OpenBao read and write API operation retries.

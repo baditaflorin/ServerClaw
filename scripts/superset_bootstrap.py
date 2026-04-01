@@ -8,6 +8,7 @@ import json
 import ssl
 import sys
 import uuid
+from collections.abc import Callable, MutableSequence
 from pathlib import Path
 from typing import Any
 from urllib import error, request
@@ -126,15 +127,20 @@ def list_api_names(base_url: str, token: str, path: str, field: str) -> set[str]
     return {str(item[field]) for item in result if field in item}
 
 
-def ensure_local_imports():
+def create_local_app():
     from superset.app import create_app
+
+    return create_app()
+
+
+def ensure_local_runtime():
     from superset.connectors.sqla.models import SqlMetric, SqlaTable, TableColumn
     from superset.extensions import db
     from superset.models.core import Database
     from superset.models.dashboard import Dashboard
     from superset.models.slice import Slice
 
-    return create_app, db, Database, SqlaTable, TableColumn, SqlMetric, Slice, Dashboard
+    return db, Database, SqlaTable, TableColumn, SqlMetric, Slice, Dashboard
 
 
 def build_dashboard_position(chart_id: int, chart_uuid: str, chart_title: str) -> dict[str, Any]:
@@ -199,13 +205,84 @@ def build_chart_params(dataset_id: int) -> dict[str, Any]:
     }
 
 
+def remove_relationship_item(
+    items: MutableSequence[Any],
+    item: Any,
+    *,
+    delete_item: Callable[[Any], None],
+) -> None:
+    if item in items:
+        items.remove(item)
+    delete_item(item)
+
+
+def reconcile_named_collection(
+    items: MutableSequence[Any],
+    specs: list[dict[str, Any]],
+    *,
+    key_attr: str,
+    make_item: Callable[[], Any],
+    apply_spec: Callable[[Any, dict[str, Any]], None],
+    remove_item: Callable[[Any], None],
+) -> dict[str, list[str]]:
+    existing_by_name: dict[str, Any] = {}
+    created: list[str] = []
+    removed: list[str] = []
+    deduped: list[str] = []
+
+    for item in list(items):
+        name = str(getattr(item, key_attr))
+        if name in existing_by_name:
+            remove_item(item)
+            deduped.append(name)
+            continue
+        existing_by_name[name] = item
+
+    for spec in specs:
+        name = str(spec["name"])
+        item = existing_by_name.pop(name, None)
+        if item is None:
+            item = make_item()
+            items.append(item)
+            created.append(name)
+        apply_spec(item, spec)
+
+    for name, item in existing_by_name.items():
+        remove_item(item)
+        removed.append(name)
+
+    return {"created": created, "removed": removed, "deduped": deduped}
+
+
+def apply_table_column_spec(column: Any, spec: dict[str, Any]) -> None:
+    column.column_name = spec["name"]
+    column.verbose_name = spec.get("verbose_name")
+    column.type = spec.get("type")
+    column.groupby = bool(spec.get("groupby", True))
+    column.filterable = bool(spec.get("filterable", True))
+    column.is_dttm = bool(spec.get("is_dttm", False))
+    column.description = spec.get("description")
+    column.expression = None
+    column.python_date_format = None
+    column.extra = None
+
+
+def apply_sql_metric_spec(metric: Any, spec: dict[str, Any]) -> None:
+    metric.metric_name = spec["name"]
+    metric.verbose_name = spec.get("verbose_name")
+    metric.expression = spec["expression"]
+    metric.metric_type = None
+    metric.description = spec.get("description")
+    metric.extra = "{}"
+
+
 def bootstrap_local(args: argparse.Namespace) -> int:
-    create_app, db, Database, SqlaTable, TableColumn, SqlMetric, Slice, Dashboard = ensure_local_imports()
     definition = load_definition(args.definition_file)
-    app = create_app()
+    app = create_local_app()
     changes: list[str] = []
 
     with app.app_context():
+        db, Database, SqlaTable, TableColumn, SqlMetric, Slice, Dashboard = ensure_local_runtime()
         for item in definition["databases"]:
             database = db.session.query(Database).filter_by(database_name=item["name"]).one_or_none()
             if database is None:
@@ -255,65 +332,79 @@ def bootstrap_local(args: argparse.Namespace) -> int:
         dataset.extra = "{}"
         dataset.normalize_columns = False
         dataset.always_filter_main_dttm = False
-        dataset.columns.clear()
-        for column_spec in landing["columns"]:
-            dataset.columns.append(
-                TableColumn(
-                    column_name=column_spec["name"],
-                    verbose_name=column_spec.get("verbose_name"),
-                    type=column_spec.get("type"),
-                    groupby=bool(column_spec.get("groupby", True)),
-                    filterable=bool(column_spec.get("filterable", True)),
-                    is_dttm=bool(column_spec.get("is_dttm", False)),
-                    description=column_spec.get("description"),
-                )
+        with db.session.no_autoflush:
+            column_changes = reconcile_named_collection(
+                dataset.columns,
+                landing["columns"],
+                key_attr="column_name",
+                make_item=TableColumn,
+                apply_spec=apply_table_column_spec,
+                remove_item=lambda item: remove_relationship_item(
+                    dataset.columns,
+                    item,
+                    delete_item=db.session.delete,
+                ),
             )
-        dataset.metrics.clear()
-        for metric_spec in landing["metrics"]:
-            dataset.metrics.append(
-                SqlMetric(
-                    metric_name=metric_spec["name"],
-                    verbose_name=metric_spec.get("verbose_name"),
-                    expression=metric_spec["expression"],
-                    metric_type=None,
-                    description=metric_spec.get("description"),
-                    extra="{}",
-                )
+            metric_changes = reconcile_named_collection(
+                dataset.metrics,
+                landing["metrics"],
+                key_attr="metric_name",
+                make_item=SqlMetric,
+                apply_spec=apply_sql_metric_spec,
+                remove_item=lambda item: remove_relationship_item(
+                    dataset.metrics,
+                    item,
+                    delete_item=db.session.delete,
+                ),
             )
+        for name in column_changes["created"]:
+            changes.append(f"dataset-column:create:{landing['dataset_name']}:{name}")
+        for name in column_changes["removed"]:
+            changes.append(f"dataset-column:remove:{landing['dataset_name']}:{name}")
+        for name in column_changes["deduped"]:
+            changes.append(f"dataset-column:dedupe:{landing['dataset_name']}:{name}")
+        for name in metric_changes["created"]:
+            changes.append(f"dataset-metric:create:{landing['dataset_name']}:{name}")
+        for name in metric_changes["removed"]:
+            changes.append(f"dataset-metric:remove:{landing['dataset_name']}:{name}")
+        for name in metric_changes["deduped"]:
+            changes.append(f"dataset-metric:dedupe:{landing['dataset_name']}:{name}")
         db.session.commit()
 
-        chart = db.session.query(Slice).filter_by(slice_name=landing["chart_title"]).one_or_none()
-        if chart is None:
-            chart = Slice(slice_name=landing["chart_title"])
-            chart.uuid = uuid.UUID(landing["chart_uuid"])
-            db.session.add(chart)
-            changes.append(f"chart:create:{landing['chart_title']}")
-        chart.slice_name = landing["chart_title"]
-        chart.datasource_id = dataset.id
-        chart.datasource_type = "table"
-        chart.datasource_name = dataset.table_name
-        chart.viz_type = "table"
-        chart.description = "Repo-managed landing table listing the PostgreSQL databases visible to Superset."
-        chart.params = json.dumps(build_chart_params(dataset.id))
-        chart.query_context = None
+        with db.session.no_autoflush:
+            chart = db.session.query(Slice).filter_by(slice_name=landing["chart_title"]).one_or_none()
+            if chart is None:
+                chart = Slice(slice_name=landing["chart_title"])
+                chart.uuid = uuid.UUID(landing["chart_uuid"])
+                db.session.add(chart)
+                changes.append(f"chart:create:{landing['chart_title']}")
+            chart.slice_name = landing["chart_title"]
+            chart.datasource_type = "table"
+            chart.datasource_id = dataset.id
+            chart.datasource_name = dataset.table_name
+            chart.viz_type = "table"
+            chart.description = "Repo-managed landing table listing the PostgreSQL databases visible to Superset."
+            chart.params = json.dumps(build_chart_params(dataset.id))
+            chart.query_context = None
         db.session.commit()
 
-        dashboard = db.session.query(Dashboard).filter_by(slug=landing["dashboard_slug"]).one_or_none()
-        if dashboard is None:
-            dashboard = Dashboard(slug=landing["dashboard_slug"])
-            dashboard.uuid = uuid.UUID(landing["dashboard_uuid"])
-            db.session.add(dashboard)
-            changes.append(f"dashboard:create:{landing['dashboard_title']}")
-        dashboard.dashboard_title = landing["dashboard_title"]
-        dashboard.slug = landing["dashboard_slug"]
-        dashboard.description = "Repo-managed landing dashboard for the LV3 Superset rollout."
-        dashboard.css = ""
-        dashboard.published = True
-        dashboard.slices = [chart]
-        dashboard.position_json = json.dumps(
-            build_dashboard_position(chart.id, str(chart.uuid), landing["chart_title"])
-        )
-        dashboard.json_metadata = json.dumps(build_dashboard_metadata())
+        with db.session.no_autoflush:
+            dashboard = db.session.query(Dashboard).filter_by(slug=landing["dashboard_slug"]).one_or_none()
+            if dashboard is None:
+                dashboard = Dashboard(slug=landing["dashboard_slug"])
+                dashboard.uuid = uuid.UUID(landing["dashboard_uuid"])
+                db.session.add(dashboard)
+                changes.append(f"dashboard:create:{landing['dashboard_title']}")
+            dashboard.dashboard_title = landing["dashboard_title"]
+            dashboard.slug = landing["dashboard_slug"]
+            dashboard.description = "Repo-managed landing dashboard for the LV3 Superset rollout."
+            dashboard.css = ""
+            dashboard.published = True
+            dashboard.slices = [chart]
+            dashboard.position_json = json.dumps(
+                build_dashboard_position(chart.id, str(chart.uuid), landing["chart_title"])
+            )
+            dashboard.json_metadata = json.dumps(build_dashboard_metadata())
         db.session.commit()
 
     print(json.dumps({"changed": bool(changes), "changes": changes}))
@@ -321,12 +412,12 @@ def bootstrap_local(args: argparse.Namespace) -> int:
 
 
 def verify_local(args: argparse.Namespace) -> int:
-    create_app, db, Database, SqlaTable, _TableColumn, _SqlMetric, Slice, Dashboard = ensure_local_imports()
     definition = load_definition(args.definition_file)
-    app = create_app()
+    app = create_local_app()
     check_health(args.base_url)
 
     with app.app_context():
+        db, Database, SqlaTable, _TableColumn, _SqlMetric, Slice, Dashboard = ensure_local_runtime()
         actual_databases = {
             str(name)
             for (name,) in db.session.query(Database.database_name).all()

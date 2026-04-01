@@ -1,3 +1,4 @@
+import importlib.util
 from pathlib import Path
 
 import yaml
@@ -16,10 +17,20 @@ CONFIG_TEMPLATE = REPO_ROOT / "roles" / "superset_runtime" / "templates" / "supe
 BOOTSTRAP_TEMPLATE = REPO_ROOT / "roles" / "superset_runtime" / "templates" / "bootstrap-definition.json.j2"
 DOCKERFILE = REPO_ROOT / "roles" / "superset_runtime" / "templates" / "Dockerfile.j2"
 REQUIREMENTS = REPO_ROOT / "roles" / "superset_runtime" / "templates" / "requirements.txt.j2"
+BOOTSTRAP_SCRIPT = REPO_ROOT / "scripts" / "superset_bootstrap.py"
 
 
 def load_yaml(path: Path):
     return yaml.safe_load(path.read_text())
+
+
+def load_bootstrap_module():
+    spec = importlib.util.spec_from_file_location("superset_bootstrap", BOOTSTRAP_SCRIPT)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def test_defaults_define_runtime_paths_keycloak_and_landing_dashboard_contract() -> None:
@@ -31,6 +42,7 @@ def test_defaults_define_runtime_paths_keycloak_and_landing_dashboard_contract()
     assert defaults["superset_data_dir"] == "{{ superset_site_dir }}/data"
     assert defaults["superset_pythonpath_dir"] == "{{ superset_site_dir }}/pythonpath"
     assert defaults["superset_asset_dir"] == "{{ superset_site_dir }}/assets"
+    assert defaults["superset_static_env_file"] == "{{ superset_site_dir }}/runtime.env"
     assert defaults["superset_public_base_url"] == "https://{{ superset_service_topology.public_hostname }}"
     assert defaults["superset_image_name"] == "lv3/superset"
     assert defaults["superset_internal_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.superset_port }}"
@@ -49,6 +61,7 @@ def test_argument_spec_requires_runtime_paths_and_bootstrap_inputs() -> None:
     options = specs["argument_specs"]["main"]["options"]
 
     assert options["superset_site_dir"]["type"] == "path"
+    assert options["superset_static_env_file"]["type"] == "path"
     assert options["superset_internal_port"]["type"] == "int"
     assert options["superset_public_base_url"]["type"] == "str"
     assert options["superset_database_password_local_file"]["type"] == "path"
@@ -77,6 +90,8 @@ def test_main_tasks_render_build_bootstrap_and_verify_runtime() -> None:
     assert bootstrap_task["ansible.builtin.command"]["argv"] == [
         "docker",
         "exec",
+        "-u",
+        "0",
         "{{ superset_container_name }}",
         "/app/.venv/bin/python",
         "{{ superset_bootstrap_script_container_file }}",
@@ -84,6 +99,10 @@ def test_main_tasks_render_build_bootstrap_and_verify_runtime() -> None:
         "--definition-file",
         "{{ superset_bootstrap_definition_container_file }}",
     ]
+    assert "(superset_bootstrap.rc | default(1)) == 0" in bootstrap_task["changed_when"]
+    assert "(superset_bootstrap.stdout_lines | default([]) | length) > 0" in bootstrap_task["changed_when"]
+    assert "(superset_bootstrap.stdout_lines | last)" in bootstrap_task["changed_when"]
+    assert "from_json" in bootstrap_task["changed_when"]
 
     db_upgrade_task = next(task for task in tasks if task["name"] == "Run the Superset metadata database migrations")
     assert db_upgrade_task["ansible.builtin.command"]["argv"] == [
@@ -94,6 +113,12 @@ def test_main_tasks_render_build_bootstrap_and_verify_runtime() -> None:
         "db",
         "upgrade",
     ]
+
+    admin_check_task = next(task for task in tasks if task["name"] == "Check whether the Superset admin user already exists")
+    admin_check_script = admin_check_task["ansible.builtin.command"]["argv"][5]
+    assert "with app.app_context():" in admin_check_script
+    assert "app = create_app()" in admin_check_script
+    assert "create_app();" not in admin_check_script
 
     admin_create_task = next(task for task in tasks if task["name"] == "Create the Superset admin user")
     assert admin_create_task["ansible.builtin.command"]["argv"][3:6] == [
@@ -116,6 +141,8 @@ def test_verify_tasks_cover_local_health_and_managed_contract() -> None:
     assert contract_task["ansible.builtin.command"]["argv"] == [
         "docker",
         "exec",
+        "-u",
+        "0",
         "{{ superset_container_name }}",
         "/app/.venv/bin/python",
         "{{ superset_bootstrap_script_container_file }}",
@@ -159,6 +186,8 @@ def test_templates_define_openbao_envs_compose_and_bootstrap_contract() -> None:
     assert "{{ superset_pythonpath_dir }}:/app/pythonpath:ro" in compose_template
     assert "{{ superset_asset_dir }}:/app/assets:ro" in compose_template
     assert "http://127.0.0.1:{{ superset_container_port }}/health" in compose_template
+    assert "- {{ superset_static_env_file }}" in compose_template
+    assert "- {{ superset_env_file }}" in compose_template
 
     assert "SUPERSET_CONFIG_PATH=/app/pythonpath/superset_config.py" in env_template
     assert "SUPERSET_KEYCLOAK_CLIENT_ID={{ superset_keycloak_client_id }}" in env_template
@@ -178,6 +207,80 @@ def test_templates_define_openbao_envs_compose_and_bootstrap_contract() -> None:
     assert '"dashboard_title": "{{ superset_landing_dashboard_title }}"' in bootstrap_template
 
     assert "FROM {{ superset_base_image }}" in dockerfile
-    assert "/app/.venv/bin/pip install --no-cache-dir -r /tmp/requirements.txt" in dockerfile
+    assert "/app/.venv/bin/python -m ensurepip --default-pip" in dockerfile
+    assert "/app/.venv/bin/python -m pip install --no-cache-dir -r /tmp/requirements.txt" in dockerfile
     assert "{% for dependency in superset_python_dependencies %}" in requirements
     assert "{{ dependency }}" in requirements
+
+
+def test_bootstrap_script_sets_chart_fields_before_flush() -> None:
+    script = BOOTSTRAP_SCRIPT.read_text()
+
+    assert "with db.session.no_autoflush:" in script
+    assert script.index('chart.datasource_type = "table"') < script.index("chart.datasource_id = dataset.id")
+    assert "dashboard.slices = [chart]" in script
+
+
+def test_bootstrap_script_reconciles_named_children_in_place() -> None:
+    module = load_bootstrap_module()
+
+    class DummyItem:
+        def __init__(self, name: str, **attrs) -> None:
+            self.column_name = name
+            for key, value in attrs.items():
+                setattr(self, key, value)
+
+    items = [
+        DummyItem("database_name", type="OLD", verbose_name="Old"),
+        DummyItem("database_name", type="DUPLICATE"),
+        DummyItem("legacy_column", type="TEXT"),
+    ]
+    removed: list[str] = []
+
+    def remove_item(item) -> None:
+        removed.append(item.column_name)
+        items.remove(item)
+
+    result = module.reconcile_named_collection(
+        items,
+        [
+            {
+                "name": "database_name",
+                "type": "TEXT",
+                "verbose_name": "Database Name",
+                "groupby": True,
+                "filterable": True,
+                "is_dttm": False,
+            },
+            {
+                "name": "workspace_name",
+                "type": "TEXT",
+                "verbose_name": "Workspace Name",
+                "groupby": True,
+                "filterable": True,
+                "is_dttm": False,
+            },
+        ],
+        key_attr="column_name",
+        make_item=lambda: DummyItem(""),
+        apply_spec=module.apply_table_column_spec,
+        remove_item=remove_item,
+    )
+
+    assert [item.column_name for item in items] == ["database_name", "workspace_name"]
+    assert items[0].type == "TEXT"
+    assert items[0].verbose_name == "Database Name"
+    assert removed == ["database_name", "legacy_column"]
+    assert result == {
+        "created": ["workspace_name"],
+        "removed": ["legacy_column"],
+        "deduped": ["database_name"],
+    }
+
+
+def test_bootstrap_script_reconciles_metrics_without_clear_and_rebuild() -> None:
+    script = BOOTSTRAP_SCRIPT.read_text()
+
+    assert "reconcile_named_collection(" in script
+    assert "dataset.columns.clear()" not in script
+    assert "dataset.metrics.clear()" not in script

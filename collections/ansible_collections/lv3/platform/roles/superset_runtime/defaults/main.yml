@@ -14,6 +14,7 @@ superset_pythonpath_dir: "{{ superset_site_dir }}/pythonpath"
 superset_asset_dir: "{{ superset_site_dir }}/assets"
 superset_secret_dir: /etc/lv3/superset
 superset_compose_file: "{{ superset_site_dir }}/docker-compose.yml"
+superset_static_env_file: "{{ superset_site_dir }}/runtime.env"
 superset_env_file: "{{ compose_runtime_secret_root }}/superset/runtime.env"
 superset_legacy_env_file: "{{ superset_site_dir }}/superset.env"
 superset_openbao_agent_dir: "{{ superset_site_dir }}/openbao"

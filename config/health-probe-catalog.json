@@ -3147,7 +3147,7 @@
         "timeout_seconds": 300,
         "retries": 36,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8099/health",
+        "url": "http://127.0.0.1:8105/health",
         "method": "GET",
         "expected_status": [
           200
@@ -3159,7 +3159,7 @@
         "timeout_seconds": 300,
         "retries": 36,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8099/health",
+        "url": "http://127.0.0.1:8105/health",
         "method": "GET",
         "expected_status": [
           200
@@ -3181,7 +3181,7 @@
           "bindings": [
             {
               "host": "10.10.10.20",
-              "port": 8099
+              "port": 8105
             }
           ],
           "required_networks": [

@@ -238,11 +238,11 @@ def test_build_platform_vars_includes_superset_publication_topology() -> None:
 
     assert superset["public_hostname"] == "bi.lv3.org"
     assert superset["dns"]["name"] == "bi"
-    assert superset["ports"]["internal"] == 8099
+    assert superset["ports"]["internal"] == 8105
     assert superset["urls"]["public"] == "https://bi.lv3.org"
-    assert superset["urls"]["internal"] == "http://10.10.10.20:8099"
+    assert superset["urls"]["internal"] == "http://10.10.10.20:8105"
     assert superset["edge"]["upstream"] == superset["urls"]["internal"]
-    assert platform_vars["superset_port"] == 8099
+    assert platform_vars["superset_port"] == 8105
 
 
 def test_build_platform_vars_includes_piper_private_topology() -> None:
@@ -454,7 +454,7 @@ def test_build_service_urls_resolves_jupyterhub_internal_url() -> None:
 
 
 def test_build_service_urls_resolves_superset_internal_url() -> None:
-    ports = {"superset_port": 8099}
+    ports = {"superset_port": 8105}
     service = {"owning_vm": "docker-runtime-lv3", "public_hostname": "bi.lv3.org"}
     host_vars = {"management_tailscale_ipv4": "100.118.189.95"}
     guest_ipv4_by_name = {"docker-runtime-lv3": "10.10.10.20"}
@@ -469,10 +469,10 @@ def test_build_service_urls_resolves_superset_internal_url() -> None:
         stack,
     )
 
-    assert port_map == {"internal": 8099}
+    assert port_map == {"internal": 8105}
     assert urls == {
         "public": "https://bi.lv3.org",
-        "internal": "http://10.10.10.20:8099",
+        "internal": "http://10.10.10.20:8105",
     }
 
 
