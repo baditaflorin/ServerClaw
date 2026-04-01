@@ -85,10 +85,28 @@ def load_common_docker_bridge_chains() -> list[dict]:
 
 
 def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
-    task_names = [task["name"] for task in load_tasks()]
+    tasks = load_tasks()
+    task_names = [task["name"] for task in tasks]
     assert task_names.index("Apply Docker bridge forward-compat rules live without reloading nftables") < task_names.index(
+        "Persist required Docker kernel modules across reboot"
+    )
+    assert task_names.index("Persist required Docker kernel modules across reboot") < task_names.index(
+        "Load required Docker kernel modules before starting Docker"
+    )
+    assert task_names.index("Load required Docker kernel modules before starting Docker") < task_names.index(
         "Ensure Docker service is enabled and running"
     )
+
+    defaults = load_defaults()
+    persist_modules = next(task for task in tasks if task["name"] == "Persist required Docker kernel modules across reboot")
+    load_modules = next(task for task in tasks if task["name"] == "Load required Docker kernel modules before starting Docker")
+    assert defaults["docker_runtime_kernel_modules"] == ["iptable_nat"]
+    assert defaults["docker_runtime_kernel_modules_file"] == "/etc/modules-load.d/lv3-docker-runtime.conf"
+    assert persist_modules["ansible.builtin.copy"]["dest"] == "{{ docker_runtime_kernel_modules_file }}"
+    assert persist_modules["when"] == "docker_runtime_kernel_modules | length > 0"
+    assert load_modules["ansible.builtin.command"]["argv"] == ["modprobe", "{{ item }}"]
+    assert load_modules["loop"] == "{{ docker_runtime_kernel_modules }}"
+    assert load_modules["changed_when"] is False
 
 
 def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:

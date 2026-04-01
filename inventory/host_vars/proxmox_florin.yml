@@ -519,8 +519,7 @@ proxmox_guests:
       placement_class: primary
       anti_affinity_group: runtime-ai
       co_location_exceptions: []
-    packages:
-      - docker.io
+    packages: []
 
 network_policy:
   guest_management_sources:
