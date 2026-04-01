@@ -10,10 +10,12 @@
       - ops_portal_service_dir
       - ops_portal_build_context_dir
       - ops_portal_data_dir
+      - ops_portal_state_dir
       - ops_portal_secret_dir
       - ops_portal_compose_file
       - ops_portal_env_file
       - ops_portal_session_secret_file
+      - ops_portal_attention_state_file
       - ops_portal_container_name
       - ops_portal_internal_port
       - ops_portal_gateway_url
@@ -53,7 +55,13 @@
         mode: "0755"
       - path: "{{ ops_portal_data_dir }}/receipts/live-applies"
         mode: "0755"
+      - path: "{{ ops_portal_data_dir }}/receipts/promotions"
+        mode: "0755"
       - path: "{{ ops_portal_data_dir }}/receipts/drift-reports"
+        mode: "0755"
+      - path: "{{ ops_portal_state_dir }}"
+        owner: "10001"
+        group: "10001"
         mode: "0755"
       - path: "{{ ops_portal_secret_dir }}"
         mode: "0700"

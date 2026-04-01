@@ -95,6 +95,25 @@
       - "'Search destinations, pin favorites, and reopen recent paths from one shared masthead control.' in ops_portal_verify_launcher.content"
     fail_msg: "Ops portal launcher partial rendered without the expected launcher surface."
 
+- name: Verify the attention center partial renders locally
+  ansible.builtin.uri:
+    url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/partials/attention"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: ops_portal_verify_attention
+  changed_when: false
+  retries: 18
+  delay: 5
+  until: ops_portal_verify_attention.status == 200
+
+- name: Assert the attention center is present
+  ansible.builtin.assert:
+    that:
+      - "'Notification Center' in ops_portal_verify_attention.content"
+      - "'Actionable items routed into one shared queue' in ops_portal_verify_attention.content"
+    fail_msg: "Ops portal attention center partial rendered without the ADR 0312 notification surface."
+
 - name: Verify the runtime assurance matrix partial renders locally
   ansible.builtin.uri:
     url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/partials/runtime-assurance"

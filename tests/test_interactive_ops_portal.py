@@ -18,6 +18,7 @@ from scripts.ops_portal.app import (
     build_live_apply_timeline_chart,
     create_app,
     normalize_health,
+    stable_token,
 )
 
 
@@ -298,7 +299,9 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
     data_root = tmp_path / "data"
     (data_root / "config").mkdir(parents=True)
     (data_root / "receipts" / "live-applies").mkdir(parents=True)
+    (data_root / "receipts" / "promotions").mkdir(parents=True)
     (data_root / "receipts" / "drift-reports").mkdir(parents=True)
+    (tmp_path / "state").mkdir(parents=True)
 
     (data_root / "config" / "service-capability-catalog.json").write_text(
         json.dumps(
@@ -621,6 +624,20 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
         + "\n",
         encoding="utf-8",
     )
+    (data_root / "receipts" / "promotions" / "2026-03-24-promote-ops-portal.json").write_text(
+        json.dumps(
+            {
+                "promotion_id": "promotion-ops-portal",
+                "ts": "2026-03-24T19:15:00Z",
+                "branch": "main",
+                "playbook": "playbooks/services/ops_portal.yml",
+                "gate_actor": {"id": "ops"},
+                "gate_decision": "approved",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (data_root / "receipts" / "live-applies" / "._2026-03-24-grafana-runtime-assurance.json").write_bytes(
         b"\xa3\x00\x00not-json"
     )
@@ -654,7 +671,9 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
         workflow_catalog_path=data_root / "config" / "workflow-catalog.json",
         changelog_path=data_root / "changelog.md",
         live_applies_dir=data_root / "receipts" / "live-applies",
+        promotions_dir=data_root / "receipts" / "promotions",
         drift_receipts_dir=data_root / "receipts" / "drift-reports",
+        attention_state_path=tmp_path / "state" / "attention-state.json",
         maintenance_windows_path=None,
         docs_base_url="https://docs.lv3.org",
         grafana_logs_url="https://grafana.lv3.org/explore?service={service}",
@@ -685,6 +704,8 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Escalation Path" in response.text
     assert "Live apply" in response.text
     assert "Platform Overview" in response.text
+    assert "Attention Center" in response.text
+    assert "Shared notification center for work that needs a human" in response.text
     assert "Runtime Assurance" in response.text
     assert "Scoreboard and rollup by active service and environment" in response.text
     assert "Deployment Console" in response.text
@@ -698,7 +719,7 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Application Launcher" in response.text
     assert "Validation Gate Status" in response.text
     assert "Drift Status" in response.text
-    assert "Recent Live Applies" in response.text
+    assert "Recent Activity" in response.text
     assert "shared-edge / platform-sso" in response.text
     assert "ops.lv3.org · operator · shared-edge · platform-sso" in response.text
     assert "Capability Contracts" in response.text
@@ -749,7 +770,7 @@ def test_dashboard_ignores_metadata_sidecars_in_receipts(
     response = client.get("/")
 
     assert response.status_code == 200
-    assert "Recent Live Applies" in response.text
+    assert "Recent Activity" in response.text
     assert "Dashboard permissions drifted" in response.text
 
 
@@ -778,6 +799,7 @@ def test_dashboard_ignores_macos_metadata_receipts(
     assert "Interactive Ops Portal" in response.text
     assert "Dashboard permissions drifted" in response.text
     assert "Applied ops portal runtime" in response.text
+    assert "Promoted main via playbooks/services/ops_portal.yml; gate approved" in response.text
 
 
 def test_build_health_mix_chart_groups_service_tones() -> None:
@@ -880,6 +902,34 @@ def test_launcher_persona_switch_updates_selection(portal_client: tuple[TestClie
     assert response.status_code == 200
     assert "Identity and platform administration." in response.text
     assert "Converge Ops Portal" in response.text
+
+
+def test_attention_actions_persist_and_append_to_activity_timeline(
+    portal_runtime: tuple[TestClient, FakeGatewayClient, Path],
+) -> None:
+    client, _gateway, data_root = portal_runtime
+    item_id = f"runtime-assurance:{stable_token('ops_portal', 'production', 'edge_browser_surface')}"
+
+    acknowledged = client.post(f"/actions/attention/{item_id}", data={"action": "acknowledged"})
+
+    assert acknowledged.status_code == 200
+    assert "Acknowledged" in acknowledged.text
+    assert "Platform Operations Portal needs runtime follow-up" in acknowledged.text
+
+    state_path = data_root.parent / "state" / "attention-state.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    assert state["items"][item_id]["current"]["action"] == "acknowledged"
+    assert state["items"][item_id]["history"][-1]["action"] == "acknowledged"
+
+    timeline = client.get("/partials/changelog")
+    assert timeline.status_code == 200
+    assert "Platform Operations Portal needs runtime follow-up was acknowledged" in timeline.text
+
+    reopened = client.post(f"/actions/attention/{item_id}", data={"action": "reopened"})
+
+    assert reopened.status_code == 200
+    reopened_state = json.loads(state_path.read_text(encoding="utf-8"))
+    assert "current" not in reopened_state["items"][item_id]
 
 
 def test_launcher_search_filters_results(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -1102,7 +1152,9 @@ def test_load_live_apply_receipts_ignores_unreadable_receipts(tmp_path: Path) ->
         workflow_catalog_path=config_dir / "workflow-catalog.json",
         changelog_path=data_root / "changelog.md",
         live_applies_dir=live_applies_dir,
+        promotions_dir=data_root / "receipts" / "promotions",
         drift_receipts_dir=drift_receipts_dir,
+        attention_state_path=tmp_path / "state" / "attention-state.json",
         maintenance_windows_path=None,
         docs_base_url="https://docs.lv3.org",
         grafana_logs_url="https://grafana.lv3.org/explore?service={service}",

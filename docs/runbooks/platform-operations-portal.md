@@ -254,6 +254,34 @@ A failed live replay that serves `/health` but returns `404` for
 `/partials/launcher` indicates sync drift or a clobbered guest-side portal tree,
 not a healthy launcher rollout.
 
+## Shared Attention Center
+
+ADR 0312 adds a shared notification center plus a browser-visible activity
+timeline to the interactive portal.
+
+Operator flow:
+
+1. Open `https://ops.lv3.org`.
+2. Scroll to **Attention Center**.
+3. Review the active queue for drift, runtime assurance, blocked coordination,
+   maintenance, or live-apply follow-up items.
+4. Use **Acknowledge** when a human has taken ownership, or **Dismiss** when the
+   item is no longer useful in the active queue.
+5. Reopen an acknowledged or dismissed item if it still needs human attention.
+6. Confirm the action also appears in **Activity Timeline** so the change is
+   auditable without deleting the underlying source signal.
+
+The current implementation persists attention state under the managed runtime
+path `/opt/ops-portal/state/attention-state.json` on `docker-runtime-lv3`
+instead of keeping it only in browser session data.
+
+The safest live verification path is:
+
+1. open **Attention Center**
+2. acknowledge one runtime assurance or drift item
+3. refresh the page and confirm the item remains under the acknowledged section
+4. open **Activity Timeline** and confirm the acknowledgement event is present
+
 ## Structured Runbook Launcher
 
 The interactive portal runbook panel now loads its entries from the platform API gateway instead of maintaining a separate local workflow-only list.

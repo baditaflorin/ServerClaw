@@ -11,6 +11,8 @@ Recover the interactive ops portal runtime when `ops.lv3.org` or the local `http
 - the portal shell loads but the chart panels stay blank or never repaint after section refreshes
 - the overview loads but the runtime assurance scoreboard section is missing or
   empty
+- the portal shell loads but the attention center section is missing or all
+  acknowledge and dismiss actions reset after refresh
 - the portal loads but the masthead, sidebar, or state components render unstyled as plain HTML
 - the login flow redirects to `/oauth2/callback?...error=invalid_scope`
 - the Keycloak login form accepts a submit and then renders `We are sorry... Unexpected error when handling authentication request to identity provider.`
@@ -49,7 +51,27 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   'curl -sf http://127.0.0.1:8092/partials/overview | grep -F "Runtime Assurance"'
 ```
 
-4. Verify the edge can still reach the runtime:
+4. Verify the attention center partial still renders:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
+  ops@10.10.10.20 \
+  'curl -sf http://127.0.0.1:8092/partials/attention | grep -F "Notification Center"'
+```
+
+5. Verify the attention state path exists and stays writable:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
+  ops@10.10.10.20 \
+  'sudo test -d /opt/ops-portal/state && sudo ls -ld /opt/ops-portal/state'
+```
+
+6. Verify the edge can still reach the runtime:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
@@ -59,7 +81,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   'curl -k -I -H "Host: ops.lv3.org" https://127.0.0.1/health'
 ```
 
-5. If the portal redirects to Keycloak but the submit fails, check the Keycloak runtime directly:
+7. If the portal redirects to Keycloak but the submit fails, check the Keycloak runtime directly:
 
 ```bash
 curl -I https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
@@ -234,13 +256,18 @@ ANSIBLE_HOST_KEY_CHECKING=False "$REPO/scripts/run_with_namespace.sh" uvx --from
    container, then re-apply the portal runtime so the mirrored data and assets
    are rebuilt together.
 
-8. If the shared PatternFly shell is unstyled or the mobile navigation drawer
+8. If acknowledge or dismiss actions appear to work but revert after refresh,
+   confirm `/opt/ops-portal/state` is mounted into the container and writable by
+   the container user. A read-only or missing state mount leaves the portal able
+   to render the attention center but unable to persist operator actions.
+
+9. If the shared PatternFly shell is unstyled or the mobile navigation drawer
    stops responding, verify the published CSP still allows the pinned
    `https://unpkg.com/@patternfly/patternfly@5.4.0/patternfly.min.css` asset
    and that `/static/portal.js` loads from the same origin.
 
-9. If the callback includes `error=invalid_scope`, verify the rendered oauth2-proxy config on `nginx-lv3` does not request a custom `groups` scope. The portal relies on a client-mapped `groups` claim, so the requested scope must stay `openid profile email` unless a real Keycloak client scope named `groups` is added and assigned.
-10. If the auth failure is actually Keycloak, recover the runtime from the Proxmox host through the guest agent:
+10. If the callback includes `error=invalid_scope`, verify the rendered oauth2-proxy config on `nginx-lv3` does not request a custom `groups` scope. The portal relies on a client-mapped `groups` claim, so the requested scope must stay `openid profile email` unless a real Keycloak client scope named `groups` is added and assigned.
+11. If the auth failure is actually Keycloak, recover the runtime from the Proxmox host through the guest agent:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
