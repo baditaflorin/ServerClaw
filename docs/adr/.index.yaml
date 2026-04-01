@@ -7,9 +7,9 @@
 
 schema_version: 1
 generated: '2026-04-01'
-total_adrs: 337
+total_adrs: 338
 implementation_status_summary:
-  Implemented: 285
+  Implemented: 286
   Partial: 7
   Not Implemented: 43
   Deprecated: 1
@@ -292,6 +292,7 @@ concerns:
     - '0314'
     - '0315'
     - '0316'
+    - 0318
   release:
     - 0008
     - '0110'
@@ -5640,4 +5641,20 @@ adr_index:
       - proxy
     summary: LLM agents MUST use the Keycloak admin REST API directly for operator provisioning when
     filename: 0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md
+    implemented_version: 0.0.0
+  - adr: 0318
+    title: Repeatable Operator Onboarding with CC Audit Trail
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: platform
+    keywords:
+      - repeatable
+      - operator
+      - onboarding
+      - cc
+      - audit
+      - trail
+    summary: scripts/provisionoperator.py is the authoritative IaC entry point for operator
+    filename: 0318-repeatable-operator-onboarding-with-cc-audit-trail.md
     implemented_version: 0.0.0

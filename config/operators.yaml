@@ -90,7 +90,10 @@ operators:
     ssh:
       principal: matei.busui-tmp
       certificate_ttl_hours: 24
-      public_keys: []
+      public_keys:
+        - name: bootstrap-placeholder
+          public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server
+          fingerprint: SHA256:+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ
     openbao:
       entity_name: matei.busui-tmp
       policies:
