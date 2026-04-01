@@ -1,4 +1,5 @@
 import React, { ReactNode, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { Command } from "cmdk";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AllCommunityModule,
@@ -48,6 +49,18 @@ import {
   type JourneyProgress,
   type JourneyEventInput,
 } from "./journeyAnalytics";
+import {
+  DOCS_BASE_URL,
+  paletteKindLabels,
+  paletteLaneLabels,
+  paletteStaticEntries,
+  readPaletteStorageState,
+  recordPaletteRecent,
+  togglePaletteFavorite,
+  type PaletteEntrySeed,
+  type PaletteSearchResult,
+  type PaletteStorageState,
+} from "./commandPalette";
 import {
   readTourProgress,
   startOperatorAccessTour,
@@ -202,13 +215,30 @@ const CANONICAL_PAGE_STATES: ReadonlyArray<CanonicalPageStateKind> = [
   "not_found",
 ];
 
-const DOCS_BASE_URL = "https://docs.lv3.org";
 const RUNBOOK_URLS = {
   operatorAdmin: `${DOCS_BASE_URL}/runbooks/windmill-operator-access-admin/`,
   operatorOnboarding: `${DOCS_BASE_URL}/runbooks/operator-onboarding/`,
   operatorOffboarding: `${DOCS_BASE_URL}/runbooks/operator-offboarding/`,
   validation: `${DOCS_BASE_URL}/runbooks/validate-repository-automation/`,
 } as const;
+
+type CommandPaletteSearchPayload = {
+  status: string;
+  query: string;
+  count: number;
+  results: PaletteSearchResult[];
+};
+
+type CommandPaletteItem = PaletteEntrySeed & {
+  onSelect: () => void;
+  searchValue: string;
+};
+
+type CommandPaletteSection = {
+  id: string;
+  label: string;
+  items: CommandPaletteItem[];
+};
 
 type JourneyScorecardMetric = {
   status: string;
@@ -268,7 +298,6 @@ type TourFlowState = {
   startedAt: number;
   resumed: boolean;
 };
-
 const operatorGridTheme = themeQuartz.withParams({
   spacing: 7,
   accentColor: "#a5411c",
@@ -284,7 +313,54 @@ const queryKeys = {
   operatorInventory: (operatorId: string) => ["operator-inventory", operatorId] as const,
   operatorInventoryRoot: () => ["operator-inventory"] as const,
   operatorJourneyScorecards: () => ["operator-journey-scorecards"] as const,
+  commandPaletteSearch: (query: string) => ["command-palette-search", query] as const,
 };
+
+function isCommandPaletteSearchPayload(payload: unknown): payload is CommandPaletteSearchPayload {
+  if (!payload || typeof payload !== "object") {
+    return false;
+  }
+  const candidate = payload as Partial<CommandPaletteSearchPayload>;
+  return candidate.status === "ok" && Array.isArray(candidate.results);
+}
+
+async function fetchCommandPaletteSearch(query: string): Promise<PaletteSearchResult[]> {
+  const payload = await backend.command_palette_search({
+    query,
+    limit: 8,
+  });
+  if (!isCommandPaletteSearchPayload(payload)) {
+    throw new Error("Windmill returned an invalid command palette search payload.");
+  }
+  return payload.results;
+}
+
+function buildPaletteSearchValue(item: PaletteEntrySeed): string {
+  return [
+    item.label,
+    item.description,
+    paletteLaneLabels[item.lane],
+    paletteKindLabels[item.kind],
+    ...(item.keywords ?? []),
+  ]
+    .join(" ")
+    .trim();
+}
+
+function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+  if (target.closest("[cmdk-root]")) {
+    return true;
+  }
+  return (
+    target.isContentEditable ||
+    target.tagName === "INPUT" ||
+    target.tagName === "TEXTAREA" ||
+    target.tagName === "SELECT"
+  );
+}
 
 function ToolbarButton({ label, onClick, active = false, disabled = false }: ToolbarButtonProps) {
   return (
@@ -776,11 +852,15 @@ function App() {
   const queryClient = useQueryClient();
   const [selectedOperatorId, setSelectedOperatorId] = useState("");
   const [quickFilterText, setQuickFilterText] = useState("");
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [paletteQuery, setPaletteQuery] = useState("");
+  const [paletteState, setPaletteState] = useState<PaletteStorageState>(() => readPaletteStorageState());
   const [displayedOperatorCount, setDisplayedOperatorCount] = useState(0);
   const [mentionTarget, setMentionTarget] = useState("");
   const [notesMarkdown, setNotesMarkdown] = useState("");
   const gridApiRef = useRef<GridApi<OperatorRecord> | null>(null);
   const deferredQuickFilterText = useDeferredValue(quickFilterText);
+  const deferredPaletteQuery = useDeferredValue(paletteQuery.trim());
   const [actionResult, setActionResult] = useState<ActionResultState>({
     title: "No action executed yet",
     kind: "idle",
@@ -836,6 +916,12 @@ function App() {
     staleTime: 60_000,
     refetchInterval: 120_000,
     retry: 1,
+  });
+  const commandPaletteSearchQuery = useQuery({
+    queryKey: queryKeys.commandPaletteSearch(deferredPaletteQuery),
+    queryFn: () => fetchCommandPaletteSearch(deferredPaletteQuery),
+    enabled: paletteOpen && deferredPaletteQuery.length >= 2,
+    staleTime: 30_000,
   });
 
   const operators = rosterQuery.data?.operators ?? [];
@@ -1355,6 +1441,35 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    function handleGlobalPaletteShortcut(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setPaletteOpen((current) => !current);
+        return;
+      }
+      if (
+        event.key === "/" &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.altKey &&
+        !isTypingTarget(event.target)
+      ) {
+        event.preventDefault();
+        setPaletteOpen(true);
+      }
+    }
+
+    document.addEventListener("keydown", handleGlobalPaletteShortcut);
+    return () => document.removeEventListener("keydown", handleGlobalPaletteShortcut);
+  }, []);
+
+  useEffect(() => {
+    if (!paletteOpen && paletteQuery) {
+      setPaletteQuery("");
+    }
+  }, [paletteOpen, paletteQuery]);
+
   function launchTour(intent: TourIntent, options: TourLaunchOptions = {}) {
     if (tourRunning) {
       return;
@@ -1516,6 +1631,43 @@ function App() {
       shouldValidate: offboardForm.formState.submitCount > 0,
     });
     return true;
+  }
+
+  function closePalette() {
+    setPaletteOpen(false);
+  }
+
+  function focusElementById(elementId: string, sectionSelector?: string) {
+    if (sectionSelector) {
+      document.querySelector(sectionSelector)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+    window.setTimeout(() => {
+      const element = document.getElementById(elementId);
+      if (element instanceof HTMLElement) {
+        element.focus();
+      }
+    }, 40);
+  }
+
+  function openHref(href: string, newTab = false) {
+    if (newTab) {
+      window.open(href, "_blank", "noopener,noreferrer");
+      return;
+    }
+    window.location.assign(href);
+  }
+
+  function runPaletteItem(item: CommandPaletteItem) {
+    setPaletteState((current) => recordPaletteRecent(current, item.id));
+    closePalette();
+    item.onSelect();
+  }
+
+  function handlePaletteFavoriteToggle(itemId: string) {
+    setPaletteState((current) => togglePaletteFavorite(current, itemId));
   }
 
   function toggleLink() {
@@ -2269,6 +2421,321 @@ function App() {
     rosterState.kind,
     validationIssues,
   ]);
+  const paletteSearchResults = commandPaletteSearchQuery.data ?? [];
+
+  const paletteAppAndGlossaryEntries = useMemo<CommandPaletteItem[]>(
+    () =>
+      paletteStaticEntries.map((item) => ({
+        ...item,
+        onSelect: () => {
+          if (item.href) {
+            openHref(item.href, item.newTab);
+          }
+        },
+        searchValue: buildPaletteSearchValue(item),
+      })),
+    [],
+  );
+
+  const palettePageEntries = useMemo<CommandPaletteItem[]>(
+    () => [
+      {
+        id: "page:roster",
+        label: "Roster",
+        description: "Jump to the AG Grid roster and focus the quick filter.",
+        lane: "observe",
+        kind: "page",
+        keywords: ["operators", "ag grid", "quick filter", "roster"],
+        canFavorite: true,
+        onSelect: () => focusElementById("operator-quick-filter", '[data-tour-target="roster-panel"]'),
+        searchValue: "Roster operators ag grid quick filter observe",
+      },
+      {
+        id: "page:notes",
+        label: "Rich Notes",
+        description: "Jump to the bounded rich-text notes workspace for the selected operator.",
+        lane: "change",
+        kind: "page",
+        keywords: ["notes", "markdown", "tiptap", "editor"],
+        canFavorite: true,
+        onSelect: () => focusElementById("operator-notes-markdown", ".notesWorkspace"),
+        searchValue: "Rich Notes markdown editor tiptap notes workspace change",
+      },
+      {
+        id: "page:onboard",
+        label: "Onboard Operator",
+        description: "Jump to the schema-first onboarding form and focus the name field.",
+        lane: "change",
+        kind: "page",
+        keywords: ["onboard", "create operator", "access", "form"],
+        canFavorite: true,
+        onSelect: () => focusElementById("onboard-name", '[data-tour-target="onboard-form"]'),
+        searchValue: "Onboard Operator create operator schema form change",
+      },
+      {
+        id: "page:offboard",
+        label: "Off-board Operator",
+        description: "Jump to the governed off-boarding form and focus the operator selector.",
+        lane: "recover",
+        kind: "page",
+        keywords: ["offboard", "disable operator", "revoke access"],
+        canFavorite: true,
+        onSelect: () => focusElementById("offboard-operator", '[data-tour-target="offboard-form"]'),
+        searchValue: "Off-board Operator disable revoke access recover",
+      },
+      {
+        id: "page:reconcile",
+        label: "Reconcile Roster",
+        description: "Jump to the reconciliation form and focus the scope selector.",
+        lane: "change",
+        kind: "page",
+        keywords: ["reconcile", "sync operators", "roster"],
+        canFavorite: true,
+        onSelect: () => focusElementById("sync-operator"),
+        searchValue: "Reconcile Roster sync operators change",
+      },
+      {
+        id: "page:inventory",
+        label: "Selected Operator Inventory",
+        description: "Jump to the live inventory panel for the currently selected operator.",
+        lane: "observe",
+        kind: "page",
+        keywords: ["inventory", "selected operator", "access report"],
+        canFavorite: true,
+        onSelect: () => document.querySelector('[data-tour-target="inventory-panel"]')?.scrollIntoView({ behavior: "smooth", block: "start" }),
+        searchValue: "Selected Operator Inventory observe access report",
+      },
+    ],
+    [],
+  );
+
+  const paletteQuickActionEntries = useMemo<CommandPaletteItem[]>(() => {
+    const items: CommandPaletteItem[] = [
+      {
+        id: "quick:refresh-roster",
+        label: "Refresh Roster",
+        description: "Re-run the live operator roster query without leaving the palette.",
+        lane: "observe",
+        kind: "quick_action",
+        keywords: ["refresh", "roster", "query"],
+        onSelect: () => {
+          void rosterQuery.refetch();
+        },
+        searchValue: "Refresh Roster observe query refresh",
+      },
+      {
+        id: "quick:refresh-inventory",
+        label: "Refresh Inventory",
+        description: "Refresh the selected operator inventory panel.",
+        lane: "observe",
+        kind: "quick_action",
+        keywords: ["refresh", "inventory", "selected operator"],
+        onSelect: () => {
+          if (selectedOperatorId) {
+            void inventoryQuery.refetch();
+          }
+        },
+        searchValue: "Refresh Inventory observe selected operator",
+      },
+      {
+        id: "quick:tour-first-run",
+        label: "Start First-Run Tour",
+        description: "Launch the guided onboarding walkthrough for new operators.",
+        lane: "start",
+        kind: "quick_action",
+        keywords: ["tour", "first run", "guided onboarding"],
+        onSelect: () => launchTour("first_run"),
+        searchValue: "Start First-Run Tour onboarding start guided",
+      },
+      {
+        id: "quick:tour-onboard-privileged",
+        label: "Start Onboard Admin Or Operator Tour",
+        description: "Launch the guided onboarding path for privileged operators.",
+        lane: "change",
+        kind: "quick_action",
+        keywords: ["tour", "admin", "operator", "onboard"],
+        onSelect: () => launchTour("onboard_privileged"),
+        searchValue: "Start Onboard Admin Or Operator Tour change guided onboarding",
+      },
+      {
+        id: "quick:tour-onboard-viewer",
+        label: "Start Onboard Viewer Tour",
+        description: "Launch the guided onboarding path for a read-only viewer.",
+        lane: "start",
+        kind: "quick_action",
+        keywords: ["tour", "viewer", "onboard"],
+        onSelect: () => launchTour("onboard_viewer"),
+        searchValue: "Start Onboard Viewer Tour start guided onboarding viewer",
+      },
+      {
+        id: "quick:tour-offboard",
+        label: "Start Off-board Tour",
+        description: "Launch the guided off-boarding walkthrough.",
+        lane: "recover",
+        kind: "quick_action",
+        keywords: ["tour", "offboard", "revoke", "disable"],
+        onSelect: () => launchTour("offboard"),
+        searchValue: "Start Off-board Tour recover offboard guided",
+      },
+      {
+        id: "quick:tour-inventory",
+        label: "Start Inventory Review Tour",
+        description: "Launch the guided inventory review path for the selected operator.",
+        lane: "observe",
+        kind: "quick_action",
+        keywords: ["tour", "inventory", "review"],
+        onSelect: () => launchTour("inventory"),
+        searchValue: "Start Inventory Review Tour observe guided review",
+      },
+    ];
+
+    if (canResumeTour && tourProgress.lastIntent) {
+      items.unshift({
+        id: "quick:tour-resume",
+        label: `Resume ${tourIntentLabel(tourProgress.lastIntent)}`,
+        description: "Resume the most recently dismissed guided walkthrough in this browser.",
+        lane: "start",
+        kind: "quick_action",
+        keywords: ["resume", "tour", "guided onboarding"],
+        onSelect: () => launchTour(tourProgress.lastIntent!, { resume: true }),
+        searchValue: `Resume ${tourIntentLabel(tourProgress.lastIntent)} start guided tour`,
+      });
+    }
+
+    return items;
+  }, [
+    canResumeTour,
+    inventoryQuery,
+    launchTour,
+    rosterQuery,
+    selectedOperatorId,
+    tourProgress.lastIntent,
+  ]);
+
+  const paletteOperatorEntries = useMemo<CommandPaletteItem[]>(
+    () =>
+      operators.map((operator) => ({
+        id: `operator:${operator.id}`,
+        label: operator.name,
+        description: `${operator.role} • ${operator.status} • ${operator.email}`,
+        lane: operator.status === "inactive" ? "recover" : "observe",
+        kind: "operator",
+        keywords: [
+          operator.id,
+          operator.email,
+          operator.role,
+          operator.status,
+          operator.keycloak_username,
+          ...operator.realm_roles,
+          ...operator.groups,
+        ],
+        canFavorite: true,
+        onSelect: () => {
+          if (selectOperator(operator.id)) {
+            focusElementById("operator-quick-filter", '[data-tour-target="roster-panel"]');
+          }
+        },
+        searchValue: [
+          operator.name,
+          operator.id,
+          operator.email,
+          operator.role,
+          operator.status,
+          operator.keycloak_username,
+          operator.realm_roles.join(" "),
+          operator.groups.join(" "),
+        ]
+          .join(" ")
+          .trim(),
+      })),
+    [operators, notesDirty, selectedOperatorId],
+  );
+
+  const paletteDocsEntries = useMemo<CommandPaletteItem[]>(
+    () =>
+      paletteSearchResults.map((result) => ({
+        id: result.id,
+        label: result.title,
+        description: result.description || `Open the matching ${paletteKindLabels[result.kind]}.`,
+        lane: result.lane,
+        kind: result.kind,
+        href: result.href,
+        keywords: result.keywords,
+        newTab: true,
+        onSelect: () => openHref(result.href, true),
+        searchValue: buildPaletteSearchValue({
+          id: result.id,
+          label: result.title,
+          description: result.description,
+          lane: result.lane,
+          kind: result.kind,
+          href: result.href,
+          keywords: result.keywords,
+          newTab: true,
+        }),
+      })),
+    [paletteSearchResults],
+  );
+
+  const paletteEntryIndex = useMemo(() => {
+    const entries = [
+      ...paletteAppAndGlossaryEntries,
+      ...palettePageEntries,
+      ...paletteQuickActionEntries,
+      ...paletteOperatorEntries,
+    ];
+    return new Map(entries.map((item) => [item.id, item] as const));
+  }, [
+    paletteAppAndGlossaryEntries,
+    paletteOperatorEntries,
+    palettePageEntries,
+    paletteQuickActionEntries,
+  ]);
+
+  const paletteFavoriteEntries = useMemo(
+    () => paletteState.favoriteIds.map((itemId) => paletteEntryIndex.get(itemId)).filter(Boolean) as CommandPaletteItem[],
+    [paletteEntryIndex, paletteState.favoriteIds],
+  );
+
+  const paletteRecentEntries = useMemo(() => {
+    const favoriteIds = new Set(paletteState.favoriteIds);
+    return paletteState.recentIds
+      .filter((itemId) => !favoriteIds.has(itemId))
+      .map((itemId) => paletteEntryIndex.get(itemId))
+      .filter(Boolean) as CommandPaletteItem[];
+  }, [paletteEntryIndex, paletteState.favoriteIds, paletteState.recentIds]);
+
+  const paletteSections = useMemo<CommandPaletteSection[]>(() => {
+    const excludedIds = new Set([
+      ...paletteFavoriteEntries.map((item) => item.id),
+      ...paletteRecentEntries.map((item) => item.id),
+    ]);
+    const applicationEntries = paletteAppAndGlossaryEntries.filter(
+      (item) => item.kind === "application" && !excludedIds.has(item.id),
+    );
+    const glossaryEntries = paletteAppAndGlossaryEntries.filter((item) => item.kind === "glossary");
+    const pageEntries = palettePageEntries.filter((item) => !excludedIds.has(item.id));
+    const operatorEntries = paletteOperatorEntries.filter((item) => !excludedIds.has(item.id));
+
+    return [
+      { id: "favorites", label: "Favorites", items: paletteFavoriteEntries },
+      { id: "recent", label: "Recent", items: paletteRecentEntries },
+      { id: "applications", label: "Applications", items: applicationEntries },
+      { id: "pages", label: "Pages", items: pageEntries },
+      { id: "operators", label: "Operators", items: operatorEntries },
+      { id: "docs", label: "Docs And Runbooks", items: paletteDocsEntries },
+      { id: "glossary", label: "Glossary", items: glossaryEntries },
+      { id: "actions", label: "Quick Actions", items: paletteQuickActionEntries },
+    ].filter((section) => section.items.length > 0);
+  }, [
+    paletteAppAndGlossaryEntries,
+    paletteDocsEntries,
+    paletteFavoriteEntries,
+    palettePageEntries,
+    paletteQuickActionEntries,
+    paletteRecentEntries,
+    paletteOperatorEntries,
+  ]);
 
   const checklistCompletedCount = CHECKLIST_ITEMS.filter((item) => journeyProgress.checklist[item.id]).length;
   const checklistCompletionRate = Number(
@@ -2284,6 +2751,100 @@ function App() {
 
   return (
     <div className="shell">
+      {paletteOpen ? (
+        <div className="commandPaletteModal" onMouseDown={closePalette}>
+          <div className="commandPaletteShell" onMouseDown={(event) => event.stopPropagation()}>
+            <Command
+              loop
+              label="Operator access command palette"
+              className="commandPalette"
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  event.preventDefault();
+                  closePalette();
+                }
+              }}
+            >
+              <div className="commandPaletteHeader">
+                <div>
+                  <p className="commandPaletteEyebrow">Global Command Palette</p>
+                  <h2>Universal open dialog for operators, runbooks, glossary, and safe quick actions</h2>
+                </div>
+                <button className="commandPaletteClose" type="button" onClick={closePalette} aria-label="Close command palette">
+                  Esc
+                </button>
+              </div>
+              <div className="commandPaletteInputRow">
+                <Command.Input
+                  autoFocus
+                  value={paletteQuery}
+                  onValueChange={setPaletteQuery}
+                  placeholder="Search operators, runbooks, ADRs, glossary terms, and actions"
+                  className="commandPaletteInput"
+                />
+                <span className="commandPaletteShortcut">Ctrl/Cmd+K</span>
+              </div>
+              <Command.List className="commandPaletteList">
+                <Command.Empty className="commandPaletteEmpty">
+                  No matching destinations yet. Try an operator name, a runbook term, or an action like
+                  &nbsp;`refresh roster`.
+                </Command.Empty>
+                {commandPaletteSearchQuery.isFetching ? (
+                  <div className="commandPaletteStatus">Searching ADRs and runbooks through the repo search fabric…</div>
+                ) : null}
+                {commandPaletteSearchQuery.isError ? (
+                  <div className="commandPaletteStatus commandPaletteStatusWarning">
+                    Docs search is temporarily degraded. Local actions, operators, and saved destinations still work.
+                  </div>
+                ) : null}
+                {paletteSections.map((section) => (
+                  <Command.Group key={section.id} heading={section.label} className="commandPaletteGroup">
+                    {section.items.map((item) => {
+                      const isFavorite = paletteState.favoriteIds.includes(item.id);
+                      return (
+                        <Command.Item
+                          key={item.id}
+                          value={item.searchValue}
+                          keywords={item.keywords}
+                          className="commandPaletteItem"
+                          onSelect={() => runPaletteItem(item)}
+                        >
+                          <div className="commandPaletteItemCopy">
+                            <div className="commandPaletteItemMeta">
+                              <span className="commandPaletteBadge highlighted">{paletteLaneLabels[item.lane]}</span>
+                              <span className="commandPaletteBadge">{paletteKindLabels[item.kind]}</span>
+                            </div>
+                            <span className="commandPaletteItemLabel">{item.label}</span>
+                            <span className="commandPaletteItemDescription">{item.description}</span>
+                          </div>
+                          {item.canFavorite ? (
+                            <button
+                              type="button"
+                              className="commandPaletteFavorite"
+                              aria-label={`${isFavorite ? "Remove" : "Add"} ${item.label} ${isFavorite ? "from" : "to"} favorites`}
+                              onMouseDown={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                handlePaletteFavoriteToggle(item.id);
+                              }}
+                            >
+                              {isFavorite ? "★" : "☆"}
+                            </button>
+                          ) : null}
+                        </Command.Item>
+                      );
+                    })}
+                  </Command.Group>
+                ))}
+              </Command.List>
+              <div className="commandPaletteFooter">
+                <span>Recent destinations stay local to this browser session family.</span>
+                <span>Destructive work still routes into the full governed forms.</span>
+              </div>
+            </Command>
+          </div>
+        </div>
+      ) : null}
       <section className="hero">
         <div className="heroCard">
           <h1>Operator Access Admin</h1>
@@ -2293,6 +2854,15 @@ function App() {
             keeping every mutation on the same repo-managed backend path.
           </p>
           <p className="muted">Mutations now invalidate TanStack Query cache entries instead of forcing a full-page refresh.</p>
+          <div className="heroActions">
+            <button className="button" type="button" onClick={() => setPaletteOpen(true)}>
+              Open Command Palette
+            </button>
+            <span className="heroShortcut">Ctrl/Cmd+K</span>
+            <span className="muted">
+              Search operators, pages, runbooks, ADRs, glossary terms, and safe quick actions from one universal open dialog.
+            </span>
+          </div>
         </div>
         <div className="heroStats">
           <div className="heroCard stat">
@@ -2438,6 +3008,7 @@ function App() {
                 <label className="gridSearch">
                   <span className="gridSearchLabel">Quick Filter</span>
                   <input
+                    id="operator-quick-filter"
                     value={quickFilterText}
                     onChange={(event) => setQuickFilterText(event.target.value)}
                     placeholder="Search by operator, role, group, status, or notes"
@@ -2604,6 +3175,7 @@ function App() {
                       <p>Paste or edit markdown directly to import and export the same note content.</p>
                     </div>
                     <textarea
+                      id="operator-notes-markdown"
                       className="markdownTextarea"
                       value={notesMarkdown}
                       onChange={(event) => setNotesMarkdown(event.target.value)}

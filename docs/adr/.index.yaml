@@ -5552,7 +5552,7 @@ adr_index:
   - adr: '0311'
     title: Global Command Palette And Universal Open Dialog Via cmdk
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -5565,6 +5565,7 @@ adr_index:
       - cmdk
     summary: We will use cmdk as the default global command palette and universal open
     filename: 0311-global-command-palette-and-universal-open-dialog-via-cmdk.md
+    implemented_version: 0.130.85
   - adr: '0312'
     title: Shared Notification Center And Activity Timeline Across Human Surfaces
     status: Accepted

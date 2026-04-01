@@ -1,9 +1,10 @@
 # ADR 0311: Global Command Palette And Universal Open Dialog Via cmdk
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: not yet
+- Implemented In Platform Version: 0.130.85
+- Implemented On: 2026-04-02
 - Date: 2026-03-31
 
 ## Context

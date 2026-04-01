@@ -54,6 +54,7 @@ The workflow manages these live surfaces:
 - seeded helper `f/lv3/quarterly_access_review`
 - seeded helper `f/lv3/operator_journey_event`
 - seeded helper `f/lv3/operator_journey_scorecards`
+- seeded helper `f/lv3/command_palette_search`
 - enabled schedule `f/lv3/scheduler_watchdog_loop_every_10s`
 - seeded helper `f/lv3/config_merge/merge_config_changes`
 - enabled schedule `f/lv3/config_merge/merge_config_changes_every_minute`
@@ -106,6 +107,7 @@ Run these checks after converge:
 21. `WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" python3 scripts/windmill_run_wait_result.py --base-url http://100.64.0.1:8005 --workspace lv3 --path f/lv3/serverclaw_skills --payload-json '{"workspace_id":"ops"}'`
 22. `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/schedules/list | jq '.[] | select(.path=="f/lv3/operator_journey_scorecards_daily") | {path, enabled, schedule, script_path, args}'`
 23. `WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" python3 scripts/windmill_run_wait_result.py --base-url http://100.64.0.1:8005 --workspace lv3 --path f/lv3/operator_journey_scorecards --payload-json '{"window_days":30,"write_latest":true}'`
+24. `WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" python3 scripts/windmill_run_wait_result.py --base-url http://100.64.0.1:8005 --workspace lv3 --path f/lv3/command_palette_search --payload-json '{"query":"totp"}'`
 
 ## Notes
 
@@ -129,6 +131,7 @@ Run these checks after converge:
 - After a concurrent replay, capture the worker mount source in the receipt with `docker inspect`. The branch-scoped converge path can succeed even if a later compose render returns the steady-state worker bind mount to the canonical `/srv/proxmox_florin_server` host path.
 - The worker-checkout staging archive is built with a repo-local Python tar plus gzip helper instead of controller `tar`, which keeps macOS extended attributes out of `worker-checkout.tar.gz` and avoids guest-side extraction failures on `docker-runtime-lv3`.
 - Repo-managed Windmill raw apps now install frontend dependencies inside the guest-side seed staging directory before `wmill sync push`. Keep each raw app `package-lock.json` current when frontend dependencies change so converges stay deterministic even though the runtime now has a no-lock fallback for package-only apps.
+- ADR 0311 now uses the repo-managed `f/lv3/command_palette_search` helper to feed ADR and runbook results into the live `operator_access_admin` `cmdk` palette. If the browser palette can still open local actions but not docs, verify that helper directly before chasing frontend-only fixes.
 - The raw-app sync now stages the controller-side app tree through `rsync --filter='dir-merge,- .gitignore'` before it crosses the Proxmox jump path. Keep local frontend build artifacts like `node_modules/` and generated bundles excluded through each app's committed `.gitignore`, because ignored controller-local files are now intentionally pruned from the live seed upload.
 - The raw-app dependency install and `wmill sync push` steps now retry transient guest-side Docker EOFs before the converge fails. If a replay still exhausts those retries, capture the Docker journal evidence in the live-apply receipt before re-running.
 - `make converge-windmill` now verifies exact content parity for the critical verification scripts `f/lv3/windmill_healthcheck`, `f/lv3/gate-status`, and `f/lv3/stage-smoke-suites`. A replay that only leaves those paths present but stale now fails closed during the managed verify phase instead of reporting a false-green sync.
