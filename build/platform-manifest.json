@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.130",
+  "repo_version": "0.177.131",
   "platform_version": "0.130.82",
-  "generated_at": "2026-04-01T13:12:46Z",
-  "next_refresh_at": "2026-04-01T14:12:46Z",
+  "generated_at": "2026-04-01T13:39:56Z",
+  "next_refresh_at": "2026-04-01T14:39:56Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5880,10 +5880,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.129",
+    "last_version": "0.177.130",
     "deployed_at": "2026-04-01",
-    "summary": "accepts ADRs 0319 through 0323 to split the overloaded shared runtime into pool-scoped deployment lanes, raise the governed runtime memory envelope, and add bounded memory-pressure autoscaling rules for elastic services before more workloads are added to the platform",
-    "release_notes_url": "docs/release-notes/0.177.130.md"
+    "summary": "documents ADRs 0324 through 0328 to define programmatic sharding for service catalogs, ADR discovery, workstream history, agent discovery registries, and size-budgeted top-level summaries",
+    "release_notes_url": "docs/release-notes/0.177.131.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

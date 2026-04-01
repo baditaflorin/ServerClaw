@@ -14610,6 +14610,6 @@ workstreams:
     canonical_truth:
       changelog_entry: documents ADRs 0324 through 0328 to define programmatic sharding for service catalogs, ADR discovery, workstream history, agent discovery registries, and size-budgeted top-level summaries
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.131
       latest_receipts: {}
     blockers: []
