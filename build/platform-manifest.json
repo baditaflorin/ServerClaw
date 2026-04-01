@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.135",
+  "repo_version": "0.177.136",
   "platform_version": "0.130.85",
-  "generated_at": "2026-04-01T21:32:06Z",
-  "next_refresh_at": "2026-04-01T22:32:06Z",
+  "generated_at": "2026-04-01T21:48:41Z",
+  "next_refresh_at": "2026-04-01T22:48:41Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5987,10 +5987,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.134",
+    "last_version": "0.177.135",
     "deployed_at": "2026-04-01",
-    "summary": "implements ADR 0294 by making One-API the private unified OpenAI-compatible LLM proxy, migrating Open WebUI and ServerClaw onto repo-managed One-API provider contracts, and re-verifying the platform-context memory lane plus docker-runtime recovery from the exact-main replay",
-    "release_notes_url": "docs/release-notes/0.177.135.md"
+    "summary": "hardens shared docker-runtime bridge-chain checks so missing DOCKER and DOCKER-FORWARD chains fail safe before a host-wide Docker restart, records ADR 0329, and adds the runtime bridge-chain loss runbook used to diagnose the 2026-04-01 uptime incident on docker-runtime-lv3",
+    "release_notes_url": "docs/release-notes/0.177.136.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
