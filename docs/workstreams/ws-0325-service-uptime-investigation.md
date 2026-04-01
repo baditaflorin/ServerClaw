@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0319](../adr/0319-runtime-pools-as-the-service-partition-boundary.md)
 - Title: Investigate why multiple live services are failing to remain healthy across the platform runtime pools
-- Status: in_progress
+- Status: ready_for_merge
 - Branch: `codex/ws-0325-service-uptime-investigation`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0325-service-uptime-investigation`
 - Owner: codex

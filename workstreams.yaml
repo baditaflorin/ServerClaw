@@ -15446,7 +15446,7 @@ workstreams:
   - id: ws-0325-service-uptime-investigation
     adr: "0319"
     title: Investigate recurring service restarts and uptime failures across the runtime pools
-    status: in_progress
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0325-service-uptime-investigation
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0325-service-uptime-investigation
@@ -15494,6 +15494,10 @@ workstreams:
             - tests/test_common_docker_bridge_chains_helper.py
             - tests/test_docker_runtime_role.py
           mode: exclusive
+    canonical_truth:
+      changelog_entry: hardens shared docker-runtime bridge-chain checks so missing DOCKER and DOCKER-FORWARD chains fail safe before a host-wide Docker restart, records ADR 0329, and adds the runtime bridge-chain loss runbook used to diagnose the 2026-04-01 uptime incident on docker-runtime-lv3
+      release_bump: patch
+      included_in_repo_version: null
     blockers: []
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
