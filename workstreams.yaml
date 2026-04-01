@@ -1886,7 +1886,7 @@ workstreams:
     ready_to_merge: false
     live_applied: true
     blockers:
-      - 'The branch is still rebased onto latest realistic `origin/main` `b7dde631d290474de3200886846217e688e0c16e` / `0.177.134`, but the exact-main public verification still cannot start honestly because active ws-0303 monitoring-stack, ws-0300 Falco, ws-0299 ntfy, and ws-0247 Dify playbooks are mutating `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`.'
+      - 'The branch is still rebased onto latest realistic `origin/main` `cbb0c99f3f69c3ab2bb7658daf443c45df9ea49b` / `0.177.135`, but the exact-main public verification still cannot start honestly because active ws-0303 monitoring-stack, ws-0289 Label Studio, ws-0275 Tika, and ws-0247 Keycloak/Dify playbooks are mutating `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`, and the latest 900-second quiet-window waiter still failed to acquire a safe window.'
       - 'Fresh read-only public checks on 2026-04-02 still show `errors.lv3.org` drifted away from the repo-managed GlitchTip publication: it resolves to `65.108.75.123` but serves certificate `CN=nginx.lv3.org` and `308` redirects `/health/` to `https://nginx.lv3.org/health/`, so the exact-main live apply must be rerun and verified from the integrated tree before any truthful merge.'
       - 'Repo automation is mostly green from the rebased tree: `make remote-validate` and `make check-build-server` pass, and `make validate` plus `make pre-push-gate` are both reduced to protected canonical-truth regeneration of the top-level `README.md`; do not merge until the live replay succeeds and that final generated-docs decision is handled truthfully.'
   - id: ws-0292-live-apply
