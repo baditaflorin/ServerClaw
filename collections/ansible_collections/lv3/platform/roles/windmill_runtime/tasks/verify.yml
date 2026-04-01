@@ -235,6 +235,26 @@
   loop_control:
     label: "{{ windmill_verify_atlas_helper_files_local.results[item].item }}"
 
+- name: Ensure the Windmill Atlas verification seeded job secret directories exist on the guest immediately before Atlas verification
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+  loop: "{{ windmill_worker_seed_job_secret_directories }}"
+  no_log: true
+
+- name: Mirror the Windmill Atlas verification seeded job secret files to the guest immediately before Atlas verification
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.path }}"
+    mode: "{{ item.mode }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+  loop: "{{ windmill_worker_seed_job_secret_files }}"
+  no_log: true
+
 - name: Define the critical Windmill verification script expectations
   ansible.builtin.set_fact:
     windmill_verify_critical_seed_script_expectations:

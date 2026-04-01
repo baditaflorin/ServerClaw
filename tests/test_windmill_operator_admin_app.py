@@ -126,10 +126,13 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert "windmill_worker_runtime_writable_directories" in defaults_text
     assert "windmill_worker_repo_secret_directories" in defaults_text
     assert "windmill_worker_repo_secret_files" in defaults_text
+    assert "windmill_worker_seed_job_secret_directories" in defaults_text
+    assert "windmill_worker_seed_job_secret_files" in defaults_text
     assert "windmill_worker_proxmox_api_token_payload_dir" in defaults_text
     assert "windmill_worker_superadmin_secret_file" in defaults_text
     assert defaults["windmill_worker_superadmin_secret_dir"] == "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill"
     assert defaults["windmill_worker_superadmin_secret_file"] == "{{ windmill_worker_superadmin_secret_dir }}/superadmin-secret.txt"
+    assert defaults["windmill_worker_seed_job_secret_root"] == "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill-job-secrets"
     assert defaults["windmill_atlas_approle_local_file"] == "{{ windmill_controller_local_root }}/openbao/atlas-approle.json"
     assert defaults["windmill_ntfy_alertmanager_password_local_file"] == "{{ windmill_controller_local_root }}/ntfy/alertmanager-password.txt"
     assert defaults["windmill_runtime_api_base_url"] == "http://127.0.0.1:{{ windmill_server_port }}"
@@ -180,6 +183,43 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_worker_repo_secret_files"][3]["path"] == (
         "{{ windmill_worker_repo_checkout_host_path }}/.local/openbao/atlas-approle.json"
     )
+    assert defaults["windmill_worker_seed_job_secret_directories"] == [
+        {
+            "path": "{{ windmill_worker_seed_job_secret_root }}/openbao",
+            "owner": "root",
+            "group": "root",
+            "mode": "0700",
+        },
+        {
+            "path": "{{ windmill_worker_seed_job_secret_root }}/ntfy",
+            "owner": "root",
+            "group": "root",
+            "mode": "0700",
+        },
+    ]
+    assert defaults["windmill_worker_seed_job_secret_files"] == [
+        {
+            "path": "{{ windmill_worker_seed_job_secret_root }}/openbao/init.json",
+            "src": "{{ windmill_controller_local_root }}/openbao/init.json",
+            "owner": "root",
+            "group": "root",
+            "mode": "0600",
+        },
+        {
+            "path": "{{ windmill_worker_seed_job_secret_root }}/openbao/atlas-approle.json",
+            "src": "{{ windmill_controller_local_root }}/openbao/atlas-approle.json",
+            "owner": "root",
+            "group": "root",
+            "mode": "0600",
+        },
+        {
+            "path": "{{ windmill_worker_seed_job_secret_root }}/ntfy/alertmanager-password.txt",
+            "src": "{{ windmill_controller_local_root }}/ntfy/alertmanager-password.txt",
+            "owner": "root",
+            "group": "root",
+            "mode": "0600",
+        },
+    ]
     assert defaults["windmill_operator_manager_env"]["LV3_OPERATOR_MANAGER_SURFACE"] == "windmill"
     assert defaults["windmill_openbao_runtime_network"] == "openbao_default"
     assert defaults["windmill_operator_manager_env"]["LV3_OPENBAO_URL"] == "http://lv3-openbao:8201"
@@ -772,10 +812,14 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Ensure the Windmill worker checkout mutable files remain writable for Windmill jobs" in tasks
     assert "Ensure the Windmill worker checkout secret directories exist" in tasks
     assert "Mirror the Windmill worker checkout bootstrap secret files" in tasks
+    assert "Ensure the Windmill seeded job secret directories exist" in tasks
+    assert "Mirror the Windmill seeded job secret files" in tasks
     assert "windmill_worker_repo_mutable_directories" in tasks
     assert "windmill_worker_repo_mutable_files" in tasks
     assert "windmill_worker_repo_secret_directories" in tasks
     assert "windmill_worker_repo_secret_files" in tasks
+    assert "windmill_worker_seed_job_secret_directories" in tasks
+    assert "windmill_worker_seed_job_secret_files" in tasks
     assert "Ensure the worker checkout secret directory exists" in tasks
     assert "Mirror the Windmill superadmin secret into the worker checkout" in tasks
     assert "windmill_worker_superadmin_secret_dir" in tasks
@@ -982,6 +1026,12 @@ def test_windmill_verify_remirrors_atlas_surfaces_immediately_before_atlas_drift
     atlas_helper_assert_index = task_names.index(
         "Assert the Windmill Atlas verification helper files match controller state immediately before Atlas verification"
     )
+    atlas_seed_job_secret_dir_index = task_names.index(
+        "Ensure the Windmill Atlas verification seeded job secret directories exist on the guest immediately before Atlas verification"
+    )
+    atlas_seed_job_secret_mirror_index = task_names.index(
+        "Mirror the Windmill Atlas verification seeded job secret files to the guest immediately before Atlas verification"
+    )
     critical_scripts_verify_index = task_names.index(
         "Verify the critical Windmill verification scripts are seeded with current controller content"
     )
@@ -991,8 +1041,9 @@ def test_windmill_verify_remirrors_atlas_surfaces_immediately_before_atlas_drift
     atlas_drift_check_index = task_names.index("Run the Windmill Atlas drift check script")
 
     assert stage_smoke_assert_index < atlas_helper_collect_index < atlas_helper_mirror_index < atlas_snapshot_mirror_index
-    assert atlas_snapshot_mirror_index < atlas_helper_assert_index < atlas_drift_check_index
-    assert atlas_helper_assert_index < critical_scripts_verify_index < critical_scripts_assert_index < atlas_drift_check_index
+    assert atlas_snapshot_mirror_index < atlas_helper_assert_index < atlas_seed_job_secret_dir_index
+    assert atlas_seed_job_secret_dir_index < atlas_seed_job_secret_mirror_index < critical_scripts_verify_index
+    assert critical_scripts_verify_index < critical_scripts_assert_index < atlas_drift_check_index
 
 
 def test_windmill_verify_reconciles_runtime_before_later_seeded_jobs() -> None:
@@ -1060,3 +1111,30 @@ def test_windmill_worker_secret_mirror_uses_ops_ownership() -> None:
     assert ensure_secret_dir_task["ansible.builtin.file"]["group"] == "{{ proxmox_host_admin_user }}"
     assert mirror_secret_task["ansible.builtin.copy"]["owner"] == "{{ proxmox_host_admin_user }}"
     assert mirror_secret_task["ansible.builtin.copy"]["group"] == "{{ proxmox_host_admin_user }}"
+
+
+def test_windmill_seed_job_secret_mirror_uses_root_ownership() -> None:
+    loaded_tasks = yaml.safe_load(
+        (
+            REPO_ROOT
+            / "collections"
+            / "ansible_collections"
+            / "lv3"
+            / "platform"
+            / "roles"
+            / "windmill_runtime"
+            / "tasks"
+            / "main.yml"
+        ).read_text(encoding="utf-8")
+    )
+    mirror_secret_task = next(
+        task for task in loaded_tasks if task["name"] == "Mirror the Windmill seeded job secret files"
+    )
+    ensure_secret_dir_task = next(
+        task for task in loaded_tasks if task["name"] == "Ensure the Windmill seeded job secret directories exist"
+    )
+
+    assert ensure_secret_dir_task["ansible.builtin.file"]["owner"] == "{{ item.owner }}"
+    assert ensure_secret_dir_task["ansible.builtin.file"]["group"] == "{{ item.group }}"
+    assert mirror_secret_task["ansible.builtin.copy"]["owner"] == "{{ item.owner }}"
+    assert mirror_secret_task["ansible.builtin.copy"]["group"] == "{{ item.group }}"

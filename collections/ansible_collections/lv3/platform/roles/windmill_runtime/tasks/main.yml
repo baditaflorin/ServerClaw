@@ -782,6 +782,26 @@
   loop: "{{ windmill_worker_repo_secret_files }}"
   no_log: true
 
+- name: Ensure the Windmill seeded job secret directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+  loop: "{{ windmill_worker_seed_job_secret_directories }}"
+  no_log: true
+
+- name: Mirror the Windmill seeded job secret files
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.path }}"
+    mode: "{{ item.mode }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+  loop: "{{ windmill_worker_seed_job_secret_files }}"
+  no_log: true
+
 - name: Remove the staged Windmill worker checkout archive from the guest
   ansible.builtin.file:
     path: "{{ windmill_worker_checkout_archive_remote_file.path }}"

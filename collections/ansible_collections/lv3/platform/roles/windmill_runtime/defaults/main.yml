@@ -177,6 +177,7 @@ windmill_worker_proxmox_api_token_payload_dir: "{{ windmill_worker_repo_checkout
 windmill_worker_proxmox_api_token_payload_file: "{{ windmill_worker_proxmox_api_token_payload_dir }}/lv3-automation-primary.json"
 windmill_worker_superadmin_secret_dir: "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill"
 windmill_worker_superadmin_secret_file: "{{ windmill_worker_superadmin_secret_dir }}/superadmin-secret.txt"
+windmill_worker_seed_job_secret_root: "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill-job-secrets"
 windmill_openbao_runtime_network: openbao_default
 windmill_worker_repo_mutable_directories:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/state"
@@ -231,6 +232,31 @@ windmill_worker_repo_secret_files:
     mode: "0600"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/openbao/atlas-approle.json"
     src: "{{ windmill_controller_local_root }}/openbao/atlas-approle.json"
+    mode: "0600"
+windmill_worker_seed_job_secret_directories:
+  - path: "{{ windmill_worker_seed_job_secret_root }}/openbao"
+    owner: root
+    group: root
+    mode: "0700"
+  - path: "{{ windmill_worker_seed_job_secret_root }}/ntfy"
+    owner: root
+    group: root
+    mode: "0700"
+windmill_worker_seed_job_secret_files:
+  - path: "{{ windmill_worker_seed_job_secret_root }}/openbao/init.json"
+    src: "{{ windmill_controller_local_root }}/openbao/init.json"
+    owner: root
+    group: root
+    mode: "0600"
+  - path: "{{ windmill_worker_seed_job_secret_root }}/openbao/atlas-approle.json"
+    src: "{{ windmill_controller_local_root }}/openbao/atlas-approle.json"
+    owner: root
+    group: root
+    mode: "0600"
+  - path: "{{ windmill_worker_seed_job_secret_root }}/ntfy/alertmanager-password.txt"
+    src: "{{ windmill_controller_local_root }}/ntfy/alertmanager-password.txt"
+    owner: root
+    group: root
     mode: "0600"
 windmill_worker_checkout_checksum_file: >-
   {{
@@ -308,6 +334,12 @@ windmill_worker_checkout_prune_preserve_paths: >-
       | map(attribute='path')
       | list
       + windmill_worker_repo_secret_files
+      | map(attribute='path')
+      | list
+      + windmill_worker_seed_job_secret_directories
+      | map(attribute='path')
+      | list
+      + windmill_worker_seed_job_secret_files
       | map(attribute='path')
       | list
       + [
