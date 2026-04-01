@@ -2,13 +2,13 @@
 
 - ADR: [ADR 0319](../adr/0319-runtime-pools-as-the-service-partition-boundary.md), [ADR 0320](../adr/0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes.md), [ADR 0321](../adr/0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md), [ADR 0322](../adr/0322-memory-pressure-autoscaling-for-elastic-runtime-pools.md), [ADR 0323](../adr/0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md)
 - Title: Refine the runtime-pool ADR bundle with battle-tested API-first OSS adoption guidance
-- Status: in_progress
+- Status: merged
 - Implemented In Repo Version: pending
 - Live Applied In Platform Version: N/A
 - Implemented On: pending
 - Live Applied On: N/A
-- Branch: `codex/adr-0319-library-fit`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0319-library-fit`
+- Branch: `codex/adr-0319-library-fit-main`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0319-library-fit/.worktrees/adr-0319-library-fit-main`
 - Owner: codex
 - Depends On: `adr-0319-runtime-pools-as-the-service-partition-boundary`, `adr-0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes`, `adr-0321-runtime-pool-memory-envelopes-and-reserved-host-headroom`, `adr-0322-memory-pressure-autoscaling-for-elastic-runtime-pools`, `adr-0323-service-mobility-tiers-and-migration-waves-for-runtime-pools`
 - Conflicts With: none

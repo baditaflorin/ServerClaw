@@ -14946,10 +14946,10 @@ workstreams:
   - id: ws-0329-runtime-library-fit
     adr: "0319"
     title: Refine the runtime-pool ADR bundle with battle-tested API-first OSS recommendations
-    status: in_progress
+    status: merged
     owner: codex
-    branch: codex/adr-0319-library-fit
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0319-library-fit
+    branch: codex/adr-0319-library-fit-main
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0319-library-fit/.worktrees/adr-0319-library-fit-main
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0329-runtime-library-fit.md
     depends_on:
       - adr-0319-runtime-pools-as-the-service-partition-boundary
@@ -15015,6 +15015,7 @@ workstreams:
     canonical_truth:
       changelog_entry: refines ADRs 0319 through 0323 by explicitly preferring battle-tested API-first OSS such as Nomad Autoscaler, Traefik, Dapr, Microcks, OpenFGA, Temporal, and NATS JetStream over new repo-local runtime orchestration code
       release_bump: patch
+      included_in_repo_version: 0.177.133
     blockers: []
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
