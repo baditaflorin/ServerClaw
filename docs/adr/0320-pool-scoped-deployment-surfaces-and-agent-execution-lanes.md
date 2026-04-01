@@ -29,6 +29,9 @@ boundary.
 Every runtime pool must have its own **deployment surface** and its own
 **execution lane**.
 
+The first implementation should compose battle-tested API-first tools instead
+of inventing new repo-local runtime APIs.
+
 ### Required pool-scoped surfaces
 
 Each runtime pool must define all of the following as separate repo-managed
@@ -38,9 +41,25 @@ objects:
 - service-specific playbook entry point
 - runtime role root
 - compose project name or Nomad namespace
+- Traefik router, service, and middleware identifiers for the pool
+- Dapr application ids and component references when the pool uses Dapr
 - secret materialization directory and restart scope
 - health probes and rollback bundle
+- API contract or schema artifact that can be loaded into Microcks for mock and
+  conformance testing
 - execution lane id used by the scheduler and conflict registry
+
+### Preferred deployment building blocks
+
+For pool-aware delivery we prefer these existing surfaces:
+
+- `Nomad namespaces` or `job groups` for pool-level scheduling boundaries
+- `Traefik` dynamic configuration for per-pool publication, retries, and
+  traffic shifts
+- `Dapr` sidecars and APIs for service invocation, pub/sub, bindings, secrets,
+  and workflow hooks where those patterns are needed
+- `Microcks` for API mocking, contract validation, and compatibility checks so
+  agents do not need custom mock servers or ad hoc test harnesses
 
 ### Service-catalog requirements
 
@@ -49,6 +68,7 @@ Every service that lands on a runtime pool must declare:
 - `runtime_pool`
 - `deployment_surface`
 - `restart_domain`
+- `api_contract_ref`
 - dependency edges that cross into other pools
 
 The default serialisation boundary for service work becomes the runtime pool,
@@ -77,6 +97,8 @@ not the whole environment cell.
 - more deployment surfaces mean more metadata and more validation paths
 - shared helpers must stay disciplined or the repo will drift into repeated
   near-duplicate playbooks
+- pool-aware delivery will be slower to bootstrap if the contract artifacts
+  needed by Traefik, Dapr, or Microcks are missing
 
 ## Boundaries
 
@@ -93,3 +115,4 @@ not the whole environment cell.
 - ADR 0173: Workstream surface ownership manifest
 - ADR 0175: Cross-workstream interface contracts
 - ADR 0176: Inventory sharding and host-scoped Ansible execution
+- ADR 0232: Nomad for durable batch and long-running internal jobs

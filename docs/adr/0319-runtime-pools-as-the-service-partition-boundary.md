@@ -28,6 +28,10 @@ cell. What it lacks is a smaller, service-level partition boundary inside one
 cell so we can change one cluster of services without implicitly touching every
 other service on the same runtime host.
 
+The platform also does not want to grow a bespoke runtime framework when
+production-tested OSS already exists and has docs future agents can verify
+directly.
+
 ## Decision
 
 We will treat the **runtime pool** as the primary partition boundary for
@@ -59,6 +63,23 @@ Dedicated non-pool planes such as `nginx-lv3`, `postgres-lv3`,
 `monitoring-lv3`, `docker-build-lv3`, and `coolify-lv3` remain separate from
 this runtime-pool split.
 
+### Preferred runtime substrate
+
+The first implementation should prefer existing API-first OSS rather than new
+custom orchestration code:
+
+- `Nomad` is the preferred scheduler for runtime pools that outgrow one
+  Compose-managed VM and need declarative placement, restart policy, and
+  namespace-level isolation
+- `Traefik` is the preferred pool ingress and service-discovery layer for
+  dynamic routing between pool members
+- `Dapr` is the preferred application runtime helper when services need
+  service-to-service invocation, pub/sub, state bindings, or workflow helpers
+  without bespoke integration glue
+
+This ADR does not require every pool to move to those products immediately, but
+it makes them the default direction for new pool-aware implementation work.
+
 ### Hard partitioning rules
 
 - control-plane anchors may not share a runtime pool with AI-bursty workloads
@@ -88,6 +109,8 @@ this runtime-pool split.
 - more pools mean more playbooks, probes, and migration planning work
 - some current services will need explicit exceptions until the pool split is
   fully implemented
+- adopting Nomad, Traefik, and Dapr raises the platform baseline, so partial
+  rollouts must avoid leaving operators with three half-integrated runtimes
 
 ## Boundaries
 

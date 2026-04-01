@@ -21,6 +21,7 @@
 - define pool-scoped deployment surfaces so agents can change one runtime pool without blocking unrelated work on another
 - define an explicit runtime memory increase, host free-memory floor, and autoscaling bounds for elastic pools
 - define mobility tiers and migration waves so the current `docker-runtime-lv3` catch-all host can be decomposed safely rather than all at once
+- refine the bundle so it points at battle-tested API-first OSS building blocks instead of leaving the implementation path overly custom
 
 ## Non-Goals
 
@@ -50,6 +51,7 @@
 - raise the governed runtime memory budget from one shared envelope to pool-specific envelopes with one host-side free-memory floor
 - autoscale only elastic pools and only inside declared min and max bounds
 - move services in waves according to mobility tier rather than treating stateful anchors and bursty stateless workers the same
+- prefer `Nomad`, `Nomad Autoscaler`, `Traefik`, `Dapr`, and `Microcks` before introducing new repo-local runtime orchestration code
 
 ## Verification Plan
 
