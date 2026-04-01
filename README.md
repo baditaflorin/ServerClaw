@@ -70,6 +70,8 @@ Harbor is now live on `docker-runtime-lv3` and published at `https://registry.lv
 
 MinIO is now live on `docker-runtime-lv3` and published at `https://minio.lv3.org`, with the operator console held behind `https://minio-console.lv3.org`, the shared launch buckets for Loki, Langfuse, Gitea LFS, and RAG staging converged from repo automation, and the shared `minio-root` repository path now backing the verified Restic config-backup flow from current `main`.
 
+ADR 0292 Lago billing is now re-verified on production from `main`: `https://billing.lv3.org` keeps the browser surface behind the shared oauth2-proxy sign-in flow, anonymous `https://billing.lv3.org/api/health` requests now fail closed at the API gateway with the canonical `401` envelope, and the 2026-04-01 exact-main replay on release `0.177.127` re-verified public smoke event ingest plus current-usage aggregation on platform version `0.130.81`.
+
 Signed release bundles are now live through that private Gitea path: the repo-managed `release-bundle` workflow publishes tarball, checksum, and Sigstore bundle assets into private Gitea Releases, and controller-side replay now verifies those assets with Cosign against the committed public key before treating them as eligible runtime input.
 
 Renovate is now live through that same private Gitea Actions path on `docker-build-lv3`: the Harbor-pinned `registry.lv3.org/check-runner/renovate:42.76.4` runtime mints a short-lived scoped Gitea token from the OpenBao-rendered bootstrap bundle at job start, maintains the private `Renovate Dashboard`, and now opens governed `main`-targeted update PRs against `ops/proxmox_florin_server`.
@@ -217,8 +219,8 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.126` |
-| Platform version | `0.130.80` |
+| Repository version | `0.177.127` |
+| Platform version | `0.130.81` |
 | Observed check date | `2026-03-31` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -245,6 +247,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `analytics.lv3.org` | `plausible` | `edge-published` | `docker-runtime-lv3` |
 | `api.lv3.org` | `api-gateway` | `edge-published` | `docker-runtime-lv3` |
 | `apps.lv3.org` | `coolify-apps` | `edge-published` | `coolify-lv3` |
+| `billing.lv3.org` | `lago` | `edge-published` | `docker-runtime-lv3` |
 | `build.lv3.org` | `docker-build` | `informational-only` | `docker-build-lv3` |
 | `chat.lv3.org` | `serverclaw` | `edge-published` | `coolify-lv3` |
 | `ci.lv3.org` | `woodpecker` | `edge-published` | `docker-runtime-lv3` |
@@ -334,6 +337,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `k6_load_testing` | `2026-03-31-adr-0305-k6-mainline-live-apply` |
 | `keycloak` | `2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply` |
 | `keycloak_operator_access` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
+| `lago` | `2026-04-01-adr-0292-lago-mainline-live-apply` |
 | `langfuse` | `2026-03-26-adr-0146-langfuse-live-apply` |
 | `local_search_and_indexing_fabric` | `2026-03-29-adr-0239-browser-local-search-post-merge-replay` |
 | `log_queryability_canary` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
@@ -679,6 +683,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Host Control Loops](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-host-control-loops.md)
 - [Configure JupyterHub](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-jupyterhub.md)
 - [Configure Keycloak](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-keycloak.md)
+- [Configure Lago](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-lago.md)
 - [Configure Langfuse](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-langfuse.md)
 - [Configure Mail Platform](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mail-platform.md)
 - [Configure Mailpit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mailpit.md)
@@ -1502,6 +1507,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0290-live-apply: Live Apply ADR 0290 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0290-live-apply.md)
 - [Workstream ws-0291-live-apply: Live Apply ADR 0291 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0291-live-apply.md)
 - [Workstream ws-0291-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0291-main-merge.md)
+- [Workstream ws-0292-live-apply: Live Apply ADR 0292 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-live-apply.md)
 - [Workstream WS-0293: Temporal Durable Workflow Engine Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-live-apply.md)
 - [Workstream ws-0295-live-apply: Live Apply ADR 0295 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md)
 - [Workstream WS-0296: Education Repo Refresh And Named Deploy Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-education-refresh.md)
@@ -1534,8 +1540,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.126` |
-| Platform version | `0.130.80` |
+| Repository version | `0.177.127` |
+| Platform version | `0.130.81` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1822,6 +1828,7 @@ This repository is intentionally opinionated:
 | `0273` | Live apply ADR 0273 public endpoint admission control | `live_applied` | [adr-0273-public-endpoint-admission-control.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md) |
 | `0274` | Live apply ADR 0274 shared MinIO object storage from latest origin/main | `live_applied` | [ws-0274-minio-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0274-minio-live-apply.md) |
 | `0277` | Live apply the private Typesense structured-search plane from latest origin/main | `live_applied` | [ws-0277-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0277-live-apply.md) |
+| `0292` | Live apply Lago as the usage metering and billing API layer from latest origin/main | `merged` | [ws-0292-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-live-apply.md) |
 | `0295` | Shared artifact cache plane and dedicated cache VM roadmap | `live_applied` | [adr-0295-artifact-cache-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md) |
 | `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `merged` | [ws-0297-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md) |

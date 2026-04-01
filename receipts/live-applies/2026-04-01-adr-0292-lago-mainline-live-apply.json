@@ -56,6 +56,11 @@
       "observed": "`make syntax-check-lago`, `./scripts/validate_repo.sh agent-standards`, and `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` all passed from the refreshed worktree."
     },
     {
+      "check": "Full repository promotion gate on the protected release surfaces",
+      "result": "pass",
+      "observed": "After promoting the protected release surfaces for repository version `0.177.127` and platform version `0.130.81`, `make pre-push-gate` passed end to end, including `workstream-surfaces`, `generated-docs`, `dependency-graph`, `ansible-syntax`, `ansible-lint`, `security-scan`, `semgrep-sast`, and `integration-tests`."
+    },
+    {
       "check": "Exact-main Lago converge replay",
       "result": "pass",
       "observed": "`make converge-lago env=production` completed cleanly with final recap `docker-runtime-lv3 ok=447 changed=150 failed=0`, `nginx-lv3 ok=45 changed=4 failed=0`, `postgres-lv3 ok=74 changed=0 failed=0`, and `localhost ok=18 changed=0 failed=0`."
@@ -77,8 +82,15 @@
     "workstreams.yaml",
     "config/service-capability-catalog.json",
     "config/subdomain-exposure-registry.json",
+    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-targeted-tests-r3.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-syntax-check-lago-r2.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-validate-agent-standards-r3.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-validate-repository-data-models-r1.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-dependency-diagram-r3.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-generate-status-r2.txt",
     "receipts/live-applies/evidence/2026-04-01-ws-0292-main-pre-apply-public-baseline-r2-0.177.126.txt",
     "receipts/live-applies/evidence/2026-04-01-ws-0292-main-post-apply-public-verification-r1-0.177.126.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-pre-push-gate-r4.txt",
     "receipts/live-applies/evidence/2026-04-01-ws-0292-mainline-r31-converge-0.177.126.txt",
     "receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json"
   ],

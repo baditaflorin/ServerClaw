@@ -570,7 +570,7 @@ workstreams:
   - id: ws-0292-live-apply
     adr: "0292"
     title: Live apply Lago as the usage metering and billing API layer from latest origin/main
-    status: live_applied
+    status: merged
     owner: codex
     branch: codex/ws-0292-main-integration-r1
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2
@@ -605,6 +605,7 @@ workstreams:
       - inventory/group_vars/platform.yml
       - playbooks/lago.yml
       - playbooks/services/lago.yml
+      - collections/ansible_collections/lv3/platform/playbooks/api-gateway.yml
       - collections/ansible_collections/lv3/platform/playbooks/lago.yml
       - collections/ansible_collections/lv3/platform/playbooks/services/lago.yml
       - collections/ansible_collections/lv3/platform/roles/lago_postgres/
@@ -644,6 +645,7 @@ workstreams:
       - receipts/live-applies/
       - receipts/live-applies/evidence/
       - receipts/ops-portal-snapshot.html
+      - receipts/sbom/**
       - tests/test_lago_runtime_role.py
       - tests/test_restic_config_backup.py
       - tests/test_restic_config_backup_role.py
@@ -667,12 +669,14 @@ workstreams:
             - docs/runbooks/configure-lago.md
             - playbooks/lago.yml
             - playbooks/services/lago.yml
+            - collections/ansible_collections/lv3/platform/playbooks/api-gateway.yml
             - collections/ansible_collections/lv3/platform/playbooks/lago.yml
             - collections/ansible_collections/lv3/platform/playbooks/services/lago.yml
             - collections/ansible_collections/lv3/platform/roles/lago_postgres/**
             - collections/ansible_collections/lv3/platform/roles/lago_runtime/**
             - receipts/image-scans/**
             - receipts/live-applies/**
+            - receipts/sbom/**
           mode: exclusive
         - id: restic_live_apply_support
           paths:
@@ -767,7 +771,7 @@ workstreams:
       latest_receipts:
         lago: 2026-04-01-adr-0292-lago-mainline-live-apply
     blockers: []
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: true
   - id: ws-0295-live-apply
     adr: "0295"

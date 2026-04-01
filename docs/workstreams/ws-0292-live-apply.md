@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0292](../adr/0292-lago-as-the-usage-metering-and-billing-api-layer.md)
 - Title: Deploy Lago as the repo-managed usage metering and billing API layer, publish `billing.lv3.org`, and verify metered ingestion end to end
-- Status: live_applied
+- Status: merged
 - Included In Repo Version: 0.177.127
 - Canonical Mainline Receipt: `receipts/live-applies/2026-04-01-adr-0292-lago-mainline-live-apply.json`
 - Platform Version Observed During Integration: 0.130.80
@@ -15,7 +15,7 @@
 - Owner: codex
 - Depends On: `adr-0021-public-subdomain-publication`, `adr-0042-postgresql-as-the-shared-relational-database`, `adr-0063-keycloak-sso-for-internal-services`, `adr-0077-compose-secret-injection-pattern`, `adr-0086-backup-and-recovery`, `adr-0276-nats-jetstream-as-the-platform-event-bus`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `Makefile`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/adr/0292`, `docs/workstreams/ws-0292-live-apply.md`, `docs/runbooks/configure-lago.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/diagrams/service-dependency-graph.excalidraw`, `docs/site-generated/architecture/dependency-graph.md`, `build/platform-manifest.json`, `versions/stack.yaml`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `playbooks/lago.yml`, `playbooks/services/lago.yml`, `collections/ansible_collections/lv3/platform/playbooks/lago.yml`, `collections/ansible_collections/lv3/platform/playbooks/services/lago.yml`, `roles/lago_postgres/`, `roles/lago_runtime/`, `roles/api_gateway_runtime/`, `roles/nginx_edge_publication/`, `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`, `collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml`, `scripts/api_gateway/main.py`, `scripts/generate_platform_vars.py`, `config/*catalog*.json`, `config/ansible-execution-scopes.yaml`, `config/ansible-role-idempotency.yml`, `config/prometheus/file_sd/https_tls_targets.yml`, `config/prometheus/rules/https_tls_alerts.yml`, `config/uptime-kuma/monitors.json`, `receipts/image-scans/`, `receipts/live-applies/`, `receipts/live-applies/evidence/`, `receipts/ops-portal-snapshot.html`, `tests/`
+- Shared Surfaces: `workstreams.yaml`, `Makefile`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/adr/0292`, `docs/workstreams/ws-0292-live-apply.md`, `docs/runbooks/configure-lago.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/diagrams/service-dependency-graph.excalidraw`, `docs/site-generated/architecture/dependency-graph.md`, `build/platform-manifest.json`, `versions/stack.yaml`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `playbooks/lago.yml`, `playbooks/services/lago.yml`, `collections/ansible_collections/lv3/platform/playbooks/api-gateway.yml`, `collections/ansible_collections/lv3/platform/playbooks/lago.yml`, `collections/ansible_collections/lv3/platform/playbooks/services/lago.yml`, `roles/lago_postgres/`, `roles/lago_runtime/`, `roles/api_gateway_runtime/`, `roles/nginx_edge_publication/`, `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`, `collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml`, `scripts/api_gateway/main.py`, `scripts/generate_platform_vars.py`, `config/*catalog*.json`, `config/ansible-execution-scopes.yaml`, `config/ansible-role-idempotency.yml`, `config/prometheus/file_sd/https_tls_targets.yml`, `config/prometheus/rules/https_tls_alerts.yml`, `config/uptime-kuma/monitors.json`, `receipts/image-scans/`, `receipts/live-applies/`, `receipts/live-applies/evidence/`, `receipts/ops-portal-snapshot.html`, `receipts/sbom/**`, `tests/`
 
 ## Scope
 
@@ -44,10 +44,12 @@
 - `build/platform-manifest.json`
 - `docs/diagrams/service-dependency-graph.excalidraw`
 - `docs/site-generated/architecture/dependency-graph.md`
+- `collections/ansible_collections/lv3/platform/playbooks/api-gateway.yml`
 - `collections/ansible_collections/lv3/platform/playbooks/lago.yml`
 - `collections/ansible_collections/lv3/platform/roles/lago_runtime/`
 - `collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/`
 - `receipts/live-applies/2026-03-31-adr-0292-lago-mainline-live-apply.json`
+- `receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json`
 - `receipts/live-applies/evidence/2026-03-31-ws-0292-*`
 
 ## Verification
@@ -64,6 +66,10 @@
 - Repo automation and repository-model checks on the refreshed tree also
   passed: `make syntax-check-lago`, `./scripts/validate_repo.sh agent-standards`,
   and `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`.
+- The final protected-surface validation also passed before merge:
+  `uv run --with jsonschema python scripts/generate_dependency_diagram.py --write`,
+  `make generate-status`, and `make pre-push-gate`. The durable proof is
+  `receipts/live-applies/evidence/2026-04-01-ws-0292-main-pre-push-gate-r4.txt`.
 - The successful latest-main replay evidence is
   `receipts/live-applies/evidence/2026-04-01-ws-0292-mainline-r31-converge-0.177.126.txt`.
   `make converge-lago env=production` completed with clean recap
