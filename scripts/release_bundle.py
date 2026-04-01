@@ -969,8 +969,6 @@ def command_publish(args: argparse.Namespace) -> int:
         retain_count=args.retain_count,
         exclude_tags={identity.release_tag},
     )
-    if removed_tags:
-        print(json.dumps({"pruned_bundle_releases": removed_tags}, indent=2))
     bundle_path, signature_path, sigstore_bundle_path, sha256_path, manifest, identity = build_release_bundle(args)
     if not sigstore_bundle_path.exists():
         raise FileNotFoundError(f"missing Sigstore bundle at {sigstore_bundle_path}")
@@ -1013,6 +1011,7 @@ def command_publish(args: argparse.Namespace) -> int:
         "sha256_path": str(sha256_path),
         "release_url": release.get("html_url"),
         "uploaded_assets": [asset["name"] for asset in uploaded_assets],
+        "pruned_bundle_releases": removed_tags,
     }
     print(json.dumps(payload, indent=2))
     return 0
