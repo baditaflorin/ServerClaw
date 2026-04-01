@@ -1199,6 +1199,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0315: Canonical Page States And Next-Best-Action Guidance For Human Surfaces](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0315-canonical-page-states-and-next-best-action-guidance-for-human-surfaces.md)
 - [ADR 0316: Journey Analytics And Onboarding Success Scorecards](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0316-journey-analytics-and-onboarding-success-scorecards.md)
 - [ADR 0317: Keycloak Direct-API Operator Provisioning via SSH Proxy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md)
+- [ADR 0318: Repeatable Operator Onboarding with CC Audit Trail](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
