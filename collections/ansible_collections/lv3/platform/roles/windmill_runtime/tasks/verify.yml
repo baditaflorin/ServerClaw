@@ -71,6 +71,11 @@
   loop_control:
     label: "{{ item }}"
 
+- name: Reconcile the Windmill runtime before validation gate verification
+  ansible.builtin.import_tasks: recover_verification_runtime.yml
+  vars:
+    windmill_verify_runtime_reconcile_reason: validation gate verification
+
 - name: Run the Windmill validation gate status script
   ansible.builtin.shell: >
     python3 {{ (playbook_dir | dirname ~ '/scripts/windmill_run_wait_result.py') | quote }}
@@ -116,6 +121,11 @@
       - ((windmill_verify_validation_gate_status.stdout | from_json).gate_status.waiver_summary.release_blockers | type_debug) == "list"
     fail_msg: >-
       Windmill API responded, but the seeded validation gate status script did not return the expected structured result.
+
+- name: Reconcile the Windmill runtime before stage smoke verification
+  ansible.builtin.import_tasks: recover_verification_runtime.yml
+  vars:
+    windmill_verify_runtime_reconcile_reason: stage smoke verification
 
 - name: Run the Windmill stage smoke suites script
   ansible.builtin.shell: >
@@ -401,6 +411,11 @@
   loop_control:
     label: "{{ item.item.path }}"
   no_log: true
+
+- name: Reconcile the Windmill runtime before Atlas drift verification
+  ansible.builtin.import_tasks: recover_verification_runtime.yml
+  vars:
+    windmill_verify_runtime_reconcile_reason: Atlas drift verification
 
 - name: Run the Windmill Atlas drift check script
   ansible.builtin.shell: >

@@ -649,6 +649,17 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     verify_tasks = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml"
     ).read_text()
+    recover_verify_tasks = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "windmill_runtime"
+        / "tasks"
+        / "recover_verification_runtime.yml"
+    ).read_text()
     wait_for_workers_tasks = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/wait_for_workers.yml"
     ).read_text()
@@ -843,6 +854,9 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Mirror Windmill Atlas schema snapshots to the guest immediately before Atlas verification" in verify_tasks
     assert "Collect guest-side checksums for Windmill Atlas verification helper files" in verify_tasks
     assert "Assert the Windmill Atlas verification helper files match controller state immediately before Atlas verification" in verify_tasks
+    assert "Reconcile the Windmill runtime before validation gate verification" in verify_tasks
+    assert "Reconcile the Windmill runtime before stage smoke verification" in verify_tasks
+    assert "Reconcile the Windmill runtime before Atlas drift verification" in verify_tasks
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks
     assert "Assert the Windmill validation gate status result" in verify_tasks
@@ -887,6 +901,14 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "scripts/run_python_with_packages.sh" in verify_tasks
     assert "failed_when: false" in verify_tasks
     assert "retries: 6" in verify_tasks
+    assert "recover_verification_runtime.yml" in verify_tasks
+    assert "Check whether the Windmill runtime API is reachable before {{ windmill_verify_runtime_reconcile_reason }}" in recover_verify_tasks
+    assert "docker compose --file \"{{ windmill_compose_file }}\" up -d --remove-orphans" in recover_verify_tasks
+    assert "Wait for the Windmill runtime API after verification recovery before {{ windmill_verify_runtime_reconcile_reason }}" in recover_verify_tasks
+    assert "Wait for Windmill workers to register before {{ windmill_verify_runtime_reconcile_reason }}" in recover_verify_tasks
+    assert "import_tasks: wait_for_workers.yml" in recover_verify_tasks
+    assert "windmill_verify_critical_seed_scripts.status == 200" in verify_tasks
+    assert "windmill_verify_critical_seed_scripts.json | default({})" in verify_tasks
     assert "windmill_verify_default_operations_scripts.status == 200" in verify_tasks
     assert "windmill_verify_default_operations_scripts.json | default({})" in verify_tasks
     assert "delegate_to: localhost" in tasks
@@ -971,6 +993,36 @@ def test_windmill_verify_remirrors_atlas_surfaces_immediately_before_atlas_drift
     assert stage_smoke_assert_index < atlas_helper_collect_index < atlas_helper_mirror_index < atlas_snapshot_mirror_index
     assert atlas_snapshot_mirror_index < atlas_helper_assert_index < atlas_drift_check_index
     assert atlas_helper_assert_index < critical_scripts_verify_index < critical_scripts_assert_index < atlas_drift_check_index
+
+
+def test_windmill_verify_reconciles_runtime_before_later_seeded_jobs() -> None:
+    verify_tasks = yaml.safe_load(
+        (
+            REPO_ROOT
+            / "collections"
+            / "ansible_collections"
+            / "lv3"
+            / "platform"
+            / "roles"
+            / "windmill_runtime"
+            / "tasks"
+            / "verify.yml"
+        ).read_text()
+    )
+    task_names = [task["name"] for task in verify_tasks]
+
+    validation_gate_reconcile_index = task_names.index(
+        "Reconcile the Windmill runtime before validation gate verification"
+    )
+    validation_gate_index = task_names.index("Run the Windmill validation gate status script")
+    stage_smoke_reconcile_index = task_names.index("Reconcile the Windmill runtime before stage smoke verification")
+    stage_smoke_index = task_names.index("Run the Windmill stage smoke suites script")
+    atlas_reconcile_index = task_names.index("Reconcile the Windmill runtime before Atlas drift verification")
+    atlas_drift_check_index = task_names.index("Run the Windmill Atlas drift check script")
+
+    assert validation_gate_reconcile_index < validation_gate_index
+    assert stage_smoke_reconcile_index < stage_smoke_index
+    assert atlas_reconcile_index < atlas_drift_check_index
 
 
 def test_windmill_worker_secret_mirror_uses_ops_ownership() -> None:

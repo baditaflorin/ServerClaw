@@ -1,0 +1,50 @@
+---
+# Purpose: Reconcile the Windmill runtime immediately before a seeded verification workflow so concurrent churn cannot strand later checks on a dead compose stack.
+# Inputs: windmill_runtime_api_base_url, windmill_compose_file, wait_for_workers.yml, and windmill_verify_runtime_reconcile_reason.
+# Outputs: A reachable Windmill API and at least one registered worker before the next seeded verification workflow runs.
+# Idempotency: Conditionally mutating; only restarts compose services when the local API is unavailable, then waits for recovery.
+# Dependencies: windmill_runtime convergence, Docker Compose on the guest, and tasks/wait_for_workers.yml.
+
+- name: Check whether the Windmill runtime API is reachable before {{ windmill_verify_runtime_reconcile_reason }}
+  ansible.builtin.uri:
+    url: "{{ windmill_runtime_api_base_url }}/api/version"
+    method: GET
+    status_code: 200
+  register: windmill_verify_runtime_preflight
+  failed_when: false
+  changed_when: false
+
+- name: Recover the Windmill compose services before {{ windmill_verify_runtime_reconcile_reason }} when the API is unavailable
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_ids="$(docker ps -aq \
+      --filter label=com.docker.compose.project=windmill \
+      --filter label=com.docker.compose.replace)"
+    if [ -n "$stale_ids" ]; then
+      docker rm -f $stale_ids
+    fi
+    docker compose --file "{{ windmill_compose_file }}" up -d --remove-orphans \
+      openbao-agent windmill_server windmill_worker windmill_worker_native
+  args:
+    executable: /bin/bash
+  register: windmill_verify_runtime_recover
+  changed_when: >-
+    'Creating' in windmill_verify_runtime_recover.stdout
+    or 'Recreating' in windmill_verify_runtime_recover.stdout
+    or 'Starting' in windmill_verify_runtime_recover.stdout
+  when: windmill_verify_runtime_preflight.status | default(0) != 200
+
+- name: Wait for the Windmill runtime API after verification recovery before {{ windmill_verify_runtime_reconcile_reason }}
+  ansible.builtin.uri:
+    url: "{{ windmill_runtime_api_base_url }}/api/version"
+    method: GET
+    status_code: 200
+  register: windmill_verify_runtime_post_recovery
+  retries: "{{ windmill_runtime_api_wait_retries }}"
+  delay: "{{ windmill_runtime_api_wait_delay_seconds }}"
+  until: windmill_verify_runtime_post_recovery.status == 200
+  changed_when: false
+  when: windmill_verify_runtime_preflight.status | default(0) != 200
+
+- name: Wait for Windmill workers to register before {{ windmill_verify_runtime_reconcile_reason }}
+  ansible.builtin.import_tasks: wait_for_workers.yml
