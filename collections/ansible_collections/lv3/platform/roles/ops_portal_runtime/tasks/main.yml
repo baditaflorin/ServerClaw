@@ -316,9 +316,7 @@
     recurse: true
     file_type: file
     patterns: "{{ item.patterns | default(['*.json']) }}"
-    excludes:
-      - "._*"
-      - ".DS_Store"
+    excludes: "{{ (item.excludes | default([])) + ['._*', '.DS_Store'] }}"
   loop: "{{ ops_portal_directory_sources }}"
   loop_control:
     label: "{{ item.dest | replace(ops_portal_data_dir ~ '/', '') }}"

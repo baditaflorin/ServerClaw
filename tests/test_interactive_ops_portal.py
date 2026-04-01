@@ -1037,10 +1037,14 @@ def test_load_live_apply_receipts_ignores_unreadable_receipts(tmp_path: Path) ->
     data_root = tmp_path / "data"
     live_applies_dir = data_root / "receipts" / "live-applies"
     drift_receipts_dir = data_root / "receipts" / "drift-reports"
+    evidence_dir = live_applies_dir / "evidence"
+    preview_dir = live_applies_dir / "preview"
     config_dir = data_root / "config"
     config_dir.mkdir(parents=True)
     live_applies_dir.mkdir(parents=True)
     drift_receipts_dir.mkdir(parents=True)
+    evidence_dir.mkdir(parents=True)
+    preview_dir.mkdir(parents=True)
 
     (config_dir / "service-capability-catalog.json").write_text('{"services":[]}\n', encoding="utf-8")
     (config_dir / "persona-catalog.json").write_text('{"personas":[]}\n', encoding="utf-8")
@@ -1062,6 +1066,30 @@ def test_load_live_apply_receipts_ignores_unreadable_receipts(tmp_path: Path) ->
         encoding="utf-8",
     )
     (live_applies_dir / "2026-03-30-bad.json").write_bytes(b"\xa3\x00not-utf8")
+    (evidence_dir / "2026-03-31-evidence.json").write_text(
+        json.dumps(
+            {
+                "receipt_id": "receipt-evidence",
+                "summary": "Evidence transcript",
+                "workflow_id": "live-apply-service service=ops_portal env=production",
+                "recorded_on": "2026-03-31T12:00:00Z",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (preview_dir / "2026-03-31-preview.json").write_text(
+        json.dumps(
+            {
+                "receipt_id": "receipt-preview",
+                "summary": "Preview environment validation",
+                "workflow_id": "preview-run service=ops_portal",
+                "recorded_on": "2026-03-31T13:00:00Z",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
     settings = PortalSettings(
         gateway_url="http://gateway.invalid",

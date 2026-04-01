@@ -74,6 +74,9 @@ ops_portal_directory_sources:
     dest: "{{ ops_portal_data_dir }}/receipts/live-applies/"
     patterns:
       - "*.json"
+    excludes:
+      - evidence
+      - preview
   - src: "{{ ops_portal_repo_root }}/receipts/drift-reports/"
     dest: "{{ ops_portal_data_dir }}/receipts/drift-reports/"
     patterns:

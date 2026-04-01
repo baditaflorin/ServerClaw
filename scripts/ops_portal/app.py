@@ -223,6 +223,7 @@ DEFAULT_PERSONA_CATALOG = {
 }
 LAUNCHER_RECENT_LIMIT = 6
 LAUNCHER_FAVORITE_LIMIT = 8
+LIVE_APPLY_RECEIPT_EXCLUDED_PARTS = {"evidence", "preview"}
 
 
 def browser_usable_url(value: Any) -> str | None:
@@ -232,6 +233,10 @@ def browser_usable_url(value: Any) -> str | None:
     if candidate.startswith(("http://", "https://")):
         return candidate
     return None
+
+
+def include_live_apply_receipt_path(path: Path) -> bool:
+    return not any(part in LIVE_APPLY_RECEIPT_EXCLUDED_PARTS for part in path.parts)
 
 
 def launcher_purpose_for_service(service: dict[str, Any]) -> str:
@@ -860,6 +865,8 @@ class PortalRepository:
         service_keywords = self._service_keywords(services)
         receipts: list[dict[str, Any]] = []
         for receipt_path in sorted(self.settings.live_applies_dir.rglob("*.json"), reverse=True):
+            if not include_live_apply_receipt_path(receipt_path):
+                continue
             receipt = load_optional_json_document(receipt_path)
             if not isinstance(receipt, dict):
                 continue

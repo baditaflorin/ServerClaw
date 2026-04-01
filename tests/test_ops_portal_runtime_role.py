@@ -83,7 +83,11 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert '{{ ops_portal_repo_root }}/requirements/ops-portal.txt' in tasks
     assert 'patterns:' in defaults
     assert '"*.json"' in defaults
+    assert 'excludes:' in defaults
+    assert '- evidence' in defaults
+    assert '- preview' in defaults
     assert "Discover the ops portal directory-backed data files on the controller" in tasks
+    assert "item.excludes | default([])" in tasks
     assert "Ensure the synced ops portal directory-backed data subdirectories exist" in tasks
     assert "Sync the ops portal directory-backed data source files" in tasks
     assert "ops_portal_directory_source_files.results | subelements('files', skip_missing=True)" in tasks

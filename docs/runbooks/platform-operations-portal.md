@@ -153,11 +153,12 @@ promotion-bypass audit event before running the service playbook.
 mirrored into `/opt/ops-portal/service`; using the absolute worktree path avoids
 accidentally syncing a different branch's portal tree.
 
-The runtime mirror only pulls structured `*.json` receipt documents from
-`receipts/live-applies/` and `receipts/drift-reports/`. Large text evidence
-logs stay in the repo as authoritative branch history, but they are not copied
-into `/opt/ops-portal/data/` because the interactive runtime reads receipt JSON
-documents rather than raw transcript blobs.
+The runtime mirror only pulls structured production/staging `*.json` receipt
+documents from `receipts/live-applies/` and `receipts/drift-reports/`.
+`receipts/live-applies/evidence/` transcripts and `preview/` validation
+payloads stay in the repo as authoritative branch history, but they are not
+copied into `/opt/ops-portal/data/` because the interactive runtime reads
+deployment receipt JSON documents rather than raw transcript blobs.
 
 Do not run two branch-local `ops_portal` production replays at the same time.
 Concurrent applies share `/opt/ops-portal/service` on `docker-runtime-lv3` and
