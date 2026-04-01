@@ -586,7 +586,7 @@ platform_guest_catalog:
     - vmid: 190
       name: runtime-ai-lv3
       role: runtime-ai
-      template_key: lv3-docker-host
+      template_key: lv3-debian-base
       ipv4: 10.10.10.90
       cidr: 24
       gateway4: 10.10.10.1
@@ -845,7 +845,7 @@ platform_guest_catalog:
       vmid: 190
       name: runtime-ai-lv3
       role: runtime-ai
-      template_key: lv3-docker-host
+      template_key: lv3-debian-base
       ipv4: 10.10.10.90
       cidr: 24
       gateway4: 10.10.10.1
@@ -1104,7 +1104,7 @@ platform_guest_catalog:
       vmid: 190
       name: runtime-ai-lv3
       role: runtime-ai
-      template_key: lv3-docker-host
+      template_key: lv3-debian-base
       ipv4: 10.10.10.90
       cidr: 24
       gateway4: 10.10.10.1
