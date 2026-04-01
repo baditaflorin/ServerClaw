@@ -131,6 +131,10 @@ curl -sS \
   the live 2026-03-31 replay showed the runner can lose a prior `apt-get
   install docker.io` state across step boundaries even while the checkout and
   mounted credential files remain intact.
+- The validate workflow now wipes the workspace before checkout to avoid stale
+  PR sync failures where an older branch left an incomplete tree behind. If a
+  Renovate PR validation still reports an incomplete checkout, re-run the PR
+  validation after confirming the runner workspace has been cleaned.
 - If a Renovate, validate, or release-bundle workflow fails before repo checkout
   while pulling its Harbor-pinned job image, verify `https://registry.lv3.org`
   and a direct `docker-build-lv3` image pull before debugging the workflow

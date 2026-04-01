@@ -113,4 +113,5 @@ The verifier checks:
 - Non-`main` branch bundles are intentionally published as prereleases.
 - The current live Gitea repo is not automatically synced from `origin/main`, so branch-safe verification should push the workstream branch into Gitea instead of assuming the live Gitea `main` already contains the latest GitHub state.
 - When Cosign also emits a detached `.sig`, the workflow uploads it as an optional compatibility asset, but verification relies on the Sigstore bundle.
+- The `publish` command now prunes older `bundle-*` releases before uploading new assets. Use `--retain-count` to control how many bundle releases remain in Gitea when attachment storage is tight.
 - Rotate the signing key pair deliberately. A new private key requires committing the matching public key update and re-running `make converge-gitea`.
