@@ -67,6 +67,7 @@ def test_runtime_ai_pool_playbook_covers_provisioning_substrate_namespace_migrat
     )
 
     assert playbook[4]["hosts"] == "docker-runtime-lv3"
+    assert "roles" not in playbook[4]
     down_task = next(
         task for task in playbook[4]["tasks"] if task["name"] == "Stop the legacy document-extraction compose stacks on docker-runtime-lv3"
     )

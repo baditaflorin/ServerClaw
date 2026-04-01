@@ -248,10 +248,6 @@
       loop: "{{ runtime_ai_legacy_compose_files }}"
       register: runtime_ai_legacy_compose_stats
 
-  roles:
-    - role: lv3.platform.linux_guest_firewall
-    - role: lv3.platform.docker_runtime
-
   tasks:
     - name: Stop the legacy document-extraction compose stacks on docker-runtime-lv3
       ansible.builtin.command:
