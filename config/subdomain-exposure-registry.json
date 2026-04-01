@@ -3717,12 +3717,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 50,
-    "active_total": 46,
-    "active_public_total": 42,
+    "catalog_total": 51,
+    "active_total": 47,
+    "active_public_total": 43,
     "active_private_total": 4,
     "planned_total": 4,
-    "shared_edge_total": 41,
+    "shared_edge_total": 42,
     "platform_sso_total": 17
   }
 }

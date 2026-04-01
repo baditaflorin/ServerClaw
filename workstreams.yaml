@@ -1886,10 +1886,9 @@ workstreams:
     ready_to_merge: false
     live_applied: true
     blockers:
-      - 'The branch was rebased onto `origin/main` `6bf10bdd138846055729ca75dc90a98d284c152b` / `0.177.132`, but `origin/main` advanced again during validation to `5e9cfe6e528a4261bddfb9430417daf80d5b3be0` / `0.177.133`, so this branch is behind latest main again before any truthful merge.'
-      - 'The exact-main public verification still cannot start honestly because the rebased quiet-window probe times out behind active ws-0303 monitoring-stack and ws-0279 Grist playbooks on `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`.'
-      - 'Fresh read-only public checks show `errors.lv3.org` is currently drifted again: it resolves to `65.108.75.123` but serves certificate `CN=nginx.lv3.org` and `308` redirects `/health/` to `https://nginx.lv3.org/health/`, so the exact-main live apply must be rerun and verified from the integrated tree before any truthful merge.'
-      - 'Repo automation is mostly green from the rebased tree: `make remote-validate` and `make check-build-server` pass, while `make validate` and `make pre-push-gate` are both blocked only by protected canonical-truth regeneration of the top-level `README.md`; do not merge until the live replay succeeds and that final generated-docs decision is handled truthfully.'
+      - 'The branch is now rebased onto latest realistic `origin/main` `b7dde631d290474de3200886846217e688e0c16e` / `0.177.134`, but the exact-main public verification still cannot start honestly because active ws-0303 monitoring-stack and ws-0289 Label Studio playbooks are mutating `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`.'
+      - 'Fresh read-only public checks still show `errors.lv3.org` drifted away from the repo-managed GlitchTip publication: it resolves to `65.108.75.123` but serves certificate `CN=nginx.lv3.org` and `308` redirects `/health/` to `https://nginx.lv3.org/health/`, so the exact-main live apply must be rerun and verified from the integrated tree before any truthful merge.'
+      - 'Repo automation is mostly green from the rebased tree: `make remote-validate` and `make check-build-server` pass, and `make validate` plus `make pre-push-gate` are both reduced to protected canonical-truth regeneration of the top-level `README.md`; do not merge until the live replay succeeds and that final generated-docs decision is handled truthfully.'
   - id: ws-0292-live-apply
     adr: "0292"
     title: Live apply Lago as the usage metering and billing API layer from latest origin/main

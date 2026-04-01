@@ -3,13 +3,13 @@
 - ADR: [ADR 0281](../adr/0281-glitchtip-as-the-sentry-compatible-application-error-tracker.md)
 - Title: Replace the partial ad hoc GlitchTip install with a repo-managed Sentry-compatible error tracking service, instrument first-party producers, and verify the live stack end to end
 - Status: blocked
-- Included In Repo Version: branch-local release cut `0.177.132`
+- Included In Repo Version: latest realistic `origin/main` replay base `0.177.134`
 - Branch-Local Receipt: `receipts/live-applies/2026-04-01-adr-0281-glitchtip-mainline-live-apply.json` records the current partial exact-main outcome; historical first-live receipt `receipts/live-applies/2026-03-30-adr-0281-glitchtip-live-apply.json`
 - Canonical Mainline Receipt: `receipts/live-applies/2026-04-01-adr-0281-glitchtip-mainline-live-apply.json` (currently partial and intentionally blocked on shared-host quiet-window contention)
 - Live Applied In Platform Version: first implementation `0.130.69`; latest fully verified mainline platform truth still `0.130.82` because the exact-main `0.177.132` public verification timed out before completion
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
-- Latest origin/main Base: `0.177.133` at `5e9cfe6e528a4261bddfb9430417daf80d5b3be0`
+- Latest origin/main Base: `0.177.134` at `b7dde631d290474de3200886846217e688e0c16e`
 - Branch: `codex/ws-0281-mainline-v2`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2`
 - Owner: codex
@@ -27,7 +27,7 @@
 
 ## Non-Goals
 
-- opportunistically bumping `VERSION`, release sections in `changelog.md`, the integrated `README.md` summary, or `versions/stack.yaml` outside the exact-main integration step; this worktree now contains a branch-local `0.177.132` integration cut that will need to be refreshed again because `origin/main` advanced during verification
+- opportunistically bumping `VERSION`, release sections in `changelog.md`, the integrated `README.md` summary, or `versions/stack.yaml` outside the exact-main integration step; this worktree is now rebased onto `origin/main` `0.177.134`, but the exact-main live replay and protected canonical-truth update still have not completed truthfully
 - claiming a broader production-readiness posture beyond the ADR 0281 error-tracking scope
 - rewriting unrelated platform services or replacing existing Loki, Tempo, Langfuse, or Grafana responsibilities
 
@@ -72,14 +72,15 @@
 
 ## Latest-Main Replay Status
 
-- The branch was freshly rebased onto `origin/main` `6bf10bdd138846055729ca75dc90a98d284c152b` at repository version `0.177.132`, and all validation receipts in this worktree reflect that exact base. While those checks were running, `origin/main` advanced again to `5e9cfe6e528a4261bddfb9430417daf80d5b3be0` / `0.177.133`, so the branch is now behind latest main again before any truthful merge.
+- The branch is now freshly rebased onto latest realistic `origin/main` `b7dde631d290474de3200886846217e688e0c16e` at repository version `0.177.134`. No newer realistic mainline tip was present during this replay window.
 - The exact-main replay initially failed in the shared Docker bridge-chain helper after Docker recovered its publication chains. This branch hardens that helper and the dependent Keycloak, JupyterHub, and Superset assertions, with focused regression evidence in `receipts/live-applies/evidence/2026-04-01-adr-0281-docker-bridge-chain-fix-tests-r2-0.177.132.txt` (`61 passed`).
 - The corrected exact-main replay (`receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-live-apply-r2-0.177.132.txt`) reconverged PostgreSQL, Docker runtime recovery, Keycloak, the GlitchTip runtime, repo-managed bootstrap, and NGINX edge publication, then spent a full 30-minute budget waiting for a controller-local quiet window before public verification.
-- That first quiet-window wait timed out behind concurrent `ws-0303-main-integration` and `ws-0286-live-apply-r2` playbooks on shared hosts. When the playbook entered a second 30-minute retry wait, the replay was manually stopped to avoid holding shared-host capacity open. A fresh rebased probe still times out behind active `ws-0303-main-integration` monitoring-stack and `ws-0279-main-publish-r1` Grist playbooks; see `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-quiet-window-blocked-r1-0.177.132.txt`, `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-manual-stop-r1-0.177.132.txt`, and `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-quiet-window-probe-r3-0.177.132.txt`.
+- That first quiet-window wait timed out behind concurrent `ws-0303-main-integration` and `ws-0286-live-apply-r2` playbooks on shared hosts. When the playbook entered a second 30-minute retry wait, the replay was manually stopped to avoid holding shared-host capacity open. The latest rebased probe is still not safe to restart: active `ws-0303-main-integration` monitoring-stack and `ws-0289-label-studio-live-apply-r1` playbooks are mutating `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`; see `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-quiet-window-blocked-r1-0.177.134.txt`, `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-manual-stop-r1-0.177.132.txt`, and `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-quiet-window-probe-r3-0.177.132.txt`.
 - The branch now carries a truthful partial exact-main receipt in `receipts/live-applies/2026-04-01-adr-0281-glitchtip-mainline-live-apply.json`; `scripts/live_apply_receipts.py --validate` passes against it, proving the branch-local canonical receipt state is internally consistent even though the live verification is blocked.
 - The same branch still retains earlier same-worktree proof that `errors.lv3.org` served the correct TLS certificate, returned `HTTP/2 200` for public health and auth config, exposed the `LV3 Keycloak` OIDC handoff, and accepted a platform-findings smoke event before the `0.177.132` release cut. See `receipts/live-applies/evidence/2026-04-01-adr-0281-current-public-surface-r2-0.177.129.txt`, `receipts/live-applies/evidence/2026-04-01-adr-0281-public-auth-config-r1-0.177.129.txt`, and `receipts/live-applies/evidence/2026-04-01-adr-0281-event-smoke-r2-0.177.129.txt`.
-- The rebased repo validation picture is now current. `make remote-validate` passes via `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-remote-validate-r5-0.177.132.txt`, `make check-build-server` passes via `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-check-build-server-r2-0.177.132.txt`, and `make validate` plus `make pre-push-gate` are both down to the same protected generated-docs blocker: canonical truth wants to rewrite the top-level `README.md`; see `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-validate-r7-0.177.132.txt` and `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-pre-push-gate-r2-0.177.132.txt`.
-- Fresh read-only public checks now show the live edge is currently drifted again: `errors.lv3.org` resolves to `65.108.75.123` but serves certificate `CN=nginx.lv3.org` and `308` redirects `/health/` to `https://nginx.lv3.org/health/`; see `receipts/live-applies/evidence/2026-04-01-adr-0281-current-public-surface-r3-0.177.132.txt` and `receipts/live-applies/evidence/2026-04-01-adr-0281-current-public-cert-r1-0.177.132.txt`.
+- The rebased repo validation picture is now current on `0.177.134`. `make remote-validate` passes via `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-remote-validate-r3-0.177.134.txt`, `make check-build-server` passes via `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-check-build-server-r1-0.177.134.txt`, and both `make validate` plus `make pre-push-gate` are now reduced to the same protected generated-docs blocker: canonical truth wants to rewrite the top-level `README.md`; see `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-validate-r2-0.177.134.txt` and `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-pre-push-gate-r1-0.177.134.txt`.
+- The rebased local validation bundle also exposed one mainline-drift issue that is now fixed on this branch: `config/ansible-role-idempotency.yml` was missing `grist_runtime` after the replay, and adding that tracked entry restores `scripts/ansible_role_idempotency.py` to green.
+- Fresh read-only public checks still show the live edge is currently drifted: `errors.lv3.org` resolves to `65.108.75.123` but serves certificate `CN=nginx.lv3.org` and `308` redirects `/health/` to `https://nginx.lv3.org/health/`; see `receipts/live-applies/evidence/2026-04-01-adr-0281-current-public-surface-r1-0.177.134.txt` and `receipts/live-applies/evidence/2026-04-01-adr-0281-current-public-cert-r1-0.177.134.txt`.
 
 ## Verification
 
@@ -164,9 +165,9 @@
 
 ## Outcome
 
-- The branch now contains the exact-main bridge-chain hardening, the rebased latest-main replay state for `0.177.132`, a truthful partial mainline receipt, and current blocker evidence showing that shared-host concurrency plus live public-surface drift, not repository integration, stopped the final honest verification step.
-- Merge is blocked on four fronts: `origin/main` has advanced again to `5e9cfe6e528a4261bddfb9430417daf80d5b3be0` / `0.177.133`, so this branch is behind latest main; the exact-main public verification still needs a quiet window clear of `ws-0303` and `ws-0279` activity on `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`; the read-only public edge currently serves `CN=nginx.lv3.org` and redirects `errors.lv3.org` to `nginx.lv3.org`; and `make validate` / `make pre-push-gate` still stop on protected canonical-truth regeneration for the top-level `README.md`.
-- The next agent should rebase onto latest `origin/main`, retry the exact-main GlitchTip live apply only inside a real quiet window, re-check the public `errors.lv3.org` surface from the integrated tree, update platform truth only if that replay really verifies end to end, rerun `make validate`, `make remote-validate`, `make pre-push-gate`, and `make check-build-server`, and only then merge/push `main` and delete this worktree.
+- The branch now contains the exact-main bridge-chain hardening, the rebased latest-main replay state for `0.177.134`, a truthful partial mainline receipt, and current blocker evidence showing that shared-host concurrency plus live public-surface drift, not repository integration, stopped the final honest verification step.
+- Merge is blocked on three fronts: the exact-main public verification still needs a quiet window clear of current `ws-0303` and `ws-0289` activity on `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`; the read-only public edge currently serves `CN=nginx.lv3.org` and redirects `errors.lv3.org` to `nginx.lv3.org`; and `make validate` / `make pre-push-gate` still stop on protected canonical-truth regeneration for the top-level `README.md`.
+- The next agent should retry the exact-main GlitchTip live apply only inside a real quiet window from this rebased tree, re-check the public `errors.lv3.org` surface from the integrated tree, update platform truth only if that replay really verifies end to end, rerun `make validate`, `make remote-validate`, `make pre-push-gate`, and `make check-build-server`, and only then merge/push `main` and delete this worktree.
 
 ## Merge Criteria
 
