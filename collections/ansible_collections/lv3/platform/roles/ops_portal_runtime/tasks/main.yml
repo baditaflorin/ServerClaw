@@ -261,8 +261,12 @@
 
 - name: Sync the shared search fabric files
   ansible.builtin.copy:
-    src: "{{ ops_portal_repo_root }}/scripts/search_fabric/"
-    dest: "{{ ops_portal_service_dir }}/search_fabric/"
+    src: "{{ item.path }}"
+    dest: >-
+      {{
+        ops_portal_service_dir ~ '/search_fabric/' ~
+        (item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', ''))
+      }}
     owner: root
     group: root
     mode: "0644"
