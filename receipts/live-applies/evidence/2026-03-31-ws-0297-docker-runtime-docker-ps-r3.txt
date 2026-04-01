@@ -1,0 +1,19 @@
+NAMES                                    STATUS                             PORTS
+keycloak-keycloak-1                      Up 10 seconds                      8443/tcp, 10.10.10.20:8091->8080/tcp, 127.0.0.1:18080->8080/tcp, 127.0.0.1:19000->9000/tcp
+keycloak-openbao-agent                   Up 11 seconds (healthy)
+lv3-restic-config-backup-openbao-agent   Up 16 seconds
+api-gateway                              Up 17 seconds (health: starting)
+lv3-openbao                              Up 17 seconds                      0.0.0.0:8200->8200/tcp, 10.10.10.20:8201->8201/tcp, 127.0.0.1:8201->8201/tcp
+gitea                                    Up 17 seconds                      2222/tcp, 10.10.10.20:3003->3000/tcp
+gitea-openbao-agent                      Up 17 seconds (healthy)            8200/tcp
+nginx                                    Up 7 seconds (health: starting)    0.0.0.0:8095->8080/tcp, [::]:8095->8080/tcp
+harbor-jobservice                        Up 7 seconds (health: starting)
+harbor-core                              Up 8 seconds (health: starting)
+trivy-adapter                            Up 8 seconds (health: starting)
+registry                                 Up 8 seconds (health: starting)
+registryctl                              Up 8 seconds (health: starting)
+harbor-db                                Up 8 seconds (health: starting)
+harbor-portal                            Up 8 seconds (health: starting)
+redis                                    Up 8 seconds (health: starting)
+harbor-log                               Up 17 seconds (health: starting)   127.0.0.1:1514->10514/tcp
+dify-ssrf-proxy                          Up 17 seconds                      3128/tcp

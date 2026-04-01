@@ -38,6 +38,7 @@ def test_role_only_starts_socket_units_when_no_proxy_service_owns_the_listener()
         == "Start Proxmox Tailscale proxy sockets when the listener is not already owned by an active proxy service"
     )
     assert state_task["register"] == "proxmox_tailscale_proxy_unit_states"
+    assert state_task["become"] is False
     assert "proxmox_tailscale_proxy_unit_states.results" in start_task["vars"]["proxmox_tailscale_proxy_unit_state_lines"]
     assert start_task["when"] == "proxmox_tailscale_service_active_state != 'active'"
 
@@ -84,9 +85,15 @@ def test_role_rearms_or_restarts_changed_proxy_units_after_rendering() -> None:
         for task in tasks
         if task.get("name") == "Start Proxmox Tailscale proxy sockets after re-arming changed proxy listeners"
     )
+    cmdline_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Read active Proxmox Tailscale proxy service command lines"
+    )
 
     assert enable_task["ansible.builtin.systemd"]["enabled"] is True
     assert "state" not in enable_task["ansible.builtin.systemd"]
+    assert cmdline_task["become"] is False
     assert stop_task["ansible.builtin.systemd"]["state"] == "stopped"
     assert "proxmox_tailscale_proxy_cmdlines.results" in stop_task["vars"]["proxmox_tailscale_running_cmdline"]
     assert stop_task["when"] == [

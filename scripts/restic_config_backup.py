@@ -11,6 +11,7 @@ import os
 import shlex
 import socket
 import subprocess
+import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, replace
@@ -36,6 +37,10 @@ DEFAULT_RUNTIME_STATE_DIR = Path("/var/lib/lv3/restic-config-backup")
 DEFAULT_RUNTIME_CONFIG_NAME = "runtime-config.json"
 DEFAULT_TRIGGER = "manual"
 DEFAULT_GRACE_MINUTES = 30
+DEFAULT_MINIO_READY_RETRIES = 12
+DEFAULT_MINIO_READY_DELAY_SECONDS = 5
+DEFAULT_MINIO_HEALTH_PATH = "/minio/health/live"
+DEFAULT_RESTIC_REPOSITORY_PROBE_TIMEOUT_SECONDS = 60
 NTFY_CRITICAL_TITLE = "Restic backup critical"
 NTFY_STALE_MESSAGE_PREFIX = "Restic backup source is stale"
 
@@ -86,15 +91,24 @@ def run_command(
     *,
     env: dict[str, str] | None = None,
     cwd: Path | None = None,
+    timeout: float | None = None,
 ) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        argv,
-        text=True,
-        capture_output=True,
-        check=False,
-        env=env,
-        cwd=str(cwd) if cwd else None,
-    )
+    try:
+        return subprocess.run(
+            argv,
+            text=True,
+            capture_output=True,
+            check=False,
+            env=env,
+            cwd=str(cwd) if cwd else None,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        timeout_detail = int(timeout) if isinstance(timeout, (int, float)) else timeout
+        raise RuntimeError(
+            " ".join(shlex.quote(item) for item in argv)
+            + f" timed out after {timeout_detail} seconds"
+        ) from exc
 
 
 def ensure_directory(path: Path) -> None:
@@ -131,33 +145,107 @@ def snapshot_id_from_backup_stdout(stdout: str) -> str | None:
     return None
 
 
-def inspect_container_state(container_name: str) -> dict[str, Any]:
-    inspect = run_command(
-        [
-            "docker",
-            "inspect",
-            container_name,
-            "--format",
-            "{{json .State}}",
-        ]
-    )
+def inspect_container(container_name: str) -> dict[str, Any]:
+    inspect = run_command(["docker", "inspect", container_name])
     if inspect.returncode != 0:
         detail = inspect.stderr.strip() or inspect.stdout.strip() or f"failed to inspect {container_name}"
         raise RuntimeError(detail)
     try:
-        state = json.loads(inspect.stdout.strip() or "{}")
+        payload = json.loads(inspect.stdout.strip() or "[]")
     except json.JSONDecodeError as exc:
-        raise RuntimeError(f"unable to parse Docker state for {container_name}") from exc
+        raise RuntimeError(f"unable to parse Docker inspect payload for {container_name}") from exc
+    if not isinstance(payload, list) or not payload or not isinstance(payload[0], dict):
+        raise RuntimeError(f"Docker inspect payload for {container_name} must be a non-empty list")
+    state = payload[0].get("State") or {}
     if not isinstance(state, dict):
         raise RuntimeError(f"Docker state for {container_name} must be an object")
-    return state
+    return payload[0]
+
+
+def container_compose_start_command(container: dict[str, Any]) -> tuple[list[str], Path | None] | None:
+    labels = ((container.get("Config") or {}).get("Labels") or {}) if isinstance(container, dict) else {}
+    working_dir = str(labels.get("com.docker.compose.project.working_dir") or "").strip()
+    config_files = str(labels.get("com.docker.compose.project.config_files") or "").strip()
+    service = str(labels.get("com.docker.compose.service") or "").strip()
+    if not service:
+        return None
+
+    command = ["docker", "compose"]
+    for config_file in config_files.split(","):
+        candidate = config_file.strip()
+        if candidate:
+            command.extend(["--file", candidate])
+    command.extend(["up", "-d", service])
+    return command, (Path(working_dir) if working_dir else None)
+
+
+def extract_container_addresses(container: dict[str, Any]) -> list[str]:
+    networks = ((container.get("NetworkSettings") or {}).get("Networks") or {}) if isinstance(container, dict) else {}
+    addresses: list[str] = []
+    for network in networks.values():
+        if not isinstance(network, dict):
+            continue
+        candidate = str(network.get("IPAddress") or "").strip()
+        if not candidate:
+            continue
+        try:
+            ipaddress.ip_address(candidate)
+        except ValueError:
+            continue
+        addresses.append(candidate)
+    return addresses
+
+
+def wait_for_minio_endpoint(
+    container_name: str,
+    *,
+    retries: int = DEFAULT_MINIO_READY_RETRIES,
+    delay_seconds: int = DEFAULT_MINIO_READY_DELAY_SECONDS,
+) -> tuple[str, str]:
+    last_error = "container did not become ready"
+
+    for attempt in range(retries):
+        container = inspect_container(container_name)
+        state = (container.get("State") or {}) if isinstance(container, dict) else {}
+        if not bool(state.get("Running")):
+            last_error = f"{container_name} is not running"
+        else:
+            addresses = extract_container_addresses(container)
+            if not addresses:
+                last_error = f"{container_name} has no reachable container IP"
+            else:
+                host = addresses[0]
+                endpoint = f"http://{host}:9000"
+                try:
+                    with urllib.request.urlopen(f"{endpoint}{DEFAULT_MINIO_HEALTH_PATH}", timeout=5) as response:
+                        if response.status == 200:
+                            return host, endpoint
+                        last_error = f"unexpected HTTP {response.status}"
+                except urllib.error.HTTPError as exc:
+                    last_error = f"HTTP {exc.code}"
+                except OSError as exc:
+                    last_error = str(exc)
+
+        if attempt < retries - 1:
+            time.sleep(delay_seconds)
+
+    raise RuntimeError(
+        f"{container_name} did not become ready for restic at {DEFAULT_MINIO_HEALTH_PATH}: {last_error}"
+    )
 
 
 def ensure_container_running(container_name: str) -> None:
-    state = inspect_container_state(container_name)
+    container = inspect_container(container_name)
+    state = (container.get("State") or {}) if isinstance(container, dict) else {}
     if bool(state.get("Running")):
         return
-    start = run_command(["docker", "start", container_name])
+
+    compose_start = container_compose_start_command(container)
+    if compose_start is not None:
+        command, cwd = compose_start
+        start = run_command(command, cwd=cwd)
+    else:
+        start = run_command(["docker", "start", container_name])
     if start.returncode != 0:
         detail = start.stderr.strip() or start.stdout.strip() or f"failed to start {container_name}"
         raise RuntimeError(detail)
@@ -170,32 +258,7 @@ def resolve_minio_endpoint(catalog: dict[str, Any]) -> tuple[str, str]:
     if not container_name:
         raise ValueError("restic catalog is missing controller_host.minio.container_name")
     ensure_container_running(container_name)
-    inspect = run_command(
-        [
-            "docker",
-            "inspect",
-            container_name,
-            "--format",
-            "{{range .NetworkSettings.Networks}}{{if .IPAddress}}{{.IPAddress}} {{end}}{{end}}",
-        ]
-    )
-    if inspect.returncode != 0:
-        detail = inspect.stderr.strip() or inspect.stdout.strip() or f"failed to inspect {container_name}"
-        raise RuntimeError(detail)
-    addresses: list[str] = []
-    for token in inspect.stdout.split():
-        candidate = token.strip()
-        if not candidate:
-            continue
-        try:
-            ipaddress.ip_address(candidate)
-        except ValueError:
-            continue
-        addresses.append(candidate)
-    if not addresses:
-        raise RuntimeError(f"{container_name} has no reachable container IP")
-    host = addresses[0]
-    return host, f"http://{host}:9000"
+    return wait_for_minio_endpoint(container_name)
 
 
 def restic_repository(catalog: dict[str, Any], endpoint: str) -> str:
@@ -246,12 +309,14 @@ def restic_call(
     endpoint: str,
     cache_dir: Path,
     cwd: Path | None = None,
+    timeout: float | None = None,
 ) -> subprocess.CompletedProcess[str]:
     command = ["restic", *restic_common_args(catalog), *args]
     outcome = run_command(
         command,
         env=build_restic_env(catalog=catalog, credentials=credentials, endpoint=endpoint, cache_dir=cache_dir),
         cwd=cwd,
+        timeout=timeout,
     )
     if outcome.returncode != 0:
         detail = outcome.stderr.strip() or outcome.stdout.strip() or "restic command failed"
@@ -269,6 +334,7 @@ def ensure_restic_repository(
     snapshots = run_command(
         ["restic", *restic_common_args(catalog), "snapshots", "--json"],
         env=build_restic_env(catalog=catalog, credentials=credentials, endpoint=endpoint, cache_dir=cache_dir),
+        timeout=DEFAULT_RESTIC_REPOSITORY_PROBE_TIMEOUT_SECONDS,
     )
     if snapshots.returncode == 0:
         return
@@ -417,6 +483,7 @@ def summarize_latest_snapshots(
         credentials=credentials,
         endpoint=endpoint,
         cache_dir=cache_dir,
+        timeout=DEFAULT_RESTIC_REPOSITORY_PROBE_TIMEOUT_SECONDS,
     )
     snapshots = json.loads(snapshots_result.stdout or "[]")
     if not isinstance(snapshots, list):
@@ -893,6 +960,7 @@ def run_restore_verification(
         credentials=credentials,
         endpoint=endpoint,
         cache_dir=cache_dir,
+        timeout=DEFAULT_RESTIC_REPOSITORY_PROBE_TIMEOUT_SECONDS,
     )
     snapshots = json.loads(snapshots_result.stdout or "[]")
     if not isinstance(snapshots, list):

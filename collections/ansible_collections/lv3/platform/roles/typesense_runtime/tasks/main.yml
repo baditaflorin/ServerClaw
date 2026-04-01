@@ -1,0 +1,268 @@
+---
+- name: Validate Typesense runtime inputs
+  ansible.builtin.assert:
+    that:
+      - typesense_site_dir | length > 0
+      - typesense_compose_file | length > 0
+      - typesense_env_file | length > 0
+      - typesense_openbao_agent_dir | length > 0
+      - typesense_openbao_secret_path | length > 0
+      - typesense_port | int > 0
+      - typesense_host_proxy_port | int > 0
+      - typesense_image | length > 0
+      - typesense_container_name | length > 0
+      - typesense_internal_base_url | length > 0
+      - typesense_controller_url | length > 0
+      - typesense_collection_name | length > 0
+      - typesense_api_key_local_file | length > 0
+    fail_msg: >-
+      typesense_runtime requires compose paths, OpenBao settings, stable listener
+      URLs, and the controller-local API key path.
+
+- name: Ensure the Typesense runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Typesense runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ typesense_site_dir }}"
+      mode: "0755"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Ensure the controller-local Typesense runtime directory exists
+  ansible.builtin.file:
+    path: "{{ typesense_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the controller-local Typesense API key
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ typesense_api_key_local_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ typesense_api_key_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: typesense_api_key_generation
+  changed_when: "'changed' in typesense_api_key_generation.stdout"
+  no_log: true
+
+- name: Read the controller-local Typesense API key
+  ansible.builtin.set_fact:
+    typesense_api_key: "{{ lookup('ansible.builtin.file', typesense_api_key_local_file) | trim }}"
+    typesense_runtime_secret_payload:
+      TYPESENSE_API_KEY: "{{ lookup('ansible.builtin.file', typesense_api_key_local_file) | trim }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Typesense
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: typesense
+    common_openbao_compose_env_agent_dir: "{{ typesense_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ typesense_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ typesense_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ typesense_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ typesense_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ typesense_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ typesense_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ typesense_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ typesense_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ typesense_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ typesense_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: typesense.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ typesense_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ typesense_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ typesense_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ typesense_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Typesense environment file
+  ansible.builtin.template:
+    src: typesense.env.j2
+    dest: "{{ typesense_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: typesense_env_template
+  no_log: true
+
+- name: Render the Typesense compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ typesense_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: typesense_compose_template
+
+- name: Pull the Typesense image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ typesense_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ typesense_site_dir }}"
+  register: typesense_pull
+  changed_when: >-
+    'Pulling' in typesense_pull.stdout
+    or 'Downloaded newer image' in typesense_pull.stdout
+    or 'Pull complete' in typesense_pull.stdout
+
+- name: Start or refresh the Typesense runtime
+  block:
+    - name: Recreate the Typesense runtime when config changes
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ typesense_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ typesense_site_dir }}"
+      register: typesense_up_recreate
+      changed_when: >-
+        'Creating' in typesense_up_recreate.stdout
+        or 'Recreating' in typesense_up_recreate.stdout
+        or 'Starting' in typesense_up_recreate.stdout
+      when: typesense_env_template.changed or typesense_compose_template.changed
+
+    - name: Ensure the Typesense runtime is running
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ typesense_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ typesense_site_dir }}"
+      register: typesense_up
+      changed_when: >-
+        'Creating' in typesense_up.stdout
+        or 'Recreating' in typesense_up.stdout
+        or 'Starting' in typesense_up.stdout
+      when: not (typesense_env_template.changed or typesense_compose_template.changed)
+  rescue:
+    - name: Record whether the Typesense runtime failed because the compose network is missing
+      ansible.builtin.set_fact:
+        typesense_missing_compose_network: >-
+          {{
+            'failed to create endpoint' in
+            (
+              ansible_failed_result.stderr
+              | default(ansible_failed_result.msg | default(''))
+              | lower
+            )
+            and 'does not exist' in
+            (
+              ansible_failed_result.stderr
+              | default(ansible_failed_result.msg | default(''))
+              | lower
+            )
+            and 'network' in
+            (
+              ansible_failed_result.stderr
+              | default(ansible_failed_result.msg | default(''))
+              | lower
+            )
+          }}
+
+    - name: Surface unexpected Typesense runtime startup failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('typesense compose up failed')) }}"
+      when: not typesense_missing_compose_network
+
+    - name: Tear down the stale Typesense compose stack after missing-network startup failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ typesense_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ typesense_site_dir }}"
+      failed_when: false
+      changed_when: true
+      when: typesense_missing_compose_network
+
+    - name: Remove the stale Typesense bridge network after missing-network startup failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - network
+          - rm
+          - "{{ typesense_site_dir | basename }}_default"
+      failed_when: false
+      changed_when: true
+      when: typesense_missing_compose_network
+
+    - name: Recover the Typesense compose stack when a stale network reference blocks startup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ typesense_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ typesense_site_dir }}"
+      register: typesense_up_recovered
+      changed_when: >-
+        'Creating' in typesense_up_recovered.stdout
+        or 'Recreating' in typesense_up_recovered.stdout
+        or 'Starting' in typesense_up_recovered.stdout
+      when: typesense_missing_compose_network
+
+- name: Wait for Typesense to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ typesense_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Verify the Typesense runtime
+  ansible.builtin.import_tasks: verify.yml

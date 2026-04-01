@@ -90,6 +90,11 @@ platform_host:
         listen_port: 8004
         upstream_host: 10.10.10.20
         upstream_port: 8082
+      - name: typesense
+        listen_address: 100.64.0.1
+        listen_port: 8016
+        upstream_host: 10.10.10.20
+        upstream_port: 8108
       - name: step-ca
         listen_address: 100.64.0.1
         listen_port: 9443
@@ -185,10 +190,14 @@ platform_ports:
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
   gotenberg_port: 3007
+  typesense_port: 8108
+  typesense_host_proxy_port: 8016
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
   plausible_port: 8016
+  minio_api_port: 9010
+  minio_console_port: 9011
   flagsmith_port: 8017
   lago_api_port: 8099
   lago_front_port: 8100
@@ -275,10 +284,14 @@ platform_port_assignments:
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
   gotenberg_port: 3007
+  typesense_port: 8108
+  typesense_host_proxy_port: 8016
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
   plausible_port: 8016
+  minio_api_port: 9010
+  minio_console_port: 9011
   flagsmith_port: 8017
   lago_api_port: 8099
   lago_front_port: 8100
@@ -1570,6 +1583,24 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8082
       controller: http://100.64.0.1:8004
+  typesense:
+    service_name: typesense
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8016
+    service_id: typesense
+    ports:
+      internal: 8108
+      controller: 8016
+    urls:
+      internal: http://10.10.10.20:8108
+      controller: http://100.64.0.1:8016
   searxng:
     service_name: searxng
     owning_vm: docker-runtime-lv3
@@ -1683,6 +1714,50 @@ platform_service_topology:
     urls:
       public: https://analytics.lv3.org
       internal: http://10.10.10.20:8016
+  minio:
+    service_name: minio
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: minio.lv3.org
+    console_public_hostname: minio-console.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: minio
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+      additional_records:
+        - name: minio-console
+          type: A
+          target: 65.108.75.123
+          ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:9010
+      client_max_body_size: 0
+      chunked_transfer_encoding: true
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 900
+      proxy_send_timeout_seconds: 900
+      security_headers_enabled: false
+      crawl_policy_enabled: false
+    service_id: minio
+    ports:
+      internal: 9010
+      console: 9011
+    urls:
+      public: https://minio.lv3.org
+      internal: http://10.10.10.20:9010
+      console_internal: http://10.10.10.20:9011
+      console_public: https://minio-console.lv3.org
   lago:
     service_name: lago
     owning_vm: docker-runtime-lv3
@@ -2636,6 +2711,14 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: minio
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: minio-console
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: billing
       type: A
       value: 65.108.75.123
@@ -2765,6 +2848,7 @@ platform_management_allowed_tcp_ports:
   - 3001
   - 3009
   - 8004
+  - 8016
   - 9443
   - 8200
   - 8014
@@ -3328,6 +3412,24 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8082
       controller: http://100.64.0.1:8004
+  typesense:
+    service_name: typesense
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8016
+    service_id: typesense
+    ports:
+      internal: 8108
+      controller: 8016
+    urls:
+      internal: http://10.10.10.20:8108
+      controller: http://100.64.0.1:8016
   searxng:
     service_name: searxng
     owning_vm: docker-runtime-lv3
@@ -3441,6 +3543,50 @@ public_edge_service_topology:
     urls:
       public: https://analytics.lv3.org
       internal: http://10.10.10.20:8016
+  minio:
+    service_name: minio
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: minio.lv3.org
+    console_public_hostname: minio-console.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: minio
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+      additional_records:
+        - name: minio-console
+          type: A
+          target: 65.108.75.123
+          ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:9010
+      client_max_body_size: 0
+      chunked_transfer_encoding: true
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 900
+      proxy_send_timeout_seconds: 900
+      security_headers_enabled: false
+      crawl_policy_enabled: false
+    service_id: minio
+    ports:
+      internal: 9010
+      console: 9011
+    urls:
+      public: https://minio.lv3.org
+      internal: http://10.10.10.20:9010
+      console_internal: http://10.10.10.20:9011
+      console_public: https://minio-console.lv3.org
   lago:
     service_name: lago
     owning_vm: docker-runtime-lv3
@@ -4363,6 +4509,9 @@ semaphore_private_base_url: http://10.10.10.20:3004
 semaphore_controller_url: http://100.64.0.1:8020
 netbox_host_proxy_port: 8004
 netbox_controller_url: http://100.64.0.1:8004
+typesense_port: 8108
+typesense_host_proxy_port: 8016
+typesense_controller_url: http://100.64.0.1:8016
 open_webui_host_proxy_port: 8008
 open_webui_controller_url: http://100.64.0.1:8008
 plane_port: 8093
@@ -4395,6 +4544,8 @@ gitea_host_proxy_port: 3009
 gitea_root_url: http://git.lv3.org:3009
 gitea_private_base_url: http://10.10.10.20:3003
 gitea_controller_url: http://100.64.0.1:3009
+minio_public_url: https://minio.lv3.org
+minio_console_public_url: https://minio-console.lv3.org
 platform_context_internal_port: 8010
 platform_context_host_proxy_port: 8010
 platform_context_private_url: http://127.0.0.1:8010
@@ -4416,6 +4567,7 @@ proxmox_management_allowed_tcp_ports:
   - 3001
   - 3009
   - 8004
+  - 8016
   - 9443
   - 8200
   - 8014
@@ -4462,6 +4614,8 @@ searxng_port: 8881
 searxng_host_proxy_port: 80
 langfuse_port: 3002
 plausible_port: 8016
+minio_api_port: 9010
+minio_console_port: 9011
 flagsmith_port: 8017
 lago_api_port: 8099
 lago_front_port: 8100

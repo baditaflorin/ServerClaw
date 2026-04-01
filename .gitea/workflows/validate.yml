@@ -57,26 +57,41 @@ jobs:
             workspace_host_path="$(discover_workspace_host_path)"
             if [ -n "${workspace_host_path}" ]; then
               printf '%s\n' "${workspace_host_path}" > .local/validation-gate/workspace-host.path
+              printf 'LV3_DOCKER_WORKSPACE_PATH=%s\n' "${workspace_host_path}" >> "${GITHUB_ENV}"
             fi
             "${docker_bin}" --version
-            exit 0
+          else
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update
+            apt-get install -y --no-install-recommends docker-cli
+            docker_bin="$(command -v docker || command -v docker.io || true)"
+            if [ -z "${docker_bin}" ]; then
+              echo "Docker CLI remained unavailable after docker-cli installation." >&2
+              exit 1
+            fi
+            printf '%s\n' "${docker_bin}" > .local/validation-gate/docker-bin.path
+            workspace_host_path="$(discover_workspace_host_path)"
+            if [ -z "${workspace_host_path}" ]; then
+              echo "Workspace host path remained unavailable after Docker CLI installation." >&2
+              exit 1
+            fi
+            printf '%s\n' "${workspace_host_path}" > .local/validation-gate/workspace-host.path
+            printf 'LV3_DOCKER_WORKSPACE_PATH=%s\n' "${workspace_host_path}" >> "${GITHUB_ENV}"
+            "${docker_bin}" --version
           fi
-          export DEBIAN_FRONTEND=noninteractive
-          apt-get update
-          apt-get install -y --no-install-recommends docker-cli
-          docker_bin="$(command -v docker || command -v docker.io || true)"
-          if [ -z "${docker_bin}" ]; then
-            echo "Docker CLI remained unavailable after docker-cli installation." >&2
-            exit 1
+          if ! command -v make >/dev/null 2>&1; then
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update
+            apt-get install -y --no-install-recommends make
           fi
-          printf '%s\n' "${docker_bin}" > .local/validation-gate/docker-bin.path
-          workspace_host_path="$(discover_workspace_host_path)"
-          if [ -z "${workspace_host_path}" ]; then
-            echo "Workspace host path remained unavailable after Docker CLI installation." >&2
-            exit 1
+          if ! command -v uv >/dev/null 2>&1; then
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update
+            apt-get install -y --no-install-recommends python3-venv
+            python3 -m venv /opt/uv
+            /opt/uv/bin/python -m pip install --no-cache-dir --upgrade pip uv
+            ln -sf /opt/uv/bin/uv /usr/local/bin/uv
           fi
-          printf '%s\n' "${workspace_host_path}" > .local/validation-gate/workspace-host.path
-          "${docker_bin}" --version
 
       - name: Run managed image gate
         run: python3 scripts/managed_image_gate.py --baseline-revision origin/main
@@ -100,6 +115,7 @@ jobs:
         run: |
           set -euo pipefail
           export LV3_DOCKER_WORKSPACE_PATH="$(cat .local/validation-gate/workspace-host.path)"
+          export LV3_K6_TARGET_URL_OVERRIDES='{"openfga":"http://10.10.10.20:8098/healthz"}'
           make k6-smoke K6_ARGS="--runner-context gitea-actions --environment production --service keycloak --service openfga"
 
       - name: Bundle validation artifacts

@@ -175,6 +175,9 @@ roles:
   mattermost_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  minio_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   monitoring_mattermost_notifications:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -375,6 +378,9 @@ roles:
   step_ca_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  tika_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   step_ca_ssh_trust:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -385,9 +391,6 @@ roles:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   tesseract_ocr_runtime:
-    policy: tracked
-    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
-  tika_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   uptime_kuma_runtime:

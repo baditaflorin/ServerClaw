@@ -64,6 +64,22 @@ def ensure_dir(path: Path) -> Path:
     return path
 
 
+def workspace_host_root() -> Path | None:
+    raw = os.environ.get("LV3_DOCKER_WORKSPACE_PATH", "").strip()
+    return Path(raw) if raw else None
+
+
+def host_path_for_repo_path(path: Path) -> Path:
+    host_root = workspace_host_root()
+    if not host_root:
+        return path
+    try:
+        rel = path.relative_to(REPO_ROOT)
+    except ValueError:
+        return path
+    return host_root / rel
+
+
 def temp_env(temp_dir: Path) -> dict[str, str]:
     resolved = str(temp_dir.resolve())
     return {
@@ -383,13 +399,14 @@ def grype_scan_sbom(
         )
     else:
         network_mode = docker_network_mode(config)
+        sbom_mount_source = host_path_for_repo_path(sbom_path.parent)
         command = docker_run_prefix(network_mode)
         command.extend(
             [
                 "-v",
                 f"{grype_db_cache_dir.resolve()}:/grype-db",
                 "-v",
-                f"{sbom_path.parent.resolve()}:/sbom",
+                f"{sbom_mount_source.resolve()}:/sbom",
                 "-e",
                 "GRYPE_DB_CACHE_DIR=/grype-db",
                 "-e",

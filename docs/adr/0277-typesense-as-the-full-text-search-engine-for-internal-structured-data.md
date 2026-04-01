@@ -1,9 +1,10 @@
 # ADR 0277: Typesense As The Full-Text Search Engine For Internal Structured Data
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.177.125
+- Implemented In Platform Version: 0.130.80
+- Implemented On: 2026-03-31
 - Date: 2026-03-29
 
 ## Context

@@ -7,6 +7,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from adr_catalog import resolve_service_adr_path
 from controller_automation_toolkit import emit_cli_error, repo_path
 from deployment_history import DEFAULT_AUDIT_LOOKBACK_DAYS, load_deployment_history, load_service_catalog_data
 from environment_catalog import configured_environment_ids
@@ -166,10 +167,9 @@ def render_service_page(service: dict[str, Any], entries: list[dict[str, Any]]) 
         links.append(render_external_link(service["public_url"], "Public URL"))
     elif service.get("internal_url"):
         links.append(render_external_link(service["internal_url"], "Internal URL"))
-    if service.get("adr"):
-        matches = sorted(repo_path("docs", "adr").glob(f"{service['adr']}-*.md"))
-        if matches:
-            links.append(render_external_link(str(matches[0]), f"ADR {service['adr']}"))
+    adr_path = resolve_service_adr_path(service)
+    if adr_path is not None:
+        links.append(render_external_link(str(adr_path), f"ADR {service['adr']}"))
 
     header = (
         '<section class="panel">'

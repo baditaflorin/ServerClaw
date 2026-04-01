@@ -186,7 +186,7 @@ def load_maintenance_windows(
 ) -> list[dict[str, Any]]:
     try:
         payload = world_state.get("maintenance_windows", allow_stale=True)
-    except (SurfaceNotFoundError, WorldStateUnavailable, StaleDataError, OSError, RuntimeError):
+    except Exception:
         payload = None
     if isinstance(payload, dict):
         active_windows = payload.get("active_windows")
@@ -202,7 +202,7 @@ def load_maintenance_windows(
 def load_service_health_snapshot(world_state: WorldStateClient) -> dict[str, Any]:
     try:
         return world_state.get("service_health", allow_stale=True)
-    except (SurfaceNotFoundError, WorldStateUnavailable, StaleDataError, OSError, RuntimeError):
+    except Exception:
         return {"services": []}
 
 

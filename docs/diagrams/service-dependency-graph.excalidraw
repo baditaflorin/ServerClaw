@@ -272,7 +272,7 @@
       "lineHeight": 1.25
     },
     {
-      "id": "26491e719b3df4d0",
+      "id": "39654526493eef0b",
       "type": "rectangle",
       "x": 1040,
       "y": 220,
@@ -301,7 +301,7 @@
       "locked": false
     },
     {
-      "id": "7d82cf9c7df51265",
+      "id": "713b39e04d1bd00a",
       "type": "text",
       "x": 1060,
       "y": 242,
@@ -328,14 +328,14 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "Total tracked services\n66",
+      "text": "Total tracked services\n68",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "Total tracked services\n66",
+      "originalText": "Total tracked services\n68",
       "lineHeight": 1.25
     },
     {

@@ -379,26 +379,111 @@ def test_snapshot_id_from_backup_stdout_reads_restic_json_stream() -> None:
     assert restic_backup.snapshot_id_from_backup_stdout(stdout) == "abc123"
 
 
-def test_resolve_minio_endpoint_starts_stopped_container_and_ignores_invalid_tokens(monkeypatch) -> None:
+def test_resolve_minio_endpoint_recovers_compose_managed_container(monkeypatch) -> None:
     calls: list[list[str]] = []
+    inspect_count = 0
+
+    class FakeResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
 
     def fake_run_command(argv, **kwargs):
+        nonlocal inspect_count
         calls.append(argv)
-        if argv == ["docker", "inspect", "outline-minio", "--format", "{{json .State}}"]:
-            return types.SimpleNamespace(returncode=0, stdout='{"Running": false}', stderr="")
-        if argv == ["docker", "start", "outline-minio"]:
-            return types.SimpleNamespace(returncode=0, stdout="outline-minio\n", stderr="")
-        if argv == [
-            "docker",
-            "inspect",
-            "outline-minio",
-            "--format",
-            "{{range .NetworkSettings.Networks}}{{if .IPAddress}}{{.IPAddress}} {{end}}{{end}}",
-        ]:
-            return types.SimpleNamespace(returncode=0, stdout="invalid IP 10.200.18.2 \n", stderr="")
+        if argv == ["docker", "inspect", "minio"]:
+            inspect_count += 1
+            running = inspect_count > 1
+            return types.SimpleNamespace(
+                returncode=0,
+                stdout=json.dumps(
+                    [
+                        {
+                            "State": {"Running": running},
+                            "Config": {
+                                "Labels": {
+                                    "com.docker.compose.project.working_dir": "/opt/outline",
+                                    "com.docker.compose.project.config_files": "/opt/outline/docker-compose.yml",
+                                    "com.docker.compose.service": "minio",
+                                }
+                            },
+                            "NetworkSettings": {
+                                "Networks": {
+                                    "broken": {"IPAddress": "invalid IP"},
+                                    "outline_default": {"IPAddress": "10.200.18.2" if running else ""},
+                                }
+                            },
+                        }
+                    ]
+                ),
+                stderr="",
+            )
+        if argv == ["docker", "compose", "--file", "/opt/outline/docker-compose.yml", "up", "-d", "minio"]:
+            return types.SimpleNamespace(returncode=0, stdout="started\n", stderr="")
         raise AssertionError(f"unexpected command: {argv}")
 
     monkeypatch.setattr(restic_backup, "run_command", fake_run_command)
+    monkeypatch.setattr(restic_backup.time, "sleep", lambda _: None)
+    monkeypatch.setattr(restic_backup.urllib.request, "urlopen", lambda *args, **kwargs: FakeResponse())
+
+    host, endpoint = restic_backup.resolve_minio_endpoint({"controller_host": {"minio": {"container_name": "minio"}}})
+
+    assert host == "10.200.18.2"
+    assert endpoint == "http://10.200.18.2:9000"
+    assert calls == [
+        ["docker", "inspect", "minio"],
+        ["docker", "compose", "--file", "/opt/outline/docker-compose.yml", "up", "-d", "minio"],
+        ["docker", "inspect", "minio"],
+    ]
+
+
+def test_resolve_minio_endpoint_starts_standalone_stopped_container(monkeypatch) -> None:
+    calls: list[list[str]] = []
+    inspect_count = 0
+
+    class FakeResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fake_run_command(argv, **kwargs):
+        nonlocal inspect_count
+        calls.append(argv)
+        if argv == ["docker", "inspect", "outline-minio"]:
+            inspect_count += 1
+            running = inspect_count > 1
+            return types.SimpleNamespace(
+                returncode=0,
+                stdout=json.dumps(
+                    [
+                        {
+                            "State": {"Running": running},
+                            "Config": {"Labels": {}},
+                            "NetworkSettings": {
+                                "Networks": {
+                                    "bridge": {"IPAddress": "10.200.18.2" if running else ""},
+                                }
+                            },
+                        }
+                    ]
+                ),
+                stderr="",
+            )
+        if argv == ["docker", "start", "outline-minio"]:
+            return types.SimpleNamespace(returncode=0, stdout="outline-minio\n", stderr="")
+        raise AssertionError(f"unexpected command: {argv}")
+
+    monkeypatch.setattr(restic_backup, "run_command", fake_run_command)
+    monkeypatch.setattr(restic_backup.time, "sleep", lambda _: None)
+    monkeypatch.setattr(restic_backup.urllib.request, "urlopen", lambda *args, **kwargs: FakeResponse())
 
     host, endpoint = restic_backup.resolve_minio_endpoint(
         {"controller_host": {"minio": {"container_name": "outline-minio"}}}
@@ -407,15 +492,9 @@ def test_resolve_minio_endpoint_starts_stopped_container_and_ignores_invalid_tok
     assert host == "10.200.18.2"
     assert endpoint == "http://10.200.18.2:9000"
     assert calls == [
-        ["docker", "inspect", "outline-minio", "--format", "{{json .State}}"],
+        ["docker", "inspect", "outline-minio"],
         ["docker", "start", "outline-minio"],
-        [
-            "docker",
-            "inspect",
-            "outline-minio",
-            "--format",
-            "{{range .NetworkSettings.Networks}}{{if .IPAddress}}{{.IPAddress}} {{end}}{{end}}",
-        ],
+        ["docker", "inspect", "outline-minio"],
     ]
 
 
@@ -427,9 +506,11 @@ def test_repo_surfaces_register_restic_backup_contract() -> None:
     assert "restic-config-backup" in workflow_catalog
     assert "restic-config-restore-verify" in workflow_catalog
     assert "converge-restic-config-backup" in workflow_catalog
+    assert workflow_catalog["converge-restic-config-backup"]["preflight"]["required_secret_ids"][1] == "minio_root_password"
     assert command_catalog["run-restic-config-backup"]["workflow_id"] == "restic-config-backup"
     assert command_catalog["run-restic-config-restore-verify"]["workflow_id"] == "restic-config-restore-verify"
     assert command_catalog["converge-restic-config-backup"]["workflow_id"] == "converge-restic-config-backup"
+    assert command_catalog["converge-restic-config-backup"]["inputs"][1]["name"] == "minio_root_password"
     assert "playbooks/restic-config-backup.yml" in execution_scopes
 
 

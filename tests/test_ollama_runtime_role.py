@@ -43,13 +43,15 @@ def test_role_recovers_missing_docker_nat_chain_before_startup() -> None:
     assert precheck_task["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
 
     start_block = next(
-        task for task in tasks if task.get("name") == "Start the Ollama runtime and recover Docker nat-chain failures"
+        task
+        for task in tasks
+        if task.get("name") == "Start the Ollama runtime and recover Docker nat-chain and compose-network failures"
     )
     rescue_names = [task["name"] for task in start_block["rescue"]]
+    assert "Reset stale Ollama compose resources after startup failure" in rescue_names
     assert "Restart Docker to restore nat chain before retrying Ollama startup" in rescue_names
-    assert "Detect stale Docker networking drift during Ollama startup" in rescue_names
     assert "Remove the stale Ollama compose network before retrying startup" in rescue_names
-    assert "Retry Ollama startup after Docker nat-chain recovery" in rescue_names
+    assert "Retry Ollama startup after Docker nat-chain or compose-network recovery" in rescue_names
 
 
 def test_role_force_recreates_ollama_when_port_binding_is_missing() -> None:

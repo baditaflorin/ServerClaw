@@ -1,0 +1,26 @@
+# Playbook: services/typesense.yml
+# Purpose: Provide the governed service-wrapper entrypoint for Typesense live apply.
+# Use case: Used by generic `live-apply-service service=typesense` executions.
+#
+# Inputs (required):
+#   - env (string, required by wrapper): Shared execution environment selector.
+#
+# Inputs (optional):
+#   - EXTRA_ARGS (string, optional): Additional ansible-playbook flags forwarded by the wrapper.
+#
+# Outputs:
+#   - Imports the canonical Typesense converge playbook for scoped execution and validation.
+#
+# Idempotency: Fully idempotent because this file only delegates to the canonical playbook.
+#
+# Dependencies:
+#   - ADR 0165: Playbook metadata contract.
+#   - ADR 0167: Workstream handoff and isolated-worktree execution.
+#   - Requires: playbooks/typesense.yml
+#
+# Related ADRs: 0165, 0167, 0277
+# Related Runbooks: docs/runbooks/configure-typesense.md
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+---
+- import_playbook: ../typesense.yml

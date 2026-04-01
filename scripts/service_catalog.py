@@ -22,6 +22,7 @@ SERVICE_CATALOG_PATH: Final = repo_path("config", "service-capability-catalog.js
 SERVICE_CATALOG_SCHEMA_PATH: Final = repo_path(
     "docs", "schema", "service-capability-catalog.schema.json"
 )
+ADR_DIR: Final = repo_path("docs", "adr")
 HOST_VARS_PATH: Final = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 STACK_PATH: Final = repo_path("versions", "stack.yaml")
 WORKSTREAMS_PATH: Final = repo_path("workstreams.yaml")
@@ -385,6 +386,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
         internal_url = None
         public_url = None
         subdomain = None
+        adr = None
         for field in ("internal_url", "public_url", "subdomain", "dashboard_url", "runbook", "adr"):
             if field in service:
                 value = require_str(service.get(field), f"services[{index}].{field}")
@@ -394,6 +396,31 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
                     public_url = value
                 if field == "subdomain":
                     subdomain = value
+                if field == "adr":
+                    adr = value
+
+        adr_file = None
+        if "adr_file" in service:
+            adr_file = require_str(service.get("adr_file"), f"services[{index}].adr_file")
+            adr_path = repo_path(adr_file)
+            if not adr_path.exists():
+                raise ValueError(f"services[{index}].adr_file references missing path {adr_file}")
+            try:
+                adr_path.relative_to(ADR_DIR)
+            except ValueError as exc:
+                raise ValueError(f"services[{index}].adr_file must stay under docs/adr/") from exc
+            if adr is None:
+                raise ValueError(f"services[{index}].adr_file requires services[{index}].adr")
+            if adr_path.name.split("-", 1)[0] != adr:
+                raise ValueError(f"services[{index}].adr_file must match ADR {adr}")
+        if adr is not None:
+            adr_matches = sorted(ADR_DIR.glob(f"{adr}-*.md"))
+            if not adr_matches:
+                raise ValueError(f"services[{index}].adr references unknown ADR '{adr}'")
+            if len(adr_matches) > 1 and adr_file is None:
+                raise ValueError(
+                    f"services[{index}].adr_file is required because ADR {adr} resolves to multiple files"
+                )
 
         require_environment_bindings(
             service.get("environments"),

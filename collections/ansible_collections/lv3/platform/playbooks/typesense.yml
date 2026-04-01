@@ -1,0 +1,55 @@
+# Playbook: collections/ansible_collections/lv3/platform/playbooks/typesense.yml
+# Purpose: Converge the private Typesense runtime and its Proxmox host Tailscale proxy.
+# Use case: Collection-packaged execution path for ADR 0277 live apply and replay.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (file, required): Controller SSH key for the Proxmox host and docker-runtime guest.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Inventory environment selector for the shared execution runner.
+#
+# Outputs:
+#   - Repo-managed Typesense runtime on docker-runtime-lv3 plus the private Tailscale TCP proxy on proxmox_florin.
+#
+# Idempotency: Fully idempotent.
+#
+# Dependencies:
+#   - ADR 0077: Compose runtime secrets injection via OpenBao Agent.
+#   - ADR 0165: Playbook metadata contract.
+#   - ADR 0277: Typesense for structured full-text search.
+#   - Role: lv3.platform.proxmox_tailscale_proxy — publishes the operator-only proxy on the host.
+#   - Role: lv3.platform.proxmox_security — keeps the host firewall aligned with the declared management ports.
+#   - Role: lv3.platform.typesense_runtime — manages the Typesense runtime and controller-local API key.
+#   - Role: lv3.platform.api_gateway_runtime — refreshes the platform-services structured-search collection.
+#
+# Related ADRs: 0077, 0165, 0277
+# Related Runbooks: docs/runbooks/configure-typesense.md
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+---
+- name: Converge the Tailscale operator proxy for Typesense
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: lv3.platform.proxmox_tailscale_proxy
+    - role: lv3.platform.proxmox_security
+
+- name: Converge Typesense and refresh the API gateway structured-search catalog on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.typesense_runtime
+    - role: lv3.platform.api_gateway_runtime

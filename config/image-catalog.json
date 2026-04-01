@@ -382,6 +382,28 @@
         "converge-gotenberg"
       ]
     },
+    "typesense_runtime": {
+      "kind": "runtime",
+      "service_id": "typesense",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "typesense",
+      "registry_ref": "docker.io/typesense/typesense",
+      "tag": "29.0",
+      "digest": "sha256:3f1d38d0d944d959890fd5d32d6109f18095e1ddf05f8a23d1b4b5cc3a595088",
+      "ref": "docker.io/typesense/typesense:29.0@sha256:3f1d38d0d944d959890fd5d32d6109f18095e1ddf05f8a23d1b4b5cc3a595088",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-30-typesense-runtime.json",
+      "consumers": [
+        "roles/typesense_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-typesense"
+      ]
+    },
     "homepage_runtime": {
       "kind": "runtime",
       "service_id": "homepage",
@@ -457,19 +479,19 @@
         "converge-langfuse"
       ]
     },
-    "langfuse_minio_runtime": {
+    "minio_runtime": {
       "kind": "runtime",
-      "service_id": "langfuse",
+      "service_id": "minio",
       "runtime_host": "docker-runtime-lv3",
-      "container_name": "langfuse-minio",
+      "container_name": "minio",
       "registry_ref": "docker.io/minio/minio",
       "tag": "RELEASE.2025-07-23T15-54-02Z",
       "digest": "sha256:f6efb212cad3b62f78ca02339f16d8bc28d5bb2fbe792dfc21225c6037d2af8b",
       "ref": "docker.io/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:f6efb212cad3b62f78ca02339f16d8bc28d5bb2fbe792dfc21225c6037d2af8b",
       "platform": "linux/amd64",
-      "pinned_on": "2026-03-25",
+      "pinned_on": "2026-03-30",
       "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-25-langfuse-minio-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-03-30-minio-runtime.json",
       "exception": {
         "owner": "Platform operations",
         "justification": "The pinned upstream MinIO image still reports critical Trivy findings in bundled Go binaries; keep it digest-pinned and review on the next image rotation window.",
@@ -477,17 +499,21 @@
           "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
           "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
         ],
-        "approved_on": "2026-03-25",
-        "expires_on": "2026-04-08",
-        "remediation_plan": "Re-scan and refresh langfuse_minio_runtime with make upgrade-container-image IMAGE_ID=langfuse_minio_runtime WRITE=true APPLY=true before the exception expires."
+        "approved_on": "2026-03-30",
+        "expires_on": "2026-04-13",
+        "remediation_plan": "Re-scan and refresh minio_runtime with make upgrade-container-image IMAGE_ID=minio_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
-        "roles/langfuse_runtime/templates/docker-compose.yml.j2",
+        "roles/minio_runtime/templates/docker-compose.yml.j2",
+        "roles/outline_runtime/templates/docker-compose.yml.j2",
+        "roles/plane_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py",
         "docs/runbooks/container-image-policy.md"
       ],
       "apply_targets": [
-        "converge-langfuse"
+        "converge-minio",
+        "converge-outline",
+        "converge-plane"
       ]
     },
     "langfuse_redis_runtime": {

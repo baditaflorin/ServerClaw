@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.123",
-  "platform_version": "0.130.78",
-  "generated_at": "2026-03-31T21:51:51Z",
-  "next_refresh_at": "2026-03-31T22:51:51Z",
+  "repo_version": "0.177.126",
+  "platform_version": "0.130.80",
+  "generated_at": "2026-04-01T01:31:47Z",
+  "next_refresh_at": "2026-04-01T02:31:47Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -151,7 +151,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://build.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "docker_runtime": {
         "service_name": "Docker Runtime VM",
@@ -162,7 +162,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docker.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "docs_portal": {
         "service_name": "Developer Portal",
@@ -184,7 +184,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://logs.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z",
+        "last_live_apply": "2026-04-01T00:00:00Z",
         "slo_status": "unknown"
       },
       "excalidraw": {
@@ -219,7 +219,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3009",
-        "last_live_apply": "2026-03-31T00:00:00Z",
+        "last_live_apply": "2026-04-01T00:00:00Z",
         "slo_status": "unknown"
       },
       "gotenberg": {
@@ -267,7 +267,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://headscale.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "homepage": {
         "service_name": "Homepage",
@@ -374,6 +374,18 @@
         "primary_url": "http://100.64.0.1:8066",
         "last_live_apply": "2026-03-31T00:00:00Z"
       },
+      "minio": {
+        "service_name": "MinIO",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://minio.lv3.org",
+        "last_live_apply": "2026-03-31T00:00:00Z",
+        "slo_status": "unknown"
+      },
       "n8n": {
         "service_name": "n8n",
         "status": "healthy",
@@ -463,7 +475,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3001",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "ollama": {
         "service_name": "Ollama",
@@ -567,7 +579,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://tasks.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z",
+        "last_live_apply": "2026-04-01T00:00:00Z",
         "slo_status": "unknown"
       },
       "platform_context_api": {
@@ -579,7 +591,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8010",
-        "last_live_apply": "2026-03-31T00:00:00Z",
+        "last_live_apply": "2026-04-01T00:00:00Z",
         "slo_status": "unknown"
       },
       "plausible": {
@@ -603,7 +615,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9444",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "postgres": {
         "service_name": "PostgreSQL",
@@ -614,7 +626,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "postgres://database.lv3.org:5432",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "proxmox_ui": {
         "service_name": "Proxmox UI",
@@ -625,7 +637,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://proxmox.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "realtime": {
         "service_name": "Netdata Realtime Metrics",
@@ -706,7 +718,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9443",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "temporal": {
         "service_name": "Temporal",
@@ -740,6 +752,18 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:9998",
+        "last_live_apply": "2026-04-01T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "typesense": {
+        "service_name": "Typesense",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.64.0.1:8016",
         "last_live_apply": "2026-03-31T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -788,7 +812,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://ci.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z",
+        "last_live_apply": "2026-04-01T00:00:00Z",
         "slo_status": "unknown"
       }
     }
@@ -1894,6 +1918,32 @@
         "runbook": "docs/runbooks/configure-mattermost.md"
       },
       {
+        "id": "converge-minio",
+        "description": "Deploy the shared MinIO runtime on docker-runtime-lv3, publish the public S3 API and authenticated console, and verify the launch buckets and policies.",
+        "tags": [
+          "converge-minio",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 350,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/minio-object-storage.md"
+      },
+      {
         "id": "converge-monitoring",
         "description": "Converge the monitoring VM, guest telemetry paths, Grafana dashboards, Prometheus service-graph metrics, Tempo tracing, and centralized Loki log shipping.",
         "tags": [
@@ -2646,6 +2696,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-tika.md"
+      },
+      {
+        "id": "converge-typesense",
+        "description": "Deploy the private Typesense runtime on docker-runtime-lv3, refresh the Proxmox host Tailscale proxy, and repopulate the platform-services structured-search collection used by the shared API gateway.",
+        "tags": [
+          "converge-typesense",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 280,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-typesense.md"
       },
       {
         "id": "converge-vaultwarden",
@@ -4682,7 +4758,7 @@
         "id": "configure-gitea",
         "title": "Configure Gitea",
         "agent_trust_required": "T3",
-        "steps": 8,
+        "steps": 9,
         "path": "docs/runbooks/configure-gitea.md",
         "workflow_ids": [
           "converge-gitea"
@@ -5113,6 +5189,16 @@
         ]
       },
       {
+        "id": "configure-typesense",
+        "title": "Configure Typesense",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-typesense.md",
+        "workflow_ids": [
+          "converge-typesense"
+        ]
+      },
+      {
         "id": "configure-vaultwarden",
         "title": "Configure Vaultwarden",
         "agent_trust_required": "T3",
@@ -5313,10 +5399,20 @@
         ]
       },
       {
+        "id": "minio-object-storage",
+        "title": "MinIO Object Storage",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/minio-object-storage.md",
+        "workflow_ids": [
+          "converge-minio"
+        ]
+      },
+      {
         "id": "monitoring-stack",
         "title": "Monitoring Stack Runbook",
         "agent_trust_required": "T3",
-        "steps": 22,
+        "steps": 23,
         "path": "docs/runbooks/monitoring-stack.md",
         "workflow_ids": [
           "converge-monitoring"
@@ -5440,7 +5536,7 @@
         "id": "rag-platform-context",
         "title": "RAG Platform Context",
         "agent_trust_required": "T3",
-        "steps": 12,
+        "steps": 13,
         "path": "docs/runbooks/rag-platform-context.md",
         "workflow_ids": [
           "converge-rag-context"
@@ -5450,7 +5546,7 @@
         "id": "restic-config-backups",
         "title": "Restic Config Backups",
         "agent_trust_required": "T3",
-        "steps": 4,
+        "steps": 5,
         "path": "docs/runbooks/restic-config-backups.md",
         "workflow_ids": [
           "converge-restic-config-backup",
@@ -5736,10 +5832,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.122",
-    "deployed_at": "2026-03-31",
-    "summary": "implemented ADRs 0307 through 0316 by defining the cohesive platform",
-    "release_notes_url": "docs/release-notes/0.177.123.md"
+    "last_version": "0.177.125",
+    "deployed_at": "2026-04-01",
+    "summary": "Refresh the Renovate validation path with a direct OpenFGA guest health check and restore SBOM scanner host-path mapping for runner scans. Record the Renovate live-apply follow-up evidence, including build-server workspace cleanup for the remote gate.",
+    "release_notes_url": "docs/release-notes/0.177.126.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

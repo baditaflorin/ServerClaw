@@ -1,4 +1,24 @@
 ---
+# Purpose: Declare the shared defaults for converging the private Gitea runtime, bootstrap artifacts, and MinIO-backed LFS contract.
+# Use case: Load whenever the gitea_runtime role renders the runtime env, compose stack, and bootstrap assets.
+#
+# Inputs (required):
+#   - ansible host facts, service topology, and repo-local secret paths.
+#
+# Inputs (optional):
+#   - gitea_* overrides (optional): Allow controlled overrides of runtime paths, endpoints, and bootstrap metadata.
+#
+# Outputs:
+#   - Default variable values consumed by the gitea_runtime role.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0143: Defines the private Gitea platform surface.
+#   - ADR 0165: Requires metadata headers on managed playbook and role surfaces.
+#   - ADR 0233: Adds the release-bundle bootstrap contract.
+#   - ADR 0274: Moves Gitea LFS storage to the shared MinIO object layer.
 gitea_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('gitea') }}"
 gitea_keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
 gitea_site_dir: /opt/gitea
@@ -35,6 +55,12 @@ gitea_oidc_discovery_url: "https://sso.lv3.org/realms/lv3/.well-known/openid-con
 gitea_oidc_internal_discovery_url: "http://{{ gitea_keycloak_service_topology.private_ip }}:8091/realms/lv3/.well-known/openid-configuration"
 gitea_oidc_required_claim_name: groups
 gitea_oidc_required_claim_value: lv3-platform-admins
+gitea_minio_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('minio') }}"
+gitea_minio_access_key_id: gitealfs
+gitea_minio_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/minio-secret-key.txt
+gitea_minio_bucket_name: gitea-lfs
+gitea_minio_region: us-east-1
+gitea_minio_endpoint: "{{ gitea_minio_service_topology.private_ip }}:{{ hostvars['proxmox_florin'].platform_port_assignments.minio_api_port }}"
 gitea_admin_username: ops-gitea
 gitea_admin_email: "{{ proxmox_notification_email }}"
 gitea_admin_password_remote_file: "{{ gitea_secret_dir }}/admin-password"

@@ -55,6 +55,7 @@
     socket_state="$(systemctl show -p ActiveState --value lv3-tailscale-proxy-{{ item.name }}.socket)"
     service_state="$(systemctl show -p ActiveState --value lv3-tailscale-proxy-{{ item.name }}.service)"
     printf 'socket=%s\nservice=%s\n' "$socket_state" "$service_state"
+  become: false
   args:
     executable: /bin/bash
   loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
@@ -105,6 +106,7 @@
       exit 0
     fi
     ps -p "$pid" -o command=
+  become: false
   args:
     executable: /bin/bash
   loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"

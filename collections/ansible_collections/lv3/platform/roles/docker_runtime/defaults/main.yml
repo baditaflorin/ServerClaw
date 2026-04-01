@@ -84,6 +84,8 @@ docker_runtime_chain_recheck_retries: 30
 docker_runtime_chain_recheck_delay_seconds: 2
 docker_runtime_container_recovery_retries: 12
 docker_runtime_container_recovery_delay_seconds: 5
+docker_runtime_openbao_recovery_timeout_seconds: 180
+docker_runtime_openbao_recovery_delay_seconds: 5
 docker_runtime_nonpersistent_restart_policies:
   - ""
   - "no"
@@ -98,6 +100,9 @@ docker_runtime_controller_repo_root: >-
   }}
 docker_runtime_publication_assurance_helper_local_path: >-
   {{ docker_runtime_controller_repo_root }}/scripts/docker_publication_assurance.py
+docker_runtime_repo_root: "{{ inventory_dir | dirname }}"
+docker_runtime_publication_assurance_script_src: >-
+  {{ docker_runtime_repo_root }}/scripts/docker_publication_assurance.py
 docker_runtime_publication_assurance_script_path: /usr/local/bin/lv3-docker-publication-assurance
 docker_runtime_publication_assurance_helper_source: "{{ inventory_dir ~ '/../scripts/docker_publication_assurance.py' }}"
 docker_runtime_container_forward_source_cidrs:

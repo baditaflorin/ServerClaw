@@ -19,7 +19,11 @@
     return_content: true
     status_code: 200
   register: langfuse_verify_project
+  retries: 30
+  delay: 5
+  until: (langfuse_verify_project.status | default(0)) == 200
   changed_when: false
+  failed_when: false
   no_log: true
 
 - name: Assert the Langfuse bootstrap project matches the repo-managed seed

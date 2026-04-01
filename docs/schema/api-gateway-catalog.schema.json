@@ -65,6 +65,16 @@
           },
           "upstream_auth_env_var": {
             "type": "string"
+          },
+          "upstream_auth_header": {
+            "type": "string"
+          },
+          "upstream_auth_scheme": {
+            "type": "string",
+            "enum": [
+              "bearer",
+              "raw"
+            ]
           }
         }
       }

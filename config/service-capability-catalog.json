@@ -185,6 +185,7 @@
         "crawl4ai_runtime"
       ],
       "adr": "0288",
+      "adr_file": "docs/adr/0288-crawl4ai-as-the-llm-optimised-web-content-crawler.md",
       "runbook": "docs/runbooks/configure-crawl4ai.md",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=crawl4ai-availability",
       "tags": [
@@ -371,6 +372,7 @@
         "keycloak_directus_client_secret"
       ],
       "adr": "0289",
+      "adr_file": "docs/adr/0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md",
       "runbook": "docs/runbooks/configure-directus.md",
       "tags": [
         "data-api",
@@ -555,6 +557,7 @@
       "secret_catalog_ids": [
         "gitea_admin_password",
         "gitea_database_password",
+        "gitea_minio_secret_key",
         "gitea_runner_registration_token",
         "gitea_webhook_secret"
       ],
@@ -620,6 +623,7 @@
       "uptime_monitor_name": "Grafana Public",
       "health_probe_id": "grafana",
       "secret_catalog_ids": [
+        "loki_minio_secret_key",
         "monitoring_guest_writer_token",
         "monitoring_proxmox_writer_token"
       ],
@@ -739,6 +743,7 @@
         "flagsmith_runtime"
       ],
       "adr": "0288",
+      "adr_file": "docs/adr/0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md",
       "runbook": "docs/runbooks/configure-flagsmith.md",
       "tags": [
         "feature-flags",
@@ -842,12 +847,12 @@
         "langfuse_runtime",
         "langfuse_worker_runtime",
         "langfuse_clickhouse_runtime",
-        "langfuse_minio_runtime",
         "langfuse_redis_runtime"
       ],
       "secret_catalog_ids": [
         "langfuse_database_password",
         "langfuse_bootstrap_user_password",
+        "langfuse_minio_secret_key",
         "langfuse_project_secret_key",
         "keycloak_langfuse_client_secret"
       ],
@@ -991,6 +996,44 @@
       }
     },
     {
+      "id": "minio",
+      "name": "MinIO",
+      "description": "Shared S3-compatible object storage runtime for platform buckets, governed bucket policy reconciliation, and browser-based object inspection.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:9010",
+      "public_url": "https://minio.lv3.org",
+      "subdomain": "minio.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "MinIO Public Health",
+      "health_probe_id": "minio",
+      "image_catalog_ids": [
+        "minio_runtime"
+      ],
+      "secret_catalog_ids": [
+        "minio_root_password"
+      ],
+      "adr": "0274",
+      "adr_file": "docs/adr/0274-minio-as-the-s3-compatible-object-storage-layer.md",
+      "runbook": "docs/runbooks/minio-object-storage.md",
+      "tags": [
+        "s3",
+        "object-storage",
+        "minio",
+        "shared"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://minio.lv3.org",
+          "subdomain": "minio.lv3.org",
+          "notes": "The public S3 API remains machine-accessible while the browser console is separately published at minio-console.lv3.org behind the shared edge OIDC gate."
+        }
+      }
+    },
+    {
       "id": "redpanda",
       "name": "Redpanda",
       "description": "Private Kafka-compatible streaming platform for durable, replayable event logs and schema-managed topics.",
@@ -1009,6 +1052,7 @@
         "redpanda_platform_password"
       ],
       "adr": "0290",
+      "adr_file": "docs/adr/0290-redpanda-as-the-kafka-compatible-streaming-platform.md",
       "runbook": "docs/runbooks/configure-redpanda.md",
       "tags": [
         "streaming",
@@ -1251,6 +1295,39 @@
       }
     },
     {
+      "id": "typesense",
+      "name": "Typesense",
+      "description": "Private full-text search engine for structured internal platform data and faceted operator lookups.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://100.64.0.1:8016",
+      "exposure": "private-only",
+      "health_probe_id": "typesense",
+      "image_catalog_ids": [
+        "typesense_runtime"
+      ],
+      "secret_catalog_ids": [
+        "typesense_api_key"
+      ],
+      "adr": "0277",
+      "runbook": "docs/runbooks/configure-typesense.md",
+      "tags": [
+        "search",
+        "structured-data",
+        "full-text",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://100.64.0.1:8016",
+          "notes": "Private Tailscale controller route published by the Proxmox host proxy."
+        }
+      }
+    },
+    {
       "id": "nginx_edge",
       "name": "NGINX Edge",
       "description": "Public ingress edge that terminates TLS and publishes selected services.",
@@ -1422,6 +1499,7 @@
       "exposure": "private-only",
       "health_probe_id": "piper",
       "adr": "0284",
+      "adr_file": "docs/adr/0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md",
       "runbook": "docs/runbooks/configure-piper.md",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=piper-availability",
       "tags": [
@@ -1569,6 +1647,7 @@
         "temporal_database_password"
       ],
       "adr": "0293",
+      "adr_file": "docs/adr/0293-temporal-as-the-durable-workflow-and-task-queue-engine.md",
       "runbook": "docs/runbooks/configure-temporal.md",
       "tags": [
         "workflow",
@@ -1637,7 +1716,7 @@
       "health_probe_id": "outline",
       "image_catalog_ids": [
         "outline_runtime",
-        "langfuse_minio_runtime",
+        "minio_runtime",
         "langfuse_redis_runtime"
       ],
       "secret_catalog_ids": [
@@ -1686,6 +1765,7 @@
         "keycloak_jupyterhub_client_secret"
       ],
       "adr": "0291",
+      "adr_file": "docs/adr/0291-jupyterhub-as-the-interactive-notebook-environment.md",
       "runbook": "docs/runbooks/configure-jupyterhub.md",
       "tags": [
         "jupyter",
@@ -1729,6 +1809,7 @@
         "keycloak_paperless_client_secret"
       ],
       "adr": "0285",
+      "adr_file": "docs/adr/0285-paperless-ngx-as-the-document-management-and-archive-api.md",
       "runbook": "docs/runbooks/configure-paperless.md",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=paperless-availability",
       "tags": [
@@ -1769,7 +1850,7 @@
         "plane_backend_runtime",
         "plane_proxy_runtime",
         "netbox_redis_runtime",
-        "langfuse_minio_runtime",
+        "minio_runtime",
         "plane_rabbitmq_runtime"
       ],
       "secret_catalog_ids": [
@@ -1809,6 +1890,9 @@
       "exposure": "private-only",
       "uptime_monitor_name": "Platform Context Private",
       "health_probe_id": "platform_context_api",
+      "secret_catalog_ids": [
+        "platform_context_minio_secret_key"
+      ],
       "adr": "0070",
       "runbook": "docs/runbooks/rag-platform-context.md",
       "tags": [
@@ -2088,6 +2172,7 @@
         "woodpecker_secret_smoke"
       ],
       "adr": "0287",
+      "adr_file": "docs/adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md",
       "runbook": "docs/runbooks/configure-woodpecker.md",
       "degradation_modes": [
         {
@@ -2288,6 +2373,7 @@
       "exposure": "private-only",
       "health_probe_id": "tesseract_ocr",
       "adr": "0286",
+      "adr_file": "docs/adr/0286-tesseract-ocr-service-for-scanned-image-text-extraction.md",
       "runbook": "docs/runbooks/configure-tesseract-ocr.md",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tesseract-ocr-availability",
       "tags": [

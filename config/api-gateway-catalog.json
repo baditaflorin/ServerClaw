@@ -302,6 +302,20 @@
       "healthcheck_path": "/"
     },
     {
+      "id": "typesense",
+      "name": "Typesense",
+      "upstream": "http://10.10.10.20:8108",
+      "gateway_prefix": "/v1/typesense",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/health",
+      "upstream_auth_env_var": "LV3_GATEWAY_TYPESENSE_API_KEY",
+      "upstream_auth_header": "X-TYPESENSE-API-KEY",
+      "upstream_auth_scheme": "raw"
+    },
+    {
       "id": "uptime_kuma",
       "name": "Uptime Kuma",
       "upstream": "http://10.10.10.20:3001",

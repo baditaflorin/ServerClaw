@@ -224,6 +224,8 @@ class GatewayService:
     healthcheck_path: str = "/"
     openapi_path: str | None = None
     upstream_auth_env_var: str | None = None
+    upstream_auth_header: str | None = None
+    upstream_auth_scheme: str = "bearer"
 
 
 @dataclass(frozen=True)
@@ -270,6 +272,83 @@ class GatewayConfig:
     billing_ingest_producers_path: Path = Path("/config/billing-ingest-producers.json")
     billing_rejection_subject: str = "billing.events.rejected"
     billing_org_api_key: str | None = None
+    typesense_base_url: str | None = None
+    typesense_api_key: str | None = None
+
+
+class TypesenseStructuredSearchClient:
+    _COLLECTION_PROFILES = {
+        "platform-services": {
+            "query_by": "name,description,tags,category,vm,exposure,subdomain,runbook,adr,health_probe_id",
+            "facet_by": "category,exposure,vm,lifecycle_status,tags",
+        }
+    }
+
+    def __init__(self, *, base_url: str, api_key: str, client: httpx.AsyncClient) -> None:
+        self._base_url = base_url.rstrip("/")
+        self._api_key = api_key
+        self._client = client
+
+    @staticmethod
+    def _quoted_filter_value(value: str) -> str:
+        return f"`{value.replace('`', '')}`"
+
+    async def search(
+        self,
+        query: str,
+        *,
+        collection: str,
+        limit: int,
+        filters: dict[str, str],
+    ) -> dict[str, Any]:
+        profile = self._COLLECTION_PROFILES.get(collection)
+        if profile is None:
+            raise HTTPException(status_code=404, detail=f"unknown structured-search collection '{collection}'")
+        filter_parts = [
+            f"{field}:={self._quoted_filter_value(value)}"
+            for field, value in sorted(filters.items())
+            if value.strip()
+        ]
+        params = {
+            "q": query,
+            "query_by": profile["query_by"],
+            "facet_by": profile["facet_by"],
+            "per_page": str(limit),
+        }
+        if filter_parts:
+            params["filter_by"] = " && ".join(filter_parts)
+        try:
+            response = await self._client.get(
+                f"{self._base_url}/collections/{collection}/documents/search",
+                params=params,
+                headers={"X-TYPESENSE-API-KEY": self._api_key},
+                timeout=resolve_timeout_seconds("http_request", 5),
+            )
+            response.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise HTTPException(status_code=503, detail="structured search dependency is unavailable") from exc
+        payload = response.json()
+        hits = payload.get("hits", [])
+        results = []
+        for hit in hits:
+            if not isinstance(hit, dict):
+                continue
+            document = hit.get("document", {})
+            if not isinstance(document, dict):
+                continue
+            result = dict(document)
+            result["text_match"] = hit.get("text_match")
+            result["highlights"] = hit.get("highlights", [])
+            results.append(result)
+        return {
+            "backend": "typesense",
+            "collection": collection,
+            "query": query,
+            "count": len(results),
+            "found": int(payload.get("found", len(results))),
+            "facet_counts": payload.get("facet_counts", []),
+            "results": results,
+        }
 
 
 class KeycloakJWTVerifier:
@@ -599,6 +678,15 @@ class GatewayRuntime:
         self.billing_producers = self._load_billing_producers(config.billing_ingest_producers_path)
         self.http_client = httpx.AsyncClient(follow_redirects=False)
         self.search_client = SearchClient(config.repo_root)
+        self.structured_search_client = (
+            TypesenseStructuredSearchClient(
+                base_url=config.typesense_base_url,
+                api_key=config.typesense_api_key,
+                client=self.http_client,
+            )
+            if config.typesense_base_url and config.typesense_api_key
+            else None
+        )
         self.degradation_store = DegradationStateStore(config.degradation_state_path)
         self.circuit_registry = CircuitRegistry(
             config.repo_root,
@@ -1014,6 +1102,8 @@ def build_config() -> GatewayConfig:
         ),
         billing_rejection_subject=os.environ.get("LV3_GATEWAY_BILLING_REJECTION_SUBJECT", "billing.events.rejected"),
         billing_org_api_key=os.environ.get("LV3_GATEWAY_BILLING_ORG_API_KEY") or None,
+        typesense_base_url=os.environ.get("LV3_GATEWAY_TYPESENSE_BASE_URL") or None,
+        typesense_api_key=os.environ.get("LV3_GATEWAY_TYPESENSE_API_KEY") or None,
     )
 
 
@@ -1711,6 +1801,39 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
     ) -> dict[str, Any]:
         return await platform_search(request, q=q, collection=collection, limit=limit, identity=identity)
 
+    @app.get("/v1/search/structured")
+    @app.get("/v1/platform/search/structured")
+    async def platform_structured_search(
+        request: Request,
+        q: str = Query(min_length=2),
+        collection: str = Query(default="platform-services"),
+        limit: int = Query(default=10, ge=1, le=25),
+        category: str | None = Query(default=None),
+        exposure: str | None = Query(default=None),
+        vm: str | None = Query(default=None),
+        lifecycle_status: str | None = Query(default=None),
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        if runtime.structured_search_client is None:
+            raise HTTPException(status_code=503, detail="structured search is unavailable")
+        payload = await runtime.structured_search_client.search(
+            q,
+            collection=collection,
+            limit=limit,
+            filters={
+                "category": category or "",
+                "exposure": exposure or "",
+                "vm": vm or "",
+                "lifecycle_status": lifecycle_status or "",
+            },
+        )
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return payload
+
     @app.get("/v1/graph/nodes")
     async def graph_nodes(
         request: Request,
@@ -2404,7 +2527,13 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
         else:
             upstream_token = runtime.upstream_token(service)
             if upstream_token:
-                headers["Authorization"] = f"Bearer {upstream_token}"
+                auth_header = service.upstream_auth_header or "Authorization"
+                auth_scheme = service.upstream_auth_scheme or "bearer"
+                if auth_scheme.lower() == "raw":
+                    headers[auth_header] = upstream_token
+                else:
+                    scheme = "Bearer" if auth_scheme.lower() == "bearer" else auth_scheme
+                    headers[auth_header] = f"{scheme} {upstream_token}"
 
         url = urljoin(service.upstream + "/", upstream_path.lstrip("/"))
         body = await request.body()

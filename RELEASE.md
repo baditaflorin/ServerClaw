@@ -1,18 +1,13 @@
-# Release 0.177.123
+# Release 0.177.126
 
-- Date: 2026-03-31
+- Date: 2026-04-01
 
 ## Summary
-- implemented ADRs 0307 through 0316 by defining the cohesive platform
-  workbench, journey-aware entry routing, onboarding checklist, task-oriented
-  navigation, command palette, notification center, contextual help,
-  resumable-task reentry, canonical page states, and journey scorecards for
-  human onboarding and user flow
+- Refresh the Renovate validation path with a direct OpenFGA guest health check and restore SBOM scanner host-path mapping for runner scans.
+- Record the Renovate live-apply follow-up evidence, including build-server workspace cleanup for the remote gate.
 
 ## Platform Impact
-- repository architecture only; platform version remains `0.130.78` because
-  this release records product and onboarding direction rather than a live
-  infrastructure apply
+- Renovate validation and SBOM scanning contract refreshed; build-server workspace cleanup documented.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

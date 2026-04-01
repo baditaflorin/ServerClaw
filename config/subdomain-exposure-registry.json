@@ -1979,6 +1979,161 @@
       "notes": "The public hostname terminates at the shared edge and forwards only the Matrix client listener; authentication is enforced by Synapse and federation stays disabled for this ADR."
     },
     {
+      "fqdn": "minio-console.lv3.org",
+      "service_id": "minio",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0274",
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
+      },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "minio",
+          "kind": "proxy",
+          "source": "public_edge_extra_sites",
+          "target": "http://10.10.10.20:{{ platform_port_assignments.minio_console_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
+      },
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "public_edge_extra_sites",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "oauth2_proxy",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {
+          "upstream": "http://10.10.10.20:{{ platform_port_assignments.minio_console_port }}",
+          "client_max_body_size": 0,
+          "chunked_transfer_encoding": true,
+          "proxy_request_buffering": false,
+          "proxy_read_timeout_seconds": 900,
+          "proxy_send_timeout_seconds": 900,
+          "security_headers_enabled": false,
+          "preserve_upstream_security_headers": true
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "The MinIO browser console is published through the shared authenticated edge path and proxied to the docker-runtime guest listener on port 9011."
+    },
+    {
+      "fqdn": "minio.lv3.org",
+      "service_id": "minio",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0274",
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "open",
+        "audience": "public"
+      },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "public",
+        "auth_requirement": "none",
+        "route_target": {
+          "service_id": "minio",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.minio_api_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "minio",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "noindex": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.minio_api_port }}",
+          "client_max_body_size": 0,
+          "chunked_transfer_encoding": true,
+          "proxy_request_buffering": false,
+          "proxy_read_timeout_seconds": 900,
+          "proxy_send_timeout_seconds": 900,
+          "security_headers_enabled": false,
+          "crawl_policy_enabled": false
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "The public MinIO S3-compatible API is published through the shared NGINX edge and proxies to the docker-runtime guest listener on port 9010."
+    },
+    {
       "fqdn": "n8n.lv3.org",
       "service_id": "n8n",
       "environment": "production",
@@ -3272,12 +3427,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 45,
-    "active_total": 41,
-    "active_public_total": 37,
+    "catalog_total": 47,
+    "active_total": 43,
+    "active_public_total": 39,
     "active_private_total": 4,
     "planned_total": 4,
-    "shared_edge_total": 36,
+    "shared_edge_total": 38,
     "platform_sso_total": 16
   }
 }

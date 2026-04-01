@@ -41,6 +41,28 @@ def test_build_platform_vars_includes_langfuse_publication_topology() -> None:
     assert platform_vars["outline_port"] == 3006
 
 
+def test_build_platform_vars_includes_minio_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    minio = platform_vars["platform_service_topology"]["minio"]
+    dns_records = {
+        (record["name"], record["type"], record["value"], record["ttl"])
+        for record in platform_vars["hetzner_dns_records"]
+    }
+
+    assert minio["public_hostname"] == "minio.lv3.org"
+    assert minio["console_public_hostname"] == "minio-console.lv3.org"
+    assert minio["ports"]["internal"] == 9010
+    assert minio["ports"]["console"] == 9011
+    assert minio["urls"]["public"] == "https://minio.lv3.org"
+    assert minio["urls"]["internal"] == "http://10.10.10.20:9010"
+    assert minio["urls"]["console_internal"] == "http://10.10.10.20:9011"
+    assert minio["urls"]["console_public"] == "https://minio-console.lv3.org"
+    assert platform_vars["minio_public_url"] == "https://minio.lv3.org"
+    assert platform_vars["minio_console_public_url"] == "https://minio-console.lv3.org"
+    assert ("minio", "A", "65.108.75.123", 60) in dns_records
+    assert ("minio-console", "A", "65.108.75.123", 60) in dns_records
+
+
 def test_build_platform_vars_includes_dify_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     dify = platform_vars["platform_service_topology"]["dify"]
@@ -234,6 +256,16 @@ def test_build_platform_vars_includes_redpanda_private_topology() -> None:
     assert redpanda["urls"]["schema_registry"] == "http://10.10.10.20:8104"
     assert platform_vars["redpanda_http_proxy_port"] == 8103
     assert platform_vars["redpanda_schema_registry_port"] == 8104
+
+def test_build_platform_vars_includes_typesense_private_controller_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    typesense = platform_vars["platform_service_topology"]["typesense"]
+
+    assert typesense["ports"]["internal"] == 8108
+    assert typesense["ports"]["controller"] == 8016
+    assert typesense["urls"]["internal"] == "http://10.10.10.20:8108"
+    assert typesense["urls"]["controller"] == "http://100.64.0.1:8016"
+    assert platform_vars["typesense_controller_url"] == "http://100.64.0.1:8016"
 
 
 def test_build_platform_vars_includes_nextcloud_publication_topology() -> None:
