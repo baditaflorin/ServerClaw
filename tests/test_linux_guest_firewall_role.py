@@ -48,10 +48,24 @@ def test_linux_guest_firewall_reasserts_docker_bridge_chains_after_firewall_eval
         for task in tasks
         if task["name"] == "Ensure Docker bridge networking remains available after firewall evaluation"
     )
-    include_role = ensure_task["ansible.builtin.include_role"]
+    include_role = ensure_task["block"][0]["ansible.builtin.include_role"]
     assert include_role["name"] == "lv3.platform.common"
     assert include_role["tasks_from"] == "docker_bridge_chains"
-    assert ensure_task["vars"]["common_docker_bridge_chains_service_name"] == "docker"
+    assert ensure_task["block"][0]["vars"]["common_docker_bridge_chains_service_name"] == "docker"
+    restart_task = next(
+        task
+        for task in ensure_task["rescue"]
+        if task["name"] == "Restart Docker to restore bridge chains after guest firewall evaluation"
+    )
+    recovery_recheck = next(
+        task
+        for task in ensure_task["rescue"]
+        if task["name"] == "Recheck Docker bridge networking after guest firewall recovery restart"
+    )
+    assert restart_task["ansible.builtin.systemd"] == {"name": "docker", "state": "restarted"}
+    assert recovery_recheck["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert recovery_recheck["ansible.builtin.include_role"]["tasks_from"] == "docker_bridge_chains"
+    assert recovery_recheck["vars"]["common_docker_bridge_chains_service_name"] == "docker"
 
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 TEMPLATE_PATH = (
