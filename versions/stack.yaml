@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.131
-platform_version: 0.130.82
+repo_version: 0.177.132
+platform_version: 0.130.83
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -23,6 +23,7 @@ live_apply_evidence:
     gitea: 2026-03-26-adr-0143-gitea-live-apply
     homepage: 2026-03-26-adr-0152-homepage-live-apply
     langfuse: 2026-03-26-adr-0146-langfuse-live-apply
+    livekit: 2026-04-01-adr-0293-livekit-mainline-live-apply
     lago: 2026-04-01-adr-0292-lago-mainline-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
     uptime_kuma: 2026-03-22-adr-0027-uptime-kuma-live-apply
@@ -1089,8 +1090,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.131
+    current: 0.177.132
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.82
+    current: 0.130.83
     meaning: intended platform release for the actual server configuration

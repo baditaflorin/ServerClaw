@@ -55,3 +55,47 @@ playbooks:
     lock_resources:
       - observability:uptime-kuma
       - edge:uptime-kuma
+
+  - path: playbooks/livekit.yml
+    workflow_id: converge-livekit
+    make_target: converge-livekit
+    mutation_scope: platform
+    shared_surfaces:
+      - service:livekit
+      - host:proxmox_florin
+      - host:proxmox_florin/service:proxmox_network
+      - vm:110
+      - vm:110/service:nginx_edge_publication
+      - vm:120
+      - vm:120/service:livekit
+      - inventory/host_vars/proxmox_florin.yml
+    lock_resources:
+      - host:proxmox_florin
+      - host:proxmox_florin/service:proxmox_network
+      - vm:110
+      - vm:110/service:nginx_edge_publication
+      - vm:120
+      - vm:120/service:livekit
+
+  - path: playbooks/services/livekit.yml
+    workflow_id: converge-livekit
+    make_target: live-apply-service
+    make_vars:
+      service: livekit
+    mutation_scope: platform
+    shared_surfaces:
+      - service:livekit
+      - host:proxmox_florin
+      - host:proxmox_florin/service:proxmox_network
+      - vm:110
+      - vm:110/service:nginx_edge_publication
+      - vm:120
+      - vm:120/service:livekit
+      - inventory/host_vars/proxmox_florin.yml
+    lock_resources:
+      - host:proxmox_florin
+      - host:proxmox_florin/service:proxmox_network
+      - vm:110
+      - vm:110/service:nginx_edge_publication
+      - vm:120
+      - vm:120/service:livekit

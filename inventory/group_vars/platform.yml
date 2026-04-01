@@ -28,6 +28,7 @@ platform_host:
       - 443
       - 587
       - 993
+      - 7881
     public_ingress_tcp_forwards:
       - listen_port: 25
         target_host: 10.10.10.20
@@ -44,6 +45,9 @@ platform_host:
       - listen_port: 993
         target_host: 10.10.10.20
         target_port: 993
+      - listen_port: 7881
+        target_host: 10.10.10.20
+        target_port: 7881
     tailscale_hostname: proxmox-florin-subnet-router
     tailscale_advertise_routes:
       - 10.10.10.0/24
@@ -164,6 +168,9 @@ platform_ports:
   mailpit_http_port: 8025
   mailpit_smtp_port: 1025
   mail_platform_gateway_port: 8081
+  livekit_signal_port: 7880
+  livekit_tcp_port: 7881
+  livekit_udp_port: 7882
   ntfy_port: 2586
   openfga_http_port: 8098
   openfga_host_proxy_port: 8014
@@ -259,6 +266,9 @@ platform_port_assignments:
   mailpit_http_port: 8025
   mailpit_smtp_port: 1025
   mail_platform_gateway_port: 8081
+  livekit_signal_port: 7880
+  livekit_tcp_port: 7881
+  livekit_udp_port: 7882
   ntfy_port: 2586
   openfga_http_port: 8098
   openfga_host_proxy_port: 8014
@@ -1372,6 +1382,38 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8025
       smtp: smtp://10.10.10.20:1025
+  livekit:
+    service_name: livekit
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: livekit.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: livekit
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      upstream: http://10.10.10.20:7880
+    service_id: livekit
+    ports:
+      internal: 7880
+      media_tcp: 7881
+      media_udp: 7882
+    urls:
+      public: https://livekit.lv3.org
+      internal: http://10.10.10.20:7880
   redpanda:
     service_name: redpanda
     owning_vm: docker-runtime-lv3
@@ -2725,6 +2767,10 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: livekit
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: matrix
       type: A
       value: 65.108.75.123
@@ -3233,6 +3279,38 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8025
       smtp: smtp://10.10.10.20:1025
+  livekit:
+    service_name: livekit
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: livekit.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: livekit
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      upstream: http://10.10.10.20:7880
+    service_id: livekit
+    ports:
+      internal: 7880
+      media_tcp: 7881
+      media_udp: 7882
+    urls:
+      public: https://livekit.lv3.org
+      internal: http://10.10.10.20:7880
   redpanda:
     service_name: redpanda
     owning_vm: docker-runtime-lv3
@@ -4659,6 +4737,9 @@ netdata_port: 19999
 mailpit_http_port: 8025
 mailpit_smtp_port: 1025
 mail_platform_gateway_port: 8081
+livekit_signal_port: 7880
+livekit_tcp_port: 7881
+livekit_udp_port: 7882
 ntfy_port: 2586
 openbao_http_port: 8201
 openbao_proxy_port: 8200

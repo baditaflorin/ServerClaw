@@ -1,6 +1,33 @@
 ---
+# Purpose: Declare the default Proxmox bridge, forwarding, and firewall helper inputs used by repo-managed guest networking.
+# Use case: Loaded whenever the Proxmox network role renders host bridges, public ingress forwarding, or per-guest firewall policy.
+#
+# Inputs (required):
+#   - inventory hostvars (generated): Management uplink, bridge topology, guest inventory, and policy matrix consumed by the role tasks.
+#
+# Inputs (optional):
+#   - proxmox_staging_bridge_enabled (bool, optional, default=true): Whether the optional staging bridge should be rendered on the host.
+#   - proxmox_public_ingress_tcp_forwards / proxmox_public_ingress_udp_forwards (list, optional): Extra public ingress mappings published through the Proxmox host firewall.
+#
+# Outputs:
+#   - Stable defaults for IPv4 forwarding, public ingress forwarding, and the Proxmox firewall conntrack helper paths.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0021: Public ingress is published through the shared edge and Proxmox host forwarding rules.
+#   - ADR 0067: Guest traffic policy is enforced through repo-managed firewall renders.
+#   - ADR 0293: LiveKit depends on the declared TCP and UDP ingress forwarding paths.
+#
+# Related ADRs: 0021, 0067, 0293
+# Related Runbooks: docs/runbooks/configure-livekit.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-01
 proxmox_network_enable_ipv4_forwarding: true
 proxmox_public_ingress_tcp_forwards: []
+proxmox_public_ingress_udp_forwards: []
 proxmox_network_conntrack_helper_path: /usr/local/sbin/lv3-proxmox-firewall-conntrack
 proxmox_network_conntrack_service_file: /etc/systemd/system/lv3-proxmox-firewall-conntrack.service
 proxmox_staging_bridge_enabled: true

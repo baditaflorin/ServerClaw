@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.131",
-  "platform_version": "0.130.82",
-  "generated_at": "2026-04-01T13:39:56Z",
-  "next_refresh_at": "2026-04-01T14:39:56Z",
+  "repo_version": "0.177.132",
+  "platform_version": "0.130.83",
+  "generated_at": "2026-04-01T14:13:30Z",
+  "next_refresh_at": "2026-04-01T15:13:30Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -327,6 +327,17 @@
         "primary_url": "https://langfuse.lv3.org",
         "last_live_apply": "2026-04-01T00:00:00Z",
         "slo_status": "unknown"
+      },
+      "livekit": {
+        "service_name": "LiveKit",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://livekit.lv3.org",
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "mail_platform": {
         "service_name": "Mail Platform",
@@ -1824,6 +1835,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-langfuse.md"
+      },
+      {
+        "id": "converge-livekit",
+        "description": "Converge LiveKit on docker-runtime-lv3, program Proxmox public TCP and UDP media forwarding, and publish livekit.lv3.org through the shared NGINX edge.",
+        "tags": [
+          "converge-livekit",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-livekit.md"
       },
       {
         "id": "converge-mail-platform",
@@ -4903,6 +4940,16 @@
         ]
       },
       {
+        "id": "configure-livekit",
+        "title": "Configure LiveKit",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-livekit.md",
+        "workflow_ids": [
+          "converge-livekit"
+        ]
+      },
+      {
         "id": "configure-mail-platform",
         "title": "Configure Mail Platform",
         "agent_trust_required": "T3",
@@ -5880,10 +5927,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.130",
+    "last_version": "0.177.131",
     "deployed_at": "2026-04-01",
-    "summary": "documents ADRs 0324 through 0328 to define programmatic sharding for service catalogs, ADR discovery, workstream history, agent discovery registries, and size-budgeted top-level summaries",
-    "release_notes_url": "docs/release-notes/0.177.131.md"
+    "summary": "implements ADR 0293 by introducing LiveKit as the repo-managed real-time audio and voice channel for agents, converging the runtime on docker-runtime-lv3, publishing livekit.lv3.org through the shared edge, and recording the first verified exact-main live-apply evidence",
+    "release_notes_url": "docs/release-notes/0.177.132.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

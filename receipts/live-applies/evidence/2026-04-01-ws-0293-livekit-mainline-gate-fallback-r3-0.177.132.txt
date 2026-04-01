@@ -1,0 +1,13 @@
+Validation lane selection
+  mode: explicit_checks
+  branch: codex/ws-0293-main-integration-r1
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth
+  blocking checks: workstream-surfaces, agent-standards, schema-validation, generated-docs, dependency-graph
+  changed files: Makefile, README.md, RELEASE.md, VERSION, build/platform-manifest.json, changelog.md, ...
+
+CHECK              STATUS DURATION(s)
+agent-standards     passed 4.36
+dependency-graph    passed 4.53
+generated-docs      passed 10.93
+schema-validation   passed 50.99
+workstream-surfaces passed 8.87

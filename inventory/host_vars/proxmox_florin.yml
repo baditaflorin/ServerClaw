@@ -35,6 +35,9 @@ platform_port_assignments:
   mailpit_smtp_port: 1025
   mail_platform_gateway_port: 8081
   mail_platform_internal_submission_port: 1587
+  livekit_signal_port: 7880
+  livekit_tcp_port: 7881
+  livekit_udp_port: 7882
   ntfy_port: 2586
   openfga_http_port: 8098
   openfga_host_proxy_port: 8014
@@ -132,6 +135,7 @@ proxmox_public_ingress_tcp_ports:
   - 443
   - 587
   - 993
+  - 7881
 proxmox_public_ingress_tcp_forwards:
   - listen_port: 25
     target_host: 10.10.10.20
@@ -148,6 +152,13 @@ proxmox_public_ingress_tcp_forwards:
   - listen_port: 993
     target_host: 10.10.10.20
     target_port: 993
+  - listen_port: 7881
+    target_host: 10.10.10.20
+    target_port: 7881
+proxmox_public_ingress_udp_forwards:
+  - listen_port: 7882
+    target_host: 10.10.10.20
+    target_port: 7882
 platform_failure_domains:
   - id: host:proxmox_florin
     kind: host
@@ -621,6 +632,21 @@ network_policy:
           ports:
             - 8108
           description: Local Docker workloads that use the private Typesense structured-search API
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 7880
+          description: Reverse proxy access to the LiveKit signalling API
+        - source: public
+          protocol: tcp
+          ports:
+            - 7881
+          description: Public TCP media ingress forwarded by the host for LiveKit
+        - source: public
+          protocol: udp
+          ports:
+            - 7882
+          description: Public UDP media ingress forwarded by the host for LiveKit
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -1542,6 +1568,30 @@ lv3_service_topology:
     observability:
       guest_dashboard: false
       service_telemetry: false
+  livekit:
+    service_name: livekit
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: livekit.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: livekit
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.livekit_signal_port }}"
   redpanda:
     service_name: redpanda
     owning_vm: docker-runtime-lv3

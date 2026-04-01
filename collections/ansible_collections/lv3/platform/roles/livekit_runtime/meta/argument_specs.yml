@@ -1,0 +1,65 @@
+---
+# Purpose: Declare the supported input contract for the LiveKit runtime role.
+# Use case: Loaded by Ansible to validate LiveKit runtime variables before execution.
+# Inputs: Role variables covering image pins, runtime paths, OpenBao wiring, and controller-local credentials.
+# Outputs: Provides argument specifications used by Ansible role validation.
+# Idempotency: Fully idempotent because this file only documents the role interface.
+# Dependencies: ADR 0165 and ADR 0293.
+argument_specs:
+  main:
+    short_description: Deploy the LiveKit runtime and its repo-managed verification helper.
+    options:
+      livekit_image:
+        type: str
+        required: true
+      livekit_container_name:
+        type: str
+        required: true
+      livekit_site_dir:
+        type: path
+        required: true
+      livekit_compose_file:
+        type: path
+        required: true
+      livekit_config_file:
+        type: path
+        required: true
+      livekit_env_file:
+        type: path
+        required: true
+      livekit_openbao_agent_dir:
+        type: path
+        required: true
+      livekit_api_key_local_file:
+        type: path
+        required: true
+      livekit_api_secret_local_file:
+        type: path
+        required: true
+      livekit_helper_script_local_file:
+        type: path
+        required: true
+      livekit_remote_helper_script:
+        type: path
+        required: true
+      livekit_signal_port:
+        type: int
+        required: true
+      livekit_media_tcp_port:
+        type: int
+        required: true
+      livekit_media_udp_port:
+        type: int
+        required: true
+      livekit_public_hostname:
+        type: str
+        required: true
+      livekit_bind_address:
+        type: str
+        required: true
+      livekit_verify_room_prefix:
+        type: str
+        required: true
+      livekit_verify_timeout_seconds:
+        type: int
+        required: true

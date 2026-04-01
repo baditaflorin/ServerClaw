@@ -1817,6 +1817,66 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-livekit": {
+      "description": "Converge LiveKit on docker-runtime-lv3, program Proxmox public TCP and UDP media forwarding, and publish livekit.lv3.org through the shared NGINX edge.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-livekit",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-livekit"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "livekit_api_key",
+          "livekit_api_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-livekit"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-livekit.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/livekit.yml",
+        "playbooks/services/livekit.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/livekit.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/livekit.yml",
+        "collections/ansible_collections/lv3/platform/roles/livekit_runtime",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/generate_platform_vars.py",
+        "scripts/livekit_tool.py",
+        "config/service-capability-catalog.json",
+        "config/subdomain-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/certificate-catalog.json",
+        "config/service-completeness.json"
+      ],
+      "outputs": [
+        "A repo-managed LiveKit runtime on docker-runtime-lv3 with controller-local mirrored API credentials, public signalling at livekit.lv3.org, and public TCP plus UDP media forwarding through the Proxmox host."
+      ],
+      "verification_commands": [
+        "make syntax-check-livekit",
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/livekit_tool.py verify-room-lifecycle --url https://livekit.lv3.org --api-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/livekit/api-key.txt --api-secret-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/livekit/api-secret.txt --room-prefix livekit-workflow-verify --identity livekit-workflow-probe --timeout-seconds 120",
+        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a \"ss -lnt | grep -E ':(7880|7881) ' && ss -lun | grep -E ':(7882) '\" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-redpanda": {
       "description": "Deploy the private Redpanda Kafka-compatible streaming runtime on docker-runtime-lv3 and verify the Admin API, HTTP Proxy, and Schema Registry contract.",
       "lifecycle_status": "active",

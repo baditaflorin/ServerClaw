@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-04-01'
 total_adrs: 348
 implementation_status_summary:
-  Implemented: 287
+  Implemented: 288
   Partial: 7
-  Not Implemented: 52
+  Not Implemented: 51
   Deprecated: 1
   Complete: 1
 concerns:
@@ -5196,7 +5196,7 @@ adr_index:
   - adr: 0293
     title: Livekit As The Real-Time Audio And Voice Channel For Agents
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: agent-discovery
     keywords:
@@ -5209,6 +5209,7 @@ adr_index:
       - agents
     summary: We will deploy Livekit as the real-time audio and voice channel for agent
     filename: 0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
+    implemented_version: 0.177.132
   - adr: 0293
     title: Temporal As The Durable Workflow And Task Queue Engine
     status: Accepted
