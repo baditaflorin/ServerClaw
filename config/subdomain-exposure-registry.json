@@ -3573,12 +3573,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 48,
-    "active_total": 44,
-    "active_public_total": 40,
+    "catalog_total": 49,
+    "active_total": 45,
+    "active_public_total": 41,
     "active_private_total": 4,
     "planned_total": 4,
-    "shared_edge_total": 39,
+    "shared_edge_total": 40,
     "platform_sso_total": 17
   }
 }
