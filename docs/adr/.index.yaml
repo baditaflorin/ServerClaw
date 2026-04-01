@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-04-01'
 total_adrs: 336
 implementation_status_summary:
-  Implemented: 283
+  Implemented: 284
   Partial: 7
-  Not Implemented: 45
+  Not Implemented: 44
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4788,7 +4788,7 @@ adr_index:
       - data
     summary: We will deploy Typesense as the full-text search engine for internal
     filename: 0277-typesense-as-the-full-text-search-engine-for-internal-structured-data.md
-    implemented_version: 0.177.124
+    implemented_version: 0.177.125
   - adr: 0278
     title: Gotenberg As The Document-To-PDF Rendering Service
     status: Accepted

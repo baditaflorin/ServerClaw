@@ -217,8 +217,8 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.124` |
-| Platform version | `0.130.79` |
+| Repository version | `0.177.125` |
+| Platform version | `0.130.80` |
 | Observed check date | `2026-03-31` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -1533,8 +1533,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.124` |
-| Platform version | `0.130.79` |
+| Repository version | `0.177.125` |
+| Platform version | `0.130.80` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

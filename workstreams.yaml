@@ -2723,6 +2723,7 @@ workstreams:
       - receipts/live-applies/2026-03-31-adr-0277-typesense-mainline-live-apply.json
       - receipts/live-applies/evidence/2026-03-30-ws-0277-*
       - receipts/live-applies/evidence/2026-03-31-ws-0277-*
+      - receipts/restic-backups/20260331T235950Z.json
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -2801,14 +2802,15 @@ workstreams:
             - receipts/live-applies/evidence/2026-03-30-ws-0277-*
             - receipts/live-applies/evidence/2026-03-31-ws-0277-*
             - receipts/live-applies/2026-03-31-adr-0277-typesense-mainline-live-apply.json
+            - receipts/restic-backups/20260331T235950Z.json
           mode: shared_contract
           contract: typesense-live-apply-v1
     ready_to_merge: true
     live_applied: true
     canonical_truth:
-      changelog_entry: implements ADR 0277 by bringing the private Typesense structured-search runtime, controller proxy, API gateway search route, and recorded exact-main live-apply evidence onto main while advancing the tracked platform truth to 0.130.79
+      changelog_entry: implements ADR 0277 by bringing the private Typesense structured-search runtime, controller proxy, API gateway search route, and recorded exact-main live-apply evidence onto main while advancing the tracked platform truth to 0.130.80
       release_bump: patch
-      included_in_repo_version: 0.177.124
+      included_in_repo_version: 0.177.125
       latest_receipts:
         typesense: 2026-03-31-adr-0277-typesense-mainline-live-apply
   - id: ws-0254-serverclaw-adrs
