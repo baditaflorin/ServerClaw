@@ -23,7 +23,10 @@ The current implementation uses these boundaries:
 
 - the Lago browser UI and operator management surface stay behind the shared
   oauth2-proxy and Keycloak edge-auth flow
-- `billing.lv3.org/api/health` remains intentionally public for probes
+- anonymous requests to `billing.lv3.org/api/health` are intentionally rejected
+  by the API gateway with the canonical `401` error envelope; use the
+  repo-managed playbook verification path or the private guest-local endpoint
+  for unauthenticated liveness checks
 - `billing.lv3.org/api/v1/events` is intentionally public, but only through
   the API-gateway adapter that enforces producer bearer tokens plus
   repo-managed metric and subscription scope
@@ -105,8 +108,8 @@ make syntax-check-lago
 Runtime verification:
 
 ```bash
-curl -fsS https://billing.lv3.org/api/health
-curl -I https://billing.lv3.org/
+curl -skI https://billing.lv3.org/
+curl -skI https://billing.lv3.org/api/health
 curl -fsS -X POST \
   -H "Authorization: Bearer $(tr -d '\n' < .local/lago/smoke-producer-token.txt)" \
   -H "Content-Type: application/json" \
@@ -124,6 +127,10 @@ checks current usage for the seeded smoke customer through the local Lago API.
 - The browser UI is intentionally edge-authenticated rather than app-native
   OIDC. If anonymous browser access reaches `/`, treat that as a rollback-level
   defect.
+- Anonymous `billing.lv3.org/api/health` calls should fail closed with the
+  canonical gateway `401` response. Treat a public `200` on that route as a
+  publication regression unless the contract is intentionally widened in a
+  follow-up ADR or workstream.
 - The public ingest endpoint is intentionally narrow. Producers should never
   talk directly to the private Lago API port on `10.10.10.20:8099`.
 - Because the current secret path is controller-local plus guest-local file

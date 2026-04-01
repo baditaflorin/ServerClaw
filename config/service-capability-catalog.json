@@ -906,6 +906,7 @@
         "lago_redis_runtime"
       ],
       "adr": "0292",
+      "adr_file": "docs/adr/0292-lago-as-the-usage-metering-and-billing-api-layer.md",
       "runbook": "docs/runbooks/configure-lago.md",
       "tags": [
         "billing",

@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-01-adr-0292-lago-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-01",
+  "recorded_on": "2026-04-01",
+  "recorded_at": "2026-04-01T06:50:05Z",
+  "recorded_by": "codex",
+  "source_commit": "001d039cb2f61dac36e4de9a287f6098c27ca8fd",
+  "repo_version_context": "0.177.126",
+  "platform_version_context": "0.130.80",
+  "workflow_id": "adr-0292-lago-mainline-live-apply",
+  "adr": "0292",
+  "summary": "Re-verified ADR 0292 from the latest realistic `origin/main` lineage by refreshing the worktree onto commit `741241bf8739a093bc396900cd6f0ce6056a192b`, repairing the explicit Lago ADR catalog mapping plus regenerated subdomain exposure registry state required by current automation, and replaying `make converge-lago env=production` from the refreshed tree rooted at source commit `001d039cb2f61dac36e4de9a287f6098c27ca8fd`. The replay re-converged PostgreSQL, the shared Docker runtime, the API gateway, and the shared NGINX edge, restored the protected `billing.lv3.org` browser surface, submitted a fresh public smoke event through the API-gateway billing adapter, and verified current-usage aggregation end to end on repository version context `0.177.126` and platform version context `0.130.80` before the final protected release promotion.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "service",
+      "name": "lago",
+      "address": "https://billing.lv3.org"
+    },
+    {
+      "kind": "service",
+      "name": "api-gateway-billing-adapter",
+      "address": "https://billing.lv3.org/api/v1/events"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Latest realistic origin/main refresh",
+      "result": "pass",
+      "observed": "`git fetch origin --prune` resolved `origin/main` to `741241bf8739a093bc396900cd6f0ce6056a192b` (`Merge gitea/main history`). The imported history advanced the branch tip without changing the repository tree relative to the previously refreshed mainline content, so the replay stayed on the latest realistic main snapshot while preserving repository version context `0.177.126` and platform version context `0.130.80` before release promotion."
+    },
+    {
+      "check": "Focused repository validation on the refreshed tree",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml --with-requirements requirements/api-gateway.txt pytest tests/test_api_gateway.py tests/test_api_gateway_runtime_role.py tests/test_docker_runtime_role.py tests/test_generate_platform_vars.py tests/test_lago_playbook.py tests/test_lago_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_restic_config_backup.py tests/test_restic_config_backup_role.py -q` returned `134 passed in 13.76s`."
+    },
+    {
+      "check": "Repository automation and data-model validation",
+      "result": "pass",
+      "observed": "`make syntax-check-lago`, `./scripts/validate_repo.sh agent-standards`, and `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` all passed from the refreshed worktree."
+    },
+    {
+      "check": "Exact-main Lago converge replay",
+      "result": "pass",
+      "observed": "`make converge-lago env=production` completed cleanly with final recap `docker-runtime-lv3 ok=447 changed=150 failed=0`, `nginx-lv3 ok=45 changed=4 failed=0`, `postgres-lv3 ok=74 changed=0 failed=0`, and `localhost ok=18 changed=0 failed=0`."
+    },
+    {
+      "check": "Public billing edge verification before and after replay",
+      "result": "pass",
+      "observed": "The pre-apply public baseline showed both `/` and `/api/health` misrouted as `HTTP/2 308` redirects to `https://nginx.lv3.org/...`. After the replay, `https://billing.lv3.org/` returned the expected shared oauth2 sign-in redirect and `https://billing.lv3.org/api/health` returned the expected canonical `401` gateway rejection for anonymous callers."
+    },
+    {
+      "check": "Public billing smoke ingest and current-usage verification",
+      "result": "pass",
+      "observed": "The replay generated a unique public smoke transaction id, submitted the event through the API-gateway billing adapter, and verified Lago current usage reflects that public smoke event on the same run."
+    }
+  ],
+  "evidence_refs": [
+    "docs/workstreams/ws-0292-live-apply.md",
+    "docs/runbooks/configure-lago.md",
+    "workstreams.yaml",
+    "config/service-capability-catalog.json",
+    "config/subdomain-exposure-registry.json",
+    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-pre-apply-public-baseline-r2-0.177.126.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-post-apply-public-verification-r1-0.177.126.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0292-mainline-r31-converge-0.177.126.txt",
+    "receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json"
+  ],
+  "notes": [
+    "The earlier `2026-03-31-adr-0292-lago-mainline-live-apply` receipt remains a historical record of the first implementation, but this 2026-04-01 receipt supersedes it as the durable latest-main replay proof after the shared-host concurrency window closed.",
+    "The successful replay required the explicit `adr_file` mapping for the Lago service catalog entry and a regenerated `config/subdomain-exposure-registry.json`; both repairs are captured in this integration branch and are reflected in the live API-gateway runtime bundle."
+  ]
+}
