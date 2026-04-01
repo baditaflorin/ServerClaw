@@ -810,6 +810,23 @@
         "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Open WebUI converge from git."
       }
     },
+    "one_api": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when One-API or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the One-API converge and bootstrap verification workflow from git."
+      }
+    },
     "serverclaw": {
       "tier": "R1",
       "recovery_objective": {

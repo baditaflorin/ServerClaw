@@ -39,7 +39,7 @@ def test_main_tasks_install_cluster_specific_pgaudit_package_and_extension() -> 
     assert package_task["ansible.builtin.apt"]["name"] == "postgresql-{{ postgres_vm_cluster_major_version }}-pgaudit"
     assert package_task["when"] == [
         "postgres_vm_pgaudit_enabled | bool",
-        "\"pgaudit\" in postgres_vm_shared_preload_libraries",
+        "'pgaudit' in postgres_vm_shared_preload_libraries",
     ]
     assert extension_task["ansible.builtin.command"]["argv"][-1] == "CREATE EXTENSION IF NOT EXISTS pgaudit"
 

@@ -333,6 +333,10 @@ def test_docker_runtime_unseals_openbao_before_recovering_openbao_agent(tmp_path
         task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
     )
     script = recover_containers["ansible.builtin.command"]["argv"][2]
+    script = script.replace(
+        "{{ docker_runtime_nonpersistent_restart_policies | to_json }}",
+        json.dumps(load_defaults()["docker_runtime_nonpersistent_restart_policies"]),
+    )
     script = script.replace("{{ docker_runtime_openbao_recovery_timeout_seconds | int }}", "5")
     script = script.replace("{{ docker_runtime_openbao_recovery_delay_seconds | int }}", "0")
     script = re.sub(
@@ -538,8 +542,7 @@ def test_docker_runtime_patches_nftables_rule_block_once() -> None:
 def test_linux_guest_firewall_template_includes_all_docker_forward_compat_cidrs() -> None:
     template = FIREWALL_TEMPLATE.read_text()
     assert "docker_runtime_container_forward_source_cidrs" in template
-    assert "172.16.0.0/12" in template
-    assert "192.168.0.0/16" in template
+    assert "linux_guest_firewall_container_forward_source_cidrs" in template
 
 
 def test_docker_runtime_pins_public_edge_hostnames_and_address_pools() -> None:

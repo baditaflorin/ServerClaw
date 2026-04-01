@@ -18,8 +18,8 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Lago, Langfuse, LiveKit, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n |
-| `3` | Homepage, Platform API Gateway, Woodpecker CI |
+| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Lago, Langfuse, LiveKit, Matrix Synapse, Mattermost, NetBox, Nextcloud, One-API, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n |
+| `3` | Homepage, Open WebUI, Platform API Gateway, ServerClaw, Woodpecker CI |
 | `4` | Ops Portal |
 
 ## Mermaid Diagram
@@ -80,7 +80,7 @@ graph TD
     n8n["n8n\nTier 2"]
     netbox["NetBox\nTier 2"]
     nextcloud["Nextcloud\nTier 2"]
-    open_webui["Open WebUI\nTier 2"]
+    one_api["One-API\nTier 2"]
     openfga["OpenFGA\nTier 2"]
     outline["Outline\nTier 2"]
     paperless["Paperless-ngx\nTier 2"]
@@ -88,14 +88,15 @@ graph TD
     plausible["Plausible Analytics\nTier 2"]
     status_page["Public Status Page\nTier 2"]
     semaphore["Semaphore\nTier 2"]
-    serverclaw["ServerClaw\nTier 2"]
     temporal["Temporal\nTier 2"]
     tesseract_ocr["Tesseract OCR\nTier 2"]
     typesense["Typesense\nTier 2"]
     vaultwarden["Vaultwarden\nTier 2"]
     windmill["Windmill\nTier 2"]
     homepage["Homepage\nTier 3"]
+    open_webui["Open WebUI\nTier 3"]
     api_gateway["Platform API Gateway\nTier 3"]
+    serverclaw["ServerClaw\nTier 3"]
     woodpecker["Woodpecker CI\nTier 3"]
     ops_portal["Ops Portal\nTier 4"]
     alertmanager -->|soft| mattermost
@@ -199,8 +200,10 @@ graph TD
     nextcloud -->|hard| postgres
     nomad -->|soft| docker_build
     nomad -->|soft| docker_runtime
+    one_api -->|hard| ollama
     open_webui -->|soft| keycloak
     open_webui -->|hard| ollama
+    open_webui -->|hard| one_api
     open_webui -->|startup_only| openbao
     open_webui -->|soft| searxng
     openfga -->|soft| keycloak
@@ -238,6 +241,7 @@ graph TD
     serverclaw -->|soft| keycloak
     serverclaw -->|soft| nginx_edge
     serverclaw -->|hard| ollama
+    serverclaw -->|hard| one_api
     serverclaw -->|startup_only| openbao
     serverclaw -->|soft| searxng
     status_page -->|hard| nginx_edge

@@ -9,7 +9,6 @@ log_line_prefix = '{{ postgres_vm_log_line_prefix }}'
 log_connections = {{ 'on' if postgres_vm_log_connections else 'off' }}
 log_disconnections = {{ 'on' if postgres_vm_log_disconnections else 'off' }}
 {% if postgres_vm_pgaudit_enabled %}
-shared_preload_libraries = '{{ postgres_vm_shared_preload_libraries | join(",") }}'
 pgaudit.log = '{{ postgres_vm_pgaudit_log }}'
 pgaudit.log_catalog = {{ 'on' if postgres_vm_pgaudit_log_catalog else 'off' }}
 pgaudit.log_parameter = {{ 'on' if postgres_vm_pgaudit_log_parameter else 'off' }}

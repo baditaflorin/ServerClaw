@@ -1,0 +1,26 @@
+Workstream surface ownership validation
+Workstream surface ownership validation failed: workstream surface ownership validation failed:
+- collections/ansible_collections/lv3/platform/roles/jupyterhub_runtime/tasks/verify.yml: outside declared owned surfaces for ws-0294-live-apply
+- collections/ansible_collections/lv3/platform/roles/postgres_vm/defaults/main.yml: outside declared owned surfaces for ws-0294-live-apply
+- collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml: outside declared owned surfaces for ws-0294-live-apply
+- collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/verify.yml: outside declared owned surfaces for ws-0294-live-apply
+- collections/ansible_collections/lv3/platform/roles/postgres_vm/templates/postgresql-lv3.conf.j2: outside declared owned surfaces for ws-0294-live-apply
+- collections/ansible_collections/lv3/platform/roles/rag_context_runtime/defaults/main.yml: outside declared owned surfaces for ws-0294-live-apply
+- collections/ansible_collections/lv3/platform/roles/rag_context_runtime/tasks/main.yml: outside declared owned surfaces for ws-0294-live-apply
+- collections/ansible_collections/lv3/platform/roles/rag_context_runtime/tasks/verify.yml: outside declared owned surfaces for ws-0294-live-apply
+- collections/ansible_collections/lv3/platform/roles/rag_context_runtime/templates/docker-compose.yml.j2: outside declared owned surfaces for ws-0294-live-apply
+- config/ansible-role-idempotency.yml: outside declared owned surfaces for ws-0294-live-apply
+- inventory/group_vars/postgres_guests.yml: outside declared owned surfaces for ws-0294-live-apply
+- playbooks/rag-context.yml: outside declared owned surfaces for ws-0294-live-apply
+- scripts/vulnerability_budget.py: outside declared owned surfaces for ws-0294-live-apply
+- tests/test_jupyterhub_runtime_role.py: outside declared owned surfaces for ws-0294-live-apply
+- tests/test_linux_guest_firewall_role.py: outside declared owned surfaces for ws-0294-live-apply
+- tests/test_ollama_runtime_role.py: outside declared owned surfaces for ws-0294-live-apply
+- tests/test_one_api_bootstrap.py: outside declared owned surfaces for ws-0294-live-apply
+- tests/test_openbao_compose_env_helper.py: outside declared owned surfaces for ws-0294-live-apply
+- tests/test_postgres_vm_access_policy.py: outside declared owned surfaces for ws-0294-live-apply
+- tests/test_postgres_vm_role.py: outside declared owned surfaces for ws-0294-live-apply
+- tests/test_rag_context_playbook.py: outside declared owned surfaces for ws-0294-live-apply
+- tests/test_rag_context_runtime_role.py: outside declared owned surfaces for ws-0294-live-apply
+- tests/test_service_id_resolver.py: outside declared owned surfaces for ws-0294-live-apply
+- tests/test_vulnerability_budget.py: outside declared owned surfaces for ws-0294-live-apply

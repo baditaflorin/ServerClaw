@@ -467,7 +467,7 @@ password SSH disabled on host and guests
 | Lane | Title | Transport | Surfaces | Primary Rule |
 | --- | --- | --- | --- | --- |
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
-| `api` | API Lane | `https` | 15 | Default new APIs to internal-only or operator-only publication. |
+| `api` | API Lane | `https` | 16 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
 | `event` | Event Lane | `mixed` | 15 | Event sinks must be documented and intentionally reachable. |
 
@@ -489,6 +489,7 @@ password SSH disabled on host and guests
 | `headscale-control-plane` | `api` | `service_api` | `https://headscale.lv3.org` |
 | `langfuse-observability-api` | `api` | `service_api` | `https://langfuse.lv3.org/api/public` |
 | `open-webui-operator-workbench` | `api` | `service_api` | `http://100.64.0.1:8008` |
+| `one-api-unified-llm-api` | `api` | `service_api` | `http://100.64.0.1:8018/v1` |
 | `ollama-local-inference-api` | `api` | `service_api` | `http://10.10.10.20:11434` |
 | `platform-context-api` | `api` | `service_api` | `http://100.64.0.1:8010` |
 | `mail-platform-submission` | `message` | `mail_submission` | `10.10.10.20:1587` |
@@ -513,7 +514,7 @@ password SSH disabled on host and guests
 | Tier | Title | Surfaces | Summary |
 | --- | --- | --- | --- |
 | `internal-only` | Internal-Only | 19 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
-| `operator-only` | Operator-Only | 8 | Reachable only from approved operator devices over private access such as Tailscale. |
+| `operator-only` | Operator-Only | 9 | Reachable only from approved operator devices over private access such as Tailscale. |
 | `public-edge` | Public Edge | 3 | Intentionally published on a public domain through the named edge model. |
 
 ### Classified API And Webhook Surfaces
@@ -532,6 +533,7 @@ password SSH disabled on host and guests
 | `mattermost-operator-api` | `operator-only` | `api` | `http://100.64.0.1:8066/api/v4` | Reachable only through the Proxmox host Tailscale proxy on port 8066. |
 | `langfuse-observability-api` | `public-edge` | `api` | `https://langfuse.lv3.org/api/public` | Reachable on https://langfuse.lv3.org/api/public through the shared NGINX edge, authenticated with project-scoped API keys for ingestion and Keycloak-backed browser login for operators. |
 | `open-webui-operator-workbench` | `operator-only` | `api` | `http://100.64.0.1:8008` | Reachable only through the Proxmox host Tailscale proxy on port 8008. |
+| `one-api-unified-llm-api` | `operator-only` | `api` | `http://100.64.0.1:8018/v1` | Reachable only through the Proxmox host Tailscale proxy on port 8018 and the LV3 private guest network. |
 | `ollama-local-inference-api` | `internal-only` | `api` | `http://10.10.10.20:11434` | Reachable only on the LV3 private guest network at docker-runtime-lv3:11434. |
 | `platform-context-api` | `operator-only` | `api` | `http://100.64.0.1:8010` | Reachable only through the Proxmox host Tailscale proxy on port 8010 and requires the controller-local bearer token. |
 | `stalwart-mail-events` | `internal-only` | `event` | `http://10.10.10.20:8081/webhooks/stalwart` | Reachable only from the private mail-platform stack on docker-runtime-lv3. |
@@ -705,6 +707,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Ntfy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ntfy.md)
 - [Configure ntopng Private Flow Visibility](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ntopng.md)
 - [Configure Ollama](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ollama.md)
+- [Configure One-API](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-one-api.md)
 - [Configure Open WebUI](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-open-webui.md)
 - [Configure OpenBao](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-openbao.md)
 - [Configure OpenFGA](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-openfga.md)
@@ -1536,6 +1539,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream WS-0293: Temporal Durable Workflow Engine Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-live-apply.md)
 - [Workstream ws-0293-livekit-live-apply: Live Apply ADR 0293 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-livekit-live-apply.md)
 - [Workstream ws-0293-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-main-integration.md)
+- [Workstream ws-0294-live-apply: Live Apply ADR 0294 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0294-live-apply.md)
 - [Workstream ws-0295-live-apply: Live Apply ADR 0295 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md)
 - [Workstream WS-0296: Education Repo Refresh And Named Deploy Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-education-refresh.md)
 - [Workstream WS-0296: Dedicated Artifact Cache VM Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-live-apply.md)

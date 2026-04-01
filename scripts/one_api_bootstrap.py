@@ -18,7 +18,7 @@ from typing import Any
 from script_bootstrap import ensure_repo_root_on_path
 
 REPO_ROOT = ensure_repo_root_on_path(__file__)
-from platform.retry import MaxRetriesExceeded, RetryPolicy, with_retry
+from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
 try:
     from datetime import UTC
 except ImportError:  # pragma: no cover
@@ -110,28 +110,51 @@ def http_json(
                 payload = response.read().decode("utf-8")
                 if isinstance(expected_status, tuple):
                     if response.status not in expected_status:
-                        raise BootstrapError(f"{method} {url} returned unexpected status {response.status}")
+                        raise PlatformRetryError(
+                            f"{method} {url} returned unexpected status {response.status}",
+                            code=f"http:{response.status}",
+                            retry_class=RetryClass.PERMANENT,
+                        )
                 elif response.status != expected_status:
-                    raise BootstrapError(f"{method} {url} returned unexpected status {response.status}")
+                    raise PlatformRetryError(
+                        f"{method} {url} returned unexpected status {response.status}",
+                        code=f"http:{response.status}",
+                        retry_class=RetryClass.PERMANENT,
+                    )
                 return response.status, json.loads(payload) if payload else {}
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")
-            raise BootstrapError(f"{method} {url} failed with status {exc.code}: {detail}") from exc
-        except (urllib.error.URLError, TimeoutError, OSError, JSONDecodeError) as exc:
-            raise BootstrapError(f"{method} {url} failed: {exc}") from exc
+            raise PlatformRetryError(
+                f"{method} {url} failed with status {exc.code}: {detail}",
+                code=f"http:{exc.code}",
+                retry_class=RetryClass.PERMANENT,
+            ) from exc
 
     attempts = max(retries, 1)
-    last_error: BootstrapError | None = None
-    for attempt in range(1, attempts + 1):
-        try:
-            return perform_request()
-        except BootstrapError as exc:
-            last_error = exc
-            if attempt >= attempts:
-                break
-            time.sleep(max(float(retry_delay_seconds), 0.0))
-    assert last_error is not None
-    raise BootstrapError(f"{method} {url} failed after {attempts} attempts: {last_error}") from last_error
+    policy = RetryPolicy(
+        max_attempts=attempts,
+        base_delay_s=max(float(retry_delay_seconds), 0.0),
+        max_delay_s=max(float(retry_delay_seconds), 0.0),
+        multiplier=1.0,
+        jitter=False,
+        transient_max=0,
+    )
+
+    try:
+        return with_retry(
+            perform_request,
+            policy=policy,
+            error_context=f"{method} {url}",
+        )
+    except PlatformRetryError as exc:
+        raise BootstrapError(str(exc)) from exc
+    except MaxRetriesExceeded as exc:
+        last_error = exc.last_error
+        if isinstance(last_error, PlatformRetryError):
+            raise BootstrapError(str(last_error)) from last_error
+        if isinstance(last_error, (urllib.error.URLError, TimeoutError, OSError, JSONDecodeError)):
+            raise BootstrapError(f"{method} {url} failed after {attempts} attempts: {last_error}") from last_error
+        raise BootstrapError(f"{method} {url} failed after {attempts} attempts") from exc
 
 
 def expect_success(payload: dict[str, Any], url: str) -> Any:

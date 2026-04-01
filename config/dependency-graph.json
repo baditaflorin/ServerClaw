@@ -385,9 +385,18 @@
       "service": "open_webui",
       "name": "Open WebUI",
       "vm": "docker-runtime-lv3",
-      "tier": 2,
+      "tier": 3,
       "category": "automation",
       "adr": "0060"
+    },
+    {
+      "id": "one_api",
+      "service": "one_api",
+      "name": "One-API",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0294"
     },
     {
       "id": "openbao",
@@ -556,7 +565,7 @@
       "service": "serverclaw",
       "name": "ServerClaw",
       "vm": "coolify-lv3",
-      "tier": 2,
+      "tier": 3,
       "category": "access",
       "adr": "0254"
     },
@@ -1164,6 +1173,12 @@
     },
     {
       "from": "open_webui",
+      "to": "one_api",
+      "type": "hard",
+      "description": "Open WebUI uses the private One-API runtime for repo-managed local model access."
+    },
+    {
+      "from": "open_webui",
       "to": "ollama",
       "type": "hard",
       "description": "Open WebUI routes the repo-managed local model connector to the private Ollama runtime on docker-runtime-lv3."
@@ -1179,6 +1194,12 @@
       "to": "searxng",
       "type": "soft",
       "description": "Open WebUI delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
+    },
+    {
+      "from": "one_api",
+      "to": "ollama",
+      "type": "hard",
+      "description": "One-API forwards local chat and embedding aliases to the private Ollama runtime."
     },
     {
       "from": "openfga",
@@ -1509,6 +1530,12 @@
       "to": "nginx_edge",
       "type": "soft",
       "description": "Public access to chat.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "serverclaw",
+      "to": "one_api",
+      "type": "hard",
+      "description": "ServerClaw uses the private One-API runtime for repo-managed local model access."
     },
     {
       "from": "serverclaw",

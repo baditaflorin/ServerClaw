@@ -29,8 +29,6 @@ postgres_vm_pgaudit_enabled: true
 postgres_vm_log_connections: true
 postgres_vm_log_disconnections: true
 postgres_vm_log_line_prefix: "%m [%p] %q%u@%d "
-postgres_vm_shared_preload_libraries:
-  - pgaudit
 postgres_vm_pgaudit_log: ddl,role
 postgres_vm_pgaudit_log_catalog: false
 postgres_vm_pgaudit_log_parameter: false
