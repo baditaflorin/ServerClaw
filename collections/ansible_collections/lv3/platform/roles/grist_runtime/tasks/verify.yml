@@ -57,6 +57,7 @@
           (grist_verify_local_auth_surface.status | int) in [200, 400]
           and 'Loading... - Grist' in (grist_verify_local_auth_surface.content | default(''))
           and '"supportAnon":false' in (grist_verify_local_auth_surface.content | default(''))
+          and '"errMessage":"No login system is configured"' not in (grist_verify_local_auth_surface.content | default(''))
         )
     fail_msg: >-
       The local Grist runtime answered /o/docs/, but it did not present the

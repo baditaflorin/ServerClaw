@@ -776,18 +776,30 @@
       - grist_docker_nat_chain.rc == 0 or grist_docker_nat_chain_recheck.rc == 0
     fail_msg: "Docker is running but the nat DOCKER chain is missing; Grist published ports will fail."
 
-- name: Wait for the Keycloak issuer discovery document before Grist startup
-  ansible.builtin.uri:
-    url: "{{ grist_keycloak_issuer }}/.well-known/openid-configuration"
-    method: GET
-    status_code: 200
-    return_content: true
+- name: Wait for the Keycloak issuer discovery document through the shared edge route before Grist startup
+  ansible.builtin.shell: |
+    set -euo pipefail
+    discovery_json="$(curl --fail --silent --show-error \
+      --connect-timeout 5 \
+      --max-time 10 \
+      --resolve '{{ hostvars["proxmox_florin"].lv3_service_topology.keycloak.public_hostname }}:443:{{ grist_public_edge_private_ip }}' \
+      '{{ grist_keycloak_issuer }}/.well-known/openid-configuration')"
+    DISCOVERY_JSON="$discovery_json" python3 - "{{ grist_keycloak_issuer }}" <<'PY'
+    import json
+    import os
+    import sys
+
+    payload = json.loads(os.environ["DISCOVERY_JSON"])
+    issuer = payload.get("issuer")
+    if issuer != sys.argv[1]:
+        raise SystemExit(f"unexpected issuer: {issuer!r}")
+    PY
+  args:
+    executable: /bin/bash
   register: grist_keycloak_discovery
   retries: 18
   delay: 5
-  until: >-
-    grist_keycloak_discovery.status == 200
-    and ((grist_keycloak_discovery.json | default({})).issuer | default('')) == grist_keycloak_issuer
+  until: grist_keycloak_discovery.rc == 0
   changed_when: false
 
 - name: Check whether the Grist local port is already published
@@ -1028,6 +1040,93 @@
     port: "{{ grist_internal_port }}"
     delay: 0
     timeout: 180
+
+- name: Probe the Grist local auth surface before final verification
+  ansible.builtin.uri:
+    url: "{{ grist_internal_base_url }}/o/docs/"
+    method: GET
+    follow_redirects: none
+    return_content: true
+    status_code:
+      - 200
+      - 302
+      - 303
+      - 307
+      - 308
+      - 400
+    headers:
+      Host: "{{ grist_service_topology.public_hostname }}"
+      X-Forwarded-Host: "{{ grist_service_topology.public_hostname }}"
+      X-Forwarded-Proto: https
+  register: grist_pre_verify_auth_surface
+  changed_when: false
+
+- name: Record whether the Grist login middleware needs recovery
+  ansible.builtin.set_fact:
+    grist_oidc_login_recovery_needed: >-
+      {{
+        (grist_pre_verify_auth_surface.status | int) in [200, 400]
+        and '"errMessage":"No login system is configured"' in (grist_pre_verify_auth_surface.content | default(''))
+      }}
+
+- name: Wait for the Keycloak issuer discovery document through the shared edge route before Grist login middleware recovery
+  ansible.builtin.shell: |
+    set -euo pipefail
+    discovery_json="$(curl --fail --silent --show-error \
+      --connect-timeout 5 \
+      --max-time 10 \
+      --resolve '{{ hostvars["proxmox_florin"].lv3_service_topology.keycloak.public_hostname }}:443:{{ grist_public_edge_private_ip }}' \
+      '{{ grist_keycloak_issuer }}/.well-known/openid-configuration')"
+    DISCOVERY_JSON="$discovery_json" python3 - "{{ grist_keycloak_issuer }}" <<'PY'
+    import json
+    import os
+    import sys
+
+    payload = json.loads(os.environ["DISCOVERY_JSON"])
+    issuer = payload.get("issuer")
+    if issuer != sys.argv[1]:
+        raise SystemExit(f"unexpected issuer: {issuer!r}")
+    PY
+  args:
+    executable: /bin/bash
+  register: grist_keycloak_discovery_recovery
+  retries: 18
+  delay: 5
+  until: grist_keycloak_discovery_recovery.rc == 0
+  changed_when: false
+  when: grist_oidc_login_recovery_needed | bool
+
+- name: Force-recreate the Grist runtime after OIDC bootstrap recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ grist_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --no-deps
+      - grist
+  args:
+    chdir: "{{ grist_site_dir }}"
+  register: grist_oidc_recovery_up
+  changed_when: >-
+    'Creating' in grist_oidc_recovery_up.stdout
+    or 'Recreating' in grist_oidc_recovery_up.stdout
+    or 'Starting' in grist_oidc_recovery_up.stdout
+  retries: 3
+  delay: 5
+  until: grist_oidc_recovery_up.rc == 0
+  when: grist_oidc_login_recovery_needed | bool
+
+- name: Wait for Grist to listen locally after login middleware recovery
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ grist_internal_port }}"
+    delay: 0
+    timeout: 180
+  when: grist_oidc_login_recovery_needed | bool
 
 - name: Verify the Grist runtime
   ansible.builtin.import_tasks: verify.yml

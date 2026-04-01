@@ -85,7 +85,10 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     persist_recurse = next(task for task in tasks if task.get("name") == "Ensure existing Grist persist content is owned by the runtime user")
     env_render = next(task for task in tasks if task.get("name") == "Render the Grist environment file")
     compose_render = next(task for task in tasks if task.get("name") == "Render the Grist compose file")
-    keycloak_discovery = next(task for task in tasks if task.get("name") == "Wait for the Keycloak issuer discovery document before Grist startup")
+    keycloak_discovery = next(
+        task for task in tasks
+        if task.get("name") == "Wait for the Keycloak issuer discovery document through the shared edge route before Grist startup"
+    )
     local_port_probe = next(task for task in tasks if task.get("name") == "Check whether the Grist local port is already published")
     status_probe = next(task for task in tasks if task.get("name") == "Check whether the current Grist local status endpoint is healthy before startup")
     force_recreate_fact = next(task for task in tasks if task.get("name") == "Record whether the Grist startup needs a force recreate")
@@ -100,6 +103,14 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
         task for task in tasks if task.get("name") == "Ensure Docker bridge networking chains are present before retrying Grist force-recreate"
     )
     network_retry = next(task for task in tasks if task.get("name") == "Retry Grist force-recreate after Docker networking recovery")
+    auth_surface_probe = next(task for task in tasks if task.get("name") == "Probe the Grist local auth surface before final verification")
+    auth_recovery_fact = next(task for task in tasks if task.get("name") == "Record whether the Grist login middleware needs recovery")
+    auth_recovery_discovery = next(
+        task for task in tasks
+        if task.get("name") == "Wait for the Keycloak issuer discovery document through the shared edge route before Grist login middleware recovery"
+    )
+    auth_recovery_up = next(task for task in tasks if task.get("name") == "Force-recreate the Grist runtime after OIDC bootstrap recovery")
+    auth_recovery_wait = next(task for task in tasks if task.get("name") == "Wait for Grist to listen locally after login middleware recovery")
     task_names = [task.get("name") for task in tasks]
 
     assert nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
@@ -156,8 +167,15 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     assert env_render["register"] == "grist_env_template"
     assert env_render["ansible.builtin.template"]["dest"] == "{{ grist_static_env_file }}"
     assert compose_render["register"] == "grist_compose_template"
-    assert keycloak_discovery["ansible.builtin.uri"]["url"] == "{{ grist_keycloak_issuer }}/.well-known/openid-configuration"
-    assert "grist_keycloak_discovery.status == 200" in keycloak_discovery["until"]
+    assert "--resolve" in keycloak_discovery["ansible.builtin.shell"]
+    assert "--connect-timeout 5" in keycloak_discovery["ansible.builtin.shell"]
+    assert "--max-time 10" in keycloak_discovery["ansible.builtin.shell"]
+    assert "{{ grist_public_edge_private_ip }}" in keycloak_discovery["ansible.builtin.shell"]
+    assert "{{ grist_keycloak_issuer }}/.well-known/openid-configuration" in keycloak_discovery["ansible.builtin.shell"]
+    assert "{{ hostvars[\"proxmox_florin\"].lv3_service_topology.keycloak.public_hostname }}" in keycloak_discovery["ansible.builtin.shell"]
+    assert 'DISCOVERY_JSON="$discovery_json" python3 - "{{ grist_keycloak_issuer }}" <<\'PY\'' in keycloak_discovery["ansible.builtin.shell"]
+    assert 'payload = json.loads(os.environ["DISCOVERY_JSON"])' in keycloak_discovery["ansible.builtin.shell"]
+    assert keycloak_discovery["until"] == "grist_keycloak_discovery.rc == 0"
     assert local_port_probe["ansible.builtin.wait_for"]["port"] == "{{ grist_internal_port }}"
     assert status_probe["ansible.builtin.uri"]["url"] == "{{ grist_internal_base_url }}/status"
     assert "com.docker.compose.replace" in replace_cleanup["ansible.builtin.shell"]
@@ -175,6 +193,21 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     assert bridge_chain_helper["vars"]["common_docker_bridge_chains_service_name"] == "docker"
     assert bridge_chain_helper["vars"]["common_docker_bridge_chains_require_nat_chain"] is True
     assert network_retry["ansible.builtin.command"]["argv"][-2:] == ["--force-recreate", "--remove-orphans"]
+    assert auth_surface_probe["ansible.builtin.uri"]["url"] == "{{ grist_internal_base_url }}/o/docs/"
+    assert auth_surface_probe["ansible.builtin.uri"]["headers"]["Host"] == "{{ grist_service_topology.public_hostname }}"
+    auth_recovery_expression = auth_recovery_fact["ansible.builtin.set_fact"]["grist_oidc_login_recovery_needed"]
+    assert "(grist_pre_verify_auth_surface.status | int) in [200, 400]" in auth_recovery_expression
+    assert '"errMessage":"No login system is configured"' in auth_recovery_expression
+    assert "--resolve" in auth_recovery_discovery["ansible.builtin.shell"]
+    assert "--connect-timeout 5" in auth_recovery_discovery["ansible.builtin.shell"]
+    assert "--max-time 10" in auth_recovery_discovery["ansible.builtin.shell"]
+    assert "{{ grist_public_edge_private_ip }}" in auth_recovery_discovery["ansible.builtin.shell"]
+    assert 'payload = json.loads(os.environ["DISCOVERY_JSON"])' in auth_recovery_discovery["ansible.builtin.shell"]
+    assert auth_recovery_discovery["until"] == "grist_keycloak_discovery_recovery.rc == 0"
+    assert auth_recovery_up["ansible.builtin.command"]["argv"][-3:] == ["--force-recreate", "--no-deps", "grist"]
+    assert auth_recovery_up["register"] == "grist_oidc_recovery_up"
+    assert auth_recovery_up["until"] == "grist_oidc_recovery_up.rc == 0"
+    assert auth_recovery_wait["ansible.builtin.wait_for"]["port"] == "{{ grist_internal_port }}"
     force_recreate_expression = force_recreate_fact["ansible.builtin.set_fact"]["grist_force_recreate"]
     assert "grist_env_template.changed" in force_recreate_expression
     assert "grist_compose_template.changed" in force_recreate_expression
@@ -199,6 +232,7 @@ def test_publish_tasks_wait_for_public_status_and_verify_login_gating() -> None:
     assert "(grist_publish_auth_redirect.status | int) in [200, 400]" in login_gate_expression
     assert "'Loading... - Grist'" in login_gate_expression
     assert '\'"supportAnon":false\'' in login_gate_expression
+    assert '"errMessage":"No login system is configured"' in login_gate_expression
 
 
 def test_verify_task_checks_the_local_status_endpoint() -> None:
@@ -217,6 +251,7 @@ def test_verify_task_checks_the_local_status_endpoint() -> None:
     local_gate_expression = assert_task["ansible.builtin.assert"]["that"][0]
     assert "grist_verify_local_auth_surface.location is defined" in local_gate_expression
     assert "(grist_verify_local_auth_surface.status | int) in [200, 400]" in local_gate_expression
+    assert '"errMessage":"No login system is configured"' in local_gate_expression
 
 
 def test_grist_templates_enable_persistent_oidc_runtime() -> None:
@@ -233,3 +268,6 @@ def test_grist_templates_enable_persistent_oidc_runtime() -> None:
     assert '      - "{{ ansible_host }}:{{ grist_internal_port }}:8484"' in compose_template
     assert '      - "127.0.0.1:{{ grist_internal_port }}:8484"' in compose_template
     assert '      - "{{ item.hostname }}:{{ item.address }}"' in compose_template
+    assert "node -e" in compose_template
+    assert "http://127.0.0.1:8484/status" in compose_template
+    assert "wget --no-verbose" not in compose_template

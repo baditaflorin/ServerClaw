@@ -62,6 +62,7 @@
           (grist_publish_auth_redirect.status | int) in [200, 400]
           and 'Loading... - Grist' in (grist_publish_auth_redirect.content | default(''))
           and '"supportAnon":false' in (grist_publish_auth_redirect.content | default(''))
+          and '"errMessage":"No login system is configured"' not in (grist_publish_auth_redirect.content | default(''))
         )
     fail_msg: >-
       Grist is reachable publicly, but the unauthenticated document route did not
