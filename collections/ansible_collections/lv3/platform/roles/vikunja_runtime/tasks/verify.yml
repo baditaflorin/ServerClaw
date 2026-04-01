@@ -5,7 +5,6 @@
 # Outputs: Read-only verification results for the runtime, controller, and public publication paths.
 # Idempotency: Fully idempotent; these are read-only HTTP checks against the live service.
 # Dependencies: ADR 0286 and ADR 0165; requires the vikunja_runtime compose stack to be running.
----
 - name: Read the Vikunja API token from the control machine
   ansible.builtin.set_fact:
     vikunja_api_token: "{{ lookup('ansible.builtin.file', vikunja_api_token_local_file) | trim }}"
