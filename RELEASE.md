@@ -1,9 +1,9 @@
-# Release 0.177.127
+# Release 0.177.128
 
 - Date: 2026-04-01
 
 ## Summary
-- live-applied ADR 0292 from latest `origin/main`: the repo-managed Lago billing stack now re-verifies `https://billing.lv3.org` behind the shared oauth2 edge, keeps anonymous `/api/health` requests blocked at the API gateway, and confirms public smoke event ingest plus current-usage aggregation on platform version `0.130.81`.
+- live-applied ADR 0292 from the latest `origin/main`: the repo-managed Lago billing stack now re-verifies `https://billing.lv3.org` behind the shared oauth2 edge, keeps anonymous `/api/health` requests blocked at the API gateway, and confirms public smoke event ingest plus current-usage aggregation on platform version `0.130.81`.
 
 ## Platform Impact
 - Exact-main Lago verification preserved the protected billing edge, gateway-mediated public event ingest, and current-usage aggregation on production; platform version advances to 0.130.81 with this release.

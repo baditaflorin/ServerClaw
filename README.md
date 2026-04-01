@@ -70,7 +70,7 @@ Harbor is now live on `docker-runtime-lv3` and published at `https://registry.lv
 
 MinIO is now live on `docker-runtime-lv3` and published at `https://minio.lv3.org`, with the operator console held behind `https://minio-console.lv3.org`, the shared launch buckets for Loki, Langfuse, Gitea LFS, and RAG staging converged from repo automation, and the shared `minio-root` repository path now backing the verified Restic config-backup flow from current `main`.
 
-ADR 0292 Lago billing is now re-verified on production from `main`: `https://billing.lv3.org` keeps the browser surface behind the shared oauth2-proxy sign-in flow, anonymous `https://billing.lv3.org/api/health` requests now fail closed at the API gateway with the canonical `401` envelope, and the 2026-04-01 exact-main replay on release `0.177.127` re-verified public smoke event ingest plus current-usage aggregation on platform version `0.130.81`.
+ADR 0292 Lago billing is now re-verified on production from `main`: `https://billing.lv3.org` keeps the browser surface behind the shared oauth2-proxy sign-in flow, anonymous `https://billing.lv3.org/api/health` requests now fail closed at the API gateway with the canonical `401` envelope, and the 2026-04-01 exact-main replay on release `0.177.128` re-verified public smoke event ingest plus current-usage aggregation on platform version `0.130.81`.
 
 Signed release bundles are now live through that private Gitea path: the repo-managed `release-bundle` workflow publishes tarball, checksum, and Sigstore bundle assets into private Gitea Releases, and controller-side replay now verifies those assets with Cosign against the committed public key before treating them as eligible runtime input.
 
@@ -219,7 +219,7 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.127` |
+| Repository version | `0.177.128` |
 | Platform version | `0.130.81` |
 | Observed check date | `2026-03-31` |
 | Observed OS | `Debian 13` |
@@ -1523,6 +1523,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0305-live-apply: Live Apply ADR 0305 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-live-apply.md)
 - [Workstream ws-0305-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md)
 - [Workstream ws-0306-live-apply: Live Apply ADR 0306 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md)
+- [Workstream ws-0315-gitea-followups: Gitea Release Bundles And Renovate PR Validation Follow-ups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -1540,7 +1541,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.127` |
+| Repository version | `0.177.128` |
 | Platform version | `0.130.81` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1833,6 +1834,7 @@ This repository is intentionally opinionated:
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md) |
 | `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `merged` | [ws-0297-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md) |
 | `0297` | Integrate ADR 0297 live-apply evidence and release updates on main | `merged` | [ws-0297-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-main-merge.md) |
+| `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

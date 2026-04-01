@@ -80,6 +80,7 @@ SEMVER_PATTERN = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 DEFAULT_HTTP_TIMEOUT_SECONDS = 30.0
 DEFAULT_ASSET_DOWNLOAD_WAIT_SECONDS = 600.0
 TRANSIENT_DOWNLOAD_STATUS_CODES = {404, 408, 409, 423, 425, 429, 500, 502, 503, 504}
+DEFAULT_RELEASE_BUNDLE_RETAIN_COUNT = 10
 
 
 @dataclass(frozen=True)
@@ -336,6 +337,99 @@ def fetch_release_asset_detail(
         token=token,
     )
     return json.loads(payload.decode("utf-8"))
+
+
+def parse_release_timestamp(release: dict[str, Any]) -> datetime:
+    for field in ("published_at", "created_at"):
+        value = release.get(field)
+        if not value:
+            continue
+        try:
+            if isinstance(value, str) and value.endswith("Z"):
+                return datetime.fromisoformat(value.replace("Z", "+00:00"))
+            if isinstance(value, str):
+                return datetime.fromisoformat(value)
+        except ValueError:
+            continue
+    return datetime.min.replace(tzinfo=UTC)
+
+
+def list_releases(
+    *,
+    gitea_url: str,
+    repository: str,
+    token: str,
+    page: int,
+    limit: int,
+) -> list[dict[str, Any]]:
+    url = repo_api_path(gitea_url, repository, f"releases?limit={limit}&page={page}")
+    _status, payload = api_request("GET", url, token=token, accepted_statuses=(200,))
+    return json.loads(payload.decode("utf-8"))
+
+
+def fetch_all_releases(*, gitea_url: str, repository: str, token: str) -> list[dict[str, Any]]:
+    releases: list[dict[str, Any]] = []
+    page = 1
+    limit = 50
+    while True:
+        batch = list_releases(gitea_url=gitea_url, repository=repository, token=token, page=page, limit=limit)
+        if not batch:
+            break
+        releases.extend(batch)
+        if len(batch) < limit:
+            break
+        page += 1
+    return releases
+
+
+def delete_release(
+    *,
+    gitea_url: str,
+    repository: str,
+    token: str,
+    release_id: int,
+) -> None:
+    api_request(
+        "DELETE",
+        repo_api_path(gitea_url, repository, f"releases/{release_id}"),
+        token=token,
+        accepted_statuses=(204, 200),
+    )
+
+
+def prune_release_bundles(
+    *,
+    gitea_url: str,
+    repository: str,
+    token: str,
+    retain_count: int,
+    exclude_tags: set[str],
+) -> list[str]:
+    if retain_count < 1:
+        return []
+    releases = fetch_all_releases(gitea_url=gitea_url, repository=repository, token=token)
+    bundle_releases = [
+        release for release in releases if str(release.get("tag_name", "")).startswith("bundle-")
+    ]
+    bundle_releases.sort(key=parse_release_timestamp, reverse=True)
+    preserved = []
+    removed = []
+    for release in bundle_releases:
+        tag_name = str(release.get("tag_name", ""))
+        if tag_name in exclude_tags:
+            preserved.append(tag_name)
+            continue
+        if len(preserved) < retain_count:
+            preserved.append(tag_name)
+            continue
+        delete_release(
+            gitea_url=gitea_url,
+            repository=repository,
+            token=token,
+            release_id=int(release["id"]),
+        )
+        removed.append(tag_name)
+    return removed
 
 
 def ensure_release(
@@ -867,6 +961,14 @@ def command_build(args: argparse.Namespace) -> int:
 
 def command_publish(args: argparse.Namespace) -> int:
     token = load_api_token(args.api_token)
+    identity = determine_release_identity(ref_name=args.ref_name, ref_type=args.ref_type, commit=args.commit)
+    removed_tags = prune_release_bundles(
+        gitea_url=args.gitea_url,
+        repository=args.repository,
+        token=token,
+        retain_count=args.retain_count,
+        exclude_tags={identity.release_tag},
+    )
     bundle_path, signature_path, sigstore_bundle_path, sha256_path, manifest, identity = build_release_bundle(args)
     if not sigstore_bundle_path.exists():
         raise FileNotFoundError(f"missing Sigstore bundle at {sigstore_bundle_path}")
@@ -909,6 +1011,7 @@ def command_publish(args: argparse.Namespace) -> int:
         "sha256_path": str(sha256_path),
         "release_url": release.get("html_url"),
         "uploaded_assets": [asset["name"] for asset in uploaded_assets],
+        "pruned_bundle_releases": removed_tags,
     }
     print(json.dumps(payload, indent=2))
     return 0
@@ -1004,6 +1107,7 @@ def build_parser() -> argparse.ArgumentParser:
         if name == "publish":
             command_parser.add_argument("--gitea-url", default=os.environ.get("GITHUB_SERVER_URL", "http://100.64.0.1:3009"))
             command_parser.add_argument("--api-token")
+            command_parser.add_argument("--retain-count", type=int, default=DEFAULT_RELEASE_BUNDLE_RETAIN_COUNT)
         command_parser.set_defaults(func=func)
 
     verify_parser = subparsers.add_parser(

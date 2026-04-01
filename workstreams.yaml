@@ -351,6 +351,70 @@ workstreams:
       changelog_entry: integrates the ADR 0297 live-apply evidence and build-server cleanup receipt into main, bumps the repo version to 0.177.126, and refreshes release notes plus generated status artifacts
       release_bump: patch
       included_in_repo_version: 0.177.126
+  - id: ws-0315-gitea-followups
+    adr: "0297"
+    title: Resolve Gitea release bundle retention and Renovate PR validation checkout drift
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0315-gitea-followups
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0315-gitea-followups
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md
+    depends_on:
+      - ws-0297-main-merge
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0315-gitea-followups.md
+      - .gitea/workflows/validate.yml
+      - .gitea/workflows/release-bundle.yml
+      - README.md
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - scripts/release_bundle.py
+      - docs/runbooks/configure-renovate.md
+      - docs/runbooks/signed-release-bundles.md
+      - receipts/live-applies/2026-04-01-adr-0297-gitea-followups-live-apply.json
+      - receipts/live-applies/evidence/2026-04-01-ws-0315-*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: gitea_workflows
+          paths:
+            - .gitea/workflows/validate.yml
+            - .gitea/workflows/release-bundle.yml
+          mode: shared_contract
+          contract: gitea-workflows-v1
+        - id: generated_truth
+          paths:
+            - README.md
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
+        - id: release_bundle_tooling
+          paths:
+            - scripts/release_bundle.py
+          mode: shared_contract
+          contract: gitea-release-bundle-tooling-v1
+        - id: gitea_runbooks
+          paths:
+            - docs/runbooks/configure-renovate.md
+            - docs/runbooks/signed-release-bundles.md
+            - docs/workstreams/ws-0315-gitea-followups.md
+          mode: shared_contract
+          contract: gitea-runbooks-v1
+        - id: gitea_followup_receipts
+          paths:
+            - receipts/live-applies/2026-04-01-adr-0297-gitea-followups-live-apply.json
+            - receipts/live-applies/evidence/2026-04-01-ws-0315-*
+          mode: shared_contract
+          contract: receipt-evidence-v1
+    ready_to_merge: true
+    live_applied: true
   - id: ws-0266-validation-runner-capability-contracts
     adr: "0266"
     title: Validation runner capability contracts and environment attestation
@@ -767,7 +831,7 @@ workstreams:
         capturing the explicit Lago ADR catalog mapping plus regenerated
         exposure registry state required by the final replay
       release_bump: patch
-      included_in_repo_version: 0.177.127
+      included_in_repo_version: 0.177.128
       latest_receipts:
         lago: 2026-04-01-adr-0292-lago-mainline-live-apply
     blockers: []

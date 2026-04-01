@@ -3,7 +3,7 @@
 - ADR: [ADR 0292](../adr/0292-lago-as-the-usage-metering-and-billing-api-layer.md)
 - Title: Deploy Lago as the repo-managed usage metering and billing API layer, publish `billing.lv3.org`, and verify metered ingestion end to end
 - Status: merged
-- Included In Repo Version: 0.177.127
+- Included In Repo Version: 0.177.128
 - Canonical Mainline Receipt: `receipts/live-applies/2026-04-01-adr-0292-lago-mainline-live-apply.json`
 - Platform Version Observed During Integration: 0.130.80
 - Live Applied In Platform Version: 0.130.81
@@ -97,6 +97,6 @@
   as audit context, but the April 1 `r31` replay supersedes it as the durable
   latest-main proof for `billing.lv3.org`.
 - The final integration step promotes this replay into repository version
-  `0.177.127` and platform version `0.130.81`, with
+  `0.177.128` and platform version `0.130.81`, with
   `receipts/live-applies/2026-04-01-adr-0292-lago-mainline-live-apply.json`
   as the canonical receipt.
