@@ -5415,7 +5415,7 @@ adr_index:
   - adr: '0304'
     title: Atlas For Declarative Database Schema Migration Versioning And Pre-Migration Linting
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: release
     keywords:
@@ -5429,6 +5429,7 @@ adr_index:
       - linting
     summary: We will integrate Atlas as the migration linting and drift detection layer
     filename: 0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
+    implemented_version: 0.177.135
   - adr: '0305'
     title: k6 For Continuous Load Testing And SLO Error Budget Burn Validation
     status: Accepted

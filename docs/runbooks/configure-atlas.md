@@ -61,10 +61,18 @@ Outputs:
 - optional NATS notifications on `platform.db.schema_drift`
 - optional ntfy alerts for drift findings
 
-The seeded Windmill checkout also consumes repo-local runtime artifacts under
-`.local/` when the job subprocess environment omits the equivalent secret
-variables. That fallback keeps the governed `f/lv3/atlas_drift_check` path
-usable from the isolated checkout without storing secrets in the repository.
+The seeded Windmill checkout also consumes repo-local runtime artifacts when
+the worker subprocess environment omits the equivalent secret variables. The
+current resolution order is:
+
+1. root-owned seeded job artifacts under `.local/windmill-job-secrets/openbao/`
+   and `.local/windmill-job-secrets/ntfy/`
+2. repo-local controller artifacts under `.local/openbao/` and `.local/ntfy/`
+3. `/proc/1/environ` inside the worker container for the matching environment
+   variables
+
+That fallback keeps the governed `f/lv3/atlas_drift_check` path usable from the
+isolated checkout without storing secrets in the repository.
 
 ## Verification
 
@@ -129,7 +137,14 @@ same tree should recover once the shared hosts are quiet enough.
   receipts and notifications, but it must not mutate database schema state.
 - The seeded Windmill wrapper prefers the runtime environment when
   `LV3_ATLAS_OPENBAO_APPROLE_JSON` and
-  `LV3_NTFY_ALERTMANAGER_PASSWORD` are present, but it will fall back to
+  `LV3_NTFY_ALERTMANAGER_PASSWORD` are present, but it will now look first in
+  `.local/windmill-job-secrets/openbao/atlas-approle.json` and
+  `.local/windmill-job-secrets/ntfy/alertmanager-password.txt`, then in
   `.local/openbao/atlas-approle.json` and
-  `.local/ntfy/alertmanager-password.txt` inside the isolated checkout when the
-  worker subprocess drops those values.
+  `.local/ntfy/alertmanager-password.txt`, and finally in `/proc/1/environ`
+  when the worker subprocess drops those values.
+- The seeded Windmill validation-gate wrapper now reconstructs the governed
+  `waiver_summary` contract when `scripts/gate_status.py` returns the raw gate
+  status payload without that field. That keeps the repo-managed Windmill
+  verification path stable across latest-main replays without changing the
+  CLI-facing output of `scripts/gate_status.py`.

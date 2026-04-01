@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 import shlex
@@ -11,6 +12,75 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Any
+
+
+def default_waiver_summary(receipt_dir: Path, reason: str | None = None) -> dict[str, Any]:
+    summary: dict[str, Any] = {
+        "generated_at": None,
+        "catalog_path": None,
+        "receipt_dir": str(receipt_dir),
+        "policy": None,
+        "totals": {
+            "all_receipts": 0,
+            "legacy_receipts": 0,
+            "compliant_receipts": 0,
+            "open_waivers": 0,
+            "expired_waivers": 0,
+            "invalid_receipts": 0,
+        },
+        "latest_receipt": None,
+        "open_waivers": [],
+        "expiring_soon": [],
+        "reason_codes": [],
+        "warnings": [],
+        "release_blockers": [],
+        "invalid_receipts": [],
+    }
+    if reason:
+        summary["summary_error"] = reason
+    return summary
+
+
+def load_repo_module(repo_root: Path, relative_path: str, module_name: str):
+    module_path = repo_root / relative_path
+    if not module_path.is_file():
+        raise FileNotFoundError(f"missing module at {module_path}")
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"unable to load module spec for {module_path}")
+    module = importlib.util.module_from_spec(spec)
+    repo_root_str = str(repo_root)
+    added_repo_root = False
+    if repo_root_str not in sys.path:
+        sys.path.insert(0, repo_root_str)
+        added_repo_root = True
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        if added_repo_root:
+            try:
+                sys.path.remove(repo_root_str)
+            except ValueError:
+                pass
+    return module
+
+
+def ensure_waiver_summary(repo_root: Path, gate_status: dict[str, Any]) -> None:
+    existing = gate_status.get("waiver_summary")
+    if isinstance(existing, dict):
+        return
+
+    receipt_dir = repo_root / "receipts" / "gate-bypasses"
+    try:
+        module = load_repo_module(
+            repo_root=repo_root,
+            relative_path="scripts/gate_bypass_waivers.py",
+            module_name=f"windmill_gate_bypass_waivers_{abs(hash(repo_root.resolve()))}",
+        )
+        summary = module.summarize_receipts(directory=receipt_dir)
+        gate_status["waiver_summary"] = summary if isinstance(summary, dict) else default_waiver_summary(receipt_dir)
+    except Exception as exc:
+        gate_status["waiver_summary"] = default_waiver_summary(receipt_dir, reason=str(exc))
 
 
 def build_gate_status_command(repo_root: Path) -> list[str]:
@@ -84,6 +154,7 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
             }
         )
         return payload
+    ensure_waiver_summary(repo_root, gate_status)
     payload.update(
         {
             "status": "ok",

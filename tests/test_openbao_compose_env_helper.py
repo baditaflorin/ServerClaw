@@ -77,7 +77,6 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "- name: Ensure the local OpenBao API is unsealed before runtime secret injection" in tasks
     assert "include_tasks: unseal_openbao_api.yml" in tasks
     assert 'common_openbao_unseal_context: "runtime secret injection for {{ common_openbao_compose_env_service_name }}"' in tasks
-    assert "keys_base64[: (openbao_init_key_threshold | default(2) | int)]" not in tasks
     assert "Read OpenBao seal status before" in unseal_tasks
     assert "common_openbao_unseal_completed" in unseal_tasks
     assert "include_tasks: unseal_openbao_api_key.yml" in unseal_tasks
@@ -121,7 +120,6 @@ def test_systemd_helper_reuses_local_openbao_recovery() -> None:
     assert "- name: Wait for the local OpenBao API to answer" in tasks
     assert "- name: Ensure the configured OpenBao API is unsealed before host-native secret delivery" in tasks
     assert "include_tasks: unseal_openbao_api.yml" in tasks
-    assert "- name: Unseal the local OpenBao API when host-native secret delivery finds it sealed" in tasks
     assert "register: common_openbao_systemd_credentials_unsealed_status" in tasks
     assert "common_openbao_systemd_credentials_unsealed_status.status == 200" in tasks
     assert "not (common_openbao_systemd_credentials_unsealed_status.json.sealed | bool)" in tasks

@@ -1,9 +1,10 @@
 # ADR 0304: Atlas For Declarative Database Schema Migration Versioning And Pre-Migration Linting
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.135
+- Implemented In Platform Version: 0.130.85
+- Implemented On: 2026-04-01
 - Date: 2026-03-29
 
 ## Context

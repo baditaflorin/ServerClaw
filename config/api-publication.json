@@ -227,6 +227,15 @@
       "approval_notes": "ADR 0091 drift subjects stay private-first because they disclose real-time divergence between repo intent and live platform state."
     },
     {
+      "id": "platform-db-subjects",
+      "title": "Platform database event subjects",
+      "lane": "event",
+      "lane_surface_ref": "platform-db-subjects",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0304 schema drift subjects stay private-first because they disclose live database topology and divergence between committed Atlas snapshots and production PostgreSQL state."
+    },
+    {
       "id": "platform-security-subjects",
       "title": "Platform security event subjects",
       "lane": "event",

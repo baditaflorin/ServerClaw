@@ -21,6 +21,11 @@ def write_gate_status_script(repo_root: Path, body: str) -> None:
     (repo_root / "scripts" / "gate_status.py").write_text(body.strip() + "\n", encoding="utf-8")
 
 
+def write_script(repo_root: Path, name: str, body: str) -> None:
+    (repo_root / "scripts").mkdir(parents=True, exist_ok=True)
+    (repo_root / "scripts" / name).write_text(body.strip() + "\n", encoding="utf-8")
+
+
 def test_gate_status_wrapper_blocks_when_repo_checkout_is_missing(tmp_path: Path) -> None:
     module = load_module("gate_status_windmill_missing", WRAPPER_PATH)
     payload = module.main(repo_path=str(tmp_path / "missing"))
@@ -53,6 +58,85 @@ print(json.dumps(payload))
     assert payload["gate_status"]["last_run"] == {"status": "passed"}
     assert payload["gate_status"]["enabled_checks"] == [{"id": "agent-standards"}]
     assert payload["command"].endswith("--format json")
+
+
+def test_gate_status_wrapper_injects_waiver_summary_when_missing(tmp_path: Path) -> None:
+    module = load_module("gate_status_windmill_waiver_summary", WRAPPER_PATH)
+    repo_root = tmp_path
+    write_gate_status_script(
+        repo_root,
+        """
+import json
+
+print(json.dumps({"manifest_path": "manifest.json", "enabled_checks": [{"id": "agent-standards"}]}))
+""",
+    )
+    write_script(
+        repo_root,
+        "gate_bypass_waivers.py",
+        """
+from pathlib import Path
+
+def summarize_receipts(*, directory: Path):
+    return {
+        "receipt_dir": str(directory),
+        "totals": {"compliant_receipts": 3},
+        "release_blockers": [],
+    }
+""",
+    )
+
+    payload = module.main(repo_path=str(repo_root))
+
+    assert payload["status"] == "ok"
+    assert payload["gate_status"]["waiver_summary"]["totals"]["compliant_receipts"] == 3
+    assert payload["gate_status"]["waiver_summary"]["release_blockers"] == []
+
+
+def test_gate_status_wrapper_preserves_existing_waiver_summary(tmp_path: Path) -> None:
+    module = load_module("gate_status_windmill_existing_waiver_summary", WRAPPER_PATH)
+    repo_root = tmp_path
+    write_gate_status_script(
+        repo_root,
+        """
+import json
+
+print(json.dumps({
+    "manifest_path": "manifest.json",
+    "enabled_checks": [{"id": "agent-standards"}],
+    "waiver_summary": {
+        "totals": {"compliant_receipts": 7},
+        "release_blockers": [{"reason_code": "existing"}],
+    },
+}))
+""",
+    )
+
+    payload = module.main(repo_path=str(repo_root))
+
+    assert payload["status"] == "ok"
+    assert payload["gate_status"]["waiver_summary"]["totals"]["compliant_receipts"] == 7
+    assert payload["gate_status"]["waiver_summary"]["release_blockers"] == [{"reason_code": "existing"}]
+
+
+def test_gate_status_wrapper_falls_back_when_waiver_summary_helper_is_missing(tmp_path: Path) -> None:
+    module = load_module("gate_status_windmill_missing_waiver_summary_helper", WRAPPER_PATH)
+    repo_root = tmp_path
+    write_gate_status_script(
+        repo_root,
+        """
+import json
+
+print(json.dumps({"manifest_path": "manifest.json", "enabled_checks": [{"id": "agent-standards"}]}))
+""",
+    )
+
+    payload = module.main(repo_path=str(repo_root))
+
+    assert payload["status"] == "ok"
+    assert payload["gate_status"]["waiver_summary"]["totals"]["compliant_receipts"] == 0
+    assert payload["gate_status"]["waiver_summary"]["release_blockers"] == []
+    assert "summary_error" in payload["gate_status"]["waiver_summary"]
 
 
 def test_gate_status_wrapper_prefers_helper_runner_when_available(tmp_path: Path) -> None:
