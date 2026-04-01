@@ -1886,9 +1886,9 @@ workstreams:
     ready_to_merge: false
     live_applied: true
     blockers:
-      - 'origin/main advanced again during this workstream and is now `6bf10bdd178871e44df4af5285ac7084a311869f` at repository version `0.177.132`; this branch was cut from an earlier `0.177.132` release tree rooted at `2f6602f77b8c7996317150729479e66d3de62475`, so final merge still requires a fresh rebase onto the latest realistic origin/main before any new release bump.'
-      - 'The exact-main `make live-apply-service service=glitchtip env=production` replay reconverged PostgreSQL, Docker runtime recovery, Keycloak, the GlitchTip runtime, repo-managed bootstrap, and NGINX publication, but the first 30-minute controller-local quiet-window wait timed out behind concurrent ws-0303 monitoring-stack and ws-0286 Vikunja/Typesense playbooks on shared hosts; the replay was then manually stopped when the playbook entered a second 30-minute quiet-window retry.'
-      - 'The branch-local release/receipt state is now truthful and internally validated, but the full repo automation bundle still needs a fresh rerun from the rebased tree after the quiet-window blocker clears, including `make validate`, `make remote-validate`, `make pre-push-gate`, and `make check-build-server`.'
+      - 'The branch is now rebased onto latest realistic `origin/main` `6bf10bdd138846055729ca75dc90a98d284c152b` at repository version `0.177.132`, but the exact-main public verification still cannot start honestly because the rebased quiet-window probe times out behind active ws-0303 monitoring-stack and ws-0279 Grist playbooks on `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`.'
+      - 'Fresh read-only public checks show `errors.lv3.org` is currently drifted again: it resolves to `65.108.75.123` but serves certificate `CN=nginx.lv3.org` and `308` redirects `/health/` to `https://nginx.lv3.org/health/`, so the exact-main live apply must be rerun and verified from the integrated tree before any truthful merge.'
+      - 'Repo automation is mostly green from the rebased tree: `make remote-validate` and `make check-build-server` pass, while `make validate` and `make pre-push-gate` are both blocked only by protected canonical-truth regeneration of the top-level `README.md`; do not merge until the live replay succeeds and that final generated-docs decision is handled truthfully.'
   - id: ws-0292-live-apply
     adr: "0292"
     title: Live apply Lago as the usage metering and billing API layer from latest origin/main

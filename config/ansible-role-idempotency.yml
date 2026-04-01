@@ -163,6 +163,9 @@ roles:
   linux_keepalived:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  livekit_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   loki_log_agent:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
