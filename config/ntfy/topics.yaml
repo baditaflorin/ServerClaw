@@ -27,12 +27,19 @@ topics:
       - warning
       - rotating_light
   platform.security.warn:
-    description: Changedetection security-advisory notifications that need operator review.
+    description: Security-advisory and SBOM delta notifications that need operator review.
     default_title: LV3 security advisory
     default_priority: 4
     default_tags:
       - warning
       - shield
+  platform.backup.critical:
+    description: Critical backup freshness or restore-readiness failures that require operator action.
+    default_title: LV3 backup critical
+    default_priority: 5
+    default_tags:
+      - rotating_light
+      - floppy_disk
   platform.security.critical:
     description: Critical security findings promoted through the Windmill NATS bridge.
     default_title: LV3 critical security finding
@@ -120,6 +127,9 @@ users:
     token_secret_id: ntfy_windmill_token
     token_label: windmill
     publish_topics:
+      - platform.security.warn
+      - platform.backup.critical
+      - platform.slo.warn
       - platform.security.critical
       - platform.watchdog.critical
   ops:
@@ -130,6 +140,7 @@ users:
       - platform-alerts-sbom-verify
       - platform.monitoring.critical
       - platform.security.warn
+      - platform.backup.critical
       - platform.security.critical
       - platform.ansible.info
       - platform.ansible.warn

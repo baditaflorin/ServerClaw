@@ -99,7 +99,7 @@ def test_summarize_latest_snapshots_keeps_event_driven_sources_protected(tmp_pat
         catalog={"controller_host": {"minio": {"bucket": "restic-config-backup"}}},
         sources=[source],
         repo_root=repo_root,
-        credentials={"restic_password": "pw", "minio_secret_key": "secret", "nats_password": "x", "ntfy_password": "y"},
+        credentials={"restic_password": "pw", "minio_secret_key": "secret", "nats_password": "x", "ntfy_token": "y"},
         endpoint="http://10.10.10.20:9000",
         cache_dir=tmp_path / "cache",
         restore_verify_dir=tmp_path / "restore",
@@ -150,7 +150,7 @@ def test_summarize_latest_snapshots_clamps_negative_interval_age(tmp_path: Path)
         catalog={"controller_host": {"minio": {"bucket": "restic-config-backup"}}},
         sources=[source],
         repo_root=repo_root,
-        credentials={"restic_password": "pw", "minio_secret_key": "secret", "nats_password": "x", "ntfy_password": "y"},
+        credentials={"restic_password": "pw", "minio_secret_key": "secret", "nats_password": "x", "ntfy_token": "y"},
         endpoint="http://10.10.10.20:9000",
         cache_dir=tmp_path / "cache",
         restore_verify_dir=tmp_path / "restore",
@@ -893,33 +893,38 @@ def test_make_live_apply_targets_bootstrap_pyyaml_for_restic_trigger() -> None:
 def test_post_ntfy_notification_uses_human_readable_title(monkeypatch) -> None:
     captured: dict[str, object] = {}
 
-    class _Response:
-        status = 200
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):
-            return False
-
-    def fake_urlopen(request, timeout=0):
-        captured["url"] = request.full_url
-        captured["title"] = request.headers["Title"]
-        captured["body"] = request.data.decode("utf-8")
+    def fake_run_command(argv, *, env=None, cwd=None, timeout=None):
+        captured["argv"] = argv
+        captured["cwd"] = cwd
         captured["timeout"] = timeout
-        return _Response()
+        return types.SimpleNamespace(returncode=0, stdout='{"status":"published"}', stderr="")
 
-    monkeypatch.setattr(restic_backup.urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(restic_backup, "run_command", fake_run_command)
 
     result = restic_backup.post_ntfy_notification(
-        {"controller_host": {"ntfy": {"url": "http://127.0.0.1:2586", "topic": "platform-alerts"}}},
-        {"ntfy_password": "secret"},
+        {
+            "controller_host": {
+                "ntfy": {
+                    "url": "http://10.10.10.20:2586",
+                    "topic": "platform.backup.critical",
+                    "publisher": "windmill",
+                }
+            }
+        },
+        {"ntfy_token": "secret"},
         "stale backup detected",
     )
 
     assert result["status"] == "sent"
-    assert captured["title"] == "Restic backup critical"
-    assert captured["body"] == "stale backup detected"
+    argv = captured["argv"]
+    assert "--publisher" in argv
+    assert argv[argv.index("--publisher") + 1] == "windmill"
+    assert "--topic" in argv
+    assert argv[argv.index("--topic") + 1] == "platform.backup.critical"
+    assert "--title" in argv
+    assert argv[argv.index("--title") + 1] == "Restic backup critical"
+    assert "--message" in argv
+    assert argv[argv.index("--message") + 1] == "stale backup detected"
 
 
 def test_emit_stale_signals_uses_human_readable_notification_text(tmp_path: Path, monkeypatch) -> None:
@@ -952,7 +957,7 @@ def test_emit_stale_signals_uses_human_readable_notification_text(tmp_path: Path
 
     notifications = restic_backup.emit_stale_signals(
         catalog={"controller_host": {}},
-        credentials={"nats_password": "x", "ntfy_password": "y"},
+        credentials={"nats_password": "x", "ntfy_token": "y"},
         latest_receipt=latest_receipt,
         latest_receipt_path=receipt_path,
     )

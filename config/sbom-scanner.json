@@ -22,9 +22,8 @@
     }
   },
   "ntfy": {
-    "username": "alertmanager",
-    "host": "10.10.10.20",
-    "port": 2586,
-    "topic": "platform-alerts"
+    "base_url": "http://10.10.10.20:2586",
+    "publisher": "windmill",
+    "topic": "platform.security.warn"
   }
 }

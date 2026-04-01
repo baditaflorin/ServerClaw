@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+import types
 from pathlib import Path
 
 import pytest
@@ -548,6 +549,50 @@ def test_build_receipts_keeps_failed_receipt_when_ntfy_warning_delivery_fails(mo
     assert payload["result"] == "failed"
     assert payload["notifications"]["ntfy_topic_notified"] is None
     assert any("ntfy notification unavailable: missing secret" == reason for reason in payload["failure_reasons"])
+
+
+def test_notify_ntfy_uses_governed_helper(monkeypatch, tmp_path: Path) -> None:
+    (tmp_path / "config").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "config" / "service-capability-catalog.json").write_text(
+        json.dumps(
+            {
+                "services": [
+                    {
+                        "id": "ntfy",
+                        "name": "ntfy",
+                        "internal_url": "http://10.10.10.20:2586",
+                    }
+                ]
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    captured: dict[str, object] = {}
+
+    def fake_run(argv, cwd=None, text=None, capture_output=None, check=None):
+        captured["argv"] = argv
+        captured["cwd"] = cwd
+        return types.SimpleNamespace(returncode=0, stdout='{"status":"published"}', stderr="")
+
+    monkeypatch.setattr(k6_load_testing.subprocess, "run", fake_run)
+
+    topic = k6_load_testing.notify_ntfy(
+        repo_root=tmp_path,
+        service_id="grafana",
+        scenario="load",
+        budget_remaining_pct=10.0,
+        receipt_path=tmp_path / "receipts" / "k6" / "load-grafana.json",
+    )
+
+    assert topic == "platform.slo.warn"
+    argv = captured["argv"]
+    assert "--publisher" in argv
+    assert argv[argv.index("--publisher") + 1] == "windmill"
+    assert "--topic" in argv
+    assert argv[argv.index("--topic") + 1] == "platform.slo.warn"
+    assert "--base-url" in argv
+    assert argv[argv.index("--base-url") + 1] == "http://10.10.10.20:2586"
 
 
 def test_publish_regression_event_fails_fast_when_nats_endpoint_is_unreachable(monkeypatch, tmp_path: Path) -> None:

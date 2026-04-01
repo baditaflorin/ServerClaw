@@ -11,7 +11,6 @@ import socket
 import subprocess
 import sys
 import urllib.parse
-import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +27,8 @@ K6_SCRIPT_PATH = REPO_ROOT / "config" / "k6" / "scripts" / "http-slo-probe.js"
 K6_RECEIPTS_DIR = REPO_ROOT / "receipts" / "k6"
 K6_RAW_DIR = K6_RECEIPTS_DIR / "raw"
 K6_RECEIPT_SCHEMA_PATH = REPO_ROOT / "docs" / "schema" / "k6-receipt.schema.json"
+NTFY_TOPIC_REGISTRY_PATH = REPO_ROOT / "config" / "ntfy" / "topics.yaml"
+NTFY_PUBLISH_SCRIPT_PATH = REPO_ROOT / "scripts" / "ntfy_publish.py"
 SUMMARY_KEY_PATTERN = re.compile(r"^(?P<metric>[a-z0-9_]+)\{service_id:(?P<service_id>[a-z0-9_]+)\}$")
 SUPPORTED_SCHEMA_VERSION = "1.0.0"
 DEFAULT_MAX_ERROR_RATE = 0.01
@@ -40,7 +41,7 @@ DEFAULT_LOAD_HOLD_DURATION = "5m"
 DEFAULT_SOAK_DURATION = "30m"
 DEFAULT_REGRESSION_THRESHOLD = 0.20
 DEFAULT_NATS_URL = "nats://127.0.0.1:4222"
-DEFAULT_NTFY_USERNAME = "alertmanager"
+DEFAULT_NTFY_PUBLISHER = "windmill"
 DEFAULT_NTFY_WARN_TOPIC = "platform.slo.warn"
 
 
@@ -109,17 +110,6 @@ def run_git(repo_root: Path, *args: str) -> str:
     if completed.returncode != 0:
         raise RuntimeError(completed.stderr.strip() or f"git {' '.join(args)} failed")
     return completed.stdout.strip()
-
-
-def maybe_read_secret_path(repo_root: Path, secret_id: str) -> str | None:
-    payload = load_json(repo_root / "config" / "controller-local-secrets.json")
-    secret = require_mapping(payload.get("secrets"), "config/controller-local-secrets.json.secrets").get(secret_id)
-    if not isinstance(secret, dict) or secret.get("kind") != "file":
-        return None
-    path = Path(require_str(secret.get("path"), f"secret '{secret_id}'.path")).expanduser()
-    if not path.exists():
-        return None
-    return path.read_text(encoding="utf-8").strip()
 
 
 def load_service_index(repo_root: Path) -> dict[str, dict[str, Any]]:
@@ -538,36 +528,45 @@ def notify_ntfy(
 ) -> str | None:
     if budget_remaining_pct >= DEFAULT_WARNING_THRESHOLD_PCT:
         return None
-    password = maybe_read_secret_path(repo_root, "ntfy_alertmanager_password")
-    if not password:
-        raise ValueError("ntfy_alertmanager_password is not available for k6 warning notification")
     ntfy_service = load_service_index(repo_root).get("ntfy")
     if ntfy_service is None:
         raise ValueError("service-capability-catalog.json is missing ntfy")
     base_url = require_str(ntfy_service.get("internal_url"), "ntfy.internal_url").rstrip("/")
     topic = DEFAULT_NTFY_WARN_TOPIC
-    request = urllib.request.Request(
-        f"{base_url}/{urllib.parse.quote(topic)}",
-        data=(
-            f"{service_id} {scenario} load-test warning: "
-            f"{budget_remaining_pct:.1f}% error budget remaining "
-            f"({relative_repo_path(receipt_path, repo_root)})"
-        ).encode("utf-8"),
-        method="POST",
-        headers={
-            "Title": f"LV3 k6 warning for {service_id}",
-            "Priority": "default",
-            "Authorization": "Basic "
-            + (
-                __import__("base64").b64encode(
-                    f"{DEFAULT_NTFY_USERNAME}:{password}".encode("utf-8")
-                ).decode("ascii")
-            ),
-        },
+    message = (
+        f"{service_id} {scenario} load-test warning: "
+        f"{budget_remaining_pct:.1f}% error budget remaining "
+        f"({relative_repo_path(receipt_path, repo_root)})"
     )
-    with urllib.request.urlopen(request, timeout=10) as response:  # noqa: S310
-        if response.status >= 300:
-            raise RuntimeError(f"ntfy notification failed with HTTP {response.status}")
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(NTFY_PUBLISH_SCRIPT_PATH),
+            "--registry",
+            str(NTFY_TOPIC_REGISTRY_PATH),
+            "--publisher",
+            os.environ.get("LV3_NTFY_PUBLISHER", "").strip() or DEFAULT_NTFY_PUBLISHER,
+            "--topic",
+            topic,
+            "--message",
+            message,
+            "--title",
+            f"LV3 k6 warning for {service_id}",
+            "--priority",
+            "4",
+            "--base-url",
+            base_url,
+            "--sequence-id",
+            f"k6:{service_id}:{scenario}:{receipt_path.stem}",
+        ],
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        detail = completed.stderr.strip() or completed.stdout.strip() or "ntfy publish command failed"
+        raise RuntimeError(f"ntfy notification failed: {detail}")
     return topic
 
 

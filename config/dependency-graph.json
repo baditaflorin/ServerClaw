@@ -349,7 +349,7 @@
       "service": "ntfy",
       "name": "ntfy",
       "vm": "docker-runtime-lv3",
-      "tier": 1,
+      "tier": 2,
       "category": "communication",
       "adr": "0299"
     },

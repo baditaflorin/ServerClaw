@@ -48,7 +48,8 @@ Generated controller-local artifacts:
 ## Governed Topics
 
 - `platform.monitoring.critical` for Alertmanager critical operator push delivery
-- `platform.security.warn` for Changedetection advisories
+- `platform.security.warn` for Changedetection advisories and SBOM delta notifications
+- `platform.backup.critical` for restic freshness and restore-readiness failures
 - `platform.security.critical` and `platform.watchdog.critical` for the Windmill bridge
 - `platform.ansible.info`, `platform.ansible.warn`, and `platform.ansible.critical` for governed playbook notifications
 - `platform.ci.critical` for Gitea validation failures

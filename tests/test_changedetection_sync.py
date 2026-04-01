@@ -78,7 +78,7 @@ def desired_state() -> dict:
             {
                 "id": "security-advisories",
                 "title": "security-advisories",
-                "notification_urls": ["ntfy://alertmanager:secret@10.10.10.20:2586/platform-alerts?priority=high"],
+                "notification_urls": ["ntfy://changedetection:secret@10.10.10.20:2586/platform.security.warn?priority=high"],
                 "notification_muted": False,
                 "overrides_watch": True,
             },
@@ -169,7 +169,7 @@ def test_sync_deletes_unmanaged_tags_and_watches() -> None:
             "tag-2": {
                 "uuid": "tag-2",
                 "title": "security-advisories",
-                "notification_urls": ["ntfy://alertmanager:secret@10.10.10.20:2586/platform-alerts?priority=high"],
+                "notification_urls": ["ntfy://changedetection:secret@10.10.10.20:2586/platform.security.warn?priority=high"],
                 "notification_muted": False,
                 "overrides_watch": True,
             },
@@ -240,7 +240,7 @@ def test_sync_ignores_live_watch_defaults_not_declared_in_desired_state() -> Non
             "tag-2": {
                 "uuid": "tag-2",
                 "title": "security-advisories",
-                "notification_urls": ["ntfy://alertmanager:secret@10.10.10.20:2586/platform-alerts?priority=high"],
+                "notification_urls": ["ntfy://changedetection:secret@10.10.10.20:2586/platform.security.warn?priority=high"],
                 "notification_muted": False,
                 "overrides_watch": True,
             },

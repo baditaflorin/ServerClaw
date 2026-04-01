@@ -11,6 +11,7 @@ def test_ntfy_topic_registry_declares_governed_and_legacy_topics() -> None:
 
     assert "platform.monitoring.critical:" in registry
     assert "platform.security.warn:" in registry
+    assert "platform.backup.critical:" in registry
     assert "platform.ansible.critical:" in registry
     assert "platform.ci.critical:" in registry
     assert "platform.watchdog.critical:" in registry

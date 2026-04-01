@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import base64
 import contextlib
 import fcntl
 import ipaddress
@@ -13,6 +12,7 @@ import os
 import shlex
 import socket
 import subprocess
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -50,6 +50,10 @@ DEFAULT_RESTIC_REPOSITORY_PROBE_TIMEOUT_SECONDS = 180
 NTFY_CRITICAL_TITLE = "Restic backup critical"
 NTFY_STALE_MESSAGE_PREFIX = "Restic backup source is stale"
 FALLBACK_MINIO_CONTAINER_NAMES = ("outline-minio",)
+NTFY_TOPIC_REGISTRY_PATH = repo_path("config", "ntfy", "topics.yaml")
+NTFY_PUBLISH_SCRIPT_PATH = repo_path("scripts", "ntfy_publish.py")
+DEFAULT_NTFY_PUBLISHER = "windmill"
+DEFAULT_NTFY_TOPIC = "platform.backup.critical"
 
 
 @dataclass(frozen=True)
@@ -131,7 +135,7 @@ def load_runtime_credentials(path: Path | None = None) -> dict[str, str]:
     if candidate is None:
         raise ValueError("systemd runtime credentials are unavailable")
     payload = json.loads(Path(candidate).read_text(encoding="utf-8"))
-    required = ("restic_password", "minio_secret_key", "nats_password", "ntfy_password")
+    required = ("restic_password", "minio_secret_key", "nats_password", "ntfy_token")
     missing = [field for field in required if not str(payload.get(field) or "").strip()]
     if missing:
         raise ValueError("runtime credential payload is missing " + ", ".join(missing))
@@ -835,34 +839,45 @@ def post_ntfy_notification(
 ) -> dict[str, Any]:
     ntfy = (catalog.get("controller_host") or {}).get("ntfy") or {}
     base_url = str(ntfy.get("url") or "http://127.0.0.1:2586").rstrip("/")
-    topic = str(ntfy.get("topic") or "platform-alerts").strip() or "platform-alerts"
-    username = str(ntfy.get("username") or "alertmanager").strip() or "alertmanager"
-    password = credentials["ntfy_password"]
-    publish_url = base_url if base_url.endswith(f"/{topic}") else f"{base_url}/{topic}"
-    request = urllib.request.Request(
-        publish_url,
-        data=message.encode("utf-8"),
-        method="POST",
-        headers={
-            "Authorization": "Basic " + base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii"),
-            "Title": NTFY_CRITICAL_TITLE,
-            "Priority": "4",
-        },
+    topic = str(ntfy.get("topic") or DEFAULT_NTFY_TOPIC).strip() or DEFAULT_NTFY_TOPIC
+    publisher = str(ntfy.get("publisher") or DEFAULT_NTFY_PUBLISHER).strip() or DEFAULT_NTFY_PUBLISHER
+    result = run_command(
+        [
+            sys.executable,
+            str(NTFY_PUBLISH_SCRIPT_PATH),
+            "--registry",
+            str(NTFY_TOPIC_REGISTRY_PATH),
+            "--publisher",
+            publisher,
+            "--topic",
+            topic,
+            "--token",
+            credentials["ntfy_token"],
+            "--message",
+            message,
+            "--title",
+            NTFY_CRITICAL_TITLE,
+            "--priority",
+            "5",
+            "--base-url",
+            base_url,
+        ],
+        cwd=REPO_ROOT,
+        timeout=10,
     )
-    try:
-        with urllib.request.urlopen(request, timeout=5) as response:
-            return {
-                "channel": "ntfy",
-                "topic": topic,
-                "status": "sent",
-                "http_status": response.status,
-            }
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError) as exc:
+    if result.returncode == 0:
+        return {
+            "channel": "ntfy",
+            "topic": topic,
+            "status": "sent",
+        }
+    else:
+        detail = result.stderr.strip() or result.stdout.strip() or "ntfy publish command failed"
         return {
             "channel": "ntfy",
             "topic": topic,
             "status": "error",
-            "error": str(exc),
+            "error": detail,
         }
 
 

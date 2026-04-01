@@ -40,8 +40,8 @@ restic_config_backup_minio_secret_key_local_file: >-
   {{ restic_config_backup_controller_repo_common_root }}/.local/minio/root-password.txt
 restic_config_backup_nats_password_local_file: >-
   {{ restic_config_backup_controller_repo_common_root }}/.local/nats/jetstream-admin-password.txt
-restic_config_backup_ntfy_password_local_file: >-
-  {{ restic_config_backup_controller_repo_common_root }}/.local/ntfy/alertmanager-password.txt
+restic_config_backup_ntfy_token_local_file: >-
+  {{ restic_config_backup_controller_repo_common_root }}/.local/ntfy/windmill-token.txt
 restic_config_backup_runtime_openbao_secret_path: services/restic-config-backup/runtime-config
 restic_config_backup_runtime_openbao_policy_name: lv3-restic-config-backup-runtime
 restic_config_backup_runtime_openbao_approle_name: restic-config-backup
@@ -58,7 +58,7 @@ restic_config_backup_runtime_config_payload:
   restic_password: ""
   minio_secret_key: ""
   nats_password: ""
-  ntfy_password: ""
+  ntfy_token: ""
 restic_config_backup_runtime_openbao_secret_payload:
   runtime_config_json: "{{ restic_config_backup_runtime_config_payload | to_nice_json }}"
 restic_config_backup_runtime_openbao_policy_rules: |-

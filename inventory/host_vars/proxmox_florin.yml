@@ -923,7 +923,7 @@ network_policy:
           protocol: tcp
           ports:
             - 2586
-          description: Alertmanager access to the private ntfy paging gateway
+          description: Alertmanager access to the governed ntfy runtime listener
         - source: nginx-lv3
           protocol: tcp
           ports:

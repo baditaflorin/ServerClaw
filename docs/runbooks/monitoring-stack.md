@@ -39,7 +39,7 @@ make converge-monitoring
 
 ## Controller Prerequisites
 
-- The shared monitoring converge path validates Alertmanager delivery into the private ntfy paging gateway and expects the controller-local secret file `.local/ntfy/alertmanager-password.txt`.
+- The shared monitoring converge path validates Alertmanager delivery into the governed ntfy push channel and expects the controller-local secret file `.local/ntfy/alertmanager-password.txt`.
 - If that file is missing in a fresh worktree, run `make converge-ntfy` first or materialize the existing controller-local secret before rerunning `make converge-monitoring`.
 - The Loki chunk backend now also expects `.local/monitoring/loki-minio-secret-key.txt`; if it is missing, rerun `make converge-minio` before replaying the monitoring stack.
 
@@ -49,7 +49,7 @@ make converge-monitoring
 2. Installs and starts `grafana`, `influxdb2`, `influxdb2-cli`, and `loki`.
 3. Installs Prometheus from Debian plus pinned `tempo` and `otelcol-contrib` Debian packages.
 4. Configures a managed Prometheus service with the remote-write receiver enabled plus the `exemplar-storage` and `native-histograms` features required by Tempo span metrics and service-graph metrics.
-5. Configures Alertmanager routing for severity-based notification delivery into Mattermost and the private ntfy paging gateway.
+5. Configures Alertmanager routing for severity-based notification delivery into Mattermost and the governed ntfy push channel.
 6. Configures the blackbox exporter plus generated HTTP and TCP probe jobs from `config/health-probe-catalog.json`.
 7. Configures generated HTTPS and TLS assurance probes plus expiry alert rules from the service, subdomain, certificate, and health-probe catalogs.
 8. Configures Tempo with local-block storage, a 7-day trace retention window, and metrics generation into Prometheus.

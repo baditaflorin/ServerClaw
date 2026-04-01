@@ -16,9 +16,9 @@
       "subject": "platform.backup.stale"
     },
     "ntfy": {
-      "url": "http://127.0.0.1:2586",
-      "topic": "platform-alerts",
-      "username": "alertmanager"
+      "url": "http://10.10.10.20:2586",
+      "topic": "platform.backup.critical",
+      "publisher": "windmill"
     }
   },
   "sources": [

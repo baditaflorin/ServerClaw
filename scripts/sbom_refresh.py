@@ -3,18 +3,15 @@
 from __future__ import annotations
 
 import argparse
-import base64
 import json
 import os
+import subprocess
 import sys
-import urllib.error
-import urllib.request
 from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, repo_path
 from drift_lib import load_controller_context, nats_tunnel, publish_nats_events, resolve_nats_credentials
-from platform_observation_tool import maybe_read_secret_path
 from sbom_scanner import (
     CVE_RECEIPTS_DIR,
     SBOM_RECEIPTS_DIR,
@@ -31,6 +28,10 @@ from sbom_scanner import (
 
 
 IMAGE_CATALOG_PATH = repo_path("config", "image-catalog.json")
+NTFY_TOPIC_REGISTRY_PATH = repo_path("config", "ntfy", "topics.yaml")
+NTFY_PUBLISH_SCRIPT_PATH = repo_path("scripts", "ntfy_publish.py")
+DEFAULT_NTFY_PUBLISHER = "windmill"
+DEFAULT_NTFY_TOPIC = "platform.security.warn"
 
 
 def load_image_catalog(path: Path) -> dict[str, Any]:
@@ -49,19 +50,62 @@ def publish_delta_events(events: list[dict[str, Any]], *, context: dict[str, Any
         publish_nats_events(events, nats_url=f"nats://127.0.0.1:{local_port}", credentials=credentials)
 
 
-def ntfy_publish_url(config: dict[str, Any]) -> str:
-    host = os.environ.get("LV3_NTFY_HOST", "").strip() or str(config["ntfy"]["host"])
-    port = int(os.environ.get("LV3_NTFY_PORT", "").strip() or config["ntfy"]["port"])
-    topic = os.environ.get("LV3_NTFY_TOPIC", "").strip() or str(config["ntfy"]["topic"])
-    return f"http://{host}:{port}/{topic}"
+def ntfy_base_url(config: dict[str, Any]) -> str:
+    ntfy_config = config.get("ntfy", {})
+    explicit = os.environ.get("LV3_NTFY_BASE_URL", "").strip() or str(ntfy_config.get("base_url") or "").strip()
+    if explicit:
+        return explicit.rstrip("/")
+    host = os.environ.get("LV3_NTFY_HOST", "").strip() or str(ntfy_config["host"])
+    port = int(os.environ.get("LV3_NTFY_PORT", "").strip() or ntfy_config["port"])
+    return f"http://{host}:{port}"
+
+
+def ntfy_publisher(config: dict[str, Any]) -> str:
+    ntfy_config = config.get("ntfy", {})
+    explicit = os.environ.get("LV3_NTFY_PUBLISHER", "").strip()
+    if explicit:
+        return explicit
+    publisher = str(ntfy_config.get("publisher") or ntfy_config.get("username") or DEFAULT_NTFY_PUBLISHER).strip()
+    if not publisher:
+        raise ValueError("sbom scanner ntfy publisher is not configured")
+    return publisher
+
+
+def ntfy_topic(config: dict[str, Any]) -> str:
+    ntfy_config = config.get("ntfy", {})
+    explicit = os.environ.get("LV3_NTFY_TOPIC", "").strip()
+    if explicit:
+        return explicit
+    topic = str(ntfy_config.get("topic") or DEFAULT_NTFY_TOPIC).strip()
+    if not topic:
+        raise ValueError("sbom scanner ntfy topic is not configured")
+    return topic
+
+
+def build_ntfy_publish_command(*, config: dict[str, Any], message: str) -> list[str]:
+    return [
+        sys.executable,
+        str(NTFY_PUBLISH_SCRIPT_PATH),
+        "--registry",
+        str(NTFY_TOPIC_REGISTRY_PATH),
+        "--publisher",
+        ntfy_publisher(config),
+        "--topic",
+        ntfy_topic(config),
+        "--message",
+        message,
+        "--title",
+        "Platform CVE delta",
+        "--priority",
+        "4",
+        "--base-url",
+        ntfy_base_url(config),
+    ]
 
 
 def maybe_send_ntfy_alert(events: list[dict[str, Any]], *, context: dict[str, Any], config: dict[str, Any], enabled: bool) -> None:
     if not enabled or not events:
         return
-    password = maybe_read_secret_path(context["secret_manifest"], "ntfy_alertmanager_password")
-    if not password:
-        raise RuntimeError("ntfy alert requested but ntfy_alertmanager_password is unavailable")
     message_lines = [
         f"ADR 0298 detected {len(events)} net-new HIGH/CRITICAL image findings.",
     ]
@@ -72,24 +116,11 @@ def maybe_send_ntfy_alert(events: list[dict[str, Any]], *, context: dict[str, An
             f"- {event['image_id']}: {finding.get('severity')} {finding.get('vulnerability_id')} in "
             f"{package.get('name')} {package.get('version')}"
         )
-    request = urllib.request.Request(
-        ntfy_publish_url(config),
-        data="\n".join(message_lines).encode("utf-8"),
-        headers={
-            "Authorization": "Basic "
-            + base64.b64encode(
-                f"{config['ntfy']['username']}:{password}".encode("utf-8")
-            ).decode("ascii"),
-            "Title": "Platform CVE delta",
-            "Priority": "high",
-        },
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=10):
-            return
-    except urllib.error.URLError as exc:
-        raise RuntimeError(f"failed to publish the ntfy CVE alert: {exc}") from exc
+    command = build_ntfy_publish_command(config=config, message="\n".join(message_lines))
+    result = subprocess.run(command, text=True, capture_output=True, check=False)
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip() or "ntfy publish command failed"
+        raise RuntimeError(f"failed to publish the ntfy CVE alert: {detail}")
 
 
 def build_parser() -> argparse.ArgumentParser:

@@ -1,5 +1,5 @@
-# Purpose: Converge the private ntfy runtime, controller-local password material, and compose-managed service artifacts.
-# Use case: Run during ntfy deploys, updates, and exact-main replays for the private alerting endpoint.
+# Purpose: Converge the governed ntfy runtime, controller-local auth material, and compose-managed service artifacts.
+# Use case: Run during ntfy deploys, updates, and exact-main replays for the published operator push endpoint.
 # Inputs: Runtime paths, controller-local password artifacts, image and port settings, and the repo-managed ntfy configuration template.
 # Outputs: Installs ntfy prerequisites, renders the config and compose inputs, and keeps the ntfy runtime running on the target host.
 # Idempotency: Partially idempotent because password generation and compose restarts only occur when required state is missing or changed.

@@ -74,9 +74,9 @@
       {{
         lookup('ansible.builtin.file', restic_config_backup_nats_password_local_file) | trim
       }}
-    restic_config_backup_ntfy_password: >-
+    restic_config_backup_ntfy_token: >-
       {{
-        lookup('ansible.builtin.file', restic_config_backup_ntfy_password_local_file) | trim
+        lookup('ansible.builtin.file', restic_config_backup_ntfy_token_local_file) | trim
       }}
   delegate_to: localhost
   become: false
@@ -87,8 +87,8 @@
       - restic_config_backup_repository_password | length > 0
       - restic_config_backup_minio_secret_key | length > 0
       - restic_config_backup_nats_password | length > 0
-      - restic_config_backup_ntfy_password | length > 0
-    fail_msg: "Controller-local restic, MinIO, NATS, or ntfy credentials are missing."
+      - restic_config_backup_ntfy_token | length > 0
+    fail_msg: "Controller-local restic, MinIO, NATS, or ntfy token credentials are missing."
 
 - name: Install restic runtime packages
   ansible.builtin.apt:
@@ -132,7 +132,7 @@
       restic_password: "{{ restic_config_backup_repository_password }}"
       minio_secret_key: "{{ restic_config_backup_minio_secret_key }}"
       nats_password: "{{ restic_config_backup_nats_password }}"
-      ntfy_password: "{{ restic_config_backup_ntfy_password }}"
+      ntfy_token: "{{ restic_config_backup_ntfy_token }}"
 
 - name: Provision OpenBao-backed systemd credentials for the restic backup service
   ansible.builtin.include_role:
