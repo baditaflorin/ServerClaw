@@ -7,12 +7,13 @@
 
 schema_version: 1
 generated: '2026-04-01'
-total_adrs: 336
+total_adrs: 338
 implementation_status_summary:
-  Implemented: 282
+  Implemented: 287
   Partial: 7
-  Not Implemented: 46
+  Not Implemented: 42
   Deprecated: 1
+  Complete: 1
 concerns:
   agent-coordination:
     - '0153'
@@ -291,6 +292,7 @@ concerns:
     - '0314'
     - '0315'
     - '0316'
+    - 0318
   release:
     - 0008
     - '0110'
@@ -368,6 +370,7 @@ concerns:
     - 0296
     - '0307'
     - 0308
+    - '0317'
 discovery_queries:
   how do we bootstrap:
     - '0001'
@@ -4724,7 +4727,7 @@ adr_index:
   - adr: '0274'
     title: MinIO As The S3-Compatible Object Storage Layer
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: storage
     keywords:
@@ -4736,6 +4739,7 @@ adr_index:
       - layer
     summary: We will deploy MinIO in standalone mode on the docker-runtime VM as the
     filename: 0274-minio-as-the-s3-compatible-object-storage-layer.md
+    implemented_version: 0.177.124
   - adr: '0275'
     title: Apache Tika Server For Document Text Extraction In The RAG Pipeline
     status: Accepted
@@ -4773,7 +4777,7 @@ adr_index:
   - adr: '0277'
     title: Typesense As The Full-Text Search Engine For Internal Structured Data
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: documentation
     keywords:
@@ -4787,6 +4791,7 @@ adr_index:
       - data
     summary: We will deploy Typesense as the full-text search engine for internal
     filename: 0277-typesense-as-the-full-text-search-engine-for-internal-structured-data.md
+    implemented_version: 0.177.125
   - adr: 0278
     title: Gotenberg As The Document-To-PDF Rendering Service
     status: Accepted
@@ -5148,7 +5153,7 @@ adr_index:
   - adr: 0292
     title: Apache Superset As The SQL-First Business Intelligence Layer
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -5161,10 +5166,11 @@ adr_index:
       - layer
     summary: We will deploy Apache Superset as the shared SQL-first business intelligence
     filename: 0292-apache-superset-as-the-sql-first-business-intelligence-layer.md
+    implemented_version: 0.177.129
   - adr: 0292
     title: Lago As The Usage Metering And Billing API Layer
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: api
     keywords:
@@ -5177,6 +5183,7 @@ adr_index:
       - layer
     summary: We will deploy Lago as the usage metering and billing API layer for
     filename: 0292-lago-as-the-usage-metering-and-billing-api-layer.md
+    implemented_version: 0.177.118
   - adr: 0293
     title: Livekit As The Real-Time Audio And Voice Channel For Agents
     status: Accepted
@@ -5621,3 +5628,35 @@ adr_index:
       - scorecards
     summary: We will define privacy-preserving journey analytics and onboarding
     filename: 0316-journey-analytics-and-onboarding-success-scorecards.md
+  - adr: '0317'
+    title: Keycloak Direct-API Operator Provisioning via SSH Proxy
+    status: Accepted
+    implementation_status: Complete
+    date: '2026-04-01'
+    concern: vm-topology
+    keywords:
+      - keycloak
+      - direct-api
+      - operator
+      - provisioning
+      - ssh
+      - proxy
+    summary: LLM agents MUST use the Keycloak admin REST API directly for operator provisioning when
+    filename: 0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md
+    implemented_version: 0.0.0
+  - adr: 0318
+    title: Repeatable Operator Onboarding with CC Audit Trail
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: platform
+    keywords:
+      - repeatable
+      - operator
+      - onboarding
+      - cc
+      - audit
+      - trail
+    summary: scripts/provisionoperator.py is the authoritative IaC entry point for operator
+    filename: 0318-repeatable-operator-onboarding-with-cc-audit-trail.md
+    implemented_version: 0.0.0

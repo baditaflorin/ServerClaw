@@ -28,6 +28,8 @@ approved_roles:
   - plausible
   - postgres
   - semaphore_admin
+  - superset
+  - superset_reader
   - temporal
   - vaultwarden_admin
   - windmill

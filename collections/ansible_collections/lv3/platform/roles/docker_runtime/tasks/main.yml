@@ -41,7 +41,7 @@
     name: "{{ docker_runtime_prereq_packages }}"
     state: present
     update_cache: true
-    lock_timeout: 300
+    lock_timeout: "{{ docker_runtime_apt_lock_timeout }}"
     force_apt_get: true
 
 - name: Ensure Docker-managed directories exist
@@ -69,14 +69,14 @@
   ansible.builtin.apt:
     name: "{{ docker_runtime_conflicting_packages }}"
     state: absent
-    lock_timeout: 300
+    lock_timeout: "{{ docker_runtime_apt_lock_timeout }}"
 
 - name: Install Docker runtime packages
   ansible.builtin.apt:
     name: "{{ docker_runtime_engine_packages }}"
     state: present
     update_cache: true
-    lock_timeout: 300
+    lock_timeout: "{{ docker_runtime_apt_lock_timeout }}"
     force_apt_get: true
 
 - name: Ensure docker admin group exists
@@ -136,7 +136,7 @@
 
 - name: Install the Docker publication assurance helper
   ansible.builtin.copy:
-    content: "{{ lookup('ansible.builtin.file', docker_runtime_publication_assurance_helper_local_path) }}"
+    content: "{{ lookup('ansible.builtin.file', docker_runtime_publication_assurance_script_src) }}"
     dest: "{{ docker_runtime_publication_assurance_script_path }}"
     owner: root
     group: root
@@ -445,6 +445,26 @@
         | list
       }}
 
+- name: Record whether stopped containers require the local OpenBao runtime
+  ansible.builtin.set_fact:
+    docker_runtime_stopped_pre_restart_requires_local_openbao: >-
+      {{
+        '"openbao-agent"' in (
+          (docker_runtime_stopped_pre_restart_container_details | default([])) | to_json
+        )
+      }}
+  when: docker_runtime_stopped_pre_restart_container_names | default([]) | length > 0
+
+- name: Recover the local OpenBao runtime before restarting OpenBao-backed containers
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: ensure_local_openbao_runtime
+  vars:
+    common_local_openbao_runtime_consumer_name: docker-runtime stopped container recovery
+  when:
+    - docker_runtime_stopped_pre_restart_container_names | default([]) | length > 0
+    - docker_runtime_stopped_pre_restart_requires_local_openbao | default(false) | bool
+
 - name: Recover pre-restart containers that remained stopped after Docker restarts
   ansible.builtin.command:
     argv:
@@ -467,7 +487,20 @@
             "does not exist",
         )
         OPENBAO_HEALTH_URL = "http://127.0.0.1:8201/v1/sys/health"
-        OPENBAO_READY_STATUS_CODES = {200, 429}
+        OPENBAO_SEAL_STATUS_URL = "http://127.0.0.1:8201/v1/sys/seal-status"
+        OPENBAO_UNSEAL_URL = "http://127.0.0.1:8201/v1/sys/unseal"
+        OPENBAO_READY_STATUS_CODES = {200, 429, 472, 473, 501, 503}
+        OPENBAO_UNSEAL_KEYS = {{
+            (
+              (
+                lookup('ansible.builtin.file', openbao_init_local_file, errors='ignore')
+                | default('{}', true)
+              )
+              | from_json
+            ).keys_base64 | default([], true) | to_json
+        }}
+        OPENBAO_RECOVERY_TIMEOUT_SECONDS = {{ docker_runtime_openbao_recovery_timeout_seconds | int }}
+        OPENBAO_RECOVERY_DELAY_SECONDS = {{ docker_runtime_openbao_recovery_delay_seconds | int }}
 
 
         def combined_output(stdout, stderr):
@@ -506,12 +539,73 @@
 
                 time.sleep(delay_seconds)
 
+        def read_openbao_json(url):
+            request = urllib.request.Request(url, method="GET")
+            try:
+                with urllib.request.urlopen(request, timeout=5) as response:
+                    payload = response.read().decode()
+                    return response.status, json.loads(payload or "{}")
+            except urllib.error.HTTPError as exc:
+                payload = exc.read().decode()
+                return exc.code, json.loads(payload or "{}")
 
-        def wait_for_local_openbao(*, timeout_seconds=60, delay_seconds=2):
+
+        def submit_local_openbao_unseal_key(key):
+            request = urllib.request.Request(
+                OPENBAO_UNSEAL_URL,
+                data=json.dumps({"key": key}).encode(),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(request, timeout=5) as response:
+                payload = response.read().decode()
+                return response.status, json.loads(payload or "{}")
+
+
+        def ensure_local_openbao_unsealed():
+            if not OPENBAO_UNSEAL_KEYS:
+                raise RuntimeError(
+                    "local OpenBao is sealed after a Docker restart, but no recovery keys are available"
+                )
+
+            seal_status, seal_payload = read_openbao_json(OPENBAO_SEAL_STATUS_URL)
+            if seal_status == 200 and not seal_payload.get("sealed", True):
+                return False
+
+            if seal_status not in {200, 503}:
+                raise RuntimeError(
+                    f"unexpected OpenBao seal-status response before recovery: HTTP {seal_status}"
+                )
+
+            for unseal_key in OPENBAO_UNSEAL_KEYS:
+                unseal_status, unseal_payload = submit_local_openbao_unseal_key(unseal_key)
+                if unseal_status != 200:
+                    raise RuntimeError(
+                        f"OpenBao unseal request failed with HTTP {unseal_status}"
+                    )
+                if not unseal_payload.get("sealed", True):
+                    return True
+
+            seal_status, seal_payload = read_openbao_json(OPENBAO_SEAL_STATUS_URL)
+            if seal_status == 200 and not seal_payload.get("sealed", True):
+                return True
+
+            raise RuntimeError("local OpenBao remained sealed after submitting recovery keys")
+
+
+        def wait_for_local_openbao(
+            *,
+            timeout_seconds=OPENBAO_RECOVERY_TIMEOUT_SECONDS,
+            delay_seconds=OPENBAO_RECOVERY_DELAY_SECONDS,
+        ):
             deadline = time.monotonic() + timeout_seconds
             last_error = ""
             while time.monotonic() < deadline:
                 try:
+                    seal_status, seal_payload = read_openbao_json(OPENBAO_SEAL_STATUS_URL)
+                    if seal_status == 200 and seal_payload.get("sealed", False):
+                        ensure_local_openbao_unsealed()
+
                     with urllib.request.urlopen(OPENBAO_HEALTH_URL, timeout=5) as response:
                         if response.status in OPENBAO_READY_STATUS_CODES:
                             return
@@ -528,9 +622,31 @@
                 f"local OpenBao did not become ready at {OPENBAO_HEALTH_URL}: {last_error or 'timed out'}"
             )
 
+        def services_need_local_openbao(services):
+            return any(
+                service == "openbao-agent" or service.endswith("-openbao-agent")
+                for service in services
+            )
+
+
+        def services_provide_local_openbao(services):
+            return any(service == "openbao" for service in services)
+
+        def compose_group_sort_key(item):
+            (working_dir, config_files), compose_group = item
+            services = compose_group["services"]
+            if services_provide_local_openbao(services):
+                priority = 0
+            elif services_need_local_openbao(services):
+                priority = 2
+            else:
+                priority = 1
+            return (priority, working_dir, config_files)
+
         containers = json.load(sys.stdin)
 
         direct_start = []
+        openbao_direct_start = []
         compose_groups = {}
 
         for container in containers:
@@ -551,7 +667,10 @@
                 continue
 
             if name:
-                direct_start.append(name)
+                if "openbao-agent" in name:
+                    openbao_direct_start.append(name)
+                else:
+                    direct_start.append(name)
 
         actions = []
 
@@ -572,20 +691,20 @@
                 or "lv3-openbao" in container_names
             )
 
+        def compose_group_recovery_sort_key(item):
+            (working_dir, config_files), compose_group = item
+            if is_local_openbao_group(
+                working_dir,
+                config_files,
+                compose_group["services"],
+                compose_group["container_names"],
+            ):
+                return (0, working_dir, config_files)
+            return compose_group_sort_key(item)
+
         for (working_dir, config_files), compose_group in sorted(
             compose_groups.items(),
-            key=lambda item: (
-                0
-                if is_local_openbao_group(
-                    item[0][0],
-                    item[0][1],
-                    item[1]["services"],
-                    item[1]["container_names"],
-                )
-                else 1,
-                item[0][0],
-                item[0][1],
-            ),
+            key=compose_group_recovery_sort_key,
         ):
             command = ["docker", "compose"]
             config_file_list = [value for value in config_files.split(",") if value]
@@ -599,7 +718,7 @@
                 services,
                 container_names,
             )
-            if "openbao-agent" in services and not local_openbao_group:
+            if services_need_local_openbao(services) and not local_openbao_group:
                 wait_for_local_openbao()
             command.extend(["up", "-d", "--force-recreate", *services])
 
@@ -648,7 +767,7 @@
                 recovery_command = ["docker", "compose"]
                 for config_file in config_file_list:
                     recovery_command.extend(["--file", config_file])
-                if "openbao-agent" in services and not local_openbao_group:
+                if services_need_local_openbao(services) and not local_openbao_group:
                     wait_for_local_openbao()
                 recovery_command.extend(["up", "-d", "--force-recreate", *services])
                 try:
@@ -690,7 +809,7 @@
                 final_up_command = ["docker", "compose"]
                 for config_file in config_file_list:
                     final_up_command.extend(["--file", config_file])
-                if "openbao-agent" in services and not local_openbao_group:
+                if services_need_local_openbao(services) and not local_openbao_group:
                     wait_for_local_openbao()
                 final_up_command.extend(["up", "-d", *services])
                 run_with_retry(
@@ -708,6 +827,16 @@
                         "services": services,
                     }
                 )
+
+        if openbao_direct_start:
+            wait_for_local_openbao()
+            run_with_retry(["docker", "start", *openbao_direct_start])
+            actions.append(
+                {
+                    "type": "docker_start_openbao_agents",
+                    "containers": openbao_direct_start,
+                }
+            )
     stdin: >-
       {{
         (docker_runtime_stopped_pre_restart_container_details | default([])) | to_json
@@ -727,6 +856,7 @@
         import sys
 
         NONPERSISTENT_RESTART_POLICIES = set({{ docker_runtime_nonpersistent_restart_policies | to_json }})
+        SUCCESSFUL_EXIT_RESTART_POLICIES = NONPERSISTENT_RESTART_POLICIES | {"on-failure"}
 
         containers = json.load(sys.stdin)
         statuses = []
@@ -736,7 +866,7 @@
             container_name = (container.get("Name") or "").lstrip("/")
             restart_policy = (container.get("HostConfig") or {}).get("RestartPolicy") or {}
             restart_policy_name = str(restart_policy.get("Name") or "").strip().lower()
-            require_running = restart_policy_name not in NONPERSISTENT_RESTART_POLICIES
+            require_running = restart_policy_name not in SUCCESSFUL_EXIT_RESTART_POLICIES
             result = subprocess.run(
                 ["docker", "inspect", container_name],
                 text=True,
@@ -750,7 +880,7 @@
                 status = str(state.get("Status") or "")
                 exit_code = state.get("ExitCode")
                 healthy = running or (
-                    not require_running
+                    restart_policy_name in SUCCESSFUL_EXIT_RESTART_POLICIES
                     and status == "exited"
                     and exit_code == 0
                 )

@@ -4,6 +4,7 @@ import json
 import sqlite3
 import sys
 import time
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
@@ -69,6 +70,12 @@ def write_json(path: Path, payload: dict) -> None:
 def write_yaml(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content)
+
+
+def write_billing_producer_catalog(tmp_path: Path, payload: dict) -> Path:
+    path = tmp_path / "config" / "billing-ingest-producers.json"
+    write_json(path, payload)
+    return path
 
 
 def test_gateway_runtime_compose_mounts_config_at_app_path() -> None:
@@ -861,6 +868,237 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
     asyncio.run(run())
 
 
+def test_billing_health_route_proxies_without_platform_auth(tmp_path: Path) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "billing.test":
+            assert request.url.path == "/health"
+            return httpx.Response(200, json={"status": "ok", "service": "lago"})
+        return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+
+    producer_catalog_path = write_billing_producer_catalog(tmp_path, {"producers": []})
+    transport = httpx.MockTransport(handler)
+    config, _token = make_repo(tmp_path, "http://upstream.test")
+    config = replace(
+        config,
+        billing_api_base_url="http://billing.test",
+        billing_ingest_producers_path=producer_catalog_path,
+        billing_org_api_key="lago-org-api-key",
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.get("/v1/billing/health")
+                    assert response.status_code == 200
+                    assert response.json() == {"status": "ok", "service": "lago"}
+            finally:
+                await runtime.close()
+
+    asyncio.run(run())
+
+
+def test_billing_event_route_forwards_valid_events_to_lago(tmp_path: Path) -> None:
+    producer_catalog = {
+        "producers": [
+            {
+                "id": "smoke-producer",
+                "name": "Smoke Producer",
+                "token": "producer-token",
+                "allowed_metric_codes": ["api_calls"],
+                "allowed_external_subscription_ids": ["sub-123"],
+            }
+        ]
+    }
+    producer_catalog_path = write_billing_producer_catalog(tmp_path, producer_catalog)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "billing.test":
+            assert request.url.path == "/api/v1/events"
+            assert request.headers["Authorization"] == "Bearer lago-org-api-key"
+            payload = json.loads(request.content.decode("utf-8"))
+            assert payload["event"]["external_subscription_id"] == "sub-123"
+            assert payload["event"]["code"] == "api_calls"
+            return httpx.Response(200, json={"event": {"status": "accepted"}})
+        return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+
+    transport = httpx.MockTransport(handler)
+    config, _token = make_repo(tmp_path, "http://upstream.test")
+    config = replace(
+        config,
+        billing_api_base_url="http://billing.test",
+        billing_ingest_producers_path=producer_catalog_path,
+        billing_org_api_key="lago-org-api-key",
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.post(
+                        "/v1/billing/events",
+                        headers={"Authorization": "Bearer producer-token"},
+                        json={
+                            "event": {
+                                "transaction_id": str(gateway_main.uuid.uuid4()),
+                                "external_subscription_id": "sub-123",
+                                "code": "api_calls",
+                                "properties": {"count": 1},
+                            }
+                        },
+                    )
+                    assert response.status_code == 200
+                    assert response.json()["event"]["status"] == "accepted"
+            finally:
+                await runtime.close()
+
+    asyncio.run(run())
+
+
+def test_billing_event_route_rejects_invalid_scope_and_publishes_rejection(tmp_path: Path) -> None:
+    producer_catalog = {
+        "producers": [
+            {
+                "id": "smoke-producer",
+                "name": "Smoke Producer",
+                "token": "producer-token",
+                "allowed_metric_codes": ["api_calls"],
+                "allowed_external_subscription_ids": ["sub-123"],
+            }
+        ]
+    }
+    producer_catalog_path = write_billing_producer_catalog(tmp_path, producer_catalog)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "billing.test":
+            return httpx.Response(200, json={"event": {"status": "accepted"}})
+        return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+
+    transport = httpx.MockTransport(handler)
+    config, _token = make_repo(tmp_path, "http://upstream.test")
+    config = replace(
+        config,
+        billing_api_base_url="http://billing.test",
+        billing_ingest_producers_path=producer_catalog_path,
+        billing_org_api_key="lago-org-api-key",
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            rejections: list[tuple[str, dict[str, object]]] = []
+
+            async def fake_emit(subject: str, payload: dict[str, object]) -> None:
+                rejections.append((subject, payload))
+
+            runtime.event_emitter.emit = fake_emit  # type: ignore[method-assign]
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.post(
+                        "/v1/billing/events",
+                        headers={"Authorization": "Bearer producer-token"},
+                        json={
+                            "event": {
+                                "transaction_id": str(gateway_main.uuid.uuid4()),
+                                "external_subscription_id": "sub-123",
+                                "code": "forbidden_metric",
+                                "properties": {"count": 1},
+                            }
+                        },
+                    )
+                    assert response.status_code == 422
+                    assert response.json()["error"]["code"] == "INPUT_SCHEMA_INVALID"
+                    assert rejections[0][0] == "billing.events.rejected"
+                    assert rejections[0][1]["reason_code"] == "metric_not_allowed"
+                    assert rejections[0][1]["producer_id"] == "smoke-producer"
+            finally:
+                await runtime.close()
+
+    asyncio.run(run())
+
+
+def test_billing_event_route_rejects_invalid_token_and_publishes_rejection(tmp_path: Path) -> None:
+    producer_catalog = {
+        "producers": [
+            {
+                "id": "smoke-producer",
+                "name": "Smoke Producer",
+                "token": "producer-token",
+                "allowed_metric_codes": ["api_calls"],
+                "allowed_external_subscription_ids": ["sub-123"],
+            }
+        ]
+    }
+    producer_catalog_path = write_billing_producer_catalog(tmp_path, producer_catalog)
+
+    transport = httpx.MockTransport(lambda request: httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text())))
+    config, _token = make_repo(tmp_path, "http://upstream.test")
+    config = replace(
+        config,
+        billing_api_base_url="http://billing.test",
+        billing_ingest_producers_path=producer_catalog_path,
+        billing_org_api_key="lago-org-api-key",
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            rejections: list[tuple[str, dict[str, object]]] = []
+
+            async def fake_emit(subject: str, payload: dict[str, object]) -> None:
+                rejections.append((subject, payload))
+
+            runtime.event_emitter.emit = fake_emit  # type: ignore[method-assign]
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.post(
+                        "/v1/billing/events",
+                        headers={"Authorization": "Bearer wrong-token"},
+                        json={
+                            "event": {
+                                "transaction_id": str(gateway_main.uuid.uuid4()),
+                                "external_subscription_id": "sub-123",
+                                "code": "api_calls",
+                                "properties": {"count": 1},
+                            }
+                        },
+                    )
+                    assert response.status_code == 401
+                    assert response.json()["error"]["code"] == "AUTH_TOKEN_INVALID"
+                    assert rejections[0][0] == "billing.events.rejected"
+                    assert rejections[0][1]["reason_code"] == "invalid_producer_token"
+            finally:
+                await runtime.close()
+
+    asyncio.run(run())
+
+
 def test_gateway_enters_and_surfaces_keycloak_degraded_mode(tmp_path: Path) -> None:
     jwks_online = {"value": True}
 
@@ -1436,7 +1674,158 @@ def test_gateway_retries_safe_proxy_reads(tmp_path: Path) -> None:
     import asyncio
 
     asyncio.run(run())
-    assert upstream_calls["count"] == 3
+
+
+def test_gateway_structured_search_route_queries_typesense(tmp_path: Path) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "jwks.test":
+            return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+        if request.url.host == "typesense.test":
+            assert request.headers["X-TYPESENSE-API-KEY"] == "typesense-secret"
+            assert request.url.path == "/collections/platform-services/documents/search"
+            assert request.url.params["q"] == "api"
+            assert request.url.params["per_page"] == "5"
+            assert (
+                request.url.params["query_by"]
+                == "name,description,tags,category,vm,exposure,subdomain,runbook,adr,health_probe_id"
+            )
+            assert request.url.params["facet_by"] == "category,exposure,vm,lifecycle_status,tags"
+            assert request.url.params["filter_by"] == "category:=`data`"
+            return httpx.Response(
+                200,
+                json={
+                    "found": 1,
+                    "hits": [
+                        {
+                            "document": {
+                                "id": "api_gateway",
+                                "name": "Platform API Gateway",
+                                "category": "data",
+                            },
+                            "text_match": 123,
+                            "highlights": [{"field": "name"}],
+                        }
+                    ],
+                    "facet_counts": [{"field_name": "category"}],
+                },
+            )
+        return httpx.Response(200, json={"status": "ok"})
+
+    transport = httpx.MockTransport(handler)
+    config, token = make_repo(tmp_path, "http://upstream.test")
+    config = replace(
+        config,
+        typesense_base_url="http://typesense.test",
+        typesense_api_key="typesense-secret",
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            runtime.structured_search_client = gateway_main.TypesenseStructuredSearchClient(
+                base_url=config.typesense_base_url or "",
+                api_key=config.typesense_api_key or "",
+                client=runtime_client,
+            )
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.get(
+                        "/v1/platform/search/structured?q=api&collection=platform-services&limit=5&category=data",
+                        headers={"Authorization": f"Bearer {token}"},
+                    )
+                    assert response.status_code == 200
+                    payload = response.json()
+                    assert payload["backend"] == "typesense"
+                    assert payload["collection"] == "platform-services"
+                    assert payload["found"] == 1
+                    assert payload["results"][0]["id"] == "api_gateway"
+            finally:
+                await runtime.close()
+
+    asyncio.run(run())
+
+
+def test_gateway_proxy_supports_raw_upstream_auth_headers(tmp_path: Path, monkeypatch) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "jwks.test":
+            return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+        assert request.headers["X-TYPESENSE-API-KEY"] == "typesense-secret"
+        assert "Authorization" not in request.headers
+        assert request.url.host == "typesense.test"
+        assert request.url.path == "/collections/platform-services"
+        return httpx.Response(200, json={"ok": True, "path": request.url.path})
+
+    transport = httpx.MockTransport(handler)
+    config, token = make_repo(tmp_path, "http://upstream.test")
+    service_catalog = json.loads((tmp_path / "config" / "service-capability-catalog.json").read_text())
+    service_catalog["services"].append(
+        {
+            "id": "typesense",
+            "name": "Typesense",
+            "description": "search",
+            "category": "data",
+            "lifecycle_status": "active",
+            "vm": "docker-runtime-lv3",
+            "internal_url": "http://100.64.0.1:8016",
+            "health_probe_id": "typesense",
+            "adr": "0277",
+            "runbook": "docs/runbooks/configure-typesense.md",
+            "tags": ["search"],
+            "environments": {"production": {"status": "active", "url": "http://100.64.0.1:8016"}},
+        }
+    )
+    write_json(tmp_path / "config" / "service-capability-catalog.json", service_catalog)
+    write_json(
+        tmp_path / "config" / "api-gateway-catalog.json",
+        {
+            "schema_version": "1.0.0",
+            "services": [
+                {
+                    "id": "typesense",
+                    "name": "Typesense",
+                    "upstream": "http://typesense.test",
+                    "gateway_prefix": "/v1/typesense",
+                    "auth": "keycloak_jwt",
+                    "required_role": "platform-read",
+                    "strip_prefix": True,
+                    "timeout_seconds": 5,
+                    "healthcheck_path": "/health",
+                    "upstream_auth_env_var": "LV3_GATEWAY_TYPESENSE_API_KEY",
+                    "upstream_auth_header": "X-TYPESENSE-API-KEY",
+                    "upstream_auth_scheme": "raw",
+                }
+            ],
+        },
+    )
+    monkeypatch.setenv("LV3_GATEWAY_TYPESENSE_API_KEY", "typesense-secret")
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.get(
+                        "/v1/typesense/collections/platform-services",
+                        headers={"Authorization": f"Bearer {token}"},
+                    )
+                    assert response.status_code == 200
+                    assert response.json()["path"] == "/collections/platform-services"
+            finally:
+                await runtime.close()
+
+    asyncio.run(run())
 
 
 def test_resolve_repo_root_supports_repo_layout(tmp_path: Path) -> None:

@@ -1,0 +1,629 @@
+# Purpose: Build the repo-managed Superset image, converge the runtime stack, and bootstrap the governed datasource inventory dashboard.
+# Use case: Run during Superset deployment, recovery, and exact-main replay on docker-runtime-lv3.
+# Inputs: Runtime paths, image pins, PostgreSQL credentials, Keycloak client secret, and the bootstrap verifier.
+# Outputs: The live Superset container, OpenBao-backed runtime env, datasource registration, and seeded landing dashboard match repo truth.
+# Idempotency: Partially idempotent because compose restarts and managed metadata reconciliation occur when the declared runtime or bootstrap inputs change.
+# Dependencies: ADR 0165, ADR 0021, ADR 0042, ADR 0063, ADR 0077, and ADR 0292.
+---
+- name: Validate Superset runtime inputs
+  ansible.builtin.assert:
+    that:
+      - superset_site_dir | length > 0
+      - superset_build_dir | length > 0
+      - superset_data_dir | length > 0
+      - superset_pythonpath_dir | length > 0
+      - superset_asset_dir | length > 0
+      - superset_secret_dir | length > 0
+      - superset_compose_file | length > 0
+      - superset_static_env_file | length > 0
+      - superset_env_file | length > 0
+      - superset_image_name | length > 0
+      - superset_base_image | length > 0
+      - superset_internal_port | int > 0
+      - superset_internal_base_url | length > 0
+      - superset_public_base_url | length > 0
+      - superset_database_host | length > 0
+      - superset_database_password_local_file | length > 0
+      - superset_reader_password_local_file | length > 0
+      - superset_postgres_database_catalog_local_file | length > 0
+      - superset_keycloak_client_secret_local_file | length > 0
+      - superset_controller_bootstrap_script_local_path | length > 0
+    fail_msg: >-
+      superset_runtime requires runtime paths, pinned image refs, PostgreSQL
+      auth, the datasource catalog, and the mirrored Keycloak client secret.
+
+- name: Check whether the Superset metadata database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ superset_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: superset_database_password_local
+
+- name: Check whether the Superset reader password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ superset_reader_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: superset_reader_password_local
+
+- name: Check whether the Superset PostgreSQL catalog exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ superset_postgres_database_catalog_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: superset_database_catalog_local
+
+- name: Check whether the Superset Keycloak client secret exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ superset_keycloak_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: superset_keycloak_client_secret_local
+
+- name: Check whether the Superset bootstrap helper exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ superset_controller_bootstrap_script_local_path }}"
+  delegate_to: localhost
+  become: false
+  register: superset_bootstrap_helper_local
+
+- name: Fail if the Superset metadata database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ superset_database_password_local_file }} is missing on the control machine.
+      Converge superset_postgres before deploying Superset.
+  when: not superset_database_password_local.stat.exists
+
+- name: Fail if the Superset reader password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ superset_reader_password_local_file }} is missing on the control machine.
+      Converge superset_postgres before deploying Superset.
+  when: not superset_reader_password_local.stat.exists
+
+- name: Fail if the Superset PostgreSQL catalog is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ superset_postgres_database_catalog_local_file }} is missing on the control machine.
+      Converge superset_postgres before deploying Superset.
+  when: not superset_database_catalog_local.stat.exists
+
+- name: Fail if the Superset Keycloak client secret is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ superset_keycloak_client_secret_local_file }} is missing on the control machine.
+      Converge the Keycloak runtime before deploying Superset.
+  when: not superset_keycloak_client_secret_local.stat.exists
+
+- name: Fail if the Superset bootstrap helper is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ superset_controller_bootstrap_script_local_path }} is missing on the control machine.
+      The repo bootstrap helper must exist before deploying Superset.
+  when: not superset_bootstrap_helper_local.stat.exists
+
+- name: Ensure the Superset runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+      - python3
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Superset runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ superset_site_dir }}"
+      mode: "0755"
+    - path: "{{ superset_build_dir }}"
+      mode: "0755"
+    - path: "{{ superset_data_dir }}"
+      mode: "0755"
+    - path: "{{ superset_pythonpath_dir }}"
+      mode: "0755"
+    - path: "{{ superset_asset_dir }}"
+      mode: "0755"
+    - path: "{{ superset_secret_dir }}"
+      mode: "0700"
+
+- name: Ensure the local Superset artefact directory exists
+  ansible.builtin.file:
+    path: "{{ superset_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the Superset runtime secrets
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      {{ item.command }} > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - path: "{{ superset_secret_key_remote_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ superset_admin_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\\n'"
+  register: superset_secret_generation
+  changed_when: "'changed' in superset_secret_generation.stdout"
+  no_log: true
+
+- name: Read the Superset runtime secrets
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  register: superset_secret_reads
+  loop:
+    - "{{ superset_secret_key_remote_file }}"
+    - "{{ superset_admin_password_remote_file }}"
+  no_log: true
+
+- name: Record the Superset runtime inputs and managed secrets
+  ansible.builtin.set_fact:
+    superset_secret_key: "{{ superset_secret_reads.results[0].content | b64decode | trim }}"
+    superset_admin_password: "{{ superset_secret_reads.results[1].content | b64decode | trim }}"
+    superset_database_password: "{{ lookup('ansible.builtin.file', superset_database_password_local_file) | trim }}"
+    superset_reader_password: "{{ lookup('ansible.builtin.file', superset_reader_password_local_file) | trim }}"
+    superset_keycloak_client_secret: "{{ lookup('ansible.builtin.file', superset_keycloak_client_secret_local_file) | trim }}"
+    superset_expected_postgres_databases: "{{ lookup('ansible.builtin.file', superset_postgres_database_catalog_local_file) | from_json }}"
+    superset_metadata_database_uri: >-
+      postgresql+psycopg2://{{ superset_database_user }}:{{
+        (lookup('ansible.builtin.file', superset_database_password_local_file) | trim) | urlencode
+      }}@{{ superset_database_host }}:{{ superset_database_port }}/{{ superset_database_name }}?options={{
+        ('-csearch_path=' ~ superset_database_schema ~ ',public') | urlencode
+      }}
+    superset_runtime_secret_payload:
+      SUPERSET_SECRET_KEY: "{{ superset_secret_reads.results[0].content | b64decode | trim }}"
+      SUPERSET_DATABASE_URI: >-
+        postgresql+psycopg2://{{ superset_database_user }}:{{
+          (lookup('ansible.builtin.file', superset_database_password_local_file) | trim) | urlencode
+        }}@{{ superset_database_host }}:{{ superset_database_port }}/{{ superset_database_name }}?options={{
+          ('-csearch_path=' ~ superset_database_schema ~ ',public') | urlencode
+        }}
+      SUPERSET_ADMIN_PASSWORD: "{{ superset_secret_reads.results[1].content | b64decode | trim }}"
+      SUPERSET_KEYCLOAK_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', superset_keycloak_client_secret_local_file) | trim }}"
+  no_log: true
+
+- name: Mirror the Superset runtime secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  loop:
+    - dest: "{{ superset_secret_key_local_file }}"
+      content: "{{ superset_secret_key }}"
+    - dest: "{{ superset_admin_password_local_file }}"
+      content: "{{ superset_admin_password }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Superset
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: superset
+    common_openbao_compose_env_agent_dir: "{{ superset_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ superset_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ superset_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ superset_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ superset_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ superset_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ superset_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ superset_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ superset_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ superset_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ superset_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: superset.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ superset_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ superset_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ superset_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ superset_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Superset environment file
+  ansible.builtin.template:
+    src: runtime.env.j2
+    dest: "{{ superset_static_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: superset_env_template
+
+- name: Render the Superset bootstrap definition
+  ansible.builtin.template:
+    src: bootstrap-definition.json.j2
+    dest: "{{ superset_bootstrap_definition_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: superset_bootstrap_definition_template
+  no_log: true
+
+- name: Render the Superset compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ superset_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: superset_compose_template
+
+- name: Render the Superset Dockerfile
+  ansible.builtin.template:
+    src: Dockerfile.j2
+    dest: "{{ superset_build_dir }}/Dockerfile"
+    owner: root
+    group: root
+    mode: "0644"
+  register: superset_dockerfile_template
+
+- name: Render the Superset Python requirements
+  ansible.builtin.template:
+    src: requirements.txt.j2
+    dest: "{{ superset_build_dir }}/requirements.txt"
+    owner: root
+    group: root
+    mode: "0644"
+  register: superset_requirements_template
+
+- name: Render the Superset config module
+  ansible.builtin.template:
+    src: superset_config.py.j2
+    dest: "{{ superset_pythonpath_dir }}/superset_config.py"
+    owner: root
+    group: root
+    mode: "0644"
+  register: superset_config_template
+
+- name: Copy the Superset bootstrap helper into the mounted Python path
+  ansible.builtin.copy:
+    src: "{{ superset_controller_bootstrap_script_local_path }}"
+    dest: "{{ superset_bootstrap_script_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: superset_bootstrap_script_copy
+
+- name: Ensure the Superset base image is cached locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if docker image inspect "{{ superset_base_image }}" >/dev/null 2>&1; then
+      exit 0
+    fi
+    timeout "{{ superset_base_image_pull_timeout_seconds }}" docker pull "{{ superset_base_image }}" || true
+    docker image inspect "{{ superset_base_image }}" >/dev/null 2>&1
+  args:
+    chdir: "{{ superset_site_dir }}"
+    executable: /bin/bash
+  register: superset_base_image_cache
+  changed_when: >-
+    'Downloaded newer image' in (superset_base_image_cache.stdout | default(''))
+    or 'Pull complete' in (superset_base_image_cache.stdout | default(''))
+    or 'Status: Downloaded newer image' in (superset_base_image_cache.stdout | default(''))
+  retries: 5
+  delay: 10
+  until: superset_base_image_cache.rc == 0
+
+- name: Build the Superset image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - build
+      - --network
+      - host
+      - --pull=false
+      - -t
+      - "{{ superset_image_name }}:latest"
+      - "{{ superset_build_dir }}"
+  args:
+    chdir: "{{ superset_site_dir }}"
+  environment:
+    DOCKER_BUILDKIT: "0"
+    COMPOSE_DOCKER_CLI_BUILD: "0"
+  register: superset_build
+  changed_when: >-
+    'writing image' in (superset_build.stdout | lower)
+    or 'writing image' in (superset_build.stderr | lower)
+    or 'naming to' in (superset_build.stdout | lower)
+    or 'naming to' in (superset_build.stderr | lower)
+    or 'exporting to image' in (superset_build.stdout | lower)
+    or 'successfully built' in (superset_build.stdout | lower)
+    or 'successfully tagged' in (superset_build.stdout | lower)
+  retries: 3
+  delay: 10
+  until: superset_build.rc == 0
+
+- name: Pull the Superset compose-managed OpenBao image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ superset_compose_file }}"
+      - pull
+      - openbao-agent
+  args:
+    chdir: "{{ superset_site_dir }}"
+  register: superset_pull
+  changed_when: >-
+    'Pulling' in superset_pull.stdout
+    or 'Downloaded newer image' in superset_pull.stdout
+    or 'Pull complete' in superset_pull.stdout
+
+- name: Check whether the Docker nat chain exists before Superset startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: superset_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing before Superset startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: superset_docker_nat_chain.rc != 0
+
+- name: Ensure Docker bridge networking chains are present before Superset startup
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: true
+  when: superset_docker_nat_chain.rc != 0
+
+- name: Assert Docker nat chain is present before Superset startup
+  ansible.builtin.assert:
+    that:
+      - superset_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_verify.rc | default(1)) == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; Superset published ports will fail."
+
+- name: Check whether the Superset local port is already published
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ superset_internal_port }}"
+    delay: 0
+    timeout: 1
+  register: superset_local_port_probe
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the current Superset local health endpoint is healthy before startup
+  ansible.builtin.uri:
+    url: "{{ superset_internal_base_url }}/health"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: superset_health_probe
+  changed_when: false
+  failed_when: false
+
+- name: Record whether the Superset startup needs a force recreate
+  ansible.builtin.set_fact:
+    superset_force_recreate: >-
+      {{
+        superset_docker_nat_chain.rc != 0
+        or (superset_env_template.changed | default(false))
+        or (superset_bootstrap_definition_template.changed | default(false))
+        or (superset_compose_template.changed | default(false))
+        or (superset_dockerfile_template.changed | default(false))
+        or (superset_requirements_template.changed | default(false))
+        or (superset_config_template.changed | default(false))
+        or (superset_bootstrap_script_copy.changed | default(false))
+        or (superset_build.changed | default(false))
+        or (superset_pull.changed | default(false))
+        or (superset_local_port_probe.failed | default(false))
+        or (superset_health_probe.status | default(0)) != 200
+        or (superset_health_probe.content | default('') | trim) != 'OK'
+      }}
+
+- name: Force-recreate the Superset runtime stack after Docker networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ superset_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+      - --force-recreate
+  args:
+    chdir: "{{ superset_site_dir }}"
+  register: superset_force_recreate_up
+  changed_when: >-
+    'Creating' in superset_force_recreate_up.stdout
+    or 'Recreating' in superset_force_recreate_up.stdout
+    or 'Starting' in superset_force_recreate_up.stdout
+  failed_when: false
+  retries: 3
+  delay: 5
+  until: superset_force_recreate_up.rc == 0
+  when: superset_force_recreate
+
+- name: Assert the Superset force-recreate succeeded
+  ansible.builtin.assert:
+    that:
+      - superset_force_recreate_up.rc == 0
+    fail_msg: "{{ superset_force_recreate_up.stderr | default(superset_force_recreate_up.msg | default('superset compose force-recreate failed')) }}"
+  when: superset_force_recreate
+
+- name: Start the Superset runtime stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ superset_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ superset_site_dir }}"
+  register: superset_start_up
+  changed_when: >-
+    'Creating' in superset_start_up.stdout
+    or 'Recreating' in superset_start_up.stdout
+    or 'Starting' in superset_start_up.stdout
+  when: not superset_force_recreate
+
+- name: Assert the Superset runtime stack started successfully
+  ansible.builtin.assert:
+    that:
+      - superset_start_up.rc == 0
+    fail_msg: "{{ superset_start_up.stderr | default(superset_start_up.msg | default('superset compose up failed')) }}"
+  when: not superset_force_recreate
+
+- name: Wait for the Superset runtime listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ superset_internal_port }}"
+    delay: 0
+    timeout: 300
+
+- name: Verify the Superset local health endpoint before metadata bootstrap
+  ansible.builtin.uri:
+    url: "{{ superset_internal_base_url }}/health"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: superset_local_health_ready
+  retries: 36
+  delay: 5
+  until:
+    - superset_local_health_ready.status == 200
+    - (superset_local_health_ready.content | trim) == "OK"
+  changed_when: false
+
+- name: Run the Superset metadata database migrations
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ superset_container_name }}"
+      - /app/.venv/bin/superset
+      - db
+      - upgrade
+  register: superset_db_upgrade
+  changed_when: false
+
+- name: Check whether the Superset admin user already exists
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ superset_container_name }}"
+      - /app/.venv/bin/python
+      - -c
+      - |
+        from superset.app import create_app
+        from superset.extensions import db
+        from flask_appbuilder.security.sqla.models import User
+
+        app = create_app()
+        with app.app_context():
+            print(1 if db.session.query(User).filter_by(username='{{ superset_admin_username }}').first() else 0)
+  register: superset_admin_user_check
+  changed_when: false
+
+- name: Create the Superset admin user
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ superset_container_name }}"
+      - /app/.venv/bin/superset
+      - fab
+      - create-admin
+      - --username
+      - "{{ superset_admin_username }}"
+      - --firstname
+      - "{{ superset_admin_first_name }}"
+      - --lastname
+      - "{{ superset_admin_last_name }}"
+      - --email
+      - "{{ superset_admin_email }}"
+      - --password
+      - "{{ superset_admin_password }}"
+  register: superset_admin_create
+  changed_when: true
+  when: (superset_admin_user_check.stdout | trim) != "1"
+  no_log: true
+
+- name: Ensure the Superset admin password matches the managed secret
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ superset_container_name }}"
+      - /app/.venv/bin/superset
+      - fab
+      - reset-password
+      - --username
+      - "{{ superset_admin_username }}"
+      - --password
+      - "{{ superset_admin_password }}"
+  register: superset_admin_reset
+  changed_when: false
+  no_log: true
+
+- name: Initialize the Superset metadata roles and permissions
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ superset_container_name }}"
+      - /app/.venv/bin/superset
+      - init
+  register: superset_init
+  changed_when: false
+
+- name: Bootstrap the Superset datasource inventory and landing dashboard
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - -u
+      - "0"
+      - "{{ superset_container_name }}"
+      - /app/.venv/bin/python
+      - "{{ superset_bootstrap_script_container_file }}"
+      - bootstrap-local
+      - --definition-file
+      - "{{ superset_bootstrap_definition_container_file }}"
+  register: superset_bootstrap
+  changed_when: >-
+    (superset_bootstrap.rc | default(1)) == 0 and
+    (superset_bootstrap.stdout_lines | default([]) | length) > 0 and
+    (((superset_bootstrap.stdout_lines | last) | trim | from_json).changed | default(false))
+
+- name: Verify the Superset runtime
+  ansible.builtin.include_tasks: verify.yml

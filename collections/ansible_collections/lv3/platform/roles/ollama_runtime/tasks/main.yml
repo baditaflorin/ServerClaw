@@ -1,4 +1,10 @@
 ---
+# Purpose: Converge the private Ollama runtime and its repo-managed model bootstrap on docker-runtime-lv3.
+# Use case: Run when provisioning or refreshing the shared LLM inference surface for internal consumers.
+# Inputs: ollama_runtime_* paths, image pin, model catalog, and listener settings.
+# Outputs: Rendered compose runtime, synchronized model bootstrap inputs, and a running Ollama service.
+# Idempotency: Partially idempotent; reruns reconcile the same runtime and model bootstrap configuration.
+# Dependencies: ADR 0165, ADR 0198, and the shared Docker runtime contract.
 - name: Validate Ollama runtime inputs
   ansible.builtin.assert:
     that:
@@ -111,7 +117,7 @@
       - ollama_runtime_docker_nat_chain_recheck.rc == 0
     fail_msg: "Docker is running but the nat DOCKER chain is missing; Ollama published ports will fail."
 
-- name: Start the Ollama runtime and recover Docker nat-chain failures
+- name: Start the Ollama runtime and recover Docker nat-chain and compose-network failures
   block:
     - name: Start the Ollama runtime
       ansible.builtin.command:
@@ -131,16 +137,13 @@
         or 'Recreating' in ollama_runtime_up.stdout
         or 'Starting' in ollama_runtime_up.stdout
   rescue:
-    - name: Flag Docker nat-chain failures during Ollama startup
+    - name: Flag Docker nat-chain and stale compose-network failures during Ollama startup
       ansible.builtin.set_fact:
         ollama_runtime_docker_nat_chain_missing: >-
           {{
             'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
             or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
           }}
-
-    - name: Detect stale Docker networking drift during Ollama startup
-      ansible.builtin.set_fact:
         ollama_runtime_compose_network_missing: >-
           {{
             'failed to create endpoint' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
@@ -150,9 +153,9 @@
     - name: Surface unexpected Ollama startup failures
       ansible.builtin.fail:
         msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('ollama compose up failed')) }}"
-      when:
-        - not ollama_runtime_docker_nat_chain_missing
-        - not ollama_runtime_compose_network_missing
+      when: >-
+        not ollama_runtime_docker_nat_chain_missing
+        and not ollama_runtime_compose_network_missing
 
     - name: Restart Docker to restore nat chain before retrying Ollama startup
       ansible.builtin.service:
@@ -200,7 +203,7 @@
         state: restarted
       when: ollama_runtime_compose_network_missing
 
-    - name: Retry Ollama startup after Docker nat-chain recovery
+    - name: Retry Ollama startup after Docker nat-chain or compose-network recovery
       ansible.builtin.command:
         argv:
           - docker
@@ -209,6 +212,7 @@
           - "{{ ollama_runtime_compose_file }}"
           - up
           - -d
+          - --force-recreate
           - --remove-orphans
       args:
         chdir: "{{ ollama_runtime_site_dir }}"

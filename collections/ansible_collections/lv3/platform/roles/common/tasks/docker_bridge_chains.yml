@@ -102,6 +102,37 @@
       }}
   when: common_docker_bridge_chains_active_state.rc == 0
 
+- name: Reset SSH connection before Docker bridge-chain recovery checks
+  ansible.builtin.meta: reset_connection
+  when:
+    - common_docker_bridge_chains_active_state.rc == 0
+    - >
+      (
+        common_docker_bridge_chains_expect_forward_chain | default(false)
+        and common_docker_bridge_chains_forward_check.rc == 1
+      )
+      or (
+        (common_docker_bridge_chains_require_nat_chain | bool)
+        and common_docker_bridge_chains_nat_check.rc == 1
+      )
+
+- name: Wait for SSH before Docker bridge-chain recovery checks
+  ansible.builtin.wait_for_connection:
+    timeout: "{{ ((common_docker_bridge_chains_retries | int) * (common_docker_bridge_chains_delay | int)) + 60 }}"
+    connect_timeout: 5
+    sleep: "{{ [common_docker_bridge_chains_delay | int, 1] | max }}"
+  when:
+    - common_docker_bridge_chains_active_state.rc == 0
+    - >
+      (
+        common_docker_bridge_chains_expect_forward_chain | default(false)
+        and common_docker_bridge_chains_forward_check.rc == 1
+      )
+      or (
+        (common_docker_bridge_chains_require_nat_chain | bool)
+        and common_docker_bridge_chains_nat_check.rc == 1
+      )
+
 - name: Wait briefly for Docker bridge chains to recover after daemon activation
   ansible.builtin.shell: |
     set -euo pipefail

@@ -165,6 +165,23 @@
       "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications."
     },
     {
+      "fqdn": "bi.lv3.org",
+      "service_id": "superset",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0292",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge while browser authentication remains service-native through the repo-managed Keycloak OIDC client."
+    },
+    {
       "fqdn": "build.lv3.org",
       "service_id": "docker_build",
       "environment": "production",
@@ -539,6 +556,40 @@
       "notes": "The public hostname terminates at the shared edge and forwards only the Matrix client listener; authentication is enforced by Synapse and federation stays disabled for this ADR."
     },
     {
+      "fqdn": "minio.lv3.org",
+      "service_id": "minio",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "none",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0274",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "The public MinIO S3-compatible API is published through the shared NGINX edge and proxies to the docker-runtime guest listener on port 9010."
+    },
+    {
+      "fqdn": "minio-console.lv3.org",
+      "service_id": "minio",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0274",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "The MinIO browser console is published through the shared authenticated edge path and proxied to the docker-runtime guest listener on port 9011."
+    },
+    {
       "fqdn": "n8n.lv3.org",
       "service_id": "n8n",
       "environment": "production",
@@ -654,6 +705,23 @@
         "auto_renew": true
       },
       "notes": "Harbor registry published through the shared NGINX edge with browser sign-in delegated at the Harbor application layer."
+    },
+    {
+      "fqdn": "billing.lv3.org",
+      "service_id": "lago",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0292",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "The shared edge protects the Lago browser UI while `/api/health` and `/api/v1/events` intentionally stay reachable for probes and governed producer ingest through the API gateway adapter."
     },
     {
       "fqdn": "search.lv3.org",

@@ -1,0 +1,158 @@
+---
+# Playbook: sftpgo.yml
+# Purpose: Converge SFTPGo DNS publication, PostgreSQL access, runtime state, and edge publication for the managed file-transfer surface.
+# Use case: Run during SFTPGo deployment, update, or recovery when the repo-managed SFTP and WebDAV service must match ADR 0291.
+#
+# Inputs (required):
+#   - proxmox_guest_ssh_connection_mode (string, required): SSH path used by the runtime and postgres guest plays.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Selects the target environment lane.
+#
+# Outputs:
+#   - The files.lv3.org DNS record, PostgreSQL backend, SFTPGo runtime, private controller path, and public edge publication are reconciled to repo state.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0291: SFTPGo as the managed file transfer service with REST provisioning.
+#   - Requires: postgres-lv3, docker-runtime-lv3, nginx-lv3, OpenBao, and Keycloak to already exist.
+#   - Role: lv3.platform.sftpgo_postgres - provisions the SFTPGo database and role.
+#   - Role: lv3.platform.sftpgo_runtime - converges the SFTPGo runtime, bootstrap identities, and smoke verification flow.
+#   - Role: lv3.platform.nginx_edge_publication - publishes WebDAV through the shared edge.
+#
+# Related ADRs: 0042, 0056, 0077, 0086, 0276, 0291
+# Related Runbooks: docs/runbooks/configure-sftpgo.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- name: Ensure Hetzner DNS publication for SFTPGo
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
+    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
+    subdomain_fqdn: files.lv3.org
+
+  tasks:
+    - name: Load controller defaults
+      ansible.builtin.include_vars:
+        file: "{{ inventory_defaults_path }}"
+
+    - name: Load the subdomain catalog
+      ansible.builtin.include_vars:
+        file: "{{ subdomain_catalog_path }}"
+        name: subdomain_catalog
+
+    - name: Select the SFTPGo subdomain entry
+      ansible.builtin.set_fact:
+        selected_subdomain: >-
+          {{
+            (
+              subdomain_catalog.subdomains
+              | selectattr('fqdn', 'equalto', subdomain_fqdn)
+              | list
+              | first
+            ) | default({})
+          }}
+
+    - name: Assert the SFTPGo subdomain is catalogued
+      ansible.builtin.assert:
+        that:
+          - selected_subdomain != {}
+          - selected_subdomain.status in ['active', 'planned']
+          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
+        fail_msg: "files.lv3.org must exist in config/subdomain-catalog.json before live apply."
+
+    - name: Derive the managed Hetzner record name
+      ansible.builtin.set_fact:
+        selected_subdomain_record_name: >-
+          {{
+            '@'
+            if selected_subdomain.fqdn == hetzner_dns_zone_name
+            else (
+              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
+            )
+          }}
+
+    - name: Converge the SFTPGo Hetzner DNS record
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_record
+      vars:
+        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
+        hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
+        hetzner_dns_record_type: A
+        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
+        hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
+
+- name: Prepare PostgreSQL for SFTPGo
+  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.postgres_vm
+    - role: lv3.platform.sftpgo_postgres
+
+- name: Converge SFTPGo on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.sftpgo
+        playbook_execution_audit_target: sftpgo
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.keycloak_runtime
+    - role: lv3.platform.sftpgo_runtime
+
+- name: Publish SFTPGo WebDAV through the NGINX edge
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication
+
+- name: Bootstrap and verify the SFTPGo publication contract
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Bootstrap and verify the SFTPGo provisioning and publication contract
+      ansible.builtin.include_role:
+        name: lv3.platform.sftpgo_runtime
+        tasks_from: publish.yml

@@ -1,4 +1,10 @@
 ---
+# Purpose: Verify the Langfuse runtime health and bootstrap API contracts after convergence.
+# Use case: Included after Langfuse deployment or recovery to confirm the private runtime is reachable and usable.
+# Inputs: langfuse_* verification URLs and seeded project credentials.
+# Outputs: Pass/fail verification results for the Langfuse health and bootstrap API checks.
+# Idempotency: Fully idempotent; verification only reads runtime state.
+# Dependencies: ADR 0146, ADR 0165, and a converged Langfuse runtime.
 - name: Verify the Langfuse public health endpoint
   ansible.builtin.uri:
     url: "{{ langfuse_internal_base_url }}/api/public/health"
@@ -19,7 +25,11 @@
     return_content: true
     status_code: 200
   register: langfuse_verify_project
+  retries: 30
+  delay: 5
+  until: (langfuse_verify_project.status | default(0)) == 200
   changed_when: false
+  failed_when: false
   no_log: true
 
 - name: Assert the Langfuse bootstrap project matches the repo-managed seed

@@ -1,0 +1,29 @@
+---
+# Playbook: services/sftpgo.yml
+# Purpose: Provide the stable live-apply service wrapper for SFTPGo.
+# Use case: Run `make live-apply-service service=sftpgo` so the generic service lane can invoke the SFTPGo converge playbook.
+#
+# Inputs (required):
+#   - env (str, required): Environment selector passed by the live-apply wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH connection strategy.
+#
+# Outputs:
+#   - Imports the canonical SFTPGo converge playbook.
+#
+# Idempotency: Fully idempotent
+#              The wrapper only imports the canonical playbook and adds no extra mutation.
+#
+# Dependencies:
+#   - ADR 0291: SFTPGo as the managed file transfer service with REST provisioning.
+#   - Requires: playbooks/sftpgo.yml
+#   - Role: imported playbook - owns all live mutations.
+#
+# Related ADRs: 0291
+# Related Runbooks: docs/runbooks/configure-sftpgo.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- import_playbook: ../sftpgo.yml

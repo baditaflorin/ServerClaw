@@ -1,0 +1,47 @@
+# Purpose: Verify the local Superset runtime and the managed metadata objects after converge or recovery.
+# Use case: Imported by the Superset runtime role after the compose stack and metadata bootstrap are reconciled.
+# Inputs: superset_internal_base_url, superset_internal_port, bootstrap definition, and the runtime helper script path.
+# Outputs: Confirms the local runtime listener, health contract, datasource registrations, and landing dashboard objects exist.
+# Idempotency: Fully idempotent because these are read-only verification probes.
+# Dependencies: ADR 0165 and ADR 0292.
+---
+- name: Wait for the Superset runtime to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ superset_internal_port }}"
+    delay: 0
+    timeout: 300
+
+- name: Verify the Superset health endpoint locally
+  ansible.builtin.uri:
+    url: "{{ superset_internal_base_url }}/health"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: superset_verify_health
+  retries: 36
+  delay: 5
+  until:
+    - superset_verify_health.status == 200
+    - (superset_verify_health.content | trim) == "OK"
+  changed_when: false
+
+- name: Verify the managed Superset datasources and landing dashboard locally
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - -u
+      - "0"
+      - "{{ superset_container_name }}"
+      - /app/.venv/bin/python
+      - "{{ superset_bootstrap_script_container_file }}"
+      - verify-local
+      - --base-url
+      - http://127.0.0.1:{{ superset_container_port }}
+      - --definition-file
+      - "{{ superset_bootstrap_definition_container_file }}"
+      - --report-file
+      - "{{ superset_verify_report_container_file }}"
+  register: superset_verify_contract
+  changed_when: false

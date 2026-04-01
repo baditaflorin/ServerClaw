@@ -1,4 +1,10 @@
 ---
+# Purpose: Converge the Proxmox host's declared Tailscale TCP proxy listeners.
+# Use case: Run when refreshing the Proxmox management ingress policy for private operator access.
+# Inputs: platform_host network declarations or proxmox_tailscale_tcp_proxies overrides.
+# Outputs: Applied Tailscale serve/funnel TCP proxy configuration for the Proxmox host.
+# Idempotency: Partially idempotent; reruns reconcile the same declared proxy listeners.
+# Dependencies: ADR 0165, the Proxmox host bootstrap baseline, and Tailscale being installed.
 - name: Resolve Proxmox Tailscale proxy inputs
   ansible.builtin.set_fact:
     proxmox_tailscale_effective_tcp_proxies: >-
@@ -55,6 +61,7 @@
     socket_state="$(systemctl show -p ActiveState --value lv3-tailscale-proxy-{{ item.name }}.socket)"
     service_state="$(systemctl show -p ActiveState --value lv3-tailscale-proxy-{{ item.name }}.service)"
     printf 'socket=%s\nservice=%s\n' "$socket_state" "$service_state"
+  become: false
   args:
     executable: /bin/bash
   loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
@@ -105,6 +112,7 @@
       exit 0
     fi
     ps -p "$pid" -o command=
+  become: false
   args:
     executable: /bin/bash
   loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"

@@ -1985,6 +1985,81 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-superset": {
+      "description": "Deploy the Superset metadata schema, runtime, Keycloak client, and public edge publication, then verify SQL-first BI access end to end.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-superset",
+        "command": "make converge-superset"
+      },
+      "preflight": {
+        "required": true,
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
+        ],
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "superset_database_password",
+          "superset_reader_password",
+          "superset_secret_key",
+          "superset_admin_password",
+          "keycloak_superset_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-superset"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-superset.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/superset.yml",
+        "playbooks/services/superset.yml",
+        "roles/superset_postgres",
+        "roles/superset_runtime",
+        "roles/keycloak_runtime",
+        "roles/nginx_edge_publication",
+        "scripts/superset_bootstrap.py",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/subdomain-catalog.json",
+        "config/service-completeness.json",
+        "config/dependency-graph.json",
+        "config/slo-catalog.json",
+        "config/data-catalog.json",
+        "config/service-redundancy-catalog.json",
+        "config/secret-catalog.json",
+        "config/controller-local-secrets.json",
+        "config/command-catalog.json",
+        "config/workflow-catalog.json",
+        "config/ansible-execution-scopes.yaml"
+      ],
+      "outputs": [
+        "A published Superset runtime on bi.lv3.org backed by the managed superset schema in the shared postgres database, a repo-managed Keycloak client, read-only PostgreSQL datasource registration, and a seeded landing dashboard."
+      ],
+      "verification_commands": [
+        "make syntax-check-superset",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/superset/docker-compose.yml ps && curl -fsS http://127.0.0.1:8105/health'",
+        "curl -fsS https://bi.lv3.org/health",
+        "python3 scripts/superset_bootstrap.py verify-public --base-url https://bi.lv3.org --expected-postgres-databases-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/superset/postgres-databases.json --database-prefix PostgreSQL --expected-dashboard \"LV3 Platform Database Inventory\" --expected-chart \"PostgreSQL Databases\" --expected-sso-host sso.lv3.org --admin-username admin --admin-password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/superset/admin-password.txt --expected-extra-database \"Plausible ClickHouse\" --report-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/superset/verify-public-report.json"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 280,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 2,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-tika": {
       "description": "Deploy the private Apache Tika runtime on docker-runtime-lv3 and verify the standard `/version`, `/tika`, and `/meta` extraction contracts.",
       "lifecycle_status": "active",
@@ -2705,7 +2780,7 @@
         "required": true,
         "required_secret_ids": [
           "bootstrap_ssh_private_key",
-          "outline_minio_root_password",
+          "minio_root_password",
           "nats_jetstream_admin_password",
           "ntfy_alertmanager_password"
         ],
@@ -3579,6 +3654,85 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-lago": {
+      "description": "Converge Lago on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish billing.lv3.org through the shared edge, and verify public producer ingest plus current-usage aggregation end to end.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-lago",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-lago"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
+        ],
+        "generated_secret_ids": [
+          "lago_database_password",
+          "lago_redis_password",
+          "lago_secret_key_base",
+          "lago_rsa_private_key",
+          "lago_encryption_primary_key",
+          "lago_encryption_deterministic_key",
+          "lago_encryption_key_derivation_salt",
+          "lago_bootstrap_user_password",
+          "lago_org_api_key",
+          "lago_smoke_producer_token",
+          "lago_producer_catalog"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-lago"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-lago.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/lago.yml",
+        "playbooks/services/lago.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/lago.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/lago.yml",
+        "collections/ansible_collections/lv3/platform/roles/lago_postgres",
+        "collections/ansible_collections/lv3/platform/roles/lago_runtime",
+        "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/api_gateway/main.py",
+        "config/service-capability-catalog.json",
+        "config/subdomain-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/secret-catalog.json",
+        "config/controller-local-secrets.json",
+        "config/api-gateway-catalog.json",
+        "config/dependency-graph.json",
+        "config/data-catalog.json",
+        "config/service-completeness.json"
+      ],
+      "outputs": [
+        "A repo-managed Lago runtime on docker-runtime-lv3 with a shared PostgreSQL backend, protected browser publication at billing.lv3.org, and a governed public producer-ingest adapter that proves current-usage aggregation end to end."
+      ],
+      "verification_commands": [
+        "make syntax-check-lago",
+        "curl -fsS https://billing.lv3.org/api/health",
+        "curl -I https://billing.lv3.org/",
+        "curl -fsS -X POST -H \"Authorization: Bearer $(tr -d '\\n' < .local/lago/smoke-producer-token.txt)\" -H \"Content-Type: application/json\" --data '{\"event\":{\"transaction_id\":\"00000000-0000-4000-8000-000000000001\",\"external_subscription_id\":\"lv3-billing-smoke-subscription\",\"code\":\"api_calls\"}}' https://billing.lv3.org/api/v1/events"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-keycloak": {
       "description": "Converge Keycloak on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at sso.lv3.org, and wire Grafana through the shared SSO broker.",
       "lifecycle_status": "active",
@@ -4270,7 +4424,7 @@
           "langfuse_encryption_key",
           "langfuse_clickhouse_password",
           "langfuse_redis_password",
-          "langfuse_minio_root_password",
+          "langfuse_minio_secret_key",
           "langfuse_bootstrap_user_password",
           "langfuse_project_secret_key",
           "keycloak_langfuse_client_secret"
@@ -4306,6 +4460,66 @@
         "max_steps": 350,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-minio": {
+      "description": "Deploy the shared MinIO runtime on docker-runtime-lv3, publish the public S3 API and authenticated console, and verify the launch buckets and policies.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-minio",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-minio"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "minio_root_password",
+          "langfuse_minio_secret_key",
+          "gitea_minio_secret_key",
+          "loki_minio_secret_key",
+          "platform_context_minio_secret_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-minio"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/minio-object-storage.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/minio.yml",
+        "playbooks/services/minio.yml",
+        "roles/minio_runtime",
+        "roles/nginx_edge_publication",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/generate_platform_vars.py",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/subdomain-catalog.json"
+      ],
+      "outputs": [
+        "A shared MinIO runtime on docker-runtime-lv3 with the public S3 API at minio.lv3.org, an authenticated operator console at minio-console.lv3.org, and repo-managed launch buckets for Langfuse, Gitea LFS, Loki, and RAG staging."
+      ],
+      "verification_commands": [
+        "make syntax-check-minio",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:9010/minio/health/live'",
+        "curl -fsSI https://minio.lv3.org/minio/health/live",
+        "curl -fsSI https://minio-console.lv3.org/"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
@@ -4832,6 +5046,61 @@
         "max_steps": 280,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 1,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-typesense": {
+      "description": "Deploy the private Typesense runtime on docker-runtime-lv3, refresh the Proxmox host Tailscale proxy, and repopulate the platform-services structured-search collection used by the shared API gateway.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-typesense",
+        "command": "make converge-typesense"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "typesense_api_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-typesense"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-typesense.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/typesense.yml",
+        "playbooks/services/typesense.yml",
+        "roles/typesense_runtime",
+        "roles/api_gateway_runtime",
+        "scripts/typesense_catalog_sync.py",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/api-gateway-catalog.json",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json"
+      ],
+      "outputs": [
+        "A private Typesense runtime on docker-runtime-lv3 reachable through the Proxmox host proxy, plus a live platform-services collection and authenticated /v1/platform/search/structured API gateway surface."
+      ],
+      "verification_commands": [
+        "make syntax-check-typesense",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8108/health'",
+        "TYPESENSE_API_KEY=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/typesense/api-key.txt) && curl -fsS -H \"X-TYPESENSE-API-KEY: $TYPESENSE_API_KEY\" http://100.64.0.1:8016/collections/platform-services",
+        "LV3_TOKEN=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt) && curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" 'https://api.lv3.org/v1/platform/search/structured?q=api&collection=platform-services'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 280,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
         "max_restarts": 1,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"

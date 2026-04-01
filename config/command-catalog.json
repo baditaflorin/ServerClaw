@@ -1782,6 +1782,51 @@
         "timeout_seconds": 1500
       }
     },
+    "converge-superset": {
+      "description": "Converge the Superset PostgreSQL metadata plane, runtime, Keycloak client, and shared-edge publication, then verify SQL-first BI access on bi.lv3.org.",
+      "workflow_id": "converge-superset",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish bi.lv3.org and keep the shared edge certificate current."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-superset passes",
+        "make validate passes before the apply",
+        "The Superset metadata schema, read-only datasource inventory, and public edge blast radius are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, one local Superset /health response, the public /health result, one Keycloak redirect response, and successful public API verification of the managed datasource inventory and landing dashboard."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Superset runtime fails to start, the managed metadata bootstrap fails, or the public publication does not preserve the documented Keycloak login path.",
+          "Stop if the public verification path cannot prove the managed datasource inventory or landing dashboard after converge."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Superset runtime, Keycloak client, and shared-edge publication from version control before retrying.",
+          "Do not compensate for a failed rollout by leaving behind manual Superset metadata, PostgreSQL role, or Keycloak client drift outside the repo-managed converge path."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "converge-tika": {
       "description": "Converge the private Apache Tika extraction runtime on docker-runtime-lv3 for repo-managed document ingestion workflows.",
       "workflow_id": "converge-tika",
@@ -2196,6 +2241,51 @@
         "timeout_seconds": 1800
       }
     },
+    "converge-lago": {
+      "description": "Converge Lago with the shared PostgreSQL backend, protected billing.lv3.org publication, and governed public producer-ingest adapter.",
+      "workflow_id": "converge-lago",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish billing.lv3.org and expand the shared edge certificate."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-lago passes",
+        "make validate passes before the apply",
+        "The billing edge-auth boundary, public producer-ingest contract, and shared docker-runtime-lv3 impact are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, local and public health checks, protected-root verification, public ingest smoke evidence, and current-usage verification."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the PostgreSQL setup, Lago runtime startup, public billing adapter path, or current-usage verification fails.",
+          "Stop if the rollout would leave the Lago browser surface anonymously reachable outside the documented `/api/health` and `/api/v1/events` exceptions."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Lago runtime, shared PostgreSQL state, API-gateway adapter, and edge publication from version control before retrying.",
+          "Do not compensate for a failed rollout by hand-editing Lago plans, customers, subscriptions, or mirrored producer credentials outside the repo-managed seed path."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "converge-keycloak": {
       "description": "Converge the shared Keycloak SSO broker, publish it at sso.lv3.org, and wire Grafana to the shared OIDC login flow.",
       "workflow_id": "converge-keycloak",
@@ -2339,6 +2429,51 @@
         "rollback_guidance": [
           "Restore the last known-good Langfuse and edge configuration from version control before retrying.",
           "Do not compensate for a failed rollout by manually creating projects, users, or API keys in the Langfuse UI."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
+    "converge-minio": {
+      "description": "Converge the shared MinIO runtime, publish the public S3 API and authenticated console, and verify the launch buckets and policies.",
+      "workflow_id": "converge-minio",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish minio.lv3.org, minio-console.lv3.org, and expand the shared edge certificate."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-minio passes",
+        "make validate passes before the apply",
+        "The public API blast radius, authenticated console route, and launch consumer bucket contract are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, public API health verification, console oauth2-proxy redirect verification, and bucket/CORS/lifecycle proofs."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the MinIO runtime fails to start, either public hostname routes to the wrong upstream, or the launch buckets and policies do not reconcile as declared.",
+          "Stop if the console becomes publicly reachable without the intended oauth2-proxy redirect."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good MinIO runtime and shared-edge configuration from version control before retrying.",
+          "Do not compensate for a failed rollout by manually creating buckets, access keys, or policies in the MinIO console."
         ]
       },
       "execution": {
@@ -3117,6 +3252,44 @@
         "rollback_guidance": [
           "Restore the last known-good Gotenberg runtime and API gateway config bundle before retrying.",
           "Do not leave behind manual container, firewall, or API gateway drift outside the repo-managed playbook path."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
+    "converge-typesense": {
+      "description": "Converge the private Typesense runtime on docker-runtime-lv3, refresh the Proxmox host controller proxy, and repopulate the repo-managed platform-services search collection.",
+      "workflow_id": "converge-typesense",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-typesense passes",
+        "make validate passes before the apply",
+        "The private search boundary, API gateway structured-search dependency, and controller-local API key rotation contract are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the local health endpoint, the private controller collection proof, and one authenticated API gateway structured-search query."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Typesense runtime fails to start, the platform-services collection cannot be synchronized, or the guest firewall or host proxy would expose the API beyond the intended private boundary.",
+          "Stop if the shared API gateway structured-search endpoint cannot return a live Typesense-backed result after the runtime converges."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Typesense runtime state and API gateway config bundle before retrying.",
+          "Do not leave behind manual container, secret, proxy, or collection drift outside the repo-managed playbook path."
         ]
       },
       "execution": {
@@ -4296,7 +4469,7 @@
           "description": "Controller-side SSH key used through the Proxmox jump path."
         },
         {
-          "name": "outline_minio_root_password",
+          "name": "minio_root_password",
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
@@ -4320,7 +4493,7 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-restic-config-backup passes",
         "make validate passes before the apply",
-        "The docker-runtime worker checkout exists at /srv/proxmox_florin_server and matches the repo state being applied"
+        "The docker-runtime worker checkout exists at /srv/proxmox_florin_server so converge can stage the required restic runtime support files before the immediate validation run"
       ],
       "evidence": {
         "live_apply_receipt_required": true,

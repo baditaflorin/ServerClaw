@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "restic-restore-verify-20260331T224348Z",
+  "recorded_at": "2026-03-31T22:43:48Z",
+  "recorded_on": "2026-03-31",
+  "recorded_by": "codex",
+  "restored_at": "2026-03-31T22:43:48Z",
+  "result": "pass",
+  "source_id": "receipts",
+  "snapshot_id": "730584af9231aefff3add390201fdb275e526e1e75c511fd1b6eed13ba40ec2f",
+  "snapshot_recorded_at": "2026-03-31T22:43:19Z",
+  "restore_path": "/var/lib/lv3/restic-config-backup/restore-verification/20260331T224348Z/restore/srv/proxmox_florin_server/receipts",
+  "restored_file_count": 3351,
+  "expected_minimum_files": 1
+}

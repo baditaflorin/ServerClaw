@@ -1,0 +1,71 @@
+# Purpose: Describe the required runtime variables for the Superset stack.
+# Use case: Run during syntax and role-argument validation before converging Superset.
+# Inputs: superset_* variables consumed by the runtime tasks and templates.
+# Outputs: Machine-readable argument specs for the superset_runtime role.
+# Idempotency: Fully idempotent because this file only validates role inputs.
+# Dependencies: ADR 0165, ADR 0063, ADR 0077, and ADR 0292.
+---
+argument_specs:
+  main:
+    short_description: Converge the Superset runtime, datasource registration, and public verification path.
+    options:
+      superset_site_dir:
+        type: path
+        required: true
+      superset_build_dir:
+        type: path
+        required: true
+      superset_data_dir:
+        type: path
+        required: true
+      superset_pythonpath_dir:
+        type: path
+        required: true
+      superset_asset_dir:
+        type: path
+        required: true
+      superset_secret_dir:
+        type: path
+        required: true
+      superset_compose_file:
+        type: path
+        required: true
+      superset_static_env_file:
+        type: path
+        required: true
+      superset_env_file:
+        type: path
+        required: true
+      superset_image_name:
+        type: str
+        required: true
+      superset_base_image:
+        type: str
+        required: true
+      superset_internal_port:
+        type: int
+        required: true
+      superset_internal_base_url:
+        type: str
+        required: true
+      superset_public_base_url:
+        type: str
+        required: true
+      superset_database_host:
+        type: str
+        required: true
+      superset_database_password_local_file:
+        type: path
+        required: true
+      superset_reader_password_local_file:
+        type: path
+        required: true
+      superset_postgres_database_catalog_local_file:
+        type: path
+        required: true
+      superset_keycloak_client_secret_local_file:
+        type: path
+        required: true
+      superset_controller_bootstrap_script_local_path:
+        type: path
+        required: true

@@ -1,0 +1,29 @@
+---
+# Purpose: Declare the supported variable contract for the Lago PostgreSQL role.
+# Use case: Loaded by Ansible before converging the Lago database role and schema contract on postgres-lv3.
+# Inputs: lago_* PostgreSQL variables for the database, role, password artifact, and local receipts.
+# Outputs: Machine-readable argument specs for the lago_postgres role.
+# Idempotency: Fully idempotent because this file only describes the role interface.
+# Dependencies: ADR 0165, ADR 0292, and the shared PostgreSQL automation pattern.
+argument_specs:
+  main:
+    short_description: Provision the PostgreSQL role and database required by Lago.
+    options:
+      lago_database_name:
+        type: str
+        required: true
+      lago_database_user:
+        type: str
+        required: true
+      lago_postgres_secret_dir:
+        type: path
+        required: true
+      lago_postgres_password_file:
+        type: path
+        required: true
+      lago_local_artifact_dir:
+        type: path
+        required: true
+      lago_database_password_local_file:
+        type: path
+        required: true

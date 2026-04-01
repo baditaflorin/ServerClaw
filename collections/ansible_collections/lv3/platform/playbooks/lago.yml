@@ -1,0 +1,259 @@
+---
+# Playbook: lago.yml
+# Purpose: Converge Lago, its shared PostgreSQL backend, the billing gateway adapter, and the protected edge publication for `billing.lv3.org`.
+# Use case: Run when the usage metering and billing API layer must be applied, upgraded, or recovered entirely from repo-managed automation.
+#
+# Inputs (required):
+#   - env (str, required): Deployment environment selector that resolves the target postgres, docker-runtime, and nginx guests.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the live apply.
+#
+# Outputs:
+#   - A repo-managed Lago runtime on docker-runtime-lv3, a shared PostgreSQL backend on postgres-lv3, gateway-backed public ingest at `billing.lv3.org/api/v1/events`, and protected browser access through the shared edge auth flow.
+#
+# Idempotency: Partially idempotent
+#              Re-converges keep the seeded billing catalog stable, but each smoke verification emits a fresh synthetic usage event.
+#
+# Dependencies:
+#   - ADR 0292: Defines Lago as the usage metering and billing API layer.
+#   - Requires: postgres-lv3, docker-runtime-lv3, api-gateway, OpenBao, and the shared NGINX edge to already exist.
+#   - Role: lv3.platform.lago_postgres - provisions the Lago database and role.
+#   - Role: lv3.platform.lago_runtime - converges the Lago runtime, seed catalog, and local smoke verification.
+#   - Role: lv3.platform.api_gateway_runtime - deploys the public producer-ingest adapter used by the billing edge routes.
+#
+# Related ADRs: 0021, 0042, 0077, 0086, 0276, 0292
+# Related Runbooks: docs/runbooks/configure-lago.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- name: Ensure Hetzner DNS publication for Lago
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    subdomain_catalog_path: "{{ playbook_dir }}/../../../../../config/subdomain-catalog.json"
+    inventory_defaults_path: "{{ playbook_dir }}/../../../../../inventory/group_vars/all.yml"
+    subdomain_fqdn: billing.lv3.org
+
+  tasks:
+    - name: Load controller defaults
+      ansible.builtin.include_vars:
+        file: "{{ inventory_defaults_path }}"
+
+    - name: Load the subdomain catalog
+      ansible.builtin.include_vars:
+        file: "{{ subdomain_catalog_path }}"
+        name: subdomain_catalog
+
+    - name: Select the Lago subdomain entry
+      ansible.builtin.set_fact:
+        selected_subdomain: >-
+          {{
+            (
+              subdomain_catalog.subdomains
+              | selectattr('fqdn', 'equalto', subdomain_fqdn)
+              | list
+              | first
+            ) | default({})
+          }}
+
+    - name: Assert the Lago subdomain is catalogued
+      ansible.builtin.assert:
+        that:
+          - selected_subdomain != {}
+          - selected_subdomain.status in ['active', 'planned']
+          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
+        fail_msg: "billing.lv3.org must exist in config/subdomain-catalog.json before live apply."
+
+    - name: Derive the managed Hetzner record name
+      ansible.builtin.set_fact:
+        selected_subdomain_record_name: >-
+          {{
+            '@'
+            if selected_subdomain.fqdn == hetzner_dns_zone_name
+            else (
+              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
+            )
+          }}
+
+    - name: Converge the Lago Hetzner DNS record
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_record
+      vars:
+        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
+        hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
+        hetzner_dns_record_type: A
+        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
+        hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
+
+- name: Prepare PostgreSQL for Lago
+  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  become: true
+  gather_facts: true
+  vars:
+    ansible_become_timeout: 120
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.postgres_vm
+    - role: lv3.platform.lago_postgres
+
+- name: Converge Lago and the billing ingest adapter on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+  vars:
+    ansible_become_timeout: 120
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.lago
+        playbook_execution_audit_target: lago
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.lago_runtime
+    - role: lv3.platform.api_gateway_runtime
+
+- name: Publish Lago through the NGINX edge
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../../../../../inventory/group_vars/platform.yml"
+  vars:
+    ansible_become_timeout: 120
+    public_edge_sync_generated_static_dirs: false
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication
+
+- name: Verify Lago end to end after edge publication
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../../../../../inventory/group_vars/platform.yml"
+  vars:
+    ansible_become_timeout: 120
+    lago_public_base_url: "{{ platform_service_topology.lago.urls.public }}"
+    lago_public_ingest_url: "{{ lago_public_base_url }}/api/v1/events"
+    lago_api_local_base_url: "{{ platform_service_topology.lago.urls.api }}"
+    lago_direct_api_local_base_url: "http://127.0.0.1:{{ platform_service_topology.lago.ports.api }}"
+    lago_org_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/org-api-key.txt
+    lago_smoke_producer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/smoke-producer-token.txt
+    lago_org_api_key: "{{ lookup('ansible.builtin.file', lago_org_api_key_local_file) | trim }}"
+    lago_smoke_producer_token: "{{ lookup('ansible.builtin.file', lago_smoke_producer_token_local_file) | trim }}"
+    lago_smoke_metric_code: api_calls
+    lago_smoke_external_customer_id: lv3-billing-smoke-customer
+    lago_smoke_external_subscription_id: lv3-billing-smoke-subscription
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  tasks:
+    - name: Run shared Lago post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: lago
+        playbook_execution_post_verify_audit_action: playbook.verify.lago
+
+    - name: Verify the public Lago browser surface stays protected by the shared edge auth flow
+      ansible.builtin.uri:
+        url: "{{ lago_public_base_url }}/"
+        method: GET
+        follow_redirects: none
+        status_code:
+          - 302
+          - 401
+      register: lago_public_root_protection
+      changed_when: false
+
+    - name: Assert the public Lago browser surface is not anonymously reachable
+      ansible.builtin.assert:
+        that:
+          - lago_public_root_protection.status in [302, 401]
+        fail_msg: "billing.lv3.org root unexpectedly allowed anonymous browser access."
+
+    - name: Generate a unique transaction id for the public Lago smoke event
+      ansible.builtin.set_fact:
+        lago_public_smoke_transaction_id: "{{ lookup('ansible.builtin.pipe', 'python3 -c \"import uuid; print(uuid.uuid4())\"') | trim }}"
+
+    - name: Submit a public Lago smoke event through the API gateway adapter
+      ansible.builtin.uri:
+        url: "{{ lago_public_ingest_url }}"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ lago_smoke_producer_token }}"
+        body_format: json
+        body:
+          event:
+            transaction_id: "{{ lago_public_smoke_transaction_id }}"
+            external_subscription_id: "{{ lago_smoke_external_subscription_id }}"
+            code: "{{ lago_smoke_metric_code }}"
+        status_code: 200
+        return_content: true
+      register: lago_public_smoke_event
+      retries: 48
+      delay: 5
+      until: lago_public_smoke_event.status == 200
+      changed_when: false
+      no_log: true
+
+    - name: Verify Lago current usage reflects the public smoke event
+      ansible.builtin.uri:
+        url: "{{ lago_direct_api_local_base_url }}/api/v1/customers/{{ lago_smoke_external_customer_id }}/current_usage?external_subscription_id={{ lago_smoke_external_subscription_id | urlencode }}"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ lago_org_api_key }}"
+        status_code: 200
+        return_content: true
+      register: lago_public_usage_check
+      retries: 24
+      delay: 5
+      until: >-
+        lago_public_usage_check.status == 200
+        and (
+          (lago_public_usage_check.content | lower)
+          is search(lago_smoke_metric_code | lower)
+        )
+      changed_when: false
+      no_log: true
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: lago

@@ -70,6 +70,14 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             self.defaults["public_edge_generated_build_root"],
             "{{ inventory_dir | dirname }}/build",
         )
+        self.assertIn(
+            "public_edge_service_topology.get('api_gateway', {})",
+            self.defaults["public_edge_api_gateway_upstream"],
+        )
+        self.assertIn(
+            "'internal',",
+            self.defaults["public_edge_api_gateway_upstream"],
+        )
         self.assertIn("User-agent: *", self.defaults["public_edge_robots_txt_content"])
         self.assertIn("Disallow: /", self.defaults["public_edge_robots_txt_content"])
 
@@ -83,6 +91,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             [
                 "agents.lv3.org",
                 "analytics.lv3.org",
+                "billing.lv3.org",
                 "changelog.lv3.org",
                 "coolify.lv3.org",
                 "docs.lv3.org",
@@ -91,6 +100,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
                 "home.lv3.org",
                 "langfuse.lv3.org",
                 "logs.lv3.org",
+                "minio-console.lv3.org",
                 "n8n.lv3.org",
                 "ops.lv3.org",
                 "realtime.lv3.org",
@@ -114,11 +124,19 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         )
         self.assertEqual(protected_sites["flags.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
         self.assertEqual(protected_sites["flags.lv3.org"]["unauthenticated_paths"], ["/health"])
+        self.assertEqual(
+            protected_sites["billing.lv3.org"]["unauthenticated_proxy_routes"],
+            [
+                {"path": "/api/health", "upstream": "{{ public_edge_api_gateway_upstream }}/v1/billing/health"},
+                {"path": "/api/v1/events", "upstream": "{{ public_edge_api_gateway_upstream }}/v1/billing/events"},
+            ],
+        )
         self.assertEqual(protected_sites["agents.lv3.org"]["unauthenticated_paths"], ["/healthz"])
         self.assertEqual(protected_sites["agents.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
         self.assertNotIn("unauthenticated_paths", protected_sites["coolify.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["draw.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["langfuse.lv3.org"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["minio-console.lv3.org"])
         self.assertEqual(protected_sites["n8n.lv3.org"]["unauthenticated_paths"], ["/healthz"])
         self.assertEqual(
             protected_sites["n8n.lv3.org"]["unauthenticated_prefix_paths"],
@@ -246,6 +264,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("site.root_proxy_path is defined", self.template)
         self.assertIn("location = / {", self.template)
         self.assertIn("site.hostname in public_edge_authenticated_sites", self.template)
+        self.assertIn("protected_site.unauthenticated_proxy_routes | default([])", self.template)
         self.assertIn('add_header X-Robots-Tag "{{ public_edge_robots_meta_content }}" always;', self.template)
         self.assertIn("location = /robots.txt {", self.template)
         self.assertIn("server_name {{ public_edge_apex_hostname }};", self.template)
@@ -259,6 +278,19 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
 
     def test_static_pages_include_robots_meta_tag(self) -> None:
         self.assertIn('<meta name="robots" content="{{ public_edge_robots_meta_content }}">', self.static_template)
+
+    def test_minio_console_is_published_with_large_upload_and_header_passthrough_overrides(self) -> None:
+        minio_console = next(
+            site for site in self.defaults["public_edge_extra_sites"] if site["hostname"] == "minio-console.lv3.org"
+        )
+
+        self.assertEqual(
+            minio_console["upstream"],
+            "http://10.10.10.20:{{ platform_port_assignments.minio_console_port }}",
+        )
+        self.assertEqual(minio_console["client_max_body_size"], 0)
+        self.assertFalse(minio_console["security_headers_enabled"])
+        self.assertTrue(minio_console["preserve_upstream_security_headers"])
 
     def test_template_supports_proxy_header_stripping_and_blocked_paths(self) -> None:
         self.assertIn("site.proxy_hide_headers | default([])", self.template)

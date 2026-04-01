@@ -1,0 +1,17 @@
+Service completeness: lago
+Status: PASS
+- ADR: ok (docs/adr/0292-lago-as-the-usage-metering-and-billing-api-layer.md)
+- Ansible role: ok (collections/ansible_collections/lv3/platform/roles/lago_runtime)
+- Service capability catalog: ok (config/service-capability-catalog.json)
+- Health probe definition: ok (config/health-probe-catalog.json)
+- Subdomain entry: ok (config/subdomain-catalog.json)
+- API gateway registration: ok (config/api-gateway-catalog.json)
+- Dependency graph node: ok (config/dependency-graph.json)
+- Keycloak client scaffold: n/a (config/service-completeness.json)
+- Secret definition: ok (config/secret-catalog.json)
+- Grafana dashboard: grandfathered until 2026-09-30 (config/grafana/dashboards/lago.json)
+- SLO definition: grandfathered until 2026-09-30 (config/slo-catalog.json)
+- Compose secrets injection: n/a (collections/ansible_collections/lv3/platform/roles/lago_runtime/templates/docker-compose.yml.j2)
+- Data catalog entry: ok (config/data-catalog.json)
+- Alert rules: grandfathered until 2026-09-30 (config/alertmanager/rules/lago.yml)
+- Runbook: ok (docs/runbooks/configure-lago.md)

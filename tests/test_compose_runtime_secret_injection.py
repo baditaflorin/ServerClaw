@@ -131,6 +131,8 @@ def test_control_plane_recovery_uses_dedicated_windmill_backup_dsn() -> None:
     assert "--entrypoint {{ common_openbao_systemd_credentials_container_entrypoint }}" in helper_service_text
     assert "common_openbao_systemd_credentials_secret_path" in helper_text
     assert "register: common_openbao_systemd_credentials_approle_upsert" in helper_text
+    assert 'retries: "{{ common_openbao_api_operation_retries }}"' in helper_text
+    assert 'delay: "{{ common_openbao_api_operation_delay }}"' in helper_text
     assert "until: common_openbao_systemd_credentials_approle_upsert.status == 204" in helper_text
 
 

@@ -23,6 +23,9 @@
     status_code: 401
     return_content: true
   register: api_gateway_auth_check
+  retries: "{{ api_gateway_runtime_recovery_probe_retries }}"
+  delay: "{{ api_gateway_runtime_recovery_probe_delay }}"
+  until: api_gateway_auth_check.status == 401
   changed_when: false
 
 - name: Assert the anonymous health rejection uses the canonical error envelope
@@ -31,24 +34,6 @@
       - api_gateway_auth_check.json.error.code == "AUTH_TOKEN_MISSING"
       - (api_gateway_auth_check.json.error.trace_id | default('')) | length > 0
     fail_msg: "API gateway anonymous auth rejection did not return the canonical error envelope."
-
-- name: Wait for the local Keycloak realm discovery endpoint used by API gateway verification
-  ansible.builtin.uri:
-    url: "{{ api_gateway_keycloak_verify_base_url }}/realms/lv3/.well-known/openid-configuration"
-    method: GET
-    return_content: true
-    status_code: 200
-  register: api_gateway_keycloak_verify_discovery
-  retries: "{{ api_gateway_keycloak_verify_ready_retries }}"
-  delay: "{{ api_gateway_keycloak_verify_ready_delay }}"
-  until: api_gateway_keycloak_verify_discovery.status == 200
-  changed_when: false
-
-- name: Assert the local Keycloak discovery document matches the public issuer
-  ansible.builtin.assert:
-    that:
-      - api_gateway_keycloak_verify_discovery.json.issuer == api_gateway_keycloak_issuer_url
-    fail_msg: "API gateway verification reached Keycloak locally, but the discovery issuer does not match the public issuer."
 
 - name: Check whether the controller-local API gateway verification client secret exists
   ansible.builtin.stat:
@@ -63,6 +48,52 @@
   delegate_to: localhost
   become: false
   register: api_gateway_platform_context_token_stat
+
+- name: Default the local Keycloak discovery endpoint as unavailable for API gateway verification
+  ansible.builtin.set_fact:
+    api_gateway_keycloak_verify_discovery_available: false
+
+- name: Wait for the local Keycloak realm discovery endpoint used by API gateway verification
+  when: api_gateway_verify_client_secret_stat.stat.exists
+  block:
+    - name: Wait for the local Keycloak realm discovery endpoint used by API gateway verification
+      ansible.builtin.uri:
+        url: "{{ api_gateway_keycloak_verify_base_url }}/realms/lv3/.well-known/openid-configuration"
+        method: GET
+        return_content: true
+        status_code: 200
+      register: api_gateway_keycloak_verify_discovery
+      retries: >-
+        {{
+          3
+          if api_gateway_platform_context_token_stat.stat.exists
+          else api_gateway_keycloak_verify_ready_retries
+        }}
+      delay: "{{ api_gateway_keycloak_verify_ready_delay }}"
+      until: api_gateway_keycloak_verify_discovery.status == 200
+      changed_when: false
+
+    - name: Record the local Keycloak discovery endpoint as available for API gateway verification
+      ansible.builtin.set_fact:
+        api_gateway_keycloak_verify_discovery_available: true
+
+    - name: Assert the local Keycloak discovery document matches the public issuer
+      ansible.builtin.assert:
+        that:
+          - api_gateway_keycloak_verify_discovery.json.issuer == api_gateway_keycloak_issuer_url
+        fail_msg: "API gateway verification reached Keycloak locally, but the discovery issuer does not match the public issuer."
+  rescue:
+    - name: Mark the local Keycloak discovery endpoint as unavailable for API gateway verification
+      ansible.builtin.set_fact:
+        api_gateway_keycloak_verify_discovery_available: false
+
+- name: Assert that API gateway verification can fall back when local Keycloak discovery is unavailable
+  ansible.builtin.assert:
+    that:
+      - api_gateway_keycloak_verify_discovery_available or api_gateway_platform_context_token_stat.stat.exists
+    fail_msg: >-
+      API gateway verification could not reach the local Keycloak discovery endpoint
+      and no legacy platform context token was available for authenticated fallback verification.
 
 - name: Read the controller-local API gateway verification client secret
   ansible.builtin.slurp:
@@ -87,7 +118,9 @@
     api_gateway_verify_keycloak_request_succeeded: false
 
 - name: Request a Keycloak bearer token for API gateway verification
-  when: api_gateway_verify_client_secret_stat.stat.exists
+  when:
+    - api_gateway_verify_client_secret_stat.stat.exists
+    - api_gateway_keycloak_verify_discovery_available
   block:
     - name: Request a Keycloak bearer token for API gateway verification
       ansible.builtin.uri:
@@ -163,6 +196,20 @@
   register: api_gateway_runtime_assurance_check
   changed_when: false
 
+- name: Verify the authenticated structured platform search endpoint succeeds with a real bearer token
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ api_gateway_internal_port }}/v1/platform/search/structured?q=api&collection={{ api_gateway_typesense_collection | urlencode }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ api_gateway_verify_access_token }}"
+    status_code: 200
+    return_content: true
+  register: api_gateway_structured_search_check
+  changed_when: false
+  retries: "{{ api_gateway_structured_search_verify_retries }}"
+  delay: "{{ api_gateway_structured_search_verify_delay }}"
+  until: api_gateway_structured_search_check.status == 200
+
 - name: Assert the runtime assurance endpoint returns a report envelope
   ansible.builtin.assert:
     that:
@@ -170,3 +217,12 @@
       - api_gateway_runtime_assurance_check.json.summary is defined
       - api_gateway_runtime_assurance_check.json.entries is defined
     fail_msg: "API gateway runtime assurance verification did not return the expected report envelope."
+
+- name: Assert the structured search endpoint returns Typesense-backed platform catalog results
+  ansible.builtin.assert:
+    that:
+      - api_gateway_structured_search_check.json.backend == "typesense"
+      - api_gateway_structured_search_check.json.collection == api_gateway_typesense_collection
+      - api_gateway_structured_search_check.json.results is sequence
+      - api_gateway_structured_search_check.json.found | int > 0
+    fail_msg: "API gateway structured search verification did not return a Typesense-backed result set."

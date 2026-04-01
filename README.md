@@ -68,7 +68,13 @@ Gitea is now live on `docker-runtime-lv3` at `http://100.64.0.1:3009`, with Keyc
 
 Harbor is now live on `docker-runtime-lv3` and published at `https://registry.lv3.org`, with Trivy-backed CVE scanning, Keycloak-backed operator login, a repo-managed `check-runner` project, and verified pull access from `docker-build-lv3` through the exact-main replay on 2026-03-29.
 
+MinIO is now live on `docker-runtime-lv3` and published at `https://minio.lv3.org`, with the operator console held behind `https://minio-console.lv3.org`, the shared launch buckets for Loki, Langfuse, Gitea LFS, and RAG staging converged from repo automation, and the shared `minio-root` repository path now backing the verified Restic config-backup flow from current `main`.
+
+ADR 0292 Lago billing is now re-verified on production from `main`: `https://billing.lv3.org` keeps the browser surface behind the shared oauth2-proxy sign-in flow, anonymous `https://billing.lv3.org/api/health` requests now fail closed at the API gateway with the canonical `401` envelope, and the 2026-04-01 exact-main replay on release `0.177.128` re-verified public smoke event ingest plus current-usage aggregation on platform version `0.130.81`.
+
 Signed release bundles are now live through that private Gitea path: the repo-managed `release-bundle` workflow publishes tarball, checksum, and Sigstore bundle assets into private Gitea Releases, and controller-side replay now verifies those assets with Cosign against the committed public key before treating them as eligible runtime input.
+
+Renovate is now live through that same private Gitea Actions path on `docker-build-lv3`: the Harbor-pinned `registry.lv3.org/check-runner/renovate:42.76.4` runtime mints a short-lived scoped Gitea token from the OpenBao-rendered bootstrap bundle at job start, maintains the private `Renovate Dashboard`, and now opens governed `main`-targeted update PRs against `ops/proxmox_florin_server`.
 
 Dozzle is now live on `docker-runtime-lv3` and published at `https://logs.lv3.org`, with repo-managed agents on `docker-build-lv3` and `monitoring-lv3`, shared-edge Keycloak auth, and verified remote agent reachability over the guest network.
 
@@ -116,6 +122,13 @@ The repository now also ships ADR 0161 real-time agent coordination: `platform.a
 The repository now also ships ADR 0113 world-state materializer live on production: the Windmill worker checkout refreshes nine operational surfaces into `world_state.current_view`, the host-side `WorldStateClient()` probe now works directly on `docker-runtime-lv3`, and the latest-main replay on 2026-03-27 verified every surface fresh with `is_expired = false`.
 The repository now also ships ADR 0151 n8n automation live on production: the repo-managed `n8n` runtime is active on `docker-runtime-lv3`, PostgreSQL-backed persistence is pinned to `postgres-lv3` at `10.10.10.50`, and `https://n8n.lv3.org` now serves the protected editor with public webhook prefixes through the shared NGINX edge after the first successful `main`-based live apply on 2026-03-26.
 The repository now also ships ADR 0148 private web search live on production: the repo-managed SearXNG runtime is active on `docker-runtime-lv3`, the Proxmox host publishes the private operator and agent entrypoint on `http://100.64.0.1`, `search.lv3.org` resolves to that tailnet proxy, and Open WebUI now uses the local SearXNG JSON endpoint for governed web search after the 2026-03-26 live apply.
+ADR 0277 Typesense structured search is now live on production from `main`:
+`docker-runtime-lv3` now serves the private Typesense runtime behind the
+controller proxy at `http://100.64.0.1:8016`, the repo-managed
+`platform-services` collection is populated from git-declared service metadata,
+and the 2026-03-31 exact-main replay re-verified the authenticated
+`https://api.lv3.org/v1/platform/search/structured` route returning
+`"backend": "typesense"` for live platform-service lookups.
 The repository now also ships ADR 0165 workflow idempotency: `platform.idempotency`, scheduler-side cached result replay, closure-loop trigger scoping, `execution.idempotent_hit` ledger events, and `lv3 intent status <intent_id>` provide deterministic duplicate suppression for platform-managed workflows; the live Windmill converge from `main` on 2026-03-25 now applies and verifies the shared `platform.idempotency_records` schema on `postgres-lv3`.
 The repository now also ships ADR 0119 budgeted workflow scheduling live on production: the latest-main Windmill replay on 2026-03-27 re-verified bootstrap-session auth fallback, worker token propagation, the dispatcher and lane scheduler, and both watchdog seed paths plus their enabled schedules on `docker-runtime-lv3`.
 The repository now also ships ADR 0204 self-correcting automation loops: the committed correction-loop catalog governs every mutating workflow exactly once, and the 2026-03-28 Windmill observation replay verified `runtime_self_correction_watchers` end to end with the bounded retry budget persisted in durable closure-loop state.
@@ -147,6 +160,28 @@ client API serves at `https://matrix.lv3.org`, the governed controller path
 stays available at `http://100.64.0.1:8015`, and the 2026-03-29 exact-main
 replay re-verified public login plus the corrected internal-edge HTTPS
 assurance path from `monitoring-lv3`.
+ADR 0256 Matrix bridges are now live on production from `main`: repo-managed
+mautrix Discord and WhatsApp bridge bots now answer at
+`@discordbot:matrix.lv3.org` and `@whatsappbot:matrix.lv3.org` through
+`https://matrix.lv3.org`, and the 2026-03-30 exact-main replay on release
+`0.177.98` re-verified the controller bootstrap path together with the public
+management-room smoke end to end.
+ADR 0260 Nextcloud is now live on production from `main`: `https://cloud.lv3.org/status.php`
+returns `installed=true`, the published `/.well-known/caldav` and
+`/.well-known/carddav` routes redirect to `https://cloud.lv3.org/remote.php/dav/`,
+and the 2026-03-30 exact-main replay on release `0.177.93` re-verified the
+guest-local `10.10.10.20:8084` runtime together with the shared OpenBao
+publication-recovery path and the new mutable OCC recovery path for
+concurrent Docker interruptions on the shared host.
+ADR 0262 delegated authorization is now live on production from `main`: the
+private OpenFGA service answers on `http://100.64.0.1:8014`, the
+repo-managed `serverclaw-authz` store and verification set pass through
+`scripts/serverclaw_authz.py verify` against the guest-local Keycloak listener
+at `http://10.10.10.20:8091`, `https://api.lv3.org/v1/platform/services` now
+lists `openfga` with `gateway_prefix: /v1/openfga`, and
+`https://api.lv3.org/v1/openfga/healthz` returns the canonical
+`AUTH_INSUFFICIENT_ROLE` envelope for `lv3-agent-hub`, proving the route is
+live and correctly role-gated.
 ADR 0295 shared artifact cache plane is now live on production: `docker-build-lv3`
 now serves internal pull-through mirrors on `10.10.10.30:5001-5004`, the
 2026-03-29 exact-main replay re-warmed a repo-derived `41`-image seed set, and
@@ -154,17 +189,29 @@ now serves internal pull-through mirrors on `10.10.10.30:5001-5004`, the
 path were both re-verified afterward.
 The repository now also ships ADR 0251 stage-scoped smoke suites fully live on
 production: the promotion gate and runtime-assurance scoreboard now require
-declared or inherited smoke suites for active environments, the current
-exact-main verification on `docker-runtime-lv3` keeps the Windmill worker
-checkout aligned with those imports, `config/windmill/scripts/gate-status.py`
-returns `status: ok`, the live promotion gate still rejects the stale staged
-`grafana` receipt while reporting no required or observed stage-smoke suites
-for that receipt, and the authenticated runtime-assurance gateway plus local
-ops-portal partials verify cleanly on platform version `0.130.59`.
+declared or inherited smoke suites for active environments, the latest
+exact-main replay on release `0.177.100` pins the Windmill worker checkout to
+the active worktree during `make converge-windmill`, re-verifies the live
+`f/lv3/gate-status` and `f/lv3/stage-smoke-suites` wrappers together with the
+worker-local `post_merge_run: passed` surface, confirms runtime-assurance
+summary `55 total / 36 pass / 19 degraded / 0 failed`, and keeps the promotion
+gate blocking the stale staged `grafana` receipt for the expected SLO,
+capacity, and receipt-age reasons on platform version `0.130.67`.
 The repository now also ships ADR 0197 Dify visual workflow canvas fully live on production: `https://agents.lv3.org/healthz` now returns `200`, governed Dify tool calls through `https://api.lv3.org/v1/dify-tools/get-platform-status` re-verified from the latest-main replay, and the linked-worktree smoke export plus Langfuse trace path completed successfully on 2026-03-28.
 The repository now also ships ADR 0231 local secret delivery live on production: `docker-runtime-lv3` now serves the control-plane backup path through a repo-managed OpenBao Agent plus systemd credentials, the legacy `/etc/lv3/control-plane-recovery/openbao-backup-token.json` artifact is gone, and the 2026-03-28 replay re-verified a fresh backup generation plus restore drill on `backup-lv3`.
 The repository now also ships ADR 0137 crawl policy automation live on production: the shared public edge serves a universal `robots.txt`, emits `X-Robots-Tag: noindex, nofollow` across published hostnames, adds robots meta tags to repository-generated HTML surfaces, and includes `lv3.org` in the shared edge certificate definition.
 The repository now also ships the first ADR 0166 canonical error rollout live on production: `config/error-codes.yaml` and `scripts/canonical_errors.py` now normalize repo-managed gateway and platform-context failures behind one trace-id-backed error envelope, and the 2026-03-26 live replay from `main` verified the canonical `AUTH_TOKEN_MISSING` response on both `https://api.lv3.org/v1/health` and `http://100.64.0.1:8010/v1/platform-summary`.
+ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-lv3` now serves the repo-managed private event bus on `10.10.10.20:4222`, the 2026-03-30 exact-main replay re-verified the `PLATFORM_EVENTS`, `RAG_DOCUMENT`, and `SECRET_ROTATION` streams after a short shared Docker-runtime correction loop, and the controller-side check/apply paths plus platform, secret-rotation, and RAG smoke publishes all completed cleanly.
+ADR 0302 Restic file-level backups are now live on production from `main`: `docker-runtime-lv3` now writes encrypted snapshots of `receipts/`, `config/`, `versions/stack.yaml`, and the controller-local secret manifest into the MinIO-backed `restic-config-backup` repository, and the 2026-03-31 exact-main replay re-verified the systemd timer, the event-driven live-apply trigger path, and the governed restore-verification rehearsal end to end.
+ADR 0303 PostgreSQL pgaudit query and privilege audit logging is now live on production from `main`: `postgres-lv3` now runs with repo-managed `pgaudit` preload and approved-role catalogs, Alloy ships structured PostgreSQL audit and unknown-role connection signals into Loki and Prometheus, and the 2026-03-31 exact-main replay re-verified the unknown-role alert path through Alertmanager, the local relay on `monitoring-lv3`, and JetStream publication on `platform.security.pgaudit_unknown_role`.
+ADR 0305 k6 continuous load testing and SLO error-budget burn validation is now
+integrated on `main`: release `0.177.120` carries the repo-managed smoke,
+load, and soak entrypoints together with Windmill scheduling, Prometheus
+remote-write, and bounded notification handling, while the latest realistic
+2026-03-31 exact-main replay truthfully preserved current live degradation on
+platform version `0.130.77`, including public Keycloak OIDC `502 Bad Gateway`,
+Keycloak smoke failure `110/110`, Keycloak load failure `1184/1600` (`74.00%`),
+and OpenFGA load failure `14/1182` (`1.18%`).
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
@@ -172,9 +219,9 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.123` |
-| Platform version | `0.130.78` |
-| Observed check date | `2026-03-30` |
+| Repository version | `0.177.129` |
+| Platform version | `0.130.82` |
+| Observed check date | `2026-03-31` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
 | Observed kernel | `6.17.13-2-pve` |
@@ -200,6 +247,8 @@ Template VM: `9000` `debian13-cloud-template`
 | `analytics.lv3.org` | `plausible` | `edge-published` | `docker-runtime-lv3` |
 | `api.lv3.org` | `api-gateway` | `edge-published` | `docker-runtime-lv3` |
 | `apps.lv3.org` | `coolify-apps` | `edge-published` | `coolify-lv3` |
+| `bi.lv3.org` | `superset` | `edge-published` | `docker-runtime-lv3` |
+| `billing.lv3.org` | `lago` | `edge-published` | `docker-runtime-lv3` |
 | `build.lv3.org` | `docker-build` | `informational-only` | `docker-build-lv3` |
 | `chat.lv3.org` | `serverclaw` | `edge-published` | `coolify-lv3` |
 | `ci.lv3.org` | `woodpecker` | `edge-published` | `docker-runtime-lv3` |
@@ -218,6 +267,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `logs.lv3.org` | `dozzle` | `edge-published` | `docker-runtime-lv3` |
 | `mail.lv3.org` | `mail-platform` | `informational-only` | `docker-runtime-lv3` |
 | `matrix.lv3.org` | `matrix-synapse` | `edge-published` | `docker-runtime-lv3` |
+| `minio.lv3.org` | `minio` | `edge-published` | `docker-runtime-lv3` |
 | `n8n.lv3.org` | `n8n` | `edge-published` | `docker-runtime-lv3` |
 | `nginx.lv3.org` | `nginx-edge` | `edge-static` | `nginx-lv3` |
 | `notebooks.lv3.org` | `jupyterhub` | `edge-published` | `docker-runtime-lv3` |
@@ -288,6 +338,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `k6_load_testing` | `2026-03-31-adr-0305-k6-mainline-live-apply` |
 | `keycloak` | `2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply` |
 | `keycloak_operator_access` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
+| `lago` | `2026-04-01-adr-0292-lago-mainline-live-apply` |
 | `langfuse` | `2026-03-26-adr-0146-langfuse-live-apply` |
 | `local_search_and_indexing_fabric` | `2026-03-29-adr-0239-browser-local-search-post-merge-replay` |
 | `log_queryability_canary` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
@@ -295,6 +346,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `mailpit` | `2026-03-30-adr-0282-mailpit-mainline-live-apply` |
 | `matrix_synapse` | `2026-03-29-adr-0255-matrix-synapse-mainline-live-apply` |
 | `mattermost` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
+| `minio` | `2026-03-31-adr-0274-minio-object-storage-mainline-live-apply` |
 | `monitoring` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
 | `mutation_audit` | `2026-03-23-adr-0066-mutation-audit-live-apply` |
 | `mutation_ledger` | `2026-03-27-adr-0115-mutation-ledger-mainline-live-apply` |
@@ -371,10 +423,12 @@ Template VM: `9000` `debian13-cloud-template`
 | `stage_smoke_suites` | `2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
 | `staging_environment` | `2026-03-27-adr-0183-staging-live-apply` |
 | `step_ca` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
+| `superset` | `2026-04-01-adr-0292-superset-mainline-live-apply` |
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `temporal` | `2026-03-30-adr-0293-temporal-mainline-live-apply` |
 | `tesseract_ocr` | `2026-03-30-adr-0286-tesseract-ocr-live-apply` |
 | `tika` | `2026-03-30-adr-0275-apache-tika-live-apply` |
+| `typesense` | `2026-03-31-adr-0277-typesense-mainline-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
 | `validation_gate` | `2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply` |
 | `validation_runner_contracts` | `2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply` |
@@ -552,7 +606,8 @@ backup-lv3 runs Proxmox Backup Server on 10.10.10.60
 PBS datastore proxmox is mounted at /mnt/datastore/proxmox on the dedicated backup disk
 Proxmox storage lv3-backup-pbs points to 10.10.10.60:8007
 nightly job backup-lv3-nightly protects VMIDs 110, 120, 130, 140, 150, and 170 at 02:30
-the backup coverage ledger now shows 6 of 7 governed assets protected; backup-lv3 remains uncovered until lv3-backup-offsite exists
+the backup coverage ledger now shows 10 of 12 governed assets protected; backup-lv3 off-site evidence and monitoring-lv3 freshness remain the visible uncovered gaps
+Restic file-level backups now protect `receipts/`, `config/`, `versions/stack.yaml`, and `config/controller-local-secrets.json` in the `restic-config-backup` MinIO repository, with timer-driven interval runs plus live-apply-trigger snapshots for `config/` and `versions/stack.yaml`
 control-plane recovery archives from docker-runtime-lv3 now land on /srv/control-plane-recovery/runtime/docker-runtime-lv3/latest
 the mirrored controller recovery bundle now lives under /srv/control-plane-recovery/controller
 the scheduled restore drill on backup-lv3 last passed at 2026-03-22T21:29:48Z
@@ -630,6 +685,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Host Control Loops](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-host-control-loops.md)
 - [Configure JupyterHub](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-jupyterhub.md)
 - [Configure Keycloak](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-keycloak.md)
+- [Configure Lago](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-lago.md)
 - [Configure Langfuse](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-langfuse.md)
 - [Configure Mail Platform](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mail-platform.md)
 - [Configure Mailpit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mailpit.md)
@@ -662,10 +718,12 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure ServerClaw](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-serverclaw.md)
 - [Configure step-ca](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-step-ca.md)
 - [Configure Storage And Backups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-storage-and-backups.md)
+- [Configure Superset](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-superset.md)
 - [Configure Tailscale Private Access](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-tailscale-access.md)
 - [Configure Temporal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-temporal.md)
 - [Configure Tesseract OCR](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-tesseract-ocr.md)
 - [Configure Apache Tika](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-tika.md)
+- [Configure Typesense](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-typesense.md)
 - [Configure Vaultwarden](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-vaultwarden.md)
 - [Configure Windmill](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-windmill.md)
 - [Configure Woodpecker](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-woodpecker.md)
@@ -715,6 +773,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [LLM Implementation Prompts — ADRs 0082–0091](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/llm-implementation-prompts.md)
 - [Log Queryability Canary](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/log-queryability-canary.md)
 - [Maintenance Windows](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/maintenance-windows.md)
+- [MinIO Object Storage](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/minio-object-storage.md)
 - [Monitoring Stack Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/monitoring-stack.md)
 - [Mutation Audit Log](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/mutation-audit-log.md)
 - [Mutation Ledger](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/mutation-ledger.md)
@@ -1142,6 +1201,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0314: Resumable Multi-Step Flows And Return-To-Task Reentry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0314-resumable-multi-step-flows-and-return-to-task-reentry.md)
 - [ADR 0315: Canonical Page States And Next-Best-Action Guidance For Human Surfaces](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0315-canonical-page-states-and-next-best-action-guidance-for-human-surfaces.md)
 - [ADR 0316: Journey Analytics And Onboarding Success Scorecards](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0316-journey-analytics-and-onboarding-success-scorecards.md)
+- [ADR 0317: Keycloak Direct-API Operator Provisioning via SSH Proxy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md)
+- [ADR 0318: Repeatable Operator Onboarding with CC Audit Trail](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -1428,8 +1489,10 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream WS-0271: Backup Coverage Assertion Ledger Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0271-live-apply.md)
 - [Workstream ws-0272-live-apply: ADR 0272 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md)
 - [Workstream ws-0274-live-apply: Live Apply ADR 0274 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0274-live-apply.md)
+- [Workstream ws-0274-minio-live-apply: Live Apply ADR 0274 MinIO From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0274-minio-live-apply.md)
 - [Workstream ws-0275-live-apply: ADR 0275 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0275-live-apply.md)
 - [Workstream ws-0276-live-apply: Live Apply ADR 0276 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0276-live-apply.md)
+- [Workstream ws-0277-live-apply: ADR 0277 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0277-live-apply.md)
 - [Workstream ws-0278-live-apply: ADR 0278 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-live-apply.md)
 - [Workstream ws-0278-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-main-integration.md)
 - [Workstream ws-0280-live-apply: ADR 0280 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0280-live-apply.md)
@@ -1449,11 +1512,14 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0290-live-apply: Live Apply ADR 0290 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0290-live-apply.md)
 - [Workstream ws-0291-live-apply: Live Apply ADR 0291 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0291-live-apply.md)
 - [Workstream ws-0291-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0291-main-merge.md)
+- [Workstream ws-0292-live-apply: Live Apply ADR 0292 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-live-apply.md)
+- [Workstream ws-0292-superset-live-apply: Live Apply ADR 0292 Superset From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-superset-live-apply.md)
 - [Workstream WS-0293: Temporal Durable Workflow Engine Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-live-apply.md)
 - [Workstream ws-0295-live-apply: Live Apply ADR 0295 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md)
 - [Workstream WS-0296: Education Repo Refresh And Named Deploy Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-education-refresh.md)
 - [Workstream WS-0296: Dedicated Artifact Cache VM Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-live-apply.md)
 - [Workstream ws-0297-live-apply: Live Apply ADR 0297 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md)
+- [Workstream ws-0297-main-merge: Integrate ADR 0297 Live Apply Into `main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-main-merge.md)
 - [Workstream ws-0298-live-apply: Live Apply ADR 0298 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0298-live-apply.md)
 - [Workstream ws-0298-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0298-main-merge.md)
 - [Workstream ws-0301-live-apply: Live Apply ADR 0301 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0301-live-apply.md)
@@ -1463,6 +1529,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0305-live-apply: Live Apply ADR 0305 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-live-apply.md)
 - [Workstream ws-0305-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md)
 - [Workstream ws-0306-live-apply: Live Apply ADR 0306 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md)
+- [Workstream ws-0315-gitea-followups: Gitea Release Bundles And Renovate PR Validation Follow-ups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -1480,8 +1547,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.123` |
-| Platform version | `0.130.78` |
+| Repository version | `0.177.129` |
+| Platform version | `0.130.82` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1707,7 +1774,6 @@ This repository is intentionally opinionated:
 | `0214` | HA and replication architecture bundle for production and staging | `merged` | [adr-0214-ha-replication-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0214-ha-replication-architecture-bundle.md) |
 | `0224` | Live apply ADR 0224 server-resident operations as the default control model | `live_applied` | [ws-0224-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0224-live-apply.md) |
 | `0224` | Server-resident operations architecture bundle | `merged` | [adr-0224-server-resident-operations-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md) |
-| `0224` | Refresh education_wemeshup from upstream main through a named repo-deploy profile | `merged` | [ws-0296-education-refresh.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-education-refresh.md) |
 | `0226` | Live apply ADR 0226 systemd host-resident control-loop supervision | `live_applied` | [ws-0226-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-live-apply.md) |
 | `0226` | Finalize ADR 0226 exact-main evidence on origin/main | `merged` | [ws-0226-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-main-merge.md) |
 | `0228` | Integrate ADR 0228 live apply into origin/main | `live_applied` | [ws-0228-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0228-main-merge.md) |
@@ -1767,8 +1833,15 @@ This repository is intentionally opinionated:
 | `0271` | Backup coverage assertion ledger live apply | `live_applied` | [ws-0271-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0271-live-apply.md) |
 | `0272` | Restore readiness ladders and stateful warm-up verification profiles | `live_applied` | [ws-0272-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md) |
 | `0273` | Live apply ADR 0273 public endpoint admission control | `live_applied` | [adr-0273-public-endpoint-admission-control.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md) |
+| `0274` | Live apply ADR 0274 shared MinIO object storage from latest origin/main | `live_applied` | [ws-0274-minio-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0274-minio-live-apply.md) |
+| `0277` | Live apply the private Typesense structured-search plane from latest origin/main | `live_applied` | [ws-0277-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0277-live-apply.md) |
+| `0292` | Live apply Lago as the usage metering and billing API layer from latest origin/main | `merged` | [ws-0292-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-live-apply.md) |
+| `0292` | Live apply ADR 0292 Apache Superset from latest origin/main | `live_applied` | [ws-0292-superset-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-superset-live-apply.md) |
 | `0295` | Shared artifact cache plane and dedicated cache VM roadmap | `live_applied` | [adr-0295-artifact-cache-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md) |
+| `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `merged` | [ws-0297-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md) |
+| `0297` | Integrate ADR 0297 live-apply evidence and release updates on main | `merged` | [ws-0297-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-main-merge.md) |
+| `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

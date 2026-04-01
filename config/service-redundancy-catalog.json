@@ -486,6 +486,23 @@
         "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Langfuse converge from git."
       }
     },
+    "lago": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Lago, its shared PostgreSQL-backed billing state, or its local runtime companions cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Lago converge and public-ingest verification workflow from git."
+      }
+    },
     "mail_platform": {
       "tier": "R1",
       "recovery_objective": {
@@ -518,6 +535,23 @@
         "location": "docker-runtime-lv3",
         "failover_trigger": "Restore docker-runtime-lv3 when Mailpit or its private SMTP capture surface cannot be recovered in place.",
         "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Mailpit converge from git."
+      }
+    },
+    "minio": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when the shared MinIO object store or its bucket data cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the MinIO converge from git."
       }
     },
     "redpanda": {
@@ -1052,6 +1086,24 @@
         "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the step-ca converge from git."
       }
     },
+    "superset": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120",
+        "pbs_vm_150"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 or postgres-lv3 when Superset, its managed metadata schema, or the published bi.lv3.org surface cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3 and postgres-lv3 as needed, then rerun the Superset converge plus public datasource inventory verification from git."
+      }
+    },
     "tika": {
       "tier": "R1",
       "recovery_objective": {
@@ -1084,6 +1136,23 @@
         "location": "docker-runtime-lv3",
         "failover_trigger": "Restore docker-runtime-lv3 when Tesseract OCR or the paired private document-extraction runtime state cannot be recovered in place.",
         "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Tika and Tesseract OCR converges from git."
+      }
+    },
+    "typesense": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Typesense, its private controller proxy contract, or the derived search index volume cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Typesense converge and API gateway converge from git to rebuild the repo-managed structured-search collections."
       }
     },
     "uptime_kuma": {

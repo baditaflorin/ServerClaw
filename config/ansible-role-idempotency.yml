@@ -136,6 +136,12 @@ roles:
   langfuse_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  lago_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  lago_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   linux_access:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -167,6 +173,9 @@ roles:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   mattermost_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  minio_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   monitoring_mattermost_notifications:
@@ -268,6 +277,12 @@ roles:
   portainer_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  superset_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  superset_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   postgres_ha:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -366,7 +381,16 @@ roles:
   semaphore_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  sftpgo_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  sftpgo_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   step_ca_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  tika_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   step_ca_ssh_trust:
@@ -381,7 +405,7 @@ roles:
   tesseract_ocr_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
-  tika_runtime:
+  typesense_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   uptime_kuma_runtime:
@@ -391,6 +415,12 @@ roles:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   vaultwarden_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  vikunja_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  vikunja_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   wait_for_healthy:

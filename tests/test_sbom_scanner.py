@@ -109,6 +109,13 @@ def test_find_native_grype_binary_prefers_linux_install(monkeypatch) -> None:
     assert scanner.find_native_grype_binary() == "/usr/local/bin/grype"
 
 
+def test_host_path_for_repo_path_uses_workspace_host(monkeypatch) -> None:
+    monkeypatch.setenv("LV3_DOCKER_WORKSPACE_PATH", "/host/workspace")
+    candidate = scanner.REPO_ROOT / "receipts" / "sbom" / "image.cdx.json"
+
+    assert scanner.host_path_for_repo_path(candidate) == Path("/host/workspace/receipts/sbom/image.cdx.json")
+
+
 def test_syft_scan_image_uses_native_syft_on_linux(monkeypatch, tmp_path: Path) -> None:
     recorded: dict[str, object] = {}
     expected_payload = {"bomFormat": "CycloneDX"}

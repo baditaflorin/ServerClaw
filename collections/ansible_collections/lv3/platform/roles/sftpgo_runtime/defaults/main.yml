@@ -1,0 +1,72 @@
+---
+# Purpose: Define default runtime inputs for the SFTPGo managed file-transfer surface.
+
+sftpgo_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology | service_topology_get('sftpgo') }}"
+sftpgo_session_authority: "{{ platform_session_authority }}"
+sftpgo_image: "{{ container_image_catalog.images.sftpgo_runtime.ref }}"
+sftpgo_container_name: sftpgo
+sftpgo_site_dir: /opt/sftpgo
+sftpgo_config_dir: "{{ sftpgo_site_dir }}/config"
+sftpgo_plugin_dir: "{{ sftpgo_site_dir }}/plugins"
+sftpgo_state_dir: "{{ sftpgo_site_dir }}/state"
+sftpgo_data_dir: /srv/sftpgo/data
+sftpgo_secret_dir: /etc/lv3/sftpgo
+sftpgo_compose_file: "{{ sftpgo_site_dir }}/docker-compose.yml"
+sftpgo_config_file: "{{ sftpgo_config_dir }}/sftpgo.json"
+sftpgo_env_file: "{{ compose_runtime_secret_root }}/sftpgo/runtime.env"
+sftpgo_legacy_env_file: "{{ sftpgo_site_dir }}/sftpgo.env"
+sftpgo_openbao_agent_dir: "{{ sftpgo_site_dir }}/openbao"
+sftpgo_openbao_agent_image: "{{ openbao_agent_image }}"
+sftpgo_openbao_agent_container_name: sftpgo-openbao-agent
+sftpgo_openbao_secret_path: services/sftpgo/runtime-env
+sftpgo_openbao_policy_name: lv3-service-sftpgo-runtime
+sftpgo_openbao_approle_name: sftpgo-runtime
+sftpgo_database_name: sftpgo
+sftpgo_database_user: sftpgo
+sftpgo_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+sftpgo_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/sftpgo/database-password.txt
+sftpgo_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/sftpgo
+sftpgo_bootstrap_admin_username: lv3-sftpgo-admin
+sftpgo_bootstrap_admin_password_local_file: "{{ sftpgo_local_artifact_dir }}/bootstrap-admin-password.txt"
+sftpgo_oidc_admin_username: florin.badita
+sftpgo_oidc_admin_email: baditaflorin@gmail.com
+sftpgo_oidc_admin_password_local_file: "{{ sftpgo_local_artifact_dir }}/florin.badita-password.txt"
+sftpgo_api_key_name: lv3-sftpgo-rest-provisioner
+sftpgo_api_key_local_file: "{{ sftpgo_local_artifact_dir }}/admin-api-key.txt"
+sftpgo_bootstrap_report_local_file: "{{ sftpgo_local_artifact_dir }}/bootstrap-report.json"
+sftpgo_smoke_user_username: sftpgo-smoke
+sftpgo_smoke_user_password_local_file: "{{ sftpgo_local_artifact_dir }}/smoke-user-password.txt"
+sftpgo_smoke_user_private_key_local_file: "{{ sftpgo_local_artifact_dir }}/smoke-user.id_ed25519"
+sftpgo_smoke_user_public_key_local_file: "{{ sftpgo_smoke_user_private_key_local_file }}.pub"
+sftpgo_smoke_user_home_dir: "/srv/sftpgo/data/{{ sftpgo_smoke_user_username }}"
+sftpgo_smoke_user_quota_bytes: 104857600
+sftpgo_smoke_user_quota_files: 100
+sftpgo_keycloak_client_id: sftpgo
+sftpgo_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/sftpgo-client-secret.txt
+sftpgo_keycloak_config_url: >-
+  https://{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}/realms/lv3/.well-known/openid-configuration
+sftpgo_keycloak_username_field: preferred_username
+sftpgo_admin_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.sftpgo_admin_port }}"
+sftpgo_webdav_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.sftpgo_webdav_port }}"
+sftpgo_sftp_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.sftpgo_sftp_port }}"
+sftpgo_controller_url: "{{ hostvars['proxmox_florin'].sftpgo_controller_url }}"
+sftpgo_public_base_url: "https://{{ sftpgo_service_topology.public_hostname }}"
+sftpgo_local_admin_url: "http://127.0.0.1:{{ sftpgo_admin_port }}"
+sftpgo_local_webdav_url: "http://127.0.0.1:{{ sftpgo_webdav_port }}"
+sftpgo_public_edge_private_ip: "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
+sftpgo_public_hostname_overrides:
+  - hostname: "{{ sftpgo_service_topology.public_hostname }}"
+    address: "{{ sftpgo_public_edge_private_ip }}"
+  - hostname: "{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}"
+    address: "{{ sftpgo_public_edge_private_ip }}"
+sftpgo_event_subject: platform.sftpgo.events
+sftpgo_nats_host: 10.10.10.20
+sftpgo_nats_port: 4222
+sftpgo_nats_username: jetstream-admin
+sftpgo_nats_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt
+sftpgo_plugin_pubsub_url: https://github.com/sftpgo/sftpgo-plugin-pubsub/releases/download/v1.0.16/sftpgo-plugin-pubsub-linux-amd64
+sftpgo_plugin_pubsub_sha256: ca636b4deb335059b2e711a2643f66728c23883e481edb74d8840c035f1d2171
+sftpgo_plugin_binary: "{{ sftpgo_plugin_dir }}/sftpgo-plugin-pubsub"
+sftpgo_plugin_container_path: /plugins/sftpgo-plugin-pubsub
+sftpgo_runtime_uid: 1000
+sftpgo_runtime_gid: 1000

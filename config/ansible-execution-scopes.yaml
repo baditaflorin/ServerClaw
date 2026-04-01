@@ -135,6 +135,14 @@ playbooks:
       - service:grist
       - config/subdomain-catalog.json
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/typesense.yml:
+    playbook_id: typesense
+    mutation_scope: platform
+    shared_surfaces:
+      - service:typesense
+      - service:api-gateway
+      - config/api-gateway-catalog.json
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/guest-access.yml:
     playbook_id: guest-access
     mutation_scope: platform
@@ -165,11 +173,23 @@ playbooks:
     shared_surfaces:
       - service:keycloak
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/lago.yml:
+    playbook_id: lago
+    mutation_scope: platform
+    shared_surfaces:
+      - service:lago
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/langfuse.yml:
     playbook_id: langfuse
     mutation_scope: platform
     shared_surfaces:
       - service:langfuse
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/minio.yml:
+    playbook_id: minio
+    mutation_scope: platform
+    shared_surfaces:
+      - service:minio
       - inventory/host_vars/proxmox_florin.yml
   playbooks/mail-platform.yml:
     playbook_id: mail-platform
@@ -361,11 +381,22 @@ playbooks:
     shared_surfaces:
       - service:semaphore
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/sftpgo.yml:
+    playbook_id: sftpgo
+    mutation_scope: platform
+    shared_surfaces:
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/step-ca.yml:
     playbook_id: step-ca
     mutation_scope: platform
     shared_surfaces:
       - service:step-ca
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/superset.yml:
+    playbook_id: superset
+    mutation_scope: platform
+    shared_surfaces:
+      - service:superset
       - inventory/host_vars/proxmox_florin.yml
   playbooks/piper.yml:
     playbook_id: piper
@@ -435,6 +466,12 @@ playbooks:
     shared_surfaces:
       - service:nextcloud
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/minio.yml:
+    playbook_id: minio
+    mutation_scope: platform
+    shared_surfaces:
+      - service:minio
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/services/docker-runtime-observability.yml:
     playbook_id: docker-runtime-observability
     mutation_scope: host
@@ -482,11 +519,22 @@ playbooks:
     shared_surfaces:
       - service:jupyterhub
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/lago.yml:
+    playbook_id: lago
+    mutation_scope: platform
+    shared_surfaces:
+      - service:lago
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/services/guest-log-shipping.yml:
     playbook_id: guest-log-shipping
     mutation_scope: platform
     shared_surfaces:
       - service:guest-log-shipping
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/sftpgo.yml:
+    playbook_id: sftpgo
+    mutation_scope: platform
+    shared_surfaces:
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/nginx-observability.yml:
     playbook_id: nginx-observability
@@ -505,6 +553,12 @@ playbooks:
     mutation_scope: host
     shared_surfaces:
       - service:proxmox-metrics
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/superset.yml:
+    playbook_id: superset
+    mutation_scope: platform
+    shared_surfaces:
+      - service:superset
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/tika.yml:
     playbook_id: tika
@@ -536,4 +590,9 @@ playbooks:
     mutation_scope: host
     shared_surfaces:
       - service:ollama
+      - inventory/host_vars/proxmox_florin.yml
+  collections/ansible_collections/lv3/platform/playbooks/vikunja.yml:
+    playbook_id: vikunja
+    mutation_scope: platform
+    shared_surfaces:
       - inventory/host_vars/proxmox_florin.yml

@@ -1,0 +1,24 @@
+{
+  "projects": [
+{% for project in vikunja_project_manifests %}
+    {
+      "id": {{ project.id | to_json }},
+      "title": {{ project.title | to_json }},
+      "identifier": {{ project.identifier | to_json }},
+      "description": {{ project.description | to_json }},
+      "hex_color": {{ project.hex_color | to_json }},
+      "members": {{ project.members | to_json }},
+      "labels": {{ project.labels | to_json }},
+      "webhooks": [
+{% for webhook in project.webhooks %}
+        {
+          "target_url": {{ webhook.target_url | to_json }},
+          "secret": {{ webhook.secret | to_json }},
+          "events": {{ webhook.events | to_json }}
+        }{% if not loop.last %},{% endif %}
+{% endfor %}
+      ]
+    }{% if not loop.last %},{% endif %}
+{% endfor %}
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-31-adr-0274-minio-object-storage-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-31",
+  "recorded_on": "2026-03-31",
+  "recorded_at": "2026-03-31T22:57:06Z",
+  "recorded_by": "codex",
+  "source_commit": "bc41cbab7192eecdb68673753c36f057d7ce3925",
+  "repo_version_context": "0.177.124",
+  "platform_version_context": "0.130.79",
+  "workflow_id": "adr-0274-minio-object-storage-mainline-live-apply",
+  "adr": "0274",
+  "summary": "Promoted ADR 0274 MinIO object storage into canonical mainline truth as repository version `0.177.124` and first verified platform version `0.130.79` after refreshing from the latest realistic `origin/main` commit `14b18869a2ff421ec12596bd199af0adb09a95b8`. The shared MinIO API and authenticated console are now live from `docker-runtime-lv3`, the launch buckets for Loki, Langfuse, Gitea LFS, and RAG staging remain governed from repo automation, and the shared `minio-root` repository path now backs the verified Restic config-backup and restore workflow on current `main`.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "MinIO API",
+      "address": "https://minio.lv3.org"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "MinIO console",
+      "address": "https://minio-console.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused MinIO, Restic, and OpenBao validation bundle",
+      "result": "pass",
+      "observed": "The integrated tree passed focused pytest for the MinIO runtime, Restic backup, and OpenBao recovery surfaces (`25 passed`), plus `make syntax-check-minio`, `make syntax-check-restic-config-backup`, and `ansible-playbook -i inventory/hosts.yml playbooks/openbao.yml --syntax-check`."
+    },
+    {
+      "check": "Controller-side Restic backup and restore verification",
+      "result": "pass",
+      "observed": "`make restic-config-backup env=production` produced `receipts/restic-backups/20260331T224319Z.json` after clearing a verified stale repository lock, and `make restic-config-restore-verify env=production` produced `receipts/restic-restore-verifications/20260331T224348Z.json` with `result: pass` and `restored_file_count: 3351`."
+    },
+    {
+      "check": "Mainline MinIO live apply and edge verification",
+      "result": "pass",
+      "observed": "The final `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=minio env=production` replay succeeded end to end, keeping local MinIO health, public `https://minio.lv3.org/minio/health/live`, the authenticated console redirect at `https://minio-console.lv3.org`, and the post-apply Restic backup hook green while writing `receipts/restic-backups/20260331T225338Z.json`."
+    },
+    {
+      "check": "Shared recovery documentation and automation hardening",
+      "result": "pass",
+      "observed": "The Langfuse bucket CORS smoke probe is now retry-hardened for transient post-recovery connection refusals, and the repo runbooks document both the shared Docker-runtime disk-pressure dependency and the safe stale-lock recovery flow for the MinIO-backed Restic path."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "changelog.md",
+    "build/platform-manifest.json",
+    "docs/adr/.index.yaml",
+    "docs/adr/0274-minio-as-the-s3-compatible-object-storage-layer.md",
+    "docs/release-notes/0.177.124.md",
+    "docs/release-notes/README.md",
+    "docs/runbooks/minio-object-storage.md",
+    "docs/runbooks/restic-config-backups.md",
+    "docs/workstreams/ws-0274-minio-live-apply.md",
+    "workstreams.yaml",
+    "versions/stack.yaml",
+    "receipts/live-applies/evidence/2026-03-31-ws-0274-mainline-final-focused-pytest-r2-0.177.124.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0274-mainline-final-syntax-check-minio-r2-0.177.124.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0274-mainline-final-syntax-check-restic-r2-0.177.124.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0274-mainline-final-openbao-syntax-r2-0.177.124.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0274-mainline-final-docker-runtime-disk-recovery-r1-0.177.124.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0274-mainline-final-restic-config-unlock-r2-0.177.124.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0274-mainline-final-restic-config-backup-r5-0.177.124.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0274-mainline-final-restic-config-restore-verify-r3-0.177.124.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0274-mainline-final-live-apply-minio-r8-0.177.124.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0274-mainline-final-live-apply-minio-r9-0.177.124.txt",
+    "receipts/restic-backups/20260331T224319Z.json",
+    "receipts/restic-backups/20260331T225338Z.json",
+    "receipts/restic-restore-verifications/20260331T224348Z.json",
+    "receipts/restic-snapshots-latest.json"
+  ],
+  "notes": [
+    "This receipt records the first verified `main`-integrated platform promotion for ADR 0274 MinIO object storage.",
+    "The integrated replay started from latest realistic `origin/main` commit `14b18869a2ff421ec12596bd199af0adb09a95b8`, which still carried repository version `0.177.123` and platform version `0.130.78` before this promotion.",
+    "The transient `r8` Langfuse CORS probe failure was corrected by hardening the verification retry contract rather than weakening the MinIO edge or bucket assertions.",
+    "A manually interrupted backup left a stale Restic repository lock; the final proof set preserves the PID check and `restic unlock` recovery instead of hiding the operator-facing behavior.",
+    "Shared Docker-runtime disk headroom is now documented as an operational dependency for both MinIO and the MinIO-backed Restic backup workflow."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-03-31-ws-0274-mainline-final-cors-retry-hardening",
+    "surface": "collections/ansible_collections/lv3/platform/roles/minio_runtime/tasks/verify.yml",
+    "diagnosis": "transient_failure",
+    "repair_action": "Added connection-refused retries and bounded curl timeouts to the Langfuse bucket CORS smoke probe, then replayed the full MinIO live-apply wrapper until the local runtime, public API, authenticated console redirect, and post-apply Restic hook all passed.",
+    "verification": "receipts/live-applies/evidence/2026-03-31-ws-0274-mainline-final-live-apply-minio-r9-0.177.124.txt"
+  }
+}

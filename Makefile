@@ -89,15 +89,16 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 
 .PHONY: prepare-run-namespace validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-ansible-idempotency validate-shell validate-json validate-semgrep validate-compose-runtime-envs validate-dependency-direction validate-data-models validate-policy validate-architecture-fitness validate-interface-contracts validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-slo-rules validate-generated-slo generate-https-tls-assurance validate-generated-https-tls-assurance https-tls-assurance generate-status-docs assemble-canonical-truth check-canonical-truth generate-platform-manifest generate-status generate-ops-portal generate-changelog-portal generate-edge-static-sites generate-dependency-diagram generate-diagrams generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors docs deploy-ops-portal
 .PHONY: deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info interface-contracts interface-contract-info capability-contracts capability-contract-info services show-service environments environment-info preview-create preview-validate preview-destroy preview-list preview-info lanes lane-info execution-lanes execution-lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness managed-image-gate sbom-refresh upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status
-.PHONY: backup-coverage-ledger dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-browser-runner syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-artifact-cache-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-mailpit syntax-check-paperless syntax-check-redpanda syntax-check-openbao syntax-check-openfga syntax-check-step-ca syntax-check-temporal syntax-check-headscale syntax-check-semaphore syntax-check-woodpecker syntax-check-windmill syntax-check-restic-config-backup syntax-check-keycloak syntax-check-langfuse syntax-check-netbox syntax-check-searxng syntax-check-flagsmith syntax-check-crawl4ai
+.PHONY: backup-coverage-ledger dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-browser-runner syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-artifact-cache-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-mailpit syntax-check-paperless syntax-check-redpanda syntax-check-openbao syntax-check-openfga syntax-check-step-ca syntax-check-temporal syntax-check-headscale syntax-check-semaphore syntax-check-woodpecker syntax-check-windmill syntax-check-restic-config-backup syntax-check-keycloak syntax-check-langfuse syntax-check-minio syntax-check-netbox syntax-check-searxng syntax-check-typesense syntax-check-flagsmith syntax-check-crawl4ai
 .PHONY: syntax-check-ollama syntax-check-piper syntax-check-n8n syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-vaultwarden syntax-check-rag-context syntax-check-secret-rotation syntax-check-dozzle syntax-check-excalidraw syntax-check-realtime collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window ensure-resource-lock-registry resource-locks resource-lock-acquire resource-lock-release resource-lock-heartbeat operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-staging-bridge configure-ingress configure-edge-publication configure-tailscale configure-host-control-loops provision-guests
-.PHONY: harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-api-gateway converge-ops-portal converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-paperless converge-redpanda converge-openbao converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-keycloak converge-langfuse converge-netbox converge-searxng converge-crawl4ai converge-ollama converge-piper converge-n8n converge-open-webui converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-realtime converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret
+.PHONY: harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-api-gateway converge-ops-portal converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-paperless converge-redpanda converge-openbao converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-keycloak converge-langfuse converge-minio converge-netbox converge-searxng converge-typesense converge-crawl4ai converge-ollama converge-piper converge-n8n converge-open-webui converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-realtime converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import syntax-check-matrix-synapse converge-matrix-synapse syntax-check-nomad converge-nomad remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server syntax-check-changedetection converge-changedetection syntax-check-gotenberg converge-gotenberg
-.PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-jupyterhub converge-jupyterhub
+.PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-jupyterhub converge-jupyterhub syntax-check-superset converge-superset syntax-check-sftpgo converge-sftpgo
 .PHONY: syntax-check-tesseract-ocr converge-tesseract-ocr
 .PHONY: syntax-check-flagsmith converge-flagsmith
+.PHONY: syntax-check-lago converge-lago
 .PHONY: syntax-check-matrix-synapse converge-matrix-synapse
 .PHONY: syntax-check-nextcloud converge-nextcloud
 .PHONY: syntax-check-nomad converge-nomad
@@ -583,6 +584,12 @@ syntax-check-directus:
 syntax-check-jupyterhub:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/jupyterhub.yml --syntax-check
 
+syntax-check-superset:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/superset.yml --syntax-check
+
+syntax-check-sftpgo:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/sftpgo.yml --syntax-check
+
 syntax-check-semaphore:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/semaphore.yml --syntax-check
 
@@ -610,8 +617,14 @@ syntax-check-harbor:
 syntax-check-langfuse:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/langfuse.yml --syntax-check
 
+syntax-check-minio:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/minio.yml --syntax-check
+
 syntax-check-flagsmith:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/flagsmith.yml --syntax-check
+
+syntax-check-lago:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/lago.yml --syntax-check
 
 syntax-check-plausible:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/plausible.yml --syntax-check
@@ -651,6 +664,9 @@ syntax-check-crawl4ai:
 
 syntax-check-gotenberg:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/gotenberg.yml --syntax-check
+
+syntax-check-typesense:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/typesense.yml --syntax-check
 
 syntax-check-netbox:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/netbox.yml --syntax-check
@@ -899,6 +915,20 @@ converge-jupyterhub:
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/jupyterhub.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
 
+converge-superset:
+	$(MAKE) preflight WORKFLOW=converge-superset
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
+	$(MAKE) generate-edge-static-sites
+	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/superset.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
+
+converge-sftpgo:
+	$(MAKE) preflight WORKFLOW=converge-sftpgo
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
+	$(MAKE) generate-edge-static-sites
+	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/sftpgo.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
+
 converge-semaphore:
 	$(MAKE) preflight WORKFLOW=converge-semaphore
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/semaphore.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
@@ -941,12 +971,24 @@ converge-langfuse:
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/langfuse.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
+converge-minio:
+	$(MAKE) preflight WORKFLOW=converge-minio
+	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/minio.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
 converge-flagsmith:
 	$(MAKE) preflight WORKFLOW=converge-flagsmith
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
 	$(MAKE) generate-edge-static-sites
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/flagsmith.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
+
+converge-lago:
+	$(MAKE) preflight WORKFLOW=converge-lago
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
+	$(MAKE) generate-edge-static-sites
+	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/lago.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
 
 converge-plausible:
 	$(MAKE) preflight WORKFLOW=converge-plausible
@@ -1005,6 +1047,10 @@ converge-gitea:
 converge-gotenberg:
 	$(MAKE) preflight WORKFLOW=converge-gotenberg
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/gotenberg.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+converge-typesense:
+	$(MAKE) preflight WORKFLOW=converge-typesense
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/typesense.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 converge-control-plane-recovery:
 	$(MAKE) preflight WORKFLOW=converge-control-plane-recovery

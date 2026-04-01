@@ -195,6 +195,19 @@
     ]
   },
   {
+    "name": "Lago Public Health",
+    "type": "http",
+    "url": "https://billing.lv3.org/api/health",
+    "description": "Public Lago health endpoint published through the shared NGINX edge and billing adapter path.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
     "name": "Langfuse Public Health",
     "type": "http",
     "url": "https://langfuse.lv3.org/api/public/health",
@@ -216,6 +229,19 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "MinIO Public Health",
+    "type": "http",
+    "url": "https://minio.lv3.org/minio/health/live",
+    "description": "Public MinIO S3 API health endpoint published through the shared NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
     "accepted_statuscodes": [
       "200-299"
     ]
@@ -507,6 +533,19 @@
       "200-299"
     ],
     "ignoreTls": true
+  },
+  {
+    "name": "Superset Public Health",
+    "type": "http",
+    "url": "https://bi.lv3.org/health",
+    "description": "Public Superset health endpoint published through the shared NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   },
   {
     "name": "Tika Private",

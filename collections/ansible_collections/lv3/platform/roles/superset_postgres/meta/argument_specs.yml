@@ -1,0 +1,41 @@
+# Purpose: Describe the required PostgreSQL variables for the Superset metadata plane.
+# Use case: Run during syntax and role-argument validation before converging the Superset PostgreSQL role.
+# Inputs: superset_* variables consumed by the superset_postgres tasks.
+# Outputs: Machine-readable argument specs for the superset_postgres role.
+# Idempotency: Fully idempotent because this file only validates role inputs.
+# Dependencies: ADR 0165, ADR 0042, and ADR 0292.
+---
+argument_specs:
+  main:
+    short_description: Converge the Superset metadata schema, managed role, and read-only datasource role.
+    options:
+      superset_database_name:
+        type: str
+        required: true
+      superset_database_schema:
+        type: str
+        required: true
+      superset_database_user:
+        type: str
+        required: true
+      superset_reader_user:
+        type: str
+        required: true
+      superset_postgres_secret_dir:
+        type: path
+        required: true
+      superset_postgres_password_file:
+        type: path
+        required: true
+      superset_reader_password_file:
+        type: path
+        required: true
+      superset_database_password_local_file:
+        type: path
+        required: true
+      superset_reader_password_local_file:
+        type: path
+        required: true
+      superset_postgres_database_catalog_local_file:
+        type: path
+        required: true

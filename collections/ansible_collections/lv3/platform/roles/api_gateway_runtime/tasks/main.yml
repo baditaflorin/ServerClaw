@@ -171,6 +171,33 @@
   loop_control:
     label: "{{ item.dest }}"
 
+- name: Check whether the controller-local Lago billing producer catalog exists
+  ansible.builtin.stat:
+    path: "{{ api_gateway_billing_ingest_producers_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: api_gateway_billing_ingest_producers_stat
+
+- name: Sync the controller-local Lago billing producer catalog
+  ansible.builtin.copy:
+    src: "{{ api_gateway_billing_ingest_producers_local_file }}"
+    dest: "{{ api_gateway_config_dir }}/billing-ingest-producers.json"
+    owner: root
+    group: root
+    mode: "0600"
+  when: api_gateway_billing_ingest_producers_stat.stat.exists
+  no_log: true
+
+- name: Render an empty Lago billing producer catalog when no controller-local catalog exists
+  ansible.builtin.copy:
+    dest: "{{ api_gateway_config_dir }}/billing-ingest-producers.json"
+    owner: root
+    group: root
+    mode: "0600"
+    content: |
+      {"producers":[]}
+  when: not api_gateway_billing_ingest_producers_stat.stat.exists
+
 - name: Discover committed drift receipts to bundle with the gateway
   ansible.builtin.set_fact:
     api_gateway_drift_receipts: "{{ lookup('ansible.builtin.fileglob', api_gateway_drift_receipts_glob, wantlist=True) }}"
@@ -188,6 +215,52 @@
   loop_control:
     label: "{{ item | basename }}"
 
+- name: Resolve the API gateway structured-search Typesense connection settings
+  ansible.builtin.set_fact:
+    api_gateway_resolved_typesense_base_url: >-
+      {{
+        (
+          api_gateway_typesense_base_url
+          | default('', true)
+          | trim
+        )
+        or
+        (
+          api_gateway_typesense_service_topology.urls.internal
+          if (
+            api_gateway_typesense_service_topology is mapping
+            and api_gateway_typesense_service_topology.urls is defined
+            and api_gateway_typesense_service_topology.urls.internal is defined
+          )
+          else 'http://127.0.0.1:8108'
+        )
+      }}
+    api_gateway_resolved_typesense_api_key: >-
+      {{
+        (
+          api_gateway_typesense_api_key
+          | default('', true)
+          | trim
+        )
+        or
+        (
+          lookup('ansible.builtin.file', api_gateway_typesense_api_key_local_file, errors='ignore')
+          | default('', true)
+          | trim
+        )
+      }}
+  no_log: true
+
+- name: Assert the API gateway structured-search Typesense connection settings resolved
+  ansible.builtin.assert:
+    that:
+      - api_gateway_resolved_typesense_base_url | length > 0
+      - api_gateway_resolved_typesense_api_key | length > 0
+    fail_msg: >-
+      API gateway structured-search requires a Typesense base URL and controller-local API key
+      before the runtime environment can be rendered.
+  no_log: true
+
 - name: Render the API gateway environment file
   ansible.builtin.template:
     src: api-gateway.env.j2
@@ -195,6 +268,7 @@
     owner: root
     group: root
     mode: "0644"
+  register: api_gateway_env_template
 
 - name: Render the API gateway Dockerfile
   ansible.builtin.copy:
@@ -495,6 +569,7 @@
         api_gateway_network_mode != 'host'
         and api_gateway_published_port.stdout | trim == ""
       )
+      or api_gateway_env_template.changed
       or api_gateway_runtime_config_probe.rc != 0
       or api_gateway_container_image_drifted
       or (
@@ -514,6 +589,9 @@
       - -f
       - "{{ api_gateway_runtime_config_probe_path }}"
   register: api_gateway_runtime_config_probe_after_recovery
+  retries: "{{ api_gateway_runtime_recovery_probe_retries }}"
+  delay: "{{ api_gateway_runtime_recovery_probe_delay }}"
+  until: api_gateway_runtime_config_probe_after_recovery.rc == 0
   changed_when: false
   failed_when: false
 
@@ -528,6 +606,9 @@
       - "{{ item }}"
   loop: "{{ api_gateway_runtime_packaged_probe_paths }}"
   register: api_gateway_runtime_packaged_probes_after_recovery
+  retries: "{{ api_gateway_runtime_recovery_probe_retries }}"
+  delay: "{{ api_gateway_runtime_recovery_probe_delay }}"
+  until: api_gateway_runtime_packaged_probes_after_recovery.rc == 0
   changed_when: false
   failed_when: false
 
@@ -555,8 +636,63 @@
         | length
       ) > 0
 
+- name: Check whether the controller-local Typesense API key exists
+  ansible.builtin.stat:
+    path: "{{ api_gateway_typesense_api_key_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: api_gateway_typesense_api_key_stat
+
+- name: Fail if the controller-local Typesense API key is missing
+  ansible.builtin.fail:
+    msg: >-
+      {{ api_gateway_typesense_api_key_local_file }} is missing on the control machine.
+      Converge the Typesense runtime before refreshing the API gateway structured-search catalog.
+  when: not api_gateway_typesense_api_key_stat.stat.exists
+
+- name: Wait for the controller-visible Typesense health endpoint
+  ansible.builtin.uri:
+    url: "{{ api_gateway_typesense_controller_url }}/health"
+    method: GET
+    status_code: 200
+  delegate_to: localhost
+  become: false
+  register: api_gateway_typesense_health
+  retries: 18
+  delay: 5
+  until: api_gateway_typesense_health.status == 200
+  changed_when: false
+
+- name: Sync the Typesense platform-services collection from the service catalog
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ api_gateway_typesense_sync_script }}"
+      - --catalog
+      - "{{ api_gateway_service_catalog_src }}"
+      - --typesense-url
+      - "{{ api_gateway_typesense_controller_url }}"
+      - --api-key-file
+      - "{{ api_gateway_typesense_api_key_local_file }}"
+      - --collection
+      - "{{ api_gateway_typesense_collection }}"
+  delegate_to: localhost
+  become: false
+  register: api_gateway_typesense_sync
+  changed_when: >-
+    (
+      api_gateway_typesense_sync.stdout
+      | trim
+      | default('{}', true)
+      | from_json
+    ).changed | bool
+
 - name: Verify the API gateway runtime
   ansible.builtin.meta: reset_connection
+
+- name: Wait for SSH after resetting the connection before API gateway verification
+  ansible.builtin.wait_for_connection:
+    timeout: 60
 
 - name: Verify the API gateway runtime
   ansible.builtin.import_tasks: verify.yml

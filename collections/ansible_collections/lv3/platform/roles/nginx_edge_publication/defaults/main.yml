@@ -71,6 +71,22 @@ public_edge_generated_build_root: "{{ inventory_dir | dirname }}/build"
 public_edge_static_sites: "{{ public_edge_service_topology | service_topology_edge_static_sites }}"
 public_edge_plausible_service_topology: "{{ public_edge_service_topology.get('plausible', {}) }}"
 public_edge_plausible_base_url: "{{ public_edge_plausible_service_topology.get('urls', {}).get('public', '') }}"
+public_edge_api_gateway_upstream: >-
+  {{
+    public_edge_service_topology.get('api_gateway', {}).get(
+      'urls',
+      {}
+    ).get(
+      'internal',
+      public_edge_service_topology.get('api_gateway', {}).get(
+        'edge',
+        {}
+      ).get(
+        'upstream',
+        'http://127.0.0.1:8083'
+      )
+    )
+  }}
 public_edge_plausible_site_registrations: "{{ hostvars[public_edge_control_plane_host].plausible_site_registrations | default([]) }}"
 public_edge_plausible_tracked_sites: >-
   {{
@@ -96,6 +112,13 @@ public_edge_security_headers_overrides:
     content_security_policy: >-
       default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none';
       object-src 'none'
+  bi.lv3.org:
+    content_security_policy: >-
+      default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
+      'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
+      connect-src 'self' https://bi.lv3.org https://sso.lv3.org; worker-src 'self' blob:;
+      child-src 'self' blob:; manifest-src 'self'
   coolify.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
@@ -215,6 +238,16 @@ public_edge_extra_sites:
     proxy_request_buffering: false
     proxy_read_timeout_seconds: 900
     proxy_send_timeout_seconds: 900
+  - hostname: minio-console.lv3.org
+    kind: proxy
+    upstream: "http://10.10.10.20:{{ platform_port_assignments.minio_console_port }}"
+    client_max_body_size: 0
+    chunked_transfer_encoding: true
+    proxy_request_buffering: false
+    proxy_read_timeout_seconds: 900
+    proxy_send_timeout_seconds: 900
+    security_headers_enabled: false
+    preserve_upstream_security_headers: true
   - hostname: changelog.lv3.org
     kind: static_dir
     source_dir: changelog-portal
@@ -236,6 +269,13 @@ public_edge_authenticated_sites:
     auth_proxy_upstream: http://127.0.0.1:4180
   coolify.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
+  billing.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+    unauthenticated_proxy_routes:
+      - path: /api/health
+        upstream: "{{ public_edge_api_gateway_upstream }}/v1/billing/health"
+      - path: /api/v1/events
+        upstream: "{{ public_edge_api_gateway_upstream }}/v1/billing/events"
   docs.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   draw.lv3.org:
@@ -249,6 +289,8 @@ public_edge_authenticated_sites:
     unauthenticated_paths:
       - /healthz
   langfuse.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+  minio-console.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   tasks.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180

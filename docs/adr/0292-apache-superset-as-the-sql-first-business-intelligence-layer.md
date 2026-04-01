@@ -1,9 +1,10 @@
 # ADR 0292: Apache Superset As The SQL-First Business Intelligence Layer
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.129
+- Implemented In Platform Version: 0.130.82
+- Implemented On: 2026-04-01
 - Date: 2026-03-29
 
 ## Context

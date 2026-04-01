@@ -1,18 +1,12 @@
-# Release 0.177.123
+# Release 0.177.129
 
-- Date: 2026-03-31
+- Date: 2026-04-01
 
 ## Summary
-- implemented ADRs 0307 through 0316 by defining the cohesive platform
-  workbench, journey-aware entry routing, onboarding checklist, task-oriented
-  navigation, command palette, notification center, contextual help,
-  resumable-task reentry, canonical page states, and journey scorecards for
-  human onboarding and user flow
+- implements ADR 0292 by adding Apache Superset as the SQL-first BI layer, publishing bi.lv3.org through the shared edge, reconciling repo-managed PostgreSQL and Plausible datasources plus the landing dashboard, and preserving exact-main live-apply evidence on the synchronized 0.177.128 baseline before the platform version advances to 0.130.82
 
 ## Platform Impact
-- repository architecture only; platform version remains `0.130.78` because
-  this release records product and onboarding direction rather than a live
-  infrastructure apply
+- platform version advances to 0.130.82 after the exact-main ADR 0292 replay re-verifies Apache Superset on bi.lv3.org, preserves the shared Keycloak, PostgreSQL, MinIO, and backup contracts, and records the canonical SQL-first BI live-apply receipt on top of the 0.130.81 baseline
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

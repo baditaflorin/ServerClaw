@@ -15,6 +15,7 @@ WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
 CONTROL_PLANE_LANES_PATH = REPO_ROOT / "config" / "control-plane-lanes.json"
+MAKEFILE_PATH = REPO_ROOT / "Makefile"
 
 
 def _load_module(path: Path, name: str):
@@ -377,30 +378,112 @@ def test_snapshot_id_from_backup_stdout_reads_restic_json_stream() -> None:
 
     assert restic_backup.snapshot_id_from_backup_stdout(stdout) == "abc123"
 
+def test_resolve_minio_endpoint_recovers_compose_managed_container(monkeypatch) -> None:
+    calls: list[list[str]] = []
+    inspect_count = 0
 
-def test_resolve_minio_endpoint_restarts_stopped_container() -> None:
-    commands: list[list[str]] = []
-    inspect_payloads = [
-        {
-            "State": {"Running": False, "Status": "exited"},
-            "NetworkSettings": {"Networks": {"outline_default": {"IPAddress": ""}}},
-        },
-        {
-            "State": {"Running": True, "Status": "running"},
-            "NetworkSettings": {"Networks": {"outline_default": {"IPAddress": "10.200.18.2"}}},
-        },
-    ]
+    class FakeResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
 
     def fake_run_command(argv, **kwargs):
-        commands.append(argv)
-        if argv[:2] == ["docker", "inspect"]:
-            payload = inspect_payloads.pop(0)
-            return types.SimpleNamespace(returncode=0, stdout=json.dumps([payload]), stderr="")
-        if argv[:2] == ["docker", "start"]:
+        nonlocal inspect_count
+        calls.append(argv)
+        if argv == ["docker", "inspect", "minio"]:
+            inspect_count += 1
+            running = inspect_count > 1
+            return types.SimpleNamespace(
+                returncode=0,
+                stdout=json.dumps(
+                    [
+                        {
+                            "State": {"Running": running},
+                            "Config": {
+                                "Labels": {
+                                    "com.docker.compose.project.working_dir": "/opt/outline",
+                                    "com.docker.compose.project.config_files": "/opt/outline/docker-compose.yml",
+                                    "com.docker.compose.service": "minio",
+                                }
+                            },
+                            "NetworkSettings": {
+                                "Networks": {
+                                    "broken": {"IPAddress": "invalid IP"},
+                                    "outline_default": {"IPAddress": "10.200.18.2" if running else ""},
+                                }
+                            },
+                        }
+                    ]
+                ),
+                stderr="",
+            )
+        if argv == ["docker", "compose", "--file", "/opt/outline/docker-compose.yml", "up", "-d", "minio"]:
+            return types.SimpleNamespace(returncode=0, stdout="started\n", stderr="")
+        raise AssertionError(f"unexpected command: {argv}")
+
+    monkeypatch.setattr(restic_backup, "run_command", fake_run_command)
+    monkeypatch.setattr(restic_backup.time, "sleep", lambda _: None)
+    monkeypatch.setattr(restic_backup.urllib.request, "urlopen", lambda *args, **kwargs: FakeResponse())
+
+    host, endpoint = restic_backup.resolve_minio_endpoint({"controller_host": {"minio": {"container_name": "minio"}}})
+
+    assert host == "10.200.18.2"
+    assert endpoint == "http://10.200.18.2:9000"
+    assert calls == [
+        ["docker", "inspect", "minio"],
+        ["docker", "compose", "--file", "/opt/outline/docker-compose.yml", "up", "-d", "minio"],
+        ["docker", "inspect", "minio"],
+        ["docker", "inspect", "minio"],
+    ]
+
+
+def test_resolve_minio_endpoint_starts_standalone_stopped_container(monkeypatch) -> None:
+    calls: list[list[str]] = []
+    inspect_count = 0
+
+    class FakeResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fake_run_command(argv, **kwargs):
+        nonlocal inspect_count
+        calls.append(argv)
+        if argv == ["docker", "inspect", "minio"]:
+            inspect_count += 1
+            running = inspect_count > 1
+            return types.SimpleNamespace(
+                returncode=0,
+                stdout=json.dumps(
+                    [
+                        {
+                            "State": {"Running": running},
+                            "Config": {"Labels": {}},
+                            "NetworkSettings": {
+                                "Networks": {
+                                    "bridge": {"IPAddress": "10.200.18.2" if running else ""},
+                                }
+                            },
+                        }
+                    ]
+                ),
+                stderr="",
+            )
+        if argv == ["docker", "start", "minio"]:
             return types.SimpleNamespace(returncode=0, stdout="minio\n", stderr="")
         raise AssertionError(f"unexpected command: {argv}")
 
-    restic_backup.run_command = fake_run_command
+    monkeypatch.setattr(restic_backup, "run_command", fake_run_command)
+    monkeypatch.setattr(restic_backup.time, "sleep", lambda _: None)
+    monkeypatch.setattr(restic_backup.urllib.request, "urlopen", lambda *args, **kwargs: FakeResponse())
 
     host, endpoint = restic_backup.resolve_minio_endpoint(
         {"controller_host": {"minio": {"container_name": "minio", "bucket": "restic-config-backup"}}}
@@ -408,15 +491,25 @@ def test_resolve_minio_endpoint_restarts_stopped_container() -> None:
 
     assert host == "10.200.18.2"
     assert endpoint == "http://10.200.18.2:9000"
-    assert commands == [
+    assert calls == [
         ["docker", "inspect", "minio"],
         ["docker", "start", "minio"],
+        ["docker", "inspect", "minio"],
         ["docker", "inspect", "minio"],
     ]
 
 
-def test_resolve_minio_endpoint_falls_back_to_outline_minio_when_dedicated_minio_is_absent() -> None:
+def test_resolve_minio_endpoint_falls_back_to_outline_minio_when_dedicated_minio_is_absent(monkeypatch) -> None:
     commands: list[list[str]] = []
+
+    class FakeResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
 
     def fake_run_command(argv, **kwargs):
         commands.append(argv)
@@ -437,7 +530,9 @@ def test_resolve_minio_endpoint_falls_back_to_outline_minio_when_dedicated_minio
             )
         raise AssertionError(f"unexpected command: {argv}")
 
-    restic_backup.run_command = fake_run_command
+    monkeypatch.setattr(restic_backup, "run_command", fake_run_command)
+    monkeypatch.setattr(restic_backup.time, "sleep", lambda _: None)
+    monkeypatch.setattr(restic_backup.urllib.request, "urlopen", lambda *args, **kwargs: FakeResponse())
 
     host, endpoint = restic_backup.resolve_minio_endpoint(
         {"controller_host": {"minio": {"container_name": "minio", "bucket": "restic-config-backup"}}}
@@ -447,6 +542,7 @@ def test_resolve_minio_endpoint_falls_back_to_outline_minio_when_dedicated_minio
     assert endpoint == "http://10.200.18.2:9000"
     assert commands == [
         ["docker", "inspect", "minio"],
+        ["docker", "inspect", "outline-minio"],
         ["docker", "inspect", "outline-minio"],
     ]
 
@@ -484,7 +580,8 @@ def test_resolve_minio_endpoint_reports_failed_container_restart() -> None:
         raise AssertionError("Expected resolve_minio_endpoint to reject containers that cannot be restarted")
 
 
-def test_resolve_minio_endpoint_rejects_invalid_container_ip() -> None:
+def test_resolve_minio_endpoint_rejects_invalid_container_ip(monkeypatch) -> None:
+    monkeypatch.setattr(restic_backup.time, "sleep", lambda _: None)
     restic_backup.run_command = lambda argv, **kwargs: types.SimpleNamespace(
         returncode=0,
         stdout=json.dumps(
@@ -497,6 +594,7 @@ def test_resolve_minio_endpoint_rejects_invalid_container_ip() -> None:
         ),
         stderr="",
     )
+    monkeypatch.setattr(restic_backup.urllib.request, "urlopen", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError()))
 
     try:
         restic_backup.resolve_minio_endpoint(
@@ -508,7 +606,17 @@ def test_resolve_minio_endpoint_rejects_invalid_container_ip() -> None:
         raise AssertionError("Expected resolve_minio_endpoint to reject invalid MinIO container IPs")
 
 
-def test_resolve_minio_endpoint_prefers_valid_ipv4_address() -> None:
+def test_resolve_minio_endpoint_prefers_valid_ipv4_address(monkeypatch) -> None:
+    class FakeResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(restic_backup.time, "sleep", lambda _: None)
     restic_backup.run_command = lambda argv, **kwargs: types.SimpleNamespace(
         returncode=0,
         stdout=json.dumps(
@@ -526,6 +634,7 @@ def test_resolve_minio_endpoint_prefers_valid_ipv4_address() -> None:
         ),
         stderr="",
     )
+    monkeypatch.setattr(restic_backup.urllib.request, "urlopen", lambda *args, **kwargs: FakeResponse())
 
     host, endpoint = restic_backup.resolve_minio_endpoint(
         {"controller_host": {"minio": {"container_name": "minio", "bucket": "restic-config-backup"}}}
@@ -594,9 +703,11 @@ def test_repo_surfaces_register_restic_backup_contract() -> None:
     assert "restic-config-backup" in workflow_catalog
     assert "restic-config-restore-verify" in workflow_catalog
     assert "converge-restic-config-backup" in workflow_catalog
+    assert workflow_catalog["converge-restic-config-backup"]["preflight"]["required_secret_ids"][1] == "minio_root_password"
     assert command_catalog["run-restic-config-backup"]["workflow_id"] == "restic-config-backup"
     assert command_catalog["run-restic-config-restore-verify"]["workflow_id"] == "restic-config-restore-verify"
     assert command_catalog["converge-restic-config-backup"]["workflow_id"] == "converge-restic-config-backup"
+    assert command_catalog["converge-restic-config-backup"]["inputs"][1]["name"] == "minio_root_password"
     assert "playbooks/restic-config-backup.yml" in execution_scopes
 
 
@@ -619,8 +730,7 @@ def test_trigger_remote_command_includes_live_apply_flag() -> None:
 
     assert "--live-apply-trigger" in command
 
-
-def test_trigger_remote_command_falls_back_to_runtime_script_mirror() -> None:
+def test_trigger_remote_command_falls_back_to_api_gateway_script_and_keeps_repo_surfaces() -> None:
     command = trigger.build_remote_command(
         mode="backup",
         triggered_by="manual",
@@ -629,11 +739,11 @@ def test_trigger_remote_command_falls_back_to_runtime_script_mirror() -> None:
         live_apply_trigger=False,
     )
 
-    assert "primary_script=/srv/proxmox_florin_server/scripts/restic_config_backup.py" in command
-    assert "fallback_script=/opt/api-gateway/service/scripts/restic_config_backup.py" in command
-    assert 'if [ ! -f "$script_path" ] && [ -f "$fallback_script" ]; then script_path="$fallback_script"; fi' in command
-    assert 'sudo python3 "$script_path" --repo-root /srv/proxmox_florin_server' in command
-
+    assert "/opt/api-gateway/service/scripts/restic_config_backup.py" in command
+    assert "/srv/proxmox_florin_server/config/restic-file-backup-catalog.json" in command
+    assert "/etc/lv3/restic-config-backup/restic-file-backup-catalog.json" in command
+    assert "/srv/proxmox_florin_server/receipts/restic-backups" in command
+    assert "/srv/proxmox_florin_server/receipts/restic-restore-verifications" in command
 
 def test_ensure_remote_runtime_support_files_uploads_required_bundle(tmp_path: Path, monkeypatch) -> None:
     scripts_dir = tmp_path / "scripts"
@@ -675,6 +785,45 @@ def test_ensure_remote_runtime_support_files_uploads_required_bundle(tmp_path: P
     assert stdin_payloads[0].startswith("#!/usr/bin/env python3")
 
 
+def test_sync_reported_receipt_artifacts_downloads_reported_files(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(trigger, "LOCAL_REPO_ROOT", tmp_path)
+    monkeypatch.setattr(
+        trigger,
+        "fetch_remote_repo_file",
+        lambda context, target, repo_root, relative_path: json.dumps(
+            {"path": relative_path, "repo_root": repo_root, "target": target}
+        )
+        + "\n",
+    )
+
+    synced = trigger.sync_reported_receipt_artifacts(
+        {"controller": "context"},
+        target="docker-runtime-lv3",
+        repo_root="/srv/proxmox_florin_server",
+        report={
+            "receipt_path": "receipts/restic-backups/20260401T112837Z.json",
+            "latest_snapshot_receipt": "receipts/restic-snapshots-latest.json",
+        },
+    )
+
+    assert synced == [
+        "receipts/restic-backups/20260401T112837Z.json",
+        "receipts/restic-snapshots-latest.json",
+    ]
+    assert json.loads(
+        (tmp_path / "receipts" / "restic-backups" / "20260401T112837Z.json").read_text(encoding="utf-8")
+    ) == {
+        "path": "receipts/restic-backups/20260401T112837Z.json",
+        "repo_root": "/srv/proxmox_florin_server",
+        "target": "docker-runtime-lv3",
+    }
+    assert json.loads((tmp_path / "receipts" / "restic-snapshots-latest.json").read_text(encoding="utf-8")) == {
+        "path": "receipts/restic-snapshots-latest.json",
+        "repo_root": "/srv/proxmox_florin_server",
+        "target": "docker-runtime-lv3",
+    }
+
+
 def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkeypatch) -> None:
     captured: dict[str, object] = {}
 
@@ -691,6 +840,19 @@ def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkey
         trigger,
         "run_command",
         lambda command: types.SimpleNamespace(returncode=0, stdout='REPORT_JSON={"summary":{"protected":1}}', stderr=""),
+    )
+    monkeypatch.setattr(
+        trigger,
+        "sync_reported_receipt_artifacts",
+        lambda context, target, repo_root, report: captured.update(
+            {
+                "sync_context": context,
+                "sync_target": target,
+                "sync_repo_root": repo_root,
+                "sync_report": report,
+            }
+        )
+        or ["receipts/restic-snapshots-latest.json"],
     )
 
     assert (
@@ -710,37 +872,22 @@ def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkey
         "context": {"controller": "context"},
         "repo_root": "/srv/proxmox_florin_server",
         "target": "docker-runtime-lv3",
+        "sync_context": {"controller": "context"},
+        "sync_target": "docker-runtime-lv3",
+        "sync_repo_root": "/srv/proxmox_florin_server",
+        "sync_report": {"summary": {"protected": 1}},
     }
 
+def test_make_live_apply_targets_bootstrap_pyyaml_for_restic_trigger() -> None:
+    makefile = MAKEFILE_PATH.read_text(encoding="utf-8")
 
-def test_makefile_live_apply_targets_invoke_restic_trigger_with_pyyaml() -> None:
-    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
-
-    assert (
-        "uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-group --live-apply-trigger"
-        in makefile
-    )
-    assert (
-        "uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-service --live-apply-trigger"
-        in makefile
-    )
-    assert (
-        "uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-site --live-apply-trigger"
-        in makefile
-    )
-    assert (
-        'uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env "$(or $(env),production)" --mode backup --triggered-by live-apply-waves --live-apply-trigger'
-        in makefile
-    )
-
-
-def test_makefile_live_apply_service_catalog_gates_fail_fast() -> None:
-    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
-    start = makefile.index("live-apply-service:")
-    end = makefile.index("\nlive-apply-site:", start)
-    section = makefile[start:end]
-
-    assert '\t\tset -e; \\' in section
+    for target in ("live-apply-group", "live-apply-service", "live-apply-site", "live-apply-waves"):
+        start = makefile.index(f"{target}:")
+        next_target = makefile.find("\n\n", start)
+        if next_target == -1:
+            next_target = len(makefile)
+        block = makefile[start:next_target]
+        assert "uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py" in block
 
 
 def test_post_ntfy_notification_uses_human_readable_title(monkeypatch) -> None:

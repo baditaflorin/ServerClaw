@@ -1,4 +1,11 @@
+import json
+import os
 from pathlib import Path
+import re
+import subprocess
+import sys
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import yaml
 
@@ -116,6 +123,8 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert defaults["docker_runtime_chain_recheck_delay_seconds"] == 2
     assert defaults["docker_runtime_container_recovery_retries"] == 12
     assert defaults["docker_runtime_container_recovery_delay_seconds"] == 5
+    assert defaults["docker_runtime_openbao_recovery_timeout_seconds"] == 180
+    assert defaults["docker_runtime_openbao_recovery_delay_seconds"] == 5
     assert defaults["docker_runtime_nonpersistent_restart_policies"] == ["", "no"]
     assert ensure_task["vars"]["common_docker_bridge_chains_retries"] == "{{ docker_runtime_chain_recheck_retries }}"
     assert ensure_task["vars"]["common_docker_bridge_chains_delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
@@ -144,8 +153,21 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert "def combined_output(stdout, stderr):" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def exception_output(exc):" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "OPENBAO_HEALTH_URL" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "OPENBAO_SEAL_STATUS_URL" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "OPENBAO_UNSEAL_URL" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "OPENBAO_UNSEAL_KEYS" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "OPENBAO_RECOVERY_TIMEOUT_SECONDS" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "OPENBAO_RECOVERY_DELAY_SECONDS" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "read_openbao_json" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "submit_local_openbao_unseal_key" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "ensure_local_openbao_unsealed" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "wait_for_local_openbao" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "services_need_local_openbao" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "services_provide_local_openbao" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert '"http://127.0.0.1:8201/v1/sys/health"' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert '"http://127.0.0.1:8201/v1/sys/seal-status"' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert '"http://127.0.0.1:8201/v1/sys/unseal"' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "def compose_group_sort_key(item):" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "No chain/target/match by that name" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "failed to create endpoint" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "retry_on_any_error=True" in recover_containers["ansible.builtin.command"]["argv"][2]
@@ -156,7 +178,15 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert "def is_local_openbao_group(" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'normalized_working_dir == "/opt/openbao"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert '"lv3-openbao" in container_names' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'if "openbao-agent" in services and not local_openbao_group:' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'service.endswith("-openbao-agent")' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'service == "openbao"' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "if services_provide_local_openbao(services):" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "elif services_need_local_openbao(services):" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "def compose_group_recovery_sort_key(item):" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "return compose_group_sort_key(item)" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "if services_need_local_openbao(services) and not local_openbao_group:" in (
+        recover_containers["ansible.builtin.command"]["argv"][2]
+    )
     assert 'remove_command = ["docker", "rm", "-f", *container_names]' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'recovery_command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'down_command.extend(["down", "--remove-orphans"])' in recover_containers["ansible.builtin.command"]["argv"][2]
@@ -176,8 +206,16 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     )
     assert '["docker", "inspect", container_name]' in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert "NONPERSISTENT_RESTART_POLICIES" in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert "SUCCESSFUL_EXIT_RESTART_POLICIES" in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert "restart_policy_name" in confirm_recovery["ansible.builtin.command"]["argv"][2]
-    assert "require_running = restart_policy_name not in NONPERSISTENT_RESTART_POLICIES" in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert (
+        'SUCCESSFUL_EXIT_RESTART_POLICIES = NONPERSISTENT_RESTART_POLICIES | {"on-failure"}'
+        in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    )
+    assert "require_running = restart_policy_name not in SUCCESSFUL_EXIT_RESTART_POLICIES" in (
+        confirm_recovery["ansible.builtin.command"]["argv"][2]
+    )
+    assert "restart_policy_name in SUCCESSFUL_EXIT_RESTART_POLICIES" in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert 'and status == "exited"' in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert '"healthy": healthy' in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert "sys.exit(0 if all_running else 1)" in confirm_recovery["ansible.builtin.command"]["argv"][2]
@@ -186,13 +224,193 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert confirm_recovery["until"] == "docker_runtime_recovered_container_inspect.rc == 0"
 
 
+def test_docker_runtime_accepts_clean_on_failure_exit_after_restart(tmp_path: Path) -> None:
+    tasks = load_tasks()
+    confirm_recovery = next(task for task in tasks if task["name"] == "Confirm pre-restart containers recovered after Docker restarts")
+    script = confirm_recovery["ansible.builtin.command"]["argv"][2]
+    script = script.replace(
+        "{{ docker_runtime_nonpersistent_restart_policies | to_json }}",
+        json.dumps(load_defaults()["docker_runtime_nonpersistent_restart_policies"]),
+    )
+    fake_docker = tmp_path / "docker"
+    fake_docker.write_text(
+        """#!/bin/sh
+if [ "$1" = "inspect" ] && [ "$2" = "plane-migrator" ]; then
+  cat <<'JSON'
+[{"Name":"/plane-migrator","State":{"Running":false,"Status":"exited","ExitCode":0}}]
+JSON
+  exit 0
+fi
+echo "unexpected command: $*" >&2
+exit 1
+"""
+    )
+    fake_docker.chmod(0o755)
+
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        input=json.dumps(
+            [
+                {
+                    "Name": "/plane-migrator",
+                    "HostConfig": {"RestartPolicy": {"Name": "on-failure"}},
+                }
+            ]
+        ),
+        text=True,
+        capture_output=True,
+        env={
+            **os.environ,
+            "PATH": f"{tmp_path}:{os.environ['PATH']}",
+        },
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    statuses = json.loads(result.stdout)
+    assert statuses == [
+        {
+            "requested_name": "plane-migrator",
+            "full_name": "/plane-migrator",
+            "exists": True,
+            "restart_policy_name": "on-failure",
+            "require_running": False,
+            "running": False,
+            "status": "exited",
+            "exit_code": 0,
+            "healthy": True,
+        }
+    ]
+
+
+def test_docker_runtime_unseals_openbao_before_recovering_openbao_agent(tmp_path: Path) -> None:
+    tasks = load_tasks()
+    recover_containers = next(
+        task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
+    )
+    script = recover_containers["ansible.builtin.command"]["argv"][2]
+    script = script.replace("{{ docker_runtime_openbao_recovery_timeout_seconds | int }}", "5")
+    script = script.replace("{{ docker_runtime_openbao_recovery_delay_seconds | int }}", "0")
+    script = re.sub(
+        r"OPENBAO_UNSEAL_KEYS = \{\{.*?\n\s*OPENBAO_RECOVERY_TIMEOUT_SECONDS =",
+        'OPENBAO_UNSEAL_KEYS = ["key-1", "key-2", "key-3"]\nOPENBAO_RECOVERY_TIMEOUT_SECONDS =',
+        script,
+        flags=re.DOTALL,
+    )
+
+    class OpenBaoState:
+        sealed = True
+        unseal_attempts = 0
+
+    class Handler(BaseHTTPRequestHandler):
+        def _write_json(self, status: int, payload: dict) -> None:
+            body = json.dumps(payload).encode()
+            self.send_response(status)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def do_GET(self) -> None:  # noqa: N802
+            if self.path == "/v1/sys/seal-status":
+                self._write_json(200, {"sealed": OpenBaoState.sealed})
+                return
+            if self.path == "/v1/sys/health":
+                if OpenBaoState.sealed:
+                    self._write_json(503, {"sealed": True})
+                    return
+                self._write_json(200, {"sealed": False})
+                return
+            self._write_json(404, {"error": "not found"})
+
+        def do_POST(self) -> None:  # noqa: N802
+            if self.path == "/v1/sys/unseal":
+                OpenBaoState.unseal_attempts += 1
+                if OpenBaoState.unseal_attempts >= 2:
+                    OpenBaoState.sealed = False
+                self._write_json(200, {"sealed": OpenBaoState.sealed})
+                return
+            self._write_json(404, {"error": "not found"})
+
+        def log_message(self, format: str, *args: object) -> None:
+            return
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base_url = f"http://127.0.0.1:{server.server_port}"
+    script = script.replace(
+        'OPENBAO_HEALTH_URL = "http://127.0.0.1:8201/v1/sys/health"',
+        f'OPENBAO_HEALTH_URL = "{base_url}/v1/sys/health"',
+    )
+    script = script.replace(
+        'OPENBAO_SEAL_STATUS_URL = "http://127.0.0.1:8201/v1/sys/seal-status"',
+        f'OPENBAO_SEAL_STATUS_URL = "{base_url}/v1/sys/seal-status"',
+    )
+    script = script.replace(
+        'OPENBAO_UNSEAL_URL = "http://127.0.0.1:8201/v1/sys/unseal"',
+        f'OPENBAO_UNSEAL_URL = "{base_url}/v1/sys/unseal"',
+    )
+
+    fake_docker = tmp_path / "docker"
+    fake_docker.write_text(
+        """#!/bin/sh
+if [ "$1" = "compose" ]; then
+  exit 0
+fi
+echo "unexpected command: $*" >&2
+exit 1
+"""
+    )
+    fake_docker.chmod(0o755)
+
+    compose_file = tmp_path / "docker-compose.yml"
+    compose_file.write_text("services: {}\n")
+
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        input=json.dumps(
+            [
+                {
+                    "Name": "/typesense-openbao-agent-1",
+                    "Config": {
+                        "Labels": {
+                            "com.docker.compose.project.working_dir": str(tmp_path),
+                            "com.docker.compose.project.config_files": str(compose_file),
+                            "com.docker.compose.service": "openbao-agent",
+                        }
+                    },
+                }
+            ]
+        ),
+        text=True,
+        capture_output=True,
+        env={
+            **os.environ,
+            "PATH": f"{tmp_path}:{os.environ['PATH']}",
+        },
+        check=False,
+    )
+
+    server.shutdown()
+    server.server_close()
+    thread.join(timeout=2)
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert OpenBaoState.unseal_attempts == 2
+    assert OpenBaoState.sealed is False
+
+
 def test_common_docker_bridge_chains_warms_control_socket_before_restarting() -> None:
     tasks = load_common_docker_bridge_chains()
     task_names = {task["name"] for task in tasks}
     assert "Warm the Docker control socket before chain health checks" in task_names
+    assert "Reset SSH connection before Docker bridge-chain recovery checks" in task_names
+    assert "Wait for SSH before Docker bridge-chain recovery checks" in task_names
     assert "Wait briefly for Docker bridge chains to recover after daemon activation" in task_names
     assert "Restart Docker when required bridge chains are missing" in task_names
     info_ready = next(task for task in tasks if task["name"] == "Warm the Docker control socket before chain health checks")
+    wait_for_ssh = next(task for task in tasks if task["name"] == "Wait for SSH before Docker bridge-chain recovery checks")
     chain_wait = next(
         task for task in tasks if task["name"] == "Wait briefly for Docker bridge chains to recover after daemon activation"
     )
@@ -215,6 +433,13 @@ def test_common_docker_bridge_chains_warms_control_socket_before_restarting() ->
     assert info_ready["retries"] == "{{ common_docker_bridge_chains_retries }}"
     assert info_ready["delay"] == "{{ common_docker_bridge_chains_delay }}"
     assert info_ready["until"] == "common_docker_bridge_chains_info_ready.rc == 0"
+    assert wait_for_ssh["ansible.builtin.wait_for_connection"]["timeout"] == (
+        "{{ ((common_docker_bridge_chains_retries | int) * (common_docker_bridge_chains_delay | int)) + 60 }}"
+    )
+    assert wait_for_ssh["ansible.builtin.wait_for_connection"]["connect_timeout"] == 5
+    assert wait_for_ssh["ansible.builtin.wait_for_connection"]["sleep"] == (
+        "{{ [common_docker_bridge_chains_delay | int, 1] | max }}"
+    )
     assert "iptables -t nat -S DOCKER" in chain_wait["ansible.builtin.shell"]
     assert "iptables -t filter -S DOCKER-FORWARD" in chain_wait["ansible.builtin.shell"]
     assert "sleep {{ common_docker_bridge_chains_delay }}" in chain_wait["ansible.builtin.shell"]
@@ -292,6 +517,11 @@ def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() ->
     assert defaults["docker_runtime_publication_assurance_helper_local_path"] == (
         "{{ docker_runtime_controller_repo_root }}/scripts/docker_publication_assurance.py"
     )
+    assert defaults["docker_runtime_repo_root"] == "{{ inventory_dir | dirname }}"
+    assert (
+        defaults["docker_runtime_publication_assurance_script_src"]
+        == "{{ docker_runtime_repo_root }}/scripts/docker_publication_assurance.py"
+    )
     assert defaults["docker_runtime_publication_assurance_script_path"] == "/usr/local/bin/lv3-docker-publication-assurance"
     assert defaults["docker_runtime_publication_assurance_helper_source"] == (
         "{{ inventory_dir ~ '/../scripts/docker_publication_assurance.py' }}"
@@ -315,13 +545,14 @@ def test_docker_runtime_installs_publication_assurance_helper_before_chain_check
 
     assert install_task["ansible.builtin.copy"]["dest"] == "{{ docker_runtime_publication_assurance_script_path }}"
     assert install_task["ansible.builtin.copy"]["content"] == (
-        "{{ lookup('ansible.builtin.file', docker_runtime_publication_assurance_helper_local_path) }}"
+        "{{ lookup('ansible.builtin.file', docker_runtime_publication_assurance_script_src) }}"
     )
     assert tasks.index(install_task) < tasks.index(nftables_check_task)
 
 
 def test_docker_runtime_waits_out_background_apt_maintenance() -> None:
     tasks = load_tasks()
+    defaults = load_defaults()
     prereq_task = next(task for task in tasks if task["name"] == "Install Docker repository prerequisites")
     remove_conflicts_task = next(task for task in tasks if task["name"] == "Remove conflicting Docker packages")
     install_runtime_task = next(task for task in tasks if task["name"] == "Install Docker runtime packages")
@@ -330,20 +561,22 @@ def test_docker_runtime_waits_out_background_apt_maintenance() -> None:
     remove_conflicts_apt = remove_conflicts_task["ansible.builtin.apt"]
     install_runtime_apt = install_runtime_task["ansible.builtin.apt"]
 
+    assert defaults["docker_runtime_apt_lock_timeout"] == 1200
+
     assert prereq_apt["name"] == "{{ docker_runtime_prereq_packages }}"
     assert prereq_apt["state"] == "present"
     assert prereq_apt["update_cache"] is True
-    assert prereq_apt["lock_timeout"] == 300
+    assert prereq_apt["lock_timeout"] == "{{ docker_runtime_apt_lock_timeout }}"
     assert prereq_apt["force_apt_get"] is True
 
     assert remove_conflicts_apt["name"] == "{{ docker_runtime_conflicting_packages }}"
     assert remove_conflicts_apt["state"] == "absent"
-    assert remove_conflicts_apt["lock_timeout"] == 300
+    assert remove_conflicts_apt["lock_timeout"] == "{{ docker_runtime_apt_lock_timeout }}"
 
     assert install_runtime_apt["name"] == "{{ docker_runtime_engine_packages }}"
     assert install_runtime_apt["state"] == "present"
     assert install_runtime_apt["update_cache"] is True
-    assert install_runtime_apt["lock_timeout"] == 300
+    assert install_runtime_apt["lock_timeout"] == "{{ docker_runtime_apt_lock_timeout }}"
     assert install_runtime_apt["force_apt_get"] is True
 
 

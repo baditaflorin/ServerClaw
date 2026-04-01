@@ -74,6 +74,11 @@ class OpsPortalRenderTests(unittest.TestCase):
             self.assertIn("ops.lv3.org", dns_html)
             self.assertIn("get-platform-status", agents_html)
             self.assertIn("Agent Coordination Map", agents_html)
+            self.assertIn("0274-minio-as-the-s3-compatible-object-storage-layer.md", index_html)
+            self.assertNotIn(
+                "0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md",
+                index_html,
+            )
             self.assertEqual(snapshot_file.read_text(), index_html)
         finally:
             ops_portal.active_ephemeral_receipts = original_receipts

@@ -5,8 +5,21 @@
 # Idempotency: Fully idempotent because this file only declares role defaults.
 # Dependencies: ADR 0165, ADR 0092, ADR 0175, and ADR 0197.
 ---
-api_gateway_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('api_gateway') }}"
+api_gateway_service_topology: >-
+  {{
+    hostvars['proxmox_florin'].platform_service_topology.api_gateway
+    | default(
+        hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('api_gateway')
+      )
+  }}
 api_gateway_windmill_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('windmill') }}"
+api_gateway_lago_service_topology: >-
+  {{
+    hostvars['proxmox_florin'].platform_service_topology.lago
+    | default(
+        hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('lago')
+      )
+  }}
 api_gateway_repo_root: "{{ inventory_dir | dirname }}"
 api_gateway_site_dir: /opt/api-gateway
 api_gateway_service_dir: "{{ api_gateway_site_dir }}/service"
@@ -162,10 +175,46 @@ api_gateway_platform_vars_src: "{{ api_gateway_repo_root }}/inventory/group_vars
 api_gateway_drift_receipts_glob: "{{ api_gateway_repo_root }}/receipts/drift-reports/*.json"
 api_gateway_platform_context_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt
 api_gateway_dify_tools_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/tools-api-key.txt
+api_gateway_billing_ingest_producers_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/producer-catalog.json
+api_gateway_lago_org_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/org-api-key.txt
 api_gateway_dify_tools_api_key_header: X-LV3-Dify-Api-Key
+api_gateway_typesense_service_topology: >-
+  {{
+    (
+      platform_service_topology | service_topology_get('typesense')
+    )
+    if (platform_service_topology is defined)
+    else (
+      hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('typesense')
+    )
+  }}
+api_gateway_typesense_controller_url: >-
+  {{
+    (
+      api_gateway_typesense_service_topology.urls.controller
+    )
+    if (
+      api_gateway_typesense_service_topology is mapping
+      and api_gateway_typesense_service_topology.urls is defined
+      and api_gateway_typesense_service_topology.urls.controller is defined
+    )
+    else (
+      'http://'
+      ~ hostvars['proxmox_florin'].management_tailscale_ipv4
+      ~ ':'
+      ~ (hostvars['proxmox_florin'].typesense_host_proxy_port | string)
+    )
+  }}
+api_gateway_typesense_base_url: http://127.0.0.1:8108
+api_gateway_typesense_collection: platform-services
+api_gateway_typesense_api_key_local_file: "{{ api_gateway_shared_local_root }}/typesense/api-key.txt"
+api_gateway_typesense_sync_script: "{{ api_gateway_repo_root }}/scripts/typesense_catalog_sync.py"
 api_gateway_windmill_base_url: "http://{{ api_gateway_windmill_service_topology.private_ip }}:{{ windmill_server_port }}"
 api_gateway_windmill_token_local_file: "{{ api_gateway_shared_local_root }}/windmill/superadmin-secret.txt"
 api_gateway_runbook_runs_dir: /data/runbooks/runs
+api_gateway_billing_api_base_url: "{{ api_gateway_lago_service_topology.urls.api | default('') }}"
+api_gateway_billing_ingest_producers_path: /config/billing-ingest-producers.json
+api_gateway_billing_rejection_subject: billing.events.rejected
 api_gateway_sources:
   - src: "{{ api_gateway_repo_root }}/.githooks/pre-push"
     dest: .githooks/pre-push
@@ -245,7 +294,11 @@ api_gateway_keycloak_verify_ready_retries: 60
 api_gateway_keycloak_verify_ready_delay: 5
 api_gateway_keycloak_verify_token_retries: 18
 api_gateway_keycloak_verify_token_delay: 5
+api_gateway_structured_search_verify_retries: 12
+api_gateway_structured_search_verify_delay: 5
 api_gateway_keycloak_docker_network: keycloak_default
+api_gateway_runtime_recovery_probe_retries: 18
+api_gateway_runtime_recovery_probe_delay: 5
 api_gateway_runtime_config_probe_path: /app/config/ledger-event-types.yaml
 api_gateway_runtime_packaged_probe_paths:
   - /app/.gitea/workflows/release-bundle.yml
@@ -290,6 +343,18 @@ api_gateway_include_upstream_openapi: false
 api_gateway_dify_tools_api_key: >-
   {{
     lookup('ansible.builtin.file', api_gateway_dify_tools_api_key_local_file, errors='ignore')
+    | default('', true)
+    | trim
+  }}
+api_gateway_lago_org_api_key: >-
+  {{
+    lookup('ansible.builtin.file', api_gateway_lago_org_api_key_local_file, errors='ignore')
+    | default('', true)
+    | trim
+  }}
+api_gateway_typesense_api_key: >-
+  {{
+    lookup('ansible.builtin.file', api_gateway_typesense_api_key_local_file, errors='ignore')
     | default('', true)
     | trim
   }}

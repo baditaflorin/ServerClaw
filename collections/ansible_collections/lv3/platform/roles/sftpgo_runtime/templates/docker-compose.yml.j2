@@ -1,0 +1,55 @@
+services:
+  openbao-agent:
+    image: {{ sftpgo_openbao_agent_image }}
+    container_name: {{ sftpgo_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ sftpgo_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ sftpgo_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ sftpgo_env_file | dirname }}:{{ sftpgo_env_file | dirname }}
+
+  sftpgo:
+    image: {{ sftpgo_image }}
+    container_name: {{ sftpgo_container_name }}
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+    extra_hosts:
+{% for item in sftpgo_public_hostname_overrides %}
+      - "{{ item.hostname }}:{{ item.address }}"
+{% endfor %}
+    env_file:
+      - {{ sftpgo_env_file }}
+    ports:
+      - "{{ ansible_host }}:{{ sftpgo_sftp_port }}:{{ sftpgo_sftp_port }}"
+      - "127.0.0.1:{{ sftpgo_sftp_port }}:{{ sftpgo_sftp_port }}"
+      - "{{ ansible_host }}:{{ sftpgo_webdav_port }}:{{ sftpgo_webdav_port }}"
+      - "127.0.0.1:{{ sftpgo_webdav_port }}:{{ sftpgo_webdav_port }}"
+      - "{{ ansible_host }}:{{ sftpgo_admin_port }}:{{ sftpgo_admin_port }}"
+      - "127.0.0.1:{{ sftpgo_admin_port }}:{{ sftpgo_admin_port }}"
+    volumes:
+      - {{ sftpgo_config_file }}:/etc/sftpgo/sftpgo.json:ro
+      - {{ sftpgo_data_dir }}:/srv/sftpgo/data
+      - {{ sftpgo_state_dir }}:/var/lib/sftpgo
+      - {{ sftpgo_plugin_dir }}:/plugins:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider http://127.0.0.1:{{ sftpgo_admin_port }}/healthz || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 24

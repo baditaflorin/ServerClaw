@@ -1,0 +1,9 @@
+FROM {{ superset_base_image }}
+
+USER root
+
+COPY requirements.txt /tmp/requirements.txt
+RUN /app/.venv/bin/python -m ensurepip --default-pip \
+    && /app/.venv/bin/python -m pip install --no-cache-dir -r /tmp/requirements.txt
+
+USER superset

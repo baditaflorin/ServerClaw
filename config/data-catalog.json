@@ -691,6 +691,34 @@
       "notes": "The service-local MinIO bucket stores shared notebook assets and collaborative exploratory artifacts exchanged between operators."
     },
     {
+      "id": "lago-billing-control-plane-state",
+      "service": "lago",
+      "name": "Lago billing catalog and usage state",
+      "class": "confidential",
+      "retention_days": 1825,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "Lago PostgreSQL database on postgres-lv3"
+      ],
+      "notes": "Lago stores billable metrics, plans, customers, subscriptions, invoices, credit notes, and aggregated usage records that may include tenant identifiers and billing contacts."
+    },
+    {
+      "id": "lago-generated-billing-artifacts",
+      "service": "lago",
+      "name": "Lago generated billing artifacts",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/lago/data/storage on docker-runtime-lv3"
+      ],
+      "notes": "The Lago storage directory retains generated invoice exports, PDF-ready billing artifacts, and other runtime files needed for billing-history reconstruction."
+    },
+    {
       "id": "plane-object-storage",
       "service": "plane",
       "name": "Plane attachment object storage",
@@ -746,6 +774,34 @@
         "Docker volume plausible-data"
       ],
       "notes": "PostgreSQL-backed site configuration, dashboard state, and the bootstrap recovery user metadata remain restorable with the runtime volumes."
+    },
+    {
+      "id": "minio-shared-object-storage",
+      "service": "minio",
+      "name": "Shared object storage buckets and IAM metadata",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/minio/data"
+      ],
+      "notes": "Repo-managed MinIO stores shared service objects, bucket metadata, and bucket-level lifecycle policy state for Loki, Langfuse exports, Gitea LFS, and RAG staging."
+    },
+    {
+      "id": "platform-context-staging-objects",
+      "service": "platform_context_api",
+      "name": "Platform-context staging object storage",
+      "class": "confidential",
+      "retention_days": 14,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "s3://rag-staging"
+      ],
+      "notes": "Raw document uploads stage in the shared MinIO bucket before extraction and should expire quickly to limit retained sensitive source material."
     },
     {
       "id": "promotion-receipts",
@@ -823,6 +879,35 @@
         "/etc/pve/local/pve-ssl.*"
       ],
       "notes": "Runtime keys are rotated with certificate renewal and old material should not persist beyond the overlap window."
+    },
+    {
+      "id": "typesense-platform-service-index",
+      "service": "typesense",
+      "name": "Typesense platform service index",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "Docker volume typesense-data on docker-runtime-lv3",
+        "Typesense collection platform-services"
+      ],
+      "notes": "The repo-managed platform service catalog is materialized into Typesense as a derived full-text and faceted-search index and can be replayed from git after restore."
+    },
+    {
+      "id": "superset-metadata-and-managed-assets",
+      "service": "superset",
+      "name": "Superset metadata and managed BI assets",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "PostgreSQL database postgres on postgres-lv3, schema superset"
+      ],
+      "notes": "Superset persists datasource definitions, saved queries, charts, dashboards, and user-generated BI metadata in the managed superset schema, so the schema should remain recoverable with the shared PostgreSQL backup policy."
     },
     {
       "id": "vaultwarden-shared-vault",

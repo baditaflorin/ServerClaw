@@ -1,3 +1,34 @@
+---
+# Playbook: openbao.yml
+# Purpose: Converge OpenBao, its PostgreSQL dynamic-credential backend, and the controller-side end-to-end verification path.
+# Use case: Run during OpenBao deployment, recovery, or contract verification when the secrets authority and dynamic PostgreSQL credentials must match repo truth.
+#
+# Inputs (required):
+#   - openbao_init_local_file (string, required): Controller-local init payload used to re-establish the unsealed runtime state before delegated verification.
+#   - openbao_controller_approle_local_file (string, required): Controller-local AppRole artifact used by the managed end-to-end verification login.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Selects the target environment lane.
+#
+# Outputs:
+#   - OpenBao runtime state, PostgreSQL backend policy, and controller-side dynamic credential verification are reconciled to the declared platform contract.
+#
+# Idempotency: Partially idempotent
+#              Reruns reconcile the runtime and backend safely, but the verification lane issues live auth and database credentials against the current environment state.
+#
+# Dependencies:
+#   - ADR 0043: Defines OpenBao as the platform secrets authority and dynamic credential plane.
+#   - ADR 0165: Requires the playbook metadata contract for repo-managed automation.
+#   - Requires: docker-runtime-lv3, the target PostgreSQL lane, and the controller-local OpenBao bootstrap artifacts.
+#   - Role: lv3.platform.openbao_postgres_backend - configures PostgreSQL for managed OpenBao dynamic credentials.
+#   - Role: lv3.platform.openbao_runtime - converges OpenBao and restores the unsealed runtime state when needed.
+#
+# Related ADRs: 0043, 0077, 0165
+# Related Runbooks: docs/runbooks/openbao-secrets.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-31
+
 - name: Prepare PostgreSQL for OpenBao dynamic credentials
   hosts: "{{ 'postgres_guests:&staging' if (env | default('production')) == 'staging' else 'postgres_guests:&production' }}"
   become: true
@@ -53,6 +84,37 @@
       vars:
         playbook_execution_notification_service: openbao
 
+- name: Ensure OpenBao remains unsealed before PostgreSQL end-to-end verification
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: false
+  tags:
+    - tier-2
+    - security
+    - service-openbao
+
+  tasks:
+    - name: Read the OpenBao init payload from the control machine
+      ansible.builtin.slurp:
+        src: "{{ openbao_init_local_file }}"
+      delegate_to: localhost
+      become: false
+      register: openbao_verify_init_payload_raw
+      no_log: true
+
+    - name: Record the OpenBao init payload facts for verification
+      ansible.builtin.set_fact:
+        openbao_verify_init_payload: "{{ openbao_verify_init_payload_raw.content | b64decode | from_json }}"
+      no_log: true
+
+    - name: Ensure OpenBao remains unsealed before PostgreSQL end-to-end verification
+      ansible.builtin.include_role:
+        name: lv3.platform.openbao_runtime
+        tasks_from: ensure_unsealed.yml
+      vars:
+        openbao_unseal_context: PostgreSQL end-to-end verification
+        openbao_unseal_init_payload: "{{ openbao_verify_init_payload }}"
+
 - name: Verify PostgreSQL dynamic credentials end to end
   hosts: "{{ 'postgres_guests:&staging' if (env | default('production')) == 'staging' else 'postgres_guests:&production' }}"
   become: true
@@ -87,6 +149,7 @@
         return_content: true
         status_code: 200
       delegate_to: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+      become: false
       register: openbao_verify_controller_login
       no_log: true
 
@@ -99,6 +162,7 @@
         return_content: true
         status_code: 200
       delegate_to: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+      become: false
       register: openbao_verify_postgres_dynamic_credential
       retries: 6
       delay: 5

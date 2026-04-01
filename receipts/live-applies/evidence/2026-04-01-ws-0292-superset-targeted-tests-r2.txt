@@ -1,0 +1,17 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply
+configfile: pytest.ini
+collected 104 items
+
+tests/test_superset_runtime_role.py .........                            [  8%]
+tests/test_generate_platform_vars.py ................................... [ 42%]
+........                                                                 [ 50%]
+tests/test_superset_playbook.py ....                                     [ 53%]
+tests/test_openbao_compose_env_helper.py .                               [ 54%]
+tests/test_openbao_systemd_credentials_helper.py ..                      [ 56%]
+tests/test_compose_runtime_secret_injection.py ............              [ 68%]
+tests/test_docker_runtime_role.py ............                           [ 79%]
+tests/test_keycloak_runtime_role.py .....................                [100%]
+
+============================= 104 passed in 7.24s ==============================

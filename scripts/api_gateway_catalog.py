@@ -25,6 +25,8 @@ SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
 SUPPORTED_SCHEMA_VERSION = "1.0.0"
 IDENTIFIER_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_]*$")
 ENV_VAR_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]*$")
+HEADER_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9-]*$")
+AUTH_SCHEMES = {"bearer", "raw"}
 
 
 def require_mapping(value: Any, path: str) -> dict[str, Any]:
@@ -171,6 +173,20 @@ def validate_api_gateway_catalog(
             if not ENV_VAR_PATTERN.match(upstream_auth_env_var):
                 raise ValueError(f"{path}.upstream_auth_env_var must be an uppercase env var name")
             normalized_service["upstream_auth_env_var"] = upstream_auth_env_var
+
+        upstream_auth_header = service.get("upstream_auth_header")
+        if upstream_auth_header is not None:
+            upstream_auth_header = require_str(upstream_auth_header, f"{path}.upstream_auth_header")
+            if not HEADER_PATTERN.match(upstream_auth_header):
+                raise ValueError(f"{path}.upstream_auth_header must be a valid HTTP header name")
+            normalized_service["upstream_auth_header"] = upstream_auth_header
+
+        upstream_auth_scheme = service.get("upstream_auth_scheme")
+        if upstream_auth_scheme is not None:
+            upstream_auth_scheme = require_str(upstream_auth_scheme, f"{path}.upstream_auth_scheme")
+            if upstream_auth_scheme not in AUTH_SCHEMES:
+                raise ValueError(f"{path}.upstream_auth_scheme must be one of {sorted(AUTH_SCHEMES)}")
+            normalized_service["upstream_auth_scheme"] = upstream_auth_scheme
 
         normalized.append(normalized_service)
 

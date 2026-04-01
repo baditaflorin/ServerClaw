@@ -1,0 +1,465 @@
+---
+# Purpose: Converge the Vikunja runtime stack, managed secrets, webhook bridge, and controller-local access files.
+# Use case: Run during Vikunja deployment or replay on docker-runtime-lv3 after the Vikunja PostgreSQL backend is prepared.
+#
+# Inputs (required):
+#   - vikunja_site_dir (path, required): Runtime root directory.
+#   - vikunja_secret_dir (path, required): Guest-side secret directory.
+#   - vikunja_compose_file (path, required): Managed compose file path.
+#   - vikunja_env_file (path, required): Managed runtime environment file path.
+#   - vikunja_internal_port (int, required): Internal Vikunja listener port.
+#   - vikunja_controller_url (str, required): Host-controller access URL.
+#   - vikunja_public_base_url (str, required): Public base URL.
+#   - vikunja_database_password_local_file (path, required): Controller-local database password artifact.
+#   - vikunja_api_token_local_file (path, required): Controller-local Vikunja API token artifact.
+#
+# Outputs:
+#   - Managed Vikunja compose stack, rendered secrets, bootstrap artifacts, controller auth files, and synchronized project state.
+#
+# Idempotency: Fully idempotent
+#              Secrets are generated once and reused, compose replay is repeatable, and bootstrap/sync steps tolerate retries and existing state.
+#
+# Dependencies:
+#   - ADR 0286: Defines the Vikunja deployment, alert bridge, and controller access path.
+#   - Requires: vikunja_postgres has already created the Vikunja database password artifact.
+#   - Role: vikunja_runtime — converges the runtime and bootstrap flow.
+#
+# Related ADRs: 0063, 0077, 0165, 0276, 0286
+# Related Runbooks: docs/runbooks/configure-vikunja.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+- name: Validate Vikunja runtime inputs
+  ansible.builtin.assert:
+    that:
+      - vikunja_site_dir | length > 0
+      - vikunja_secret_dir | length > 0
+      - vikunja_compose_file | length > 0
+      - vikunja_env_file | length > 0
+      - vikunja_internal_port | int > 0
+      - vikunja_controller_url | length > 0
+      - vikunja_public_base_url | length > 0
+      - vikunja_database_password_local_file | length > 0
+      - vikunja_keycloak_client_secret_local_file | length > 0
+      - vikunja_event_nats_password_local_file | length > 0
+      - vikunja_image | length > 0
+      - vikunja_bridge_image | length > 0
+    fail_msg: >-
+      vikunja_runtime requires runtime paths, pinned image refs, database auth,
+      the Keycloak OIDC client secret, and the NATS publish credential.
+
+- name: Ensure the Vikunja database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ vikunja_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: vikunja_database_password_local
+
+- name: Ensure the Vikunja Keycloak client secret exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ vikunja_keycloak_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: vikunja_keycloak_client_secret_local
+
+- name: Ensure the NATS publish password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ vikunja_event_nats_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: vikunja_event_nats_password_local
+
+- name: Fail if the Vikunja database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ vikunja_database_password_local_file }} is missing on the control machine.
+      Converge vikunja_postgres before deploying Vikunja.
+  when: not vikunja_database_password_local.stat.exists
+
+- name: Fail if the Vikunja Keycloak client secret is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ vikunja_keycloak_client_secret_local_file }} is missing on the control machine.
+      Converge the Keycloak runtime before deploying Vikunja.
+  when: not vikunja_keycloak_client_secret_local.stat.exists
+
+- name: Fail if the NATS publish password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ vikunja_event_nats_password_local_file }} is missing on the control machine.
+      Converge the NATS runtime before deploying the Vikunja webhook bridge.
+  when: not vikunja_event_nats_password_local.stat.exists
+
+- name: Ensure the Vikunja runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+      - python3
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Vikunja runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ vikunja_site_dir }}"
+      mode: "0755"
+    - path: "{{ vikunja_data_dir }}"
+      mode: "0755"
+    - path: "{{ vikunja_files_dir }}"
+      owner: "1000"
+      group: "0"
+      mode: "0750"
+    - path: "{{ vikunja_secret_dir }}"
+      mode: "0700"
+
+- name: Generate the Vikunja runtime secrets
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      {{ item.command }} > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - path: "{{ vikunja_service_secret_remote_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ vikunja_webhook_secret_remote_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ vikunja_automation_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\\n'"
+    - path: "{{ vikunja_operator_shadow_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\\n'"
+  register: vikunja_secret_generation
+  changed_when: "'changed' in vikunja_secret_generation.stdout"
+  no_log: true
+
+- name: Read the Vikunja runtime secrets
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  register: vikunja_secret_reads
+  loop:
+    - "{{ vikunja_service_secret_remote_file }}"
+    - "{{ vikunja_webhook_secret_remote_file }}"
+    - "{{ vikunja_automation_password_remote_file }}"
+    - "{{ vikunja_operator_shadow_password_remote_file }}"
+  no_log: true
+
+- name: Record the Vikunja runtime secrets
+  ansible.builtin.set_fact:
+    vikunja_service_secret: "{{ vikunja_secret_reads.results[0].content | b64decode | trim }}"
+    vikunja_webhook_secret: "{{ vikunja_secret_reads.results[1].content | b64decode | trim }}"
+    vikunja_automation_password: "{{ vikunja_secret_reads.results[2].content | b64decode | trim }}"
+    vikunja_operator_shadow_password: "{{ vikunja_secret_reads.results[3].content | b64decode | trim }}"
+    vikunja_database_password: "{{ lookup('ansible.builtin.file', vikunja_database_password_local_file) | trim }}"
+    vikunja_keycloak_client_secret: "{{ lookup('ansible.builtin.file', vikunja_keycloak_client_secret_local_file) | trim }}"
+    vikunja_event_nats_password: "{{ lookup('ansible.builtin.file', vikunja_event_nats_password_local_file) | trim }}"
+    vikunja_runtime_secret_payload:
+      VIKUNJA_SERVICE_SECRET: "{{ vikunja_secret_reads.results[0].content | b64decode | trim }}"
+      VIKUNJA_DATABASE_PASSWORD: "{{ lookup('ansible.builtin.file', vikunja_database_password_local_file) | trim }}"
+      VIKUNJA_AUTH_OPENID_PROVIDERS_LV3_CLIENTSECRET: "{{ lookup('ansible.builtin.file', vikunja_keycloak_client_secret_local_file) | trim }}"
+      VIKUNJA_WEBHOOK_SECRET: "{{ vikunja_secret_reads.results[1].content | b64decode | trim }}"
+      VIKUNJA_EVENT_NATS_PASSWORD: "{{ lookup('ansible.builtin.file', vikunja_event_nats_password_local_file) | trim }}"
+  no_log: true
+
+- name: Ensure the local Vikunja artifact directory exists
+  ansible.builtin.file:
+    path: "{{ vikunja_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the Vikunja runtime secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  loop:
+    - dest: "{{ vikunja_service_secret_local_file }}"
+      content: "{{ vikunja_service_secret }}"
+    - dest: "{{ vikunja_webhook_secret_local_file }}"
+      content: "{{ vikunja_webhook_secret }}"
+    - dest: "{{ vikunja_automation_password_local_file }}"
+      content: "{{ vikunja_automation_password }}"
+  no_log: true
+
+- name: Check whether the Vikunja API token already exists locally
+  ansible.builtin.stat:
+    path: "{{ vikunja_api_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: vikunja_api_token_local
+
+- name: Record whether Vikunja bootstrap local auth is required
+  ansible.builtin.set_fact:
+    vikunja_local_auth_enabled: "{{ not vikunja_api_token_local.stat.exists }}"
+
+- name: Prepare OpenBao agent runtime secret injection for Vikunja
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: vikunja
+    common_openbao_compose_env_agent_dir: "{{ vikunja_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ vikunja_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ vikunja_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ vikunja_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ vikunja_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ vikunja_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ vikunja_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ vikunja_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ vikunja_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ vikunja_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ vikunja_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: vikunja.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ vikunja_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ vikunja_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ vikunja_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ vikunja_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Vikunja webhook bridge script
+  ansible.builtin.copy:
+    src: vikunja-webhook-bridge.py
+    dest: "{{ vikunja_site_dir }}/vikunja-webhook-bridge.py"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the Vikunja environment file
+  ansible.builtin.template:
+    src: vikunja.env.j2
+    dest: "{{ vikunja_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: vikunja_env_template
+  no_log: true
+
+- name: Render the Vikunja compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ vikunja_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: vikunja_compose_template
+
+- name: Pull the Vikunja images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ vikunja_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ vikunja_site_dir }}"
+  register: vikunja_pull
+  retries: 3
+  delay: 15
+  until: vikunja_pull.rc == 0
+  changed_when: >-
+    'Pulling' in vikunja_pull.stdout
+    or 'Downloaded newer image' in vikunja_pull.stdout
+    or 'Pull complete' in vikunja_pull.stdout
+
+- name: Start the Vikunja runtime stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ vikunja_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ vikunja_site_dir }}"
+  register: vikunja_up
+  changed_when: >-
+    'Creating' in vikunja_up.stdout
+    or 'Recreating' in vikunja_up.stdout
+    or 'Starting' in vikunja_up.stdout
+
+- name: Wait for Vikunja to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ vikunja_internal_port }}"
+    delay: 0
+    timeout: 300
+
+- name: Wait for the Vikunja info endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ vikunja_internal_port }}/api/v1/info"
+    method: GET
+    status_code: 200
+    return_content: true
+    timeout: 30
+  register: vikunja_info
+  retries: 36
+  delay: 5
+  until: vikunja_info.status == 200
+  changed_when: false
+
+- name: Ensure the Vikunja automation user exists
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if docker exec {{ vikunja_container_name | quote }} /app/vikunja/vikunja user list --email {{ vikunja_automation_email | quote }} | grep -q {{ vikunja_automation_email | quote }}; then
+      echo "already-exists"
+      exit 0
+    fi
+    docker exec {{ vikunja_container_name | quote }} /app/vikunja/vikunja user create --username {{ vikunja_automation_username | quote }} --email {{ vikunja_automation_email | quote }} --password {{ vikunja_automation_password | quote }}
+    echo "created"
+  args:
+    executable: /bin/bash
+  register: vikunja_automation_user_result
+  changed_when: "'created' in vikunja_automation_user_result.stdout"
+  no_log: true
+
+- name: Ensure the Florin shadow user exists for OIDC fallback linking
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if docker exec {{ vikunja_container_name | quote }} /app/vikunja/vikunja user list --email {{ vikunja_operator_email | quote }} | grep -q {{ vikunja_operator_email | quote }}; then
+      echo "already-exists"
+      exit 0
+    fi
+    docker exec {{ vikunja_container_name | quote }} /app/vikunja/vikunja user create --username {{ vikunja_operator_username | quote }} --email {{ vikunja_operator_email | quote }} --password {{ vikunja_operator_shadow_password | quote }}
+    echo "created"
+  args:
+    executable: /bin/bash
+  register: vikunja_operator_user_result
+  changed_when: "'created' in vikunja_operator_user_result.stdout"
+  no_log: true
+
+- name: Bootstrap the Vikunja automation token when it is missing
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir | dirname }}/scripts/vikunja_tool.py"
+      - bootstrap
+      - --base-url
+      - "{{ vikunja_controller_url }}"
+      - --username
+      - "{{ vikunja_automation_username }}"
+      - --password-file
+      - "{{ vikunja_automation_password_local_file }}"
+      - --token-file
+      - "{{ vikunja_api_token_local_file }}"
+      - --auth-file
+      - "{{ vikunja_admin_auth_local_file }}"
+      - --token-title
+      - "{{ vikunja_automation_token_title }}"
+      - --expires-at
+      - "{{ vikunja_automation_token_expires_at }}"
+      - --public-url
+      - "{{ vikunja_public_base_url }}"
+      - --project-identifier
+      - "{{ vikunja_alert_task_project_identifier }}"
+      - --default-assignee
+      - "{{ vikunja_alert_task_default_assignee_username }}"
+  delegate_to: localhost
+  become: false
+  register: vikunja_bootstrap_token
+  changed_when: true
+  no_log: true
+  when: vikunja_local_auth_enabled
+
+- name: Disable local Vikunja auth after bootstrap
+  ansible.builtin.set_fact:
+    vikunja_local_auth_enabled: false
+  when: vikunja_bootstrap_token is changed
+
+- name: Render the Vikunja environment file after bootstrap auth disable
+  ansible.builtin.template:
+    src: vikunja.env.j2
+    dest: "{{ vikunja_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: vikunja_env_template_final
+  no_log: true
+  when: vikunja_bootstrap_token is changed
+
+- name: Recreate the Vikunja runtime after bootstrap auth disable
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ vikunja_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+      - --force-recreate
+  args:
+    chdir: "{{ vikunja_site_dir }}"
+  register: vikunja_recreate_after_bootstrap
+  changed_when: true
+  when: vikunja_bootstrap_token is changed
+
+- name: Wait for the Vikunja info endpoint after bootstrap auth disable
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ vikunja_internal_port }}/api/v1/info"
+    method: GET
+    status_code: 200
+    return_content: true
+    timeout: 30
+  register: vikunja_info_after_bootstrap
+  retries: 36
+  delay: 5
+  until: vikunja_info_after_bootstrap.status == 200
+  changed_when: false
+  when: vikunja_bootstrap_token is changed
+
+- name: Render the Vikunja desired-state specification locally
+  ansible.builtin.template:
+    src: desired-state.json.j2
+    dest: "{{ vikunja_desired_state_local_file }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Reconcile the repo-managed Vikunja project state
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir | dirname }}/scripts/vikunja_sync.py"
+      - --auth-file
+      - "{{ vikunja_admin_auth_local_file }}"
+      - --desired-state-file
+      - "{{ vikunja_desired_state_local_file }}"
+      - --summary-output
+      - "{{ vikunja_sync_summary_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: vikunja_state_sync
+  changed_when: >-
+    '"created"' in (vikunja_state_sync.stdout | lower)
+    or '"updated"' in (vikunja_state_sync.stdout | lower)
+    or '"deleted"' in (vikunja_state_sync.stdout | lower)
+
+- name: Verify the Vikunja runtime
+  ansible.builtin.import_tasks: verify.yml

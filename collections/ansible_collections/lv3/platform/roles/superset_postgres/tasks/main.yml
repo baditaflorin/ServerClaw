@@ -1,0 +1,325 @@
+# Purpose: Create the Superset metadata schema, the managed metadata/runtime role, and the read-only datasource role.
+# Use case: Run before the Superset runtime so the metadata database and datasource credentials already exist.
+# Inputs: PostgreSQL role names, schema name, remote secret paths, and controller-local artefact paths.
+# Outputs: The postgres database contains the managed superset schema plus durable controller-local password and catalog artefacts.
+# Idempotency: Partially idempotent because long-lived passwords are created only when missing and later runs reconcile database state in place.
+# Dependencies: ADR 0165, ADR 0042, and ADR 0292.
+---
+- name: Validate Superset PostgreSQL inputs
+  ansible.builtin.assert:
+    that:
+      - superset_database_name | length > 0
+      - superset_database_schema | length > 0
+      - superset_database_user | length > 0
+      - superset_reader_user | length > 0
+      - superset_postgres_secret_dir | length > 0
+      - superset_postgres_password_file | length > 0
+      - superset_reader_password_file | length > 0
+      - superset_database_password_local_file | length > 0
+      - superset_reader_password_local_file | length > 0
+      - superset_postgres_database_catalog_local_file | length > 0
+    fail_msg: >-
+      superset_postgres requires the metadata schema, managed role names, and
+      controller-local artefact paths.
+
+- name: Ensure the Superset PostgreSQL secret directory exists
+  ansible.builtin.file:
+    path: "{{ superset_postgres_secret_dir }}"
+    state: directory
+    owner: root
+    group: postgres
+    mode: "0750"
+
+- name: Ensure the local Superset artefact directory exists
+  ansible.builtin.file:
+    path: "{{ superset_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the Superset metadata database password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ superset_database_password_local_file }}" ]; then
+      umask 077
+      openssl rand -hex 24 > "{{ superset_database_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: superset_database_password_generation
+  changed_when: "'changed' in superset_database_password_generation.stdout"
+  no_log: true
+
+- name: Generate the Superset datasource reader password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ superset_reader_password_local_file }}" ]; then
+      umask 077
+      openssl rand -hex 24 > "{{ superset_reader_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: superset_reader_password_generation
+  changed_when: "'changed' in superset_reader_password_generation.stdout"
+  no_log: true
+
+- name: Read the Superset PostgreSQL passwords
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  delegate_to: localhost
+  become: false
+  register: superset_postgres_password_reads
+  loop:
+    - "{{ superset_database_password_local_file }}"
+    - "{{ superset_reader_password_local_file }}"
+  no_log: true
+
+- name: Record the Superset PostgreSQL passwords
+  ansible.builtin.set_fact:
+    superset_database_password: "{{ superset_postgres_password_reads.results[0].content | b64decode | trim }}"
+    superset_reader_password: "{{ superset_postgres_password_reads.results[1].content | b64decode | trim }}"
+  no_log: true
+
+- name: Persist the Superset metadata database password on the PostgreSQL member
+  ansible.builtin.copy:
+    dest: "{{ superset_postgres_password_file }}"
+    content: "{{ superset_database_password }}\n"
+    owner: root
+    group: postgres
+    mode: "0640"
+  no_log: true
+
+- name: Persist the Superset reader password on the PostgreSQL member
+  ansible.builtin.copy:
+    dest: "{{ superset_reader_password_file }}"
+    content: "{{ superset_reader_password }}\n"
+    owner: root
+    group: postgres
+    mode: "0640"
+  no_log: true
+
+- name: Check whether the local PostgreSQL member is writable
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT CASE WHEN pg_is_in_recovery() THEN 0 ELSE 1 END"
+  register: superset_postgres_writable_check
+  changed_when: false
+
+- name: Check whether the Superset metadata role already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_roles WHERE rolname = '{{ superset_database_user }}'"
+  register: superset_postgres_role_check
+  changed_when: false
+  when: superset_postgres_writable_check.stdout | trim == "1"
+
+- name: Check whether the Superset reader role already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_roles WHERE rolname = '{{ superset_reader_user }}'"
+  register: superset_reader_role_check
+  changed_when: false
+  when: superset_postgres_writable_check.stdout | trim == "1"
+
+- name: Create the Superset metadata role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        CREATE ROLE {{ superset_database_user }} LOGIN
+        PASSWORD '{{ superset_database_password }}'
+  changed_when: true
+  no_log: true
+  when:
+    - superset_postgres_writable_check.stdout | trim == "1"
+    - superset_postgres_role_check.stdout != "1"
+
+- name: Create the Superset datasource reader role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        CREATE ROLE {{ superset_reader_user }} LOGIN
+        PASSWORD '{{ superset_reader_password }}'
+  changed_when: true
+  no_log: true
+  when:
+    - superset_postgres_writable_check.stdout | trim == "1"
+    - superset_reader_role_check.stdout != "1"
+
+- name: Ensure the Superset metadata role password matches the managed secret
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER ROLE {{ superset_database_user }} PASSWORD '{{ superset_database_password }}'"
+  changed_when: false
+  no_log: true
+  when: superset_postgres_writable_check.stdout | trim == "1"
+
+- name: Ensure the Superset reader role password matches the managed secret
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER ROLE {{ superset_reader_user }} PASSWORD '{{ superset_reader_password }}'"
+  changed_when: false
+  no_log: true
+  when: superset_postgres_writable_check.stdout | trim == "1"
+
+- name: Ensure the Superset metadata database is reachable and the schema exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -d
+      - "{{ superset_database_name }}"
+      - -c
+      - "CREATE SCHEMA IF NOT EXISTS {{ superset_database_schema }} AUTHORIZATION {{ superset_database_user }}"
+  changed_when: false
+  when: superset_postgres_writable_check.stdout | trim == "1"
+
+- name: Ensure the Superset metadata schema owner is correct
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -d
+      - "{{ superset_database_name }}"
+      - -c
+      - "ALTER SCHEMA {{ superset_database_schema }} OWNER TO {{ superset_database_user }}"
+  changed_when: false
+  when: superset_postgres_writable_check.stdout | trim == "1"
+
+- name: Ensure the Superset metadata role can connect to the metadata database
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "GRANT CONNECT ON DATABASE {{ superset_database_name }} TO {{ superset_database_user }}"
+  changed_when: false
+  when: superset_postgres_writable_check.stdout | trim == "1"
+
+- name: Ensure the Superset metadata role defaults to the managed schema
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        ALTER ROLE {{ superset_database_user }} IN DATABASE {{ superset_database_name }}
+        SET search_path TO {{ superset_database_schema }}, public
+  changed_when: false
+  when: superset_postgres_writable_check.stdout | trim == "1"
+
+- name: Ensure the Superset reader inherits the cluster-wide read-all-data capability
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "GRANT pg_read_all_data TO {{ superset_reader_user }}"
+  changed_when: false
+  when: superset_postgres_writable_check.stdout | trim == "1"
+
+- name: Query the list of non-template PostgreSQL databases
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT datname FROM pg_database WHERE datistemplate = false ORDER BY datname"
+  register: superset_postgres_database_catalog
+  changed_when: false
+  when: superset_postgres_writable_check.stdout | trim == "1"
+
+- name: Record the Superset datasource database list
+  ansible.builtin.set_fact:
+    superset_postgres_database_names: "{{ superset_postgres_database_catalog.stdout_lines }}"
+  when: superset_postgres_writable_check.stdout | trim == "1"
+
+- name: Ensure the Superset reader can connect to each current PostgreSQL database
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "GRANT CONNECT ON DATABASE {{ item }} TO {{ superset_reader_user }}"
+  loop: "{{ superset_postgres_database_names | default([]) }}"
+  changed_when: false
+  when: superset_postgres_writable_check.stdout | trim == "1"
+
+- name: Persist the Superset PostgreSQL database catalog on the primary
+  ansible.builtin.copy:
+    dest: "{{ superset_postgres_database_catalog_remote_file }}"
+    content: "{{ (superset_postgres_database_names | default([])) | to_nice_json }}\n"
+    owner: root
+    group: postgres
+    mode: "0640"
+  when: superset_postgres_writable_check.stdout | trim == "1"
+
+- name: Persist the Superset PostgreSQL database catalog on the control machine
+  ansible.builtin.copy:
+    dest: "{{ superset_postgres_database_catalog_local_file }}"
+    content: "{{ (superset_postgres_database_names | default([])) | to_nice_json }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  when: superset_postgres_writable_check.stdout | trim == "1"

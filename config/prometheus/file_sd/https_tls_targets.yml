@@ -359,6 +359,24 @@
     policy_critical: '14'
     display_url: https://sso.lv3.org:443/realms/lv3/.well-known/openid-configuration
 - targets:
+    - https://10.10.10.10:443/api/health
+  labels:
+    assurance_id: lago-public
+    service_id: lago
+    service_name: Lago
+    environment: production
+    scope: public
+    exposure: edge-published
+    auth_requirement: edge_oidc
+    probe_module: http_2xx_follow_redirects
+    probe_hostname: billing.lv3.org
+    certificate_id: billing-edge
+    expected_issuer: letsencrypt
+    policy_unit: days
+    policy_warn: '21'
+    policy_critical: '14'
+    display_url: https://billing.lv3.org:443/api/health
+- targets:
     - https://10.10.10.10:443/api/public/health
   labels:
     assurance_id: langfuse-public
@@ -412,6 +430,24 @@
     policy_warn: '21'
     policy_critical: '14'
     display_url: https://matrix.lv3.org:443/_matrix/client/versions
+- targets:
+    - https://10.10.10.10:443/minio/health/live
+  labels:
+    assurance_id: minio-public
+    service_id: minio
+    service_name: MinIO
+    environment: production
+    scope: public
+    exposure: edge-published
+    auth_requirement: none
+    probe_module: http_2xx_follow_redirects
+    probe_hostname: minio.lv3.org
+    certificate_id: minio-edge
+    expected_issuer: letsencrypt
+    policy_unit: days
+    policy_warn: '21'
+    policy_critical: '14'
+    display_url: https://minio.lv3.org:443/minio/health/live
 - targets:
     - https://10.10.10.10:443/healthz
   labels:
@@ -718,6 +754,24 @@
     policy_warn: '6'
     policy_critical: '2'
     display_url: https://100.64.0.1:9443/health
+- targets:
+    - https://10.10.10.10:443/health
+  labels:
+    assurance_id: superset-public
+    service_id: superset
+    service_name: Apache Superset
+    environment: production
+    scope: public
+    exposure: edge-published
+    auth_requirement: upstream_auth
+    probe_module: http_2xx_follow_redirects
+    probe_hostname: bi.lv3.org
+    certificate_id: bi-edge
+    expected_issuer: letsencrypt
+    policy_unit: days
+    policy_warn: '21'
+    policy_critical: '14'
+    display_url: https://bi.lv3.org:443/health
 - targets:
     - https://10.10.10.10:443/
   labels:

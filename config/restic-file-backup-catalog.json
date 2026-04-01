@@ -5,7 +5,7 @@
     "minio": {
       "container_name": "minio",
       "bucket": "restic-config-backup",
-      "access_key": "minio",
+      "access_key": "minio-root",
       "region": "eu-central-1",
       "bucket_lookup": "path"
     },

@@ -155,6 +155,16 @@
       "description": "Mailpit remains reachable on the private guest-network listener for staging and development SMTP capture flows."
     },
     {
+      "id": "minio-availability",
+      "service_id": "minio",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://minio.lv3.org/minio/health/live",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The shared MinIO S3-compatible object-storage API remains reachable through the public LV3 edge."
+    },
+    {
       "id": "matrix-synapse-availability",
       "service_id": "matrix_synapse",
       "indicator": "availability",
@@ -346,6 +356,16 @@
       "description": "The public status page remains externally reachable as the last-resort platform signal."
     },
     {
+      "id": "superset-availability",
+      "service_id": "superset",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://bi.lv3.org/health",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Superset remains reachable through the public LV3 edge for SQL-first BI exploration, dashboard viewing, and governed datasource verification."
+    },
+    {
       "id": "tika-availability",
       "service_id": "tika",
       "indicator": "availability",
@@ -364,6 +384,16 @@
       "target_url": "http://10.10.10.20:3008/healthz",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The private Tesseract OCR runtime remains reachable on docker-runtime-lv3 for scanned-image and image-only document fallback extraction."
+    },
+    {
+      "id": "typesense-availability",
+      "service_id": "typesense",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://100.64.0.1:8016/health",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private Typesense controller endpoint remains reachable for repo-managed structured search sync and operator keyword lookups."
     },
     {
       "id": "uptime-kuma-availability",

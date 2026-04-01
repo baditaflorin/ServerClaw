@@ -24,6 +24,7 @@ jobs:
           WORKFLOW_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          find . -mindepth 1 -maxdepth 1 -exec rm -rf {} +
           git config --global --add safe.directory "$PWD"
           git init .
           if git remote get-url origin >/dev/null 2>&1; then
@@ -33,6 +34,8 @@ jobs:
           fi
           git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch --depth=1 origin "${WORKFLOW_REF}"
           git checkout --force "${WORKFLOW_SHA}"
+          git reset --hard
+          git clean -fdx
 
       - name: Prepare tool cache
         run: mkdir -p .tmp/bin .tmp/release-bundles
@@ -125,6 +128,7 @@ jobs:
           WORKFLOW_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          find . -mindepth 1 -maxdepth 1 -exec rm -rf {} +
           git config --global --add safe.directory "$PWD"
           git init .
           if git remote get-url origin >/dev/null 2>&1; then
@@ -134,6 +138,8 @@ jobs:
           fi
           git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch --depth=1 origin "${WORKFLOW_REF}"
           git checkout --force "${WORKFLOW_SHA}"
+          git reset --hard
+          git clean -fdx
 
       - name: Prepare tool cache
         run: mkdir -p .tmp/bin .tmp/release-verify

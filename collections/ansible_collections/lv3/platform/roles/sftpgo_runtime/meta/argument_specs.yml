@@ -1,0 +1,79 @@
+---
+# Purpose: Describe the required runtime variables for the SFTPGo stack.
+
+argument_specs:
+  main:
+    short_description: Converge the SFTPGo runtime, bootstrap identities, and smoke transfer verification path.
+    options:
+      sftpgo_site_dir:
+        type: path
+        required: true
+      sftpgo_config_dir:
+        type: path
+        required: true
+      sftpgo_plugin_dir:
+        type: path
+        required: true
+      sftpgo_state_dir:
+        type: path
+        required: true
+      sftpgo_data_dir:
+        type: path
+        required: true
+      sftpgo_secret_dir:
+        type: path
+        required: true
+      sftpgo_compose_file:
+        type: path
+        required: true
+      sftpgo_config_file:
+        type: path
+        required: true
+      sftpgo_env_file:
+        type: path
+        required: true
+      sftpgo_image:
+        type: str
+        required: true
+      sftpgo_admin_port:
+        type: int
+        required: true
+      sftpgo_webdav_port:
+        type: int
+        required: true
+      sftpgo_sftp_port:
+        type: int
+        required: true
+      sftpgo_controller_url:
+        type: str
+        required: true
+      sftpgo_public_base_url:
+        type: str
+        required: true
+      sftpgo_database_host:
+        type: str
+        required: true
+      sftpgo_database_name:
+        type: str
+        required: true
+      sftpgo_database_user:
+        type: str
+        required: true
+      sftpgo_database_password_local_file:
+        type: path
+        required: true
+      sftpgo_keycloak_client_secret_local_file:
+        type: path
+        required: true
+      sftpgo_nats_password_local_file:
+        type: path
+        required: true
+      sftpgo_bootstrap_admin_password_local_file:
+        type: path
+        required: true
+      sftpgo_oidc_admin_password_local_file:
+        type: path
+        required: true
+      sftpgo_api_key_local_file:
+        type: path
+        required: true

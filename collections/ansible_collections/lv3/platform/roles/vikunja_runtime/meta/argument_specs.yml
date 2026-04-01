@@ -1,0 +1,58 @@
+---
+# Purpose: Declare the validated input contract for the vikunja_runtime role.
+# Use case: Used by Ansible argument validation before the Vikunja runtime tasks run.
+#
+# Inputs (required):
+#   - vikunja_site_dir (path, required): Runtime root directory.
+#   - vikunja_compose_file (path, required): Managed compose file path.
+#   - vikunja_env_file (path, required): Managed runtime environment file path.
+#   - vikunja_internal_port (int, required): Internal Vikunja listener port.
+#   - vikunja_controller_url (str, required): Host-controller access URL.
+#   - vikunja_public_base_url (str, required): Public upstream-authenticated base URL.
+#   - vikunja_database_password_local_file (path, required): Controller-local database password artifact.
+#   - vikunja_keycloak_client_secret_local_file (path, required): Controller-local Keycloak OIDC client secret.
+#
+# Outputs:
+#   - Argument-spec validation metadata for the vikunja_runtime role.
+#
+# Idempotency: Fully idempotent
+#              This file only declares validation metadata.
+#
+# Dependencies:
+#   - ADR 0286: Defines the Vikunja bootstrap and controller contract.
+#   - Requires: vikunja_runtime role defaults and tasks.
+#   - Role: vikunja_runtime — validates the role inputs before runtime convergence.
+#
+# Related ADRs: 0165, 0286
+# Related Runbooks: docs/runbooks/configure-vikunja.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+argument_specs:
+  main:
+    short_description: Converge the repo-managed Vikunja runtime and controller bootstrap state.
+    options:
+      vikunja_site_dir:
+        type: path
+        required: true
+      vikunja_compose_file:
+        type: path
+        required: true
+      vikunja_env_file:
+        type: path
+        required: true
+      vikunja_internal_port:
+        type: int
+        required: true
+      vikunja_controller_url:
+        type: str
+        required: true
+      vikunja_public_base_url:
+        type: str
+        required: true
+      vikunja_database_password_local_file:
+        type: path
+        required: true
+      vikunja_keycloak_client_secret_local_file:
+        type: path
+        required: true

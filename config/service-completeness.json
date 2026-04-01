@@ -284,6 +284,16 @@
         "alert_rules": "2026-09-23"
       }
     },
+    "minio": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "suppressed_checks": {
+        "api_gateway": "2026-09-23"
+      }
+    },
     "redpanda": {
       "service_type": "compose",
       "requires_subdomain": false,
@@ -484,6 +494,18 @@
         "alert_rules": "2026-09-30"
       }
     },
+    "lago": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "suppressed_checks": {
+        "grafana_dashboard": "2026-09-30",
+        "alert_rules": "2026-09-30",
+        "slo_definition": "2026-09-30"
+      }
+    },
     "paperless": {
       "service_type": "compose",
       "requires_subdomain": true,
@@ -506,7 +528,7 @@
       "service_type": "compose",
       "requires_subdomain": false,
       "requires_oidc": false,
-      "requires_secrets": false,
+      "requires_secrets": true,
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
@@ -594,6 +616,19 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
+    "superset": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "keycloak_client_generated": true,
+      "suppressed_checks": {
+        "api_gateway": "2026-09-30",
+        "alert_rules": "2026-09-30",
+        "grafana_dashboard": "2026-09-30"
+      }
+    },
     "tika": {
       "service_type": "compose",
       "requires_subdomain": false,
@@ -617,6 +652,16 @@
       "suppressed_checks": {
         "api_gateway": "2026-09-23"
       }
+    },
+    "typesense": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "dashboard_file": "config/grafana/dashboards/typesense.json",
+      "alert_rule_file": "config/alertmanager/rules/typesense.yml",
+      "suppressed_checks": {}
     },
     "uptime_kuma": {
       "service_type": "compose",

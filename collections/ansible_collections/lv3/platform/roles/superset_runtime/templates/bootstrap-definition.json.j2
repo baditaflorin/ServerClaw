@@ -1,0 +1,64 @@
+{
+  "version": "1.0.0",
+  "databases": [
+{% for database_name in superset_expected_postgres_databases %}
+    {
+      "name": "{{ superset_database_display_name_prefix }}: {{ database_name }}",
+      "uri": "postgresql+psycopg2://{{ superset_reader_user }}:{{ superset_reader_password | urlencode }}@{{ superset_database_host }}:{{ superset_database_port }}/{{ database_name }}",
+      "uuid": "{{ ('lv3-superset-database-' ~ database_name) | to_uuid }}",
+      "description": "Read-only PostgreSQL datasource for the {{ database_name }} database.",
+      "expose_in_sqllab": true,
+      "allow_run_async": false,
+      "allow_ctas": false,
+      "allow_cvas": false,
+      "allow_dml": false,
+      "allow_csv_upload": false,
+      "verify_connectivity": {{ 'true' if database_name == 'postgres' else 'false' }}
+    }{% if not loop.last or superset_register_plausible_clickhouse %},{% endif %}
+{% endfor %}
+{% if superset_register_plausible_clickhouse %}
+    {
+      "name": "{{ superset_plausible_clickhouse_name }}",
+      "uri": "{{ superset_plausible_clickhouse_uri }}",
+      "uuid": "{{ 'lv3-superset-database-plausible-clickhouse' | to_uuid }}",
+      "description": "Read-only Plausible analytics datasource backed by ClickHouse.",
+      "expose_in_sqllab": true,
+      "allow_run_async": false,
+      "allow_ctas": false,
+      "allow_cvas": false,
+      "allow_dml": false,
+      "allow_csv_upload": false,
+      "verify_connectivity": false
+    }
+{% endif %}
+  ],
+  "landing": {
+    "database_name": "{{ superset_database_display_name_prefix }}: postgres",
+    "dataset_name": "{{ superset_landing_dataset_name }}",
+    "dataset_uuid": "{{ 'lv3-superset-dataset-platform-database-inventory' | to_uuid }}",
+    "dataset_description": "Repo-managed virtual dataset listing the PostgreSQL databases currently visible to the Superset reader contract.",
+    "dataset_sql": {{ superset_landing_dataset_sql | to_json }},
+    "columns": [
+      {
+        "name": "database_name",
+        "type": "TEXT",
+        "verbose_name": "Database Name",
+        "groupby": true,
+        "filterable": true,
+        "is_dttm": false
+      }
+    ],
+    "metrics": [
+      {
+        "name": "count",
+        "expression": "COUNT(*)",
+        "verbose_name": "COUNT(*)"
+      }
+    ],
+    "chart_title": "{{ superset_landing_chart_title }}",
+    "chart_uuid": "{{ 'lv3-superset-chart-postgresql-databases' | to_uuid }}",
+    "dashboard_title": "{{ superset_landing_dashboard_title }}",
+    "dashboard_uuid": "{{ 'lv3-superset-dashboard-platform-database-inventory' | to_uuid }}",
+    "dashboard_slug": "{{ superset_landing_dashboard_slug }}"
+  }
+}

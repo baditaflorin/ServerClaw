@@ -104,6 +104,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://minio.lv3.org/minio/health/live
+  labels:
+    service_id: minio
+    slo_id: minio-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://matrix.lv3.org/_matrix/client/versions
   labels:
     service_id: matrix_synapse
@@ -237,6 +244,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://bi.lv3.org/health
+  labels:
+    service_id: superset
+    slo_id: superset-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - http://10.10.10.20:9998/version
   labels:
     service_id: tika
@@ -248,6 +262,13 @@
   labels:
     service_id: tesseract_ocr
     slo_id: tesseract-ocr-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - http://100.64.0.1:8016/health
+  labels:
+    service_id: typesense
+    slo_id: typesense-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:

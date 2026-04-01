@@ -30,6 +30,7 @@ def test_docker_bridge_chain_helper_asserts_on_retry_task_success_state() -> Non
         for task in tasks
         if task["name"] == "Restart Docker when required bridge chains are still missing after the retry loop"
     )
+    wait_for_ssh = next(task for task in tasks if task["name"] == "Wait for SSH before Docker bridge-chain recovery checks")
     nat_verify = next(task for task in tasks if task["name"] == "Verify Docker nat chain after retry loop")
     forward_verify = next(task for task in tasks if task["name"] == "Verify Docker forward chain after retry loop")
     nat_assert = next(task for task in tasks if task["name"] == "Assert Docker nat chain is present after health evaluation")
@@ -41,6 +42,8 @@ def test_docker_bridge_chain_helper_asserts_on_retry_task_success_state() -> Non
     assert "common_docker_bridge_chains_wait" in restart_task["when"][1]
     assert "common_docker_bridge_chains_nat_check.rc != 0" in restart_task["when"][2]
     assert "common_docker_bridge_chains_nat_recheck.rc != 0" in retry_restart_task["when"][1]
+    assert wait_for_ssh["ansible.builtin.wait_for_connection"]["connect_timeout"] == 5
+    assert wait_for_ssh["ansible.builtin.wait_for_connection"]["connect_timeout"] == 5
     assert nat_verify["register"] == "common_docker_bridge_chains_nat_verify"
     assert forward_verify["register"] == "common_docker_bridge_chains_forward_verify"
     assert nat_verify["retries"] == "{{ common_docker_bridge_chains_retries }}"

@@ -41,6 +41,28 @@ def test_build_platform_vars_includes_langfuse_publication_topology() -> None:
     assert platform_vars["outline_port"] == 3006
 
 
+def test_build_platform_vars_includes_minio_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    minio = platform_vars["platform_service_topology"]["minio"]
+    dns_records = {
+        (record["name"], record["type"], record["value"], record["ttl"])
+        for record in platform_vars["hetzner_dns_records"]
+    }
+
+    assert minio["public_hostname"] == "minio.lv3.org"
+    assert minio["console_public_hostname"] == "minio-console.lv3.org"
+    assert minio["ports"]["internal"] == 9010
+    assert minio["ports"]["console"] == 9011
+    assert minio["urls"]["public"] == "https://minio.lv3.org"
+    assert minio["urls"]["internal"] == "http://10.10.10.20:9010"
+    assert minio["urls"]["console_internal"] == "http://10.10.10.20:9011"
+    assert minio["urls"]["console_public"] == "https://minio-console.lv3.org"
+    assert platform_vars["minio_public_url"] == "https://minio.lv3.org"
+    assert platform_vars["minio_console_public_url"] == "https://minio-console.lv3.org"
+    assert ("minio", "A", "65.108.75.123", 60) in dns_records
+    assert ("minio-console", "A", "65.108.75.123", 60) in dns_records
+
+
 def test_build_platform_vars_includes_dify_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     dify = platform_vars["platform_service_topology"]["dify"]
@@ -163,6 +185,22 @@ def test_build_platform_vars_includes_flagsmith_publication_topology() -> None:
     assert platform_vars["flagsmith_port"] == 8017
 
 
+def test_build_platform_vars_includes_lago_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    lago = platform_vars["platform_service_topology"]["lago"]
+
+    assert lago["public_hostname"] == "billing.lv3.org"
+    assert lago["dns"]["name"] == "billing"
+    assert lago["ports"]["internal"] == 8100
+    assert lago["ports"]["api"] == 8099
+    assert lago["urls"]["public"] == "https://billing.lv3.org"
+    assert lago["urls"]["internal"] == "http://10.10.10.20:8100"
+    assert lago["urls"]["api"] == "http://10.10.10.20:8099"
+    assert lago["edge"]["prefix_proxy_routes"] == [{"path": "/api/", "upstream": "http://10.10.10.20:8099"}]
+    assert platform_vars["lago_api_port"] == 8099
+    assert platform_vars["lago_front_port"] == 8100
+
+
 def test_build_platform_vars_includes_tika_private_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     tika = platform_vars["platform_service_topology"]["tika"]
@@ -194,6 +232,19 @@ def test_build_platform_vars_includes_jupyterhub_publication_topology() -> None:
     assert jupyterhub["edge"]["client_max_body_size"] == "2g"
 
 
+def test_build_platform_vars_includes_superset_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    superset = platform_vars["platform_service_topology"]["superset"]
+
+    assert superset["public_hostname"] == "bi.lv3.org"
+    assert superset["dns"]["name"] == "bi"
+    assert superset["ports"]["internal"] == 8105
+    assert superset["urls"]["public"] == "https://bi.lv3.org"
+    assert superset["urls"]["internal"] == "http://10.10.10.20:8105"
+    assert superset["edge"]["upstream"] == superset["urls"]["internal"]
+    assert platform_vars["superset_port"] == 8105
+
+
 def test_build_platform_vars_includes_piper_private_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     piper = platform_vars["platform_service_topology"]["piper"]
@@ -218,6 +269,16 @@ def test_build_platform_vars_includes_redpanda_private_topology() -> None:
     assert redpanda["urls"]["schema_registry"] == "http://10.10.10.20:8104"
     assert platform_vars["redpanda_http_proxy_port"] == 8103
     assert platform_vars["redpanda_schema_registry_port"] == 8104
+
+def test_build_platform_vars_includes_typesense_private_controller_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    typesense = platform_vars["platform_service_topology"]["typesense"]
+
+    assert typesense["ports"]["internal"] == 8108
+    assert typesense["ports"]["controller"] == 8016
+    assert typesense["urls"]["internal"] == "http://10.10.10.20:8108"
+    assert typesense["urls"]["controller"] == "http://100.64.0.1:8016"
+    assert platform_vars["typesense_controller_url"] == "http://100.64.0.1:8016"
 
 
 def test_build_platform_vars_includes_nextcloud_publication_topology() -> None:
@@ -390,6 +451,30 @@ def test_build_service_urls_resolves_jupyterhub_internal_url() -> None:
         "public": "https://notebooks.lv3.org",
         "internal": "http://10.10.10.20:8097",
     }
+
+
+def test_build_service_urls_resolves_superset_internal_url() -> None:
+    ports = {"superset_port": 8105}
+    service = {"owning_vm": "docker-runtime-lv3", "public_hostname": "bi.lv3.org"}
+    host_vars = {"management_tailscale_ipv4": "100.118.189.95"}
+    guest_ipv4_by_name = {"docker-runtime-lv3": "10.10.10.20"}
+    stack = {"desired_state": {"host_id": "proxmox_florin"}}
+
+    port_map, urls = generate_platform_vars.build_service_urls(
+        "superset",
+        service,
+        host_vars,
+        guest_ipv4_by_name,
+        ports,
+        stack,
+    )
+
+    assert port_map == {"internal": 8105}
+    assert urls == {
+        "public": "https://bi.lv3.org",
+        "internal": "http://10.10.10.20:8105",
+    }
+
 
 def test_build_service_urls_resolves_paperless_internal_url() -> None:
     ports = {"paperless_port": 8018}

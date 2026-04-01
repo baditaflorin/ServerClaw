@@ -14,3 +14,23 @@ argument_specs:
         required: true
         description:
           - Absolute repo checkout path mirrored onto docker-runtime-lv3.
+      restic_config_backup_runtime_catalog_path:
+        type: str
+        required: false
+        description:
+          - Absolute runtime path for the deployed ADR 0302 restic catalog on docker-runtime-lv3.
+      restic_config_backup_controller_catalog_local_file:
+        type: str
+        required: false
+        description:
+          - Controller-local source path for the repo-managed ADR 0302 restic catalog JSON.
+      restic_config_backup_fallback_script_path:
+        type: str
+        required: false
+        description:
+          - Absolute fallback script path used when the worker checkout mirror is missing the ADR 0302 entrypoint.
+      restic_config_backup_minio_container_name:
+        type: str
+        required: false
+        description:
+          - Docker container name for the shared MinIO runtime that hosts the ADR 0302 Restic repository.

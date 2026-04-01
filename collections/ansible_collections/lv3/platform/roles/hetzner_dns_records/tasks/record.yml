@@ -1,4 +1,10 @@
 ---
+# Purpose: Create, update, or delete one canonical Hetzner DNS record payload for the managed DNS boundary role.
+# Use case: Included by `hetzner_dns_records` when reconciling a single repo-declared DNS record against the provider API.
+# Inputs: `hetzner_dns_record`, `dns_provider_boundary_zone`, and the loaded provider-side record inventory.
+# Outputs: A matching provider-side DNS record state for the requested name/type/value tuple.
+# Idempotency: Fully idempotent; re-runs only create, update, or delete when the provider state diverges.
+# Dependencies: ADR 0165 metadata standard and the `hetzner_dns_records` role entrypoint that loads provider inventory and auth context.
 - name: Select existing canonical DNS records with the same name and type
   ansible.builtin.set_fact:
     dns_provider_boundary_same_name_type_records: >-
@@ -56,6 +62,19 @@
       Unsupported Hetzner DNS record state {{ hetzner_dns_record.state | default('present') }}
       for {{ hetzner_dns_record.name }} {{ hetzner_dns_record.type }}.
 
+- name: Build the canonical DNS record provider payload
+  ansible.builtin.set_fact:
+    dns_provider_boundary_desired_record_payload: >-
+      {{
+        {
+          'zone_id': dns_provider_boundary_zone.provider_ref,
+          'name': hetzner_dns_record.name,
+          'type': hetzner_dns_record.type,
+          'value': hetzner_dns_record.value,
+          'ttl': (hetzner_dns_record.ttl | default(60) | int)
+        }
+      }}
+
 - name: Delete the canonical DNS record when it is retired
   ansible.builtin.uri:
     url: "{{ hetzner_dns_api_base_url }}/records/{{ dns_provider_boundary_matching_records[0].provider_ref }}"
@@ -88,12 +107,7 @@
     headers:
       Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
     body_format: json
-    body:
-      zone_id: "{{ dns_provider_boundary_zone.provider_ref }}"
-      name: "{{ hetzner_dns_record.name }}"
-      type: "{{ hetzner_dns_record.type }}"
-      value: "{{ hetzner_dns_record.value }}"
-      ttl: "{{ hetzner_dns_record.ttl | default(60) | int }}"
+    body: "{{ dns_provider_boundary_desired_record_payload }}"
     status_code:
       - 200
       - 201
@@ -120,12 +134,7 @@
     headers:
       Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
     body_format: json
-    body:
-      zone_id: "{{ dns_provider_boundary_zone.provider_ref }}"
-      name: "{{ hetzner_dns_record.name }}"
-      type: "{{ hetzner_dns_record.type }}"
-      value: "{{ hetzner_dns_record.value }}"
-      ttl: "{{ hetzner_dns_record.ttl | default(60) | int }}"
+    body: "{{ dns_provider_boundary_desired_record_payload }}"
     status_code:
       - 200
       - 201

@@ -1,0 +1,35 @@
+---
+# Purpose: Declare the shared defaults for preparing the Vikunja PostgreSQL database and controller-local password artifact.
+# Use case: Used whenever the vikunja_postgres role provisions the Vikunja database, roles, and mirrored secret files.
+#
+# Inputs (required):
+#   - inventory host facts (generated, required): Selects the target PostgreSQL guest and controller-local artifact paths.
+#
+# Inputs (optional):
+#   - vikunja_database_name (str, optional, default=vikunja): Managed Vikunja database name.
+#   - vikunja_database_user (str, optional, default=vikunja_admin): Managed Vikunja login role.
+#   - vikunja_database_support_role (str, optional, default=vikunja_user): Managed support role granted to the login.
+#
+# Outputs:
+#   - Default variable values consumed by the Vikunja PostgreSQL role tasks.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0286: Defines Vikunja as a repo-managed service with a PostgreSQL backend.
+#   - Requires: Controller-local artifact storage under .local/vikunja.
+#   - Role: vikunja_postgres — prepares the Vikunja database and login on postgres-lv3.
+#
+# Related ADRs: 0165, 0286
+# Related Runbooks: docs/runbooks/configure-vikunja.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+vikunja_database_name: vikunja
+vikunja_database_user: vikunja_admin
+vikunja_database_support_role: vikunja_user
+vikunja_postgres_secret_dir: /etc/lv3/vikunja
+vikunja_postgres_password_file: "{{ vikunja_postgres_secret_dir }}/database-password"
+vikunja_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vikunja
+vikunja_database_password_local_file: "{{ vikunja_local_artifact_dir }}/database-password.txt"

@@ -1,0 +1,50 @@
+---
+# Purpose: Declare the supported variable contract for the Typesense runtime role.
+# Use case: Loaded by Ansible before converging the private Typesense search runtime on docker-runtime-lv3.
+# Inputs: typesense_* paths, image pin, OpenBao settings, and controller-local secret references.
+# Outputs: Machine-readable argument specs for the typesense_runtime role.
+# Idempotency: Fully idempotent because this file only documents the role interface.
+# Dependencies: ADR 0165, ADR 0277, and the shared Docker runtime contract.
+argument_specs:
+  main:
+    short_description: Converge the private Typesense runtime for internal structured search.
+    options:
+      typesense_site_dir:
+        type: path
+        required: true
+      typesense_compose_file:
+        type: path
+        required: true
+      typesense_env_file:
+        type: path
+        required: true
+      typesense_openbao_agent_dir:
+        type: path
+        required: true
+      typesense_openbao_secret_path:
+        type: str
+        required: true
+      typesense_port:
+        type: int
+        required: true
+      typesense_host_proxy_port:
+        type: int
+        required: true
+      typesense_image:
+        type: str
+        required: true
+      typesense_container_name:
+        type: str
+        required: true
+      typesense_internal_base_url:
+        type: str
+        required: true
+      typesense_controller_url:
+        type: str
+        required: true
+      typesense_collection_name:
+        type: str
+        required: true
+      typesense_api_key_local_file:
+        type: path
+        required: true

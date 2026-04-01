@@ -1,0 +1,28 @@
+---
+# Playbook: collections/lv3/platform/playbooks/services/minio.yml
+# Purpose: Provide the canonical collection service-scoped entrypoint for the ADR 0274 MinIO live apply.
+# Use case: Used by collection consumers that target only the MinIO service workflow.
+#
+# Inputs (required):
+#   - None.
+#
+# Inputs (optional):
+#   - None.
+#
+# Outputs:
+#   - Imports the collection MinIO playbook without redefining service scope.
+#
+# Idempotency: Fully idempotent
+#              This file only re-exports the canonical collection playbook entrypoint.
+#
+# Dependencies:
+#   - ADR 0274: Owns the MinIO runtime and publication contract.
+#   - Requires: collections/ansible_collections/lv3/platform/playbooks/minio.yml.
+#   - Role: import_playbook - delegates execution to the canonical playbook.
+#
+# Related ADRs: 0165, 0274
+# Related Runbooks: docs/runbooks/minio-object-storage.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+- import_playbook: ../minio.yml
