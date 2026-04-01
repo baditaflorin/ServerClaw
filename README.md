@@ -90,7 +90,7 @@ Mattermost is now live on `docker-runtime-lv3` and reachable privately at `http:
 
 Portainer is now live on `docker-runtime-lv3` and reachable privately at `https://100.64.0.1:9444`, with controller-local bootstrap artifacts under `.local/portainer` and a governed wrapper for read-mostly runtime inspection plus bounded restarts.
 
-Private Ollama is now live on `docker-runtime-lv3` at `10.10.10.20:11434`, the repo-managed `llama3.2:3b` startup model is present, and Open WebUI now uses that connector privately through `host.docker.internal:11434` without publishing Ollama on the public edge.
+Private Ollama is now live on `docker-runtime-lv3` at `10.10.10.20:11434`, the repo-managed `llama3.2:3b` startup model is present, and One-API now fronts that private inference lane through `http://100.64.0.1:8018/v1` so Open WebUI and ServerClaw consume the governed OpenAI-compatible contract instead of binding directly to Ollama.
 
 Semantic platform-context retrieval is now live on `docker-runtime-lv3` at `http://100.64.0.1:8010`: the committed `0.177.26` governed `main` replay on 2026-03-28 preserved the healthy Ollama-backed vector collection, the earlier same-day latest-main replay proved the bounded repair path for legacy `384` to `768` drift, and direct API plus operator CLI queries now verify `retrieval_backend: "vector"` end to end.
 

@@ -6,12 +6,12 @@
 # ============================================================================
 
 schema_version: 1
-generated: '2026-04-01'
+generated: '2026-04-02'
 total_adrs: 348
 implementation_status_summary:
-  Implemented: 288
+  Implemented: 290
   Partial: 7
-  Not Implemented: 51
+  Not Implemented: 49
   Deprecated: 1
   Complete: 1
 concerns:
@@ -5244,7 +5244,7 @@ adr_index:
       - router
     summary: We will deploy One-API as the unified LLM API proxy and router, superseding
     filename: 0294-one-api-as-the-unified-llm-api-proxy-and-router.md
-    implemented_version: 0.130.74
+    implemented_version: 0.177.135
   - adr: 0295
     title: Shared Artifact Cache Plane For Container And Package Dependencies
     status: Accepted

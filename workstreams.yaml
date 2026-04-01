@@ -1054,7 +1054,7 @@ workstreams:
   - id: ws-0294-live-apply
     adr: "0294"
     title: Live apply One-API as the unified LLM API proxy and router from latest origin/main
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0294-main-integration
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-main-integration
@@ -1262,8 +1262,17 @@ workstreams:
             - docs/diagrams/service-dependency-graph.excalidraw
           mode: shared_contract
           contract: latest-main-generated-truth-v1
-    ready_to_merge: false
-    live_applied: false
+    blockers: []
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0294 by making One-API the private unified OpenAI-compatible LLM proxy, migrating Open WebUI and ServerClaw onto repo-managed One-API provider contracts, and re-verifying the platform-context memory lane plus docker-runtime recovery from the exact-main replay
+      release_bump: patch
+      latest_receipts:
+        one_api: 2026-04-01-adr-0294-one-api-mainline-live-apply
+        open_webui: 2026-04-01-adr-0294-one-api-mainline-live-apply
+        platform_context: 2026-04-01-adr-0294-one-api-mainline-live-apply
+        serverclaw: 2026-04-01-adr-0294-one-api-mainline-live-apply
   - id: ws-0274-minio-live-apply
     adr: "0274"
     title: Live apply ADR 0274 shared MinIO object storage from latest origin/main

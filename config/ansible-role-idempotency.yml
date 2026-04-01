@@ -112,6 +112,9 @@ roles:
   grafana_sso:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  grist_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   guest_observability:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

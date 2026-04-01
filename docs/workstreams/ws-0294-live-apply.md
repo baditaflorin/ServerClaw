@@ -2,15 +2,17 @@
 
 - ADR: [ADR 0294](../adr/0294-one-api-as-the-unified-llm-api-proxy-and-router.md)
 - Title: Deploy One-API as the unified LLM API proxy and router, then migrate the governed Open WebUI and ServerClaw consumers onto it
-- Status: ready_for_merge
-- Included In Repo Version: not yet
+- Status: live_applied
+- Included In Repo Version: 0.177.135
 - Branch-Local Receipt: `receipts/live-applies/2026-03-31-adr-0294-one-api-live-apply.json`
-- Canonical Mainline Receipt: pending exact-main replay
-- Live Applied In Platform Version: 0.130.74
-- Implemented On: 2026-03-31
-- Live Applied On: 2026-03-31
-- Branch: `codex/ws-0294-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-live-apply`
+- Canonical Mainline Receipt: `receipts/live-applies/2026-04-01-adr-0294-one-api-mainline-live-apply.json`
+- Platform Version Observed During Integration: 0.130.84
+- Live Applied In Platform Version: 0.130.85
+- Release Date: 2026-04-01
+- Implemented On: 2026-04-01
+- Live Applied On: 2026-04-01
+- Branch: `codex/ws-0294-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-main-integration`
 - Owner: codex
 - Depends On: `adr-0042`, `adr-0077`, `adr-0095`, `adr-0145`, `adr-0254`
 - Conflicts With: none
@@ -57,28 +59,37 @@ connectivity onto the unified OpenAI-compatible proxy contract.
 
 ## Verification
 
-- Focused branch validation passed from the live-apply worktree: `uv run --with pytest --with pyyaml pytest -q tests/test_one_api_runtime_role.py tests/test_docker_runtime_role.py tests/test_linux_guest_firewall_role.py tests/test_ollama_runtime_role.py tests/test_postgres_vm_role.py tests/test_postgres_vm_access_policy.py` returned `37 passed in 2.46s`, and `make syntax-check-one-api` passed.
-- `make converge-one-api` completed successfully from the settled worktree with final recap `docker-runtime-lv3 : ok=192 changed=2 failed=0`, `localhost : ok=3 failed=0`, `postgres-lv3 : ok=58 changed=5 failed=0`, and `proxmox_florin : ok=41 changed=4 failed=0`.
-- The controller-side bootstrap verification reported `verification_passed: true`, reconciled the managed root profile as `root / LV3 Platform Root`, exposed the governed model set `gpt-4.1-mini`, `gpt-4o-mini`, and `text-embedding-3-small`, returned chat probe excerpt `READY`, and kept both downstream provider env files present.
-- The generated provider env contracts now point consumers at One-API: Open WebUI uses `http://host.docker.internal:8101/v1`, and ServerClaw uses `http://10.10.10.20:8101/v1`.
-- `make converge-open-webui` completed successfully with final recap `docker-runtime-lv3 : ok=125 changed=6 failed=0` and `proxmox_florin : ok=41 changed=4 failed=0`, including the admin sign-in verification path.
-- `make converge-serverclaw` completed successfully with final recap `coolify-lv3 : ok=79 changed=5 failed=0`, `docker-runtime-lv3 : ok=81 changed=2 failed=0`, `nginx-lv3 : ok=45 changed=4 failed=0`, and `proxmox_florin : ok=272 changed=3 failed=0`.
+- The exact-main targeted pytest bundle passed on repository version `0.177.134` with `174 passed in 14.59s` across the One-API, Open WebUI, OpenBao, Ollama, Docker runtime, guest firewall, PostgreSQL, log shipping, RAG, and vulnerability-budget lanes.
+- `./scripts/validate_repo.sh all` passed on the synchronized tree after the final `grist_runtime` idempotency ledger update and the Docker runtime assertion hardening landed.
+- `make converge-one-api env=production` completed successfully from the exact-main tree with final recap `docker-runtime-lv3 : ok=223 changed=4 failed=0`, `localhost : ok=3 changed=0 failed=0`, `postgres-lv3 : ok=73 changed=5 failed=0`, and `proxmox_florin : ok=41 changed=4 failed=0`.
+- The controller-side bootstrap verification reported `verification_passed: true`, kept both generated provider env files present, exposed the governed chat and embedding aliases, and returned chat probe excerpt `READY`.
+- `make converge-open-webui env=production` completed successfully with final recap `docker-runtime-lv3 : ok=151 changed=2 failed=0` and `proxmox_florin : ok=41 changed=4 failed=0`, including the admin sign-in verification path.
+- The first exact-main `make converge-serverclaw env=production` replay surfaced `docker-runtime-lv3` disk exhaustion during `apt-get update`; after the documented `docker image prune -af` plus `docker builder prune -af` recovery and a clean `apt-get update`, the second replay passed with final recap `coolify-lv3 : ok=87 changed=4 failed=0`, `docker-runtime-lv3 : ok=89 changed=0 failed=0`, `nginx-lv3 : ok=45 changed=4 failed=0`, and `proxmox_florin : ok=360 changed=0 failed=0`.
+- `make converge-rag-context env=production` completed successfully with final recap `docker-runtime-lv3 : ok=182 changed=21 failed=0` and `proxmox_florin : ok=41 changed=4 failed=0`, including the cited platform-context query and the ServerClaw memory round-trip through semantic plus keyword recall.
+- Post-replay verification confirmed the consumer paths still answered correctly: the Open WebUI head probe returned `HTTP 200`, the ServerClaw public edge at `https://chat.lv3.org` returned `HTTP/2 200` with the expected hardening headers, Open WebUI now renders `OPENAI_API_BASE_URL=http://host.docker.internal:8101/v1` with `ENABLE_OLLAMA_API=False`, and ServerClaw now renders `OPENAI_API_BASE_URL=http://10.10.10.20:8101/v1` with the same governed default model contract.
 
 ## Live Apply Outcome
 
-- ADR 0294 is now live from this isolated worktree on platform version `0.130.74`: One-API is the unified private OpenAI-compatible proxy, Ollama remains the backend inference engine, Open WebUI and ServerClaw now consume repo-managed One-API provider contracts, and the operator-only host proxy on `http://100.64.0.1:8018` is verified.
+- ADR 0294 is now live from the exact-main integration branch on platform version `0.130.85`: One-API is the unified private OpenAI-compatible proxy, Ollama remains the backend inference engine, Open WebUI and ServerClaw now consume repo-managed One-API provider contracts, and the operator-only host proxy on `http://100.64.0.1:8018` is verified.
 - The settled branch also hardens the supporting recovery paths that surfaced during truthful live replay: Docker bridge recovery now waits for SSH after daemon restarts, PostgreSQL converges the correct `pgaudit` package and verifies `shared_preload_libraries`, the guest firewall and PostgreSQL access policy admit the governed Docker bridge CIDRs, and the Ollama startup path clears stale partial blobs before in-container model pulls.
 - The One-API playbook now converges `ollama_runtime` before `one_api_runtime`, which turned the previously flaky bootstrap into a reproducible end-to-end workflow instead of assuming a healthy backend model lane out of band.
+- The canonical 2026-04-01 replay also records the only manual operator intervention required during the exact-main window: temporary Docker image and builder cache cleanup on `docker-runtime-lv3` to restore enough free space for the shared apt metadata refresh that the ServerClaw replay inherited from current main.
 
 ## Live Evidence
 
 - Branch-local receipt: `receipts/live-applies/2026-03-31-adr-0294-one-api-live-apply.json`
-- Bootstrap report: `receipts/live-applies/evidence/2026-03-31-ws-0294-bootstrap-report-r1.json`
-- Bootstrap summary: `receipts/live-applies/evidence/2026-03-31-ws-0294-bootstrap-summary-r1.txt`
-- Provider env base URLs: `receipts/live-applies/evidence/2026-03-31-ws-0294-provider-env-base-urls-r2.txt`
-- Focused pytest output: `receipts/live-applies/evidence/2026-03-31-ws-0294-targeted-pytest-r1.txt`
-- Syntax-check output: `receipts/live-applies/evidence/2026-03-31-ws-0294-syntax-check-one-api-r2.txt`
+- Canonical mainline receipt: `receipts/live-applies/2026-04-01-adr-0294-one-api-mainline-live-apply.json`
+- Targeted pytest output: `receipts/live-applies/evidence/2026-04-01-ws-0294-main-integration-targeted-pytest-r4-0.177.134.txt`
+- Repository validation output: `receipts/live-applies/evidence/2026-04-01-ws-0294-main-integration-validate-repo-all-r6-0.177.134.txt`
+- One-API converge replay: `receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-converge-one-api-r1-0.177.134.txt`
+- Open WebUI converge replay: `receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-converge-open-webui-r1-0.177.134.txt`
+- ServerClaw converge replay and disk-pressure recovery: `receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-converge-serverclaw-r1-0.177.134.txt`, `receipts/live-applies/evidence/2026-04-01-ws-0294-docker-runtime-space-recovery-r1-0.177.134.txt`, and `receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-converge-serverclaw-r2-0.177.134.txt`
+- Bootstrap verification report: `receipts/live-applies/evidence/2026-04-01-ws-0294-bootstrap-report-r2-0.177.134.json`
+- One-API status proof: `receipts/live-applies/evidence/2026-04-01-ws-0294-one-api-status-r1-0.177.134.json`
+- Runtime env verification: `receipts/live-applies/evidence/2026-04-01-ws-0294-open-webui-runtime-env-r1-0.177.134.txt` and `receipts/live-applies/evidence/2026-04-01-ws-0294-serverclaw-runtime-env-r1-0.177.134.txt`
+- Endpoint verification: `receipts/live-applies/evidence/2026-04-01-ws-0294-open-webui-head-r1-0.177.134.txt` and `receipts/live-applies/evidence/2026-04-01-ws-0294-serverclaw-head-r1-0.177.134.txt`
 
 ## Merge-To-Main Notes
 
-- Remaining for the exact-main integration step: fetch and rebase onto the latest `origin/main`, rerun the relevant validation and live replay paths from that synchronized tree, then update the protected surfaces `VERSION`, `changelog.md`, `RELEASE.md`, `docs/release-notes/`, `README.md`, `versions/stack.yaml`, and `build/platform-manifest.json` together with the canonical mainline receipt.
+- The exact-main integration step completed from `origin/main` commit `b7dde631d290474de3200886846217e688e0c16e`; the remaining work on this branch is only the protected release cut, final merge to `main`, and push to `origin/main`.
+- Raw provider-env captures were intentionally not retained in the committed evidence set because they contained live consumer tokens; the bootstrap report plus the downstream runtime env verification files are the canonical non-secret proofs for the generated provider contracts.

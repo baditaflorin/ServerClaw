@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.177.134
-platform_version: 0.130.84
+platform_version: 0.130.85
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -780,7 +780,8 @@ observed_state:
     default_model: llama3.2:3b
     default_model_present: true
     startup_model_repulled_when_already_present: false
-    open_webui_connector_verified: true
+    one_api_connector_verified: true
+    open_webui_connector_verified: false
     generation_latency_ms:
       min: 2357.8
       avg: 3062.2
@@ -888,6 +889,18 @@ observed_state:
       - Architecture
       - Incident Postmortems
       - Runbooks
+  one_api:
+    runtime_vm: 10.10.10.20
+    postgres_backend_vm: 10.10.10.50
+    host_tailscale_proxy_url: http://100.64.0.1:8018
+    private_http_url: http://10.10.10.20:8101
+    private_openai_base_url: http://10.10.10.20:8101/v1
+    controller_openai_base_url: http://100.64.0.1:8018/v1
+    container_running: true
+    status_api_verified: true
+    bootstrap_verification_passed: true
+    managed_channels_present: true
+    approved_provider_envs_present: true
   open_webui:
     runtime_vm: 10.10.10.20
     host_tailscale_proxy_url: http://100.64.0.1:8008
@@ -897,15 +910,20 @@ observed_state:
     bootstrap_admin_login_verified: true
     password_auth_enabled: true
     oidc_enabled: false
-    approved_provider_env_present: false
+    approved_provider_env_present: true
     web_search_permission: true
     web_search_provider: searxng
     image_generation_permission: false
     code_interpreter_permission: false
     direct_tool_servers_permission: false
-    ollama_connector_enabled: true
+    openai_connector_enabled: true
+    openai_connector_url: http://host.docker.internal:8101/v1
+    openai_connector_verified: true
+    default_models: gpt-4o-mini
+    default_pinned_models: gpt-4o-mini
+    ollama_connector_enabled: false
     ollama_connector_url: http://host.docker.internal:11434
-    ollama_connector_verified: true
+    ollama_connector_verified: false
   searxng:
     runtime_vm: 10.10.10.20
     host_tailscale_proxy_url: http://100.64.0.1
@@ -928,6 +946,7 @@ observed_state:
     embedding_backend: ollama
     indexed_chunk_count: 29
     corpus_source_count: 4
+    serverclaw_memory_round_trip_verified: true
   mattermost:
     runtime_vm: 10.10.10.20
     postgres_backend_vm: 10.10.10.50
