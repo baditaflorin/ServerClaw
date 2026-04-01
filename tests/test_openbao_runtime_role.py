@@ -91,11 +91,13 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     assert "postgres_ha.initial_primary" in defaults
     assert "ansible_host" in defaults
     assert "@{{ openbao_postgres_host }}:5432/postgres?sslmode=disable" in defaults
-    assert 'CREATE ROLE "{{name}}" WITH LOGIN PASSWORD \'{{password}}\' VALID UNTIL \'{{expiration}}\';' in defaults
-    assert 'GRANT lv3_openbao_connect_all TO "{{name}}";' in defaults
-    assert 'GRANT pg_read_all_data TO "{{name}}";' in defaults
-    assert 'GRANT pg_use_reserved_connections TO "{{name}}";' in defaults
-    assert 'DROP ROLE IF EXISTS "{{name}}";' in defaults
+    assert "creation_statements: !unsafe |-" in defaults
+    assert 'CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD \'{{ password }}\' VALID UNTIL \'{{ expiration }}\';' in defaults
+    assert 'GRANT lv3_openbao_connect_all TO "{{ name }}";' in defaults
+    assert 'GRANT pg_read_all_data TO "{{ name }}";' in defaults
+    assert 'GRANT pg_use_reserved_connections TO "{{ name }}";' in defaults
+    assert "revocation_statements: !unsafe |-" in defaults
+    assert 'DROP ROLE IF EXISTS "{{ name }}";' in defaults
     assert "openbao_http_extra_bind_addresses: []" in defaults
     assert 'openbao_atlas_approle_local_file: "{{ openbao_local_artifact_dir }}/atlas-approle.json"' in defaults
     assert 'path "database/creds/postgres-atlas-readonly"' in (
@@ -109,6 +111,7 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
         / "templates"
         / "policy-lv3-agent-atlas.hcl.j2"
     ).read_text(encoding="utf-8")
+    assert "  - name: postgres-atlas-readonly\n" in defaults
     assert '  - postgres-atlas-readonly' in defaults
 
 
