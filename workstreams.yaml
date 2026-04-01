@@ -1415,7 +1415,8 @@ workstreams:
       included_in_repo_version: 0.177.128
       latest_receipts:
         lago: 2026-04-01-adr-0292-lago-mainline-live-apply
-    blockers: []
+    blockers:
+      - remote push gate still fails until the exact-main integration step refreshes docs/diagrams/agent-coordination-map.excalidraw, build/platform-manifest.json, and canonical truth outputs touching changelog.md plus versions/stack.yaml
     ready_to_merge: false
     live_applied: true
   - id: ws-0295-live-apply

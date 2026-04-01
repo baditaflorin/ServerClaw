@@ -81,7 +81,7 @@
 
 - `receipts/live-applies/evidence/2026-04-02-ws-0311-generate-metadata-r1.txt`
 - `receipts/live-applies/evidence/2026-04-02-ws-0311-pytest-r1.txt`
-- `receipts/live-applies/evidence/2026-04-02-ws-0311-validate-repo-r5.txt`
+- `receipts/live-applies/evidence/2026-04-02-ws-0311-validate-repo-r6.txt`
 - `receipts/live-applies/evidence/2026-04-02-ws-0311-ansible-syntax-r1.txt`
 - `receipts/live-applies/evidence/2026-04-02-ws-0311-syntax-check-windmill-r1.txt`
 - `receipts/live-applies/evidence/2026-04-02-ws-0311-preflight-converge-windmill-r1.txt`
@@ -91,6 +91,7 @@
 - `receipts/live-applies/evidence/2026-04-02-ws-0311-command-palette-search-r4.json`
 - `receipts/live-applies/evidence/2026-04-02-ws-0311-raw-app-sync-r1.txt`
 - `receipts/live-applies/evidence/2026-04-02-ws-0311-live-app-summary-r2.json`
+- `receipts/live-applies/evidence/2026-04-02-ws-0311-push-gate-r1.txt`
 
 ## Merge Criteria
 
@@ -102,3 +103,4 @@
 
 - This branch intentionally does not touch the protected mainline closeout surfaces: `VERSION`, release sections in `changelog.md`, the top-level `README.md` status summary, `versions/stack.yaml`, and any canonical generated truth surfaces still wait for the exact-main integration step.
 - The exact-main integration branch should start from the latest `origin/main`, replay the repo-managed Windmill converge once the shared `f/lv3/gate-status` lane is stable, record the canonical mainline receipt, and only then update the protected release and integrated-truth files.
+- A direct push of this workstream branch is currently blocked by the remote pre-push gate because it also wants exact-main-only generated surfaces refreshed: `docs/diagrams/agent-coordination-map.excalidraw`, `build/platform-manifest.json`, and canonical truth outputs that touch `changelog.md` plus `versions/stack.yaml`. Those surfaces were intentionally left unchanged here to respect the branch-local constraints.

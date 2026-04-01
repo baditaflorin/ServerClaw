@@ -82,13 +82,14 @@
     "tests/test_windmill_operator_admin_app.py",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-generate-metadata-r1.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-pytest-r5.txt",
-    "receipts/live-applies/evidence/2026-04-02-ws-0311-validate-repo-r5.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-validate-repo-r6.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-ansible-syntax-r1.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-syntax-check-windmill-r2.txt",
-    "receipts/live-applies/evidence/2026-04-02-ws-0311-git-diff-check-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-git-diff-check-r2.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-preflight-converge-windmill-r1.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-converge-windmill-r1.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-gate-status-failure-summary-r1.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-push-gate-r1.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-command-palette-search-sync-r4.json",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-command-palette-search-r4.json",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-raw-app-sync-r1.txt",
@@ -99,6 +100,7 @@
   "notes": [
     "This receipt records the branch-local latest-main proof before the protected release and integrated-truth surfaces are updated on an exact-main integration branch.",
     "The first governed production replay failed closed in the shared `f/lv3/gate-status` lane, and a separate live API inspection showed the operator raw app later drifted away from the command palette bundle during concurrent work. The branch therefore used narrower repo-managed syncs of `f/lv3/command_palette_search` and `f/lv3/operator_access_admin` rather than overwriting unrelated shared verification code out of band.",
-    "Protected follow-up still waits for merge-to-main: `VERSION`, release sections in `changelog.md`, the top-level `README.md` status summary, `versions/stack.yaml`, and any canonical mainline receipt or generated truth surfaces."
+    "Protected follow-up still waits for merge-to-main: `VERSION`, release sections in `changelog.md`, the top-level `README.md` status summary, `versions/stack.yaml`, and any canonical mainline receipt or generated truth surfaces.",
+    "A direct branch push to GitHub was blocked by the remote pre-push gate because it also wants exact-main-only generated-surface updates to `docs/diagrams/agent-coordination-map.excalidraw`, `build/platform-manifest.json`, and canonical-truth outputs touching `changelog.md` plus `versions/stack.yaml`."
   ]
 }
