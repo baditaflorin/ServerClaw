@@ -48,6 +48,8 @@ class ChangelogPortalTests(unittest.TestCase):
             minio_html = (temp_dir / "site" / "service" / "minio" / "index.html").read_text()
 
             self.assertIn("Deployment History Portal", index_html)
+            self.assertIn("Contextual Help", index_html)
+            self.assertIn("Escalation Path", index_html)
             self.assertIn("2026-03-22-adr-0011-monitoring-live-apply", index_html)
             self.assertIn('<meta name="robots" content="noindex, nofollow">', index_html)
             self.assertIn("promotion-1", promotions_html)

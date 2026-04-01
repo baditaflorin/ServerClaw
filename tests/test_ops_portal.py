@@ -62,6 +62,9 @@ class OpsPortalRenderTests(unittest.TestCase):
             agents_html = (temp_dir / "agents" / "index.html").read_text()
 
             self.assertIn("Platform Operations Portal", index_html)
+            self.assertIn("Contextual Help", index_html)
+            self.assertIn("Escalation Path", index_html)
+            self.assertIn("Recovery tier", index_html)
             self.assertIn("Release Readiness", index_html)
             self.assertIn("SLO Status", index_html)
             self.assertIn("Grafana", index_html)

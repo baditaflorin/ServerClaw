@@ -17,12 +17,14 @@ from urllib.error import URLError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
+import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 from adr_catalog import resolve_service_adr_path
 from api_publication import load_api_publication_catalog
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from dependency_graph import load_dependency_graph, render_dependency_page
+from ops_portal.contextual_help import build_docs_page_help, glossary_reference_rows, site_path_to_browser_href
 
 
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
@@ -269,37 +271,21 @@ def build_page_frontmatter(
     sensitivity: str,
     portal_display: str,
     tags: list[str] | None = None,
-    extra_metadata: dict[str, str | list[str]] | None = None,
+    extra_metadata: dict[str, Any] | None = None,
     search_exclude: bool = False,
 ) -> str:
-    def append_field(lines: list[str], key: str, value: str | list[str]) -> None:
-        if isinstance(value, list):
-            values = [item for item in value if item]
-            if not values:
-                return
-            lines.append(f"{key}:")
-            for item in values:
-                lines.append(f"  - {item}")
-            return
-        if value:
-            lines.append(f"{key}: {value}")
-
-    lines = [
-        "---",
-        f"sensitivity: {sensitivity}",
-        f"portal_display: {portal_display}",
-    ]
+    payload: dict[str, Any] = {
+        "sensitivity": sensitivity,
+        "portal_display": portal_display,
+    }
     if tags:
-        lines.append("tags:")
-        for tag in tags:
-            lines.append(f"  - {tag}")
+        payload["tags"] = tags
     if extra_metadata:
-        for key, value in extra_metadata.items():
-            append_field(lines, key, value)
+        payload.update(extra_metadata)
     if search_exclude:
-        lines.extend(["search:", "  exclude: true"])
-    lines.append("---")
-    return "\n".join(lines) + "\n\n"
+        payload["search"] = {"exclude": True}
+    rendered = yaml.safe_dump(payload, sort_keys=False, default_flow_style=False).strip()
+    return f"---\n{rendered}\n---\n\n"
 
 
 def portal_notice(document: PortalDocument) -> str:
@@ -334,7 +320,10 @@ def render_portal_document(document: PortalDocument, target_path: Path) -> str:
         sensitivity=document.sensitivity,
         portal_display=document.portal_display,
         tags=[document.sensitivity.lower(), section],
-        extra_metadata=pagefind_metadata(target_path),
+        extra_metadata={
+            **pagefind_metadata(target_path),
+            "contextual_help": build_docs_page_help(target_path=target_path, title=document.title),
+        },
         search_exclude=document.sensitivity == "CONFIDENTIAL",
     )
     notice = portal_notice(document)
@@ -366,6 +355,7 @@ def wrap_generated_page(
     tags: list[str] | None = None,
     pagefind_service: str | None = None,
     pagefind_capabilities: list[str] | None = None,
+    contextual_help: dict[str, Any] | None = None,
 ) -> str:
     normalized_content = content.lstrip()
     normalized_content = re.sub(r"\A---\n.*?\n---\n+", "", normalized_content, count=1, flags=re.DOTALL)
@@ -379,11 +369,15 @@ def wrap_generated_page(
         sensitivity=sensitivity,
         portal_display=portal_display,
         tags=tags,
-        extra_metadata=pagefind_metadata(
-            target_path,
-            service=pagefind_service,
-            capabilities=pagefind_capabilities,
-        ),
+        extra_metadata={
+            **pagefind_metadata(
+                target_path,
+                service=pagefind_service,
+                capabilities=pagefind_capabilities,
+            ),
+            "contextual_help": contextual_help
+            or build_docs_page_help(target_path=target_path, title=target_path.stem.replace("-", " ").title()),
+        },
     )
     notice = portal_notice(
         PortalDocument(
@@ -957,6 +951,18 @@ def render_reference_pages(
         ),
     )
 
+    write_generated(
+        output_dir,
+        "reference/glossary.md",
+        wrap_generated_page(
+            render_template("reference-glossary.md.j2", rows=glossary_reference_rows()),
+            target_path=Path("reference", "glossary.md"),
+            sensitivity="INTERNAL",
+            tags=["reference", "glossary"],
+            contextual_help=build_docs_page_help(target_path=Path("reference", "glossary.md"), title="Glossary"),
+        ),
+    )
+
     subdomains_index = subdomains_by_service(subdomains)
     port_rows = []
     for service in sorted(services, key=lambda item: (min((row["port"] for row in service_port_rows(item, subdomains_index.get(item["id"], []))), default=0), item["name"])):
@@ -974,11 +980,11 @@ def render_reference_pages(
     write_generated(
         output_dir,
         "reference/ports.md",
-        wrap_generated_page(
-            render_template("reference-ports.md.j2", rows=port_rows),
-            target_path=Path("reference", "ports.md"),
-            sensitivity="INTERNAL",
-            tags=["reference", "ports"],
+            wrap_generated_page(
+                render_template("reference-ports.md.j2", rows=port_rows),
+                target_path=Path("reference", "ports.md"),
+                sensitivity="INTERNAL",
+                tags=["reference", "ports"],
         ),
     )
 
@@ -1002,11 +1008,11 @@ def render_reference_pages(
     write_generated(
         output_dir,
         "reference/subdomains.md",
-        wrap_generated_page(
-            render_template("reference-subdomains.md.j2", rows=subdomain_rows),
-            target_path=Path("reference", "subdomains.md"),
-            sensitivity="INTERNAL",
-            tags=["reference", "subdomains"],
+            wrap_generated_page(
+                render_template("reference-subdomains.md.j2", rows=subdomain_rows),
+                target_path=Path("reference", "subdomains.md"),
+                sensitivity="INTERNAL",
+                tags=["reference", "subdomains"],
         ),
     )
 
@@ -1035,11 +1041,11 @@ def render_reference_pages(
     write_generated(
         output_dir,
         "reference/identities.md",
-        wrap_generated_page(
-            render_template("reference-identities.md.j2", classes=classes, identities=identities),
-            target_path=Path("reference", "identities.md"),
-            sensitivity="INTERNAL",
-            tags=["reference", "identities"],
+            wrap_generated_page(
+                render_template("reference-identities.md.j2", classes=classes, identities=identities),
+                target_path=Path("reference", "identities.md"),
+                sensitivity="INTERNAL",
+                tags=["reference", "identities"],
         ),
     )
 
@@ -1058,11 +1064,11 @@ def render_reference_pages(
     write_generated(
         output_dir,
         "reference/secrets.md",
-        wrap_generated_page(
-            render_template("reference-secrets.md.j2", secrets=secret_rows),
-            target_path=Path("reference", "secrets.md"),
-            sensitivity="INTERNAL",
-            tags=["reference", "secrets"],
+            wrap_generated_page(
+                render_template("reference-secrets.md.j2", secrets=secret_rows),
+                target_path=Path("reference", "secrets.md"),
+                sensitivity="INTERNAL",
+                tags=["reference", "secrets"],
         ),
     )
 
@@ -1224,6 +1230,24 @@ def render_services(output_dir: Path) -> None:
                 tags=["services", service["id"]],
                 pagefind_service=service["id"],
                 pagefind_capabilities=service.get("tags", []),
+                contextual_help=build_docs_page_help(
+                    target_path=Path("services", f"{service['id']}.md"),
+                    title=str(service.get("name", service["id"])),
+                    service=context,
+                    runbook_href=(
+                        site_path_to_browser_href("", site_path_for_repo_path(repo_path(service["runbook"])))
+                        if service.get("runbook") and site_path_for_repo_path(repo_path(service["runbook"])) is not None
+                        else None
+                    ),
+                    runbook_title=context.get("runbook_title"),
+                    adr_href=(
+                        site_path_to_browser_href("", site_path_for_repo_path(resolve_service_adr_path(service)))
+                        if resolve_service_adr_path(service) is not None
+                        and site_path_for_repo_path(resolve_service_adr_path(service)) is not None
+                        else None
+                    ),
+                    adr_id=str(service.get("adr")) if service.get("adr") else None,
+                ),
             ),
         )
 
@@ -1264,6 +1288,7 @@ def validate_site(output_dir: Path) -> None:
         output_dir / "architecture" / "index.md",
         output_dir / "architecture" / "dependency-graph.md",
         output_dir / "reference" / "ports.md",
+        output_dir / "reference" / "glossary.md",
         output_dir / "api" / "index.md",
         output_dir / "api" / "openapi.md",
         output_dir / "api" / "openapi.json",

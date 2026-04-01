@@ -23,6 +23,29 @@ The current portal combines:
 - a shared masthead application launcher with purpose grouping, persona filters,
   favorites, and recent destinations
 
+## Contextual Help Drawer
+
+ADR 0313 adds a shared **Contextual Help** drawer to both the interactive ops
+portal runtime and the generated static snapshot.
+
+The drawer is meant to answer the page-local questions operators hit most often
+without forcing them to leave the flow of work:
+
+- what this page is for and who it is aimed at
+- which platform terms on the page have special meaning
+- which ADRs, runbooks, or docs pages are the canonical next read
+- how to back out safely or hand the task off when the action is risky
+
+Expected root-page content now includes:
+
+- a **Contextual Help** toggle in the masthead
+- glossary entries such as `Live apply`, `Recovery tier`, and `Handoff`
+- a visible **Escalation Path** block with the owning runbook and handoff route
+
+Page-specific help content is assembled in
+`scripts/ops_portal/contextual_help.py` so the generated snapshot and the live
+runtime stay on the same glossary and escalation model.
+
 ## Local Generation
 
 Generate the static snapshot locally when you need a read-only render for checks,
@@ -82,11 +105,25 @@ That covers both sides of the portal contract:
 - `generate_ops_portal.py --check` verifies the static snapshot still renders
 - `make syntax-check-ops-portal` verifies the interactive runtime playbook and
   role wiring
+- the runtime verification role also asserts that the live root page includes
+  `Contextual Help`, `Live apply`, and `Escalation Path`
 
 For the launcher-specific runtime behavior, also run the focused tests:
 
 ```bash
 uv run --with pytest --with pyyaml --with jsonschema --with fastapi==0.116.1 --with httpx==0.28.1 --with cryptography==45.0.6 --with PyJWT==2.10.1 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest tests/test_interactive_ops_portal.py tests/test_ops_portal.py -q
+```
+
+For a direct local HTML assertion on the built snapshot:
+
+```bash
+python3 - <<'PY'
+from pathlib import Path
+html = Path("build/ops-portal/index.html").read_text(encoding="utf-8")
+for marker in ("Contextual Help", "Live apply", "Escalation Path"):
+    assert marker in html, marker
+print("ops-portal-help-ok")
+PY
 ```
 
 ## Deployment
@@ -122,6 +159,15 @@ can clobber each other's uploaded tree, which leaves partial routes such as
 `/partials/launcher` missing even when the playbook itself reached the verify
 phase. The runtime role now checks `/partials/launcher` locally during replay so
 that drift fails closed instead of silently publishing an incomplete shell.
+
+After a live ADR 0313 replay, also confirm the root page contains the help
+drawer strings from the guest-local runtime:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 \
+  'curl -fsS http://127.0.0.1:8092/ | rg "Contextual Help|Live apply|Escalation Path"'
+```
 
 ## Publication Boundary
 

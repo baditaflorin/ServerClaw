@@ -680,6 +680,9 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Connected Surfaces" in response.text
     assert "Homepage" in response.text
     assert "Docs" in response.text
+    assert "Contextual Help" in response.text
+    assert "Escalation Path" in response.text
+    assert "Live apply" in response.text
     assert "Platform Overview" in response.text
     assert "Runtime Assurance" in response.text
     assert "Scoreboard and rollup by active service and environment" in response.text

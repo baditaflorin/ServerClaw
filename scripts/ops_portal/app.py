@@ -37,6 +37,14 @@ except ImportError:  # pragma: no cover - direct module or repo checkout import 
     except ImportError:  # pragma: no cover - repo checkout import path
         from scripts.ops_portal.runtime_assurance import build_runtime_assurance_models
 
+try:
+    from .contextual_help import build_ops_portal_help
+except ImportError:  # pragma: no cover - direct module or repo checkout import path
+    try:
+        from contextual_help import build_ops_portal_help
+    except ImportError:  # pragma: no cover - repo checkout import path
+        from scripts.ops_portal.contextual_help import build_ops_portal_help
+
 
 def utc_now() -> datetime:
     return datetime.now(UTC).replace(microsecond=0)
@@ -1700,6 +1708,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "search_query": "",
         "search_collection": "",
         "launcher": launcher_context["launcher"],
+        "contextual_help": build_ops_portal_help(request.app.state.settings.docs_base_url),
     }
 
 

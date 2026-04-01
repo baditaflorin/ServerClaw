@@ -117,6 +117,9 @@ def test_ops_portal_dockerfile_depends_on_synced_helper_files() -> None:
 def test_ops_portal_verify_checks_launcher_and_runtime_assurance_partials() -> None:
     verify_tasks = VERIFY_TASKS_PATH.read_text(encoding="utf-8")
 
+    assert "Assert the contextual help drawer is present on the ops portal root page" in verify_tasks
+    assert "'Contextual Help' in ops_portal_verify_root.content" in verify_tasks
+    assert "'Escalation Path' in ops_portal_verify_root.content" in verify_tasks
     assert "Verify the application launcher partial renders locally" in verify_tasks
     assert '/partials/launcher' in verify_tasks
     assert "Application Launcher" in verify_tasks

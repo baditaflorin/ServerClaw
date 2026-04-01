@@ -60,6 +60,9 @@ def test_ops_portal_runtime_retries_local_health_and_root_checks() -> None:
     tasks = yaml.safe_load((ROLE_TASKS_PATH / "verify.yml").read_text())
     health_task = next(task for task in tasks if task["name"] == "Verify the ops portal health endpoint responds locally")
     root_task = next(task for task in tasks if task["name"] == "Verify the ops portal root page renders locally")
+    root_assert = next(
+        task for task in tasks if task["name"] == "Assert the contextual help drawer is present on the ops portal root page"
+    )
 
     assert health_task["retries"] == 20
     assert health_task["delay"] == 3
@@ -68,3 +71,5 @@ def test_ops_portal_runtime_retries_local_health_and_root_checks() -> None:
     assert root_task["retries"] == 20
     assert root_task["delay"] == 3
     assert root_task["until"] == "ops_portal_verify_root.status == 200"
+    assert root_task["ansible.builtin.uri"]["return_content"] is True
+    assert "'Contextual Help' in ops_portal_verify_root.content" in root_assert["ansible.builtin.assert"]["that"]

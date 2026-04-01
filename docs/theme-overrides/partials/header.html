@@ -53,6 +53,11 @@
       {% include ".icons/" ~ icon ~ ".svg" %}
     </label>
     {% include "partials/search.html" %}
+    {% if page.meta and page.meta.contextual_help %}
+      <button class="lv3-contextual-help-toggle" type="button" aria-expanded="false" aria-controls="lv3-contextual-help-drawer" data-contextual-help-toggle>
+        Contextual Help
+      </button>
+    {% endif %}
     {% if config.repo_url %}
       <div class="md-header__source">
         {% include "partials/source.html" %}
