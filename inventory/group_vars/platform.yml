@@ -604,8 +604,7 @@ platform_guest_catalog:
         placement_class: primary
         anti_affinity_group: runtime-ai
         co_location_exceptions: []
-      packages:
-        - docker.io
+      packages: []
   by_name:
     nginx-lv3:
       vmid: 110
@@ -863,8 +862,7 @@ platform_guest_catalog:
         placement_class: primary
         anti_affinity_group: runtime-ai
         co_location_exceptions: []
-      packages:
-        - docker.io
+      packages: []
   by_role:
     nginx:
       vmid: 110
@@ -1122,8 +1120,7 @@ platform_guest_catalog:
         placement_class: primary
         anti_affinity_group: runtime-ai
         co_location_exceptions: []
-      packages:
-        - docker.io
+      packages: []
 platform_service_topology:
   nginx_edge:
     service_name: nginx-edge
