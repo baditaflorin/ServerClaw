@@ -30,6 +30,7 @@ REMOTE_RUNTIME_SUPPORT_FILES = (
     ("scripts/controller_automation_toolkit.py", 0o644),
     ("config/restic-file-backup-catalog.json", 0o644),
 )
+SYNCABLE_REPORT_KEYS = ("receipt_path", "latest_snapshot_receipt")
 
 
 def extract_report_json(stdout: str) -> dict | None:
@@ -149,6 +150,71 @@ def sync_remote_runtime_file(
         raise RuntimeError(f"{remote_path}: {detail}")
 
 
+def normalize_repo_relative_path(path: str) -> PurePosixPath:
+    candidate = PurePosixPath(str(path).strip())
+    if candidate.is_absolute():
+        raise ValueError(f"expected a repo-relative path, got absolute path: {path}")
+    if any(part in {"", ".", ".."} for part in candidate.parts):
+        raise ValueError(f"receipt sync path must stay within the repo root: {path}")
+    if not candidate.parts or candidate.parts[0] != "receipts":
+        raise ValueError(f"receipt sync path must stay under receipts/: {path}")
+    return candidate
+
+
+def fetch_remote_repo_file(
+    context: dict,
+    *,
+    target: str,
+    repo_root: str,
+    relative_path: str,
+) -> str:
+    relative = normalize_repo_relative_path(relative_path)
+    remote_path = str(PurePosixPath(repo_root) / relative)
+    remote_command = f"sudo cat {shlex.quote(remote_path)}"
+    command = build_guest_ssh_command(context, target, remote_command)
+    completed = subprocess.run(
+        command,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        detail = completed.stderr.strip() or completed.stdout.strip() or "remote download failed"
+        raise RuntimeError(f"{remote_path}: {detail}")
+    return completed.stdout
+
+
+def sync_reported_receipt_artifacts(
+    context: dict,
+    *,
+    target: str,
+    repo_root: str,
+    report: dict | None,
+) -> list[str]:
+    if not isinstance(report, dict):
+        return []
+
+    synced: list[str] = []
+    for key in SYNCABLE_REPORT_KEYS:
+        relative_path = report.get(key)
+        if not isinstance(relative_path, str) or not relative_path.strip():
+            continue
+        relative = normalize_repo_relative_path(relative_path)
+        local_path = LOCAL_REPO_ROOT / Path(*relative.parts)
+        local_path.parent.mkdir(parents=True, exist_ok=True)
+        local_path.write_text(
+            fetch_remote_repo_file(
+                context,
+                target=target,
+                repo_root=repo_root,
+                relative_path=relative_path,
+            ),
+            encoding="utf-8",
+        )
+        synced.append(relative_path)
+    return synced
+
+
 def ensure_remote_runtime_support_files(context: dict, *, repo_root: str, target: str = "docker-runtime-lv3") -> None:
     repo_root_path = PurePosixPath(repo_root)
     for relative_path, mode in REMOTE_RUNTIME_SUPPORT_FILES:
@@ -201,6 +267,15 @@ def main(argv: list[str] | None = None) -> int:
             "stdout": outcome.stdout.strip(),
             "stderr": outcome.stderr.strip(),
         }
+        if outcome.returncode == 0:
+            synced_paths = sync_reported_receipt_artifacts(
+                context,
+                target="docker-runtime-lv3",
+                repo_root=args.repo_root,
+                report=report,
+            )
+            if synced_paths:
+                payload["synced_local_paths"] = synced_paths
         if report is not None:
             payload["report"] = report
             if isinstance(report, dict):

@@ -589,6 +589,45 @@ def test_ensure_remote_runtime_support_files_uploads_required_bundle(tmp_path: P
     assert stdin_payloads[0].startswith("#!/usr/bin/env python3")
 
 
+def test_sync_reported_receipt_artifacts_downloads_reported_files(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(trigger, "LOCAL_REPO_ROOT", tmp_path)
+    monkeypatch.setattr(
+        trigger,
+        "fetch_remote_repo_file",
+        lambda context, target, repo_root, relative_path: json.dumps(
+            {"path": relative_path, "repo_root": repo_root, "target": target}
+        )
+        + "\n",
+    )
+
+    synced = trigger.sync_reported_receipt_artifacts(
+        {"controller": "context"},
+        target="docker-runtime-lv3",
+        repo_root="/srv/proxmox_florin_server",
+        report={
+            "receipt_path": "receipts/restic-backups/20260401T112837Z.json",
+            "latest_snapshot_receipt": "receipts/restic-snapshots-latest.json",
+        },
+    )
+
+    assert synced == [
+        "receipts/restic-backups/20260401T112837Z.json",
+        "receipts/restic-snapshots-latest.json",
+    ]
+    assert json.loads(
+        (tmp_path / "receipts" / "restic-backups" / "20260401T112837Z.json").read_text(encoding="utf-8")
+    ) == {
+        "path": "receipts/restic-backups/20260401T112837Z.json",
+        "repo_root": "/srv/proxmox_florin_server",
+        "target": "docker-runtime-lv3",
+    }
+    assert json.loads((tmp_path / "receipts" / "restic-snapshots-latest.json").read_text(encoding="utf-8")) == {
+        "path": "receipts/restic-snapshots-latest.json",
+        "repo_root": "/srv/proxmox_florin_server",
+        "target": "docker-runtime-lv3",
+    }
+
+
 def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkeypatch) -> None:
     captured: dict[str, object] = {}
 
@@ -605,6 +644,19 @@ def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkey
         trigger,
         "run_command",
         lambda command: types.SimpleNamespace(returncode=0, stdout='REPORT_JSON={"summary":{"protected":1}}', stderr=""),
+    )
+    monkeypatch.setattr(
+        trigger,
+        "sync_reported_receipt_artifacts",
+        lambda context, target, repo_root, report: captured.update(
+            {
+                "sync_context": context,
+                "sync_target": target,
+                "sync_repo_root": repo_root,
+                "sync_report": report,
+            }
+        )
+        or ["receipts/restic-snapshots-latest.json"],
     )
 
     assert (
@@ -624,6 +676,10 @@ def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkey
         "context": {"controller": "context"},
         "repo_root": "/srv/proxmox_florin_server",
         "target": "docker-runtime-lv3",
+        "sync_context": {"controller": "context"},
+        "sync_target": "docker-runtime-lv3",
+        "sync_repo_root": "/srv/proxmox_florin_server",
+        "sync_report": {"summary": {"protected": 1}},
     }
 
 

@@ -52,13 +52,40 @@ def test_tasks_install_mc_and_manage_buckets_policies_and_lifecycle() -> None:
 def test_tasks_recover_stale_compose_network_during_startup() -> None:
     tasks = load_yaml(TASKS_PATH)
     start_block = next(
-        task for task in tasks if task.get("name") == "Start the MinIO runtime and recover stale compose-network failures"
+        task
+        for task in tasks
+        if task.get("name") == "Start the MinIO runtime and recover stale compose-network or task-state failures"
+    )
+    rescue_fact = next(
+        task for task in start_block["rescue"] if task["name"] == "Flag stale MinIO compose-network failures during startup"
+    )
+    unexpected_failure = next(
+        task for task in start_block["rescue"] if task["name"] == "Surface unexpected MinIO startup failures"
+    )
+    cleanup_task = next(
+        task
+        for task in start_block["rescue"]
+        if task["name"] == "Force-remove stale MinIO containers after task-state startup failure"
+    )
+    reset_task = next(
+        task for task in start_block["rescue"] if task["name"] == "Reset stale MinIO compose resources after startup failure"
+    )
+    retry_task = next(
+        task for task in start_block["rescue"] if task["name"] == "Retry MinIO startup after compose-network recovery"
     )
     rescue_names = [task["name"] for task in start_block["rescue"]]
 
     assert "Flag stale MinIO compose-network failures during startup" in rescue_names
     assert "Reset stale MinIO compose resources after startup failure" in rescue_names
+    assert "Force-remove stale MinIO containers after task-state startup failure" in rescue_names
     assert "Retry MinIO startup after compose-network recovery" in rescue_names
+    assert "AlreadyExists: task" in rescue_fact["ansible.builtin.set_fact"]["minio_container_task_already_exists"]
+    assert "already exists" in rescue_fact["ansible.builtin.set_fact"]["minio_container_task_already_exists"]
+    assert unexpected_failure["when"] == ["not minio_compose_network_missing", "not minio_container_task_already_exists"]
+    assert 'docker rm -f "$container_name"' in cleanup_task["ansible.builtin.shell"]
+    assert cleanup_task["when"] == "minio_container_task_already_exists"
+    assert reset_task["when"] == "minio_compose_network_missing or minio_container_task_already_exists"
+    assert retry_task["when"] == "minio_compose_network_missing or minio_container_task_already_exists"
 
 
 def test_templates_publish_public_server_and_console_urls() -> None:

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.128",
-  "platform_version": "0.130.81",
-  "generated_at": "2026-04-01T08:25:00Z",
-  "next_refresh_at": "2026-04-01T09:25:00Z",
+  "repo_version": "0.177.129",
+  "platform_version": "0.130.82",
+  "generated_at": "2026-04-01T11:36:51Z",
+  "next_refresh_at": "2026-04-01T12:36:51Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -719,6 +719,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9443",
         "last_live_apply": "2026-04-01T00:00:00Z"
+      },
+      "superset": {
+        "service_name": "Apache Superset",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://bi.lv3.org",
+        "last_live_apply": "2026-04-01T00:00:00Z",
+        "slo_status": "unknown"
       },
       "temporal": {
         "service_name": "Temporal",
@@ -2618,6 +2630,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-step-ca.md"
+      },
+      {
+        "id": "converge-superset",
+        "description": "Deploy the Superset metadata schema, runtime, Keycloak client, and public edge publication, then verify SQL-first BI access end to end.",
+        "tags": [
+          "converge-superset",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 280,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 2,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-superset.md"
       },
       {
         "id": "converge-temporal",
@@ -5149,6 +5187,16 @@
         ]
       },
       {
+        "id": "configure-superset",
+        "title": "Configure Superset",
+        "agent_trust_required": "T3",
+        "steps": 6,
+        "path": "docs/runbooks/configure-superset.md",
+        "workflow_ids": [
+          "converge-superset"
+        ]
+      },
+      {
         "id": "configure-tailscale-access",
         "title": "Configure Tailscale Private Access",
         "agent_trust_required": "T3",
@@ -5832,10 +5880,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.127",
+    "last_version": "0.177.128",
     "deployed_at": "2026-04-01",
-    "summary": "Re-verify ADR 0292 from the latest `origin/main`, preserve the protected Lago billing edge on production, and promote the successful exact-main replay plus validation evidence into the current release.",
-    "release_notes_url": "docs/release-notes/0.177.128.md"
+    "summary": "implements ADR 0292 by adding Apache Superset as the SQL-first BI layer, publishing bi.lv3.org through the shared edge, reconciling repo-managed PostgreSQL and Plausible datasources plus the landing dashboard, and preserving exact-main live-apply evidence on the synchronized 0.177.128 baseline before the platform version advances to 0.130.82",
+    "release_notes_url": "docs/release-notes/0.177.129.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

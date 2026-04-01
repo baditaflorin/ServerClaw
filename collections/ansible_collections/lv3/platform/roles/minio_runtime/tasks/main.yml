@@ -281,7 +281,7 @@
     or 'Downloaded newer image' in minio_pull.stdout
     or 'Pull complete' in minio_pull.stdout
 
-- name: Start the MinIO runtime and recover stale compose-network failures
+- name: Start the MinIO runtime and recover stale compose-network or task-state failures
   block:
     - name: Ensure the MinIO runtime is running
       ansible.builtin.command:
@@ -305,14 +305,37 @@
       ansible.builtin.set_fact:
         minio_compose_network_missing: >-
           {{
-            'failed to create endpoint' in (ansible_failed_result.stderr | default(''))
-            and 'does not exist' in (ansible_failed_result.stderr | default(''))
+            'failed to create endpoint' in (
+              (ansible_failed_result.stderr | default(''))
+              ~ ' ' ~ (ansible_failed_result.stdout | default(''))
+              ~ ' ' ~ (ansible_failed_result.msg | default(''))
+            )
+            and 'does not exist' in (
+              (ansible_failed_result.stderr | default(''))
+              ~ ' ' ~ (ansible_failed_result.stdout | default(''))
+              ~ ' ' ~ (ansible_failed_result.msg | default(''))
+            )
+          }}
+        minio_container_task_already_exists: >-
+          {{
+            'AlreadyExists: task' in (
+              (ansible_failed_result.stderr | default(''))
+              ~ ' ' ~ (ansible_failed_result.stdout | default(''))
+              ~ ' ' ~ (ansible_failed_result.msg | default(''))
+            )
+            and 'already exists' in (
+              (ansible_failed_result.stderr | default(''))
+              ~ ' ' ~ (ansible_failed_result.stdout | default(''))
+              ~ ' ' ~ (ansible_failed_result.msg | default(''))
+            )
           }}
 
     - name: Surface unexpected MinIO startup failures
       ansible.builtin.fail:
         msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('minio compose up failed')) }}"
-      when: not minio_compose_network_missing
+      when:
+        - not minio_compose_network_missing
+        - not minio_container_task_already_exists
 
     - name: Reset stale MinIO compose resources after startup failure
       ansible.builtin.command:
@@ -331,6 +354,26 @@
         or 'Removing' in (minio_down_retry.stdout | default(''))
         or 'Removing' in (minio_down_retry.stderr | default(''))
       failed_when: false
+      when: minio_compose_network_missing or minio_container_task_already_exists
+
+    - name: Force-remove stale MinIO containers after task-state startup failure
+      ansible.builtin.shell: |
+        set -euo pipefail
+        changed=0
+        for container_name in "{{ minio_openbao_agent_container_name }}" "{{ minio_container_name }}"; do
+          if docker container inspect "$container_name" >/dev/null 2>&1; then
+            docker rm -f "$container_name" >/dev/null 2>&1 || true
+            changed=1
+          fi
+        done
+        if [ "$changed" -eq 1 ]; then
+          echo changed
+        fi
+      args:
+        executable: /bin/bash
+      register: minio_force_remove_stale_containers
+      changed_when: "'changed' in (minio_force_remove_stale_containers.stdout | default(''))"
+      when: minio_container_task_already_exists
 
     - name: Retry MinIO startup after compose-network recovery
       ansible.builtin.command:
@@ -347,6 +390,7 @@
         chdir: "{{ minio_site_dir }}"
       register: minio_up
       changed_when: true
+      when: minio_compose_network_missing or minio_container_task_already_exists
 
 - name: Wait for MinIO to listen locally
   ansible.builtin.wait_for:

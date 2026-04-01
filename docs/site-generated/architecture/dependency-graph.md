@@ -4,10 +4,6 @@ portal_display: full
 tags:
   - architecture
   - dependency-graph
-pagefind_section: architecture
-pagefind_audience:
-  - contributors
-  - operators
 ---
 
 !!! note "Sensitivity: INTERNAL"
@@ -22,7 +18,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Lago, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n |
+| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Lago, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway, Woodpecker CI |
 | `4` | Ops Portal |
 
@@ -60,6 +56,7 @@ graph TD
     searxng["SearXNG\nTier 1"]
     step_ca["step-ca\nTier 1"]
     uptime_kuma["Uptime Kuma\nTier 1"]
+    superset["Apache Superset\nTier 2"]
     tika["Apache Tika\nTier 2"]
     browser_runner["Browser Runner\nTier 2"]
     changedetection["Changedetection.io\nTier 2"]
@@ -237,6 +234,11 @@ graph TD
     serverclaw -->|soft| searxng
     status_page -->|hard| nginx_edge
     status_page -->|hard| uptime_kuma
+    superset -->|hard| docker_runtime
+    superset -->|soft| keycloak
+    superset -->|soft| nginx_edge
+    superset -->|startup_only| openbao
+    superset -->|hard| postgres
     temporal -->|startup_only| openbao
     temporal -->|hard| postgres
     tesseract_ocr -->|hard| docker_runtime

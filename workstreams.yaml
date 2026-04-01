@@ -14067,7 +14067,7 @@ workstreams:
   - id: ws-0292-superset-live-apply
     adr: "0292"
     title: Live apply ADR 0292 Apache Superset from latest origin/main
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0292-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply
@@ -14084,10 +14084,24 @@ workstreams:
       - docs/workstreams/ws-0292-superset-live-apply.md
       - docs/adr/0292-apache-superset-as-the-sql-first-business-intelligence-layer.md
       - docs/runbooks/configure-superset.md
+      - docs/runbooks/docker-runtime-disk-pressure.md
       - docs/adr/.index.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - receipts/ops-portal-snapshot.html
       - inventory/group_vars/platform.yml
       - inventory/host_vars/proxmox_florin.yml
       - scripts/generate_platform_vars.py
+      - scripts/container_image_policy.py
+      - scripts/live_apply_receipts.py
       - Makefile
       - playbooks/superset.yml
       - playbooks/services/superset.yml
@@ -14098,6 +14112,7 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
       - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
       - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/minio_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/superset_postgres/**
       - collections/ansible_collections/lv3/platform/roles/superset_runtime/**
       - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
@@ -14129,12 +14144,16 @@ workstreams:
       - config/uptime-kuma/monitors.json
       - docs/site-generated/architecture/dependency-graph.md
       - scripts/restic_config_backup.py
+      - scripts/trigger_restic_live_apply.py
       - scripts/superset_bootstrap.py
+      - scripts/workflow_catalog.py
       - tests/test_compose_runtime_secret_injection.py
       - tests/test_generate_platform_vars.py
       - tests/test_keycloak_runtime_role.py
+      - tests/test_minio_runtime_role.py
       - tests/test_openbao_compose_env_helper.py
       - tests/test_openbao_systemd_credentials_helper.py
+      - tests/test_restic_config_backup.py
       - tests/test_superset_postgres_role.py
       - tests/test_superset_runtime_role.py
       - tests/test_superset_playbook.py
@@ -14153,12 +14172,37 @@ workstreams:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: adr-index-generator-v1
+        - id: adr_0292_generated_truth_support
+          paths:
+            - README.md
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - receipts/ops-portal-snapshot.html
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
         - id: adr_0292_superset_docs
           paths:
             - docs/workstreams/ws-0292-superset-live-apply.md
             - docs/adr/0292-apache-superset-as-the-sql-first-business-intelligence-layer.md
             - docs/runbooks/configure-superset.md
+            - docs/runbooks/docker-runtime-disk-pressure.md
           mode: exclusive
+        - id: release_management_surfaces
+          paths:
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: platform_truth_generation
+          paths:
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: canonical-truth-v1
         - id: adr_0292_superset_runtime
           paths:
             - playbooks/superset.yml
@@ -14177,12 +14221,15 @@ workstreams:
             - inventory/group_vars/platform.yml
             - inventory/host_vars/proxmox_florin.yml
             - scripts/generate_platform_vars.py
+            - scripts/container_image_policy.py
+            - scripts/live_apply_receipts.py
             - Makefile
             - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
             - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
             - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
             - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
             - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/minio_runtime/tasks/main.yml
             - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
             - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
             - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
@@ -14212,11 +14259,15 @@ workstreams:
             - config/uptime-kuma/monitors.json
             - docs/site-generated/architecture/dependency-graph.md
             - scripts/restic_config_backup.py
+            - scripts/trigger_restic_live_apply.py
+            - scripts/workflow_catalog.py
             - tests/test_compose_runtime_secret_injection.py
             - tests/test_generate_platform_vars.py
             - tests/test_keycloak_runtime_role.py
+            - tests/test_minio_runtime_role.py
             - tests/test_openbao_compose_env_helper.py
             - tests/test_openbao_systemd_credentials_helper.py
+            - tests/test_restic_config_backup.py
           mode: shared_contract
           contract: adr-0292-superset-live-apply-v1
         - id: adr_0292_live_apply_receipts
@@ -14225,8 +14276,15 @@ workstreams:
             - receipts/live-applies/2026-04-01-adr-0292-superset-mainline-live-apply.json
             - receipts/live-applies/evidence/2026-04-01-ws-0292-superset-*
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    canonical_truth:
+      changelog_entry: implements ADR 0292 by adding Apache Superset as the SQL-first BI layer, publishing bi.lv3.org through the shared edge, reconciling repo-managed PostgreSQL and Plausible datasources plus the landing dashboard, and recording the first verified exact-main promotion as repository version 0.177.129 and platform version 0.130.82
+      release_bump: patch
+      included_in_repo_version: 0.177.129
+      latest_receipts:
+        superset: 2026-04-01-adr-0292-superset-mainline-live-apply
+    blockers: []
+    ready_to_merge: true
+    live_applied: true
   - id: ws-0317-keycloak-provisioning-adr
     adr: "0317"
     title: Keycloak direct-API operator provisioning via SSH proxy

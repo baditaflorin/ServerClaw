@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-04-01'
 total_adrs: 338
 implementation_status_summary:
-  Implemented: 286
+  Implemented: 287
   Partial: 7
-  Not Implemented: 43
+  Not Implemented: 42
   Deprecated: 1
   Complete: 1
 concerns:
@@ -5152,7 +5152,7 @@ adr_index:
   - adr: 0292
     title: Apache Superset As The SQL-First Business Intelligence Layer
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -5165,6 +5165,7 @@ adr_index:
       - layer
     summary: We will deploy Apache Superset as the shared SQL-first business intelligence
     filename: 0292-apache-superset-as-the-sql-first-business-intelligence-layer.md
+    implemented_version: 0.177.129
   - adr: 0292
     title: Lago As The Usage Metering And Billing API Layer
     status: Accepted

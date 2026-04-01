@@ -1,12 +1,12 @@
-# Release 0.177.128
+# Release 0.177.129
 
 - Date: 2026-04-01
 
 ## Summary
-- live-applied ADR 0292 from the latest `origin/main`: the repo-managed Lago billing stack now re-verifies `https://billing.lv3.org` behind the shared oauth2 edge, keeps anonymous `/api/health` requests blocked at the API gateway, and confirms public smoke event ingest plus current-usage aggregation on platform version `0.130.81`.
+- implements ADR 0292 by adding Apache Superset as the SQL-first BI layer, publishing bi.lv3.org through the shared edge, reconciling repo-managed PostgreSQL and Plausible datasources plus the landing dashboard, and preserving exact-main live-apply evidence on the synchronized 0.177.128 baseline before the platform version advances to 0.130.82
 
 ## Platform Impact
-- Exact-main Lago verification preserved the protected billing edge, gateway-mediated public event ingest, and current-usage aggregation on production; platform version advances to 0.130.81 with this release.
+- platform version advances to 0.130.82 after the exact-main ADR 0292 replay re-verifies Apache Superset on bi.lv3.org, preserves the shared Keycloak, PostgreSQL, MinIO, and backup contracts, and records the canonical SQL-first BI live-apply receipt on top of the 0.130.81 baseline
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
