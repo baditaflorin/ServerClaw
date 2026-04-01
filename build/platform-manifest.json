@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.132",
+  "repo_version": "0.177.133",
   "platform_version": "0.130.83",
-  "generated_at": "2026-04-01T14:13:30Z",
-  "next_refresh_at": "2026-04-01T15:13:30Z",
+  "generated_at": "2026-04-01T15:57:22Z",
+  "next_refresh_at": "2026-04-01T16:57:22Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5927,10 +5927,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.131",
+    "last_version": "0.177.132",
     "deployed_at": "2026-04-01",
-    "summary": "implements ADR 0293 by introducing LiveKit as the repo-managed real-time audio and voice channel for agents, converging the runtime on docker-runtime-lv3, publishing livekit.lv3.org through the shared edge, and recording the first verified exact-main live-apply evidence",
-    "release_notes_url": "docs/release-notes/0.177.132.md"
+    "summary": "refines ADRs 0319 through 0323 by explicitly preferring battle-tested API-first OSS such as Nomad Autoscaler, Traefik, Dapr, Microcks, OpenFGA, Temporal, and NATS JetStream over new repo-local runtime orchestration code",
+    "release_notes_url": "docs/release-notes/0.177.133.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
