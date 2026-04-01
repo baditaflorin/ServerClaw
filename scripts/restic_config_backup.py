@@ -25,6 +25,7 @@ REPO_ROOT = ensure_repo_root_on_path(__file__)
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 from platform.events import build_envelope
+from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
 
 
 DEFAULT_REPO_ROOT = Path("/srv/proxmox_florin_server")
@@ -203,8 +204,17 @@ def wait_for_minio_endpoint(
     delay_seconds: int = DEFAULT_MINIO_READY_DELAY_SECONDS,
 ) -> tuple[str, str]:
     last_error = "container did not become ready"
+    retry_policy = RetryPolicy(
+        max_attempts=retries,
+        base_delay_s=float(delay_seconds),
+        max_delay_s=float(delay_seconds),
+        multiplier=1.0,
+        jitter=False,
+        transient_max=0,
+    )
 
-    for attempt in range(retries):
+    def probe_minio_endpoint() -> tuple[str, str]:
+        nonlocal last_error
         container = inspect_container(container_name)
         state = (container.get("State") or {}) if isinstance(container, dict) else {}
         if not bool(state.get("Running")):
@@ -226,12 +236,24 @@ def wait_for_minio_endpoint(
                 except OSError as exc:
                     last_error = str(exc)
 
-        if attempt < retries - 1:
-            time.sleep(delay_seconds)
+        raise PlatformRetryError(
+            f"{container_name} is not ready for restic",
+            code="platform:health_gate_fail",
+            retry_class=RetryClass.BACKOFF,
+            retry_after=float(delay_seconds),
+        )
 
-    raise RuntimeError(
-        f"{container_name} did not become ready for restic at {DEFAULT_MINIO_HEALTH_PATH}: {last_error}"
-    )
+    try:
+        return with_retry(
+            probe_minio_endpoint,
+            policy=retry_policy,
+            error_context=f"restic MinIO readiness for {container_name}",
+            sleep_fn=time.sleep,
+        )
+    except MaxRetriesExceeded as exc:
+        raise RuntimeError(
+            f"{container_name} did not become ready for restic at {DEFAULT_MINIO_HEALTH_PATH}: {last_error}"
+        ) from exc
 
 
 def ensure_container_running(container_name: str) -> None:
