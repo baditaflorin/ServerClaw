@@ -4,6 +4,7 @@
 - Title: Live apply a repo-managed `cmdk` command palette and universal open dialog on the Windmill operator access admin surface
 - Status: live_applied
 - Included In Repo Version: not yet
+- Branch-Local Receipt: `receipts/live-applies/2026-04-02-adr-0311-global-command-palette-live-apply.json`
 - Live Applied In Platform Version: 0.130.85
 - Implemented On: 2026-04-02
 - Live Applied On: 2026-04-02
@@ -80,7 +81,7 @@
 
 - `receipts/live-applies/evidence/2026-04-02-ws-0311-generate-metadata-r1.txt`
 - `receipts/live-applies/evidence/2026-04-02-ws-0311-pytest-r1.txt`
-- `receipts/live-applies/evidence/2026-04-02-ws-0311-validate-repo-r3.txt`
+- `receipts/live-applies/evidence/2026-04-02-ws-0311-validate-repo-r5.txt`
 - `receipts/live-applies/evidence/2026-04-02-ws-0311-ansible-syntax-r1.txt`
 - `receipts/live-applies/evidence/2026-04-02-ws-0311-syntax-check-windmill-r1.txt`
 - `receipts/live-applies/evidence/2026-04-02-ws-0311-preflight-converge-windmill-r1.txt`
