@@ -1,0 +1,25 @@
+Stale orphan monitoring-process analysis for ADR 0281 on 0.177.129
+Checked on: 2026-04-01
+
+$ ps -p 13879 -o pid=,ppid=,etime=,state=,%cpu=,%mem=,command=
+13879     1 01-01:35:15 S      0.0  0.0 /opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python /opt/homebrew/bin/ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/inventory/hosts.yml -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.ansible/shards/066806741458496199610f5813b74281/monitoring-stack-production.json --limit monitoring-lv3,nginx-lv3,proxmox_florin,postgres-lv3,docker-runtime-lv3,docker-build-lv3,backup-lv3,artifact-cache-lv3,coolify-lv3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/playbooks/monitoring-stack.yml -e env=production --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+$ ps -p 13879 -o lstart=
+Tue Mar 31 14:36:54 2026
+
+$ pgrep -P 13879 -a || true
+
+$ lsof -nP -p 13879 -a -i || true
+
+$ stat -f '%Sm %N' /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/receipts/live-applies/evidence/2026-03-31-adr-0303-mainline-converge-monitoring-r3.txt /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.local/runs/abd5164d2646488fb6fed6752b9c0ca5/logs/ansible.log
+Mar 31 16:12:42 2026 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/receipts/live-applies/evidence/2026-03-31-adr-0303-mainline-converge-monitoring-r3.txt
+Mar 31 14:36:54 2026 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.local/runs/abd5164d2646488fb6fed6752b9c0ca5/logs/ansible.log
+
+$ tail -n 5 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/receipts/live-applies/evidence/2026-03-31-adr-0303-mainline-converge-monitoring-r3.txt
+PLAY [Wire Proxmox metrics into the monitoring stack] **************************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T11:36:54.962Z","vm":"controller","workflow_id":"ansible-playbook"}
+make: *** [converge-monitoring] Error 143
+
+Inference: the remaining controller-local ansible-playbook wrapper appears stale and non-mutating because it has no children, no open network sockets, no recent log writes, and its own monitoring receipt already ended with Error 143 on 2026-03-31.

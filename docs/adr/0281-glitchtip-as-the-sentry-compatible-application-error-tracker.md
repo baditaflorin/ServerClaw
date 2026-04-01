@@ -1,7 +1,7 @@
 # ADR 0281: GlitchTip As The Sentry-Compatible Application Error Tracker
 
 - Status: Accepted
-- Implementation Status: Implemented
+- Implementation Status: Live applied
 - Implemented In Repo Version: 0.177.104
 - Implemented In Platform Version: 0.130.69
 - Implemented On: 2026-03-30

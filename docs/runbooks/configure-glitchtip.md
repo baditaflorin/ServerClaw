@@ -80,6 +80,11 @@ python3 scripts/glitchtip_event_smoke.py \
   --request-timeout-seconds 60
 ```
 
+When running from a linked git worktree, the controller-local GlitchTip
+artifacts still live under the primary checkout's `.local/` secret root, not
+under a worktree-local `.local/` directory. Point `--api-token-file` and
+`--dsn-file` at that primary checkout path before running the event smoke.
+
 A mail-gateway runtime that has been reconverged after GlitchTip bootstrap should also expose the Sentry runtime environment variables:
 
 ```bash

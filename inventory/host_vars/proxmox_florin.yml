@@ -653,6 +653,7 @@ network_policy:
         - source: host
           protocol: tcp
           ports:
+            - 3005
             - 5000
             - 8008
             - 8010
@@ -694,6 +695,11 @@ network_policy:
           ports:
             - 7882
           description: Public UDP media ingress forwarded by the host for LiveKit
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 3005
+          description: Reverse proxy access to the public GlitchTip error tracking surface
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -869,6 +875,11 @@ network_policy:
           ports:
             - 8084
           description: Local Docker workloads that reach Nextcloud over the private runtime listener
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 3005
+          description: Private monitoring probes for the GlitchTip runtime
         - source: monitoring-lv3
           protocol: tcp
           ports:

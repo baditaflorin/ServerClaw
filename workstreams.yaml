@@ -1692,7 +1692,7 @@ workstreams:
   - id: ws-0281-live-apply
     adr: "0281"
     title: Live apply the GlitchTip application error tracking stack from latest origin/main
-    status: in_progress
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0281-mainline-v2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2

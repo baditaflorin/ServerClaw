@@ -2,14 +2,14 @@
 
 - ADR: [ADR 0281](../adr/0281-glitchtip-as-the-sentry-compatible-application-error-tracker.md)
 - Title: Replace the partial ad hoc GlitchTip install with a repo-managed Sentry-compatible error tracking service, instrument first-party producers, and verify the live stack end to end
-- Status: in_progress
+- Status: ready_for_merge
 - Included In Repo Version: 0.177.104
-- Branch-Local Receipt: pending fresh `0.177.123` quiet-window replay; latest blocked probes `receipts/live-applies/evidence/2026-03-31-adr-0281-quiet-window-blocked-r5-0.177.123.txt` and `receipts/live-applies/evidence/2026-03-31-adr-0281-quiet-window-waiter-r4-0.177.122.txt`; historical receipt `receipts/live-applies/2026-03-30-adr-0281-glitchtip-live-apply.json`
-- Canonical Mainline Receipt: pending final `main` integration
-- Live Applied In Platform Version: historical branch-local replay `0.130.69`; latest-main re-verification pending
+- Branch-Local Receipt: verified latest-main replay evidence `receipts/live-applies/evidence/2026-04-01-ws-0281-converge-glitchtip-r1-0.177.129.txt`, `receipts/live-applies/evidence/2026-04-01-adr-0281-current-public-surface-r2-0.177.129.txt`, `receipts/live-applies/evidence/2026-04-01-adr-0281-public-auth-config-r1-0.177.129.txt`, `receipts/live-applies/evidence/2026-04-01-adr-0281-event-smoke-r2-0.177.129.txt`, and `receipts/live-applies/evidence/2026-04-01-adr-0281-quiet-window-manual-stop-r1-0.177.129.txt`; historical receipt `receipts/live-applies/2026-03-30-adr-0281-glitchtip-live-apply.json`
+- Canonical Mainline Receipt: pending final `main` integration on top of `origin/main` `0.177.130`
+- Live Applied In Platform Version: first implementation `0.130.69`; latest-main replay reverified against repository version `0.177.129`
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
-- Latest origin/main Base: `0.177.123` at `bd9f92ea90ee07df43caaafcf979701d4a9ccb41`
+- Latest origin/main Base: `0.177.130` at `fc731170ceec3ea32a910d1980314ef4b150888e`
 - Branch: `codex/ws-0281-mainline-v2`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2`
 - Owner: codex
@@ -72,15 +72,15 @@
 
 ## Latest-Main Replay Status
 
-- ADR 0281 has now been replayed onto the current fetched `origin/main` base `bd9f92ea90ee07df43caaafcf979701d4a9ccb41` (`0.177.123`) with rebased commits `427ec280a`, `915074cb5`, `3acd60ab7`, `e837b66e2`, `dc43c5173`, `bf9bf8c9f`, `03f177ebe`, and `9367ba441`.
-- Fresh latest-main targeted validation passed from this worktree: `109 passed` across the replayed and hardening-adjacent pytest surfaces, captured in `receipts/live-applies/evidence/2026-03-31-adr-0281-targeted-latest-main-tests-r5-0.177.123.txt`.
-- Latest-main repo validation is green on `0.177.123` through `make syntax-check-glitchtip`, `./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json role-argument-specs data-models`, `./scripts/validate_repo.sh ansible-syntax`, `./scripts/validate_repo.sh ansible-lint`, `scripts/platform_manifest.py --check`, `scripts/generate_slo_rules.py --check`, `scripts/generate_dependency_diagram.py --check`, `scripts/generate_diagrams.py --check`, `./scripts/validate_repo.sh generated-portals`, and `git diff --check`; see `receipts/live-applies/evidence/2026-03-31-adr-0281-repo-validation-summary-r5-0.177.123.txt`, `receipts/live-applies/evidence/2026-03-31-adr-0281-repo-contract-refresh-r3-0.177.123.txt`, `receipts/live-applies/evidence/2026-03-31-adr-0281-ansible-lint-r1-0.177.123.txt`, and `receipts/live-applies/evidence/2026-03-31-adr-0281-generated-non-readme-checks-r5-0.177.123.txt`.
-- The `0.177.123` replay needed a generated refresh of `docs/diagrams/agent-coordination-map.excalidraw` after `scripts/generate_diagrams.py --check` reported stale generated output; the refreshed map now records `304` parallel branches instead of `303`.
-- `config/subdomain-exposure-registry.json` remains refreshed from `scripts/subdomain_exposure_audit.py --write-registry`, and the branch-local contract checks now pass again after this latest `0.177.123` truth refresh through `make syntax-check-glitchtip`, `./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json role-argument-specs data-models`, `./scripts/validate_repo.sh ansible-syntax`, and `git diff --check`; see `receipts/live-applies/evidence/2026-03-31-adr-0281-repo-contract-refresh-r3-0.177.123.txt`.
-- `scripts/canonical_truth.py --check` and `scripts/generate_status_docs.py --check` still fail only because they want to refresh the protected top-level `README.md` and generated status docs; that protected-file integration remains intentionally deferred until this workstream finishes the latest-main live apply. Evidence is in `receipts/live-applies/evidence/2026-03-31-adr-0281-generated-surfaces-except-canonical-r5-0.177.123.txt`.
-- A fresh quiet-window probe on `0.177.123` is still blocked by concurrent live applies touching the same shared hosts. `receipts/live-applies/evidence/2026-03-31-adr-0281-quiet-window-blocked-r5-0.177.123.txt` captures blocked checks against `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3` with 5 conflicting controller-local `ansible-playbook` processes, while `receipts/live-applies/evidence/2026-03-31-adr-0281-quiet-window-waiter-r4-0.177.122.txt` records that a 15-minute waiter never found a quiet controller window.
-- Read-only public-surface observation still shows shared-edge drift: `errors.lv3.org` resolves to `65.108.75.123`, but the edge is serving `CN=nginx.lv3.org` and returning `308` redirects to `https://nginx.lv3.org/...` for both the GlitchTip health and auth endpoints. Evidence is in `receipts/live-applies/evidence/2026-03-31-adr-0281-current-public-surface-r5-0.177.123.txt`.
-- Because the shared hosts are not quiet and the public edge is presently drifted, the latest-main GlitchTip live apply has not yet been rerun safely from this worktree.
+- ADR 0281 is replayed on rebased commit `cfffe8b87529118b3f534bc5a2adfe884bc97052`, which verified the GlitchTip live path on the `0.177.129` `origin/main` snapshot before `origin/main` advanced to `0.177.130` through the release/docs-only commits `c2dc6a07a`, `3d17c116d`, and `fc731170c`.
+- The `0.177.129` refresh restored the missing GlitchTip `3005` network-policy exposure on `docker-runtime-lv3`, refreshed `config/subdomain-exposure-registry.json`, and updated `tests/test_keycloak_runtime_role.py` for the current Keycloak client-secret reconciliation surface.
+- Fresh latest-main targeted validation passed from this worktree: `114 passed` across the GlitchTip and adjacent hardening surfaces, captured in `receipts/live-applies/evidence/2026-04-01-adr-0281-targeted-latest-main-tests-r2-0.177.129.txt`.
+- Latest-main repo validation is green on `0.177.129` through `make syntax-check-glitchtip`, `./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json role-argument-specs data-models`, `./scripts/validate_repo.sh ansible-syntax`, `./scripts/validate_repo.sh ansible-lint`, `scripts/platform_manifest.py --check`, `scripts/generate_slo_rules.py --check`, `scripts/generate_dependency_diagram.py --check`, `scripts/generate_diagrams.py --check`, `./scripts/validate_repo.sh generated-portals`, and `git diff --check`; see `receipts/live-applies/evidence/2026-04-01-adr-0281-repo-contract-refresh-r2-0.177.129.txt`, `receipts/live-applies/evidence/2026-04-01-adr-0281-ansible-lint-r1-0.177.129.txt`, and `receipts/live-applies/evidence/2026-04-01-adr-0281-generated-non-readme-checks-r2-0.177.129.txt`.
+- `scripts/canonical_truth.py --check` and `scripts/generate_status_docs.py --check` still fail only because they want to refresh the protected top-level `README.md` and generated status docs; that protected-file integration remains deferred until the final `main` merge step. Evidence is in `receipts/live-applies/evidence/2026-04-01-adr-0281-generated-surfaces-except-canonical-r1-0.177.129.txt`.
+- `make converge-glitchtip` replayed successfully through PostgreSQL, Docker runtime recovery, Keycloak reconcile, GlitchTip bootstrap, and NGINX edge publication; the automated quiet-window publication verifier then stalled behind concurrent `ws-0247-clean-main-r1` and `ws-0286-live-apply-r2` ansible runs on the same shared hosts. Evidence is in `receipts/live-applies/evidence/2026-04-01-ws-0281-converge-glitchtip-r1-0.177.129.txt`, `receipts/live-applies/evidence/2026-04-01-adr-0281-quiet-window-waiter-r1-0.177.129.txt`, and `receipts/live-applies/evidence/2026-04-01-adr-0281-quiet-window-manual-stop-r1-0.177.129.txt`.
+- Independent post-converge public verification now shows `errors.lv3.org` serving `CN=errors.lv3.org` with `HTTP/2 200` on both `/api/0/internal/health/` and `/_allauth/browser/v1/config`; the auth config advertises `LV3 Keycloak` and `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration`. Evidence is in `receipts/live-applies/evidence/2026-04-01-adr-0281-current-public-surface-r2-0.177.129.txt` and `receipts/live-applies/evidence/2026-04-01-adr-0281-public-auth-config-r1-0.177.129.txt`.
+- End-to-end ingestion is also reverified: `scripts/glitchtip_event_smoke.py` succeeded against the live public surface, recording event `dcddc4c934064775b3aad2f01b293aec` and issue `PLATFORM-FINDINGS-7`. Evidence is in `receipts/live-applies/evidence/2026-04-01-adr-0281-event-smoke-r2-0.177.129.txt`.
+- The remaining integration gap is now repo-state only: rebase this verified branch onto `origin/main` `0.177.130`, refresh protected generated/release surfaces, and merge/push `main`.
 
 ## Verification
 
@@ -94,6 +94,25 @@
 
 ## Branch-Local Results
 
+- `receipts/live-applies/evidence/2026-04-01-ws-0281-converge-glitchtip-r1-0.177.129.txt`
+  captures the governed latest-main replay through PostgreSQL, Docker runtime,
+  Keycloak recovery, GlitchTip bootstrap, and NGINX edge publication. The
+  automated quiet-window publication verifier never cleared because unrelated
+  concurrent workstreams kept touching `docker-runtime-lv3` and `nginx-lv3`, so
+  the waiting verifier was manually stopped after independent public
+  verification succeeded; see
+  `receipts/live-applies/evidence/2026-04-01-adr-0281-quiet-window-manual-stop-r1-0.177.129.txt`.
+- Fresh public verification preserved in
+  `receipts/live-applies/evidence/2026-04-01-adr-0281-current-public-surface-r2-0.177.129.txt`
+  and
+  `receipts/live-applies/evidence/2026-04-01-adr-0281-public-auth-config-r1-0.177.129.txt`
+  confirmed `errors.lv3.org` resolves to `65.108.75.123`, serves
+  `CN=errors.lv3.org`, returns `HTTP/2 200` on the public health and auth
+  endpoints, and advertises the repo-managed Keycloak OIDC provider.
+- Fresh end-to-end ingestion verification preserved in
+  `receipts/live-applies/evidence/2026-04-01-adr-0281-event-smoke-r2-0.177.129.txt`
+  confirmed the live public DSN path creates issue `PLATFORM-FINDINGS-7` for
+  event `dcddc4c934064775b3aad2f01b293aec`.
 - `receipts/live-applies/2026-03-30-adr-0281-glitchtip-live-apply.json`
   records the synchronized branch-local replay from committed source
   `229fd0933019701297b96259aef6a9b6beecfdcd` on repository version
@@ -146,9 +165,9 @@
 
 ## Outcome
 
-- The latest-main replay, recovery hardening, and repo-validation refresh are now integrated in this worktree on top of `0.177.123`, with fresh receipts for targeted tests, repo validation, protected-surface blockers, quiet-window contention, and current public-surface drift.
-- The live rerun remains blocked by external concurrent controller activity and current shared-edge drift, so this workstream is not yet ready for final protected-surface integration onto `main`.
-- Merge to `main` must wait for a fresh quiet window, a successful latest-main `make converge-glitchtip`, renewed public health/auth/smoke verification, and then the protected-file updates (`VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, ADR metadata, and canonical mainline receipt).
+- The latest-main replay, recovery hardening, and repo-validation refresh are now integrated in this worktree on top of the verified `0.177.129` snapshot, with fresh receipts for targeted tests, repo validation, the governed converge, public auth and health, and end-to-end event ingestion.
+- The live service is no longer blocked: `errors.lv3.org` is healthy, serves the dedicated certificate, exposes the repo-managed Keycloak OIDC provider, and accepts live Sentry-compatible events. The only blocked automation was the controller-local quiet-window verifier, which was waiting on unrelated concurrent workstreams rather than GlitchTip state.
+- Merge to `main` now depends on repo-state integration only: rebase this verified branch onto `origin/main` `0.177.130`, refresh the protected generated/release surfaces (`VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, release notes, and canonical receipts), and then push the final integrated `main`.
 
 ## Merge Criteria
 
