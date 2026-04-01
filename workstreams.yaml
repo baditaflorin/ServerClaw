@@ -18325,6 +18325,9 @@ workstreams:
       - docs/adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md
       - docs/runbooks/configure-label-studio.md
       - docs/adr/.index.yaml
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
       - inventory/group_vars/platform.yml
       - inventory/host_vars/proxmox_florin.yml
       - scripts/generate_platform_vars.py
@@ -18453,6 +18456,9 @@ workstreams:
             - tests/test_subdomain_catalog.py
             - tests/test_nginx_edge_publication_role.py
             - tests/test_edge_publication_playbooks.py
+            - receipts/image-scans/2026-03-31-label-studio-runtime.json
+            - receipts/image-scans/2026-03-31-label-studio-runtime.trivy.json
+            - receipts/live-applies/*label-studio*
           mode: shared_contract
           contract: adr-0289-label-studio-live-apply-v1
         - id: release_management_surfaces

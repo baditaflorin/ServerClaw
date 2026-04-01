@@ -30,6 +30,7 @@ def test_compute_impact_for_postgres_includes_direct_and_transitive_failures() -
         "netbox",
         "openfga",
         "outline",
+        "paperless",
         "plane",
         "semaphore",
         "temporal",
