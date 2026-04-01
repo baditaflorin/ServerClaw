@@ -40,22 +40,23 @@
     fail_msg: "The Dapr sidecar did not publish the expected runtime-pool router app id."
 
 - name: Verify the Dapr sidecar can invoke the Traefik ping route
-  ansible.builtin.uri:
-    url: >-
-      http://127.0.0.1:{{ runtime_pool_substrate_dapr_http_port }}/v1.0/invoke/{{ runtime_pool_substrate_dapr_app_id }}/method{{ runtime_pool_substrate_traefik_ping_path }}
-    method: GET
-    status_code:
-      - 200
-    return_content: true
-    timeout: 15
+  ansible.builtin.command:
+    argv:
+      - curl
+      - --fail
+      - --silent
+      - --show-error
+      - --path-as-is
+      - >-
+        http://127.0.0.1:{{ runtime_pool_substrate_dapr_http_port }}/v1.0/invoke/http://127.0.0.1:{{ runtime_pool_substrate_traefik_port }}/method{{ runtime_pool_substrate_traefik_ping_path }}
   register: runtime_pool_substrate_verify_dapr_ping
   retries: 12
   delay: 5
-  until: runtime_pool_substrate_verify_dapr_ping.status == 200
+  until: runtime_pool_substrate_verify_dapr_ping.rc == 0
   changed_when: false
 
 - name: Assert the Dapr invocation bridge returns the Traefik ping payload
   ansible.builtin.assert:
     that:
-      - runtime_pool_substrate_verify_dapr_ping.content | trim == 'OK'
+      - runtime_pool_substrate_verify_dapr_ping.stdout | trim == 'OK'
     fail_msg: "The Dapr invocation bridge did not proxy the runtime-pool router ping endpoint."

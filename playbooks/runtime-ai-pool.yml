@@ -216,13 +216,14 @@
       changed_when: false
 
     - name: Verify the runtime-ai Dapr bridge can invoke Apache Tika through Traefik
-      ansible.builtin.uri:
-        url: "http://127.0.0.1:3500/v1.0/invoke/runtime-ai-router/method/tika/version"
-        method: GET
-        status_code:
-          - 200
-        return_content: true
-        timeout: 30
+      ansible.builtin.command:
+        argv:
+          - curl
+          - --fail
+          - --silent
+          - --show-error
+          - --path-as-is
+          - http://127.0.0.1:3500/v1.0/invoke/http://127.0.0.1:9080/method/tika/version
       register: runtime_ai_dapr_tika_route
       changed_when: false
 

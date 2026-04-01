@@ -67,6 +67,16 @@ def test_verify_tasks_cover_traefik_ping_dapr_metadata_and_dapr_invoke() -> None
     assert "Verify the Dapr sidecar can invoke the Traefik ping route" in names
     assert "Assert the Dapr invocation bridge returns the Traefik ping payload" in names
 
+    dapr_invoke_task = next(task for task in tasks if task["name"] == "Verify the Dapr sidecar can invoke the Traefik ping route")
+    assert dapr_invoke_task["ansible.builtin.command"]["argv"][:5] == [
+        "curl",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--path-as-is",
+    ]
+    assert "http://127.0.0.1:{{ runtime_pool_substrate_dapr_http_port }}/v1.0/invoke/http://127.0.0.1:{{ runtime_pool_substrate_traefik_port }}/method{{ runtime_pool_substrate_traefik_ping_path }}" in dapr_invoke_task["ansible.builtin.command"]["argv"][-1]
+
 
 def test_templates_define_host_networked_traefik_and_dapr_router() -> None:
     compose_template = COMPOSE_TEMPLATE.read_text()

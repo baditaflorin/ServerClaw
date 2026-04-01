@@ -71,7 +71,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.90 \
-  'curl -fsS http://127.0.0.1:3500/v1.0/invoke/runtime-ai-router/method/tika/version'
+  'curl -fsS --path-as-is http://127.0.0.1:3500/v1.0/invoke/http://127.0.0.1:9080/method/tika/version'
 ```
 
 Verify Nomad sees the runtime-ai namespace and client:
@@ -105,5 +105,6 @@ curl -fsS -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/gotenberg
 - This pool is the first production slice, not the final partitioning end state. Keep the moved services limited to the document-extraction boundary until follow-on pools are planned.
 - The current Proxmox host only exposes the base template VM `9000`, so `runtime-ai-lv3` clones from `lv3-debian-base` and the playbook's `docker_runtime` role installs Docker during first converge. Do not switch this guest back to `lv3-docker-host` until the richer template is rebuilt and applied live.
 - Traefik and Dapr on `runtime-ai-lv3` are private infrastructure surfaces. Do not publish them directly on the public edge.
+- Dapr service invocation reaches the local router through the direct non-Dapr endpoint URL form (`/v1.0/invoke/http://127.0.0.1:9080/...`), not through self-discovery on the `runtime-ai-router` app id. Keep `curl --path-as-is` in operator checks so the nested `http://` path is preserved verbatim.
 - `runtime-ai-lv3` is the supported place for memory-bursty document extraction and similar AI-adjacent helpers. Do not reintroduce these workloads on `docker-runtime-lv3` without a new ADR or rollback decision.
 - The shared API gateway still runs on `docker-runtime-lv3`. The pool playbook refreshes it after the upstream move so `/v1/gotenberg` keeps working.

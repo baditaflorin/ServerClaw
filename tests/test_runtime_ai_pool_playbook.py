@@ -51,11 +51,20 @@ def test_runtime_ai_pool_playbook_covers_provisioning_substrate_namespace_migrat
         "lv3.platform.gotenberg_runtime",
         "lv3.platform.tesseract_ocr_runtime",
     ]
-    post_task_urls = [task["ansible.builtin.uri"]["url"] for task in playbook[3]["post_tasks"]]
+    post_task_urls = [
+        task["ansible.builtin.uri"]["url"]
+        for task in playbook[3]["post_tasks"]
+        if "ansible.builtin.uri" in task
+    ]
     assert "http://127.0.0.1:9080/tika/version" in post_task_urls
     assert "http://127.0.0.1:9080/gotenberg/health" in post_task_urls
     assert "http://127.0.0.1:9080/tesseract-ocr/healthz" in post_task_urls
-    assert "http://127.0.0.1:3500/v1.0/invoke/runtime-ai-router/method/tika/version" in post_task_urls
+    dapr_post_task = next(
+        task for task in playbook[3]["post_tasks"] if task["name"] == "Verify the runtime-ai Dapr bridge can invoke Apache Tika through Traefik"
+    )
+    assert dapr_post_task["ansible.builtin.command"]["argv"][-1] == (
+        "http://127.0.0.1:3500/v1.0/invoke/http://127.0.0.1:9080/method/tika/version"
+    )
 
     assert playbook[4]["hosts"] == "docker-runtime-lv3"
     down_task = next(
