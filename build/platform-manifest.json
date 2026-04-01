@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.128",
   "platform_version": "0.130.81",
-  "generated_at": "2026-04-01T07:57:56Z",
-  "next_refresh_at": "2026-04-01T08:57:56Z",
+  "generated_at": "2026-04-01T08:25:00Z",
+  "next_refresh_at": "2026-04-01T09:25:00Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5834,7 +5834,7 @@
   "recent_changes": {
     "last_version": "0.177.127",
     "deployed_at": "2026-04-01",
-    "summary": "No changelog notes were present in `## Unreleased` at release time.",
+    "summary": "Re-verify ADR 0292 from the latest `origin/main`, preserve the protected Lago billing edge on production, and promote the successful exact-main replay plus validation evidence into the current release.",
     "release_notes_url": "docs/release-notes/0.177.128.md"
   },
   "agentic_architecture": {

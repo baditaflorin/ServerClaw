@@ -11,7 +11,7 @@
   "platform_version_context": "0.130.80",
   "workflow_id": "adr-0292-lago-mainline-live-apply",
   "adr": "0292",
-  "summary": "Re-verified ADR 0292 from the latest realistic `origin/main` lineage by refreshing the worktree onto commit `741241bf8739a093bc396900cd6f0ce6056a192b`, repairing the explicit Lago ADR catalog mapping plus regenerated subdomain exposure registry state required by current automation, and replaying `make converge-lago env=production` from the refreshed tree rooted at source commit `001d039cb2f61dac36e4de9a287f6098c27ca8fd`. The replay re-converged PostgreSQL, the shared Docker runtime, the API gateway, and the shared NGINX edge, restored the protected `billing.lv3.org` browser surface, submitted a fresh public smoke event through the API-gateway billing adapter, and verified current-usage aggregation end to end on repository version context `0.177.126` and platform version context `0.130.80` before the final protected release promotion.",
+  "summary": "Re-verified ADR 0292 from the latest realistic `origin/main` lineage by refreshing the worktree onto commit `741241bf8739a093bc396900cd6f0ce6056a192b`, repairing the explicit Lago ADR catalog mapping plus regenerated subdomain exposure registry state required by current automation, and replaying `make converge-lago env=production` from the refreshed tree rooted at source commit `001d039cb2f61dac36e4de9a287f6098c27ca8fd`. The replay re-converged PostgreSQL, the shared Docker runtime, the API gateway, and the shared NGINX edge, restored the protected `billing.lv3.org` browser surface, submitted a fresh public smoke event through the API-gateway billing adapter, and verified current-usage aggregation end to end on repository version context `0.177.126` and platform version context `0.130.80` before the final protected release promotion. Later the same day, `origin/main` advanced to `ef62d910cd1c873e09200ce48b20c5ad4bf0f1c1` for the repo-only ws-0315 Gitea follow-up; that newer mainline was merged into this promotion branch, canonical truth plus generated status artifacts were regenerated, and the final protected release surfaces passed `make pre-push-gate` on repository version `0.177.128` while preserving the live-applied platform version `0.130.81` without requiring a second Lago replay.",
   "targets": [
     {
       "kind": "guest",
@@ -58,7 +58,7 @@
     {
       "check": "Full repository promotion gate on the protected release surfaces",
       "result": "pass",
-      "observed": "After promoting the protected release surfaces for repository version `0.177.127` and platform version `0.130.81`, `make pre-push-gate` passed end to end, including `workstream-surfaces`, `generated-docs`, `dependency-graph`, `ansible-syntax`, `ansible-lint`, `security-scan`, `semgrep-sast`, and `integration-tests`."
+      "observed": "After `origin/main` advanced to `ef62d910cd1c873e09200ce48b20c5ad4bf0f1c1` (`[mainline] Merge ws-0315 gitea followups`), the promotion branch merged that repo-only follow-up, regenerated canonical truth plus platform-manifest and status artifacts, and then `make pre-push-gate` passed end to end on repository version `0.177.128` and platform version `0.130.81`, including `workstream-surfaces`, `schema-validation`, `generated-docs`, `dependency-graph`, `ansible-syntax`, `ansible-lint`, `security-scan`, `semgrep-sast`, and `integration-tests`."
     },
     {
       "check": "Exact-main Lago converge replay",
@@ -86,16 +86,19 @@
     "receipts/live-applies/evidence/2026-04-01-ws-0292-main-syntax-check-lago-r2.txt",
     "receipts/live-applies/evidence/2026-04-01-ws-0292-main-validate-agent-standards-r3.txt",
     "receipts/live-applies/evidence/2026-04-01-ws-0292-main-validate-repository-data-models-r1.txt",
-    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-dependency-diagram-r3.txt",
-    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-generate-status-r2.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-canonical-truth-r1.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-dependency-diagram-r4.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-generate-status-r3.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-platform-manifest-r3.txt",
     "receipts/live-applies/evidence/2026-04-01-ws-0292-main-pre-apply-public-baseline-r2-0.177.126.txt",
     "receipts/live-applies/evidence/2026-04-01-ws-0292-main-post-apply-public-verification-r1-0.177.126.txt",
-    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-pre-push-gate-r4.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0292-main-pre-push-gate-r7.txt",
     "receipts/live-applies/evidence/2026-04-01-ws-0292-mainline-r31-converge-0.177.126.txt",
     "receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json"
   ],
   "notes": [
     "The earlier `2026-03-31-adr-0292-lago-mainline-live-apply` receipt remains a historical record of the first implementation, but this 2026-04-01 receipt supersedes it as the durable latest-main replay proof after the shared-host concurrency window closed.",
-    "The successful replay required the explicit `adr_file` mapping for the Lago service catalog entry and a regenerated `config/subdomain-exposure-registry.json`; both repairs are captured in this integration branch and are reflected in the live API-gateway runtime bundle."
+    "The successful replay required the explicit `adr_file` mapping for the Lago service catalog entry and a regenerated `config/subdomain-exposure-registry.json`; both repairs are captured in this integration branch and are reflected in the live API-gateway runtime bundle.",
+    "The later ws-0315 `origin/main` advance was repo-only Gitea automation follow-up work. Merging it into the promotion branch changed repository release surfaces to `0.177.128` but did not require a second platform replay because the live Lago verification already held on platform version `0.130.81`."
   ]
 }

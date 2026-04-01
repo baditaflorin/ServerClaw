@@ -54,12 +54,14 @@
 
 ## Verification
 
-- `git fetch origin --prune` on 2026-04-01 resolved the newest realistic
-  `origin/main` commit as `741241bf8739a093bc396900cd6f0ce6056a192b`
-  (`Merge gitea/main history`). The imported commit advanced history only; the
-  refreshed worktree remained tree-equivalent to the prior `main` content while
-  preserving repository version `0.177.126` and platform version `0.130.80`
-  before the final ADR 0292 replay.
+- `git fetch origin --prune` first resolved the refreshed replay baseline as
+  `741241bf8739a093bc396900cd6f0ce6056a192b` (`Merge gitea/main history`), so
+  the successful Lago replay ran on repository version `0.177.126` and
+  platform version `0.130.80` before release promotion. Later the same day
+  `origin/main` advanced again to `ef62d910cd1c873e09200ce48b20c5ad4bf0f1c1`
+  (`[mainline] Merge ws-0315 gitea followups`); that newer mainline was merged
+  into this promotion branch without requiring a second Lago replay because the
+  ws-0315 changes were repo-only Gitea automation follow-ups.
 - Focused repository validation on the refreshed tree passed before the final
   replay: `uv run --with pytest --with pyyaml --with-requirements requirements/api-gateway.txt pytest tests/test_api_gateway.py tests/test_api_gateway_runtime_role.py tests/test_docker_runtime_role.py tests/test_generate_platform_vars.py tests/test_lago_playbook.py tests/test_lago_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_restic_config_backup.py tests/test_restic_config_backup_role.py -q`
   returned `134 passed in 13.76s`.
@@ -67,9 +69,13 @@
   passed: `make syntax-check-lago`, `./scripts/validate_repo.sh agent-standards`,
   and `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`.
 - The final protected-surface validation also passed before merge:
+  `uvx --from pyyaml python scripts/canonical_truth.py --write`,
+  `make generate-status`,
   `uv run --with jsonschema python scripts/generate_dependency_diagram.py --write`,
-  `make generate-status`, and `make pre-push-gate`. The durable proof is
-  `receipts/live-applies/evidence/2026-04-01-ws-0292-main-pre-push-gate-r4.txt`.
+  `uv run --with pyyaml --with jsonschema python scripts/platform_manifest.py --write`,
+  and `make pre-push-gate` on the final latest-main merge tip rooted at
+  `ef62d910cd1c873e09200ce48b20c5ad4bf0f1c1`. The durable proof is
+  `receipts/live-applies/evidence/2026-04-01-ws-0292-main-pre-push-gate-r7.txt`.
 - The successful latest-main replay evidence is
   `receipts/live-applies/evidence/2026-04-01-ws-0292-mainline-r31-converge-0.177.126.txt`.
   `make converge-lago env=production` completed with clean recap
@@ -92,7 +98,8 @@
 ## Results
 
 - ADR 0292 is now re-verified from the latest realistic `origin/main` lineage
-  with a clean 2026-04-01 replay on top of the refreshed mainline tree.
+  with a clean 2026-04-01 replay on top of the refreshed mainline tree and a
+  final closeout rebased onto `ef62d910cd1c873e09200ce48b20c5ad4bf0f1c1`.
 - The historical 2026-03-31 concurrency-tainted evidence remains in the branch
   as audit context, but the April 1 `r31` replay supersedes it as the durable
   latest-main proof for `billing.lv3.org`.
