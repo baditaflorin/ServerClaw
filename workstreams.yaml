@@ -807,7 +807,8 @@ workstreams:
             - tests/test_outline_runtime_role.py
           mode: shared_contract
           contract: adr-0279-main-merge-v1
-    blockers: []
+    blockers:
+      - service-specific Docker restart rescue paths still exist on docker-runtime-lv3 and need follow-up hardening beyond the shared bridge-chain helper
     ready_to_merge: true
     live_applied: true
     canonical_truth:
@@ -15439,6 +15440,64 @@ workstreams:
       changelog_entry: refines ADRs 0319 through 0323 by explicitly preferring battle-tested API-first OSS such as Nomad Autoscaler, Traefik, Dapr, Microcks, OpenFGA, Temporal, and NATS JetStream over new repo-local runtime orchestration code
       release_bump: patch
       included_in_repo_version: 0.177.133
+    blockers: []
+    ready_to_merge: true
+    live_applied: false
+  - id: ws-0325-service-uptime-investigation
+    adr: "0319"
+    title: Investigate recurring service restarts and uptime failures across the runtime pools
+    status: ready_for_merge
+    owner: codex
+    branch: codex/ws-0325-service-uptime-investigation
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0325-service-uptime-investigation
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0325-service-uptime-investigation.md
+    depends_on:
+      - adr-0123-service-uptime-contracts
+      - adr-0196-realtime-metrics
+      - adr-0319-runtime-pools-as-the-service-partition-boundary
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0325-service-uptime-investigation.md
+      - docs/adr/0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/docker-runtime-bridge-chain-loss.md
+      - roles/common/tasks/docker_bridge_chains.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+      - tests/test_common_docker_bridge_chains_helper.py
+      - tests/test_docker_runtime_role.py
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws0325_investigation_doc
+          paths:
+            - docs/workstreams/ws-0325-service-uptime-investigation.md
+          mode: exclusive
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: ws0325_bridge_chain_decision
+          paths:
+            - docs/adr/0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
+            - docs/runbooks/docker-runtime-bridge-chain-loss.md
+          mode: exclusive
+        - id: ws0325_bridge_chain_helper
+          paths:
+            - roles/common/tasks/docker_bridge_chains.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+            - tests/test_common_docker_bridge_chains_helper.py
+            - tests/test_docker_runtime_role.py
+          mode: exclusive
+    canonical_truth:
+      changelog_entry: hardens shared docker-runtime bridge-chain checks so missing DOCKER and DOCKER-FORWARD chains fail safe before a host-wide Docker restart, records ADR 0329, and adds the runtime bridge-chain loss runbook used to diagnose the 2026-04-01 uptime incident on docker-runtime-lv3
+      release_bump: patch
+      included_in_repo_version: null
     blockers: []
     ready_to_merge: true
     live_applied: false

@@ -7,10 +7,10 @@
 
 schema_version: 1
 generated: '2026-04-02'
-total_adrs: 348
+total_adrs: 349
 implementation_status_summary:
   Implemented: 290
-  Partial: 7
+  Partial: 8
   Not Implemented: 49
   Deprecated: 1
   Complete: 1
@@ -175,6 +175,7 @@ concerns:
     - '0256'
     - '0273'
     - '0276'
+    - 0329
   platform:
     - 0019
     - '0025'
@@ -5825,3 +5826,20 @@ adr_index:
       - ledgers
     summary: We will manage root summary surfaces with explicit size budgets and
     filename: 0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md
+  - adr: 0329
+    title: Shared Docker Runtime Bridge-Chain Checks Must Fail Safe Before Daemon Restart
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-01'
+    concern: networking
+    keywords:
+      - shared
+      - docker
+      - runtime
+      - bridge-chain
+      - checks
+      - must
+      - fail
+      - safe
+    summary: Shared Docker bridge-chain preflight checks on a shared runtime pool must
+    filename: 0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md

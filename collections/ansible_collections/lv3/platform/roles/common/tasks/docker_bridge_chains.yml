@@ -1,8 +1,8 @@
 # Purpose: Wait for Docker-managed iptables bridge chains to exist before dependent publication logic runs.
 # Use case: Include after Docker starts on guests where downstream tasks rely on the DOCKER nat and forward chains.
 # Inputs: common_docker_bridge_chains_* variables describing the service name and retry behavior.
-# Outputs: Verified presence of the expected Docker bridge chains or an explicit failure.
-# Idempotency: Fully idempotent; checks state and waits without applying persistent changes.
+# Outputs: Verified presence of the expected Docker bridge chains or an explicit failure without restarting Docker.
+# Idempotency: Fully idempotent; checks state, waits for bounded automatic recovery, and does not mutate Docker service state.
 # Dependencies: ADR 0165 metadata standard, the common role defaults, and a Docker-managed guest.
 ---
 - name: Validate common docker_bridge_chains entrypoint inputs
@@ -160,36 +160,6 @@
         and common_docker_bridge_chains_nat_check.rc == 1
       )
 
-- name: Restart Docker when required bridge chains are missing
-  ansible.builtin.systemd_service:
-    name: "{{ common_docker_bridge_chains_service_name }}"
-    state: restarted
-    no_block: true
-  register: common_docker_bridge_chains_restart
-  when:
-    - common_docker_bridge_chains_active_state.rc == 0
-    - ((common_docker_bridge_chains_wait | default({})).get('rc', 1)) != 0
-    - >
-      (
-        common_docker_bridge_chains_expect_forward_chain | default(false)
-        and common_docker_bridge_chains_forward_check.rc != 0
-      )
-      or (
-        (common_docker_bridge_chains_require_nat_chain | bool)
-        and common_docker_bridge_chains_nat_check.rc != 0
-      )
-
-- name: Reset SSH connection after Docker bridge recovery restart
-  ansible.builtin.meta: reset_connection
-  when: common_docker_bridge_chains_restart is changed
-
-- name: Wait for Docker host SSH after bridge-chain recovery restart
-  ansible.builtin.wait_for_connection:
-    timeout: 120
-    connect_timeout: 5
-    sleep: 2
-  when: common_docker_bridge_chains_restart is changed
-
 - name: Recheck Docker nat chain after health evaluation
   ansible.builtin.command:
     argv:
@@ -223,22 +193,6 @@
   delay: "{{ common_docker_bridge_chains_delay }}"
   until: common_docker_bridge_chains_forward_recheck.rc == 0
   when: common_docker_bridge_chains_active_state.rc == 0
-
-- name: Restart Docker when required bridge chains are still missing after the retry loop
-  ansible.builtin.systemd_service:
-    name: "{{ common_docker_bridge_chains_service_name }}"
-    state: restarted
-  when:
-    - common_docker_bridge_chains_active_state.rc == 0
-    - >
-      (
-        common_docker_bridge_chains_expect_forward_chain | default(false)
-        and common_docker_bridge_chains_forward_recheck.rc != 0
-      )
-      or (
-        (common_docker_bridge_chains_require_nat_chain | bool)
-        and common_docker_bridge_chains_nat_recheck.rc != 0
-      )
 
 - name: Verify Docker nat chain after retry loop
   ansible.builtin.command:
