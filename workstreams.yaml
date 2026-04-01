@@ -14463,7 +14463,7 @@ workstreams:
   - id: ws-0293-livekit-live-apply
     adr: "0293"
     title: Live apply LiveKit as the real-time audio and voice channel for agents from latest origin/main
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0293-live-apply-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2
@@ -14612,5 +14612,5 @@ workstreams:
             - receipts/live-applies/evidence/*livekit*
           mode: shared_contract
           contract: live-apply-receipts-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true

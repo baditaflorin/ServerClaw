@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0293](../adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md)
 - Title: Deploy LiveKit as the repo-managed real-time voice transport for operator and agent sessions
-- Status: in_progress
-- Implemented In Repo Version: pending main integration
-- Live Applied In Platform Version: pending verification
-- Implemented On: pending verification
-- Live Applied On: pending verification
+- Status: live_applied
+- Implemented In Repo Version: pending exact-main integration on `origin/main` `0.177.131`
+- Live Applied In Platform Version: branch replay atop repo version `0.177.129`; exact-main `0.177.131` replay pending
+- Implemented On: 2026-04-01
+- Live Applied On: 2026-04-01
 - Branch: `codex/ws-0293-live-apply-r2`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2`
 - Owner: codex
@@ -61,6 +61,9 @@
 - the same live edge file had `mtime=2026-04-01 13:27:58 UTC`, several minutes after this branch rendered and reloaded NGINX at `2026-04-01T13:23:19Z` through `2026-04-01T13:23:25Z`; that post-render rewrite is the concrete proof that another concurrent shared-host replay clobbered the LiveKit edge publication during the final verification window
 - the shared-host watcher also showed this was not an isolated stale-process issue anymore: during `r13`, concurrent `glitchtip`, `dify`, and `vikunja` runs from `ws-0281-mainline-v2`, `ws-0247-clean-main-r1`, and `ws-0286-live-apply-r2` were actively mutating `nginx-lv3`, `docker-runtime-lv3`, and `proxmox_florin`, while the long-stale `ws-0303-main-integration` process still remained visible in the process table
 - because those sibling workstreams are still replaying shared-edge truth from branches that do not yet carry ADR 0293, any shared `nginx_edge_publication` run from those branches can remove `livekit.lv3.org` again; the next authoritative LiveKit replay therefore requires a genuinely quiet shared-host window, and the final exact-main replay must happen only after the ADR 0293 changes are integrated onto `main`
+- `2026-04-01-ws-0293-livekit-branch-converge-r14.txt` is the first fully successful authoritative branch replay for this workstream: Proxmox public TCP/UDP programming, Docker runtime recovery, OpenBao-backed LiveKit secret injection, guest-local listeners on `7880/7881/7882`, guest-local room lifecycle verification, runtime SBOM capture, shared `nginx-lv3` publication, and the controller-side public room-lifecycle probe all completed successfully in one pass
+- post-`r14` public verification from the controller now confirms the externally visible contract is correct: `curl -fsSI https://livekit.lv3.org` returns `HTTP/2 200`, and `openssl s_client -connect livekit.lv3.org:443 -servername livekit.lv3.org` presents `subject=CN=livekit.lv3.org` with `DNS:livekit.lv3.org` in the SAN set
+- the branch is therefore ready for promotion, but the protected integration files still intentionally wait for the exact-main step: the remaining work is to rebase or merge onto latest `origin/main` commit `4d3ef7d3a61931e0e18e9d74ad97d7511ecb2f7d` (`VERSION 0.177.131`), update `VERSION` plus release and canonical-truth files on `main`, rerun the governed exact-main live apply, and only then flip the ADR metadata to its definitive first-mainline repo/platform versions
 
 ## Verification Plan
 
