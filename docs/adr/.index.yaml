@@ -7,12 +7,13 @@
 
 schema_version: 1
 generated: '2026-04-01'
-total_adrs: 336
+total_adrs: 337
 implementation_status_summary:
-  Implemented: 284
+  Implemented: 285
   Partial: 7
-  Not Implemented: 44
+  Not Implemented: 43
   Deprecated: 1
+  Complete: 1
 concerns:
   agent-coordination:
     - '0153'
@@ -368,6 +369,7 @@ concerns:
     - 0296
     - '0307'
     - 0308
+    - '0317'
 discovery_queries:
   how do we bootstrap:
     - '0001'
@@ -5623,3 +5625,19 @@ adr_index:
       - scorecards
     summary: We will define privacy-preserving journey analytics and onboarding
     filename: 0316-journey-analytics-and-onboarding-success-scorecards.md
+  - adr: '0317'
+    title: Keycloak Direct-API Operator Provisioning via SSH Proxy
+    status: Accepted
+    implementation_status: Complete
+    date: '2026-04-01'
+    concern: vm-topology
+    keywords:
+      - keycloak
+      - direct-api
+      - operator
+      - provisioning
+      - ssh
+      - proxy
+    summary: LLM agents MUST use the Keycloak admin REST API directly for operator provisioning when
+    filename: 0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md
+    implemented_version: 0.0.0
