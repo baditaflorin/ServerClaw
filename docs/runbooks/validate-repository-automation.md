@@ -164,4 +164,5 @@ python3 scripts/correction_loops.py --validate
 - if CI fails but local validation passes, rerun `make validate` from a clean working tree to catch unstaged or ignored-file drift
 - if a local fallback or login shell picks up an older Python and direct validators fail on `int | None` or similar modern type syntax, export `LV3_VALIDATE_PYTHON_BIN=/absolute/path/to/python3.10+` and rerun
 - if the build-server immutable snapshot is missing a generated JSON artifact that is intentionally excluded from `.rsync-exclude`, keep the artifact excluded and extend the validation contract only if the remote gate truly needs that file
+- if the build-server gate fails with `No space left on device`, prune stale session workspaces under `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces` (plus `.lv3-runs` and `.lv3-snapshots`) to restore disk capacity before retrying
 - if a new file type needs validation, extend [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repo.sh) and keep `make validate` as the single top-level entry point

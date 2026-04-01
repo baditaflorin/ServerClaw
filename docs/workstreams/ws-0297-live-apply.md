@@ -7,6 +7,8 @@
 - Branch-Local Receipt: `receipts/live-applies/2026-03-31-adr-0297-renovate-live-apply.json`
 - Canonical Mainline Receipt: `receipts/live-applies/2026-03-31-adr-0297-renovate-mainline-live-apply.json`
 - Follow-up Receipt: `receipts/live-applies/2026-03-31-adr-0297-renovate-followups-live-apply.json`
+- Build-Server Cleanup Receipt: `receipts/live-applies/2026-04-01-adr-0297-build-server-workspace-cleanup-live-apply.json`
+- Build-Server Cleanup Evidence: `receipts/live-applies/evidence/2026-04-01-ws-0297-build-server-workspace-cleanup-r1.txt`, `receipts/live-applies/evidence/2026-04-01-ws-0297-validate-generated-artifacts-r1.txt`
 - Live Applied In Platform Version: 0.130.74
 - Implemented On: 2026-03-31
 - Live Applied On: 2026-03-31
@@ -116,6 +118,7 @@
 - The private Gitea `main` snapshot now has a verified Renovate dashboard plus governed update-PR creation path on top of the exact source tree that settled this ADR's workflow contract.
 - The validation gate now maps SBOM paths through the runner host workspace, restoring grype scan success on pull request workflows.
 - The branch-local receipt remains the pre-integration audit trail, while the canonical mainline receipt records the exact-main hosted verification that backs the protected release and canonical-truth updates.
+- Build-server workspace storage was reclaimed after the remote pre-push gate snapshot upload failure, and the cleanup evidence was captured for future audits.
 
 ## Mainline Closeout
 

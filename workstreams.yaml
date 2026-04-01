@@ -19,7 +19,7 @@ workstreams:
   - id: ws-0296-education-refresh
     adr: "0224"
     title: Refresh education_wemeshup from upstream main through a named repo-deploy profile
-    status: merged
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0296-education-refresh
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-education-refresh
@@ -88,7 +88,7 @@ workstreams:
   - id: ws-0297-live-apply
     adr: "0297"
     title: Live apply Renovate as the automated stack version upgrade proposer from latest origin/main
-    status: live_applied
+    status: merged
     owner: codex
     branch: codex/ws-0297-live-apply-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-live-apply-r2
@@ -169,6 +169,9 @@ workstreams:
       - receipts/live-applies/2026-03-31-adr-0297-renovate-live-apply.json
       - receipts/live-applies/2026-03-31-adr-0297-renovate-mainline-live-apply.json
       - receipts/live-applies/2026-03-31-adr-0297-renovate-followups-live-apply.json
+      - receipts/live-applies/2026-04-01-adr-0297-build-server-workspace-cleanup-live-apply.json
+      - receipts/live-applies/evidence/2026-04-01-ws-0297-build-server-workspace-cleanup-r1.txt
+      - receipts/live-applies/evidence/2026-04-01-ws-0297-validate-generated-artifacts-r1.txt
       - receipts/live-applies/evidence/*ws-0297-*
     ownership_manifest:
       owned_surfaces:
@@ -206,6 +209,9 @@ workstreams:
             - receipts/live-applies/2026-03-31-adr-0297-renovate-live-apply.json
             - receipts/live-applies/2026-03-31-adr-0297-renovate-mainline-live-apply.json
             - receipts/live-applies/2026-03-31-adr-0297-renovate-followups-live-apply.json
+            - receipts/live-applies/2026-04-01-adr-0297-build-server-workspace-cleanup-live-apply.json
+            - receipts/live-applies/evidence/2026-04-01-ws-0297-build-server-workspace-cleanup-r1.txt
+            - receipts/live-applies/evidence/2026-04-01-ws-0297-validate-generated-artifacts-r1.txt
             - receipts/live-applies/evidence/*ws-0297-*
           mode: exclusive
         - id: adr_0297_generated_truth_support
@@ -250,6 +256,101 @@ workstreams:
       included_in_repo_version: 0.177.119
       latest_receipts:
         renovate: 2026-03-31-adr-0297-renovate-mainline-live-apply
+  - id: ws-0297-main-merge
+    adr: "0297"
+    title: Integrate ADR 0297 live-apply evidence and release updates on main
+    status: merged
+    owner: codex
+    branch: codex/ws-0297-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-main-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-main-merge.md
+    depends_on:
+      - ws-0297-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0297-live-apply.md
+      - docs/workstreams/ws-0297-main-merge.md
+      - docs/adr/0297-renovate-bot-as-the-automated-stack-version-upgrade-proposer.md
+      - docs/runbooks/validate-repository-automation.md
+      - receipts/live-applies/2026-04-01-adr-0297-build-server-workspace-cleanup-live-apply.json
+      - receipts/live-applies/evidence/2026-04-01-ws-0297-build-server-workspace-cleanup-r1.txt
+      - receipts/live-applies/evidence/2026-04-01-ws-0297-validate-generated-artifacts-r1.txt
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.126.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/adr/.index.yaml
+      - receipts/ops-portal-snapshot.html
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: workstream_docs
+          paths:
+            - docs/workstreams/ws-0297-live-apply.md
+            - docs/workstreams/ws-0297-main-merge.md
+            - docs/runbooks/validate-repository-automation.md
+          mode: shared_contract
+          contract: workstream-docs-v1
+        - id: release_management_surfaces
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.126.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: platform_truth_generation
+          paths:
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: canonical-truth-v1
+        - id: generated_artifacts
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - receipts/ops-portal-snapshot.html
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
+        - id: build_server_cleanup_receipts
+          paths:
+            - receipts/live-applies/2026-04-01-adr-0297-build-server-workspace-cleanup-live-apply.json
+            - receipts/live-applies/evidence/2026-04-01-ws-0297-build-server-workspace-cleanup-r1.txt
+            - receipts/live-applies/evidence/2026-04-01-ws-0297-validate-generated-artifacts-r1.txt
+          mode: shared_contract
+          contract: receipt-evidence-v1
+        - id: renovate_followup_artifacts
+          paths:
+            - .gitea/workflows/validate.yml
+            - scripts/k6_load_testing.py
+            - scripts/sbom_scanner.py
+            - tests/test_sbom_scanner.py
+            - receipts/live-applies/2026-03-31-adr-0297-renovate-followups-live-apply.json
+            - receipts/live-applies/evidence/2026-03-31-ws-0297-*
+          mode: shared_contract
+          contract: renovate-followup-artifacts-v1
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: integrates the ADR 0297 live-apply evidence and build-server cleanup receipt into main, bumps the repo version to 0.177.126, and refreshes release notes plus generated status artifacts
+      release_bump: patch
+      included_in_repo_version: 0.177.126
   - id: ws-0266-validation-runner-capability-contracts
     adr: "0266"
     title: Validation runner capability contracts and environment attestation
