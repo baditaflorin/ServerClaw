@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.125",
+  "repo_version": "0.177.126",
   "platform_version": "0.130.80",
-  "generated_at": "2026-04-01T00:05:21Z",
-  "next_refresh_at": "2026-04-01T01:05:21Z",
+  "generated_at": "2026-04-01T01:31:47Z",
+  "next_refresh_at": "2026-04-01T02:31:47Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -151,7 +151,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://build.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "docker_runtime": {
         "service_name": "Docker Runtime VM",
@@ -162,7 +162,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docker.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "docs_portal": {
         "service_name": "Developer Portal",
@@ -184,7 +184,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://logs.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z",
+        "last_live_apply": "2026-04-01T00:00:00Z",
         "slo_status": "unknown"
       },
       "excalidraw": {
@@ -219,7 +219,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3009",
-        "last_live_apply": "2026-03-31T00:00:00Z",
+        "last_live_apply": "2026-04-01T00:00:00Z",
         "slo_status": "unknown"
       },
       "gotenberg": {
@@ -267,7 +267,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://headscale.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "homepage": {
         "service_name": "Homepage",
@@ -464,7 +464,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3001",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "ollama": {
         "service_name": "Ollama",
@@ -568,7 +568,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://tasks.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z",
+        "last_live_apply": "2026-04-01T00:00:00Z",
         "slo_status": "unknown"
       },
       "platform_context_api": {
@@ -580,7 +580,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8010",
-        "last_live_apply": "2026-03-31T00:00:00Z",
+        "last_live_apply": "2026-04-01T00:00:00Z",
         "slo_status": "unknown"
       },
       "plausible": {
@@ -604,7 +604,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9444",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "postgres": {
         "service_name": "PostgreSQL",
@@ -615,7 +615,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "postgres://database.lv3.org:5432",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "proxmox_ui": {
         "service_name": "Proxmox UI",
@@ -626,7 +626,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://proxmox.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "realtime": {
         "service_name": "Netdata Realtime Metrics",
@@ -707,7 +707,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9443",
-        "last_live_apply": "2026-03-31T00:00:00Z"
+        "last_live_apply": "2026-04-01T00:00:00Z"
       },
       "temporal": {
         "service_name": "Temporal",
@@ -741,7 +741,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:9998",
-        "last_live_apply": "2026-03-31T00:00:00Z",
+        "last_live_apply": "2026-04-01T00:00:00Z",
         "slo_status": "unknown"
       },
       "typesense": {
@@ -801,7 +801,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://ci.lv3.org",
-        "last_live_apply": "2026-03-31T00:00:00Z",
+        "last_live_apply": "2026-04-01T00:00:00Z",
         "slo_status": "unknown"
       }
     }
@@ -5785,10 +5785,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.124",
+    "last_version": "0.177.125",
     "deployed_at": "2026-04-01",
-    "summary": "implements ADR 0277 by bringing the private Typesense structured-search runtime, controller proxy, API gateway search route, and exact-main live-apply evidence onto `main`, while also hardening shared Docker recovery so local OpenBao unseal succeeds before post-apply backup recovery",
-    "release_notes_url": "docs/release-notes/0.177.125.md"
+    "summary": "Refresh the Renovate validation path with a direct OpenFGA guest health check and restore SBOM scanner host-path mapping for runner scans. Record the Renovate live-apply follow-up evidence, including build-server workspace cleanup for the remote gate.",
+    "release_notes_url": "docs/release-notes/0.177.126.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
