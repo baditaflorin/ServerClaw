@@ -14524,6 +14524,7 @@ workstreams:
       - receipts/image-scans/2026-03-30-livekit-runtime.json
       - receipts/image-scans/2026-03-30-livekit-runtime.trivy.json
       - receipts/sbom/host-docker-runtime-lv3-2026-03-31.cdx.json
+      - receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json
       - receipts/live-applies/*livekit*
       - receipts/live-applies/evidence/*livekit*
     ownership_manifest:
@@ -14566,6 +14567,7 @@ workstreams:
             - tests/test_docker_runtime_role.py
             - tests/test_linux_guest_firewall_role.py
             - receipts/sbom/host-docker-runtime-lv3-2026-03-31.cdx.json
+            - receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json
           mode: shared_contract
           contract: docker-runtime-recovery-v1
         - id: livekit_platform_topology_contract
