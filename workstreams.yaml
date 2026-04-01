@@ -14455,9 +14455,13 @@ workstreams:
         - id: ws0307_adr_docs
           paths:
             - docs/adr/0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
-            - docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
             - platform/interface_contracts.py
           mode: exclusive
+        - id: ws0307_0308_execution_surface_contract
+          paths:
+            - docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
+          mode: shared_contract
+          contract: adr-0308-execution-surface-v1
         - id: ws0307_adr_index
           paths:
             - docs/adr/.index.yaml
@@ -14492,7 +14496,7 @@ workstreams:
   - id: ws-0308-live-apply
     adr: "0308"
     title: Live apply ADR 0308 operator provisioning execution surface and connectivity contracts from latest origin/main
-    status: in_progress
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0308-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0308-live-apply
@@ -14509,10 +14513,19 @@ workstreams:
       - docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
       - docs/runbooks/operator-onboarding.md
       - docs/adr/.index.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
       - config/workflow-catalog.json
+      - config/windmill/scripts/gate-status.py
+      - scripts/gate_status.py
       - scripts/preflight_controller_local.py
       - scripts/workflow_catalog.py
+      - platform/repo.py
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
       - tests/test_preflight_controller_local.py
+      - tests/test_controller_automation_toolkit.py
+      - tests/test_common_docker_bridge_chains_helper.py
+      - tests/test_docker_runtime_role.py
       - receipts/live-applies/2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply.json
       - receipts/live-applies/evidence/2026-04-02-ws-0308-*
     ownership_manifest:
@@ -14525,16 +14538,50 @@ workstreams:
         - id: ws0308_operator_surface_docs
           paths:
             - docs/workstreams/ws-0308-live-apply.md
-            - docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
-            - docs/runbooks/operator-onboarding.md
           mode: exclusive
+        - id: ws0308_operator_onboarding_runbook_contract
+          paths:
+            - docs/runbooks/operator-onboarding.md
+          mode: shared_contract
+          contract: operator-onboarding-runbook-v1
+        - id: ws0308_generated_truth_artifacts
+          paths:
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
+        - id: ws0308_0308_execution_surface_contract
+          paths:
+            - docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
+          mode: shared_contract
+          contract: adr-0308-execution-surface-v1
         - id: ws0308_preflight_contract
           paths:
             - config/workflow-catalog.json
             - scripts/preflight_controller_local.py
             - scripts/workflow_catalog.py
             - tests/test_preflight_controller_local.py
-          mode: exclusive
+          mode: shared_contract
+          contract: ws0308-preflight-catalog-v1
+        - id: ws0308_windmill_gate_contract
+          paths:
+            - config/windmill/scripts/gate-status.py
+            - scripts/gate_status.py
+          mode: shared_contract
+          contract: validation-gate-status-v1
+        - id: ws0308_controller_repo_path
+          paths:
+            - platform/repo.py
+            - tests/test_controller_automation_toolkit.py
+          mode: shared_contract
+          contract: ws0308-controller-repo-path-v1
+        - id: ws0308_exact_main_runtime_guard
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+            - tests/test_common_docker_bridge_chains_helper.py
+            - tests/test_docker_runtime_role.py
+          mode: shared_contract
+          contract: ws0308-docker-runtime-guard-v1
         - id: ws0308_adr_index
           paths:
             - docs/adr/.index.yaml
@@ -14546,8 +14593,13 @@ workstreams:
             - receipts/live-applies/evidence/2026-04-02-ws-0308-*
           mode: exclusive
     blockers: []
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0308 by documenting the verified operator provisioning execution surface, making operator-onboard preflight fail closed on dependency outages, repairing the Windmill gate-status and worktree checkout paths, and re-verifying the latest exact-main Windmill plus controller-local workflows
+      release_bump: patch
+      latest_receipts:
+        operator_provisioning_connectivity: 2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply
   - id: ws-0292-superset-live-apply
     adr: "0292"
     title: Live apply ADR 0292 Apache Superset from latest origin/main

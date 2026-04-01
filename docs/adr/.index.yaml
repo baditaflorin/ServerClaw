@@ -5516,9 +5516,9 @@ adr_index:
       - contracts
       - operator
       - provisioning
-    summary: The operatormanager.py onboard command must run from within the Docker network on VM 120
+    summary: The operatormanager.py onboard command must run where OpenBao is reachable over plain HTTP.
     filename: 0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
-    implemented_version: 0.0.0
+    implemented_version: 0.130.85
   - adr: 0309
     title: Task-Oriented Information Architecture Across The Platform Workbench
     status: Accepted
