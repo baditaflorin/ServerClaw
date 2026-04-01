@@ -22,6 +22,7 @@ jobs:
           WORKFLOW_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          find . -mindepth 1 -maxdepth 1 -exec rm -rf {} +
           git config --global --add safe.directory "$PWD"
           git init .
           if git remote get-url origin >/dev/null 2>&1; then
@@ -32,6 +33,8 @@ jobs:
           git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch origin "${WORKFLOW_REF}"
           git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch origin main
           git checkout --force "${WORKFLOW_SHA}"
+          git reset --hard
+          git clean -fdx
 
       - name: Bootstrap validation toolchain
         run: |
