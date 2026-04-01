@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.129",
+  "repo_version": "0.177.130",
   "platform_version": "0.130.82",
-  "generated_at": "2026-04-01T11:36:51Z",
-  "next_refresh_at": "2026-04-01T12:36:51Z",
+  "generated_at": "2026-04-01T13:12:46Z",
+  "next_refresh_at": "2026-04-01T14:12:46Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5880,10 +5880,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.128",
+    "last_version": "0.177.129",
     "deployed_at": "2026-04-01",
-    "summary": "implements ADR 0292 by adding Apache Superset as the SQL-first BI layer, publishing bi.lv3.org through the shared edge, reconciling repo-managed PostgreSQL and Plausible datasources plus the landing dashboard, and preserving exact-main live-apply evidence on the synchronized 0.177.128 baseline before the platform version advances to 0.130.82",
-    "release_notes_url": "docs/release-notes/0.177.129.md"
+    "summary": "accepts ADRs 0319 through 0323 to split the overloaded shared runtime into pool-scoped deployment lanes, raise the governed runtime memory envelope, and add bounded memory-pressure autoscaling rules for elastic services before more workloads are added to the platform",
+    "release_notes_url": "docs/release-notes/0.177.130.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

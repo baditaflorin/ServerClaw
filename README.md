@@ -219,7 +219,7 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.129` |
+| Repository version | `0.177.130` |
 | Platform version | `0.130.82` |
 | Observed check date | `2026-03-31` |
 | Observed OS | `Debian 13` |
@@ -1203,6 +1203,11 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0316: Journey Analytics And Onboarding Success Scorecards](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0316-journey-analytics-and-onboarding-success-scorecards.md)
 - [ADR 0317: Keycloak Direct-API Operator Provisioning via SSH Proxy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md)
 - [ADR 0318: Repeatable Operator Onboarding with CC Audit Trail](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md)
+- [ADR 0319: Runtime Pools As The Service Partition Boundary](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0319-runtime-pools-as-the-service-partition-boundary.md)
+- [ADR 0320: Pool-Scoped Deployment Surfaces And Agent Execution Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes.md)
+- [ADR 0321: Runtime Pool Memory Envelopes And Reserved Host Headroom](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md)
+- [ADR 0322: Memory-Pressure Autoscaling For Elastic Runtime Pools](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0322-memory-pressure-autoscaling-for-elastic-runtime-pools.md)
+- [ADR 0323: Service Mobility Tiers And Migration Waves For Runtime Pools](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -1388,6 +1393,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0273: Public Endpoint Admission Control](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md)
 - [Workstream ADR 0295: Artifact Cache Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md)
 - [Workstream ADR 0307: Platform App Cohesion, Onboarding, And User-Flow Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0307-platform-app-cohesion-bundle.md)
+- [Workstream ADR 0319: Runtime Pool Partitioning And Memory-Aware Autoscaling Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md)
 - [Workstream ws-0021-edge-cert-repair: Shared Edge Certificate Expansion Repair](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0021-edge-cert-repair.md)
 - [Workstream ws-0101-live-apply: ADR 0101 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0101-live-apply.md)
 - [Workstream ws-0105-live-apply: Live Apply ADR 0105 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md)
@@ -1547,7 +1553,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.129` |
+| Repository version | `0.177.130` |
 | Platform version | `0.130.82` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1842,6 +1848,7 @@ This repository is intentionally opinionated:
 | `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `merged` | [ws-0297-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md) |
 | `0297` | Integrate ADR 0297 live-apply evidence and release updates on main | `merged` | [ws-0297-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-main-merge.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md) |
+| `0319` | Split the overloaded shared runtime into pool-scoped lanes with higher memory headroom and bounded autoscaling | `merged` | [adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

@@ -14453,10 +14453,10 @@ workstreams:
   - id: ws-0319-runtime-pool-bundle
     adr: "0319"
     title: Split the overloaded shared runtime into pool-scoped lanes with higher memory headroom and bounded autoscaling
-    status: in_progress
+    status: merged
     owner: codex
-    branch: codex/adr-0319-runtime-cells
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0319-runtime-cells
+    branch: codex/adr-0319-main-integration
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0319-runtime-cells/.worktrees/adr-0319-main-integration
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md
     depends_on:
       - adr-0105-platform-capacity-model
@@ -14524,6 +14524,7 @@ workstreams:
     canonical_truth:
       changelog_entry: accepts ADRs 0319 through 0323 to split the overloaded shared runtime into pool-scoped deployment lanes, raise the governed runtime memory envelope, and add bounded memory-pressure autoscaling rules for elastic services before more workloads are added to the platform
       release_bump: patch
+      included_in_repo_version: 0.177.130
     blockers: []
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false

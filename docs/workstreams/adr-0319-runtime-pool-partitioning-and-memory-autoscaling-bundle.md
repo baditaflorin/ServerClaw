@@ -2,13 +2,13 @@
 
 - ADR: [ADR 0319](../adr/0319-runtime-pools-as-the-service-partition-boundary.md), [ADR 0320](../adr/0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes.md), [ADR 0321](../adr/0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md), [ADR 0322](../adr/0322-memory-pressure-autoscaling-for-elastic-runtime-pools.md), [ADR 0323](../adr/0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md)
 - Title: Five ADRs to split the overloaded shared runtime into smaller pool-scoped lanes, increase governed memory headroom, and add bounded autoscaling under memory pressure
-- Status: in_progress
-- Implemented In Repo Version: pending
+- Status: merged
+- Implemented In Repo Version: 0.177.130
 - Live Applied In Platform Version: N/A
-- Implemented On: pending
+- Implemented On: 2026-04-01
 - Live Applied On: N/A
-- Branch: `codex/adr-0319-runtime-cells`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0319-runtime-cells`
+- Branch: `codex/adr-0319-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0319-runtime-cells/.worktrees/adr-0319-main-integration`
 - Owner: codex
 - Depends On: `adr-0105-platform-capacity-model`, `adr-0154-vm-scoped-parallel-execution-lanes`, `adr-0157-per-vm-concurrency-budget-and-resource-reservation`, `adr-0184-failure-domain-labels-and-anti-affinity-policy`, `adr-0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads`, `adr-0214-production-and-staging-cells-as-the-unit-of-high-availability`, `adr-0232-nomad-for-durable-batch-and-long-running-internal-jobs`
 - Conflicts With: none
