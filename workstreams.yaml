@@ -367,6 +367,9 @@ workstreams:
       - docs/workstreams/ws-0315-gitea-followups.md
       - .gitea/workflows/validate.yml
       - .gitea/workflows/release-bundle.yml
+      - README.md
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
       - scripts/release_bundle.py
       - docs/runbooks/configure-renovate.md
       - docs/runbooks/signed-release-bundles.md
@@ -385,6 +388,13 @@ workstreams:
             - .gitea/workflows/release-bundle.yml
           mode: shared_contract
           contract: gitea-workflows-v1
+        - id: generated_truth
+          paths:
+            - README.md
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
         - id: release_bundle_tooling
           paths:
             - scripts/release_bundle.py
