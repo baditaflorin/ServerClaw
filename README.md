@@ -1517,6 +1517,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0305-live-apply: Live Apply ADR 0305 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-live-apply.md)
 - [Workstream ws-0305-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md)
 - [Workstream ws-0306-live-apply: Live Apply ADR 0306 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md)
+- [Workstream ws-0315-gitea-followups: Gitea Release Bundles And Renovate PR Validation Follow-ups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning

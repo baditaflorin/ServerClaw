@@ -6,7 +6,7 @@
   "recorded_on": "2026-04-01",
   "recorded_at": "2026-04-01T07:40:00Z",
   "recorded_by": "codex",
-  "source_commit": "",
+  "source_commit": "5e96cf05dba368fdf9bbc28e760f3da263bf7338",
   "repo_version_context": "0.177.126",
   "platform_version_context": "0.130.80",
   "workflow_id": "adr-0297-gitea-followups-live-apply",
