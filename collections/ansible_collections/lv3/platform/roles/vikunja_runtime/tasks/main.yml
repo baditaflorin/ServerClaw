@@ -327,22 +327,30 @@
   ansible.builtin.shell: |
     set -euo pipefail
     if docker exec {{ vikunja_container_name | quote }} /app/vikunja/vikunja user list --email {{ vikunja_automation_email | quote }} | grep -q {{ vikunja_automation_email | quote }}; then
+      echo "already-exists"
       exit 0
     fi
     docker exec {{ vikunja_container_name | quote }} /app/vikunja/vikunja user create --username {{ vikunja_automation_username | quote }} --email {{ vikunja_automation_email | quote }} --password {{ vikunja_automation_password | quote }}
+    echo "created"
   args:
     executable: /bin/bash
+  register: vikunja_automation_user_result
+  changed_when: "'created' in vikunja_automation_user_result.stdout"
   no_log: true
 
 - name: Ensure the Florin shadow user exists for OIDC fallback linking
   ansible.builtin.shell: |
     set -euo pipefail
     if docker exec {{ vikunja_container_name | quote }} /app/vikunja/vikunja user list --email {{ vikunja_operator_email | quote }} | grep -q {{ vikunja_operator_email | quote }}; then
+      echo "already-exists"
       exit 0
     fi
     docker exec {{ vikunja_container_name | quote }} /app/vikunja/vikunja user create --username {{ vikunja_operator_username | quote }} --email {{ vikunja_operator_email | quote }} --password {{ vikunja_operator_shadow_password | quote }}
+    echo "created"
   args:
     executable: /bin/bash
+  register: vikunja_operator_user_result
+  changed_when: "'created' in vikunja_operator_user_result.stdout"
   no_log: true
 
 - name: Bootstrap the Vikunja automation token when it is missing
