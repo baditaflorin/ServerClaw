@@ -86,14 +86,21 @@
   when: not (platform_context_verify_rebuild_local | bool)
 
 - name: Wait for the Qdrant API before live query verification
-  ansible.builtin.uri:
-    url: http://127.0.0.1:6333/collections
-    method: GET
-    status_code: 200
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - platform-context-api
+      - python
+      - -c
+      - |
+        import urllib.request
+
+        urllib.request.urlopen("http://qdrant:6333/collections", timeout=10)
   register: platform_context_qdrant_verify_ready
   retries: "{{ platform_context_verify_request_retries }}"
   delay: "{{ platform_context_verify_request_delay_seconds }}"
-  until: platform_context_qdrant_verify_ready.status == 200
+  until: platform_context_qdrant_verify_ready.rc == 0
   changed_when: false
 
 - name: Wait for Ollama again before live query verification when semantic embeddings use the local Ollama backend

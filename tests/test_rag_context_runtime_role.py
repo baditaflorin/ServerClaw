@@ -240,10 +240,20 @@ def test_verify_tasks_wait_for_runtime_dependencies_before_query_smoke_tests() -
     )
     assert defaults["platform_context_verify_request_retries"] == 12
     assert defaults["platform_context_verify_request_delay_seconds"] == 5
-    assert qdrant_wait["ansible.builtin.uri"]["url"] == "http://127.0.0.1:6333/collections"
+    assert qdrant_wait["ansible.builtin.command"]["argv"][:5] == [
+        "docker",
+        "exec",
+        "platform-context-api",
+        "python",
+        "-c",
+    ]
+    assert (
+        qdrant_wait["ansible.builtin.command"]["argv"][5]
+        == 'import urllib.request\n\nurllib.request.urlopen("http://qdrant:6333/collections", timeout=10)\n'
+    )
     assert qdrant_wait["retries"] == "{{ platform_context_verify_request_retries }}"
     assert qdrant_wait["delay"] == "{{ platform_context_verify_request_delay_seconds }}"
-    assert qdrant_wait["until"] == "platform_context_qdrant_verify_ready.status == 200"
+    assert qdrant_wait["until"] == "platform_context_qdrant_verify_ready.rc == 0"
     assert ollama_wait["ansible.builtin.uri"]["url"] == "{{ platform_context_ollama_url }}/api/version"
     assert ollama_wait["retries"] == "{{ platform_context_verify_request_retries }}"
     assert ollama_wait["delay"] == "{{ platform_context_verify_request_delay_seconds }}"
