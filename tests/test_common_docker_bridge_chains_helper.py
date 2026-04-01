@@ -23,13 +23,8 @@ def load_tasks() -> list[dict]:
 
 def test_docker_bridge_chain_helper_asserts_on_retry_task_success_state() -> None:
     tasks = load_tasks()
+    task_names = {task["name"] for task in tasks}
     expect_forward = next(task for task in tasks if task["name"] == "Decide whether Docker forward-chain enforcement is required")
-    restart_task = next(task for task in tasks if task["name"] == "Restart Docker when required bridge chains are missing")
-    retry_restart_task = next(
-        task
-        for task in tasks
-        if task["name"] == "Restart Docker when required bridge chains are still missing after the retry loop"
-    )
     wait_for_ssh = next(task for task in tasks if task["name"] == "Wait for SSH before Docker bridge-chain recovery checks")
     nat_verify = next(task for task in tasks if task["name"] == "Verify Docker nat chain after retry loop")
     forward_verify = next(task for task in tasks if task["name"] == "Verify Docker forward chain after retry loop")
@@ -39,9 +34,8 @@ def test_docker_bridge_chain_helper_asserts_on_retry_task_success_state() -> Non
     )
 
     assert "common_docker_bridge_chains_expect_forward_chain" in expect_forward["ansible.builtin.set_fact"]
-    assert "common_docker_bridge_chains_wait" in restart_task["when"][1]
-    assert "common_docker_bridge_chains_nat_check.rc != 0" in restart_task["when"][2]
-    assert "common_docker_bridge_chains_nat_recheck.rc != 0" in retry_restart_task["when"][1]
+    assert "Restart Docker when required bridge chains are missing" not in task_names
+    assert "Restart Docker when required bridge chains are still missing after the retry loop" not in task_names
     assert wait_for_ssh["ansible.builtin.wait_for_connection"]["connect_timeout"] == 5
     assert wait_for_ssh["ansible.builtin.wait_for_connection"]["connect_timeout"] == 5
     assert nat_verify["register"] == "common_docker_bridge_chains_nat_verify"

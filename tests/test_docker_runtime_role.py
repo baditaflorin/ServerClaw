@@ -447,20 +447,20 @@ exit 1
     assert OpenBaoState.sealed is False
 
 
-def test_common_docker_bridge_chains_warms_control_socket_before_restarting() -> None:
+def test_common_docker_bridge_chains_warms_control_socket_before_failing_safe() -> None:
     tasks = load_common_docker_bridge_chains()
     task_names = {task["name"] for task in tasks}
     assert "Warm the Docker control socket before chain health checks" in task_names
     assert "Reset SSH connection before Docker bridge-chain recovery checks" in task_names
     assert "Wait for SSH before Docker bridge-chain recovery checks" in task_names
     assert "Wait briefly for Docker bridge chains to recover after daemon activation" in task_names
-    assert "Restart Docker when required bridge chains are missing" in task_names
+    assert "Restart Docker when required bridge chains are missing" not in task_names
+    assert "Restart Docker when required bridge chains are still missing after the retry loop" not in task_names
     info_ready = next(task for task in tasks if task["name"] == "Warm the Docker control socket before chain health checks")
     wait_for_ssh = next(task for task in tasks if task["name"] == "Wait for SSH before Docker bridge-chain recovery checks")
     chain_wait = next(
         task for task in tasks if task["name"] == "Wait briefly for Docker bridge chains to recover after daemon activation"
     )
-    restart_task = next(task for task in tasks if task["name"] == "Restart Docker when required bridge chains are missing")
     nat_recheck = next(task for task in tasks if task["name"] == "Recheck Docker nat chain after health evaluation")
     forward_recheck = next(task for task in tasks if task["name"] == "Recheck Docker forward chain after health evaluation")
     nat_verify = next(task for task in tasks if task["name"] == "Verify Docker nat chain after retry loop")
@@ -490,7 +490,6 @@ def test_common_docker_bridge_chains_warms_control_socket_before_restarting() ->
     assert "iptables -t filter -S DOCKER-FORWARD" in chain_wait["ansible.builtin.shell"]
     assert "sleep {{ common_docker_bridge_chains_delay }}" in chain_wait["ansible.builtin.shell"]
     assert chain_wait["failed_when"] is False
-    assert any(".get('rc', 1)" in condition for condition in restart_task["when"])
     assert nat_recheck["retries"] == "{{ common_docker_bridge_chains_retries }}"
     assert nat_recheck["delay"] == "{{ common_docker_bridge_chains_delay }}"
     assert nat_recheck["until"] == "common_docker_bridge_chains_nat_recheck.rc == 0"
