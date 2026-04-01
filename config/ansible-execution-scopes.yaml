@@ -375,6 +375,11 @@ playbooks:
     shared_surfaces:
       - service:semaphore
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/sftpgo.yml:
+    playbook_id: sftpgo
+    mutation_scope: platform
+    shared_surfaces:
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/step-ca.yml:
     playbook_id: step-ca
     mutation_scope: platform
@@ -520,6 +525,11 @@ playbooks:
     shared_surfaces:
       - service:guest-log-shipping
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/sftpgo.yml:
+    playbook_id: sftpgo
+    mutation_scope: platform
+    shared_surfaces:
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/services/nginx-observability.yml:
     playbook_id: nginx-observability
     mutation_scope: host
@@ -574,4 +584,9 @@ playbooks:
     mutation_scope: host
     shared_surfaces:
       - service:ollama
+      - inventory/host_vars/proxmox_florin.yml
+  collections/ansible_collections/lv3/platform/playbooks/vikunja.yml:
+    playbook_id: vikunja
+    mutation_scope: platform
+    shared_surfaces:
       - inventory/host_vars/proxmox_florin.yml
