@@ -2352,6 +2352,7 @@
         "keycloak_superset_client_secret"
       ],
       "adr": "0292",
+      "adr_file": "docs/adr/0292-apache-superset-as-the-sql-first-business-intelligence-layer.md",
       "runbook": "docs/runbooks/configure-superset.md",
       "tags": [
         "analytics",
