@@ -75,6 +75,7 @@ def test_templates_define_host_networked_traefik_and_dapr_router() -> None:
     assert "runtime-ai-traefik:" in compose_template
     assert "runtime-ai-dapr-router:" in compose_template
     assert "network_mode: host" in compose_template
+    assert "./daprd" in compose_template
     assert "--app-id" in compose_template
     assert "runtime-ai-tika:" in router_template
     assert "runtime-ai-gotenberg:" in router_template
