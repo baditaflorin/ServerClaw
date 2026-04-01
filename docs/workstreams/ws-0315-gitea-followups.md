@@ -36,9 +36,10 @@
 ## Expected Live Surfaces
 
 - private Gitea release bundle workflow prunes older `bundle-*` releases before uploading new assets
-- Gitea pull-request validation runs complete after a clean checkout on pre-existing Renovate PR branches
+- Gitea pull-request validation runs start from a clean checkout on pre-existing Renovate PR branches
 
 ## Verification
 
-- Re-run `release-bundle.yml` on private `main` and confirm `success`.
-- Re-run the failed Renovate PR validation runs (PRs `#4` and `#5`) and confirm `success`.
+- `release-bundle.yml` reruns succeeded on `codex/ws-0315-gitea-followups` (run IDs `225` and `227`).
+- Renovate PR validations were re-triggered via `POST /pulls/{id}/update` for PRs `#6` and `#7` (runs `228` and `229`).
+- PR validation failures now report repository data model mismatches (ClickHouse digest expectations) instead of incomplete checkout workspaces, confirming the cleanup fix landed.

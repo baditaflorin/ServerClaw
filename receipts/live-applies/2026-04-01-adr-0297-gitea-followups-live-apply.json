@@ -4,9 +4,9 @@
   "environment": "production",
   "applied_on": "2026-04-01",
   "recorded_on": "2026-04-01",
-  "recorded_at": "2026-04-01T07:40:00Z",
+  "recorded_at": "2026-04-01T07:13:06Z",
   "recorded_by": "codex",
-  "source_commit": "5e96cf05dba368fdf9bbc28e760f3da263bf7338",
+  "source_commit": "8b2f918cda268ef5f2acd1c1be46a2475eb8ec68",
   "repo_version_context": "0.177.126",
   "platform_version_context": "0.130.80",
   "workflow_id": "adr-0297-gitea-followups-live-apply",
@@ -30,12 +30,12 @@
     {
       "check": "Release bundle workflow pruning logic",
       "result": "pass",
-      "observed": "`release_bundle.py publish` now prunes older bundle releases before publishing new assets, with `--retain-count` controlling retention."
+      "observed": "Gitea release-bundle workflow runs 225 and 227 succeeded on `codex/ws-0315-gitea-followups`, confirming old bundle releases are pruned before publishing new assets."
     },
     {
       "check": "PR validation checkout cleanup",
       "result": "pass",
-      "observed": "Gitea validate workflow now wipes workspace contents before checkout to avoid stale PR sync checkouts."
+      "observed": "Gitea validate workflow reruns 228 (PR 7) and 229 (PR 6) started from clean checkouts; failures now cite repository data model mismatches instead of incomplete workspaces."
     },
     {
       "check": "Repository validation slice",
@@ -45,7 +45,7 @@
     {
       "check": "Release bundle contract validation",
       "result": "pass",
-      "observed": "`python3 scripts/release_bundle.py validate` returned status ok with 2658 tracked files."
+      "observed": "`python3 scripts/release_bundle.py validate` returned status ok with 2659 tracked files."
     },
     {
       "check": "Repository data models",
@@ -62,10 +62,22 @@
     "scripts/release_bundle.py",
     "receipts/live-applies/evidence/2026-04-01-ws-0315-validate-gitea-workflows-r1.txt",
     "receipts/live-applies/evidence/2026-04-01-ws-0315-release-bundle-validate-r1.txt",
-    "receipts/live-applies/evidence/2026-04-01-ws-0315-repository-data-models-r1.txt"
+    "receipts/live-applies/evidence/2026-04-01-ws-0315-repository-data-models-r1.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0315-gitea-release-bundle-dispatch-r2.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0315-release-bundle-run-225-r1.json",
+    "receipts/live-applies/evidence/2026-04-01-ws-0315-release-bundle-run-227-r1.json",
+    "receipts/live-applies/evidence/2026-04-01-ws-0315-release-bundle-job-302-logs-r1.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0315-release-bundle-job-303-logs-r1.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0315-pull-6-update-r1.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0315-pull-7-update-r1.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0315-validate-run-228-r1.json",
+    "receipts/live-applies/evidence/2026-04-01-ws-0315-validate-run-229-r1.json",
+    "receipts/live-applies/evidence/2026-04-01-ws-0315-validate-job-304-logs-r1.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0315-validate-job-305-logs-r1.txt"
   ],
   "notes": [
     "The private Gitea release-bundle attachment store previously exhausted storage; pruning old bundle releases prevents recurring failures without removing the new release assets.",
-    "A stale Renovate PR validation run reported an incomplete checkout; the checkout now removes leftover workspace contents before fetching to avoid drift."
+    "A stale Renovate PR validation run reported an incomplete checkout; the checkout now removes leftover workspace contents before fetching to avoid drift.",
+    "PR validation reruns for PRs 6 and 7 still fail because the image digest expectations in the data model do not match the Renovate branch contents."
   ]
 }
