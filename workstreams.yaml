@@ -14453,7 +14453,7 @@ workstreams:
   - id: ws-0324-programmatic-doc-shards
     adr: "0324"
     title: Programmatic sharding roadmap for oversized service, ADR, discovery, and workstream surfaces
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0324-programmatic-doc-shards
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-programmatic-doc-shards
@@ -14506,11 +14506,11 @@ workstreams:
             - docs/release-notes/*.md
           mode: shared_contract
           contract: release-management-v1
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
     canonical_truth:
       changelog_entry: documents ADRs 0324 through 0328 to define programmatic sharding for service catalogs, ADR discovery, workstream history, agent discovery registries, and size-budgeted top-level summaries
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.130
       latest_receipts: {}
     blockers: []

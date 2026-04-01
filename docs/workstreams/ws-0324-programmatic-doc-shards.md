@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0324](../adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md)
 - Title: Define programmatic sharding patterns for oversized service, ADR, workstream, discovery, and summary surfaces
-- Status: ready_for_merge
+- Status: merged
 - Branch: `codex/ws-0324-programmatic-doc-shards`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-programmatic-doc-shards`
 - Owner: codex

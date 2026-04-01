@@ -219,7 +219,7 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.129` |
+| Repository version | `0.177.130` |
 | Platform version | `0.130.82` |
 | Observed check date | `2026-03-31` |
 | Observed OS | `Debian 13` |
@@ -1203,6 +1203,11 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0316: Journey Analytics And Onboarding Success Scorecards](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0316-journey-analytics-and-onboarding-success-scorecards.md)
 - [ADR 0317: Keycloak Direct-API Operator Provisioning via SSH Proxy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md)
 - [ADR 0318: Repeatable Operator Onboarding with CC Audit Trail](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md)
+- [ADR 0324: Service Definition Shards And Generated Service Catalog Assembly](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md)
+- [ADR 0325: Faceted ADR Index Shards And Reservation Windows](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md)
+- [ADR 0326: Workstream Registry Shards With Active And Archive Assembly](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md)
+- [ADR 0327: Sectional Agent Discovery Registries And Generated Onboarding Packs](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md)
+- [ADR 0328: Size-Budgeted Root Summaries And Automatic Rollover Ledgers](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -1530,6 +1535,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0305-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md)
 - [Workstream ws-0306-live-apply: Live Apply ADR 0306 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md)
 - [Workstream ws-0315-gitea-followups: Gitea Release Bundles And Renovate PR Validation Follow-ups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md)
+- [Workstream ws-0324-programmatic-doc-shards: Programmatic Document And Registry Sharding ADR Set](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0324-programmatic-doc-shards.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -1547,7 +1553,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.129` |
+| Repository version | `0.177.130` |
 | Platform version | `0.130.82` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1842,6 +1848,7 @@ This repository is intentionally opinionated:
 | `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `merged` | [ws-0297-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md) |
 | `0297` | Integrate ADR 0297 live-apply evidence and release updates on main | `merged` | [ws-0297-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-main-merge.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md) |
+| `0324` | Programmatic sharding roadmap for oversized service, ADR, discovery, and workstream surfaces | `merged` | [ws-0324-programmatic-doc-shards.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0324-programmatic-doc-shards.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow
