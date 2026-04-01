@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import controller_automation_toolkit as toolkit
+from platform import repo as repo_module
 
 
 def test_yaml_fallback_keeps_colon_scalars_in_lists(tmp_path: Path) -> None:
@@ -79,3 +80,34 @@ def test_resolve_repo_local_path_maps_inaccessible_controller_secret_into_repo_l
     resolved = toolkit.resolve_repo_local_path(inaccessible, repo_root=repo_root)
 
     assert resolved == mirrored_secret
+
+
+def test_repo_path_handles_inaccessible_candidate(tmp_path: Path, monkeypatch) -> None:
+    secret_path = tmp_path / ".local" / "keycloak" / "bootstrap-admin-password.txt"
+    original_exists = Path.exists
+
+    def fake_exists(path: Path) -> bool:
+        if path == secret_path:
+            raise PermissionError("permission denied")
+        return original_exists(path)
+
+    monkeypatch.setattr(repo_module, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(Path, "exists", fake_exists, raising=False)
+
+    resolved = repo_module.repo_path(".local", "keycloak", "bootstrap-admin-password.txt")
+
+    assert resolved == secret_path
+
+
+def test_repo_path_prefers_shared_root_local_dir_from_worktree(tmp_path: Path, monkeypatch) -> None:
+    worktree_root = tmp_path / ".worktrees" / "ws-0308-live-apply"
+    shared_secret = tmp_path / ".local" / "keycloak" / "bootstrap-admin-password.txt"
+    shared_secret.parent.mkdir(parents=True)
+    shared_secret.write_text("secret", encoding="utf-8")
+    worktree_root.mkdir(parents=True)
+
+    monkeypatch.setattr(repo_module, "REPO_ROOT", worktree_root)
+
+    resolved = repo_module.repo_path(".local", "keycloak", "bootstrap-admin-password.txt")
+
+    assert resolved == shared_secret

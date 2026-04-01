@@ -22,19 +22,39 @@ PYYAML_INSTALL_HINT: Final[str] = (
 _MISSING = object()
 
 
+def _path_exists(path: Path) -> bool:
+    try:
+        return path.exists()
+    except OSError:
+        return False
+
+
+def _shared_worktree_root() -> Path | None:
+    if REPO_ROOT.parent.name != ".worktrees":
+        return None
+    return REPO_ROOT.parent.parent
+
+
 def repo_path(*parts: str) -> Path:
     if not parts:
         return REPO_ROOT
 
     candidate = REPO_ROOT.joinpath(*parts)
-    if candidate.exists():
+    if _path_exists(candidate):
         return candidate
 
     head = parts[0]
     if head in PACKAGED_SIBLING_DIRS:
         sibling_root = REPO_ROOT.parent / head
-        if sibling_root.exists():
+        if _path_exists(sibling_root):
             return sibling_root.joinpath(*parts[1:])
+
+    if head == ".local":
+        shared_root = _shared_worktree_root()
+        if shared_root is not None:
+            shared_candidate = shared_root.joinpath(*parts)
+            if _path_exists(shared_candidate):
+                return shared_candidate
 
     return candidate
 

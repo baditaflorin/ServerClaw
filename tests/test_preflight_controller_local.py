@@ -87,6 +87,39 @@ def test_validate_workflow_catalog_rejects_unknown_bootstrap_manifest(tmp_path: 
         workflow_catalog.validate_workflow_catalog(catalog, secret_manifest, bootstrap_catalog)
 
 
+def test_validate_workflow_catalog_rejects_invalid_health_check(tmp_path: Path) -> None:
+    key_path = tmp_path / ".local" / "ssh" / "id_ed25519"
+    key_path.parent.mkdir(parents=True)
+    key_path.write_text("key", encoding="utf-8")
+
+    secret_manifest = minimal_secret_manifest(key_path)
+    catalog = minimal_workflow(
+        workflow_id="demo",
+        preflight_payload={
+            "required": True,
+            "required_secret_ids": ["bootstrap_ssh_private_key"],
+            "health_checks": [
+                {
+                    "id": "missing-command",
+                    "description": "Broken health check",
+                }
+            ],
+        },
+    )
+    bootstrap_catalog = {
+        "schema_version": "1.0.0",
+        "manifests": {
+            "controller-local-base": {
+                "description": "Base bootstrap",
+                "optional_read_only_caches": [],
+            }
+        },
+    }
+
+    with pytest.raises(ValueError, match="preflight.health_checks\\[0\\]\\.command"):
+        workflow_catalog.validate_workflow_catalog(catalog, secret_manifest, bootstrap_catalog)
+
+
 def test_run_workflow_materializes_missing_generated_artifact(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     repo_root = tmp_path
     key_path = repo_root / ".local" / "ssh" / "id_ed25519"
@@ -266,3 +299,89 @@ def test_run_workflow_resolves_repo_local_secret_mirror(tmp_path: Path, monkeypa
     )
 
     assert exit_code == 0
+
+
+def test_run_workflow_executes_health_checks(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    repo_root = tmp_path
+    key_path = repo_root / ".local" / "ssh" / "id_ed25519"
+    key_path.parent.mkdir(parents=True)
+    key_path.write_text("key", encoding="utf-8")
+    secret_manifest = minimal_secret_manifest(key_path)
+    workflow = minimal_workflow(
+        workflow_id="operator-onboard",
+        preflight_payload={
+            "required": True,
+            "required_secret_ids": ["bootstrap_ssh_private_key"],
+            "health_checks": [
+                {
+                    "id": "demo-health",
+                    "description": "Demo health check passes",
+                    "command": "printf 'healthy\\n'",
+                    "timeout_seconds": 2,
+                }
+            ],
+        },
+    )
+    bootstrap_catalog = {
+        "schema_version": "1.0.0",
+        "manifests": {
+            "controller-local-base": {
+                "description": "Base bootstrap",
+                "optional_read_only_caches": [],
+            }
+        },
+    }
+
+    monkeypatch.setattr(preflight, "REPO_ROOT", repo_root)
+
+    exit_code = preflight.run_workflow(
+        secret_manifest,
+        workflow,
+        bootstrap_catalog,
+        "operator-onboard",
+    )
+
+    assert exit_code == 0
+
+
+def test_run_workflow_fails_when_health_check_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    repo_root = tmp_path
+    key_path = repo_root / ".local" / "ssh" / "id_ed25519"
+    key_path.parent.mkdir(parents=True)
+    key_path.write_text("key", encoding="utf-8")
+    secret_manifest = minimal_secret_manifest(key_path)
+    workflow = minimal_workflow(
+        workflow_id="operator-onboard",
+        preflight_payload={
+            "required": True,
+            "required_secret_ids": ["bootstrap_ssh_private_key"],
+            "health_checks": [
+                {
+                    "id": "demo-health",
+                    "description": "Demo health check fails",
+                    "command": "exit 7",
+                    "timeout_seconds": 2,
+                }
+            ],
+        },
+    )
+    bootstrap_catalog = {
+        "schema_version": "1.0.0",
+        "manifests": {
+            "controller-local-base": {
+                "description": "Base bootstrap",
+                "optional_read_only_caches": [],
+            }
+        },
+    }
+
+    monkeypatch.setattr(preflight, "REPO_ROOT", repo_root)
+
+    exit_code = preflight.run_workflow(
+        secret_manifest,
+        workflow,
+        bootstrap_catalog,
+        "operator-onboard",
+    )
+
+    assert exit_code == 1

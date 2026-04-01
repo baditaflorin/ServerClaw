@@ -10,15 +10,18 @@ import sys
 from pathlib import Path
 from typing import Any
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+
 if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    sys.path.insert(0, str(REPO_ROOT))
 
 try:
     from scripts import validation_lanes
 except ModuleNotFoundError as exc:
     if exc.name != "yaml" or os.environ.get("LV3_GATE_STATUS_PYYAML_BOOTSTRAPPED") == "1":
         raise
-    helper_path = Path(__file__).resolve().with_name("run_python_with_packages.sh")
+    helper_path = SCRIPT_DIR / "run_python_with_packages.sh"
     if not helper_path.is_file():
         raise
     os.environ["LV3_GATE_STATUS_PYYAML_BOOTSTRAPPED"] = "1"
@@ -27,6 +30,7 @@ except ModuleNotFoundError as exc:
         [str(helper_path), "pyyaml", "--", str(Path(__file__).resolve()), *sys.argv[1:]],
     )
 
+from scripts import gate_bypass_waivers
 
 DEFAULT_MANIFEST = Path("config/validation-gate.json")
 DEFAULT_LANE_CATALOG = Path("config/validation-lanes.yaml")
@@ -34,7 +38,6 @@ DEFAULT_LAST_RUN = Path(".local/validation-gate/last-run.json")
 DEFAULT_REMOTE_VALIDATE_RUN = Path(".local/validation-gate/remote-validate-last-run.json")
 DEFAULT_POST_MERGE_RUN = Path(".local/validation-gate/post-merge-last-run.json")
 DEFAULT_BYPASS_DIR = Path("receipts/gate-bypasses")
-REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -62,6 +65,19 @@ def latest_bypass_receipt(directory: Path) -> tuple[Path, dict[str, Any]] | None
         return None
     latest = receipts[-1]
     return latest, json.loads(latest.read_text(encoding="utf-8"))
+
+
+def build_waiver_summary(*, bypass_dir: Path) -> dict[str, Any]:
+    summary = gate_bypass_waivers.summarize_receipts(directory=bypass_dir)
+    return {
+        "totals": summary["totals"],
+        "latest_receipt": summary["latest_receipt"],
+        "open_waivers": summary["open_waivers"],
+        "expiring_soon": summary["expiring_soon"],
+        "warnings": summary["warnings"],
+        "release_blockers": summary["release_blockers"],
+        "invalid_receipts": summary["invalid_receipts"],
+    }
 
 
 def build_status_payload(
@@ -93,6 +109,7 @@ def build_status_payload(
             }
             for lane_id, lane in catalog.lanes.items()
         ]
+    waiver_summary = build_waiver_summary(bypass_dir=bypass_dir)
 
     payload = {
         "manifest_path": str(manifest_path),
@@ -110,6 +127,7 @@ def build_status_payload(
         "remote_validate_run": remote_validate_run,
         "post_merge_run": post_merge_run,
         "latest_bypass": None,
+        "waiver_summary": waiver_summary,
     }
     if bypass is not None:
         path, bypass_payload = bypass
@@ -169,6 +187,29 @@ def print_status_text(payload: dict[str, Any]) -> None:
             "Latest bypass receipt: "
             f"{path} ({bypass_payload.get('bypass', 'unknown')} at {bypass_payload.get('created_at', 'unknown')})"
         )
+    waiver_summary = payload["waiver_summary"]
+    totals = waiver_summary["totals"]
+    print(
+        "Waiver summary: "
+        f"{totals['open_waivers']} open, "
+        f"{totals['legacy_receipts']} legacy, "
+        f"{len(waiver_summary['warnings'])} warnings, "
+        f"{len(waiver_summary['release_blockers'])} release blockers"
+    )
+    for item in waiver_summary["open_waivers"]:
+        print(
+            "  Open waiver: "
+            f"{item['reason_code']} until {item['expires_on']} "
+            f"({item['owner']}; {item['remediation_ref']})"
+        )
+    for item in waiver_summary["release_blockers"] + waiver_summary["warnings"]:
+        print(
+            "  Aging repeated reason: "
+            f"{item['reason_code']} [{item['status']}] "
+            f"after {item['repeat_after_expiry_occurrences']} repeat(s) past expiry"
+        )
+    for item in waiver_summary["invalid_receipts"]:
+        print(f"  Invalid waiver receipt: {item['path']} ({item['error']})")
 
 
 def main(argv: list[str] | None = None) -> int:

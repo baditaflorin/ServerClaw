@@ -6858,6 +6858,26 @@
         "required_secret_ids": [
           "keycloak_bootstrap_admin_password",
           "openbao_init_payload"
+        ],
+        "health_checks": [
+          {
+            "id": "keycloak_public_discovery",
+            "description": "Keycloak realm discovery responds through the shared public SSO edge.",
+            "command": "curl -fsS https://sso.lv3.org/realms/lv3/.well-known/openid-configuration >/dev/null",
+            "timeout_seconds": 15
+          },
+          {
+            "id": "openbao_private_mtls_listener",
+            "description": "The private OpenBao listener on the Proxmox host answers a TLS handshake with the managed step-ca trust root.",
+            "command": "openssl s_client -connect 100.64.0.1:8200 -CAfile /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt < /dev/null 2>/dev/null | grep -q 'Verify return code: 0 (ok)'",
+            "timeout_seconds": 15
+          },
+          {
+            "id": "windmill_private_api",
+            "description": "The private Windmill API version endpoint responds on the Proxmox host proxy surface.",
+            "command": "curl -fsS http://100.64.0.1:8005/api/version >/dev/null",
+            "timeout_seconds": 15
+          }
         ]
       },
       "validation_targets": [
@@ -6883,6 +6903,7 @@
         "The Keycloak user, OpenBao entity, and repo-managed operator role definitions are converged for the requested operator."
       ],
       "verification_commands": [
+        "make preflight WORKFLOW=operator-onboard",
         "python3 scripts/operator_manager.py validate",
         "python3 scripts/operator_access_inventory.py --id florin-badita --offline",
         "make workflow-info WORKFLOW=operator-onboard"

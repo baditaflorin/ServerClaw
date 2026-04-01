@@ -22,6 +22,7 @@ from worktree_bootstrap import (
     validate_bootstrap_catalog,
 )
 from workflow_catalog import (
+    DEFAULT_PREFLIGHT_HEALTH_CHECK_TIMEOUT_SECONDS,
     WORKFLOW_SECRET_FIELDS,
     load_secret_manifest,
     load_workflow_catalog,
@@ -141,6 +142,37 @@ def report_optional_cache(entry: dict) -> str:
     return f"INFO bootstrap cache {entry_id}: {state} at {path}"
 
 
+def run_health_check(check: dict) -> tuple[bool, str]:
+    check_id = check["id"]
+    description = check["description"]
+    command = check["command"]
+    timeout_seconds = check.get("timeout_seconds", DEFAULT_PREFLIGHT_HEALTH_CHECK_TIMEOUT_SECONDS)
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=str(REPO_ROOT),
+            text=True,
+            capture_output=True,
+            shell=True,
+            executable="/bin/bash",
+            env=os.environ.copy(),
+            check=False,
+            timeout=timeout_seconds,
+        )
+    except subprocess.TimeoutExpired:
+        return False, f"FAIL health check {check_id}: timed out after {timeout_seconds}s ({description})"
+
+    if completed.returncode == 0:
+        return True, f"PASS health check {check_id}: {description}"
+
+    detail = completed.stderr.strip() or completed.stdout.strip() or "no output"
+    detail = detail.splitlines()[-1]
+    return (
+        False,
+        f"FAIL health check {check_id}: `{command}` exited {completed.returncode} ({detail})",
+    )
+
+
 def run_bootstrap_preflight(bootstrap_catalog: dict, workflow: dict) -> bool:
     manifest_ids = resolve_workflow_manifest_ids(bootstrap_catalog, workflow)
     if not manifest_ids:
@@ -190,6 +222,12 @@ def run_workflow(secret_manifest: dict, catalog: dict, bootstrap_catalog: dict, 
 
     for secret_id in preflight.get("blocked_secret_ids", []):
         ok, message = check_secret(secret_id, secret_manifest["secrets"][secret_id])
+        print(message)
+        if not ok:
+            failed = True
+
+    for check in preflight.get("health_checks", []):
+        ok, message = run_health_check(check)
         print(message)
         if not ok:
             failed = True
