@@ -101,7 +101,7 @@ def test_main_tasks_render_build_force_recreate_and_verify_runtime() -> None:
 
     nat_assert = next(task for task in tasks if task["name"] == "Assert Docker nat chain is present before JupyterHub startup")
     assert nat_assert["ansible.builtin.assert"]["that"] == [
-        "jupyterhub_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_verify.rc | default(1)) == 0"
+        "jupyterhub_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_chain_present | default(false))"
     ]
 
     hub_cache = next(task for task in tasks if task["name"] == "Ensure the JupyterHub hub base image is cached locally")

@@ -297,7 +297,7 @@
 - name: Assert Docker nat chain is present before Keycloak startup
   ansible.builtin.assert:
     that:
-      - keycloak_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_verify.rc | default(1)) == 0
+      - keycloak_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_chain_present | default(false))
     fail_msg: "Docker is running but the nat DOCKER chain is missing; Keycloak published ports will fail."
 
 - name: Check whether the Keycloak admin port is already published locally

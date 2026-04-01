@@ -276,7 +276,7 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert "keycloak_pull.changed" not in force_recreate_expression
     nat_assert = next(task for task in tasks if task.get("name") == "Assert Docker nat chain is present before Keycloak startup")
     assert nat_assert["ansible.builtin.assert"]["that"] == [
-        "keycloak_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_verify.rc | default(1)) == 0"
+        "keycloak_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_chain_present | default(false))"
     ]
 
 

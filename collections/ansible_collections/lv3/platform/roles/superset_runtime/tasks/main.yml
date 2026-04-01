@@ -403,7 +403,7 @@
 - name: Assert Docker nat chain is present before Superset startup
   ansible.builtin.assert:
     that:
-      - superset_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_verify.rc | default(1)) == 0
+      - superset_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_chain_present | default(false))
     fail_msg: "Docker is running but the nat DOCKER chain is missing; Superset published ports will fail."
 
 - name: Check whether the Superset local port is already published

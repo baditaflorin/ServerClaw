@@ -409,7 +409,7 @@
 - name: Assert Docker nat chain is present before JupyterHub startup
   ansible.builtin.assert:
     that:
-      - jupyterhub_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_verify.rc | default(1)) == 0
+      - jupyterhub_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_chain_present | default(false))
     fail_msg: "Docker is running but the nat DOCKER chain is missing; JupyterHub published ports will fail."
 
 - name: Check whether the JupyterHub local port is already published
