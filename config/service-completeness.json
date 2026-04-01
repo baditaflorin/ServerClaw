@@ -406,7 +406,7 @@
     },
     "ntfy": {
       "service_type": "compose",
-      "requires_subdomain": false,
+      "requires_subdomain": true,
       "requires_oidc": false,
       "requires_secrets": true,
       "requires_compose_secrets": false,

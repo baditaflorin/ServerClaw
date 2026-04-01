@@ -351,7 +351,7 @@
       "vm": "docker-runtime-lv3",
       "tier": 1,
       "category": "communication",
-      "adr": "0097"
+      "adr": "0299"
     },
     {
       "id": "ntopng",
@@ -680,7 +680,7 @@
       "from": "alertmanager",
       "to": "ntfy",
       "type": "soft",
-      "description": "Critical paging depends on ntfy delivery, but Mattermost still provides a lower-fidelity fallback notification path."
+      "description": "Critical Alertmanager notifications publish into the governed ntfy topic registry for operator push delivery, while Mattermost still provides the team-visible fallback channel."
     },
     {
       "from": "api_gateway",
@@ -734,7 +734,31 @@
       "from": "changedetection",
       "to": "ntfy",
       "type": "soft",
-      "description": "Security-advisory watches use the private ntfy gateway for high-priority push notifications."
+      "description": "Security-advisory watches publish repo-managed operator push notifications through the governed ntfy channel."
+    },
+    {
+      "from": "gitea",
+      "to": "ntfy",
+      "type": "soft",
+      "description": "Validation-gate failures publish critical operator push notifications to ntfy without requiring UI polling."
+    },
+    {
+      "from": "ntfy",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The ntfy runtime, topic registry, and auth state are hosted on docker-runtime-lv3."
+    },
+    {
+      "from": "ntfy",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public operator access to ntfy.lv3.org depends on the shared NGINX edge publication path, while the private runtime remains directly verifiable."
+    },
+    {
+      "from": "windmill",
+      "to": "ntfy",
+      "type": "soft",
+      "description": "The repo-seeded Windmill resource and NATS bridge publish high-priority operator push notifications through ntfy."
     },
     {
       "from": "crawl4ai",

@@ -27,6 +27,7 @@ MUTATION_AUDIT_SPEC.loader.exec_module(MUTATION_AUDIT_MODULE)
 
 build_event = MUTATION_AUDIT_MODULE.build_event
 emit_event_best_effort = MUTATION_AUDIT_MODULE.emit_event_best_effort
+publish_ntfy_failure_best_effort = MUTATION_AUDIT_MODULE.publish_ntfy_failure_best_effort
 
 
 ACTION_SANITIZE_PATTERN = re.compile(r"[^a-z0-9]+")
@@ -88,6 +89,12 @@ class CallbackModule(CallbackBase):
             context=f"ansible task '{task.get_name()}'",
             stderr=sys.stderr,
         )
+        if outcome == "failure":
+            publish_ntfy_failure_best_effort(
+                event,
+                context=f"ansible task '{task.get_name()}' failure notification",
+                stderr=sys.stderr,
+            )
 
     def v2_runner_on_ok(self, result) -> None:
         self._emit_for_result(result, outcome="success")

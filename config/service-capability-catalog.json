@@ -1705,18 +1705,32 @@
     {
       "id": "ntfy",
       "name": "ntfy",
-      "description": "Private push notification gateway used for critical platform paging.",
+      "description": "Repo-governed self-hosted push notification channel published at ntfy.lv3.org for operator-targeted automation alerts.",
       "category": "communication",
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:2586",
-      "exposure": "private-only",
+      "public_url": "https://ntfy.lv3.org",
+      "subdomain": "ntfy.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "ntfy Public",
       "health_probe_id": "ntfy",
-      "secret_catalog_ids": [
-        "ntfy_alertmanager_password"
+      "image_catalog_ids": [
+        "ntfy_runtime"
       ],
-      "adr": "0097",
+      "secret_catalog_ids": [
+        "ntfy_alertmanager_password",
+        "ntfy_ansible_password",
+        "ntfy_ansible_token",
+        "ntfy_changedetection_password",
+        "ntfy_gitea_actions_password",
+        "ntfy_gitea_actions_token",
+        "ntfy_ops_password",
+        "ntfy_windmill_password",
+        "ntfy_windmill_token"
+      ],
+      "adr": "0299",
       "runbook": "docs/runbooks/configure-ntfy.md",
       "runtime_pool": "runtime-general",
       "deployment_surface": "playbooks/ntfy.yml",
@@ -1725,13 +1739,16 @@
       "mobility_tier": "movable_singleton",
       "tags": [
         "notifications",
-        "paging",
-        "private"
+        "push",
+        "automation",
+        "public"
       ],
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://10.10.10.20:2586"
+          "url": "https://ntfy.lv3.org",
+          "subdomain": "ntfy.lv3.org",
+          "notes": "The public edge publishes ntfy.lv3.org while the repo-managed topic registry, auth users, and token contracts continue to govern publisher access."
         }
       }
     },

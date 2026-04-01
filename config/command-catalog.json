@@ -652,12 +652,12 @@
           "kind": "controller_secret",
           "required": false,
           "source": "config/controller-local-secrets.json",
-          "description": "Controller-local ntfy password used when the load probe publishes error-budget warnings to the private platform.slo.warn topic."
+          "description": "Controller-local ntfy compatibility password used when the load probe publishes error-budget warnings to the governed platform.slo.warn topic."
         }
       ],
       "expected_preconditions": [
         "make validate passes before treating the resulting load receipts as operational evidence",
-        "The execution host can reach the declared service URLs, the private Prometheus remote-write endpoint, and the private ntfy topic when warning publication is enabled",
+        "The execution host can reach the declared service URLs, the private Prometheus remote-write endpoint, and the governed ntfy topic when warning publication is enabled",
         "Operators confirm the targeted services are healthy enough that a representative diagnostic load probe will not mask an unrelated incident"
       ],
       "evidence": {
@@ -704,12 +704,12 @@
           "kind": "controller_secret",
           "required": false,
           "source": "config/controller-local-secrets.json",
-          "description": "Controller-local ntfy password used when the soak probe publishes error-budget warnings to the private platform.slo.warn topic."
+          "description": "Controller-local ntfy compatibility password used when the soak probe publishes error-budget warnings to the governed platform.slo.warn topic."
         }
       ],
       "expected_preconditions": [
         "make validate passes before the soak evidence is used for long-running capacity or release decisions",
-        "The execution host can reach the declared service URLs, the private Prometheus remote-write endpoint, and the private ntfy topic when warning publication is enabled",
+        "The execution host can reach the declared service URLs, the private Prometheus remote-write endpoint, and the governed ntfy topic when warning publication is enabled",
         "Operators confirm the targeted services can tolerate the longer diagnostic window or that a maintenance window is active before replaying the soak manually"
       ],
       "evidence": {
@@ -3598,7 +3598,7 @@
       }
     },
     "converge-ntfy": {
-      "description": "Converge the private ntfy paging gateway and the repo-managed Alertmanager credential on docker-runtime-lv3.",
+      "description": "Converge the published ntfy push channel, governed topic registry, and repo-managed publisher credentials on docker-runtime-lv3.",
       "workflow_id": "converge-ntfy",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -3614,20 +3614,20 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-ntfy passes",
         "make validate passes before the apply",
-        "The Alertmanager dependency and the repo-managed ntfy topic credential are reviewed before rollout"
+        "The public ntfy publication path, governed topic registry, and dependent publisher credentials are reviewed before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record ntfy health, container status, and the controller-local credential artifact path used by Alertmanager."
+        "notes": "Record internal and public ntfy health, container status, generated controller-local credentials, and at least one governed publish verification."
       },
       "failure_guidance": {
         "stop_conditions": [
           "Stop if the ntfy runtime, compose converge, or health verification fails.",
-          "Stop if the converge would leave the paging topic reachable without the expected authenticated boundary."
+          "Stop if the converge would leave the published ntfy channel or its governed topics reachable without the expected authenticated boundary."
         ],
         "rollback_guidance": [
           "Restore the last known-good ntfy runtime state before retrying.",
-          "Do not hand-edit topic authentication or container configuration outside the repo-managed workflow."
+          "Do not hand-edit topic authentication, credential artifacts, or container configuration outside the repo-managed workflow."
         ]
       },
       "execution": {

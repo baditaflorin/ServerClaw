@@ -7,6 +7,7 @@ import datetime as dt
 import json
 import os
 import re
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -39,7 +40,12 @@ SCHEMA_PATH: Final[Path] = repo_path("docs", "schema", "mutation-audit-event.jso
 DEFAULT_LOCAL_SINK_PATH: Final[Path] = repo_path(
     ".local", "state", "mutation-audit", "mutation-audit.jsonl"
 )
+DEFAULT_NTFY_FAILURE_DEDUPE_STATE_PATH: Final[Path] = repo_path(
+    ".local", "state", "ntfy", "mutation-audit-failures.json"
+)
 DEFAULT_LOKI_LABELS: Final[dict[str, str]] = {"job": "mutation-audit"}
+NTFY_TOPIC_REGISTRY_PATH: Final[Path] = repo_path("config", "ntfy", "topics.yaml")
+NTFY_PUBLISH_SCRIPT_PATH: Final[Path] = repo_path("scripts", "ntfy_publish.py")
 ALLOWED_ACTOR_CLASSES: Final[set[str]] = {"operator", "agent", "service", "automation"}
 ALLOWED_SURFACES: Final[set[str]] = {
     "ansible",
@@ -297,6 +303,61 @@ def emit_event_best_effort(
         emit_event(event, file_path=file_path, loki_url=loki_url, loki_labels=loki_labels)
     except (OSError, ValueError, RuntimeError, json.JSONDecodeError) as exc:
         print(f"Mutation audit warning ({context}): {exc}", file=stderr)
+        return False
+    return True
+
+
+def format_ntfy_failure_message(event: dict[str, Any]) -> str:
+    message = (
+        f"{event['target']} failed during {event['action']}. "
+        f"Correlation id: {event['correlation_id']}."
+    )
+    if event["evidence_ref"]:
+        message += f" Evidence: {event['evidence_ref']}."
+    return message
+
+
+def publish_ntfy_failure_best_effort(
+    event: dict[str, Any],
+    *,
+    context: str,
+    stderr: Any = sys.stderr,
+    publish_script: Path = NTFY_PUBLISH_SCRIPT_PATH,
+    registry_path: Path = NTFY_TOPIC_REGISTRY_PATH,
+    dedupe_state_path: Path = DEFAULT_NTFY_FAILURE_DEDUPE_STATE_PATH,
+) -> bool:
+    event = validate_event(event)
+    if event["surface"] != "ansible" or event["outcome"] != "failure":
+        return False
+    if not publish_script.is_file():
+        print(f"Mutation audit warning ({context}): ntfy publish helper is missing at {publish_script}", file=stderr)
+        return False
+    if not registry_path.is_file():
+        print(f"Mutation audit warning ({context}): ntfy topic registry is missing at {registry_path}", file=stderr)
+        return False
+
+    command = [
+        sys.executable,
+        str(publish_script),
+        "--registry",
+        str(registry_path),
+        "--publisher",
+        "ansible",
+        "--topic",
+        "platform.ansible.critical",
+        "--message",
+        format_ntfy_failure_message(event),
+        "--sequence-id",
+        f"ansible:{event['correlation_id']}:failure",
+        "--dedupe-state-file",
+        str(dedupe_state_path),
+        "--dedupe-window-seconds",
+        "900",
+    ]
+    result = subprocess.run(command, text=True, capture_output=True, check=False)
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip() or "ntfy publish command failed"
+        print(f"Mutation audit warning ({context}): {detail}", file=stderr)
         return False
     return True
 

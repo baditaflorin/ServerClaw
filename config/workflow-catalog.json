@@ -5065,7 +5065,7 @@
       }
     },
     "converge-ntfy": {
-      "description": "Deploy the private ntfy paging gateway on docker-runtime-lv3 and persist the repo-managed credential used by Alertmanager critical routing.",
+      "description": "Deploy the published ntfy push channel on docker-runtime-lv3 and persist the repo-managed credential and token bundle used by governed publishers.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -5078,7 +5078,15 @@
           "bootstrap_ssh_private_key"
         ],
         "generated_secret_ids": [
-          "ntfy_alertmanager_password"
+          "ntfy_alertmanager_password",
+          "ntfy_ansible_password",
+          "ntfy_ansible_token",
+          "ntfy_changedetection_password",
+          "ntfy_gitea_actions_password",
+          "ntfy_gitea_actions_token",
+          "ntfy_ops_password",
+          "ntfy_windmill_password",
+          "ntfy_windmill_token"
         ]
       },
       "validation_targets": [
@@ -5090,16 +5098,20 @@
       "implementation_refs": [
         "Makefile",
         "playbooks/ntfy.yml",
+        "playbooks/services/ntfy.yml",
         "roles/ntfy_runtime",
         "inventory/host_vars/proxmox_florin.yml",
-        "config/ntfy/server.yml"
+        "config/ntfy/server.yml",
+        "config/ntfy/topics.yaml",
+        "config/subdomain-catalog.json"
       ],
       "outputs": [
-        "A private ntfy runtime on docker-runtime-lv3 with the paging topic credential mirrored under .local/ntfy."
+        "A published ntfy runtime on docker-runtime-lv3 with the governed topic registry, controller-local publisher credentials, and ntfy.lv3.org edge contract mirrored from the repository."
       ],
       "verification_commands": [
         "make syntax-check-ntfy",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:2586/v1/health'"
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:2586/v1/health'",
+        "curl -fsS https://ntfy.lv3.org/v1/health"
       ],
       "execution_class": "mutation",
       "budget": {

@@ -756,8 +756,8 @@
       "standby": {
         "kind": "cold",
         "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when ntfy or its runtime state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the ntfy converge from git."
+        "failover_trigger": "Restore docker-runtime-lv3 when the ntfy runtime or its published edge contract cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the repo-managed ntfy converge from git."
       }
     },
     "ntopng": {

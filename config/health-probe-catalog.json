@@ -1953,7 +1953,7 @@
       "verify_file": "roles/ntfy_runtime/tasks/verify.yml",
       "liveness": {
         "kind": "http",
-        "description": "The private ntfy health endpoint responds on docker-runtime-lv3.",
+        "description": "The ntfy health endpoint responds on docker-runtime-lv3.",
         "timeout_seconds": 60,
         "retries": 20,
         "delay_seconds": 3,
@@ -1965,7 +1965,7 @@
       },
       "readiness": {
         "kind": "http",
-        "description": "The private ntfy health endpoint remains reachable after auth config loads.",
+        "description": "The ntfy health endpoint remains reachable after governed auth and topic configuration load.",
         "timeout_seconds": 60,
         "retries": 20,
         "delay_seconds": 3,
@@ -1976,8 +1976,20 @@
         ]
       },
       "uptime_kuma": {
-        "enabled": false,
-        "reason": "The paging gateway is private-only and verified directly by the role and Alertmanager integration."
+        "enabled": true,
+        "monitor": {
+          "name": "ntfy Public",
+          "type": "http",
+          "url": "https://ntfy.lv3.org/v1/health",
+          "description": "Published ntfy health endpoint through the shared NGINX edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
       }
     },
     "ntopng": {

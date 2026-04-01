@@ -1050,6 +1050,28 @@
         "live-apply-service service=nextcloud env=production"
       ]
     },
+    "ntfy_runtime": {
+      "kind": "runtime",
+      "service_id": "ntfy",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "ntfy",
+      "registry_ref": "docker.io/binwiederhier/ntfy",
+      "tag": "v2.21.0",
+      "digest": "sha256:28cb21ed7011425d02adbff38b380f39390a7ae20f281c335b5649f9a41fc7c1",
+      "ref": "docker.io/binwiederhier/ntfy:v2.21.0@sha256:28cb21ed7011425d02adbff38b380f39390a7ae20f281c335b5649f9a41fc7c1",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-04-01",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-04-01-ntfy-runtime.json",
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/ntfy_runtime/tasks/main.yml",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-ntfy"
+      ]
+    },
     "ollama_runtime": {
       "kind": "runtime",
       "service_id": "ollama",
