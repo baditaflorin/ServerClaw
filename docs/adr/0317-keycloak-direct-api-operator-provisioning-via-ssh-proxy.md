@@ -30,6 +30,10 @@ curl -sk https://sso.lv3.org/realms/master/protocol/openid-connect/token \
 If both succeed, use this ADR's procedure. If Keycloak returns 502, wait 30 s and retry — the
 container restarts occasionally.
 
+When running from a dedicated git worktree under `.worktrees/<name>`, resolve `.local/` from the
+shared repository root rather than the worktree path. The repo-managed
+`scripts/provision_operator.py` fallback now does this automatically.
+
 ## Critical facts
 
 | Item | Value |
@@ -136,8 +140,8 @@ Role names per access tier (from `scripts/operator_manager.py`):
 | Role | Keycloak realm role | Groups |
 |---|---|---|
 | `admin` | `platform-admin` | `lv3-platform-admins`, `grafana-admins` |
-| `operator` | `platform-operator` | `lv3-platform-operators` |
-| `viewer` | `platform-viewer` | `lv3-platform-viewers` |
+| `operator` | `platform-operator` | `lv3-platform-operators`, `grafana-viewers` |
+| `viewer` | `platform-read` | `lv3-platform-viewers`, `grafana-viewers` |
 
 ### Step 6 — Assign groups
 

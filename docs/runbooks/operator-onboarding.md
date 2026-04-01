@@ -69,6 +69,27 @@ python3 scripts/operator_manager.py onboard \
   --emit-json
 ```
 
+When the controller-side OpenBao or Windmill path is unavailable and you only need the
+Keycloak direct-API fallback from ADR 0317, use:
+
+```bash
+python3 scripts/provision_operator.py \
+  --id matei-busui-tmp-001 \
+  --name "Matei Busui" \
+  --email busui.matei1994@gmail.com \
+  --username matei.busui-tmp \
+  --role admin \
+  --expires 2026-04-08T00:00:00Z \
+  --requester florin@badita.org
+```
+
+Notes:
+
+- `scripts/provision_operator.py` now resolves `.local/` from the shared repo root, so it is safe
+  to run from a dedicated git worktree under `.worktrees/`.
+- Use `--skip-email` when re-verifying an existing account from exact `main`; this preserves the
+  direct-API provisioning and assignment checks without sending duplicate onboarding mail.
+
 Dry-run support:
 
 ```bash

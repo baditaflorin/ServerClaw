@@ -17,20 +17,17 @@ Usage:
         [--dry-run]
 
 What it does:
-    1. Validates input against operators.yaml schema constraints
-    2. Checks for existing Keycloak user (idempotent)
-    3. Creates Keycloak user with generated password (or reuses .local password file)
-    4. Assigns realm role and groups per role tier (see ADR 0108)
-    5. Verifies assignments
-    6. Sends rich onboarding email to operator, CC to requester (audit trail per ADR 0318)
-    7. Updates operators.yaml with the new entry (or prints YAML if --dry-run)
-    8. Saves password to .local/keycloak/<username>-password.txt
+    1. Resolves the shared `.local/` tree correctly from normal checkouts and git worktrees
+    2. Checks for an existing Keycloak user (idempotent)
+    3. Creates the Keycloak user with a generated password (or reuses `.local` password state)
+    4. Assigns realm roles and groups per role tier (see ADR 0108)
+    5. Verifies the expected assignments end to end
+    6. Sends the onboarding email unless `--skip-email` is requested for replay-only verification
+    7. Saves the password to `.local/keycloak/<username>-password.txt`
 
 Prerequisites:
-    - SSH access to 100.64.0.1 (for SMTP relay — internal network only)
     - .local/keycloak/bootstrap-admin-password.txt readable
-    - .local/mail-platform/profiles/platform-transactional-mailbox-password.txt readable
-    - .local/ssh/hetzner_llm_agents_ed25519 readable (for SSH SMTP relay)
+    - SSH access to 100.64.0.1 plus `.local/mail-platform/...` and `.local/ssh/...` only when sending email
 
 Related ADRs:
     - ADR 0108: Operator onboarding/offboarding workflow design
@@ -57,26 +54,84 @@ from email.mime.text import MIMEText
 from pathlib import Path
 from typing import Any
 
+from script_bootstrap import ensure_repo_root_on_path
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
-REPO_ROOT = Path(__file__).parent.parent
+REPO_ROOT = ensure_repo_root_on_path(__file__)
 KEYCLOAK_URL = "https://sso.lv3.org"
 REALM = "lv3"
 ADMIN_USER = "lv3-bootstrap-admin"
-
-BOOTSTRAP_PASS_FILE = REPO_ROOT / ".local" / "keycloak" / "bootstrap-admin-password.txt"
-SMTP_PASS_FILE = REPO_ROOT / ".local" / "mail-platform" / "profiles" / "platform-transactional-mailbox-password.txt"
-SSH_KEY_FILE = REPO_ROOT / ".local" / "ssh" / "hetzner_llm_agents_ed25519"
-PASSWORD_DIR = REPO_ROOT / ".local" / "keycloak"
-OPERATORS_YAML = REPO_ROOT / "config" / "operators.yaml"
 
 SMTP_HOST = "10.10.10.20"
 SMTP_PORT = 587
 SMTP_USER = "platform"
 SMTP_FROM = "LV3 Platform <platform@lv3.org>"
 SSH_PROXY = "ops@100.64.0.1"
+
+
+def detect_common_repo_root(repo_root: Path) -> Path:
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--git-common-dir"],
+            cwd=repo_root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return repo_root
+    common_dir = Path(result.stdout.strip())
+    if not common_dir.is_absolute():
+        common_dir = (repo_root / common_dir).resolve()
+    if common_dir.name == ".git":
+        return common_dir.parent
+    return repo_root
+
+
+def discover_local_root(repo_root: Path, common_repo_root: Path) -> Path:
+    override = os.environ.get("LV3_LOCAL_ROOT", "").strip()
+    if override:
+        return Path(override).expanduser()
+    shared_root = common_repo_root / ".local"
+    if repo_root.parent.name == ".worktrees" and shared_root.exists():
+        return shared_root
+    direct_root = repo_root / ".local"
+    if direct_root.exists():
+        return direct_root
+    if shared_root.exists():
+        return shared_root
+    if repo_root.parent.name == ".worktrees":
+        return repo_root.parent.parent / ".local"
+    return direct_root
+
+
+COMMON_REPO_ROOT = detect_common_repo_root(REPO_ROOT)
+LOCAL_ROOT = discover_local_root(REPO_ROOT, COMMON_REPO_ROOT)
+
+
+def repo_path(*parts: str) -> Path:
+    path = Path(*parts)
+    if path.is_absolute():
+        return path
+    if path.parts and path.parts[0] == ".local":
+        return LOCAL_ROOT.joinpath(*path.parts[1:])
+    worktree_path = REPO_ROOT / path
+    if worktree_path.exists():
+        return worktree_path
+    common_path = COMMON_REPO_ROOT / path
+    if common_path.exists():
+        return common_path
+    return worktree_path
+
+
+BOOTSTRAP_PASS_FILE = repo_path(".local", "keycloak", "bootstrap-admin-password.txt")
+SMTP_PASS_FILE = repo_path(".local", "mail-platform", "profiles", "platform-transactional-mailbox-password.txt")
+SSH_KEY_FILE = repo_path(".local", "ssh", "hetzner_llm_agents_ed25519")
+PASSWORD_DIR = repo_path(".local", "keycloak")
+OPERATORS_YAML = repo_path("config", "operators.yaml")
 
 # Role → (realm_roles, groups, openbao_policies)
 ROLE_DEFINITIONS: dict[str, dict[str, list[str]]] = {
@@ -87,12 +142,12 @@ ROLE_DEFINITIONS: dict[str, dict[str, list[str]]] = {
     },
     "operator": {
         "realm_roles": ["platform-operator"],
-        "groups": ["lv3-platform-operators"],
+        "groups": ["lv3-platform-operators", "grafana-viewers"],
         "openbao_policies": ["platform-operator"],
     },
     "viewer": {
-        "realm_roles": ["platform-viewer"],
-        "groups": ["lv3-platform-viewers"],
+        "realm_roles": ["platform-read"],
+        "groups": ["lv3-platform-viewers", "grafana-viewers"],
         "openbao_policies": ["platform-read"],
     },
 }
@@ -299,13 +354,11 @@ with smtplib.SMTP("{SMTP_HOST}", {SMTP_PORT}, timeout=15) as s:
 # ---------------------------------------------------------------------------
 
 def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
-    bootstrap_pass = BOOTSTRAP_PASS_FILE.read_text().strip()
-    smtp_pass = SMTP_PASS_FILE.read_text().strip()
-
     role_def = ROLE_DEFINITIONS[args.role]
 
     # --- Step 0: password file ---
     pw_file = PASSWORD_DIR / f"{args.username}-password.txt"
+    pw_file.parent.mkdir(parents=True, exist_ok=True)
     if pw_file.exists():
         password = pw_file.read_text().strip()
         print(f"[0] Reusing existing password from {pw_file}")
@@ -320,6 +373,8 @@ def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
     if dry_run:
         print(f"[dry-run] Would provision {args.username} ({args.email}) role={args.role}")
         return
+
+    bootstrap_pass = BOOTSTRAP_PASS_FILE.read_text().strip()
 
     # --- Step 1: check existing user ---
     token = get_token(bootstrap_pass)
@@ -382,36 +437,52 @@ def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
     _, roles_body = kc("GET", f"/users/{user_id}/role-mappings/realm", token)
     token = get_token(bootstrap_pass)
     _, groups_body = kc("GET", f"/users/{user_id}/groups", token)
-    print(f"[5] Roles:  {[r['name'] for r in (roles_body or [])]}")
-    print(f"[5] Groups: {[g['name'] for g in (groups_body or [])]}")
+    assigned_roles = {r["name"] for r in (roles_body or [])}
+    assigned_groups = {g["name"] for g in (groups_body or [])}
+    print(f"[5] Roles:  {sorted(assigned_roles)}")
+    print(f"[5] Groups: {sorted(assigned_groups)}")
+    missing_roles = [role_name for role_name in role_def["realm_roles"] if role_name not in assigned_roles]
+    missing_groups = [group_name for group_name in role_def["groups"] if group_name not in assigned_groups]
+    if missing_roles or missing_groups:
+        raise RuntimeError(
+            "Verification failed: "
+            f"missing roles={missing_roles or 'none'}, missing groups={missing_groups or 'none'}"
+        )
 
     # --- Step 6: send email ---
-    first_name = args.name.split()[0]
-    msg = build_email(
-        to_email=args.email,
-        cc_email=args.requester,
-        first_name=first_name,
-        username=args.username,
-        password=password,
-        role=args.role,
-        expiry=args.expires,
-        requester_email=args.requester,
-    )
-    send_email_via_ssh_proxy(
-        smtp_pass=smtp_pass,
-        ssh_key=SSH_KEY_FILE,
-        msg=msg,
-        recipients=[args.email, args.requester],
-    )
+    if args.skip_email:
+        print("[6] Skipping onboarding email (--skip-email)")
+    else:
+        smtp_pass = SMTP_PASS_FILE.read_text().strip()
+        first_name = args.name.split()[0]
+        msg = build_email(
+            to_email=args.email,
+            cc_email=args.requester,
+            first_name=first_name,
+            username=args.username,
+            password=password,
+            role=args.role,
+            expiry=args.expires,
+            requester_email=args.requester,
+        )
+        send_email_via_ssh_proxy(
+            smtp_pass=smtp_pass,
+            ssh_key=SSH_KEY_FILE,
+            msg=msg,
+            recipients=[args.email, args.requester],
+        )
 
     print(f"\n✓ Operator '{args.name}' provisioned successfully.")
     print(f"  Keycloak username : {args.username}")
     print(f"  User ID           : {user_id}")
     print(f"  Password file     : {pw_file}")
-    print(f"  Email sent to     : {args.email} (CC: {args.requester})")
+    if args.skip_email:
+        print("  Email sent to     : skipped (--skip-email)")
+    else:
+        print(f"  Email sent to     : {args.email} (CC: {args.requester})")
     print(f"  Expires           : {args.expires}")
     print()
-    print("NEXT: add the operators.yaml entry and push to origin/main.")
+    print("NEXT: ensure the operators.yaml entry exists, then push the audited change to origin/main.")
 
 
 # ---------------------------------------------------------------------------
@@ -448,6 +519,11 @@ def main() -> None:
         "--dry-run",
         action="store_true",
         help="Print what would happen without making any changes",
+    )
+    parser.add_argument(
+        "--skip-email",
+        action="store_true",
+        help="Skip the onboarding email while still provisioning and verifying the Keycloak account",
     )
     args = parser.parse_args()
     provision(args, dry_run=args.dry_run)
