@@ -8,7 +8,7 @@
 - Owner: codex
 - Depends On: `ADR 0038`, `ADR 0163`, `ADR 0164`, `ADR 0174`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md`, `docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md`, `docs/adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md`, `docs/adr/0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md`, `docs/adr/0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md`, `docs/adr/.index.yaml`, `docs/workstreams/ws-0324-programmatic-doc-shards.md`, `workstreams.yaml`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`
+- Shared Surfaces: `README.md`, `RELEASE.md`, `build/platform-manifest.json`, `docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md`, `docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md`, `docs/adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md`, `docs/adr/0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md`, `docs/adr/0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md`, `docs/adr/.index.yaml`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/workstreams/ws-0324-programmatic-doc-shards.md`, `workstreams.yaml`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `versions/stack.yaml`
 
 ## Scope
 
@@ -37,7 +37,12 @@
 - `docs/adr/0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md`
 - `docs/adr/0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md`
 - `docs/adr/.index.yaml`
+- `README.md`
+- `RELEASE.md`
+- `build/platform-manifest.json`
+- `docs/diagrams/agent-coordination-map.excalidraw`
 - `docs/workstreams/ws-0324-programmatic-doc-shards.md`
+- `versions/stack.yaml`
 - `workstreams.yaml`
 
 ## Verification
