@@ -306,17 +306,45 @@
     mode: "0755"
   loop: "{{ ops_portal_directory_sources }}"
 
-- name: Sync the ops portal directory-backed data sources
-  ansible.builtin.copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    owner: root
-    group: root
-    mode: "0644"
-    directory_mode: "0755"
+- name: Discover the ops portal directory-backed data files on the controller
+  ansible.builtin.find:
+    paths: "{{ item.src }}"
+    recurse: true
+    file_type: file
+    patterns: "{{ item.patterns | default(['*.json']) }}"
+    excludes:
+      - "._*"
+      - ".DS_Store"
   loop: "{{ ops_portal_directory_sources }}"
   loop_control:
     label: "{{ item.dest | replace(ops_portal_data_dir ~ '/', '') }}"
+  register: ops_portal_directory_source_files
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the synced ops portal directory-backed data subdirectories exist
+  ansible.builtin.file:
+    path: "{{ (item.0.item.dest ~ (item.1.path | replace(item.0.item.src, ''))) | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ ops_portal_directory_source_files.results | subelements('files', skip_missing=True) }}"
+  loop_control:
+    label: >-
+      {{ ((item.0.item.dest ~ (item.1.path | replace(item.0.item.src, ''))) | dirname)
+      | replace(ops_portal_data_dir ~ '/', '') }}
+
+- name: Sync the ops portal directory-backed data source files
+  ansible.builtin.copy:
+    src: "{{ item.1.path }}"
+    dest: "{{ item.0.item.dest }}{{ item.1.path | replace(item.0.item.src, '') }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ ops_portal_directory_source_files.results | subelements('files', skip_missing=True) }}"
+  loop_control:
+    label: "{{ (item.0.item.dest ~ (item.1.path | replace(item.0.item.src, ''))) | replace(ops_portal_data_dir ~ '/', '') }}"
 
 - name: Discover macOS metadata files in the synced ops portal data tree
   ansible.builtin.find:

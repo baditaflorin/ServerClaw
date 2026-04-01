@@ -440,6 +440,7 @@ workstreams:
       - docs/runbooks/platform-operations-portal.md
       - docs/runbooks/developer-portal.md
       - docs/runbooks/deployment-history-portal.md
+      - docs/runbooks/ops-portal-down.md
       - scripts/portal_utils.py
       - scripts/generate_ops_portal.py
       - scripts/generate_docs_site.py
@@ -449,6 +450,8 @@ workstreams:
       - docs/templates/reference-glossary.md.j2
       - docs/theme-overrides/
       - docs/site-generated/architecture/dependency-graph.md
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
       - receipts/ops-portal-snapshot.html
       - tests/test_ops_portal.py
@@ -477,6 +480,7 @@ workstreams:
             - docs/runbooks/platform-operations-portal.md
             - docs/runbooks/developer-portal.md
             - docs/runbooks/deployment-history-portal.md
+            - docs/runbooks/ops-portal-down.md
           mode: shared_contract
           contract: portal-help-docs-v1
         - id: contextual_help_adr_surface
@@ -495,6 +499,8 @@ workstreams:
             - docs/templates/reference-glossary.md.j2
             - docs/theme-overrides/**
             - docs/site-generated/architecture/dependency-graph.md
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
             - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
             - receipts/ops-portal-snapshot.html
             - tests/test_ops_portal.py

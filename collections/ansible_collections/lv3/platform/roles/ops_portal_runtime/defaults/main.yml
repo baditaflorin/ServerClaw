@@ -72,8 +72,12 @@ ops_portal_file_sources:
 ops_portal_directory_sources:
   - src: "{{ ops_portal_repo_root }}/receipts/live-applies/"
     dest: "{{ ops_portal_data_dir }}/receipts/live-applies/"
+    patterns:
+      - "*.json"
   - src: "{{ ops_portal_repo_root }}/receipts/drift-reports/"
     dest: "{{ ops_portal_data_dir }}/receipts/drift-reports/"
+    patterns:
+      - "*.json"
 ops_portal_runtime_file_sources:
   - src: "{{ ops_portal_repo_root }}/scripts/ops_portal/__init__.py"
     dest: "{{ ops_portal_service_dir }}/ops_portal/__init__.py"

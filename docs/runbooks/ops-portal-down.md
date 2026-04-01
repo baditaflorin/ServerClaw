@@ -117,6 +117,12 @@ controller-side sync can read from the top-level checkout instead of the active
 worktree and fail on missing live inputs such as `runtime_assurance.py` or
 `portal.js`.
 
+The runtime data mirror now syncs only structured `*.json` live-apply and
+drift receipts into `/opt/ops-portal/data/receipts/`. Evidence transcripts
+under `receipts/live-applies/evidence/` stay in the repo for audit history and
+receipt cross-references, but they are intentionally excluded from the guest
+sync because the runtime only reads receipt JSON files.
+
 If a Codex-managed local replay exits with signal `15` before the first remote
 task output appears, treat that as a controller-local interruption rather than
 proof that the guest apply failed. Move to the staged service/data resync below

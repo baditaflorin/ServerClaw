@@ -8,7 +8,7 @@
 - Owner: codex
 - Depends On: `adr-0093`, `adr-0094`, `adr-0134`, `adr-0235`, `adr-0242`, `adr-0312`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0313-live-apply.md`, `docs/adr/0313-contextual-help-glossary-and-escalation-drawer.md`, `docs/adr/.index.yaml`, `docs/runbooks/platform-operations-portal.md`, `docs/runbooks/developer-portal.md`, `docs/runbooks/deployment-history-portal.md`, `scripts/portal_utils.py`, `scripts/generate_ops_portal.py`, `scripts/generate_docs_site.py`, `scripts/generate_changelog_portal.py`, `scripts/ops_portal/`, `docs/templates/reference-index.md.j2`, `docs/templates/reference-glossary.md.j2`, `docs/theme-overrides/`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml`, `tests/test_ops_portal.py`, `tests/test_interactive_ops_portal.py`, `tests/test_docs_site.py`, `tests/test_changelog_portal.py`, `tests/test_ops_portal_playbook.py`, `tests/test_ops_portal_runtime_role.py`, `receipts/live-applies/`, `receipts/live-applies/evidence/`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0313-live-apply.md`, `docs/adr/0313-contextual-help-glossary-and-escalation-drawer.md`, `docs/adr/.index.yaml`, `docs/runbooks/platform-operations-portal.md`, `docs/runbooks/developer-portal.md`, `docs/runbooks/deployment-history-portal.md`, `docs/runbooks/ops-portal-down.md`, `scripts/portal_utils.py`, `scripts/generate_ops_portal.py`, `scripts/generate_docs_site.py`, `scripts/generate_changelog_portal.py`, `scripts/ops_portal/`, `docs/templates/reference-index.md.j2`, `docs/templates/reference-glossary.md.j2`, `docs/theme-overrides/`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml`, `tests/test_ops_portal.py`, `tests/test_interactive_ops_portal.py`, `tests/test_docs_site.py`, `tests/test_changelog_portal.py`, `tests/test_ops_portal_playbook.py`, `tests/test_ops_portal_runtime_role.py`, `receipts/live-applies/`, `receipts/live-applies/evidence/`
 
 ## Purpose
 
@@ -45,6 +45,7 @@ for a safe exact-main merge.
 - `docs/runbooks/platform-operations-portal.md`
 - `docs/runbooks/developer-portal.md`
 - `docs/runbooks/deployment-history-portal.md`
+- `docs/runbooks/ops-portal-down.md`
 - `scripts/portal_utils.py`
 - `scripts/generate_ops_portal.py`
 - `scripts/generate_docs_site.py`
@@ -54,6 +55,8 @@ for a safe exact-main merge.
 - `docs/templates/reference-glossary.md.j2`
 - `docs/theme-overrides/`
 - `docs/site-generated/architecture/dependency-graph.md`
+- `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml`
+- `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml`
 - `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml`
 - `receipts/ops-portal-snapshot.html`
 - `tests/test_ops_portal.py`
