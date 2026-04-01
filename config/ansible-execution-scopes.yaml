@@ -125,9 +125,11 @@ playbooks:
       - inventory/host_vars/proxmox_florin.yml
   playbooks/gotenberg.yml:
     playbook_id: gotenberg
-    mutation_scope: host
+    mutation_scope: lane
+    target_lane: lane:runtime-ai
     shared_surfaces:
       - service:gotenberg
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/grist.yml:
     playbook_id: grist
     mutation_scope: platform
@@ -209,6 +211,16 @@ playbooks:
     shared_surfaces:
       - service:nomad
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/runtime-ai-pool.yml:
+    playbook_id: runtime-ai-pool
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-ai-pool
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - config/execution-lanes.yaml
+      - config/api-gateway-catalog.json
+      - config/service-capability-catalog.json
   playbooks/mattermost.yml:
     playbook_id: mattermost
     mutation_scope: platform
@@ -425,14 +437,16 @@ playbooks:
       - inventory/host_vars/proxmox_florin.yml
   playbooks/tika.yml:
     playbook_id: tika
-    mutation_scope: host
+    mutation_scope: lane
+    target_lane: lane:runtime-ai
     shared_surfaces:
       - service:tika
       - inventory/host_vars/proxmox_florin.yml
   playbooks/tesseract-ocr.yml:
     playbook_id: tesseract-ocr
     canonical_service_id: tesseract_ocr
-    mutation_scope: host
+    mutation_scope: lane
+    target_lane: lane:runtime-ai
     shared_surfaces:
       - service:tesseract-ocr
       - inventory/host_vars/proxmox_florin.yml
@@ -579,19 +593,38 @@ playbooks:
     shared_surfaces:
       - service:superset
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/gotenberg.yml:
+    playbook_id: gotenberg
+    mutation_scope: lane
+    target_lane: lane:runtime-ai
+    shared_surfaces:
+      - service:gotenberg
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/services/tika.yml:
     playbook_id: tika
-    mutation_scope: host
+    mutation_scope: lane
+    target_lane: lane:runtime-ai
     shared_surfaces:
       - service:tika
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/tesseract-ocr.yml:
     playbook_id: tesseract-ocr
     canonical_service_id: tesseract_ocr
-    mutation_scope: host
+    mutation_scope: lane
+    target_lane: lane:runtime-ai
     shared_surfaces:
       - service:tesseract-ocr
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/runtime-ai-pool.yml:
+    playbook_id: runtime-ai-pool
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-ai-pool
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - config/execution-lanes.yaml
+      - config/api-gateway-catalog.json
+      - config/service-capability-catalog.json
   collections/ansible_collections/lv3/platform/playbooks/dozzle.yml:
     playbook_id: dozzle
     mutation_scope: platform

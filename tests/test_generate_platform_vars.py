@@ -236,8 +236,21 @@ def test_build_platform_vars_includes_tika_private_topology() -> None:
     tika = platform_vars["platform_service_topology"]["tika"]
 
     assert tika["ports"]["internal"] == 9998
-    assert tika["urls"]["internal"] == "http://10.10.10.20:9998"
+    assert tika["urls"]["internal"] == "http://10.10.10.90:9998"
     assert tika["exposure_model"] == "private-only"
+    assert tika["runtime_pool"] == "runtime-ai"
+    assert tika["deployment_surface"] == "playbooks/services/tika.yml"
+
+
+def test_build_platform_vars_includes_gotenberg_private_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    gotenberg = platform_vars["platform_service_topology"]["gotenberg"]
+
+    assert gotenberg["ports"]["internal"] == 3007
+    assert gotenberg["urls"]["internal"] == "http://10.10.10.90:3007"
+    assert gotenberg["exposure_model"] == "private-only"
+    assert gotenberg["runtime_pool"] == "runtime-ai"
+    assert gotenberg["deployment_surface"] == "playbooks/services/gotenberg.yml"
 
 
 def test_build_platform_vars_includes_tesseract_ocr_private_topology() -> None:
@@ -245,8 +258,10 @@ def test_build_platform_vars_includes_tesseract_ocr_private_topology() -> None:
     tesseract_ocr = platform_vars["platform_service_topology"]["tesseract_ocr"]
 
     assert tesseract_ocr["ports"]["internal"] == 3008
-    assert tesseract_ocr["urls"]["internal"] == "http://10.10.10.20:3008"
+    assert tesseract_ocr["urls"]["internal"] == "http://10.10.10.90:3008"
     assert tesseract_ocr["exposure_model"] == "private-only"
+    assert tesseract_ocr["runtime_pool"] == "runtime-ai"
+    assert tesseract_ocr["deployment_surface"] == "playbooks/services/tesseract-ocr.yml"
     assert platform_vars["tesseract_ocr_port"] == 3008
 
 
@@ -561,7 +576,7 @@ def test_build_platform_vars_renders_service_topology_without_unresolved_templat
 
 def test_tika_network_policy_allows_proxmox_host_private_probe() -> None:
     host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text(encoding="utf-8"))
-    allowed_inbound = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+    allowed_inbound = host_vars["network_policy"]["guests"]["runtime-ai-lv3"]["allowed_inbound"]
 
     assert any(rule["source"] == "host" and 9998 in rule["ports"] for rule in allowed_inbound)
 

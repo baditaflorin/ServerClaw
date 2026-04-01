@@ -550,8 +550,8 @@
   {
     "name": "Tika Private",
     "type": "http",
-    "url": "http://10.10.10.20:9998/version",
-    "description": "Private Apache Tika version endpoint on docker-runtime-lv3.",
+    "url": "http://10.10.10.90:9998/version",
+    "description": "Private Apache Tika version endpoint on runtime-ai-lv3.",
     "interval": 60,
     "retryInterval": 60,
     "maxretries": 0,

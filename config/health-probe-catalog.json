@@ -810,7 +810,7 @@
     },
     "gotenberg": {
       "service_name": "gotenberg",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-ai-lv3",
       "role": "gotenberg_runtime",
       "verify_file": "roles/gotenberg_runtime/tasks/verify.yml",
       "startup": {
@@ -852,7 +852,7 @@
       },
       "uptime_kuma": {
         "enabled": false,
-        "reason": "The Gotenberg runtime stays private to docker-runtime-lv3 and is verified through repo-managed readiness probes plus authenticated API gateway checks."
+        "reason": "The Gotenberg runtime stays private to runtime-ai-lv3 and is verified through repo-managed readiness probes plus authenticated API gateway checks."
       }
     },
     "grafana": {
@@ -3366,7 +3366,7 @@
     },
     "tika": {
       "service_name": "tika",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-ai-lv3",
       "role": "tika_runtime",
       "verify_file": "roles/tika_runtime/tasks/verify.yml",
       "startup": {
@@ -3383,7 +3383,7 @@
       },
       "liveness": {
         "kind": "http",
-        "description": "Apache Tika keeps serving the local version endpoint on docker-runtime-lv3.",
+        "description": "Apache Tika keeps serving the local version endpoint on runtime-ai-lv3.",
         "timeout_seconds": 180,
         "retries": 24,
         "delay_seconds": 5,
@@ -3411,8 +3411,8 @@
         "monitor": {
           "name": "Tika Private",
           "type": "http",
-          "url": "http://10.10.10.20:9998/version",
-          "description": "Private Apache Tika version endpoint on docker-runtime-lv3.",
+          "url": "http://10.10.10.90:9998/version",
+          "description": "Private Apache Tika version endpoint on runtime-ai-lv3.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
@@ -3425,7 +3425,7 @@
     },
     "tesseract_ocr": {
       "service_name": "tesseract-ocr",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-ai-lv3",
       "role": "tesseract_ocr_runtime",
       "verify_file": "roles/tesseract_ocr_runtime/tasks/verify.yml",
       "startup": {
@@ -3467,7 +3467,7 @@
       },
       "uptime_kuma": {
         "enabled": false,
-        "reason": "The Tesseract OCR runtime remains private to docker-runtime-lv3 and is verified through repo-managed readiness probes and helper-path checks."
+        "reason": "The Tesseract OCR runtime remains private to runtime-ai-lv3 and is verified through repo-managed readiness probes and helper-path checks."
       }
     },
     "uptime_kuma": {

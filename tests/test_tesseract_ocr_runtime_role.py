@@ -132,7 +132,7 @@ def test_playbook_and_service_wrapper_import_the_tesseract_ocr_runtime() -> None
     root_wrapper = load_yaml(PLAYBOOK_PATH)
     wrapper = load_yaml(SERVICE_WRAPPER_PATH)
 
-    assert "docker-runtime-lv3" in playbook[0]["hosts"]
+    assert playbook[0]["hosts"] == "{{ playbook_execution_host_patterns.runtime_ai[playbook_execution_env] }}"
     roles = [role["role"] for role in playbook[0]["roles"]]
     assert roles == [
         "lv3.platform.linux_guest_firewall",
@@ -147,11 +147,11 @@ def test_inventory_opens_private_tesseract_ocr_access_to_host_guest_and_monitori
     host_vars = load_yaml(HOST_VARS_PATH)
 
     assert host_vars["platform_port_assignments"]["tesseract_ocr_port"] == 3008
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
-    assert 3008 in next(rule for rule in docker_runtime_rules if rule["source"] == "host" and 3008 in rule["ports"])["ports"]
-    assert 3008 in next(rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 3008 in rule["ports"])["ports"]
-    assert 3008 in next(rule for rule in docker_runtime_rules if rule["source"] == "172.16.0.0/12" and 3008 in rule["ports"])["ports"]
-    assert 3008 in next(rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 3008 in rule["ports"])["ports"]
+    runtime_ai_rules = host_vars["network_policy"]["guests"]["runtime-ai-lv3"]["allowed_inbound"]
+    assert 3008 in next(rule for rule in runtime_ai_rules if rule["source"] == "host" and 3008 in rule["ports"])["ports"]
+    assert 3008 in next(rule for rule in runtime_ai_rules if rule["source"] == "all_guests" and 3008 in rule["ports"])["ports"]
+    assert 3008 in next(rule for rule in runtime_ai_rules if rule["source"] == "172.16.0.0/12" and 3008 in rule["ports"])["ports"]
+    assert 3008 in next(rule for rule in runtime_ai_rules if rule["source"] == "monitoring-lv3" and 3008 in rule["ports"])["ports"]
 
 
 def test_workflow_and_command_catalogs_declare_converge_tesseract_ocr_entrypoint() -> None:
@@ -170,16 +170,16 @@ def test_workflow_and_command_catalogs_declare_converge_tesseract_ocr_entrypoint
     assert "syntax-check-tesseract-ocr" in workflow["validation_targets"]
     assert workflow["owner_runbook"] == "docs/runbooks/configure-tesseract-ocr.md"
     assert verification_commands[0] == "make syntax-check-tesseract-ocr"
-    assert verification_commands[1] == "curl -fsS http://10.10.10.20:3008/healthz"
+    assert verification_commands[1] == "curl -fsS http://10.10.10.90:3008/healthz"
     assert verification_commands[2] == (
         "curl -fsS -F "
         "'file=@collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png;"
-        "filename=ocr-ok.png;type=image/png' http://10.10.10.20:3008/ocr"
+        "filename=ocr-ok.png;type=image/png' http://10.10.10.90:3008/ocr"
     )
     assert verification_commands[3] == (
         "python3 scripts/document_extraction.py "
         "collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png "
-        "--tika-url http://10.10.10.20:9998 --tesseract-url http://10.10.10.20:3008"
+        "--tika-url http://10.10.10.90:9998 --tesseract-url http://10.10.10.90:3008"
     )
     assert all("base64" not in item for item in verification_commands)
     assert all("scp " not in item and "ssh " not in item for item in verification_commands[1:])
@@ -196,7 +196,9 @@ def test_ansible_execution_scopes_register_tesseract_ocr_playbooks() -> None:
 
     assert root_entry["playbook_id"] == "tesseract-ocr"
     assert root_entry["canonical_service_id"] == "tesseract_ocr"
-    assert root_entry["mutation_scope"] == "host"
+    assert root_entry["mutation_scope"] == "lane"
+    assert root_entry["target_lane"] == "lane:runtime-ai"
     assert service_entry["playbook_id"] == "tesseract-ocr"
     assert service_entry["canonical_service_id"] == "tesseract_ocr"
-    assert service_entry["mutation_scope"] == "host"
+    assert service_entry["mutation_scope"] == "lane"
+    assert service_entry["target_lane"] == "lane:runtime-ai"

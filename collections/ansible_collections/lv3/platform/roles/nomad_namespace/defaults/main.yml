@@ -1,0 +1,4 @@
+---
+nomad_namespace_name: runtime-ai
+nomad_namespace_description: Runtime AI pool namespace for isolated document-extraction and bursty inference jobs.
+nomad_namespace_create_only_when_missing: true

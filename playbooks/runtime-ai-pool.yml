@@ -1,0 +1,264 @@
+# Playbook: runtime-ai-pool.yml
+# Purpose: Provision the dedicated runtime-ai guest, converge the Nomad/Traefik/Dapr pool substrate, move the first document-extraction slice onto it, and retire the legacy copies from docker-runtime-lv3.
+# Use case: Run for ADR 0319 and ADR 0320 live apply when the first production runtime-ai pool must become true end to end.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (path, required via make targets): SSH private key used for the Proxmox host and guest jump path.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Deployment environment selector. This playbook currently converges only the production runtime-ai guest.
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH routing mode for guest access.
+#   - platform_trace_id (string, optional): Mutation-audit trace identifier propagated by the make wrapper.
+#
+# Outputs:
+#   - Dedicated VM `runtime-ai-lv3` provisioned on Proxmox with Docker, guest firewall policy, named `ops` access, a runtime-ai Nomad namespace and client, Traefik plus Dapr substrate services, and the migrated Tika, Gotenberg, and Tesseract OCR workloads.
+#
+# Idempotency: Partially idempotent
+#              Provisioning and service converges are idempotent. The Proxmox-side replay intentionally stop/starts VM 190 after `qm set` changes so the cloud-init-backed network and hardware settings become effective.
+#
+# Dependencies:
+#   - ADR 0319: Defines the runtime-ai pool and the preferred Nomad, Traefik, and Dapr substrate.
+#   - ADR 0320: Defines the pool-scoped deployment surface and lane boundary.
+#   - ADR 0232: Provides the private Nomad scheduler and client bootstrap path.
+#   - Role: lv3.platform.proxmox_guests — provisions the dedicated guest from the managed template catalog.
+#   - Role: lv3.platform.nomad_cluster_member — enrolls the runtime-ai guest into the private Nomad cluster.
+#   - Role: lv3.platform.nomad_namespace — ensures the runtime-ai namespace exists on the scheduler.
+#   - Role: lv3.platform.runtime_pool_substrate — converges the Traefik and Dapr pool substrate.
+#
+# Related ADRs: 0232, 0319, 0320
+# Related Runbooks: docs/runbooks/configure-runtime-ai-pool.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-01
+---
+- name: Ensure the runtime-ai VM is provisioned on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - automation
+    - service-runtime-ai-pool
+  vars:
+    runtime_ai_vm_vmid: 190
+    proxmox_guests_active: >-
+      {{
+        proxmox_guests
+        | selectattr('vmid', 'equalto', runtime_ai_vm_vmid)
+        | list
+      }}
+
+  roles:
+    - role: lv3.platform.proxmox_guests
+      tags:
+        - guests
+        - runtime-ai-pool
+
+  post_tasks:
+    - name: Stop the runtime-ai VM from Proxmox after qm set changes
+      ansible.builtin.command: "qm stop {{ runtime_ai_vm_vmid }} --skiplock 1"
+      register: runtime_ai_vm_stop
+      failed_when: runtime_ai_vm_stop.rc not in [0, 255]
+      changed_when: true
+      tags:
+        - guests
+        - runtime-ai-pool
+
+    - name: Start the runtime-ai VM from Proxmox after the forced stop
+      ansible.builtin.command: "qm start {{ runtime_ai_vm_vmid }}"
+      register: runtime_ai_vm_start_after_stop
+      failed_when: runtime_ai_vm_start_after_stop.rc not in [0, 255]
+      changed_when: runtime_ai_vm_start_after_stop.rc == 0
+      tags:
+        - guests
+        - runtime-ai-pool
+
+- name: Converge the dedicated runtime-ai guest substrate
+  hosts: runtime-ai-lv3
+  become: true
+  gather_facts: false
+  tags:
+    - tier-2
+    - automation
+    - service-runtime-ai-pool
+  vars:
+    proxmox_guest_ssh_connection_mode: proxmox_host_jump
+
+  pre_tasks:
+    - name: Wait for the runtime-ai VM SSH service to be reachable
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Gather facts after SSH is ready
+      ansible.builtin.setup:
+
+    - name: Wait for cloud-init first boot work to finish when present
+      ansible.builtin.shell: |
+        if command -v cloud-init >/dev/null 2>&1; then
+          cloud-init status --wait
+        fi
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Wait for Debian package manager activity to settle after cloud-init
+      ansible.builtin.shell: |
+        for _ in $(seq 1 120); do
+          if ! pgrep -x apt-get >/dev/null \
+            && ! pgrep -x dpkg >/dev/null; then
+            exit 0
+          fi
+          sleep 5
+        done
+        exit 1
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.linux_access
+      vars:
+        linux_access_admin_user: "{{ proxmox_guest_ci_user }}"
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.nomad_cluster_member
+      vars:
+        nomad_cluster_server: false
+        nomad_cluster_client: true
+        nomad_cluster_node_class: runtime-ai
+        nomad_cluster_node_meta:
+          workload_pool: runtime-ai
+    - role: lv3.platform.runtime_pool_substrate
+
+- name: Ensure the runtime-ai Nomad namespace exists
+  hosts: monitoring-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-runtime-ai-pool
+
+  roles:
+    - role: lv3.platform.nomad_namespace
+      vars:
+        nomad_namespace_name: runtime-ai
+        nomad_namespace_description: Runtime AI pool namespace for the dedicated document-extraction and bursty AI guest.
+
+- name: Converge the document-extraction services on runtime-ai-lv3
+  hosts: runtime-ai-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-runtime-ai-pool
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.tika_runtime
+    - role: lv3.platform.gotenberg_runtime
+    - role: lv3.platform.tesseract_ocr_runtime
+
+  post_tasks:
+    - name: Verify the runtime-ai Traefik route to Apache Tika
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:9080/tika/version"
+        method: GET
+        status_code:
+          - 200
+        return_content: true
+        timeout: 30
+      register: runtime_ai_tika_route
+      changed_when: false
+
+    - name: Verify the runtime-ai Traefik route to Gotenberg
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:9080/gotenberg/health"
+        method: GET
+        status_code:
+          - 200
+        return_content: true
+        timeout: 30
+      register: runtime_ai_gotenberg_route
+      changed_when: false
+
+    - name: Verify the runtime-ai Traefik route to Tesseract OCR
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:9080/tesseract-ocr/healthz"
+        method: GET
+        status_code:
+          - 200
+        return_content: true
+        timeout: 30
+      register: runtime_ai_tesseract_route
+      changed_when: false
+
+    - name: Verify the runtime-ai Dapr bridge can invoke Apache Tika through Traefik
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:3500/v1.0/invoke/runtime-ai-router/method/tika/version"
+        method: GET
+        status_code:
+          - 200
+        return_content: true
+        timeout: 30
+      register: runtime_ai_dapr_tika_route
+      changed_when: false
+
+- name: Retire the legacy document-extraction copies from docker-runtime-lv3
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-runtime-ai-pool
+  vars:
+    runtime_ai_legacy_compose_files:
+      - /opt/tika/docker-compose.yml
+      - /opt/gotenberg/docker-compose.yml
+      - /opt/tesseract-ocr/docker-compose.yml
+
+  pre_tasks:
+    - name: Gather the legacy document-extraction compose files
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop: "{{ runtime_ai_legacy_compose_files }}"
+      register: runtime_ai_legacy_compose_stats
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+
+  tasks:
+    - name: Stop the legacy document-extraction compose stacks on docker-runtime-lv3
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ item.stat.path }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ item.stat.path | dirname }}"
+      loop: "{{ runtime_ai_legacy_compose_stats.results }}"
+      when: item.stat.exists
+      register: runtime_ai_legacy_compose_down
+      changed_when: >-
+        'Stopping' in (runtime_ai_legacy_compose_down.stdout | default(''))
+        or 'Removing' in (runtime_ai_legacy_compose_down.stdout | default(''))
+        or 'Removing' in (runtime_ai_legacy_compose_down.stderr | default(''))
+
+- name: Refresh the shared API gateway after the Gotenberg move
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-runtime-ai-pool
+
+  roles:
+    - role: lv3.platform.api_gateway_runtime

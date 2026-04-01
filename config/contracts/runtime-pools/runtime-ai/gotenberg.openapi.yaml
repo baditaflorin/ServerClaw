@@ -1,0 +1,67 @@
+openapi: 3.1.0
+info:
+  title: Runtime-AI Gotenberg Contract
+  version: 1.0.0
+  description: Private Gotenberg document rendering contract for the runtime-ai pool.
+servers:
+  - url: http://10.10.10.90:3007
+paths:
+  /health:
+    get:
+      summary: Return the Gotenberg health state.
+      operationId: getGotenbergHealth
+      responses:
+        "200":
+          description: Runtime is healthy.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /forms/chromium/convert/html:
+    post:
+      summary: Render HTML input to PDF with Chromium.
+      operationId: convertHtmlToPdf
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: string
+                  format: binary
+              required:
+                - files
+      responses:
+        "200":
+          description: PDF rendered successfully.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+  /forms/libreoffice/convert:
+    post:
+      summary: Render a supported office document to PDF with LibreOffice.
+      operationId: convertOfficeToPdf
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: string
+                  format: binary
+              required:
+                - files
+      responses:
+        "200":
+          description: PDF rendered successfully.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary

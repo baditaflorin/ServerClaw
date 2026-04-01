@@ -498,6 +498,29 @@ proxmox_guests:
       co_location_exceptions: []
     packages:
       - docker.io
+  - vmid: 190
+    name: runtime-ai-lv3
+    role: runtime-ai
+    template_key: lv3-docker-host
+    ipv4: 10.10.10.90
+    cidr: 24
+    gateway4: 10.10.10.1
+    macaddr: BC:24:11:19:0A:90
+    cores: 6
+    memory_mb: 16384
+    disk_gb: 128
+    tags:
+      - ai
+      - docker
+      - runtime
+      - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: runtime-ai
+      co_location_exceptions: []
+    packages:
+      - docker.io
 
 network_policy:
   guest_management_sources:
@@ -694,15 +717,12 @@ network_policy:
         - source: all_guests
           protocol: tcp
           ports:
-            - 3007
-            - 3008
             - 8055
             - 8101
             - 11235
             - 8881
-            - 9998
             - 11434
-          description: Private guest-to-guest document rendering, extraction, OCR, crawl extraction, One-API, agent API, and governed data API traffic
+          description: Private guest-to-guest access to the Directus, One-API, Crawl4AI, Ollama, and SearXNG internal APIs
         - source: all_guests
           protocol: tcp
           ports:
@@ -732,9 +752,7 @@ network_policy:
           protocol: tcp
           ports:
             - 8098
-            - 3008
-            - 9998
-          description: Proxmox host verification and controller-side access to the private OpenFGA, Tika, and Tesseract OCR APIs
+          description: Proxmox host verification and controller-side access to the private OpenFGA API
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
@@ -748,16 +766,13 @@ network_policy:
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
-            - 3007
-            - 3008
             - 5000
             - 8055
             - 8101
             - 11235
             - 8881
-            - 9998
             - 11434
-          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Directus, Crawl4AI, One-API, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Changedetection, Directus, One-API, Crawl4AI, Ollama, and SearXNG APIs
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
@@ -771,16 +786,13 @@ network_policy:
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
-            - 3007
-            - 3008
             - 5000
             - 8055
             - 8101
             - 11235
             - 8881
-            - 9998
             - 11434
-          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Directus, Crawl4AI, One-API, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Changedetection, Directus, One-API, Crawl4AI, Ollama, and SearXNG APIs
         - source: docker-build-lv3
           protocol: tcp
           ports:
@@ -881,13 +893,11 @@ network_policy:
           protocol: tcp
           ports:
             - 8098
-            - 3008
             - 5000
             - 8089
             - 8100
             - 8101
-            - 9998
-          description: Private monitoring probes for the OpenFGA, Tesseract OCR, Changedetection, Dozzle, Piper, One-API, and Tika runtimes
+          description: Private monitoring probes for the OpenFGA, Changedetection, Dozzle, Piper, and One-API runtimes
         - source: monitoring-lv3
           protocol: tcp
           ports:
@@ -952,6 +962,58 @@ network_policy:
           ports:
             - 4647
           description: Nomad server RPC to docker-build-lv3
+    runtime-ai-lv3:
+      allow_container_forwarding: true
+      allowed_inbound:
+        - source: management
+          protocol: tcp
+          ports:
+            - 22
+          description: Operator and Ansible SSH access
+        - source: host
+          protocol: tcp
+          ports:
+            - 3007
+            - 3008
+            - 3500
+            - 9080
+            - 9998
+          description: Proxmox host verification and controller-side access to the runtime-ai pool substrate and document services
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 3007
+            - 3008
+            - 3500
+            - 9080
+            - 9998
+          description: Private guest-to-guest access to the runtime-ai pool substrate plus document rendering and extraction services
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 3007
+            - 3008
+            - 3500
+            - 9080
+            - 9998
+          description: Local Docker workloads that call the runtime-ai pool substrate plus document rendering and extraction services
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 3007
+            - 3008
+            - 3500
+            - 9080
+            - 9998
+          description: Local Docker workloads that call the runtime-ai pool substrate plus document rendering and extraction services
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 3007
+            - 3008
+            - 9080
+            - 9998
+          description: Private monitoring probes for the runtime-ai pool router and document services
     monitoring-lv3:
       allowed_inbound:
         - source: management
@@ -1030,6 +1092,11 @@ network_policy:
           ports:
             - 4647
           description: Nomad client RPC from docker-build-lv3
+        - source: runtime-ai-lv3
+          protocol: tcp
+          ports:
+            - 4647
+          description: Nomad client RPC from runtime-ai-lv3
     coolify-lv3:
       allow_container_forwarding: true
       allowed_inbound:
@@ -1625,16 +1692,24 @@ lv3_service_topology:
       url: "{{ step_ca_controller_url }}"
   tika:
     service_name: tika
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-ai-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-ai-lv3') | map(attribute='ipv4') | first) }}"
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/tika.yml
+    restart_domain: runtime-ai-document-extraction
+    api_contract_ref: config/contracts/runtime-pools/runtime-ai/tika.openapi.yaml
     exposure_model: private-only
     observability:
       guest_dashboard: false
       service_telemetry: false
   tesseract_ocr:
     service_name: tesseract-ocr
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-ai-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-ai-lv3') | map(attribute='ipv4') | first) }}"
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/tesseract-ocr.yml
+    restart_domain: runtime-ai-document-extraction
+    api_contract_ref: config/contracts/runtime-pools/runtime-ai/tesseract-ocr.openapi.yaml
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -2110,8 +2185,12 @@ lv3_service_topology:
       url: "{{ one_api_controller_url }}"
   gotenberg:
     service_name: gotenberg
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-ai-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-ai-lv3') | map(attribute='ipv4') | first) }}"
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/gotenberg.yml
+    restart_domain: runtime-ai-document-extraction
+    api_contract_ref: config/contracts/runtime-pools/runtime-ai/gotenberg.openapi.yaml
     exposure_model: private-only
     observability:
       guest_dashboard: false

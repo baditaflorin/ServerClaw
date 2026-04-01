@@ -98,13 +98,12 @@ def test_playbook_converges_runtime_and_api_gateway_route() -> None:
 
     assert len(playbook) == 1
     play = playbook[0]
-    assert play["hosts"] == "docker-runtime-lv3"
+    assert play["hosts"] == "{{ playbook_execution_host_patterns.runtime_ai[playbook_execution_env] }}"
     roles = [role["role"] for role in play["roles"]]
     assert roles == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.docker_runtime",
         "lv3.platform.gotenberg_runtime",
-        "lv3.platform.api_gateway_runtime",
     ]
 
 
@@ -117,15 +116,17 @@ def test_inventory_opens_the_private_rendering_port_to_guest_and_docker_callers(
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
 
     assert host_vars["platform_port_assignments"]["gotenberg_port"] == 3007
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+    runtime_ai_rules = host_vars["network_policy"]["guests"]["runtime-ai-lv3"]["allowed_inbound"]
     guest_rule = next(
-        rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 3007 in rule["ports"]
+        rule for rule in runtime_ai_rules if rule["source"] == "all_guests" and 3007 in rule["ports"]
     )
     assert 3007 in guest_rule["ports"]
     docker_rule = next(
-        rule for rule in docker_runtime_rules if rule["source"] == "172.16.0.0/12" and 3007 in rule["ports"]
+        rule for rule in runtime_ai_rules if rule["source"] == "172.16.0.0/12" and 3007 in rule["ports"]
     )
     assert 3007 in docker_rule["ports"]
+    host_rule = next(rule for rule in runtime_ai_rules if rule["source"] == "host" and 3007 in rule["ports"])
+    assert 3007 in host_rule["ports"]
 
 
 def test_workflow_and_command_catalogs_declare_converge_entrypoint() -> None:
@@ -152,7 +153,7 @@ def test_api_gateway_catalog_exposes_the_authenticated_gotenberg_route() -> None
     route = next(service for service in catalog["services"] if service["id"] == "gotenberg")
 
     assert route["gateway_prefix"] == "/v1/gotenberg"
-    assert route["upstream"] == "http://10.10.10.20:3007"
+    assert route["upstream"] == "http://10.10.10.90:3007"
     assert route["auth"] == "keycloak_jwt"
     assert route["healthcheck_path"] == "/health"
 
@@ -160,7 +161,12 @@ def test_api_gateway_catalog_exposes_the_authenticated_gotenberg_route() -> None
 def test_ansible_execution_scopes_registers_the_direct_gotenberg_playbook() -> None:
     scopes = yaml.safe_load(ANSIBLE_EXECUTION_SCOPES_PATH.read_text())
     entry = scopes["playbooks"]["playbooks/gotenberg.yml"]
+    service_entry = scopes["playbooks"]["playbooks/services/gotenberg.yml"]
 
     assert entry["playbook_id"] == "gotenberg"
-    assert entry["mutation_scope"] == "host"
+    assert entry["mutation_scope"] == "lane"
+    assert entry["target_lane"] == "lane:runtime-ai"
     assert "service:gotenberg" in entry["shared_surfaces"]
+    assert service_entry["playbook_id"] == "gotenberg"
+    assert service_entry["mutation_scope"] == "lane"
+    assert service_entry["target_lane"] == "lane:runtime-ai"

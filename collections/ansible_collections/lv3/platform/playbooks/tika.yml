@@ -1,7 +1,7 @@
 ---
 # Playbook: tika.yml
-# Purpose: Converge the private Apache Tika runtime on docker-runtime-lv3.
-# Use case: Run during Tika deployment, upgrade, or recovery when the document-extraction service must match repo truth.
+# Purpose: Converge the private Apache Tika runtime on the dedicated runtime-ai pool guest.
+# Use case: Run during Tika deployment, upgrade, recovery, or runtime-ai pool placement changes when the document-extraction service must match repo truth.
 #
 # Inputs (required):
 #   - env (str, required): Target environment passed through the shared execution wrapper.
@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH path for the live apply.
 #
 # Outputs:
-#   - /opt/tika/docker-compose.yml on docker-runtime-lv3
+#   - /opt/tika/docker-compose.yml on runtime-ai-lv3
 #   - a running private Apache Tika container listening on the internal guest network
 #
 # Idempotency: Fully idempotent
@@ -24,11 +24,11 @@
 #   - Role: lv3.platform.tika_runtime - converges and verifies the Tika runtime
 #
 # Related ADRs: 0023, 0067, 0275
-# Related Runbooks: docs/runbooks/configure-tika.md
+# Related Runbooks: docs/runbooks/configure-tika.md, docs/runbooks/configure-runtime-ai-pool.md
 # Author: LV3 Platform
-# Last Updated: 2026-03-30
-- name: Converge Apache Tika on the Docker runtime VM
-  hosts: docker-runtime-lv3
+# Last Updated: 2026-04-02
+- name: Converge Apache Tika on the runtime-ai pool guest
+  hosts: "{{ playbook_execution_host_patterns.runtime_ai[playbook_execution_env] }}"
   become: true
   gather_facts: true
   tags:
@@ -44,7 +44,7 @@
         playbook_execution_audit_action: playbook.start.tika
         playbook_execution_audit_target: tika
         required_hosts:
-          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+          - "{{ playbook_execution_required_hosts.runtime_ai[playbook_execution_env] }}"
 
   roles:
     - role: lv3.platform.linux_guest_firewall
