@@ -1,12 +1,12 @@
-# Release 0.177.138
+# Release 0.177.139
 
 - Date: 2026-04-02
 
 ## Summary
-- implements ADR 0308 by documenting the verified operator provisioning execution surface, making operator-onboard preflight fail closed on dependency outages, repairing the Windmill gate-status and worktree checkout paths, and re-verifying the latest exact-main Windmill plus controller-local workflows
+- implements ADR 0313 by adding a shared contextual-help, glossary, and escalation drawer across the interactive ops portal plus the generated docs and changelog portals, while preserving the runtime receipt-sync and docker-guest recovery hardening uncovered during the refreshed exact-main replay
 
 ## Platform Impact
-- no live platform version bump; this release updates repository automation, release metadata, and operator tooling only
+- platform version advances to 0.130.87 after the refreshed exact-main ADR 0313 replay re-verifies the shared contextual-help, glossary, and escalation drawer across ops.lv3.org, docs.lv3.org, and changelog.lv3.org on top of the 0.130.86 baseline plus the newer ADR 0308 and bridge-chain hardening already merged to origin/main
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

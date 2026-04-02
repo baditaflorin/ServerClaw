@@ -9,7 +9,7 @@ schema_version: 1
 generated: '2026-04-02'
 total_adrs: 349
 implementation_status_summary:
-  Implemented: 291
+  Implemented: 292
   Partial: 8
   Not Implemented: 48
   Deprecated: 1
@@ -5596,7 +5596,7 @@ adr_index:
       - drawer
     summary: We will provide a shared contextual help and escalation drawer in
     filename: 0313-contextual-help-glossary-and-escalation-drawer.md
-    implemented_version: 0.130.86
+    implemented_version: 0.177.139
   - adr: '0314'
     title: Resumable Multi-Step Flows And Return-To-Task Reentry
     status: Accepted

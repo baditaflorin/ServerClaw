@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.138
-platform_version: 0.130.86
+repo_version: 0.177.139
+platform_version: 0.130.87
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -73,7 +73,7 @@ live_apply_evidence:
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     semaphore: 2026-03-25-adr-0149-semaphore-live-apply
     searxng: 2026-03-26-adr-0148-searxng-live-apply
-    ops_portal: 2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply
+    ops_portal: 2026-04-02-adr-0313-contextual-help-mainline-live-apply
     ollama: 2026-03-27-adr-0176-inventory-sharding-mainline-live-apply
     operator_access: 2026-03-28-adr-0238-operator-grid-live-apply
     preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
@@ -118,7 +118,7 @@ live_apply_evidence:
     log_queryability_canary: 2026-03-28-adr-0250-log-queryability-canary-live-apply
     operator_access_guided_onboarding: 2026-03-28-adr-0242-guided-human-onboarding-live-apply
     runtime_state_semantics: 2026-03-28-adr-0246-runtime-state-semantics-live-apply
-    docs_portal: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
+    docs_portal: 2026-04-02-adr-0313-contextual-help-mainline-live-apply
     harbor: 2026-03-29-adr-0201-harbor-mainline-live-apply
     ops_portal_visualizations: 2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply
     nomad_scheduler: 2026-03-29-adr-0232-nomad-mainline-live-apply
@@ -1112,8 +1112,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.138
+    current: 0.177.139
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.86
+    current: 0.130.87
     meaning: intended platform release for the actual server configuration

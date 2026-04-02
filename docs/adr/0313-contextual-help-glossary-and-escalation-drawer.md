@@ -2,8 +2,8 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: 0.130.86
+- Implemented In Repo Version: 0.177.139
+- Implemented In Platform Version: 0.130.87
 - Implemented On: 2026-04-02
 - Date: 2026-03-31
 
@@ -85,9 +85,16 @@ When a page includes a risky or failure-prone task, the help drawer must say:
   evaluation on `docker-runtime-lv3`, and the mirrored runtime tree imported
   `platform.datetime_compat` even though the isolated image layout does not ship
   the repo `platform` package.
-- The exact-main merge still has to run on top of `origin/main` repository
-  version `0.177.137` and platform version `0.130.86` before protected release
-  and canonical-truth surfaces can be updated.
+- After `origin/main` advanced to repository version `0.177.138` during the
+  first exact-main attempt, the refreshed replay from
+  `codex/ws-0313-main-integration` source commit
+  `ab0d29de49bee1a9ac0c17c17afd4fc5491d8927` cut repository version
+  `0.177.139`, converged the interactive `ops_portal` runtime on
+  `docker-runtime-lv3` with final recap
+  `ok=189 changed=14 unreachable=0 failed=0 skipped=36`, republished the
+  generated docs and changelog portals through `nginx-lv3`, and recorded the
+  canonical proof in
+  `receipts/live-applies/2026-04-02-adr-0313-contextual-help-mainline-live-apply.json`.
 
 ## Related ADRs
 

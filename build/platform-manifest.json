@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.138",
-  "platform_version": "0.130.86",
-  "generated_at": "2026-04-02T01:26:37Z",
-  "next_refresh_at": "2026-04-02T02:26:37Z",
+  "repo_version": "0.177.139",
+  "platform_version": "0.130.87",
+  "generated_at": "2026-04-02T02:57:50Z",
+  "next_refresh_at": "2026-04-02T03:57:50Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -48,7 +48,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://10.10.10.60:8007",
-        "last_live_apply": "2026-04-01T00:00:00Z"
+        "last_live_apply": "2026-04-02T00:00:00Z"
       },
       "browser_runner": {
         "service_name": "Browser Runner",
@@ -5987,10 +5987,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.137",
+    "last_version": "0.177.138",
     "deployed_at": "2026-04-02",
-    "summary": "implements ADR 0308 by documenting the verified operator provisioning execution surface, making operator-onboard preflight fail closed on dependency outages, repairing the Windmill gate-status and worktree checkout paths, and re-verifying the latest exact-main Windmill plus controller-local workflows",
-    "release_notes_url": "docs/release-notes/0.177.138.md"
+    "summary": "implements ADR 0313 by adding a shared contextual-help, glossary, and escalation drawer across the interactive ops portal plus the generated docs and changelog portals, while preserving the runtime receipt-sync and docker-guest recovery hardening uncovered during the refreshed exact-main replay",
+    "release_notes_url": "docs/release-notes/0.177.139.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
