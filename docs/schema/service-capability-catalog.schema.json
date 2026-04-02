@@ -129,6 +129,22 @@
             "type": "string",
             "minLength": 1
           },
+          "runtime_pool": {
+            "type": "string",
+            "minLength": 1
+          },
+          "deployment_surface": {
+            "type": "string",
+            "minLength": 1
+          },
+          "restart_domain": {
+            "type": "string",
+            "minLength": 1
+          },
+          "api_contract_ref": {
+            "type": "string",
+            "minLength": 1
+          },
           "dashboard_url": {
             "type": "string",
             "minLength": 1

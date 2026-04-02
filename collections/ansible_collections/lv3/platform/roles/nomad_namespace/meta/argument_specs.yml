@@ -1,0 +1,14 @@
+---
+argument_specs:
+  main:
+    short_description: Ensure a Nomad namespace exists on the private scheduler.
+    options:
+      nomad_namespace_name:
+        type: str
+        required: false
+      nomad_namespace_description:
+        type: str
+        required: false
+      nomad_namespace_create_only_when_missing:
+        type: bool
+        required: false

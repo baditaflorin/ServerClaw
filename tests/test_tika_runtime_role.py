@@ -127,6 +127,8 @@ def test_compose_template_exposes_the_private_tika_port() -> None:
 
 def test_host_network_policy_allows_private_tika_access() -> None:
     host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text())
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
-    guest_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 9998 in rule["ports"])
+    runtime_ai_rules = host_vars["network_policy"]["guests"]["runtime-ai-lv3"]["allowed_inbound"]
+    guest_rule = next(rule for rule in runtime_ai_rules if rule["source"] == "all_guests" and 9998 in rule["ports"])
     assert 9998 in guest_rule["ports"]
+    host_rule = next(rule for rule in runtime_ai_rules if rule["source"] == "host" and 9998 in rule["ports"])
+    assert 9998 in host_rule["ports"]

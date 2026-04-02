@@ -402,6 +402,9 @@ playbook_execution_host_patterns:
   docker_runtime:
     production: docker-runtime-lv3
     staging: docker-runtime-staging-lv3
+  runtime_ai:
+    production: runtime-ai-lv3
+    staging: docker-runtime-staging-lv3
   docker_build:
     production: docker-build-lv3
     staging: docker-build-staging-lv3

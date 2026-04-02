@@ -247,6 +247,27 @@
     - docker_runtime_container_forward_compat_enabled | bool
     - docker_runtime_nftables_config_stat.stat.exists
 
+- name: Persist required Docker kernel modules across reboot
+  ansible.builtin.copy:
+    dest: "{{ docker_runtime_kernel_modules_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      {% for module in docker_runtime_kernel_modules %}
+      {{ module }}
+      {% endfor %}
+  when: docker_runtime_kernel_modules | length > 0
+
+- name: Load required Docker kernel modules before starting Docker
+  ansible.builtin.command:
+    argv:
+      - modprobe
+      - "{{ item }}"
+  loop: "{{ docker_runtime_kernel_modules }}"
+  changed_when: false
+  when: docker_runtime_kernel_modules | length > 0
+
 - name: Ensure Docker service is enabled and running
   ansible.builtin.include_role:
     name: lv3.platform.common

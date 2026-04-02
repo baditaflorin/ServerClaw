@@ -2121,7 +2121,7 @@
       }
     },
     "converge-tika": {
-      "description": "Deploy the private Apache Tika runtime on docker-runtime-lv3 and verify the standard `/version`, `/tika`, and `/meta` extraction contracts.",
+      "description": "Deploy the private Apache Tika runtime on runtime-ai-lv3 and verify the standard `/version`, `/tika`, and `/meta` extraction contracts through the dedicated runtime-ai pool.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2145,20 +2145,23 @@
         "Makefile",
         "playbooks/tika.yml",
         "playbooks/services/tika.yml",
+        "playbooks/runtime-ai-pool.yml",
         "roles/tika_runtime",
         "inventory/host_vars/proxmox_florin.yml",
+        "config/ansible-execution-scopes.yaml",
         "config/service-capability-catalog.json",
         "config/health-probe-catalog.json",
-        "config/image-catalog.json"
+        "config/image-catalog.json",
+        "config/contracts/runtime-pools/runtime-ai/tika.openapi.yaml"
       ],
       "outputs": [
-        "A private Apache Tika runtime on docker-runtime-lv3 with version, plaintext extraction, and metadata extraction verified on the standard REST endpoints."
+        "A private Apache Tika runtime on runtime-ai-lv3 with version, plaintext extraction, and metadata extraction verified on the standard REST endpoints."
       ],
       "verification_commands": [
         "make syntax-check-tika",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p\" ops@10.10.10.20 'curl -fsS http://127.0.0.1:9998/version'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p\" ops@10.10.10.20 'body=$(mktemp); trap '\"'\"'rm -f \"$body\"'\"'\"' EXIT; printf \"<html><body><h1>LV3 Tika workflow verification</h1></body></html>\" | curl -fsS -X PUT -H \"Content-Type: text/html\" -H \"Accept: text/plain\" --data-binary @- http://127.0.0.1:9998/tika >\"$body\"; grep -q \"LV3 Tika workflow verification\" \"$body\"'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p\" ops@10.10.10.20 'printf \"<html><body><h1>LV3 Tika metadata verification</h1></body></html>\" | curl -fsS -X PUT -H \"Content-Type: text/html\" -H \"Accept: application/json\" --data-binary @- http://127.0.0.1:9998/meta | grep -q \"X-TIKA:Parsed-By\"'"
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p\" ops@10.10.10.90 'curl -fsS http://127.0.0.1:9998/version'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p\" ops@10.10.10.90 'body=$(mktemp); trap '\"'\"'rm -f \"$body\"'\"'\"' EXIT; printf \"<html><body><h1>LV3 Tika workflow verification</h1></body></html>\" | curl -fsS -X PUT -H \"Content-Type: text/html\" -H \"Accept: text/plain\" --data-binary @- http://127.0.0.1:9998/tika >\"$body\"; grep -q \"LV3 Tika workflow verification\" \"$body\"'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p\" ops@10.10.10.90 'printf \"<html><body><h1>LV3 Tika metadata verification</h1></body></html>\" | curl -fsS -X PUT -H \"Content-Type: text/html\" -H \"Accept: application/json\" --data-binary @- http://127.0.0.1:9998/meta | grep -q \"X-TIKA:Parsed-By\"'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2172,7 +2175,7 @@
       }
     },
     "converge-nomad": {
-      "description": "Converge the private Nomad scheduler on monitoring-lv3 plus the runtime and build clients, including controller-local TLS and ACL bootstrap artifacts and repo-managed smoke jobs.",
+      "description": "Converge the private Nomad scheduler on monitoring-lv3 plus the runtime, runtime-ai, and build clients, including controller-local TLS and ACL bootstrap artifacts and repo-managed smoke jobs.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2210,7 +2213,7 @@
         "scripts/generate_platform_vars.py"
       ],
       "outputs": [
-        "A private Nomad API published on the Proxmox Tailscale proxy, a Nomad server on monitoring-lv3, Nomad clients on docker-runtime-lv3 and docker-build-lv3, and repo-managed smoke jobs verified across both client classes."
+        "A private Nomad API published on the Proxmox Tailscale proxy, a Nomad server on monitoring-lv3, Nomad clients on docker-runtime-lv3, runtime-ai-lv3, and docker-build-lv3, and repo-managed smoke jobs verified across the runtime, runtime-ai, and build client classes."
       ],
       "verification_commands": [
         "make syntax-check-nomad",
@@ -2222,7 +2225,7 @@
         "max_duration_seconds": 1800,
         "max_steps": 300,
         "max_concurrent_instances": 1,
-        "max_touched_hosts": 4,
+        "max_touched_hosts": 5,
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
@@ -5118,7 +5121,7 @@
       }
     },
     "converge-gotenberg": {
-      "description": "Deploy the private Gotenberg runtime on docker-runtime-lv3 and refresh the shared API gateway route used for authenticated PDF rendering requests.",
+      "description": "Deploy the private Gotenberg runtime on runtime-ai-lv3 and verify the shared API gateway route that now targets the dedicated runtime-ai pool upstream.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -5142,21 +5145,23 @@
         "Makefile",
         "playbooks/gotenberg.yml",
         "playbooks/services/gotenberg.yml",
+        "playbooks/runtime-ai-pool.yml",
         "roles/gotenberg_runtime",
-        "roles/api_gateway_runtime",
         "inventory/host_vars/proxmox_florin.yml",
+        "config/ansible-execution-scopes.yaml",
         "config/api-gateway-catalog.json",
         "config/service-capability-catalog.json",
-        "config/health-probe-catalog.json"
+        "config/health-probe-catalog.json",
+        "config/contracts/runtime-pools/runtime-ai/gotenberg.openapi.yaml"
       ],
       "outputs": [
-        "A private Gotenberg runtime on docker-runtime-lv3 with Chromium and LibreOffice render paths verified locally, plus an authenticated /v1/gotenberg route on the shared platform API gateway."
+        "A private Gotenberg runtime on runtime-ai-lv3 with Chromium and LibreOffice render paths verified locally, plus an authenticated /v1/gotenberg route on the shared platform API gateway."
       ],
       "verification_commands": [
         "make syntax-check-gotenberg",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:3007/health'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'html=$(mktemp --suffix=.html); pdf=$(mktemp); trap '\"'\"'rm -f \"$html\" \"$pdf\"'\"'\"' EXIT; printf \"<html><body><h1>LV3 Gotenberg workflow verification</h1></body></html>\" >\"$html\"; curl -fsS -o \"$pdf\" -F \"files=@${html};filename=index.html;type=text/html\" http://127.0.0.1:3007/forms/chromium/convert/html; head -c 4 \"$pdf\" | grep -q %PDF'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'txt=$(mktemp --suffix=.txt); pdf=$(mktemp); trap '\"'\"'rm -f \"$txt\" \"$pdf\"'\"'\"' EXIT; printf \"LV3 Gotenberg workflow verification\\n\" >\"$txt\"; curl -fsS -o \"$pdf\" -F \"files=@${txt};filename=verification.txt;type=text/plain\" http://127.0.0.1:3007/forms/libreoffice/convert; head -c 4 \"$pdf\" | grep -q %PDF'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.90 'curl -fsS http://127.0.0.1:3007/health'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.90 'html=$(mktemp --suffix=.html); pdf=$(mktemp); trap '\"'\"'rm -f \"$html\" \"$pdf\"'\"'\"' EXIT; printf \"<html><body><h1>LV3 Gotenberg workflow verification</h1></body></html>\" >\"$html\"; curl -fsS -o \"$pdf\" -F \"files=@${html};filename=index.html;type=text/html\" http://127.0.0.1:3007/forms/chromium/convert/html; head -c 4 \"$pdf\" | grep -q %PDF'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.90 'txt=$(mktemp --suffix=.txt); pdf=$(mktemp); trap '\"'\"'rm -f \"$txt\" \"$pdf\"'\"'\"' EXIT; printf \"LV3 Gotenberg workflow verification\\n\" >\"$txt\"; curl -fsS -o \"$pdf\" -F \"files=@${txt};filename=verification.txt;type=text/plain\" http://127.0.0.1:3007/forms/libreoffice/convert; head -c 4 \"$pdf\" | grep -q %PDF'",
         "LV3_TOKEN=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt) && curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" https://api.lv3.org/v1/gotenberg/health"
       ],
       "execution_class": "mutation",
@@ -7507,7 +7512,7 @@
       }
     },
     "converge-tesseract-ocr": {
-      "description": "Build and deploy the private Tesseract OCR fallback runtime on docker-runtime-lv3 and verify direct OCR plus the Tika-first helper path.",
+      "description": "Build and deploy the private Tesseract OCR fallback runtime on runtime-ai-lv3 and verify direct OCR plus the Tika-first helper path through the dedicated runtime-ai pool.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7531,24 +7536,27 @@
         "Makefile",
         "playbooks/tesseract-ocr.yml",
         "playbooks/services/tesseract-ocr.yml",
+        "playbooks/runtime-ai-pool.yml",
         "roles/tesseract_ocr_runtime",
         "scripts/tesseract_ocr_service.py",
         "scripts/document_extraction.py",
         "requirements/tesseract-ocr.txt",
         "inventory/host_vars/proxmox_florin.yml",
+        "config/ansible-execution-scopes.yaml",
         "config/service-capability-catalog.json",
         "config/health-probe-catalog.json",
         "config/slo-catalog.json",
-        "config/data-catalog.json"
+        "config/data-catalog.json",
+        "config/contracts/runtime-pools/runtime-ai/tesseract-ocr.openapi.yaml"
       ],
       "outputs": [
-        "A private Tesseract OCR runtime on docker-runtime-lv3 with repo-managed direct OCR verification plus a Tika-first fallback extraction helper for scanned-image documents."
+        "A private Tesseract OCR runtime on runtime-ai-lv3 with repo-managed direct OCR verification plus a Tika-first fallback extraction helper for scanned-image documents."
       ],
       "verification_commands": [
         "make syntax-check-tesseract-ocr",
-        "curl -fsS http://10.10.10.20:3008/healthz",
-        "curl -fsS -F 'file=@collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png;filename=ocr-ok.png;type=image/png' http://10.10.10.20:3008/ocr",
-        "python3 scripts/document_extraction.py collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png --tika-url http://10.10.10.20:9998 --tesseract-url http://10.10.10.20:3008"
+        "curl -fsS http://10.10.10.90:3008/healthz",
+        "curl -fsS -F 'file=@collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png;filename=ocr-ok.png;type=image/png' http://10.10.10.90:3008/ocr",
+        "python3 scripts/document_extraction.py collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png --tika-url http://10.10.10.90:9998 --tesseract-url http://10.10.10.90:3008"
       ],
       "execution_class": "mutation",
       "budget": {

@@ -1,0 +1,35 @@
+services:
+  runtime-ai-traefik:
+    image: {{ runtime_pool_substrate_traefik_image }}
+    container_name: {{ runtime_pool_substrate_traefik_container_name }}
+    restart: unless-stopped
+    network_mode: host
+    command:
+      - --entrypoints.runtime-ai.address=:{{ runtime_pool_substrate_traefik_port }}
+      - --providers.file.directory=/etc/traefik/dynamic
+      - --providers.file.watch=true
+      - --log.level=INFO
+      - --ping=true
+      - --ping.entrypoint=runtime-ai
+    volumes:
+      - {{ runtime_pool_substrate_dynamic_config_dir }}:/etc/traefik/dynamic:ro
+
+  runtime-ai-dapr-router:
+    image: {{ runtime_pool_substrate_dapr_image }}
+    container_name: {{ runtime_pool_substrate_dapr_container_name }}
+    restart: unless-stopped
+    network_mode: host
+    command:
+      - ./daprd
+      - --app-id
+      - {{ runtime_pool_substrate_dapr_app_id }}
+      - --app-port
+      - "{{ runtime_pool_substrate_traefik_port }}"
+      - --app-protocol
+      - http
+      - --dapr-http-port
+      - "{{ runtime_pool_substrate_dapr_http_port }}"
+      - --dapr-grpc-port
+      - "{{ runtime_pool_substrate_dapr_grpc_port }}"
+      - --log-level
+      - info

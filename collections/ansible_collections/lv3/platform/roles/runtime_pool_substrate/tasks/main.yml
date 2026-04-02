@@ -1,0 +1,93 @@
+---
+# Purpose: Converge a dedicated runtime-pool substrate with Traefik routing and a Dapr invocation bridge.
+# Use case: Include on a dedicated runtime guest when a pool needs internal API-first routing and Dapr service invocation without application-specific glue.
+# Inputs: runtime_pool_substrate_* variables covering compose paths, image refs, ports, route prefixes, and upstream listeners.
+# Outputs: Rendered compose state plus running Traefik and Dapr runtime containers for the pool.
+# Idempotency: Partially idempotent; reruns reconcile the same compose stack and router config on repeated applies.
+# Dependencies: ADR 0319, ADR 0320, docker_runtime, and the runtime_pool_substrate templates.
+- name: Validate runtime-pool substrate inputs
+  ansible.builtin.assert:
+    that:
+      - runtime_pool_substrate_root_dir | length > 0
+      - runtime_pool_substrate_compose_file | length > 0
+      - runtime_pool_substrate_dynamic_config_dir | length > 0
+      - runtime_pool_substrate_router_config_file | length > 0
+      - runtime_pool_substrate_traefik_image | length > 0
+      - runtime_pool_substrate_traefik_container_name | length > 0
+      - runtime_pool_substrate_traefik_port | int > 0
+      - runtime_pool_substrate_traefik_ping_path | length > 0
+      - runtime_pool_substrate_dapr_image | length > 0
+      - runtime_pool_substrate_dapr_container_name | length > 0
+      - runtime_pool_substrate_dapr_app_id | length > 0
+      - runtime_pool_substrate_dapr_http_port | int > 0
+      - runtime_pool_substrate_dapr_grpc_port | int > 0
+      - runtime_pool_substrate_tika_upstream | length > 0
+      - runtime_pool_substrate_gotenberg_upstream | length > 0
+      - runtime_pool_substrate_tesseract_upstream | length > 0
+    fail_msg: >-
+      runtime_pool_substrate requires compose paths, pinned image references,
+      runtime ports, and the three document-extraction upstream routes.
+
+- name: Ensure runtime-pool substrate directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ runtime_pool_substrate_root_dir }}"
+    - "{{ runtime_pool_substrate_dynamic_config_dir }}"
+
+- name: Render the runtime-pool router config
+  ansible.builtin.template:
+    src: runtime-ai-router.yml.j2
+    dest: "{{ runtime_pool_substrate_router_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the runtime-pool substrate compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ runtime_pool_substrate_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the runtime-pool substrate images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ runtime_pool_substrate_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ runtime_pool_substrate_root_dir }}"
+  register: runtime_pool_substrate_pull
+  changed_when: >-
+    'Pulling' in runtime_pool_substrate_pull.stdout
+    or 'Downloaded newer image' in runtime_pool_substrate_pull.stdout
+    or 'Pull complete' in runtime_pool_substrate_pull.stdout
+
+- name: Ensure the runtime-pool substrate is running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ runtime_pool_substrate_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ runtime_pool_substrate_root_dir }}"
+  register: runtime_pool_substrate_up
+  changed_when: >-
+    'Creating' in runtime_pool_substrate_up.stdout
+    or 'Recreating' in runtime_pool_substrate_up.stdout
+    or 'Starting' in runtime_pool_substrate_up.stdout
+
+- name: Verify the runtime-pool substrate
+  ansible.builtin.import_tasks: verify.yml

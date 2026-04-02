@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "recorded_at": "2026-04-01T17:14:18Z",
+  "recorded_at": "2026-04-01T23:58:48Z",
   "recorded_on": "2026-04-01",
   "recorded_by": "codex",
   "repository": {
@@ -61,13 +61,13 @@
         "keep_monthly": 6
       },
       "latest_snapshot": {
-        "snapshot_id": "7999520e2791e0609e6f249f96e06bf7e71e5f06950f1f594f8e44410e44257d",
-        "recorded_at": "2026-04-01T17:14:18Z",
+        "snapshot_id": "76c1330e6501008357825ec35a1ee86682b262bf8fe160d5fac16fa7d019d1d6",
+        "recorded_at": "2026-04-01T23:58:48Z",
         "host": "docker-runtime-lv3",
         "paths": [
           "config"
         ],
-        "files": 268
+        "files": 258
       },
       "last_restore_verification": null,
       "reasons": [
@@ -88,8 +88,8 @@
         "keep_daily": 30
       },
       "latest_snapshot": {
-        "snapshot_id": "327f86e9d30bac643deb388e6c28aa405b407e759ffe40f5c7fb7550cc40e58b",
-        "recorded_at": "2026-04-01T17:14:18Z",
+        "snapshot_id": "8a1a8574857f38dc63c98172501bb20788237072fad8a625950af5f883cc6f9a",
+        "recorded_at": "2026-04-01T23:58:48Z",
         "host": "docker-runtime-lv3",
         "paths": [
           "versions/stack.yaml"

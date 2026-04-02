@@ -1,0 +1,51 @@
+http:
+  routers:
+    runtime-ai-tika:
+      entryPoints:
+        - runtime-ai
+      rule: "PathPrefix(`{{ runtime_pool_substrate_tika_prefix }}`)"
+      service: runtime-ai-tika
+      middlewares:
+        - runtime-ai-strip-tika
+    runtime-ai-gotenberg:
+      entryPoints:
+        - runtime-ai
+      rule: "PathPrefix(`{{ runtime_pool_substrate_gotenberg_prefix }}`)"
+      service: runtime-ai-gotenberg
+      middlewares:
+        - runtime-ai-strip-gotenberg
+    runtime-ai-tesseract:
+      entryPoints:
+        - runtime-ai
+      rule: "PathPrefix(`{{ runtime_pool_substrate_tesseract_prefix }}`)"
+      service: runtime-ai-tesseract
+      middlewares:
+        - runtime-ai-strip-tesseract
+
+  services:
+    runtime-ai-tika:
+      loadBalancer:
+        servers:
+          - url: "{{ runtime_pool_substrate_tika_upstream }}"
+    runtime-ai-gotenberg:
+      loadBalancer:
+        servers:
+          - url: "{{ runtime_pool_substrate_gotenberg_upstream }}"
+    runtime-ai-tesseract:
+      loadBalancer:
+        servers:
+          - url: "{{ runtime_pool_substrate_tesseract_upstream }}"
+
+  middlewares:
+    runtime-ai-strip-tika:
+      stripPrefix:
+        prefixes:
+          - "{{ runtime_pool_substrate_tika_prefix }}"
+    runtime-ai-strip-gotenberg:
+      stripPrefix:
+        prefixes:
+          - "{{ runtime_pool_substrate_gotenberg_prefix }}"
+    runtime-ai-strip-tesseract:
+      stripPrefix:
+        prefixes:
+          - "{{ runtime_pool_substrate_tesseract_prefix }}"

@@ -3,12 +3,12 @@
 ## Purpose
 
 This runbook converges ADR 0286 so scanned-image and image-only documents have
-a shared, private OCR fallback service on `docker-runtime-lv3`.
+a shared, private OCR fallback service on `runtime-ai-lv3`.
 
 ## Result
 
-- `docker-runtime-lv3` builds the repo-managed Tesseract OCR image from `/opt/tesseract-ocr/app`
-- the private runtime listens on `10.10.10.20:3008`
+- `runtime-ai-lv3` builds the repo-managed Tesseract OCR image from `/opt/tesseract-ocr/app`
+- the private runtime listens on `10.10.10.90:3008`
 - the service exposes `/healthz` and `/ocr`
 - repo-managed verification confirms the OCR route extracts deterministic text from a known image fixture
 - `scripts/document_extraction.py` can call Tika first and fall back to Tesseract OCR when Tika returns no text
@@ -38,25 +38,29 @@ ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=tesseract-ocr env=p
 
 ## Verification
 
-Verify the private Tesseract OCR health endpoint on `docker-runtime-lv3`:
+Verify the private Tesseract OCR health endpoint on `runtime-ai-lv3`:
 
 ```bash
 cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
-curl -fsS http://10.10.10.20:3008/healthz
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -J ops@100.64.0.1 \
+  ops@10.10.10.90 \
+  'curl -fsS http://127.0.0.1:3008/healthz'
 ```
 
 Verify direct OCR extraction through the `/ocr` endpoint:
 
 ```bash
 cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
-curl -fsS -F 'file=@collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png;filename=ocr-ok.png;type=image/png' http://10.10.10.20:3008/ocr
+curl -fsS -F 'file=@collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png;filename=ocr-ok.png;type=image/png' http://10.10.10.90:3008/ocr
 ```
 
 Verify the Tika-first fallback helper chooses OCR when Tika returns no text:
 
 ```bash
 cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
-python3 scripts/document_extraction.py collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png --tika-url http://10.10.10.20:9998 --tesseract-url http://10.10.10.20:3008
+python3 scripts/document_extraction.py collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png --tika-url http://10.10.10.90:9998 --tesseract-url http://10.10.10.90:3008
 ```
 
 ## Operating Notes

@@ -306,13 +306,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_190"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when Gotenberg or the shared runtime state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Gotenberg converge and gateway verification workflow."
+        "location": "runtime-ai-lv3",
+        "failover_trigger": "Restore runtime-ai-lv3 when Gotenberg or the runtime-ai document-extraction pool state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-ai-lv3, then rerun the Gotenberg converge and gateway verification workflow."
       }
     },
     "grist": {
@@ -1146,13 +1146,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_190"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when Apache Tika or the shared runtime state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Tika converge and extraction verification workflow."
+        "location": "runtime-ai-lv3",
+        "failover_trigger": "Restore runtime-ai-lv3 when Apache Tika or the runtime-ai document-extraction pool state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-ai-lv3, then rerun the Tika converge and extraction verification workflow."
       }
     },
     "tesseract_ocr": {
@@ -1163,13 +1163,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_190"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when Tesseract OCR or the paired private document-extraction runtime state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Tika and Tesseract OCR converges from git."
+        "location": "runtime-ai-lv3",
+        "failover_trigger": "Restore runtime-ai-lv3 when Tesseract OCR or the runtime-ai document-extraction pool state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-ai-lv3, then rerun the Tika and Tesseract OCR converges from git."
       }
     },
     "typesense": {

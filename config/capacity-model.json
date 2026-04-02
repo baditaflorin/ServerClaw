@@ -193,6 +193,27 @@
       "notes": "Validated from live qm config on 2026-03-30 for ADR 0296 dedicated artifact cache adoption."
     },
     {
+      "vmid": 190,
+      "name": "runtime-ai-lv3",
+      "status": "active",
+      "environment": "production",
+      "metrics_host": "runtime-ai-lv3",
+      "allocated": {
+        "ram_gb": 16,
+        "vcpu": 6,
+        "disk_gb": 128
+      },
+      "budget": {
+        "ram_gb": 24,
+        "vcpu": 8,
+        "disk_gb": 160
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Declared for ADR 0319 runtime-ai pool live apply and validated against the planned production guest shape on 2026-04-02."
+    },
+    {
       "vmid": 210,
       "name": "nginx-staging-lv3",
       "status": "planned",

@@ -101,6 +101,17 @@ argument_specs:
         required: false
         description:
           - Docker daemon configuration rendered into `/etc/docker/daemon.json`.
+      docker_runtime_kernel_modules:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Kernel modules that must be loaded before Docker starts so bridge NAT rules can be programmed.
+      docker_runtime_kernel_modules_file:
+        type: path
+        required: false
+        description:
+          - Destination path for the modules-load file that persists Docker kernel modules across reboot.
       docker_runtime_publication_assurance_script_path:
         type: path
         required: false

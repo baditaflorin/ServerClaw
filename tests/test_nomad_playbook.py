@@ -24,7 +24,7 @@ def test_nomad_playbook_covers_controller_proxy_server_clients_and_bootstrap() -
         "Prepare controller-local Nomad bootstrap artifacts",
         "Converge the Proxmox firewall and Tailscale operator proxy for Nomad",
         "Converge the Nomad server on the monitoring guest",
-        "Converge the Nomad clients on the runtime and build guests",
+        "Converge the Nomad clients on the runtime, runtime-ai, and build guests",
         "Bootstrap Nomad ACLs and verify repo-managed smoke jobs",
     ]
 
@@ -49,6 +49,7 @@ def test_nomad_playbook_covers_controller_proxy_server_clients_and_bootstrap() -
     ]
 
     client_roles = [role["role"] for role in playbook[3]["roles"]]
+    assert "runtime-ai-lv3" in playbook[3]["hosts"]
     assert client_roles == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.docker_runtime",
@@ -68,6 +69,7 @@ def test_nomad_inventory_opens_rpc_in_both_directions_between_server_and_clients
     host_vars = HOST_VARS_PATH.read_text()
     assert "Nomad client RPC from docker-runtime-lv3" in host_vars
     assert "Nomad client RPC from docker-build-lv3" in host_vars
+    assert "Nomad client RPC from runtime-ai-lv3" in host_vars
     assert "Nomad server RPC to docker-runtime-lv3" in host_vars
     assert "Nomad server RPC to docker-build-lv3" in host_vars
 

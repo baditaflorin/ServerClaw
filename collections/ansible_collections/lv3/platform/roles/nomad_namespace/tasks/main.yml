@@ -1,0 +1,53 @@
+---
+# Purpose: Ensure a named Nomad namespace exists for a pool-scoped scheduling boundary.
+# Use case: Include on the Nomad server host when a runtime pool needs its own namespace before workload placement begins.
+# Inputs: nomad_namespace_* variables plus the lv3-nomad wrapper with the mirrored bootstrap token.
+# Outputs: A verified namespace on the private Nomad scheduler.
+# Idempotency: Fully idempotent; creation is skipped when the namespace already exists.
+# Dependencies: ADR 0232, ADR 0319, and a working lv3-nomad installation on the target host.
+- name: Validate Nomad namespace inputs
+  ansible.builtin.assert:
+    that:
+      - nomad_namespace_name | length > 0
+      - nomad_namespace_description | length > 0
+    fail_msg: "nomad_namespace requires a namespace name and description."
+
+- name: Check whether the Nomad namespace already exists
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/lv3-nomad
+      - namespace
+      - status
+      - "{{ nomad_namespace_name }}"
+  register: nomad_namespace_status
+  changed_when: false
+  failed_when: nomad_namespace_status.rc not in [0, 1]
+
+- name: Create the Nomad namespace when it is missing
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/lv3-nomad
+      - namespace
+      - apply
+      - -description
+      - "{{ nomad_namespace_description }}"
+      - "{{ nomad_namespace_name }}"
+  when: nomad_namespace_status.rc != 0 or not (nomad_namespace_create_only_when_missing | bool)
+  register: nomad_namespace_apply
+  changed_when: true
+
+- name: Re-check the Nomad namespace after creation
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/lv3-nomad
+      - namespace
+      - status
+      - "{{ nomad_namespace_name }}"
+  register: nomad_namespace_status_after_apply
+  changed_when: false
+
+- name: Assert the Nomad namespace is available
+  ansible.builtin.assert:
+    that:
+      - nomad_namespace_status_after_apply.rc == 0
+    fail_msg: "The requested Nomad namespace is not available after converge."

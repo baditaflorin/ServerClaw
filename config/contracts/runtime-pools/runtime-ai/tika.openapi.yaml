@@ -1,0 +1,62 @@
+openapi: 3.1.0
+info:
+  title: Runtime-AI Apache Tika Contract
+  version: 1.0.0
+  description: Private Apache Tika document extraction contract for the runtime-ai pool.
+servers:
+  - url: http://10.10.10.90:9998
+paths:
+  /version:
+    get:
+      summary: Return the Apache Tika version banner.
+      operationId: getTikaVersion
+      responses:
+        "200":
+          description: Version banner returned.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /tika:
+    put:
+      summary: Extract plaintext from a submitted document.
+      operationId: extractPlaintext
+      requestBody:
+        required: true
+        content:
+          text/html:
+            schema:
+              type: string
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "200":
+          description: Plaintext extraction succeeded.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /meta:
+    put:
+      summary: Extract metadata from a submitted document.
+      operationId: extractMetadata
+      requestBody:
+        required: true
+        content:
+          text/html:
+            schema:
+              type: string
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "200":
+          description: Metadata extraction succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true

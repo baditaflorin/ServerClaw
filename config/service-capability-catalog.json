@@ -583,9 +583,9 @@
       "description": "Private stateless document rendering service for HTML, Markdown, text, and Office-to-PDF conversion workflows.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:3007",
+      "vm": "runtime-ai-lv3",
+      "vmid": 190,
+      "internal_url": "http://10.10.10.90:3007",
       "exposure": "private-only",
       "health_probe_id": "gotenberg",
       "image_catalog_ids": [
@@ -593,6 +593,10 @@
       ],
       "adr": "0278",
       "runbook": "docs/runbooks/configure-gotenberg.md",
+      "runtime_pool": "runtime-ai",
+      "deployment_surface": "playbooks/services/gotenberg.yml",
+      "restart_domain": "runtime-ai-document-extraction",
+      "api_contract_ref": "config/contracts/runtime-pools/runtime-ai/gotenberg.openapi.yaml",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-gotenberg/lv3-gotenberg",
       "tags": [
         "documents",
@@ -603,8 +607,8 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://10.10.10.20:3007",
-          "notes": "The runtime stays private to the guest network; authenticated operator and automation access may be brokered through the shared API gateway route at https://api.lv3.org/v1/gotenberg."
+          "url": "http://10.10.10.90:3007",
+          "notes": "The runtime stays private on runtime-ai-lv3; authenticated operator and automation access is brokered through the shared API gateway route at https://api.lv3.org/v1/gotenberg."
         }
       }
     },
@@ -2494,9 +2498,9 @@
       "description": "Private stateless document text and metadata extraction service for the RAG and ServerClaw memory ingestion pipelines.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:9998",
+      "vm": "runtime-ai-lv3",
+      "vmid": 190,
+      "internal_url": "http://10.10.10.90:9998",
       "exposure": "private-only",
       "uptime_monitor_name": "Tika Private",
       "health_probe_id": "tika",
@@ -2505,6 +2509,10 @@
       ],
       "adr": "0275",
       "runbook": "docs/runbooks/configure-tika.md",
+      "runtime_pool": "runtime-ai",
+      "deployment_surface": "playbooks/services/tika.yml",
+      "restart_domain": "runtime-ai-document-extraction",
+      "api_contract_ref": "config/contracts/runtime-pools/runtime-ai/tika.openapi.yaml",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-tika/lv3-tika",
       "tags": [
         "documents",
@@ -2515,8 +2523,8 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://10.10.10.20:9998",
-          "notes": "The runtime stays private to the guest network and is consumed directly by repo-managed ingestion workflows; no shared API gateway publication is issued."
+          "url": "http://10.10.10.90:9998",
+          "notes": "The runtime stays private on runtime-ai-lv3 and is consumed directly by repo-managed ingestion workflows; no shared API gateway publication is issued."
         }
       }
     },
@@ -2526,14 +2534,18 @@
       "description": "Private OCR fallback API for scanned PDFs and image uploads when Apache Tika returns no embedded text.",
       "category": "data",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:3008",
+      "vm": "runtime-ai-lv3",
+      "vmid": 190,
+      "internal_url": "http://10.10.10.90:3008",
       "exposure": "private-only",
       "health_probe_id": "tesseract_ocr",
       "adr": "0286",
       "adr_file": "docs/adr/0286-tesseract-ocr-service-for-scanned-image-text-extraction.md",
       "runbook": "docs/runbooks/configure-tesseract-ocr.md",
+      "runtime_pool": "runtime-ai",
+      "deployment_surface": "playbooks/services/tesseract-ocr.yml",
+      "restart_domain": "runtime-ai-document-extraction",
+      "api_contract_ref": "config/contracts/runtime-pools/runtime-ai/tesseract-ocr.openapi.yaml",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tesseract-ocr-availability",
       "tags": [
         "ocr",
@@ -2544,8 +2556,8 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://10.10.10.20:3008",
-          "notes": "Tesseract OCR stays private on docker-runtime-lv3 and is intended as the second-stage fallback when Tika returns no text for image-like documents or scanned PDFs."
+          "url": "http://10.10.10.90:3008",
+          "notes": "Tesseract OCR stays private on runtime-ai-lv3 and is intended as the second-stage fallback when Tika returns no text for image-like documents or scanned PDFs."
         }
       }
     },

@@ -50,7 +50,7 @@
     {
       "id": "gotenberg",
       "name": "Gotenberg",
-      "upstream": "http://10.10.10.20:3007",
+      "upstream": "http://10.10.10.90:3007",
       "gateway_prefix": "/v1/gotenberg",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",

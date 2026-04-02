@@ -30,6 +30,5 @@ packages:
 
 runcmd:
   - systemctl enable --now qemu-guest-agent
-  - test -x /usr/bin/docker && systemctl enable --now docker || true
 
 final_message: "{{ item.name }} cloud-init completed."

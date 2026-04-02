@@ -17,7 +17,7 @@ def test_tika_playbook_converges_firewall_before_runtime_verification() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
     play = plays[0]
 
-    assert play["hosts"] == "docker-runtime-lv3"
+    assert play["hosts"] == "{{ playbook_execution_host_patterns.runtime_ai[playbook_execution_env] }}"
     assert play["roles"] == [
         {"role": "lv3.platform.linux_guest_firewall"},
         {"role": "lv3.platform.docker_runtime"},
@@ -59,5 +59,6 @@ def test_ansible_execution_scopes_registers_the_direct_tika_playbook() -> None:
     entry = scopes["playbooks"]["playbooks/tika.yml"]
 
     assert entry["playbook_id"] == "tika"
-    assert entry["mutation_scope"] == "host"
+    assert entry["mutation_scope"] == "lane"
+    assert entry["target_lane"] == "lane:runtime-ai"
     assert "service:tika" in entry["shared_surfaces"]

@@ -58,6 +58,21 @@ lanes:
       total_memory_mb: 4096
       total_disk_iops: 240
 
+  - lane_id: lane:runtime-ai
+    vm_id: 190
+    hostname: runtime-ai-lv3
+    services:
+      - gotenberg
+      - tika
+      - tesseract_ocr
+    max_concurrent_ops: 2
+    serialisation: resource_lock
+    admission_policy: soft
+    vm_budget:
+      total_cpu_milli: 3000
+      total_memory_mb: 4096
+      total_disk_iops: 220
+
   - lane_id: lane:build
     vm_id: 130
     hostname: docker-build-lv3

@@ -583,6 +583,28 @@ platform_guest_catalog:
         co_location_exceptions: []
       packages:
         - docker.io
+    - vmid: 190
+      name: runtime-ai-lv3
+      role: runtime-ai
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.90
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:90
+      cores: 6
+      memory_mb: 16384
+      disk_gb: 128
+      tags:
+        - ai
+        - docker
+        - runtime
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-ai
+        co_location_exceptions: []
+      packages: []
   by_name:
     nginx-lv3:
       vmid: 110
@@ -818,6 +840,29 @@ platform_guest_catalog:
         co_location_exceptions: []
       packages:
         - docker.io
+    runtime-ai-lv3:
+      vmid: 190
+      name: runtime-ai-lv3
+      role: runtime-ai
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.90
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:90
+      cores: 6
+      memory_mb: 16384
+      disk_gb: 128
+      tags:
+        - ai
+        - docker
+        - runtime
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-ai
+        co_location_exceptions: []
+      packages: []
   by_role:
     nginx:
       vmid: 110
@@ -1053,6 +1098,29 @@ platform_guest_catalog:
         co_location_exceptions: []
       packages:
         - docker.io
+    runtime-ai:
+      vmid: 190
+      name: runtime-ai-lv3
+      role: runtime-ai
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.90
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:90
+      cores: 6
+      memory_mb: 16384
+      disk_gb: 128
+      tags:
+        - ai
+        - docker
+        - runtime
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-ai
+        co_location_exceptions: []
+      packages: []
 platform_service_topology:
   nginx_edge:
     service_name: nginx-edge
@@ -1459,8 +1527,12 @@ platform_service_topology:
       controller: https://100.64.0.1:9443
   tika:
     service_name: tika
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-ai-lv3
+    private_ip: 10.10.10.90
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/tika.yml
+    restart_domain: runtime-ai-document-extraction
+    api_contract_ref: config/contracts/runtime-pools/runtime-ai/tika.openapi.yaml
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1469,11 +1541,15 @@ platform_service_topology:
     ports:
       internal: 9998
     urls:
-      internal: http://10.10.10.20:9998
+      internal: http://10.10.10.90:9998
   tesseract_ocr:
     service_name: tesseract-ocr
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-ai-lv3
+    private_ip: 10.10.10.90
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/tesseract-ocr.yml
+    restart_domain: runtime-ai-document-extraction
+    api_contract_ref: config/contracts/runtime-pools/runtime-ai/tesseract-ocr.openapi.yaml
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1482,7 +1558,7 @@ platform_service_topology:
     ports:
       internal: 3008
     urls:
-      internal: http://10.10.10.20:3008
+      internal: http://10.10.10.90:3008
   semaphore:
     service_name: semaphore
     owning_vm: docker-runtime-lv3
@@ -2123,8 +2199,12 @@ platform_service_topology:
       controller_openai: http://100.64.0.1:8018/v1
   gotenberg:
     service_name: gotenberg
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-ai-lv3
+    private_ip: 10.10.10.90
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/gotenberg.yml
+    restart_domain: runtime-ai-document-extraction
+    api_contract_ref: config/contracts/runtime-pools/runtime-ai/gotenberg.openapi.yaml
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -2133,7 +2213,7 @@ platform_service_topology:
     ports:
       internal: 3007
     urls:
-      internal: http://10.10.10.20:3007
+      internal: http://10.10.10.90:3007
   serverclaw:
     service_name: serverclaw
     owning_vm: coolify-lv3
@@ -3409,8 +3489,12 @@ public_edge_service_topology:
       controller: https://100.64.0.1:9443
   tika:
     service_name: tika
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-ai-lv3
+    private_ip: 10.10.10.90
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/tika.yml
+    restart_domain: runtime-ai-document-extraction
+    api_contract_ref: config/contracts/runtime-pools/runtime-ai/tika.openapi.yaml
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -3419,11 +3503,15 @@ public_edge_service_topology:
     ports:
       internal: 9998
     urls:
-      internal: http://10.10.10.20:9998
+      internal: http://10.10.10.90:9998
   tesseract_ocr:
     service_name: tesseract-ocr
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-ai-lv3
+    private_ip: 10.10.10.90
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/tesseract-ocr.yml
+    restart_domain: runtime-ai-document-extraction
+    api_contract_ref: config/contracts/runtime-pools/runtime-ai/tesseract-ocr.openapi.yaml
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -3432,7 +3520,7 @@ public_edge_service_topology:
     ports:
       internal: 3008
     urls:
-      internal: http://10.10.10.20:3008
+      internal: http://10.10.10.90:3008
   semaphore:
     service_name: semaphore
     owning_vm: docker-runtime-lv3
@@ -4073,8 +4161,12 @@ public_edge_service_topology:
       controller_openai: http://100.64.0.1:8018/v1
   gotenberg:
     service_name: gotenberg
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-ai-lv3
+    private_ip: 10.10.10.90
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/gotenberg.yml
+    restart_domain: runtime-ai-document-extraction
+    api_contract_ref: config/contracts/runtime-pools/runtime-ai/gotenberg.openapi.yaml
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -4083,7 +4175,7 @@ public_edge_service_topology:
     ports:
       internal: 3007
     urls:
-      internal: http://10.10.10.20:3007
+      internal: http://10.10.10.90:3007
   serverclaw:
     service_name: serverclaw
     owning_vm: coolify-lv3

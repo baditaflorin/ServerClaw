@@ -168,7 +168,7 @@
       "id": "gotenberg",
       "service": "gotenberg",
       "name": "Gotenberg",
-      "vm": "docker-runtime-lv3",
+      "vm": "runtime-ai-lv3",
       "tier": 2,
       "category": "automation",
       "adr": "0278"
@@ -600,7 +600,7 @@
       "id": "tika",
       "service": "tika",
       "name": "Apache Tika",
-      "vm": "docker-runtime-lv3",
+      "vm": "runtime-ai-lv3",
       "tier": 2,
       "category": "automation",
       "adr": "0275"
@@ -609,7 +609,7 @@
       "id": "tesseract_ocr",
       "service": "tesseract_ocr",
       "name": "Tesseract OCR",
-      "vm": "docker-runtime-lv3",
+      "vm": "runtime-ai-lv3",
       "tier": 2,
       "category": "data",
       "adr": "0286"
@@ -911,7 +911,7 @@
       "from": "gotenberg",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Gotenberg Chromium and LibreOffice renderers are hosted on docker-runtime-lv3."
+      "description": "The Gotenberg Chromium and LibreOffice renderers are hosted on runtime-ai-lv3."
     },
     {
       "from": "grafana",
@@ -1571,7 +1571,7 @@
       "from": "tika",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Apache Tika extraction runtime is hosted on docker-runtime-lv3."
+      "description": "The Apache Tika extraction runtime is hosted on runtime-ai-lv3."
     },
     {
       "from": "vaultwarden",
@@ -1631,7 +1631,7 @@
       "from": "tesseract_ocr",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Tesseract OCR runtime and its repo-built container image are hosted on docker-runtime-lv3."
+      "description": "The Tesseract OCR runtime and its repo-built container image are hosted on runtime-ai-lv3."
     },
     {
       "from": "tesseract_ocr",
