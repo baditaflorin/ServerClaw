@@ -642,6 +642,10 @@ validate_agent_standards() {
   local raw_app_lock_rc=$?
   [[ $raw_app_lock_rc -ne 0 ]] && rc=$raw_app_lock_rc
 
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_public_entrypoints.py" --check >/dev/null
+  local public_repo_rc=$?
+  [[ $public_repo_rc -ne 0 ]] && rc=$public_repo_rc
+
   # Warnings only — do not fail
   _validate_config_registry_updated || true
   _validate_structure_index_updated || true

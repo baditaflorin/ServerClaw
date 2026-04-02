@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-04-02'
-total_adrs: 349
+total_adrs: 359
 implementation_status_summary:
-  Implemented: 296
-  Partial: 8
-  Not Implemented: 44
+  Implemented: 301
+  Partial: 11
+  Not Implemented: 46
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -40,6 +40,9 @@ concerns:
     - '0320'
     - '0325'
     - '0327'
+    - '0331'
+    - '0335'
+    - '0337'
   api:
     - 0049
     - '0075'
@@ -120,6 +123,8 @@ concerns:
     - 0287
     - 0295
     - '0305'
+    - '0330'
+    - '0336'
   documentation:
     - '0074'
     - 0081
@@ -134,6 +139,7 @@ concerns:
     - 0239
     - '0263'
     - '0277'
+    - 0338
   host-os:
     - '0002'
     - '0004'
@@ -149,6 +155,7 @@ concerns:
     - '0133'
     - '0150'
     - '0243'
+    - '0334'
   monitoring:
     - '0041'
     - '0052'
@@ -303,6 +310,7 @@ concerns:
     - '0323'
     - '0326'
     - 0328
+    - 0339
   release:
     - 0008
     - '0110'
@@ -311,6 +319,7 @@ concerns:
     - '0246'
     - 0297
     - '0304'
+    - '0332'
   resilience:
     - '0163'
     - '0167'
@@ -341,6 +350,7 @@ concerns:
     - '0262'
     - '0300'
     - '0301'
+    - '0333'
   storage:
     - '0020'
     - '0051'
@@ -5847,3 +5857,156 @@ adr_index:
       - safe
     summary: Shared Docker bridge-chain preflight checks on a shared runtime pool must
     filename: 0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
+  - adr: '0330'
+    title: Public GitHub Readiness As A First-Class Repository Lifecycle
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-02'
+    concern: ci-cd
+    keywords:
+      - public
+      - github
+      - readiness
+      - as
+      - first-class
+      - repository
+      - lifecycle
+    summary: We will treat public GitHub readiness as a first-class repository lifecycle,
+    filename: 0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+    implemented_version: 0.177.143
+  - adr: '0331'
+    title: Repository-Relative Paths For Public Metadata And Generated Docs
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: agent-discovery
+    keywords:
+      - repository-relative
+      - paths
+      - public
+      - metadata
+      - generated
+      - docs
+    summary: Committed public metadata and generated documentation must use repository-relative
+    filename: 0331-repository-relative-paths-for-public-metadata-and-generated-docs.md
+    implemented_version: 0.177.143
+  - adr: '0332'
+    title: Relative Release And Status Links In Generated Root Surfaces
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: release
+    keywords:
+      - relative
+      - release
+      - status
+      - links
+      - generated
+      - root
+      - surfaces
+    summary: Root summary generation must emit repository-relative links and avoid absolute
+    filename: 0332-relative-release-and-status-links-in-generated-root-surfaces.md
+    implemented_version: 0.177.143
+  - adr: '0333'
+    title: Private Overlay Files For Deployment-Specific Secrets And Identities
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-02'
+    concern: security
+    keywords:
+      - private
+      - overlay
+      - files
+      - deployment-specific
+      - secrets
+      - identities
+    summary: Deployment-specific secrets, identities, and one-off bootstrap artefacts must
+    filename: 0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+    implemented_version: 0.177.143
+  - adr: '0334'
+    title: Example-First Inventory And Service Identity Catalogs
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-02'
+    concern: identity
+    keywords:
+      - example-first
+      - inventory
+      - service
+      - identity
+      - catalogs
+    summary: Primary onboarding catalogs should move toward example-first inventories and
+    filename: 0334-example-first-inventory-and-service-identity-catalogs.md
+  - adr: '0335'
+    title: Public-Safe Agent Onboarding Entrypoints
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: agent-discovery
+    keywords:
+      - public-safe
+      - agent
+      - onboarding
+      - entrypoints
+    summary: Root onboarding entrypoints must stay public-safe and generic, focusing on repo
+    filename: 0335-public-safe-agent-onboarding-entrypoints.md
+    implemented_version: 0.177.143
+  - adr: '0336'
+    title: Public Entrypoint Leakage Validation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: ci-cd
+    keywords:
+      - public
+      - entrypoint
+      - leakage
+      - validation
+    summary: Public entrypoints must be covered by an automated leakage validator that fails
+    filename: 0336-public-entrypoint-leakage-validation.md
+    implemented_version: 0.177.143
+  - adr: '0337'
+    title: Fork-First Workstream And Worktree Metadata
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: agent-discovery
+    keywords:
+      - fork-first
+      - workstream
+      - worktree
+      - metadata
+    summary: Workstream and worktree metadata must be fork-first and repository-relative.
+    filename: 0337-fork-first-workstream-and-worktree-metadata.md
+    implemented_version: 0.177.143
+  - adr: 0338
+    title: Public Documentation Tiers And Private History Boundaries
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-02'
+    concern: documentation
+    keywords:
+      - public
+      - documentation
+      - tiers
+      - private
+      - history
+      - boundaries
+    summary: We will manage documentation with explicit public tiers and private-history
+    filename: 0338-public-documentation-tiers-and-private-history-boundaries.md
+    implemented_version: 0.177.143
+  - adr: 0339
+    title: Reference Deployment Samples And Replaceable Provider Profiles
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-02'
+    concern: platform
+    keywords:
+      - reference
+      - deployment
+      - samples
+      - replaceable
+      - provider
+      - profiles
+    summary: We will provide reference deployment samples and replaceable provider profiles
+    filename: 0339-reference-deployment-samples-and-replaceable-provider-profiles.md

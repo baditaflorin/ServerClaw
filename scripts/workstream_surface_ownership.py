@@ -68,6 +68,13 @@ def _normalized_repo_pattern(pattern: str, path: str) -> str:
     return pattern
 
 
+def _normalized_repo_path(value: Any, path: str) -> str:
+    normalized = _require_str(value, path).replace("\\", "/").strip()
+    if normalized.startswith("/"):
+        raise ValueError(f"{path} must be repository-relative, not absolute")
+    return normalized
+
+
 def _load_yaml(path: Path) -> dict[str, Any]:
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     return _require_mapping(payload, str(path))
@@ -109,7 +116,10 @@ def parse_workstream_ownerships(registry: dict[str, Any]) -> list[WorkstreamOwne
         workstream_id = _require_str(entry.get("id"), f"{path}.id")
         status = _require_str(entry.get("status"), f"{path}.status")
         branch = _require_str(entry.get("branch"), f"{path}.branch")
-        doc = _require_str(entry.get("doc"), f"{path}.doc")
+        doc = _normalized_repo_path(entry.get("doc"), f"{path}.doc")
+        worktree_path = entry.get("worktree_path")
+        if worktree_path is not None:
+            _normalized_repo_path(worktree_path, f"{path}.worktree_path")
         manifest = entry.get("ownership_manifest")
 
         is_active = status not in TERMINAL_WORKSTREAM_STATUSES
