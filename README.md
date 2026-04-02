@@ -72,8 +72,6 @@ MinIO is now live on `docker-runtime-lv3` and published at `https://minio.lv3.or
 
 ADR 0292 Lago billing is now re-verified on production from `main`: `https://billing.lv3.org` keeps the browser surface behind the shared oauth2-proxy sign-in flow, anonymous `https://billing.lv3.org/api/health` requests now fail closed at the API gateway with the canonical `401` envelope, and the 2026-04-01 exact-main replay on release `0.177.128` re-verified public smoke event ingest plus current-usage aggregation on platform version `0.130.81`.
 
-ADR 0319 and ADR 0320 are now live on production from current `main`: the 2026-04-02 exact-main replay established the first dedicated `runtime-ai-lv3` pool with Nomad, Traefik, and Dapr, moved Apache Tika, Gotenberg, and Tesseract OCR off `docker-runtime-lv3`, and re-verified the authenticated `https://api.lv3.org/v1/gotenberg/health` path on platform version `0.130.89`; after ADR 0316 occupied repository release `0.177.141`, the merged mainline closeout promoted this runtime-ai rollout as repository release `0.177.142`.
-
 Signed release bundles are now live through that private Gitea path: the repo-managed `release-bundle` workflow publishes tarball, checksum, and Sigstore bundle assets into private Gitea Releases, and controller-side replay now verifies those assets with Cosign against the committed public key before treating them as eligible runtime input.
 
 Renovate is now live through that same private Gitea Actions path on `docker-build-lv3`: the Harbor-pinned `registry.lv3.org/check-runner/renovate:42.76.4` runtime mints a short-lived scoped Gitea token from the OpenBao-rendered bootstrap bundle at job start, maintains the private `Renovate Dashboard`, and now opens governed `main`-targeted update PRs against `ops/proxmox_florin_server`.
@@ -222,7 +220,7 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.142` |
-| Platform version | `0.130.89` |
+| Platform version | `0.130.90` |
 | Observed check date | `2026-04-02` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -239,7 +237,6 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 | 151 | `postgres-replica-lv3` | `10.10.10.51` | `false` |
 | 160 | `backup-lv3` | `10.10.10.60` | `true` |
 | 170 | `coolify-lv3` | `10.10.10.70` | `true` |
-| 190 | `runtime-ai-lv3` | `10.10.10.90` | `true` |
 
 Template VM: `9000` `debian13-cloud-template`
 
@@ -309,6 +306,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `certificate_lifecycle` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
 | `changedetection` | `2026-03-30-adr-0280-changedetection-mainline-live-apply` |
 | `command_catalog` | `2026-03-28-adr-0230-policy-decisions-live-apply` |
+| `command_palette` | `2026-04-02-adr-0311-global-command-palette-mainline-live-apply` |
 | `config_merge` | `2026-03-26-adr-0158-config-merge-live-apply` |
 | `control_metadata_witness` | `2026-03-27-adr-0181-control-metadata-witness-live-apply` |
 | `control_plane_lanes` | `2026-03-22-adr-0045-control-plane-communication-lanes-live-apply` |
@@ -1564,6 +1562,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0305-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md)
 - [Workstream ws-0306-live-apply: Live Apply ADR 0306 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md)
 - [Workstream ws-0308-live-apply: Live Apply ADR 0308 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0308-live-apply.md)
+- [Workstream ws-0311-live-apply: Live Apply ADR 0311 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0311-live-apply.md)
 - [Workstream ws-0313-live-apply: Live Apply ADR 0313 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0313-live-apply.md)
 - [Workstream ws-0315-gitea-followups: Gitea Release Bundles And Renovate PR Validation Follow-ups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md)
 - [Workstream ws-0315-live-apply: Live Apply ADR 0315 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-live-apply.md)
@@ -1591,7 +1590,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.142` |
-| Platform version | `0.130.89` |
+| Platform version | `0.130.90` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1890,6 +1889,7 @@ This repository is intentionally opinionated:
 | `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `merged` | [ws-0297-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md) |
 | `0297` | Integrate ADR 0297 live-apply evidence and release updates on main | `merged` | [ws-0297-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-main-merge.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md) |
+| `0311` | Live apply a repo-managed cmdk command palette and universal open dialog on the Windmill operator access admin surface | `merged` | [ws-0311-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0311-live-apply.md) |
 | `0313` | Live apply contextual help, glossary, and escalation drawer across the first-party portal surfaces | `live_applied` | [ws-0313-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0313-live-apply.md) |
 | `0315` | Live apply canonical page states and next-best-action guidance on the Windmill operator admin surface | `live_applied` | [ws-0315-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-live-apply.md) |
 | `0316` | Live apply journey analytics and onboarding success scorecards from latest origin/main | `merged` | [ws-0316-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0316-live-apply.md) |

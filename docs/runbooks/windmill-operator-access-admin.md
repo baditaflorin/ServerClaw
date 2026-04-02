@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook documents the browser-first operator administration surface introduced by ADR 0122, the data-dense AG Grid roster from ADR 0238, the bounded rich-notes editing from ADR 0241, the guided in-app onboarding added for ADR 0242, and the privacy-preserving journey analytics and onboarding scorecards added for ADR 0316.
+This runbook documents the browser-first operator administration surface introduced by ADR 0122, the data-dense AG Grid roster from ADR 0238, the bounded rich-notes editing from ADR 0241, the guided in-app onboarding added for ADR 0242, the ADR 0311 global command palette now powered by `cmdk`, and the privacy-preserving journey analytics and onboarding scorecards added for ADR 0316.
 
 It wraps the existing ADR 0108 backend so operators can:
 
@@ -163,6 +163,25 @@ access mutation succeeds, the operator should continue in the interactive ops
 portal and complete the ADR 0310 activation checklist at
 `https://ops.lv3.org#activation`.
 
+## Command Palette
+
+ADR 0311 adds a global `Ctrl/Cmd+K` command palette to the app.
+
+The live palette is intentionally a fast-open surface, not a mutation bypass:
+
+- applications and pages can open directly
+- operators can be selected directly into the roster and inventory workflow
+- safe quick actions such as refresh and guided-tour launch run immediately
+- ADR and runbook search results come from the repo-managed `f/lv3/command_palette_search` helper
+- governed mutations still route into the full onboarding, off-boarding, reconciliation, or notes-save flows
+
+Palette behavior:
+
+- `Ctrl/Cmd+K` toggles the palette from anywhere in the app
+- `/` opens it when focus is not already inside a text field
+- favorites and recents are browser-local and stay scoped to this app surface
+- glossary entries deep-link to the canonical docs pages rather than storing a second policy source in the browser bundle
+
 ## New Operator Flow
 
 1. Open Windmill and launch `f/lv3/operator_access_admin`.
@@ -203,6 +222,7 @@ docker run --rm \
   sh -lc 'cd /workspace && wmill generate-metadata f/lv3/operator_access_admin.raw_app --base-url http://100.64.0.1:8005 --workspace lv3 --token "$WM_TOKEN" --lock-only --skip-scripts --skip-flows --yes'
 uv run --with pytest --with pyyaml python -m pytest tests/test_windmill_operator_admin_app.py -q
 uv run --with pytest python -m pytest tests/test_journey_scorecards.py tests/test_windmill_operator_admin_app.py -q
+uv run --with pytest --with pyyaml python -m pytest tests/test_command_palette_search.py tests/test_windmill_operator_admin_app.py -q
 uv run --with pytest --with pyyaml python -m pytest tests/test_operator_manager.py tests/test_windmill_operator_admin_app.py -q
 python3 -m py_compile scripts/operator_manager.py scripts/journey_scorecards.py config/windmill/scripts/operator-roster.py config/windmill/scripts/operator-inventory.py config/windmill/scripts/operator-update-notes.py config/windmill/scripts/operator-journey-event.py config/windmill/scripts/operator-journey-scorecards.py
 ANSIBLE_CONFIG=ansible.cfg ANSIBLE_COLLECTIONS_PATH=collections uvx --from ansible-core ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --syntax-check
@@ -215,6 +235,7 @@ tmpdir="$(mktemp -d)" && mkdir -p "$tmpdir/f/lv3" && rsync -a config/windmill/ap
 - The app depends on the worker checkout being mounted at `/srv/proxmox_florin_server`; the Windmill runtime now bind-mounts that host checkout into both worker pools.
 - The AG Grid roster keeps the browser experience dense, but the actual access mutations still flow only through the repo-governed ADR 0108 scripts.
 - The app now relies on repo-managed frontend dependencies staged during raw-app sync, so new browser libraries must be added to the raw app `package.json` and verified through `make converge-windmill`.
+- ADR 0311 now relies on the repo-managed `f/lv3/command_palette_search` helper for ADR and runbook matches. If the palette starts returning stale or empty docs results, re-run `f/lv3/command_palette_search` directly before assuming the browser bundle is at fault.
 - The app is a Windmill-private admin surface; `ops.lv3.org` remains a separate portal.
 - ADR 0241 keeps the stored source format as markdown even though the editor is rich text, so repo diffs, sync workflows, and later migrations stay inspectable.
 - Inline validation mirrors the frontend schema only; the governed backend scripts remain the authoritative enforcement path for live identity mutations.
