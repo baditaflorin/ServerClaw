@@ -11,6 +11,7 @@ from adr_catalog import resolve_service_adr_path
 from controller_automation_toolkit import emit_cli_error, repo_path
 from deployment_history import DEFAULT_AUDIT_LOOKBACK_DAYS, load_deployment_history, load_service_catalog_data
 from environment_catalog import configured_environment_ids
+from ops_portal.contextual_help import build_changelog_page_help
 from portal_utils import PORTAL_STYLES, escape, page_template, render_badge, render_external_link
 
 
@@ -50,6 +51,7 @@ def write_page(output_dir: Path, relative_path: str, title: str, subtitle: str, 
             nav_items=normalized_nav(relative_path),
             body=body,
             page_path=depth_prefix,
+            contextual_help=build_changelog_page_help(relative_path),
         ),
         encoding="utf-8",
     )

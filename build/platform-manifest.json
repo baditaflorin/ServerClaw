@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.137",
-  "platform_version": "0.130.86",
-  "generated_at": "2026-04-01T23:03:38Z",
-  "next_refresh_at": "2026-04-02T00:03:38Z",
+  "repo_version": "0.177.140",
+  "platform_version": "0.130.88",
+  "generated_at": "2026-04-02T06:16:56Z",
+  "next_refresh_at": "2026-04-02T07:16:56Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -48,7 +48,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://10.10.10.60:8007",
-        "last_live_apply": "2026-04-01T00:00:00Z"
+        "last_live_apply": "2026-04-02T00:00:00Z"
       },
       "browser_runner": {
         "service_name": "Browser Runner",
@@ -5987,10 +5987,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.136",
-    "deployed_at": "2026-04-01",
-    "summary": "implements ADR 0317 by restoring the live Keycloak direct-API provisioning path, making the repo-managed fallback safe from dedicated git worktrees, aligning the fallback role mapping with the live realm, and recording exact-main recovery plus direct verification evidence",
-    "release_notes_url": "docs/release-notes/0.177.137.md"
+    "last_version": "0.177.139",
+    "deployed_at": "2026-04-02",
+    "summary": "implements ADR 0315 by standardizing the live operator admin surface on a reusable canonical state model that explains loading, empty, degraded, validation, system-error, unauthorized, not-found, and success outcomes with explicit next-best actions and linked recovery guidance",
+    "release_notes_url": "docs/release-notes/0.177.140.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

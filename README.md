@@ -219,8 +219,8 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.137` |
-| Platform version | `0.130.86` |
+| Repository version | `0.177.140` |
+| Platform version | `0.130.88` |
 | Observed check date | `2026-03-31` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -319,7 +319,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `directus` | `2026-03-30-adr-0289-directus-mainline-live-apply` |
 | `docker_publication` | `2026-03-30-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply` |
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
-| `docs_portal` | `2026-03-29-adr-0239-browser-local-search-post-merge-replay` |
+| `docs_portal` | `2026-04-02-adr-0313-contextual-help-mainline-live-apply` |
 | `dozzle` | `2026-03-26-adr-0150-dozzle-live-apply` |
 | `excalidraw` | `2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply` |
 | `failure_domain_policy` | `2026-03-27-adr-0184-failure-domain-labels-live-apply` |
@@ -371,7 +371,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `openbao_operator_entity` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `openbao_operator_policy` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `openfga` | `2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply` |
-| `operator_access` | `2026-03-28-adr-0238-operator-grid-live-apply` |
+| `operator_access` | `2026-04-02-adr-0315-canonical-page-states-mainline-live-apply` |
 | `operator_access_composition_root` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_guided_onboarding` | `2026-03-28-adr-0242-guided-human-onboarding-live-apply` |
 | `operator_access_inventory` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
@@ -381,7 +381,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `operator_access_runbooks` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_validation` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_workflows` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
-| `ops_portal` | `2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply` |
+| `ops_portal` | `2026-04-02-adr-0313-contextual-help-mainline-live-apply` |
 | `ops_portal_visualizations` | `2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply` |
 | `outline` | `2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply` |
 | `paperless` | `2026-03-31-adr-0285-paperless-live-apply` |
@@ -1559,7 +1559,10 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0305-live-apply: Live Apply ADR 0305 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-live-apply.md)
 - [Workstream ws-0305-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md)
 - [Workstream ws-0306-live-apply: Live Apply ADR 0306 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md)
+- [Workstream ws-0308-live-apply: Live Apply ADR 0308 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0308-live-apply.md)
+- [Workstream ws-0313-live-apply: Live Apply ADR 0313 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0313-live-apply.md)
 - [Workstream ws-0315-gitea-followups: Gitea Release Bundles And Renovate PR Validation Follow-ups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md)
+- [Workstream ws-0315-live-apply: Live Apply ADR 0315 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-live-apply.md)
 - [Workstream ws-0317-live-apply: Live Apply ADR 0317 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0317-live-apply.md)
 - [Workstream ws-0319-live-apply: Apply ADR 0319 And ADR 0320 On Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0319-live-apply.md)
 - [Workstream ws-0324-programmatic-doc-shards: Programmatic Document And Registry Sharding ADR Set](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0324-programmatic-doc-shards.md)
@@ -1582,8 +1585,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.137` |
-| Platform version | `0.130.86` |
+| Repository version | `0.177.140` |
+| Platform version | `0.130.88` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1864,6 +1867,7 @@ This repository is intentionally opinionated:
 | `0264` | Integrate ADR 0264 failure-domain-isolated validation lanes onto origin/main | `merged` | [ws-0264-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-main-merge.md) |
 | `0264` | Receipt-driven resilience architecture bundle | `merged` | [adr-0264-receipt-driven-resilience-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md) |
 | `0265` | Immutable validation snapshots for remote builders and schema checks | `live_applied` | [adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md) |
+| `0266` | Validation runner capability contracts and environment attestation | `live_applied` | [adr-0266-validation-runner-capability-contracts-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0266-validation-runner-capability-contracts-live-apply.md) |
 | `0268` | Fresh-worktree bootstrap manifests live apply | `live_applied` | [ws-0268-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0268-live-apply.md) |
 | `0268` | Integrate ADR 0268 exact-main replay onto current origin/main | `merged` | [ws-0268-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0268-main-integration.md) |
 | `0271` | Backup coverage assertion ledger live apply | `live_applied` | [ws-0271-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0271-live-apply.md) |
@@ -1881,6 +1885,8 @@ This repository is intentionally opinionated:
 | `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `merged` | [ws-0297-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md) |
 | `0297` | Integrate ADR 0297 live-apply evidence and release updates on main | `merged` | [ws-0297-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-main-merge.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md) |
+| `0313` | Live apply contextual help, glossary, and escalation drawer across the first-party portal surfaces | `live_applied` | [ws-0313-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0313-live-apply.md) |
+| `0315` | Live apply canonical page states and next-best-action guidance on the Windmill operator admin surface | `live_applied` | [ws-0315-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-live-apply.md) |
 | `0317` | Live apply ADR 0317 Keycloak direct-API operator provisioning via SSH proxy | `live_applied` | [ws-0317-live-apply.md](docs/workstreams/ws-0317-live-apply.md) |
 | `0319` | Split the overloaded shared runtime into pool-scoped lanes with higher memory headroom and bounded autoscaling | `merged` | [adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md) |
 | `0319` | Investigate recurring service restarts and uptime failures across the runtime pools | `merged` | [ws-0325-service-uptime-investigation.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0325-service-uptime-investigation.md) |

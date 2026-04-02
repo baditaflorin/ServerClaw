@@ -13,6 +13,7 @@ This runbook documents the repo-managed onboarding path introduced by ADR 0108.
 - `config/operators.yaml` validates.
 - `.local/keycloak/bootstrap-admin-password.txt` exists on the controller or Windmill worker.
 - `.local/openbao/init.json` exists on the controller or Windmill worker.
+- `make preflight WORKFLOW=operator-onboard` passes.
 - Optional but recommended:
   - `TAILSCALE_API_KEY` and `TAILSCALE_TAILNET`
   - `LV3_TAILSCALE_INVITE_ENDPOINT`
@@ -21,6 +22,29 @@ This runbook documents the repo-managed onboarding path introduced by ADR 0108.
 - `viewer` operators do not receive SSH access and therefore do not need an SSH public key; `admin` and `operator` still do.
 - `make converge-windmill` now mirrors the ADR 0108 operator-manager bootstrap secrets and optional environment values into the Windmill worker runtime so the browser-first path can use the same live credentials and optional hooks as the controller path without a worker-local `.local/` checkout.
 - Controller-local live runs should override `LV3_OPENBAO_URL` to a forwarded loopback automation endpoint such as `http://127.0.0.1:18201`; the shared service catalog still points OpenBao at the private mTLS listener on `https://100.64.0.1:8200`, while `operator_manager.py` uses the non-mTLS automation listener on `127.0.0.1:8201`.
+
+## Canonical Live Surface
+
+Prefer the Windmill worker path for real onboarding:
+
+```bash
+WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+python3 scripts/windmill_run_wait_result.py \
+  --base-url http://100.64.0.1:8005 \
+  --workspace lv3 \
+  --path f/lv3/operator_onboard \
+  --payload-json '{
+    "name": "Alice Example",
+    "email": "alice@example.com",
+    "role": "operator",
+    "ssh_key": "'"$(cat /tmp/alice.pub)"'",
+    "operator_id": "alice-example",
+    "keycloak_username": "alice.example"
+  }'
+```
+
+That route runs on `docker-runtime-lv3` and already exposes `LV3_OPENBAO_URL=http://lv3-openbao:8201`
+inside the worker runtime, so it avoids the controller-side mTLS trap automatically.
 
 ## Roster-First Flow
 
@@ -55,6 +79,37 @@ The app now includes a `Guided Onboarding` launcher:
 - the first-run Shepherd tour starts automatically on a fresh browser session
 - `Onboard Admin Or Operator` and `Onboard Viewer` give role-specific walkthroughs
 - dismissed tours can be resumed from the same launcher without restarting the page
+
+## Controller-Local Fallback
+
+If you need the controller-side script path, forward the guest-host OpenBao automation listener first:
+
+```bash
+ssh -f -N \
+  -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ExitOnForwardFailure=yes \
+  -o StrictHostKeyChecking=no \
+  -o UserKnownHostsFile=/dev/null \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' \
+  -L 18201:127.0.0.1:8201 \
+  ops@10.10.10.20
+```
+
+Then run the controller script against that loopback URL:
+
+```bash
+LV3_OPENBAO_URL=http://127.0.0.1:18201 \
+python3 scripts/operator_manager.py onboard \
+  --name "Alice Example" \
+  --email "alice@example.com" \
+  --role operator \
+  --ssh-key @/tmp/alice.pub \
+  --emit-json
+```
+
+For direct guest-host fallback without Windmill, use the same explicit `ProxyCommand` form and run
+the script on `ops@10.10.10.20` with `LV3_OPENBAO_URL=http://127.0.0.1:8201`.
 
 ## Direct Script Usage
 
@@ -118,10 +173,13 @@ make sync-operators
 
 ## Verification
 
+- `make preflight WORKFLOW=operator-onboard`
 - `python3 scripts/operator_manager.py validate`
 - `python3 scripts/operator_access_inventory.py --id <operator-id>`
 - `make workflow-info WORKFLOW=operator-onboard`
 - `make workflow-info WORKFLOW=sync-operators`
+- `curl -fsS https://sso.lv3.org/realms/lv3/.well-known/openid-configuration >/dev/null`
+- `curl -fsS http://100.64.0.1:8005/api/version`
 - `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/schedules/list | jq '.[] | select(.path=="f/lv3/quarterly_access_review_every_monday_0900")'`
 
 ## Notes

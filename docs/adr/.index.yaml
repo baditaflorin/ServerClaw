@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-04-02'
 total_adrs: 349
 implementation_status_summary:
-  Implemented: 291
+  Implemented: 293
   Partial: 8
-  Not Implemented: 49
+  Not Implemented: 47
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5516,9 +5516,9 @@ adr_index:
       - contracts
       - operator
       - provisioning
-    summary: The operatormanager.py onboard command must run from within the Docker network on VM 120
+    summary: The operatormanager.py onboard command must run where OpenBao is reachable over plain HTTP.
     filename: 0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
-    implemented_version: 0.0.0
+    implemented_version: 0.177.138
   - adr: 0309
     title: Task-Oriented Information Architecture Across The Platform Workbench
     status: Accepted
@@ -5585,7 +5585,7 @@ adr_index:
   - adr: '0313'
     title: Contextual Help, Glossary, And Escalation Drawer
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-31'
     concern: agent-discovery
     keywords:
@@ -5596,6 +5596,7 @@ adr_index:
       - drawer
     summary: We will provide a shared contextual help and escalation drawer in
     filename: 0313-contextual-help-glossary-and-escalation-drawer.md
+    implemented_version: 0.177.139
   - adr: '0314'
     title: Resumable Multi-Step Flows And Return-To-Task Reentry
     status: Accepted
@@ -5613,7 +5614,7 @@ adr_index:
   - adr: '0315'
     title: Canonical Page States And Next-Best-Action Guidance For Human Surfaces
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -5626,6 +5627,7 @@ adr_index:
       - surfaces
     summary: We will standardize first-party human-facing pages on a canonical state model
     filename: 0315-canonical-page-states-and-next-best-action-guidance-for-human-surfaces.md
+    implemented_version: 0.177.140
   - adr: '0316'
     title: Journey Analytics And Onboarding Success Scorecards
     status: Accepted

@@ -11,6 +11,22 @@ It gives operators and agents one place to answer:
 - whether a change came from a live apply, a promotion, or a mutation audit event
 - which receipt or evidence file backs the entry
 
+## Contextual Help
+
+ADR 0313 adds a shared **Contextual Help** drawer to the changelog portal so
+operators do not have to leave the history timeline to decode deployment terms
+or figure out the next escalation step.
+
+Expected page-level help content now includes:
+
+- a short explanation of the timeline or filtered view being shown
+- glossary entries such as `Live apply`, `Promotion`, `Mutation audit`, and
+  `Handoff`
+- canonical deep links to the deployment-history runbook, the shared glossary,
+  and ADR 0313
+- an **Escalation Path** section that points operators back to the owning
+  runbook and the receipt or evidence trail when the timeline looks wrong
+
 ## Generation
 
 Generate the portal locally:
@@ -84,6 +100,18 @@ or directly:
 uv run --with pyyaml --with jsonschema python scripts/generate_changelog_portal.py --check
 ```
 
+For a direct artifact assertion after generation:
+
+```bash
+python3 - <<'PY'
+from pathlib import Path
+html = Path("build/changelog-portal/index.html").read_text(encoding="utf-8")
+for marker in ("Contextual Help", "Escalation Path", "Mutation audit"):
+    assert marker in html, marker
+print("changelog-portal-help-ok")
+PY
+```
+
 ## Live Verification
 
 After publishing through the shared edge:
@@ -95,6 +123,18 @@ curl -Ik https://changelog.lv3.org/
 Expected result: `HTTP/2 302` to `/oauth2/sign_in` for an unauthenticated request.
 
 The shared edge publication lane also refreshes `build/docs-portal/`, so `make deploy-changelog-portal` remains self-contained even when the docs portal build directory is absent locally.
+
+For deployed artifact parity, compare the generated file with the edge copy on
+`nginx-lv3`:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.10 \
+  'sha256sum /var/www/lv3-generated/changelog-portal/index.html'
+sha256sum build/changelog-portal/index.html
+```
+
+Both digests should match after a clean publication replay.
 
 ## Deployment Boundary
 

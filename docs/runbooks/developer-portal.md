@@ -5,6 +5,24 @@
 
 This runbook covers the generated documentation site published at `docs.lv3.org`.
 
+## Contextual Help
+
+ADR 0313 adds a page-level **Contextual Help** drawer to the generated docs
+portal.
+
+Generated pages now carry structured `contextual_help` metadata in frontmatter.
+The MkDocs theme override renders that metadata as:
+
+- a masthead **Contextual Help** toggle
+- page-purpose and audience guidance
+- glossary terms that match the current page
+- canonical links back to the relevant runbooks, ADRs, and reference pages
+- an **Escalation Path** section for risky or failure-prone tasks
+
+The docs generator also now publishes a dedicated glossary reference page at
+`docs.lv3.org/reference/glossary/`, sourced from the same glossary registry used
+by the other first-party portal surfaces.
+
 ## Build
 
 ```bash
@@ -44,9 +62,13 @@ The deploy target refreshes both shared edge static directories before publicati
 - `build/docs-portal/index.html` exists after `make docs`
 - `build/docs-portal/services/keycloak/index.html` exists
 - `build/docs-portal/reference/ports/index.html` exists
+- `build/docs-portal/reference/glossary/index.html` exists
 - `build/docs-portal/pagefind/pagefind-entry.json` exists
 - `build/docs-portal/pagefind/pagefind-ui.js` exists
 - `build/docs-portal/index.html` references `pagefind/pagefind-ui.js`
+- `docs/site-generated/services/keycloak.md` includes `contextual_help:`
+- `build/docs-portal/services/keycloak/index.html` contains `Contextual Help`
+  and `Escalation Path`
 - unauthenticated `curl -Ik https://docs.lv3.org/` returns `302` to `/oauth2/sign_in`
 - the rendered site carries `<meta name="robots" content="noindex, nofollow">`
 - the published site returns `X-Robots-Tag: noindex, nofollow`

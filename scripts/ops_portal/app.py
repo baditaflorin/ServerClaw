@@ -7,7 +7,7 @@ import uuid
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from platform.datetime_compat import UTC, date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -18,6 +18,9 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Stre
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
+
+
+UTC = timezone.utc
 
 try:
     from publication_contract import registry_entries
@@ -36,6 +39,14 @@ except ImportError:  # pragma: no cover - direct module or repo checkout import 
         from runtime_assurance import build_runtime_assurance_models
     except ImportError:  # pragma: no cover - repo checkout import path
         from scripts.ops_portal.runtime_assurance import build_runtime_assurance_models
+
+try:
+    from .contextual_help import build_ops_portal_help
+except ImportError:  # pragma: no cover - direct module or repo checkout import path
+    try:
+        from contextual_help import build_ops_portal_help
+    except ImportError:  # pragma: no cover - repo checkout import path
+        from scripts.ops_portal.contextual_help import build_ops_portal_help
 
 
 def utc_now() -> datetime:
@@ -215,6 +226,7 @@ DEFAULT_PERSONA_CATALOG = {
 }
 LAUNCHER_RECENT_LIMIT = 6
 LAUNCHER_FAVORITE_LIMIT = 8
+LIVE_APPLY_RECEIPT_EXCLUDED_PARTS = {"evidence", "preview"}
 
 
 def browser_usable_url(value: Any) -> str | None:
@@ -224,6 +236,10 @@ def browser_usable_url(value: Any) -> str | None:
     if candidate.startswith(("http://", "https://")):
         return candidate
     return None
+
+
+def include_live_apply_receipt_path(path: Path) -> bool:
+    return not any(part in LIVE_APPLY_RECEIPT_EXCLUDED_PARTS for part in path.parts)
 
 
 def launcher_purpose_for_service(service: dict[str, Any]) -> str:
@@ -852,6 +868,8 @@ class PortalRepository:
         service_keywords = self._service_keywords(services)
         receipts: list[dict[str, Any]] = []
         for receipt_path in sorted(self.settings.live_applies_dir.rglob("*.json"), reverse=True):
+            if not include_live_apply_receipt_path(receipt_path):
+                continue
             receipt = load_optional_json_document(receipt_path)
             if not isinstance(receipt, dict):
                 continue
@@ -1700,6 +1718,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "search_query": "",
         "search_collection": "",
         "launcher": launcher_context["launcher"],
+        "contextual_help": build_ops_portal_help(request.app.state.settings.docs_base_url),
     }
 
 

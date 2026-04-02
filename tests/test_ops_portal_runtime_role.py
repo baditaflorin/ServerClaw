@@ -76,12 +76,22 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert "Sync critical ops portal runtime files explicitly" in tasks
     assert "Reset the synced search fabric package tree before refresh" in tasks
     assert "Sync the shared search fabric files" in tasks
+    assert "ops_portal_service_dir ~ '/search_fabric/'" in tasks
     assert "Sync the ops portal service build inputs explicitly" in tasks
     assert '{{ ops_portal_repo_root }}/scripts/publication_contract.py' in tasks
     assert '{{ ops_portal_repo_root }}/scripts/stage_smoke.py' in tasks
     assert '{{ ops_portal_repo_root }}/requirements/ops-portal.txt' in tasks
-    assert "Sync the ops portal directory-backed data sources" in tasks
-    assert 'directory_mode: "0755"' in tasks
+    assert 'patterns:' in defaults
+    assert '"*.json"' in defaults
+    assert 'excludes:' in defaults
+    assert '- evidence' in defaults
+    assert '- preview' in defaults
+    assert "Discover the ops portal directory-backed data files on the controller" in tasks
+    assert "item.excludes | default([])" in tasks
+    assert "Ensure the synced ops portal directory-backed data subdirectories exist" in tasks
+    assert "select('in', item.1.path.split('/'))" in tasks
+    assert "Sync the ops portal directory-backed data source files" in tasks
+    assert "ops_portal_directory_source_files.results | subelements('files', skip_missing=True)" in tasks
     assert "Remove stale ops portal build-context ignore and metadata files" in tasks
     assert "{{ ops_portal_build_context_dir }}/._publication_contract.py" in tasks
     assert "{{ ops_portal_build_context_dir }}/._stage_smoke.py" in tasks
@@ -117,6 +127,9 @@ def test_ops_portal_dockerfile_depends_on_synced_helper_files() -> None:
 def test_ops_portal_verify_checks_launcher_and_runtime_assurance_partials() -> None:
     verify_tasks = VERIFY_TASKS_PATH.read_text(encoding="utf-8")
 
+    assert "Assert the contextual help drawer is present on the ops portal root page" in verify_tasks
+    assert "'Contextual Help' in ops_portal_verify_root.content" in verify_tasks
+    assert "'Escalation Path' in ops_portal_verify_root.content" in verify_tasks
     assert "Verify the application launcher partial renders locally" in verify_tasks
     assert '/partials/launcher' in verify_tasks
     assert "Application Launcher" in verify_tasks

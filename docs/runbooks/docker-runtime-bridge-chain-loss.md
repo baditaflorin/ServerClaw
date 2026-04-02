@@ -57,9 +57,12 @@ blast radius.
 3. If most workloads are still up, schedule a maintenance window before any
    Docker daemon restart. A host-wide restart on this guest is disruptive by
    design.
-4. If the guest is already broadly degraded and a restart is approved, restart
-   Docker once on `docker-runtime-lv3`, then re-check the chains and container
-   state before touching service-specific playbooks.
+4. Repo-managed replays that pass through `lv3.platform.linux_guest_firewall`
+   now attempt one Docker restart automatically if the bridge-chain helper still
+   fails after the nftables reload. If that replay already consumed its single
+   restart or the guest is broadly degraded before any service converge begins,
+   restart Docker once on `docker-runtime-lv3`, then re-check the chains and
+   container state before touching service-specific playbooks.
 5. After the runtime is stable again, rerun only the affected service converges
    from the repo root instead of replaying unrelated services.
 

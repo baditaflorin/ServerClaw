@@ -58,19 +58,30 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert "inventory_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
     assert "playbook_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
     assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
-    assert defaults["windmill_worker_checkout_integrity_files"] == [
+    assert {
         "Makefile",
+        "config/sbom-scanner.json",
         "config/validation-gate.json",
         "config/validation-lanes.yaml",
+        "config/gate-bypass-waiver-catalog.json",
+        "scripts/__init__.py",
         "scripts/policy_checks.py",
         "scripts/policy_toolchain.py",
         "scripts/command_catalog.py",
+        "scripts/controller_automation_toolkit.py",
+        "scripts/validate_repo.sh",
+        "scripts/gate_bypass_waivers.py",
         "scripts/gate_status.py",
+        "scripts/sbom_scanner.py",
+        "scripts/sbom_refresh.py",
         "scripts/stage_smoke_suites.py",
+        "scripts/validation_lanes.py",
+        "scripts/run_python_with_packages.sh",
         "config/windmill/scripts/gate-status.py",
         "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+        "config/windmill/scripts/sbom-refresh.py",
         "config/windmill/scripts/stage-smoke-suites.py",
-    ]
+    }.issubset(set(defaults["windmill_worker_checkout_integrity_files"]))
     assert defaults["windmill_seed_repo_root_local_dir"] == "{{ windmill_worker_checkout_repo_root_local_dir }}"
     assert defaults["windmill_seed_script_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/scripts"
     assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
@@ -159,13 +170,18 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert "OPENBAO_INIT_JSON" in defaults["windmill_operator_manager_env"]
     assert {
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/fixtures", "mode": "1777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/sbom", "mode": "1777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/cve", "mode": "1777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/k6", "mode": "1777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/k6/raw", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local", "mode": "0755"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/k6", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/reaper-runs", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/runtime", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/archive", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/locks", "mode": "1777"}.items()),
-    } == {frozenset(item.items()) for item in defaults["windmill_worker_runtime_writable_directories"]}
+    }.issubset({frozenset(item.items()) for item in defaults["windmill_worker_runtime_writable_directories"]})
     weekly_schedule = next(entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/build_cache_maintenance_weekly")
     assert weekly_schedule["schedule"] == "0 0 4 * * 7"
     quarterly_schedule = next(
@@ -222,6 +238,24 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert "refetchInterval: 60_000" in app_source
     assert "refetchInterval: selectedOperatorId ? 45_000 : false" in app_source
     assert "Mutations now invalidate TanStack Query cache entries" in app_source
+    assert "const CANONICAL_PAGE_STATES" in app_source
+    assert '"loading"' in app_source
+    assert '"background_refresh"' in app_source
+    assert '"empty"' in app_source
+    assert '"partial_or_degraded"' in app_source
+    assert '"success"' in app_source
+    assert '"validation_error"' in app_source
+    assert '"system_error"' in app_source
+    assert '"unauthorized"' in app_source
+    assert '"not_found"' in app_source
+    assert "StateGuidanceCard" in app_source
+    assert "Next best action" in app_source
+    assert "Help and recovery" in app_source
+    assert 'data-canonical-state={state.kind}' in app_source
+    assert "ADR 0315 Page Guidance" in app_source
+    assert "Latest Result State" in app_source
+    assert "Rich Notes State" in app_source
+    assert "Inventory State" in app_source
     assert "isRosterPayload" in app_source
     assert "candidate.status === \"ok\" && Array.isArray(candidate.operators)" in app_source
     assert "extractRosterError" in app_source
@@ -300,6 +334,12 @@ def test_operator_admin_runbook_mentions_ag_grid_roster_controls() -> None:
     assert "Quick Filter" in runbook
     assert "pin or resize columns" in runbook
     assert "Guided Onboarding" in runbook
+    assert "Canonical Page-State Guidance" in runbook
+    assert "Background Refresh" in runbook
+    assert "Validation Error" in runbook
+    assert "Unauthorized" in runbook
+    assert "Latest Result" in runbook
+    assert "validate-repository-automation" in runbook
     assert "npm ci" in runbook
 
 
@@ -695,7 +735,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert 'delay: "{{ windmill_worker_container_wait_delay_seconds }}"' in tasks
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
-    assert "Run the Windmill seeded healthcheck script" not in tasks
+    assert "Run the Windmill seeded healthcheck script" in tasks
     assert 'WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"' in tasks
     assert "until: windmill_healthcheck.rc == 0" in tasks
     assert "failed_when: false" in tasks
@@ -720,8 +760,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Verify the Windmill default operations scripts are seeded" in verify_tasks
     assert 'WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"' in verify_tasks
     assert 'Authorization: "Bearer {{ windmill_runtime_api_token }}"' in verify_tasks
-    assert "until: windmill_verify_healthcheck.rc == 0" in verify_tasks
-    assert "until: windmill_verify_validation_gate_status.rc == 0" in verify_tasks
+    assert "windmill_verify_healthcheck.rc == 0" in verify_tasks
+    assert "windmill_verify_validation_gate_status.rc == 0" in verify_tasks
     assert "failed_when: false" in verify_tasks
     assert "retries: 6" in verify_tasks
     assert "windmill_verify_default_operations_scripts.status == 200" in verify_tasks

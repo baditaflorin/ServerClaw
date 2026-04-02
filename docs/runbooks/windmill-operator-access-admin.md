@@ -72,6 +72,40 @@ The browser app now uses TanStack Query for server-state and mutation feedback:
 
 Operators should expect explicit `Loading`, `Refreshing`, `Stale`, `Fresh`, and `Error` state pills in both the roster and inventory panels, plus a structured mutation result panel that records the last action outcome.
 
+## Canonical Page-State Guidance
+
+ADR 0315 now standardizes this page on one explicit state inventory with
+next-best-action guidance.
+
+Across the page and its major panels, operators can now encounter:
+
+- `Loading`
+- `Background Refresh`
+- `Empty`
+- `Partial / Degraded`
+- `Success`
+- `Validation Error`
+- `System Error`
+- `Unauthorized`
+- `Not Found`
+
+Every non-happy-path state now answers three questions inline:
+
+- what happened in plain language
+- what to do next without losing context
+- where to recover safely through the owning runbook or validation guidance
+
+The shared recovery links on this surface are:
+
+- `windmill-operator-access-admin`
+- `operator-onboarding`
+- `operator-offboarding`
+- `validate-repository-automation`
+
+The `Latest Result` panel is now part of the recovery model, not just a log
+dump. Treat its structured JSON payload as the canonical handoff artifact when
+you need another operator to continue the task.
+
 ## Operator Workflows Backed By The App
 
 - onboarding: `f/lv3/operator_onboard`

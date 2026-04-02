@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-from platform.datetime_compat import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urlparse
 
 from stage_smoke import declared_smoke_suites, latest_matching_smoke_receipt, receipt_passed as smoke_receipt_passed
+
+
+UTC = timezone.utc
 
 
 DEFAULT_OWNER_TEAM = "lv3-platform"

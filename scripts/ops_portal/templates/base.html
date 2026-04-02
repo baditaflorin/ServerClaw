@@ -44,13 +44,16 @@
             Applications
             <span class="launcher-toggle-meta">{{ launcher.selected_persona.name }}</span>
           </button>
-          <a
-            class="pf-v5-c-button pf-m-link portal-toolbar-link"
-            href="{{ docs_base_url }}/runbooks/ops-portal-down.md"
-            target="_blank"
-            rel="noreferrer">
-            Help
-          </a>
+          {% if contextual_help %}
+          <button
+            id="contextual-help-toggle"
+            class="pf-v5-c-button pf-m-link portal-toolbar-link contextual-help-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="contextual-help-drawer">
+            Contextual Help
+          </button>
+          {% endif %}
           <a class="pf-v5-c-button pf-m-secondary portal-toolbar-link" href="#drift">
             Notifications
             <span class="portal-toolbar-badge">{{ maintenance_count + (drift_summary.unsuppressed_count or 0) }}</span>
@@ -175,6 +178,100 @@
       <section id="launcher-shell" class="launcher-shell" hidden>
         {% include "partials/launcher.html" %}
       </section>
+      {% if contextual_help %}
+      <div class="contextual-help-overlay" data-contextual-help-dismiss hidden></div>
+      <aside id="contextual-help-drawer" class="contextual-help-drawer" hidden>
+        <div class="contextual-help-header">
+          <div>
+            <p class="portal-eyebrow">Need help in this page?</p>
+            <h2>{{ contextual_help.title }}</h2>
+          </div>
+          <button
+            class="pf-v5-c-button pf-m-plain contextual-help-close"
+            type="button"
+            aria-label="Close contextual help"
+            data-contextual-help-dismiss>
+            Close
+          </button>
+        </div>
+        <p class="contextual-help-summary">{{ contextual_help.summary }}</p>
+
+        {% if contextual_help.audience %}
+        <section class="contextual-help-block">
+          <h3>Audience</h3>
+          <div class="launcher-badges">
+            {% for audience in contextual_help.audience %}
+            <span class="launcher-badge">{{ audience }}</span>
+            {% endfor %}
+          </div>
+        </section>
+        {% endif %}
+
+        {% if contextual_help.sections %}
+        <section class="contextual-help-block">
+          <h3>Page Focus</h3>
+          <ul class="contextual-help-list">
+            {% for section in contextual_help.sections %}
+            <li class="contextual-help-list-item">
+              <a href="{{ section.href }}">{{ section.label }}</a>
+              <span>{{ section.summary }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+        </section>
+        {% endif %}
+
+        {% if contextual_help.glossary %}
+        <section class="contextual-help-block">
+          <h3>Glossary</h3>
+          <ul class="contextual-help-list">
+            {% for item in contextual_help.glossary %}
+            <li class="contextual-help-list-item">
+              <strong>{{ item.term }}</strong>
+              <span>{{ item.definition }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+        </section>
+        {% endif %}
+
+        {% if contextual_help.references %}
+        <section class="contextual-help-block">
+          <h3>Canonical Links</h3>
+          <ul class="contextual-help-links">
+            {% for item in contextual_help.references %}
+            <li class="contextual-help-link-row">
+              <a href="{{ item.href }}" target="_blank" rel="noreferrer">{{ item.label }}</a>
+              <span>{{ item.kind }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+        </section>
+        {% endif %}
+
+        {% if contextual_help.escalation %}
+        <section class="contextual-help-block contextual-help-block-accent">
+          <h3>Escalation Path</h3>
+          <div class="contextual-help-escalation-row">
+            <strong>Back out safely</strong>
+            <span>{{ contextual_help.escalation.backout }}</span>
+          </div>
+          {% if contextual_help.escalation.runbook %}
+          <div class="contextual-help-escalation-row">
+            <strong>Owning runbook</strong>
+            <a href="{{ contextual_help.escalation.runbook.href }}" target="_blank" rel="noreferrer">
+              {{ contextual_help.escalation.runbook.label }}
+            </a>
+          </div>
+          {% endif %}
+          <div class="contextual-help-escalation-row">
+            <strong>Handoff</strong>
+            <span>{{ contextual_help.escalation.handoff }}</span>
+          </div>
+        </section>
+        {% endif %}
+      </aside>
+      {% endif %}
       {% block content %}{% endblock %}
     </main>
   </div>

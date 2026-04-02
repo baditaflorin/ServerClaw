@@ -286,6 +286,105 @@ textarea {
   font-size: 0.92rem;
 }
 
+.stateCard {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.stateCardCompact {
+  padding: 16px;
+  border-radius: 18px;
+}
+
+.stateCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.stateCardCopy {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.stateCardBadgeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stateCardCopy h3 {
+  margin: 0;
+  font-family: "IBM Plex Serif", "Georgia", serif;
+  font-size: clamp(1.2rem, 2vw, 1.65rem);
+}
+
+.stateCardCopy p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.stateCardGrid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.stateCardGridCompact {
+  grid-template-columns: 1fr;
+}
+
+.stateCardGrid h4 {
+  margin: 0 0 10px;
+  font-size: 0.92rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.stateList {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.stateList li + li {
+  margin-top: 8px;
+}
+
+.stateLinks {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stateLink {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 9px 12px;
+  border: 1px solid rgba(28, 26, 22, 0.12);
+  background: white;
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.stateLink:hover {
+  border-color: rgba(165, 65, 28, 0.24);
+  color: var(--accent);
+}
+
 .tableWrap {
   display: grid;
   gap: 14px;
@@ -600,9 +699,23 @@ textarea {
   margin-bottom: 0;
 }
 
+.formStatusBanner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .bannerInfo {
   background: rgba(165, 65, 28, 0.08);
   border-color: rgba(165, 65, 28, 0.14);
+}
+
+.bannerWarning {
+  background: rgba(123, 86, 7, 0.09);
+  border-color: rgba(123, 86, 7, 0.18);
+  color: var(--pause);
 }
 
 .bannerError {
@@ -615,6 +728,10 @@ textarea {
   background: rgba(35, 98, 58, 0.08);
   border-color: rgba(35, 98, 58, 0.14);
   color: var(--ok);
+}
+
+.formStatusLink {
+  padding: 8px 12px;
 }
 
 .inventoryMeta {
@@ -871,6 +988,10 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .stateCardGrid {
+    grid-template-columns: 1fr;
+  }
+
   .tourCardHeader {
     flex-direction: column;
   }
@@ -912,6 +1033,10 @@ textarea {
 
   .toolbarSelect {
     min-width: 100%;
+  }
+
+  .stateCard {
+    padding: 16px;
   }
 
   .gridControls,

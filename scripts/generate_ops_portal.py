@@ -26,6 +26,7 @@ from environment_topology import (
     validate_environment_topology,
 )
 from portal_utils import PORTAL_STYLES, escape, page_template, render_badge, render_external_link
+from ops_portal.contextual_help import build_static_ops_page_help
 from release_manager import build_release_status_snapshot
 from service_catalog import load_service_catalog, validate_service_catalog
 from slo_tracking import build_slo_status_entries
@@ -897,7 +898,15 @@ def load_agent_registry_best_effort() -> tuple[dict[str, Any], dict[str, Any]]:
         )
 
 
-def write_page(output_dir: Path, relative_path: str, title: str, subtitle: str, body: str) -> None:
+def write_page(
+    output_dir: Path,
+    relative_path: str,
+    title: str,
+    subtitle: str,
+    body: str,
+    *,
+    docs_base_url: str = "https://docs.lv3.org",
+) -> None:
     target = output_dir / relative_path
     target.parent.mkdir(parents=True, exist_ok=True)
     depth_prefix = "../" * len(Path(relative_path).parent.parts)
@@ -908,6 +917,7 @@ def write_page(output_dir: Path, relative_path: str, title: str, subtitle: str, 
             nav_items=normalized_nav(relative_path),
             body=body,
             page_path=depth_prefix,
+            contextual_help=build_static_ops_page_help(relative_path, docs_base_url),
         )
     )
 
@@ -980,6 +990,7 @@ def render_portal(
         + render_release_panel()
         + render_ephemeral_vm_panel()
         + render_service_cards(services, health, dependency_summaries),
+        docs_base_url="https://docs.lv3.org",
     )
     write_page(
         output_dir,
@@ -987,6 +998,7 @@ def render_portal(
         "Environment Topology",
         "Canonical production and staging topology rendered from the environment, service, and subdomain catalogs.",
         render_environment_topology(environment_catalog, services, subdomains),
+        docs_base_url="https://docs.lv3.org",
     )
     write_page(
         output_dir,
@@ -994,6 +1006,7 @@ def render_portal(
         "VM Inventory",
         "Observed VM inventory from versions/stack.yaml with hosted services stitched in from the service catalog.",
         render_vm_inventory(services, stack, guest_roles),
+        docs_base_url="https://docs.lv3.org",
     )
     write_page(
         output_dir,
@@ -1001,6 +1014,7 @@ def render_portal(
         "DNS Map",
         "Catalog of active and planned LV3 subdomains, targets, exposure, and certificate ownership.",
         render_dns_map(subdomains),
+        docs_base_url="https://docs.lv3.org",
     )
     write_page(
         output_dir,
@@ -1008,6 +1022,7 @@ def render_portal(
         "Runbook Index",
         "All operator runbooks in one place, with linked ADR references detected from the markdown source.",
         render_runbooks(),
+        docs_base_url="https://docs.lv3.org",
     )
     write_page(
         output_dir,
@@ -1015,6 +1030,7 @@ def render_portal(
         "ADR Decision Log",
         "Repository ADRs with implementation metadata so operators can separate proposed contracts from real repo truth.",
         render_adrs(),
+        docs_base_url="https://docs.lv3.org",
     )
     write_page(
         output_dir,
@@ -1022,6 +1038,7 @@ def render_portal(
         "Agent Capability Surface",
         "Machine-readable tools currently available for agent and operator use, rendered for quick human inspection.",
         render_agents(tools),
+        docs_base_url="https://docs.lv3.org",
     )
     validate_output(output_dir)
     if snapshot_file is not None:

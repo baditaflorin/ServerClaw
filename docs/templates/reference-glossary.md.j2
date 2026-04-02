@@ -1,0 +1,10 @@
+# Glossary
+
+Shared first-party browser surfaces reuse these platform terms so operators do
+not have to reverse-engineer local wording from each page.
+
+| Term | Definition | Surface |
+| --- | --- | --- |
+{% for row in rows -%}
+| {{ row.term }} | {{ row.definition }} | {{ row.surface }} |
+{% endfor %}

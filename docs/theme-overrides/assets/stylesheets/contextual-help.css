@@ -1,0 +1,121 @@
+.lv3-contextual-help-toggle,
+.lv3-contextual-help-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--md-primary-bg-color);
+  font: inherit;
+  cursor: pointer;
+}
+
+.lv3-contextual-help-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  z-index: 31;
+}
+
+.lv3-contextual-help-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(30rem, 94vw);
+  padding: 1.2rem 1rem 1.4rem;
+  overflow-y: auto;
+  border-left: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: -18px 0 44px rgba(15, 23, 42, 0.18);
+  z-index: 32;
+}
+
+.lv3-contextual-help-header,
+.lv3-contextual-help-row,
+.lv3-contextual-help-links li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.lv3-contextual-help-header {
+  align-items: start;
+}
+
+.lv3-contextual-help-header h2,
+.lv3-contextual-help-block h3 {
+  margin: 0;
+}
+
+.lv3-contextual-help-summary {
+  margin: 0.85rem 0 0;
+  line-height: 1.6;
+}
+
+.lv3-contextual-help-block {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.lv3-contextual-help-block-accent {
+  padding: 0.95rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.lv3-contextual-help-list,
+.lv3-contextual-help-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.lv3-contextual-help-list li,
+.lv3-contextual-help-links li {
+  padding: 0.8rem 0.9rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: rgba(248, 250, 252, 0.88);
+}
+
+.lv3-contextual-help-list li {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.lv3-contextual-help-list span,
+.lv3-contextual-help-links span,
+.lv3-contextual-help-row span {
+  color: var(--md-default-fg-color--light);
+  line-height: 1.5;
+}
+
+.lv3-contextual-help-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.lv3-contextual-help-chips span {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: rgba(248, 250, 252, 0.88);
+}
+
+@media (max-width: 44.9375em) {
+  .lv3-contextual-help-toggle {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.74rem;
+  }
+}

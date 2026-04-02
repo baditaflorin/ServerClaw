@@ -2,9 +2,9 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.0.0
-- Implemented In Platform Version: 0.0.0
-- Implemented On: 2026-03-31
+- Implemented In Repo Version: 0.177.138
+- Implemented In Platform Version: 0.130.85
+- Implemented On: 2026-04-02
 - Date: 2026-03-31
 
 ## Context
@@ -29,20 +29,20 @@ constraints ad-hoc.
 
 ### Canonical execution surface
 
-The `operator_manager.py onboard` command **must run from within the Docker network on VM 120
-(`docker-runtime-lv3`, LAN IP `10.10.10.20`)**. The correct trigger is the Windmill workflow
-`operator-onboard`, which runs on that VM and has plain HTTP access to all required services.
+The `operator_manager.py onboard` command **must run where OpenBao is reachable over plain HTTP**.
+There are now two verified ways to satisfy that constraint:
 
-The correct invocation for an LLM agent is:
+1. **Preferred**: trigger the Windmill worker path `f/lv3/operator_onboard` on VM 120
+   (`docker-runtime-lv3`, LAN IP `10.10.10.20`). The worker runtime sets
+   `LV3_OPENBAO_URL=http://lv3-openbao:8201` and runs inside the exact network that can reach the
+   required services.
+2. **Fallback**: SSH to `docker-runtime-lv3` and run `scripts/operator_manager.py onboard` from the
+   guest host with `LV3_OPENBAO_URL=http://127.0.0.1:8201`.
 
-```
-1. Ensure operators.yaml is updated with the new operator entry (can be done from the Mac).
-2. Trigger the Windmill workflow via Windmill API (preferred), OR
-3. SSH to the Proxmox host and run the script remotely with LV3_OPENBAO_URL overridden.
-```
-
-Do NOT attempt to run `make operator-onboard` or `uvx ... operator_manager.py onboard` from the
-developer Mac directly against live services. It will fail.
+Do **not** attempt to run `make operator-onboard` or `scripts/operator_manager.py onboard` from the
+developer Mac against the default service-catalog OpenBao URL. The controller-side default still
+points at the private mTLS listener on `https://100.64.0.1:8200`, and `operator_manager.py` does
+not speak client-certificate TLS yet.
 
 ### Network topology
 
@@ -83,7 +83,7 @@ The private key for the `ops` user on the Proxmox host lives at:
 ```
 
 The corresponding public key is authorized on the Proxmox host (`ops@100.64.0.1`).
-The same key authorizes access through the ops user. Use:
+The same key is also authorized on `docker-runtime-lv3`. Use:
 
 ```bash
 ssh -i .local/ssh/hetzner_llm_agents_ed25519 \
@@ -91,76 +91,112 @@ ssh -i .local/ssh/hetzner_llm_agents_ed25519 \
     ops@100.64.0.1 '<command>'
 ```
 
-The Proxmox host **cannot** reach the docker-runtime VM (`10.10.10.20`) via SSH from the `ops` user
-account — the ops SSH key is not authorized on `10.10.10.20`. Docker-internal service access from
-the Proxmox host is via `nc` / TCP port probing only.
+For guest access, prefer the explicit proxy form because the `-J` shorthand does not always carry
+the correct identity arguments from an arbitrary workstation shell:
+
+```bash
+ssh -i .local/ssh/hetzner_llm_agents_ed25519 \
+    -o IdentitiesOnly=yes \
+    -o StrictHostKeyChecking=no \
+    -o UserKnownHostsFile=/dev/null \
+    -o ProxyCommand='ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' \
+    ops@10.10.10.20 '<command>'
+```
+
+That path was re-verified on 2026-04-02 from the controller worktree.
 
 ### Service health check procedure
 
-Before attempting any provisioning, an agent should verify all three backend services are up:
+Before attempting any provisioning, run the repo-managed preflight:
 
 ```bash
-# 1. Check Keycloak (public URL)
-curl -s -o /dev/null -w "%{http_code}" https://sso.lv3.org/realms/lv3
-# Expected: 200. If 502: Keycloak container is down on docker-runtime VM.
+make preflight WORKFLOW=operator-onboard
+```
 
-# 2. Check OpenBao (mTLS endpoint — just verify TCP + TLS handshake, not API)
-openssl s_client -connect 100.64.0.1:8200 -CAfile .local/step-ca/certs/root_ca.crt < /dev/null 2>/dev/null | grep -E "Verify|CONNECTED"
-# Expected: "Verify return code: 0 (ok)". If EOF/timeout: OpenBao socket not active.
+As of 2026-04-02 that preflight checks:
 
-# 3. Check Windmill (via Proxmox host since Tailscale proxy may be down)
-ssh -i .local/ssh/hetzner_llm_agents_ed25519 ops@100.64.0.1 \
-    'nc -z -w3 10.10.10.20 8000 && echo "up" || echo "down"'
-# Expected: "up". If "Connection refused": Windmill container is down.
+```bash
+# 1. Check Keycloak (public discovery contract)
+curl -fsS https://sso.lv3.org/realms/lv3/.well-known/openid-configuration >/dev/null
+
+# 2. Check OpenBao (private mTLS listener)
+openssl s_client -connect 100.64.0.1:8200 -CAfile .local/step-ca/certs/root_ca.crt < /dev/null 2>/dev/null | grep -q "Verify return code: 0 (ok)"
+
+# 3. Check Windmill (private host proxy contract)
+curl -fsS http://100.64.0.1:8005/api/version >/dev/null
 ```
 
 If any service is down, operator provisioning cannot complete. Do not proceed — record the failure
-and ask the user to check service health on VM 120.
+and repair the dependency first. The 2026-04-02 implementation now fails closed through
+`scripts/preflight_controller_local.py` instead of relying on manual memory alone.
 
 ### Windmill API trigger (preferred path)
 
-When Windmill is up, trigger the workflow via its API. The superadmin token is stored at:
+When Windmill is up, prefer the helper that resolves the current script metadata and submits through
+the supported `run_wait_result` path. The managed bootstrap secret lives at:
 
 ```
-.local/windmill/superadmin-token.txt   (if populated by Ansible)
+.local/windmill/superadmin-secret.txt
 ```
-
-Or retrieve it from OpenBao (requires OpenBao to be sealed/unsealed first).
 
 ```bash
-WM_TOKEN=$(cat .local/windmill/superadmin-token.txt)
-WM_URL="http://100.64.0.1:8005"    # or tunnel: ssh -L 18000:10.10.10.20:8000 ops@100.64.0.1
-
-curl -s -X POST "$WM_URL/api/w/lv3/jobs/run/f/platform/operator-onboard" \
-  -H "Authorization: Bearer $WM_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
+WINDMILL_TOKEN="$(tr -d '\n' < .local/windmill/superadmin-secret.txt)" \
+python3 scripts/windmill_run_wait_result.py \
+  --base-url http://100.64.0.1:8005 \
+  --workspace lv3 \
+  --path f/lv3/operator_onboard \
+  --payload-json '{
     "name": "Florin Badita",
     "email": "florin@badita.org",
     "role": "admin",
     "operator_id": "florin-tmp-001",
     "keycloak_username": "florin.badita-tmp",
     "tailscale_login_email": "florin@badita.org",
-    "bootstrap_password": "'$(cat .local/keycloak/bootstrap-admin-password.txt)'"
+    "bootstrap_password": "'"$(cat .local/keycloak/bootstrap-admin-password.txt)"'"
   }'
 ```
 
+For a no-mutation smoke, pass `"dry_run": true` and a `viewer` role payload.
+
 ### Remote script execution path (fallback)
 
-If Windmill is unavailable but the docker-runtime VM is accessible via SSH from the Proxmox host:
+If Windmill is unavailable, the guest-host fallback is now available directly from the Mac through
+the same `ops` key:
 
 ```bash
-# Not currently possible — ops SSH key not authorized on 10.10.10.20.
-# Future: add ops public key to docker-runtime VM's authorized_keys.
-# Once authorized:
-ssh -i .local/ssh/hetzner_llm_agents_ed25519 ops@100.64.0.1 \
-  "ssh ops@10.10.10.20 'cd /srv/proxmox_florin_server && \
-   LV3_OPENBAO_URL=http://lv3-openbao:8201 \
-   uvx --with pyyaml python scripts/operator_manager.py onboard \
-     --name \"Florin Badita\" \
-     --email \"florin@badita.org\" \
+ssh -i .local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o StrictHostKeyChecking=no \
+  -o UserKnownHostsFile=/dev/null \
+  -o ProxyCommand='ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' \
+  ops@10.10.10.20 \
+  'cd /srv/proxmox_florin_server && \
+   LV3_OPENBAO_URL=http://127.0.0.1:8201 \
+   uv run --with pyyaml python scripts/operator_manager.py onboard \
+     --name "Florin Badita" \
+     --email "florin@badita.org" \
      --role admin \
-     --id florin-tmp-001'"
+     --id florin-tmp-001 \
+     --ssh-key "@/tmp/florin.pub" \
+     --emit-json'
+```
+
+For a controller-local live read path without switching execution surfaces, forward OpenBao to a
+loopback automation port first:
+
+```bash
+ssh -f -N \
+  -i .local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ExitOnForwardFailure=yes \
+  -o StrictHostKeyChecking=no \
+  -o UserKnownHostsFile=/dev/null \
+  -o ProxyCommand='ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' \
+  -L 18201:127.0.0.1:8201 \
+  ops@10.10.10.20
+
+LV3_OPENBAO_URL=http://127.0.0.1:18201 \
+uv run --with pyyaml python scripts/operator_access_inventory.py --id florin-badita
 ```
 
 ### operators.yaml editing (always works from Mac)
@@ -199,8 +235,8 @@ ssh-keygen -t ed25519 -C "<id>@lv3 (expires <date>)" -f /tmp/<id> -N ""
 - The SSH key location is explicit — no hunt across `.local/` subdirectories
 
 **Negative / Trade-offs**
-- The "correct path" (Windmill API trigger) requires Windmill to be up; there is no fully local fallback today
-- The remote script fallback requires the ops SSH key to be authorized on the docker-runtime VM (not yet the case)
+- The preferred Windmill path still requires Windmill to be healthy on `docker-runtime-lv3`
+- Controller-local live runs still require an OpenBao loopback override or tunnel because the default service catalog points at the mTLS edge
 - `operator_manager.py` has no client-cert support, making the mTLS endpoint permanently inaccessible from the Mac without code changes
 
 ## Gap Register
@@ -210,9 +246,8 @@ These gaps make the workflow more fragile than it should be. Each is tracked her
 | Gap | Impact | Fix |
 |-----|--------|-----|
 | `operator_manager.py` has no SSL client-cert support | Can only call OpenBao from Docker-internal network | Add `LV3_OPENBAO_CLIENT_CERT` / `LV3_OPENBAO_CLIENT_KEY` env var support to `platform/operator_access/http.py` |
-| ops SSH key not authorized on `docker-runtime-lv3` | No fallback path when Windmill is down | Add `hetzner_llm_agents_ed25519.pub` to ops authorized_keys on VM 120 |
-| No `.local/windmill/superadmin-token.txt` convention | Windmill API trigger requires manual token lookup | Ansible role for Windmill should persist the superadmin token to `.local/windmill/` |
-| Service health not checked before provisioning attempt | Agents waste turns on connection errors | Add preflight health check to `scripts/preflight_controller_local.py` for operator-onboard |
+| Controller-side `make operator-onboard` still resolves OpenBao through the service catalog by default | Controller-local live runs fail unless the operator knows to tunnel or override `LV3_OPENBAO_URL` | Teach the controller path to prefer a repo-managed loopback automation endpoint when one is available |
+| The supported Windmill script path and token file were easy to misremember (`f/lv3/operator_onboard` vs older guesses, `superadmin-secret.txt` vs `superadmin-token.txt`) | Agents can hit the wrong API route or secret path even when the runtime is healthy | Keep ADR 0308 and `docs/runbooks/operator-onboarding.md` aligned with the live Windmill contract and re-verify after each Windmill replay |
 
 ## Related ADRs
 

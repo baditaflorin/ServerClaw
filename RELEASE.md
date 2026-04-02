@@ -1,12 +1,12 @@
-# Release 0.177.137
+# Release 0.177.140
 
 - Date: 2026-04-02
 
 ## Summary
-- implements ADR 0317 by restoring the live Keycloak direct-API provisioning path, making the repo-managed fallback safe from dedicated git worktrees, aligning the fallback role mapping with the live realm, and recording exact-main recovery plus direct verification evidence
+- implements ADR 0315 by standardizing the live operator admin surface on a reusable canonical state model that explains loading, empty, degraded, validation, system-error, unauthorized, not-found, and success outcomes with explicit next-best actions and linked recovery guidance
 
 ## Platform Impact
-- Restored the Keycloak direct-API operator provisioning fallback and verified the worktree-safe replay path.
+- platform version advances to 0.130.88 after the exact-main ADR 0315 replay re-verifies the governed Windmill operator admin surface and next-best-action guidance on top of the 0.130.87 baseline
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

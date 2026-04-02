@@ -42,6 +42,7 @@ ALLOWED_ESCALATION_ACTIONS = {"notify_and_abort", "abort_silently", "escalate_to
 ALLOWED_RESOURCE_CLAIM_ACCESS = {"read", "write", "exclusive"}
 WORKFLOW_SECRET_FIELDS = ("required_secret_ids", "generated_secret_ids", "blocked_secret_ids")
 EXECUTION_LANES_PATH = repo_path("config", "execution-lanes.yaml")
+DEFAULT_PREFLIGHT_HEALTH_CHECK_TIMEOUT_SECONDS = 15
 
 
 def load_json(path: Path) -> dict:
@@ -148,6 +149,31 @@ def validate_secret_manifest(manifest: dict) -> None:
     secrets = manifest.get("secrets")
     if not isinstance(secrets, dict):
         raise ValueError("secret manifest must define an object-valued 'secrets' key")
+
+
+def validate_preflight_health_checks(health_checks: object, workflow_id: str) -> None:
+    if health_checks is None:
+        return
+    if not isinstance(health_checks, list):
+        raise ValueError(f"workflow '{workflow_id}' preflight.health_checks must be a list")
+    for index, check in enumerate(health_checks):
+        path = f"workflow '{workflow_id}' preflight.health_checks[{index}]"
+        if not isinstance(check, dict):
+            raise ValueError(f"{path} must be a mapping")
+        check_id = check.get("id")
+        if not isinstance(check_id, str) or not check_id.strip():
+            raise ValueError(f"{path}.id must be a non-empty string")
+        description = check.get("description")
+        if not isinstance(description, str) or not description.strip():
+            raise ValueError(f"{path}.description must be a non-empty string")
+        command = check.get("command")
+        if not isinstance(command, str) or not command.strip():
+            raise ValueError(f"{path}.command must be a non-empty string")
+        timeout_seconds = check.get("timeout_seconds", DEFAULT_PREFLIGHT_HEALTH_CHECK_TIMEOUT_SECONDS)
+        if isinstance(timeout_seconds, bool) or not isinstance(timeout_seconds, int):
+            raise ValueError(f"{path}.timeout_seconds must be an integer")
+        if timeout_seconds < 1:
+            raise ValueError(f"{path}.timeout_seconds must be >= 1")
 
 
 def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_catalog: dict | None = None) -> None:
@@ -278,6 +304,7 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
                     f"workflow '{workflow_id}' bootstrap_manifest_ids[{index}] must be a non-empty string"
                 )
         resolve_workflow_manifest_ids(bootstrap_catalog, workflow)
+        validate_preflight_health_checks(preflight.get("health_checks", []), workflow_id)
 
         validation_targets = workflow.get("validation_targets")
         if not isinstance(validation_targets, list):
@@ -455,6 +482,14 @@ def show_workflow(catalog: dict, workflow_id: str) -> int:
             print(f"  - {manifest_id}: {manifest['description']}")
     else:
         print("Bootstrap manifests: none")
+    health_checks = preflight.get("health_checks", [])
+    if health_checks:
+        print("Preflight health checks:")
+        for check in health_checks:
+            timeout_seconds = check.get("timeout_seconds", DEFAULT_PREFLIGHT_HEALTH_CHECK_TIMEOUT_SECONDS)
+            print(f"  - {check['id']} ({timeout_seconds}s): {check['description']}")
+    else:
+        print("Preflight health checks: none")
 
     print("Implementation refs:")
     for path_str in workflow["implementation_refs"]:

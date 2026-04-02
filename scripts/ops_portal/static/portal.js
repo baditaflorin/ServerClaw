@@ -5,6 +5,9 @@
   const sidebar = document.querySelector("[data-portal-sidebar]");
   const launcherToggle = document.getElementById("launcher-toggle");
   const launcherShell = document.getElementById("launcher-shell");
+  const contextualHelpToggle = document.getElementById("contextual-help-toggle");
+  const contextualHelpDrawer = document.getElementById("contextual-help-drawer");
+  const contextualHelpDismiss = document.querySelectorAll("[data-contextual-help-dismiss]");
 
   function setSidebarOpen(isOpen) {
     body.classList.toggle("portal-sidebar-open", isOpen);
@@ -27,6 +30,20 @@
     }
   }
 
+  function setContextualHelpOpen(isOpen) {
+    if (!contextualHelpToggle || !contextualHelpDrawer) {
+      return;
+    }
+    contextualHelpDrawer.hidden = !isOpen;
+    contextualHelpToggle.setAttribute("aria-expanded", String(isOpen));
+    body.classList.toggle("contextual-help-open", isOpen);
+    contextualHelpDismiss.forEach((element) => {
+      if (element instanceof HTMLElement) {
+        element.hidden = !isOpen;
+      }
+    });
+  }
+
   if (navToggle && sidebar) {
     navToggle.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -47,6 +64,24 @@
 
     launcherShell.addEventListener("click", (event) => {
       event.stopPropagation();
+    });
+  }
+
+  if (contextualHelpToggle && contextualHelpDrawer) {
+    contextualHelpToggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const isOpen = contextualHelpToggle.getAttribute("aria-expanded") === "true";
+      setContextualHelpOpen(!isOpen);
+    });
+
+    contextualHelpDrawer.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
+
+    contextualHelpDismiss.forEach((element) => {
+      element.addEventListener("click", () => {
+        setContextualHelpOpen(false);
+      });
     });
   }
 
@@ -96,6 +131,16 @@
     }
 
     if (
+      contextualHelpDrawer &&
+      contextualHelpToggle &&
+      !contextualHelpDrawer.hidden &&
+      !contextualHelpDrawer.contains(event.target) &&
+      !contextualHelpToggle.contains(event.target)
+    ) {
+      setContextualHelpOpen(false);
+    }
+
+    if (
       window.innerWidth <= 960 &&
       body.classList.contains("portal-sidebar-open") &&
       sidebar &&
@@ -114,6 +159,10 @@
     if (launcherShell && !launcherShell.hidden) {
       setLauncherOpen(false);
       launcherToggle?.focus();
+    }
+    if (contextualHelpDrawer && !contextualHelpDrawer.hidden) {
+      setContextualHelpOpen(false);
+      contextualHelpToggle?.focus();
     }
     if (body.classList.contains("portal-sidebar-open")) {
       setSidebarOpen(false);

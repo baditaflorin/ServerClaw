@@ -29,6 +29,129 @@ def render_external_link(href: str, label: str) -> str:
 ROBOTS_META_CONTENT = "noindex, nofollow"
 
 
+def _render_help_sections(sections: list[dict[str, str]]) -> str:
+    if not sections:
+        return ""
+    items = []
+    for item in sections:
+        items.append(
+            '<li class="contextual-help-list-item">'
+            f'<a href="{escape(item["href"])}">{escape(item["label"])}</a>'
+            f'<span>{escape(item["summary"])}</span>'
+            "</li>"
+        )
+    return (
+        '<section class="contextual-help-block">'
+        '<h2 class="contextual-help-title">Page Focus</h2>'
+        f'<ul class="contextual-help-list">{"".join(items)}</ul>'
+        "</section>"
+    )
+
+
+def _render_help_glossary(glossary: list[dict[str, str]]) -> str:
+    if not glossary:
+        return ""
+    items = []
+    for item in glossary:
+        items.append(
+            '<li class="contextual-help-list-item">'
+            f'<strong>{escape(item["term"])}</strong>'
+            f'<span>{escape(item["definition"])}</span>'
+            "</li>"
+        )
+    return (
+        '<section class="contextual-help-block">'
+        '<h2 class="contextual-help-title">Glossary</h2>'
+        f'<ul class="contextual-help-list">{"".join(items)}</ul>'
+        "</section>"
+    )
+
+
+def _render_help_references(references: list[dict[str, str]]) -> str:
+    if not references:
+        return ""
+    links = []
+    for item in references:
+        links.append(
+            '<li class="contextual-help-link-row">'
+            f'<a href="{escape(item["href"])}" target="_blank" rel="noreferrer">{escape(item["label"])}</a>'
+            f'<span>{escape(item["kind"])}</span>'
+            "</li>"
+        )
+    return (
+        '<section class="contextual-help-block">'
+        '<h2 class="contextual-help-title">Canonical Links</h2>'
+        f'<ul class="contextual-help-links">{"".join(links)}</ul>'
+        "</section>"
+    )
+
+
+def _render_help_escalation(escalation: dict[str, object] | None) -> str:
+    if not escalation:
+        return ""
+    runbook = escalation.get("runbook")
+    runbook_html = ""
+    if isinstance(runbook, dict):
+        runbook_html = (
+            '<div class="contextual-help-escalation-row">'
+            '<strong>Owning runbook</strong>'
+            f'<a href="{escape(runbook.get("href", ""))}" target="_blank" rel="noreferrer">{escape(runbook.get("label", "Runbook"))}</a>'
+            "</div>"
+        )
+    return (
+        '<section class="contextual-help-block contextual-help-block-accent">'
+        '<h2 class="contextual-help-title">Escalation Path</h2>'
+        '<div class="contextual-help-escalation-row">'
+        '<strong>Back out safely</strong>'
+        f'<span>{escape(escalation.get("backout", ""))}</span>'
+        "</div>"
+        f"{runbook_html}"
+        '<div class="contextual-help-escalation-row">'
+        '<strong>Handoff</strong>'
+        f'<span>{escape(escalation.get("handoff", ""))}</span>'
+        "</div>"
+        "</section>"
+    )
+
+
+def render_contextual_help(contextual_help: dict[str, object] | None) -> str:
+    if not contextual_help:
+        return ""
+    audience = contextual_help.get("audience")
+    audience_html = ""
+    if isinstance(audience, list) and audience:
+        chips = "".join(f'<span class="tag">{escape(item)}</span>' for item in audience)
+        audience_html = (
+            '<div class="contextual-help-audience">'
+            '<strong>Audience</strong>'
+            f'<div class="chip-row">{chips}</div>'
+            "</div>"
+        )
+    sections = contextual_help.get("sections")
+    glossary = contextual_help.get("glossary")
+    references = contextual_help.get("references")
+    return (
+        '<div class="contextual-help-shell">'
+        '<button class="contextual-help-toggle" type="button" aria-expanded="false" aria-controls="contextual-help-drawer" data-contextual-help-toggle>'
+        "Contextual Help"
+        "</button>"
+        '<div class="contextual-help-overlay" data-contextual-help-dismiss hidden></div>'
+        '<aside class="contextual-help-drawer" id="contextual-help-drawer" hidden>'
+        '<div class="contextual-help-header">'
+        f'<div><p class="eyebrow">Need help in this page?</p><h2>{escape(contextual_help.get("title", "Contextual Help"))}</h2></div>'
+        '<button class="contextual-help-close" type="button" aria-label="Close contextual help" data-contextual-help-dismiss>Close</button>'
+        "</div>"
+        f'<p class="subtitle">{escape(contextual_help.get("summary", ""))}</p>'
+        f"{audience_html}"
+        f"{_render_help_sections(sections if isinstance(sections, list) else [])}"
+        f"{_render_help_glossary(glossary if isinstance(glossary, list) else [])}"
+        f"{_render_help_references(references if isinstance(references, list) else [])}"
+        f"{_render_help_escalation(contextual_help.get('escalation') if isinstance(contextual_help.get('escalation'), dict) else None)}"
+        "</aside>"
+        "</div>"
+    )
+
+
 def page_template(
     *,
     title: str,
@@ -36,11 +159,14 @@ def page_template(
     nav_items: list[tuple[str, str, bool]],
     body: str,
     page_path: str,
+    contextual_help: dict[str, object] | None = None,
 ) -> str:
     nav_html = []
     for href, label, active in nav_items:
         classes = "nav-link nav-link-active" if active else "nav-link"
         nav_html.append(f'<a class="{classes}" href="{escape(href)}">{escape(label)}</a>')
+
+    help_html = render_contextual_help(contextual_help)
 
     return f"""<!doctype html>
 <html lang="en">
@@ -57,6 +183,7 @@ def page_template(
         <p class="eyebrow">LV3 Platform</p>
         <h1>{escape(title)}</h1>
         <p class="subtitle">{escape(subtitle)}</p>
+        {help_html}
       </header>
       <nav class="nav-bar">
         {''.join(nav_html)}
@@ -65,6 +192,37 @@ def page_template(
         {body}
       </main>
     </div>
+    <script>
+      (() => {{
+        const body = document.body;
+        const toggle = document.querySelector("[data-contextual-help-toggle]");
+        const drawer = document.getElementById("contextual-help-drawer");
+        const dismissButtons = document.querySelectorAll("[data-contextual-help-dismiss]");
+        if (!toggle || !drawer) {{
+          return;
+        }}
+        function setOpen(isOpen) {{
+          toggle.setAttribute("aria-expanded", String(isOpen));
+          drawer.hidden = !isOpen;
+          dismissButtons.forEach((button) => {{
+            if (button instanceof HTMLElement && button.classList.contains("contextual-help-overlay")) {{
+              button.hidden = !isOpen;
+            }}
+          }});
+          body.classList.toggle("contextual-help-open", isOpen);
+        }}
+        toggle.addEventListener("click", () => setOpen(toggle.getAttribute("aria-expanded") !== "true"));
+        dismissButtons.forEach((button) => {{
+          button.addEventListener("click", () => setOpen(false));
+        }});
+        document.addEventListener("keydown", (event) => {{
+          if (event.key === "Escape" && toggle.getAttribute("aria-expanded") === "true") {{
+            setOpen(false);
+            toggle.focus();
+          }}
+        }});
+      }})();
+    </script>
   </body>
 </html>
 """
@@ -141,6 +299,108 @@ a {
   color: var(--muted);
   font-size: 1rem;
   line-height: 1.6;
+}
+
+.contextual-help-shell {
+  margin-top: 18px;
+}
+
+.contextual-help-toggle,
+.contextual-help-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.contextual-help-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 37, 32, 0.3);
+  z-index: 18;
+}
+
+.contextual-help-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(28rem, 92vw);
+  padding: 24px 20px 28px;
+  border-left: 1px solid var(--line);
+  background: rgba(255, 251, 244, 0.98);
+  box-shadow: var(--shadow);
+  overflow-y: auto;
+  z-index: 19;
+}
+
+.contextual-help-header,
+.contextual-help-escalation-row,
+.contextual-help-link-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.contextual-help-header {
+  align-items: start;
+}
+
+.contextual-help-audience,
+.contextual-help-block {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.contextual-help-block-accent {
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: rgba(20, 90, 74, 0.06);
+}
+
+.contextual-help-title {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.contextual-help-list,
+.contextual-help-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.contextual-help-list-item,
+.contextual-help-link-row {
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--panel-strong);
+}
+
+.contextual-help-list-item {
+  display: grid;
+  gap: 6px;
+}
+
+.contextual-help-list-item a,
+.contextual-help-link-row a {
+  font-weight: bold;
+}
+
+.contextual-help-link-row {
+  align-items: center;
 }
 
 .nav-bar {
