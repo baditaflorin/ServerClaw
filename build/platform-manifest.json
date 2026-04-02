@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.143",
-  "platform_version": "0.130.90",
-  "generated_at": "2026-04-02T11:55:16Z",
-  "next_refresh_at": "2026-04-02T12:55:16Z",
+  "repo_version": "0.177.144",
+  "platform_version": "0.130.91",
+  "generated_at": "2026-04-02T13:38:35Z",
+  "next_refresh_at": "2026-04-02T14:38:35Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5608,7 +5608,7 @@
         "id": "operator-onboarding",
         "title": "Operator Onboarding",
         "agent_trust_required": "T3",
-        "steps": 7,
+        "steps": 12,
         "path": "docs/runbooks/operator-onboarding.md",
         "workflow_ids": [
           "operator-onboard",
@@ -5629,7 +5629,7 @@
         "id": "platform-operations-portal",
         "title": "Platform Operations Portal",
         "agent_trust_required": "T3",
-        "steps": 16,
+        "steps": 45,
         "path": "docs/runbooks/platform-operations-portal.md",
         "workflow_ids": [
           "converge-ops-portal"
@@ -5987,10 +5987,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.142",
+    "last_version": "0.177.143",
     "deployed_at": "2026-04-02",
-    "summary": "implements ADRs 0330-0339 by turning public GitHub readiness into a first-class repository lifecycle, making workstream and generated-doc metadata repository-relative, simplifying root onboarding docs into a generic forkable template, and enforcing new public-entrypoint leakage validation",
-    "release_notes_url": "docs/release-notes/0.177.143.md"
+    "summary": "implements ADRs 0308, 0310, and 0312 by adding the journey-aware `/entry` router, first-run activation checklist and progressive capability reveal, shared notification center and activity timeline, and resilient search-fabric sync for the interactive ops portal runtime",
+    "release_notes_url": "docs/release-notes/0.177.144.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

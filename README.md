@@ -43,8 +43,8 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.143` |
-| Platform version | `0.130.90` |
+| Repository version | `0.177.144` |
+| Platform version | `0.130.91` |
 | Observed check date | `2026-04-02` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -163,7 +163,7 @@ rewriting one operator's workstation paths.
 | `operator_access_runbooks` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_validation` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_workflows` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
-| `ops_portal` | `2026-04-02-adr-0313-contextual-help-mainline-live-apply` |
+| `ops_portal` | `2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply` |
 | `ops_portal_visualizations` | `2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply` |
 | `outline` | `2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply` |
 | `paperless` | `2026-03-31-adr-0285-paperless-live-apply` |
@@ -303,8 +303,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.143` |
-| Platform version | `0.130.90` |
+| Repository version | `0.177.144` |
+| Platform version | `0.130.91` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -581,7 +581,10 @@ Current values on `main`:
 | `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `merged` | [ws-0297-live-apply.md](docs/workstreams/ws-0297-live-apply.md) |
 | `0297` | Integrate ADR 0297 live-apply evidence and release updates on main | `merged` | [ws-0297-main-merge.md](docs/workstreams/ws-0297-main-merge.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
+| `0308` | Live apply ADR 0308 journey-aware entry routing and saved home selection from latest origin/main | `live_applied` | [ws-0308-journey-live-apply.md](docs/workstreams/ws-0308-journey-live-apply.md) |
+| `0310` | Implement the first-run activation checklist and progressive capability reveal inside the interactive ops portal | `live_applied` | [ws-0310-live-apply.md](docs/workstreams/ws-0310-live-apply.md) |
 | `0311` | Live apply a repo-managed cmdk command palette and universal open dialog on the Windmill operator access admin surface | `merged` | [ws-0311-live-apply.md](docs/workstreams/ws-0311-live-apply.md) |
+| `0312` | Live apply the shared notification center and activity timeline across human surfaces | `live_applied` | [ws-0312-live-apply.md](docs/workstreams/ws-0312-live-apply.md) |
 | `0313` | Live apply contextual help, glossary, and escalation drawer across the first-party portal surfaces | `live_applied` | [ws-0313-live-apply.md](docs/workstreams/ws-0313-live-apply.md) |
 | `0315` | Live apply canonical page states and next-best-action guidance on the Windmill operator admin surface | `live_applied` | [ws-0315-live-apply.md](docs/workstreams/ws-0315-live-apply.md) |
 | `0316` | Live apply journey analytics and onboarding success scorecards from latest origin/main | `merged` | [ws-0316-live-apply.md](docs/workstreams/ws-0316-live-apply.md) |

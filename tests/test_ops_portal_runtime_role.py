@@ -80,6 +80,9 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert "Reset the synced search fabric package tree before refresh" in tasks
     assert "Sync the shared search fabric files" in tasks
     assert "ops_portal_service_dir ~ '/search_fabric/'" in tasks
+    assert "register: search_fabric_copy_result" in tasks
+    assert "retries: 3" in tasks
+    assert "until: search_fabric_copy_result is succeeded" in tasks
     assert "Sync the ops portal service build inputs explicitly" in tasks
     assert '{{ ops_portal_repo_root }}/scripts/publication_contract.py' in tasks
     assert '{{ ops_portal_repo_root }}/scripts/stage_smoke.py' in tasks

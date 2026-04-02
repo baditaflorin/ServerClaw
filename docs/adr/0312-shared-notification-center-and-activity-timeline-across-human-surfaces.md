@@ -1,9 +1,10 @@
 # ADR 0312: Shared Notification Center And Activity Timeline Across Human Surfaces
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.144
+- Implemented In Platform Version: 0.130.91
+- Implemented On: 2026-04-02
 - Date: 2026-03-31
 
 ## Context

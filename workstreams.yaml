@@ -621,11 +621,11 @@ workstreams:
   - id: ws-0310-live-apply
     adr: "0310"
     title: Implement the first-run activation checklist and progressive capability reveal inside the interactive ops portal
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0310-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0310-live-apply.md
+    worktree_path: .worktrees/ws-0310-live-apply
+    doc: docs/workstreams/ws-0310-live-apply.md
     depends_on:
       - adr-0093-interactive-ops-portal-runtime-contract
       - adr-0108-operator-onboarding-and-offboarding
@@ -658,8 +658,8 @@ workstreams:
       - tests/test_interactive_ops_portal.py
       - tests/test_ops_portal_playbook.py
       - tests/test_ops_portal_runtime_role.py
-      - receipts/live-applies/2026-04-02-adr-0310-activation-checklist-live-apply.json
-      - receipts/live-applies/evidence/2026-04-02-ws-0310-*
+      - receipts/live-applies/2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-04-02-ws-0308-journey-*
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -709,11 +709,13 @@ workstreams:
           mode: exclusive
         - id: ws0310_live_apply_receipts
           paths:
-            - receipts/live-applies/2026-04-02-adr-0310-activation-checklist-live-apply.json
-            - receipts/live-applies/evidence/2026-04-02-ws-0310-*
+            - receipts/live-applies/2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-04-02-ws-0308-journey-*
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    canonical_truth:
+      included_in_repo_version: 0.177.144
+    ready_to_merge: true
+    live_applied: true
     blockers: []
   - id: ws-0313-live-apply
     adr: "0313"
@@ -15203,11 +15205,11 @@ workstreams:
   - id: ws-0308-journey-live-apply
     adr: "0308"
     title: Live apply ADR 0308 journey-aware entry routing and saved home selection from latest origin/main
-    status: ready
+    status: live_applied
     owner: codex
-    branch: codex/ws-0308-live-apply-r2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0308-live-apply-r2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0308-journey-live-apply.md
+    branch: codex/ws-0308-live-apply-r3
+    worktree_path: .worktrees/ws-0308-live-apply-r2
+    doc: docs/workstreams/ws-0308-journey-live-apply.md
     depends_on:
       - adr-0093-interactive-ops-portal
       - adr-0152-homepage
@@ -15219,18 +15221,43 @@ workstreams:
     shared_surfaces:
       - workstreams.yaml
       - docs/workstreams/ws-0308-journey-live-apply.md
+      - docs/workstreams/ws-0310-live-apply.md
+      - docs/workstreams/ws-0312-live-apply.md
       - docs/workstreams/adr-0307-platform-app-cohesion-bundle.md
       - docs/adr/0308-journey-aware-entry-routing-and-saved-home-selection.md
+      - docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md
+      - docs/adr/0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md
       - docs/adr/.index.yaml
+      - .config-locations.yaml
+      - config/activation-checklist.json
+      - docs/schema/activation-checklist.schema.json
       - docs/runbooks/platform-operations-portal.md
+      - docs/runbooks/operator-onboarding.md
+      - docs/runbooks/windmill-operator-access-admin.md
+      - docs/runbooks/ops-portal-down.md
+      - Makefile
+      - inventory/group_vars/platform.yml
+      - playbooks/ops-portal.yml
+      - receipts/ops-portal-snapshot.html
       - scripts/ops_portal/app.py
       - scripts/ops_portal/templates/base.html
       - scripts/ops_portal/templates/entry.html
       - scripts/ops_portal/templates/index.html
+      - scripts/ops_portal/templates/partials/activation.html
+      - scripts/ops_portal/templates/partials/attention.html
+      - scripts/ops_portal/templates/partials/changelog.html
+      - scripts/ops_portal/templates/partials/launcher.html
+      - scripts/ops_portal/templates/partials/overview.html
+      - scripts/ops_portal/templates/partials/runbooks.html
       - scripts/ops_portal/static/portal.css
+      - scripts/validate_repository_data_models.py
       - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
       - tests/test_interactive_ops_portal.py
+      - tests/test_ops_portal_playbook.py
       - tests/test_ops_portal_runtime_role.py
       - README.md
       - RELEASE.md
@@ -15240,9 +15267,13 @@ workstreams:
       - docs/release-notes/*.md
       - versions/stack.yaml
       - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
       - receipts/live-applies/*journey-entry-routing*
       - receipts/live-applies/evidence/*journey-entry-routing*
       - receipts/live-applies/evidence/*ws-0308-journey*
+      - receipts/restic-backups/20260402T131708Z.json
+      - receipts/restic-snapshots-latest.json
+      - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -15253,9 +15284,16 @@ workstreams:
         - id: ws0308_journey_docs
           paths:
             - docs/workstreams/ws-0308-journey-live-apply.md
+            - docs/workstreams/ws-0310-live-apply.md
+            - docs/workstreams/ws-0312-live-apply.md
             - docs/workstreams/adr-0307-platform-app-cohesion-bundle.md
             - docs/adr/0308-journey-aware-entry-routing-and-saved-home-selection.md
+            - docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md
+            - docs/adr/0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md
             - docs/runbooks/platform-operations-portal.md
+            - docs/runbooks/operator-onboarding.md
+            - docs/runbooks/windmill-operator-access-admin.md
+            - docs/runbooks/ops-portal-down.md
           mode: exclusive
         - id: ws0308_journey_runtime
           paths:
@@ -15263,12 +15301,37 @@ workstreams:
             - scripts/ops_portal/templates/base.html
             - scripts/ops_portal/templates/entry.html
             - scripts/ops_portal/templates/index.html
+            - scripts/ops_portal/templates/partials/activation.html
+            - scripts/ops_portal/templates/partials/attention.html
+            - scripts/ops_portal/templates/partials/changelog.html
+            - scripts/ops_portal/templates/partials/launcher.html
+            - scripts/ops_portal/templates/partials/overview.html
+            - scripts/ops_portal/templates/partials/runbooks.html
             - scripts/ops_portal/static/portal.css
             - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
             - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/docker-compose.yml.j2
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
             - tests/test_interactive_ops_portal.py
+            - tests/test_ops_portal_playbook.py
             - tests/test_ops_portal_runtime_role.py
           mode: exclusive
+        - id: ws0308_journey_activation_and_validation_contract
+          paths:
+            - .config-locations.yaml
+            - config/activation-checklist.json
+            - docs/schema/activation-checklist.schema.json
+            - scripts/validate_repository_data_models.py
+          mode: shared_contract
+          contract: ws0308-portal-validation-v1
+        - id: ws0308_journey_deploy_contract
+          paths:
+            - Makefile
+            - inventory/group_vars/platform.yml
+            - playbooks/ops-portal.yml
+          mode: shared_contract
+          contract: ws0308-portal-deploy-v1
         - id: ws0308_journey_release_surfaces
           paths:
             - README.md
@@ -15280,6 +15343,7 @@ workstreams:
             - versions/stack.yaml
             - build/platform-manifest.json
             - docs/adr/.index.yaml
+            - docs/diagrams/agent-coordination-map.excalidraw
           mode: shared_contract
           contract: release-management-v1
         - id: ws0308_journey_live_apply_receipts
@@ -15287,16 +15351,21 @@ workstreams:
             - receipts/live-applies/*journey-entry-routing*
             - receipts/live-applies/evidence/*journey-entry-routing*
             - receipts/live-applies/evidence/*ws-0308-journey*
+            - receipts/ops-portal-snapshot.html
+            - receipts/restic-backups/20260402T131708Z.json
+            - receipts/restic-snapshots-latest.json
+            - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
           mode: shared_contract
           contract: live-apply-receipts-v1
     blockers: []
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
-      changelog_entry: implements ADR 0308 by adding a journey-aware `/entry` router, activation-first home selection, and saved-home persistence to the interactive ops portal
+      changelog_entry: implements ADRs 0308, 0310, and 0312 by adding the journey-aware `/entry` router, first-run activation checklist and progressive capability reveal, shared notification center and activity timeline, and resilient search-fabric sync for the interactive ops portal runtime
       release_bump: patch
-      included_in_repo_version: 0.177.140
-      latest_receipts: {}
+      included_in_repo_version: 0.177.144
+      latest_receipts:
+        ops_portal: 2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply
   - id: ws-0292-superset-live-apply
     adr: "0292"
     title: Live apply ADR 0292 Apache Superset from latest origin/main
@@ -16409,11 +16478,11 @@ workstreams:
   - id: ws-0312-live-apply
     adr: "0312"
     title: Live apply the shared notification center and activity timeline across human surfaces
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0312-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0312-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0312-live-apply.md
+    worktree_path: .worktrees/ws-0312-live-apply
+    doc: docs/workstreams/ws-0312-live-apply.md
     depends_on:
       - adr-0093-interactive-ops-portal
       - adr-0307-platform-workbench-as-the-cohesive-first-party-app-frame
@@ -16440,8 +16509,8 @@ workstreams:
       - tests/test_interactive_ops_portal.py
       - tests/test_ops_portal_runtime_role.py
       - tests/test_ops_portal_playbook.py
-      - receipts/live-applies/2026-04-02-adr-0312-shared-notification-center-live-apply.json
-      - receipts/live-applies/evidence/2026-04-02-adr-0312-*
+      - receipts/live-applies/2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-04-02-ws-0308-journey-*
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -16469,8 +16538,8 @@ workstreams:
             - tests/test_interactive_ops_portal.py
             - tests/test_ops_portal_runtime_role.py
             - tests/test_ops_portal_playbook.py
-            - receipts/live-applies/2026-04-02-adr-0312-shared-notification-center-live-apply.json
-            - receipts/live-applies/evidence/2026-04-02-adr-0312-*
+            - receipts/live-applies/2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-04-02-ws-0308-journey-*
           mode: exclusive
         - id: ws0312_adr_index
           paths:
@@ -16478,8 +16547,10 @@ workstreams:
           mode: shared_contract
           contract: ws0312-adr-index-v1
     blockers: []
-    ready_to_merge: false
-    live_applied: false
+    canonical_truth:
+      included_in_repo_version: 0.177.144
+    ready_to_merge: true
+    live_applied: true
   - id: ws-0319-live-apply
     adr: "0319"
     title: Live apply the first runtime-ai pool split with Nomad, Traefik, and Dapr on the latest mainline
@@ -16822,77 +16893,3 @@ workstreams:
     blockers: []
     ready_to_merge: true
     live_applied: true
-  - id: ws-0312-live-apply
-    adr: "0312"
-    title: Live apply the shared notification center and activity timeline across human surfaces
-    status: in_progress
-    owner: codex
-    branch: codex/ws-0312-main-integration
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0312-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0312-live-apply.md
-    depends_on:
-      - adr-0093-interactive-ops-portal
-      - adr-0307-platform-workbench-as-the-cohesive-first-party-app-frame
-      - adr-0309-task-oriented-information-architecture-across-the-platform-workbench
-    conflicts_with: []
-    shared_surfaces:
-      - workstreams.yaml
-      - docs/workstreams/ws-0312-live-apply.md
-      - docs/adr/0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md
-      - docs/adr/.index.yaml
-      - docs/runbooks/platform-operations-portal.md
-      - docs/runbooks/ops-portal-down.md
-      - scripts/ops_portal/app.py
-      - scripts/ops_portal/static/portal.css
-      - scripts/ops_portal/templates/base.html
-      - scripts/ops_portal/templates/index.html
-      - scripts/ops_portal/templates/partials/attention.html
-      - scripts/ops_portal/templates/partials/changelog.html
-      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
-      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
-      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/docker-compose.yml.j2
-      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
-      - tests/test_interactive_ops_portal.py
-      - tests/test_ops_portal_runtime_role.py
-      - tests/test_ops_portal_playbook.py
-      - receipts/live-applies/2026-04-02-adr-0312-shared-notification-center-live-apply.json
-      - receipts/live-applies/evidence/2026-04-02-adr-0312-*
-    ownership_manifest:
-      owned_surfaces:
-        - id: workstream_registry
-          paths:
-            - workstreams.yaml
-          mode: shared_contract
-          contract: workstream-registry-v1
-        - id: ws0312_ops_portal_surface
-          paths:
-            - docs/workstreams/ws-0312-live-apply.md
-            - docs/adr/0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md
-            - docs/runbooks/platform-operations-portal.md
-            - docs/runbooks/ops-portal-down.md
-            - scripts/ops_portal/app.py
-            - scripts/ops_portal/static/portal.css
-            - scripts/ops_portal/templates/base.html
-            - scripts/ops_portal/templates/index.html
-            - scripts/ops_portal/templates/partials/attention.html
-            - scripts/ops_portal/templates/partials/changelog.html
-            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
-            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
-            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
-            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/docker-compose.yml.j2
-            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
-            - tests/test_interactive_ops_portal.py
-            - tests/test_ops_portal_runtime_role.py
-            - tests/test_ops_portal_playbook.py
-            - receipts/live-applies/2026-04-02-adr-0312-shared-notification-center-live-apply.json
-            - receipts/live-applies/evidence/2026-04-02-adr-0312-*
-          mode: exclusive
-        - id: ws0312_adr_index
-          paths:
-            - docs/adr/.index.yaml
-          mode: shared_contract
-          contract: ws0312-adr-index-v1
-    blockers: []
-    ready_to_merge: false
-    live_applied: false

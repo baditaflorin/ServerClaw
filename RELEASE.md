@@ -1,12 +1,12 @@
-# Release 0.177.143
+# Release 0.177.144
 
 - Date: 2026-04-02
 
 ## Summary
-- implements ADRs 0330-0339 by turning public GitHub readiness into a first-class repository lifecycle, making workstream and generated-doc metadata repository-relative, simplifying root onboarding docs into a generic forkable template, and enforcing new public-entrypoint leakage validation
+- implements ADRs 0308, 0310, and 0312 by adding the journey-aware `/entry` router, first-run activation checklist and progressive capability reveal, shared notification center and activity timeline, and resilient search-fabric sync for the interactive ops portal runtime
 
 ## Platform Impact
-- Prepares the repository for public GitHub publication with generic onboarding, repository-relative metadata, and guarded public entrypoints.
+- Live-applies the merged interactive ops portal journey routing, activation checklist, shared attention center, and resilient search-fabric runtime sync.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

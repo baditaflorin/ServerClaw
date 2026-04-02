@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-02",
+  "recorded_on": "2026-04-02",
+  "recorded_at": "2026-04-02T13:40:20Z",
+  "recorded_by": "codex",
+  "source_commit": "4a450d363d961325ad945676793d05b4ccbe1008",
+  "repo_version_context": "0.177.144",
+  "platform_version_context": "0.130.91",
+  "workflow_id": "adr-0308-journey-entry-routing-mainline-live-apply",
+  "adr": "0308",
+  "summary": "Promoted the merged interactive ops portal journey bundle into canonical mainline truth as repository version `0.177.144` and platform version `0.130.91` from the latest realistic `origin/main` baseline `0.177.143 / 0.130.90`, carrying ADR 0308 journey-aware entry routing, ADR 0310 first-run activation checklist and progressive capability reveal, ADR 0312 shared notification center and activity timeline, and a resilient retry around the shared search-fabric runtime sync through the same governed production replay.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Ops portal public entry route",
+      "address": "https://ops.lv3.org/entry"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Ops portal guest runtime",
+      "address": "http://10.10.10.20:8092/entry?neutral=1"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Release readiness and protected-surface cut",
+      "result": "pass",
+      "observed": "`scripts/release_manager.py status --json` confirmed the latest-main baseline, `--dry-run --bump patch` resolved repository version `0.177.144`, and the final release write updated the protected repo surfaces without invoking the external Outline sync because `LV3_SKIP_OUTLINE_SYNC=1` was set for this exact-main closeout."
+    },
+    {
+      "check": "Focused interactive ops portal regression slice",
+      "result": "pass",
+      "observed": "`make syntax-check-ops-portal` and the focused pytest slice passed from the exact integration worktree, leaving the portal runtime, playbook, and runtime-role regression slice at `47 passed`."
+    },
+    {
+      "check": "Exact-main governed ops-portal replay",
+      "result": "pass",
+      "observed": "The first combined replay exposed a real runtime drift where the shared search-fabric copy could race a missing destination directory; after adding a bounded retry in `ops_portal_runtime`, the final replay completed successfully with recap `docker-runtime-lv3 : ok=194 changed=16 unreachable=0 failed=0 skipped=40 rescued=0 ignored=0`."
+    },
+    {
+      "check": "Guest-local journey, activation, and attention contract",
+      "result": "pass",
+      "observed": "Guest-local verification confirmed `/health`, the neutral `Journey-Aware Start Surface`, the `First-Run Activation` partial, the shared `Notification Center` partial, and the shared launcher/search partial from inside `docker-runtime-lv3`."
+    },
+    {
+      "check": "Public auth-gated edge",
+      "result": "pass",
+      "observed": "The public `https://ops.lv3.org/entry` edge returned `HTTP/2 302` with `location: https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/entry`, preserving the unauthenticated oauth2-proxy gate."
+    },
+    {
+      "check": "Generated truth refresh after the platform-version bump",
+      "result": "pass",
+      "observed": "After manually promoting platform version `0.130.91`, the exact-main tree regenerated platform vars, the ADR index, canonical truth, generated status docs, platform manifest, diagrams, dependency graph, ops portal, and changelog portal from the same integrated worktree."
+    },
+    {
+      "check": "Exact-main repository automation and validation bundle",
+      "result": "pass",
+      "observed": "The final exact-main tree passed `scripts/validate_repository_data_models.py --validate`, `scripts/live_apply_receipts.py --validate`, `./scripts/validate_repo.sh agent-standards`, `./scripts/validate_repo.sh workstream-surfaces`, `make validate`, `make remote-validate`, `make pre-push-gate`, and `git diff --check` after regenerating `inventory/group_vars/platform.yml` and the updated agent-coordination diagram."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "build/platform-manifest.json",
+    "changelog.md",
+    "docs/adr/.index.yaml",
+    "docs/adr/0308-journey-aware-entry-routing-and-saved-home-selection.md",
+    "docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md",
+    "docs/adr/0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md",
+    "docs/release-notes/0.177.143.md",
+    "docs/release-notes/0.177.144.md",
+    "docs/release-notes/README.md",
+    "docs/runbooks/platform-operations-portal.md",
+    "docs/workstreams/ws-0308-journey-live-apply.md",
+    "docs/workstreams/ws-0310-live-apply.md",
+    "docs/workstreams/ws-0312-live-apply.md",
+    "receipts/live-applies/2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-release-status-r2.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-release-dry-run-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-release-write-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-syntax-check-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-targeted-tests-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-live-apply-r5-combined.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-live-apply-r6-combined.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-ops-portal-guest-runtime-r4.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-portal-public-entry-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-generate-adr-index-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-canonical-truth-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-generate-status-docs-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-platform-manifest-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-generate-diagrams-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-generate-dependency-diagram-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-generate-ops-portal-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-generate-platform-vars-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-generate-changelog-portal-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-generate-diagrams-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-validate-data-models-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-live-apply-receipts-validate-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-agent-standards-r4.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-workstream-surfaces-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-validate-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-remote-validate-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-pre-push-gate-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-git-diff-check-r2.txt",
+    "receipts/restic-backups/20260402T131708Z.json",
+    "receipts/restic-snapshots-latest.json",
+    "receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json",
+    "versions/stack.yaml",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This receipt is the canonical exact-main record for the merged portal bundle that carried ADR 0308, ADR 0310, and ADR 0312 through the same governed production replay.",
+    "The production replay refreshed the governed restic config-backup receipt and the host SBOM alongside the portal deployment.",
+    "The final repository automation and validation bundle passed from the same `0.177.144 / 0.130.91` tree that is prepared for merge to `main`."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-04-02-adr-0308-mainline-ops-portal-runtime-sync-retry",
+    "surface": "exact-main interactive ops portal live apply",
+    "diagnosis": "transient_failure",
+    "repair_action": "When the first combined replay failed copying `scripts/search_fabric/utils.py` because the destination directory was missing under `/opt/ops-portal/service/search_fabric`, added a bounded retry to the shared search-fabric copy task in `ops_portal_runtime` and reran the governed production replay from the same integration worktree.",
+    "verification": "receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-live-apply-r6-combined.txt"
+  }
+}

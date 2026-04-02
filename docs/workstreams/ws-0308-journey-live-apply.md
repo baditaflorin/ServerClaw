@@ -1,85 +1,80 @@
 # Workstream ws-0308-journey-live-apply: Live Apply ADR 0308 Journey Routing From Latest `origin/main`
 
 - ADR: [ADR 0308](../adr/0308-journey-aware-entry-routing-and-saved-home-selection.md)
-- Title: Ship the journey-aware entry router, saved-home selection, and activation-first start surface on the interactive ops portal
-- Status: ready
-- Branch: `codex/ws-0308-live-apply-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0308-live-apply-r2`
+- Title: Ship the journey-aware entry router, saved-home selection, activation-first start surface, and the integrated attention-first portal shell on the interactive ops portal
+- Status: live_applied
+- Included In Repo Version: `0.177.144`
+- Canonical Mainline Receipt: `receipts/live-applies/2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply.json`
+- Live Applied In Platform Version: `0.130.91`
+- Implemented On: 2026-04-02
+- Live Applied On: 2026-04-02
+- Exact-Main Replay Baseline: repo `0.177.143`, platform `0.130.90`
+- Branch: `codex/ws-0308-live-apply-r3`
+- Worktree: `.worktrees/ws-0308-live-apply-r2`
 - Owner: codex
-- Depends On: `adr-0093`, `adr-0152`, `adr-0235`, `adr-0242`, `adr-0313`
+- Depends On: `adr-0093`, `adr-0152`, `adr-0235`, `adr-0242`, `adr-0310`, `adr-0312`, `adr-0313`
 - Conflicts With: `ws-0308-live-apply`
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0308-journey-live-apply.md`, `docs/workstreams/adr-0307-platform-app-cohesion-bundle.md`, `docs/adr/0308-journey-aware-entry-routing-and-saved-home-selection.md`, `docs/runbooks/platform-operations-portal.md`, `scripts/ops_portal/app.py`, `scripts/ops_portal/templates/base.html`, `scripts/ops_portal/templates/entry.html`, `scripts/ops_portal/templates/index.html`, `scripts/ops_portal/static/portal.css`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml`, `tests/test_interactive_ops_portal.py`, `tests/test_ops_portal_runtime_role.py`, `receipts/live-applies/`, `receipts/live-applies/evidence/`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0308-journey-live-apply.md`, `docs/workstreams/adr-0307-platform-app-cohesion-bundle.md`, `docs/adr/0308-journey-aware-entry-routing-and-saved-home-selection.md`, `docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md`, `docs/adr/0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md`, `docs/adr/.index.yaml`, `docs/runbooks/platform-operations-portal.md`, `scripts/ops_portal/app.py`, `scripts/ops_portal/templates/base.html`, `scripts/ops_portal/templates/entry.html`, `scripts/ops_portal/templates/index.html`, `scripts/ops_portal/templates/partials/activation.html`, `scripts/ops_portal/templates/partials/attention.html`, `scripts/ops_portal/templates/partials/launcher.html`, `scripts/ops_portal/static/portal.css`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml`, `tests/test_interactive_ops_portal.py`, `tests/test_ops_portal_playbook.py`, `tests/test_ops_portal_runtime_role.py`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `receipts/live-applies/2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-04-02-ws-0308-journey-*`, `receipts/restic-backups/20260402T131708Z.json`, `receipts/restic-snapshots-latest.json`, `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`
 
 ## Purpose
 
-Implement the journey-aware entry-routing ADR on top of the latest realistic
-`origin/main` portal runtime so authenticated operators land on the right
-surface in the right order:
-
-1. a permitted deep link
-2. unfinished activation work
-3. a pinned home
-4. a role-derived default home
-5. the neutral start surface
+Implement the journey-aware `/entry` router on top of the latest realistic
+`origin/main` portal runtime and carry the merged ADR 0310 and ADR 0312 portal
+surfaces through the same exact-main replay so authenticated users land on the
+right start surface, complete first-run activation safely, and see shared
+attention signals without losing the saved-home and deep-link guarantees.
 
 ## Scope
 
-- add a neutral `/entry` route to the interactive ops portal runtime
-- store activation and saved-home state in durable browser cookies
-- infer viewer/operator/admin entry mode from the authenticated portal session
-- expose curated home choices for Homepage, Ops Portal, Docs, and Changelog
-- document the operational verification path and preserve live-apply evidence
+- add a neutral `/entry` route and durable saved-home selection to the
+  interactive ops portal
+- keep first-run users on the activation-aware surface until they complete or
+  skip onboarding gates
+- surface the shared notification center and activity timeline inside the same
+  first-party portal shell
+- harden the managed runtime replay so the shared search-fabric sync survives
+  transient runtime-tree churn during live apply
+- document and preserve the exact-main live-apply evidence, release-truth
+  update, backup receipt, and refreshed SBOM
 
-## Non-Goals
+## Outcome
 
-- changing authorization or bypassing role checks through a saved home
-- replacing the shared launcher or the ADR 0313 contextual-help drawer
-- reusing the existing `ws-0308-live-apply` registry key, which already belongs
-  to the unrelated operator-provisioning ADR that also uses number `0308`
+- The final exact-main integration promoted the combined portal change to
+  repository version `0.177.144` and platform version `0.130.91` from the
+  latest realistic baseline `0.177.143 / 0.130.90`.
+- The exact-main replay succeeded with
+  `docker-runtime-lv3 : ok=194 changed=16 unreachable=0 failed=0 skipped=40 rescued=0 ignored=0`
+  after adding a bounded retry around the shared search-fabric copy step in the
+  managed `ops_portal_runtime` role.
+- The integrated runtime now serves the journey-aware neutral start surface, the
+  first-run activation checklist, the shared notification center, and the
+  launcher/search shell from the same governed production deployment.
+- The replay refreshed the governed restic config-backup receipt
+  `receipts/restic-backups/20260402T131708Z.json`, updated
+  `receipts/restic-snapshots-latest.json`, and regenerated the host SBOM at
+  `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`.
 
-## Expected Repo Surfaces
+## Verification
 
-- `docs/adr/0308-journey-aware-entry-routing-and-saved-home-selection.md`
-- `docs/workstreams/ws-0308-journey-live-apply.md`
-- `docs/workstreams/adr-0307-platform-app-cohesion-bundle.md`
-- `docs/runbooks/platform-operations-portal.md`
-- `scripts/ops_portal/app.py`
-- `scripts/ops_portal/templates/base.html`
-- `scripts/ops_portal/templates/entry.html`
-- `scripts/ops_portal/templates/index.html`
-- `scripts/ops_portal/static/portal.css`
-- `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml`
-- `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml`
-- `tests/test_interactive_ops_portal.py`
-- `tests/test_ops_portal_runtime_role.py`
-- `workstreams.yaml`
-- `receipts/live-applies/`
-- `receipts/live-applies/evidence/`
+- `receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-syntax-check-r3.txt`
+  and `...targeted-tests-r3.txt` capture the focused portal regression slice,
+  including `47 passed` across the interactive portal runtime, playbook, and
+  runtime-role tests.
+- `receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-live-apply-r6-combined.txt`
+  captures the final governed production replay from the exact worktree with
+  the runtime-role correction applied.
+- `receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-ops-portal-guest-runtime-r4.txt`
+  confirms `/health`, `/entry?neutral=1`, `/partials/activation`,
+  `/partials/attention`, and `/partials/launcher` from inside
+  `docker-runtime-lv3`.
+- `receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-portal-public-entry-r2.txt`
+  confirms the public `https://ops.lv3.org/entry` edge still redirects
+  unauthenticated users to the oauth2-proxy sign-in flow.
+- The canonical receipt records the final release cut, generated-truth refresh,
+  repository validation bundle, and the retained correction-loop evidence from
+  the transient first replay failure.
 
-## Expected Live Surfaces
+## Remaining Shared Follow-Up
 
-- `https://ops.lv3.org/entry` renders the journey-aware start surface after the
-  oauth2-proxy sign-in flow
-- first-run operators cannot pin a saved home until the activation checklist is
-  completed or skipped
-- a pinned home overrides the role-derived default home, while explicit deep
-  links still win for the current request
-- repo-managed runtime verification fails closed if the `/entry?neutral=1`
-  surface disappears during a future replay
-
-## Verification Plan
-
-- `python3 -m py_compile scripts/ops_portal/app.py`
-- `uv run --with pytest --with pyyaml --with jsonschema --with fastapi==0.116.1 --with httpx==0.28.1 --with cryptography==45.0.6 --with PyJWT==2.10.1 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest tests/test_interactive_ops_portal.py tests/test_ops_portal_runtime_role.py tests/test_ops_portal.py tests/test_runtime_assurance_scoreboard.py -q`
-- `make syntax-check-ops-portal`
-- `./scripts/validate_repo.sh agent-standards`
-- `./scripts/validate_repo.sh workstream-surfaces`
-- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=ops_portal env=production EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0308-live-apply-r2'`
-
-## Notes
-
-- `origin/main` already contains another `ADR 0308` document and an existing
-  `ws-0308-live-apply` entry for the operator-provisioning execution-surface
-  workstream. This workstream keeps the requested ADR file path but uses the
-  unique registry key `ws-0308-journey-live-apply` so the workstream registry
-  stays merge-safe.
+- None for ADR 0308, ADR 0310, or ADR 0312. The remaining shared work in this
+  turn is the standard merge-to-`main`, push, and worktree cleanup sequence.

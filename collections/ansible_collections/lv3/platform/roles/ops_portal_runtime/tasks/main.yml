@@ -278,6 +278,10 @@
     owner: root
     group: root
     mode: "0644"
+  register: search_fabric_copy_result
+  retries: 3
+  delay: 1
+  until: search_fabric_copy_result is succeeded
   loop: "{{ search_fabric_source_files.files | sort(attribute='path') }}"
   loop_control:
     label: "{{ item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', '') }}"
