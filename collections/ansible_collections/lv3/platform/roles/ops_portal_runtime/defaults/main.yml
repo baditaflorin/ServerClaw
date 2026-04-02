@@ -128,10 +128,10 @@ ops_portal_runtime_overlay_directories:
   - "{{ ops_portal_service_dir }}/ops_portal/templates"
   - "{{ ops_portal_service_dir }}/ops_portal/templates/macros"
   - "{{ ops_portal_service_dir }}/ops_portal/templates/partials"
-ops_portal_service_build_file_sources:
+ops_portal_build_file_sources:
   - src: "{{ ops_portal_repo_root }}/scripts/publication_contract.py"
-    dest: "{{ ops_portal_service_dir }}/publication_contract.py"
+    filename: publication_contract.py
   - src: "{{ ops_portal_repo_root }}/scripts/stage_smoke.py"
-    dest: "{{ ops_portal_service_dir }}/stage_smoke.py"
+    filename: stage_smoke.py
   - src: "{{ ops_portal_repo_root }}/requirements/ops-portal.txt"
-    dest: "{{ ops_portal_service_dir }}/requirements.txt"
+    filename: requirements.txt

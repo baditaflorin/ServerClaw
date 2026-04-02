@@ -251,25 +251,25 @@
   loop_control:
     label: "{{ item.dest | replace(ops_portal_build_context_dir ~ '/', '') }}"
 
-- name: Sync the clean ops portal Docker build-context root files
+- name: Sync the clean ops portal Docker build-context Dockerfile
   ansible.builtin.copy:
     remote_src: true
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+    src: "{{ ops_portal_service_dir }}/Dockerfile"
+    dest: "{{ ops_portal_build_context_dir }}/Dockerfile"
     owner: root
     group: root
     mode: "0644"
-  loop:
-    - src: "{{ ops_portal_service_dir }}/Dockerfile"
-      dest: "{{ ops_portal_build_context_dir }}/Dockerfile"
-    - src: "{{ ops_portal_service_dir }}/publication_contract.py"
-      dest: "{{ ops_portal_build_context_dir }}/publication_contract.py"
-    - src: "{{ ops_portal_service_dir }}/stage_smoke.py"
-      dest: "{{ ops_portal_build_context_dir }}/stage_smoke.py"
-    - src: "{{ ops_portal_service_dir }}/requirements.txt"
-      dest: "{{ ops_portal_build_context_dir }}/requirements.txt"
+
+- name: Sync the clean ops portal Docker build-context helper files directly from controller sources
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ ops_portal_build_context_dir }}/{{ item.filename }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ ops_portal_build_file_sources }}"
   loop_control:
-    label: "{{ item.dest | replace(ops_portal_build_context_dir ~ '/', '') }}"
+    label: "{{ item.filename }}"
 
 - name: Normalize the synced ops portal application tree ownership
   ansible.builtin.file:

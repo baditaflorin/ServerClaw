@@ -183,13 +183,13 @@
 - name: Sync the ops portal service build inputs explicitly
   ansible.builtin.copy:
     src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+    dest: "{{ ops_portal_service_dir }}/{{ item.filename }}"
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ ops_portal_service_build_file_sources }}"
+  loop: "{{ ops_portal_build_file_sources }}"
   loop_control:
-    label: "{{ item.dest | replace(ops_portal_service_dir ~ '/', '') }}"
+    label: "{{ item.filename }}"
 
 - name: Discover macOS metadata files in the synced ops portal service tree
   ansible.builtin.find:

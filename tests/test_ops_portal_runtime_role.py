@@ -93,7 +93,7 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert "Sync the shared search fabric files" in sync_tasks
     assert "ops_portal_service_dir ~ '/search_fabric/'" in sync_tasks
     assert "Sync the ops portal service build inputs explicitly" in sync_tasks
-    assert 'ops_portal_service_build_file_sources' in defaults
+    assert 'ops_portal_build_file_sources' in defaults
     assert '{{ ops_portal_repo_root }}/scripts/publication_contract.py' in defaults
     assert '{{ ops_portal_repo_root }}/scripts/stage_smoke.py' in defaults
     assert '{{ ops_portal_repo_root }}/requirements/ops-portal.txt' in defaults
@@ -113,16 +113,23 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert "{{ ops_portal_build_context_dir }}/._stage_smoke.py" in tasks
     assert "Remove stale ops portal build-context entries before sync" in tasks
     assert "Sync the clean ops portal Docker build-context directories" in tasks
-    assert "Sync the clean ops portal Docker build-context root files" in tasks
+    assert "Sync the clean ops portal Docker build-context Dockerfile" in tasks
+    assert "Sync the clean ops portal Docker build-context helper files directly from controller sources" in tasks
     assert "remote_src: true" in tasks
     assert 'src: "{{ ops_portal_service_dir }}/ops_portal/"' in tasks
     assert 'dest: "{{ ops_portal_build_context_dir }}/ops_portal/"' in tasks
     assert 'src: "{{ ops_portal_service_dir }}/search_fabric/"' in tasks
     assert 'dest: "{{ ops_portal_build_context_dir }}/search_fabric/"' in tasks
+    assert 'src: "{{ ops_portal_service_dir }}/Dockerfile"' in tasks
+    assert 'dest: "{{ ops_portal_build_context_dir }}/Dockerfile"' in tasks
+    assert 'dest: "{{ ops_portal_build_context_dir }}/{{ item.filename }}"' in tasks
     assert "{{ ops_portal_build_context_dir }}/publication_contract.py" in tasks
     assert "{{ ops_portal_build_context_dir }}/stage_smoke.py" in tasks
     assert "{{ ops_portal_build_context_dir }}/requirements.txt" in tasks
     assert "{{ ops_portal_build_context_dir }}/Dockerfile" in tasks
+    assert 'src: "{{ ops_portal_service_dir }}/publication_contract.py"' not in tasks
+    assert 'src: "{{ ops_portal_service_dir }}/stage_smoke.py"' not in tasks
+    assert 'src: "{{ ops_portal_service_dir }}/requirements.txt"' not in tasks
     assert "Discover macOS metadata files in the synced ops portal data tree" in tasks
     assert "Remove macOS metadata files from the synced ops portal data tree" in tasks
     assert "lookup('ansible.builtin.file', item.path)" not in tasks
