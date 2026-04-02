@@ -39,6 +39,7 @@
         )
         | trim
       }}
+    linux_guest_firewall_recover_missing_docker_bridge_chains: true
   tags:
     - tier-2
     - access

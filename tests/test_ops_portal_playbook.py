@@ -29,6 +29,13 @@ def test_ops_portal_playbook_resolves_repo_root_from_the_git_worktree() -> None:
     assert "| trim" in repo_root_expr
 
 
+def test_ops_portal_playbook_enables_bridge_chain_recovery_on_shared_docker_runtime() -> None:
+    plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
+    play = plays[0]
+
+    assert play["vars"]["linux_guest_firewall_recover_missing_docker_bridge_chains"] is True
+
+
 def test_ops_portal_runtime_clears_previous_build_context_before_sync() -> None:
     tasks = yaml.safe_load((ROLE_TASKS_PATH / "main.yml").read_text())
     cleanup_task = next(task for task in tasks if task["name"] == "Remove stale ops portal service sources before sync")
