@@ -73,6 +73,22 @@
     </div>
   </section>
 
+  <section id="attention" class="pf-v5-c-page__main-section portal-section">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Attention Center</p>
+        <h2>Shared notification center for work that needs a human</h2>
+      </div>
+      <div class="section-meta">
+        <span class="pill">{{ attention_summary.active_count }} active</span>
+        <span class="pill">{{ attention_summary.acknowledged_count }} acknowledged</span>
+      </div>
+    </div>
+    <div id="attention-panel" class="shell-live-panel" hx-get="/partials/attention" hx-trigger="load, every 30s" hx-swap="innerHTML">
+      {% include "partials/attention.html" %}
+    </div>
+  </section>
+
   <section id="deployments" class="pf-v5-c-page__main-section portal-section">
     <div class="section-head">
       <div>
@@ -157,8 +173,8 @@
   <section id="changelog" class="pf-v5-c-page__main-section portal-section">
     <div class="section-head">
       <div>
-        <p class="section-kicker">Changelog</p>
-        <h2>Recent live-apply receipts and unreleased notes</h2>
+        <p class="section-kicker">Activity Timeline</p>
+        <h2>Recent platform history across receipts, promotions, and human actions</h2>
       </div>
     </div>
     <div id="changelog-panel" class="shell-live-panel" hx-get="/partials/changelog" hx-trigger="load" hx-swap="innerHTML">
