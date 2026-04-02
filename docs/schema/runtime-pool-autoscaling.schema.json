@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/runtime-pool-autoscaling.schema.json",
+  "title": "LV3 Runtime Pool Autoscaling Catalog",
+  "type": "object",
+  "required": [
+    "$schema",
+    "schema_version",
+    "controller",
+    "policies"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "docs/schema/runtime-pool-autoscaling.schema.json"
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "controller": {
+      "type": "object",
+      "required": [
+        "preferred_implementation",
+        "metrics_source",
+        "routing_surface",
+        "invocation_surface",
+        "receipt_directory",
+        "pause_conditions"
+      ],
+      "properties": {
+        "preferred_implementation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metrics_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "routing_surface": {
+          "type": "string",
+          "minLength": 1
+        },
+        "invocation_surface": {
+          "type": "string",
+          "minLength": 1
+        },
+        "receipt_directory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pause_conditions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/policy"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "instanceBounds": {
+      "type": "object",
+      "required": [
+        "min",
+        "max"
+      ],
+      "properties": {
+        "min": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "scaleOutPolicy": {
+      "type": "object",
+      "required": [
+        "working_set_utilization_percent",
+        "sustain_minutes",
+        "oom_event_immediate"
+      ],
+      "properties": {
+        "working_set_utilization_percent": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "sustain_minutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "oom_event_immediate": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "scaleInPolicy": {
+      "type": "object",
+      "required": [
+        "working_set_utilization_percent",
+        "cooldown_minutes"
+      ],
+      "properties": {
+        "working_set_utilization_percent": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "cooldown_minutes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "policy": {
+      "type": "object",
+      "required": [
+        "pool_id",
+        "enabled",
+        "nomad_namespace",
+        "instance_bounds",
+        "scale_out",
+        "scale_in",
+        "required_signals",
+        "allowed_mobility_tiers",
+        "pause_when_lanes_active"
+      ],
+      "properties": {
+        "pool_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "nomad_namespace": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "instance_bounds": {
+          "$ref": "#/$defs/instanceBounds"
+        },
+        "scale_out": {
+          "$ref": "#/$defs/scaleOutPolicy"
+        },
+        "scale_in": {
+          "$ref": "#/$defs/scaleInPolicy"
+        },
+        "required_signals": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "available_memory_percent",
+              "memory_pressure_stall",
+              "swap_activity",
+              "oom_or_restart_evidence"
+            ]
+          }
+        },
+        "allowed_mobility_tiers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "elastic_stateless",
+              "burst_batch"
+            ]
+          }
+        },
+        "pause_when_lanes_active": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

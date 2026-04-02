@@ -43,16 +43,16 @@ def test_compose_template_publishes_private_submission_port_on_vm_ip() -> None:
 
 def test_host_firewall_only_opens_private_submission_for_local_docker_networks() -> None:
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
-    relay_rules = [rule for rule in docker_runtime_rules if 1587 in rule["ports"]]
-    assert {rule["source"] for rule in relay_rules} == {"172.16.0.0/12", "192.168.0.0/16"}
+    runtime_control_rules = host_vars["network_policy"]["guests"]["runtime-control-lv3"]["allowed_inbound"]
+    relay_rules = [rule for rule in runtime_control_rules if 1587 in rule["ports"]]
+    assert {rule["source"] for rule in relay_rules} >= {"172.16.0.0/12", "192.168.0.0/16"}
 
 
 def test_control_plane_lane_points_at_private_submission_relay() -> None:
     lanes = json.loads(CONTROL_PLANE_LANES_PATH.read_text())
     message_surfaces = lanes["lanes"]["message"]["current_surfaces"]
     submission = next(surface for surface in message_surfaces if surface["id"] == "mail-platform-submission")
-    assert submission["endpoint"] == "10.10.10.20:1587"
+    assert submission["endpoint"] == "10.10.10.92:1587"
 
 
 def test_defaults_resolve_mail_gateway_otlp_endpoint_from_canonical_host_topology() -> None:

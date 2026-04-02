@@ -3,6 +3,12 @@ argument_specs:
   main:
     short_description: Converge the runtime-pool Traefik and Dapr substrate on a dedicated runtime guest.
     options:
+      runtime_pool_substrate_pool_id:
+        type: str
+        required: false
+      runtime_pool_substrate_entrypoint_name:
+        type: str
+        required: false
       runtime_pool_substrate_root_dir:
         type: str
         required: false
@@ -59,4 +65,8 @@ argument_specs:
         required: false
       runtime_pool_substrate_tesseract_upstream:
         type: str
+        required: false
+      runtime_pool_substrate_routes:
+        type: list
+        elements: dict
         required: false

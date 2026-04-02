@@ -924,7 +924,7 @@ groups:
           indicator: availability
         annotations:
           summary: openfga-availability is burning its error budget at 14x
-          description: The private OpenFGA runtime remains reachable on docker-runtime-lv3
+          description: The private OpenFGA runtime remains reachable on runtime-control-lv3
             for delegated authorization queries from the platform guest network.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_openfga_availability
@@ -937,7 +937,7 @@ groups:
           indicator: availability
         annotations:
           summary: openfga-availability is burning its error budget at 3x
-          description: The private OpenFGA runtime remains reachable on docker-runtime-lv3
+          description: The private OpenFGA runtime remains reachable on runtime-control-lv3
             for delegated authorization queries from the platform guest network.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_openfga_availability
@@ -950,7 +950,7 @@ groups:
           indicator: availability
         annotations:
           summary: openfga-availability has less than 10% error budget remaining
-          description: The private OpenFGA runtime remains reachable on docker-runtime-lv3
+          description: The private OpenFGA runtime remains reachable on runtime-control-lv3
             for delegated authorization queries from the platform guest network.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_openfga_latency

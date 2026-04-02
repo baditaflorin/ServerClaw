@@ -2,12 +2,12 @@
 
 ## Purpose
 
-This runbook converges Uptime Kuma on the Docker runtime VM and publishes it through the NGINX edge at `https://uptime.lv3.org`.
+This runbook converges Uptime Kuma on the runtime-general VM and publishes it through the NGINX edge at `https://uptime.lv3.org`.
 
 ## Result
 
 - Hetzner DNS contains the `uptime.lv3.org` A record
-- `docker-runtime-lv3` runs Uptime Kuma from `/opt/uptime-kuma`
+- `runtime-general-lv3` runs Uptime Kuma from `/opt/uptime-kuma`
 - `nginx-lv3` reverse proxies `uptime.lv3.org` and expands the shared edge certificate when needed
 - local control-machine auth for future monitor management is stored under `.local/uptime-kuma/`
 - the first repo-managed monitor set is applied from generated `config/uptime-kuma/monitors.json`
@@ -71,7 +71,7 @@ make uptime-kuma-manage ACTION=list-maintenances
 Verify the runtime container:
 
 ```bash
-ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a 'sudo docker ps --filter name=uptime-kuma && sudo ls -ld /opt/uptime-kuma /opt/uptime-kuma/data' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml runtime-general-lv3 -m shell -a 'sudo docker ps --filter name=uptime-kuma && sudo ls -ld /opt/uptime-kuma /opt/uptime-kuma/data' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 Verify public publication:

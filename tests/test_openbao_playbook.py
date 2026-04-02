@@ -13,9 +13,9 @@ def test_openbao_postgres_dynamic_credential_verification_skips_become_on_delega
     login_task = next(task for task in verify_play["tasks"] if task.get("name") == "Login to OpenBao as the controller AppRole")
     credential_task = next(task for task in verify_play["tasks"] if task.get("name") == "Request a PostgreSQL dynamic credential")
 
-    assert login_task["delegate_to"] == "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+    assert login_task["delegate_to"] == "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
     assert login_task["become"] is False
-    assert credential_task["delegate_to"] == "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+    assert credential_task["delegate_to"] == "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
     assert credential_task["become"] is False
 
 
@@ -30,6 +30,6 @@ def test_openbao_playbook_reestablishes_unsealed_state_before_postgres_end_to_en
         if task.get("name") == "Ensure OpenBao remains unsealed before PostgreSQL end-to-end verification"
     )
 
-    assert unseal_play["hosts"] == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+    assert unseal_play["hosts"] == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
     assert ensure_task["ansible.builtin.include_role"]["name"] == "lv3.platform.openbao_runtime"
     assert ensure_task["ansible.builtin.include_role"]["tasks_from"] == "ensure_unsealed.yml"

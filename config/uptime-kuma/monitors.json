@@ -119,8 +119,8 @@
   {
     "name": "Gitea Private",
     "type": "http",
-    "url": "http://10.10.10.20:3003/api/healthz",
-    "description": "Private Gitea health endpoint on docker-runtime-lv3.",
+    "url": "http://10.10.10.92:3003/api/healthz",
+    "description": "Private Gitea health endpoint on runtime-control-lv3.",
     "interval": 60,
     "retryInterval": 60,
     "maxretries": 0,
@@ -223,8 +223,8 @@
   {
     "name": "Mail Platform Gateway Private",
     "type": "http",
-    "url": "http://10.10.10.20:8081/healthz",
-    "description": "Private mail gateway health endpoint on docker-runtime-lv3.",
+    "url": "http://10.10.10.92:8081/healthz",
+    "description": "Private mail gateway health endpoint on runtime-control-lv3.",
     "interval": 60,
     "retryInterval": 60,
     "maxretries": 0,
@@ -286,19 +286,6 @@
     ]
   },
   {
-    "name": "NetBox Private",
-    "type": "http",
-    "url": "http://10.10.10.20:8082/login/",
-    "description": "Private NetBox login surface on docker-runtime-lv3.",
-    "interval": 60,
-    "retryInterval": 60,
-    "maxretries": 0,
-    "maxredirects": 10,
-    "accepted_statuscodes": [
-      "200-299"
-    ]
-  },
-  {
     "name": "Nextcloud Public Status",
     "type": "http",
     "url": "https://cloud.lv3.org/status.php",
@@ -307,6 +294,19 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "NetBox Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8082/login/",
+    "description": "Private NetBox login surface on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
     "accepted_statuscodes": [
       "200-299"
     ]
@@ -497,8 +497,8 @@
   {
     "name": "Semaphore Private",
     "type": "http",
-    "url": "http://10.10.10.20:3004/api/ping",
-    "description": "Private Semaphore ping endpoint on docker-runtime-lv3.",
+    "url": "http://10.10.10.92:3004/api/ping",
+    "description": "Private Semaphore ping endpoint on runtime-control-lv3.",
     "interval": 60,
     "retryInterval": 60,
     "maxretries": 0,
@@ -523,8 +523,8 @@
   {
     "name": "Step CA Private",
     "type": "http",
-    "url": "https://10.10.10.20:9000/health",
-    "description": "Private step-ca health endpoint on docker-runtime-lv3.",
+    "url": "https://10.10.10.92:9000/health",
+    "description": "Private step-ca health endpoint on runtime-control-lv3.",
     "interval": 60,
     "retryInterval": 60,
     "maxretries": 0,
@@ -576,8 +576,8 @@
   {
     "name": "Windmill Private",
     "type": "http",
-    "url": "http://10.10.10.20:8000/api/version",
-    "description": "Private Windmill API version endpoint on docker-runtime-lv3.",
+    "url": "http://10.10.10.92:8000/api/version",
+    "description": "Private Windmill API version endpoint on runtime-control-lv3.",
     "interval": 60,
     "retryInterval": 60,
     "maxretries": 0,

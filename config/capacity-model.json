@@ -214,6 +214,48 @@
       "notes": "Declared for ADR 0319 runtime-ai pool live apply and validated against the planned production guest shape on 2026-04-02."
     },
     {
+      "vmid": 191,
+      "name": "runtime-general-lv3",
+      "status": "active",
+      "environment": "production",
+      "metrics_host": "runtime-general-lv3",
+      "allocated": {
+        "ram_gb": 12,
+        "vcpu": 4,
+        "disk_gb": 128
+      },
+      "budget": {
+        "ram_gb": 20,
+        "vcpu": 6,
+        "disk_gb": 160
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Declared for ADR 0320 runtime-general pool implementation and validated against the planned production guest shape on 2026-04-02."
+    },
+    {
+      "vmid": 192,
+      "name": "runtime-control-lv3",
+      "status": "active",
+      "environment": "production",
+      "metrics_host": "runtime-control-lv3",
+      "allocated": {
+        "ram_gb": 12,
+        "vcpu": 4,
+        "disk_gb": 128
+      },
+      "budget": {
+        "ram_gb": 16,
+        "vcpu": 6,
+        "disk_gb": 160
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Declared for the phase-5 runtime-control migration wave and aligned with the approved baseline envelope from ADR 0321."
+    },
+    {
       "vmid": 210,
       "name": "nginx-staging-lv3",
       "status": "planned",
@@ -383,6 +425,36 @@
       "notes": "Reserved planned capacity for ADR 0098."
     }
   ],
+  "runtime_pool_memory": {
+    "host_free_memory_floor_gb": 20,
+    "measurement_and_control": {
+      "metrics_source": "prometheus",
+      "control_surface": "nomad-autoscaler"
+    },
+    "pools": [
+      {
+        "id": "runtime-control",
+        "baseline_ram_gb": 12,
+        "max_ram_gb": 16,
+        "admission_priority": 1,
+        "notes": "Control-plane capacity is reserved first and now anchors the dedicated runtime-control-lv3 guest before lower-priority runtime pools can expand."
+      },
+      {
+        "id": "runtime-general",
+        "baseline_ram_gb": 12,
+        "max_ram_gb": 20,
+        "admission_priority": 2,
+        "notes": "Operator and support services use the runtime-general lane first; later migrations can consume this governed envelope without re-arguing the pool budget."
+      },
+      {
+        "id": "runtime-ai",
+        "baseline_ram_gb": 16,
+        "max_ram_gb": 28,
+        "admission_priority": 3,
+        "notes": "Bursty document, notebook, and inference-adjacent workloads may expand last and only inside the approved runtime-ai envelope."
+      }
+    ]
+  },
   "reservations": [
     {
       "id": "ephemeral-pool",

@@ -16474,6 +16474,335 @@ workstreams:
     blockers: []
     ready_to_merge: true
     live_applied: false
+  - id: ws-0330-runtime-pool-transition-program
+    adr: "0319"
+    title: Complete the phased runtime-pool transition after the first runtime-ai split
+    status: merged
+    owner: codex
+    branch: codex/ws-0330-runtime-pools-transition
+    worktree_path: .worktrees/ws-0324-runtime-pools-transition
+    doc: docs/workstreams/ws-0330-runtime-pool-transition-program.md
+    depends_on:
+      - adr-0319-runtime-pools-as-the-service-partition-boundary
+      - adr-0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes
+      - adr-0321-runtime-pool-memory-envelopes-and-reserved-host-headroom
+      - adr-0322-memory-pressure-autoscaling-for-elastic-runtime-pools
+      - adr-0323-service-mobility-tiers-and-migration-waves-for-runtime-pools
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0330-runtime-pool-transition-program.md
+      - README.md
+      - build/platform-manifest.json
+      - versions/stack.yaml
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
+      - docs/adr/.index.yaml
+      - docs/adr/0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md
+      - docs/adr/0322-memory-pressure-autoscaling-for-elastic-runtime-pools.md
+      - docs/adr/0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md
+      - config/service-capability-catalog.json
+      - config/contracts/service-partitions/*
+      - docs/schema/service-capability-catalog.schema.json
+      - docs/schema/service-partition-catalog.schema.json
+      - scripts/generate_platform_vars.py
+      - scripts/validate_repository_data_models.py
+      - inventory/hosts.yml
+      - inventory/group_vars/all.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - config/execution-lanes.yaml
+      - config/ansible-execution-scopes.yaml
+      - config/api-gateway-catalog.json
+      - config/control-plane-lanes.json
+      - config/health-probe-catalog.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/subdomain-exposure-registry.json
+      - config/uptime-kuma/monitors.json
+      - config/workflow-catalog.json
+      - config/capacity-model.json
+      - config/grafana/dashboards/slo-overview.json
+      - config/runtime-pool-autoscaling.json
+      - playbooks/runtime-general-pool.yml
+      - playbooks/services/runtime-general-pool.yml
+      - playbooks/runtime-control-pool.yml
+      - playbooks/services/runtime-control-pool.yml
+      - playbooks/api-gateway.yml
+      - playbooks/gitea.yml
+      - playbooks/harbor.yml
+      - playbooks/homepage.yml
+      - playbooks/keycloak.yml
+      - playbooks/mail-platform-diagnostics.yml
+      - playbooks/mail-platform-notification-profiles-verify.yml
+      - playbooks/mail-platform-send-gmail.yml
+      - playbooks/mail-platform.yml
+      - playbooks/nats-jetstream.yml
+      - playbooks/ops-portal.yml
+      - playbooks/uptime-kuma.yml
+      - playbooks/nomad.yml
+      - playbooks/openbao.yml
+      - playbooks/openfga.yml
+      - playbooks/semaphore.yml
+      - playbooks/step-ca.yml
+      - playbooks/temporal.yml
+      - playbooks/vaultwarden.yml
+      - playbooks/windmill.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mailpit.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+      - collections/ansible_collections/lv3/platform/roles/runtime_pool_substrate/**
+      - docs/runbooks/configure-runtime-general-pool.md
+      - docs/runbooks/configure-runtime-control-pool.md
+      - docs/runbooks/configure-gitea.md
+      - docs/runbooks/configure-harbor.md
+      - docs/runbooks/configure-keycloak.md
+      - docs/runbooks/configure-mail-platform.md
+      - docs/runbooks/configure-mailpit.md
+      - docs/runbooks/deploy-uptime-kuma.md
+      - docs/runbooks/configure-homepage.md
+      - docs/runbooks/configure-nomad.md
+      - docs/runbooks/configure-openbao.md
+      - docs/runbooks/configure-openfga.md
+      - docs/runbooks/runtime-pool-memory-governance.md
+      - docs/runbooks/configure-runtime-pool-autoscaling.md
+      - docs/runbooks/configure-semaphore.md
+      - docs/runbooks/configure-step-ca.md
+      - docs/runbooks/configure-temporal.md
+      - docs/runbooks/configure-vaultwarden.md
+      - docs/runbooks/configure-windmill.md
+      - docs/schema/capacity-model.schema.json
+      - docs/schema/runtime-pool-autoscaling.schema.json
+      - scripts/capacity_report.py
+      - scripts/runtime_pool_autoscaling.py
+      - tests/test_generate_platform_vars.py
+      - tests/test_runtime_pool_service_classification.py
+      - tests/test_runtime_pool_substrate_role.py
+      - tests/test_mailpit_playbook.py
+      - tests/test_mail_platform_runtime_role.py
+      - tests/test_mail_platform_verify_playbook.py
+      - tests/test_nomad_playbook.py
+      - tests/test_homepage_runtime_role.py
+      - tests/test_openbao_playbook.py
+      - tests/test_openfga_metadata.py
+      - tests/test_openfga_runtime_role.py
+      - tests/test_harbor_runtime_role.py
+      - tests/test_nats_jetstream_runtime_role.py
+      - tests/test_runtime_control_pool_playbook.py
+      - tests/test_runtime_general_pool_playbook.py
+      - tests/test_runtime_general_service_playbooks.py
+      - tests/test_temporal_playbook.py
+      - tests/test_capacity_report.py
+      - tests/test_runtime_pool_autoscaling.py
+      - receipts/runtime-pool-scaling/.gitkeep
+      - VERSION
+      - changelog.md
+      - docs/release-notes/*.md
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: ws0330_generated_truth
+          paths:
+            - README.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/site-generated/architecture/dependency-graph.md
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
+        - id: ws0330_latest_main_merge_normalization
+          paths:
+            - playbooks/ops-portal.yml
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+          mode: shared_contract
+          contract: latest-main-merge-normalization-v1
+        - id: ws0330_platform_truth_generation
+          paths:
+            - build/platform-manifest.json
+            - versions/stack.yaml
+          mode: shared_contract
+          contract: canonical-truth-v1
+        - id: ws0330_runtime_pool_adr_metadata
+          paths:
+            - docs/adr/0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md
+            - docs/adr/0322-memory-pressure-autoscaling-for-elastic-runtime-pools.md
+            - docs/adr/0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md
+          mode: shared_contract
+          contract: runtime-pool-adr-metadata-v1
+        - id: ws0330_release_surfaces
+          paths:
+            - VERSION
+            - changelog.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: ws0330_transition_program_docs
+          paths:
+            - docs/workstreams/ws-0330-runtime-pool-transition-program.md
+          mode: exclusive
+        - id: ws0330_service_partition_artifacts
+          paths:
+            - config/contracts/service-partitions/*
+            - docs/schema/service-partition-catalog.schema.json
+            - tests/test_runtime_pool_service_classification.py
+          mode: exclusive
+        - id: ws0330_service_classification_contract
+          paths:
+            - config/service-capability-catalog.json
+            - docs/schema/service-capability-catalog.schema.json
+          mode: shared_contract
+          contract: service-runtime-classification-v1
+        - id: ws0330_generated_platform_projection
+          paths:
+            - scripts/generate_platform_vars.py
+            - inventory/group_vars/platform.yml
+            - tests/test_generate_platform_vars.py
+          mode: shared_contract
+          contract: runtime-pool-platform-projection-v1
+        - id: ws0330_repo_model_validation
+          paths:
+            - scripts/validate_repository_data_models.py
+          mode: shared_contract
+          contract: repository-data-model-validation-v1
+        - id: ws0330_runtime_general_pool_artifacts
+          paths:
+            - playbooks/runtime-general-pool.yml
+            - playbooks/services/runtime-general-pool.yml
+            - docs/runbooks/configure-runtime-general-pool.md
+            - tests/test_runtime_general_pool_playbook.py
+            - tests/test_runtime_general_service_playbooks.py
+          mode: exclusive
+        - id: ws0330_runtime_control_pool_artifacts
+          paths:
+            - playbooks/runtime-control-pool.yml
+            - playbooks/services/runtime-control-pool.yml
+            - docs/runbooks/configure-runtime-control-pool.md
+            - tests/test_runtime_control_pool_playbook.py
+          mode: exclusive
+        - id: ws0330_runtime_general_transition_contract
+          paths:
+            - inventory/hosts.yml
+            - inventory/group_vars/all.yml
+            - inventory/host_vars/proxmox_florin.yml
+            - config/execution-lanes.yaml
+            - config/ansible-execution-scopes.yaml
+            - config/health-probe-catalog.json
+            - config/service-redundancy-catalog.json
+            - config/slo-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/subdomain-exposure-registry.json
+            - config/workflow-catalog.json
+            - playbooks/homepage.yml
+            - playbooks/uptime-kuma.yml
+            - playbooks/nomad.yml
+            - collections/ansible_collections/lv3/platform/playbooks/mailpit.yml
+            - collections/ansible_collections/lv3/platform/roles/runtime_pool_substrate/**
+            - docs/runbooks/configure-mailpit.md
+            - docs/runbooks/deploy-uptime-kuma.md
+            - docs/runbooks/configure-homepage.md
+            - docs/runbooks/configure-nomad.md
+            - tests/test_runtime_pool_substrate_role.py
+            - tests/test_mailpit_playbook.py
+            - tests/test_nomad_playbook.py
+            - tests/test_homepage_runtime_role.py
+          mode: shared_contract
+          contract: runtime-general-transition-v1
+        - id: ws0330_runtime_control_transition_contract
+          paths:
+            - inventory/hosts.yml
+            - inventory/group_vars/all.yml
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - config/execution-lanes.yaml
+            - config/ansible-execution-scopes.yaml
+            - config/api-gateway-catalog.json
+            - config/control-plane-lanes.json
+            - config/health-probe-catalog.json
+            - config/service-redundancy-catalog.json
+            - config/service-capability-catalog.json
+            - config/slo-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/grafana/dashboards/slo-overview.json
+            - config/subdomain-exposure-registry.json
+            - config/uptime-kuma/monitors.json
+            - playbooks/api-gateway.yml
+            - playbooks/gitea.yml
+            - playbooks/harbor.yml
+            - playbooks/keycloak.yml
+            - playbooks/mail-platform-diagnostics.yml
+            - playbooks/mail-platform-notification-profiles-verify.yml
+            - playbooks/mail-platform-send-gmail.yml
+            - playbooks/mail-platform.yml
+            - playbooks/nats-jetstream.yml
+            - playbooks/nomad.yml
+            - playbooks/openbao.yml
+            - playbooks/openfga.yml
+            - playbooks/semaphore.yml
+            - playbooks/step-ca.yml
+            - playbooks/temporal.yml
+            - playbooks/vaultwarden.yml
+            - playbooks/windmill.yml
+            - collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml
+            - docs/runbooks/configure-gitea.md
+            - docs/runbooks/configure-harbor.md
+            - docs/runbooks/configure-keycloak.md
+            - docs/runbooks/configure-mail-platform.md
+            - docs/runbooks/configure-nomad.md
+            - docs/runbooks/configure-openbao.md
+            - docs/runbooks/configure-openfga.md
+            - docs/runbooks/configure-semaphore.md
+            - docs/runbooks/configure-step-ca.md
+            - docs/runbooks/configure-temporal.md
+            - docs/runbooks/configure-vaultwarden.md
+            - docs/runbooks/configure-windmill.md
+            - tests/test_generate_platform_vars.py
+            - tests/test_mail_platform_runtime_role.py
+            - tests/test_mail_platform_verify_playbook.py
+            - tests/test_nomad_playbook.py
+            - tests/test_openbao_playbook.py
+            - tests/test_openfga_metadata.py
+            - tests/test_openfga_runtime_role.py
+            - tests/test_harbor_runtime_role.py
+            - tests/test_nats_jetstream_runtime_role.py
+            - tests/test_temporal_playbook.py
+          mode: shared_contract
+          contract: runtime-control-transition-v1
+        - id: ws0330_runtime_pool_capacity_governance_contract
+          paths:
+            - config/capacity-model.json
+            - docs/schema/capacity-model.schema.json
+            - scripts/capacity_report.py
+            - docs/runbooks/runtime-pool-memory-governance.md
+            - tests/test_capacity_report.py
+          mode: shared_contract
+          contract: runtime-pool-capacity-governance-v1
+        - id: ws0330_runtime_pool_autoscaling_contract
+          paths:
+            - config/runtime-pool-autoscaling.json
+            - docs/schema/runtime-pool-autoscaling.schema.json
+            - scripts/runtime_pool_autoscaling.py
+            - docs/runbooks/configure-runtime-pool-autoscaling.md
+            - tests/test_runtime_pool_autoscaling.py
+            - receipts/runtime-pool-scaling/.gitkeep
+          mode: shared_contract
+          contract: runtime-pool-autoscaling-v1
+    canonical_truth:
+      changelog_entry: completes the repo-managed runtime-pool transition program by classifying all services, implementing the runtime-general and runtime-control deployment surfaces, and adding governed runtime-pool memory-envelope and autoscaling contracts while leaving the runtime-control live apply for a later mainline change
+      release_bump: patch
+      included_in_repo_version: 0.177.145
+    blockers: []
+    ready_to_merge: true
+    live_applied: false
   - id: ws-0325-service-uptime-investigation
     adr: "0319"
     title: Investigate recurring service restarts and uptime failures across the runtime pools

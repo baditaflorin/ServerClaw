@@ -593,6 +593,7 @@ Current values on `main`:
 | `0319` | Split the overloaded shared runtime into pool-scoped lanes with higher memory headroom and bounded autoscaling | `merged` | [adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md](docs/workstreams/adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md) |
 | `0319` | Investigate recurring service restarts and uptime failures across the runtime pools | `merged` | [ws-0325-service-uptime-investigation.md](docs/workstreams/ws-0325-service-uptime-investigation.md) |
 | `0319` | Refine the runtime-pool ADR bundle with battle-tested API-first OSS recommendations | `merged` | [ws-0329-runtime-library-fit.md](docs/workstreams/ws-0329-runtime-library-fit.md) |
+| `0319` | Complete the phased runtime-pool transition after the first runtime-ai split | `merged` | [ws-0330-runtime-pool-transition-program.md](docs/workstreams/ws-0330-runtime-pool-transition-program.md) |
 | `0324` | Programmatic sharding roadmap for oversized service, ADR, discovery, and workstream surfaces | `merged` | [ws-0324-programmatic-doc-shards.md](docs/workstreams/ws-0324-programmatic-doc-shards.md) |
 | `0330` | Prepare the repository for public GitHub publication as a generic and forkable reference platform | `merged` | [adr-0330-public-github-readiness-bundle.md](docs/workstreams/adr-0330-public-github-readiness-bundle.md) |
 <!-- END GENERATED: merged-workstreams -->

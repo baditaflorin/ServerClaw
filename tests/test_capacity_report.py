@@ -237,3 +237,108 @@ def test_report_json_includes_capacity_class_occupancy_from_active_fixture_recei
 
     preview = next(item for item in payload["capacity_classes"] if item["id"] == "preview_burst")
     assert preview["occupied"] == {"ram_gb": 2, "vcpu": 2.0, "disk_gb": 20.0}
+
+
+def test_capacity_model_runtime_pool_memory_governance_surfaces_in_reports(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    inventory_path = tmp_path / "inventory" / "hosts.yml"
+    inventory_path.parent.mkdir(parents=True)
+    inventory_path.write_text(
+        """
+all:
+  children:
+    proxmox_hosts:
+      hosts:
+        proxmox_florin:
+          ansible_host: 65.108.75.123
+    lv3_guests:
+      hosts: {}
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(capacity_report, "INVENTORY_PATH", inventory_path)
+    fixture_receipts = tmp_path / "receipts" / "fixtures"
+    fixture_receipts.mkdir(parents=True)
+    monkeypatch.setattr(capacity_report, "FIXTURE_RECEIPTS_DIR", fixture_receipts)
+
+    service_catalog_path = tmp_path / "config" / "service-capability-catalog.json"
+    service_catalog_path.parent.mkdir(parents=True, exist_ok=True)
+    service_catalog_path.write_text(
+        json.dumps(
+            {
+                "$schema": "docs/schema/service-capability-catalog.schema.json",
+                "schema_version": "1.0.0",
+                "services": [
+                    {"id": "keycloak", "runtime_pool": "runtime-control", "mobility_tier": "anchor"},
+                    {"id": "homepage", "runtime_pool": "runtime-general", "mobility_tier": "elastic_stateless"},
+                    {"id": "tika", "runtime_pool": "runtime-ai", "mobility_tier": "burst_batch"},
+                ],
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(capacity_report, "SERVICE_CATALOG_PATH", service_catalog_path)
+
+    model_path = tmp_path / "config" / "capacity-model.json"
+    model_path.write_text(
+        json.dumps(
+            {
+                "$schema": "docs/schema/capacity-model.schema.json",
+                "schema_version": "1.0.0",
+                "host": {
+                    "id": "proxmox_florin",
+                    "name": "florin",
+                    "metrics_host": "proxmox_florin",
+                    "physical": {"ram_gb": 128, "vcpu": 32, "disk_gb": 1000},
+                    "target_utilisation": {
+                        "ram_percent": 80,
+                        "vcpu_percent": 75,
+                        "disk_percent": 75,
+                    },
+                    "reserved_for_platform": {"ram_gb": 8, "vcpu": 2, "disk_gb": 100},
+                },
+                "guests": [],
+                "runtime_pool_memory": {
+                    "host_free_memory_floor_gb": 20,
+                    "measurement_and_control": {
+                        "metrics_source": "prometheus",
+                        "control_surface": "nomad-autoscaler",
+                    },
+                    "pools": [
+                        {"id": "runtime-control", "baseline_ram_gb": 12, "max_ram_gb": 16, "admission_priority": 1},
+                        {"id": "runtime-general", "baseline_ram_gb": 12, "max_ram_gb": 20, "admission_priority": 2},
+                        {"id": "runtime-ai", "baseline_ram_gb": 16, "max_ram_gb": 28, "admission_priority": 3},
+                    ],
+                },
+                "reservations": [
+                    {
+                        "id": "recovery-drill-pool",
+                        "kind": "planned_growth",
+                        "status": "reserved",
+                        "capacity_class": "recovery_reserved",
+                        "reserved": {"ram_gb": 4, "vcpu": 2, "disk_gb": 48},
+                    }
+                ],
+                "service_load_profiles": [],
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    model = capacity_report.load_capacity_model(model_path)
+    report = capacity_report.build_report(model, with_live_metrics=False)
+    payload = json.loads(capacity_report.render_json(report))
+    output = capacity_report.render_text(report)
+
+    assert payload["runtime_pool_memory"]["combined_baseline_ram_gb"] == 40
+    assert payload["runtime_pool_memory"]["combined_max_ram_gb"] == 64
+    assert payload["runtime_pool_memory"]["remaining_ram_after_pool_max_gb"] == 52
+    assert "Runtime pool memory governance:" in output
+    assert "baseline 40.0 GB, max 64.0 GB" in output

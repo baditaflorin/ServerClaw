@@ -1,51 +1,27 @@
 http:
   routers:
-    runtime-ai-tika:
+{% for route in runtime_pool_substrate_routes %}
+    {{ runtime_pool_substrate_pool_id }}-{{ route.route_id }}:
       entryPoints:
-        - runtime-ai
-      rule: "PathPrefix(`{{ runtime_pool_substrate_tika_prefix }}`)"
-      service: runtime-ai-tika
+        - {{ runtime_pool_substrate_entrypoint_name }}
+      rule: "PathPrefix(`{{ route.prefix }}`)"
+      service: {{ runtime_pool_substrate_pool_id }}-{{ route.route_id }}
       middlewares:
-        - runtime-ai-strip-tika
-    runtime-ai-gotenberg:
-      entryPoints:
-        - runtime-ai
-      rule: "PathPrefix(`{{ runtime_pool_substrate_gotenberg_prefix }}`)"
-      service: runtime-ai-gotenberg
-      middlewares:
-        - runtime-ai-strip-gotenberg
-    runtime-ai-tesseract:
-      entryPoints:
-        - runtime-ai
-      rule: "PathPrefix(`{{ runtime_pool_substrate_tesseract_prefix }}`)"
-      service: runtime-ai-tesseract
-      middlewares:
-        - runtime-ai-strip-tesseract
+        - {{ runtime_pool_substrate_pool_id }}-strip-{{ route.route_id }}
+{% endfor %}
 
   services:
-    runtime-ai-tika:
+{% for route in runtime_pool_substrate_routes %}
+    {{ runtime_pool_substrate_pool_id }}-{{ route.route_id }}:
       loadBalancer:
         servers:
-          - url: "{{ runtime_pool_substrate_tika_upstream }}"
-    runtime-ai-gotenberg:
-      loadBalancer:
-        servers:
-          - url: "{{ runtime_pool_substrate_gotenberg_upstream }}"
-    runtime-ai-tesseract:
-      loadBalancer:
-        servers:
-          - url: "{{ runtime_pool_substrate_tesseract_upstream }}"
+          - url: "{{ route.upstream }}"
+{% endfor %}
 
   middlewares:
-    runtime-ai-strip-tika:
+{% for route in runtime_pool_substrate_routes %}
+    {{ runtime_pool_substrate_pool_id }}-strip-{{ route.route_id }}:
       stripPrefix:
         prefixes:
-          - "{{ runtime_pool_substrate_tika_prefix }}"
-    runtime-ai-strip-gotenberg:
-      stripPrefix:
-        prefixes:
-          - "{{ runtime_pool_substrate_gotenberg_prefix }}"
-    runtime-ai-strip-tesseract:
-      stripPrefix:
-        prefixes:
-          - "{{ runtime_pool_substrate_tesseract_prefix }}"
+          - "{{ route.prefix }}"
+{% endfor %}

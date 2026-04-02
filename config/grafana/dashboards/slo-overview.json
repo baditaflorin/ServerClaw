@@ -4871,7 +4871,7 @@
         "y": 161
       },
       "options": {
-        "content": "### openfga-availability\n\nThe private OpenFGA runtime remains reachable on docker-runtime-lv3 for delegated authorization queries from the platform guest network.\n\nService: `openfga`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=openfga-availability)",
+        "content": "### openfga-availability\n\nThe private OpenFGA runtime remains reachable on runtime-control-lv3 for delegated authorization queries from the platform guest network.\n\nService: `openfga`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=openfga-availability)",
         "mode": "markdown"
       }
     },

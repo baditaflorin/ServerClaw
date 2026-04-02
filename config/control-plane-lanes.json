@@ -47,6 +47,7 @@
           "owner_refs": [
             "nginx-lv3",
             "docker-runtime-lv3",
+            "runtime-control-lv3",
             "docker-build-lv3",
             "monitoring-lv3",
             "postgres-lv3",
@@ -192,7 +193,7 @@
         {
           "id": "mail-gateway-api",
           "kind": "service_api",
-          "endpoint": "http://10.10.10.20:8081",
+          "endpoint": "http://10.10.10.92:8081",
           "auth": "Private X-API-Key stored under .local/mail-platform on the controller.",
           "service_refs": [
             "mail_platform"
@@ -313,7 +314,7 @@
         {
           "id": "mail-platform-submission",
           "kind": "mail_submission",
-          "endpoint": "10.10.10.20:1587",
+          "endpoint": "10.10.10.92:1587",
           "auth": "Managed mailbox or service-specific credentials handled by the internal mail platform.",
           "service_refs": [
             "mail_platform"
@@ -321,7 +322,7 @@
           "workflow_refs": [
             "converge-mail-platform"
           ],
-          "notes": "Stalwart on docker-runtime-lv3 exposes a private submission relay on port 1587 for local platform workloads while public client submission remains on port 587."
+          "notes": "Stalwart on runtime-control-lv3 exposes a private submission relay on port 1587 for local platform workloads while public client submission remains on port 587."
         },
         {
           "id": "proxmox-host-operator-notifications",
@@ -356,7 +357,7 @@
         {
           "id": "stalwart-mail-events",
           "kind": "webhook",
-          "endpoint": "http://10.10.10.20:8081/webhooks/stalwart",
+          "endpoint": "http://10.10.10.92:8081/webhooks/stalwart",
           "auth": "Private internal callback from Stalwart to the mail gateway inside the mail platform stack.",
           "service_refs": [
             "mail_platform"
@@ -383,7 +384,7 @@
           "id": "platform-finding-subjects",
           "kind": "event_subject",
           "endpoint": "platform.findings.*",
-          "auth": "Internal NATS publication from ADR 0071 through the private docker-runtime-lv3 event bus runtime.",
+          "auth": "Internal NATS publication from ADR 0071 through the private runtime-control-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
@@ -397,7 +398,7 @@
           "id": "platform-watchdog-subjects",
           "kind": "event_subject",
           "endpoint": "platform.watchdog.*",
-          "auth": "Internal NATS publication from ADR 0172 through the private docker-runtime-lv3 event bus runtime.",
+          "auth": "Internal NATS publication from ADR 0172 through the private runtime-control-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
@@ -410,7 +411,7 @@
           "id": "platform-api-request-events",
           "kind": "event_subject",
           "endpoint": "platform.api.request",
-          "auth": "Internal NATS publication from ADR 0092 through the private docker-runtime-lv3 event bus runtime.",
+          "auth": "Internal NATS publication from ADR 0092 through the private runtime-control-lv3 event bus runtime.",
           "service_refs": [
             "api_gateway"
           ],
@@ -421,7 +422,7 @@
           "id": "platform-drift-subjects",
           "kind": "event_subject",
           "endpoint": "platform.drift.*",
-          "auth": "Internal NATS publication from ADR 0091 through the private docker-runtime-lv3 event bus runtime.",
+          "auth": "Internal NATS publication from ADR 0091 through the private runtime-control-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
@@ -434,7 +435,7 @@
           "id": "platform-security-subjects",
           "kind": "event_subject",
           "endpoint": "platform.security.*",
-          "auth": "Internal NATS publication from ADR 0102 and ADR 0142 through the private docker-runtime-lv3 event bus runtime.",
+          "auth": "Internal NATS publication from ADR 0102 and ADR 0142 through the private runtime-control-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
@@ -448,7 +449,7 @@
           "id": "platform-slo-subjects",
           "kind": "event_subject",
           "endpoint": "platform.slo.*",
-          "auth": "Internal NATS publication from ADR 0305 through the private docker-runtime-lv3 event bus runtime.",
+          "auth": "Internal NATS publication from ADR 0305 through the private runtime-control-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
@@ -462,7 +463,7 @@
           "id": "maintenance-window-subjects",
           "kind": "event_subject",
           "endpoint": "platform.maintenance.*",
-          "auth": "Internal NATS publication for ADR 0080 platform.maintenance.opened, platform.maintenance.closed, and platform.maintenance.force_closed events through the private docker-runtime-lv3 event bus runtime.",
+          "auth": "Internal NATS publication for ADR 0080 platform.maintenance.opened, platform.maintenance.closed, and platform.maintenance.force_closed events through the private runtime-control-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
@@ -476,7 +477,7 @@
           "id": "platform-backup-subjects",
           "kind": "event_subject",
           "endpoint": "platform.backup.*",
-          "auth": "Internal NATS publication from ADR 0099 and ADR 0302 through the private docker-runtime-lv3 event bus runtime.",
+          "auth": "Internal NATS publication from ADR 0099 and ADR 0302 through the private runtime-control-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
@@ -489,7 +490,7 @@
           "id": "platform-world-state-events",
           "kind": "event_subject",
           "endpoint": "platform.world_state.refreshed",
-          "auth": "Internal NATS publication from ADR 0113 through the private docker-runtime-lv3 event bus runtime.",
+          "auth": "Internal NATS publication from ADR 0113 through the private runtime-control-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
@@ -500,7 +501,7 @@
           "id": "platform-ledger-events",
           "kind": "event_subject",
           "endpoint": "platform.mutation.recorded",
-          "auth": "Internal NATS publication from ADR 0115 through the private docker-runtime-lv3 event bus runtime.",
+          "auth": "Internal NATS publication from ADR 0115 through the private runtime-control-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
@@ -511,7 +512,7 @@
           "id": "platform-agent-events",
           "kind": "event_subject",
           "endpoint": "platform.agent.*",
-          "auth": "Internal NATS publication from ADR 0161 through the private docker-runtime-lv3 event bus runtime.",
+          "auth": "Internal NATS publication from ADR 0161 through the private runtime-control-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
@@ -524,7 +525,7 @@
           "id": "platform-execution-events",
           "kind": "event_subject",
           "endpoint": "platform.execution.*",
-          "auth": "Internal NATS publication from ADR 0119 and ADR 0162 through the private docker-runtime-lv3 event bus runtime.",
+          "auth": "Internal NATS publication from ADR 0119 and ADR 0162 through the private runtime-control-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
@@ -537,7 +538,7 @@
           "id": "platform-config-merge-events",
           "kind": "event_subject",
           "endpoint": "platform.config.*",
-          "auth": "Internal NATS publication from ADR 0158 through the private docker-runtime-lv3 Windmill worker runtime.",
+          "auth": "Internal NATS publication from ADR 0158 through the private runtime-control-lv3 Windmill worker runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],

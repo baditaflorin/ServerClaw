@@ -145,7 +145,7 @@ def test_build_platform_vars_includes_harbor_publication_topology() -> None:
     assert harbor["dns"]["name"] == "registry"
     assert harbor["ports"]["internal"] == 8095
     assert harbor["urls"]["public"] == "https://registry.lv3.org"
-    assert harbor["urls"]["internal"] == "http://10.10.10.20:8095"
+    assert harbor["urls"]["internal"] == "http://10.10.10.92:8095"
 
 
 def test_build_platform_vars_includes_openfga_private_controller_topology() -> None:
@@ -154,7 +154,7 @@ def test_build_platform_vars_includes_openfga_private_controller_topology() -> N
 
     assert openfga["ports"]["internal"] == 8098
     assert openfga["ports"]["controller"] == 8014
-    assert openfga["urls"]["internal"] == "http://10.10.10.20:8098"
+    assert openfga["urls"]["internal"] == "http://10.10.10.92:8098"
     assert openfga["urls"]["controller"] == "http://100.64.0.1:8014"
     assert platform_vars["openfga_controller_url"] == "http://100.64.0.1:8014"
 
@@ -164,7 +164,7 @@ def test_build_platform_vars_includes_temporal_private_loopback_topology() -> No
     temporal = platform_vars["platform_service_topology"]["temporal"]
 
     assert temporal["exposure_model"] == "private-only"
-    assert temporal["private_ip"] == "10.10.10.20"
+    assert temporal["private_ip"] == "10.10.10.92"
     assert temporal["access"]["kind"] == "ssh-tunnel"
     assert temporal["access"]["url"] == "grpc://127.0.0.1:7233"
     assert "urls" not in temporal or temporal["urls"] == {}
@@ -172,7 +172,7 @@ def test_build_platform_vars_includes_temporal_private_loopback_topology() -> No
 def test_build_platform_vars_includes_openbao_extra_bind_addresses() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
 
-    assert platform_vars["openbao_http_extra_bind_addresses"] == ["10.10.10.20"]
+    assert platform_vars["openbao_http_extra_bind_addresses"] == ["10.10.10.92"]
 
 
 def test_build_platform_vars_includes_one_api_private_controller_topology() -> None:
@@ -275,6 +275,8 @@ def test_build_platform_vars_includes_jupyterhub_publication_topology() -> None:
     assert jupyterhub["urls"]["public"] == "https://notebooks.lv3.org"
     assert jupyterhub["urls"]["internal"] == "http://10.10.10.20:8097"
     assert jupyterhub["edge"]["client_max_body_size"] == "2g"
+    assert jupyterhub["runtime_pool"] == "runtime-ai"
+    assert jupyterhub["mobility_tier"] == "burst_batch"
 
 
 def test_build_platform_vars_includes_superset_publication_topology() -> None:
@@ -339,6 +341,19 @@ def test_build_platform_vars_includes_nextcloud_publication_topology() -> None:
         {"path": "/.well-known/carddav", "location": "/remote.php/dav/", "status": 301},
         {"path": "/.well-known/caldav", "location": "/remote.php/dav/", "status": 301},
     ]
+
+
+def test_build_platform_vars_projects_control_and_dedicated_pool_metadata() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+
+    keycloak = platform_vars["platform_service_topology"]["keycloak"]
+    grafana = platform_vars["platform_service_topology"]["grafana"]
+
+    assert keycloak["runtime_pool"] == "runtime-control"
+    assert keycloak["restart_domain"] == "runtime-control-identity"
+    assert keycloak["mobility_tier"] == "anchor"
+    assert grafana["runtime_pool"] == "dedicated-monitoring"
+    assert grafana["mobility_tier"] == "anchor"
 
 
 def test_build_platform_vars_includes_shared_session_authority_contract() -> None:
@@ -411,9 +426,9 @@ def test_build_service_urls_supports_private_nomad_controller_url() -> None:
 
 def test_build_service_urls_resolves_homepage_internal_url() -> None:
     ports = {"homepage_port": 3090}
-    service = {"owning_vm": "docker-runtime-lv3"}
+    service = {"owning_vm": "runtime-general-lv3"}
     host_vars = {"management_tailscale_ipv4": "100.118.189.95"}
-    guest_ipv4_by_name = {"docker-runtime-lv3": "10.10.10.20"}
+    guest_ipv4_by_name = {"runtime-general-lv3": "10.10.10.91"}
     stack = {"desired_state": {"host_id": "proxmox_florin"}}
 
     port_map, urls = generate_platform_vars.build_service_urls(
@@ -426,7 +441,24 @@ def test_build_service_urls_resolves_homepage_internal_url() -> None:
     )
 
     assert port_map == {"internal": 3090}
-    assert urls == {"internal": "http://10.10.10.20:3090"}
+    assert urls == {"internal": "http://10.10.10.91:3090"}
+
+
+def test_build_platform_vars_moves_support_surfaces_to_runtime_general() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    homepage = platform_vars["platform_service_topology"]["homepage"]
+    mailpit = platform_vars["platform_service_topology"]["mailpit"]
+    status_page = platform_vars["platform_service_topology"]["status_page"]
+    uptime_kuma = platform_vars["platform_service_topology"]["uptime_kuma"]
+
+    assert homepage["owning_vm"] == "runtime-general-lv3"
+    assert homepage["urls"]["internal"] == "http://10.10.10.91:3090"
+    assert mailpit["owning_vm"] == "runtime-general-lv3"
+    assert mailpit["urls"]["internal"] == "http://10.10.10.91:8025"
+    assert status_page["owning_vm"] == "runtime-general-lv3"
+    assert status_page["edge"]["upstream"] == "http://10.10.10.91:3001"
+    assert uptime_kuma["owning_vm"] == "runtime-general-lv3"
+    assert uptime_kuma["urls"]["internal"] == "http://10.10.10.91:3001"
 
 
 def test_build_service_urls_resolves_excalidraw_internal_url() -> None:

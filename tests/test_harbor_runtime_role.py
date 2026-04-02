@@ -171,7 +171,8 @@ def test_verify_accepts_running_services_after_ping() -> None:
 
 def test_host_network_policy_allows_nginx_edge_access_to_harbor() -> None:
     host_vars = load_yaml(HOST_VARS)
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
-    harbor_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "nginx-lv3" and 8095 in rule["ports"])
+    runtime_control_rules = host_vars["network_policy"]["guests"]["runtime-control-lv3"]["allowed_inbound"]
+    harbor_rule = next(rule for rule in runtime_control_rules if rule["source"] == "nginx-lv3" and 8095 in rule["ports"])
 
-    assert harbor_rule["description"].lower().startswith("edge access")
+    assert "edge access" in harbor_rule["description"].lower()
+    assert "harbor" in harbor_rule["description"].lower()

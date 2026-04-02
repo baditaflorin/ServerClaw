@@ -4,11 +4,11 @@ This runbook covers the private Gitea deployment introduced by ADR 0143.
 
 ## Purpose
 
-`git.lv3.org` provides the self-hosted Git and CI surface for LV3. It runs privately on `docker-runtime-lv3`, uses PostgreSQL on `postgres-lv3`, authenticates operators through Keycloak, stores LFS payloads in the shared MinIO bucket `gitea-lfs`, and dispatches Actions jobs to `docker-build-lv3`.
+`git.lv3.org` provides the self-hosted Git and CI surface for LV3. It runs privately on `runtime-control-lv3`, uses PostgreSQL on `postgres-lv3`, authenticates operators through Keycloak, stores LFS payloads in the shared MinIO bucket `gitea-lfs`, and dispatches Actions jobs to `docker-build-lv3`.
 
 ## Managed Paths
 
-- Runtime host: `docker-runtime-lv3`
+- Runtime host: `runtime-control-lv3`
 - Database host: `postgres-lv3`
 - Runner host: `docker-build-lv3`
 - Controller URL: `http://100.64.0.1:3009`
@@ -113,7 +113,7 @@ curl -sS \
 7. Confirm the runtime env now declares MinIO-backed LFS:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'sudo grep -E "^GITEA__lfs__" /run/lv3-secrets/gitea/runtime.env'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.92 'sudo grep -E "^GITEA__lfs__" /run/lv3-secrets/gitea/runtime.env'
 ```
 
 ## Smoke-Test Repository Creation

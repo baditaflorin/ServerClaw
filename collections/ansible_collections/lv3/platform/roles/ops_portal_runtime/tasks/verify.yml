@@ -1,3 +1,9 @@
+# Purpose: Verify that the repo-managed ops portal responds locally and renders the expected launcher, activation, help, and runtime assurance surfaces.
+# Use case: Include after ops_portal_runtime reconciliation or from role-specific verify tasks.
+# Inputs: ops_portal_verify_* variables plus the rendered ops portal runtime and HTTP listener.
+# Outputs: Assertion-only verification state for the local ops portal runtime.
+# Idempotency: Fully idempotent; verification tasks only read local runtime state and assert expected content.
+# Dependencies: ADR 0165, ADR 0310, ops_portal_runtime defaults, and a running local Docker runtime.
 ---
 - name: Verify the ops portal container is running
   ansible.builtin.command:

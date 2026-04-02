@@ -41,7 +41,7 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - http://10.10.10.20:3003/api/healthz
+    - http://10.10.10.92:3003/api/healthz
   labels:
     service_id: gitea
     slo_id: gitea-availability
@@ -97,7 +97,7 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - http://10.10.10.20:8025/api/v1/info
+    - http://10.10.10.91:8025/api/v1/info
   labels:
     service_id: mailpit
     slo_id: mailpit-availability
@@ -160,14 +160,14 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - http://10.10.10.20:8098/healthz
+    - http://10.10.10.92:8098/healthz
   labels:
     service_id: openfga
     slo_id: openfga-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - http://10.10.10.20:8098/healthz
+    - http://10.10.10.92:8098/healthz
   labels:
     service_id: openfga
     slo_id: openfga-latency
@@ -230,7 +230,7 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - http://10.10.10.20:3004/api/ping
+    - http://10.10.10.92:3004/api/ping
   labels:
     service_id: semaphore
     slo_id: semaphore-availability
@@ -293,7 +293,7 @@
     indicator: availability
     probe_module: http_2xx_insecure_tls
 - targets:
-    - http://10.10.10.20:8000/api/version
+    - http://10.10.10.92:8000/api/version
   labels:
     service_id: windmill
     slo_id: windmill-availability

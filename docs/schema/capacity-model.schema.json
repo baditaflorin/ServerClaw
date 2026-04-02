@@ -82,6 +82,9 @@
         "$ref": "#/$defs/guestEntry"
       }
     },
+    "runtime_pool_memory": {
+      "$ref": "#/$defs/runtimePoolMemoryGovernance"
+    },
     "reservations": {
       "type": "array",
       "items": {
@@ -246,6 +249,76 @@
           "additionalProperties": false
         },
         "max_concurrent_vms": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtimePoolMemoryGovernance": {
+      "type": "object",
+      "required": [
+        "host_free_memory_floor_gb",
+        "measurement_and_control",
+        "pools"
+      ],
+      "properties": {
+        "host_free_memory_floor_gb": {
+          "type": "number",
+          "minimum": 0
+        },
+        "measurement_and_control": {
+          "type": "object",
+          "required": [
+            "metrics_source",
+            "control_surface"
+          ],
+          "properties": {
+            "metrics_source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "control_surface": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "pools": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/runtimePoolMemoryEnvelope"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtimePoolMemoryEnvelope": {
+      "type": "object",
+      "required": [
+        "id",
+        "baseline_ram_gb",
+        "max_ram_gb",
+        "admission_priority"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "baseline_ram_gb": {
+          "type": "number",
+          "minimum": 0
+        },
+        "max_ram_gb": {
+          "type": "number",
+          "minimum": 0
+        },
+        "admission_priority": {
           "type": "integer",
           "minimum": 1
         },

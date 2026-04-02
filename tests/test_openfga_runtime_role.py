@@ -205,7 +205,7 @@ def test_openfga_playbook_bootstraps_serverclaw_authz_from_localhost() -> None:
         "(not (openfga_bootstrap.stdout | from_json).verification_passed)"
     )
     assert bootstrap_play["vars"]["openfga_bootstrap_keycloak_host"] == (
-        "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+        "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
     )
     assert bootstrap_play["vars"]["openfga_bootstrap_keycloak_url"] == (
         "http://{{ hostvars[openfga_bootstrap_keycloak_host].ansible_host }}:8091"

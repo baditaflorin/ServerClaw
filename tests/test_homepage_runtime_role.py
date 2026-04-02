@@ -38,8 +38,12 @@ class HomepageRuntimeRoleTests(unittest.TestCase):
     def test_inventory_declares_homepage_topology_and_firewall_access(self) -> None:
         self.assertIn("homepage_port: 3090", self.host_vars_text)
         self.assertIn("service_name: homepage", self.host_vars_text)
+        self.assertIn("owning_vm: runtime-general-lv3", self.host_vars_text)
         self.assertIn("public_hostname: home.lv3.org", self.host_vars_text)
-        self.assertIn("upstream: \"http://10.10.10.20:{{ platform_port_assignments.homepage_port }}\"", self.host_vars_text)
+        self.assertIn(
+            "upstream: \"http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.homepage_port }}\"",
+            self.host_vars_text,
+        )
         self.assertIn("port: 3090", self.host_vars_text)
 
 

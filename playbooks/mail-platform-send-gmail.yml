@@ -10,7 +10,7 @@
         msg: "Sending live Gmail probe through the mail gateway."
 
 - name: Send the live Gmail probe
-  hosts: docker-runtime-lv3
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
   gather_facts: true
 
