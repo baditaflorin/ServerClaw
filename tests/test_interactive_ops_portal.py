@@ -466,7 +466,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                                 "enabled": True,
                                 "label": "Validation Gate Status",
                                 "description": "Open the shared validation-gate status launcher path.",
-                                "purpose": "observe",
+                                "lane": "observe",
                                 "personas": ["operator", "observer"],
                                 "href": "/#runbooks",
                             }
@@ -482,7 +482,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                                 "enabled": True,
                                 "label": "Drift Status",
                                 "description": "Open the drift panel.",
-                                "purpose": "observe",
+                                "lane": "observe",
                                 "personas": ["observer", "operator"],
                                 "href": "/#drift",
                             }
@@ -498,7 +498,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                                 "enabled": True,
                                 "label": "Converge Ops Portal",
                                 "description": "Open the governed portal deployment path.",
-                                "purpose": "administer",
+                                "lane": "change",
                                 "personas": ["administrator", "operator"],
                                 "href": "/#runbooks",
                             }
@@ -545,6 +545,64 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
         + "\n",
         encoding="utf-8",
     )
+    (data_root / "config" / "workbench-information-architecture.json").write_text(
+        json.dumps(
+            {
+                "lanes": [
+                    {"id": "start", "label": "Start", "question": "Where do I begin and what needs my attention?"},
+                    {"id": "observe", "label": "Observe", "question": "What is happening right now?"},
+                    {"id": "change", "label": "Change", "question": "How do I make a safe governed change?"},
+                    {"id": "learn", "label": "Learn", "question": "Where is the explanation, runbook, or reference?"},
+                    {"id": "recover", "label": "Recover", "question": "How do I restore, repair, or escalate?"},
+                ],
+                "service_category_defaults": {
+                    "automation": {"primary_lane": "change", "secondary_lanes": ["observe"], "next_success_lane": "observe", "next_failure_lane": "recover"},
+                    "communication": {"primary_lane": "learn", "secondary_lanes": ["change"], "next_success_lane": "change", "next_failure_lane": "recover"},
+                    "data": {"primary_lane": "learn", "secondary_lanes": ["observe"], "next_success_lane": "change", "next_failure_lane": "recover"},
+                    "infrastructure": {"primary_lane": "change", "secondary_lanes": ["recover"], "next_success_lane": "observe", "next_failure_lane": "recover"},
+                    "observability": {"primary_lane": "observe", "secondary_lanes": ["recover"], "next_success_lane": "change", "next_failure_lane": "recover"},
+                    "security": {"primary_lane": "recover", "secondary_lanes": ["observe"], "next_success_lane": "change", "next_failure_lane": "recover"},
+                    "access": {"primary_lane": "start", "secondary_lanes": ["learn"], "next_success_lane": "observe", "next_failure_lane": "recover"},
+                },
+                "service_overrides": [
+                    {"service_id": "ops_portal", "primary_lane": "start", "secondary_lanes": ["observe", "change", "learn", "recover"], "next_success_lane": "change", "next_failure_lane": "recover"},
+                    {"service_id": "keycloak", "primary_lane": "recover", "secondary_lanes": ["start", "change"], "next_success_lane": "start", "next_failure_lane": "recover"},
+                    {"service_id": "grafana", "primary_lane": "observe", "secondary_lanes": ["recover"], "next_success_lane": "change", "next_failure_lane": "recover"}
+                ],
+                "workflow_defaults": {
+                    "diagnostic": {"primary_lane": "observe", "secondary_lanes": ["learn"], "next_success_lane": "change", "next_failure_lane": "recover"},
+                    "mutation": {"primary_lane": "change", "secondary_lanes": ["observe"], "next_success_lane": "observe", "next_failure_lane": "recover"}
+                },
+                "workflow_overrides": [
+                    {"workflow_id": "gate-status", "primary_lane": "observe", "secondary_lanes": ["learn"], "next_success_lane": "change", "next_failure_lane": "recover"},
+                    {"workflow_id": "continuous-drift-detection", "primary_lane": "observe", "secondary_lanes": ["recover"], "next_success_lane": "change", "next_failure_lane": "recover"},
+                    {"workflow_id": "converge-ops-portal", "primary_lane": "change", "secondary_lanes": ["recover", "observe"], "next_success_lane": "observe", "next_failure_lane": "recover"}
+                ],
+                "runbook_defaults": {
+                    "diagnostic": {"primary_lane": "learn", "secondary_lanes": ["observe"], "next_success_lane": "change", "next_failure_lane": "recover"},
+                    "mutation": {"primary_lane": "change", "secondary_lanes": ["recover"], "next_success_lane": "observe", "next_failure_lane": "recover"}
+                },
+                "runbook_overrides": [
+                    {"runbook_id": "validation-gate-status", "primary_lane": "observe", "secondary_lanes": ["learn"], "next_success_lane": "change", "next_failure_lane": "recover"}
+                ],
+                "pages": [
+                    {"id": "ops_portal_shell", "title": "Interactive Ops Portal", "surface": "ops_portal", "route": "/", "section_id": "portal_main", "fragment": "overview", "nav_label": "Portal Home", "nav_visible": False, "nav_order": 1, "primary_lane": "start", "secondary_lanes": ["observe", "change", "learn", "recover"], "next_success_lane": "change", "next_failure_lane": "recover"},
+                    {"id": "ops_portal_overview", "title": "Platform Overview", "surface": "ops_portal", "route": "/partials/overview", "section_id": "overview", "fragment": "overview", "nav_label": "Overview", "nav_visible": True, "nav_order": 10, "primary_lane": "start", "secondary_lanes": ["observe", "change"], "next_success_lane": "observe", "next_failure_lane": "recover"},
+                    {"id": "ops_portal_deployments", "title": "Deployment Console", "surface": "ops_portal", "route": "/", "section_id": "deployments", "fragment": "deployments", "nav_label": "Deployment Console", "nav_visible": True, "nav_order": 20, "primary_lane": "change", "secondary_lanes": ["observe", "recover"], "next_success_lane": "observe", "next_failure_lane": "recover"},
+                    {"id": "ops_portal_agents", "title": "Agent Coordination", "surface": "ops_portal", "route": "/partials/agents", "section_id": "agents", "fragment": "agents", "nav_label": "Agent Coordination", "nav_visible": True, "nav_order": 30, "primary_lane": "observe", "secondary_lanes": ["change"], "next_success_lane": "change", "next_failure_lane": "recover"},
+                    {"id": "ops_portal_runtime_assurance", "title": "Runtime Assurance", "surface": "ops_portal", "route": "/partials/runtime-assurance", "section_id": "runtime-assurance", "fragment": "runtime-assurance", "nav_label": "Runtime Assurance", "nav_visible": True, "nav_order": 40, "primary_lane": "observe", "secondary_lanes": ["recover"], "next_success_lane": "change", "next_failure_lane": "recover"},
+                    {"id": "ops_portal_drift", "title": "Drift Panel", "surface": "ops_portal", "route": "/partials/drift", "section_id": "drift", "fragment": "drift", "nav_label": "Drift", "nav_visible": True, "nav_order": 50, "primary_lane": "observe", "secondary_lanes": ["change", "recover"], "next_success_lane": "change", "next_failure_lane": "recover"},
+                    {"id": "ops_portal_search", "title": "Search Fabric", "surface": "ops_portal", "route": "/partials/search", "section_id": "search", "fragment": "search", "nav_label": "Search", "nav_visible": True, "nav_order": 60, "primary_lane": "learn", "secondary_lanes": ["start"], "next_success_lane": "change", "next_failure_lane": "learn"},
+                    {"id": "ops_portal_runbooks", "title": "Runbook Launcher", "surface": "ops_portal", "route": "/partials/runbooks", "section_id": "runbooks", "fragment": "runbooks", "nav_label": "Runbooks", "nav_visible": True, "nav_order": 70, "primary_lane": "change", "secondary_lanes": ["learn", "recover"], "next_success_lane": "observe", "next_failure_lane": "recover"},
+                    {"id": "ops_portal_changelog", "title": "Changelog", "surface": "ops_portal", "route": "/partials/changelog", "section_id": "changelog", "fragment": "changelog", "nav_label": "Changelog", "nav_visible": True, "nav_order": 80, "primary_lane": "learn", "secondary_lanes": ["observe"], "next_success_lane": "change", "next_failure_lane": "learn"},
+                    {"id": "ops_portal_launcher", "title": "Application Launcher", "surface": "ops_portal", "route": "/partials/launcher", "section_id": "launcher-shell", "fragment": "launcher-shell", "nav_label": "Application Launcher", "nav_visible": False, "nav_order": 90, "primary_lane": "start", "secondary_lanes": ["change", "learn", "observe"], "next_success_lane": "change", "next_failure_lane": "learn"}
+                ]
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (data_root / "config" / "persona-catalog.json").write_text(
         json.dumps(
             {
@@ -554,7 +612,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "name": "Operator",
                         "description": "Default runtime operator.",
                         "default": True,
-                        "focus_purposes": ["operate", "observe", "learn"],
+                        "focus_lanes": ["start", "observe", "change"],
                         "default_favorites": ["service:grafana", "workflow:gate-status"],
                     },
                     {
@@ -562,7 +620,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "name": "Observer",
                         "description": "Monitoring and drift review.",
                         "default": False,
-                        "focus_purposes": ["observe", "operate", "administer"],
+                        "focus_lanes": ["observe", "recover", "change"],
                         "default_favorites": ["workflow:continuous-drift-detection"],
                     },
                     {
@@ -570,7 +628,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "name": "Administrator",
                         "description": "Identity and platform administration.",
                         "default": False,
-                        "focus_purposes": ["administer", "operate", "observe"],
+                        "focus_lanes": ["recover", "change", "observe"],
                         "default_favorites": ["workflow:converge-ops-portal"],
                     },
                 ]
@@ -650,6 +708,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
         static_api_token="test-token",
         service_catalog_path=data_root / "config" / "service-capability-catalog.json",
         persona_catalog_path=data_root / "config" / "persona-catalog.json",
+        workbench_ia_path=data_root / "config" / "workbench-information-architecture.json",
         publication_registry_path=data_root / "config" / "subdomain-exposure-registry.json",
         workflow_catalog_path=data_root / "config" / "workflow-catalog.json",
         changelog_path=data_root / "changelog.md",
@@ -685,6 +744,11 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Escalation Path" in response.text
     assert "Live apply" in response.text
     assert "Platform Overview" in response.text
+    assert "Start" in response.text
+    assert "Observe" in response.text
+    assert "Change" in response.text
+    assert "Learn" in response.text
+    assert "Recover" in response.text
     assert "Runtime Assurance" in response.text
     assert "Scoreboard and rollup by active service and environment" in response.text
     assert "Deployment Console" in response.text
@@ -708,6 +772,8 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Ops portal dependency map" in response.text
     assert "Session states at a glance" in response.text
     assert "Recent rollout tempo" in response.text
+    assert "Success: Observe" in response.text
+    assert "Failure: Recover" in response.text
     assert gateway.platform_health_tokens == ["test-token"]
     assert gateway.runtime_assurance_tokens == ["test-token"]
     assert gateway.agent_coordination_tokens == ["test-token"]
@@ -733,6 +799,7 @@ def test_runtime_assurance_scoreboard_renders_service_rows(
     response = client.get("/partials/overview")
 
     assert response.status_code == 200
+    assert 'data-primary-lane="start"' in response.text
     assert "Healthy Rows" in response.text
     assert "Rows Needing Action" in response.text
     assert "Grafana" in response.text
@@ -880,6 +947,7 @@ def test_launcher_persona_switch_updates_selection(portal_client: tuple[TestClie
     assert response.status_code == 200
     assert "Identity and platform administration." in response.text
     assert "Converge Ops Portal" in response.text
+    assert "Recover" in response.text
 
 
 def test_launcher_search_filters_results(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -933,6 +1001,7 @@ def test_search_action_renders_results(portal_client: tuple[TestClient, FakeGate
     response = client.post("/actions/search", data={"query": "tls cert expires", "collection": "runbooks"})
 
     assert response.status_code == 200
+    assert 'data-primary-lane="learn"' in response.text
     assert "Rotate Certificates" in response.text
     assert gateway.search_calls == [{"query": "tls cert expires", "collection": "runbooks", "limit": 8, "token": "test-token"}]
 
@@ -1049,6 +1118,7 @@ def test_load_live_apply_receipts_ignores_unreadable_receipts(tmp_path: Path) ->
 
     (config_dir / "service-capability-catalog.json").write_text('{"services":[]}\n', encoding="utf-8")
     (config_dir / "persona-catalog.json").write_text('{"personas":[]}\n', encoding="utf-8")
+    (config_dir / "workbench-information-architecture.json").write_text('{}\n', encoding="utf-8")
     (config_dir / "subdomain-exposure-registry.json").write_text('{"publications":[]}\n', encoding="utf-8")
     (config_dir / "workflow-catalog.json").write_text('{"workflows":{}}\n', encoding="utf-8")
     (data_root / "changelog.md").write_text("# Changelog\n", encoding="utf-8")
@@ -1098,6 +1168,7 @@ def test_load_live_apply_receipts_ignores_unreadable_receipts(tmp_path: Path) ->
         static_api_token="test-token",
         service_catalog_path=config_dir / "service-capability-catalog.json",
         persona_catalog_path=config_dir / "persona-catalog.json",
+        workbench_ia_path=config_dir / "workbench-information-architecture.json",
         publication_registry_path=config_dir / "subdomain-exposure-registry.json",
         workflow_catalog_path=config_dir / "workflow-catalog.json",
         changelog_path=data_root / "changelog.md",

@@ -1,3 +1,4 @@
+<div data-primary-lane="{{ page_lane.primary_lane if page_lane else '' }}" data-secondary-lanes="{{ page_lane.secondary_lanes_csv if page_lane else '' }}" data-next-success-lane="{{ page_lane.next_success_lane if page_lane else '' }}" data-next-failure-lane="{{ page_lane.next_failure_lane if page_lane else '' }}"></div>
 {% if runtime_assurance_warning %}
 <div class="banner warning">Runtime assurance data is degraded: {{ runtime_assurance_warning }}</div>
 {% endif %}

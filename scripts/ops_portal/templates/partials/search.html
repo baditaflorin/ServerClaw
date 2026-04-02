@@ -1,5 +1,5 @@
 {% from "macros/states.html" import state_message %}
-<div class="pf-v5-c-card panel search-panel">
+<div class="pf-v5-c-card panel search-panel" data-primary-lane="{{ page_lane.primary_lane if page_lane else '' }}" data-secondary-lanes="{{ page_lane.secondary_lanes_csv if page_lane else '' }}" data-next-success-lane="{{ page_lane.next_success_lane if page_lane else '' }}" data-next-failure-lane="{{ page_lane.next_failure_lane if page_lane else '' }}">
   <form class="search-form" hx-post="/actions/search" hx-target="#search-panel" hx-swap="innerHTML">
     <div>
       <label class="form-label" for="search-query">Query</label>

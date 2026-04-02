@@ -98,6 +98,7 @@ from validation_runner_contracts import (
     load_contract_catalog as load_validation_runner_contract_catalog,
     validate_contract_catalog as validate_validation_runner_contract_catalog,
 )
+from workbench_information_architecture import TASK_LANE_IDS, TASK_LANE_ORDER, normalize_task_lane
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
@@ -125,6 +126,8 @@ RESTORE_READINESS_PROFILE_PATH = repo_path("config", "restore-readiness-profiles
 RESTORE_READINESS_PROFILE_SCHEMA_PATH = repo_path("docs", "schema", "restore-readiness-profiles.schema.json")
 PERSONA_CATALOG_PATH = repo_path("config", "persona-catalog.json")
 PERSONA_CATALOG_SCHEMA_PATH = repo_path("docs", "schema", "persona-catalog.schema.json")
+WORKBENCH_IA_PATH = repo_path("config", "workbench-information-architecture.json")
+WORKBENCH_IA_SCHEMA_PATH = repo_path("docs", "schema", "workbench-information-architecture.schema.json")
 REPO_DEPLOY_CATALOG_PATH = repo_path("config", "repo-deploy-catalog.json")
 REPO_DEPLOY_CATALOG_SCHEMA_PATH = repo_path("docs", "schema", "repo-deploy-catalog.schema.json")
 REPLACEABILITY_REVIEW_CATALOG_PATH = repo_path("config", "replaceability-review-catalog.json")
@@ -173,9 +176,6 @@ IDENTITY_REQUIRED_METADATA = {
     "rotation_or_expiry",
     "credential_storage",
 }
-LAUNCHER_PURPOSES = {"operate", "observe", "learn", "plan", "administer"}
-
-
 def require_str_int_mapping(value: Any, path: str) -> dict[str, int]:
     value = require_mapping(value, path)
     result: dict[str, int] = {}
@@ -2722,10 +2722,10 @@ def validate_persona_catalog() -> None:
         is_default = require_bool(persona.get("default"), f"{path}.default")
         if is_default:
             default_count += 1
-        focus_purposes = require_string_list(persona.get("focus_purposes"), f"{path}.focus_purposes")
-        for purpose in focus_purposes:
-            if purpose not in LAUNCHER_PURPOSES:
-                raise ValueError(f"{path}.focus_purposes contains unsupported purpose '{purpose}'")
+        focus_lanes = require_string_list(persona.get("focus_lanes"), f"{path}.focus_lanes")
+        for lane in focus_lanes:
+            if lane not in TASK_LANE_IDS:
+                raise ValueError(f"{path}.focus_lanes contains unsupported lane '{lane}'")
         default_favorites = require_string_list(persona.get("default_favorites"), f"{path}.default_favorites")
         for favorite in default_favorites:
             if ":" not in favorite:
@@ -2733,6 +2733,108 @@ def validate_persona_catalog() -> None:
 
     if default_count != 1:
         raise ValueError("config/persona-catalog.json must declare exactly one default persona")
+
+
+def validate_workbench_information_architecture(
+    workflow_catalog: dict[str, Any],
+    service_catalog: dict[str, Any],
+) -> None:
+    payload = load_json(WORKBENCH_IA_PATH)
+    schema = load_json(WORKBENCH_IA_SCHEMA_PATH)
+    jsonschema.validate(instance=payload, schema=schema)
+
+    lanes = require_list(payload.get("lanes"), "config/workbench-information-architecture.json.lanes")
+    lane_ids = []
+    for index, lane in enumerate(lanes):
+        path = f"config/workbench-information-architecture.json.lanes[{index}]"
+        lane = require_mapping(lane, path)
+        lane_id = require_identifier(lane.get("id"), f"{path}.id")
+        lane_ids.append(lane_id)
+        require_str(lane.get("label"), f"{path}.label")
+        require_str(lane.get("question"), f"{path}.question")
+    if lane_ids != list(TASK_LANE_ORDER):
+        raise ValueError(
+            "config/workbench-information-architecture.json.lanes must preserve the canonical lane order "
+            f"{list(TASK_LANE_ORDER)}"
+        )
+
+    known_service_ids = {
+        require_identifier(item.get("id"), f"config/service-capability-catalog.json.services[{index}].id")
+        for index, item in enumerate(require_list(service_catalog.get("services"), "config/service-capability-catalog.json.services"))
+        for item in [require_mapping(item, f"config/service-capability-catalog.json.services[{index}]")]
+    }
+    known_workflow_ids = {
+        require_identifier(workflow_id, f"config/workflow-catalog.json.workflows.{workflow_id}")
+        for workflow_id in require_mapping(workflow_catalog.get("workflows"), "config/workflow-catalog.json.workflows")
+    }
+
+    def validate_contract(item: dict[str, Any], path: str) -> None:
+        primary_lane = normalize_task_lane(item.get("primary_lane"), default="")
+        if primary_lane not in TASK_LANE_IDS:
+            raise ValueError(f"{path}.primary_lane must be one of {sorted(TASK_LANE_IDS)}")
+        secondary_lanes = require_string_list(item.get("secondary_lanes"), f"{path}.secondary_lanes")
+        for lane in secondary_lanes:
+            if lane not in TASK_LANE_IDS:
+                raise ValueError(f"{path}.secondary_lanes contains unsupported lane '{lane}'")
+        next_success_lane = normalize_task_lane(item.get("next_success_lane"), default="")
+        next_failure_lane = normalize_task_lane(item.get("next_failure_lane"), default="")
+        if next_success_lane not in TASK_LANE_IDS:
+            raise ValueError(f"{path}.next_success_lane must be one of {sorted(TASK_LANE_IDS)}")
+        if next_failure_lane not in TASK_LANE_IDS:
+            raise ValueError(f"{path}.next_failure_lane must be one of {sorted(TASK_LANE_IDS)}")
+
+    service_overrides = require_list(payload.get("service_overrides"), "config/workbench-information-architecture.json.service_overrides")
+    seen_service_ids: set[str] = set()
+    for index, item in enumerate(service_overrides):
+        path = f"config/workbench-information-architecture.json.service_overrides[{index}]"
+        item = require_mapping(item, path)
+        service_id = require_identifier(item.get("service_id"), f"{path}.service_id")
+        if service_id in seen_service_ids:
+            raise ValueError(f"{path}.service_id duplicates '{service_id}'")
+        seen_service_ids.add(service_id)
+        if service_id not in known_service_ids:
+            raise ValueError(f"{path}.service_id references unknown service '{service_id}'")
+        validate_contract(item, path)
+
+    workflow_overrides = require_list(payload.get("workflow_overrides"), "config/workbench-information-architecture.json.workflow_overrides")
+    seen_workflow_ids: set[str] = set()
+    for index, item in enumerate(workflow_overrides):
+        path = f"config/workbench-information-architecture.json.workflow_overrides[{index}]"
+        item = require_mapping(item, path)
+        workflow_id = require_identifier(item.get("workflow_id"), f"{path}.workflow_id")
+        if workflow_id in seen_workflow_ids:
+            raise ValueError(f"{path}.workflow_id duplicates '{workflow_id}'")
+        seen_workflow_ids.add(workflow_id)
+        if workflow_id not in known_workflow_ids:
+            raise ValueError(f"{path}.workflow_id references unknown workflow '{workflow_id}'")
+        validate_contract(item, path)
+
+    pages = require_list(payload.get("pages"), "config/workbench-information-architecture.json.pages")
+    page_ids: set[str] = set()
+    section_ids: set[str] = set()
+    nav_orders: set[int] = set()
+    for index, item in enumerate(pages):
+        path = f"config/workbench-information-architecture.json.pages[{index}]"
+        item = require_mapping(item, path)
+        page_id = require_identifier(item.get("id"), f"{path}.id")
+        section_id = require_identifier(item.get("section_id"), f"{path}.section_id")
+        nav_order = require_int(item.get("nav_order"), f"{path}.nav_order", 1)
+        if page_id in page_ids:
+            raise ValueError(f"{path}.id duplicates '{page_id}'")
+        if section_id in section_ids:
+            raise ValueError(f"{path}.section_id duplicates '{section_id}'")
+        if nav_order in nav_orders:
+            raise ValueError(f"{path}.nav_order duplicates '{nav_order}'")
+        page_ids.add(page_id)
+        section_ids.add(section_id)
+        nav_orders.add(nav_order)
+        require_str(item.get("title"), f"{path}.title")
+        require_identifier(item.get("surface"), f"{path}.surface")
+        require_str(item.get("route"), f"{path}.route")
+        require_identifier(item.get("fragment"), f"{path}.fragment")
+        require_str(item.get("nav_label"), f"{path}.nav_label")
+        require_bool(item.get("nav_visible"), f"{path}.nav_visible")
+        validate_contract(item, path)
 
 
 def validate_runtime_assurance_matrix_data() -> None:
@@ -2768,7 +2870,9 @@ def validate_repository_data_models() -> int:
     secret_manifest = load_secret_manifest()
     validate_secret_manifest(secret_manifest)
     workflow_catalog = load_workflow_catalog()
+    service_catalog = load_json(SERVICE_CAPABILITY_CATALOG_PATH)
     validate_workflow_catalog(workflow_catalog, secret_manifest)
+    validate_workbench_information_architecture(workflow_catalog, service_catalog)
     validate_correction_loop_catalog(load_correction_loop_catalog(), workflow_catalog)
     validate_agent_policies(workflow_catalog)
     command_catalog = load_command_catalog()

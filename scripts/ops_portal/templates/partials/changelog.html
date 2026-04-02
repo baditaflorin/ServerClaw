@@ -1,5 +1,5 @@
 {% from "macros/states.html" import empty_state %}
-<div class="changelog-grid">
+<div class="changelog-grid" data-primary-lane="{{ page_lane.primary_lane if page_lane else '' }}" data-secondary-lanes="{{ page_lane.secondary_lanes_csv if page_lane else '' }}" data-next-success-lane="{{ page_lane.next_success_lane if page_lane else '' }}" data-next-failure-lane="{{ page_lane.next_failure_lane if page_lane else '' }}">
   <section class="pf-v5-c-card panel chart-panel">
     <div class="section-head">
       <div>

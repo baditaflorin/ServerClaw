@@ -1,0 +1,16 @@
+{% macro lane_banner(page) -%}
+{% if page %}
+<div
+  class="journey-strip"
+  data-primary-lane="{{ page.primary_lane }}"
+  data-secondary-lanes="{{ page.secondary_lanes_csv }}"
+  data-next-success-lane="{{ page.next_success_lane }}"
+  data-next-failure-lane="{{ page.next_failure_lane }}">
+  <span class="pill">{{ page.primary_lane_label }}</span>
+  {% for label in page.secondary_lane_labels %}
+  <span class="pill">{{ label }}</span>
+  {% endfor %}
+  <span class="muted">Success: {{ page.next_success_lane_label }} · Failure: {{ page.next_failure_lane_label }}</span>
+</div>
+{% endif %}
+{%- endmacro %}

@@ -358,7 +358,7 @@
           "enabled": true,
           "label": "Validation Gate Status",
           "description": "Open the safe validation status path in the shared runbook launcher.",
-          "purpose": "observe",
+          "lane": "observe",
           "personas": [
             "operator",
             "observer"
@@ -576,7 +576,7 @@
           "enabled": true,
           "label": "Fault Injection",
           "description": "Jump to the governed resilience drill path in the ops portal runbook launcher.",
-          "purpose": "administer",
+          "lane": "change",
           "personas": [
             "administrator",
             "observer"
@@ -643,7 +643,7 @@
           "enabled": true,
           "label": "Network Impairment Matrix",
           "description": "Open the staged degradation planning and rehearsal path from the shared shell.",
-          "purpose": "plan",
+          "lane": "change",
           "personas": [
             "planner",
             "operator"
@@ -2639,7 +2639,7 @@
           "enabled": true,
           "label": "Drift Status",
           "description": "Jump directly to the latest multi-source drift view in the interactive ops portal.",
-          "purpose": "observe",
+          "lane": "observe",
           "personas": [
             "observer",
             "operator"
@@ -4084,7 +4084,7 @@
           "enabled": true,
           "label": "Converge Ops Portal",
           "description": "Open the governed portal deployment workflow through the shared runbook and action shell.",
-          "purpose": "administer",
+          "lane": "change",
           "personas": [
             "administrator",
             "operator"

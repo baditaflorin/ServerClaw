@@ -145,3 +145,5 @@ def test_ops_portal_runtime_file_sources_include_launcher_partial() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
 
     assert "scripts/ops_portal/templates/partials/launcher.html" in defaults
+    assert "config/workbench-information-architecture.json" in defaults
+    assert "scripts/workbench_information_architecture.py" in defaults

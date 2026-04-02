@@ -22,6 +22,7 @@ from correction_loops import (
     resolve_workflow_correction_loop,
     validate_correction_loop_catalog,
 )
+from workbench_information_architecture import TASK_LANE_IDS, normalize_task_lane
 from worktree_bootstrap import (
     load_bootstrap_catalog,
     resolve_workflow_manifest_ids,
@@ -228,6 +229,47 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
         for index, tag in enumerate(tags):
             if not isinstance(tag, str) or not tag.strip():
                 raise ValueError(f"workflow '{workflow_id}' tags[{index}] must be a non-empty string")
+        human_navigation = workflow.get("human_navigation")
+        if human_navigation is not None:
+            if not isinstance(human_navigation, dict):
+                raise ValueError(f"workflow '{workflow_id}' human_navigation must be a mapping")
+            launcher = human_navigation.get("launcher")
+            if launcher is not None:
+                if not isinstance(launcher, dict):
+                    raise ValueError(f"workflow '{workflow_id}' human_navigation.launcher must be a mapping")
+                enabled = launcher.get("enabled")
+                if not isinstance(enabled, bool):
+                    raise ValueError(f"workflow '{workflow_id}' human_navigation.launcher.enabled must be a boolean")
+                if enabled:
+                    lane = normalize_task_lane(launcher.get("lane"), default="")
+                    if lane not in TASK_LANE_IDS:
+                        raise ValueError(
+                            f"workflow '{workflow_id}' human_navigation.launcher.lane must be one of "
+                            f"{sorted(TASK_LANE_IDS)}"
+                        )
+                    if not isinstance(launcher.get("label"), str) or not launcher["label"].strip():
+                        raise ValueError(
+                            f"workflow '{workflow_id}' human_navigation.launcher.label must be a non-empty string"
+                        )
+                    if not isinstance(launcher.get("description"), str) or not launcher["description"].strip():
+                        raise ValueError(
+                            f"workflow '{workflow_id}' human_navigation.launcher.description must be a non-empty string"
+                        )
+                    href = launcher.get("href")
+                    if not isinstance(href, str) or not href.strip():
+                        raise ValueError(
+                            f"workflow '{workflow_id}' human_navigation.launcher.href must be a non-empty string"
+                        )
+                    personas = launcher.get("personas", [])
+                    if not isinstance(personas, list):
+                        raise ValueError(
+                            f"workflow '{workflow_id}' human_navigation.launcher.personas must be a list"
+                        )
+                    for index, persona in enumerate(personas):
+                        if not isinstance(persona, str) or not persona.strip():
+                            raise ValueError(
+                                f"workflow '{workflow_id}' human_navigation.launcher.personas[{index}] must be a non-empty string"
+                            )
         required_read_surfaces = workflow.get("required_read_surfaces", [])
         if not isinstance(required_read_surfaces, list):
             raise ValueError(f"workflow '{workflow_id}' required_read_surfaces must be a list")

@@ -27,7 +27,7 @@
           "name",
           "description",
           "default",
-          "focus_purposes",
+          "focus_lanes",
           "default_favorites"
         ],
         "properties": {
@@ -46,18 +46,18 @@
           "default": {
             "type": "boolean"
           },
-          "focus_purposes": {
+          "focus_lanes": {
             "type": "array",
             "minItems": 1,
             "uniqueItems": true,
             "items": {
               "type": "string",
               "enum": [
-                "operate",
+                "start",
                 "observe",
+                "change",
                 "learn",
-                "plan",
-                "administer"
+                "recover"
               ]
             }
           },

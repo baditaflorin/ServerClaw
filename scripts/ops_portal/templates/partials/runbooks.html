@@ -1,3 +1,4 @@
+{% from "macros/lane_context.html" import lane_banner %}
 {% from "macros/states.html" import empty_state, state_message, unauthorized_state %}
 {% if runbook_warning %}
   {% if "401" in runbook_warning or "403" in runbook_warning %}
@@ -8,6 +9,11 @@
 {% endif %}
 
 <div class="runbook-grid">
+  {% if page_lane %}
+  <section class="pf-v5-c-card panel runbook-card" data-primary-lane="{{ page_lane.primary_lane }}" data-secondary-lanes="{{ page_lane.secondary_lanes_csv }}" data-next-success-lane="{{ page_lane.next_success_lane }}" data-next-failure-lane="{{ page_lane.next_failure_lane }}">
+    {{ lane_banner(page_lane) }}
+  </section>
+  {% endif %}
   {% if runbooks %}
   {% for runbook in runbooks %}
   <article class="pf-v5-c-card panel runbook-card">
@@ -17,6 +23,7 @@
         <h3>{{ runbook.id }}</h3>
         <p class="muted">{{ runbook.description }}</p>
       </div>
+      <span class="pill">{{ runbook.primary_lane_label }}</span>
     </div>
     {% if runbook.owner_runbook %}
     <p><a href="{{ docs_base_url }}/{{ runbook.owner_runbook }}" target="_blank" rel="noreferrer">Open runbook</a></p>

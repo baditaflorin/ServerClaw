@@ -1,5 +1,5 @@
 {% from "macros/states.html" import empty_state %}
-<section class="pf-v5-c-card panel drift-panel">
+<section class="pf-v5-c-card panel drift-panel" data-primary-lane="{{ page_lane.primary_lane if page_lane else '' }}" data-secondary-lanes="{{ page_lane.secondary_lanes_csv if page_lane else '' }}" data-next-success-lane="{{ page_lane.next_success_lane if page_lane else '' }}" data-next-failure-lane="{{ page_lane.next_failure_lane if page_lane else '' }}">
   <div class="drift-summary">
     <div>
       <span class="label">Latest drift run</span>

@@ -7,10 +7,10 @@
       "name": "Operator",
       "description": "Day-to-day runtime operations and service switching.",
       "default": true,
-      "focus_purposes": [
-        "operate",
+      "focus_lanes": [
+        "start",
         "observe",
-        "learn"
+        "change"
       ],
       "default_favorites": [
         "service:ops_portal",
@@ -25,10 +25,10 @@
       "name": "Observer",
       "description": "Monitoring, drift, assurance, and incident triage.",
       "default": false,
-      "focus_purposes": [
+      "focus_lanes": [
         "observe",
-        "operate",
-        "administer"
+        "recover",
+        "change"
       ],
       "default_favorites": [
         "service:grafana",
@@ -43,10 +43,10 @@
       "name": "Planner",
       "description": "Planning work, reviewing docs, and coordinating changes.",
       "default": false,
-      "focus_purposes": [
-        "plan",
+      "focus_lanes": [
+        "start",
         "learn",
-        "operate"
+        "change"
       ],
       "default_favorites": [
         "service:plane",
@@ -61,9 +61,9 @@
       "name": "Administrator",
       "description": "Identity, secrets, control-plane, and platform administration.",
       "default": false,
-      "focus_purposes": [
-        "administer",
-        "operate",
+      "focus_lanes": [
+        "recover",
+        "change",
         "observe"
       ],
       "default_favorites": [

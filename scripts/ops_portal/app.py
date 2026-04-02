@@ -23,6 +23,29 @@ from starlette.middleware.sessions import SessionMiddleware
 UTC = timezone.utc
 
 try:
+    from workbench_information_architecture import (
+        DEFAULT_PERSONAS_BY_TASK_LANE,
+        TASK_LANE_IDS,
+        TASK_LANE_LABELS,
+        TASK_LANE_ORDER,
+        TASK_LANE_QUESTIONS,
+        default_personas_for_task_lane,
+        normalize_task_lane,
+        normalize_task_lane_list,
+    )
+except ImportError:  # pragma: no cover - repo checkout import path
+    from scripts.workbench_information_architecture import (
+        DEFAULT_PERSONAS_BY_TASK_LANE,
+        TASK_LANE_IDS,
+        TASK_LANE_LABELS,
+        TASK_LANE_ORDER,
+        TASK_LANE_QUESTIONS,
+        default_personas_for_task_lane,
+        normalize_task_lane,
+        normalize_task_lane_list,
+    )
+
+try:
     from publication_contract import registry_entries
 except ImportError:  # pragma: no cover - repo checkout import path
     from scripts.publication_contract import registry_entries
@@ -117,53 +140,6 @@ EDGE_META = {
     "startup_only": {"color": "#d97706", "line_type": "dashed", "width": 2.1},
     "soft": {"color": "#7d8597", "line_type": "dotted", "width": 1.6},
 }
-
-LAUNCHER_PURPOSE_ORDER = ("operate", "observe", "learn", "plan", "administer")
-LAUNCHER_PURPOSE_LABELS = {
-    "operate": "Operate",
-    "observe": "Observe",
-    "learn": "Learn",
-    "plan": "Plan",
-    "administer": "Administer",
-}
-LAUNCHER_PURPOSE_BY_CATEGORY = {
-    "automation": "operate",
-    "communication": "plan",
-    "data": "learn",
-    "infrastructure": "administer",
-    "observability": "observe",
-    "security": "administer",
-    "access": "administer",
-}
-LAUNCHER_PURPOSE_OVERRIDES = {
-    "changelog_portal": "learn",
-    "coolify": "operate",
-    "coolify_apps": "operate",
-    "docs_portal": "learn",
-    "gitea": "plan",
-    "grafana": "observe",
-    "headscale": "administer",
-    "homepage": "operate",
-    "keycloak": "administer",
-    "langfuse": "observe",
-    "netbox": "plan",
-    "ops_portal": "operate",
-    "outline": "learn",
-    "plane": "plan",
-    "portainer": "administer",
-    "proxmox_ui": "administer",
-    "realtime": "observe",
-    "status_page": "observe",
-    "uptime_kuma": "observe",
-    "windmill": "operate",
-}
-LAUNCHER_PERSONAS_BY_PURPOSE = {
-    "operate": ["operator", "administrator"],
-    "observe": ["observer", "operator"],
-    "learn": ["planner", "operator"],
-    "plan": ["planner", "operator"],
-    "administer": ["administrator", "operator"],
-}
 DEFAULT_PERSONA_CATALOG = {
     "personas": [
         {
@@ -171,7 +147,7 @@ DEFAULT_PERSONA_CATALOG = {
             "name": "Operator",
             "description": "Day-to-day runtime operations and service switching.",
             "default": True,
-            "focus_purposes": ["operate", "observe", "learn"],
+            "focus_lanes": ["start", "observe", "change"],
             "default_favorites": [
                 "service:ops_portal",
                 "service:homepage",
@@ -185,7 +161,7 @@ DEFAULT_PERSONA_CATALOG = {
             "name": "Observer",
             "description": "Monitoring, drift, assurance, and incident triage.",
             "default": False,
-            "focus_purposes": ["observe", "operate", "administer"],
+            "focus_lanes": ["observe", "recover", "change"],
             "default_favorites": [
                 "service:grafana",
                 "service:realtime",
@@ -199,7 +175,7 @@ DEFAULT_PERSONA_CATALOG = {
             "name": "Planner",
             "description": "Planning work, reviewing docs, and coordinating changes.",
             "default": False,
-            "focus_purposes": ["plan", "learn", "operate"],
+            "focus_lanes": ["start", "learn", "change"],
             "default_favorites": [
                 "service:plane",
                 "service:outline",
@@ -213,7 +189,7 @@ DEFAULT_PERSONA_CATALOG = {
             "name": "Administrator",
             "description": "Identity, secrets, control-plane, and platform administration.",
             "default": False,
-            "focus_purposes": ["administer", "operate", "observe"],
+            "focus_lanes": ["recover", "change", "observe"],
             "default_favorites": [
                 "service:keycloak",
                 "service:openbao",
@@ -227,6 +203,221 @@ DEFAULT_PERSONA_CATALOG = {
 LAUNCHER_RECENT_LIMIT = 6
 LAUNCHER_FAVORITE_LIMIT = 8
 LIVE_APPLY_RECEIPT_EXCLUDED_PARTS = {"evidence", "preview"}
+
+DEFAULT_SERVICE_CATEGORY_NAVIGATION = {
+    "automation": {
+        "primary_lane": "change",
+        "secondary_lanes": ["observe"],
+        "next_success_lane": "observe",
+        "next_failure_lane": "recover",
+    },
+    "communication": {
+        "primary_lane": "learn",
+        "secondary_lanes": ["change"],
+        "next_success_lane": "change",
+        "next_failure_lane": "recover",
+    },
+    "data": {
+        "primary_lane": "learn",
+        "secondary_lanes": ["observe"],
+        "next_success_lane": "change",
+        "next_failure_lane": "recover",
+    },
+    "infrastructure": {
+        "primary_lane": "change",
+        "secondary_lanes": ["recover"],
+        "next_success_lane": "observe",
+        "next_failure_lane": "recover",
+    },
+    "observability": {
+        "primary_lane": "observe",
+        "secondary_lanes": ["recover"],
+        "next_success_lane": "change",
+        "next_failure_lane": "recover",
+    },
+    "security": {
+        "primary_lane": "recover",
+        "secondary_lanes": ["observe"],
+        "next_success_lane": "change",
+        "next_failure_lane": "recover",
+    },
+    "access": {
+        "primary_lane": "start",
+        "secondary_lanes": ["learn"],
+        "next_success_lane": "observe",
+        "next_failure_lane": "recover",
+    },
+}
+
+
+def normalize_navigation_contract(
+    payload: Any,
+    *,
+    default_lane: str = "start",
+) -> dict[str, Any]:
+    payload = payload if isinstance(payload, dict) else {}
+    primary_lane = normalize_task_lane(payload.get("primary_lane"), default=default_lane)
+    secondary_lanes = [
+        lane for lane in normalize_task_lane_list(payload.get("secondary_lanes", [])) if lane != primary_lane
+    ]
+    next_success_lane = normalize_task_lane(payload.get("next_success_lane"), default=primary_lane)
+    next_failure_lane = normalize_task_lane(payload.get("next_failure_lane"), default="recover")
+    return {
+        "primary_lane": primary_lane,
+        "secondary_lanes": secondary_lanes,
+        "next_success_lane": next_success_lane,
+        "next_failure_lane": next_failure_lane,
+        "primary_lane_label": TASK_LANE_LABELS[primary_lane],
+        "secondary_lane_labels": [TASK_LANE_LABELS[lane] for lane in secondary_lanes],
+        "next_success_lane_label": TASK_LANE_LABELS[next_success_lane],
+        "next_failure_lane_label": TASK_LANE_LABELS[next_failure_lane],
+        "primary_question": TASK_LANE_QUESTIONS[primary_lane],
+    }
+
+
+def normalize_workbench_information_architecture(payload: Any) -> dict[str, Any]:
+    payload = payload if isinstance(payload, dict) else {}
+    lanes = [
+        {
+            "id": lane,
+            "label": TASK_LANE_LABELS[lane],
+            "question": TASK_LANE_QUESTIONS[lane],
+        }
+        for lane in TASK_LANE_ORDER
+    ]
+    category_defaults = {
+        category: normalize_navigation_contract(definition, default_lane=definition.get("primary_lane", "start"))
+        for category, definition in (
+            payload.get("service_category_defaults", {}) if isinstance(payload.get("service_category_defaults"), dict) else {}
+        ).items()
+    }
+    for category, definition in DEFAULT_SERVICE_CATEGORY_NAVIGATION.items():
+        category_defaults.setdefault(
+            category,
+            normalize_navigation_contract(definition, default_lane=definition["primary_lane"]),
+        )
+
+    def index_contracts(entries: Any, key_name: str, *, default_lane: str = "start") -> dict[str, dict[str, Any]]:
+        indexed: dict[str, dict[str, Any]] = {}
+        if not isinstance(entries, list):
+            return indexed
+        for item in entries:
+            if not isinstance(item, dict):
+                continue
+            entry_id = item.get(key_name)
+            if not isinstance(entry_id, str) or not entry_id.strip():
+                continue
+            indexed[entry_id.strip()] = {
+                key_name: entry_id.strip(),
+                **normalize_navigation_contract(item, default_lane=default_lane),
+            }
+        return indexed
+
+    workflow_defaults = {}
+    raw_workflow_defaults = payload.get("workflow_defaults")
+    if isinstance(raw_workflow_defaults, dict):
+        for key, value in raw_workflow_defaults.items():
+            if key in {"diagnostic", "mutation"}:
+                workflow_defaults[key] = normalize_navigation_contract(value, default_lane="change")
+    runbook_defaults = {}
+    raw_runbook_defaults = payload.get("runbook_defaults")
+    if isinstance(raw_runbook_defaults, dict):
+        for key, value in raw_runbook_defaults.items():
+            if key in {"diagnostic", "mutation"}:
+                runbook_defaults[key] = normalize_navigation_contract(value, default_lane="learn")
+
+    pages: list[dict[str, Any]] = []
+    pages_by_id: dict[str, dict[str, Any]] = {}
+    pages_by_section: dict[str, dict[str, Any]] = {}
+    for item in payload.get("pages", []) if isinstance(payload.get("pages"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        page_id = item.get("id")
+        section_id = item.get("section_id")
+        route = item.get("route")
+        title = item.get("title")
+        if not all(isinstance(value, str) and value.strip() for value in (page_id, section_id, route, title)):
+            continue
+        page = {
+            "id": page_id.strip(),
+            "title": title.strip(),
+            "surface": str(item.get("surface", "ops_portal")).strip() or "ops_portal",
+            "route": route.strip(),
+            "section_id": section_id.strip(),
+            "fragment": str(item.get("fragment", section_id)).strip() or section_id.strip(),
+            "nav_label": str(item.get("nav_label", title)).strip() or title.strip(),
+            "nav_visible": bool(item.get("nav_visible")),
+            "nav_order": int(item.get("nav_order", len(pages) + 1)),
+            **normalize_navigation_contract(item),
+        }
+        page["secondary_lanes_csv"] = ",".join(page["secondary_lanes"])
+        pages.append(page)
+        pages_by_id[page["id"]] = page
+        pages_by_section[page["section_id"]] = page
+
+    return {
+        "lanes": lanes,
+        "service_category_defaults": category_defaults,
+        "service_overrides": index_contracts(payload.get("service_overrides"), "service_id"),
+        "workflow_defaults": {
+            "diagnostic": workflow_defaults.get(
+                "diagnostic",
+                normalize_navigation_contract({"primary_lane": "observe", "secondary_lanes": ["learn"]}, default_lane="observe"),
+            ),
+            "mutation": workflow_defaults.get(
+                "mutation",
+                normalize_navigation_contract({"primary_lane": "change", "secondary_lanes": ["observe"]}, default_lane="change"),
+            ),
+        },
+        "workflow_overrides": index_contracts(payload.get("workflow_overrides"), "workflow_id", default_lane="change"),
+        "runbook_defaults": {
+            "diagnostic": runbook_defaults.get(
+                "diagnostic",
+                normalize_navigation_contract({"primary_lane": "learn", "secondary_lanes": ["observe"]}, default_lane="learn"),
+            ),
+            "mutation": runbook_defaults.get(
+                "mutation",
+                normalize_navigation_contract({"primary_lane": "change", "secondary_lanes": ["recover"]}, default_lane="change"),
+            ),
+        },
+        "runbook_overrides": index_contracts(payload.get("runbook_overrides"), "runbook_id", default_lane="learn"),
+        "pages": sorted(pages, key=lambda item: item["nav_order"]),
+        "pages_by_id": pages_by_id,
+        "pages_by_section": pages_by_section,
+    }
+
+
+def build_shell_navigation(
+    pages: list[dict[str, Any]],
+    section_counts: dict[str, int],
+) -> list[dict[str, Any]]:
+    groups: list[dict[str, Any]] = []
+    visible_pages = [page for page in pages if page.get("nav_visible")]
+    for lane in TASK_LANE_ORDER:
+        entries: list[dict[str, Any]] = []
+        for page in visible_pages:
+            if lane != page["primary_lane"] and lane not in page["secondary_lanes"]:
+                continue
+            entries.append(
+                {
+                    "id": page["id"],
+                    "label": page["nav_label"],
+                    "href": f"#{page['fragment']}",
+                    "count": section_counts.get(page["section_id"]),
+                    "is_primary": lane == page["primary_lane"],
+                }
+            )
+        if not entries:
+            continue
+        groups.append(
+            {
+                "id": lane,
+                "label": TASK_LANE_LABELS[lane],
+                "question": TASK_LANE_QUESTIONS[lane],
+                "entries": entries,
+            }
+        )
+    return groups
 
 
 def browser_usable_url(value: Any) -> str | None:
@@ -242,16 +433,43 @@ def include_live_apply_receipt_path(path: Path) -> bool:
     return not any(part in LIVE_APPLY_RECEIPT_EXCLUDED_PARTS for part in path.parts)
 
 
-def launcher_purpose_for_service(service: dict[str, Any]) -> str:
-    service_id = str(service.get("id", ""))
-    if service_id in LAUNCHER_PURPOSE_OVERRIDES:
-        return LAUNCHER_PURPOSE_OVERRIDES[service_id]
-    category = str(service.get("category", ""))
-    return LAUNCHER_PURPOSE_BY_CATEGORY.get(category, "operate")
+def service_navigation_contract(
+    service: dict[str, Any],
+    workbench_ia: dict[str, Any],
+) -> dict[str, Any]:
+    service_id = str(service.get("id", "")).strip()
+    category = str(service.get("category", "")).strip()
+    override = workbench_ia.get("service_overrides", {}).get(service_id, {})
+    default = workbench_ia.get("service_category_defaults", {}).get(
+        category,
+        normalize_navigation_contract(DEFAULT_SERVICE_CATEGORY_NAVIGATION.get("access", {})),
+    )
+    return {**default, **override}
 
 
-def default_launcher_personas(purpose: str) -> list[str]:
-    return list(LAUNCHER_PERSONAS_BY_PURPOSE.get(purpose, ["operator"]))
+def workflow_navigation_contract(
+    workflow_id: str,
+    workflow: dict[str, Any],
+    workbench_ia: dict[str, Any],
+) -> dict[str, Any]:
+    override = workbench_ia.get("workflow_overrides", {}).get(workflow_id)
+    if override:
+        return dict(override)
+    execution_class = str(workflow.get("execution_class", "mutation")).strip().lower()
+    return dict(workbench_ia.get("workflow_defaults", {}).get(execution_class, {}))
+
+
+def runbook_navigation_contract(runbook: dict[str, Any], workbench_ia: dict[str, Any]) -> dict[str, Any]:
+    runbook_id = str(runbook.get("id", "")).strip()
+    override = workbench_ia.get("runbook_overrides", {}).get(runbook_id)
+    if override:
+        return dict(override)
+    execution_class = str(runbook.get("execution_class", "diagnostic")).strip().lower()
+    return dict(workbench_ia.get("runbook_defaults", {}).get(execution_class, {}))
+
+
+def default_launcher_personas(primary_lane: str) -> list[str]:
+    return default_personas_for_task_lane(primary_lane)
 
 
 def normalize_persona_catalog(payload: Any) -> list[dict[str, Any]]:
@@ -276,11 +494,9 @@ def normalize_persona_catalog(payload: Any) -> list[dict[str, Any]]:
         if persona_id in seen_ids:
             continue
         seen_ids.add(persona_id)
-        focus_purposes = [
-            purpose
-            for purpose in item.get("focus_purposes", [])
-            if isinstance(purpose, str) and purpose in LAUNCHER_PURPOSE_ORDER
-        ]
+        focus_lanes = normalize_task_lane_list(
+            item.get("focus_lanes", item.get("focus_purposes", [])),
+        )
         default_favorites = [
             favorite
             for favorite in item.get("default_favorites", [])
@@ -294,7 +510,7 @@ def normalize_persona_catalog(payload: Any) -> list[dict[str, Any]]:
                 if isinstance(description, str) and description.strip()
                 else "No description recorded.",
                 "default": bool(item.get("default")),
-                "focus_purposes": focus_purposes,
+                "focus_lanes": focus_lanes,
                 "default_favorites": default_favorites,
             }
         )
@@ -344,29 +560,30 @@ def build_launcher_groups(
     recent_ids: set[str],
     query: str,
 ) -> list[dict[str, Any]]:
-    grouped: dict[str, list[dict[str, Any]]] = {purpose: [] for purpose in LAUNCHER_PURPOSE_ORDER}
+    grouped: dict[str, list[dict[str, Any]]] = {lane: [] for lane in TASK_LANE_ORDER}
     for entry in entries:
         if not launcher_entry_visible(entry, str(persona["id"]), query):
             continue
-        grouped[entry["purpose"]].append(decorate_launcher_entry(entry, favorite_ids, recent_ids))
+        grouped[entry["primary_lane"]].append(decorate_launcher_entry(entry, favorite_ids, recent_ids))
 
-    ordered_purposes: list[str] = []
-    for purpose in persona.get("focus_purposes", []):
-        if purpose not in ordered_purposes:
-            ordered_purposes.append(purpose)
-    for purpose in LAUNCHER_PURPOSE_ORDER:
-        if purpose not in ordered_purposes:
-            ordered_purposes.append(purpose)
+    ordered_lanes: list[str] = []
+    for lane in persona.get("focus_lanes", []):
+        if lane not in ordered_lanes:
+            ordered_lanes.append(lane)
+    for lane in TASK_LANE_ORDER:
+        if lane not in ordered_lanes:
+            ordered_lanes.append(lane)
 
     groups: list[dict[str, Any]] = []
-    for purpose in ordered_purposes:
-        items = sorted(grouped.get(purpose, []), key=lambda item: (item["kind"], item["name"]))
+    for lane in ordered_lanes:
+        items = sorted(grouped.get(lane, []), key=lambda item: (item["kind"], item["name"]))
         if not items:
             continue
         groups.append(
             {
-                "purpose": purpose,
-                "label": LAUNCHER_PURPOSE_LABELS[purpose],
+                "lane": lane,
+                "label": TASK_LANE_LABELS[lane],
+                "question": TASK_LANE_QUESTIONS[lane],
                 "entries": items,
             }
         )
@@ -460,6 +677,7 @@ def build_launcher_entries(
     services: list[dict[str, Any]],
     publications: list[dict[str, Any]],
     workflows: dict[str, Any],
+    workbench_ia: dict[str, Any],
 ) -> list[dict[str, Any]]:
     publications_by_service: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for publication in publications:
@@ -478,7 +696,7 @@ def build_launcher_entries(
         service_id = str(service.get("id", "")).strip()
         if not service_id:
             continue
-        purpose = launcher_purpose_for_service(service)
+        navigation = service_navigation_contract(service, workbench_ia)
         publications_for_service = publications_by_service.get(service_id, [])
         primary_publication = next(
             (
@@ -502,12 +720,12 @@ def build_launcher_entries(
                 "name": str(service.get("name", service_id)),
                 "description": description,
                 "href": "/" if service_id == "ops_portal" else href,
-                "purpose": purpose,
-                "purpose_label": LAUNCHER_PURPOSE_LABELS[purpose],
-                "personas": default_launcher_personas(purpose),
+                **navigation,
+                "personas": default_launcher_personas(navigation["primary_lane"]),
                 "summary_line": " / ".join(str(item) for item in (fqdn, audience, access_model) if item),
                 "badges": [
                     str(service.get("category", "uncategorized")),
+                    navigation["primary_lane_label"],
                     str(audience),
                     str(access_model),
                 ],
@@ -537,14 +755,26 @@ def build_launcher_entries(
         )
         if not href:
             continue
-        purpose = str(launcher.get("purpose", "operate"))
-        if purpose not in LAUNCHER_PURPOSE_LABELS:
-            purpose = "operate"
+        navigation = workflow_navigation_contract(workflow_id, workflow, workbench_ia)
+        declared_lane = normalize_task_lane(launcher.get("lane", launcher.get("purpose")), default="")
+        if declared_lane in TASK_LANE_IDS:
+            navigation = {
+                **navigation,
+                **normalize_navigation_contract(
+                    {
+                        "primary_lane": declared_lane,
+                        "secondary_lanes": navigation.get("secondary_lanes", []),
+                        "next_success_lane": navigation.get("next_success_lane"),
+                        "next_failure_lane": navigation.get("next_failure_lane"),
+                    },
+                    default_lane=declared_lane,
+                ),
+            }
         personas = [
             persona_id
             for persona_id in launcher.get("personas", [])
             if isinstance(persona_id, str) and persona_id.strip()
-        ] or default_launcher_personas(purpose)
+        ] or default_launcher_personas(navigation["primary_lane"])
         label = str(launcher.get("label") or workflow.get("description") or workflow_id)
         description = str(launcher.get("description") or workflow.get("description") or "").strip()
         tags = workflow.get("tags") if isinstance(workflow.get("tags"), list) else []
@@ -556,12 +786,12 @@ def build_launcher_entries(
                 "name": label,
                 "description": description,
                 "href": href,
-                "purpose": purpose,
-                "purpose_label": LAUNCHER_PURPOSE_LABELS[purpose],
+                **navigation,
                 "personas": personas,
                 "summary_line": str(workflow.get("owner_runbook", "")).strip(),
                 "badges": [
                     "workflow",
+                    navigation["primary_lane_label"],
                     str(workflow.get("execution_class", "unknown")),
                     str(workflow.get("live_impact", "unknown")),
                 ],
@@ -575,7 +805,7 @@ def build_launcher_entries(
             }
         )
 
-    return sorted(entries, key=lambda item: (LAUNCHER_PURPOSE_ORDER.index(item["purpose"]), item["kind"], item["name"]))
+    return sorted(entries, key=lambda item: (TASK_LANE_ORDER.index(item["primary_lane"]), item["kind"], item["name"]))
 
 
 @dataclass(frozen=True)
@@ -585,6 +815,7 @@ class PortalSettings:
     static_api_token: str | None
     service_catalog_path: Path
     persona_catalog_path: Path
+    workbench_ia_path: Path
     publication_registry_path: Path
     workflow_catalog_path: Path
     changelog_path: Path
@@ -607,6 +838,12 @@ class PortalSettings:
             ),
             persona_catalog_path=Path(
                 os.getenv("OPS_PORTAL_PERSONA_CATALOG", data_root / "config" / "persona-catalog.json")
+            ),
+            workbench_ia_path=Path(
+                os.getenv(
+                    "OPS_PORTAL_WORKBENCH_IA_CATALOG",
+                    data_root / "config" / "workbench-information-architecture.json",
+                )
             ),
             publication_registry_path=Path(
                 os.getenv(
@@ -775,6 +1012,10 @@ class PortalRepository:
     def load_persona_catalog(self) -> list[dict[str, Any]]:
         payload = load_json_file(self.settings.persona_catalog_path, DEFAULT_PERSONA_CATALOG)
         return normalize_persona_catalog(payload)
+
+    def load_workbench_information_architecture(self) -> dict[str, Any]:
+        payload = load_json_file(self.settings.workbench_ia_path, {})
+        return normalize_workbench_information_architecture(payload)
 
     def load_publication_registry(self) -> list[dict[str, Any]]:
         payload = load_json_file(self.settings.publication_registry_path, {"publications": []})
@@ -1509,10 +1750,20 @@ def template_root() -> Path:
     return Path(__file__).resolve().parent
 
 
-def build_runbook_models(runbooks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def build_runbook_models(runbooks: list[dict[str, Any]], workbench_ia: dict[str, Any]) -> list[dict[str, Any]]:
     featured_ids = {"validation-gate-status"}
-    featured = [item for item in runbooks if item["id"] in featured_ids]
-    remainder = [item for item in runbooks if item["id"] not in featured_ids]
+    normalized: list[dict[str, Any]] = []
+    for item in runbooks:
+        if not isinstance(item, dict) or "id" not in item:
+            continue
+        normalized.append(
+            {
+                **item,
+                **runbook_navigation_contract(item, workbench_ia),
+            }
+        )
+    featured = [item for item in normalized if item["id"] in featured_ids]
+    remainder = [item for item in normalized if item["id"] not in featured_ids]
     combined = featured + remainder
     return combined[:6]
 
@@ -1525,8 +1776,9 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
     publications = repository.load_publication_registry()
     workflows = repository.load_workflow_definitions()
     personas = repository.load_persona_catalog()
+    workbench_ia = repository.load_workbench_information_architecture()
 
-    entries = build_launcher_entries(services, publications, workflows)
+    entries = build_launcher_entries(services, publications, workflows, workbench_ia)
     valid_entry_ids = {entry["id"] for entry in entries}
     preferences = ensure_launcher_preferences(request.session, personas, valid_entry_ids)
     selected_persona = preferences["selected_persona"]
@@ -1563,6 +1815,7 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
             "groups": groups,
             "match_count": sum(len(group["entries"]) for group in groups),
             "entry_index": entry_index,
+            "page_lane": workbench_ia["pages_by_id"].get("ops_portal_launcher"),
         },
     }
 
@@ -1621,6 +1874,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
 
     services = repository.load_service_catalog()
     publications = repository.load_publication_registry()
+    workbench_ia = repository.load_workbench_information_architecture()
 
     capability_contracts = repository.load_capability_contract_catalog()
     dependency_graph = repository.load_dependency_graph()
@@ -1685,6 +1939,17 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "live_apply_timeline": build_live_apply_timeline_chart(deployments),
         "dependency_focus": build_dependency_focus_chart(dependency_graph, service_models),
     }
+    section_counts = {
+        "overview": len(service_models),
+        "deployments": len(deployments),
+        "agents": int(coordination.get("summary", {}).get("count", 0)),
+        "runtime-assurance": int(runtime_assurance_summary.get("row_count", 0)),
+        "drift": int(drift_summary.get("unsuppressed_count", 0) or 0),
+        "search": len(available_collections()),
+        "runbooks": len(runbooks),
+        "changelog": len(changelog_notes),
+    }
+    shell_navigation = build_shell_navigation(workbench_ia["pages"], section_counts)
 
     return {
         "request": request,
@@ -1696,7 +1961,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "capability_contract_summary": capability_summary,
         "maintenance_windows": active_maintenance,
         "maintenance_count": len(active_maintenance),
-        "runbooks": build_runbook_models(runbooks),
+        "runbooks": build_runbook_models(runbooks, workbench_ia),
         "deployments": deployments[:10],
         "changelog_notes": changelog_notes,
         "drift_report": drift_report,
@@ -1719,6 +1984,9 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "search_collection": "",
         "launcher": launcher_context["launcher"],
         "contextual_help": build_ops_portal_help(request.app.state.settings.docs_base_url),
+        "shell_page": workbench_ia["pages_by_id"].get("ops_portal_shell"),
+        "page_sections": workbench_ia["pages_by_section"],
+        "shell_navigation": shell_navigation,
     }
 
 
@@ -1766,41 +2034,49 @@ def create_app(
     @app.get("/partials/launcher", response_class=HTMLResponse)
     async def launcher_partial(request: Request, query: str = "") -> HTMLResponse:
         context = await build_launcher_panel_context(request, query=query)
+        context["page_lane"] = context["launcher"].get("page_lane")
         return templates.TemplateResponse(request=request, name="partials/launcher.html", context=context)
 
     @app.get("/partials/overview", response_class=HTMLResponse)
     async def overview_partial(request: Request) -> HTMLResponse:
         context = await build_dashboard_context(request)
+        context["page_lane"] = context["page_sections"].get("overview")
         return templates.TemplateResponse(request=request, name="partials/overview.html", context=context)
 
     @app.get("/partials/drift", response_class=HTMLResponse)
     async def drift_partial(request: Request) -> HTMLResponse:
         context = await build_dashboard_context(request)
+        context["page_lane"] = context["page_sections"].get("drift")
         return templates.TemplateResponse(request=request, name="partials/drift.html", context=context)
 
     @app.get("/partials/agents", response_class=HTMLResponse)
     async def agents_partial(request: Request) -> HTMLResponse:
         context = await build_dashboard_context(request)
+        context["page_lane"] = context["page_sections"].get("agents")
         return templates.TemplateResponse(request=request, name="partials/agents.html", context=context)
 
     @app.get("/partials/runtime-assurance", response_class=HTMLResponse)
     async def runtime_assurance_partial(request: Request) -> HTMLResponse:
         context = await build_dashboard_context(request)
+        context["page_lane"] = context["page_sections"].get("runtime-assurance")
         return templates.TemplateResponse(request=request, name="partials/runtime_assurance.html", context=context)
 
     @app.get("/partials/runbooks", response_class=HTMLResponse)
     async def runbooks_partial(request: Request) -> HTMLResponse:
         context = await build_dashboard_context(request)
+        context["page_lane"] = context["page_sections"].get("runbooks")
         return templates.TemplateResponse(request=request, name="partials/runbooks.html", context=context)
 
     @app.get("/partials/changelog", response_class=HTMLResponse)
     async def changelog_partial(request: Request) -> HTMLResponse:
         context = await build_dashboard_context(request)
+        context["page_lane"] = context["page_sections"].get("changelog")
         return templates.TemplateResponse(request=request, name="partials/changelog.html", context=context)
 
     @app.get("/partials/search", response_class=HTMLResponse)
     async def search_partial(request: Request) -> HTMLResponse:
         context = await build_dashboard_context(request)
+        context["page_lane"] = context["page_sections"].get("search")
         return templates.TemplateResponse(request=request, name="partials/search.html", context=context)
 
     @app.get("/events/deployments")
@@ -1820,10 +2096,12 @@ def create_app(
         query: str = Form(default=""),
     ) -> HTMLResponse:
         context = await build_launcher_panel_context(request, query=query)
+        context["page_lane"] = context["launcher"].get("page_lane")
         entry_index = context["launcher"]["entry_index"]
         if item_id in entry_index:
             toggle_launcher_favorite(request.session, item_id, set(entry_index))
             context = await build_launcher_panel_context(request, query=query)
+            context["page_lane"] = context["launcher"].get("page_lane")
         return templates.TemplateResponse(request=request, name="partials/launcher.html", context=context)
 
     @app.post("/actions/launcher/persona/{persona_id}", response_class=HTMLResponse)
@@ -1833,10 +2111,12 @@ def create_app(
         query: str = Form(default=""),
     ) -> HTMLResponse:
         context = await build_launcher_panel_context(request, query=query)
+        context["page_lane"] = context["launcher"].get("page_lane")
         personas = context["launcher"]["personas"]
         if any(str(persona["id"]) == persona_id for persona in personas):
             request.session["launcher_persona"] = persona_id
             context = await build_launcher_panel_context(request, query=query)
+            context["page_lane"] = context["launcher"].get("page_lane")
         return templates.TemplateResponse(request=request, name="partials/launcher.html", context=context)
 
     @app.get("/launcher/go/{item_id}")
@@ -2001,6 +2281,7 @@ def create_app(
         context = await build_dashboard_context(request)
         context["search_query"] = query
         context["search_collection"] = collection
+        context["page_lane"] = context["page_sections"].get("search")
         if not query.strip():
             context["search_error"] = "Enter a query to search the platform corpus."
             return templates.TemplateResponse(request=request, name="partials/search.html", context=context)

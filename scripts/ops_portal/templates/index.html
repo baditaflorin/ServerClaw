@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros/lane_context.html" import lane_banner %}
 
 {% block title %}LV3 Interactive Ops Portal{% endblock %}
 
@@ -6,8 +7,9 @@
   <section id="overview" class="pf-v5-c-page__main-section portal-section">
     <div class="section-head">
       <div>
-        <p class="section-kicker">Platform Overview</p>
+        <p class="section-kicker">{{ page_sections["overview"].primary_lane_label }} Lane</p>
         <h2>Real-time service status with live actions</h2>
+        {{ lane_banner(page_sections["overview"]) }}
       </div>
       <div class="section-meta">
         <span class="pill">{{ services|length }} services</span>
@@ -27,8 +29,9 @@
   <section id="deployments" class="pf-v5-c-page__main-section portal-section">
     <div class="section-head">
       <div>
-        <p class="section-kicker">Deployment Console</p>
+        <p class="section-kicker">{{ page_sections["deployments"].primary_lane_label }} Lane</p>
         <h2>Live browser-side action stream</h2>
+        {{ lane_banner(page_sections["deployments"]) }}
       </div>
     </div>
     <div class="pf-v5-c-card panel deployment-console">
@@ -43,8 +46,9 @@
   <section id="agents" class="pf-v5-c-page__main-section portal-section">
     <div class="section-head">
       <div>
-        <p class="section-kicker">Agent Coordination</p>
+        <p class="section-kicker">{{ page_sections["agents"].primary_lane_label }} Lane</p>
         <h2>Live multi-agent session map</h2>
+        {{ lane_banner(page_sections["agents"]) }}
       </div>
     </div>
     <div id="agent-panel" class="shell-live-panel" hx-get="/partials/agents" hx-trigger="load, every 15s" hx-swap="innerHTML">
@@ -55,8 +59,9 @@
   <section id="runtime-assurance" class="pf-v5-c-page__main-section portal-section">
     <div class="section-head">
       <div>
-        <p class="section-kicker">Runtime Assurance</p>
+        <p class="section-kicker">{{ page_sections["runtime-assurance"].primary_lane_label }} Lane</p>
         <h2>Per-service and per-environment verification posture</h2>
+        {{ lane_banner(page_sections["runtime-assurance"]) }}
       </div>
     </div>
     <div
@@ -72,8 +77,9 @@
   <section id="drift" class="pf-v5-c-page__main-section portal-section">
     <div class="section-head">
       <div>
-        <p class="section-kicker">Drift Panel</p>
+        <p class="section-kicker">{{ page_sections["drift"].primary_lane_label }} Lane</p>
         <h2>Latest reconciliation pressure across the platform</h2>
+        {{ lane_banner(page_sections["drift"]) }}
       </div>
     </div>
     <div id="drift-panel" class="shell-live-panel" hx-get="/partials/drift" hx-trigger="load, every 60s" hx-swap="innerHTML">
@@ -84,8 +90,9 @@
   <section id="search" class="pf-v5-c-page__main-section portal-section">
     <div class="section-head">
       <div>
-        <p class="section-kicker">Search Fabric</p>
+        <p class="section-kicker">{{ page_sections["search"].primary_lane_label }} Lane</p>
         <h2>Query ADRs, runbooks, configs, receipts, and catalog entries in one place</h2>
+        {{ lane_banner(page_sections["search"]) }}
       </div>
     </div>
     <div id="search-panel" class="shell-live-panel" hx-get="/partials/search" hx-trigger="load" hx-swap="innerHTML">
@@ -96,8 +103,9 @@
   <section id="runbooks" class="pf-v5-c-page__main-section portal-section">
     <div class="section-head">
       <div>
-        <p class="section-kicker">Runbook Launcher</p>
+        <p class="section-kicker">{{ page_sections["runbooks"].primary_lane_label }} Lane</p>
         <h2>Common operator workflows without leaving the portal</h2>
+        {{ lane_banner(page_sections["runbooks"]) }}
       </div>
     </div>
     <div id="runbook-panel" class="shell-live-panel" hx-get="/partials/runbooks" hx-trigger="load" hx-swap="innerHTML">
@@ -108,8 +116,9 @@
   <section id="changelog" class="pf-v5-c-page__main-section portal-section">
     <div class="section-head">
       <div>
-        <p class="section-kicker">Changelog</p>
+        <p class="section-kicker">{{ page_sections["changelog"].primary_lane_label }} Lane</p>
         <h2>Recent live-apply receipts and unreleased notes</h2>
+        {{ lane_banner(page_sections["changelog"]) }}
       </div>
     </div>
     <div id="changelog-panel" class="shell-live-panel" hx-get="/partials/changelog" hx-trigger="load" hx-swap="innerHTML">

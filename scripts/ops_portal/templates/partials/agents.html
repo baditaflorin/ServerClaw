@@ -1,4 +1,5 @@
 {% from "macros/states.html" import empty_state, state_message, unauthorized_state %}
+<div data-primary-lane="{{ page_lane.primary_lane if page_lane else '' }}" data-secondary-lanes="{{ page_lane.secondary_lanes_csv if page_lane else '' }}" data-next-success-lane="{{ page_lane.next_success_lane if page_lane else '' }}" data-next-failure-lane="{{ page_lane.next_failure_lane if page_lane else '' }}"></div>
 {% if coordination_warning %}
   {% if "401" in coordination_warning or "403" in coordination_warning %}
     {{ unauthorized_state("The shared gateway rejected the portal session while loading agent coordination. Refresh the browser session and retry.") }}

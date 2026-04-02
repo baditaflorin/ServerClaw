@@ -1,9 +1,11 @@
+{% from "macros/lane_context.html" import lane_banner %}
 <div id="launcher-panel" class="launcher-panel" aria-label="Platform application launcher">
   <div class="launcher-toolbar">
     <div>
       <p class="section-kicker">Application Launcher</p>
       <h2>Switch tools without leaving the shared shell</h2>
       <p class="muted">Search destinations, pin favorites, and reopen recent paths from one shared masthead control.</p>
+      {{ lane_banner(launcher.page_lane) }}
     </div>
     <span class="pill">{{ launcher.match_count }} matches</span>
   </div>
@@ -53,7 +55,7 @@
           <p class="launcher-summary">{{ entry.summary_line }}</p>
           {% endif %}
           <div class="launcher-badges">
-            <span class="launcher-badge highlighted">{{ entry.purpose_label }}</span>
+            <span class="launcher-badge highlighted">{{ entry.primary_lane_label }}</span>
             {% for badge in entry.badges %}
             <span class="launcher-badge">{{ badge }}</span>
             {% endfor %}
@@ -108,7 +110,10 @@
   {% for group in launcher.groups %}
   <section class="launcher-section">
     <div class="launcher-section-head">
-      <h3>{{ group.label }}</h3>
+      <div>
+        <h3>{{ group.label }}</h3>
+        <p class="muted">{{ group.question }}</p>
+      </div>
       <span class="pill">{{ group.entries|length }}</span>
     </div>
     <div class="launcher-entry-grid">
@@ -124,7 +129,7 @@
             <span class="launcher-badge highlighted">{{ entry.kind_label }}</span>
             {% for badge in entry.badges %}
             <span class="launcher-badge">{{ badge }}</span>
-            {% endfor %}
+{% endfor %}
           </div>
         </div>
         <form

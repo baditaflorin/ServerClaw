@@ -1,0 +1,568 @@
+{
+  "$schema": "docs/schema/workbench-information-architecture.schema.json",
+  "schema_version": "1.0.0",
+  "lanes": [
+    {
+      "id": "start",
+      "label": "Start",
+      "question": "Where do I begin and what needs my attention?"
+    },
+    {
+      "id": "observe",
+      "label": "Observe",
+      "question": "What is happening right now?"
+    },
+    {
+      "id": "change",
+      "label": "Change",
+      "question": "How do I make a safe governed change?"
+    },
+    {
+      "id": "learn",
+      "label": "Learn",
+      "question": "Where is the explanation, runbook, or reference?"
+    },
+    {
+      "id": "recover",
+      "label": "Recover",
+      "question": "How do I restore, repair, or escalate?"
+    }
+  ],
+  "service_category_defaults": {
+    "automation": {
+      "primary_lane": "change",
+      "secondary_lanes": [
+        "observe"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    },
+    "communication": {
+      "primary_lane": "learn",
+      "secondary_lanes": [
+        "change"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    "data": {
+      "primary_lane": "learn",
+      "secondary_lanes": [
+        "observe"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    "infrastructure": {
+      "primary_lane": "change",
+      "secondary_lanes": [
+        "recover"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    },
+    "observability": {
+      "primary_lane": "observe",
+      "secondary_lanes": [
+        "recover"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    "security": {
+      "primary_lane": "recover",
+      "secondary_lanes": [
+        "observe"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    "access": {
+      "primary_lane": "start",
+      "secondary_lanes": [
+        "learn"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    }
+  },
+  "service_overrides": [
+    {
+      "service_id": "changelog_portal",
+      "primary_lane": "learn",
+      "secondary_lanes": [
+        "observe"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "learn"
+    },
+    {
+      "service_id": "coolify",
+      "primary_lane": "change",
+      "secondary_lanes": [
+        "learn"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "coolify_apps",
+      "primary_lane": "change",
+      "secondary_lanes": [
+        "learn"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "docs_portal",
+      "primary_lane": "learn",
+      "secondary_lanes": [
+        "start"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "learn"
+    },
+    {
+      "service_id": "gitea",
+      "primary_lane": "change",
+      "secondary_lanes": [
+        "learn"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "grafana",
+      "primary_lane": "observe",
+      "secondary_lanes": [
+        "recover"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "headscale",
+      "primary_lane": "recover",
+      "secondary_lanes": [
+        "observe"
+      ],
+      "next_success_lane": "start",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "homepage",
+      "primary_lane": "start",
+      "secondary_lanes": [
+        "learn",
+        "observe"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "keycloak",
+      "primary_lane": "recover",
+      "secondary_lanes": [
+        "start",
+        "change"
+      ],
+      "next_success_lane": "start",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "langfuse",
+      "primary_lane": "observe",
+      "secondary_lanes": [
+        "learn"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "netbox",
+      "primary_lane": "learn",
+      "secondary_lanes": [
+        "change",
+        "observe"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "openbao",
+      "primary_lane": "recover",
+      "secondary_lanes": [
+        "change",
+        "observe"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "ops_portal",
+      "primary_lane": "start",
+      "secondary_lanes": [
+        "observe",
+        "change",
+        "learn",
+        "recover"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "outline",
+      "primary_lane": "learn",
+      "secondary_lanes": [
+        "start"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "plane",
+      "primary_lane": "change",
+      "secondary_lanes": [
+        "learn"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "portainer",
+      "primary_lane": "recover",
+      "secondary_lanes": [
+        "change",
+        "observe"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "proxmox_ui",
+      "primary_lane": "recover",
+      "secondary_lanes": [
+        "change",
+        "observe"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "realtime",
+      "primary_lane": "observe",
+      "secondary_lanes": [
+        "recover"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "status_page",
+      "primary_lane": "observe",
+      "secondary_lanes": [
+        "start"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "uptime_kuma",
+      "primary_lane": "observe",
+      "secondary_lanes": [
+        "recover"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    {
+      "service_id": "windmill",
+      "primary_lane": "change",
+      "secondary_lanes": [
+        "observe",
+        "recover"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    }
+  ],
+  "workflow_defaults": {
+    "diagnostic": {
+      "primary_lane": "observe",
+      "secondary_lanes": [
+        "learn"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    "mutation": {
+      "primary_lane": "change",
+      "secondary_lanes": [
+        "observe"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    }
+  },
+  "workflow_overrides": [
+    {
+      "workflow_id": "gate-status",
+      "primary_lane": "observe",
+      "secondary_lanes": [
+        "learn"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    {
+      "workflow_id": "fault-injection",
+      "primary_lane": "change",
+      "secondary_lanes": [
+        "recover",
+        "observe"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    },
+    {
+      "workflow_id": "network-impairment-matrix",
+      "primary_lane": "change",
+      "secondary_lanes": [
+        "observe",
+        "recover"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    },
+    {
+      "workflow_id": "continuous-drift-detection",
+      "primary_lane": "observe",
+      "secondary_lanes": [
+        "recover"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    {
+      "workflow_id": "converge-ops-portal",
+      "primary_lane": "change",
+      "secondary_lanes": [
+        "recover",
+        "observe"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    }
+  ],
+  "runbook_defaults": {
+    "diagnostic": {
+      "primary_lane": "learn",
+      "secondary_lanes": [
+        "observe"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    "mutation": {
+      "primary_lane": "change",
+      "secondary_lanes": [
+        "recover"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    }
+  },
+  "runbook_overrides": [
+    {
+      "runbook_id": "validation-gate-status",
+      "primary_lane": "observe",
+      "secondary_lanes": [
+        "learn"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    }
+  ],
+  "pages": [
+    {
+      "id": "ops_portal_shell",
+      "title": "Interactive Ops Portal",
+      "surface": "ops_portal",
+      "route": "/",
+      "section_id": "portal_main",
+      "fragment": "overview",
+      "nav_label": "Portal Home",
+      "nav_visible": false,
+      "nav_order": 1,
+      "primary_lane": "start",
+      "secondary_lanes": [
+        "observe",
+        "change",
+        "learn",
+        "recover"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    {
+      "id": "ops_portal_overview",
+      "title": "Platform Overview",
+      "surface": "ops_portal",
+      "route": "/partials/overview",
+      "section_id": "overview",
+      "fragment": "overview",
+      "nav_label": "Overview",
+      "nav_visible": true,
+      "nav_order": 10,
+      "primary_lane": "start",
+      "secondary_lanes": [
+        "observe",
+        "change"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    },
+    {
+      "id": "ops_portal_deployments",
+      "title": "Deployment Console",
+      "surface": "ops_portal",
+      "route": "/",
+      "section_id": "deployments",
+      "fragment": "deployments",
+      "nav_label": "Deployment Console",
+      "nav_visible": true,
+      "nav_order": 20,
+      "primary_lane": "change",
+      "secondary_lanes": [
+        "observe",
+        "recover"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    },
+    {
+      "id": "ops_portal_agents",
+      "title": "Agent Coordination",
+      "surface": "ops_portal",
+      "route": "/partials/agents",
+      "section_id": "agents",
+      "fragment": "agents",
+      "nav_label": "Agent Coordination",
+      "nav_visible": true,
+      "nav_order": 30,
+      "primary_lane": "observe",
+      "secondary_lanes": [
+        "change"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    {
+      "id": "ops_portal_runtime_assurance",
+      "title": "Runtime Assurance",
+      "surface": "ops_portal",
+      "route": "/partials/runtime-assurance",
+      "section_id": "runtime-assurance",
+      "fragment": "runtime-assurance",
+      "nav_label": "Runtime Assurance",
+      "nav_visible": true,
+      "nav_order": 40,
+      "primary_lane": "observe",
+      "secondary_lanes": [
+        "recover"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    {
+      "id": "ops_portal_drift",
+      "title": "Drift Panel",
+      "surface": "ops_portal",
+      "route": "/partials/drift",
+      "section_id": "drift",
+      "fragment": "drift",
+      "nav_label": "Drift",
+      "nav_visible": true,
+      "nav_order": 50,
+      "primary_lane": "observe",
+      "secondary_lanes": [
+        "change",
+        "recover"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "recover"
+    },
+    {
+      "id": "ops_portal_search",
+      "title": "Search Fabric",
+      "surface": "ops_portal",
+      "route": "/partials/search",
+      "section_id": "search",
+      "fragment": "search",
+      "nav_label": "Search",
+      "nav_visible": true,
+      "nav_order": 60,
+      "primary_lane": "learn",
+      "secondary_lanes": [
+        "start"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "learn"
+    },
+    {
+      "id": "ops_portal_runbooks",
+      "title": "Runbook Launcher",
+      "surface": "ops_portal",
+      "route": "/partials/runbooks",
+      "section_id": "runbooks",
+      "fragment": "runbooks",
+      "nav_label": "Runbooks",
+      "nav_visible": true,
+      "nav_order": 70,
+      "primary_lane": "change",
+      "secondary_lanes": [
+        "learn",
+        "recover"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    },
+    {
+      "id": "ops_portal_changelog",
+      "title": "Changelog",
+      "surface": "ops_portal",
+      "route": "/partials/changelog",
+      "section_id": "changelog",
+      "fragment": "changelog",
+      "nav_label": "Changelog",
+      "nav_visible": true,
+      "nav_order": 80,
+      "primary_lane": "learn",
+      "secondary_lanes": [
+        "observe"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "learn"
+    },
+    {
+      "id": "ops_portal_launcher",
+      "title": "Application Launcher",
+      "surface": "ops_portal",
+      "route": "/partials/launcher",
+      "section_id": "launcher-shell",
+      "fragment": "launcher-shell",
+      "nav_label": "Application Launcher",
+      "nav_visible": false,
+      "nav_order": 90,
+      "primary_lane": "start",
+      "secondary_lanes": [
+        "change",
+        "learn",
+        "observe"
+      ],
+      "next_success_lane": "change",
+      "next_failure_lane": "learn"
+    }
+  ]
+}
