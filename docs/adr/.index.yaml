@@ -11,7 +11,7 @@ total_adrs: 349
 implementation_status_summary:
   Implemented: 291
   Partial: 8
-  Not Implemented: 49
+  Not Implemented: 48
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5585,7 +5585,7 @@ adr_index:
   - adr: '0313'
     title: Contextual Help, Glossary, And Escalation Drawer
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-31'
     concern: agent-discovery
     keywords:
@@ -5596,6 +5596,7 @@ adr_index:
       - drawer
     summary: We will provide a shared contextual help and escalation drawer in
     filename: 0313-contextual-help-glossary-and-escalation-drawer.md
+    implemented_version: 0.130.86
   - adr: '0314'
     title: Resumable Multi-Step Flows And Return-To-Task Reentry
     status: Accepted

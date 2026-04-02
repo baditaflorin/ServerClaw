@@ -1,9 +1,10 @@
 # ADR 0313: Contextual Help, Glossary, And Escalation Drawer
 
 - Status: Accepted
-- Implementation Status: Not Implemented
+- Implementation Status: Implemented
 - Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implemented In Platform Version: 0.130.86
+- Implemented On: 2026-04-02
 - Date: 2026-03-31
 
 ## Context
@@ -69,6 +70,24 @@ When a page includes a risky or failure-prone task, the help drawer must say:
 - This ADR does not require third-party product-native UIs to expose the same
   drawer, though the workbench should still link to contextual help before the
   user leaves a first-party page.
+
+## Implemented Live Replay
+
+- The branch-local live apply on 2026-04-02 replayed the shared drawer from
+  `codex/ws-0313-live-apply` source commit `154564f3c2433d5dd0b295a64c34272fd3b7f956`,
+  converged the interactive `ops_portal` runtime on `docker-runtime-lv3`,
+  republished the generated docs and changelog portals through `nginx-lv3`, and
+  recorded the proof in
+  `receipts/live-applies/2026-04-02-adr-0313-contextual-help-live-apply.json`.
+- Earlier direct replay attempts remain preserved in
+  `receipts/live-applies/evidence/` because they exposed two real defects on the
+  latest lineage: Docker bridge chains could disappear after nftables
+  evaluation on `docker-runtime-lv3`, and the mirrored runtime tree imported
+  `platform.datetime_compat` even though the isolated image layout does not ship
+  the repo `platform` package.
+- The exact-main merge still has to run on top of `origin/main` repository
+  version `0.177.137` and platform version `0.130.86` before protected release
+  and canonical-truth surfaces can be updated.
 
 ## Related ADRs
 

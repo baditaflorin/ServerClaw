@@ -419,7 +419,7 @@ workstreams:
   - id: ws-0313-live-apply
     adr: "0313"
     title: Live apply contextual help, glossary, and escalation drawer across the first-party portal surfaces
-    status: in_progress
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0313-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0313-live-apply
@@ -441,10 +441,12 @@ workstreams:
       - docs/runbooks/developer-portal.md
       - docs/runbooks/deployment-history-portal.md
       - docs/runbooks/ops-portal-down.md
+      - docs/runbooks/docker-runtime-bridge-chain-loss.md
       - scripts/portal_utils.py
       - scripts/generate_ops_portal.py
       - scripts/generate_docs_site.py
       - scripts/generate_changelog_portal.py
+      - scripts/search_fabric/utils.py
       - scripts/ops_portal/
       - docs/templates/reference-index.md.j2
       - docs/templates/reference-glossary.md.j2
@@ -453,6 +455,7 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+      - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
       - receipts/ops-portal-snapshot.html
       - tests/test_ops_portal.py
       - tests/test_interactive_ops_portal.py
@@ -460,6 +463,7 @@ workstreams:
       - tests/test_changelog_portal.py
       - tests/test_ops_portal_playbook.py
       - tests/test_ops_portal_runtime_role.py
+      - tests/test_linux_guest_firewall_role.py
       - receipts/live-applies/2026-04-02-adr-0313-contextual-help-live-apply.json
       - receipts/live-applies/evidence/2026-04-02-ws-0313-*
     ownership_manifest:
@@ -481,6 +485,7 @@ workstreams:
             - docs/runbooks/developer-portal.md
             - docs/runbooks/deployment-history-portal.md
             - docs/runbooks/ops-portal-down.md
+            - docs/runbooks/docker-runtime-bridge-chain-loss.md
           mode: shared_contract
           contract: portal-help-docs-v1
         - id: contextual_help_adr_surface
@@ -494,6 +499,7 @@ workstreams:
             - scripts/generate_ops_portal.py
             - scripts/generate_docs_site.py
             - scripts/generate_changelog_portal.py
+            - scripts/search_fabric/utils.py
             - scripts/ops_portal/**
             - docs/templates/reference-index.md.j2
             - docs/templates/reference-glossary.md.j2
@@ -511,14 +517,20 @@ workstreams:
             - tests/test_ops_portal_runtime_role.py
           mode: shared_contract
           contract: portal-help-surface-v1
+        - id: contextual_help_live_recovery_fixes
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
+            - tests/test_linux_guest_firewall_role.py
+          mode: shared_contract
+          contract: ws-0313-live-recovery-fixes-v1
         - id: contextual_help_receipts
           paths:
             - receipts/live-applies/2026-04-02-adr-0313-contextual-help-live-apply.json
             - receipts/live-applies/evidence/2026-04-02-ws-0313-*
           mode: shared_contract
           contract: live-apply-receipts-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
   - id: ws-0266-validation-runner-capability-contracts
     adr: "0266"
     title: Validation runner capability contracts and environment attestation
