@@ -17,11 +17,11 @@ ROLE_TASKS_PATH = (
 )
 
 
-def test_ops_portal_playbook_uses_controller_pwd_as_repo_root() -> None:
+def test_ops_portal_playbook_leaves_repo_root_to_role_defaults_or_explicit_overrides() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
     play = plays[0]
 
-    assert play["vars"]["ops_portal_repo_root"] == "{{ lookup('ansible.builtin.env', 'PWD') }}"
+    assert "vars" not in play or "ops_portal_repo_root" not in play["vars"]
 
 
 def test_ops_portal_runtime_clears_previous_build_context_before_sync() -> None:

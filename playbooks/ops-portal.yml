@@ -3,8 +3,6 @@
   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
   become: true
   gather_facts: true
-  vars:
-    ops_portal_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"
   tags:
     - tier-2
     - access
