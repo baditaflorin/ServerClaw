@@ -72,7 +72,7 @@ MinIO is now live on `docker-runtime-lv3` and published at `https://minio.lv3.or
 
 ADR 0292 Lago billing is now re-verified on production from `main`: `https://billing.lv3.org` keeps the browser surface behind the shared oauth2-proxy sign-in flow, anonymous `https://billing.lv3.org/api/health` requests now fail closed at the API gateway with the canonical `401` envelope, and the 2026-04-01 exact-main replay on release `0.177.128` re-verified public smoke event ingest plus current-usage aggregation on platform version `0.130.81`.
 
-ADR 0319 and ADR 0320 are now live on production from current `main`: the 2026-04-02 exact-main replay on repository release `0.177.141` established the first dedicated `runtime-ai-lv3` pool with Nomad, Traefik, and Dapr, moved Apache Tika, Gotenberg, and Tesseract OCR off `docker-runtime-lv3`, and re-verified the authenticated `https://api.lv3.org/v1/gotenberg/health` path on platform version `0.130.89`.
+ADR 0319 and ADR 0320 are now live on production from current `main`: the 2026-04-02 exact-main replay established the first dedicated `runtime-ai-lv3` pool with Nomad, Traefik, and Dapr, moved Apache Tika, Gotenberg, and Tesseract OCR off `docker-runtime-lv3`, and re-verified the authenticated `https://api.lv3.org/v1/gotenberg/health` path on platform version `0.130.89`; after ADR 0316 occupied repository release `0.177.141`, the merged mainline closeout promoted this runtime-ai rollout as repository release `0.177.142`.
 
 Signed release bundles are now live through that private Gitea path: the repo-managed `release-bundle` workflow publishes tarball, checksum, and Sigstore bundle assets into private Gitea Releases, and controller-side replay now verifies those assets with Cosign against the committed public key before treating them as eligible runtime input.
 
@@ -221,7 +221,7 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.141` |
+| Repository version | `0.177.142` |
 | Platform version | `0.130.89` |
 | Observed check date | `2026-04-02` |
 | Observed OS | `Debian 13` |
@@ -1590,7 +1590,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.141` |
+| Repository version | `0.177.142` |
 | Platform version | `0.130.89` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |

@@ -16170,6 +16170,7 @@ workstreams:
       - receipts/live-applies/evidence/
       - receipts/live-applies/2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply.json
       - receipts/live-applies/evidence/2026-04-02-ws-0319-*
+      - receipts/ops-portal-snapshot.html
       - receipts/restic-backups/20260401T235848Z.json
       - receipts/restic-backups/20260402T081812Z.json
       - receipts/restic-snapshots-latest.json
@@ -16271,6 +16272,7 @@ workstreams:
           paths:
             - receipts/live-applies/2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply.json
             - receipts/live-applies/evidence/2026-04-02-ws-0319-*
+            - receipts/ops-portal-snapshot.html
             - receipts/restic-backups/20260401T235848Z.json
             - receipts/restic-backups/20260402T081812Z.json
             - receipts/restic-snapshots-latest.json
@@ -16281,7 +16283,7 @@ workstreams:
     canonical_truth:
       changelog_entry: introduced the first dedicated runtime-ai pool on production with Nomad, Traefik, and Dapr, moving Apache Tika, Gotenberg, and Tesseract OCR off docker-runtime-lv3 while preserving the authenticated /v1/gotenberg route
       release_bump: patch
-      included_in_repo_version: 0.177.141
+      included_in_repo_version: 0.177.142
       latest_receipts:
         gotenberg: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
         nomad_scheduler: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply

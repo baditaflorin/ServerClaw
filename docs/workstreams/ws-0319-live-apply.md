@@ -3,7 +3,7 @@
 - ADR: [ADR 0319](../adr/0319-runtime-pools-as-the-service-partition-boundary.md), [ADR 0320](../adr/0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes.md)
 - Title: Live apply the first runtime-ai pool split with Nomad, Traefik, and Dapr from the latest mainline
 - Status: live_applied
-- Included In Repo Version: `0.177.141`
+- Included In Repo Version: `0.177.142`
 - Canonical Mainline Receipt: `receipts/live-applies/2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply.json`
 - Live Applied In Platform Version: `0.130.89`
 - Implemented On: 2026-04-02
@@ -58,7 +58,7 @@ runtime VM.
 
 ## Outcome
 
-- Exact-main release `0.177.141` was cut from the latest integrated `origin/main`; the first write reached all protected repo surfaces before the post-write Outline sync failed with `502 Bad Gateway`, and that external publication failure is preserved in `receipts/live-applies/evidence/2026-04-02-ws-0319-mainline-release-manager-r2.txt`.
+- The first exact-main release cut wrote `0.177.141` on the integration branch before the post-write Outline sync failed with `502 Bad Gateway`; after ADR 0316 occupied `0.177.141` on `origin/main`, this live-applied workstream was integrated as repository release `0.177.142`, and the original external publication failure remains preserved in `receipts/live-applies/evidence/2026-04-02-ws-0319-mainline-release-manager-r2.txt`.
 - Governed exact-main replay `receipts/live-applies/evidence/2026-04-02-ws-0319-mainline-live-apply-r2.txt` completed successfully on top of the refreshed mainline with final recap `docker-runtime-lv3 : ok=269 changed=144 failed=0`, `monitoring-lv3 : ok=38 changed=0 failed=0`, `proxmox_florin : ok=41 changed=8 failed=0`, and `runtime-ai-lv3 : ok=305 changed=4 failed=0`.
 - Post-verify evidence in `receipts/live-applies/evidence/2026-04-02-ws-0319-mainline-post-verify-r9.txt` confirms the runtime-ai Traefik and Dapr substrate, Apache Tika, Gotenberg, Tesseract OCR, Nomad namespace membership, monitoring guest Docker chains, legacy runtime retirement, and authenticated `/v1/gotenberg` route all succeed together on the exact-main replay.
 - Failure evidence in `receipts/live-applies/evidence/2026-04-02-ws-0319-runtime-ai-pool-live-apply-r10.txt` and `receipts/live-applies/evidence/2026-04-02-ws-0319-runtime-ai-pool-live-apply-r11.txt` records the two key rollout hazards that shaped the final fix:

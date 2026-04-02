@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.141",
+  "repo_version": "0.177.142",
   "platform_version": "0.130.89",
-  "generated_at": "2026-04-02T08:10:27Z",
-  "next_refresh_at": "2026-04-02T09:10:27Z",
+  "generated_at": "2026-04-02T09:49:28Z",
+  "next_refresh_at": "2026-04-02T10:49:28Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -230,7 +230,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "http://10.10.10.20:3007",
+        "primary_url": "http://10.10.10.90:3007",
         "last_live_apply": "2026-04-02T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -786,7 +786,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "http://10.10.10.20:3008",
+        "primary_url": "http://10.10.10.90:3008",
         "last_live_apply": "2026-04-02T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -798,7 +798,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "http://10.10.10.20:9998",
+        "primary_url": "http://10.10.10.90:9998",
         "last_live_apply": "2026-04-02T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -1628,7 +1628,7 @@
       },
       {
         "id": "converge-gotenberg",
-        "description": "Deploy the private Gotenberg runtime on docker-runtime-lv3 and refresh the shared API gateway route used for authenticated PDF rendering requests.",
+        "description": "Deploy the private Gotenberg runtime on runtime-ai-lv3 and verify the shared API gateway route that now targets the dedicated runtime-ai pool upstream.",
         "tags": [
           "converge-gotenberg",
           "guest-live",
@@ -2122,7 +2122,7 @@
       },
       {
         "id": "converge-nomad",
-        "description": "Converge the private Nomad scheduler on monitoring-lv3 plus the runtime and build clients, including controller-local TLS and ACL bootstrap artifacts and repo-managed smoke jobs.",
+        "description": "Converge the private Nomad scheduler on monitoring-lv3 plus the runtime, runtime-ai, and build clients, including controller-local TLS and ACL bootstrap artifacts and repo-managed smoke jobs.",
         "tags": [
           "converge-nomad",
           "host-and-guest-live",
@@ -2139,7 +2139,7 @@
           "max_duration_seconds": 1800,
           "max_steps": 300,
           "max_concurrent_instances": 1,
-          "max_touched_hosts": 4,
+          "max_touched_hosts": 5,
           "max_restarts": 0,
           "max_rollback_depth": 1,
           "escalation_action": "notify_and_abort"
@@ -2772,7 +2772,7 @@
       },
       {
         "id": "converge-tesseract-ocr",
-        "description": "Build and deploy the private Tesseract OCR fallback runtime on docker-runtime-lv3 and verify direct OCR plus the Tika-first helper path.",
+        "description": "Build and deploy the private Tesseract OCR fallback runtime on runtime-ai-lv3 and verify direct OCR plus the Tika-first helper path through the dedicated runtime-ai pool.",
         "tags": [
           "converge-tesseract-ocr",
           "guest-live",
@@ -2798,7 +2798,7 @@
       },
       {
         "id": "converge-tika",
-        "description": "Deploy the private Apache Tika runtime on docker-runtime-lv3 and verify the standard `/version`, `/tika`, and `/meta` extraction contracts.",
+        "description": "Deploy the private Apache Tika runtime on runtime-ai-lv3 and verify the standard `/version`, `/tika`, and `/meta` extraction contracts through the dedicated runtime-ai pool.",
         "tags": [
           "converge-tika",
           "guest-live",
@@ -5083,7 +5083,7 @@
         "id": "configure-nomad",
         "title": "Configure Nomad",
         "agent_trust_required": "T3",
-        "steps": 13,
+        "steps": 15,
         "path": "docs/runbooks/configure-nomad.md",
         "workflow_ids": [
           "converge-nomad"
@@ -5987,10 +5987,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.140",
+    "last_version": "0.177.141",
     "deployed_at": "2026-04-02",
-    "summary": "implements ADR 0316 by adding privacy-preserving journey analytics, onboarding success scorecards, contextual help recovery tracking, and live Windmill and Plausible contracts for the operator access admin surface",
-    "release_notes_url": "docs/release-notes/0.177.141.md"
+    "summary": "introduces the first dedicated runtime-ai pool on production with Nomad, Traefik, and Dapr, moving Apache Tika, Gotenberg, and Tesseract OCR off `docker-runtime-lv3` while preserving the authenticated shared `/v1/gotenberg` route",
+    "release_notes_url": "docs/release-notes/0.177.142.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
