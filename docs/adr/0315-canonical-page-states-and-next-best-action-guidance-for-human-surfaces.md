@@ -1,9 +1,10 @@
 # ADR 0315: Canonical Page States And Next-Best-Action Guidance For Human Surfaces
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: not yet
+- Implemented In Platform Version: 0.130.87
+- Implemented On: 2026-04-02
 - Date: 2026-03-31
 
 ## Context

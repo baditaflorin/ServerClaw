@@ -58,6 +58,7 @@ runner `docker-build-lv3`.
 - canonical repository data models pass schema validation
 - the ADR 0306 IaC policy scan runs Checkov across the governed OpenTofu and Ansible surfaces, emits JSON plus SARIF receipts under `receipts/checkov/`, and records the current Docker Compose template gap explicitly
 - declared-to-live attestation contracts stay covered by the focused runtime, API gateway, and ops-portal regression slice
+- the Windmill operator-admin raw-app contract test now enforces ADR 0315 canonical page-state guidance, next-best-action copy, and recovery-link coverage on the governed browser surface
 - architecture fitness functions verify the governed replaceability scorecards and vendor exit plans for critical product ADRs
 - provider-boundary anti-corruption guards keep raw provider payload selectors confined to the declared boundary translation step
 - the ADR 0204 correction-loop catalog covers every governed mutating workflow exactly once
@@ -121,6 +122,7 @@ Focused declared-to-live validation can also be replayed directly:
 ```bash
 uv run --with pytest --with fastapi==0.116.1 --with httpx==0.28.1 --with uvicorn==0.35.0 --with pyyaml==6.0.2 --with cryptography==45.0.6 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest -q tests/test_declared_live_attestation.py tests/test_api_gateway.py tests/test_interactive_ops_portal.py
 uv run --with pyyaml python3 scripts/declared_live_attestation.py --repo-root . --service api_gateway --format json --timeout-seconds 5
+uv run --with pytest --with pyyaml python -m pytest -q tests/test_windmill_operator_admin_app.py
 python3 scripts/parallel_check.py iac-policy-scan
 ```
 

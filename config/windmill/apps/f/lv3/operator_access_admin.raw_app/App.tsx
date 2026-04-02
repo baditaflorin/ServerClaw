@@ -121,6 +121,8 @@ type FormStatusProps = {
   submitCount: number;
   errorCount: number;
   idleMessage: string;
+  helpHref: string;
+  helpLabel: string;
 };
 
 type ToolbarButtonProps = {
@@ -149,6 +151,52 @@ type UpdateNotesMutationInput = {
   notes_markdown: string;
   dry_run: boolean;
 };
+
+type GuidanceLink = {
+  label: string;
+  href: string;
+};
+
+type CanonicalPageStateKind =
+  | "loading"
+  | "background_refresh"
+  | "empty"
+  | "partial_or_degraded"
+  | "success"
+  | "validation_error"
+  | "system_error"
+  | "unauthorized"
+  | "not_found";
+
+type CanonicalPageState = {
+  kind: CanonicalPageStateKind;
+  badgeLabel: string;
+  title: string;
+  summary: string;
+  detail?: string;
+  nextSteps: string[];
+  helpLinks: GuidanceLink[];
+};
+
+const CANONICAL_PAGE_STATES: ReadonlyArray<CanonicalPageStateKind> = [
+  "loading",
+  "background_refresh",
+  "empty",
+  "partial_or_degraded",
+  "success",
+  "validation_error",
+  "system_error",
+  "unauthorized",
+  "not_found",
+];
+
+const DOCS_BASE_URL = "https://docs.lv3.org";
+const RUNBOOK_URLS = {
+  operatorAdmin: `${DOCS_BASE_URL}/runbooks/windmill-operator-access-admin/`,
+  operatorOnboarding: `${DOCS_BASE_URL}/runbooks/operator-onboarding/`,
+  operatorOffboarding: `${DOCS_BASE_URL}/runbooks/operator-offboarding/`,
+  validation: `${DOCS_BASE_URL}/runbooks/validate-repository-automation/`,
+} as const;
 
 const operatorGridTheme = themeQuartz.withParams({
   spacing: 7,
@@ -349,6 +397,132 @@ function getQueryFeedback(
   };
 }
 
+function dedupeGuidanceLinks(links: GuidanceLink[]): GuidanceLink[] {
+  return Array.from(new Map(links.map((link) => [link.href, link])).values());
+}
+
+function canonicalStateLabel(kind: CanonicalPageStateKind): string {
+  switch (kind) {
+    case "loading":
+      return "Loading";
+    case "background_refresh":
+      return "Background Refresh";
+    case "empty":
+      return "Empty";
+    case "partial_or_degraded":
+      return "Partial / Degraded";
+    case "success":
+      return "Success";
+    case "validation_error":
+      return "Validation Error";
+    case "system_error":
+      return "System Error";
+    case "unauthorized":
+      return "Unauthorized";
+    case "not_found":
+      return "Not Found";
+  }
+}
+
+function canonicalStateToneClass(kind: CanonicalPageStateKind): string {
+  switch (kind) {
+    case "success":
+      return "pillSuccess";
+    case "background_refresh":
+      return "pillInfo";
+    case "partial_or_degraded":
+      return "pillWarning";
+    case "validation_error":
+    case "system_error":
+    case "unauthorized":
+    case "not_found":
+      return "pillDanger";
+    case "empty":
+      return "pillRole";
+    case "loading":
+    default:
+      return "pillNeutral";
+  }
+}
+
+function canonicalStateBannerClass(kind: CanonicalPageStateKind): string {
+  switch (kind) {
+    case "success":
+      return "banner bannerInline bannerSuccess";
+    case "partial_or_degraded":
+      return "banner bannerInline bannerWarning";
+    case "validation_error":
+    case "system_error":
+    case "unauthorized":
+    case "not_found":
+      return "banner bannerInline bannerError";
+    case "loading":
+    case "background_refresh":
+    case "empty":
+    default:
+      return "banner bannerInline bannerInfo";
+  }
+}
+
+function buildCanonicalPageState(
+  kind: CanonicalPageStateKind,
+  title: string,
+  summary: string,
+  nextSteps: string[],
+  helpLinks: GuidanceLink[],
+  detail?: string,
+): CanonicalPageState {
+  return {
+    kind,
+    badgeLabel: canonicalStateLabel(kind),
+    title,
+    summary,
+    detail,
+    nextSteps,
+    helpLinks: dedupeGuidanceLinks(helpLinks),
+  };
+}
+
+function classifyFailureKind(message: string): "unauthorized" | "not_found" | "system_error" {
+  const normalized = message.toLowerCase();
+  if (/(401|403|unauthori[sz]ed|forbidden|permission|not allowed|access denied)/.test(normalized)) {
+    return "unauthorized";
+  }
+  if (/(404|not found|unknown operator|missing raw app|no such script|missing route)/.test(normalized)) {
+    return "not_found";
+  }
+  return "system_error";
+}
+
+function isValidationMessage(message: string): boolean {
+  return /(validation|invalid|required|schema|zod|must |should |missing required|expected)/.test(message.toLowerCase());
+}
+
+function classifyActionFailureKind(message: string): "validation_error" | "unauthorized" | "not_found" | "system_error" {
+  if (isValidationMessage(message)) {
+    return "validation_error";
+  }
+  return classifyFailureKind(message);
+}
+
+function baseHelpLinks(...extraLinks: GuidanceLink[]): GuidanceLink[] {
+  return dedupeGuidanceLinks([
+    { label: "Operator admin runbook", href: RUNBOOK_URLS.operatorAdmin },
+    { label: "Repository validation runbook", href: RUNBOOK_URLS.validation },
+    ...extraLinks,
+  ]);
+}
+
+function actionHelpLinks(title: string): GuidanceLink[] {
+  if (title.includes("onboarding")) {
+    return baseHelpLinks({ label: "Operator onboarding runbook", href: RUNBOOK_URLS.operatorOnboarding });
+  }
+  if (title.includes("off-boarding")) {
+    return baseHelpLinks({ label: "Operator off-boarding runbook", href: RUNBOOK_URLS.operatorOffboarding });
+  }
+  return baseHelpLinks();
+}
+
 async function fetchRoster(): Promise<RosterPayload> {
   const payload = await backend.list_operators({});
   if (!isRosterPayload(payload)) {
@@ -400,25 +574,79 @@ function FieldShell({
   );
 }
 
-function FormStatus({ isSubmitting, isDirty, submitCount, errorCount, idleMessage }: FormStatusProps) {
+function FormStatus({ isSubmitting, isDirty, submitCount, errorCount, idleMessage, helpHref, helpLabel }: FormStatusProps) {
   let className = "banner bannerInfo bannerInline";
   let message = idleMessage;
 
   if (isSubmitting) {
     className = "banner bannerInfo bannerInline";
-    message = "Validating and submitting through the governed backend.";
+    message = "Validating and submitting through the governed backend. Wait for the structured result panel before retrying.";
   } else if (submitCount > 0 && errorCount > 0) {
     className = "banner bannerError bannerInline";
     message =
       errorCount === 1
-        ? "Resolve the highlighted field before submitting."
-        : `Resolve ${errorCount} highlighted fields before submitting.`;
+        ? "Resolve the highlighted field, then submit again."
+        : `Resolve ${errorCount} highlighted fields, then submit again.`;
   } else if (isDirty) {
     className = "banner bannerInfo bannerInline";
-    message = "Schema validation is active for this form. Touched fields update inline.";
+    message = "Schema validation is active for this form. Touched fields update inline before the governed request is sent.";
   }
 
-  return <div className={className}>{message}</div>;
+  return (
+    <div className={`${className} formStatusBanner`}>
+      <span>{message}</span>
+      <a className="stateLink formStatusLink" href={helpHref} target="_blank" rel="noreferrer">
+        {helpLabel}
+      </a>
+    </div>
+  );
+}
+
+function StateGuidanceCard({
+  state,
+  compact = false,
+  eyebrow,
+}: {
+  state: CanonicalPageState;
+  compact?: boolean;
+  eyebrow?: string;
+}) {
+  return (
+    <div className={`stateCard ${compact ? "stateCardCompact" : ""}`} data-canonical-state={state.kind}>
+      <div className="stateCardHeader">
+        <div className="stateCardCopy">
+          {eyebrow ? <span className="eyebrow">{eyebrow}</span> : null}
+          <div className="stateCardBadgeRow">
+            <span className={`pill ${canonicalStateToneClass(state.kind)}`}>{state.badgeLabel}</span>
+            {!compact ? <span className="muted">Next-best-action guidance</span> : null}
+          </div>
+          <h3>{state.title}</h3>
+          <p>{state.summary}</p>
+        </div>
+      </div>
+      {state.detail ? <div className={canonicalStateBannerClass(state.kind)}>{state.detail}</div> : null}
+      <div className={`stateCardGrid ${compact ? "stateCardGridCompact" : ""}`}>
+        <div>
+          <h4>Next best action</h4>
+          <ul className="stateList">
+            {state.nextSteps.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h4>Help and recovery</h4>
+          <div className="stateLinks">
+            {state.helpLinks.map((link) => (
+              <a key={link.href} className="stateLink" href={link.href} target="_blank" rel="noreferrer">
+                {link.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function App() {
@@ -1000,6 +1228,510 @@ function App() {
   const onboardErrorCount = Object.keys(onboardForm.formState.errors).length;
   const offboardErrorCount = Object.keys(offboardForm.formState.errors).length;
   const syncErrorCount = Object.keys(syncForm.formState.errors).length;
+  const validationIssues = [
+    onboardForm.formState.submitCount > 0 && onboardErrorCount > 0 ? "Onboard Operator" : null,
+    offboardForm.formState.submitCount > 0 && offboardErrorCount > 0 ? "Off-board Operator" : null,
+    syncForm.formState.submitCount > 0 && syncErrorCount > 0 ? "Reconcile Roster" : null,
+  ].filter(Boolean) as string[];
+  const rosterState = useMemo(() => {
+    if (rosterQuery.isPending && !operators.length) {
+      return buildCanonicalPageState(
+        "loading",
+        "Loading the operator roster",
+        "The page is fetching the repo-authoritative operator roster before governed actions are enabled.",
+        [
+          "Wait for the first roster response before attempting onboarding, off-boarding, or inventory review.",
+          "If loading lasts longer than one refresh cycle, use Refresh once and then open the runbook before retrying.",
+        ],
+        baseHelpLinks({ label: "Operator onboarding runbook", href: RUNBOOK_URLS.operatorOnboarding }),
+        "This panel unlocks after the Windmill roster script returns the latest governed payload.",
+      );
+    }
+    if (rosterQuery.isError && !operators.length) {
+      const message = getErrorMessage(rosterQuery.error);
+      const helpLinks = baseHelpLinks({ label: "Operator onboarding runbook", href: RUNBOOK_URLS.operatorOnboarding });
+      switch (classifyFailureKind(message)) {
+        case "unauthorized":
+          return buildCanonicalPageState(
+            "unauthorized",
+            "Windmill did not authorize roster access",
+            "The page could not read the operator roster with the current browser session.",
+            [
+              "Refresh the Windmill session or sign in again before retrying the roster fetch.",
+              "Avoid repeated mutations until the roster is visible again so you do not act on stale assumptions.",
+            ],
+            helpLinks,
+            message,
+          );
+        case "not_found":
+          return buildCanonicalPageState(
+            "not_found",
+            "The roster route or backing script was not found",
+            "The page could not resolve the live roster endpoint it expects to call.",
+            [
+              "Refresh the page once to rule out a transient raw-app routing issue.",
+              "If the same error repeats, replay the governed Windmill converge instead of editing the live app by hand.",
+            ],
+            helpLinks,
+            message,
+          );
+        default:
+          return buildCanonicalPageState(
+            "system_error",
+            "The roster fetch failed before the page could load",
+            "The page cannot show current operators until the runtime or backend error is resolved.",
+            [
+              "Use Refresh once, then stop retrying if the same error returns.",
+              "Hand off the raw error together with the current branch and selected task so the next operator can recover safely.",
+            ],
+            helpLinks,
+            message,
+          );
+      }
+    }
+    if (!operators.length) {
+      return buildCanonicalPageState(
+        "empty",
+        "No operators are listed yet",
+        "The roster call succeeded, but it returned zero governed operators.",
+        [
+          "Start the onboarding workflow if you are intentionally bootstrapping the first operator.",
+          "If you expected existing operators, confirm the merged roster in `config/operators.yaml` before making live changes.",
+        ],
+        baseHelpLinks({ label: "Operator onboarding runbook", href: RUNBOOK_URLS.operatorOnboarding }),
+      );
+    }
+    if (rosterQuery.isError || rosterQuery.isStale) {
+      return buildCanonicalPageState(
+        "partial_or_degraded",
+        "Showing the last known roster while freshness is degraded",
+        "You can still review cached operator data, but the latest refresh did not complete cleanly.",
+        [
+          "Use the cached roster for read-only confirmation and refresh once when you are ready to retry.",
+          "Before making a risky change, confirm the Latest Result and Selected Operator Inventory panels match your expectation.",
+        ],
+        baseHelpLinks(),
+        `Last successful update ${formatTimestamp(rosterQuery.dataUpdatedAt)}.`,
+      );
+    }
+    if (rosterQuery.isFetching) {
+      return buildCanonicalPageState(
+        "background_refresh",
+        "Roster refresh is running in the background",
+        "The page is keeping the current roster visible while it checks for fresher data.",
+        [
+          "Keep working from the visible roster unless the state changes to partial or system error.",
+          "Review the Selected Operator Inventory panel after any mutation so the refresh has time to settle.",
+        ],
+        baseHelpLinks(),
+        rosterFeedback.detail,
+      );
+    }
+    return buildCanonicalPageState(
+      "success",
+      "The roster is fresh and ready for governed work",
+      "Current operator data is loaded and the page can safely guide onboarding, off-boarding, reconciliation, and notes review.",
+      [
+        "Use Quick Filter or row selection to focus the exact operator you intend to review or change.",
+        "After each mutation, review the structured Latest Result and Selected Operator Inventory panels before moving on.",
+      ],
+      baseHelpLinks(),
+      rosterFeedback.detail,
+    );
+  }, [operators.length, rosterFeedback.detail, rosterQuery.dataUpdatedAt, rosterQuery.error, rosterQuery.isError, rosterQuery.isFetching, rosterQuery.isPending, rosterQuery.isStale]);
+  const inventoryState = useMemo(() => {
+    if (!selectedOperatorId) {
+      return buildCanonicalPageState(
+        "empty",
+        "Select an operator to inspect live inventory",
+        "The inventory panel only starts polling after one operator is selected from the roster.",
+        [
+          "Choose one operator row first so the page can scope the governed inventory lookup safely.",
+          "After a mutation succeeds, return here to confirm the resulting access state for that same operator.",
+        ],
+        baseHelpLinks(),
+      );
+    }
+    if (inventoryQuery.isPending && !inventoryQuery.data) {
+      return buildCanonicalPageState(
+        "loading",
+        "Loading the selected operator inventory",
+        "The page is waiting for the governed inventory check to return the latest access view.",
+        [
+          "Wait for the first inventory response before deciding whether the access state matches the requested change.",
+          "If the query stalls, refresh the inventory once rather than changing the selected operator repeatedly.",
+        ],
+        baseHelpLinks(),
+      );
+    }
+    if (inventoryQuery.isError && !inventoryQuery.data) {
+      const message = getErrorMessage(inventoryQuery.error);
+      switch (classifyFailureKind(message)) {
+        case "unauthorized":
+          return buildCanonicalPageState(
+            "unauthorized",
+            "Inventory access is permission-limited",
+            "The page could not read the selected operator inventory with the current session.",
+            [
+              "Refresh the Windmill session or confirm you are still signed in with the expected admin identity.",
+              "Do not assume the operator state changed until the inventory panel can read live data again.",
+            ],
+            baseHelpLinks(),
+            message,
+          );
+        case "not_found":
+          return buildCanonicalPageState(
+            "not_found",
+            "The selected operator could not be found for inventory review",
+            "The roster selection no longer maps cleanly to a live inventory target.",
+            [
+              "Refresh the roster and reselect the operator to confirm the ID still exists.",
+              "If the operator was intentionally removed, move to another row instead of retrying this lookup.",
+            ],
+            baseHelpLinks({ label: "Operator off-boarding runbook", href: RUNBOOK_URLS.operatorOffboarding }),
+            message,
+          );
+        default:
+          return buildCanonicalPageState(
+            "system_error",
+            "The inventory check failed",
+            "The page could not fetch the latest live access inventory for the selected operator.",
+            [
+              "Retry the inventory check once and then stop if the same runtime error repeats.",
+              "Include the selected operator ID and the Latest Result payload in any handoff so recovery can start from context, not guesswork.",
+            ],
+            baseHelpLinks(),
+            message,
+          );
+      }
+    }
+    if (inventoryQuery.isError || inventoryQuery.isStale) {
+      return buildCanonicalPageState(
+        "partial_or_degraded",
+        "Inventory is visible, but the newest refresh is degraded",
+        "You still have a recent access view, but the page cannot guarantee it is the newest one available.",
+        [
+          "Use the visible inventory for read-only confirmation and refresh once when you need a fresher answer.",
+          "If you just ran a mutation, wait for the background refresh to complete before you conclude the platform drifted.",
+        ],
+        baseHelpLinks(),
+        `Last successful update ${formatTimestamp(inventoryQuery.dataUpdatedAt)}.`,
+      );
+    }
+    if (inventoryQuery.isFetching) {
+      return buildCanonicalPageState(
+        "background_refresh",
+        "Inventory is refreshing in the background",
+        "The page is keeping the last inventory response visible while it checks for changes.",
+        [
+          "Keep the same operator selected until the refresh completes so the comparison stays stable.",
+          "Use Refresh Inventory only when you need an immediate recheck after a governed action.",
+        ],
+        baseHelpLinks(),
+        inventoryFeedback.detail,
+      );
+    }
+    return buildCanonicalPageState(
+      "success",
+      "Inventory is current for the selected operator",
+      "The live access inventory has loaded successfully for the selected roster entry.",
+      [
+        "Compare this inventory with the Latest Result payload after each governed mutation.",
+        "Switch operators only after you have captured or handed off the context you need from this one.",
+      ],
+      baseHelpLinks(),
+      inventoryFeedback.detail,
+    );
+  }, [inventoryFeedback.detail, inventoryQuery.data, inventoryQuery.dataUpdatedAt, inventoryQuery.error, inventoryQuery.isError, inventoryQuery.isFetching, inventoryQuery.isPending, inventoryQuery.isStale, selectedOperatorId]);
+  const notesState = useMemo(() => {
+    if (!selectedOperator) {
+      return buildCanonicalPageState(
+        "empty",
+        "Select one operator to unlock rich notes",
+        "The notes editor stays empty until one roster row is selected.",
+        [
+          "Choose the operator you want to brief, review, or hand off before writing notes.",
+          "Use Quick Filter first if you need to narrow the roster before selecting a person.",
+        ],
+        baseHelpLinks(),
+      );
+    }
+    if (notesMutation.isPending) {
+      return buildCanonicalPageState(
+        "loading",
+        "Saving note changes through the governed backend",
+        "The editor is persisting markdown-backed notes for the selected operator.",
+        [
+          "Wait for the Latest Result panel before switching operators or refreshing the page.",
+          "After the save completes, confirm the draft and saved state match before moving on.",
+        ],
+        baseHelpLinks(),
+      );
+    }
+    if (actionResult.title === "Operator notes update result" && actionResult.kind === "error" && actionResult.error) {
+      const message = actionResult.error;
+      const kind = classifyActionFailureKind(message);
+      switch (kind) {
+        case "validation_error":
+          return buildCanonicalPageState(
+            "validation_error",
+            "The notes payload needs attention before it can be saved",
+            "The backend rejected the current note content or metadata.",
+            [
+              "Review the markdown source for malformed or incomplete content, then retry the save once.",
+              "If the same validation issue returns, hand off the markdown and structured result instead of editing the repo state directly.",
+            ],
+            baseHelpLinks(),
+            message,
+          );
+        case "unauthorized":
+          return buildCanonicalPageState(
+            "unauthorized",
+            "The page could not save notes with the current session",
+            "Your browser session no longer has permission to persist notes for this operator.",
+            [
+              "Refresh the Windmill session before retrying the save.",
+              "Do not discard the current markdown until the saved result is confirmed again.",
+            ],
+            baseHelpLinks(),
+            message,
+          );
+        case "not_found":
+          return buildCanonicalPageState(
+            "not_found",
+            "The selected operator is no longer available for note updates",
+            "The saved target changed or disappeared while you were editing notes.",
+            [
+              "Refresh the roster and confirm you still have the intended operator selected.",
+              "Copy the markdown out before switching rows if you need to preserve the draft for handoff.",
+            ],
+            baseHelpLinks(),
+            message,
+          );
+        default:
+          return buildCanonicalPageState(
+            "system_error",
+            "The note save failed",
+            "The editor still has your draft, but the governed backend did not accept the update.",
+            [
+              "Retry the save once after the runtime settles; then stop if the same error repeats.",
+              "Use Reset only after you have captured the markdown you want to preserve for a handoff.",
+            ],
+            baseHelpLinks(),
+            message,
+          );
+      }
+    }
+    if (notesDirty) {
+      return buildCanonicalPageState(
+        "partial_or_degraded",
+        "Your notes draft is ahead of the saved state",
+        "The editor contains unsaved changes for the selected operator.",
+        [
+          "Choose Save Notes when the draft is ready, or Reset if you want to return to the last saved markdown.",
+          "Avoid switching operators until you either save the draft or intentionally discard it.",
+        ],
+        baseHelpLinks(),
+      );
+    }
+    return buildCanonicalPageState(
+      "success",
+      "Notes match the saved markdown",
+      "The rich editor and markdown source are aligned with the current saved note for this operator.",
+      [
+        "Use the rich editor for context and the markdown pane for exact handoff text when needed.",
+        "Save again after each meaningful edit so later operators inherit the same governed context.",
+      ],
+      baseHelpLinks(),
+    );
+  }, [actionResult.error, actionResult.kind, actionResult.title, notesDirty, notesMutation.isPending, selectedOperator]);
+  const resultState = useMemo(() => {
+    const helpLinks = actionHelpLinks(actionResult.title);
+    if (actionResult.kind === "idle") {
+      return buildCanonicalPageState(
+        "empty",
+        "No governed action has been run yet",
+        "The structured result panel stays empty until you submit a form or save notes.",
+        [
+          "Run one governed action from the forms or notes editor to capture a structured backend response here.",
+          "After a success or failure, use this payload as the canonical handoff context instead of paraphrasing from memory.",
+        ],
+        helpLinks,
+      );
+    }
+    if (actionResult.kind === "pending") {
+      return buildCanonicalPageState(
+        "loading",
+        "A governed action is still running",
+        "The backend is processing the latest request and the final structured result is not ready yet.",
+        [
+          "Wait for the final status here before retrying the same action.",
+          "After the result lands, re-check the Selected Operator Inventory panel to confirm the live state.",
+        ],
+        helpLinks,
+      );
+    }
+    if (actionResult.kind === "success") {
+      return buildCanonicalPageState(
+        "success",
+        "The last governed action completed successfully",
+        "This payload is the current source of truth for the most recent onboarding, off-boarding, reconciliation, or notes update request.",
+        [
+          "Review the structured output here before you move to another operator or task.",
+          "Use the Selected Operator Inventory panel to confirm the corresponding live state after each mutation.",
+        ],
+        helpLinks,
+        actionResult.updatedAt ? `Updated ${new Date(actionResult.updatedAt).toLocaleString()}.` : undefined,
+      );
+    }
+    const errorMessage = actionResult.error ?? "Unknown action failure.";
+    switch (classifyActionFailureKind(errorMessage)) {
+      case "validation_error":
+        return buildCanonicalPageState(
+          "validation_error",
+          "The last action was rejected by validation or input rules",
+          "The backend did not accept the request payload as submitted.",
+          [
+            "Adjust the highlighted fields or payload assumptions, then resubmit once.",
+            "If you still cannot proceed safely, hand off this structured error instead of retrying blind.",
+          ],
+          helpLinks,
+          errorMessage,
+        );
+      case "unauthorized":
+        return buildCanonicalPageState(
+          "unauthorized",
+          "The last action was permission-limited",
+          "The request reached the backend, but the current session was not allowed to complete it.",
+          [
+            "Refresh the Windmill session or confirm the expected admin identity before retrying.",
+            "Avoid repeated mutation attempts until the roster and inventory panels can read successfully again.",
+          ],
+          helpLinks,
+          errorMessage,
+        );
+      case "not_found":
+        return buildCanonicalPageState(
+          "not_found",
+          "The last action referenced a target that no longer exists",
+          "The payload no longer mapped to a valid operator or runtime surface.",
+          [
+            "Refresh the roster and reselect the intended operator before retrying the action.",
+            "If the operator was intentionally removed, capture this result in the handoff and continue with the updated roster.",
+          ],
+          helpLinks,
+          errorMessage,
+        );
+      default:
+        return buildCanonicalPageState(
+          "system_error",
+          "The last action failed at runtime",
+          "The governed backend returned an operational error instead of a successful result.",
+          [
+            "Retry once after the runtime settles, then stop if the same error repeats.",
+            "Include this structured result, the operator ID, and the selected task in any escalation or handoff.",
+          ],
+          helpLinks,
+          errorMessage,
+        );
+    }
+  }, [actionResult.error, actionResult.kind, actionResult.title, actionResult.updatedAt]);
+  const pageState = useMemo(() => {
+    const baseDetail = `This surface now maps all ${CANONICAL_PAGE_STATES.length} ADR 0315 states across its panels: Loading, Background Refresh, Empty, Partial / Degraded, Success, Validation Error, System Error, Unauthorized, and Not Found.`;
+    if (rosterQuery.isPending && !operators.length) {
+      return buildCanonicalPageState(
+        "loading",
+        "Operator admin is still assembling its first page state",
+        "The page is waiting for the governed roster call before it can safely route you into task work.",
+        [
+          "Wait for the roster to load before deciding whether onboarding or inventory review is the next task.",
+          "If the loading state persists, refresh once and then switch to the runbook-guided recovery path.",
+        ],
+        baseHelpLinks(),
+        baseDetail,
+      );
+    }
+    if (validationIssues.length) {
+      return buildCanonicalPageState(
+        "validation_error",
+        "One or more forms still need valid input",
+        "The page can continue, but at least one governed form is blocked by validation feedback.",
+        [
+          "Resolve the highlighted fields in the named forms before resubmitting.",
+          "If you are unsure about the required values, use the linked runbooks or guided tours instead of guessing.",
+        ],
+        baseHelpLinks({ label: "Operator onboarding runbook", href: RUNBOOK_URLS.operatorOnboarding }),
+        `Affected form states: ${validationIssues.join(", ")}. ${baseDetail}`,
+      );
+    }
+    if (!operators.length) {
+      return buildCanonicalPageState(
+        "empty",
+        "The page is ready, but the roster is empty",
+        "This is a valid page state: the UI loaded successfully, yet there are no governed operators to work with.",
+        [
+          "Use the onboarding flow if you are intentionally creating the first operator.",
+          "If this is unexpected, confirm the merged roster source before applying live changes.",
+        ],
+        baseHelpLinks({ label: "Operator onboarding runbook", href: RUNBOOK_URLS.operatorOnboarding }),
+        baseDetail,
+      );
+    }
+    if (actionLoading || rosterQuery.isFetching || inventoryQuery.isFetching) {
+      return buildCanonicalPageState(
+        "background_refresh",
+        "The page is refreshing while keeping current context visible",
+        "At least one governed query or mutation is still in flight, but the current surface remains usable.",
+        [
+          "Continue with read-only review while the refresh settles, then verify the Latest Result and Inventory panels.",
+          "Avoid duplicate retries until the current action or refresh finishes.",
+        ],
+        baseHelpLinks(),
+        baseDetail,
+      );
+    }
+    if (
+      rosterState.kind === "partial_or_degraded" ||
+      inventoryState.kind === "partial_or_degraded" ||
+      resultState.kind === "system_error" ||
+      resultState.kind === "unauthorized" ||
+      resultState.kind === "not_found" ||
+      resultState.kind === "validation_error"
+    ) {
+      return buildCanonicalPageState(
+        "partial_or_degraded",
+        "The page is usable, but one or more task surfaces need recovery guidance",
+        "A lower panel has richer detail about the current issue, so you can keep context without losing your place in the flow.",
+        [
+          "Follow the next-best-action guidance on the affected panel before running a new mutation.",
+          "Use the structured Latest Result payload as the handoff record if you need another operator to continue safely.",
+        ],
+        baseHelpLinks(),
+        baseDetail,
+      );
+    }
+    return buildCanonicalPageState(
+      "success",
+      "The page is in a healthy guided-working state",
+      "Roster, forms, notes, and inventory are aligned so you can move through the intended task flow without losing context.",
+      [
+        "Start from the roster, act through the governed form or notes workflow, and finish by checking Latest Result and Selected Operator Inventory.",
+        "Use Guided Onboarding when the task is infrequent, risky, or likely to need a handoff.",
+      ],
+      baseHelpLinks(),
+      baseDetail,
+    );
+  }, [
+    actionLoading,
+    inventoryQuery.isFetching,
+    inventoryState.kind,
+    operators.length,
+    resultState.kind,
+    rosterQuery.isFetching,
+    rosterQuery.isPending,
+    rosterState.kind,
+    validationIssues,
+  ]);
 
   return (
     <div className="shell">
@@ -1082,6 +1814,8 @@ function App() {
         </p>
       </section>
 
+      <StateGuidanceCard state={pageState} eyebrow="ADR 0315 Page Guidance" />
+
       <div className="layout">
         <div className="mainColumn">
           <section className="panel" data-tour-target="roster-panel">
@@ -1105,6 +1839,8 @@ function App() {
               <span className={`pill ${rosterFeedback.toneClass}`}>{rosterFeedback.label}</span>
               <span className="statusMeta">{rosterFeedback.detail}</span>
             </div>
+
+            {rosterState.kind !== "success" ? <StateGuidanceCard state={rosterState} compact eyebrow="Roster State" /> : null}
 
             {rosterQuery.error ? <div className="banner bannerError">{getErrorMessage(rosterQuery.error)}</div> : null}
             {!rosterQuery.error ? (
@@ -1216,6 +1952,8 @@ function App() {
               </div>
             </div>
 
+            <StateGuidanceCard state={notesState} compact eyebrow="Rich Notes State" />
+
             {selectedOperator ? (
               <>
                 <div className="inventoryMeta noteMeta">
@@ -1298,12 +2036,7 @@ function App() {
                   </span>
                 </div>
               </>
-            ) : (
-              <div className="emptyState">
-                <h3>Select an operator</h3>
-                <p>Choose one roster entry to open the bounded rich-content editor for that operator.</p>
-              </div>
-            )}
+            ) : null}
           </section>
         </div>
 
@@ -1323,6 +2056,8 @@ function App() {
                   submitCount={onboardForm.formState.submitCount}
                   errorCount={onboardErrorCount}
                   idleMessage="Schema validation mirrors the governed onboarding payload."
+                  helpHref={RUNBOOK_URLS.operatorOnboarding}
+                  helpLabel="Open operator onboarding runbook"
                 />
                 <div className="formGrid">
                   <FieldShell
@@ -1482,6 +2217,8 @@ function App() {
                   submitCount={offboardForm.formState.submitCount}
                   errorCount={offboardErrorCount}
                   idleMessage="Schema validation keeps the off-boarding payload aligned with the backend."
+                  helpHref={RUNBOOK_URLS.operatorOffboarding}
+                  helpLabel="Open operator off-boarding runbook"
                 />
                 <div className="formGrid">
                   <FieldShell
@@ -1566,6 +2303,8 @@ function App() {
                   submitCount={syncForm.formState.submitCount}
                   errorCount={syncErrorCount}
                   idleMessage="Schema validation keeps reconciliation scope explicit before submit."
+                  helpHref={RUNBOOK_URLS.operatorAdmin}
+                  helpLabel="Open operator admin runbook"
                 />
                 <div className="formGrid">
                   <FieldShell
@@ -1610,6 +2349,7 @@ function App() {
                 <p>{actionResult.title}</p>
               </div>
             </div>
+            <StateGuidanceCard state={resultState} compact eyebrow="Latest Result State" />
             <pre>{actionResultPreview}</pre>
           </section>
 
@@ -1633,6 +2373,7 @@ function App() {
               <span className={`pill ${inventoryFeedback.toneClass}`}>{inventoryFeedback.label}</span>
               <span className="statusMeta">{inventoryFeedback.detail}</span>
             </div>
+            {inventoryState.kind !== "success" ? <StateGuidanceCard state={inventoryState} compact eyebrow="Inventory State" /> : null}
             {selectedOperator ? (
               <div className="inventoryMeta">
                 <span className="pill pillRole">{selectedOperator.name}</span>
