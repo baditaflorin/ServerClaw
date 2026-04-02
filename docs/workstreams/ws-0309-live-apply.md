@@ -72,6 +72,24 @@ and `Recover` instead of relying on product-first launcher taxonomy alone.
   `ops_portal` changes from later ADRs, so the next critical step is to refresh
   this workstream onto that newer mainline before final validation and live
   apply
+- the workstream has now been rebased onto `5f93f0cf809ffcc755a41be2678e76350933ed37`,
+  and the latest-main branch tree passes:
+  `33` focused portal tests, `python3 scripts/validate_repository_data_models.py --validate`,
+  `python3 scripts/generate_ops_portal.py --check`, `make syntax-check-ops-portal`,
+  and `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-portals`
+
+## Branch-Local Replay Status
+
+- the first isolated-worktree production replay attempt is preserved in
+  `receipts/live-applies/evidence/2026-04-02-ws-0309-branch-live-apply.txt`
+- preflight succeeded and regenerated the required portal artifacts, but the
+  governed wrapper then stopped at `make check-canonical-truth` because
+  `workstreams.yaml` changed and the generated top-level `README.md` summary was
+  therefore stale
+- per the workstream rules, that README refresh is an integration-only surface
+  and should land only in the final exact-main step, so the actual production
+  replay continues in the dedicated latest-main integration worktree rather than
+  by force-writing protected truth onto this branch
 
 ## Verification Plan
 
