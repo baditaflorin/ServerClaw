@@ -125,6 +125,8 @@ RESTORE_READINESS_PROFILE_PATH = repo_path("config", "restore-readiness-profiles
 RESTORE_READINESS_PROFILE_SCHEMA_PATH = repo_path("docs", "schema", "restore-readiness-profiles.schema.json")
 PERSONA_CATALOG_PATH = repo_path("config", "persona-catalog.json")
 PERSONA_CATALOG_SCHEMA_PATH = repo_path("docs", "schema", "persona-catalog.schema.json")
+ACTIVATION_CHECKLIST_PATH = repo_path("config", "activation-checklist.json")
+ACTIVATION_CHECKLIST_SCHEMA_PATH = repo_path("docs", "schema", "activation-checklist.schema.json")
 REPO_DEPLOY_CATALOG_PATH = repo_path("config", "repo-deploy-catalog.json")
 REPO_DEPLOY_CATALOG_SCHEMA_PATH = repo_path("docs", "schema", "repo-deploy-catalog.schema.json")
 REPLACEABILITY_REVIEW_CATALOG_PATH = repo_path("config", "replaceability-review-catalog.json")
@@ -174,6 +176,9 @@ IDENTITY_REQUIRED_METADATA = {
     "credential_storage",
 }
 LAUNCHER_PURPOSES = {"operate", "observe", "learn", "plan", "administer"}
+ACTIVATION_LINK_TYPES = {"docs", "portal_anchor", "service", "url"}
+ACTIVATION_SERVICE_ACTIONS = {"deploy", "restart", "rotate_secret"}
+ACTIVATION_RUNBOOK_EXECUTION_CLASSES = {"diagnostic", "mutation", "workflow"}
 
 
 def require_str_int_mapping(value: Any, path: str) -> dict[str, int]:
@@ -2735,6 +2740,106 @@ def validate_persona_catalog() -> None:
         raise ValueError("config/persona-catalog.json must declare exactly one default persona")
 
 
+def validate_activation_checklist_catalog() -> None:
+    payload = load_json(ACTIVATION_CHECKLIST_PATH)
+    schema = load_json(ACTIVATION_CHECKLIST_SCHEMA_PATH)
+    jsonschema.validate(instance=payload, schema=schema)
+
+    stages = require_list(payload.get("stages"), "config/activation-checklist.json.stages")
+    service_catalog = load_json(SERVICE_CAPABILITY_CATALOG_PATH)
+    services = require_list(service_catalog.get("services"), "config/service-capability-catalog.json.services")
+    service_ids = {
+        require_identifier(service.get("id"), f"config/service-capability-catalog.json.services[{index}].id")
+        for index, service in enumerate(services)
+        for service in [require_mapping(service, f"config/service-capability-catalog.json.services[{index}]")]
+    }
+
+    seen_stage_ids: set[str] = set()
+    seen_item_ids: set[str] = set()
+    for stage_index, stage in enumerate(stages):
+        stage_path = f"config/activation-checklist.json.stages[{stage_index}]"
+        stage = require_mapping(stage, stage_path)
+        stage_id = require_identifier(stage.get("id"), f"{stage_path}.id")
+        if stage_id in seen_stage_ids:
+            raise ValueError(f"{stage_path}.id duplicates '{stage_id}'")
+        seen_stage_ids.add(stage_id)
+        require_str(stage.get("title"), f"{stage_path}.title")
+        require_str(stage.get("description"), f"{stage_path}.description")
+        items = require_list(stage.get("items"), f"{stage_path}.items")
+        for item_index, item in enumerate(items):
+            item_path = f"{stage_path}.items[{item_index}]"
+            item = require_mapping(item, item_path)
+            item_id = require_identifier(item.get("id"), f"{item_path}.id")
+            if item_id in seen_item_ids:
+                raise ValueError(f"{item_path}.id duplicates '{item_id}'")
+            seen_item_ids.add(item_id)
+            require_str(item.get("title"), f"{item_path}.title")
+            require_str(item.get("description"), f"{item_path}.description")
+            links = require_list(item.get("links"), f"{item_path}.links")
+            if not links:
+                raise ValueError(f"{item_path}.links must contain at least one link")
+            for link_index, link in enumerate(links):
+                link_path = f"{item_path}.links[{link_index}]"
+                link = require_mapping(link, link_path)
+                require_str(link.get("label"), f"{link_path}.label")
+                link_type = require_str(link.get("type"), f"{link_path}.type")
+                if link_type not in ACTIVATION_LINK_TYPES:
+                    raise ValueError(f"{link_path}.type contains unsupported value '{link_type}'")
+                link_value = require_str(link.get("value"), f"{link_path}.value")
+                if link_type == "service":
+                    service_id = require_identifier(link_value, f"{link_path}.value")
+                    if service_id not in service_ids:
+                        raise ValueError(f"{link_path}.value references unknown service '{service_id}'")
+                elif link_type == "portal_anchor":
+                    require_identifier(link_value, f"{link_path}.value")
+
+    progressive_reveal = require_mapping(
+        payload.get("progressive_reveal"),
+        "config/activation-checklist.json.progressive_reveal",
+    )
+    advanced_stage_id = require_identifier(
+        progressive_reveal.get("advanced_stage_id"),
+        "config/activation-checklist.json.progressive_reveal.advanced_stage_id",
+    )
+    if advanced_stage_id not in seen_stage_ids:
+        raise ValueError(
+            "config/activation-checklist.json.progressive_reveal.advanced_stage_id must reference a declared stage"
+        )
+
+    required_stage_ids = require_string_list(
+        progressive_reveal.get("required_stage_ids"),
+        "config/activation-checklist.json.progressive_reveal.required_stage_ids",
+    )
+    for stage_id in required_stage_ids:
+        if stage_id not in seen_stage_ids:
+            raise ValueError(
+                "config/activation-checklist.json.progressive_reveal.required_stage_ids must reference declared stages"
+            )
+
+    for purpose in require_string_list(
+        progressive_reveal.get("locked_launcher_purposes"),
+        "config/activation-checklist.json.progressive_reveal.locked_launcher_purposes",
+    ):
+        if purpose not in LAUNCHER_PURPOSES:
+            raise ValueError(f"unsupported launcher purpose in activation checklist: '{purpose}'")
+
+    for action in require_string_list(
+        progressive_reveal.get("locked_service_actions"),
+        "config/activation-checklist.json.progressive_reveal.locked_service_actions",
+    ):
+        if action not in ACTIVATION_SERVICE_ACTIONS:
+            raise ValueError(f"unsupported service action in activation checklist: '{action}'")
+
+    for execution_class in require_string_list(
+        progressive_reveal.get("locked_runbook_execution_classes"),
+        "config/activation-checklist.json.progressive_reveal.locked_runbook_execution_classes",
+    ):
+        if execution_class not in ACTIVATION_RUNBOOK_EXECUTION_CLASSES:
+            raise ValueError(
+                f"unsupported runbook execution class in activation checklist: '{execution_class}'"
+            )
+
+
 def validate_runtime_assurance_matrix_data() -> None:
     payload = load_runtime_assurance_catalog()
     validate_runtime_assurance_catalog(payload, schema_path=RUNTIME_ASSURANCE_SCHEMA_PATH)
@@ -2829,6 +2934,7 @@ def validate_repository_data_models() -> int:
     validate_capacity_model_schema()
     validate_capacity_model()
     validate_persona_catalog()
+    validate_activation_checklist_catalog()
     validate_runtime_assurance_matrix_data()
     validate_repo_deploy_catalog_data()
     validate_preview_environment_profiles()

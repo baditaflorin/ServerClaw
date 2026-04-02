@@ -73,3 +73,12 @@ def test_ops_portal_runtime_retries_local_health_and_root_checks() -> None:
     assert root_task["until"] == "ops_portal_verify_root.status == 200"
     assert root_task["ansible.builtin.uri"]["return_content"] is True
     assert "'Contextual Help' in ops_portal_verify_root.content" in root_assert["ansible.builtin.assert"]["that"]
+
+
+def test_ops_portal_runtime_syncs_activation_catalog_and_partial() -> None:
+    defaults = (ROLE_TASKS_PATH.parent / "defaults" / "main.yml").read_text()
+    verify = (ROLE_TASKS_PATH / "verify.yml").read_text()
+
+    assert "config/activation-checklist.json" in defaults
+    assert "scripts/ops_portal/templates/partials/activation.html" in defaults
+    assert "Verify the activation checklist partial renders locally" in verify

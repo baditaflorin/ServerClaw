@@ -111,7 +111,7 @@ That covers both sides of the portal contract:
 For the launcher-specific runtime behavior, also run the focused tests:
 
 ```bash
-uv run --with pytest --with pyyaml --with jsonschema --with fastapi==0.116.1 --with httpx==0.28.1 --with cryptography==45.0.6 --with PyJWT==2.10.1 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest tests/test_interactive_ops_portal.py tests/test_ops_portal.py -q
+uv run --with pytest --with pyyaml --with jsonschema --with fastapi==0.116.1 --with httpx==0.28.1 --with cryptography==45.0.6 --with PyJWT==2.10.1 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest tests/test_interactive_ops_portal.py tests/test_ops_portal_runtime_role.py tests/test_ops_portal_playbook.py tests/test_ops_portal.py -q
 ```
 
 For a direct local HTML assertion on the built snapshot:
@@ -253,6 +253,48 @@ The safest live verification path is:
 A failed live replay that serves `/health` but returns `404` for
 `/partials/launcher` indicates sync drift or a clobbered guest-side portal tree,
 not a healthy launcher rollout.
+
+## First-Run Activation Checklist
+
+ADR 0310 adds the first-run activation panel directly to the interactive ops
+portal instead of creating a separate onboarding shell.
+
+Checklist inputs come from repo-managed data:
+
+- `config/activation-checklist.json`
+- `docs/schema/activation-checklist.schema.json`
+
+Portal behavior:
+
+- the checklist renders at `https://ops.lv3.org#activation`
+- item progress is persisted in the signed browser session so normal refreshes
+  and redirects keep the current first-run state
+- launcher entries with purpose `administer` stay out of the active destination
+  set until the required checklist stages are complete or advanced tools are
+  explicitly revealed for the session
+- mutating service actions (`deploy`, `restart`, `rotate-secret`) and mutating
+  runbooks fail closed server-side under the same activation state
+
+Operator flow:
+
+1. Open `https://ops.lv3.org` and start at the **First-Run Activation** panel.
+2. Mark the required items complete as you review the linked runbooks and portal
+   panels.
+3. Use `Validation Gate Status` as the safe first task inside the runbook
+   launcher.
+4. Only use **Reveal advanced tools for this session** when you need a
+   supervised bypass before the required stages are complete.
+
+Expected verification path:
+
+1. `GET /partials/activation` returns `200` and renders `First-Run Activation`
+2. before activation completes, `/partials/launcher` shows the locked-state copy
+   and `GET /launcher/go/service:keycloak` redirects to `/#activation`
+3. before activation completes, `/partials/overview` renders disabled deploy,
+   restart, and rotate-secret controls
+4. after the required items are completed or the supervised reveal path is
+   triggered, `/partials/launcher` exposes admin destinations and mutating
+   actions no longer render as locked
 
 ## Structured Runbook Launcher
 

@@ -37,6 +37,14 @@
   </div>
   <p class="muted launcher-persona-copy">{{ launcher.selected_persona.description }}</p>
 
+  {% if not launcher.advanced_unlocked %}
+  <div class="shell-state shell-state--warning">
+    <span class="shell-state__eyebrow">Guided reveal</span>
+    <strong>Advanced destinations stay gated during first run.</strong>
+    <span>Complete the activation checklist or use the supervised reveal control before opening admin surfaces such as Keycloak.</span>
+  </div>
+  {% endif %}
+
   {% if launcher.favorites %}
   <section class="launcher-section">
     <div class="launcher-section-head">
@@ -144,6 +152,35 @@
     </div>
   </section>
   {% endfor %}
+
+  {% if launcher.locked_entries %}
+  <section class="launcher-section">
+    <div class="launcher-section-head">
+      <h3>Locked Until Activation Completes</h3>
+      <span class="pill">{{ launcher.locked_entries|length }}</span>
+    </div>
+    <div class="launcher-entry-grid">
+      {% for entry in launcher.locked_entries %}
+      <article class="launcher-entry launcher-entry--locked">
+        <div class="launcher-entry-copy">
+          <strong class="launcher-entry-link launcher-entry-link--disabled">{{ entry.name }}</strong>
+          <p class="muted">{{ entry.description }}</p>
+          {% if entry.summary_line %}
+          <p class="launcher-summary">{{ entry.summary_line }}</p>
+          {% endif %}
+          <div class="launcher-badges">
+            <span class="launcher-badge highlighted">{{ entry.purpose_label }}</span>
+            {% for badge in entry.badges %}
+            <span class="launcher-badge">{{ badge }}</span>
+            {% endfor %}
+          </div>
+          <p class="muted">Complete the activation checklist or reveal advanced tools for this session to open this destination.</p>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
 
   {% if launcher.match_count == 0 %}
   <div class="launcher-empty">

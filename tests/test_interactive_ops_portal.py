@@ -20,6 +20,17 @@ from scripts.ops_portal.app import (
     normalize_health,
 )
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+REQUIRED_ACTIVATION_ITEM_IDS = [
+    "confirm_portal_login",
+    "review_operator_onboarding",
+    "review_portal_runbook",
+    "inspect_runtime_assurance",
+    "run_validation_gate_status",
+    "review_drift_panel",
+    "review_recent_changes",
+]
+
 
 def test_ops_portal_package_import_works_in_container_layout() -> None:
     repo_root = Path(__file__).resolve().parents[1]
@@ -256,6 +267,14 @@ class FakeGatewayClient:
                     "owner_runbook": "docs/runbooks/validation-gate-status.yaml",
                     "live_impact": "repo_only",
                     "execution_class": "diagnostic",
+                },
+                {
+                    "id": "converge-ops-portal",
+                    "title": "Converge the ops portal runtime",
+                    "description": "Replay the governed ops-portal service converge against the live runtime.",
+                    "owner_runbook": "docs/runbooks/platform-operations-portal.md",
+                    "live_impact": "guest_live",
+                    "execution_class": "mutation",
                 }
             ]
         }
@@ -299,6 +318,10 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
     (data_root / "config").mkdir(parents=True)
     (data_root / "receipts" / "live-applies").mkdir(parents=True)
     (data_root / "receipts" / "drift-reports").mkdir(parents=True)
+    (data_root / "config" / "activation-checklist.json").write_text(
+        (REPO_ROOT / "config" / "activation-checklist.json").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
 
     (data_root / "config" / "service-capability-catalog.json").write_text(
         json.dumps(
@@ -670,6 +693,17 @@ def portal_client(portal_runtime: tuple[TestClient, FakeGatewayClient, Path]) ->
     return client, gateway
 
 
+def complete_required_activation(client: TestClient) -> None:
+    for item_id in REQUIRED_ACTIVATION_ITEM_IDS:
+        response = client.post(f"/actions/activation/items/{item_id}", data={"status": "completed"})
+        assert response.status_code == 200
+
+
+def reveal_advanced_tools(client: TestClient) -> None:
+    response = client.post("/actions/activation/override", data={"enabled": "true"})
+    assert response.status_code == 200
+
+
 def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
     client, gateway = portal_client
 
@@ -684,6 +718,8 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Contextual Help" in response.text
     assert "Escalation Path" in response.text
     assert "Live apply" in response.text
+    assert "First-Run Activation" in response.text
+    assert "Advanced tools locked" in response.text
     assert "Platform Overview" in response.text
     assert "Runtime Assurance" in response.text
     assert "Scoreboard and rollup by active service and environment" in response.text
@@ -697,6 +733,7 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Runbook Launcher" in response.text
     assert "Application Launcher" in response.text
     assert "Validation Gate Status" in response.text
+    assert "Advanced runbooks remain locked" in response.text
     assert "Drift Status" in response.text
     assert "Recent Live Applies" in response.text
     assert "shared-edge / platform-sso" in response.text
@@ -841,19 +878,31 @@ def test_build_live_apply_timeline_chart_tracks_receipt_and_service_counts() -> 
     assert option["series"][1]["data"] == [0, 2, 1]
 
 
+def test_activation_partial_renders_locked_by_default(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+
+    response = client.get("/partials/activation")
+
+    assert response.status_code == 200
+    assert "First-Run Activation" in response.text
+    assert "0/7 required items" in response.text
+    assert "Advanced tools locked" in response.text
+    assert "Reveal advanced tools for this session" in response.text
+
+
 def test_launcher_favorite_toggle_adds_favorites_copy(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
     client, _gateway = portal_client
 
     baseline = client.get("/partials/launcher")
     assert baseline.status_code == 200
-    assert baseline.text.count("Add Keycloak to favorites") == 1
+    assert baseline.text.count("Add Drift Status to favorites") == 1
 
-    response = client.post("/actions/launcher/favorites/service:keycloak", data={"query": ""})
+    response = client.post("/actions/launcher/favorites/workflow:continuous-drift-detection", data={"query": ""})
 
     assert response.status_code == 200
-    assert response.text.count("Remove Keycloak from favorites") == 2
+    assert response.text.count("Remove Drift Status from favorites") == 2
     refreshed = client.get("/partials/launcher")
-    assert refreshed.text.count("Remove Keycloak from favorites") == 2
+    assert refreshed.text.count("Remove Drift Status from favorites") == 2
 
 
 def test_launcher_redirect_records_recent_destination(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -862,14 +911,14 @@ def test_launcher_redirect_records_recent_destination(portal_client: tuple[TestC
     before = client.get("/partials/launcher")
     assert "Recent Destinations" not in before.text
 
-    redirect = client.get("/launcher/go/service:keycloak", follow_redirects=False)
+    redirect = client.get("/launcher/go/workflow:continuous-drift-detection", follow_redirects=False)
 
     assert redirect.status_code == 303
-    assert redirect.headers["location"] == "https://sso.lv3.org"
+    assert redirect.headers["location"] == "/#drift"
 
     after = client.get("/partials/launcher")
     assert "Recent Destinations" in after.text
-    assert after.text.count("Add Keycloak to favorites") == 2
+    assert after.text.count("Add Drift Status to favorites") == 2
 
 
 def test_launcher_persona_switch_updates_selection(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -879,6 +928,7 @@ def test_launcher_persona_switch_updates_selection(portal_client: tuple[TestClie
 
     assert response.status_code == 200
     assert "Identity and platform administration." in response.text
+    assert "Locked Until Activation Completes" in response.text
     assert "Converge Ops Portal" in response.text
 
 
@@ -889,7 +939,92 @@ def test_launcher_search_filters_results(portal_client: tuple[TestClient, FakeGa
 
     assert response.status_code == 200
     assert "Drift Status" in response.text
-    assert "Keycloak" not in response.text
+    assert 'href="/launcher/go/service:keycloak"' not in response.text
+
+
+def test_locked_launcher_redirects_back_to_activation(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+
+    redirect = client.get("/launcher/go/service:keycloak", follow_redirects=False)
+
+    assert redirect.status_code == 303
+    assert redirect.headers["location"] == "/#activation"
+
+
+def test_required_activation_completion_reveals_admin_destinations(
+    portal_client: tuple[TestClient, FakeGatewayClient],
+) -> None:
+    client, _gateway = portal_client
+
+    complete_required_activation(client)
+    launcher = client.get("/partials/launcher")
+
+    assert launcher.status_code == 200
+    assert "Advanced destinations stay gated during first run." not in launcher.text
+    assert "Locked Until Activation Completes" not in launcher.text
+    assert 'href="/launcher/go/service:keycloak"' in launcher.text
+
+
+def test_mutating_surfaces_are_blocked_until_activation_completes(
+    portal_client: tuple[TestClient, FakeGatewayClient],
+) -> None:
+    client, gateway = portal_client
+
+    overview = client.get("/partials/overview")
+    runbooks = client.get("/partials/runbooks")
+    deploy = client.post("/actions/services/grafana/deploy")
+    rotate = client.post("/actions/services/grafana/rotate-secret")
+    runbook = client.post("/actions/runbooks/converge-ops-portal", data={"parameters": "{}"})
+
+    assert overview.status_code == 200
+    assert "Mutating service actions are gated" in overview.text
+    assert 'disabled title="Complete the activation checklist or reveal advanced tools for this session before deploying."' in overview.text
+    assert runbooks.status_code == 200
+    assert "Advanced runbooks remain locked" in runbooks.text
+    assert "converge-ops-portal" in runbooks.text
+    assert deploy.status_code == 200
+    assert "Complete the activation checklist or explicitly reveal advanced tools for this session before launching mutating service actions." in deploy.text
+    assert rotate.status_code == 200
+    assert "Complete the activation checklist or explicitly reveal advanced tools for this session before rotating production secrets." in rotate.text
+    assert runbook.status_code == 200
+    assert "This mutating runbook stays disabled until the activation checklist is complete or advanced tools are explicitly revealed for the session." in runbook.text
+    assert gateway.deploy_calls == []
+    assert gateway.secret_calls == []
+    assert gateway.runbook_calls == []
+
+
+def test_activation_override_reveals_advanced_tools_for_session(
+    portal_client: tuple[TestClient, FakeGatewayClient],
+) -> None:
+    client, gateway = portal_client
+
+    reveal = client.post("/actions/activation/override", data={"enabled": "true"})
+    launcher = client.get("/partials/launcher")
+    deploy = client.post("/actions/services/grafana/deploy")
+    rotate = client.post("/actions/services/grafana/rotate-secret")
+    runbooks = client.get("/partials/runbooks")
+    launch = client.post("/actions/runbooks/converge-ops-portal", data={"parameters": "{}"})
+
+    assert reveal.status_code == 200
+    assert "Restore guardrails" in reveal.text
+    assert launcher.status_code == 200
+    assert 'href="/launcher/go/service:keycloak"' in launcher.text
+    assert "Locked Until Activation Completes" not in launcher.text
+    assert deploy.status_code == 200
+    assert "Deployment accepted by gateway" in deploy.text
+    assert rotate.status_code == 200
+    assert "Secret rotation accepted by gateway" in rotate.text
+    assert runbooks.status_code == 200
+    assert "Advanced runbooks remain locked" not in runbooks.text
+    assert launch.status_code == 200
+    assert "Runbook completed successfully" in launch.text
+    assert gateway.deploy_calls == [
+        {"service_id": "grafana", "restart_only": False, "source": "portal", "token": "test-token"}
+    ]
+    assert gateway.secret_calls == ["grafana:test-token"]
+    assert gateway.runbook_calls == [
+        {"runbook_id": "converge-ops-portal", "parameters": {}, "token": "test-token"}
+    ]
 
 
 def test_health_check_action_returns_fragment(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -905,6 +1040,7 @@ def test_health_check_action_returns_fragment(portal_client: tuple[TestClient, F
 
 def test_deploy_action_records_gateway_call(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
     client, gateway = portal_client
+    reveal_advanced_tools(client)
 
     response = client.post("/actions/services/grafana/deploy")
 

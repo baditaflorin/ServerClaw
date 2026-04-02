@@ -134,6 +134,10 @@ def test_ops_portal_verify_checks_launcher_and_runtime_assurance_partials() -> N
     assert '/partials/launcher' in verify_tasks
     assert "Application Launcher" in verify_tasks
     assert "Search destinations, pin favorites, and reopen recent paths from one shared masthead control." in verify_tasks
+    assert "Verify the activation checklist partial renders locally" in verify_tasks
+    assert '/partials/activation' in verify_tasks
+    assert "First-Run Activation" in verify_tasks
+    assert "Checklist progress and progressive capability reveal" in verify_tasks
     assert "Verify the runtime assurance matrix partial renders locally" in verify_tasks
     assert '/partials/runtime-assurance' in verify_tasks
     assert "Ops portal runtime assurance matrix partial did not render the ADR 0244 view." in verify_tasks
@@ -141,7 +145,9 @@ def test_ops_portal_verify_checks_launcher_and_runtime_assurance_partials() -> N
     assert "'Runtime assurance data is degraded:' not in ops_portal_verify_runtime_assurance.content" in verify_tasks
 
 
-def test_ops_portal_runtime_file_sources_include_launcher_partial() -> None:
+def test_ops_portal_runtime_file_sources_include_launcher_and_activation_assets() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
 
+    assert "config/activation-checklist.json" in defaults
+    assert "scripts/ops_portal/templates/partials/activation.html" in defaults
     assert "scripts/ops_portal/templates/partials/launcher.html" in defaults
