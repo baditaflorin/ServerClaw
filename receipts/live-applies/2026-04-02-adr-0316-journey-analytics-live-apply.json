@@ -6,7 +6,7 @@
   "recorded_on": "2026-04-02",
   "recorded_at": "2026-04-02T06:22:38Z",
   "recorded_by": "codex",
-  "source_commit": "675f336755b3a444670ff9e03535b81d5697bbd0",
+  "source_commit": "c2d53107c441d605ecfbb22872565b67ec7f103d",
   "repo_version_context": "0.177.140",
   "platform_version_context": "0.130.88",
   "workflow_id": "adr-0316-journey-analytics-live-apply",
