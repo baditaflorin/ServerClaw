@@ -1,12 +1,12 @@
-# Release 0.177.139
+# Release 0.177.140
 
 - Date: 2026-04-02
 
 ## Summary
-- implements ADR 0313 by adding a shared contextual-help, glossary, and escalation drawer across the interactive ops portal plus the generated docs and changelog portals, while preserving the runtime receipt-sync and docker-guest recovery hardening uncovered during the refreshed exact-main replay
+- implements ADR 0315 by standardizing the live operator admin surface on a reusable canonical state model that explains loading, empty, degraded, validation, system-error, unauthorized, not-found, and success outcomes with explicit next-best actions and linked recovery guidance
 
 ## Platform Impact
-- platform version advances to 0.130.87 after the refreshed exact-main ADR 0313 replay re-verifies the shared contextual-help, glossary, and escalation drawer across ops.lv3.org, docs.lv3.org, and changelog.lv3.org on top of the 0.130.86 baseline plus the newer ADR 0308 and bridge-chain hardening already merged to origin/main
+- platform version advances to 0.130.88 after the exact-main ADR 0315 replay re-verifies the governed Windmill operator admin surface and next-best-action guidance on top of the 0.130.87 baseline
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

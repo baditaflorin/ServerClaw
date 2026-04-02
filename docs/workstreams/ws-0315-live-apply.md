@@ -3,13 +3,13 @@
 - ADR: [ADR 0315](../adr/0315-canonical-page-states-and-next-best-action-guidance-for-human-surfaces.md)
 - Title: Live apply canonical page states and next-best-action guidance on the Windmill operator admin surface
 - Status: live_applied
-- Included In Repo Version: not yet
+- Included In Repo Version: 0.177.140
 - Branch-Local Receipt: `receipts/live-applies/2026-04-02-adr-0315-canonical-page-states-live-apply.json`
-- Canonical Mainline Receipt: pending exact-main integration
+- Canonical Mainline Receipt: `receipts/live-applies/2026-04-02-adr-0315-canonical-page-states-mainline-live-apply.json`
 - Branch-Local Replay Source Commit: `cbb0c99f3f69c3ab2bb7658daf443c45df9ea49b`
 - Branch-Local Replay Repo Version: `0.177.135`
 - Branch-Local Replay Platform Version: `0.130.85`
-- Live Applied In Platform Version: 0.130.87
+- Live Applied In Platform Version: 0.130.88
 - Implemented On: 2026-04-02
 - Live Applied On: 2026-04-02
 - Exact-Main Replay Baseline: repo `0.177.139`, platform `0.130.87`
@@ -18,7 +18,7 @@
 - Owner: codex
 - Depends On: `adr-0122-windmill-operator-access-admin`, `adr-0234-shared-human-app-shell-and-navigation-via-patternfly`, `adr-0236-server-state-and-mutation-feedback-via-tanstack-query`, `adr-0242-guided-human-onboarding-via-shepherd-tours`, `adr-0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core`, `adr-0313-contextual-help-glossary-and-escalation-drawer`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `build/platform-manifest.json`, `docs/workstreams/ws-0315-live-apply.md`, `docs/adr/0315-canonical-page-states-and-next-best-action-guidance-for-human-surfaces.md`, `docs/adr/.index.yaml`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/runbooks/windmill-operator-access-admin.md`, `docs/runbooks/validate-repository-automation.md`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/App.tsx`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.css`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/package.json`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/package-lock.json`, `config/windmill/scripts/gate-status.py`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml`, `scripts/gate_status.py`, `tests/test_windmill_operator_admin_app.py`, `receipts/live-applies/2026-04-02-adr-0315-canonical-page-states-live-apply.json`, `receipts/live-applies/evidence/2026-04-02-ws-0315-live-apply-*`, `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`
+- Shared Surfaces: `workstreams.yaml`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `docs/workstreams/ws-0315-live-apply.md`, `docs/adr/0315-canonical-page-states-and-next-best-action-guidance-for-human-surfaces.md`, `docs/adr/.index.yaml`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/release-notes/README.md`, `docs/release-notes/0.177.140.md`, `docs/runbooks/windmill-operator-access-admin.md`, `docs/runbooks/validate-repository-automation.md`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/App.tsx`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.css`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/package.json`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/package-lock.json`, `config/windmill/scripts/gate-status.py`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml`, `scripts/gate_status.py`, `tests/test_windmill_operator_admin_app.py`, `receipts/live-applies/2026-04-02-adr-0315-canonical-page-states-live-apply.json`, `receipts/live-applies/2026-04-02-adr-0315-canonical-page-states-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-04-02-ws-0315-*`, `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`
 
 ## Purpose
 
@@ -50,11 +50,18 @@ leave exact evidence for the later mainline replay from the newest realistic
 ## Expected Repo Surfaces
 
 - `workstreams.yaml`
+- `README.md`
+- `RELEASE.md`
+- `VERSION`
+- `changelog.md`
+- `versions/stack.yaml`
 - `build/platform-manifest.json`
 - `docs/workstreams/ws-0315-live-apply.md`
 - `docs/adr/0315-canonical-page-states-and-next-best-action-guidance-for-human-surfaces.md`
 - `docs/adr/.index.yaml`
 - `docs/diagrams/agent-coordination-map.excalidraw`
+- `docs/release-notes/README.md`
+- `docs/release-notes/0.177.140.md`
 - `docs/runbooks/windmill-operator-access-admin.md`
 - `docs/runbooks/validate-repository-automation.md`
 - `config/windmill/apps/f/lv3/operator_access_admin.raw_app/App.tsx`
@@ -66,7 +73,8 @@ leave exact evidence for the later mainline replay from the newest realistic
 - `scripts/gate_status.py`
 - `tests/test_windmill_operator_admin_app.py`
 - `receipts/live-applies/2026-04-02-adr-0315-canonical-page-states-live-apply.json`
-- `receipts/live-applies/evidence/2026-04-02-ws-0315-live-apply-*`
+- `receipts/live-applies/2026-04-02-adr-0315-canonical-page-states-mainline-live-apply.json`
+- `receipts/live-applies/evidence/2026-04-02-ws-0315-*`
 - `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`
 
 ## Expected Live Surfaces
@@ -123,6 +131,58 @@ leave exact evidence for the later mainline replay from the newest realistic
   now shows the only remaining branch-local generated-docs blocker is the
   protected `README.md` update that belongs to the exact-main integration step.
 
+## Exact-Main Verification
+
+- `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-release-status.txt`,
+  `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-release-dry-run.txt`,
+  `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-release-write.txt`,
+  and `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-release-write-r2.txt`
+  capture the refreshed exact-main release cut on top of repository version
+  `0.177.139`. The first write prepared repository version `0.177.140` before a
+  post-write Outline sync `502`; the second write truthfully shows there were
+  no remaining `## Unreleased` bullets because the release surfaces had already
+  been cut.
+- `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-converge-windmill-r1.txt`
+  captured the exact-main governed replay with final recap
+  `docker-runtime-lv3 : ok=327 changed=46 unreachable=0 failed=0 skipped=84`,
+  `postgres-lv3 : ok=93 changed=2 unreachable=0 failed=0 skipped=28`, and
+  `proxmox_florin : ok=41 changed=4 unreachable=0 failed=0 skipped=16`.
+- `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-targeted-tests-r1.txt`
+  shows `29 passed in 4.51s` for
+  `tests/test_validation_gate.py`,
+  `tests/test_validation_gate_windmill.py`, and
+  `tests/test_windmill_operator_admin_app.py` from the integrated release tree.
+- `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-raw-app-tsc-r1.txt`
+  and `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-syntax-check-windmill-r1.txt`
+  confirm the temporary raw-app checkout passed `npm ci --no-audit --no-fund`
+  plus `npx tsc --noEmit`, and the Windmill playbook syntax lane passed from
+  the exact-main worktree.
+- `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-remote-app-verify-r1.txt`
+  confirms the browser route returned `200`, the deployed `/App.tsx` and
+  `/index.css` digests still match the exact-main worktree byte-for-byte, and
+  the live app continues to expose `Next best action`, `Help and recovery`,
+  `Background Refresh`, `Validation Error`, `System Error`, `Unauthorized`,
+  `Not Found`, `Latest Result`, `windmill-operator-access-admin`, and
+  `validate-repository-automation`.
+- `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-generate-adr-index-r1.txt`,
+  `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-canonical-truth-r1.txt`,
+  `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-platform-manifest-r1.txt`,
+  and `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-generate-diagrams-r1.txt`
+  record the regenerated ADR index, canonical truth, platform manifest, and
+  generated diagram surfaces after the release cut advanced the repository to
+  `0.177.140` and the platform lineage to `0.130.88`.
+- `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-agent-standards-r1.txt`,
+  `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-workstream-surfaces-r1.txt`,
+  `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-validate-data-models-r1.txt`,
+  `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-live-apply-receipts-validate-r1.txt`,
+  `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-validate-r1.txt`,
+  `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-remote-validate-r1.txt`,
+  `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-pre-push-gate-r1.txt`,
+  and `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-git-diff-check-r1.txt`
+  show the full repo automation and validation bundle passed from the exact-main
+  tree, including the local validation suite, remote builder lane, primary
+  branch pre-push gate, receipt/data-model validation, and `git diff --check`.
+
 ## Results
 
 - ADR 0315 is now live on the governed Windmill operator admin app.
@@ -131,17 +191,16 @@ leave exact evidence for the later mainline replay from the newest realistic
 - The branch-local replay also repaired stale validation-wrapper drift inherited
   from the older worktree baseline, so the next exact-main replay starts from a
   cleaner branch than the first live apply did.
+- The protected release surfaces now carry repository version `0.177.140`, and
+  the exact-main replay has already re-verified the governed Windmill surface on
+  the promoted platform lineage.
+- The integrated tree also passed the full repo automation bundle, so the
+  canonical receipt, release surfaces, and generated truth now agree on one
+  merge-ready exact-main state.
 
 ## Mainline Note
 
-The exact-main merge still has to:
-
-- rebase onto the latest realistic `origin/main` baseline
-- update the protected release and canonical-truth surfaces
-  `README.md`, `VERSION`, `changelog.md`, and `versions/stack.yaml`
-- create the canonical mainline ADR 0315 receipt
-- rerun `make validate`, `make remote-validate`, `make pre-push-gate`, and the
-  exact-main live replay from that integrated tree
-
-This branch-local receipt is therefore merge-safe evidence, not the final
-canonical production record.
+The protected release and canonical-truth surfaces now reflect the exact-main
+ADR 0315 replay on `codex/ws-0315-live-apply`, and the full validation bundle
+has passed on that tree. No merge-only repo surfaces remain; the last step is
+the final `origin/main` sync, merge, push, and worktree removal.
