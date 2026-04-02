@@ -16160,8 +16160,8 @@ workstreams:
     status: in_progress
     owner: codex
     branch: codex/ws-0330-runtime-pools-transition
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-runtime-pools-transition
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0330-runtime-pool-transition-program.md
+    worktree_path: .worktrees/ws-0324-runtime-pools-transition
+    doc: docs/workstreams/ws-0330-runtime-pool-transition-program.md
     depends_on:
       - adr-0319-runtime-pools-as-the-service-partition-boundary
       - adr-0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes
