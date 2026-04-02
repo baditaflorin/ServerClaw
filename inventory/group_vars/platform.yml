@@ -605,6 +605,28 @@ platform_guest_catalog:
         anti_affinity_group: runtime-ai
         co_location_exceptions: []
       packages: []
+    - vmid: 191
+      name: runtime-general-lv3
+      role: runtime-general
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.91
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:91
+      cores: 4
+      memory_mb: 12288
+      disk_gb: 128
+      tags:
+        - docker
+        - runtime
+        - general
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-general
+        co_location_exceptions: []
+      packages: []
   by_name:
     nginx-lv3:
       vmid: 110
@@ -863,6 +885,29 @@ platform_guest_catalog:
         anti_affinity_group: runtime-ai
         co_location_exceptions: []
       packages: []
+    runtime-general-lv3:
+      vmid: 191
+      name: runtime-general-lv3
+      role: runtime-general
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.91
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:91
+      cores: 4
+      memory_mb: 12288
+      disk_gb: 128
+      tags:
+        - docker
+        - runtime
+        - general
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-general
+        co_location_exceptions: []
+      packages: []
   by_role:
     nginx:
       vmid: 110
@@ -1119,6 +1164,29 @@ platform_guest_catalog:
         failure_domain: host:proxmox_florin
         placement_class: primary
         anti_affinity_group: runtime-ai
+        co_location_exceptions: []
+      packages: []
+    runtime-general:
+      vmid: 191
+      name: runtime-general-lv3
+      role: runtime-general
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.91
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:91
+      cores: 4
+      memory_mb: 12288
+      disk_gb: 128
+      tags:
+        - docker
+        - runtime
+        - general
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-general
         co_location_exceptions: []
       packages: []
 platform_service_topology:
@@ -1396,8 +1464,8 @@ platform_service_topology:
       public: https://build.lv3.org
   uptime_kuma:
     service_name: uptime-kuma
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     public_hostname: uptime.lv3.org
     exposure_model: edge-published
     observability:
@@ -1414,7 +1482,7 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:3001
+      upstream: http://10.10.10.91:3001
     service_id: uptime_kuma
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/uptime-kuma.yml
@@ -1425,11 +1493,11 @@ platform_service_topology:
       internal: 3001
     urls:
       public: https://uptime.lv3.org
-      internal: http://10.10.10.20:3001
+      internal: http://10.10.10.91:3001
   status_page:
     service_name: status-page
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     public_hostname: status.lv3.org
     exposure_model: edge-published
     observability:
@@ -1446,19 +1514,19 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:3001
+      upstream: http://10.10.10.91:3001
       root_proxy_path: /status/lv3-platform
     service_id: status_page
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/uptime-kuma.yml
     restart_domain: runtime-general-observability
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
-    mobility_tier: movable_singleton
+    mobility_tier: elastic_stateless
     ports:
       internal: 3001
     urls:
       public: https://status.lv3.org
-      internal: http://10.10.10.20:3001
+      internal: http://10.10.10.91:3001
   mail_platform:
     service_name: mail-platform
     owning_vm: docker-runtime-lv3
@@ -1498,8 +1566,8 @@ platform_service_topology:
       private_api: http://10.10.10.20:8081
   mailpit:
     service_name: mailpit
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1514,8 +1582,8 @@ platform_service_topology:
       internal: 8025
       smtp: 1025
     urls:
-      internal: http://10.10.10.20:8025
-      smtp: smtp://10.10.10.20:1025
+      internal: http://10.10.10.91:8025
+      smtp: smtp://10.10.10.91:1025
   livekit:
     service_name: livekit
     owning_vm: docker-runtime-lv3
@@ -2305,7 +2373,7 @@ platform_service_topology:
     deployment_surface: playbooks/services/dozzle.yml
     restart_domain: runtime-general-observability
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
-    mobility_tier: movable_singleton
+    mobility_tier: elastic_stateless
     ports:
       internal: 8089
     urls:
@@ -2844,8 +2912,8 @@ platform_service_topology:
       internal: http://10.10.10.20:8092
   homepage:
     service_name: homepage
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     public_hostname: home.lv3.org
     exposure_model: edge-published
     observability:
@@ -2862,18 +2930,18 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:3090
+      upstream: http://10.10.10.91:3090
     service_id: homepage
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/homepage.yml
     restart_domain: runtime-general-operator-ui
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
-    mobility_tier: movable_singleton
+    mobility_tier: elastic_stateless
     ports:
       internal: 3090
     urls:
       public: https://home.lv3.org
-      internal: http://10.10.10.20:3090
+      internal: http://10.10.10.91:3090
   openbao:
     service_name: openbao
     owning_vm: docker-runtime-lv3
@@ -3696,8 +3764,8 @@ public_edge_service_topology:
       public: https://build.lv3.org
   uptime_kuma:
     service_name: uptime-kuma
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     public_hostname: uptime.lv3.org
     exposure_model: edge-published
     observability:
@@ -3714,7 +3782,7 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:3001
+      upstream: http://10.10.10.91:3001
     service_id: uptime_kuma
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/uptime-kuma.yml
@@ -3725,11 +3793,11 @@ public_edge_service_topology:
       internal: 3001
     urls:
       public: https://uptime.lv3.org
-      internal: http://10.10.10.20:3001
+      internal: http://10.10.10.91:3001
   status_page:
     service_name: status-page
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     public_hostname: status.lv3.org
     exposure_model: edge-published
     observability:
@@ -3746,19 +3814,19 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:3001
+      upstream: http://10.10.10.91:3001
       root_proxy_path: /status/lv3-platform
     service_id: status_page
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/uptime-kuma.yml
     restart_domain: runtime-general-observability
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
-    mobility_tier: movable_singleton
+    mobility_tier: elastic_stateless
     ports:
       internal: 3001
     urls:
       public: https://status.lv3.org
-      internal: http://10.10.10.20:3001
+      internal: http://10.10.10.91:3001
   mail_platform:
     service_name: mail-platform
     owning_vm: docker-runtime-lv3
@@ -3798,8 +3866,8 @@ public_edge_service_topology:
       private_api: http://10.10.10.20:8081
   mailpit:
     service_name: mailpit
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -3814,8 +3882,8 @@ public_edge_service_topology:
       internal: 8025
       smtp: 1025
     urls:
-      internal: http://10.10.10.20:8025
-      smtp: smtp://10.10.10.20:1025
+      internal: http://10.10.10.91:8025
+      smtp: smtp://10.10.10.91:1025
   livekit:
     service_name: livekit
     owning_vm: docker-runtime-lv3
@@ -4605,7 +4673,7 @@ public_edge_service_topology:
     deployment_surface: playbooks/services/dozzle.yml
     restart_domain: runtime-general-observability
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
-    mobility_tier: movable_singleton
+    mobility_tier: elastic_stateless
     ports:
       internal: 8089
     urls:
@@ -5144,8 +5212,8 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8092
   homepage:
     service_name: homepage
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     public_hostname: home.lv3.org
     exposure_model: edge-published
     observability:
@@ -5162,18 +5230,18 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:3090
+      upstream: http://10.10.10.91:3090
     service_id: homepage
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/homepage.yml
     restart_domain: runtime-general-operator-ui
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
-    mobility_tier: movable_singleton
+    mobility_tier: elastic_stateless
     ports:
       internal: 3090
     urls:
       public: https://home.lv3.org
-      internal: http://10.10.10.20:3090
+      internal: http://10.10.10.91:3090
   openbao:
     service_name: openbao
     owning_vm: docker-runtime-lv3
@@ -5484,8 +5552,8 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8105
 uptime_kuma_service_topology:
   service_name: uptime-kuma
-  owning_vm: docker-runtime-lv3
-  private_ip: 10.10.10.20
+  owning_vm: runtime-general-lv3
+  private_ip: 10.10.10.91
   public_hostname: uptime.lv3.org
   exposure_model: edge-published
   observability:
@@ -5502,7 +5570,7 @@ uptime_kuma_service_topology:
     enabled: true
     tls: true
     kind: proxy
-    upstream: http://10.10.10.20:3001
+    upstream: http://10.10.10.91:3001
   service_id: uptime_kuma
   runtime_pool: runtime-general
   deployment_surface: playbooks/services/uptime-kuma.yml
@@ -5513,7 +5581,7 @@ uptime_kuma_service_topology:
     internal: 3001
   urls:
     public: https://uptime.lv3.org
-    internal: http://10.10.10.20:3001
+    internal: http://10.10.10.91:3001
 hetzner_dns_records: *id001
 platform_postgres_host: database.lv3.org
 openbao_postgres_host: 10.10.10.50

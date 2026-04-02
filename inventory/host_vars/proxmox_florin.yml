@@ -520,6 +520,28 @@ proxmox_guests:
       anti_affinity_group: runtime-ai
       co_location_exceptions: []
     packages: []
+  - vmid: 191
+    name: runtime-general-lv3
+    role: runtime-general
+    template_key: lv3-debian-base
+    ipv4: 10.10.10.91
+    cidr: 24
+    gateway4: 10.10.10.1
+    macaddr: BC:24:11:19:0A:91
+    cores: 4
+    memory_mb: 12288
+    disk_gb: 128
+    tags:
+      - docker
+      - runtime
+      - general
+      - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: runtime-general
+      co_location_exceptions: []
+    packages: []
 
 network_policy:
   guest_management_sources:
@@ -1013,6 +1035,62 @@ network_policy:
             - 9080
             - 9998
           description: Private monitoring probes for the runtime-ai pool router and document services
+    runtime-general-lv3:
+      allow_container_forwarding: true
+      allowed_inbound:
+        - source: management
+          protocol: tcp
+          ports:
+            - 22
+          description: Operator and Ansible SSH access
+        - source: host
+          protocol: tcp
+          ports:
+            - 1025
+            - 3001
+            - 3090
+            - 3500
+            - 8025
+            - 9080
+          description: Proxmox host verification and controller-side access to the runtime-general pool substrate and support services
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 1025
+            - 3001
+            - 3090
+            - 3500
+            - 8025
+            - 9080
+          description: Private guest-to-guest access to the runtime-general pool substrate plus the moved observability and operator surfaces
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 1025
+            - 3001
+            - 3090
+            - 3500
+            - 8025
+            - 9080
+          description: Local Docker workloads that call the runtime-general pool substrate or Mailpit interception endpoints
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 1025
+            - 3001
+            - 3090
+            - 3500
+            - 8025
+            - 9080
+          description: Local Docker workloads that call the runtime-general pool substrate or Mailpit interception endpoints
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 3001
+            - 3090
+            - 8025
+            - 9080
+          description: Private monitoring probes for the runtime-general router and moved support services
     monitoring-lv3:
       allowed_inbound:
         - source: management
@@ -1096,6 +1174,11 @@ network_policy:
           ports:
             - 4647
           description: Nomad client RPC from runtime-ai-lv3
+        - source: runtime-general-lv3
+          protocol: tcp
+          ports:
+            - 4647
+          description: Nomad client RPC from runtime-general-lv3
     coolify-lv3:
       allow_container_forwarding: true
       allowed_inbound:
@@ -1576,8 +1659,8 @@ lv3_service_topology:
       meta: Reach the build VM through the approved operator access path rather than the public edge.
   uptime_kuma:
     service_name: uptime-kuma
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-general-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}"
     public_hostname: uptime.lv3.org
     exposure_model: edge-published
     observability:
@@ -1594,11 +1677,11 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:3001"
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:3001"
   status_page:
     service_name: status-page
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-general-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}"
     public_hostname: status.lv3.org
     exposure_model: edge-published
     observability:
@@ -1615,7 +1698,7 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:3001"
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:3001"
       root_proxy_path: /status/lv3-platform
   mail_platform:
     service_name: mail-platform
@@ -1643,8 +1726,8 @@ lv3_service_topology:
       meta: Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.
   mailpit:
     service_name: mailpit
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-general-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}"
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -2468,8 +2551,8 @@ lv3_service_topology:
       upstream: "http://10.10.10.20:{{ platform_port_assignments.ops_portal_port }}"
   homepage:
     service_name: homepage
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-general-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}"
     public_hostname: home.lv3.org
     exposure_model: edge-published
     observability:
@@ -2486,7 +2569,7 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "http://10.10.10.20:{{ platform_port_assignments.homepage_port }}"
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.homepage_port }}"
   openbao:
     service_name: openbao
     owning_vm: docker-runtime-lv3

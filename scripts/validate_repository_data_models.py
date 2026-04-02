@@ -67,6 +67,7 @@ from replaceability_scorecards import (
     load_replaceability_review_catalog,
     validate_replaceability_review_catalog,
 )
+from runtime_pool_autoscaling import load_runtime_pool_autoscaling
 from slo_tracking import (
     GRAFANA_DASHBOARD_PATH,
     PROMETHEUS_ALERTS_PATH,
@@ -119,6 +120,8 @@ MAINTENANCE_WINDOW_SCHEMA_PATH = repo_path("docs", "schema", "maintenance-window
 VM_TEMPLATE_MANIFEST_PATH = repo_path("config", "vm-template-manifest.json")
 CAPACITY_MODEL_PATH = repo_path("config", "capacity-model.json")
 CAPACITY_MODEL_SCHEMA_PATH = repo_path("docs", "schema", "capacity-model.schema.json")
+RUNTIME_POOL_AUTOSCALING_PATH = repo_path("config", "runtime-pool-autoscaling.json")
+RUNTIME_POOL_AUTOSCALING_SCHEMA_PATH = repo_path("docs", "schema", "runtime-pool-autoscaling.schema.json")
 K6_RECEIPT_SCHEMA_PATH = repo_path("docs", "schema", "k6-receipt.schema.json")
 EPHEMERAL_POOL_CATALOG_PATH = repo_path("config", "ephemeral-capacity-pools.json")
 EPHEMERAL_POOL_SCHEMA_PATH = repo_path("docs", "schema", "ephemeral-capacity-pools.schema.json")
@@ -1523,9 +1526,40 @@ def validate_capacity_model_schema() -> None:
         schema.get("properties"),
         "docs/schema/capacity-model.schema.json.properties",
     )
-    for field in ("$schema", "schema_version", "host", "guests", "reservations", "service_load_profiles"):
+    for field in (
+        "$schema",
+        "schema_version",
+        "host",
+        "guests",
+        "runtime_pool_memory",
+        "reservations",
+        "service_load_profiles",
+    ):
         if field not in properties:
             raise ValueError(f"docs/schema/capacity-model.schema.json.properties must include '{field}'")
+
+
+def validate_runtime_pool_autoscaling_schema() -> None:
+    schema = require_mapping(load_json(RUNTIME_POOL_AUTOSCALING_SCHEMA_PATH), str(RUNTIME_POOL_AUTOSCALING_SCHEMA_PATH))
+    require_str(schema.get("$schema"), "docs/schema/runtime-pool-autoscaling.schema.json.$schema")
+    require_str(schema.get("$id"), "docs/schema/runtime-pool-autoscaling.schema.json.$id")
+    require_str(schema.get("title"), "docs/schema/runtime-pool-autoscaling.schema.json.title")
+    properties = require_mapping(
+        schema.get("properties"),
+        "docs/schema/runtime-pool-autoscaling.schema.json.properties",
+    )
+    for field in ("$schema", "schema_version", "controller", "policies"):
+        if field not in properties:
+            raise ValueError(
+                f"docs/schema/runtime-pool-autoscaling.schema.json.properties must include '{field}'"
+            )
+
+
+def validate_runtime_pool_autoscaling_catalog() -> None:
+    payload = load_json(RUNTIME_POOL_AUTOSCALING_PATH)
+    schema = load_json(RUNTIME_POOL_AUTOSCALING_SCHEMA_PATH)
+    jsonschema.validate(instance=payload, schema=schema)
+    load_runtime_pool_autoscaling(RUNTIME_POOL_AUTOSCALING_PATH)
 
 
 def validate_k6_receipt_schema() -> None:
@@ -2893,6 +2927,8 @@ def validate_repository_data_models() -> int:
     validate_shared_policy_packs()
     validate_capacity_model_schema()
     validate_capacity_model()
+    validate_runtime_pool_autoscaling_schema()
+    validate_runtime_pool_autoscaling_catalog()
     validate_persona_catalog()
     validate_runtime_assurance_matrix_data()
     validate_repo_deploy_catalog_data()

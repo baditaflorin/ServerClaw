@@ -426,9 +426,9 @@ def test_build_service_urls_supports_private_nomad_controller_url() -> None:
 
 def test_build_service_urls_resolves_homepage_internal_url() -> None:
     ports = {"homepage_port": 3090}
-    service = {"owning_vm": "docker-runtime-lv3"}
+    service = {"owning_vm": "runtime-general-lv3"}
     host_vars = {"management_tailscale_ipv4": "100.118.189.95"}
-    guest_ipv4_by_name = {"docker-runtime-lv3": "10.10.10.20"}
+    guest_ipv4_by_name = {"runtime-general-lv3": "10.10.10.91"}
     stack = {"desired_state": {"host_id": "proxmox_florin"}}
 
     port_map, urls = generate_platform_vars.build_service_urls(
@@ -441,7 +441,24 @@ def test_build_service_urls_resolves_homepage_internal_url() -> None:
     )
 
     assert port_map == {"internal": 3090}
-    assert urls == {"internal": "http://10.10.10.20:3090"}
+    assert urls == {"internal": "http://10.10.10.91:3090"}
+
+
+def test_build_platform_vars_moves_support_surfaces_to_runtime_general() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    homepage = platform_vars["platform_service_topology"]["homepage"]
+    mailpit = platform_vars["platform_service_topology"]["mailpit"]
+    status_page = platform_vars["platform_service_topology"]["status_page"]
+    uptime_kuma = platform_vars["platform_service_topology"]["uptime_kuma"]
+
+    assert homepage["owning_vm"] == "runtime-general-lv3"
+    assert homepage["urls"]["internal"] == "http://10.10.10.91:3090"
+    assert mailpit["owning_vm"] == "runtime-general-lv3"
+    assert mailpit["urls"]["internal"] == "http://10.10.10.91:8025"
+    assert status_page["owning_vm"] == "runtime-general-lv3"
+    assert status_page["edge"]["upstream"] == "http://10.10.10.91:3001"
+    assert uptime_kuma["owning_vm"] == "runtime-general-lv3"
+    assert uptime_kuma["urls"]["internal"] == "http://10.10.10.91:3001"
 
 
 def test_build_service_urls_resolves_excalidraw_internal_url() -> None:

@@ -1,0 +1,81 @@
+{
+  "$schema": "docs/schema/runtime-pool-autoscaling.schema.json",
+  "schema_version": "1.0.0",
+  "controller": {
+    "preferred_implementation": "nomad-autoscaler",
+    "metrics_source": "prometheus",
+    "routing_surface": "traefik",
+    "invocation_surface": "dapr",
+    "receipt_directory": "receipts/runtime-pool-scaling",
+    "pause_conditions": [
+      "active_deploy",
+      "active_migration"
+    ]
+  },
+  "policies": [
+    {
+      "pool_id": "runtime-general",
+      "enabled": true,
+      "nomad_namespace": "runtime-general",
+      "instance_bounds": {
+        "min": 1,
+        "max": 2
+      },
+      "scale_out": {
+        "working_set_utilization_percent": 75,
+        "sustain_minutes": 10,
+        "oom_event_immediate": true
+      },
+      "scale_in": {
+        "working_set_utilization_percent": 55,
+        "cooldown_minutes": 60
+      },
+      "required_signals": [
+        "available_memory_percent",
+        "memory_pressure_stall",
+        "swap_activity",
+        "oom_or_restart_evidence"
+      ],
+      "allowed_mobility_tiers": [
+        "elastic_stateless",
+        "burst_batch"
+      ],
+      "pause_when_lanes_active": [
+        "lane:runtime-general"
+      ],
+      "notes": "First autoscaling wave for operator and support services after the runtime-general pool is stable enough to scale without touching the control-plane anchors."
+    },
+    {
+      "pool_id": "runtime-ai",
+      "enabled": true,
+      "nomad_namespace": "runtime-ai",
+      "instance_bounds": {
+        "min": 1,
+        "max": 2
+      },
+      "scale_out": {
+        "working_set_utilization_percent": 75,
+        "sustain_minutes": 10,
+        "oom_event_immediate": true
+      },
+      "scale_in": {
+        "working_set_utilization_percent": 55,
+        "cooldown_minutes": 60
+      },
+      "required_signals": [
+        "available_memory_percent",
+        "memory_pressure_stall",
+        "swap_activity",
+        "oom_or_restart_evidence"
+      ],
+      "allowed_mobility_tiers": [
+        "elastic_stateless",
+        "burst_batch"
+      ],
+      "pause_when_lanes_active": [
+        "lane:runtime-ai"
+      ],
+      "notes": "Second autoscaling wave for bursty document and AI workloads once the runtime-ai services are fully migrated behind the shared substrate."
+    }
+  ]
+}

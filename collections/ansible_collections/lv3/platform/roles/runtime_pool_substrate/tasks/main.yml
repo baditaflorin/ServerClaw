@@ -8,6 +8,8 @@
 - name: Validate runtime-pool substrate inputs
   ansible.builtin.assert:
     that:
+      - runtime_pool_substrate_pool_id | length > 0
+      - runtime_pool_substrate_entrypoint_name | length > 0
       - runtime_pool_substrate_root_dir | length > 0
       - runtime_pool_substrate_compose_file | length > 0
       - runtime_pool_substrate_dynamic_config_dir | length > 0
@@ -21,12 +23,17 @@
       - runtime_pool_substrate_dapr_app_id | length > 0
       - runtime_pool_substrate_dapr_http_port | int > 0
       - runtime_pool_substrate_dapr_grpc_port | int > 0
-      - runtime_pool_substrate_tika_upstream | length > 0
-      - runtime_pool_substrate_gotenberg_upstream | length > 0
-      - runtime_pool_substrate_tesseract_upstream | length > 0
+      - runtime_pool_substrate_routes | length > 0
+      - runtime_pool_substrate_routes | selectattr('route_id', 'defined') | list | length == runtime_pool_substrate_routes | length
+      - runtime_pool_substrate_routes | selectattr('prefix', 'defined') | list | length == runtime_pool_substrate_routes | length
+      - runtime_pool_substrate_routes | selectattr('upstream', 'defined') | list | length == runtime_pool_substrate_routes | length
+      - runtime_pool_substrate_routes | map(attribute='route_id') | map('string') | map('length') | min > 0
+      - runtime_pool_substrate_routes | map(attribute='prefix') | map('string') | map('length') | min > 0
+      - runtime_pool_substrate_routes | map(attribute='upstream') | map('string') | map('length') | min > 0
     fail_msg: >-
-      runtime_pool_substrate requires compose paths, pinned image references,
-      runtime ports, and the three document-extraction upstream routes.
+      runtime_pool_substrate requires pool identifiers, compose paths, pinned
+      image references, runtime ports, and at least one declared routed
+      upstream.
 
 - name: Ensure runtime-pool substrate directories exist
   ansible.builtin.file:

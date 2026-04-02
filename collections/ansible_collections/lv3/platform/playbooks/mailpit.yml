@@ -1,6 +1,6 @@
 ---
 # Playbook: mailpit.yml
-# Purpose: Converge the private Mailpit SMTP interceptor on the selected Docker runtime guest.
+# Purpose: Converge the private Mailpit SMTP interceptor on the selected runtime-general guest.
 # Use case: Run when non-production workloads need a repo-managed SMTP capture target and operator UI.
 #
 # Inputs (required):
@@ -10,14 +10,14 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the live apply.
 #
 # Outputs:
-#   - Mailpit is running on the selected Docker runtime VM with private HTTP and SMTP listeners plus repo-managed verification.
+#   - Mailpit is running on the selected runtime-general VM with private HTTP and SMTP listeners plus repo-managed verification.
 #
 # Idempotency: Partially idempotent
 #              Mailpit is stateless in memory, so a force-recreate during image or config updates clears captured messages.
 #
 # Dependencies:
 #   - ADR 0282: Defines Mailpit as the non-production SMTP interceptor.
-#   - Requires: docker-runtime host access through the Proxmox jump path.
+#   - Requires: runtime-general host access through the Proxmox jump path.
 #   - Role: lv3.platform.mailpit_runtime — renders and verifies the Mailpit runtime stack.
 #
 # Related ADRs: 0079, 0107, 0282
@@ -26,8 +26,8 @@
 # Author: LV3 Platform
 # Last Updated: 2026-03-30
 
-- name: Converge Mailpit on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+- name: Converge Mailpit on the runtime-general VM
+  hosts: "{{ playbook_execution_host_patterns.runtime_general[playbook_execution_env] }}"
   become: true
   gather_facts: true
   tags:
@@ -43,7 +43,7 @@
         playbook_execution_audit_action: playbook.start.mailpit
         playbook_execution_audit_target: mailpit
         required_hosts:
-          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+          - "{{ playbook_execution_required_hosts.runtime_general[playbook_execution_env] }}"
 
   roles:
     - role: lv3.platform.linux_guest_firewall

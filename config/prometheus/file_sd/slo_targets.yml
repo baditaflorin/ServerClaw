@@ -97,7 +97,7 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - http://10.10.10.20:8025/api/v1/info
+    - http://10.10.10.91:8025/api/v1/info
   labels:
     service_id: mailpit
     slo_id: mailpit-availability

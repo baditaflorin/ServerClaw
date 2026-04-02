@@ -1015,7 +1015,7 @@
     },
     "homepage": {
       "service_name": "homepage",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-general-lv3",
       "role": "homepage_runtime",
       "verify_file": "roles/homepage_runtime/tasks/verify.yml",
       "liveness": {
@@ -1024,7 +1024,7 @@
         "timeout_seconds": 90,
         "retries": 18,
         "delay_seconds": 5,
-        "url": "http://10.10.10.20:3090/",
+        "url": "http://10.10.10.91:3090/",
         "method": "GET",
         "expected_status": [
           200
@@ -1036,7 +1036,7 @@
         "timeout_seconds": 90,
         "retries": 18,
         "delay_seconds": 5,
-        "url": "http://10.10.10.20:3090/",
+        "url": "http://10.10.10.91:3090/",
         "method": "GET",
         "expected_status": [
           200
@@ -1385,7 +1385,7 @@
     },
     "mailpit": {
       "service_name": "mailpit",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-general-lv3",
       "role": "mailpit_runtime",
       "verify_file": "roles/mailpit_runtime/tasks/verify.yml",
       "liveness": {
@@ -3186,7 +3186,7 @@
     },
     "status_page": {
       "service_name": "status-page",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-general-lv3",
       "role": null,
       "verify_file": null,
       "liveness": {
@@ -3472,12 +3472,12 @@
     },
     "uptime_kuma": {
       "service_name": "uptime-kuma",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-general-lv3",
       "role": "uptime_kuma_runtime",
       "verify_file": "roles/uptime_kuma_runtime/tasks/verify.yml",
       "liveness": {
         "kind": "command",
-        "description": "The Uptime Kuma container is running on docker-runtime-lv3.",
+        "description": "The Uptime Kuma container is running on runtime-general-lv3.",
         "timeout_seconds": 30,
         "retries": 1,
         "delay_seconds": 0,

@@ -391,13 +391,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_191"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when Homepage or the shared runtime state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Homepage converge from git."
+        "location": "runtime-general-lv3",
+        "failover_trigger": "Restore runtime-general-lv3 when Homepage or the runtime-general operator surface cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-general-lv3, then rerun the Homepage converge from git."
       }
     },
     "flagsmith": {
@@ -545,13 +545,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_191"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when Mailpit or its private SMTP capture surface cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Mailpit converge from git."
+        "location": "runtime-general-lv3",
+        "failover_trigger": "Restore runtime-general-lv3 when Mailpit or its private SMTP capture surface cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-general-lv3, then rerun the Mailpit converge from git."
       }
     },
     "minio": {
@@ -1094,13 +1094,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_191"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when the status page runtime cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the status-page converge from git."
+        "location": "runtime-general-lv3",
+        "failover_trigger": "Restore runtime-general-lv3 when the status page runtime cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-general-lv3, then rerun the status-page converge from git."
       }
     },
     "step_ca": {
@@ -1197,13 +1197,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_191"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when Uptime Kuma or its runtime state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Uptime Kuma converge from git."
+        "location": "runtime-general-lv3",
+        "failover_trigger": "Restore runtime-general-lv3 when Uptime Kuma or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-general-lv3, then rerun the Uptime Kuma converge from git."
       }
     },
     "vaultwarden": {

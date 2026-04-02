@@ -1,6 +1,6 @@
 ---
-- name: Converge Homepage on the Docker runtime VM
-  hosts: docker-runtime-lv3
+- name: Converge Homepage on the runtime-general VM
+  hosts: "{{ playbook_execution_host_patterns.runtime_general[playbook_execution_env] }}"
   become: true
   gather_facts: true
   vars:
@@ -11,6 +11,14 @@
     - service-homepage
 
   pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.runtime_general[playbook_execution_env] }}"
+
     - name: Ensure target guest is Debian
       ansible.builtin.assert:
         that:
@@ -23,7 +31,7 @@
     - role: lv3.platform.homepage_runtime
 
 - name: Publish Homepage on the shared NGINX edge
-  hosts: nginx-lv3
+  hosts: "{{ playbook_execution_host_patterns.nginx_edge[playbook_execution_env] }}"
   become: true
   gather_facts: true
   vars_files:

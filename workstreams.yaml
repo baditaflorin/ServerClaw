@@ -16095,9 +16095,49 @@ workstreams:
       - docs/schema/service-partition-catalog.schema.json
       - scripts/generate_platform_vars.py
       - scripts/validate_repository_data_models.py
+      - inventory/hosts.yml
+      - inventory/group_vars/all.yml
+      - inventory/host_vars/proxmox_florin.yml
       - inventory/group_vars/platform.yml
+      - config/execution-lanes.yaml
+      - config/ansible-execution-scopes.yaml
+      - config/health-probe-catalog.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/subdomain-exposure-registry.json
+      - config/workflow-catalog.json
+      - config/capacity-model.json
+      - config/runtime-pool-autoscaling.json
+      - playbooks/runtime-general-pool.yml
+      - playbooks/services/runtime-general-pool.yml
+      - playbooks/homepage.yml
+      - playbooks/uptime-kuma.yml
+      - playbooks/nomad.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mailpit.yml
+      - collections/ansible_collections/lv3/platform/roles/runtime_pool_substrate/**
+      - docs/runbooks/configure-runtime-general-pool.md
+      - docs/runbooks/configure-mailpit.md
+      - docs/runbooks/deploy-uptime-kuma.md
+      - docs/runbooks/configure-homepage.md
+      - docs/runbooks/configure-nomad.md
+      - docs/runbooks/runtime-pool-memory-governance.md
+      - docs/runbooks/configure-runtime-pool-autoscaling.md
+      - docs/schema/capacity-model.schema.json
+      - docs/schema/runtime-pool-autoscaling.schema.json
+      - scripts/capacity_report.py
+      - scripts/runtime_pool_autoscaling.py
       - tests/test_generate_platform_vars.py
       - tests/test_runtime_pool_service_classification.py
+      - tests/test_runtime_pool_substrate_role.py
+      - tests/test_mailpit_playbook.py
+      - tests/test_nomad_playbook.py
+      - tests/test_homepage_runtime_role.py
+      - tests/test_runtime_general_pool_playbook.py
+      - tests/test_runtime_general_service_playbooks.py
+      - tests/test_capacity_report.py
+      - tests/test_runtime_pool_autoscaling.py
+      - receipts/runtime-pool-scaling/.gitkeep
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -16133,6 +16173,61 @@ workstreams:
             - scripts/validate_repository_data_models.py
           mode: shared_contract
           contract: repository-data-model-validation-v1
+        - id: ws0330_runtime_general_pool_artifacts
+          paths:
+            - playbooks/runtime-general-pool.yml
+            - playbooks/services/runtime-general-pool.yml
+            - docs/runbooks/configure-runtime-general-pool.md
+            - tests/test_runtime_general_pool_playbook.py
+            - tests/test_runtime_general_service_playbooks.py
+          mode: exclusive
+        - id: ws0330_runtime_general_transition_contract
+          paths:
+            - inventory/hosts.yml
+            - inventory/group_vars/all.yml
+            - inventory/host_vars/proxmox_florin.yml
+            - config/execution-lanes.yaml
+            - config/ansible-execution-scopes.yaml
+            - config/health-probe-catalog.json
+            - config/service-redundancy-catalog.json
+            - config/slo-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/subdomain-exposure-registry.json
+            - config/workflow-catalog.json
+            - playbooks/homepage.yml
+            - playbooks/uptime-kuma.yml
+            - playbooks/nomad.yml
+            - collections/ansible_collections/lv3/platform/playbooks/mailpit.yml
+            - collections/ansible_collections/lv3/platform/roles/runtime_pool_substrate/**
+            - docs/runbooks/configure-mailpit.md
+            - docs/runbooks/deploy-uptime-kuma.md
+            - docs/runbooks/configure-homepage.md
+            - docs/runbooks/configure-nomad.md
+            - tests/test_runtime_pool_substrate_role.py
+            - tests/test_mailpit_playbook.py
+            - tests/test_nomad_playbook.py
+            - tests/test_homepage_runtime_role.py
+          mode: shared_contract
+          contract: runtime-general-transition-v1
+        - id: ws0330_runtime_pool_capacity_governance_contract
+          paths:
+            - config/capacity-model.json
+            - docs/schema/capacity-model.schema.json
+            - scripts/capacity_report.py
+            - docs/runbooks/runtime-pool-memory-governance.md
+            - tests/test_capacity_report.py
+          mode: shared_contract
+          contract: runtime-pool-capacity-governance-v1
+        - id: ws0330_runtime_pool_autoscaling_contract
+          paths:
+            - config/runtime-pool-autoscaling.json
+            - docs/schema/runtime-pool-autoscaling.schema.json
+            - scripts/runtime_pool_autoscaling.py
+            - docs/runbooks/configure-runtime-pool-autoscaling.md
+            - tests/test_runtime_pool_autoscaling.py
+            - receipts/runtime-pool-scaling/.gitkeep
+          mode: shared_contract
+          contract: runtime-pool-autoscaling-v1
     blockers: []
     ready_to_merge: false
     live_applied: false
