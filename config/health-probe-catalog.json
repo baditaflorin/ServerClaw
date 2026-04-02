@@ -37,7 +37,7 @@
     },
     "api_gateway": {
       "service_name": "api-gateway",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-control-lv3",
       "role": "api_gateway_runtime",
       "verify_file": "roles/api_gateway_runtime/tasks/verify.yml",
       "startup": {
@@ -54,7 +54,7 @@
       },
       "liveness": {
         "kind": "http",
-        "description": "The local API gateway health endpoint responds on docker-runtime-lv3.",
+        "description": "The local API gateway health endpoint responds on runtime-control-lv3.",
         "timeout_seconds": 90,
         "retries": 18,
         "delay_seconds": 5,
@@ -488,7 +488,7 @@
           "container_name": "directus",
           "bindings": [
             {
-              "host": "10.10.10.20",
+              "host": "10.10.10.92",
               "port": 8055
             }
           ],
@@ -757,7 +757,7 @@
     },
     "gitea": {
       "service_name": "gitea",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-control-lv3",
       "role": "gitea_runtime",
       "verify_file": "roles/gitea_runtime/tasks/verify.yml",
       "liveness": {
@@ -766,7 +766,7 @@
         "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,
-        "url": "http://10.10.10.20:3003/api/healthz",
+        "url": "http://10.10.10.92:3003/api/healthz",
         "method": "GET",
         "expected_status": [
           200
@@ -796,8 +796,8 @@
         "monitor": {
           "name": "Gitea Private",
           "type": "http",
-          "url": "http://10.10.10.20:3003/api/healthz",
-          "description": "Private Gitea health endpoint on docker-runtime-lv3.",
+          "url": "http://10.10.10.92:3003/api/healthz",
+          "description": "Private Gitea health endpoint on runtime-control-lv3.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
@@ -906,7 +906,7 @@
     },
     "harbor": {
       "service_name": "harbor",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-control-lv3",
       "role": "harbor_runtime",
       "verify_file": "roles/harbor_runtime/tasks/verify.yml",
       "liveness": {
@@ -936,7 +936,7 @@
           "container_name": "nginx",
           "bindings": [
             {
-              "host": "10.10.10.20",
+              "host": "10.10.10.92",
               "port": 8095
             }
           ],
@@ -1067,7 +1067,7 @@
     },
     "keycloak": {
       "service_name": "keycloak",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-control-lv3",
       "role": "keycloak_runtime",
       "verify_file": "roles/keycloak_runtime/tasks/verify.yml",
       "startup": {
@@ -1109,7 +1109,7 @@
           "container_name": "keycloak-keycloak-1",
           "bindings": [
             {
-              "host": "10.10.10.20",
+              "host": "10.10.10.92",
               "port": 8091
             }
           ],
@@ -1335,7 +1335,7 @@
     },
     "mail_platform": {
       "service_name": "mail-platform",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-control-lv3",
       "role": "mail_platform_runtime",
       "verify_file": "roles/mail_platform_runtime/tasks/verify.yml",
       "liveness": {
@@ -1371,8 +1371,8 @@
         "monitor": {
           "name": "Mail Platform Gateway Private",
           "type": "http",
-          "url": "http://10.10.10.20:8081/healthz",
-          "description": "Private mail gateway health endpoint on docker-runtime-lv3.",
+          "url": "http://10.10.10.92:8081/healthz",
+          "description": "Private mail gateway health endpoint on runtime-control-lv3.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
@@ -1736,7 +1736,7 @@
           "container_name": "nextcloud-app",
           "bindings": [
             {
-              "host": "10.10.10.20",
+              "host": "10.10.10.92",
               "port": 8084
             }
           ],
@@ -2206,7 +2206,7 @@
     },
     "openbao": {
       "service_name": "openbao",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-control-lv3",
       "role": "openbao_runtime",
       "verify_file": "roles/openbao_runtime/tasks/verify.yml",
       "startup": {
@@ -2248,7 +2248,7 @@
           "container_name": "lv3-openbao",
           "bindings": [
             {
-              "host": "10.10.10.20",
+              "host": "10.10.10.92",
               "port": 8200
             }
           ],
@@ -2267,7 +2267,7 @@
     },
     "openfga": {
       "service_name": "openfga",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-control-lv3",
       "role": "openfga_runtime",
       "verify_file": "roles/openfga_runtime/tasks/verify.yml",
       "startup": {
@@ -2284,7 +2284,7 @@
       },
       "liveness": {
         "kind": "http",
-        "description": "OpenFGA keeps serving the local health endpoint on docker-runtime-lv3.",
+        "description": "OpenFGA keeps serving the local health endpoint on runtime-control-lv3.",
         "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,
@@ -2313,7 +2313,7 @@
     },
     "temporal": {
       "service_name": "temporal",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-control-lv3",
       "role": "temporal_runtime",
       "verify_file": "roles/temporal_runtime/tasks/verify.yml",
       "startup": {
@@ -3082,7 +3082,7 @@
     },
     "semaphore": {
       "service_name": "semaphore",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-control-lv3",
       "role": "semaphore_runtime",
       "verify_file": "roles/semaphore_runtime/tasks/verify.yml",
       "liveness": {
@@ -3114,8 +3114,8 @@
         "monitor": {
           "name": "Semaphore Private",
           "type": "http",
-          "url": "http://10.10.10.20:3004/api/ping",
-          "description": "Private Semaphore ping endpoint on docker-runtime-lv3.",
+          "url": "http://10.10.10.92:3004/api/ping",
+          "description": "Private Semaphore ping endpoint on runtime-control-lv3.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
@@ -3224,16 +3224,16 @@
     },
     "step_ca": {
       "service_name": "step-ca",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-control-lv3",
       "role": "step_ca_runtime",
       "verify_file": "roles/step_ca_runtime/tasks/verify.yml",
       "liveness": {
         "kind": "tcp",
-        "description": "The private step-ca API listens on the Docker runtime guest.",
+        "description": "The private step-ca API listens on runtime-control-lv3.",
         "timeout_seconds": 120,
         "retries": 1,
         "delay_seconds": 0,
-        "host": "10.10.10.20",
+        "host": "10.10.10.92",
         "port": 9000
       },
       "readiness": {
@@ -3251,7 +3251,7 @@
           "/opt/step-ca/service-test.key",
           "--force",
           "--ca-url",
-          "https://10.10.10.20:9000",
+          "https://10.10.10.92:9000",
           "--root",
           "/opt/step-ca/home/certs/root_ca.crt",
           "--provisioner",
@@ -3281,8 +3281,8 @@
         "monitor": {
           "name": "Step CA Private",
           "type": "http",
-          "url": "https://10.10.10.20:9000/health",
-          "description": "Private step-ca health endpoint on docker-runtime-lv3.",
+          "url": "https://10.10.10.92:9000/health",
+          "description": "Private step-ca health endpoint on runtime-control-lv3.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
@@ -3527,7 +3527,7 @@
     },
     "vaultwarden": {
       "service_name": "vaultwarden",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-control-lv3",
       "role": "vaultwarden_runtime",
       "verify_file": "roles/vaultwarden_runtime/tasks/verify.yml",
       "liveness": {
@@ -3545,7 +3545,7 @@
         "timeout_seconds": 60,
         "retries": 12,
         "delay_seconds": 5,
-        "url": "https://10.10.10.20:8222/alive",
+        "url": "https://10.10.10.92:8222/alive",
         "method": "GET",
         "expected_status": [
           200
@@ -3555,7 +3555,7 @@
           "container_name": "vaultwarden",
           "bindings": [
             {
-              "host": "10.10.10.20",
+              "host": "10.10.10.92",
               "port": 8222
             }
           ],
@@ -3575,7 +3575,7 @@
     },
     "windmill": {
       "service_name": "windmill",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-control-lv3",
       "role": "windmill_runtime",
       "verify_file": "roles/windmill_runtime/tasks/verify.yml",
       "liveness": {
@@ -3607,8 +3607,8 @@
         "monitor": {
           "name": "Windmill Private",
           "type": "http",
-          "url": "http://10.10.10.20:8000/api/version",
-          "description": "Private Windmill API version endpoint on docker-runtime-lv3.",
+          "url": "http://10.10.10.92:8000/api/version",
+          "description": "Private Windmill API version endpoint on runtime-control-lv3.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,

@@ -235,6 +235,27 @@
       "notes": "Declared for ADR 0320 runtime-general pool implementation and validated against the planned production guest shape on 2026-04-02."
     },
     {
+      "vmid": 192,
+      "name": "runtime-control-lv3",
+      "status": "active",
+      "environment": "production",
+      "metrics_host": "runtime-control-lv3",
+      "allocated": {
+        "ram_gb": 12,
+        "vcpu": 4,
+        "disk_gb": 128
+      },
+      "budget": {
+        "ram_gb": 16,
+        "vcpu": 6,
+        "disk_gb": 160
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Declared for the phase-5 runtime-control migration wave and aligned with the approved baseline envelope from ADR 0321."
+    },
+    {
       "vmid": 210,
       "name": "nginx-staging-lv3",
       "status": "planned",
@@ -416,7 +437,7 @@
         "baseline_ram_gb": 12,
         "max_ram_gb": 16,
         "admission_priority": 1,
-        "notes": "Control-plane capacity is reserved first while the remaining control services still run on docker-runtime-lv3 ahead of the later runtime-control migration wave."
+        "notes": "Control-plane capacity is reserved first and now anchors the dedicated runtime-control-lv3 guest before lower-priority runtime pools can expand."
       },
       {
         "id": "runtime-general",

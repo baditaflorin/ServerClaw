@@ -1,10 +1,10 @@
 # ADR 0321: Runtime Pool Memory Envelopes And Reserved Host Headroom
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
-- Implemented On: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.144
+- Implemented In Platform Version: not yet
+- Implemented On: 2026-04-02
 - Date: 2026-04-01
 
 ## Context

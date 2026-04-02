@@ -145,7 +145,7 @@ def test_build_platform_vars_includes_harbor_publication_topology() -> None:
     assert harbor["dns"]["name"] == "registry"
     assert harbor["ports"]["internal"] == 8095
     assert harbor["urls"]["public"] == "https://registry.lv3.org"
-    assert harbor["urls"]["internal"] == "http://10.10.10.20:8095"
+    assert harbor["urls"]["internal"] == "http://10.10.10.92:8095"
 
 
 def test_build_platform_vars_includes_openfga_private_controller_topology() -> None:
@@ -154,7 +154,7 @@ def test_build_platform_vars_includes_openfga_private_controller_topology() -> N
 
     assert openfga["ports"]["internal"] == 8098
     assert openfga["ports"]["controller"] == 8014
-    assert openfga["urls"]["internal"] == "http://10.10.10.20:8098"
+    assert openfga["urls"]["internal"] == "http://10.10.10.92:8098"
     assert openfga["urls"]["controller"] == "http://100.64.0.1:8014"
     assert platform_vars["openfga_controller_url"] == "http://100.64.0.1:8014"
 
@@ -164,7 +164,7 @@ def test_build_platform_vars_includes_temporal_private_loopback_topology() -> No
     temporal = platform_vars["platform_service_topology"]["temporal"]
 
     assert temporal["exposure_model"] == "private-only"
-    assert temporal["private_ip"] == "10.10.10.20"
+    assert temporal["private_ip"] == "10.10.10.92"
     assert temporal["access"]["kind"] == "ssh-tunnel"
     assert temporal["access"]["url"] == "grpc://127.0.0.1:7233"
     assert "urls" not in temporal or temporal["urls"] == {}
@@ -172,7 +172,7 @@ def test_build_platform_vars_includes_temporal_private_loopback_topology() -> No
 def test_build_platform_vars_includes_openbao_extra_bind_addresses() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
 
-    assert platform_vars["openbao_http_extra_bind_addresses"] == ["10.10.10.20"]
+    assert platform_vars["openbao_http_extra_bind_addresses"] == ["10.10.10.92"]
 
 
 def test_build_platform_vars_includes_one_api_private_controller_topology() -> None:

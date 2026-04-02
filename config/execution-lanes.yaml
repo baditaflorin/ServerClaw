@@ -33,21 +33,15 @@ lanes:
     vm_id: 120
     hostname: docker-runtime-lv3
     services:
-      - api_gateway
       - docker_runtime
-      - keycloak
-      - mail_platform
       - mattermost
       - netbox
       - ntfy
       - ollama
       - open_webui
-      - openbao
       - ops_portal
       - platform_context_api
       - portainer
-      - step_ca
-      - windmill
     max_concurrent_ops: 3
     serialisation: resource_lock
     admission_policy: soft
@@ -70,6 +64,31 @@ lanes:
       total_cpu_milli: 3000
       total_memory_mb: 4096
       total_disk_iops: 220
+
+  - lane_id: lane:runtime-control
+    vm_id: 192
+    hostname: runtime-control-lv3
+    services:
+      - api_gateway
+      - gitea
+      - harbor
+      - keycloak
+      - mail_platform
+      - nats_jetstream
+      - openbao
+      - openfga
+      - semaphore
+      - step_ca
+      - temporal
+      - vaultwarden
+      - windmill
+    max_concurrent_ops: 1
+    serialisation: strict
+    admission_policy: hard
+    vm_budget:
+      total_cpu_milli: 2500
+      total_memory_mb: 4096
+      total_disk_iops: 200
 
   - lane_id: lane:runtime-general
     vm_id: 191

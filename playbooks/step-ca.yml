@@ -12,8 +12,8 @@
     - role: lv3.platform.proxmox_tailscale_proxy
     - role: lv3.platform.proxmox_security
 
-- name: Converge the private step-ca runtime on docker-runtime-lv3
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+- name: Converge the private step-ca runtime on runtime-control-lv3
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
   gather_facts: true
   tags:
@@ -29,7 +29,7 @@
         playbook_execution_audit_action: playbook.start.step-ca
         playbook_execution_audit_target: step_ca
         required_hosts:
-          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+          - "{{ playbook_execution_required_hosts.runtime_control[playbook_execution_env] }}"
 
   roles:
     - role: lv3.platform.linux_guest_firewall

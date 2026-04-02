@@ -31,7 +31,7 @@ platform_host:
       - 7881
     public_ingress_tcp_forwards:
       - listen_port: 25
-        target_host: 10.10.10.20
+        target_host: 10.10.10.92
         target_port: 25
       - listen_port: 80
         target_host: 10.10.10.10
@@ -40,10 +40,10 @@ platform_host:
         target_host: 10.10.10.10
         target_port: 443
       - listen_port: 587
-        target_host: 10.10.10.20
+        target_host: 10.10.10.92
         target_port: 587
       - listen_port: 993
-        target_host: 10.10.10.20
+        target_host: 10.10.10.92
         target_port: 993
       - listen_port: 7881
         target_host: 10.10.10.20
@@ -67,7 +67,7 @@ platform_host:
       - name: windmill
         listen_address: 100.64.0.1
         listen_port: 8005
-        upstream_host: 10.10.10.20
+        upstream_host: 10.10.10.92
         upstream_port: 8000
       - name: nomad
         listen_address: 100.64.0.1
@@ -87,7 +87,7 @@ platform_host:
       - name: gitea
         listen_address: 100.64.0.1
         listen_port: 3009
-        upstream_host: 10.10.10.20
+        upstream_host: 10.10.10.92
         upstream_port: 3003
       - name: netbox
         listen_address: 100.64.0.1
@@ -102,22 +102,22 @@ platform_host:
       - name: step-ca
         listen_address: 100.64.0.1
         listen_port: 9443
-        upstream_host: 10.10.10.20
+        upstream_host: 10.10.10.92
         upstream_port: 9000
       - name: openbao
         listen_address: 100.64.0.1
         listen_port: 8200
-        upstream_host: 10.10.10.20
+        upstream_host: 10.10.10.92
         upstream_port: 8200
       - name: openfga
         listen_address: 100.64.0.1
         listen_port: 8014
-        upstream_host: 10.10.10.20
+        upstream_host: 10.10.10.92
         upstream_port: 8098
       - name: semaphore
         listen_address: 100.64.0.1
         listen_port: 8020
-        upstream_host: 10.10.10.20
+        upstream_host: 10.10.10.92
         upstream_port: 3004
       - name: plane
         listen_address: 100.64.0.1
@@ -627,6 +627,28 @@ platform_guest_catalog:
         anti_affinity_group: runtime-general
         co_location_exceptions: []
       packages: []
+    - vmid: 192
+      name: runtime-control-lv3
+      role: runtime-control
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.92
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:92
+      cores: 4
+      memory_mb: 12288
+      disk_gb: 128
+      tags:
+        - docker
+        - runtime
+        - control
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-control
+        co_location_exceptions: []
+      packages: []
   by_name:
     nginx-lv3:
       vmid: 110
@@ -908,6 +930,29 @@ platform_guest_catalog:
         anti_affinity_group: runtime-general
         co_location_exceptions: []
       packages: []
+    runtime-control-lv3:
+      vmid: 192
+      name: runtime-control-lv3
+      role: runtime-control
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.92
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:92
+      cores: 4
+      memory_mb: 12288
+      disk_gb: 128
+      tags:
+        - docker
+        - runtime
+        - control
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-control
+        co_location_exceptions: []
+      packages: []
   by_role:
     nginx:
       vmid: 110
@@ -1187,6 +1232,29 @@ platform_guest_catalog:
         failure_domain: host:proxmox_florin
         placement_class: primary
         anti_affinity_group: runtime-general
+        co_location_exceptions: []
+      packages: []
+    runtime-control:
+      vmid: 192
+      name: runtime-control-lv3
+      role: runtime-control
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.92
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:92
+      cores: 4
+      memory_mb: 12288
+      disk_gb: 128
+      tags:
+        - docker
+        - runtime
+        - control
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-control
         co_location_exceptions: []
       packages: []
 platform_service_topology:
@@ -1529,8 +1597,8 @@ platform_service_topology:
       internal: http://10.10.10.91:3001
   mail_platform:
     service_name: mail-platform
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: mail.lv3.org
     exposure_model: informational-only
     observability:
@@ -1647,8 +1715,8 @@ platform_service_topology:
       schema_registry: http://10.10.10.20:8104
   step_ca:
     service_name: step-ca
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1666,7 +1734,7 @@ platform_service_topology:
       internal: 9000
       controller: 9443
     urls:
-      internal: https://10.10.10.20:9000
+      internal: https://10.10.10.92:9000
       controller: https://100.64.0.1:9443
   tika:
     service_name: tika
@@ -1706,8 +1774,8 @@ platform_service_topology:
       internal: http://10.10.10.90:3008
   semaphore:
     service_name: semaphore
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1725,12 +1793,12 @@ platform_service_topology:
       internal: 3004
       controller: 8020
     urls:
-      internal: http://10.10.10.20:3004
+      internal: http://10.10.10.92:3004
       controller: http://100.64.0.1:8020
   windmill:
     service_name: windmill
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1748,7 +1816,7 @@ platform_service_topology:
       internal: 8000
       controller: 8005
     urls:
-      internal: http://10.10.10.20:8000
+      internal: http://10.10.10.92:8000
       controller: http://100.64.0.1:8005
   nomad:
     service_name: nomad
@@ -1775,8 +1843,8 @@ platform_service_topology:
       controller: https://100.64.0.1:8013
   gitea:
     service_name: gitea
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: git.lv3.org
     exposure_model: private-only
     observability:
@@ -1803,7 +1871,7 @@ platform_service_topology:
       controller: 3009
     urls:
       public: http://git.lv3.org:3009
-      internal: http://10.10.10.20:3003
+      internal: http://10.10.10.92:3003
       controller: http://100.64.0.1:3009
   mattermost:
     service_name: mattermost
@@ -2704,8 +2772,8 @@ platform_service_topology:
       internal: https://10.10.10.70:443
   api_gateway:
     service_name: api-gateway
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: api.lv3.org
     exposure_model: edge-published
     observability:
@@ -2722,7 +2790,7 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8083
+      upstream: http://10.10.10.92:8083
     service_id: api_gateway
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/api-gateway.yml
@@ -2733,7 +2801,7 @@ platform_service_topology:
       internal: 8083
     urls:
       public: https://api.lv3.org
-      internal: http://10.10.10.20:8083
+      internal: http://10.10.10.92:8083
   browser_runner:
     service_name: browser-runner
     owning_vm: docker-runtime-lv3
@@ -2813,8 +2881,8 @@ platform_service_topology:
       controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -2831,7 +2899,7 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8091
+      upstream: http://10.10.10.92:8091
     service_id: keycloak
     runtime_pool: runtime-control
     deployment_surface: playbooks/keycloak.yml
@@ -2843,8 +2911,8 @@ platform_service_topology:
       public: https://sso.lv3.org
   harbor:
     service_name: harbor
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: registry.lv3.org
     exposure_model: edge-published
     observability:
@@ -2861,7 +2929,7 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8095
+      upstream: http://10.10.10.92:8095
       client_max_body_size: 0
       chunked_transfer_encoding: true
       proxy_request_buffering: false
@@ -2877,7 +2945,7 @@ platform_service_topology:
       internal: 8095
     urls:
       public: https://registry.lv3.org
-      internal: http://10.10.10.20:8095
+      internal: http://10.10.10.92:8095
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
@@ -2944,8 +3012,8 @@ platform_service_topology:
       internal: http://10.10.10.91:3090
   openbao:
     service_name: openbao
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -2963,12 +3031,12 @@ platform_service_topology:
       internal: 8200
       controller: 8200
     urls:
-      internal: https://10.10.10.20:8200
+      internal: https://10.10.10.92:8200
       controller: https://100.64.0.1:8200
   openfga:
     service_name: openfga
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -2986,12 +3054,12 @@ platform_service_topology:
       internal: 8098
       controller: 8014
     urls:
-      internal: http://10.10.10.20:8098
+      internal: http://10.10.10.92:8098
       controller: http://100.64.0.1:8014
   temporal:
     service_name: temporal
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -3073,8 +3141,8 @@ platform_service_topology:
       controller: https://100.64.0.1:9444
   vaultwarden:
     service_name: vaultwarden
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: vault.lv3.org
     exposure_model: private-only
     observability:
@@ -3101,7 +3169,7 @@ platform_service_topology:
       controller: 443
     urls:
       public: https://vault.lv3.org
-      internal: https://10.10.10.20:8222
+      internal: https://10.10.10.92:8222
       controller: https://vault.lv3.org
   postgres:
     service_name: postgres
@@ -3829,8 +3897,8 @@ public_edge_service_topology:
       internal: http://10.10.10.91:3001
   mail_platform:
     service_name: mail-platform
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: mail.lv3.org
     exposure_model: informational-only
     observability:
@@ -3947,8 +4015,8 @@ public_edge_service_topology:
       schema_registry: http://10.10.10.20:8104
   step_ca:
     service_name: step-ca
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -3966,7 +4034,7 @@ public_edge_service_topology:
       internal: 9000
       controller: 9443
     urls:
-      internal: https://10.10.10.20:9000
+      internal: https://10.10.10.92:9000
       controller: https://100.64.0.1:9443
   tika:
     service_name: tika
@@ -4006,8 +4074,8 @@ public_edge_service_topology:
       internal: http://10.10.10.90:3008
   semaphore:
     service_name: semaphore
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -4025,12 +4093,12 @@ public_edge_service_topology:
       internal: 3004
       controller: 8020
     urls:
-      internal: http://10.10.10.20:3004
+      internal: http://10.10.10.92:3004
       controller: http://100.64.0.1:8020
   windmill:
     service_name: windmill
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -4048,7 +4116,7 @@ public_edge_service_topology:
       internal: 8000
       controller: 8005
     urls:
-      internal: http://10.10.10.20:8000
+      internal: http://10.10.10.92:8000
       controller: http://100.64.0.1:8005
   nomad:
     service_name: nomad
@@ -4075,8 +4143,8 @@ public_edge_service_topology:
       controller: https://100.64.0.1:8013
   gitea:
     service_name: gitea
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: git.lv3.org
     exposure_model: private-only
     observability:
@@ -4103,7 +4171,7 @@ public_edge_service_topology:
       controller: 3009
     urls:
       public: http://git.lv3.org:3009
-      internal: http://10.10.10.20:3003
+      internal: http://10.10.10.92:3003
       controller: http://100.64.0.1:3009
   mattermost:
     service_name: mattermost
@@ -5004,8 +5072,8 @@ public_edge_service_topology:
       internal: https://10.10.10.70:443
   api_gateway:
     service_name: api-gateway
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: api.lv3.org
     exposure_model: edge-published
     observability:
@@ -5022,7 +5090,7 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8083
+      upstream: http://10.10.10.92:8083
     service_id: api_gateway
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/api-gateway.yml
@@ -5033,7 +5101,7 @@ public_edge_service_topology:
       internal: 8083
     urls:
       public: https://api.lv3.org
-      internal: http://10.10.10.20:8083
+      internal: http://10.10.10.92:8083
   browser_runner:
     service_name: browser-runner
     owning_vm: docker-runtime-lv3
@@ -5113,8 +5181,8 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -5131,7 +5199,7 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8091
+      upstream: http://10.10.10.92:8091
     service_id: keycloak
     runtime_pool: runtime-control
     deployment_surface: playbooks/keycloak.yml
@@ -5143,8 +5211,8 @@ public_edge_service_topology:
       public: https://sso.lv3.org
   harbor:
     service_name: harbor
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: registry.lv3.org
     exposure_model: edge-published
     observability:
@@ -5161,7 +5229,7 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8095
+      upstream: http://10.10.10.92:8095
       client_max_body_size: 0
       chunked_transfer_encoding: true
       proxy_request_buffering: false
@@ -5177,7 +5245,7 @@ public_edge_service_topology:
       internal: 8095
     urls:
       public: https://registry.lv3.org
-      internal: http://10.10.10.20:8095
+      internal: http://10.10.10.92:8095
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
@@ -5244,8 +5312,8 @@ public_edge_service_topology:
       internal: http://10.10.10.91:3090
   openbao:
     service_name: openbao
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -5263,12 +5331,12 @@ public_edge_service_topology:
       internal: 8200
       controller: 8200
     urls:
-      internal: https://10.10.10.20:8200
+      internal: https://10.10.10.92:8200
       controller: https://100.64.0.1:8200
   openfga:
     service_name: openfga
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -5286,12 +5354,12 @@ public_edge_service_topology:
       internal: 8098
       controller: 8014
     urls:
-      internal: http://10.10.10.20:8098
+      internal: http://10.10.10.92:8098
       controller: http://100.64.0.1:8014
   temporal:
     service_name: temporal
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -5373,8 +5441,8 @@ public_edge_service_topology:
       controller: https://100.64.0.1:9444
   vaultwarden:
     service_name: vaultwarden
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: vault.lv3.org
     exposure_model: private-only
     observability:
@@ -5401,7 +5469,7 @@ public_edge_service_topology:
       controller: 443
     urls:
       public: https://vault.lv3.org
-      internal: https://10.10.10.20:8222
+      internal: https://10.10.10.92:8222
       controller: https://vault.lv3.org
   postgres:
     service_name: postgres
@@ -5586,7 +5654,7 @@ hetzner_dns_records: *id001
 platform_postgres_host: database.lv3.org
 openbao_postgres_host: 10.10.10.50
 openbao_http_extra_bind_addresses:
-  - 10.10.10.20
+  - 10.10.10.92
 openbao_controller_url: https://100.64.0.1:8200
 openfga_http_port: 8098
 openfga_host_proxy_port: 8014
@@ -5599,7 +5667,7 @@ one_api_openai_base_url: http://10.10.10.20:8101/v1
 one_api_controller_openai_base_url: http://100.64.0.1:8018/v1
 semaphore_server_port: 3004
 semaphore_host_proxy_port: 8020
-semaphore_private_base_url: http://10.10.10.20:3004
+semaphore_private_base_url: http://10.10.10.92:3004
 semaphore_controller_url: http://100.64.0.1:8020
 netbox_host_proxy_port: 8004
 netbox_controller_url: http://100.64.0.1:8004
@@ -5618,7 +5686,7 @@ woodpecker_private_base_url: http://10.10.10.20:8102
 woodpecker_controller_url: http://100.64.0.1:8017
 api_gateway_internal_port: 8083
 api_gateway_public_url: https://api.lv3.org
-api_gateway_internal_url: http://10.10.10.20:8083
+api_gateway_internal_url: http://10.10.10.92:8083
 headscale_http_port: 8080
 headscale_public_url: https://headscale.lv3.org
 headscale_internal_url: http://10.10.10.1:8080
@@ -5636,7 +5704,7 @@ matrix_synapse_public_url: https://matrix.lv3.org
 gitea_http_port: 3003
 gitea_host_proxy_port: 3009
 gitea_root_url: http://git.lv3.org:3009
-gitea_private_base_url: http://10.10.10.20:3003
+gitea_private_base_url: http://10.10.10.92:3003
 gitea_controller_url: http://100.64.0.1:3009
 minio_public_url: https://minio.lv3.org
 minio_console_public_url: https://minio-console.lv3.org
@@ -5650,7 +5718,7 @@ vaultwarden_https_port: 8222
 vaultwarden_controller_url: https://vault.lv3.org
 step_ca_api_port: 9000
 step_ca_proxy_port: 9443
-step_ca_internal_url: https://10.10.10.20:9000
+step_ca_internal_url: https://10.10.10.92:9000
 step_ca_controller_url: https://100.64.0.1:9443
 windmill_host_proxy_port: 8005
 windmill_controller_url: http://100.64.0.1:8005

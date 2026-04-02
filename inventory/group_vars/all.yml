@@ -405,6 +405,12 @@ playbook_execution_host_patterns:
   runtime_ai:
     production: runtime-ai-lv3
     staging: docker-runtime-staging-lv3
+  runtime_control:
+    production: runtime-control-lv3
+    staging: docker-runtime-staging-lv3
+  runtime_general:
+    production: runtime-general-lv3
+    staging: docker-runtime-staging-lv3
   docker_build:
     production: docker-build-lv3
     staging: docker-build-staging-lv3
@@ -429,6 +435,9 @@ playbook_execution_required_hosts:
     staging: nginx-staging-lv3
   docker_runtime:
     production: docker-runtime-lv3
+    staging: docker-runtime-staging-lv3
+  runtime_control:
+    production: runtime-control-lv3
     staging: docker-runtime-staging-lv3
   docker_build:
     production: docker-build-lv3

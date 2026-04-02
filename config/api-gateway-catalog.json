@@ -39,7 +39,7 @@
     {
       "id": "gitea",
       "name": "Gitea",
-      "upstream": "http://10.10.10.20:3003",
+      "upstream": "http://10.10.10.92:3003",
       "gateway_prefix": "/v1/gitea",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
@@ -72,7 +72,7 @@
     {
       "id": "harbor",
       "name": "Harbor",
-      "upstream": "http://10.10.10.20:8095",
+      "upstream": "http://10.10.10.92:8095",
       "gateway_prefix": "/v1/harbor",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
@@ -83,7 +83,7 @@
     {
       "id": "keycloak",
       "name": "Keycloak",
-      "upstream": "http://10.10.10.20:18080",
+      "upstream": "http://10.10.10.92:18080",
       "gateway_prefix": "/v1/keycloak",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
@@ -105,7 +105,7 @@
     {
       "id": "mail_platform",
       "name": "Mail Platform",
-      "upstream": "http://10.10.10.20:8081",
+      "upstream": "http://10.10.10.92:8081",
       "gateway_prefix": "/v1/mail-platform",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
@@ -160,7 +160,7 @@
     {
       "id": "openbao",
       "name": "OpenBao",
-      "upstream": "https://10.10.10.20:8200",
+      "upstream": "https://10.10.10.92:8200",
       "gateway_prefix": "/v1/openbao",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
@@ -171,7 +171,7 @@
     {
       "id": "openfga",
       "name": "OpenFGA",
-      "upstream": "http://10.10.10.20:8098",
+      "upstream": "http://10.10.10.92:8098",
       "gateway_prefix": "/v1/openfga",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
@@ -304,7 +304,7 @@
     {
       "id": "semaphore",
       "name": "Semaphore",
-      "upstream": "http://10.10.10.20:3004",
+      "upstream": "http://10.10.10.92:3004",
       "gateway_prefix": "/v1/semaphore",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
@@ -351,7 +351,7 @@
     {
       "id": "vaultwarden",
       "name": "Vaultwarden",
-      "upstream": "https://10.10.10.20:8222",
+      "upstream": "https://10.10.10.92:8222",
       "gateway_prefix": "/v1/vaultwarden",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
@@ -362,7 +362,7 @@
     {
       "id": "windmill",
       "name": "Windmill",
-      "upstream": "http://10.10.10.20:8000",
+      "upstream": "http://10.10.10.92:8000",
       "gateway_prefix": "/v1/windmill",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",

@@ -27,7 +27,7 @@
 # Last Updated: 2026-03-30
 
 - name: Converge Mailpit on the runtime-general VM
-  hosts: "{{ playbook_execution_host_patterns.runtime_general[playbook_execution_env] }}"
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-general-lv3' }}"
   become: true
   gather_facts: true
   tags:

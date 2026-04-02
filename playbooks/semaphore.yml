@@ -37,8 +37,8 @@
     - role: lv3.platform.postgres_vm
     - role: lv3.platform.semaphore_postgres
 
-- name: Converge Semaphore on the Docker runtime VM
-  hosts: docker-runtime-lv3
+- name: Converge Semaphore on the runtime-control VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
   gather_facts: true
   tags:
@@ -54,7 +54,7 @@
         playbook_execution_audit_action: playbook.start.semaphore
         playbook_execution_audit_target: semaphore
         required_hosts:
-          - docker-runtime-lv3
+          - "{{ playbook_execution_required_hosts.runtime_control[playbook_execution_env] }}"
 
   roles:
     - role: lv3.platform.linux_guest_firewall

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook converges ADR 0043 by deploying a private OpenBao service on `docker-runtime-lv3`, seeding the current platform secret sets into OpenBao, enabling Transit, and wiring PostgreSQL dynamic credentials through `postgres-lv3`.
+This runbook converges ADR 0043 by deploying a private OpenBao service on `runtime-control-lv3`, seeding the current platform secret sets into OpenBao, enabling Transit, and wiring PostgreSQL dynamic credentials through `postgres-lv3`.
 
 ## Entry Point
 
@@ -21,12 +21,12 @@ make syntax-check-openbao
 ## Preconditions
 
 1. The controller SSH key exists at `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519`.
-2. `docker-runtime-lv3` and `postgres-lv3` are reachable through the Proxmox jump path.
+2. `runtime-control-lv3` and `postgres-lv3` are reachable through the Proxmox jump path.
 3. The existing controller-local mail, monitoring, and Proxmox API artifacts are present so the workflow can seed them into OpenBao.
 
 ## What The Workflow Changes
 
-1. Reuses the shared ADR 0067 guest network policy that allows `docker-runtime-lv3` to reach `postgres-lv3`, while this workflow manages PostgreSQL authentication through `pg_hba.conf`.
+1. Reuses the shared ADR 0067 guest network policy that allows `runtime-control-lv3` to reach `postgres-lv3`, while this workflow manages PostgreSQL authentication through `pg_hba.conf`.
 2. Creates the `openbao_rotator` PostgreSQL role with the minimum privileges needed to issue dynamic read-only credentials.
 3. Starts a Compose-managed OpenBao container under `/opt/openbao` with integrated Raft storage, a loopback-published HTTP listener on `127.0.0.1:8201`, an optional guest-IP-published private HTTP listener for bounded automation consumers such as `docker-build-lv3`, and a managed step-ca-backed TLS listener on `:8200`.
 4. Initializes and unseals OpenBao once, then mirrors the bootstrap init payload to `.local/openbao/init.json` on the controller.
@@ -63,14 +63,14 @@ worktrees do not invalidate each other by consuming a shared single-use file.
 Basic runtime checks:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 docker compose --file /opt/openbao/docker-compose.yml ps'
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 curl -fsS http://127.0.0.1:8201/v1/sys/health'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.92 docker compose --file /opt/openbao/docker-compose.yml ps'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.92 curl -fsS http://127.0.0.1:8201/v1/sys/health'
 ```
 
 Routine operator login over an SSH port forward:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -L 8201:127.0.0.1:8201 ops@100.64.0.1 'ssh -o ExitOnForwardFailure=yes -N -L 8201:127.0.0.1:8201 ops@10.10.10.20'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -L 8201:127.0.0.1:8201 ops@100.64.0.1 'ssh -o ExitOnForwardFailure=yes -N -L 8201:127.0.0.1:8201 ops@10.10.10.92'
 curl --request POST --data "{\"password\":\"$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/ops-password.txt)\"}" http://127.0.0.1:8201/v1/auth/userpass/login/ops
 ```
 
@@ -118,7 +118,7 @@ curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local
   guest IP when a bounded caller such as `docker-build-lv3` needs direct access.
   Keep that publication private and rely on the guest firewall to scope it to
   the declared automation source only.
-- The external OpenBao API on `https://100.118.189.95:8200` is private-only, published through the Proxmox host Tailscale path, and requires a valid client certificate signed by `step-ca`.
+- The external OpenBao API on `https://100.64.0.1:8200` is private-only, published through the Proxmox host Tailscale path, and requires a valid client certificate signed by `step-ca`.
 - The current implementation seeds existing mail, monitoring, Proxmox API, Windmill, and mail-profile artifacts into OpenBao so later consumers can fetch them without reintroducing git-managed secrets.
 - Dedicated rotatable secret paths and their metadata now align with `config/secret-catalog.json`, so future scheduled evaluators can inspect bounded credential age directly in OpenBao.
 
@@ -154,7 +154,7 @@ If a future rerun still leaves the guest runtime broken, the failure usually pre
 
 If the automated cleanup still cannot recover the guest runtime, repair it in this order:
 
-1. Restart Docker on `docker-runtime-lv3`.
+1. Restart Docker on `runtime-control-lv3`.
 2. Remove the broken `lv3-openbao` container.
 3. Remove the detached `openbao_default` network.
 4. Recreate the stack with `docker compose --file /opt/openbao/docker-compose.yml up -d`.

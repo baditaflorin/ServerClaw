@@ -178,7 +178,7 @@
           "service_id": "api_gateway",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}",
           "target_port": 443
         }
       },
@@ -218,7 +218,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -3104,7 +3104,7 @@
           "service_id": "keycloak",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://10.10.10.20:8091",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:8091",
           "target_port": 443
         }
       },
@@ -3144,7 +3144,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://10.10.10.20:8091"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:8091"
         },
         "tls": {
           "provider": "letsencrypt",

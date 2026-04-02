@@ -23,7 +23,7 @@ replayable from the repository.
 - Keycloak is already converged, the named operator account exists for the
   stable `principal:keycloak-user__florin.badita` reference, and the
   `serverclaw-runtime` client can issue client-credentials tokens.
-- PostgreSQL and `docker-runtime-lv3` are reachable through the standard
+- PostgreSQL and `runtime-control-lv3` are reachable through the standard
   Proxmox jump path.
 
 ## Converge
@@ -38,8 +38,8 @@ The converge flow:
 
 - configures the Proxmox host Tailscale proxy for the private controller URL
 - provisions the `openfga` PostgreSQL role and database
-- deploys the OpenFGA runtime on `docker-runtime-lv3`
-- keeps the guest-reachable runtime contract on `http://10.10.10.20:8098` for
+- deploys the OpenFGA runtime on `runtime-control-lv3`
+- keeps the guest-reachable runtime contract on `http://10.10.10.92:8098` for
   SLO probes, k6 smoke/load validation, and other guest-network callers
 - writes the runtime datastore URI and preshared API key through the OpenBao
   compose env helper
@@ -59,18 +59,18 @@ python3 scripts/serverclaw_authz.py verify \
   --config config/serverclaw-authz/bootstrap.json \
   --openfga-url http://100.64.0.1:8014 \
   --openfga-preshared-key-file .local/openfga/preshared-key.txt \
-  --keycloak-url http://10.10.10.20:8091
+  --keycloak-url http://10.10.10.92:8091
 ```
 
 Expected results:
 
-- `http://127.0.0.1:8098/healthz` returns `200 ok` on `docker-runtime-lv3`
-- `http://10.10.10.20:8098/healthz` stays reachable from the private guest
+- `http://127.0.0.1:8098/healthz` returns `200 ok` on `runtime-control-lv3`
+- `http://10.10.10.92:8098/healthz` stays reachable from the private guest
   network and is the canonical probe target for SLO and k6 validation
 - `http://100.64.0.1:8014/stores` returns `200` when the repo-managed
   preshared key is presented
 - the controller-side bootstrap and verify steps use the VM-private Keycloak
-  listener at `http://10.10.10.20:8091` so delegated-authz validation does not
+  listener at `http://10.10.10.92:8091` so delegated-authz validation does not
   depend on the public `sso.lv3.org` edge route
 - the bootstrap report records the declared Keycloak operator principal and a
   live client-credentials token for `serverclaw-runtime`
@@ -88,8 +88,8 @@ Expected results:
 - Re-run `make converge-openfga env=production` instead of hand-editing the
   OpenFGA store, tuples, or the runtime Keycloak client.
 - Keep the OpenFGA runtime on `8098`; `8096` is already occupied by the
-  separate `browser-runner` stack on `docker-runtime-lv3`. Treat
-  `http://10.10.10.20:8098` as the canonical guest-network runtime URL, while
+  separate `browser-runner` stack on `runtime-control-lv3`. Treat
+  `http://10.10.10.92:8098` as the canonical guest-network runtime URL, while
   the controller-private OpenFGA endpoint remains
   `http://100.64.0.1:8014` for controller-local bootstrap and bearer-key
   verification.
@@ -98,8 +98,8 @@ Expected results:
 - If the authz checks fail after runtime-client recreation, re-run the OpenFGA
   converge so the latest Keycloak runtime client and tuple seed are replayed
   together.
-- During shared `docker-runtime-lv3` converges, verify
-  `http://10.10.10.20:8098/healthz` from the build host before re-running k6
+- During shared `runtime-control-lv3` converges, verify
+  `http://10.10.10.92:8098/healthz` from the build host before re-running k6
   smoke/load probes; brief container restart churn can present as transient
   connection refusals without indicating repository drift.
 - Re-run `make converge-api-gateway env=production` after modifying

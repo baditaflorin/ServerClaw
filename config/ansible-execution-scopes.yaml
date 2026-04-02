@@ -1,7 +1,8 @@
 playbooks:
   playbooks/api-gateway.yml:
     playbook_id: api-gateway
-    mutation_scope: host
+    mutation_scope: lane
+    target_lane: lane:runtime-control
     shared_surfaces:
       - service:api-gateway
       - config/api-gateway-catalog.json
@@ -233,6 +234,19 @@ playbooks:
       - config/execution-lanes.yaml
       - config/health-probe-catalog.json
       - config/service-capability-catalog.json
+  playbooks/runtime-control-pool.yml:
+    playbook_id: runtime-control-pool
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-control-pool
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - config/execution-lanes.yaml
+      - config/api-gateway-catalog.json
+      - config/health-probe-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
   playbooks/mattermost.yml:
     playbook_id: mattermost
     mutation_scope: platform
@@ -266,7 +280,8 @@ playbooks:
   playbooks/nats-jetstream.yml:
     playbook_id: nats-jetstream
     canonical_service_id: nats_jetstream
-    mutation_scope: host
+    mutation_scope: lane
+    target_lane: lane:runtime-control
     shared_surfaces:
       - service:nats-jetstream
       - inventory/host_vars/proxmox_florin.yml
@@ -506,6 +521,19 @@ playbooks:
     shared_surfaces:
       - service:harbor
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/runtime-control-pool.yml:
+    playbook_id: runtime-control-pool
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-control-pool
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - config/execution-lanes.yaml
+      - config/api-gateway-catalog.json
+      - config/health-probe-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
   playbooks/services/nextcloud.yml:
     playbook_id: nextcloud
     mutation_scope: platform

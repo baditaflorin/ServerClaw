@@ -18,7 +18,7 @@
       run_once: true
 
 - name: Converge Uptime Kuma on the runtime-general VM
-  hosts: "{{ playbook_execution_host_patterns.runtime_general[playbook_execution_env] }}"
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-general-lv3' }}"
   become: true
   gather_facts: true
   tags:
@@ -40,7 +40,7 @@
     - role: lv3.platform.uptime_kuma_runtime
 
 - name: Publish Uptime Kuma through the NGINX edge
-  hosts: "{{ playbook_execution_host_patterns.nginx_edge[playbook_execution_env] }}"
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
   become: true
   gather_facts: true
   vars_files:

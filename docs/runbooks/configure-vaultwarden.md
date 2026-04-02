@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook converges ADR 0147 by deploying a private Vaultwarden service on `docker-runtime-lv3`, provisioning its PostgreSQL backend on `postgres-lv3`, publishing it only through the Proxmox host Tailscale path, and seeding the bounded admin bootstrap path.
+This runbook converges ADR 0147 by deploying a private Vaultwarden service on `runtime-control-lv3`, provisioning its PostgreSQL backend on `postgres-lv3`, publishing it only through the Proxmox host Tailscale path, and seeding the bounded admin bootstrap path.
 
 ## Entry Point
 
@@ -21,14 +21,14 @@ make syntax-check-vaultwarden
 ## Preconditions
 
 1. The controller SSH key exists at `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519`.
-2. `docker-runtime-lv3`, `postgres-lv3`, and the private `step-ca` service are already reachable through the Proxmox jump path.
+2. `runtime-control-lv3`, `postgres-lv3`, and the private `step-ca` service are already reachable through the Proxmox jump path.
 3. Operators who need browser or Bitwarden-extension access trust the LV3 internal CA root certificate from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt`.
 
 ## What The Workflow Changes
 
 1. Creates the `vaultwarden` PostgreSQL database and login role on `postgres-lv3`.
 2. Generates a controller-local database password and admin token under `.local/vaultwarden/`.
-3. Issues a private TLS certificate for `vault.lv3.org` from `step-ca` and installs a managed renewal timer on `docker-runtime-lv3`.
+3. Issues a private TLS certificate for `vault.lv3.org` from `step-ca` and installs a managed renewal timer on `runtime-control-lv3`.
 4. Starts a Compose-managed Vaultwarden container under `/opt/vaultwarden`.
 5. Publishes the HTTPS listener through the Proxmox host Tailscale TCP proxy so operators use `https://vault.lv3.org`.
 6. Invites `ops@lv3.org` through the Vaultwarden admin API if that account has not already been created.
@@ -54,7 +54,7 @@ curl --http1.1 \
   --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt \
   --resolve vault.lv3.org:443:100.64.0.1 \
   https://vault.lv3.org/alive
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/vaultwarden/docker-compose.yml ps'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.92 'docker compose --file /opt/vaultwarden/docker-compose.yml ps'
 ```
 
 Admin bootstrap smoke test:

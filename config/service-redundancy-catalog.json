@@ -51,13 +51,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_192"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when the API gateway container, config, or shared runtime data cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the API gateway converge from git."
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when the API gateway container, config, or shared runtime data cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the API gateway converge from git."
       }
     },
     "backup_pbs": {
@@ -289,13 +289,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_192"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when the Gitea runtime or its persistent state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Gitea converge and runner reconnect workflow."
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when the Gitea runtime or its persistent state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Gitea converge and runner reconnect workflow."
       }
     },
     "gotenberg": {
@@ -357,13 +357,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_192"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when Harbor or its persisted registry state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Harbor converge and registry verification workflow."
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when Harbor or its persisted registry state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Harbor converge and registry verification workflow."
       }
     },
     "headscale": {
@@ -460,13 +460,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_192"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when Keycloak or its dependent runtime state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Keycloak converge and identity verification flow."
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when Keycloak or its dependent runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Keycloak converge and identity verification flow."
       }
     },
     "langfuse": {
@@ -528,13 +528,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_192"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when the mail platform or its runtime state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the mail-platform converge from git."
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when the mail platform or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the mail-platform converge from git."
       }
     },
     "mailpit": {
@@ -647,13 +647,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_192"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when the NATS JetStream runtime or its persisted stream state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the NATS JetStream converge and stream reconcile from git."
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when the NATS JetStream runtime or its persisted stream state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the NATS JetStream converge and stream reconcile from git."
       }
     },
     "nextcloud": {
@@ -852,13 +852,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_192"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when OpenBao or its sealed runtime state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the OpenBao converge and unseal workflow from git."
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when OpenBao or its sealed runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the OpenBao converge and unseal workflow from git."
       }
     },
     "openfga": {
@@ -869,13 +869,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_192"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when OpenFGA, its private host proxy contract, or its delegated authorization runtime state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, rerun the OpenFGA converge and API gateway converge from git, and replay the repo-managed delegated authorization bootstrap verification."
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when OpenFGA, its private host proxy contract, or its delegated authorization runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, rerun the OpenFGA converge and API gateway converge from git, and replay the repo-managed delegated authorization bootstrap verification."
       }
     },
     "temporal": {
@@ -886,14 +886,14 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120",
+        "pbs_vm_192",
         "pbs_vm_150"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 or postgres-lv3 when the Temporal runtime, namespace bootstrap, or workflow history stores cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3 and postgres-lv3 as needed, then rerun the Temporal converge from git and replay the smoke verification."
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 or postgres-lv3 when the Temporal runtime, namespace bootstrap, or workflow history stores cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3 and postgres-lv3 as needed, then rerun the Temporal converge from git and replay the smoke verification."
       }
     },
     "ops_portal": {
@@ -1077,13 +1077,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_192"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when Semaphore or its runtime state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Semaphore converge from git."
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when Semaphore or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Semaphore converge from git."
       }
     },
     "status_page": {
@@ -1111,13 +1111,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_192"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when step-ca or its runtime state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the step-ca converge from git."
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when step-ca or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the step-ca converge from git."
       }
     },
     "superset": {
@@ -1214,13 +1214,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_192"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when Vaultwarden or its persistent state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Vaultwarden converge from git."
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when Vaultwarden or its persistent state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Vaultwarden converge from git."
       }
     },
     "windmill": {
@@ -1231,13 +1231,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_192"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime-lv3",
-        "failover_trigger": "Restore docker-runtime-lv3 when Windmill or its runtime state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Windmill converge from git."
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when Windmill or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Windmill converge from git."
       }
     },
     "woodpecker": {

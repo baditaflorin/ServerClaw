@@ -12,7 +12,7 @@
 #
 # Outputs:
 #   - Repo-managed Nomad TLS and ACL bootstrap artifacts exist under .local/nomad on the controller.
-#   - monitoring-lv3 runs the private Nomad server and docker-runtime-lv3 plus runtime-general-lv3 plus docker-build-lv3 and runtime-ai-lv3 run Nomad clients.
+#   - monitoring-lv3 runs the private Nomad server and docker-runtime-lv3 plus runtime-general-lv3 plus runtime-ai-lv3 plus runtime-control-lv3 plus docker-build-lv3 run Nomad clients.
 #   - The Proxmox host exposes the private Nomad API through the Tailscale TCP proxy catalog.
 #   - Repo-managed long-running and dispatchable smoke jobs are registered and verified end to end.
 #
@@ -21,7 +21,7 @@
 #
 # Dependencies:
 #   - ADR 0232: Nomad for durable batch and long-running internal jobs.
-#   - Requires: Existing Proxmox host access, monitoring-lv3, docker-runtime-lv3, runtime-general-lv3, docker-build-lv3, and runtime-ai-lv3 guests.
+#   - Requires: Existing Proxmox host access, monitoring-lv3, docker-runtime-lv3, runtime-general-lv3, runtime-ai-lv3, runtime-control-lv3, and docker-build-lv3 guests.
 #   - Role: lv3.platform.nomad_cluster_bootstrap — generates controller-local TLS artifacts, bootstraps ACLs, and verifies smoke jobs.
 #   - Role: lv3.platform.nomad_cluster_member — installs and configures the Nomad agent on server and client nodes.
 #
@@ -94,13 +94,13 @@
         nomad_cluster_server: true
         nomad_cluster_client: false
 
-- name: Converge the Nomad clients on the runtime, runtime-general, runtime-ai, and build guests
+- name: Converge the Nomad clients on the runtime, runtime-general, runtime-ai, runtime-control, and build guests
   hosts: >-
     {{
       (
         'docker-runtime-staging-lv3:docker-build-staging-lv3'
         if (env | default('production')) == 'staging'
-        else 'docker-runtime-lv3:runtime-general-lv3:runtime-ai-lv3:docker-build-lv3'
+        else 'docker-runtime-lv3:runtime-general-lv3:runtime-ai-lv3:runtime-control-lv3:docker-build-lv3'
       )
     }}
   become: true
@@ -123,6 +123,7 @@
           - "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
           - "{{ playbook_execution_host_patterns.runtime_general[playbook_execution_env] }}"
           - "{{ playbook_execution_host_patterns.runtime_ai[playbook_execution_env] }}"
+          - "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
           - "{{ playbook_execution_host_patterns.docker_build[playbook_execution_env] }}"
 
   roles:
@@ -140,6 +141,8 @@
             if inventory_hostname == 'runtime-general-lv3'
             else 'runtime-ai'
             if inventory_hostname == 'runtime-ai-lv3'
+            else 'runtime-control'
+            if inventory_hostname == 'runtime-control-lv3'
             else 'runtime'
           }}
         nomad_cluster_node_meta:
@@ -151,6 +154,8 @@
               if inventory_hostname == 'runtime-general-lv3'
               else 'runtime-ai'
               if inventory_hostname == 'runtime-ai-lv3'
+              else 'runtime-control'
+              if inventory_hostname == 'runtime-control-lv3'
               else 'runtime'
             }}
 
@@ -177,6 +182,7 @@
           - "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
           - "{{ playbook_execution_host_patterns.runtime_general[playbook_execution_env] }}"
           - "{{ playbook_execution_host_patterns.runtime_ai[playbook_execution_env] }}"
+          - "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
           - "{{ playbook_execution_host_patterns.docker_build[playbook_execution_env] }}"
 
   roles:

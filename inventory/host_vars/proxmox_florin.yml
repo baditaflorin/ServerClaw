@@ -124,7 +124,7 @@ platform_port_assignments:
   vaultwarden_https_port: 8222
 monitoring_prometheus_listen_address: 0.0.0.0:9090
 openbao_http_extra_bind_addresses:
-  - "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+  - "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
 proxmox_tailscale_hostname: proxmox-florin-subnet-router
 proxmox_tailscale_login_server: https://headscale.lv3.org
 proxmox_tailscale_tags: []
@@ -141,7 +141,7 @@ proxmox_public_ingress_tcp_ports:
   - 7881
 proxmox_public_ingress_tcp_forwards:
   - listen_port: 25
-    target_host: 10.10.10.20
+    target_host: 10.10.10.92
     target_port: 25
   - listen_port: 80
     target_host: 10.10.10.10
@@ -150,10 +150,10 @@ proxmox_public_ingress_tcp_forwards:
     target_host: 10.10.10.10
     target_port: 443
   - listen_port: 587
-    target_host: 10.10.10.20
+    target_host: 10.10.10.92
     target_port: 587
   - listen_port: 993
-    target_host: 10.10.10.20
+    target_host: 10.10.10.92
     target_port: 993
   - listen_port: 7881
     target_host: 10.10.10.20
@@ -187,7 +187,7 @@ proxmox_tailscale_tcp_proxies:
   - name: windmill
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.windmill_host_proxy_port }}"
-    upstream_host: 10.10.10.20
+    upstream_host: 10.10.10.92
     upstream_port: 8000
   - name: nomad
     listen_address: "{{ management_tailscale_ipv4 }}"
@@ -207,7 +207,7 @@ proxmox_tailscale_tcp_proxies:
   - name: gitea
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.gitea_host_proxy_port }}"
-    upstream_host: 10.10.10.20
+    upstream_host: 10.10.10.92
     upstream_port: "{{ platform_port_assignments.gitea_http_port }}"
   - name: netbox
     listen_address: "{{ management_tailscale_ipv4 }}"
@@ -222,22 +222,22 @@ proxmox_tailscale_tcp_proxies:
   - name: step-ca
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.step_ca_proxy_port }}"
-    upstream_host: 10.10.10.20
+    upstream_host: 10.10.10.92
     upstream_port: "{{ platform_port_assignments.step_ca_api_port }}"
   - name: openbao
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.openbao_proxy_port }}"
-    upstream_host: 10.10.10.20
+    upstream_host: 10.10.10.92
     upstream_port: "{{ platform_port_assignments.openbao_proxy_port }}"
   - name: openfga
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.openfga_host_proxy_port }}"
-    upstream_host: 10.10.10.20
+    upstream_host: 10.10.10.92
     upstream_port: "{{ platform_port_assignments.openfga_http_port }}"
   - name: semaphore
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.semaphore_host_proxy_port }}"
-    upstream_host: 10.10.10.20
+    upstream_host: 10.10.10.92
     upstream_port: "{{ platform_port_assignments.semaphore_server_port }}"
   - name: plane
     listen_address: "{{ management_tailscale_ipv4 }}"
@@ -542,6 +542,28 @@ proxmox_guests:
       anti_affinity_group: runtime-general
       co_location_exceptions: []
     packages: []
+  - vmid: 192
+    name: runtime-control-lv3
+    role: runtime-control
+    template_key: lv3-debian-base
+    ipv4: 10.10.10.92
+    cidr: 24
+    gateway4: 10.10.10.1
+    macaddr: BC:24:11:19:0A:92
+    cores: 4
+    memory_mb: 12288
+    disk_gb: 128
+    tags:
+      - docker
+      - runtime
+      - control
+      - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: runtime-control
+      co_location_exceptions: []
+    packages: []
 
 network_policy:
   guest_management_sources:
@@ -570,13 +592,6 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
-        - source: public
-          protocol: tcp
-          ports:
-            - 25
-            - 587
-            - 993
-          description: Public mail ingress forwarded by the host
         - source: management
           protocol: tcp
           ports:
@@ -634,23 +649,10 @@ network_policy:
             - 8103
             - 8104
           description: Local Docker workloads using the private Redpanda Kafka, HTTP Proxy, and Schema Registry listeners
-        - source: 172.16.0.0/12
-          protocol: tcp
-          ports:
-            - 1587
-          description: Local Docker workloads using the private mail submission relay
-        - source: 192.168.0.0/16
-          protocol: tcp
-          ports:
-            - 1587
-          description: Local Docker workloads using the private mail submission relay
         - source: host
           protocol: tcp
           ports:
-            - 3003
-            - 3004
             - 5000
-            - 8000
             - 8008
             - 8010
             - 8018
@@ -658,10 +660,7 @@ network_policy:
             - 8082
             - 8088
             - 8102
-            - 8200
-            - 8222
             - 8881
-            - 9000
             - 9443
           description: Host-side private service proxies
         - source: all_guests
@@ -769,11 +768,6 @@ network_policy:
           ports:
             - 8105
           description: Proxmox host verification and controller-side access to the private Superset runtime
-        - source: host
-          protocol: tcp
-          ports:
-            - 8098
-          description: Proxmox host verification and controller-side access to the private OpenFGA API
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
@@ -814,17 +808,6 @@ network_policy:
             - 8881
             - 11434
           description: Local Docker workloads that use the private Changedetection, Directus, One-API, Crawl4AI, Ollama, and SearXNG APIs
-        - source: docker-build-lv3
-          protocol: tcp
-          ports:
-            - 3003
-            - 8098
-          description: Gitea Actions runner access from docker-build-lv3
-        - source: docker-build-lv3
-          protocol: tcp
-          ports:
-            - 8201
-          description: OpenBao automation access from docker-build-lv3
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -843,21 +826,6 @@ network_policy:
         - source: nginx-lv3
           protocol: tcp
           ports:
-            - 8091
-          description: Edge and oauth2-proxy access to Keycloak
-        - source: 172.16.0.0/12
-          protocol: tcp
-          ports:
-            - 8091
-          description: Local Docker workloads that validate or broker Keycloak tokens
-        - source: 192.168.0.0/16
-          protocol: tcp
-          ports:
-            - 8091
-          description: Local Docker workloads that validate or broker Keycloak tokens
-        - source: nginx-lv3
-          protocol: tcp
-          ports:
             - 8092
           description: Reverse proxy access to the interactive ops portal
         - source: nginx-lv3
@@ -865,11 +833,6 @@ network_policy:
           ports:
             - 8105
           description: Reverse proxy access to the Superset BI workspace
-        - source: nginx-lv3
-          protocol: tcp
-          ports:
-            - 8095
-          description: Edge access to the Harbor registry and operator UI
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -905,20 +868,14 @@ network_policy:
           ports:
             - 8084
           description: Local Docker workloads that reach Nextcloud over the private runtime listener
-        - source: nginx-lv3
-          protocol: tcp
-          ports:
-            - 8083
-          description: Edge access to the unified platform API gateway
         - source: monitoring-lv3
           protocol: tcp
           ports:
-            - 8098
             - 5000
             - 8089
             - 8100
             - 8101
-          description: Private monitoring probes for the OpenFGA, Changedetection, Dozzle, Piper, and One-API runtimes
+          description: Private monitoring probes for the Changedetection, Dozzle, Piper, and One-API runtimes
         - source: monitoring-lv3
           protocol: tcp
           ports:
@@ -955,11 +912,6 @@ network_policy:
           ports:
             - 2586
           description: Alertmanager access to the private ntfy paging gateway
-        - source: monitoring-lv3
-          protocol: tcp
-          ports:
-            - 4222
-          description: Alertmanager pgaudit relay access to the private NATS JetStream listener
         - source: monitoring-lv3
           protocol: tcp
           ports:
@@ -1091,6 +1043,94 @@ network_policy:
             - 8025
             - 9080
           description: Private monitoring probes for the runtime-general router and moved support services
+    runtime-control-lv3:
+      allow_container_forwarding: true
+      allowed_inbound:
+        - source: management
+          protocol: tcp
+          ports:
+            - 22
+          description: Operator and Ansible SSH access
+        - source: public
+          protocol: tcp
+          ports:
+            - 25
+            - 587
+            - 993
+          description: Public mail ingress forwarded by the host
+        - source: host
+          protocol: tcp
+          ports:
+            - 1587
+            - 3003
+            - 3004
+            - 3500
+            - 8000
+            - 8081
+            - 8083
+            - 8091
+            - 8095
+            - 8098
+            - 8200
+            - 8222
+            - 9000
+            - 9080
+            - 9443
+          description: Proxmox host verification, host proxies, and runtime-control substrate access
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 1587
+            - 4222
+            - 8081
+            - 8091
+            - 8098
+            - 9080
+          description: Private guest-to-guest access to the control-plane mail relay, event bus, identity, authz, and runtime-control router
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 1587
+            - 4222
+            - 8091
+            - 9080
+          description: Local Docker workloads using the runtime-control mail relay, NATS listener, Keycloak API, and Traefik router
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 1587
+            - 4222
+            - 8091
+            - 9080
+          description: Local Docker workloads using the runtime-control mail relay, NATS listener, Keycloak API, and Traefik router
+        - source: docker-build-lv3
+          protocol: tcp
+          ports:
+            - 3003
+            - 8098
+            - 8201
+          description: Gitea Actions runner access plus OpenBao automation access from docker-build-lv3
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 8083
+            - 8091
+            - 8095
+          description: Shared edge access to the API gateway, Keycloak, and Harbor
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 4222
+            - 4647
+            - 8000
+            - 8081
+            - 8083
+            - 8091
+            - 8095
+            - 8098
+            - 9000
+            - 9443
+          description: Private monitoring probes plus Nomad server RPC for the control-plane services and substrate
     monitoring-lv3:
       allowed_inbound:
         - source: management
@@ -1174,6 +1214,11 @@ network_policy:
           ports:
             - 4647
           description: Nomad client RPC from runtime-ai-lv3
+        - source: runtime-control-lv3
+          protocol: tcp
+          ports:
+            - 4647
+          description: Nomad client RPC from runtime-control-lv3
         - source: runtime-general-lv3
           protocol: tcp
           ports:
@@ -1702,8 +1747,8 @@ lv3_service_topology:
       root_proxy_path: /status/lv3-platform
   mail_platform:
     service_name: mail-platform
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-control-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
     public_hostname: mail.lv3.org
     exposure_model: informational-only
     observability:
@@ -1766,8 +1811,8 @@ lv3_service_topology:
       service_telemetry: false
   step_ca:
     service_name: step-ca
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-control-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1801,8 +1846,8 @@ lv3_service_topology:
       service_telemetry: false
   semaphore:
     service_name: semaphore
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-control-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1812,8 +1857,8 @@ lv3_service_topology:
       url: "{{ semaphore_controller_url }}"
   windmill:
     service_name: windmill
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-control-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1834,8 +1879,8 @@ lv3_service_topology:
       url: "{{ nomad_controller_url }}"
   gitea:
     service_name: gitea
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-control-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
     public_hostname: git.lv3.org
     exposure_model: private-only
     observability:
@@ -2427,8 +2472,8 @@ lv3_service_topology:
       preserve_upstream_security_headers: true
   api_gateway:
     service_name: api-gateway
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-control-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
     public_hostname: api.lv3.org
     exposure_model: edge-published
     observability:
@@ -2445,7 +2490,7 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}"
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}"
   browser_runner:
     service_name: browser-runner
     owning_vm: docker-runtime-lv3
@@ -2483,8 +2528,8 @@ lv3_service_topology:
       url: "{{ platform_context_controller_url }}"
   keycloak:
     service_name: keycloak
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-control-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -2501,11 +2546,11 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8091
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:8091"
   harbor:
     service_name: harbor
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-control-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
     public_hostname: registry.lv3.org
     exposure_model: edge-published
     observability:
@@ -2522,7 +2567,7 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "http://10.10.10.20:{{ platform_port_assignments.harbor_port }}"
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.harbor_port }}"
       client_max_body_size: 0
       chunked_transfer_encoding: true
       proxy_request_buffering: false
@@ -2572,8 +2617,8 @@ lv3_service_topology:
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.homepage_port }}"
   openbao:
     service_name: openbao
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-control-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -2583,8 +2628,8 @@ lv3_service_topology:
       url: "{{ openbao_controller_url }}"
   openfga:
     service_name: openfga
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-control-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -2593,8 +2638,8 @@ lv3_service_topology:
       kind: tailscale-tcp-proxy
   temporal:
     service_name: temporal
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-control-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -2634,8 +2679,8 @@ lv3_service_topology:
       url: "{{ portainer_controller_url }}"
   vaultwarden:
     service_name: vaultwarden
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-control-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
     public_hostname: vault.lv3.org
     exposure_model: private-only
     observability:

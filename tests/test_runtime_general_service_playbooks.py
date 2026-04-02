@@ -13,8 +13,8 @@ UPTIME_KUMA_SERVICE_PLAYBOOK = REPO_ROOT / "playbooks" / "services" / "uptime-ku
 def test_homepage_playbook_targets_runtime_general_and_keeps_edge_publication() -> None:
     plays = yaml.safe_load(HOMEPAGE_PLAYBOOK.read_text())
 
-    assert plays[0]["hosts"] == "{{ playbook_execution_host_patterns.runtime_general[playbook_execution_env] }}"
-    assert plays[1]["hosts"] == "{{ playbook_execution_host_patterns.nginx_edge[playbook_execution_env] }}"
+    assert plays[0]["hosts"] == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-general-lv3' }}"
+    assert plays[1]["hosts"] == "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
     preflight = next(task for task in plays[0]["pre_tasks"] if task["name"] == "Run shared preflight checks")
     assert preflight["vars"]["required_hosts"] == [
         "{{ playbook_execution_required_hosts.runtime_general[playbook_execution_env] }}"
@@ -24,8 +24,8 @@ def test_homepage_playbook_targets_runtime_general_and_keeps_edge_publication() 
 def test_uptime_kuma_playbook_targets_runtime_general_and_keeps_edge_publication() -> None:
     plays = yaml.safe_load(UPTIME_KUMA_PLAYBOOK.read_text())
 
-    assert plays[1]["hosts"] == "{{ playbook_execution_host_patterns.runtime_general[playbook_execution_env] }}"
-    assert plays[2]["hosts"] == "{{ playbook_execution_host_patterns.nginx_edge[playbook_execution_env] }}"
+    assert plays[1]["hosts"] == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-general-lv3' }}"
+    assert plays[2]["hosts"] == "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
     preflight = next(task for task in plays[1]["pre_tasks"] if task["name"] == "Run shared preflight checks")
     assert preflight["vars"]["required_hosts"] == [
         "{{ playbook_execution_required_hosts.runtime_general[playbook_execution_env] }}"

@@ -1,0 +1,341 @@
+# Playbook: runtime-control-pool.yml
+# Purpose: Provision the dedicated runtime-control guest, converge the Nomad/Traefik/Dapr pool substrate, move the fixed-capacity control-plane slice onto it, and retire the legacy copies from docker-runtime-lv3.
+# Use case: Run for ADR 0319 and ADR 0320 follow-on work when the production runtime-control pool must become true end to end.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (path, required via make targets): SSH private key used for the Proxmox host and guest jump path.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Deployment environment selector. This playbook currently converges only the production runtime-control guest.
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH routing mode for guest access.
+#   - platform_trace_id (string, optional): Mutation-audit trace identifier propagated by the make wrapper.
+#
+# Outputs:
+#   - Dedicated VM `runtime-control-lv3` provisioned on Proxmox with Docker, guest firewall policy, named `ops` access, a runtime-control Nomad namespace and client, Traefik plus Dapr substrate services, and the migrated control-plane runtimes imported through their canonical service playbooks.
+#
+# Idempotency: Partially idempotent
+#              Provisioning, substrate, and imported service converges are idempotent. The Proxmox-side replay intentionally stop/starts VM 192 after `qm set` changes so the cloud-init-backed network and hardware settings become effective.
+#
+# Dependencies:
+#   - ADR 0319: Defines the runtime-control pool and the preferred Nomad, Traefik, and Dapr substrate.
+#   - ADR 0320: Defines the pool-scoped deployment surface and lane boundary.
+#   - ADR 0323: Governs the late migration wave for fixed-capacity control-plane anchors.
+#   - ADR 0232: Provides the private Nomad scheduler and client bootstrap path.
+#   - Role: lv3.platform.proxmox_guests — provisions the dedicated guest from the managed template catalog.
+#   - Role: lv3.platform.proxmox_network — replays the Proxmox host firewall so the new pool guest and the Nomad scheduler can reach each other.
+#   - Role: lv3.platform.linux_guest_firewall — refreshes the in-guest nftables policy on monitoring-lv3 after the canonical guest catalog changes so the Nomad scheduler admits the new runtime-control peer.
+#   - Role: lv3.platform.nomad_cluster_member — enrolls the runtime-control guest into the private Nomad cluster.
+#   - Role: lv3.platform.nomad_namespace — ensures the runtime-control namespace exists on the scheduler.
+#   - Role: lv3.platform.runtime_pool_substrate — converges the Traefik and Dapr pool substrate.
+#
+# Related ADRs: 0232, 0319, 0320, 0323
+# Related Runbooks: docs/runbooks/configure-runtime-control-pool.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-02
+---
+- name: Ensure the runtime-control VM is provisioned on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - automation
+    - service-runtime-control-pool
+  vars:
+    runtime_control_vm_vmid: 192
+    proxmox_guests_active: >-
+      {{
+        proxmox_guests
+        | selectattr('vmid', 'equalto', runtime_control_vm_vmid)
+        | list
+      }}
+
+  roles:
+    - role: lv3.platform.proxmox_guests
+      tags:
+        - guests
+        - runtime-control-pool
+    - role: lv3.platform.proxmox_network
+      tags:
+        - guests
+        - runtime-control-pool
+
+  post_tasks:
+    - name: Stop the runtime-control VM from Proxmox after qm set changes
+      ansible.builtin.command: "qm stop {{ runtime_control_vm_vmid }} --skiplock 1"
+      register: runtime_control_vm_stop
+      failed_when: runtime_control_vm_stop.rc not in [0, 255]
+      changed_when: true
+      tags:
+        - guests
+        - runtime-control-pool
+
+    - name: Start the runtime-control VM from Proxmox after the forced stop
+      ansible.builtin.command: "qm start {{ runtime_control_vm_vmid }}"
+      register: runtime_control_vm_start_after_stop
+      failed_when: runtime_control_vm_start_after_stop.rc not in [0, 255]
+      changed_when: runtime_control_vm_start_after_stop.rc == 0
+      tags:
+        - guests
+        - runtime-control-pool
+
+- name: Converge the dedicated runtime-control guest substrate
+  hosts: runtime-control-lv3
+  become: true
+  gather_facts: false
+  tags:
+    - tier-2
+    - automation
+    - service-runtime-control-pool
+  vars:
+    proxmox_guest_ssh_connection_mode: proxmox_host_jump
+    runtime_pool_substrate_pool_id: runtime-control
+    runtime_pool_substrate_entrypoint_name: runtime-control
+    runtime_pool_substrate_routes:
+      - route_id: api-gateway
+        prefix: /api-gateway
+        upstream: "http://127.0.0.1:{{ platform_port_assignments.api_gateway_internal_port }}"
+      - route_id: gitea
+        prefix: /gitea
+        upstream: "http://127.0.0.1:{{ platform_port_assignments.gitea_http_port }}"
+      - route_id: keycloak
+        prefix: /keycloak
+        upstream: http://127.0.0.1:18080
+      - route_id: mail-platform
+        prefix: /mail-platform
+        upstream: "http://127.0.0.1:{{ platform_port_assignments.mail_platform_gateway_port }}"
+      - route_id: openfga
+        prefix: /openfga
+        upstream: "http://127.0.0.1:{{ platform_port_assignments.openfga_http_port }}"
+      - route_id: semaphore
+        prefix: /semaphore
+        upstream: "http://127.0.0.1:{{ platform_port_assignments.semaphore_server_port }}"
+      - route_id: windmill
+        prefix: /windmill
+        upstream: "http://127.0.0.1:{{ platform_port_assignments.windmill_server_port }}"
+
+  pre_tasks:
+    - name: Wait for the runtime-control VM SSH service to be reachable
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Gather facts after SSH is ready
+      ansible.builtin.setup:
+
+    - name: Wait for cloud-init first boot work to finish when present
+      ansible.builtin.shell: |
+        if command -v cloud-init >/dev/null 2>&1; then
+          cloud-init status --wait
+        fi
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Wait for Debian package manager activity to settle after cloud-init
+      ansible.builtin.shell: |
+        for _ in $(seq 1 120); do
+          if ! pgrep -x apt-get >/dev/null \
+            && ! pgrep -x dpkg >/dev/null; then
+            exit 0
+          fi
+          sleep 5
+        done
+        exit 1
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Detect whether Docker is already active before the managed runtime converge
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - is-active
+          - docker.service
+      register: runtime_control_preexisting_docker
+      changed_when: false
+      failed_when: runtime_control_preexisting_docker.rc not in [0, 3, 4]
+
+    - name: Stop any preexisting Docker daemon before firewall evaluation
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - stop
+          - docker.service
+          - docker.socket
+      when: runtime_control_preexisting_docker.rc == 0
+      changed_when: true
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.linux_access
+      vars:
+        linux_access_admin_user: "{{ proxmox_guest_ci_user }}"
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.nomad_cluster_member
+      vars:
+        nomad_cluster_server: false
+        nomad_cluster_client: true
+        nomad_cluster_node_class: runtime-control
+        nomad_cluster_node_meta:
+          workload_pool: runtime-control
+    - role: lv3.platform.runtime_pool_substrate
+
+- name: Refresh monitoring guest firewall policy after the runtime-control peer catalog changes
+  hosts: monitoring-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-runtime-control-pool
+
+  pre_tasks:
+    - name: Ensure the monitoring guest target is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+      vars:
+        linux_guest_firewall_recover_missing_docker_bridge_chains: true
+
+- name: Ensure the runtime-control Nomad namespace exists
+  hosts: monitoring-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-runtime-control-pool
+
+  roles:
+    - role: lv3.platform.nomad_namespace
+      vars:
+        nomad_namespace_name: runtime-control
+        nomad_namespace_description: Runtime control pool namespace for the fixed-capacity control-plane guest.
+
+- import_playbook: mail-platform.yml
+- import_playbook: keycloak.yml
+- import_playbook: openbao.yml
+- import_playbook: step-ca.yml
+- import_playbook: openfga.yml
+- import_playbook: nats-jetstream.yml
+- import_playbook: gitea.yml
+- import_playbook: harbor.yml
+- import_playbook: semaphore.yml
+- import_playbook: temporal.yml
+- import_playbook: vaultwarden.yml
+- import_playbook: windmill.yml
+- import_playbook: api-gateway.yml
+
+- name: Verify the runtime-control substrate routes after the control-plane migration
+  hosts: runtime-control-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-runtime-control-pool
+
+  tasks:
+    - name: Verify the runtime-control Traefik route to the API gateway
+      ansible.builtin.uri:
+        url: http://127.0.0.1:9080/api-gateway/healthz
+        method: GET
+        status_code:
+          - 200
+        timeout: 30
+      changed_when: false
+
+    - name: Verify the runtime-control Traefik route to Keycloak
+      ansible.builtin.uri:
+        url: http://127.0.0.1:9080/keycloak/realms/lv3/.well-known/openid-configuration
+        method: GET
+        status_code:
+          - 200
+        timeout: 30
+      changed_when: false
+
+    - name: Verify the runtime-control Traefik route to OpenFGA
+      ansible.builtin.uri:
+        url: http://127.0.0.1:9080/openfga/healthz
+        method: GET
+        status_code:
+          - 200
+        timeout: 30
+      changed_when: false
+
+    - name: Verify the runtime-control Traefik route to Windmill
+      ansible.builtin.uri:
+        url: http://127.0.0.1:9080/windmill/api/version
+        method: GET
+        status_code:
+          - 200
+        timeout: 30
+      changed_when: false
+
+    - name: Verify the runtime-control Dapr bridge can invoke OpenFGA through Traefik
+      ansible.builtin.command:
+        argv:
+          - curl
+          - --fail
+          - --silent
+          - --show-error
+          - --path-as-is
+          - http://127.0.0.1:3500/v1.0/invoke/http://127.0.0.1:9080/method/openfga/healthz
+      register: runtime_control_dapr_openfga_route
+      changed_when: false
+
+- name: Retire the legacy control-plane copies from docker-runtime-lv3
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-runtime-control-pool
+  vars:
+    runtime_control_legacy_compose_files:
+      - /opt/api-gateway/docker-compose.yml
+      - /opt/gitea/docker-compose.yml
+      - /opt/harbor/installer/harbor/docker-compose.yml
+      - /opt/keycloak/docker-compose.yml
+      - /opt/mail-platform/docker-compose.yml
+      - /opt/nats-jetstream/docker-compose.yml
+      - /opt/openbao/docker-compose.yml
+      - /opt/openfga/docker-compose.yml
+      - /opt/semaphore/docker-compose.yml
+      - /opt/step-ca/docker-compose.yml
+      - /opt/temporal/docker-compose.yml
+      - /opt/vaultwarden/docker-compose.yml
+      - /opt/windmill/docker-compose.yml
+
+  pre_tasks:
+    - name: Gather the legacy control-plane compose files
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop: "{{ runtime_control_legacy_compose_files }}"
+      register: runtime_control_legacy_compose_stats
+
+  tasks:
+    - name: Stop the legacy control-plane compose stacks on docker-runtime-lv3
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ item.stat.path }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ item.stat.path | dirname }}"
+      loop: "{{ runtime_control_legacy_compose_stats.results }}"
+      when: item.stat.exists
+      register: runtime_control_legacy_compose_down
+      changed_when: >-
+        'Stopping' in (runtime_control_legacy_compose_down.stdout | default(''))
+        or 'Removing' in (runtime_control_legacy_compose_down.stdout | default(''))
+        or 'Removing' in (runtime_control_legacy_compose_down.stderr | default(''))

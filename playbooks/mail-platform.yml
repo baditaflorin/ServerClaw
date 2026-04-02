@@ -31,8 +31,8 @@
   roles:
     - role: lv3.platform.proxmox_network
 
-- name: Converge the mail platform runtime on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+- name: Converge the mail platform runtime on the runtime-control VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
   gather_facts: true
   tags:
@@ -48,7 +48,7 @@
         playbook_execution_audit_action: playbook.start.mail-platform
         playbook_execution_audit_target: mail_platform
         required_hosts:
-          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+          - "{{ playbook_execution_required_hosts.runtime_control[playbook_execution_env] }}"
 
   roles:
     - role: lv3.platform.linux_guest_firewall
@@ -65,8 +65,8 @@
       vars:
         playbook_execution_notification_service: mail_platform
 
-- name: Converge mail platform observability on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+- name: Converge mail platform observability on the runtime-control VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
   gather_facts: true
   tags:
@@ -81,7 +81,7 @@
         playbook_execution_require_debian: true
         playbook_execution_emit_audit: false
         required_hosts:
-          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+          - "{{ playbook_execution_required_hosts.runtime_control[playbook_execution_env] }}"
 
   roles:
     - role: lv3.platform.linux_guest_firewall
