@@ -134,6 +134,10 @@ def test_ops_portal_verify_checks_launcher_and_runtime_assurance_partials() -> N
     assert '/partials/launcher' in verify_tasks
     assert "Application Launcher" in verify_tasks
     assert "Search destinations, pin favorites, and reopen recent paths from one shared masthead control." in verify_tasks
+    assert "'journey-strip' in ops_portal_verify_launcher.content" in verify_tasks
+    assert '\'data-primary-lane=\\"start\\"\'' in verify_tasks
+    assert "'Success: Change' in ops_portal_verify_launcher.content" in verify_tasks
+    assert "'Failure: Learn' in ops_portal_verify_launcher.content" in verify_tasks
     assert "Verify the runtime assurance matrix partial renders locally" in verify_tasks
     assert '/partials/runtime-assurance' in verify_tasks
     assert "Ops portal runtime assurance matrix partial did not render the ADR 0244 view." in verify_tasks

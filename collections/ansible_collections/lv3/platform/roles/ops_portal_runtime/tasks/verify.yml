@@ -93,6 +93,10 @@
     that:
       - "'Application Launcher' in ops_portal_verify_launcher.content"
       - "'Search destinations, pin favorites, and reopen recent paths from one shared masthead control.' in ops_portal_verify_launcher.content"
+      - "'journey-strip' in ops_portal_verify_launcher.content"
+      - "'data-primary-lane=\"start\"' in ops_portal_verify_launcher.content"
+      - "'Success: Change' in ops_portal_verify_launcher.content"
+      - "'Failure: Learn' in ops_portal_verify_launcher.content"
     fail_msg: "Ops portal launcher partial rendered without the expected launcher surface."
 
 - name: Verify the runtime assurance matrix partial renders locally

@@ -956,6 +956,10 @@ def test_launcher_search_filters_results(portal_client: tuple[TestClient, FakeGa
     response = client.get("/partials/launcher", params={"query": "drift"})
 
     assert response.status_code == 200
+    assert 'class="journey-strip"' in response.text
+    assert 'data-primary-lane="start"' in response.text
+    assert "Success: Change" in response.text
+    assert "Failure: Learn" in response.text
     assert "Drift Status" in response.text
     assert "Keycloak" not in response.text
 

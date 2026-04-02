@@ -1339,7 +1339,7 @@ live-apply-service:
 	else \
 		printf '%s\n' "INFO live-apply-service: skipping service-catalog gates for non-catalog playbook '$(service)'"; \
 	fi
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/services/$(service).yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/services/$(service).yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(if $(filter ops_portal,$(service)),-e ops_portal_repo_root=$(REPO_ROOT),) $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-service --live-apply-trigger
 
 live-apply-site:
