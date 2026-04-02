@@ -44,7 +44,7 @@ rewriting one operator's workstation paths.
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.143` |
-| Platform version | `0.130.89` |
+| Platform version | `0.130.90` |
 | Observed check date | `2026-04-02` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -304,7 +304,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.143` |
-| Platform version | `0.130.89` |
+| Platform version | `0.130.90` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -581,6 +581,7 @@ Current values on `main`:
 | `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `merged` | [ws-0297-live-apply.md](docs/workstreams/ws-0297-live-apply.md) |
 | `0297` | Integrate ADR 0297 live-apply evidence and release updates on main | `merged` | [ws-0297-main-merge.md](docs/workstreams/ws-0297-main-merge.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
+| `0311` | Live apply a repo-managed cmdk command palette and universal open dialog on the Windmill operator access admin surface | `merged` | [ws-0311-live-apply.md](docs/workstreams/ws-0311-live-apply.md) |
 | `0313` | Live apply contextual help, glossary, and escalation drawer across the first-party portal surfaces | `live_applied` | [ws-0313-live-apply.md](docs/workstreams/ws-0313-live-apply.md) |
 | `0315` | Live apply canonical page states and next-best-action guidance on the Windmill operator admin surface | `live_applied` | [ws-0315-live-apply.md](docs/workstreams/ws-0315-live-apply.md) |
 | `0316` | Live apply journey analytics and onboarding success scorecards from latest origin/main | `merged` | [ws-0316-live-apply.md](docs/workstreams/ws-0316-live-apply.md) |

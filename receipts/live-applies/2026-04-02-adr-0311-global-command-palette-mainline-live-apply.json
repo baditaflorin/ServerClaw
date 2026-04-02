@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-02-adr-0311-global-command-palette-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-02",
+  "recorded_on": "2026-04-02",
+  "recorded_at": "2026-04-02T09:43:44Z",
+  "recorded_by": "codex",
+  "source_commit": "279ae8a4d4f3addb8df1977dea81428955a56f31",
+  "repo_version_context": "0.177.142",
+  "platform_version_context": "0.130.90",
+  "workflow_id": "adr-0311-global-command-palette-mainline-live-apply",
+  "adr": "0311",
+  "summary": "Promoted ADR 0311 into canonical mainline truth as repository version `0.177.142` and platform version `0.130.90` after replaying the repo-managed cmdk command palette and docs-backed search helper from the latest origin/main baseline at repository version `0.177.141` and platform version `0.130.89`, verifying focused contract tests, the refreshed exact-main Windmill converge, and the live operator-admin palette surface end to end while preserving the ADR 0316 journey analytics capabilities already live on main; when `origin/main` advanced again with publication-only generated surfaces, the branch rebased to that newer head and reran the shared truth generation plus final repository, remote, and pre-push gates before publication.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Windmill operator access admin",
+      "address": "http://100.64.0.1:8005/apps/get/p/f/lv3/operator_access_admin"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Windmill command palette search helper",
+      "address": "http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fcommand_palette_search"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Release-manager status and protected-surface cut",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python3 scripts/release_manager.py status --json` reported the release-blocker gate `met` on the `0.177.141` / `0.130.89` baseline, the exact-main protected-surface cut to repository version `0.177.142` is preserved in `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-release-status-r2.json`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-release-dry-run-r1.txt`, and `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-release-manager-r1.txt`, and the later latest-main refresh still reported `Unreleased notes: 0` in `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-release-status-r4.json` plus `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-release-dry-run-r4.txt`."
+    },
+    {
+      "check": "Focused contracts and raw-app compile on the exact-main tree",
+      "result": "pass",
+      "observed": "The exact-main tree passed `32` focused Python tests, the raw-app `npm ci` plus `npx tsc --noEmit` bundle check, script `py_compile`, `make syntax-check-windmill`, and `make preflight WORKFLOW=converge-windmill`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-focused-contracts-r2.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-raw-app-tsc-r3.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-py-compile-r2.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-syntax-check-windmill-r3.txt`, and `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-preflight-converge-windmill-r3.txt`."
+    },
+    {
+      "check": "Exact-main Windmill replay",
+      "result": "pass",
+      "observed": "The refreshed exact-main `make converge-windmill env=production` replay completed successfully with recap `docker-runtime-lv3 : ok=329 changed=47 failed=0`, `postgres-lv3 : ok=93 changed=2 failed=0`, and `proxmox_florin : ok=41 changed=4 failed=0`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-converge-windmill-r5.txt`."
+    },
+    {
+      "check": "Live command palette helper and operator-admin surface",
+      "result": "pass",
+      "observed": "The post-replay helper run returned `{\"status\":\"ok\",\"query\":\"totp\",\"count\":5}` with ADR and runbook matches, the Windmill API reports `CE v1.662.0`, and the live raw-app summary now records `latest_version: 72` with `has_command_palette_import`, `has_command_palette_backend`, `has_command_palette_cta`, `has_command_palette_file`, and `policy_has_command_palette_search` all true, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-command-palette-search-r6.json`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-windmill-api-version-r2.json`, and `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-live-app-summary-r4.json`."
+    },
+    {
+      "check": "Final repository automation and publication gates on the latest-main refresh",
+      "result": "pass",
+      "observed": "After rebasing to the later `origin/main` publication-only generated-surface refresh, the branch reran the shared generators and passed `./scripts/validate_repo.sh agent-standards`, `./scripts/validate_repo.sh workstream-surfaces`, `./scripts/validate_repo.sh data-models`, `python3 scripts/live_apply_receipts.py --validate`, `make validate`, `make remote-validate`, and `make pre-push-gate`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-agent-standards-r2.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-workstream-surfaces-r2.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-validate-data-models-r4.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-live-apply-receipts-validate-r4.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-validate-r2.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-remote-validate-r1.txt`, and `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-pre-push-gate-r2.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "build/platform-manifest.json",
+    "changelog.md",
+    "docs/adr/.index.yaml",
+    "docs/adr/0311-global-command-palette-and-universal-open-dialog-via-cmdk.md",
+    "docs/release-notes/0.177.142.md",
+    "docs/release-notes/README.md",
+    "docs/runbooks/configure-windmill.md",
+    "docs/runbooks/windmill-operator-access-admin.md",
+    "docs/workstreams/ws-0311-live-apply.md",
+    "receipts/live-applies/2026-04-02-adr-0311-global-command-palette-live-apply.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-agent-standards-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-canonical-truth-r4.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-generate-adr-index-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-generate-changelog-portal-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-generate-dependency-diagram-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-generate-diagrams-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-generate-ops-portal-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-generate-status-docs-r4.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-release-status-r2.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-release-status-r4.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-release-dry-run-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-release-dry-run-r4.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-release-manager-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-focused-contracts-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-raw-app-tsc-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-py-compile-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-syntax-check-windmill-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-preflight-converge-windmill-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-converge-windmill-r5.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-command-palette-search-r6.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-live-app-summary-r4.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-live-apply-receipts-validate-r4.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-platform-manifest-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-pre-push-gate-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-remote-validate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-validate-data-models-r4.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-validate-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-windmill-api-version-r2.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-workstream-surfaces-r2.txt",
+    "receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json",
+    "versions/stack.yaml",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This exact-main receipt is the canonical proof for ADR 0311 on repository version `0.177.142` and platform version `0.130.90`.",
+    "The earlier branch-local receipt remains preserved as historical evidence for the pre-integration replay and the concurrent drift it detected on shared verification surfaces before the exact-main promotion succeeded.",
+    "The final live operator-admin app bundle now carries both the ADR 0311 command palette and the ADR 0316 journey analytics contracts on the same private Windmill surface at live app version `72`.",
+    "The final publication pass rebased onto the later ADR 0319 generated-surface closeout on `origin/main` and reran the shared truth plus remote publication gates before pushing."
+  ]
+}

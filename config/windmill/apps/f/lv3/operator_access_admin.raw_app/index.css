@@ -39,6 +39,211 @@ textarea {
   padding: 32px 20px 48px;
 }
 
+.commandPaletteModal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: start center;
+  padding: 24px 16px;
+  background: rgba(28, 26, 22, 0.38);
+  backdrop-filter: blur(18px);
+}
+
+.commandPaletteShell {
+  width: min(860px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+}
+
+[cmdk-root].commandPalette {
+  display: grid;
+  gap: 14px;
+  background: rgba(255, 250, 242, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 28px;
+  box-shadow: 0 30px 80px rgba(28, 26, 22, 0.22);
+  padding: 22px;
+}
+
+.commandPaletteHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.commandPaletteHeader h2 {
+  margin: 4px 0 0;
+  font-family: "IBM Plex Serif", "Georgia", serif;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  line-height: 1.05;
+}
+
+.commandPaletteEyebrow {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.commandPaletteClose,
+.commandPaletteShortcut,
+.heroShortcut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 82px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.commandPaletteClose {
+  cursor: pointer;
+}
+
+.commandPaletteInputRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+[cmdk-input].commandPaletteInput {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: white;
+  color: var(--ink);
+  padding: 16px 18px;
+  font-size: 1.02rem;
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+[cmdk-input].commandPaletteInput:focus {
+  border-color: rgba(165, 65, 28, 0.4);
+  box-shadow: 0 0 0 4px rgba(217, 106, 51, 0.12);
+}
+
+[cmdk-list].commandPaletteList {
+  max-height: min(56vh, 560px);
+  overflow: auto;
+  padding-right: 6px;
+}
+
+.commandPaletteStatus,
+[cmdk-empty].commandPaletteEmpty {
+  padding: 10px 12px;
+  color: var(--muted);
+}
+
+.commandPaletteStatusWarning {
+  color: var(--pause);
+}
+
+[cmdk-group].commandPaletteGroup {
+  padding-top: 8px;
+}
+
+[cmdk-group-heading] {
+  padding: 10px 8px 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+[cmdk-item].commandPaletteItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin: 0 4px 6px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+[cmdk-item].commandPaletteItem[data-selected="true"] {
+  background: rgba(165, 65, 28, 0.08);
+  border-color: rgba(165, 65, 28, 0.18);
+  transform: translateY(-1px);
+}
+
+.commandPaletteItemCopy {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.commandPaletteItemMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.commandPaletteBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(28, 26, 22, 0.06);
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.commandPaletteBadge.highlighted {
+  background: rgba(165, 65, 28, 0.12);
+  color: var(--accent);
+}
+
+.commandPaletteItemLabel {
+  font-weight: 700;
+}
+
+.commandPaletteItemDescription {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.commandPaletteFavorite {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: white;
+  color: var(--accent);
+  width: 42px;
+  height: 42px;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.commandPaletteFooter {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 0.86rem;
+  padding-top: 4px;
+}
+
 .hero {
   display: grid;
   gap: 20px;
@@ -71,6 +276,14 @@ textarea {
   max-width: 62ch;
   color: var(--muted);
   line-height: 1.55;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
 }
 
 .heroStats {
@@ -1095,6 +1308,24 @@ textarea {
 
   .tourCardHeader {
     flex-direction: column;
+  }
+
+  .commandPaletteModal {
+    padding: 16px 12px;
+  }
+
+  .commandPaletteHeader,
+  .commandPaletteInputRow,
+  .heroActions,
+  .commandPaletteFooter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .commandPaletteClose,
+  .commandPaletteShortcut,
+  .heroShortcut {
+    width: fit-content;
   }
 
   .tourMeta {

@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-02-adr-0311-global-command-palette-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-02",
+  "recorded_on": "2026-04-02",
+  "recorded_at": "2026-04-01T22:49:59Z",
+  "recorded_by": "codex",
+  "source_commit": "ded9e1d9fb39650e0cb59420e555666070f322eb",
+  "repo_version_context": "0.177.136",
+  "platform_version_context": "0.130.85",
+  "workflow_id": "converge-windmill",
+  "adr": "0311",
+  "summary": "Live-applied ADR 0311 from the latest origin/main lineage by adding a repo-managed cmdk command palette to the private Windmill operator access admin surface, seeding the docs-backed f/lv3/command_palette_search helper, and re-verifying the live app plus search path after concurrent drift on shared Windmill verification surfaces required narrower repo-managed repair steps.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Windmill operator access admin",
+      "address": "http://100.64.0.1:8005/apps/get/p/f/lv3/operator_access_admin"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Windmill command palette search helper",
+      "address": "http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fcommand_palette_search"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Targeted ADR 0311 regression coverage",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest tests/test_command_palette_search.py tests/test_windmill_operator_admin_app.py tests/test_operator_manager.py -q` returned `28 passed in 0.69s` on the final branch tree."
+    },
+    {
+      "check": "Repository validation slice",
+      "result": "pass",
+      "observed": "`./scripts/validate_repo.sh agent-standards workstream-surfaces yaml json role-argument-specs data-models` passed after the ADR metadata, workstream registry, and receipt wiring were updated."
+    },
+    {
+      "check": "Windmill automation syntax and preflight",
+      "result": "pass",
+      "observed": "`make syntax-check-windmill`, `make preflight WORKFLOW=converge-windmill`, and `./scripts/validate_repo.sh ansible-syntax` all passed from the isolated worktree."
+    },
+    {
+      "check": "Governed Windmill converge replay",
+      "result": "partial",
+      "observed": "`make converge-windmill env=production` replayed the repo-managed worker checkout, seed scripts, and raw-app staging onto production but failed closed at the shared `f/lv3/gate-status` verification path when Windmill job `019d4b2b-a00f-b7aa-fbd4-9b4dee1fe75f` returned `Internal: Result of job is invalid json (empty) @jobs.rs:835:20`."
+    },
+    {
+      "check": "Targeted command palette search repair",
+      "result": "pass",
+      "observed": "The repo-managed targeted sync for `f/lv3/command_palette_search` returned `{\"status\":\"ok\",\"count\":1}` and the live manual verification returned `{\"status\":\"ok\",\"query\":\"totp\",\"count\":5}` with ADR and runbook matches from the search-fabric index."
+    },
+    {
+      "check": "Live operator app surface",
+      "result": "pass",
+      "observed": "A targeted repo-managed raw-app sync pushed five remote changes, and the Windmill app API summary now records `latest_version: 58` with `has_command_palette_import`, `has_command_palette_backend`, `has_command_palette_cta`, `has_command_palette_file`, and `policy_has_command_palette_search` all true."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0311-global-command-palette-and-universal-open-dialog-via-cmdk.md",
+    "docs/workstreams/ws-0311-live-apply.md",
+    "docs/runbooks/configure-windmill.md",
+    "docs/runbooks/windmill-operator-access-admin.md",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
+    "config/windmill/apps/f/lv3/operator_access_admin.raw_app/App.tsx",
+    "config/windmill/apps/f/lv3/operator_access_admin.raw_app/commandPalette.ts",
+    "config/windmill/apps/f/lv3/operator_access_admin.raw_app/backend/command_palette_search.yaml",
+    "config/windmill/scripts/command-palette-search.py",
+    "tests/test_command_palette_search.py",
+    "tests/test_windmill_operator_admin_app.py",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-generate-metadata-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-pytest-r5.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-validate-repo-r6.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-ansible-syntax-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-syntax-check-windmill-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-git-diff-check-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-preflight-converge-windmill-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-converge-windmill-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-gate-status-failure-summary-r1.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-push-gate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-command-palette-search-sync-r4.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-command-palette-search-r4.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-raw-app-sync-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-live-app-summary-r2.json",
+    "receipts/live-applies/2026-04-02-adr-0311-global-command-palette-live-apply.json",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This receipt records the branch-local latest-main proof before the protected release and integrated-truth surfaces are updated on an exact-main integration branch.",
+    "The first governed production replay failed closed in the shared `f/lv3/gate-status` lane, and a separate live API inspection showed the operator raw app later drifted away from the command palette bundle during concurrent work. The branch therefore used narrower repo-managed syncs of `f/lv3/command_palette_search` and `f/lv3/operator_access_admin` rather than overwriting unrelated shared verification code out of band.",
+    "Protected follow-up still waits for merge-to-main: `VERSION`, release sections in `changelog.md`, the top-level `README.md` status summary, `versions/stack.yaml`, and any canonical mainline receipt or generated truth surfaces.",
+    "A direct branch push to GitHub was blocked by the remote pre-push gate because it also wants exact-main-only generated-surface updates to `docs/diagrams/agent-coordination-map.excalidraw`, `build/platform-manifest.json`, and canonical-truth outputs touching `changelog.md` plus `versions/stack.yaml`."
+  ]
+}

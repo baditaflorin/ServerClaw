@@ -2,9 +2,9 @@
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
   "repo_version": "0.177.143",
-  "platform_version": "0.130.89",
-  "generated_at": "2026-04-02T11:27:57Z",
-  "next_refresh_at": "2026-04-02T12:27:57Z",
+  "platform_version": "0.130.90",
+  "generated_at": "2026-04-02T11:55:16Z",
+  "next_refresh_at": "2026-04-02T12:55:16Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5367,7 +5367,7 @@
         "id": "configure-windmill",
         "title": "Configure Windmill",
         "agent_trust_required": "T3",
-        "steps": 27,
+        "steps": 28,
         "path": "docs/runbooks/configure-windmill.md",
         "workflow_ids": [
           "converge-windmill"
