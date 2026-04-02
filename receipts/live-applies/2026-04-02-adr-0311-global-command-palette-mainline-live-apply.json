@@ -6,7 +6,7 @@
   "recorded_on": "2026-04-02",
   "recorded_at": "2026-04-02T09:43:44Z",
   "recorded_by": "codex",
-  "source_commit": "e60db9c10867cb76f73e0814389bddf879e2f2ba",
+  "source_commit": "279ae8a4d4f3addb8df1977dea81428955a56f31",
   "repo_version_context": "0.177.142",
   "platform_version_context": "0.130.90",
   "workflow_id": "adr-0311-global-command-palette-mainline-live-apply",
@@ -60,7 +60,7 @@
     {
       "check": "Final repository automation and publication gates on the latest-main refresh",
       "result": "pass",
-      "observed": "After rebasing to the later `origin/main` publication-only generated-surface refresh, the branch reran the shared generators and passed `./scripts/validate_repo.sh agent-standards`, `./scripts/validate_repo.sh workstream-surfaces`, `./scripts/validate_repo.sh data-models`, `python3 scripts/live_apply_receipts.py --validate`, `make validate`, `make remote-validate`, and `make pre-push-gate`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-agent-standards-r2.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-workstream-surfaces-r2.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-validate-data-models-r4.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-live-apply-receipts-validate-r2.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-validate-r2.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-remote-validate-r1.txt`, and `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-pre-push-gate-r1.txt`."
+      "observed": "After rebasing to the later `origin/main` publication-only generated-surface refresh, the branch reran the shared generators and passed `./scripts/validate_repo.sh agent-standards`, `./scripts/validate_repo.sh workstream-surfaces`, `./scripts/validate_repo.sh data-models`, `python3 scripts/live_apply_receipts.py --validate`, `make validate`, `make remote-validate`, and `make pre-push-gate`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-agent-standards-r2.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-workstream-surfaces-r2.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-validate-data-models-r4.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-live-apply-receipts-validate-r4.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-validate-r2.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-remote-validate-r1.txt`, and `receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-pre-push-gate-r2.txt`."
     }
   ],
   "evidence_refs": [
@@ -98,9 +98,9 @@
     "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-converge-windmill-r5.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-command-palette-search-r6.json",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-live-app-summary-r4.json",
-    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-live-apply-receipts-validate-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-live-apply-receipts-validate-r4.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-platform-manifest-r3.txt",
-    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-pre-push-gate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-pre-push-gate-r2.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-remote-validate-r1.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-validate-data-models-r4.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0311-mainline-validate-r2.txt",
