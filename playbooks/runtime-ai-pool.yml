@@ -21,6 +21,8 @@
 #   - ADR 0320: Defines the pool-scoped deployment surface and lane boundary.
 #   - ADR 0232: Provides the private Nomad scheduler and client bootstrap path.
 #   - Role: lv3.platform.proxmox_guests — provisions the dedicated guest from the managed template catalog.
+#   - Role: lv3.platform.proxmox_network — replays the Proxmox host firewall so the new pool guest and the Nomad scheduler can reach each other.
+#   - Role: lv3.platform.linux_guest_firewall — refreshes the in-guest nftables policy on `monitoring-lv3` after the canonical guest catalog changes so the Nomad scheduler admits the new runtime-ai peer without replaying the fragile shared runtime.
 #   - Role: lv3.platform.nomad_cluster_member — enrolls the runtime-ai guest into the private Nomad cluster.
 #   - Role: lv3.platform.nomad_namespace — ensures the runtime-ai namespace exists on the scheduler.
 #   - Role: lv3.platform.runtime_pool_substrate — converges the Traefik and Dapr pool substrate.
@@ -50,6 +52,10 @@
 
   roles:
     - role: lv3.platform.proxmox_guests
+      tags:
+        - guests
+        - runtime-ai-pool
+    - role: lv3.platform.proxmox_network
       tags:
         - guests
         - runtime-ai-pool
@@ -149,6 +155,27 @@
         nomad_cluster_node_meta:
           workload_pool: runtime-ai
     - role: lv3.platform.runtime_pool_substrate
+
+- name: Refresh monitoring guest firewall policy after the runtime-ai peer catalog changes
+  hosts: monitoring-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-runtime-ai-pool
+
+  pre_tasks:
+    - name: Ensure the monitoring guest target is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+      vars:
+        linux_guest_firewall_recover_missing_docker_bridge_chains: true
 
 - name: Ensure the runtime-ai Nomad namespace exists
   hosts: monitoring-lv3

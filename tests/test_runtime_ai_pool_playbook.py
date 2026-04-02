@@ -19,6 +19,7 @@ def test_runtime_ai_pool_playbook_covers_provisioning_substrate_namespace_migrat
     assert play_names == [
         "Ensure the runtime-ai VM is provisioned on the Proxmox host",
         "Converge the dedicated runtime-ai guest substrate",
+        "Refresh monitoring guest firewall policy after the runtime-ai peer catalog changes",
         "Ensure the runtime-ai Nomad namespace exists",
         "Converge the document-extraction services on runtime-ai-lv3",
         "Retire the legacy document-extraction copies from docker-runtime-lv3",
@@ -26,7 +27,10 @@ def test_runtime_ai_pool_playbook_covers_provisioning_substrate_namespace_migrat
     ]
 
     assert playbook[0]["hosts"] == "proxmox_hosts"
-    assert [role["role"] for role in playbook[0]["roles"]] == ["lv3.platform.proxmox_guests"]
+    assert [role["role"] for role in playbook[0]["roles"]] == [
+        "lv3.platform.proxmox_guests",
+        "lv3.platform.proxmox_network",
+    ]
 
     substrate_roles = [role["role"] for role in playbook[1]["roles"]]
     assert playbook[1]["hosts"] == "runtime-ai-lv3"
@@ -38,12 +42,19 @@ def test_runtime_ai_pool_playbook_covers_provisioning_substrate_namespace_migrat
         "lv3.platform.runtime_pool_substrate",
     ]
 
-    namespace_roles = [role["role"] for role in playbook[2]["roles"]]
+    peer_firewall_roles = [role["role"] for role in playbook[2]["roles"]]
     assert playbook[2]["hosts"] == "monitoring-lv3"
+    assert peer_firewall_roles == ["lv3.platform.linux_guest_firewall"]
+    assert playbook[2]["roles"][0]["vars"] == {
+        "linux_guest_firewall_recover_missing_docker_bridge_chains": True
+    }
+
+    namespace_roles = [role["role"] for role in playbook[3]["roles"]]
+    assert playbook[3]["hosts"] == "monitoring-lv3"
     assert namespace_roles == ["lv3.platform.nomad_namespace"]
 
-    service_roles = [role["role"] for role in playbook[3]["roles"]]
-    assert playbook[3]["hosts"] == "runtime-ai-lv3"
+    service_roles = [role["role"] for role in playbook[4]["roles"]]
+    assert playbook[4]["hosts"] == "runtime-ai-lv3"
     assert service_roles == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.docker_runtime",
@@ -53,28 +64,28 @@ def test_runtime_ai_pool_playbook_covers_provisioning_substrate_namespace_migrat
     ]
     post_task_urls = [
         task["ansible.builtin.uri"]["url"]
-        for task in playbook[3]["post_tasks"]
+        for task in playbook[4]["post_tasks"]
         if "ansible.builtin.uri" in task
     ]
     assert "http://127.0.0.1:9080/tika/version" in post_task_urls
     assert "http://127.0.0.1:9080/gotenberg/health" in post_task_urls
     assert "http://127.0.0.1:9080/tesseract-ocr/healthz" in post_task_urls
     dapr_post_task = next(
-        task for task in playbook[3]["post_tasks"] if task["name"] == "Verify the runtime-ai Dapr bridge can invoke Apache Tika through Traefik"
+        task for task in playbook[4]["post_tasks"] if task["name"] == "Verify the runtime-ai Dapr bridge can invoke Apache Tika through Traefik"
     )
     assert dapr_post_task["ansible.builtin.command"]["argv"][-1] == (
         "http://127.0.0.1:3500/v1.0/invoke/http://127.0.0.1:9080/method/tika/version"
     )
 
-    assert playbook[4]["hosts"] == "docker-runtime-lv3"
-    assert "roles" not in playbook[4]
+    assert playbook[5]["hosts"] == "docker-runtime-lv3"
+    assert "roles" not in playbook[5]
     down_task = next(
-        task for task in playbook[4]["tasks"] if task["name"] == "Stop the legacy document-extraction compose stacks on docker-runtime-lv3"
+        task for task in playbook[5]["tasks"] if task["name"] == "Stop the legacy document-extraction compose stacks on docker-runtime-lv3"
     )
     assert down_task["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
 
-    assert playbook[5]["hosts"] == "docker-runtime-lv3"
-    assert [role["role"] for role in playbook[5]["roles"]] == ["lv3.platform.api_gateway_runtime"]
+    assert playbook[6]["hosts"] == "docker-runtime-lv3"
+    assert [role["role"] for role in playbook[6]["roles"]] == ["lv3.platform.api_gateway_runtime"]
 
 
 def test_runtime_ai_pool_service_wrapper_imports_the_root_playbook() -> None:

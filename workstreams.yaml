@@ -15472,7 +15472,7 @@ workstreams:
   - id: ws-0319-live-apply
     adr: "0319"
     title: Live apply the first runtime-ai pool split with Nomad, Traefik, and Dapr on the latest mainline
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0319-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-live-apply
@@ -15613,6 +15613,7 @@ workstreams:
             - receipts/live-applies/
             - receipts/live-applies/evidence/
           mode: exclusive
-    blockers: []
-    ready_to_merge: false
-    live_applied: false
+    blockers:
+      - exact-main replay and canonical-truth update are still required because origin/main advanced to 0.177.137 while the branch-local live apply was being verified
+    ready_to_merge: true
+    live_applied: true

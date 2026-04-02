@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0319](../adr/0319-runtime-pools-as-the-service-partition-boundary.md), [ADR 0320](../adr/0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes.md)
 - Title: Live apply the first runtime-ai pool split with Nomad, Traefik, and Dapr from the latest mainline
-- Status: in_progress
-- Included In Repo Version: pending
-- Live Applied In Platform Version: pending
-- Implemented On: pending
-- Live Applied On: pending
+- Status: live_applied
+- Included In Repo Version: pending exact-main merge
+- Live Applied In Platform Version: branch-local replay on top of repository release `0.177.136`
+- Implemented On: 2026-04-02
+- Live Applied On: 2026-04-02
 - Branch: `codex/ws-0319-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-live-apply`
 - Owner: codex
@@ -56,6 +56,18 @@ runtime VM.
   retirement, and the authenticated `/v1/gotenberg` gateway route
 - final exact-main validation, receipt validation, canonical-truth check, and
   protected release update only after the live platform state is verified
+
+## Branch Outcome
+
+- Governed replay `receipts/live-applies/evidence/2026-04-02-ws-0319-runtime-ai-pool-live-apply-r12.txt` completed successfully after the monitoring guest used the new bounded Docker bridge-chain recovery path inside `lv3.platform.linux_guest_firewall`.
+- Post-verify evidence in `receipts/live-applies/evidence/2026-04-02-ws-0319-runtime-ai-pool-post-verify-r3.txt` confirms the runtime-ai Traefik and Dapr substrate, Apache Tika, Gotenberg, Tesseract OCR, Nomad namespace membership, monitoring guest Docker chains, legacy runtime retirement, and authenticated `/v1/gotenberg` route all succeed together.
+- Failure evidence in `receipts/live-applies/evidence/2026-04-02-ws-0319-runtime-ai-pool-live-apply-r10.txt` and `receipts/live-applies/evidence/2026-04-02-ws-0319-runtime-ai-pool-live-apply-r11.txt` records the two key rollout hazards that shaped the final fix:
+  broad guest-firewall replay touched `docker-runtime-lv3`, and a monitoring-only replay still needed bounded Docker recovery after nftables evaluation.
+- `receipts/live-applies/evidence/2026-04-02-ws-0319-docker-runtime-lv3-bridge-chain-manual-recovery-r1.txt` preserves the earlier shared-runtime manual recovery that was required during troubleshooting before the final monitoring-only approach existed.
+
+## Remaining For Main Merge
+
+- `origin/main` advanced to release `0.177.137` while this branch was converging live state, so the exact-main integration step still must merge the branch onto the latest mainline, rerun the governed `runtime-ai-pool` replay from that merged tree, and only then update `VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, `build/platform-manifest.json`, ADR implementation metadata, and the exact-main live-apply receipt.
 
 ## Merge-To-Main Notes
 

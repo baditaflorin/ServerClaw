@@ -68,11 +68,51 @@
   when: linux_guest_firewall_config.changed
 
 - name: Ensure Docker bridge networking remains available after firewall evaluation
-  ansible.builtin.include_role:
-    name: lv3.platform.common
-    tasks_from: docker_bridge_chains
-  vars:
-    common_docker_bridge_chains_service_name: docker
+  block:
+    - name: Assert Docker bridge chains remain available after guest firewall evaluation
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: "{{ linux_guest_firewall_docker_bridge_chain_service_name }}"
+  rescue:
+    - name: Reset Docker failed state before guest firewall bridge-chain recovery restart
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - reset-failed
+          - "{{ linux_guest_firewall_docker_bridge_chain_service_name }}.service"
+      changed_when: false
+      when: linux_guest_firewall_recover_missing_docker_bridge_chains | bool
+
+    - name: Restart Docker to restore bridge chains after guest firewall evaluation
+      ansible.builtin.service:
+        name: "{{ linux_guest_firewall_docker_bridge_chain_service_name }}"
+        state: restarted
+      when: linux_guest_firewall_recover_missing_docker_bridge_chains | bool
+
+    - name: Re-assert Docker bridge chains after guest firewall recovery restart
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: "{{ linux_guest_firewall_docker_bridge_chain_service_name }}"
+      when: linux_guest_firewall_recover_missing_docker_bridge_chains | bool
+
+    - name: Surface Docker bridge-chain failures after guest firewall evaluation when recovery is disabled
+      ansible.builtin.fail:
+        msg: >-
+          {{
+            ansible_failed_result.msg
+            | default(
+                ansible_failed_result.stderr
+                | default(
+                    ansible_failed_result.stdout
+                    | default('Docker bridge chain validation failed after guest firewall evaluation.')
+                )
+              )
+          }}
+      when: not linux_guest_firewall_recover_missing_docker_bridge_chains | bool
 
 - name: Re-render guest nftables policy after Docker bridge chain evaluation
   ansible.builtin.template:

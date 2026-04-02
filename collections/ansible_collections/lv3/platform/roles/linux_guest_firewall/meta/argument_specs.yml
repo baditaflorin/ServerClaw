@@ -15,6 +15,18 @@ argument_specs:
         default: proxmox_florin
         description:
           - Inventory host ID that owns the canonical `network_policy` data.
+      linux_guest_firewall_docker_bridge_chain_service_name:
+        type: str
+        required: false
+        default: docker
+        description:
+          - Service name to use when checking or restarting Docker bridge chains after a guest firewall replay.
+      linux_guest_firewall_recover_missing_docker_bridge_chains:
+        type: bool
+        required: false
+        default: false
+        description:
+          - When true, restart the Docker service and re-run the bridge-chain helper if the guest firewall replay leaves the Docker nat or forward chains missing.
       network_policy:
         type: dict
         required: false

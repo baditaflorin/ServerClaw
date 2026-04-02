@@ -39,6 +39,7 @@ def load_defaults() -> dict:
 def test_linux_guest_firewall_reasserts_docker_bridge_chains_after_firewall_evaluation() -> None:
     tasks = load_tasks()
     task_names = [task["name"] for task in tasks]
+    defaults = load_defaults()
 
     assert task_names.index("Wait for guest SSH after nftables changes") < task_names.index(
         "Ensure Docker bridge networking remains available after firewall evaluation"
@@ -48,10 +49,54 @@ def test_linux_guest_firewall_reasserts_docker_bridge_chains_after_firewall_eval
         for task in tasks
         if task["name"] == "Ensure Docker bridge networking remains available after firewall evaluation"
     )
-    include_role = ensure_task["ansible.builtin.include_role"]
+    include_role = next(
+        task
+        for task in ensure_task["block"]
+        if task["name"] == "Assert Docker bridge chains remain available after guest firewall evaluation"
+    )["ansible.builtin.include_role"]
+    reset_task = next(
+        task
+        for task in ensure_task["rescue"]
+        if task["name"] == "Reset Docker failed state before guest firewall bridge-chain recovery restart"
+    )
+    restart_task = next(
+        task
+        for task in ensure_task["rescue"]
+        if task["name"] == "Restart Docker to restore bridge chains after guest firewall evaluation"
+    )
+    reassert_task = next(
+        task
+        for task in ensure_task["rescue"]
+        if task["name"] == "Re-assert Docker bridge chains after guest firewall recovery restart"
+    )
+    fail_task = next(
+        task
+        for task in ensure_task["rescue"]
+        if task["name"] == "Surface Docker bridge-chain failures after guest firewall evaluation when recovery is disabled"
+    )
     assert include_role["name"] == "lv3.platform.common"
     assert include_role["tasks_from"] == "docker_bridge_chains"
-    assert ensure_task["vars"]["common_docker_bridge_chains_service_name"] == "docker"
+    assert ensure_task["block"][0]["vars"]["common_docker_bridge_chains_service_name"] == (
+        "{{ linux_guest_firewall_docker_bridge_chain_service_name }}"
+    )
+    assert reset_task["ansible.builtin.command"]["argv"] == [
+        "systemctl",
+        "reset-failed",
+        "{{ linux_guest_firewall_docker_bridge_chain_service_name }}.service",
+    ]
+    assert reset_task["when"] == "linux_guest_firewall_recover_missing_docker_bridge_chains | bool"
+    assert restart_task["ansible.builtin.service"] == {
+        "name": "{{ linux_guest_firewall_docker_bridge_chain_service_name }}",
+        "state": "restarted",
+    }
+    assert restart_task["when"] == "linux_guest_firewall_recover_missing_docker_bridge_chains | bool"
+    assert reassert_task["vars"]["common_docker_bridge_chains_service_name"] == (
+        "{{ linux_guest_firewall_docker_bridge_chain_service_name }}"
+    )
+    assert reassert_task["when"] == "linux_guest_firewall_recover_missing_docker_bridge_chains | bool"
+    assert fail_task["when"] == "not linux_guest_firewall_recover_missing_docker_bridge_chains | bool"
+    assert defaults["linux_guest_firewall_docker_bridge_chain_service_name"] == "docker"
+    assert defaults["linux_guest_firewall_recover_missing_docker_bridge_chains"] is False
 
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 TEMPLATE_PATH = (
