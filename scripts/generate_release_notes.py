@@ -18,11 +18,32 @@ UNRELEASED_PATTERN = re.compile(
     r"(^## Unreleased\n)(.*?)(^\s*## Latest Release\s*$)",
     re.MULTILINE | re.DOTALL,
 )
-LATEST_RELEASE_PATTERN = re.compile(
-    r"(^## Latest Release\n)(.*?)(?=^\s*## |\Z)",
-    re.MULTILINE | re.DOTALL,
-)
 RELEASES_HEADER = "## Releases\n"
+
+
+def parse_semver(version: str) -> tuple[int, int, int]:
+    major, minor, patch = version.split(".")
+    return int(major), int(minor), int(patch)
+
+
+def collect_release_versions(include_version: str | None = None) -> list[str]:
+    versions = {
+        path.stem
+        for path in RELEASE_NOTES_DIR.glob("*.md")
+        if path.name != "README.md"
+    }
+    if include_version:
+        versions.add(include_version)
+    return sorted(versions, key=parse_semver, reverse=True)
+
+
+def render_release_note_link(version: str, *, from_release_index: bool) -> str:
+    path = f"{version}.md" if from_release_index else f"docs/release-notes/{version}.md"
+    return f"- [{version} release notes]({path})"
+
+
+def render_release_index_entry(version: str) -> str:
+    return f"- [{version}]({version}.md)"
 
 
 def extract_unreleased_block(changelog_text: str) -> str:
@@ -70,37 +91,36 @@ def update_changelog_for_release(changelog_text: str, version: str) -> str:
     updated = changelog_text[: match.start()] + f"{match.group(1)}{match.group(3)}" + changelog_text[match.end() :]
     if "## Unreleased" not in updated:
         raise ValueError("failed to clear the changelog Unreleased section")
-    latest_match = LATEST_RELEASE_PATTERN.search(updated)
-    if not latest_match:
-        raise ValueError("failed to read the changelog latest release section")
-    previous_latest_block = latest_match.group(2).strip()
-    latest_link = (
-        "## Latest Release\n\n"
-        f"- [{version} release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/{version}.md)\n"
+    versions = collect_release_versions(include_version=version)
+    latest = versions[0]
+    previous = versions[1:]
+    latest_block = "## Latest Release\n\n" + render_release_note_link(latest, from_release_index=False) + "\n"
+    previous_lines = "\n".join(
+        render_release_note_link(release_version, from_release_index=False)
+        for release_version in previous
     )
-    updated, count = LATEST_RELEASE_PATTERN.subn(latest_link, updated, count=1)
+    replacement = "## Previous Releases\n"
+    if previous_lines:
+        replacement += f"\n{previous_lines}\n"
+    updated, count = re.subn(
+        r"^## Latest Release\n.*?^## Previous Releases\n.*?(?=^\s*## |\Z)",
+        latest_block + "\n" + replacement,
+        updated,
+        count=1,
+        flags=re.MULTILINE | re.DOTALL,
+    )
     if count != 1:
-        raise ValueError("failed to update the changelog latest release section")
-    if previous_latest_block:
-        updated, previous_count = re.subn(
-            r"(^## Previous Releases\n)",
-            f"## Previous Releases\n\n{previous_latest_block}\n",
-            updated,
-            count=1,
-            flags=re.MULTILINE,
-        )
-        if previous_count != 1:
-            raise ValueError("failed to preserve the previous latest release section")
+        raise ValueError("failed to rebuild the changelog release sections")
     return updated
 
 
 def update_release_notes_index(index_text: str, version: str) -> str:
-    entry = f"- [{version}](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/{version}.md)"
-    if entry in index_text:
-        return index_text
     if RELEASES_HEADER not in index_text:
         raise ValueError("docs/release-notes/README.md must contain a '## Releases' section")
-    return index_text.replace(RELEASES_HEADER, f"{RELEASES_HEADER}\n{entry}\n", 1)
+    versions = collect_release_versions(include_version=version)
+    release_lines = "\n".join(render_release_index_entry(release_version) for release_version in versions)
+    before, _header, _existing = index_text.partition(RELEASES_HEADER)
+    return f"{before}{RELEASES_HEADER}\n{release_lines}\n"
 
 
 def write_release_artifacts(
