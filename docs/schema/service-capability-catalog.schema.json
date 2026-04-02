@@ -145,6 +145,15 @@
             "type": "string",
             "minLength": 1
           },
+          "mobility_tier": {
+            "type": "string",
+            "enum": [
+              "anchor",
+              "movable_singleton",
+              "elastic_stateless",
+              "burst_batch"
+            ]
+          },
           "dashboard_url": {
             "type": "string",
             "minLength": 1

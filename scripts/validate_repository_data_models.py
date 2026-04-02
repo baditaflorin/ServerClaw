@@ -107,6 +107,7 @@ UPTIME_MONITORS_PATH = repo_path("config", "uptime-kuma", "monitors.json")
 HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
 CERTIFICATE_CATALOG_PATH = repo_path("config", "certificate-catalog.json")
 SERVICE_CAPABILITY_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
+SERVICE_PARTITION_CATALOG_PATH = repo_path("config", "contracts", "service-partitions", "catalog.json")
 SECRET_CATALOG_PATH = repo_path("config", "secret-catalog.json")
 SEED_DATA_CATALOG_PATH = repo_path("config", "seed-data-catalog.json")
 TOKEN_POLICY_PATH = repo_path("config", "token-policy.yaml")
@@ -348,6 +349,7 @@ def validate_no_scaffold_placeholders() -> None:
         repo_path("config", "service-capability-catalog.json"): load_json(
             repo_path("config", "service-capability-catalog.json")
         ),
+        SERVICE_PARTITION_CATALOG_PATH: load_json(SERVICE_PARTITION_CATALOG_PATH),
         repo_path("config", "capability-contract-catalog.json"): load_json(
             repo_path("config", "capability-contract-catalog.json")
         ),
@@ -1972,6 +1974,68 @@ def validate_workstream_live_apply_contracts() -> None:
                 require_str(step.get("path"), f"{step_path}.path")
 
 
+def validate_service_partition_classification() -> None:
+    catalog = require_mapping(load_json(SERVICE_CAPABILITY_CATALOG_PATH), str(SERVICE_CAPABILITY_CATALOG_PATH))
+    services = require_list(catalog.get("services"), "config/service-capability-catalog.json.services")
+    partition_catalog = require_mapping(load_json(SERVICE_PARTITION_CATALOG_PATH), str(SERVICE_PARTITION_CATALOG_PATH))
+    partitions = require_mapping(
+        partition_catalog.get("partitions"),
+        "config/contracts/service-partitions/catalog.json.partitions",
+    )
+    allowed_mobility_tiers = {"anchor", "movable_singleton", "elastic_stateless", "burst_batch"}
+    declared_partition_ids = set(partitions)
+    service_ids: set[str] = set()
+    partition_membership: dict[str, set[str]] = {}
+
+    for partition_id, payload in partitions.items():
+        payload = require_mapping(payload, f"config/contracts/service-partitions/catalog.json.partitions.{partition_id}")
+        partition_membership[partition_id] = set(
+            require_string_list(
+                payload.get("services"),
+                f"config/contracts/service-partitions/catalog.json.partitions.{partition_id}.services",
+            )
+        )
+
+    for index, entry in enumerate(services):
+        path = f"config/service-capability-catalog.json.services[{index}]"
+        entry = require_mapping(entry, path)
+        service_id = require_identifier(entry.get("id"), f"{path}.id")
+        service_ids.add(service_id)
+        runtime_pool = require_str(entry.get("runtime_pool"), f"{path}.runtime_pool")
+        if runtime_pool not in declared_partition_ids:
+            raise ValueError(f"{path}.runtime_pool references unknown partition '{runtime_pool}'")
+        deployment_surface = repo_path(require_str(entry.get("deployment_surface"), f"{path}.deployment_surface"))
+        if not deployment_surface.exists():
+            raise ValueError(f"{path}.deployment_surface points to missing path '{deployment_surface}'")
+        require_str(entry.get("restart_domain"), f"{path}.restart_domain")
+        api_contract_ref = require_str(entry.get("api_contract_ref"), f"{path}.api_contract_ref")
+        api_contract_path = repo_path(api_contract_ref.split("#", 1)[0])
+        if not api_contract_path.exists():
+            raise ValueError(f"{path}.api_contract_ref points to missing path '{api_contract_path}'")
+        mobility_tier = require_enum(
+            entry.get("mobility_tier"),
+            f"{path}.mobility_tier",
+            allowed_mobility_tiers,
+        )
+        if service_id not in partition_membership[runtime_pool]:
+            raise ValueError(
+                f"{path}.runtime_pool='{runtime_pool}' is not mirrored in "
+                "config/contracts/service-partitions/catalog.json"
+            )
+        if mobility_tier in {"elastic_stateless", "burst_batch"} and runtime_pool.startswith("dedicated-"):
+            raise ValueError(
+                f"{path}.mobility_tier='{mobility_tier}' cannot target dedicated partition '{runtime_pool}'"
+            )
+
+    declared_services = set().union(*partition_membership.values())
+    extra_services = sorted(declared_services - service_ids)
+    if extra_services:
+        raise ValueError(
+            "config/contracts/service-partitions/catalog.json lists unknown services: "
+            + ", ".join(extra_services)
+        )
+
+
 def validate_validation_runner_contracts() -> None:
     catalog = load_validation_runner_contract_catalog(VALIDATION_RUNNER_CONTRACTS_PATH)
     validate_validation_runner_contract_catalog(catalog)
@@ -2815,6 +2879,7 @@ def validate_repository_data_models() -> int:
     validate_workstreams_release_policy()
     validate_workstream_canonical_truth_metadata()
     validate_workstream_live_apply_contracts()
+    validate_service_partition_classification()
     validate_validation_runner_contracts()
     load_network_impairment_matrix()
     validate_interface_contracts()

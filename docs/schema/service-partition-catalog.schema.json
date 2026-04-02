@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/service-partition-catalog.schema.json",
+  "title": "Service Partition Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "partitions"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "docs/schema/service-partition-catalog.schema.json"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "partitions": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/partition"
+      }
+    }
+  },
+  "$defs": {
+    "partition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "phase",
+        "summary",
+        "services"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "runtime_pool_target",
+            "dedicated_plane",
+            "host_plane"
+          ]
+        },
+        "phase": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "services": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_]*$"
+          },
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

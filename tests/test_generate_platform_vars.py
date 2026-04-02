@@ -275,6 +275,8 @@ def test_build_platform_vars_includes_jupyterhub_publication_topology() -> None:
     assert jupyterhub["urls"]["public"] == "https://notebooks.lv3.org"
     assert jupyterhub["urls"]["internal"] == "http://10.10.10.20:8097"
     assert jupyterhub["edge"]["client_max_body_size"] == "2g"
+    assert jupyterhub["runtime_pool"] == "runtime-ai"
+    assert jupyterhub["mobility_tier"] == "burst_batch"
 
 
 def test_build_platform_vars_includes_superset_publication_topology() -> None:
@@ -339,6 +341,19 @@ def test_build_platform_vars_includes_nextcloud_publication_topology() -> None:
         {"path": "/.well-known/carddav", "location": "/remote.php/dav/", "status": 301},
         {"path": "/.well-known/caldav", "location": "/remote.php/dav/", "status": 301},
     ]
+
+
+def test_build_platform_vars_projects_control_and_dedicated_pool_metadata() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+
+    keycloak = platform_vars["platform_service_topology"]["keycloak"]
+    grafana = platform_vars["platform_service_topology"]["grafana"]
+
+    assert keycloak["runtime_pool"] == "runtime-control"
+    assert keycloak["restart_domain"] == "runtime-control-identity"
+    assert keycloak["mobility_tier"] == "anchor"
+    assert grafana["runtime_pool"] == "dedicated-monitoring"
+    assert grafana["mobility_tier"] == "anchor"
 
 
 def test_build_platform_vars_includes_shared_session_authority_contract() -> None:

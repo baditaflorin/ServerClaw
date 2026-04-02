@@ -1,0 +1,149 @@
+{
+  "$schema": "docs/schema/service-partition-catalog.schema.json",
+  "schema_version": "1.0.0",
+  "partitions": {
+    "runtime-control": {
+      "kind": "runtime_pool_target",
+      "phase": "phase-5-runtime-control-migration",
+      "summary": "Target pool for identity, secrets, workflow control, supply-chain, and other high-consequence control-plane anchors. Current VM placement may still be docker-runtime-lv3 until the control migration wave lands.",
+      "services": [
+        "api_gateway",
+        "gitea",
+        "harbor",
+        "keycloak",
+        "mail_platform",
+        "nats_jetstream",
+        "openbao",
+        "openfga",
+        "semaphore",
+        "step_ca",
+        "temporal",
+        "vaultwarden",
+        "windmill"
+      ]
+    },
+    "runtime-general": {
+      "kind": "runtime_pool_target",
+      "phase": "phase-2-runtime-general",
+      "summary": "Target pool for moderate-memory operator, collaboration, observability, and product application surfaces that should leave the legacy shared runtime before control-plane anchors move.",
+      "services": [
+        "changedetection",
+        "directus",
+        "docker_runtime",
+        "dozzle",
+        "excalidraw",
+        "flagsmith",
+        "homepage",
+        "langfuse",
+        "lago",
+        "livekit",
+        "mailpit",
+        "matrix_synapse",
+        "mattermost",
+        "minio",
+        "n8n",
+        "netbox",
+        "nextcloud",
+        "ntfy",
+        "ops_portal",
+        "grist",
+        "outline",
+        "paperless",
+        "plane",
+        "plausible",
+        "portainer",
+        "redpanda",
+        "searxng",
+        "status_page",
+        "superset",
+        "typesense",
+        "uptime_kuma",
+        "woodpecker"
+      ]
+    },
+    "runtime-ai": {
+      "kind": "runtime_pool_target",
+      "phase": "phase-1-and-phase-2-runtime-ai-follow-ons",
+      "summary": "Target pool for memory-bursty inference, retrieval, OCR, notebook, and model-adjacent workloads. Some services are already live here, while others remain target classifications for later waves.",
+      "services": [
+        "browser_runner",
+        "crawl4ai",
+        "dify",
+        "gotenberg",
+        "jupyterhub",
+        "ollama",
+        "one_api",
+        "open_webui",
+        "piper",
+        "platform_context_api",
+        "tika",
+        "tesseract_ocr"
+      ]
+    },
+    "dedicated-monitoring": {
+      "kind": "dedicated_plane",
+      "phase": "already-dedicated",
+      "summary": "Dedicated monitoring plane that remains outside the runtime-pool split for now.",
+      "services": [
+        "alertmanager",
+        "grafana",
+        "nomad",
+        "realtime"
+      ]
+    },
+    "dedicated-edge": {
+      "kind": "dedicated_plane",
+      "phase": "already-dedicated",
+      "summary": "Dedicated edge publication plane for shared NGINX-hosted public routes and static portal publication.",
+      "services": [
+        "changelog_portal",
+        "docs_portal",
+        "nginx_edge"
+      ]
+    },
+    "dedicated-backup": {
+      "kind": "dedicated_plane",
+      "phase": "already-dedicated",
+      "summary": "Dedicated backup plane kept outside the runtime-pool split.",
+      "services": [
+        "backup_pbs"
+      ]
+    },
+    "dedicated-build": {
+      "kind": "dedicated_plane",
+      "phase": "already-dedicated",
+      "summary": "Dedicated build and artifact-cache plane for repo automation and image builds.",
+      "services": [
+        "docker_build"
+      ]
+    },
+    "dedicated-coolify": {
+      "kind": "dedicated_plane",
+      "phase": "already-dedicated",
+      "summary": "Dedicated Coolify plane that remains managed outside the runtime-pool migration waves.",
+      "services": [
+        "coolify",
+        "coolify_apps",
+        "serverclaw"
+      ]
+    },
+    "dedicated-postgres": {
+      "kind": "dedicated_plane",
+      "phase": "already-dedicated",
+      "summary": "Dedicated PostgreSQL data plane outside the runtime-pool migration path.",
+      "services": [
+        "postgres"
+      ]
+    },
+    "host-management": {
+      "kind": "host_plane",
+      "phase": "already-dedicated",
+      "summary": "Host-resident management and observability surfaces that stay on the Proxmox host rather than a runtime pool guest.",
+      "services": [
+        "headscale",
+        "ntopng",
+        "proxmox_ui"
+      ]
+    }
+  }
+}

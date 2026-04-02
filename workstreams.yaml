@@ -16071,6 +16071,71 @@ workstreams:
     blockers: []
     ready_to_merge: true
     live_applied: false
+  - id: ws-0330-runtime-pool-transition-program
+    adr: "0319"
+    title: Complete the phased runtime-pool transition after the first runtime-ai split
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0330-runtime-pools-transition
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-runtime-pools-transition
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0330-runtime-pool-transition-program.md
+    depends_on:
+      - adr-0319-runtime-pools-as-the-service-partition-boundary
+      - adr-0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes
+      - adr-0321-runtime-pool-memory-envelopes-and-reserved-host-headroom
+      - adr-0322-memory-pressure-autoscaling-for-elastic-runtime-pools
+      - adr-0323-service-mobility-tiers-and-migration-waves-for-runtime-pools
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0330-runtime-pool-transition-program.md
+      - config/service-capability-catalog.json
+      - config/contracts/service-partitions/*
+      - docs/schema/service-capability-catalog.schema.json
+      - docs/schema/service-partition-catalog.schema.json
+      - scripts/generate_platform_vars.py
+      - scripts/validate_repository_data_models.py
+      - inventory/group_vars/platform.yml
+      - tests/test_generate_platform_vars.py
+      - tests/test_runtime_pool_service_classification.py
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws0330_transition_program_docs
+          paths:
+            - docs/workstreams/ws-0330-runtime-pool-transition-program.md
+          mode: exclusive
+        - id: ws0330_service_partition_artifacts
+          paths:
+            - config/contracts/service-partitions/*
+            - docs/schema/service-partition-catalog.schema.json
+            - tests/test_runtime_pool_service_classification.py
+          mode: exclusive
+        - id: ws0330_service_classification_contract
+          paths:
+            - config/service-capability-catalog.json
+            - docs/schema/service-capability-catalog.schema.json
+          mode: shared_contract
+          contract: service-runtime-classification-v1
+        - id: ws0330_generated_platform_projection
+          paths:
+            - scripts/generate_platform_vars.py
+            - inventory/group_vars/platform.yml
+            - tests/test_generate_platform_vars.py
+          mode: shared_contract
+          contract: runtime-pool-platform-projection-v1
+        - id: ws0330_repo_model_validation
+          paths:
+            - scripts/validate_repository_data_models.py
+          mode: shared_contract
+          contract: repository-data-model-validation-v1
+    blockers: []
+    ready_to_merge: false
+    live_applied: false
   - id: ws-0325-service-uptime-investigation
     adr: "0319"
     title: Investigate recurring service restarts and uptime failures across the runtime pools
