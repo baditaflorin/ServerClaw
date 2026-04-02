@@ -336,6 +336,13 @@
     label: >-
       {{ ((item.0.item.dest ~ (item.1.path | replace(item.0.item.src, ''))) | dirname)
       | replace(ops_portal_data_dir ~ '/', '') }}
+  when: >-
+    (
+      item.0.item.excludes | default([])
+      | select('in', item.1.path.split('/'))
+      | list
+      | length
+    ) == 0
 
 - name: Sync the ops portal directory-backed data source files
   ansible.builtin.copy:
@@ -347,6 +354,13 @@
   loop: "{{ ops_portal_directory_source_files.results | subelements('files', skip_missing=True) }}"
   loop_control:
     label: "{{ (item.0.item.dest ~ (item.1.path | replace(item.0.item.src, ''))) | replace(ops_portal_data_dir ~ '/', '') }}"
+  when: >-
+    (
+      item.0.item.excludes | default([])
+      | select('in', item.1.path.split('/'))
+      | list
+      | length
+    ) == 0
 
 - name: Discover macOS metadata files in the synced ops portal data tree
   ansible.builtin.find:
