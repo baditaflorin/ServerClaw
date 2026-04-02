@@ -1,12 +1,12 @@
-# Release 0.177.140
+# Release 0.177.141
 
 - Date: 2026-04-02
 
 ## Summary
-- implements ADR 0315 by standardizing the live operator admin surface on a reusable canonical state model that explains loading, empty, degraded, validation, system-error, unauthorized, not-found, and success outcomes with explicit next-best actions and linked recovery guidance
+- implements ADR 0316 by adding privacy-preserving journey analytics, onboarding success scorecards, contextual help recovery tracking, and live Windmill and Plausible contracts for the operator access admin surface
 
 ## Platform Impact
-- platform version advances to 0.130.88 after the exact-main ADR 0315 replay re-verifies the governed Windmill operator admin surface and next-best-action guidance on top of the 0.130.87 baseline
+- platform version advances to 0.130.89 after the exact-main ADR 0316 replay re-verifies live journey milestone capture, durable worker scorecard rendering, and Plausible route aggregation for the Windmill operator admin surface; the bounded Glitchtip failure-signal path now normalizes DSN-style secrets, but shared ADR 0281 publication/runtime repair for errors.lv3.org is still required before glitchtip_events can verify above 0
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

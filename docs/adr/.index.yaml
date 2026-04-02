@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-04-02'
 total_adrs: 349
 implementation_status_summary:
-  Implemented: 293
+  Implemented: 294
   Partial: 8
-  Not Implemented: 47
+  Not Implemented: 46
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5631,7 +5631,7 @@ adr_index:
   - adr: '0316'
     title: Journey Analytics And Onboarding Success Scorecards
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -5642,6 +5642,7 @@ adr_index:
       - scorecards
     summary: We will define privacy-preserving journey analytics and onboarding
     filename: 0316-journey-analytics-and-onboarding-success-scorecards.md
+    implemented_version: 0.177.141
   - adr: '0317'
     title: Keycloak Direct-API Operator Provisioning via SSH Proxy
     status: Accepted

@@ -19,9 +19,9 @@ workstreams:
   - id: ws-0316-live-apply
     adr: "0316"
     title: Live apply journey analytics and onboarding success scorecards from latest origin/main
-    status: in-progress
+    status: merged
     owner: codex
-    branch: codex/ws-0316-live-apply
+    branch: codex/ws-0316-main-integration
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0316-live-apply
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0316-live-apply.md
     depends_on:
@@ -35,6 +35,15 @@ workstreams:
       - docs/workstreams/ws-0316-live-apply.md
       - docs/adr/0316-journey-analytics-and-onboarding-success-scorecards.md
       - docs/adr/.index.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
       - docs/runbooks/configure-windmill.md
       - docs/runbooks/configure-plausible.md
       - docs/runbooks/windmill-operator-access-admin.md
@@ -45,8 +54,12 @@ workstreams:
       - scripts/journey_scorecards.py
       - tests/test_journey_scorecards.py
       - tests/test_windmill_operator_admin_app.py
+      - docs/site-generated/architecture/dependency-graph.md
+      - receipts/ops-portal-snapshot.html
+      - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
       - receipts/live-applies/2026-04-02-adr-0316-journey-analytics-live-apply.json
-      - receipts/live-applies/evidence/*ws-0316-*
+      - receipts/live-applies/2026-04-02-adr-0316-journey-analytics-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-04-02-ws-0316-*
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -54,25 +67,45 @@ workstreams:
             - workstreams.yaml
           mode: shared_contract
           contract: workstream-registry-v1
-        - id: adr_0316_docs
-          paths:
-            - docs/workstreams/ws-0316-live-apply.md
-            - docs/adr/0316-journey-analytics-and-onboarding-success-scorecards.md
-            - receipts/live-applies/2026-04-02-adr-0316-journey-analytics-live-apply.json
-            - receipts/live-applies/evidence/*ws-0316-*
-          mode: exclusive
-        - id: adr_0316_runbooks
-          paths:
-            - docs/runbooks/configure-windmill.md
-            - docs/runbooks/configure-plausible.md
-            - docs/runbooks/windmill-operator-access-admin.md
-          mode: shared_contract
-          contract: journey-analytics-runbooks-v1
         - id: adr_index_generation
           paths:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: adr-index-generator-v1
+        - id: journey_analytics_release_surfaces
+          paths:
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: journey_analytics_platform_truth_generation
+          paths:
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: canonical-truth-v1
+        - id: journey_analytics_generated_truth
+          paths:
+            - README.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
+        - id: journey_analytics_docs
+          paths:
+            - docs/workstreams/ws-0316-live-apply.md
+            - docs/runbooks/configure-windmill.md
+            - docs/runbooks/configure-plausible.md
+            - docs/runbooks/windmill-operator-access-admin.md
+          mode: shared_contract
+          contract: journey-analytics-runbooks-v1
+        - id: journey_analytics_adr_surface
+          paths:
+            - docs/adr/0316-journey-analytics-and-onboarding-success-scorecards.md
+          mode: shared_contract
+          contract: adr-0316-metadata-v1
         - id: plausible_and_windmill_contracts
           paths:
             - inventory/host_vars/proxmox_florin.yml
@@ -82,11 +115,26 @@ workstreams:
             - scripts/journey_scorecards.py
             - tests/test_journey_scorecards.py
             - tests/test_windmill_operator_admin_app.py
+            - docs/site-generated/architecture/dependency-graph.md
+            - receipts/ops-portal-snapshot.html
           mode: shared_contract
           contract: journey-analytics-contract-v1
-    ready_to_merge: false
-    live_applied: false
-    blockers: []
+        - id: journey_analytics_receipts
+          paths:
+            - receipts/live-applies/2026-04-02-adr-0316-journey-analytics-live-apply.json
+            - receipts/live-applies/2026-04-02-adr-0316-journey-analytics-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-04-02-ws-0316-*
+            - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    canonical_truth:
+      changelog_entry: implements ADR 0316 by adding privacy-preserving journey analytics, onboarding success scorecards, contextual help recovery tracking, and live Windmill and Plausible contracts for the operator access admin surface
+      release_bump: patch
+      included_in_repo_version: 0.177.141
+      latest_receipts:
+        journey_analytics: 2026-04-02-adr-0316-journey-analytics-mainline-live-apply
+    ready_to_merge: true
+    live_applied: true
   - id: ws-0296-education-refresh
     adr: "0224"
     title: Refresh education_wemeshup from upstream main through a named repo-deploy profile

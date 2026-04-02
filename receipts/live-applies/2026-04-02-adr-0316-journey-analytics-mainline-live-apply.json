@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-02-adr-0316-journey-analytics-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-02",
+  "recorded_on": "2026-04-02",
+  "recorded_at": "2026-04-02T06:22:38Z",
+  "recorded_by": "codex",
+  "source_commit": "675f336755b3a444670ff9e03535b81d5697bbd0",
+  "repo_version_context": "0.177.141",
+  "platform_version_context": "0.130.89",
+  "workflow_id": "adr-0316-journey-analytics-mainline-live-apply",
+  "adr": "0316",
+  "summary": "Promoted ADR 0316 into canonical mainline truth as repository version `0.177.141` and platform version `0.130.89` after replaying the journey analytics and onboarding success scorecard contracts from the latest realistic `origin/main` baseline at repository version `0.177.140` and platform version `0.130.88`, verifying live Windmill helper execution, durable worker-ledger scorecard output, and Plausible route aggregation end to end, and preserving the remaining shared ADR 0281 blocker where `errors.lv3.org` still does not serve a valid Glitchtip publication/runtime path for bounded failure-signal delivery.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Windmill operator admin surface",
+      "address": "f/lv3/operator_access_admin"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Plausible route ingest",
+      "address": "https://analytics.lv3.org/api/event"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Glitchtip findings edge",
+      "address": "https://errors.lv3.org/api/3/store/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Release-manager status and protected-surface cut",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python3 scripts/release_manager.py status --json` reported the release-blocker gate `met` on the `0.177.140` / `0.130.88` baseline even though the broader readiness summary remained `3/7 met`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-release-status-r2.json`, and the exact-main protected-surface cut to `0.177.141` is preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-release-manager-r4.txt`."
+    },
+    {
+      "check": "Exact-main Windmill and Plausible replay",
+      "result": "pass",
+      "observed": "The exact-main replays converged the shared journey surfaces successfully: `make converge-plausible` passed in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-converge-plausible-r3.txt`, and the final `make converge-windmill` finished with recap `docker-runtime-lv3 : ok=329 changed=48 failed=0`, `postgres-lv3 : ok=93 changed=2 failed=0`, and `proxmox_florin : ok=41 changed=4 failed=0`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-converge-windmill-r4.txt`."
+    },
+    {
+      "check": "Live operator-admin journey scorecards and worker ledger state",
+      "result": "pass",
+      "observed": "The final exact-main helper run kept the daily `f/lv3/operator_journey_scorecards` schedule enabled for `08:15` `Europe/Bucharest`, produced a live report with `52` events, `3` sessions, `3` visitors, and all six scorecards `ok`, and persisted the worker snapshot at `/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-latest.json`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-journey-schedule-r2.json`, `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-journey-event-smoke-r4.json`, `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-journey-scorecards-r5.json`, and `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-worker-state-r2.json`."
+    },
+    {
+      "check": "Plausible route aggregation across the governed onboarding flow",
+      "result": "pass",
+      "observed": "The dedicated route smoke posted one pageview to each governed route and the next scorecard render showed a `+1` delta for all nine `/journeys/operator-access-admin/*` routes, leaving the live report at `2` pageviews per governed route, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-plausible-route-smoke-r2.json` and `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-journey-scorecards-r5.json`."
+    },
+    {
+      "check": "Glitchtip failure-signal delivery on the shared public edge",
+      "result": "partial",
+      "observed": "The code path now accepts DSN-style secrets and normalizes them to `/api/<project>/store/`, but exact-main verification still found `errors.lv3.org` failing TLS hostname validation, resolving to the shared public edge at `65.108.75.123`, and leaving the live runtime host with an empty `glitchtip_default` container map, so `glitchtip_events` remains `0`; the blocker is preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-glitchtip-publication-r2.json` and `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-glitchtip-runtime-state-r3.json`."
+    },
+    {
+      "check": "Exact-main repository automation and validation bundle",
+      "result": "pass",
+      "observed": "After the ADR/workstream metadata refresh, receipt creation, platform-version bump, and generated-truth regeneration, the exact-main tree passed `scripts/validate_repository_data_models.py --validate`, `scripts/live_apply_receipts.py --validate`, `./scripts/validate_repo.sh workstream-surfaces`, `make validate`, `make remote-validate`, `make pre-push-gate`, and `git diff --check`; `./scripts/validate_repo.sh agent-standards` also exited successfully while surfacing the existing non-blocking top-level-directory warning, and the final evidence is preserved alongside the refreshed generator outputs."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "build/platform-manifest.json",
+    "changelog.md",
+    "docs/adr/.index.yaml",
+    "docs/adr/0316-journey-analytics-and-onboarding-success-scorecards.md",
+    "docs/release-notes/0.177.141.md",
+    "docs/release-notes/README.md",
+    "docs/runbooks/configure-windmill.md",
+    "docs/runbooks/configure-plausible.md",
+    "docs/runbooks/windmill-operator-access-admin.md",
+    "docs/workstreams/ws-0316-live-apply.md",
+    "receipts/live-applies/2026-04-02-adr-0316-journey-analytics-live-apply.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-release-status-r2.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-release-manager-r4.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-focused-contracts-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-converge-plausible-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-converge-windmill-r4.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-journey-schedule-r2.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-journey-event-smoke-r4.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-journey-scorecards-r5.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-plausible-route-smoke-r2.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-worker-state-r2.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-glitchtip-publication-r2.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-glitchtip-runtime-state-r3.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-generate-adr-index-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-canonical-truth-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-platform-manifest-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-generate-status-docs-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-generate-diagrams-r3.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-generate-dependency-diagram-r4.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-generate-ops-portal-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-generate-changelog-portal-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-validate-data-models-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-live-apply-receipts-validate-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-agent-standards-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-workstream-surfaces-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-validate-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-remote-validate-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-pre-push-gate-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-git-diff-check-r2.txt",
+    "versions/stack.yaml",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This exact-main receipt is the canonical proof for ADR 0316 on repository version `0.177.141` and platform version `0.130.89`.",
+    "The evidence set intentionally preserves the first blocked helper runs because they exposed real integration drift: the worker mirror initially lacked `scripts/journey_scorecards.py`, and the first Glitchtip attempt assumed the mirrored secret was already a direct store URL rather than a DSN.",
+    "The remaining partial verification is outside ADR 0316's owned browser, worker, and Plausible scope. The missing piece is the shared ADR 0281 publication/runtime repair so `errors.lv3.org` resolves to a live Glitchtip service with the correct TLS identity."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-04-02-ws-0316-mainline-sync-and-publication-truth",
+    "surface": "exact-main Windmill replay and Glitchtip failure-signal verification",
+    "diagnosis": "contract_drift",
+    "repair_action": "Reran the exact-worktree Windmill converge so the worker checkout and seeded helpers matched the integration tree, added DSN normalization to `scripts/journey_scorecards.py`, reran the live journey and Plausible scorecard proofs, and then preserved the still-open ADR 0281 publication/runtime gap explicitly in the canonical receipt rather than reporting a false-green failure-signal path.",
+    "verification": "receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-journey-scorecards-r5.json"
+  }
+}

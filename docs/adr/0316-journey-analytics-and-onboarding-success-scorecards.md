@@ -1,9 +1,10 @@
 # ADR 0316: Journey Analytics And Onboarding Success Scorecards
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.141
+- Implemented In Platform Version: 0.130.89
+- Implemented On: 2026-04-02
 - Date: 2026-03-31
 
 ## Context
@@ -90,6 +91,22 @@ Journey scorecards should combine:
 - ADR 0283: Plausible Analytics as the privacy-first web traffic analytics layer
 - ADR 0305: k6 for continuous load testing and SLO error budget validation
 - ADR 0310: First-run activation checklists and progressive capability reveal
+
+## Implementation Notes
+
+- The 2026-04-02 exact-main replay verified the live path end to end for the
+  Windmill helpers `f/lv3/operator_journey_event` and
+  `f/lv3/operator_journey_scorecards`, the worker-side ledger and latest-report
+  snapshots under `.local/state/journey-analytics/`, and the nine governed
+  `/journeys/operator-access-admin/*` Plausible route aggregates.
+- The journey helper now accepts either a direct Glitchtip store URL or a
+  DSN-style secret and normalizes DSNs into the Sentry-compatible
+  `/api/.../store/` endpoint at runtime.
+- Live failure-signal delivery remains constrained by the shared ADR 0281 gap:
+  `errors.lv3.org` currently presents the wrong TLS certificate and the
+  `glitchtip_default` Docker network has no attached containers on
+  `docker-runtime-lv3`, so `glitchtip_events` truthfully stays at `0` until
+  that shared Glitchtip publication/runtime surface is implemented.
 
 ## References
 

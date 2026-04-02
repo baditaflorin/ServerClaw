@@ -219,9 +219,9 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.140` |
-| Platform version | `0.130.88` |
-| Observed check date | `2026-03-31` |
+| Repository version | `0.177.141` |
+| Platform version | `0.130.89` |
+| Observed check date | `2026-04-02` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
 | Observed kernel | `6.17.13-2-pve` |
@@ -337,6 +337,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `iac_policy_scanning` | `2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply` |
 | `identity_taxonomy` | `2026-03-22-adr-0046-identity-classes-live-apply` |
 | `immutable_guest_replacement` | `2026-03-27-adr-0191-immutable-guest-replacement-live-apply` |
+| `journey_analytics` | `2026-04-02-adr-0316-journey-analytics-mainline-live-apply` |
 | `jupyterhub` | `2026-03-30-adr-0291-jupyterhub-mainline-live-apply` |
 | `k6_load_testing` | `2026-03-31-adr-0305-k6-mainline-live-apply` |
 | `keycloak` | `2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply` |
@@ -1562,6 +1563,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0313-live-apply: Live Apply ADR 0313 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0313-live-apply.md)
 - [Workstream ws-0315-gitea-followups: Gitea Release Bundles And Renovate PR Validation Follow-ups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md)
 - [Workstream ws-0315-live-apply: Live Apply ADR 0315 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-live-apply.md)
+- [Workstream ws-0316-live-apply: Live Apply ADR 0316 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0316-live-apply.md)
 - [Workstream ws-0317-live-apply: Live Apply ADR 0317 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0317-live-apply.md)
 - [Workstream ws-0324-programmatic-doc-shards: Programmatic Document And Registry Sharding ADR Set](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0324-programmatic-doc-shards.md)
 - [Workstream ws-0325-service-uptime-investigation: Runtime Service Uptime Investigation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0325-service-uptime-investigation.md)
@@ -1583,8 +1585,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.140` |
-| Platform version | `0.130.88` |
+| Repository version | `0.177.141` |
+| Platform version | `0.130.89` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1885,6 +1887,7 @@ This repository is intentionally opinionated:
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md) |
 | `0313` | Live apply contextual help, glossary, and escalation drawer across the first-party portal surfaces | `live_applied` | [ws-0313-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0313-live-apply.md) |
 | `0315` | Live apply canonical page states and next-best-action guidance on the Windmill operator admin surface | `live_applied` | [ws-0315-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-live-apply.md) |
+| `0316` | Live apply journey analytics and onboarding success scorecards from latest origin/main | `merged` | [ws-0316-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0316-live-apply.md) |
 | `0317` | Live apply ADR 0317 Keycloak direct-API operator provisioning via SSH proxy | `live_applied` | [ws-0317-live-apply.md](docs/workstreams/ws-0317-live-apply.md) |
 | `0319` | Split the overloaded shared runtime into pool-scoped lanes with higher memory headroom and bounded autoscaling | `merged` | [adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md) |
 | `0319` | Investigate recurring service restarts and uptime failures across the runtime pools | `merged` | [ws-0325-service-uptime-investigation.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0325-service-uptime-investigation.md) |

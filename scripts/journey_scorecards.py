@@ -11,6 +11,7 @@ import os
 import statistics
 import subprocess
 import urllib.error
+import urllib.parse
 import urllib.request
 import uuid
 from pathlib import Path
@@ -169,9 +170,43 @@ def build_glitchtip_payload(event: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def normalize_glitchtip_event_url(value: str) -> str:
+    raw = value.strip()
+    if not raw:
+        raise ValueError("glitchtip event url is required")
+    parsed = urllib.parse.urlsplit(raw)
+    if parsed.username:
+        project_id = parsed.path.rstrip("/").split("/")[-1]
+        if not project_id:
+            raise ValueError("glitchtip DSN must include a project id")
+        prefix = parsed.path.rstrip("/")
+        prefix = prefix[: -len(project_id)].rstrip("/")
+        store_path = f"{prefix}/api/{project_id}/store/"
+        query_items = [
+            ("sentry_key", parsed.username),
+            ("sentry_version", "7"),
+            ("sentry_client", "journey-scorecards/1.0"),
+        ]
+        if parsed.password:
+            query_items.append(("sentry_secret", parsed.password))
+        netloc = parsed.hostname or ""
+        if parsed.port:
+            netloc = f"{netloc}:{parsed.port}"
+        return urllib.parse.urlunsplit(
+            (
+                parsed.scheme,
+                netloc,
+                store_path,
+                urllib.parse.urlencode(query_items),
+                "",
+            )
+        )
+    return raw
+
+
 def post_json(url: str, payload: dict[str, Any]) -> None:
     request = urllib.request.Request(
-        url,
+        normalize_glitchtip_event_url(url),
         data=json.dumps(payload, sort_keys=True).encode("utf-8"),
         headers={"Content-Type": "application/json"},
         method="POST",

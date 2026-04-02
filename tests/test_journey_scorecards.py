@@ -58,6 +58,32 @@ def test_record_event_writes_ledger_and_glitchtip(monkeypatch: pytest.MonkeyPatc
     assert event["properties"]["alert_source"] == "inventory"
 
 
+def test_glitchtip_dsn_is_translated_to_store_endpoint(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    module = load_module(monkeypatch, tmp_path)
+    secret_path = tmp_path / ".local" / "glitchtip" / "platform-findings-event-url.txt"
+    secret_path.parent.mkdir(parents=True, exist_ok=True)
+    secret_path.write_text("https://public@example.com/3", encoding="utf-8")
+
+    delivered: list[str] = []
+
+    module.record_event(
+        tmp_path,
+        {
+            "event_type": "alert_emitted",
+            "visitor_id": "visitor-1",
+            "session_id": "session-1",
+            "occurred_at": "2026-04-02T08:00:00Z",
+            "flow_id": "flow-1",
+            "glitchtip": {"requested": True, "message": "Inventory alert"},
+        },
+        post_json_func=lambda url, event: delivered.append(module.normalize_glitchtip_event_url(url)),
+    )
+
+    assert delivered == [
+        "https://example.com/api/3/store/?sentry_key=public&sentry_version=7&sentry_client=journey-scorecards%2F1.0"
+    ]
+
+
 def test_sensitive_properties_fail_closed(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     module = load_module(monkeypatch, tmp_path)
 

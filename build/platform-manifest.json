@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.140",
-  "platform_version": "0.130.88",
-  "generated_at": "2026-04-02T06:16:56Z",
-  "next_refresh_at": "2026-04-02T07:16:56Z",
+  "repo_version": "0.177.141",
+  "platform_version": "0.130.89",
+  "generated_at": "2026-04-02T08:10:27Z",
+  "next_refresh_at": "2026-04-02T09:10:27Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5367,7 +5367,7 @@
         "id": "configure-windmill",
         "title": "Configure Windmill",
         "agent_trust_required": "T3",
-        "steps": 25,
+        "steps": 27,
         "path": "docs/runbooks/configure-windmill.md",
         "workflow_ids": [
           "converge-windmill"
@@ -5987,10 +5987,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.139",
+    "last_version": "0.177.140",
     "deployed_at": "2026-04-02",
-    "summary": "implements ADR 0315 by standardizing the live operator admin surface on a reusable canonical state model that explains loading, empty, degraded, validation, system-error, unauthorized, not-found, and success outcomes with explicit next-best actions and linked recovery guidance",
-    "release_notes_url": "docs/release-notes/0.177.140.md"
+    "summary": "implements ADR 0316 by adding privacy-preserving journey analytics, onboarding success scorecards, contextual help recovery tracking, and live Windmill and Plausible contracts for the operator access admin surface",
+    "release_notes_url": "docs/release-notes/0.177.141.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
