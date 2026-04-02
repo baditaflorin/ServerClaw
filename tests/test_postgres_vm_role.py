@@ -47,11 +47,20 @@ def test_main_tasks_install_cluster_specific_pgaudit_package_and_extension() -> 
 def test_main_tasks_load_sensitive_table_catalog_and_grant_audit_role() -> None:
     tasks = load_yaml(TASKS_PATH)
     decode_task = next(task for task in tasks if task.get("name") == "Decode pgaudit sensitive-table catalog")
+    schema_grant_task = next(task for task in tasks if task.get("name") == "Grant schema usage to the pgaudit audit role")
     grant_task = next(task for task in tasks if task.get("name") == "Grant sensitive-table privileges to the pgaudit audit role")
 
     assert "from_yaml" in decode_task["ansible.builtin.set_fact"]["postgres_vm_pgaudit_sensitive_tables"]
+    assert schema_grant_task["register"] == "postgres_vm_pgaudit_schema_grant"
+    assert schema_grant_task["retries"] == 10
+    assert schema_grant_task["delay"] == 3
+    assert schema_grant_task["until"] == "postgres_vm_pgaudit_schema_grant.rc == 0"
     assert "postgres_vm_pgaudit_audit_role" in grant_task["ansible.builtin.command"]["argv"][-1]
     assert "item.privileges" in grant_task["ansible.builtin.command"]["argv"][-1]
+    assert grant_task["register"] == "postgres_vm_pgaudit_table_grant"
+    assert grant_task["retries"] == 10
+    assert grant_task["delay"] == 3
+    assert grant_task["until"] == "postgres_vm_pgaudit_table_grant.rc == 0"
 
 
 def test_main_tasks_render_from_role_templates_and_restart_preload_libraries_when_needed() -> None:

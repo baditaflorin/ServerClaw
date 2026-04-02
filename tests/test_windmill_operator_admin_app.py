@@ -728,6 +728,10 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert 'Authorization: "Bearer {{ windmill_bootstrap_session_token }}"' in tasks
     assert "Sync repo-managed Windmill scripts" in tasks
     assert "scripts/sync_windmill_seed_scripts.py" in tasks
+    assert "Wait for the Windmill API before syncing repo-managed scripts" in tasks
+    assert tasks.index("Wait for the Windmill API before syncing repo-managed scripts") < tasks.index(
+        "Sync repo-managed Windmill scripts"
+    )
     assert "WINDMILL_TOKEN" in tasks
     assert "Sync repo-managed Windmill schedules" in tasks
     assert "scripts/sync_windmill_seed_schedules.py" in tasks

@@ -306,10 +306,14 @@
       - ON_ERROR_STOP=1
       - -c
       - "GRANT USAGE ON SCHEMA {{ item.schema }} TO {{ postgres_vm_pgaudit_audit_role }}"
+  register: postgres_vm_pgaudit_schema_grant
   loop: "{{ postgres_vm_pgaudit_sensitive_tables.table_grants }}"
   loop_control:
     label: "{{ item.database }}.{{ item.schema }}"
   changed_when: false
+  retries: 10
+  delay: 3
+  until: postgres_vm_pgaudit_schema_grant.rc == 0
   when: postgres_vm_pgaudit_enabled | bool
 
 - name: Grant sensitive-table privileges to the pgaudit audit role
@@ -324,10 +328,14 @@
       - ON_ERROR_STOP=1
       - -c
       - "GRANT {{ item.privileges | map('upper') | join(', ') }} ON TABLE {{ item.schema }}.{{ item.table }} TO {{ postgres_vm_pgaudit_audit_role }}"
+  register: postgres_vm_pgaudit_table_grant
   loop: "{{ postgres_vm_pgaudit_sensitive_tables.table_grants }}"
   loop_control:
     label: "{{ item.database }}.{{ item.schema }}.{{ item.table }}"
   changed_when: false
+  retries: 10
+  delay: 3
+  until: postgres_vm_pgaudit_table_grant.rc == 0
   when: postgres_vm_pgaudit_enabled | bool
 
 - name: Verify PostgreSQL health probes

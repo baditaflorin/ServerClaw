@@ -96,7 +96,7 @@ def test_linux_guest_firewall_reasserts_docker_bridge_chains_after_firewall_eval
     assert reassert_task["when"] == "linux_guest_firewall_recover_missing_docker_bridge_chains | bool"
     assert fail_task["when"] == "not linux_guest_firewall_recover_missing_docker_bridge_chains | bool"
     assert defaults["linux_guest_firewall_docker_bridge_chain_service_name"] == "docker"
-    assert defaults["linux_guest_firewall_recover_missing_docker_bridge_chains"] is False
+    assert defaults["linux_guest_firewall_recover_missing_docker_bridge_chains"] is True
 
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 TEMPLATE_PATH = (

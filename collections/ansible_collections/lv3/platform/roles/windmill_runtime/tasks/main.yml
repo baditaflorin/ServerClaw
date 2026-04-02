@@ -2163,6 +2163,19 @@
   delegate_to: localhost
   become: false
 
+- name: Wait for the Windmill API before syncing repo-managed scripts
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/version"
+    method: GET
+    status_code: 200
+  delegate_to: localhost
+  become: false
+  register: windmill_seed_script_sync_api_wait
+  retries: "{{ windmill_runtime_api_wait_retries }}"
+  delay: "{{ windmill_runtime_api_wait_delay_seconds }}"
+  until: windmill_seed_script_sync_api_wait.status == 200
+  changed_when: false
+
 - name: Sync repo-managed Windmill scripts
   vars:
     mutation_audit_action: sync.windmill_scripts
