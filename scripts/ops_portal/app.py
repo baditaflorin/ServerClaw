@@ -1846,6 +1846,26 @@ def build_runbook_models(
     return visible, locked
 
 
+def enrich_runbook_metadata(
+    runbooks: list[dict[str, Any]],
+    workflows: dict[str, Any],
+) -> list[dict[str, Any]]:
+    enriched: list[dict[str, Any]] = []
+    for item in runbooks:
+        if not isinstance(item, dict):
+            continue
+        runbook = dict(item)
+        runbook_id = str(runbook.get("id", "")).strip()
+        workflow = workflows.get(runbook_id, {}) if runbook_id else {}
+        if not isinstance(workflow, dict):
+            workflow = {}
+        for field in ("description", "owner_runbook", "execution_class", "live_impact"):
+            if not runbook.get(field) and workflow.get(field):
+                runbook[field] = workflow[field]
+        enriched.append(runbook)
+    return enriched
+
+
 async def build_launcher_panel_context(request: Request, *, query: str = "") -> dict[str, Any]:
     await ensure_session(request)
     repository: PortalRepository = request.app.state.repository
@@ -1971,6 +1991,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
 
     services = repository.load_service_catalog()
     publications = repository.load_publication_registry()
+    workflows = repository.load_workflow_definitions()
 
     capability_contracts = repository.load_capability_contract_catalog()
     dependency_graph = repository.load_dependency_graph()
@@ -2010,7 +2031,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     runtime_assurance = normalize_runtime_assurance(runtime_assurance_payload, services)
     coordination = normalize_agent_coordination(coordination_payload)
     raw_runbooks = runbook_payload.get("runbooks") if isinstance(runbook_payload, dict) else []
-    runbooks = raw_runbooks if isinstance(raw_runbooks, list) else []
+    runbooks = enrich_runbook_metadata(raw_runbooks if isinstance(raw_runbooks, list) else [], workflows)
     capability_models, capability_summary = build_capability_contract_models(capability_contracts, services)
     service_models = build_service_models(
         services,

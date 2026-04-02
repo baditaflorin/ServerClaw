@@ -264,17 +264,13 @@ class FakeGatewayClient:
                     "id": "validation-gate-status",
                     "title": "Inspect validation gate status",
                     "description": "Show the current validation-gate summary through the shared runbook service.",
-                    "owner_runbook": "docs/runbooks/validation-gate-status.yaml",
                     "live_impact": "repo_only",
-                    "execution_class": "diagnostic",
                 },
                 {
                     "id": "converge-ops-portal",
                     "title": "Converge the ops portal runtime",
                     "description": "Replay the governed ops-portal service converge against the live runtime.",
-                    "owner_runbook": "docs/runbooks/platform-operations-portal.md",
                     "live_impact": "guest_live",
-                    "execution_class": "mutation",
                 }
             ]
         }
@@ -483,6 +479,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "description": "Show validation-gate status.",
                         "lifecycle_status": "active",
                         "live_impact": "repo_only",
+                        "execution_class": "diagnostic",
                         "owner_runbook": "docs/runbooks/validation-gate.md",
                         "human_navigation": {
                             "launcher": {
@@ -499,6 +496,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "description": "Show drift status.",
                         "lifecycle_status": "active",
                         "live_impact": "guest_live",
+                        "execution_class": "diagnostic",
                         "owner_runbook": "docs/runbooks/drift-detection.md",
                         "human_navigation": {
                             "launcher": {
@@ -515,6 +513,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "description": "Converge the ops portal.",
                         "lifecycle_status": "active",
                         "live_impact": "guest_live",
+                        "execution_class": "mutation",
                         "owner_runbook": "docs/runbooks/platform-operations-portal.md",
                         "human_navigation": {
                             "launcher": {
@@ -531,12 +530,14 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "description": "Rotate one service secret.",
                         "lifecycle_status": "active",
                         "live_impact": "service_change",
+                        "execution_class": "mutation",
                         "owner_runbook": "docs/runbooks/rotate-secrets.md",
                     },
                     "validate": {
                         "description": "Repo-only validation.",
                         "lifecycle_status": "active",
                         "live_impact": "repo_only",
+                        "execution_class": "diagnostic",
                     },
                 }
             },

@@ -17,11 +17,16 @@ ROLE_TASKS_PATH = (
 )
 
 
-def test_ops_portal_playbook_uses_controller_pwd_as_repo_root() -> None:
+def test_ops_portal_playbook_resolves_repo_root_from_the_git_worktree() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
     play = plays[0]
+    repo_root_expr = play["vars"]["ops_portal_repo_root"]
 
-    assert play["vars"]["ops_portal_repo_root"] == "{{ lookup('ansible.builtin.env', 'PWD') }}"
+    assert "ansible.builtin.pipe" in repo_root_expr
+    assert "git -C " in repo_root_expr
+    assert "(playbook_dir | quote)" in repo_root_expr
+    assert "rev-parse --show-toplevel" in repo_root_expr
+    assert "| trim" in repo_root_expr
 
 
 def test_ops_portal_runtime_clears_previous_build_context_before_sync() -> None:
