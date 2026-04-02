@@ -16289,3 +16289,35 @@ workstreams:
         nomad_scheduler: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
         tesseract_ocr: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
         tika: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
+  - id: ws-0318-provision-operator-v2
+    adr: "0318"
+    title: "provision_operator.py v2: Headscale + step-ca fingerprint in single onboarding email"
+    status: ready_for_merge
+    owner: claude
+    branch: claude/provision-operator-v2
+    worktree_path: /tmp/provision-v2-worktree
+    doc: docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md
+    depends_on:
+      - adr-0318-repeatable-operator-onboarding-with-cc-audit-trail
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/provision_operator.py
+      - workstreams.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws0318v2_provision_script
+          paths:
+            - scripts/provision_operator.py
+          mode: exclusive
+        - id: ws0318v2_generated_diagrams
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: ws0318v2-generated-diagrams-v1
+    ready_to_merge: true
+    live_applied: false
