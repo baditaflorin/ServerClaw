@@ -52,14 +52,19 @@ The workflow manages these live surfaces:
 - seeded helper `f/lv3/operator_offboard`
 - seeded helper `f/lv3/sync_operators`
 - seeded helper `f/lv3/quarterly_access_review`
+- seeded helper `f/lv3/operator_journey_event`
+- seeded helper `f/lv3/operator_journey_scorecards`
 - enabled schedule `f/lv3/scheduler_watchdog_loop_every_10s`
 - seeded helper `f/lv3/config_merge/merge_config_changes`
 - enabled schedule `f/lv3/config_merge/merge_config_changes_every_minute`
 - enabled schedule `f/lv3/quarterly_access_review_every_monday_0900`
+- enabled schedule `f/lv3/operator_journey_scorecards_daily`
 - worker-runtime ADR 0108 env passthrough for Windmill audit surface labelling and optional Tailscale, step-ca, and Mattermost hooks
 - worker-runtime ADR 0108 OpenBao URL override pinned to `http://lv3-openbao:8201` over the shared `openbao_default` Docker network
 - normalized writable worker-checkout paths for ADR 0108 roster and state mutations
+- normalized writable worker-checkout path `/srv/proxmox_florin_server/.local/state/journey-analytics/` for ADR 0316 scorecard ledgers and latest-report snapshots
 - mirrored ADR 0108 bootstrap secrets under `/srv/proxmox_florin_server/.local/` on the Windmill worker checkout
+- mirrored Glitchtip findings event URL under the worker checkout so ADR 0316 failure milestones can emit bounded error signals without hard-coding the live endpoint
 - mirrored ADR 0230 policy bundle under `/srv/proxmox_florin_server/policy` on the Windmill worker checkout
 - mirrored ADR 0230 worker-safe helpers `scripts/policy_checks.py`, `scripts/policy_toolchain.py`, `scripts/command_catalog.py`, `scripts/gate_status.py`, and `config/windmill/scripts/gate-status.py`
 - PostgreSQL table `config_change_staging` in the Windmill database
@@ -99,6 +104,8 @@ Run these checks after converge:
 19. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'cd /srv/proxmox_florin_server && python3 scripts/policy_checks.py --validate && python3 scripts/command_catalog.py --check-approval --command converge-windmill --requester-class human_operator --approver-classes human_operator --validation-passed --preflight-passed --receipt-planned && python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
 20. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'find /srv/proxmox_florin_server/policy -type f \( -name "._*" -o -name ".DS_Store" \) -print' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
 21. `WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" python3 scripts/windmill_run_wait_result.py --base-url http://100.64.0.1:8005 --workspace lv3 --path f/lv3/serverclaw_skills --payload-json '{"workspace_id":"ops"}'`
+22. `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/schedules/list | jq '.[] | select(.path=="f/lv3/operator_journey_scorecards_daily") | {path, enabled, schedule, script_path, args}'`
+23. `WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" python3 scripts/windmill_run_wait_result.py --base-url http://100.64.0.1:8005 --workspace lv3 --path f/lv3/operator_journey_scorecards --payload-json '{"window_days":30,"write_latest":true}'`
 
 ## Notes
 
@@ -126,6 +133,7 @@ Run these checks after converge:
 - The raw-app dependency install and `wmill sync push` steps now retry transient guest-side Docker EOFs before the converge fails. If a replay still exhausts those retries, capture the Docker journal evidence in the live-apply receipt before re-running.
 - `make converge-windmill` now verifies exact content parity for the critical verification scripts `f/lv3/windmill_healthcheck`, `f/lv3/gate-status`, and `f/lv3/stage-smoke-suites`. A replay that only leaves those paths present but stale now fails closed during the managed verify phase instead of reporting a false-green sync.
 - If a partially failed replay leaves one of those critical scripts stale, rerun `make converge-windmill` from the exact worktree first. Use `python3 scripts/sync_windmill_seed_scripts.py ...` as a targeted repair only when you need to re-seed a small critical subset before the next full replay, and record that repair plus the parity evidence in the live-apply receipt.
+- ADR 0316 adds repo-managed worker-side state under `.local/state/journey-analytics/` plus the seeded helpers `f/lv3/operator_journey_event` and `f/lv3/operator_journey_scorecards`. Keep the worker checkout writable there. The mirrored Glitchtip findings event secret may be either a DSN like `https://<key>@errors.lv3.org/<project>` or a direct `/api/<project>/store/` URL because the helper normalizes DSNs at runtime, but bounded failure milestones still require `errors.lv3.org` to publish a valid TLS endpoint backed by a live Glitchtip runtime.
 - ADR 0230 expects the worker mirror to keep the `policy/` tree and the worker-safe policy helpers in sync with the controller checkout because approval and gate-status wrappers now evaluate the shared OPA bundle locally on `docker-runtime-lv3`.
 - ADR 0251 adds the seeded `f/lv3/stage-smoke-suites` helper so the worker can replay the same repo-managed smoke suite catalog that the controller uses for live-apply receipts and promotion evidence.
 - Worker-side ADR 0251 smoke and nightly integration runs prefer `LV3_WINDMILL_BASE_URL` and otherwise fall back to Windmill's guest-local health probe URL from `config/health-probe-catalog.json`, so Windmill's own primary-path smoke resolves the local runtime API instead of the controller-only host proxy on `100.64.0.1:8005`.

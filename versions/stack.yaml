@@ -159,6 +159,7 @@ live_apply_evidence:
     superset: 2026-04-01-adr-0292-superset-mainline-live-apply
     one_api: 2026-04-01-adr-0294-one-api-mainline-live-apply
     keycloak_direct_api: 2026-04-02-adr-0317-keycloak-direct-api-mainline-live-apply
+    journey_analytics: 2026-04-02-adr-0316-journey-analytics-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated

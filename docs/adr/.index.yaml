@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-04-02'
 total_adrs: 349
 implementation_status_summary:
-  Implemented: 295
+  Implemented: 294
   Partial: 8
-  Not Implemented: 45
+  Not Implemented: 46
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5631,7 +5631,7 @@ adr_index:
   - adr: '0316'
     title: Journey Analytics And Onboarding Success Scorecards
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -5642,6 +5642,7 @@ adr_index:
       - scorecards
     summary: We will define privacy-preserving journey analytics and onboarding
     filename: 0316-journey-analytics-and-onboarding-success-scorecards.md
+    implemented_version: 0.177.141
   - adr: '0317'
     title: Keycloak Direct-API Operator Provisioning via SSH Proxy
     status: Accepted
@@ -5677,7 +5678,7 @@ adr_index:
   - adr: 0319
     title: Runtime Pools As The Service Partition Boundary
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Not Implemented
     date: '2026-04-01'
     concern: platform
     keywords:
@@ -5689,11 +5690,10 @@ adr_index:
       - boundary
     summary: We will treat the runtime pool as the primary partition boundary for
     filename: 0319-runtime-pools-as-the-service-partition-boundary.md
-    implemented_version: 0.177.141
   - adr: '0320'
     title: Pool-Scoped Deployment Surfaces And Agent Execution Lanes
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Not Implemented
     date: '2026-04-01'
     concern: agent-discovery
     keywords:
@@ -5705,7 +5705,6 @@ adr_index:
       - lanes
     summary: Every runtime pool must have its own deployment surface and its own
     filename: 0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes.md
-    implemented_version: 0.177.141
   - adr: '0321'
     title: Runtime Pool Memory Envelopes And Reserved Host Headroom
     status: Accepted

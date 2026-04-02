@@ -385,6 +385,12 @@ textarea {
   color: var(--accent);
 }
 
+.alertBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
 .tableWrap {
   display: grid;
   gap: 14px;
@@ -549,6 +555,101 @@ textarea {
 .sidebar {
   display: grid;
   gap: 20px;
+}
+
+.scorecardPanel {
+  display: grid;
+  gap: 18px;
+}
+
+.scorecardSummary,
+.scorecardGrid,
+.routeAggregateList,
+.helpActionList,
+.helpLinks {
+  display: grid;
+  gap: 12px;
+}
+
+.scorecardSummary,
+.scorecardGrid,
+.routeAggregateList {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.scorecardMetric,
+.routeAggregateItem {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.scorecardMetric strong,
+.routeAggregateItem strong {
+  font-size: 1.35rem;
+}
+
+.checklistList {
+  display: grid;
+  gap: 12px;
+}
+
+.checklistItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.checklistItem strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.checklistItem p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.checklistMeta {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+  text-align: right;
+}
+
+.helpDrawer {
+  border-style: dashed;
+}
+
+.helpDrawer.isOpen {
+  border-style: solid;
+  border-color: rgba(165, 65, 28, 0.2);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 248, 240, 0.95));
+}
+
+.helpDrawerBody {
+  display: grid;
+  gap: 14px;
+}
+
+.helpActionList {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.helpLinks a {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
 }
 
 .forms {
@@ -1051,5 +1152,15 @@ textarea {
 
   .statusRow {
     align-items: flex-start;
+  }
+
+  .alertBanner,
+  .checklistItem {
+    flex-direction: column;
+  }
+
+  .checklistMeta {
+    justify-items: start;
+    text-align: left;
   }
 }

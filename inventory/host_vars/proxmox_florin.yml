@@ -1391,6 +1391,9 @@ plausible_site_registrations:
   - hostname: uptime.lv3.org
     site_domain: uptime.lv3.org
     timezone: Europe/Bucharest
+  - hostname: ops.lv3.org
+    site_domain: ops.lv3.org
+    timezone: Europe/Bucharest
 
 lv3_service_topology:
   nginx_edge:

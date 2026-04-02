@@ -3,10 +3,10 @@
 - Date: 2026-04-02
 
 ## Summary
-- introduced the first dedicated runtime-ai pool on production with Nomad, Traefik, and Dapr, moving Apache Tika, Gotenberg, and Tesseract OCR off docker-runtime-lv3 while preserving the authenticated /v1/gotenberg route
+- implements ADR 0316 by adding privacy-preserving journey analytics, onboarding success scorecards, contextual help recovery tracking, and live Windmill and Plausible contracts for the operator access admin surface
 
 ## Platform Impact
-- Introduced the first dedicated runtime-ai pool on production with Nomad, Traefik, and Dapr, moving Apache Tika, Gotenberg, and Tesseract OCR off docker-runtime-lv3.
+- platform version advances to 0.130.89 after the exact-main ADR 0316 replay re-verifies live journey milestone capture, durable worker scorecard rendering, and Plausible route aggregation for the Windmill operator admin surface; the bounded Glitchtip failure-signal path now normalizes DSN-style secrets, but shared ADR 0281 publication/runtime repair for errors.lv3.org is still required before glitchtip_events can verify above 0
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

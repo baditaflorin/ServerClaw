@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+"""Windmill wrapper for ADR 0316 journey event recording."""
+
+from __future__ import annotations
+
+import json
+import subprocess
+from pathlib import Path
+
+
+def main(
+    event_json: str = "{}",
+    repo_path: str = "/srv/proxmox_florin_server",
+) -> dict[str, object]:
+    repo_root = Path(repo_path)
+    script_path = repo_root / "scripts" / "journey_scorecards.py"
+    if not script_path.exists():
+        return {
+            "status": "blocked",
+            "reason": "journey analytics script is missing from the worker checkout",
+            "expected_script_path": str(script_path),
+        }
+
+    command = [
+        "python3",
+        str(script_path),
+        "record",
+        "--repo-root",
+        str(repo_root),
+        "--event-json",
+        event_json,
+    ]
+    result = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, check=False)
+    payload: dict[str, object] = {
+        "status": "ok" if result.returncode == 0 else "error",
+        "command": " ".join(command),
+        "returncode": result.returncode,
+        "stdout": result.stdout.strip(),
+        "stderr": result.stderr.strip(),
+    }
+    if result.stdout.strip():
+        try:
+            payload["result"] = json.loads(result.stdout)
+        except json.JSONDecodeError:
+            pass
+    return payload
+
+
+if __name__ == "__main__":
+    print(json.dumps(main(), indent=2, sort_keys=True))
