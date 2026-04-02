@@ -20,8 +20,35 @@ The current portal combines:
 - a FastAPI-based operator shell under `scripts/ops_portal/`
 - repo-synced catalogs and receipts mirrored into `/opt/ops-portal/data`
 - dashboard actions such as the runbook launcher
-- a shared masthead application launcher with purpose grouping, persona filters,
+- a shared masthead application launcher with task-lane grouping, persona filters,
   favorites, and recent destinations
+
+## Task-Lane Information Architecture
+
+ADR 0309 adds a task-oriented information architecture layer above the existing
+service, workflow, and runbook catalogs.
+
+The live interactive shell now uses five canonical lanes:
+
+- `Start`
+- `Observe`
+- `Change`
+- `Learn`
+- `Recover`
+
+The lane overlay is declared in:
+
+- `config/workbench-information-architecture.json`
+- `docs/schema/workbench-information-architecture.schema.json`
+- `scripts/workbench_information_architecture.py`
+
+The interactive portal uses that overlay to:
+
+- group sidebar navigation by operator intent instead of only by product name
+- assign one primary lane plus optional secondary lanes to each first-party page
+- map launcher services, workflows, and runbooks onto the same lane model
+- show the next likely lane after success and after failure through the visible
+  lane banner on page sections and launcher cards
 
 ## Contextual Help Drawer
 
@@ -84,7 +111,7 @@ container data directory during converge.
 The portal can embed a generation-time health snapshot:
 
 ```bash
-uvx --from pyyaml python scripts/generate_ops_portal.py \
+uv run --with pyyaml --with jsonschema python3 scripts/generate_ops_portal.py \
   --health-snapshot path/to/snapshot.json \
   --write
 ```
@@ -96,7 +123,7 @@ When no snapshot is provided, the portal still renders and marks service health 
 Run:
 
 ```bash
-uvx --from pyyaml python scripts/generate_ops_portal.py --check
+uv run --with pyyaml --with jsonschema python3 scripts/generate_ops_portal.py --check
 make syntax-check-ops-portal
 ```
 
@@ -168,12 +195,12 @@ phase. The runtime role now checks `/partials/launcher` locally during replay so
 that drift fails closed instead of silently publishing an incomplete shell.
 
 After a live ADR 0313 replay, also confirm the root page contains the help
-drawer strings from the guest-local runtime:
+drawer strings and the task-lane shell cues from the guest-local runtime:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 \
-  'curl -fsS http://127.0.0.1:8092/ | rg "Contextual Help|Live apply|Escalation Path"'
+  'curl -fsS http://127.0.0.1:8092/ | rg "Contextual Help|Live apply|Escalation Path|Platform Overview|Start|Observe|Change|Learn|Recover"'
 ```
 
 ## Publication Boundary
@@ -219,6 +246,7 @@ Launcher inputs come from repo-managed data:
 - `config/subdomain-exposure-registry.json`
 - `config/workflow-catalog.json`
 - `config/persona-catalog.json`
+- `config/workbench-information-architecture.json`
 
 Workflow entries only appear when the workflow declares
 `human_navigation.launcher` metadata in the workflow catalog.
@@ -227,7 +255,7 @@ Operator flow:
 
 1. Open `https://ops.lv3.org` and complete the normal sign-in flow.
 2. Select **Application Launcher** in the masthead.
-3. Search for a destination, switch persona if needed, and use the purpose
+3. Search for a destination, switch persona if needed, and use the task-lane
    groups to narrow the list.
 4. Toggle the star button on any destination to add or remove it from
    favorites.
@@ -235,11 +263,13 @@ Operator flow:
 
 Expected behavior:
 
-- the launcher groups entries into `Operate`, `Observe`, `Learn`, `Plan`, and
-  `Administer`
+- the launcher groups entries into `Start`, `Observe`, `Change`, `Learn`, and
+  `Recover`
 - switching persona changes which destinations stay visible without mutating the
   underlying catalogs
 - favorites and recent destinations persist for the current browser session
+- each launcher card shows the primary lane together with the next likely lane
+  after success and after failure
 - launcher redirects preserve the destination URL while recording the recent
   visit server-side through the portal session
 

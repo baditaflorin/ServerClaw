@@ -1943,7 +1943,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "overview": len(service_models),
         "deployments": len(deployments),
         "agents": int(coordination.get("summary", {}).get("count", 0)),
-        "runtime-assurance": int(runtime_assurance_summary.get("row_count", 0)),
+        "runtime-assurance": int(assurance_summary.get("row_count", 0)),
         "drift": int(drift_summary.get("unsuppressed_count", 0) or 0),
         "search": len(available_collections()),
         "runbooks": len(runbooks),
