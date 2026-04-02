@@ -1,12 +1,12 @@
-# Release 0.177.143
+# Release 0.177.144
 
 - Date: 2026-04-02
 
 ## Summary
-- implements ADRs 0330-0339 by turning public GitHub readiness into a first-class repository lifecycle, making workstream and generated-doc metadata repository-relative, simplifying root onboarding docs into a generic forkable template, and enforcing new public-entrypoint leakage validation
+- implements ADR 0310 by adding a first-run activation checklist, progressive capability reveal, and server-side launcher, runbook, and service-action guardrails to the interactive ops portal
 
 ## Platform Impact
-- Prepares the repository for public GitHub publication with generic onboarding, repository-relative metadata, and guarded public entrypoints.
+- platform version advances to 0.130.91 after the exact-main ADR 0310 replay re-verifies the first-run activation checklist, progressive capability reveal, and server-side launcher/runbook/service guardrails on ops.lv3.org while preserving the authenticated operator edge contract on top of the 0.130.90 baseline
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

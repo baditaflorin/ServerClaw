@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-04-02'
 total_adrs: 359
 implementation_status_summary:
-  Implemented: 302
+  Implemented: 303
   Partial: 11
-  Not Implemented: 45
+  Not Implemented: 44
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5547,7 +5547,7 @@ adr_index:
   - adr: '0310'
     title: First-Run Activation Checklists And Progressive Capability Reveal
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -5559,6 +5559,7 @@ adr_index:
       - reveal
     summary: We will add a cross-surface activation checklist and use progressive
     filename: 0310-first-run-activation-checklists-and-progressive-capability-reveal.md
+    implemented_version: 0.177.144
   - adr: '0311'
     title: Global Command Palette And Universal Open Dialog Via cmdk
     status: Accepted
