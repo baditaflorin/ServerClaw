@@ -359,7 +359,8 @@ def test_real_repo_scope_resolution_for_live_apply_paths() -> None:
         catalog_path=REPO_ROOT / "config" / "ansible-execution-scopes.yaml",
     )
 
-    assert api_scope.mutation_scope == "host"
+    assert api_scope.mutation_scope == "lane"
+    assert api_scope.target_lane == "lane:runtime-control"
     assert api_scope.source_leaf_playbooks == ("playbooks/api-gateway.yml",)
     assert plausible_scope.mutation_scope == "platform"
     assert plausible_scope.source_leaf_playbooks == ("playbooks/plausible.yml",)

@@ -43,7 +43,7 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.145` |
+| Repository version | `0.177.146` |
 | Platform version | `0.130.91` |
 | Observed check date | `2026-04-02` |
 | Observed OS | `Debian 13` |
@@ -303,7 +303,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.145` |
+| Repository version | `0.177.146` |
 | Platform version | `0.130.91` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
