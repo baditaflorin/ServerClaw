@@ -86,22 +86,21 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert 'excludes:' in defaults
     assert '- evidence' in defaults
     assert '- preview' in defaults
-    assert "Discover the ops portal directory-backed data files on the controller" in tasks
     assert "item.excludes | default([])" in tasks
-    assert "Ensure the synced ops portal directory-backed data subdirectories exist" in tasks
-    assert "select('in', item.1.path.split('/'))" in tasks
     assert "Sync the ops portal directory-backed data source files" in tasks
-    assert "ops_portal_directory_source_files.results | subelements('files', skip_missing=True)" in tasks
+    assert "ansible.posix.synchronize" in tasks
+    assert "--prune-empty-dirs" in tasks
+    assert "rsync_path: \"sudo rsync\"" in tasks
     assert "Remove stale ops portal build-context ignore and metadata files" in tasks
     assert "{{ ops_portal_build_context_dir }}/._publication_contract.py" in tasks
     assert "{{ ops_portal_build_context_dir }}/._stage_smoke.py" in tasks
     assert "Remove stale ops portal build-context entries before sync" in tasks
     assert "Sync the clean ops portal Docker build-context directories" in tasks
+    assert "Render the clean ops portal build-context Dockerfile" in tasks
     assert "Sync the clean ops portal Docker build-context root files" in tasks
-    assert "remote_src: true" in tasks
-    assert 'src: "{{ ops_portal_service_dir }}/ops_portal/"' in tasks
+    assert 'src: "{{ ops_portal_repo_root }}/scripts/ops_portal/"' in tasks
     assert 'dest: "{{ ops_portal_build_context_dir }}/ops_portal/"' in tasks
-    assert 'src: "{{ ops_portal_service_dir }}/search_fabric/"' in tasks
+    assert 'src: "{{ ops_portal_repo_root }}/scripts/search_fabric/"' in tasks
     assert 'dest: "{{ ops_portal_build_context_dir }}/search_fabric/"' in tasks
     assert "{{ ops_portal_build_context_dir }}/publication_contract.py" in tasks
     assert "{{ ops_portal_build_context_dir }}/stage_smoke.py" in tasks
