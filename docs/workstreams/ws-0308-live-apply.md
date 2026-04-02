@@ -2,8 +2,8 @@
 
 - ADR: [ADR 0308](../adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md)
 - Title: Live apply the operator provisioning execution-surface and connectivity contract from latest `origin/main`
-- Status: ready_for_merge
-- Included In Repo Version: pending main integration
+- Status: live_applied
+- Included In Repo Version: 0.177.138
 - Branch-Local Receipt: `receipts/live-applies/2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply.json`
 - Implemented On: 2026-04-02
 - Live Applied On: 2026-04-02
@@ -14,7 +14,7 @@
 - Owner: codex
 - Depends On: `adr-0044-windmill`, `adr-0056-keycloak`, `adr-0108-operator-onboarding-and-offboarding`
 - Conflicts With: `ws-0307-0308-operator-adrs`
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0308-live-apply.md`, `docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md`, `docs/runbooks/operator-onboarding.md`, `docs/adr/.index.yaml`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `config/workflow-catalog.json`, `config/windmill/scripts/gate-status.py`, `scripts/gate_status.py`, `scripts/preflight_controller_local.py`, `scripts/workflow_catalog.py`, `platform/repo.py`, `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`, `tests/test_preflight_controller_local.py`, `tests/test_controller_automation_toolkit.py`, `tests/test_common_docker_bridge_chains_helper.py`, `tests/test_docker_runtime_role.py`, `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`, `receipts/live-applies/2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply.json`, `receipts/live-applies/evidence/2026-04-02-ws-0308-*`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0308-live-apply.md`, `docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md`, `docs/runbooks/operator-onboarding.md`, `docs/adr/.index.yaml`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `config/workflow-catalog.json`, `config/windmill/scripts/gate-status.py`, `scripts/gate_status.py`, `scripts/preflight_controller_local.py`, `scripts/workflow_catalog.py`, `platform/repo.py`, `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`, `tests/test_preflight_controller_local.py`, `tests/test_controller_automation_toolkit.py`, `tests/test_common_docker_bridge_chains_helper.py`, `tests/test_docker_runtime_role.py`, `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`, `receipts/live-applies/2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply.json`, `receipts/live-applies/evidence/2026-04-02-ws-0308-*`
 
 ## Scope
 
@@ -34,6 +34,13 @@
 - `docs/runbooks/operator-onboarding.md`
 - `docs/workstreams/ws-0308-live-apply.md`
 - `docs/adr/.index.yaml`
+- `README.md`
+- `RELEASE.md`
+- `VERSION`
+- `changelog.md`
+- `docs/release-notes/README.md`
+- `docs/release-notes/0.177.138.md`
+- `versions/stack.yaml`
 - `workstreams.yaml`
 - `build/platform-manifest.json`
 - `docs/diagrams/agent-coordination-map.excalidraw`
@@ -87,7 +94,10 @@
 - The branch now also records the refreshed `docker-runtime-lv3` SBOM snapshot in `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`, capturing the runtime state that the rebased exact-main converge validated.
 - The repo automation bundle is now fully replayed on the branch: rebased `remote-validate` is green, and the only branch-local pre-push failure still points at the protected `changelog.md` update that intentionally waits for merge-to-main.
 
-## Merge-to-Main Notes
+## Mainline Integration
 
-- Protected integration work still belongs to the final mainline step: bump `VERSION`, update `changelog.md`, refresh the top-level `README.md` status summary if the integrated truth changed, update ADR 0308's `Implemented In Repo Version` metadata, and update `versions/stack.yaml` only when the merge commit becomes the final verified canonical truth.
-- The branch-local receipt `receipts/live-applies/2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply.json` is the canonical audit trail for the live apply itself; the merge-to-main step should either promote it as the canonical receipt or cut a separate mainline receipt if the protected release write materially changes the final evidence set.
+- Repo version `0.177.138` is the protected mainline integration that promoted this workstream: `VERSION`, `changelog.md`, `docs/release-notes/0.177.138.md`, `docs/release-notes/README.md`, `README.md`, `versions/stack.yaml`, and `build/platform-manifest.json` were refreshed in the integrated tree.
+- Platform version remains `0.130.86` because the release promoted already-live branch verification instead of representing a new live apply from `main`.
+- The branch-local receipt `receipts/live-applies/2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply.json` is now the canonical latest receipt for this capability in `versions/stack.yaml`.
+- The final integrated validation set passed `agent-standards`, `live_apply_receipts.py --validate`, `workstream-surfaces`, `generated-docs`, `git diff --check`, `make remote-validate`, and `make pre-push-gate`; see `receipts/live-applies/evidence/2026-04-02-ws-0308-mainline-agent-standards-r2-0.177.138.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0308-mainline-live-apply-receipts-validate-r2-0.177.138.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0308-mainline-workstream-surfaces-r2-0.177.138.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0308-mainline-generated-docs-r2-0.177.138.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0308-mainline-git-diff-check-r2-0.177.138.txt`, `receipts/live-applies/evidence/2026-04-02-ws-0308-mainline-remote-validate-r1-0.177.138.txt`, and `receipts/live-applies/evidence/2026-04-02-ws-0308-mainline-pre-push-gate-r1-0.177.138.txt`.
+- The first release-manager write hit an Outline `collections.list` HTTP `502` during knowledge sync after the protected repo surfaces had already been written. The final integration used the built-in `LV3_SKIP_OUTLINE_SYNC=1` bypass to complete the release deterministically without changing the repo truth again.

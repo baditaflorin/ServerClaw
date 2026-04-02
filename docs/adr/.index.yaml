@@ -5518,7 +5518,7 @@ adr_index:
       - provisioning
     summary: The operatormanager.py onboard command must run where OpenBao is reachable over plain HTTP.
     filename: 0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
-    implemented_version: 0.130.85
+    implemented_version: 0.177.138
   - adr: 0309
     title: Task-Oriented Information Architecture Across The Platform Workbench
     status: Accepted

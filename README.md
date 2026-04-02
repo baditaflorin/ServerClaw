@@ -219,7 +219,7 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.137` |
+| Repository version | `0.177.138` |
 | Platform version | `0.130.86` |
 | Observed check date | `2026-03-31` |
 | Observed OS | `Debian 13` |
@@ -1558,6 +1558,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0305-live-apply: Live Apply ADR 0305 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-live-apply.md)
 - [Workstream ws-0305-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md)
 - [Workstream ws-0306-live-apply: Live Apply ADR 0306 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md)
+- [Workstream ws-0308-live-apply: Live Apply ADR 0308 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0308-live-apply.md)
 - [Workstream ws-0315-gitea-followups: Gitea Release Bundles And Renovate PR Validation Follow-ups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md)
 - [Workstream ws-0317-live-apply: Live Apply ADR 0317 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0317-live-apply.md)
 - [Workstream ws-0324-programmatic-doc-shards: Programmatic Document And Registry Sharding ADR Set](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0324-programmatic-doc-shards.md)
@@ -1580,7 +1581,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.137` |
+| Repository version | `0.177.138` |
 | Platform version | `0.130.86` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1862,6 +1863,7 @@ This repository is intentionally opinionated:
 | `0264` | Integrate ADR 0264 failure-domain-isolated validation lanes onto origin/main | `merged` | [ws-0264-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-main-merge.md) |
 | `0264` | Receipt-driven resilience architecture bundle | `merged` | [adr-0264-receipt-driven-resilience-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md) |
 | `0265` | Immutable validation snapshots for remote builders and schema checks | `live_applied` | [adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md) |
+| `0266` | Validation runner capability contracts and environment attestation | `live_applied` | [adr-0266-validation-runner-capability-contracts-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0266-validation-runner-capability-contracts-live-apply.md) |
 | `0268` | Fresh-worktree bootstrap manifests live apply | `live_applied` | [ws-0268-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0268-live-apply.md) |
 | `0268` | Integrate ADR 0268 exact-main replay onto current origin/main | `merged` | [ws-0268-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0268-main-integration.md) |
 | `0271` | Backup coverage assertion ledger live apply | `live_applied` | [ws-0271-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0271-live-apply.md) |

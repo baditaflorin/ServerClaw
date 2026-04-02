@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.137",
+  "repo_version": "0.177.138",
   "platform_version": "0.130.86",
-  "generated_at": "2026-04-02T01:00:44Z",
-  "next_refresh_at": "2026-04-02T02:00:44Z",
+  "generated_at": "2026-04-02T01:26:37Z",
+  "next_refresh_at": "2026-04-02T02:26:37Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5987,10 +5987,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.136",
+    "last_version": "0.177.137",
     "deployed_at": "2026-04-02",
-    "summary": "implements ADR 0317 by restoring the live Keycloak direct-API provisioning path, making the repo-managed fallback safe from dedicated git worktrees, aligning the fallback role mapping with the live realm, and recording exact-main recovery plus direct verification evidence",
-    "release_notes_url": "docs/release-notes/0.177.137.md"
+    "summary": "implements ADR 0308 by documenting the verified operator provisioning execution surface, making operator-onboard preflight fail closed on dependency outages, repairing the Windmill gate-status and worktree checkout paths, and re-verifying the latest exact-main Windmill plus controller-local workflows",
+    "release_notes_url": "docs/release-notes/0.177.138.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
