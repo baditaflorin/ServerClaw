@@ -55,6 +55,8 @@ ops_portal_static_api_token: >-
   }}
 ops_portal_maintenance_windows_file: ""
 ops_portal_file_sources:
+  - src: "{{ ops_portal_repo_root }}/config/activation-checklist.json"
+    dest: "{{ ops_portal_data_dir }}/config/activation-checklist.json"
   - src: "{{ ops_portal_repo_root }}/config/capability-contract-catalog.json"
     dest: "{{ ops_portal_data_dir }}/config/capability-contract-catalog.json"
   - src: "{{ ops_portal_repo_root }}/config/dependency-graph.json"
@@ -100,6 +102,8 @@ ops_portal_runtime_file_sources:
     dest: "{{ ops_portal_service_dir }}/ops_portal/templates/index.html"
   - src: "{{ ops_portal_repo_root }}/scripts/ops_portal/templates/partials/action_result.html"
     dest: "{{ ops_portal_service_dir }}/ops_portal/templates/partials/action_result.html"
+  - src: "{{ ops_portal_repo_root }}/scripts/ops_portal/templates/partials/activation.html"
+    dest: "{{ ops_portal_service_dir }}/ops_portal/templates/partials/activation.html"
   - src: "{{ ops_portal_repo_root }}/scripts/ops_portal/templates/partials/agents.html"
     dest: "{{ ops_portal_service_dir }}/ops_portal/templates/partials/agents.html"
   - src: "{{ ops_portal_repo_root }}/scripts/ops_portal/templates/partials/changelog.html"

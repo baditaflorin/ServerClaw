@@ -4,7 +4,14 @@
   become: true
   gather_facts: true
   vars:
-    ops_portal_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"
+    ops_portal_repo_root: >-
+      {{
+        lookup(
+          'ansible.builtin.pipe',
+          'git -C ' ~ (playbook_dir | quote) ~ ' rev-parse --show-toplevel'
+        )
+        | trim
+      }}
   tags:
     - tier-2
     - access

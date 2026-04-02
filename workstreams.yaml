@@ -618,6 +618,103 @@ workstreams:
           contract: receipt-evidence-v1
     ready_to_merge: true
     live_applied: true
+  - id: ws-0310-live-apply
+    adr: "0310"
+    title: Implement the first-run activation checklist and progressive capability reveal inside the interactive ops portal
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0310-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0310-live-apply.md
+    depends_on:
+      - adr-0093-interactive-ops-portal-runtime-contract
+      - adr-0108-operator-onboarding-and-offboarding
+      - adr-0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher
+      - adr-0242-guided-human-onboarding-via-shepherd-tours
+      - adr-0308-journey-aware-entry-routing-and-saved-home-selection
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0310-live-apply.md
+      - docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/platform-operations-portal.md
+      - docs/runbooks/operator-onboarding.md
+      - docs/runbooks/windmill-operator-access-admin.md
+      - .config-locations.yaml
+      - config/activation-checklist.json
+      - docs/schema/activation-checklist.schema.json
+      - scripts/validate_repository_data_models.py
+      - scripts/ops_portal/app.py
+      - scripts/ops_portal/static/portal.css
+      - scripts/ops_portal/templates/base.html
+      - scripts/ops_portal/templates/index.html
+      - scripts/ops_portal/templates/partials/activation.html
+      - scripts/ops_portal/templates/partials/launcher.html
+      - scripts/ops_portal/templates/partials/overview.html
+      - scripts/ops_portal/templates/partials/runbooks.html
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+      - tests/test_interactive_ops_portal.py
+      - tests/test_ops_portal_playbook.py
+      - tests/test_ops_portal_runtime_role.py
+      - receipts/live-applies/2026-04-02-adr-0310-activation-checklist-live-apply.json
+      - receipts/live-applies/evidence/2026-04-02-ws-0310-*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws0310_portal_activation_docs
+          paths:
+            - docs/workstreams/ws-0310-live-apply.md
+            - docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md
+            - docs/runbooks/platform-operations-portal.md
+            - docs/runbooks/operator-onboarding.md
+            - docs/runbooks/windmill-operator-access-admin.md
+          mode: exclusive
+        - id: ws0310_adr_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: ws0310-adr-index-v1
+        - id: ws0310_activation_catalog
+          paths:
+            - config/activation-checklist.json
+            - docs/schema/activation-checklist.schema.json
+          mode: exclusive
+        - id: ws0310_repo_validation_contract
+          paths:
+            - .config-locations.yaml
+            - scripts/validate_repository_data_models.py
+          mode: shared_contract
+          contract: repo-validation-pipeline-v1
+        - id: ws0310_ops_portal_runtime
+          paths:
+            - scripts/ops_portal/app.py
+            - scripts/ops_portal/static/portal.css
+            - scripts/ops_portal/templates/base.html
+            - scripts/ops_portal/templates/index.html
+            - scripts/ops_portal/templates/partials/activation.html
+            - scripts/ops_portal/templates/partials/launcher.html
+            - scripts/ops_portal/templates/partials/overview.html
+            - scripts/ops_portal/templates/partials/runbooks.html
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+            - tests/test_interactive_ops_portal.py
+            - tests/test_ops_portal_playbook.py
+            - tests/test_ops_portal_runtime_role.py
+          mode: exclusive
+        - id: ws0310_live_apply_receipts
+          paths:
+            - receipts/live-applies/2026-04-02-adr-0310-activation-checklist-live-apply.json
+            - receipts/live-applies/evidence/2026-04-02-ws-0310-*
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
+    blockers: []
   - id: ws-0313-live-apply
     adr: "0313"
     title: Live apply contextual help, glossary, and escalation drawer across the first-party portal surfaces

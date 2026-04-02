@@ -7,6 +7,10 @@
   {% endif %}
 {% endif %}
 
+{% if locked_runbooks %}
+{{ state_message("Advanced runbooks remain locked", "Mutating runbooks stay disabled until the required activation stages are complete or advanced tools are explicitly revealed for this browser session.", "warning") }}
+{% endif %}
+
 <div class="runbook-grid">
   {% if runbooks %}
   {% for runbook in runbooks %}
@@ -32,7 +36,25 @@
     <div id="runbook-result-{{ runbook.id }}"></div>
   </article>
   {% endfor %}
-  {% else %}
+  {% elif not locked_runbooks %}
   {{ empty_state("No runbooks exposed to the portal", "No runbook currently opts into the ops portal delivery surface.") }}
   {% endif %}
+
+  {% for runbook in locked_runbooks %}
+  <article class="pf-v5-c-card panel runbook-card runbook-card--locked">
+    <div class="runbook-head">
+      <div>
+        <p class="service-category">{{ runbook.live_impact }}</p>
+        <h3>{{ runbook.id }}</h3>
+        <p class="muted">{{ runbook.description }}</p>
+      </div>
+      <span class="status-dot neutral">Locked</span>
+    </div>
+    <p class="muted">Execution class: {{ runbook.execution_class }}</p>
+    {% if runbook.owner_runbook %}
+    <p><a href="{{ docs_base_url }}/{{ runbook.owner_runbook }}" target="_blank" rel="noreferrer">Open runbook</a></p>
+    {% endif %}
+    <p class="muted">Finish the first-run activation checklist or reveal advanced tools for this session before launching this mutating runbook.</p>
+  </article>
+  {% endfor %}
 </div>

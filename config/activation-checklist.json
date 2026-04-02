@@ -1,0 +1,144 @@
+{
+  "$schema": "docs/schema/activation-checklist.schema.json",
+  "schema_version": "1.0.0",
+  "stages": [
+    {
+      "id": "identity_access",
+      "title": "Identity and access",
+      "description": "Confirm the protected browser path works and review the governed access expectations before making changes.",
+      "items": [
+        {
+          "id": "confirm_portal_login",
+          "title": "Confirm the protected ops portal path",
+          "description": "Use the authenticated shell as your default browser-first entry so the rest of the checklist points at live platform surfaces.",
+          "links": [
+            {
+              "label": "Portal overview",
+              "type": "portal_anchor",
+              "value": "overview"
+            }
+          ]
+        },
+        {
+          "id": "review_operator_onboarding",
+          "title": "Review the operator onboarding contract",
+          "description": "Refresh the current SSO, TOTP, SSH, and roster-backed onboarding expectations before you operate on behalf of another human.",
+          "links": [
+            {
+              "label": "Operator onboarding runbook",
+              "type": "docs",
+              "value": "runbooks/operator-onboarding/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "orientation",
+      "title": "Orientation",
+      "description": "Learn the shared shell, where status lives, and which browser surface should be your next stop.",
+      "items": [
+        {
+          "id": "review_portal_runbook",
+          "title": "Review the portal operating model",
+          "description": "Understand how the interactive portal, launcher, and linked product-native tools fit together before you branch into deeper admin work.",
+          "links": [
+            {
+              "label": "Portal runbook",
+              "type": "docs",
+              "value": "runbooks/platform-operations-portal/"
+            }
+          ]
+        },
+        {
+          "id": "inspect_runtime_assurance",
+          "title": "Inspect runtime assurance and live health",
+          "description": "Use the shared shell to see how the platform communicates health, degraded state, and next actions.",
+          "links": [
+            {
+              "label": "Runtime assurance",
+              "type": "portal_anchor",
+              "value": "runtime-assurance"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "safe_first_task",
+      "title": "Safe first task",
+      "description": "Start with a read-only or reversible operator action so you can succeed before you unlock higher-risk controls.",
+      "items": [
+        {
+          "id": "run_validation_gate_status",
+          "title": "Run the validation-gate status workflow",
+          "description": "The shared runbook launcher provides a low-risk first task that stays inside the governed browser path and returns structured status.",
+          "links": [
+            {
+              "label": "Runbook launcher",
+              "type": "portal_anchor",
+              "value": "runbooks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "collaboration_alerts",
+      "title": "Collaboration and alerts",
+      "description": "Know where drift, recent live applies, and operational follow-up items surface before you touch the higher-risk admin lanes.",
+      "items": [
+        {
+          "id": "review_drift_panel",
+          "title": "Review drift and notifications",
+          "description": "See how the shell presents unsuppressed reconciliation pressure and maintenance context.",
+          "links": [
+            {
+              "label": "Drift panel",
+              "type": "portal_anchor",
+              "value": "drift"
+            }
+          ]
+        },
+        {
+          "id": "review_recent_changes",
+          "title": "Review recent live applies and unreleased notes",
+          "description": "Use the changelog panel to understand what changed recently before you operate on production systems.",
+          "links": [
+            {
+              "label": "Recent changes",
+              "type": "portal_anchor",
+              "value": "changelog"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "advanced_capability_unlock",
+      "title": "Advanced capability unlock",
+      "description": "Administrator launcher destinations, deploy/restart/secret actions, and mutating runbooks stay hidden or disabled until the required early stages are complete or you explicitly reveal them for this session.",
+      "items": []
+    }
+  ],
+  "progressive_reveal": {
+    "advanced_stage_id": "advanced_capability_unlock",
+    "required_stage_ids": [
+      "identity_access",
+      "orientation",
+      "safe_first_task",
+      "collaboration_alerts"
+    ],
+    "locked_launcher_purposes": [
+      "administer"
+    ],
+    "locked_service_actions": [
+      "deploy",
+      "restart",
+      "rotate_secret"
+    ],
+    "locked_runbook_execution_classes": [
+      "mutation"
+    ]
+  }
+}

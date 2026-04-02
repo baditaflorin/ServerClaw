@@ -1,0 +1,119 @@
+{% from "macros/states.html" import state_message %}
+<div id="activation-panel" class="pf-v5-c-card panel activation-panel">
+  <div class="activation-summary">
+    <div>
+      <p class="section-kicker">First-Run Activation</p>
+      <h2>Checklist progress and progressive capability reveal</h2>
+      <p class="muted">
+        Complete the required stages to reveal advanced launcher destinations, mutating runbooks, and live service actions.
+      </p>
+    </div>
+    <div class="activation-summary-pills">
+      <span class="pill">{{ activation.required_item_completed }}/{{ activation.required_item_total }} required items</span>
+      <span class="pill {% if activation.advanced_unlocked %}activation-pill-unlocked{% endif %}">
+        {% if activation.advanced_unlocked %}
+        Advanced tools revealed
+        {% else %}
+        Advanced tools locked
+        {% endif %}
+      </span>
+    </div>
+  </div>
+
+  {% if activation.advanced_unlocked %}
+    {% if activation.advanced_override %}
+    {{ state_message("Advanced tools temporarily revealed", "This session is using the explicit override path. Restore the guardrails when you are finished with higher-risk work.", "warning") }}
+    {% else %}
+    {{ state_message("Required activation complete", "Advanced launcher destinations and higher-risk actions are now available for this session.", "ok") }}
+    {% endif %}
+  {% else %}
+  {{ state_message("Advanced actions stay gated", "Finish the required activation stages or use the supervised reveal control for this browser session before mutating live services.", "warning") }}
+  {% endif %}
+
+  <div class="activation-toolbar">
+    <form
+      hx-post="/actions/activation/override"
+      hx-target="#activation-panel"
+      hx-swap="outerHTML">
+      <input type="hidden" name="enabled" value="{% if activation.advanced_override %}false{% else %}true{% endif %}">
+      <button class="pf-v5-c-button {% if activation.advanced_override %}pf-m-secondary{% else %}pf-m-primary{% endif %} action-button" type="submit">
+        {% if activation.advanced_override %}
+        Restore guardrails
+        {% else %}
+        Reveal advanced tools for this session
+        {% endif %}
+      </button>
+    </form>
+    {% if activation.advanced_override_updated_at %}
+    <span class="muted">Override updated {{ activation.advanced_override_updated_at|humanize_timestamp }}</span>
+    {% endif %}
+  </div>
+
+  <div class="activation-stage-grid">
+    {% for stage in activation.stages %}
+    <article class="activation-stage activation-stage--{{ stage.status }}">
+      <div class="activation-stage-head">
+        <div>
+          <p class="service-category">
+            {% if stage.required %}
+            Required stage
+            {% else %}
+            Advanced stage
+            {% endif %}
+          </p>
+          <h3>{{ stage.title }}</h3>
+          <p class="muted">{{ stage.description }}</p>
+        </div>
+        <div class="activation-stage-meta">
+          <span class="status-dot {% if stage.status == 'completed' %}ok{% elif stage.status == 'in_progress' %}warn{% else %}neutral{% endif %}">
+            {{ stage.status_label }}
+          </span>
+          <span class="pill">{{ stage.completed_items }}/{{ stage.item_count }}</span>
+        </div>
+      </div>
+
+      <div class="activation-item-list">
+        {% for item in stage["items"] %}
+        <section class="activation-item activation-item--{{ item.status }}">
+          <div class="activation-item-copy">
+            <strong>{{ item.title }}</strong>
+            <p class="muted">{{ item.description }}</p>
+            {% if item.links %}
+            <div class="link-row">
+              {% for link in item.links %}
+              <a href="{{ link.href }}" {% if link.href.startswith('http') %}target="_blank" rel="noreferrer"{% endif %}>{{ link.label }}</a>
+              {% endfor %}
+            </div>
+            {% endif %}
+            <span class="muted">Status: {{ item.status_label }}{% if item.updated_at %} · updated {{ item.updated_at|humanize_timestamp }}{% endif %}</span>
+          </div>
+          <div class="activation-item-actions">
+            <form
+              hx-post="/actions/activation/items/{{ item.id }}"
+              hx-target="#activation-panel"
+              hx-swap="outerHTML">
+              <input type="hidden" name="status" value="completed">
+              <button class="pf-v5-c-button pf-m-primary action-button" type="submit">Mark done</button>
+            </form>
+            <form
+              hx-post="/actions/activation/items/{{ item.id }}"
+              hx-target="#activation-panel"
+              hx-swap="outerHTML">
+              <input type="hidden" name="status" value="skipped">
+              <button class="pf-v5-c-button pf-m-secondary action-button" type="submit">Skip</button>
+            </form>
+            <form
+              hx-post="/actions/activation/items/{{ item.id }}"
+              hx-target="#activation-panel"
+              hx-swap="outerHTML">
+              <input type="hidden" name="status" value="todo">
+              <button class="pf-v5-c-button pf-m-link action-button ghost" type="submit">Reset</button>
+            </form>
+          </div>
+        </section>
+        {% endfor %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</div>
