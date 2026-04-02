@@ -2,7 +2,8 @@
 
 ## Purpose
 
-This repository manages a dedicated Hetzner server that is intended to run Proxmox VE on top of Debian 13, with infrastructure changes tracked as code.
+This repository manages a Debian 13 host intended to run Proxmox VE, with
+infrastructure changes tracked as code.
 
 Both ChatGPT and Claude may be used in this repo. Work as if another assistant will continue after you.
 
@@ -26,41 +27,30 @@ Both ChatGPT and Claude may be used in this repo. Work as if another assistant w
 16. Keep everything structurally solid: separate concerns, prefer small reversible changes, and do not mix bootstrap, security, storage, and Proxmox object management in one opaque step.
 17. Every ADR must record both decision status and implementation state, including the first repo version, first platform version, and date where implementation became true.
 
-## Current Infrastructure Context
+## Public Repo Mode
 
-- Provider: Hetzner dedicated server
-- Hostname label: `proxmox_florin`
-- Primary IPv4: `65.108.75.123`
+Treat this repository as a forkable reference implementation unless a
+workstream explicitly states it is integrating verified live state from the
+current deployment.
+
+- Do not commit workstation-specific absolute paths.
+- Do not put operator-specific hostnames, domains, IP addresses, or secrets in
+  public onboarding surfaces.
+- Keep local bootstrap artefacts in ignored `.local/` state or environment
+  variables.
+- Prefer placeholder, example, or repository-relative values in committed
+  documentation and metadata.
+
+## Deployment Context
+
 - Base OS target: Debian 13
 - Hypervisor target: Proxmox VE 9
 - Desired management style: infrastructure as code
+- Reference topology: dedicated host plus repo-managed guests and services
 
-## Current Access State
-
-As of 2026-03-21:
-
-- Debian 13 is installed and reachable over SSH.
-- routine host login now uses `ops` with `sudo`, not `root`.
-- `root` remains key-only break-glass on the Proxmox host.
-- Proxmox VE is installed from Debian packages.
-- Observed kernel/banner: `Linux Debian-trixie-latest-amd64-base 6.17.13-2-pve`.
-- Observed Proxmox manager version: `9.1.6`.
-- `pveproxy` is listening on port `8006`.
-- `vmbr0` now carries the public uplink and `vmbr10` provides the internal `10.10.10.0/24` guest network.
-- Host-side IPv4 forwarding and NAT are enabled for guest egress.
-- Public ingress on TCP `80/443` is forwarded to the NGINX VM at `10.10.10.10`.
-- Template VM `9000` exists and the initial guest set (`110/120/130/140`) is provisioned and running.
-- SSH password authentication is disabled on the host.
-- Debian guests are intended to be managed as `ops` through the Proxmox jump path, not as `root`.
-- `ops@pam` exists with `PVEAdmin` for routine Proxmox administration.
-- `lv3-automation@pve` is the durable Proxmox API automation identity.
-- Proxmox host firewall is enabled with SSH and `8006` restricted to declared management sources.
-- A Let's Encrypt certificate is active for `proxmox.lv3.org`.
-- Notifications are wired through a sendmail endpoint and a catch-all matcher.
-- `ops@pam` has a TOTP factor configured.
-- The next risk area is Tailscale, monitoring, and backup policy, not base VM creation.
-
-Treat the next phase as ingress, security, backup, and API automation work.
+If a fork is already attached to a live environment, record deployment-specific
+facts in the appropriate runtime catalog, receipt, or ignored local overlay
+instead of hardcoding them into these onboarding instructions.
 
 ## Expectations For Future Changes
 
@@ -97,16 +87,16 @@ Do not claim the platform is ready for routine production use until:
 3. The Proxmox security baseline and access model are documented and applied.
 4. Routine automation defaults to named non-root identities instead of `root`.
 
-## Agent Onboarding (ADR 0163–0168)
+## Agent Onboarding (ADR 0163-0168)
 
-New agent? Read these files in order — all five take under 2 minutes:
+New agent? Read these files in order - all six take under 2 minutes:
 
-1. **README.md** — current platform status and deployment state
-2. **AGENTS.md** — this file; rules and conventions
-3. **.repo-structure.yaml** — full directory map; find any path instantly
-4. **.config-locations.yaml** — where every configuration file lives
-5. **docs/adr/.index.yaml** — searchable index of all 170+ decisions by keyword
-6. **workstreams.yaml** — parallel work in flight; check before starting
+1. **README.md** - current platform status and deployment state
+2. **AGENTS.md** - this file; rules and conventions
+3. **.repo-structure.yaml** - full directory map; find any path instantly
+4. **.config-locations.yaml** - where every configuration file lives
+5. **docs/adr/.index.yaml** - searchable index of all ADRs by keyword
+6. **workstreams.yaml** - parallel work in flight; check before starting
 
 > Token tip: These six reads replace hours of tree exploration.
 
@@ -155,12 +145,12 @@ Follow this before ending any session:
 
 Every new playbook and role must include a metadata comment block at the top.
 Copy from `playbooks/.metadata-template.yml`. Required fields:
-- `Purpose` — one sentence
-- `Use case` — when to run it
-- `Inputs` — required and optional variables
-- `Outputs` — what changes on success
-- `Idempotency` — safe to re-run? Y/N with explanation
-- `Dependencies` — ADRs, roles, prerequisites
+- `Purpose` - one sentence
+- `Use case` - when to run it
+- `Inputs` - required and optional variables
+- `Outputs` - what changes on success
+- `Idempotency` - safe to re-run? Y/N with explanation
+- `Dependencies` - ADRs, roles, prerequisites
 
 ## Automated Validation (ADR 0168)
 

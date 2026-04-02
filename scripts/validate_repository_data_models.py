@@ -207,6 +207,15 @@ def require_str(value: Any, path: str) -> str:
     return value
 
 
+def require_repo_relative_path(value: Any, path: str) -> str:
+    normalized = require_str(value, path).replace("\\", "/").strip()
+    if normalized.startswith("/"):
+        raise ValueError(f"{path} must be repository-relative, not absolute")
+    if re.match(r"^[A-Za-z]:/", normalized):
+        raise ValueError(f"{path} must be repository-relative, not absolute")
+    return normalized
+
+
 def require_bool(value: Any, path: str) -> bool:
     if not isinstance(value, bool):
         raise ValueError(f"{path} must be a boolean")
@@ -1861,12 +1870,17 @@ def validate_version_semantics() -> None:
 def validate_workstreams_release_policy() -> None:
     registry = load_yaml(WORKSTREAMS_PATH)
     release_policy = require_mapping(registry.get("release_policy"), "workstreams.yaml.release_policy")
-    breaking_change_path = require_str(
+    breaking_change_path = require_repo_relative_path(
         release_policy.get("breaking_change_criteria"),
         "workstreams.yaml.release_policy.breaking_change_criteria",
     )
-    if not breaking_change_path.endswith("/config/version-semantics.json"):
+    if breaking_change_path not in {"config/version-semantics.json", "./config/version-semantics.json"}:
         raise ValueError("workstreams.yaml.release_policy.breaking_change_criteria must point to config/version-semantics.json")
+    delivery_model = require_mapping(registry.get("delivery_model"), "workstreams.yaml.delivery_model")
+    require_repo_relative_path(
+        delivery_model.get("workstream_doc_root"),
+        "workstreams.yaml.delivery_model.workstream_doc_root",
+    )
     validate_workstream_surface_ownership_registry(registry)
 
 def validate_workstream_canonical_truth_metadata() -> None:
@@ -1925,6 +1939,8 @@ def validate_workstream_live_apply_contracts() -> None:
     for index, item in enumerate(workstreams):
         path = f"workstreams.yaml.workstreams[{index}]"
         workstream = require_mapping(item, path)
+        require_repo_relative_path(workstream.get("worktree_path"), f"{path}.worktree_path")
+        require_repo_relative_path(workstream.get("doc"), f"{path}.doc")
         live_apply = workstream.get("live_apply")
         if live_apply is None:
             continue

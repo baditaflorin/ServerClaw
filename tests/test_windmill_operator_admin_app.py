@@ -37,6 +37,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "f/lv3/sync_operators",
         "f/lv3/quarterly_access_review",
         "f/lv3/operator_roster",
+        "f/lv3/command_palette_search",
         "f/lv3/operator_inventory",
         "f/lv3/operator_journey_event",
         "f/lv3/operator_journey_scorecards",
@@ -208,9 +209,11 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     package = json.loads((app_dir / "package.json").read_text())
     lock_config = yaml.safe_load(lock_path.read_text())
     package_lock = json.loads((app_dir / "package-lock.json").read_text())
+    command_palette_backend = yaml.safe_load((app_dir / "backend" / "command_palette_search.yaml").read_text())
     index_source = (app_dir / "index.tsx").read_text()
     app_source = (app_dir / "App.tsx").read_text()
     journey_source = (app_dir / "journeyAnalytics.ts").read_text()
+    command_palette_source = (app_dir / "commandPalette.ts").read_text()
     schema_source = (app_dir / "schemas.ts").read_text()
     tsconfig = json.loads((app_dir / "tsconfig.json").read_text())
     tour_source = (app_dir / "touring.ts").read_text()
@@ -222,6 +225,7 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert package["dependencies"]["ag-grid-community"] == "35.2.0"
     assert package["dependencies"]["ag-grid-react"] == "35.2.0"
     assert package["dependencies"]["@tanstack/react-query"] == "^5.85.1"
+    assert package["dependencies"]["cmdk"] == "1.1.1"
     assert package["dependencies"]["react"] == "19.0.0"
     assert package["dependencies"]["react-hook-form"] == "^7.69.0"
     assert package["dependencies"]["shepherd.js"] == "15.2.2"
@@ -234,7 +238,12 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert "QueryClient" in index_source
     assert "QueryClientProvider" in index_source
     assert "Operator Access Admin" in app_source
+    assert "Global Command Palette" in app_source
+    assert "Universal open dialog for operators, runbooks, glossary, and safe quick actions" in app_source
     assert "AgGridReact" in app_source
+    assert "backend.command_palette_search" in app_source
+    assert "commandPaletteSearchQuery" in app_source
+    assert "Command.Input" in app_source
     assert "Task-specific Shepherd tours for first-run operators" in app_source
     assert 'data-tour-target="tour-launcher"' in app_source
     assert "startOperatorAccessTour" in app_source
@@ -279,6 +288,12 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert "resolver: zodResolver(syncFormSchema)" in app_source
     assert "Schema validation mirrors the governed onboarding payload." in app_source
     assert "touched fields update inline" in app_source.lower()
+    assert command_palette_backend["path"] == "f/lv3/command_palette_search"
+    assert "paletteStaticEntries" in command_palette_source
+    assert "togglePaletteFavorite" in command_palette_source
+    assert "recordPaletteRecent" in command_palette_source
+    assert 'label: "Developer Portal"' in command_palette_source
+    assert 'label: "Glossary: Break-glass"' in command_palette_source
     assert "export const onboardFormSchema" in schema_source
     assert "export const offboardFormSchema" in schema_source
     assert "export const syncFormSchema" in schema_source
@@ -299,13 +314,20 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert package_lock["packages"][""]["dependencies"]["@tanstack/react-query"] == "^5.85.1"
     assert package_lock["packages"][""]["dependencies"]["ag-grid-community"] == "35.2.0"
     assert package_lock["packages"][""]["dependencies"]["ag-grid-react"] == "35.2.0"
+    assert package_lock["packages"][""]["dependencies"]["cmdk"] == "1.1.1"
     assert package_lock["packages"][""]["dependencies"]["react-hook-form"] == "^7.69.0"
     assert package_lock["packages"][""]["dependencies"]["zod"] == "^4.3.6"
     assert package_lock["lockfileVersion"] == 3
+    command_palette_script = (REPO_ROOT / "config/windmill/scripts/command-palette-search.py").read_text()
     roster_script = (REPO_ROOT / "config/windmill/scripts/operator-roster.py").read_text()
     onboard_script = (REPO_ROOT / "config/windmill/scripts/operator-onboard.py").read_text()
     offboard_script = (REPO_ROOT / "config/windmill/scripts/operator-offboard.py").read_text()
     sync_script = (REPO_ROOT / "config/windmill/scripts/sync-operators.py").read_text()
+    assert "load_search_client" in command_palette_script
+    assert "importlib.util.spec_from_file_location" in command_palette_script
+    assert "SearchClient = load_search_client(repo_root)" in command_palette_script
+    assert 'SEARCH_COLLECTIONS = ("runbooks", "adrs")' in command_palette_script
+    assert "docs_href_for_source_path" in command_palette_script
     inventory_script = (REPO_ROOT / "config/windmill/scripts/operator-inventory.py").read_text()
     update_notes_script = (REPO_ROOT / "config/windmill/scripts/operator-update-notes.py").read_text()
     for script_source in (roster_script, onboard_script, offboard_script, sync_script, inventory_script, update_notes_script):

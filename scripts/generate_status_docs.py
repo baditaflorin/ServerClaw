@@ -13,7 +13,6 @@ from controller_automation_toolkit import README_PATH, emit_cli_error, load_yaml
 
 
 REPO_ROOT = repo_path()
-CANONICAL_REPO_ROOT = Path("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server")
 STACK_PATH = repo_path("versions", "stack.yaml")
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
@@ -24,7 +23,7 @@ WORKSTREAM_DOCS_DIR = repo_path("docs", "workstreams")
 GENERATED_NOTICE = (
     "> Generated from canonical repository state by "
     "[`scripts/generate_status_docs.py`]"
-    "(/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). "
+    "(scripts/generate_status_docs.py). "
     "Do not edit this block by hand."
 )
 MARKERS = {
@@ -49,12 +48,10 @@ def read_heading(path: Path) -> str:
             return line[2:].strip()
     return path.stem
 
-
-def absolute_link(label: str, path: Path) -> str:
-    resolved_path = path
-    if path.is_absolute() and path.is_relative_to(REPO_ROOT):
-        resolved_path = CANONICAL_REPO_ROOT / path.relative_to(REPO_ROOT)
-    return f"[{label}]({resolved_path})"
+def repo_relative_link(label: str, path: Path) -> str:
+    resolved_path = path if path.is_absolute() else REPO_ROOT / path
+    relative = resolved_path.relative_to(REPO_ROOT).as_posix()
+    return f"[{label}]({relative})"
 
 
 def render_table(headers: list[str], rows: list[list[str]]) -> str:
@@ -80,31 +77,21 @@ def render_platform_status() -> str:
         ["Observed kernel", f"`{stack['observed_state']['os']['kernel']}`"],
     ]
 
-    guest_rows = []
-    for guest in stack["observed_state"]["guests"]["instances"]:
-        guest_rows.append(
-            [
-                str(guest["vmid"]),
-                f"`{guest['name']}`",
-                f"`{guest['ipv4']}`",
-                "`true`" if guest["running"] else "`false`",
-            ]
-        )
-
-    service_rows = []
     topology = host_vars["lv3_service_topology"]
-    for service_id, service in sorted(topology.items(), key=lambda item: item[1].get("public_hostname") or item[0]):
-        public_hostname = service.get("public_hostname")
-        if not public_hostname:
-            continue
-        service_rows.append(
-            [
-                f"`{public_hostname}`",
-                f"`{service['service_name']}`",
-                f"`{service['exposure_model']}`",
-                f"`{service['owning_vm']}`",
-            ]
-        )
+    exposure_counts: dict[str, int] = {}
+    for service in topology.values():
+        exposure_model = service.get("exposure_model", "unknown")
+        exposure_counts[exposure_model] = exposure_counts.get(exposure_model, 0) + 1
+
+    topology_rows = [
+        ["Managed guest count", str(len(stack["observed_state"]["guests"]["instances"]))],
+        ["Running guest count", str(sum(1 for guest in stack["observed_state"]["guests"]["instances"] if guest["running"]))],
+        ["Template VM present", "`true`" if stack["observed_state"]["guests"]["template"]["vmid"] else "`false`"],
+        ["Declared services", str(len(topology))],
+        ["Publicly published services", str(sum(1 for service in topology.values() if service.get("public_hostname")))],
+    ]
+
+    exposure_rows = [[f"`{model}`", str(count)] for model, count in sorted(exposure_counts.items())]
 
     receipt_rows = []
     for capability, receipt_id in sorted(stack["live_apply_evidence"]["latest_receipts"].items()):
@@ -116,14 +103,11 @@ def render_platform_status() -> str:
         "### Current Values",
         render_table(["Field", "Value"], version_rows),
         "",
-        "### Managed Guests",
-        render_table(["VMID", "Name", "IPv4", "Running"], guest_rows),
+        "### Topology Summary",
+        render_table(["Field", "Value"], topology_rows),
         "",
-        f"Template VM: `{stack['observed_state']['guests']['template']['vmid']}` "
-        f"`{stack['observed_state']['guests']['template']['name']}`",
-        "",
-        "### Published Service Inventory",
-        render_table(["Hostname", "Service", "Exposure", "Owner"], service_rows),
+        "### Service Exposure Summary",
+        render_table(["Exposure Model", "Services"], exposure_rows),
         "",
         "### Latest Live-Apply Evidence",
         render_table(["Capability", "Receipt"], receipt_rows),
@@ -135,9 +119,7 @@ def render_control_plane_lanes() -> str:
     _catalog, normalized_lanes = load_lane_catalog()
     _publication_catalog, normalized_tiers, normalized_surfaces = load_api_publication_catalog()
     lane_rows = []
-    surface_rows = []
     tier_rows = []
-    classified_surface_rows = []
     for lane_id in ALLOWED_LANE_IDS:
         lane = normalized_lanes[lane_id]
         lane_rows.append(
@@ -149,15 +131,6 @@ def render_control_plane_lanes() -> str:
                 lane["steady_state_rules"][0],
             ]
         )
-        for surface in lane["current_surfaces"]:
-            surface_rows.append(
-                [
-                    f"`{surface['id']}`",
-                    f"`{lane_id}`",
-                    f"`{surface['kind']}`",
-                    f"`{surface['endpoint']}`",
-                ]
-            )
 
     for tier_id in ALLOWED_PUBLICATION_TIERS:
         tier = normalized_tiers[tier_id]
@@ -170,17 +143,6 @@ def render_control_plane_lanes() -> str:
             ]
         )
 
-    for surface in normalized_surfaces:
-        classified_surface_rows.append(
-            [
-                f"`{surface['id']}`",
-                f"`{surface['publication_tier']}`",
-                f"`{surface['lane']}`",
-                f"`{surface['endpoint']}`",
-                surface["reachability"],
-            ]
-        )
-
     return "\n".join(
         [
             GENERATED_NOTICE,
@@ -188,57 +150,43 @@ def render_control_plane_lanes() -> str:
             "### Lane Summary",
             render_table(["Lane", "Title", "Transport", "Surfaces", "Primary Rule"], lane_rows),
             "",
-            "### Current Governed Surfaces",
-            render_table(["Surface", "Lane", "Kind", "Endpoint"], surface_rows),
-            "",
             "### API Publication Tiers",
             render_table(["Tier", "Title", "Surfaces", "Summary"], tier_rows),
-            "",
-            "### Classified API And Webhook Surfaces",
-            render_table(["Surface", "Tier", "Lane", "Endpoint", "Reachability"], classified_surface_rows),
         ]
     ).strip()
 
 
 def render_document_links(paths: list[Path]) -> list[str]:
-    return [f"- {absolute_link(read_heading(path), path)}" for path in paths]
+    return [f"- {repo_relative_link(read_heading(path), path)}" for path in paths]
 
 
 def render_document_index() -> str:
-    runbooks = sorted(RUNBOOKS_DIR.glob("*.md"))
-    adrs = sorted(ADR_DIR.glob("*.md"))
-    workstream_docs = sorted(
-        path
-        for path in WORKSTREAM_DOCS_DIR.glob("*.md")
-        if path.name not in {"README.md", "TEMPLATE.md"}
-    )
-
     parts = [
         GENERATED_NOTICE,
         "",
         "### Core Documents",
-        *[f"- {absolute_link(label, path)}" for label, path in CORE_DOCUMENTS],
+        *[f"- {repo_relative_link(label, path)}" for label, path in CORE_DOCUMENTS],
         "",
-        "### Runbooks",
-        *render_document_links(runbooks),
-        "",
-        "### ADRs",
-        *render_document_links(adrs),
-        "",
-        "### Workstream Documents",
-        *render_document_links(workstream_docs),
+        "### Discovery Indexes",
+        f"- {repo_relative_link('ADR index', ADR_DIR / '.index.yaml')}",
+        f"- {repo_relative_link('Runbooks directory', RUNBOOKS_DIR)}",
+        f"- {repo_relative_link('Workstreams directory', WORKSTREAM_DOCS_DIR)}",
+        f"- {repo_relative_link('Release notes index', REPO_ROOT / 'docs' / 'release-notes' / 'README.md')}",
+        f"- {repo_relative_link('Generated docs directory', REPO_ROOT / 'docs' / 'site-generated')}",
     ]
     return "\n".join(parts).strip()
 
 
 def render_version_summary() -> str:
     stack = load_yaml(STACK_PATH)
+    host_vars = load_yaml(HOST_VARS_PATH)
     version_rows = [
         ["Repository version", f"`{stack['repo_version']}`"],
         ["Platform version", f"`{stack['platform_version']}`"],
         ["Observed OS", f"`Debian {stack['observed_state']['os']['major']}`"],
         ["Observed Proxmox installed", "`true`" if stack["observed_state"]["proxmox"]["installed"] else "`false`"],
         ["Observed PVE manager version", f"`{stack['observed_state']['proxmox']['version']}`"],
+        ["Declared services", str(len(host_vars["lv3_service_topology"]))],
     ]
     return "\n".join(
         [
@@ -260,7 +208,7 @@ def render_merged_workstreams() -> str:
                 f"`{workstream['adr']}`",
                 workstream["title"],
                 f"`{workstream['status']}`",
-                absolute_link(Path(workstream["doc"]).name, Path(workstream["doc"])),
+                repo_relative_link(Path(workstream["doc"]).name, Path(workstream["doc"])),
             ]
         )
     return "\n".join(
