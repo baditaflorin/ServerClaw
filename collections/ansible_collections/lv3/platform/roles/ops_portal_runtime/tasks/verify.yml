@@ -1,3 +1,9 @@
+# Purpose: Verify that the repo-managed ops portal responds locally and renders the expected launcher, activation, help, and runtime assurance surfaces.
+# Use case: Include after ops_portal_runtime reconciliation or from role-specific verify tasks.
+# Inputs: ops_portal_verify_* variables plus the rendered ops portal runtime and HTTP listener.
+# Outputs: Assertion-only verification state for the local ops portal runtime.
+# Idempotency: Fully idempotent; verification tasks only read local runtime state and assert expected content.
+# Dependencies: ADR 0165, ADR 0310, ops_portal_runtime defaults, and a running local Docker runtime.
 ---
 - name: Verify the ops portal container is running
   ansible.builtin.command:
@@ -94,6 +100,26 @@
       - "'Application Launcher' in ops_portal_verify_launcher.content"
       - "'Search destinations, pin favorites, and reopen recent paths from one shared masthead control.' in ops_portal_verify_launcher.content"
     fail_msg: "Ops portal launcher partial rendered without the expected launcher surface."
+
+- name: Verify the activation checklist partial renders locally
+  ansible.builtin.uri:
+    url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/partials/activation"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: ops_portal_verify_activation
+  changed_when: false
+  retries: 18
+  delay: 5
+  until: ops_portal_verify_activation.status == 200
+
+- name: Assert the activation checklist panel is present
+  ansible.builtin.assert:
+    that:
+      - "'First-Run Activation' in ops_portal_verify_activation.content"
+      - "'Checklist progress and progressive capability reveal' in ops_portal_verify_activation.content"
+      - "'Reveal advanced tools for this session' in ops_portal_verify_activation.content or 'Restore guardrails' in ops_portal_verify_activation.content"
+    fail_msg: "Ops portal activation checklist partial did not render the ADR 0310 surface."
 
 - name: Verify the runtime assurance matrix partial renders locally
   ansible.builtin.uri:

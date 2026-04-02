@@ -202,6 +202,19 @@ infrastructure_state:
       - "scripts/correction_loops.py: Selector resolution and validation helper"
       - "config/workflow-catalog.json: Workflows that must be covered by the correction-loop selectors"
 
+  config/activation-checklist.json:
+    purpose: Canonical ADR 0310 first-run activation checklist and progressive capability-reveal contract for browser-first human surfaces
+    owner: human
+    format: JSON
+    use_for: Declaring the staged onboarding checklist links plus which launcher, service-action, and runbook paths stay hidden or disabled until orientation is complete
+    update_when: Adding or changing first-run activation stages, checklist links, or progressive-reveal rules for human-facing portal surfaces
+    update_by: Agent or human implementing ADR 0310 follow-up work
+    validation: "uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate"
+    related_files:
+      - "docs/schema/activation-checklist.schema.json: Schema for the checklist catalog"
+      - "scripts/ops_portal/app.py: Interactive portal session state and reveal logic"
+      - "docs/runbooks/platform-operations-portal.md: Operator procedure"
+
   config/restore-readiness-profiles.json:
     purpose: Canonical ADR 0272 catalog of restore-readiness ladders and stateful warm-up profiles for protected restore targets
     owner: human

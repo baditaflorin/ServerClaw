@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.144
-platform_version: 0.130.90
+repo_version: 0.177.145
+platform_version: 0.130.91
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -73,7 +73,7 @@ live_apply_evidence:
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     semaphore: 2026-03-25-adr-0149-semaphore-live-apply
     searxng: 2026-03-26-adr-0148-searxng-live-apply
-    ops_portal: 2026-04-02-adr-0313-contextual-help-mainline-live-apply
+    ops_portal: 2026-04-02-adr-0310-activation-checklist-mainline-live-apply
     ollama: 2026-03-27-adr-0176-inventory-sharding-mainline-live-apply
     operator_access: 2026-04-02-adr-0315-canonical-page-states-mainline-live-apply
     preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
@@ -1119,8 +1119,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.144
+    current: 0.177.145
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.90
+    current: 0.130.91
     meaning: intended platform release for the actual server configuration

@@ -7,6 +7,10 @@
   {% endif %}
 {% endif %}
 
+{% if not activation.advanced_unlocked %}
+{{ state_message("Mutating service actions are gated", "Deploy, restart, and secret-rotation controls stay disabled until the required activation stages complete or advanced tools are explicitly revealed for this session.", "warning") }}
+{% endif %}
+
 <div class="overview-grid">
   <section class="pf-v5-c-card panel summary-panel">
     <div class="stat-block">
@@ -316,12 +320,16 @@
     {% endif %}
 
     <div class="action-row">
+      {% set deploy_locked = service.actions_locked and "deploy" in service.locked_actions %}
+      {% set rotate_locked = service.actions_locked and "rotate_secret" in service.locked_actions %}
+      {% set restart_locked = service.actions_locked and "restart" in service.locked_actions %}
       <button
         class="pf-v5-c-button pf-m-primary action-button"
         hx-post="/actions/services/{{ service.id }}/deploy"
         hx-target="#action-result-{{ service.id }}"
         hx-swap="innerHTML"
-        hx-confirm="Deploy {{ service.name }} through the platform gateway?">
+        hx-confirm="Deploy {{ service.name }} through the platform gateway?"
+        {% if deploy_locked %}disabled title="Complete the activation checklist or reveal advanced tools for this session before deploying."{% endif %}>
         Deploy
       </button>
       <button
@@ -336,7 +344,8 @@
         hx-post="/actions/services/{{ service.id }}/rotate-secret"
         hx-target="#action-result-{{ service.id }}"
         hx-swap="innerHTML"
-        hx-confirm="Rotate secrets for {{ service.name }}?">
+        hx-confirm="Rotate secrets for {{ service.name }}?"
+        {% if rotate_locked %}disabled title="Complete the activation checklist or reveal advanced tools for this session before rotating secrets."{% endif %}>
         Rotate secret
       </button>
       <button
@@ -345,11 +354,16 @@
         hx-target="#action-result-{{ service.id }}"
         hx-vals='{"restart_only":"true"}'
         hx-swap="innerHTML"
-        hx-confirm="Restart {{ service.name }} via deployment pipeline?">
+        hx-confirm="Restart {{ service.name }} via deployment pipeline?"
+        {% if restart_locked %}disabled title="Complete the activation checklist or reveal advanced tools for this session before restarting services."{% endif %}>
         Restart
       </button>
       <a class="pf-v5-c-button pf-m-link action-button ghost" href="{{ service.logs_url }}" target="_blank" rel="noreferrer">View logs</a>
     </div>
+
+    {% if service.actions_locked %}
+    <p class="muted">Mutating controls stay disabled during first run until the activation checklist completes or the supervised reveal path is used for this session.</p>
+    {% endif %}
 
     {% if service.runbook or service.adr %}
     <div class="link-row">

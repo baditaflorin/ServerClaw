@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.144",
-  "platform_version": "0.130.90",
-  "generated_at": "2026-04-02T14:27:49Z",
-  "next_refresh_at": "2026-04-02T15:27:49Z",
+  "repo_version": "0.177.145",
+  "platform_version": "0.130.91",
+  "generated_at": "2026-04-02T14:39:01Z",
+  "next_refresh_at": "2026-04-02T15:39:01Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5608,7 +5608,7 @@
         "id": "operator-onboarding",
         "title": "Operator Onboarding",
         "agent_trust_required": "T3",
-        "steps": 7,
+        "steps": 12,
         "path": "docs/runbooks/operator-onboarding.md",
         "workflow_ids": [
           "operator-onboard",
@@ -5629,7 +5629,7 @@
         "id": "platform-operations-portal",
         "title": "Platform Operations Portal",
         "agent_trust_required": "T3",
-        "steps": 16,
+        "steps": 24,
         "path": "docs/runbooks/platform-operations-portal.md",
         "workflow_ids": [
           "converge-ops-portal"
@@ -5987,10 +5987,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.143",
+    "last_version": "0.177.144",
     "deployed_at": "2026-04-02",
     "summary": "completes the repo-managed runtime-pool transition program by classifying all services, implementing the `runtime-general` and `runtime-control` deployment surfaces, and adding governed runtime-pool memory-envelope and autoscaling contracts",
-    "release_notes_url": "docs/release-notes/0.177.144.md"
+    "release_notes_url": "docs/release-notes/0.177.145.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

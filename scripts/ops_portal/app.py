@@ -227,6 +227,19 @@ DEFAULT_PERSONA_CATALOG = {
 LAUNCHER_RECENT_LIMIT = 6
 LAUNCHER_FAVORITE_LIMIT = 8
 LIVE_APPLY_RECEIPT_EXCLUDED_PARTS = {"evidence", "preview"}
+ACTIVATION_SESSION_KEY = "activation_checklist"
+ACTIVATION_STATUS_ORDER = {"todo": 0, "skipped": 1, "completed": 2}
+DEFAULT_ACTIVATION_CHECKLIST = {
+    "schema_version": "1.0.0",
+    "stages": [],
+    "progressive_reveal": {
+        "advanced_stage_id": "",
+        "required_stage_ids": [],
+        "locked_launcher_purposes": [],
+        "locked_service_actions": [],
+        "locked_runbook_execution_classes": [],
+    },
+}
 
 
 def browser_usable_url(value: Any) -> str | None:
@@ -304,6 +317,263 @@ def normalize_persona_catalog(payload: Any) -> list[dict[str, Any]]:
     if not any(persona["default"] for persona in personas):
         personas[0]["default"] = True
     return personas
+
+
+def normalize_activation_catalog(payload: Any) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        payload = DEFAULT_ACTIVATION_CHECKLIST
+    stages = payload.get("stages")
+    if not isinstance(stages, list):
+        stages = []
+    progressive_reveal = payload.get("progressive_reveal")
+    if not isinstance(progressive_reveal, dict):
+        progressive_reveal = {}
+    return {
+        "schema_version": str(payload.get("schema_version", "1.0.0")),
+        "stages": [stage for stage in stages if isinstance(stage, dict)],
+        "progressive_reveal": {
+            "advanced_stage_id": str(progressive_reveal.get("advanced_stage_id", "")).strip(),
+            "required_stage_ids": [
+                stage_id
+                for stage_id in progressive_reveal.get("required_stage_ids", [])
+                if isinstance(stage_id, str) and stage_id.strip()
+            ],
+            "locked_launcher_purposes": [
+                purpose
+                for purpose in progressive_reveal.get("locked_launcher_purposes", [])
+                if isinstance(purpose, str) and purpose.strip()
+            ],
+            "locked_service_actions": [
+                action
+                for action in progressive_reveal.get("locked_service_actions", [])
+                if isinstance(action, str) and action.strip()
+            ],
+            "locked_runbook_execution_classes": [
+                item
+                for item in progressive_reveal.get("locked_runbook_execution_classes", [])
+                if isinstance(item, str) and item.strip()
+            ],
+        },
+    }
+
+
+def service_href_from_catalog(service_id: str, services: list[dict[str, Any]]) -> str | None:
+    for service in services:
+        if str(service.get("id", "")) != service_id:
+            continue
+        href = browser_usable_url(service.get("public_url")) or browser_usable_url(service.get("internal_url"))
+        if href:
+            return "/" if service_id == "ops_portal" else href
+    return None
+
+
+def resolve_activation_link(
+    link: dict[str, Any],
+    *,
+    services: list[dict[str, Any]],
+    docs_base_url: str,
+) -> dict[str, str] | None:
+    link_type = str(link.get("type", "")).strip()
+    label = str(link.get("label", "")).strip()
+    value = str(link.get("value", "")).strip()
+    if not link_type or not label or not value:
+        return None
+    if link_type == "docs":
+        href = f"{docs_base_url}/{value.lstrip('/')}"
+    elif link_type == "portal_anchor":
+        href = f"/#{value.lstrip('#')}"
+    elif link_type == "service":
+        href = service_href_from_catalog(value, services)
+        if href is None:
+            return None
+    elif link_type == "url":
+        href = value
+    else:
+        return None
+    return {"label": label, "href": href}
+
+
+def activation_item_catalog(catalog: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    items: dict[str, dict[str, Any]] = {}
+    for stage in catalog.get("stages", []):
+        for item in stage.get("items", []):
+            item_id = str(item.get("id", "")).strip()
+            if item_id:
+                items[item_id] = item
+    return items
+
+
+def normalize_activation_session_state(session: dict[str, Any], catalog: dict[str, Any]) -> dict[str, Any]:
+    valid_item_ids = set(activation_item_catalog(catalog))
+    raw_state = session.get(ACTIVATION_SESSION_KEY)
+    if not isinstance(raw_state, dict):
+        raw_state = {}
+    raw_items = raw_state.get("items")
+    items: dict[str, dict[str, str]] = {}
+    if isinstance(raw_items, dict):
+        for item_id, payload in raw_items.items():
+            if item_id not in valid_item_ids or not isinstance(payload, dict):
+                continue
+            status = str(payload.get("status", "")).strip()
+            if status not in {"todo", "completed", "skipped"}:
+                continue
+            items[item_id] = {
+                "status": status,
+                "updated_at": str(payload.get("updated_at", "")).strip(),
+            }
+
+    override = bool(raw_state.get("advanced_override"))
+    override_updated_at = str(raw_state.get("advanced_override_updated_at", "")).strip()
+    normalized = {
+        "items": items,
+        "advanced_override": override,
+        "advanced_override_updated_at": override_updated_at,
+    }
+    session[ACTIVATION_SESSION_KEY] = normalized
+    return normalized
+
+
+def write_activation_item_state(
+    session: dict[str, Any],
+    catalog: dict[str, Any],
+    *,
+    item_id: str,
+    status: str,
+) -> dict[str, Any]:
+    state = normalize_activation_session_state(session, catalog)
+    if item_id not in activation_item_catalog(catalog):
+        return state
+    if status == "todo":
+        state["items"].pop(item_id, None)
+    elif status in {"completed", "skipped"}:
+        state["items"][item_id] = {"status": status, "updated_at": isoformat(utc_now())}
+    session[ACTIVATION_SESSION_KEY] = state
+    return state
+
+
+def set_activation_override(session: dict[str, Any], catalog: dict[str, Any], *, enabled: bool) -> dict[str, Any]:
+    state = normalize_activation_session_state(session, catalog)
+    state["advanced_override"] = enabled
+    state["advanced_override_updated_at"] = isoformat(utc_now()) if enabled else ""
+    session[ACTIVATION_SESSION_KEY] = state
+    return state
+
+
+def build_activation_context(
+    catalog: dict[str, Any],
+    state: dict[str, Any],
+    *,
+    services: list[dict[str, Any]],
+    docs_base_url: str,
+) -> dict[str, Any]:
+    stage_models: list[dict[str, Any]] = []
+    item_catalog = activation_item_catalog(catalog)
+    required_stage_ids = set(catalog.get("progressive_reveal", {}).get("required_stage_ids", []))
+    required_item_ids: set[str] = set()
+    completed_required_items = 0
+
+    for stage in catalog.get("stages", []):
+        stage_id = str(stage.get("id", "")).strip()
+        stage_items = stage.get("items", [])
+        item_models: list[dict[str, Any]] = []
+        completed_items = 0
+        for item in stage_items:
+            item_id = str(item.get("id", "")).strip()
+            item_state = state.get("items", {}).get(item_id, {})
+            item_status = str(item_state.get("status", "todo")) or "todo"
+            links = [
+                resolved
+                for resolved in (
+                    resolve_activation_link(link, services=services, docs_base_url=docs_base_url)
+                    for link in item.get("links", [])
+                )
+                if resolved is not None
+            ]
+            is_done = item_status in {"completed", "skipped"}
+            if is_done:
+                completed_items += 1
+            if stage_id in required_stage_ids:
+                required_item_ids.add(item_id)
+                if is_done:
+                    completed_required_items += 1
+            item_models.append(
+                {
+                    "id": item_id,
+                    "title": str(item.get("title", item_id)),
+                    "description": str(item.get("description", "")),
+                    "status": item_status,
+                    "status_label": (
+                        "Completed"
+                        if item_status == "completed"
+                        else "Skipped"
+                        if item_status == "skipped"
+                        else "To do"
+                    ),
+                    "updated_at": item_state.get("updated_at"),
+                    "links": links,
+                }
+            )
+
+        stage_models.append(
+            {
+                "id": stage_id,
+                "title": str(stage.get("title", stage_id)),
+                "description": str(stage.get("description", "")),
+                "items": item_models,
+                "item_count": len(item_models),
+                "completed_items": completed_items,
+                "required": stage_id in required_stage_ids,
+                "status": (
+                    "completed"
+                    if item_models and completed_items == len(item_models)
+                    else "in_progress"
+                    if completed_items
+                    else "todo"
+                ),
+                "status_label": (
+                    "Complete"
+                    if item_models and completed_items == len(item_models)
+                    else "In progress"
+                    if completed_items
+                    else "To do"
+                ),
+            }
+        )
+
+    required_complete = completed_required_items >= len(required_item_ids) if required_item_ids else True
+    advanced_override = bool(state.get("advanced_override"))
+    advanced_unlocked = required_complete or advanced_override
+    advanced_stage_id = str(catalog.get("progressive_reveal", {}).get("advanced_stage_id", "")).strip()
+    for stage in stage_models:
+        if stage["id"] == advanced_stage_id:
+            stage["status"] = "completed" if advanced_unlocked else "todo"
+            stage["status_label"] = (
+                "Revealed for this session"
+                if advanced_override
+                else "Ready"
+                if advanced_unlocked
+                else "Locked"
+            )
+            break
+
+    return {
+        "stages": stage_models,
+        "required_item_total": len(required_item_ids),
+        "required_item_completed": completed_required_items,
+        "required_complete": required_complete,
+        "advanced_unlocked": advanced_unlocked,
+        "advanced_override": advanced_override,
+        "advanced_override_updated_at": state.get("advanced_override_updated_at", ""),
+        "locked_launcher_purposes": set(
+            catalog.get("progressive_reveal", {}).get("locked_launcher_purposes", [])
+        ),
+        "locked_service_actions": set(
+            catalog.get("progressive_reveal", {}).get("locked_service_actions", [])
+        ),
+        "locked_runbook_execution_classes": set(
+            catalog.get("progressive_reveal", {}).get("locked_runbook_execution_classes", [])
+        ),
+    }
 
 
 def default_persona_id(personas: list[dict[str, Any]]) -> str:
@@ -578,6 +848,46 @@ def build_launcher_entries(
     return sorted(entries, key=lambda item: (LAUNCHER_PURPOSE_ORDER.index(item["purpose"]), item["kind"], item["name"]))
 
 
+def launcher_entry_locked(entry: dict[str, Any], activation: dict[str, Any]) -> bool:
+    return not activation.get("advanced_unlocked", True) and entry.get("purpose") in activation.get(
+        "locked_launcher_purposes",
+        set(),
+    )
+
+
+def split_launcher_entries(
+    entries: list[dict[str, Any]],
+    *,
+    activation: dict[str, Any],
+    persona_id: str,
+    query: str,
+    favorite_ids: set[str],
+    recent_ids: set[str],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    visible_entries: list[dict[str, Any]] = []
+    locked_entries: list[dict[str, Any]] = []
+    for entry in entries:
+        if not launcher_entry_visible(entry, persona_id, query):
+            continue
+        if launcher_entry_locked(entry, activation):
+            locked_entries.append(decorate_launcher_entry(entry, favorite_ids, recent_ids))
+            continue
+        visible_entries.append(entry)
+    locked_entries.sort(key=lambda item: (item["kind"], item["name"]))
+    return visible_entries, locked_entries
+
+
+def runbook_locked(runbook: dict[str, Any], activation: dict[str, Any]) -> bool:
+    return (
+        not activation.get("advanced_unlocked", True)
+        and str(runbook.get("execution_class", "workflow")) in activation.get("locked_runbook_execution_classes", set())
+    )
+
+
+def action_locked(action_id: str, activation: dict[str, Any]) -> bool:
+    return not activation.get("advanced_unlocked", True) and action_id in activation.get("locked_service_actions", set())
+
+
 @dataclass(frozen=True)
 class PortalSettings:
     gateway_url: str
@@ -791,6 +1101,11 @@ class PortalRepository:
         capabilities = payload.get("capabilities", [])
         return capabilities if isinstance(capabilities, list) else []
 
+    def load_activation_checklist(self) -> dict[str, Any]:
+        activation_path = self.settings.service_catalog_path.parent / "activation-checklist.json"
+        payload = load_json_file(activation_path, DEFAULT_ACTIVATION_CHECKLIST)
+        return normalize_activation_catalog(payload)
+
     def load_workflow_catalog(self) -> list[dict[str, Any]]:
         payload = load_json_file(self.settings.workflow_catalog_path, {"workflows": {}})
         workflows = []
@@ -805,6 +1120,7 @@ class PortalRepository:
                     "description": workflow.get("description", workflow_id),
                     "owner_runbook": workflow.get("owner_runbook"),
                     "entrypoint": workflow.get("preferred_entrypoint", {}),
+                    "execution_class": workflow.get("execution_class", "workflow"),
                     "live_impact": workflow.get("live_impact", "unknown"),
                 }
             )
@@ -1398,6 +1714,7 @@ def build_service_models(
     maintenance_windows: list[dict[str, Any]],
     deployments: list[dict[str, Any]],
     settings: PortalSettings,
+    activation: dict[str, Any],
 ) -> list[dict[str, Any]]:
     latest_deploy_by_service: dict[str, dict[str, Any]] = {}
     for deployment in deployments:
@@ -1450,6 +1767,8 @@ def build_service_models(
                 "maintenance_windows": windows_by_service.get(service_id, []) + windows_by_service.get("all", []),
                 "last_deployment": deployment,
                 "logs_url": build_logs_url(settings.grafana_logs_url, service_id),
+                "actions_locked": not activation.get("advanced_unlocked", True),
+                "locked_actions": sorted(activation.get("locked_service_actions", set())),
                 "publications": [
                     {
                         "fqdn": publication["fqdn"],
@@ -1509,12 +1828,42 @@ def template_root() -> Path:
     return Path(__file__).resolve().parent
 
 
-def build_runbook_models(runbooks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def build_runbook_models(
+    runbooks: list[dict[str, Any]],
+    activation: dict[str, Any],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     featured_ids = {"validation-gate-status"}
     featured = [item for item in runbooks if item["id"] in featured_ids]
     remainder = [item for item in runbooks if item["id"] not in featured_ids]
     combined = featured + remainder
-    return combined[:6]
+    visible: list[dict[str, Any]] = []
+    locked: list[dict[str, Any]] = []
+    for item in combined[:6]:
+        if runbook_locked(item, activation):
+            locked.append(item)
+        else:
+            visible.append(item)
+    return visible, locked
+
+
+def enrich_runbook_metadata(
+    runbooks: list[dict[str, Any]],
+    workflows: dict[str, Any],
+) -> list[dict[str, Any]]:
+    enriched: list[dict[str, Any]] = []
+    for item in runbooks:
+        if not isinstance(item, dict):
+            continue
+        runbook = dict(item)
+        runbook_id = str(runbook.get("id", "")).strip()
+        workflow = workflows.get(runbook_id, {}) if runbook_id else {}
+        if not isinstance(workflow, dict):
+            workflow = {}
+        for field in ("description", "owner_runbook", "execution_class", "live_impact"):
+            if not runbook.get(field) and workflow.get(field):
+                runbook[field] = workflow[field]
+        enriched.append(runbook)
+    return enriched
 
 
 async def build_launcher_panel_context(request: Request, *, query: str = "") -> dict[str, Any]:
@@ -1525,6 +1874,14 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
     publications = repository.load_publication_registry()
     workflows = repository.load_workflow_definitions()
     personas = repository.load_persona_catalog()
+    activation_catalog = repository.load_activation_checklist()
+    activation_state = normalize_activation_session_state(request.session, activation_catalog)
+    activation = build_activation_context(
+        activation_catalog,
+        activation_state,
+        services=services,
+        docs_base_url=request.app.state.settings.docs_base_url,
+    )
 
     entries = build_launcher_entries(services, publications, workflows)
     valid_entry_ids = {entry["id"] for entry in entries}
@@ -1532,7 +1889,15 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
     selected_persona = preferences["selected_persona"]
     favorite_ids = set(preferences["favorite_ids"])
     recent_ids = set(preferences["recent_ids"])
-    entry_index = {entry["id"]: entry for entry in entries}
+    visible_entries, locked_entries = split_launcher_entries(
+        entries,
+        activation=activation,
+        persona_id=str(selected_persona["id"]),
+        query=query,
+        favorite_ids=favorite_ids,
+        recent_ids=recent_ids,
+    )
+    entry_index = {entry["id"]: entry for entry in visible_entries}
 
     favorites = [
         decorate_launcher_entry(entry_index[item_id], favorite_ids, recent_ids)
@@ -1545,7 +1910,7 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
         if item_id in entry_index and launcher_entry_visible(entry_index[item_id], str(selected_persona["id"]), query)
     ]
     groups = build_launcher_groups(
-        entries,
+        visible_entries,
         persona=selected_persona,
         favorite_ids=favorite_ids,
         recent_ids=recent_ids,
@@ -1561,9 +1926,13 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
             "favorites": favorites,
             "recents": recents,
             "groups": groups,
-            "match_count": sum(len(group["entries"]) for group in groups),
+            "locked_entries": locked_entries,
+            "locked_count": len(locked_entries),
+            "advanced_unlocked": activation["advanced_unlocked"],
+            "match_count": sum(len(group["entries"]) for group in groups) + len(locked_entries),
             "entry_index": entry_index,
         },
+        "activation": activation,
     }
 
 
@@ -1618,9 +1987,11 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     repository: PortalRepository = request.app.state.repository
     gateway: Any = request.app.state.gateway_client
     launcher_context = await build_launcher_panel_context(request)
+    activation = launcher_context["activation"]
 
     services = repository.load_service_catalog()
     publications = repository.load_publication_registry()
+    workflows = repository.load_workflow_definitions()
 
     capability_contracts = repository.load_capability_contract_catalog()
     dependency_graph = repository.load_dependency_graph()
@@ -1660,7 +2031,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     runtime_assurance = normalize_runtime_assurance(runtime_assurance_payload, services)
     coordination = normalize_agent_coordination(coordination_payload)
     raw_runbooks = runbook_payload.get("runbooks") if isinstance(runbook_payload, dict) else []
-    runbooks = raw_runbooks if isinstance(raw_runbooks, list) else []
+    runbooks = enrich_runbook_metadata(raw_runbooks if isinstance(raw_runbooks, list) else [], workflows)
     capability_models, capability_summary = build_capability_contract_models(capability_contracts, services)
     service_models = build_service_models(
         services,
@@ -1670,6 +2041,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         maintenance_windows,
         deployments,
         request.app.state.settings,
+        activation,
     )
     assurance_rows, assurance_summary = build_runtime_assurance_models(
         services,
@@ -1686,17 +2058,21 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "dependency_focus": build_dependency_focus_chart(dependency_graph, service_models),
     }
 
+    visible_runbooks, locked_runbooks = build_runbook_models(runbooks, activation)
+
     return {
         "request": request,
         "operator": session,
         "services": service_models,
+        "activation": activation,
         "runtime_assurance_rows": assurance_rows,
         "runtime_assurance_summary": assurance_summary,
         "capability_contracts": capability_models,
         "capability_contract_summary": capability_summary,
         "maintenance_windows": active_maintenance,
         "maintenance_count": len(active_maintenance),
-        "runbooks": build_runbook_models(runbooks),
+        "runbooks": visible_runbooks,
+        "locked_runbooks": locked_runbooks,
         "deployments": deployments[:10],
         "changelog_notes": changelog_notes,
         "drift_report": drift_report,
@@ -1719,6 +2095,15 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "search_collection": "",
         "launcher": launcher_context["launcher"],
         "contextual_help": build_ops_portal_help(request.app.state.settings.docs_base_url),
+    }
+
+
+async def build_activation_panel_context(request: Request) -> dict[str, Any]:
+    launcher_context = await build_launcher_panel_context(request)
+    return {
+        "request": request,
+        "activation": launcher_context["activation"],
+        "docs_base_url": request.app.state.settings.docs_base_url,
     }
 
 
@@ -1767,6 +2152,11 @@ def create_app(
     async def launcher_partial(request: Request, query: str = "") -> HTMLResponse:
         context = await build_launcher_panel_context(request, query=query)
         return templates.TemplateResponse(request=request, name="partials/launcher.html", context=context)
+
+    @app.get("/partials/activation", response_class=HTMLResponse)
+    async def activation_partial(request: Request) -> HTMLResponse:
+        context = await build_activation_panel_context(request)
+        return templates.TemplateResponse(request=request, name="partials/activation.html", context=context)
 
     @app.get("/partials/overview", response_class=HTMLResponse)
     async def overview_partial(request: Request) -> HTMLResponse:
@@ -1839,12 +2229,35 @@ def create_app(
             context = await build_launcher_panel_context(request, query=query)
         return templates.TemplateResponse(request=request, name="partials/launcher.html", context=context)
 
+    @app.post("/actions/activation/items/{item_id}", response_class=HTMLResponse)
+    async def activation_item_action(
+        request: Request,
+        item_id: str,
+        status: str = Form(default="completed"),
+    ) -> HTMLResponse:
+        repository: PortalRepository = request.app.state.repository
+        activation_catalog = repository.load_activation_checklist()
+        write_activation_item_state(request.session, activation_catalog, item_id=item_id, status=status)
+        context = await build_activation_panel_context(request)
+        return templates.TemplateResponse(request=request, name="partials/activation.html", context=context)
+
+    @app.post("/actions/activation/override", response_class=HTMLResponse)
+    async def activation_override_action(
+        request: Request,
+        enabled: bool = Form(default=True),
+    ) -> HTMLResponse:
+        repository: PortalRepository = request.app.state.repository
+        activation_catalog = repository.load_activation_checklist()
+        set_activation_override(request.session, activation_catalog, enabled=enabled)
+        context = await build_activation_panel_context(request)
+        return templates.TemplateResponse(request=request, name="partials/activation.html", context=context)
+
     @app.get("/launcher/go/{item_id}")
     async def launcher_go(request: Request, item_id: str) -> RedirectResponse:
         context = await build_launcher_panel_context(request)
         entry = context["launcher"]["entry_index"].get(item_id)
         if entry is None:
-            return RedirectResponse(url="/", status_code=303)
+            return RedirectResponse(url="/#activation", status_code=303)
         record_launcher_recent(request.session, item_id, set(context["launcher"]["entry_index"]))
         return RedirectResponse(url=str(entry["href"]), status_code=303)
 
@@ -1882,6 +2295,20 @@ def create_app(
         session = await ensure_session(request)
         gateway = request.app.state.gateway_client
         broker: EventBroker = request.app.state.event_broker
+        activation_context = (await build_activation_panel_context(request))["activation"]
+        action_id = "restart" if restart_only else "deploy"
+        if action_locked(action_id, activation_context):
+            context = {
+                "request": request,
+                "result": {
+                    "title": f"{'Restart' if restart_only else 'Deploy'}: {service_id}",
+                    "status": "blocked",
+                    "detail": "Complete the activation checklist or explicitly reveal advanced tools for this session before launching mutating service actions.",
+                    "tone": "warn",
+                    "timestamp": isoformat(utc_now()),
+                },
+            }
+            return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
         try:
             result = await gateway.trigger_deploy(
                 service_id,
@@ -1922,6 +2349,19 @@ def create_app(
         session = await ensure_session(request)
         gateway = request.app.state.gateway_client
         broker: EventBroker = request.app.state.event_broker
+        activation_context = (await build_activation_panel_context(request))["activation"]
+        if action_locked("rotate_secret", activation_context):
+            context = {
+                "request": request,
+                "result": {
+                    "title": f"Rotate secret: {service_id}",
+                    "status": "blocked",
+                    "detail": "Complete the activation checklist or explicitly reveal advanced tools for this session before rotating production secrets.",
+                    "tone": "warn",
+                    "timestamp": isoformat(utc_now()),
+                },
+            }
+            return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
         try:
             result = await gateway.rotate_secret(
                 service_id,
@@ -1956,6 +2396,25 @@ def create_app(
         session = await ensure_session(request)
         gateway = request.app.state.gateway_client
         broker: EventBroker = request.app.state.event_broker
+        dashboard_context = await build_dashboard_context(request)
+        runbook_lookup = {
+            str(item.get("id")): item
+            for item in [*dashboard_context.get("runbooks", []), *dashboard_context.get("locked_runbooks", [])]
+            if isinstance(item, dict)
+        }
+        runbook_model = runbook_lookup.get(runbook_id, {})
+        if runbook_locked(runbook_model, dashboard_context["activation"]):
+            context = {
+                "request": request,
+                "result": {
+                    "title": f"Runbook: {runbook_id}",
+                    "status": "blocked",
+                    "detail": "This mutating runbook stays disabled until the activation checklist is complete or advanced tools are explicitly revealed for the session.",
+                    "tone": "warn",
+                    "timestamp": isoformat(utc_now()),
+                },
+            }
+            return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
         try:
             parsed_parameters = json.loads(parameters) if parameters.strip() else {}
             if not isinstance(parsed_parameters, dict):

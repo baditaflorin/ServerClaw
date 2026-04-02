@@ -315,6 +315,99 @@ a {
   gap: 0.25rem;
 }
 
+.launcher-entry--locked,
+.runbook-card--locked,
+.activation-stage,
+.activation-item {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.84);
+}
+
+.launcher-entry--locked,
+.runbook-card--locked {
+  background:
+    linear-gradient(180deg, rgba(20, 33, 61, 0.03), rgba(20, 33, 61, 0.06)),
+    rgba(255, 253, 248, 0.84);
+}
+
+.launcher-entry-link--disabled {
+  color: var(--ink-soft);
+  cursor: default;
+}
+
+.activation-panel,
+.activation-summary,
+.activation-toolbar,
+.activation-stage-grid,
+.activation-stage,
+.activation-stage-head,
+.activation-stage-meta,
+.activation-item-list,
+.activation-item,
+.activation-item-actions,
+.activation-item-copy,
+.activation-summary-pills {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.activation-panel {
+  padding: 1.2rem;
+}
+
+.activation-summary,
+.activation-toolbar,
+.activation-stage-head,
+.activation-item {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.activation-summary-pills,
+.activation-stage-meta,
+.activation-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+.activation-stage-grid {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.activation-stage {
+  padding: 1rem;
+}
+
+.activation-stage--completed {
+  border-color: rgba(42, 111, 79, 0.22);
+}
+
+.activation-stage--in_progress,
+.activation-item--skipped {
+  border-color: rgba(178, 106, 0, 0.22);
+}
+
+.activation-item-list {
+  gap: 0.75rem;
+}
+
+.activation-item {
+  padding: 0.85rem 0.9rem;
+}
+
+.activation-item-copy p,
+.activation-item-copy span {
+  margin: 0;
+}
+
+.activation-pill-unlocked {
+  background: rgba(42, 111, 79, 0.12);
+  color: var(--ok);
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -489,7 +582,7 @@ a {
 .deployment-console,
 .runbook-card,
 .drift-panel,
-.chart-panel {
+.chart-panel,
 .assurance-stat {
   padding: 1.2rem;
 }
@@ -605,6 +698,12 @@ a {
 .action-button.ghost {
   background: rgba(217, 119, 6, 0.12);
   color: var(--warn);
+}
+
+.action-button[disabled],
+.pf-v5-c-button.action-button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .action-result,
@@ -812,6 +911,19 @@ select {
 
   .launcher-entry {
     flex-direction: column;
+  }
+
+  .activation-summary,
+  .activation-toolbar,
+  .activation-stage-head,
+  .activation-item {
+    grid-template-columns: 1fr;
+  }
+
+  .activation-summary-pills,
+  .activation-stage-meta,
+  .activation-item-actions {
+    justify-content: flex-start;
   }
 }
 

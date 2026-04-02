@@ -1,10 +1,44 @@
+# Playbook: ops-portal.yml
+# Purpose: Converge the interactive ops portal on the shared Docker runtime with its authenticated launcher, runbook, and activation surfaces.
+# Use case: Run when the repo-managed ops portal UI, runtime assets, or reverse-proxy publication must be reconciled on production or staging.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (path, required via make targets): SSH private key used for the Proxmox host and guest jump path.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Deployment environment selector.
+#   - platform_trace_id (string, optional): Mutation-audit trace identifier propagated by the make wrapper.
+#
+# Outputs:
+#   - Ops portal runtime converged on the selected Docker runtime guest with repo-managed health verification and completion notifications.
+#
+# Idempotency: Fully idempotent
+#              Reruns reconcile the same runtime configuration, verification checks, and notification flow.
+#
+# Dependencies:
+#   - ADR 0165: Requires committed playbook metadata headers.
+#   - ADR 0310: Defines the activation checklist and progressive capability reveal surfaced through the portal.
+#   - Role: lv3.platform.ops_portal_runtime — renders and reconciles the portal runtime.
+#
+# Related ADRs: 0165, 0310
+# Related Runbooks: docs/runbooks/platform-operations-portal.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-02
 ---
 - name: Converge the interactive ops portal on the Docker runtime VM
   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
   become: true
   gather_facts: true
   vars:
-    ops_portal_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"
+    ops_portal_repo_root: >-
+      {{
+        lookup(
+          'ansible.builtin.pipe',
+          'git -C ' ~ (playbook_dir | quote) ~ ' rev-parse --show-toplevel'
+        )
+        | trim
+      }}
   tags:
     - tier-2
     - access

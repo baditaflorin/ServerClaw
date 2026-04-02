@@ -157,6 +157,12 @@ Tour behavior:
 - each step links back to the authoritative ADR 0108 runbooks instead of embedding an alternate policy source in the UI
 - keyboard navigation, focus trapping, and `Esc` exit are handled by Shepherd
 
+The Windmill app remains the browser-first provisioning surface, but it is no
+longer expected to carry the entire readiness journey by itself. After the
+access mutation succeeds, the operator should continue in the interactive ops
+portal and complete the ADR 0310 activation checklist at
+`https://ops.lv3.org#activation`.
+
 ## Command Palette
 
 ADR 0311 adds a global `Ctrl/Cmd+K` command palette to the app.
@@ -186,7 +192,7 @@ Palette behavior:
 6. Resolve any inline schema validation feedback before submitting.
 7. Submit the create action.
 8. Record the returned bootstrap password securely.
-9. Direct the new operator to sign in through Keycloak, rotate the bootstrap password, and complete TOTP enrollment.
+9. Direct the new operator to sign in through Keycloak, rotate the bootstrap password, complete TOTP enrollment, and then finish the **First-Run Activation** checklist in the interactive ops portal.
 
 ## Off-boarding Flow
 

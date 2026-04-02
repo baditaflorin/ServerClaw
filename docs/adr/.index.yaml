@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-04-02'
 total_adrs: 359
 implementation_status_summary:
-  Implemented: 305
+  Implemented: 306
   Partial: 11
-  Not Implemented: 42
+  Not Implemented: 41
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5547,7 +5547,7 @@ adr_index:
   - adr: '0310'
     title: First-Run Activation Checklists And Progressive Capability Reveal
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -5559,6 +5559,7 @@ adr_index:
       - reveal
     summary: We will add a cross-surface activation checklist and use progressive
     filename: 0310-first-run-activation-checklists-and-progressive-capability-reveal.md
+    implemented_version: 0.177.144
   - adr: '0311'
     title: Global Command Palette And Universal Open Dialog Via cmdk
     status: Accepted
@@ -5734,7 +5735,7 @@ adr_index:
       - headroom
     summary: We will replace the single shared runtime memory budget with runtime-pool
     filename: 0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md
-    implemented_version: 0.177.144
+    implemented_version: 0.177.145
   - adr: '0322'
     title: Memory-Pressure Autoscaling For Elastic Runtime Pools
     status: Accepted
@@ -5749,7 +5750,7 @@ adr_index:
       - pools
     summary: We will add a memory-pressure autoscaling control loop for elastic runtime
     filename: 0322-memory-pressure-autoscaling-for-elastic-runtime-pools.md
-    implemented_version: 0.177.144
+    implemented_version: 0.177.145
   - adr: '0323'
     title: Service Mobility Tiers And Migration Waves For Runtime Pools
     status: Accepted
@@ -5766,7 +5767,7 @@ adr_index:
       - pools
     summary: We will classify services into mobility tiers and move them through
     filename: 0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md
-    implemented_version: 0.177.144
+    implemented_version: 0.177.145
   - adr: '0324'
     title: Service Definition Shards And Generated Service Catalog Assembly
     status: Accepted
