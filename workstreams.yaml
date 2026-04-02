@@ -492,7 +492,9 @@ workstreams:
       - docs/workstreams/ws-0309-live-apply.md
       - docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md
       - docs/adr/.index.yaml
+      - Makefile
       - docs/runbooks/platform-operations-portal.md
+      - playbooks/ops-portal.yml
       - config/persona-catalog.json
       - config/workflow-catalog.json
       - config/workbench-information-architecture.json
@@ -515,11 +517,16 @@ workstreams:
       - scripts/ops_portal/templates/partials/runbooks.html
       - scripts/ops_portal/templates/partials/runtime_assurance.html
       - scripts/ops_portal/templates/partials/search.html
+      - roles/ops_portal_runtime/defaults/main.yml
+      - roles/ops_portal_runtime/tasks/main.yml
+      - roles/ops_portal_runtime/tasks/sync_service_tree.yml
       - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/sync_service_tree.yml
       - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
       - tests/test_interactive_ops_portal.py
       - tests/test_ops_portal.py
+      - tests/test_ops_portal_playbook.py
       - tests/test_ops_portal_runtime_role.py
       - receipts/live-applies/*adr-0309*
       - receipts/live-applies/evidence/*ws-0309*
@@ -539,7 +546,9 @@ workstreams:
           paths:
             - docs/workstreams/ws-0309-live-apply.md
             - docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md
+            - Makefile
             - docs/runbooks/platform-operations-portal.md
+            - playbooks/ops-portal.yml
             - config/persona-catalog.json
             - config/workflow-catalog.json
             - config/workbench-information-architecture.json
@@ -562,11 +571,16 @@ workstreams:
             - scripts/ops_portal/templates/partials/runbooks.html
             - scripts/ops_portal/templates/partials/runtime_assurance.html
             - scripts/ops_portal/templates/partials/search.html
+            - roles/ops_portal_runtime/defaults/main.yml
+            - roles/ops_portal_runtime/tasks/main.yml
+            - roles/ops_portal_runtime/tasks/sync_service_tree.yml
             - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
             - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/sync_service_tree.yml
             - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
             - tests/test_interactive_ops_portal.py
             - tests/test_ops_portal.py
+            - tests/test_ops_portal_playbook.py
             - tests/test_ops_portal_runtime_role.py
             - receipts/live-applies/*adr-0309*
             - receipts/live-applies/evidence/*ws-0309*
@@ -592,6 +606,7 @@ workstreams:
       - docs/workstreams/ws-0309-main-integration.md
       - docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md
       - docs/adr/.index.yaml
+      - Makefile
       - docs/runbooks/platform-operations-portal.md
       - README.md
       - RELEASE.md
@@ -602,6 +617,8 @@ workstreams:
       - docs/diagrams/agent-coordination-map.excalidraw
       - docs/release-notes/README.md
       - docs/release-notes/*.md
+      - docs/site-generated/architecture/dependency-graph.md
+      - playbooks/ops-portal.yml
       - config/persona-catalog.json
       - config/workflow-catalog.json
       - config/workbench-information-architecture.json
@@ -611,9 +628,13 @@ workstreams:
       - scripts/workflow_catalog.py
       - scripts/validate_repository_data_models.py
       - scripts/ops_portal/
+      - roles/ops_portal_runtime/defaults/main.yml
+      - roles/ops_portal_runtime/tasks/main.yml
+      - roles/ops_portal_runtime/tasks/sync_service_tree.yml
       - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/
       - tests/test_interactive_ops_portal.py
       - tests/test_ops_portal.py
+      - tests/test_ops_portal_playbook.py
       - tests/test_ops_portal_runtime_role.py
       - receipts/live-applies/*adr-0309*
       - receipts/live-applies/evidence/*ws-0309*
@@ -635,6 +656,7 @@ workstreams:
             - docs/workstreams/ws-0309-live-apply.md
             - docs/workstreams/ws-0309-main-integration.md
             - docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md
+            - Makefile
             - docs/runbooks/platform-operations-portal.md
             - README.md
             - RELEASE.md
@@ -644,6 +666,8 @@ workstreams:
             - build/platform-manifest.json
             - docs/diagrams/agent-coordination-map.excalidraw
             - docs/release-notes/**
+            - docs/site-generated/architecture/dependency-graph.md
+            - playbooks/ops-portal.yml
             - config/persona-catalog.json
             - config/workflow-catalog.json
             - config/workbench-information-architecture.json
@@ -653,9 +677,13 @@ workstreams:
             - scripts/workflow_catalog.py
             - scripts/validate_repository_data_models.py
             - scripts/ops_portal/**
+            - roles/ops_portal_runtime/defaults/main.yml
+            - roles/ops_portal_runtime/tasks/main.yml
+            - roles/ops_portal_runtime/tasks/sync_service_tree.yml
             - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/**
             - tests/test_interactive_ops_portal.py
             - tests/test_ops_portal.py
+            - tests/test_ops_portal_playbook.py
             - tests/test_ops_portal_runtime_role.py
             - receipts/live-applies/*adr-0309*
             - receipts/live-applies/evidence/*ws-0309*
@@ -668,7 +696,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0309 by adding the task-oriented Start, Observe, Change, Learn, and Recover information architecture across the live ops portal shell, launcher, runbook surfaces, and supporting catalogs, then carrying the exact-main validation and replay path onto main
       release_bump: patch
-      included_in_repo_version: 0.177.140
+      included_in_repo_version: 0.177.142
       latest_receipts: {}
   - id: ws-0315-gitea-followups
     adr: "0297"

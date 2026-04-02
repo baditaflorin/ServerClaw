@@ -166,7 +166,7 @@ For the governed production replay used during live applies:
 ```bash
 ALLOW_IN_PLACE_MUTATION=true \
 make live-apply-service service=ops_portal env=production \
-  EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/absolute/path/to/worktree'
+  EXTRA_ARGS='-e bypass_promotion=true'
 ```
 
 `bypass_promotion=true` is the documented break-glass path for direct production
@@ -176,9 +176,10 @@ promotion-bypass audit event before running the service playbook.
 
 `ALLOW_IN_PLACE_MUTATION=true` is the documented ADR 0191 narrow exception for
 `ops_portal` because the live service still runs on immutable-replacement-governed
-`docker-runtime-lv3`. Set `ops_portal_repo_root` to the exact checkout you want
-mirrored into `/opt/ops-portal/service`; using the absolute worktree path avoids
-accidentally syncing a different branch's portal tree.
+`docker-runtime-lv3`. The `live-apply-service` target now injects
+`ops_portal_repo_root=$(REPO_ROOT)` automatically for `ops_portal`, so the
+active worktree is the exact checkout mirrored into `/opt/ops-portal/service`
+without needing a second manual override.
 
 The runtime mirror only pulls structured production/staging `*.json` receipt
 documents from `receipts/live-applies/` and `receipts/drift-reports/`.
@@ -191,8 +192,11 @@ Do not run two branch-local `ops_portal` production replays at the same time.
 Concurrent applies share `/opt/ops-portal/service` on `docker-runtime-lv3` and
 can clobber each other's uploaded tree, which leaves partial routes such as
 `/partials/launcher` missing even when the playbook itself reached the verify
-phase. The runtime role now checks `/partials/launcher` locally during replay so
-that drift fails closed instead of silently publishing an incomplete shell.
+phase. The runtime role now refreshes `/opt/ops-portal/service` again
+immediately before syncing the Docker build context, and it checks
+`/partials/launcher` locally during replay so drift fails closed instead of
+silently publishing an incomplete shell. That extra refresh narrows the overlap
+window, but it does not make concurrent production replays safe.
 
 After a live ADR 0313 replay, also confirm the root page contains the help
 drawer strings and the task-lane shell cues from the guest-local runtime:

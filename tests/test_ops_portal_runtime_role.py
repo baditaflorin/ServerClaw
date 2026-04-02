@@ -26,6 +26,17 @@ TASKS_PATH = (
     / "tasks"
     / "main.yml"
 )
+SYNC_TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "ops_portal_runtime"
+    / "tasks"
+    / "sync_service_tree.yml"
+)
 VERIFY_TASKS_PATH = (
     REPO_ROOT
     / "collections"
@@ -64,23 +75,28 @@ COMPOSE_TEMPLATE_PATH = (
 def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
     tasks = TASKS_PATH.read_text(encoding="utf-8")
+    sync_tasks = SYNC_TASKS_PATH.read_text(encoding="utf-8")
     compose_template = COMPOSE_TEMPLATE_PATH.read_text(encoding="utf-8")
 
     assert 'ops_portal_build_context_dir: "{{ ops_portal_site_dir }}/build-context"' in defaults
     assert "ops_portal_build_context_dir" in tasks
-    assert "Remove stale ops portal service sources before sync" in tasks
-    assert "Discover the ops portal application directories on the controller" in tasks
-    assert "Sync the ops portal application files" in tasks
-    assert 'src: "{{ item.path }}"' in tasks
-    assert "Ensure the ops portal overlay directories exist" in tasks
-    assert "Sync critical ops portal runtime files explicitly" in tasks
-    assert "Reset the synced search fabric package tree before refresh" in tasks
-    assert "Sync the shared search fabric files" in tasks
-    assert "ops_portal_service_dir ~ '/search_fabric/'" in tasks
-    assert "Sync the ops portal service build inputs explicitly" in tasks
-    assert '{{ ops_portal_repo_root }}/scripts/publication_contract.py' in tasks
-    assert '{{ ops_portal_repo_root }}/scripts/stage_smoke.py' in tasks
-    assert '{{ ops_portal_repo_root }}/requirements/ops-portal.txt' in tasks
+    assert "Sync the repo-managed ops portal service tree" in tasks
+    assert "Refresh the repo-managed ops portal service tree immediately before build-context sync" in tasks
+    assert "ansible.builtin.import_tasks: sync_service_tree.yml" in tasks
+    assert "Remove stale ops portal service sources before sync" in sync_tasks
+    assert "Discover the ops portal application directories on the controller" in sync_tasks
+    assert "Sync the ops portal application files" in sync_tasks
+    assert 'src: "{{ item.path }}"' in sync_tasks
+    assert "Ensure the ops portal overlay directories exist" in sync_tasks
+    assert "Sync critical ops portal runtime files explicitly" in sync_tasks
+    assert "Reset the synced search fabric package tree before refresh" in sync_tasks
+    assert "Sync the shared search fabric files" in sync_tasks
+    assert "ops_portal_service_dir ~ '/search_fabric/'" in sync_tasks
+    assert "Sync the ops portal service build inputs explicitly" in sync_tasks
+    assert 'ops_portal_service_build_file_sources' in defaults
+    assert '{{ ops_portal_repo_root }}/scripts/publication_contract.py' in defaults
+    assert '{{ ops_portal_repo_root }}/scripts/stage_smoke.py' in defaults
+    assert '{{ ops_portal_repo_root }}/requirements/ops-portal.txt' in defaults
     assert 'patterns:' in defaults
     assert '"*.json"' in defaults
     assert 'excludes:' in defaults
@@ -149,5 +165,9 @@ def test_ops_portal_runtime_file_sources_include_launcher_partial() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
 
     assert "scripts/ops_portal/templates/partials/launcher.html" in defaults
+    assert "scripts/ops_portal/templates/macros/lane_context.html" in defaults
+    assert "scripts/ops_portal/templates/macros/states.html" in defaults
+    assert "scripts/ops_portal/templates/partials/runtime_assurance.html" in defaults
+    assert '"{{ ops_portal_service_dir }}/ops_portal/templates/macros"' in defaults
     assert "config/workbench-information-architecture.json" in defaults
     assert "scripts/workbench_information_architecture.py" in defaults

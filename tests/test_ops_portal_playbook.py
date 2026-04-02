@@ -15,6 +15,7 @@ ROLE_TASKS_PATH = (
     / "ops_portal_runtime"
     / "tasks"
 )
+SYNC_SERVICE_TASKS_PATH = ROLE_TASKS_PATH / "sync_service_tree.yml"
 
 
 def test_ops_portal_playbook_leaves_repo_root_to_role_defaults_or_explicit_overrides() -> None:
@@ -25,7 +26,7 @@ def test_ops_portal_playbook_leaves_repo_root_to_role_defaults_or_explicit_overr
 
 
 def test_ops_portal_runtime_clears_previous_build_context_before_sync() -> None:
-    tasks = yaml.safe_load((ROLE_TASKS_PATH / "main.yml").read_text())
+    tasks = yaml.safe_load(SYNC_SERVICE_TASKS_PATH.read_text())
     cleanup_task = next(task for task in tasks if task["name"] == "Remove stale ops portal service sources before sync")
 
     assert cleanup_task["ansible.builtin.file"]["state"] == "absent"
@@ -39,7 +40,7 @@ def test_ops_portal_runtime_clears_previous_build_context_before_sync() -> None:
 
 
 def test_ops_portal_runtime_removes_macos_metadata_sidecars_after_sync() -> None:
-    tasks = yaml.safe_load((ROLE_TASKS_PATH / "main.yml").read_text())
+    tasks = yaml.safe_load(SYNC_SERVICE_TASKS_PATH.read_text())
     discover_task = next(
         task for task in tasks if task["name"] == "Discover macOS metadata sidecars in synced ops portal sources"
     )
@@ -54,6 +55,21 @@ def test_ops_portal_runtime_removes_macos_metadata_sidecars_after_sync() -> None
     assert cleanup_task["ansible.builtin.file"]["state"] == "absent"
     assert cleanup_task["loop"] == "{{ ops_portal_metadata_sidecars.files }}"
     assert cleanup_task["when"] == "ops_portal_metadata_sidecars.matched | int > 0"
+
+
+def test_ops_portal_runtime_refreshes_the_service_tree_immediately_before_build_context_sync() -> None:
+    tasks = yaml.safe_load((ROLE_TASKS_PATH / "main.yml").read_text())
+    refresh_index = next(
+        index
+        for index, task in enumerate(tasks)
+        if task["name"] == "Refresh the repo-managed ops portal service tree immediately before build-context sync"
+    )
+    cleanup_index = next(
+        index for index, task in enumerate(tasks) if task["name"] == "Remove stale ops portal build-context ignore and metadata files"
+    )
+
+    assert tasks[refresh_index]["ansible.builtin.import_tasks"] == "sync_service_tree.yml"
+    assert refresh_index < cleanup_index
 
 
 def test_ops_portal_runtime_retries_local_health_and_root_checks() -> None:
