@@ -972,6 +972,10 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "docker exec windmill-windmill_worker-1 sh -lc '" in tasks
     assert 'test -n "${LV3_ATLAS_OPENBAO_APPROLE_JSON:-}"' in tasks
     assert 'test -n "${LV3_NTFY_ALERTMANAGER_PASSWORD:-}"' in tasks
+    assert "grep '^LV3_WINDMILL_BASE_URL=' {{ windmill_env_file }}" in compose_template
+    assert "grep '^LV3_WINDMILL_TOKEN=' {{ windmill_env_file }}" in compose_template
+    assert "grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' {{ windmill_env_file }}" in compose_template
+    assert "grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' {{ windmill_env_file }}" in compose_template
     assert "{{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}" in compose_template
     assert "network_mode: {{ windmill_worker_network_mode }}" in compose_template
     assert "openbao_runtime" in compose_template
@@ -995,6 +999,95 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert '[[ end ]][[ if (index .Data.data "LV3_ATLAS_OPENBAO_APPROLE_JSON") ]]LV3_ATLAS_OPENBAO_APPROLE_JSON=' in runtime_ctmpl_template
     assert '[[ end ]][[ if (index .Data.data "LV3_NTFY_ALERTMANAGER_PASSWORD") ]]LV3_NTFY_ALERTMANAGER_PASSWORD=' in runtime_ctmpl_template
     assert "{% for item in windmill_operator_manager_env" in runtime_ctmpl_template
+
+
+def test_windmill_runtime_waits_for_full_env_contract_before_starting_or_recreating_consumers() -> None:
+    tasks = yaml.safe_load(
+        (
+            REPO_ROOT
+            / "collections"
+            / "ansible_collections"
+            / "lv3"
+            / "platform"
+            / "roles"
+            / "windmill_runtime"
+            / "tasks"
+            / "main.yml"
+        ).read_text()
+    )
+    names = [task["name"] for task in tasks]
+
+    assert names.index("Start the Windmill OpenBao agent") < names.index(
+        "Wait for the rendered Windmill runtime env contract before startup"
+    ) < names.index("Start Windmill and wait for the API socket")
+    assert names.index(
+        "Check whether the rendered Windmill runtime env and live worker container expose the required runtime contract"
+    ) < names.index("Force-recreate the Windmill OpenBao agent when the runtime env contract is stale") < names.index(
+        "Wait for the rendered Windmill runtime env contract before recreating dependent services"
+    ) < names.index("Force-recreate the Windmill application services when the runtime env contract is stale")
+
+    startup_block = next(task for task in tasks if task.get("name") == "Start Windmill and wait for the API socket")
+    startup_task = next(
+        task
+        for task in startup_block["block"]
+        if task.get("name") == "Start the remaining Windmill services after the runtime env contract is ready"
+    )
+    rescue_openbao_agent = next(
+        task
+        for task in startup_block["rescue"]
+        if task.get("name") == "Restart the Windmill OpenBao agent after stale-network cleanup"
+    )
+    rescue_env_wait = next(
+        task
+        for task in startup_block["rescue"]
+        if task.get("name") == "Wait for the rendered Windmill runtime env contract after stale-network cleanup"
+    )
+    rescue_service_start = next(
+        task
+        for task in startup_block["rescue"]
+        if task.get("name") == "Start the remaining Windmill services after stale-network cleanup"
+    )
+    agent_recreate_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Force-recreate the Windmill OpenBao agent when the runtime env contract is stale"
+    )
+    service_recreate_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Force-recreate the Windmill application services when the runtime env contract is stale"
+    )
+
+    assert startup_task["ansible.builtin.command"]["argv"][-5:] == [
+        "--remove-orphans",
+        "windmill_server",
+        "windmill_worker",
+        "windmill_worker_native",
+        "windmill_extra",
+    ]
+    assert rescue_openbao_agent["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "openbao-agent"]
+    assert 'grep \'^LV3_ATLAS_OPENBAO_APPROLE_JSON=\' "{{ windmill_env_file }}"' in rescue_env_wait["ansible.builtin.shell"]
+    assert rescue_service_start["ansible.builtin.command"]["argv"][-5:] == [
+        "--remove-orphans",
+        "windmill_server",
+        "windmill_worker",
+        "windmill_worker_native",
+        "windmill_extra",
+    ]
+    assert agent_recreate_task["ansible.builtin.command"]["argv"][-4:] == [
+        "up",
+        "-d",
+        "--force-recreate",
+        "openbao-agent",
+    ]
+    assert service_recreate_task["ansible.builtin.command"]["argv"][-6:] == [
+        "-d",
+        "--force-recreate",
+        "windmill_server",
+        "windmill_worker",
+        "windmill_worker_native",
+        "windmill_extra",
+    ]
 
 
 def test_windmill_verify_remirrors_atlas_surfaces_immediately_before_atlas_drift_check() -> None:

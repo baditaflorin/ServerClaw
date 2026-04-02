@@ -1282,9 +1282,51 @@
     executable: /bin/bash
   register: windmill_stale_replace_cleanup
   changed_when: windmill_stale_replace_cleanup.stdout | trim != ""
+
+- name: Start the Windmill OpenBao agent
+  vars:
+    mutation_audit_action: start.windmill_openbao_agent
+    mutation_audit_target: windmill-runtime
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ windmill_compose_file }}"
+      - up
+      - -d
+      - openbao-agent
+  args:
+    chdir: "{{ windmill_site_dir }}"
+  register: windmill_openbao_agent_up
+  changed_when: >-
+    'Creating' in windmill_openbao_agent_up.stdout
+    or 'Recreating' in windmill_openbao_agent_up.stdout
+    or 'Starting' in windmill_openbao_agent_up.stdout
+    or 'Running' in windmill_openbao_agent_up.stdout
+  tags:
+    - mutation
+
+- name: Wait for the rendered Windmill runtime env contract before startup
+  ansible.builtin.shell: |
+    set -euo pipefail
+    test -s "{{ windmill_env_file }}"
+    grep '^LV3_WINDMILL_BASE_URL=' "{{ windmill_env_file }}"
+    grep '^LV3_WINDMILL_TOKEN=' "{{ windmill_env_file }}"
+    grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' "{{ windmill_env_file }}"
+    grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' "{{ windmill_env_file }}"
+  args:
+    executable: /bin/bash
+  register: windmill_runtime_env_file_contract
+  retries: "{{ windmill_runtime_api_wait_retries }}"
+  delay: "{{ windmill_runtime_api_wait_delay_seconds }}"
+  until: windmill_runtime_env_file_contract.rc == 0
+  changed_when: false
+  no_log: true
+
 - name: Start Windmill and wait for the API socket
   block:
-    - name: Start the Windmill stack
+    - name: Start the remaining Windmill services after the runtime env contract is ready
       vars:
         mutation_audit_action: start.windmill_stack
         mutation_audit_target: windmill-runtime
@@ -1297,6 +1339,10 @@
           - up
           - -d
           - --remove-orphans
+          - windmill_server
+          - windmill_worker
+          - windmill_worker_native
+          - windmill_extra
       args:
         chdir: "{{ windmill_site_dir }}"
       register: windmill_up
@@ -1338,7 +1384,45 @@
       changed_when: "'changed' in windmill_network_reset.stdout"
       when: windmill_missing_network_failure | bool
 
-    - name: Recreate the full Windmill stack after stale-network cleanup
+    - name: Restart the Windmill OpenBao agent after stale-network cleanup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ windmill_compose_file }}"
+          - up
+          - -d
+          - openbao-agent
+      args:
+        chdir: "{{ windmill_site_dir }}"
+      register: windmill_network_retry_openbao_agent
+      changed_when: >-
+        'Creating' in windmill_network_retry_openbao_agent.stdout
+        or 'Recreating' in windmill_network_retry_openbao_agent.stdout
+        or 'Starting' in windmill_network_retry_openbao_agent.stdout
+        or 'Running' in windmill_network_retry_openbao_agent.stdout
+      when: windmill_missing_network_failure | bool
+
+    - name: Wait for the rendered Windmill runtime env contract after stale-network cleanup
+      ansible.builtin.shell: |
+        set -euo pipefail
+        test -s "{{ windmill_env_file }}"
+        grep '^LV3_WINDMILL_BASE_URL=' "{{ windmill_env_file }}"
+        grep '^LV3_WINDMILL_TOKEN=' "{{ windmill_env_file }}"
+        grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' "{{ windmill_env_file }}"
+        grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' "{{ windmill_env_file }}"
+      args:
+        executable: /bin/bash
+      register: windmill_network_retry_env_contract
+      retries: "{{ windmill_runtime_api_wait_retries }}"
+      delay: "{{ windmill_runtime_api_wait_delay_seconds }}"
+      until: windmill_network_retry_env_contract.rc == 0
+      changed_when: false
+      no_log: true
+      when: windmill_missing_network_failure | bool
+
+    - name: Start the remaining Windmill services after stale-network cleanup
       ansible.builtin.command:
         argv:
           - docker
@@ -1348,6 +1432,10 @@
           - up
           - -d
           - --remove-orphans
+          - windmill_server
+          - windmill_worker
+          - windmill_worker_native
+          - windmill_extra
       args:
         chdir: "{{ windmill_site_dir }}"
       register: windmill_network_retry_up
@@ -1457,24 +1545,87 @@
   register: windmill_runtime_env_contract
   changed_when: false
   failed_when: false
+  no_log: true
 
-- name: Recreate the OpenBao agent and Windmill worker services when the runtime env contract is stale
-  vars:
-    mutation_audit_action: restart.windmill_runtime_contract
-    mutation_audit_target: windmill-runtime
-  args:
-    chdir: "{{ windmill_site_dir }}"
-    executable: /bin/bash
+- name: Remove stale Windmill compose replacement containers before runtime env reconciliation
   ansible.builtin.shell: |
     set -euo pipefail
     stale_ids="$(docker ps -aq \
       --filter label=com.docker.compose.project=windmill \
       --filter label=com.docker.compose.replace)"
-    if [ -n "$stale_ids" ]; then
-      docker rm -f $stale_ids
+    if [ -z "$stale_ids" ]; then
+      exit 0
     fi
-    docker compose --file "{{ windmill_compose_file }}" up -d --force-recreate \
-      openbao-agent windmill_server windmill_worker windmill_worker_native
+    docker rm -f $stale_ids
+  args:
+    executable: /bin/bash
+  register: windmill_runtime_reconcile_stale_replace_cleanup
+  changed_when: windmill_runtime_reconcile_stale_replace_cleanup.stdout | trim != ""
+  when: windmill_runtime_env_contract.rc != 0
+
+- name: Force-recreate the Windmill OpenBao agent when the runtime env contract is stale
+  vars:
+    mutation_audit_action: restart.windmill_runtime_contract
+    mutation_audit_target: windmill-runtime
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ windmill_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - openbao-agent
+  args:
+    chdir: "{{ windmill_site_dir }}"
+  register: windmill_runtime_env_agent_recreate
+  changed_when: >-
+    'Creating' in windmill_runtime_env_agent_recreate.stdout
+    or 'Recreating' in windmill_runtime_env_agent_recreate.stdout
+    or 'Starting' in windmill_runtime_env_agent_recreate.stdout
+    or 'Running' in windmill_runtime_env_agent_recreate.stdout
+  when: windmill_runtime_env_contract.rc != 0
+  tags:
+    - mutation
+
+- name: Wait for the rendered Windmill runtime env contract before recreating dependent services
+  ansible.builtin.shell: |
+    set -euo pipefail
+    test -s "{{ windmill_env_file }}"
+    grep '^LV3_WINDMILL_BASE_URL=' "{{ windmill_env_file }}"
+    grep '^LV3_WINDMILL_TOKEN=' "{{ windmill_env_file }}"
+    grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' "{{ windmill_env_file }}"
+    grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' "{{ windmill_env_file }}"
+  args:
+    executable: /bin/bash
+  register: windmill_runtime_env_file_contract_reconcile
+  retries: "{{ windmill_runtime_api_wait_retries }}"
+  delay: "{{ windmill_runtime_api_wait_delay_seconds }}"
+  until: windmill_runtime_env_file_contract_reconcile.rc == 0
+  changed_when: false
+  no_log: true
+  when: windmill_runtime_env_contract.rc != 0
+
+- name: Force-recreate the Windmill application services when the runtime env contract is stale
+  vars:
+    mutation_audit_action: restart.windmill_runtime_services
+    mutation_audit_target: windmill-runtime
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ windmill_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - windmill_server
+      - windmill_worker
+      - windmill_worker_native
+      - windmill_extra
+  args:
+    chdir: "{{ windmill_site_dir }}"
   register: windmill_runtime_env_recreate
   changed_when: >-
     'Creating' in windmill_runtime_env_recreate.stdout
@@ -1505,6 +1656,7 @@
   delay: "{{ windmill_runtime_api_wait_delay_seconds }}"
   until: windmill_runtime_env_contract_verify.rc == 0
   changed_when: false
+  no_log: true
 
 - name: Recheck the Windmill API version endpoint after runtime env contract reconciliation
   ansible.builtin.uri:
