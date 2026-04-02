@@ -2,18 +2,20 @@
 
 - ADR: [ADR 0311](../adr/0311-global-command-palette-and-universal-open-dialog-via-cmdk.md)
 - Title: Live apply a repo-managed `cmdk` command palette and universal open dialog on the Windmill operator access admin surface
-- Status: live_applied
-- Included In Repo Version: not yet
+- Status: merged
+- Included In Repo Version: 0.177.142
 - Branch-Local Receipt: `receipts/live-applies/2026-04-02-adr-0311-global-command-palette-live-apply.json`
-- Live Applied In Platform Version: 0.130.85
+- Canonical Mainline Receipt: `receipts/live-applies/2026-04-02-adr-0311-global-command-palette-mainline-live-apply.json`
+- Live Applied In Platform Version: 0.130.90
 - Implemented On: 2026-04-02
 - Live Applied On: 2026-04-02
+- Exact-Main Replay Baseline: repo `0.177.141`, platform `0.130.89`
 - Branch: `codex/ws-0311-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0311-live-apply`
 - Owner: codex
 - Depends On: `adr-0108-operator-onboarding`, `adr-0121-local-search-and-indexing-fabric`, `adr-0122-windmill-operator-access-admin`, `adr-0239-browser-local-search-experience-via-pagefind`, `adr-0309-task-oriented-information-architecture-across-the-platform-workbench`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0311-live-apply.md`, `docs/adr/0311-global-command-palette-and-universal-open-dialog-via-cmdk.md`, `docs/adr/.index.yaml`, `docs/runbooks/configure-windmill.md`, `docs/runbooks/windmill-operator-access-admin.md`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml`, `config/windmill/scripts/command-palette-search.py`, `config/windmill/apps/wmill-lock.yaml`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/**`, `tests/test_command_palette_search.py`, `tests/test_windmill_operator_admin_app.py`, `receipts/live-applies/`, `receipts/live-applies/evidence/`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0311-live-apply.md`, `docs/adr/0311-global-command-palette-and-universal-open-dialog-via-cmdk.md`, `docs/adr/.index.yaml`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/runbooks/configure-windmill.md`, `docs/runbooks/windmill-operator-access-admin.md`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml`, `config/windmill/scripts/command-palette-search.py`, `config/windmill/apps/wmill-lock.yaml`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/**`, `tests/test_command_palette_search.py`, `tests/test_windmill_operator_admin_app.py`, `receipts/ops-portal-snapshot.html`, `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`, `receipts/live-applies/2026-04-02-adr-0311-global-command-palette-live-apply.json`, `receipts/live-applies/2026-04-02-adr-0311-global-command-palette-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-04-02-ws-0311-*`
 
 ## Scope
 
@@ -61,46 +63,26 @@
 - `config/windmill/apps/f/lv3/operator_access_admin.raw_app/**`, `config/windmill/apps/wmill-lock.yaml`, `config/windmill/scripts/command-palette-search.py`, and the branch-local evidence files are exclusive to this workstream.
 - protected integration surfaces stay deferred until the final `main` integration step even if the platform replay succeeds from this branch.
 
-## Verification
+## Branch-Local Verification
 
-- The branch-local metadata gate passed: `wmill generate-metadata` reported `All metadata up-to-date`, the targeted `cmdk` bundle compiled with `npm ci --no-audit --no-fund` plus `npx tsc --noEmit`, and `python3 -m py_compile config/windmill/scripts/command-palette-search.py` returned `py_compile ok`.
-- The focused regression bundle passed with `28 passed in 0.58s` from `uv run --with pytest --with pyyaml python -m pytest tests/test_command_palette_search.py tests/test_windmill_operator_admin_app.py tests/test_operator_manager.py -q`.
-- The repo validation slice passed from this worktree: `./scripts/validate_repo.sh agent-standards workstream-surfaces yaml json role-argument-specs data-models` and `./scripts/validate_repo.sh ansible-syntax`.
-- The Windmill automation preflight path passed from this worktree: `make syntax-check-windmill` and `make preflight WORKFLOW=converge-windmill`.
-- `make converge-windmill env=production` replayed the repo-managed worker checkout, seed scripts, and raw-app staging onto the live platform but failed closed in the shared verification task `f/lv3/gate-status`. The recorded Windmill job `019d4b2b-a00f-b7aa-fbd4-9b4dee1fe75f` returned `Internal: Result of job is invalid json (empty) @jobs.rs:835:20`, so the managed gate-status assertion stopped the converge before a false-green result could be recorded.
-- A targeted repo-managed sync of `f/lv3/command_palette_search` then succeeded, and a live `scripts/windmill_run_wait_result.py` call returned `{"status":"ok","query":"totp","count":5}` with ADR and runbook matches from the live search-fabric index.
-- A targeted repo-managed raw-app sync then repaired concurrent live drift on `f/lv3/operator_access_admin`; the Windmill API summary now records `latest_version: 58`, `has_command_palette_import: true`, `has_command_palette_backend: true`, `has_command_palette_cta: true`, `has_command_palette_file: true`, and `policy_has_command_palette_search: true`.
+- The earlier branch-local receipt remains preserved in `receipts/live-applies/2026-04-02-adr-0311-global-command-palette-live-apply.json` together with the first focused test, metadata, and targeted live-repair evidence.
+- That branch-local evidence still matters because it captured the original shared-surface drift on `f/lv3/gate-status` before the later exact-main replay promoted the integrated truth safely.
 
-## Live Apply Outcome
+## Exact-Main Verification
 
-- ADR 0311 is live on platform version `0.130.85` through the private Windmill app `f/lv3/operator_access_admin` and the repo-managed helper `f/lv3/command_palette_search`.
-- The live browser surface now exposes the `Ctrl/Cmd+K` and `/` open flow, browser-local favorites plus recents, safe quick actions, operator and page jumps, glossary deep links, and docs-backed ADR and runbook search without bypassing the governed ADR 0108 mutation flows.
-- The branch also records a concurrent shared-surface hazard: during this replay the live `f/lv3/gate-status` content diverged from the branch snapshot, so this workstream intentionally scoped the repair to the ADR 0311 app and helper surfaces instead of overwriting unrelated shared verification code out of band.
+- `uv run --with pyyaml python3 scripts/release_manager.py status --json`, the patch dry run, and the actual release cut advanced the repo from `0.177.141` to `0.177.142`, while the later latest-main refresh on `origin/main` commit `67bc9f13f` still reported `Unreleased notes: 0`, confirming `0.177.142` remained the newest realistic repo cut for this replay.
+- The exact-main tree passed the focused regression and bundle checks: `32 passed` across the ADR 0311, operator-admin, operator-manager, and journey-scorecard tests, raw-app `npm ci` plus `npx tsc --noEmit`, script `py_compile`, `make syntax-check-windmill`, and `make preflight WORKFLOW=converge-windmill`.
+- The refreshed exact-main `make converge-windmill env=production` replay then completed successfully with recap `docker-runtime-lv3 : ok=329 changed=47 failed=0`, `postgres-lv3 : ok=93 changed=2 failed=0`, and `proxmox_florin : ok=41 changed=4 failed=0`.
+- Post-replay live proof also succeeded: `f/lv3/command_palette_search` returned `{"status":"ok","query":"totp","count":5}`, the Windmill API still reports `CE v1.662.0`, and the live app summary now records `latest_version: 72` with the command-palette import, backend binding, CTA copy, `commandPalette.ts` file, and policy wiring all present.
 
-## Live Evidence
+## Exact-Main Validation
 
-- `receipts/live-applies/evidence/2026-04-02-ws-0311-generate-metadata-r1.txt`
-- `receipts/live-applies/evidence/2026-04-02-ws-0311-pytest-r1.txt`
-- `receipts/live-applies/evidence/2026-04-02-ws-0311-validate-repo-r6.txt`
-- `receipts/live-applies/evidence/2026-04-02-ws-0311-ansible-syntax-r1.txt`
-- `receipts/live-applies/evidence/2026-04-02-ws-0311-syntax-check-windmill-r1.txt`
-- `receipts/live-applies/evidence/2026-04-02-ws-0311-preflight-converge-windmill-r1.txt`
-- `receipts/live-applies/evidence/2026-04-02-ws-0311-converge-windmill-r1.txt`
-- `receipts/live-applies/evidence/2026-04-02-ws-0311-gate-status-failure-summary-r1.json`
-- `receipts/live-applies/evidence/2026-04-02-ws-0311-command-palette-search-sync-r4.json`
-- `receipts/live-applies/evidence/2026-04-02-ws-0311-command-palette-search-r4.json`
-- `receipts/live-applies/evidence/2026-04-02-ws-0311-raw-app-sync-r1.txt`
-- `receipts/live-applies/evidence/2026-04-02-ws-0311-live-app-summary-r2.json`
-- `receipts/live-applies/evidence/2026-04-02-ws-0311-push-gate-r1.txt`
+- After `origin/main` advanced again with ADR 0319 publication-only generated surfaces, the rebased tree refreshed the ADR index, canonical truth, status docs, platform manifest, dependency diagram, ops-portal snapshot, changelog portal, and Excalidraw diagrams again on top of that newer mainline.
+- The final latest-main contract checks all passed: `./scripts/validate_repo.sh agent-standards`, `./scripts/validate_repo.sh workstream-surfaces`, `./scripts/validate_repo.sh data-models`, `python3 scripts/live_apply_receipts.py --validate`, `make validate`, `make remote-validate`, and `make pre-push-gate`.
+- The canonical mainline receipt records the final repository automation and validation outcome for this promoted replay.
 
-## Merge Criteria
+## Final Outcome
 
-- the raw app bundle, Windmill seed metadata, and focused command-palette tests pass from this isolated worktree
-- the live palette plus backend search path are verified against the running platform even when unrelated shared verification surfaces require a separate exact-main closeout
-- the branch records exactly which protected integration files still need the final `main` closeout after the live apply is done
-
-## Merge-To-Main Notes
-
-- This branch intentionally does not touch the protected mainline closeout surfaces: `VERSION`, release sections in `changelog.md`, the top-level `README.md` status summary, `versions/stack.yaml`, and any canonical generated truth surfaces still wait for the exact-main integration step.
-- The exact-main integration branch should start from the latest `origin/main`, replay the repo-managed Windmill converge once the shared `f/lv3/gate-status` lane is stable, record the canonical mainline receipt, and only then update the protected release and integrated-truth files.
-- A direct push of this workstream branch is currently blocked by the remote pre-push gate because it also wants exact-main-only generated surfaces refreshed: `docs/diagrams/agent-coordination-map.excalidraw`, `build/platform-manifest.json`, and canonical truth outputs that touch `changelog.md` plus `versions/stack.yaml`. Those surfaces were intentionally left unchanged here to respect the branch-local constraints.
+- ADR 0311 is now implemented in repository version `0.177.142` and live on platform version `0.130.90`.
+- The private Windmill `f/lv3/operator_access_admin` surface now ships the `Ctrl/Cmd+K` and `/` palette flow, browser-local favorites plus recents, safe quick actions, operator and page jumps, glossary deep links, and docs-backed ADR plus runbook search without bypassing the governed ADR 0108 mutation flows.
+- The promoted mainline replay preserved the already-live ADR 0316 journey analytics capabilities on the same operator-admin surface instead of overwriting them.

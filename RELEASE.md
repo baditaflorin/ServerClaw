@@ -3,10 +3,10 @@
 - Date: 2026-04-02
 
 ## Summary
-- introduces the first dedicated runtime-ai pool on production with Nomad, Traefik, and Dapr, moving Apache Tika, Gotenberg, and Tesseract OCR off docker-runtime-lv3 while preserving the authenticated `/v1/gotenberg` route
+- adds a repo-managed cmdk command palette to the Windmill operator access admin surface, backed by ADR 0121 search-fabric results and browser-local favorites/recents without bypassing governed mutations
 
 ## Platform Impact
-- platform version remains `0.130.89`; the exact-main 2026-04-02 replay already re-verified the dedicated `runtime-ai-lv3` pool substrate, Apache Tika, Gotenberg, Tesseract OCR, Nomad client health, and the authenticated shared `https://api.lv3.org/v1/gotenberg/health` gateway path on production before this final merge-to-main release cut
+- platform version advances to 0.130.90 after the exact-main ADR 0311 replay re-verifies the repo-managed cmdk command palette, ADR and runbook search helper, and governed Windmill operator-admin open flows on top of the 0.130.89 baseline while preserving the ADR 0316 journey analytics surfaces already live on main
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -1415,8 +1415,7 @@ workstreams:
       included_in_repo_version: 0.177.128
       latest_receipts:
         lago: 2026-04-01-adr-0292-lago-mainline-live-apply
-    blockers:
-      - remote push gate still fails until the exact-main integration step refreshes docs/diagrams/agent-coordination-map.excalidraw, build/platform-manifest.json, and canonical truth outputs touching changelog.md plus versions/stack.yaml
+    blockers: []
     ready_to_merge: false
     live_applied: true
   - id: ws-0295-live-apply
@@ -16325,7 +16324,7 @@ workstreams:
   - id: ws-0311-live-apply
     adr: "0311"
     title: Live apply a repo-managed cmdk command palette and universal open dialog on the Windmill operator access admin surface
-    status: live_applied
+    status: merged
     owner: codex
     branch: codex/ws-0311-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0311-live-apply
@@ -16342,6 +16341,15 @@ workstreams:
       - docs/workstreams/ws-0311-live-apply.md
       - docs/adr/0311-global-command-palette-and-universal-open-dialog-via-cmdk.md
       - docs/adr/.index.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
       - docs/runbooks/configure-windmill.md
       - docs/runbooks/windmill-operator-access-admin.md
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
@@ -16350,6 +16358,10 @@ workstreams:
       - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
       - tests/test_command_palette_search.py
       - tests/test_windmill_operator_admin_app.py
+      - receipts/ops-portal-snapshot.html
+      - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+      - receipts/live-applies/2026-04-02-adr-0311-global-command-palette-live-apply.json
+      - receipts/live-applies/2026-04-02-adr-0311-global-command-palette-mainline-live-apply.json
       - receipts/live-applies/*
       - receipts/live-applies/evidence/*ws-0311-*
     ownership_manifest:
@@ -16370,6 +16382,27 @@ workstreams:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: adr-index-generator-v1
+        - id: ws0311_release_surfaces
+          paths:
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: ws0311_platform_truth_generation
+          paths:
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: canonical-truth-v1
+        - id: ws0311_generated_truth
+          paths:
+            - README.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
         - id: ws0311_configure_windmill_runbook
           paths:
             - docs/runbooks/configure-windmill.md
@@ -16391,15 +16424,19 @@ workstreams:
             - config/windmill/apps/wmill-lock.yaml
             - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
             - tests/test_command_palette_search.py
+            - receipts/ops-portal-snapshot.html
+            - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+            - receipts/live-applies/2026-04-02-adr-0311-global-command-palette-live-apply.json
+            - receipts/live-applies/2026-04-02-adr-0311-global-command-palette-mainline-live-apply.json
             - receipts/live-applies/*
             - receipts/live-applies/evidence/*ws-0311-*
           mode: exclusive
     canonical_truth:
       changelog_entry: adds a repo-managed cmdk command palette to the Windmill operator access admin surface, backed by ADR 0121 search-fabric results and browser-local favorites/recents without bypassing governed mutations
       release_bump: patch
-      included_in_repo_version: 0.177.141
+      included_in_repo_version: 0.177.142
       latest_receipts:
-        command_palette: 2026-04-02-adr-0311-global-command-palette-live-apply
+        command_palette: 2026-04-02-adr-0311-global-command-palette-mainline-live-apply
     blockers: []
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: true
