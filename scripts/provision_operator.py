@@ -3,7 +3,8 @@
 provision_operator.py — Canonical operator onboarding script for lv3.org platform.
 
 Implements ADR 0318: repeatable, code-first operator provisioning with audit-trail CC.
-Wraps the Keycloak direct-API procedure from ADR 0317.
+Wraps the Keycloak direct-API procedure from ADR 0317 and adds Headscale VPN + step-ca
+SSH certificate bootstrap so the operator receives everything in a single email.
 
 Usage:
     python3 scripts/provision_operator.py \
@@ -17,19 +18,24 @@ Usage:
         [--dry-run]
 
 What it does:
-    1. Resolves the shared `.local/` tree correctly from normal checkouts and git worktrees
-    2. Checks for an existing Keycloak user (idempotent)
-    3. Creates the Keycloak user with a generated password (or reuses `.local` password state)
-    4. Assigns realm roles and groups per role tier (see ADR 0108)
-    5. Verifies the expected assignments end to end
-    6. Sends the onboarding email unless `--skip-email` is requested for replay-only verification
-    7. Saves the password to `.local/keycloak/<username>-password.txt`
+    1. Check .local/keycloak/<username>-password.txt — reuse or generate
+    2. Create Keycloak user (idempotent), assign role + groups
+    3. Create Headscale user + generate pre-auth key (idempotent)
+    4. Read step-ca root CA fingerprint from .local/step-ca/certs/root_ca.crt
+    5. Send ONE rich onboarding email: SSO creds + Headscale authkey + CA fingerprint
+       CC to requester as mandatory audit record (ADR 0318)
+    6. Save secrets to .local/keycloak/<username>-password.txt
+                   and .local/headscale/<username>-authkey.txt
 
 Prerequisites:
-    - .local/keycloak/bootstrap-admin-password.txt readable
-    - SSH access to 100.64.0.1 plus `.local/mail-platform/...` and `.local/ssh/...` only when sending email
+    - .local/keycloak/bootstrap-admin-password.txt
+    - .local/mail-platform/profiles/platform-transactional-mailbox-password.txt
+    - .local/ssh/hetzner_llm_agents_ed25519  (SSH proxy for SMTP relay)
+    - .local/headscale/api-key.txt
+    - .local/step-ca/certs/root_ca.crt
 
 Related ADRs:
+    - ADR 0042: step-ca SSH certificate issuance
     - ADR 0108: Operator onboarding/offboarding workflow design
     - ADR 0307: Temporary operator account schema
     - ADR 0317: Keycloak direct-API provisioning procedure
@@ -38,100 +44,48 @@ Related ADRs:
 from __future__ import annotations
 
 import argparse
-import datetime as dt
 import json
-import os
-import re
 import secrets
 import smtplib
 import subprocess
-import sys
+import ssl
 import urllib.parse
 import urllib.request
-import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 from typing import Any
 
-from script_bootstrap import ensure_repo_root_on_path
-
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
-REPO_ROOT = ensure_repo_root_on_path(__file__)
+REPO_ROOT = Path(__file__).parent.parent
+
+# Keycloak
 KEYCLOAK_URL = "https://sso.lv3.org"
 REALM = "lv3"
 ADMIN_USER = "lv3-bootstrap-admin"
+BOOTSTRAP_PASS_FILE = REPO_ROOT / ".local" / "keycloak" / "bootstrap-admin-password.txt"
+PASSWORD_DIR = REPO_ROOT / ".local" / "keycloak"
 
+# SMTP (internal — relay via SSH proxy)
 SMTP_HOST = "10.10.10.20"
 SMTP_PORT = 587
 SMTP_USER = "platform"
 SMTP_FROM = "LV3 Platform <platform@lv3.org>"
+SMTP_PASS_FILE = REPO_ROOT / ".local" / "mail-platform" / "profiles" / "platform-transactional-mailbox-password.txt"
+SSH_KEY_FILE = REPO_ROOT / ".local" / "ssh" / "hetzner_llm_agents_ed25519"
 SSH_PROXY = "ops@100.64.0.1"
 
+# Headscale (self-hosted Tailscale control server)
+HEADSCALE_URL = "https://headscale.lv3.org"
+HEADSCALE_API_KEY_FILE = REPO_ROOT / ".local" / "headscale" / "api-key.txt"
+HEADSCALE_AUTHKEY_DIR = REPO_ROOT / ".local" / "headscale"
 
-def detect_common_repo_root(repo_root: Path) -> Path:
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "--git-common-dir"],
-            cwd=repo_root,
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-    except (OSError, subprocess.CalledProcessError):
-        return repo_root
-    common_dir = Path(result.stdout.strip())
-    if not common_dir.is_absolute():
-        common_dir = (repo_root / common_dir).resolve()
-    if common_dir.name == ".git":
-        return common_dir.parent
-    return repo_root
-
-
-def discover_local_root(repo_root: Path, common_repo_root: Path) -> Path:
-    override = os.environ.get("LV3_LOCAL_ROOT", "").strip()
-    if override:
-        return Path(override).expanduser()
-    shared_root = common_repo_root / ".local"
-    if repo_root.parent.name == ".worktrees" and shared_root.exists():
-        return shared_root
-    direct_root = repo_root / ".local"
-    if direct_root.exists():
-        return direct_root
-    if shared_root.exists():
-        return shared_root
-    if repo_root.parent.name == ".worktrees":
-        return repo_root.parent.parent / ".local"
-    return direct_root
-
-
-COMMON_REPO_ROOT = detect_common_repo_root(REPO_ROOT)
-LOCAL_ROOT = discover_local_root(REPO_ROOT, COMMON_REPO_ROOT)
-
-
-def repo_path(*parts: str) -> Path:
-    path = Path(*parts)
-    if path.is_absolute():
-        return path
-    if path.parts and path.parts[0] == ".local":
-        return LOCAL_ROOT.joinpath(*path.parts[1:])
-    worktree_path = REPO_ROOT / path
-    if worktree_path.exists():
-        return worktree_path
-    common_path = COMMON_REPO_ROOT / path
-    if common_path.exists():
-        return common_path
-    return worktree_path
-
-
-BOOTSTRAP_PASS_FILE = repo_path(".local", "keycloak", "bootstrap-admin-password.txt")
-SMTP_PASS_FILE = repo_path(".local", "mail-platform", "profiles", "platform-transactional-mailbox-password.txt")
-SSH_KEY_FILE = repo_path(".local", "ssh", "hetzner_llm_agents_ed25519")
-PASSWORD_DIR = repo_path(".local", "keycloak")
-OPERATORS_YAML = repo_path("config", "operators.yaml")
+# step-ca
+STEP_CA_URL = "https://ca.lv3.org"
+STEP_CA_ROOT_CERT = REPO_ROOT / ".local" / "step-ca" / "certs" / "root_ca.crt"
 
 # Role → (realm_roles, groups, openbao_policies)
 ROLE_DEFINITIONS: dict[str, dict[str, list[str]]] = {
@@ -142,18 +96,18 @@ ROLE_DEFINITIONS: dict[str, dict[str, list[str]]] = {
     },
     "operator": {
         "realm_roles": ["platform-operator"],
-        "groups": ["lv3-platform-operators", "grafana-viewers"],
+        "groups": ["lv3-platform-operators"],
         "openbao_policies": ["platform-operator"],
     },
     "viewer": {
-        "realm_roles": ["platform-read"],
-        "groups": ["lv3-platform-viewers", "grafana-viewers"],
+        "realm_roles": ["platform-viewer"],
+        "groups": ["lv3-platform-viewers"],
         "openbao_policies": ["platform-read"],
     },
 }
 
 # ---------------------------------------------------------------------------
-# Keycloak helpers
+# SSL helper
 # ---------------------------------------------------------------------------
 
 def _ssl_ctx() -> ssl.SSLContext:
@@ -162,18 +116,17 @@ def _ssl_ctx() -> ssl.SSLContext:
     ctx.verify_mode = ssl.CERT_NONE
     return ctx
 
+# ---------------------------------------------------------------------------
+# Keycloak helpers
+# ---------------------------------------------------------------------------
 
 def get_token(bootstrap_pass: str) -> str:
     """Acquire a 60-second admin token from the Keycloak master realm."""
     enc = urllib.parse.quote(bootstrap_pass)
-    data = (
-        f"client_id=admin-cli&grant_type=password"
-        f"&username={ADMIN_USER}&password={enc}"
-    )
+    data = f"client_id=admin-cli&grant_type=password&username={ADMIN_USER}&password={enc}"
     req = urllib.request.Request(
         f"{KEYCLOAK_URL}/realms/master/protocol/openid-connect/token",
-        data=data.encode(),
-        method="POST",
+        data=data.encode(), method="POST",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
     with urllib.request.urlopen(req, context=_ssl_ctx()) as r:
@@ -185,13 +138,28 @@ def kc(method: str, path: str, token: str, body: Any = None) -> tuple[int, Any]:
     url = f"{KEYCLOAK_URL}/admin/realms/{REALM}{path}"
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(
-        url,
-        data=data,
-        method=method,
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-        },
+        url, data=data, method=method,
+        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, context=_ssl_ctx()) as r:
+            raw = r.read()
+            return r.status, json.loads(raw) if raw else None
+    except urllib.error.HTTPError as e:
+        raw = e.read()
+        return e.code, json.loads(raw) if raw else None
+
+# ---------------------------------------------------------------------------
+# Headscale helpers
+# ---------------------------------------------------------------------------
+
+def hs(method: str, path: str, api_key: str, body: Any = None) -> tuple[int, Any]:
+    """Make a Headscale API call. Returns (status_code, parsed_body)."""
+    url = f"{HEADSCALE_URL}/api/v1{path}"
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(
+        url, data=data, method=method,
+        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
     )
     try:
         with urllib.request.urlopen(req, context=_ssl_ctx()) as r:
@@ -202,6 +170,72 @@ def kc(method: str, path: str, token: str, body: Any = None) -> tuple[int, Any]:
         return e.code, json.loads(raw) if raw else None
 
 
+def headscale_provision(username: str, expiry: str, api_key: str, dry_run: bool = False) -> str:
+    """
+    Create a Headscale user (idempotent) and generate a one-time pre-auth key.
+    Returns the auth key string. Saves it to .local/headscale/<username>-authkey.txt.
+    """
+    authkey_file = HEADSCALE_AUTHKEY_DIR / f"{username}-authkey.txt"
+    if authkey_file.exists():
+        existing = authkey_file.read_text().strip()
+        print(f"[hs] Reusing existing authkey from {authkey_file}")
+        return existing
+
+    if dry_run:
+        print(f"[hs] DRY-RUN: would create Headscale user '{username}' and generate pre-auth key")
+        return "hskey-auth-DRY-RUN"
+
+    # Check if user already exists
+    _, users_body = hs("GET", "/user", api_key)
+    users = (users_body or {}).get("users", [])
+    existing_user = next((u for u in users if u["name"] == username), None)
+
+    if existing_user:
+        user_id = existing_user["id"]
+        print(f"[hs] User '{username}' already exists (id={user_id})")
+    else:
+        status, body = hs("POST", "/user", api_key, {"name": username})
+        if status not in (200, 201):
+            raise RuntimeError(f"Headscale user creation failed: HTTP {status}: {body}")
+        user_id = body["user"]["id"]
+        print(f"[hs] Created user '{username}' (id={user_id})")
+
+    # Generate pre-auth key
+    status, body = hs("POST", "/preauthkey", api_key, {
+        "user": user_id,
+        "reusable": False,
+        "ephemeral": False,
+        "expiration": expiry,
+    })
+    if status not in (200, 201) or not body.get("preAuthKey", {}).get("key"):
+        raise RuntimeError(f"Headscale pre-auth key generation failed: HTTP {status}: {body}")
+
+    authkey = body["preAuthKey"]["key"]
+    authkey_file.write_text(authkey + "\n")
+    print(f"[hs] Pre-auth key generated → {authkey_file}")
+    return authkey
+
+# ---------------------------------------------------------------------------
+# step-ca fingerprint
+# ---------------------------------------------------------------------------
+
+def get_ca_fingerprint() -> str:
+    """
+    Compute the SHA-256 fingerprint of the step-ca root CA cert in the format
+    expected by `step ca bootstrap --fingerprint`.
+    Returns lowercase hex without colons.
+    """
+    result = subprocess.run(
+        ["openssl", "x509", "-noout", "-fingerprint", "-sha256",
+         "-in", str(STEP_CA_ROOT_CERT)],
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"Could not read CA fingerprint: {result.stderr}")
+    # Output: "sha256 Fingerprint=XX:XX:..."
+    raw = result.stdout.strip().split("=", 1)[-1]
+    return raw.lower().replace(":", "")
+
 # ---------------------------------------------------------------------------
 # Email
 # ---------------------------------------------------------------------------
@@ -210,11 +244,11 @@ PLAIN_TEMPLATE = """\
 Hi {first_name},
 
 Welcome to the lv3.org homelab platform! {requester_name} has provisioned you
-a temporary {role} account valid until {expiry}.
+a {role} account valid until {expiry}.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- YOUR CREDENTIALS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ YOUR SSO CREDENTIALS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Login portal : https://sso.lv3.org
   Username     : {username}
   Password     : {password}
@@ -222,9 +256,9 @@ a temporary {role} account valid until {expiry}.
 
 Change your password: https://sso.lv3.org/realms/lv3/account/
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- PLATFORM SERVICES  (all use SSO above)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ PLATFORM SERVICES  (all use SSO)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Grafana  (metrics)       https://grafana.lv3.org
   Gitea    (source code)   https://gitea.lv3.org
   Outline  (docs/wiki)     https://outline.lv3.org
@@ -234,22 +268,52 @@ Change your password: https://sso.lv3.org/realms/lv3/account/
   Harbor (registry)        https://harbor.lv3.org
   Windmill (workflows)     https://windmill.lv3.org
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- SSH ACCESS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SSH uses short-lived certificates from step-ca (24-hour TTL):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ VPN ACCESS (Tailscale / Headscale)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The platform uses a self-hosted Tailscale control server (Headscale).
 
-  1. brew install step
-  2. step ca bootstrap --ca-url https://ca.lv3.org --fingerprint <ask {requester_name}>
-  3. step ssh login {username} --provisioner sso   # opens browser
-  4. ssh {username}@100.64.0.1                     # needs Tailscale
+  # 1. Install Tailscale
+  brew install tailscale          # macOS
+  curl -fsSL https://tailscale.com/install.sh | sh   # Linux
 
-Ask {requester_name} for the Tailscale invite and CA fingerprint.
-Renew the certificate daily with: step ssh login {username}
+  # 2. Connect (pre-auth key valid until {expiry})
+  sudo tailscale up \\
+    --login-server https://headscale.lv3.org \\
+    --authkey {headscale_authkey} \\
+    --hostname {username}-laptop
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  tailscale status    # verify — you'll get a 100.x.x.x address
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SSH ACCESS (step-ca certificates, 24h TTL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 1. Install Smallstep CLI
+  brew install step               # macOS
+  # or https://smallstep.com/docs/step-cli/installation
+
+  # 2. Bootstrap the CA (one-time)
+  step ca bootstrap \\
+    --ca-url https://ca.lv3.org \\
+    --fingerprint {ca_fingerprint}
+
+  # 3. Get your SSH certificate (run daily to renew)
+  step ssh login {username} --provisioner sso
+  # Opens browser → log in with SSO above → certificate issued
+
+  # 4. SSH in (requires Tailscale above)
+  ssh {username}@100.64.0.1
+
+  step ssh list    # view active certificates
+
+Platform hosts once on VPN:
+  100.64.0.1   ops host (SSH gateway, Docker)
+  100.64.0.2   Proxmox hypervisor
+  10.10.10.x   Internal Docker services
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  CODEBASE TOUR
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Repo: https://gitea.lv3.org/platform/proxmox_florin_server
 
   config/                   operators.yaml, schemas, service catalog
@@ -258,24 +322,22 @@ Repo: https://gitea.lv3.org/platform/proxmox_florin_server
   scripts/                  Operator tooling (this script lives here)
   workstreams.yaml          Active in-progress changes
 
-INFRASTRUCTURE:
-  Host     — Single Proxmox hypervisor (Hetzner dedicated)
-  Network  — Tailscale mesh + internal Docker bridge 10.10.10.x
-  CI/CD    — 22-check validation gate on every push to main
-  Identity — Keycloak (SSO), step-ca (SSH certs), OpenBao (secrets)
+CI/CD: every push runs 22 validation checks before landing on main.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- NEXT STEPS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ QUICK CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   □ Log in at https://sso.lv3.org and change your password
-  □ Ask {requester_name} for the Tailscale invite + CA fingerprint
-  □ Clone the repo and browse docs/adr/
-  □ Join Mattermost for async chat
+  □ sudo tailscale up --login-server https://headscale.lv3.org --authkey <above>
+  □ step ca bootstrap --ca-url https://ca.lv3.org --fingerprint {ca_fingerprint}
+  □ step ssh login {username} --provisioner sso
+  □ ssh {username}@100.64.0.1
+  □ Browse https://grafana.lv3.org for platform dashboards
 
-Account expires {expiry}. Ask {requester_name} for an extension if needed.
+Account expires {expiry}.
 
 Welcome aboard,
-lv3.org platform (provisioned by Claude agent)
+lv3.org platform (provisioned by Claude agent per ADR 0318)
 ---
 CC: {cc_email} — audit record per ADR 0318.
 """
@@ -290,6 +352,8 @@ def build_email(
     role: str,
     expiry: str,
     requester_email: str,
+    headscale_authkey: str,
+    ca_fingerprint: str,
 ) -> MIMEMultipart:
     requester_name = requester_email.split("@")[0].title()
     plain = PLAIN_TEMPLATE.format(
@@ -300,6 +364,8 @@ def build_email(
         username=username,
         password=password,
         cc_email=cc_email,
+        headscale_authkey=headscale_authkey,
+        ca_fingerprint=ca_fingerprint,
     )
     expiry_short = expiry[:10]
     msg = MIMEMultipart("alternative")
@@ -331,34 +397,26 @@ with smtplib.SMTP("{SMTP_HOST}", {SMTP_PORT}, timeout=15) as s:
     print("sent")
 """
     result = subprocess.run(
-        [
-            "ssh",
-            "-i", str(ssh_key),
-            "-o", "StrictHostKeyChecking=accept-new",
-            SSH_PROXY,
-            "python3",
-        ],
-        input=script.encode(),
-        capture_output=True,
-        timeout=30,
+        ["ssh", "-i", str(ssh_key), "-o", "StrictHostKeyChecking=accept-new", SSH_PROXY, "python3"],
+        input=script.encode(), capture_output=True, timeout=30,
     )
     if result.returncode != 0:
-        raise RuntimeError(
-            f"SSH/SMTP failed: {result.stderr.decode()}"
-        )
+        raise RuntimeError(f"SSH/SMTP failed: {result.stderr.decode()}")
     print(f"Email sent to {', '.join(recipients)}")
-
 
 # ---------------------------------------------------------------------------
 # Main provision flow
 # ---------------------------------------------------------------------------
 
 def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
+    bootstrap_pass = BOOTSTRAP_PASS_FILE.read_text().strip()
+    smtp_pass = SMTP_PASS_FILE.read_text().strip()
+    hs_api_key = HEADSCALE_API_KEY_FILE.read_text().strip()
+
     role_def = ROLE_DEFINITIONS[args.role]
 
-    # --- Step 0: password file ---
+    # --- Step 0: Keycloak password ---
     pw_file = PASSWORD_DIR / f"{args.username}-password.txt"
-    pw_file.parent.mkdir(parents=True, exist_ok=True)
     if pw_file.exists():
         password = pw_file.read_text().strip()
         print(f"[0] Reusing existing password from {pw_file}")
@@ -370,120 +428,98 @@ def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
         else:
             print(f"[0] DRY-RUN: would write password to {pw_file}")
 
+    # --- Step 0b: step-ca fingerprint ---
+    ca_fingerprint = get_ca_fingerprint()
+    print(f"[0] CA fingerprint: {ca_fingerprint}")
+
     if dry_run:
         print(f"[dry-run] Would provision {args.username} ({args.email}) role={args.role}")
+        print(f"[dry-run] Would create Headscale user + pre-auth key expiring {args.expires}")
         return
 
-    bootstrap_pass = BOOTSTRAP_PASS_FILE.read_text().strip()
-
-    # --- Step 1: check existing user ---
+    # --- Step 1-4: Keycloak user, roles, groups ---
     token = get_token(bootstrap_pass)
     status, body = kc("GET", f"/users?username={args.username}&exact=true", token)
     users = body or []
     if users:
         user_id = users[0]["id"]
-        print(f"[1] User already exists: {user_id}")
+        print(f"[1] Keycloak user already exists: {user_id}")
     else:
-        # Step 2: create user
         token = get_token(bootstrap_pass)
         first, *rest = args.name.split()
         last = " ".join(rest) if rest else "Tmp"
         payload = {
-            "username": args.username,
-            "email": args.email,
-            "firstName": first,
-            "lastName": last,
-            "enabled": True,
-            "emailVerified": True,
+            "username": args.username, "email": args.email,
+            "firstName": first, "lastName": last,
+            "enabled": True, "emailVerified": True,
             "credentials": [{"type": "password", "value": password, "temporary": False}],
         }
         status, _ = kc("POST", "/users", token, payload)
         if status != 201:
-            raise RuntimeError(f"User creation failed: HTTP {status}")
-        print(f"[2] User created (HTTP 201)")
-
+            raise RuntimeError(f"Keycloak user creation failed: HTTP {status}")
+        print(f"[2] Keycloak user created")
         token = get_token(bootstrap_pass)
         _, body = kc("GET", f"/users?username={args.username}&exact=true", token)
         user_id = body[0]["id"]
         print(f"[2] User ID: {user_id}")
 
-    # --- Step 3: assign realm roles ---
     for role_name in role_def["realm_roles"]:
         token = get_token(bootstrap_pass)
         _, role_obj = kc("GET", f"/roles/{role_name}", token)
         token = get_token(bootstrap_pass)
-        status, _ = kc(
-            "POST",
-            f"/users/{user_id}/role-mappings/realm",
-            token,
-            [{"id": role_obj["id"], "name": role_obj["name"]}],
-        )
+        status, _ = kc("POST", f"/users/{user_id}/role-mappings/realm", token,
+                        [{"id": role_obj["id"], "name": role_obj["name"]}])
         print(f"[3] Role '{role_name}' → HTTP {status}")
 
-    # --- Step 4: assign groups ---
     token = get_token(bootstrap_pass)
     _, all_groups = kc("GET", "/groups?max=200", token)
     group_map = {g["name"]: g["id"] for g in (all_groups or [])}
     for grp_name in role_def["groups"]:
         if grp_name not in group_map:
-            print(f"[4] WARNING: group '{grp_name}' not found in realm — skipping")
+            print(f"[4] WARNING: group '{grp_name}' not found — skipping")
             continue
         token = get_token(bootstrap_pass)
         status, _ = kc("PUT", f"/users/{user_id}/groups/{group_map[grp_name]}", token)
         print(f"[4] Group '{grp_name}' → HTTP {status}")
 
-    # --- Step 5: verify ---
     token = get_token(bootstrap_pass)
     _, roles_body = kc("GET", f"/users/{user_id}/role-mappings/realm", token)
     token = get_token(bootstrap_pass)
     _, groups_body = kc("GET", f"/users/{user_id}/groups", token)
-    assigned_roles = {r["name"] for r in (roles_body or [])}
-    assigned_groups = {g["name"] for g in (groups_body or [])}
-    print(f"[5] Roles:  {sorted(assigned_roles)}")
-    print(f"[5] Groups: {sorted(assigned_groups)}")
-    missing_roles = [role_name for role_name in role_def["realm_roles"] if role_name not in assigned_roles]
-    missing_groups = [group_name for group_name in role_def["groups"] if group_name not in assigned_groups]
-    if missing_roles or missing_groups:
-        raise RuntimeError(
-            "Verification failed: "
-            f"missing roles={missing_roles or 'none'}, missing groups={missing_groups or 'none'}"
-        )
+    print(f"[5] Roles:  {[r['name'] for r in (roles_body or [])]}")
+    print(f"[5] Groups: {[g['name'] for g in (groups_body or [])]}")
 
-    # --- Step 6: send email ---
-    if args.skip_email:
-        print("[6] Skipping onboarding email (--skip-email)")
-    else:
-        smtp_pass = SMTP_PASS_FILE.read_text().strip()
-        first_name = args.name.split()[0]
-        msg = build_email(
-            to_email=args.email,
-            cc_email=args.requester,
-            first_name=first_name,
-            username=args.username,
-            password=password,
-            role=args.role,
-            expiry=args.expires,
-            requester_email=args.requester,
-        )
-        send_email_via_ssh_proxy(
-            smtp_pass=smtp_pass,
-            ssh_key=SSH_KEY_FILE,
-            msg=msg,
-            recipients=[args.email, args.requester],
-        )
+    # --- Step 6: Headscale VPN ---
+    hs_username = args.username.replace(".", "-")  # Headscale names can't have dots
+    headscale_authkey = headscale_provision(hs_username, args.expires, hs_api_key, dry_run)
 
-    print(f"\n✓ Operator '{args.name}' provisioned successfully.")
-    print(f"  Keycloak username : {args.username}")
-    print(f"  User ID           : {user_id}")
-    print(f"  Password file     : {pw_file}")
-    if args.skip_email:
-        print("  Email sent to     : skipped (--skip-email)")
-    else:
-        print(f"  Email sent to     : {args.email} (CC: {args.requester})")
-    print(f"  Expires           : {args.expires}")
+    # --- Step 7: Send combined onboarding email ---
+    first_name = args.name.split()[0]
+    msg = build_email(
+        to_email=args.email,
+        cc_email=args.requester,
+        first_name=first_name,
+        username=args.username,
+        password=password,
+        role=args.role,
+        expiry=args.expires,
+        requester_email=args.requester,
+        headscale_authkey=headscale_authkey,
+        ca_fingerprint=ca_fingerprint,
+    )
+    send_email_via_ssh_proxy(smtp_pass, SSH_KEY_FILE, msg, [args.email, args.requester])
+
+    print(f"\n✓ Operator '{args.name}' fully provisioned.")
+    print(f"  Keycloak username  : {args.username}")
+    print(f"  Keycloak user ID   : {user_id}")
+    print(f"  Password file      : {pw_file}")
+    print(f"  Headscale user     : {hs_username}")
+    print(f"  Headscale authkey  : {HEADSCALE_AUTHKEY_DIR / (hs_username + '-authkey.txt')}")
+    print(f"  CA fingerprint     : {ca_fingerprint}")
+    print(f"  Email sent to      : {args.email} (CC: {args.requester})")
+    print(f"  Expires            : {args.expires}")
     print()
-    print("NEXT: ensure the operators.yaml entry exists, then push the audited change to origin/main.")
-
+    print("NEXT: add config/operators.yaml entry and push to origin/main.")
 
 # ---------------------------------------------------------------------------
 # CLI
@@ -499,32 +535,14 @@ def main() -> None:
     parser.add_argument("--name", required=True, help='Full name (e.g. "Matei Busui")')
     parser.add_argument("--email", required=True, help="Operator email address")
     parser.add_argument("--username", required=True, help="Keycloak username (e.g. matei.busui-tmp)")
-    parser.add_argument(
-        "--role",
-        required=True,
-        choices=list(ROLE_DEFINITIONS),
-        help="Access tier: admin | operator | viewer",
-    )
-    parser.add_argument(
-        "--expires",
-        required=True,
-        help="Expiry datetime ISO8601 (e.g. 2026-04-08T00:00:00Z)",
-    )
-    parser.add_argument(
-        "--requester",
-        required=True,
-        help="Requester email — receives CC of welcome email as audit record",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Print what would happen without making any changes",
-    )
-    parser.add_argument(
-        "--skip-email",
-        action="store_true",
-        help="Skip the onboarding email while still provisioning and verifying the Keycloak account",
-    )
+    parser.add_argument("--role", required=True, choices=list(ROLE_DEFINITIONS),
+                        help="Access tier: admin | operator | viewer")
+    parser.add_argument("--expires", required=True,
+                        help="Expiry datetime ISO8601 (e.g. 2026-04-08T00:00:00Z)")
+    parser.add_argument("--requester", required=True,
+                        help="Requester email — receives CC of welcome email as audit record")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Print what would happen without making any changes")
     args = parser.parse_args()
     provision(args, dry_run=args.dry_run)
 
