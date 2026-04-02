@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-02-adr-0317-keycloak-direct-api-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-02",
+  "recorded_on": "2026-04-02",
+  "recorded_at": "2026-04-01T22:40:10Z",
+  "recorded_by": "codex",
+  "source_commit": "cbb0c99f3f69c3ab2bb7658daf443c45df9ea49b",
+  "repo_version_context": "0.177.135",
+  "platform_version_context": "0.130.85",
+  "workflow_id": "adr-0317-keycloak-direct-api-live-apply",
+  "adr": "0317",
+  "summary": "Recovered and re-verified ADR 0317 from the dedicated live-apply worktree by restoring the repo-managed Keycloak runtime, proving fresh master-realm admin-token issuance and existing operator assignment lookups against `sso.lv3.org`, and hardening `scripts/provision_operator.py` so the direct-API fallback reuses the shared `.local/` secrets tree correctly from `.worktrees/` while supporting an email-free replay path for exact-main verification.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Keycloak realm discovery",
+      "address": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Keycloak master token endpoint",
+      "address": "https://sso.lv3.org/realms/master/protocol/openid-connect/token"
+    },
+    {
+      "kind": "identity",
+      "name": "Keycloak operator",
+      "address": "matei.busui-tmp"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Governed Keycloak syntax preflight",
+      "result": "pass",
+      "observed": "`make syntax-check-keycloak` completed successfully before the live replay, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0317-syntax-check-keycloak-r1.txt`."
+    },
+    {
+      "check": "Governed Keycloak recovery replay",
+      "result": "pass",
+      "observed": "`make converge-keycloak` restored the absent Keycloak/OpenBao runtime and its dependent shared publications, finishing with recap `docker-runtime-lv3 : ok=258 changed=10 failed=0`, `monitoring-lv3 : ok=18 changed=2 failed=0`, `nginx-lv3 : ok=46 changed=5 failed=0`, `postgres-lv3 : ok=70 changed=0 failed=0`, and `proxmox_florin : ok=338 changed=0 failed=0`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0317-converge-keycloak-r1.txt`."
+    },
+    {
+      "check": "Direct API verification against the recovered realm",
+      "result": "pass",
+      "observed": "Fresh controller verification confirmed OIDC discovery `200`, master-realm token issuance `200`, the existing `matei.busui-tmp` user record, and the expected `platform-admin` plus `lv3-platform-admins`/`grafana-admins` assignments; the structured proof is in `receipts/live-applies/evidence/2026-04-02-ws-0317-direct-api-verification-r1.json` and the runtime container state in `receipts/live-applies/evidence/2026-04-02-ws-0317-keycloak-runtime-state-r1.txt`."
+    },
+    {
+      "check": "Dedicated-worktree provisioning fallback replay",
+      "result": "pass",
+      "observed": "After correcting the shared `.local/` resolver, `python3 scripts/provision_operator.py --id matei-busui-tmp-001 --name 'Matei Busui' --email busui.matei1994@gmail.com --username matei.busui-tmp --role admin --expires 2026-04-08T00:00:00Z --requester florin@badita.org --skip-email` succeeded from the dedicated worktree, reused the shared password file, and reverified the live role/group assignments without resending credentials; the successful transcript is preserved in `receipts/live-applies/evidence/2026-04-02-ws-0317-worktree-provision-operator-r2.txt`."
+    },
+    {
+      "check": "Focused regression coverage and branch governance gates",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest -q tests/test_provision_operator.py tests/test_session_logout_verify.py tests/test_operator_manager.py` returned `29 passed in 0.25s`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0317-targeted-tests-r1.txt`, and `./scripts/validate_repo.sh agent-standards` passed after the ownership-manifest corrections, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0317-agent-standards-r2.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md",
+    "docs/runbooks/operator-onboarding.md",
+    "docs/workstreams/ws-0317-live-apply.md",
+    "docs/adr/.index.yaml",
+    "scripts/provision_operator.py",
+    "tests/test_provision_operator.py",
+    "workstreams.yaml",
+    "receipts/live-applies/evidence/2026-04-02-ws-0317-syntax-check-keycloak-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0317-converge-keycloak-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0317-direct-api-verification-r1.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0317-keycloak-runtime-state-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0317-worktree-provision-operator-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0317-worktree-provision-operator-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0317-generate-adr-index-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0317-targeted-tests-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0317-agent-standards-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0317-make-validate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0317-make-validate-r2.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0317-make-validate-r3.txt",
+    "receipts/live-applies/2026-04-02-adr-0317-keycloak-direct-api-live-apply.json"
+  ],
+  "notes": [
+    "This receipt captures the branch-local ADR 0317 proof before the exact-main integration replay stamps the protected release and platform-truth surfaces.",
+    "The first dedicated-worktree replay attempt (`receipts/live-applies/evidence/2026-04-02-ws-0317-worktree-provision-operator-r1.txt`) intentionally remains in the evidence set because it exposed the original bug: `scripts/provision_operator.py` wrote under the worktree-local `.local/` shadow tree instead of the shared repo secrets root.",
+    "The first two `make validate` attempts were useful correction-loop evidence rather than wasted runs: `r1` surfaced duplicate exclusive ownership for the ADR 0317 document, `r2` surfaced duplicate exclusive ownership for `scripts/provision_operator.py`, and `r3` reached the final workstream-surface gate where this worktree's unrelated pre-existing churn in `docs/site-generated/architecture/dependency-graph.md` and `receipts/ops-portal-snapshot.html` confirmed the exact-main replay must use a clean integration worktree."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-04-02-ws-0317-worktree-local-root-repair",
+    "surface": "scripts/provision_operator.py",
+    "diagnosis": "contract_drift",
+    "repair_action": "Preferred the shared repo `.local/` tree for dedicated git worktrees, moved `.local` routing ahead of normal worktree path existence checks, aligned the fallback role/group mapping with the live realm, and added `--skip-email` so the exact-main replay can verify the live user without resending credentials.",
+    "verification": "receipts/live-applies/evidence/2026-04-02-ws-0317-worktree-provision-operator-r2.txt"
+  }
+}

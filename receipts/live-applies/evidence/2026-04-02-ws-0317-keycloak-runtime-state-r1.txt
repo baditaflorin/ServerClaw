@@ -1,0 +1,3 @@
+NAME                     IMAGE                                                                                                     COMMAND                  SERVICE         CREATED         STATUS                   PORTS
+keycloak-keycloak-1      quay.io/keycloak/keycloak:26.5.4                                                                          "/opt/keycloak/bin/k…"   keycloak        6 minutes ago   Up 3 minutes             8443/tcp, 10.10.10.20:8091->8080/tcp, 127.0.0.1:18080->8080/tcp, 127.0.0.1:19000->9000/tcp
+keycloak-openbao-agent   docker.io/openbao/openbao:2.5.1@sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b   "docker-entrypoint.s…"   openbao-agent   6 minutes ago   Up 3 minutes (healthy)

@@ -219,8 +219,8 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.136` |
-| Platform version | `0.130.85` |
+| Repository version | `0.177.137` |
+| Platform version | `0.130.86` |
 | Observed check date | `2026-03-31` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -340,6 +340,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `jupyterhub` | `2026-03-30-adr-0291-jupyterhub-mainline-live-apply` |
 | `k6_load_testing` | `2026-03-31-adr-0305-k6-mainline-live-apply` |
 | `keycloak` | `2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply` |
+| `keycloak_direct_api` | `2026-04-02-adr-0317-keycloak-direct-api-mainline-live-apply` |
 | `keycloak_operator_access` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `lago` | `2026-04-01-adr-0292-lago-mainline-live-apply` |
 | `langfuse` | `2026-03-26-adr-0146-langfuse-live-apply` |
@@ -1559,6 +1560,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0305-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0305-main-integration.md)
 - [Workstream ws-0306-live-apply: Live Apply ADR 0306 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md)
 - [Workstream ws-0315-gitea-followups: Gitea Release Bundles And Renovate PR Validation Follow-ups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md)
+- [Workstream ws-0317-live-apply: Live Apply ADR 0317 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0317-live-apply.md)
 - [Workstream ws-0319-live-apply: Apply ADR 0319 And ADR 0320 On Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0319-live-apply.md)
 - [Workstream ws-0324-programmatic-doc-shards: Programmatic Document And Registry Sharding ADR Set](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0324-programmatic-doc-shards.md)
 - [Workstream ws-0325-service-uptime-investigation: Runtime Service Uptime Investigation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0325-service-uptime-investigation.md)
@@ -1580,8 +1582,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.136` |
-| Platform version | `0.130.85` |
+| Repository version | `0.177.137` |
+| Platform version | `0.130.86` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1879,6 +1881,7 @@ This repository is intentionally opinionated:
 | `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `merged` | [ws-0297-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md) |
 | `0297` | Integrate ADR 0297 live-apply evidence and release updates on main | `merged` | [ws-0297-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-main-merge.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md) |
+| `0317` | Live apply ADR 0317 Keycloak direct-API operator provisioning via SSH proxy | `live_applied` | [ws-0317-live-apply.md](docs/workstreams/ws-0317-live-apply.md) |
 | `0319` | Split the overloaded shared runtime into pool-scoped lanes with higher memory headroom and bounded autoscaling | `merged` | [adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md) |
 | `0319` | Investigate recurring service restarts and uptime failures across the runtime pools | `merged` | [ws-0325-service-uptime-investigation.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0325-service-uptime-investigation.md) |
 | `0319` | Refine the runtime-pool ADR bundle with battle-tested API-first OSS recommendations | `merged` | [ws-0329-runtime-library-fit.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0329-runtime-library-fit.md) |

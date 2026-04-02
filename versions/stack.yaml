@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.136
-platform_version: 0.130.85
+repo_version: 0.177.137
+platform_version: 0.130.86
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -158,6 +158,7 @@ live_apply_evidence:
     typesense: 2026-03-31-adr-0277-typesense-mainline-live-apply
     superset: 2026-04-01-adr-0292-superset-mainline-live-apply
     one_api: 2026-04-01-adr-0294-one-api-mainline-live-apply
+    keycloak_direct_api: 2026-04-02-adr-0317-keycloak-direct-api-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -1111,8 +1112,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.136
+    current: 0.177.137
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.85
+    current: 0.130.86
     meaning: intended platform release for the actual server configuration
