@@ -37,6 +37,7 @@ service ?=
 group ?=
 env ?= production
 EXTRA_ARGS ?=
+AUTOMATION_UV_PYTHON ?= uv run --with pyyaml python
 PLATFORM_TRACE_ID ?= $(shell python3 -c 'import uuid; print(uuid.uuid4().hex)')
 PLATFORM_INTENT_ID ?=
 SURFACE ?=
@@ -1307,7 +1308,7 @@ merge-config-changes:
 promote:
 	@test -n "$(SERVICE)" || (echo "set SERVICE=<service-id>"; exit 1)
 	@test -n "$(STAGING_RECEIPT)" || (echo "set STAGING_RECEIPT=receipts/live-applies/staging/<receipt>.json"; exit 1)
-	python3 $(REPO_ROOT)/scripts/promotion_pipeline.py --promote --service "$(SERVICE)" --staging-receipt "$(STAGING_RECEIPT)" --requester-class "$(REQUESTER_CLASS)" --approver-classes "$(APPROVER_CLASSES)" $(if $(BRANCH),--branch "$(BRANCH)",) $(if $(EXTRA_ARGS),--extra-args "$(EXTRA_ARGS)",) $(if $(filter true,$(DRY_RUN)),--dry-run,)
+	$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/promotion_pipeline.py --promote --service "$(SERVICE)" --staging-receipt "$(STAGING_RECEIPT)" --requester-class "$(REQUESTER_CLASS)" --approver-classes "$(APPROVER_CLASSES)" $(if $(BRANCH),--branch "$(BRANCH)",) $(if $(EXTRA_ARGS),--extra-args "$(EXTRA_ARGS)",) $(if $(filter true,$(DRY_RUN)),--dry-run,)
 
 live-apply-group:
 	@test -n "$(group)" || (echo "set group=<group-id>"; exit 1)
@@ -1315,9 +1316,9 @@ live-apply-group:
 	$(MAKE) check-canonical-truth
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/interface_contracts.py --check-live-apply "group:$(group)"
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
-		python3 $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "group:$(group)" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:group:$(group):$$(date -u +%Y%m%dT%H%M%SZ)"; \
+		$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "group:$(group)" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:group:$(group):$$(date -u +%Y%m%dT%H%M%SZ)"; \
 	fi
-	@if [ "$(env)" = "production" ]; then python3 $(REPO_ROOT)/scripts/vulnerability_budget.py --all; fi
+	@if [ "$(env)" = "production" ]; then $(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/vulnerability_budget.py --all; fi
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/groups/$(group).yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-group --live-apply-trigger
@@ -1328,11 +1329,11 @@ live-apply-service:
 	$(MAKE) check-canonical-truth
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/interface_contracts.py --check-live-apply "service:$(service)"
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
-		python3 $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "$(service)" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:service:$(service):$$(date -u +%Y%m%dT%H%M%SZ)"; \
+		$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "$(service)" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:service:$(service):$$(date -u +%Y%m%dT%H%M%SZ)"; \
 	fi
 	@if uv run --with pyyaml python $(REPO_ROOT)/scripts/service_id_resolver.py --exists-in-catalog "$(service)" >/dev/null; then \
 		set -e; \
-		if [ "$(env)" = "production" ]; then python3 $(REPO_ROOT)/scripts/vulnerability_budget.py --service "$(service)"; fi; \
+		if [ "$(env)" = "production" ]; then $(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/vulnerability_budget.py --service "$(service)"; fi; \
 		uv run --with pyyaml python $(REPO_ROOT)/scripts/standby_capacity.py --service "$(service)"; \
 		uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply --service "$(service)"; \
 		uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/immutable_guest_replacement.py --check-live-apply --service "$(service)" $(if $(filter true,$(ALLOW_IN_PLACE_MUTATION)),--allow-in-place-mutation,); \
@@ -1347,9 +1348,9 @@ live-apply-site:
 	$(MAKE) check-canonical-truth
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/interface_contracts.py --check-live-apply "site:site"
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
-		python3 $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "site" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:site:$$(date -u +%Y%m%dT%H%M%SZ)"; \
+		$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "site" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:site:$$(date -u +%Y%m%dT%H%M%SZ)"; \
 	fi
-	@if [ "$(env)" = "production" ]; then python3 $(REPO_ROOT)/scripts/vulnerability_budget.py --all; fi
+	@if [ "$(env)" = "production" ]; then $(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/vulnerability_budget.py --all; fi
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/site.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-site --live-apply-trigger
@@ -1361,24 +1362,24 @@ live-apply-waves:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env "$(or $(env),production)" --mode backup --triggered-by live-apply-waves --live-apply-trigger
 
 live-apply-train-status:
-	python3 $(REPO_ROOT)/scripts/live_apply_merge_train.py --repo-root $(REPO_ROOT) status
+	$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/live_apply_merge_train.py --repo-root $(REPO_ROOT) status
 
 live-apply-train-queue:
 	@test -n "$(WORKSTREAMS)" || (echo 'set WORKSTREAMS="id-a id-b"'; exit 1)
-	python3 $(REPO_ROOT)/scripts/live_apply_merge_train.py --repo-root $(REPO_ROOT) queue $(foreach ws,$(WORKSTREAMS),--workstream "$(ws)") --requested-by "$${USER:-unknown}"
+	$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/live_apply_merge_train.py --repo-root $(REPO_ROOT) queue $(foreach ws,$(WORKSTREAMS),--workstream "$(ws)") --requested-by "$${USER:-unknown}"
 
 live-apply-train-plan:
-	python3 $(REPO_ROOT)/scripts/live_apply_merge_train.py --repo-root $(REPO_ROOT) plan $(foreach ws,$(WORKSTREAMS),--workstream "$(ws)")
+	$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/live_apply_merge_train.py --repo-root $(REPO_ROOT) plan $(foreach ws,$(WORKSTREAMS),--workstream "$(ws)")
 
 live-apply-train-bundle:
-	python3 $(REPO_ROOT)/scripts/live_apply_merge_train.py --repo-root $(REPO_ROOT) bundle $(foreach ws,$(WORKSTREAMS),--workstream "$(ws)")
+	$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/live_apply_merge_train.py --repo-root $(REPO_ROOT) bundle $(foreach ws,$(WORKSTREAMS),--workstream "$(ws)")
 
 live-apply-train-run:
-	python3 $(REPO_ROOT)/scripts/live_apply_merge_train.py --repo-root $(REPO_ROOT) run $(foreach ws,$(WORKSTREAMS),--workstream "$(ws)") --requested-by "$${USER:-unknown}" $(if $(filter true,$(NO_AUTO_ROLLBACK)),--no-auto-rollback,)
+	$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/live_apply_merge_train.py --repo-root $(REPO_ROOT) run $(foreach ws,$(WORKSTREAMS),--workstream "$(ws)") --requested-by "$${USER:-unknown}" $(if $(filter true,$(NO_AUTO_ROLLBACK)),--no-auto-rollback,)
 
 live-apply-train-rollback:
 	@test -n "$(BUNDLE)" || (echo "set BUNDLE=receipts/rollback-bundles/<bundle>.json"; exit 1)
-	python3 $(REPO_ROOT)/scripts/live_apply_merge_train.py --repo-root $(REPO_ROOT) rollback --bundle "$(BUNDLE)"
+	$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/live_apply_merge_train.py --repo-root $(REPO_ROOT) rollback --bundle "$(BUNDLE)"
 
 ## Remote build execution (ADR 0082)
 .PHONY: remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server remote-tofu-plan remote-tofu-apply tofu-drift tofu-import

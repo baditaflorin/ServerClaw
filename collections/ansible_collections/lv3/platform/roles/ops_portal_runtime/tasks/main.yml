@@ -109,8 +109,213 @@
     group: root
     mode: "0644"
 
-- name: Sync the repo-managed ops portal service tree
-  ansible.builtin.import_tasks: sync_service_tree.yml
+- name: Remove stale ops portal service sources before sync
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ ops_portal_service_dir }}/ops_portal"
+    - "{{ ops_portal_service_dir }}/search_fabric"
+    - "{{ ops_portal_service_dir }}/publication_contract.py"
+    - "{{ ops_portal_service_dir }}/stage_smoke.py"
+    - "{{ ops_portal_service_dir }}/requirements.txt"
+
+- name: Ensure the ops portal application root exists
+  ansible.builtin.file:
+    path: "{{ ops_portal_service_dir }}/ops_portal"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Discover the ops portal application directories on the controller
+  ansible.builtin.find:
+    paths: "{{ ops_portal_repo_root }}/scripts/ops_portal"
+    recurse: true
+    file_type: directory
+    excludes: "__pycache__"
+  register: ops_portal_source_directories
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the synced ops portal application directories exist
+  ansible.builtin.file:
+    path: "{{ ops_portal_service_dir }}/ops_portal/{{ item.path | replace(ops_portal_repo_root ~ '/scripts/ops_portal/', '') }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ ops_portal_source_directories.files | sort(attribute='path') }}"
+  loop_control:
+    label: "{{ item.path | replace(ops_portal_repo_root ~ '/scripts/ops_portal/', '') }}"
+  when: item.path != ops_portal_repo_root ~ '/scripts/ops_portal'
+
+- name: Discover the ops portal application files on the controller
+  ansible.builtin.find:
+    paths: "{{ ops_portal_repo_root }}/scripts/ops_portal"
+    recurse: true
+    file_type: file
+    excludes:
+      - "__pycache__"
+      - "*.pyc"
+      - "._*"
+      - ".DS_Store"
+  register: ops_portal_source_files
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the synced ops portal application file parent directories exist
+  ansible.builtin.file:
+    path: >-
+      {{
+        (
+          ops_portal_service_dir ~ '/ops_portal/' ~
+          (item.path | replace(ops_portal_repo_root ~ '/scripts/ops_portal/', ''))
+        ) | dirname
+      }}
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ ops_portal_source_files.files | sort(attribute='path') }}"
+
+- name: Sync the ops portal application files
+  ansible.builtin.copy:
+    src: "{{ item.path }}"
+    dest: "{{ ops_portal_service_dir }}/ops_portal/{{ item.path | replace(ops_portal_repo_root ~ '/scripts/ops_portal/', '') }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ ops_portal_source_files.files | sort(attribute='path') }}"
+  loop_control:
+    label: "{{ item.path | replace(ops_portal_repo_root ~ '/scripts/ops_portal/', '') }}"
+
+- name: Ensure the ops portal overlay directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ ops_portal_runtime_overlay_directories }}"
+
+- name: Ensure the critical ops portal runtime file parent directories exist
+  ansible.builtin.file:
+    path: "{{ item.dest | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ ops_portal_runtime_file_sources }}"
+  loop_control:
+    label: "{{ item.dest | replace(ops_portal_service_dir ~ '/', '') }}"
+
+- name: Sync critical ops portal runtime files explicitly
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ ops_portal_runtime_file_sources }}"
+  loop_control:
+    label: "{{ item.dest | replace(ops_portal_service_dir ~ '/', '') }}"
+
+- name: Reset the synced search fabric package tree before refresh
+  ansible.builtin.file:
+    path: "{{ ops_portal_service_dir }}/search_fabric"
+    state: absent
+
+- name: Ensure the synced search fabric root exists
+  ansible.builtin.file:
+    path: "{{ ops_portal_service_dir }}/search_fabric"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Discover the search fabric directories on the controller
+  ansible.builtin.find:
+    paths: "{{ ops_portal_repo_root }}/scripts/search_fabric"
+    recurse: true
+    file_type: directory
+    excludes: "__pycache__"
+  register: search_fabric_source_directories
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the synced search fabric directories exist
+  ansible.builtin.file:
+    path: "{{ ops_portal_service_dir }}/search_fabric/{{ item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', '') }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ search_fabric_source_directories.files | sort(attribute='path') }}"
+  loop_control:
+    label: "{{ item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', '') }}"
+  when: item.path != ops_portal_repo_root ~ '/scripts/search_fabric'
+
+- name: Discover the search fabric files on the controller
+  ansible.builtin.find:
+    paths: "{{ ops_portal_repo_root }}/scripts/search_fabric"
+    recurse: true
+    file_type: file
+    excludes:
+      - "__pycache__"
+      - "*.pyc"
+      - "._*"
+      - ".DS_Store"
+  register: search_fabric_source_files
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the synced search fabric file parent directories exist
+  ansible.builtin.file:
+    path: >-
+      {{
+        (
+          ops_portal_service_dir ~ '/search_fabric/' ~
+          (item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', ''))
+        ) | dirname
+      }}
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ search_fabric_source_files.files | sort(attribute='path') }}"
+
+
+- name: Sync the shared search fabric files
+  ansible.builtin.copy:
+    src: "{{ item.path }}"
+    dest: >-
+      {{
+        ops_portal_service_dir ~ '/search_fabric/' ~
+        (item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', ''))
+      }}
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ search_fabric_source_files.files | sort(attribute='path') }}"
+  loop_control:
+    label: "{{ item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', '') }}"
+
+- name: Discover macOS metadata sidecars in synced ops portal sources
+  ansible.builtin.find:
+    paths: "{{ ops_portal_service_dir }}"
+    patterns: "._*"
+    recurse: true
+  register: ops_portal_metadata_sidecars
+
+- name: Remove macOS metadata sidecars from synced ops portal sources
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ ops_portal_metadata_sidecars.files }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: ops_portal_metadata_sidecars.matched | int > 0
 
 - name: Sync the ops portal file-backed data sources
   ansible.builtin.copy:
@@ -133,82 +338,37 @@
   loop: "{{ ops_portal_directory_sources }}"
 
 - name: Sync the ops portal directory-backed data source files
-  vars:
-    ops_portal_directory_source_patterns: "{{ item.patterns | default(['*.json']) }}"
-    ops_portal_directory_source_excludes: "{{ item.excludes | default([]) }}"
-  ansible.builtin.command:
-    argv: >-
+  ansible.posix.synchronize:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    archive: false
+    recursive: true
+    delete: false
+    perms: false
+    times: false
+    use_ssh_args: true
+    rsync_path: "sudo rsync"
+    rsync_opts: >-
       {{
-        [
-          'rsync',
-          '--archive',
-          '--compress',
-          '--prune-empty-dirs',
-          '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          '--out-format=<<CHANGED>>%i %n%L',
-          '--rsh=ssh -i '
-          ~ (
-            ansible_private_key_file
-            | default(
-              (
-                playbook_execution_secret_manifest.secrets.bootstrap_ssh_private_key.path
-                if (
-                  playbook_execution_secret_manifest is defined
-                  and playbook_execution_secret_manifest.secrets is defined
-                  and playbook_execution_secret_manifest.secrets.bootstrap_ssh_private_key is defined
-                )
-                else ''
-              ),
-              true
-            )
-          )
-          ~ ' -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null '
-          ~ (
-            (
-              ansible_ssh_common_args
-              | default('', true)
-            )
-            or
-            (
-              proxmox_guest_ssh_common_args[proxmox_guest_ssh_connection_mode]
-              | default('', true)
-            )
-          ),
-          '--rsync-path=sudo rsync',
-          '--include=*/',
-        ]
+        ['--prune-empty-dirs', '--include=*/']
         + (
-          ops_portal_directory_source_excludes
+          item.excludes | default([])
           | map('regex_replace', '^', '--exclude=/')
           | map('regex_replace', '$', '/***')
           | list
         )
         + (
-          ops_portal_directory_source_patterns
+          item.patterns | default(['*.json'])
           | map('regex_replace', '^', '--include=')
           | list
         )
-        + [
-          '--exclude=._*',
-          '--exclude=.DS_Store',
-          '--exclude=*',
-          item.src,
-          (
-            hostvars[inventory_hostname].ansible_user
-            ~ '@'
-            ~ hostvars[inventory_hostname].ansible_host
-            ~ ':'
-            ~ item.dest
-          ),
-        ]
+        + ['--exclude=._*', '--exclude=.DS_Store', '--exclude=*']
       }}
   loop: "{{ ops_portal_directory_sources }}"
   loop_control:
     label: "{{ item.dest | replace(ops_portal_data_dir ~ '/', '') }}"
   delegate_to: localhost
   become: false
-  register: ops_portal_directory_source_sync
-  changed_when: "'<<CHANGED>>' in ops_portal_directory_source_sync.stdout"
 
 - name: Discover macOS metadata files in the synced ops portal data tree
   ansible.builtin.find:
@@ -227,8 +387,41 @@
     state: absent
   loop: "{{ ops_portal_data_metadata_files.files }}"
 
-- name: Refresh the repo-managed ops portal service tree immediately before build-context sync
-  ansible.builtin.import_tasks: sync_service_tree.yml
+- name: Sync the ops portal service build inputs explicitly
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - src: "{{ ops_portal_repo_root }}/scripts/publication_contract.py"
+      dest: "{{ ops_portal_service_dir }}/publication_contract.py"
+    - src: "{{ ops_portal_repo_root }}/scripts/stage_smoke.py"
+      dest: "{{ ops_portal_service_dir }}/stage_smoke.py"
+    - src: "{{ ops_portal_repo_root }}/scripts/workbench_information_architecture.py"
+      dest: "{{ ops_portal_service_dir }}/workbench_information_architecture.py"
+    - src: "{{ ops_portal_repo_root }}/requirements/ops-portal.txt"
+      dest: "{{ ops_portal_service_dir }}/requirements.txt"
+  loop_control:
+    label: "{{ item.dest | replace(ops_portal_service_dir ~ '/', '') }}"
+
+- name: Discover macOS metadata files in the synced ops portal service tree
+  ansible.builtin.find:
+    paths: "{{ ops_portal_service_dir }}"
+    recurse: true
+    file_type: file
+    hidden: true
+    patterns:
+      - "._*"
+      - ".DS_Store"
+  register: ops_portal_service_metadata_files
+
+- name: Remove macOS metadata files from the synced ops portal service tree
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ ops_portal_service_metadata_files.files }}"
 
 - name: Remove stale ops portal build-context ignore and metadata files
   ansible.builtin.file:
@@ -262,41 +455,57 @@
     - "{{ ops_portal_build_context_dir }}/search_fabric"
 
 - name: Sync the clean ops portal Docker build-context directories
-  ansible.builtin.copy:
-    remote_src: true
+  ansible.posix.synchronize:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    owner: root
-    group: root
-    mode: "0644"
-    directory_mode: "0755"
+    archive: false
+    recursive: true
+    delete: false
+    perms: false
+    times: false
+    use_ssh_args: true
+    rsync_path: "sudo rsync"
+    rsync_opts:
+      - "--exclude=__pycache__/"
+      - "--exclude=*.pyc"
+      - "--exclude=._*"
+      - "--exclude=.DS_Store"
   loop:
-    - src: "{{ ops_portal_service_dir }}/ops_portal/"
+    - src: "{{ ops_portal_repo_root }}/scripts/ops_portal/"
       dest: "{{ ops_portal_build_context_dir }}/ops_portal/"
-    - src: "{{ ops_portal_service_dir }}/search_fabric/"
+    - src: "{{ ops_portal_repo_root }}/scripts/search_fabric/"
       dest: "{{ ops_portal_build_context_dir }}/search_fabric/"
   loop_control:
     label: "{{ item.dest | replace(ops_portal_build_context_dir ~ '/', '') }}"
+  delegate_to: localhost
+  become: false
 
-- name: Sync the clean ops portal Docker build-context Dockerfile
-  ansible.builtin.copy:
-    remote_src: true
-    src: "{{ ops_portal_service_dir }}/Dockerfile"
+- name: Render the clean ops portal build-context Dockerfile
+  ansible.builtin.template:
+    src: Dockerfile.j2
     dest: "{{ ops_portal_build_context_dir }}/Dockerfile"
     owner: root
     group: root
     mode: "0644"
 
-- name: Sync the clean ops portal Docker build-context helper files directly from controller sources
+- name: Sync the clean ops portal Docker build-context root files
   ansible.builtin.copy:
     src: "{{ item.src }}"
-    dest: "{{ ops_portal_build_context_dir }}/{{ item.filename }}"
+    dest: "{{ item.dest }}"
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ ops_portal_build_file_sources }}"
+  loop:
+    - src: "{{ ops_portal_repo_root }}/scripts/publication_contract.py"
+      dest: "{{ ops_portal_build_context_dir }}/publication_contract.py"
+    - src: "{{ ops_portal_repo_root }}/scripts/stage_smoke.py"
+      dest: "{{ ops_portal_build_context_dir }}/stage_smoke.py"
+    - src: "{{ ops_portal_repo_root }}/scripts/workbench_information_architecture.py"
+      dest: "{{ ops_portal_build_context_dir }}/workbench_information_architecture.py"
+    - src: "{{ ops_portal_repo_root }}/requirements/ops-portal.txt"
+      dest: "{{ ops_portal_build_context_dir }}/requirements.txt"
   loop_control:
-    label: "{{ item.filename }}"
+    label: "{{ item.dest | replace(ops_portal_build_context_dir ~ '/', '') }}"
 
 - name: Normalize the synced ops portal application tree ownership
   ansible.builtin.file:
@@ -322,6 +531,7 @@
     - "{{ ops_portal_build_context_dir }}/requirements.txt"
     - "{{ ops_portal_build_context_dir }}/publication_contract.py"
     - "{{ ops_portal_build_context_dir }}/stage_smoke.py"
+    - "{{ ops_portal_build_context_dir }}/workbench_information_architecture.py"
     - "{{ ops_portal_build_context_dir }}/ops_portal/app.py"
     - "{{ ops_portal_build_context_dir }}/search_fabric/__init__.py"
   register: ops_portal_build_context_manifest
@@ -332,9 +542,9 @@
       - ops_portal_build_context_manifest.results | map(attribute='stat.exists') | min
     fail_msg: >-
       Ops portal build context is incomplete. Expected Dockerfile, requirements,
-      publication contract helper, stage smoke helper, app module, and search
-      fabric package to be present in {{ ops_portal_build_context_dir }} before
-      docker compose up.
+      publication contract helper, stage smoke helper, workbench lane helper,
+      app module, and search fabric package to be present in
+      {{ ops_portal_build_context_dir }} before docker compose up.
 
 - name: Build and start the ops portal stack
   ansible.builtin.command:

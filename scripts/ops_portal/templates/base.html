@@ -11,7 +11,6 @@
   <script src="/static/portal.js" defer></script>
 </head>
 <body class="portal-app-body">
-  {% from "macros/lane_context.html" import lane_banner %}
   <div class="pf-v5-c-page portal-page" id="portal-page">
     <a class="portal-skip-link" href="#portal-main">Skip to main content</a>
 
@@ -30,9 +29,8 @@
             <p class="portal-eyebrow">LV3 Human Shell</p>
             <h1>Interactive Ops Portal</h1>
             <p class="portal-hero-copy">
-              PatternFly navigation, task lanes, shared launcher destinations, and live operator workflows in one browser surface.
+              PatternFly navigation, shared launcher destinations, and live operator workflows in one browser surface.
             </p>
-            {{ lane_banner(shell_page) }}
           </div>
         </div>
 
@@ -74,6 +72,7 @@
               <span class="muted">Launcher persona {{ launcher.selected_persona.name }}</span>
               <span class="muted">Rendered {{ generated_at|humanize_timestamp }}</span>
               <div class="link-row">
+                <a href="#activation">Activation</a>
                 <a href="#runbooks">Runbooks</a>
                 <a href="#changelog">Recent changes</a>
               </div>
@@ -87,31 +86,73 @@
       <div class="portal-sidebar__inner">
         <section class="portal-sidebar-card">
           <p class="portal-sidebar-kicker">Shared Navigation</p>
-          <h2>One workbench organized by Start, Observe, Change, Learn, and Recover.</h2>
+          <h2>One operator path for status, drift, runbooks, and receipts.</h2>
           <p class="muted">
-            ADR 0309 keeps primary orientation task-based so operators can move from intent before they translate into product names.
+            ADR 0234 starts on the live ops portal and keeps product-native tools as linked destinations instead of
+            embedding them into a one-off shell.
           </p>
         </section>
 
         <nav class="pf-v5-c-nav portal-shell-nav" aria-label="Primary">
-          {% for group in shell_navigation %}
-          <section class="pf-v5-c-nav__section" aria-labelledby="portal-nav-{{ group.id }}">
-            <h2 class="pf-v5-c-nav__section-title" id="portal-nav-{{ group.id }}">{{ group.label }}</h2>
-            <p class="muted portal-nav-question">{{ group.question }}</p>
+          <section class="pf-v5-c-nav__section" aria-labelledby="portal-nav-primary">
+            <h2 class="pf-v5-c-nav__section-title" id="portal-nav-primary">This portal</h2>
             <ul class="pf-v5-c-nav__list">
-              {% for entry in group.entries %}
               <li class="pf-v5-c-nav__item">
-                <a class="pf-v5-c-nav__link" href="{{ entry.href }}">
-                  <span class="pf-v5-c-nav__link-text">{{ entry.label }}</span>
-                  {% if entry.count is not none %}
-                  <span class="portal-shell-nav-count">{{ entry.count }}</span>
-                  {% endif %}
+                <a class="pf-v5-c-nav__link" href="#activation">
+                  <span class="pf-v5-c-nav__link-text">Activation</span>
+                  <span class="portal-shell-nav-count">
+                    {% if activation.required_complete %}
+                    0
+                    {% else %}
+                    {{ activation.required_item_total - activation.required_item_completed }}
+                    {% endif %}
+                  </span>
                 </a>
               </li>
-              {% endfor %}
+              <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#overview" aria-current="page">
+                  <span class="pf-v5-c-nav__link-text">Overview</span>
+                  <span class="portal-shell-nav-count">{{ services|length }}</span>
+                </a>
+              </li>
+              <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#deployments">
+                  <span class="pf-v5-c-nav__link-text">Deployments</span>
+                  <span class="portal-shell-nav-count">{{ deployments|length }}</span>
+                </a>
+              </li>
+              <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#agents">
+                  <span class="pf-v5-c-nav__link-text">Agents</span>
+                  <span class="portal-shell-nav-count">{{ coordination.summary.count }}</span>
+                </a>
+              </li>
+              <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#drift">
+                  <span class="pf-v5-c-nav__link-text">Drift</span>
+                  <span class="portal-shell-nav-count">{{ drift_summary.unsuppressed_count or 0 }}</span>
+                </a>
+              </li>
+              <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#search">
+                  <span class="pf-v5-c-nav__link-text">Search</span>
+                  <span class="portal-shell-nav-count">{{ search_collections|length }}</span>
+                </a>
+              </li>
+              <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#runbooks">
+                  <span class="pf-v5-c-nav__link-text">Runbooks</span>
+                  <span class="portal-shell-nav-count">{{ runbooks|length }}</span>
+                </a>
+              </li>
+              <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#changelog">
+                  <span class="pf-v5-c-nav__link-text">Changelog</span>
+                  <span class="portal-shell-nav-count">{{ changelog_notes|length }}</span>
+                </a>
+              </li>
             </ul>
           </section>
-          {% endfor %}
         </nav>
 
         <section class="portal-sidebar-card portal-sidebar-card--secondary">

@@ -3,10 +3,10 @@
 - Date: 2026-04-02
 
 ## Summary
-- implements ADR 0309 by adding the task-oriented Start, Observe, Change, Learn, and Recover information architecture across the live ops portal shell, launcher, runbook surfaces, and supporting catalogs, then carrying the exact-main validation and replay path onto main
+- implements ADR 0310 by adding a first-run activation checklist, progressive capability reveal, and server-side launcher, runbook, and service-action guardrails to the interactive ops portal
 
 ## Platform Impact
-- platform version advances to 0.130.91 after the exact-main ADR 0309 replay re-verifies the task-oriented Start, Observe, Change, Learn, and Recover information architecture on ops.lv3.org while preserving the authenticated edge contract on top of the 0.130.90 baseline
+- platform version advances to 0.130.91 after the exact-main ADR 0310 replay re-verifies the first-run activation checklist, progressive capability reveal, and server-side launcher/runbook/service guardrails on ops.lv3.org while preserving the authenticated operator edge contract on top of the 0.130.90 baseline
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

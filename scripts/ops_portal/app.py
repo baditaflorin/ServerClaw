@@ -23,29 +23,6 @@ from starlette.middleware.sessions import SessionMiddleware
 UTC = timezone.utc
 
 try:
-    from workbench_information_architecture import (
-        DEFAULT_PERSONAS_BY_TASK_LANE,
-        TASK_LANE_IDS,
-        TASK_LANE_LABELS,
-        TASK_LANE_ORDER,
-        TASK_LANE_QUESTIONS,
-        default_personas_for_task_lane,
-        normalize_task_lane,
-        normalize_task_lane_list,
-    )
-except ImportError:  # pragma: no cover - repo checkout import path
-    from scripts.workbench_information_architecture import (
-        DEFAULT_PERSONAS_BY_TASK_LANE,
-        TASK_LANE_IDS,
-        TASK_LANE_LABELS,
-        TASK_LANE_ORDER,
-        TASK_LANE_QUESTIONS,
-        default_personas_for_task_lane,
-        normalize_task_lane,
-        normalize_task_lane_list,
-    )
-
-try:
     from publication_contract import registry_entries
 except ImportError:  # pragma: no cover - repo checkout import path
     from scripts.publication_contract import registry_entries
@@ -70,6 +47,29 @@ except ImportError:  # pragma: no cover - direct module or repo checkout import 
         from contextual_help import build_ops_portal_help
     except ImportError:  # pragma: no cover - repo checkout import path
         from scripts.ops_portal.contextual_help import build_ops_portal_help
+
+try:
+    from workbench_information_architecture import (
+        DEFAULT_PERSONAS_BY_TASK_LANE,
+        TASK_LANE_IDS,
+        TASK_LANE_LABELS,
+        TASK_LANE_ORDER,
+        TASK_LANE_QUESTIONS,
+        default_personas_for_task_lane,
+        normalize_task_lane,
+        normalize_task_lane_list,
+    )
+except ImportError:  # pragma: no cover - repo checkout import path
+    from scripts.workbench_information_architecture import (
+        DEFAULT_PERSONAS_BY_TASK_LANE,
+        TASK_LANE_IDS,
+        TASK_LANE_LABELS,
+        TASK_LANE_ORDER,
+        TASK_LANE_QUESTIONS,
+        default_personas_for_task_lane,
+        normalize_task_lane,
+        normalize_task_lane_list,
+    )
 
 
 def utc_now() -> datetime:
@@ -140,6 +140,53 @@ EDGE_META = {
     "startup_only": {"color": "#d97706", "line_type": "dashed", "width": 2.1},
     "soft": {"color": "#7d8597", "line_type": "dotted", "width": 1.6},
 }
+
+LAUNCHER_PURPOSE_ORDER = ("operate", "observe", "learn", "plan", "administer")
+LAUNCHER_PURPOSE_LABELS = {
+    "operate": "Operate",
+    "observe": "Observe",
+    "learn": "Learn",
+    "plan": "Plan",
+    "administer": "Administer",
+}
+LAUNCHER_PURPOSE_BY_CATEGORY = {
+    "automation": "operate",
+    "communication": "plan",
+    "data": "learn",
+    "infrastructure": "administer",
+    "observability": "observe",
+    "security": "administer",
+    "access": "administer",
+}
+LAUNCHER_PURPOSE_OVERRIDES = {
+    "changelog_portal": "learn",
+    "coolify": "operate",
+    "coolify_apps": "operate",
+    "docs_portal": "learn",
+    "gitea": "plan",
+    "grafana": "observe",
+    "headscale": "administer",
+    "homepage": "operate",
+    "keycloak": "administer",
+    "langfuse": "observe",
+    "netbox": "plan",
+    "ops_portal": "operate",
+    "outline": "learn",
+    "plane": "plan",
+    "portainer": "administer",
+    "proxmox_ui": "administer",
+    "realtime": "observe",
+    "status_page": "observe",
+    "uptime_kuma": "observe",
+    "windmill": "operate",
+}
+LAUNCHER_PERSONAS_BY_PURPOSE = {
+    "operate": ["operator", "administrator"],
+    "observe": ["observer", "operator"],
+    "learn": ["planner", "operator"],
+    "plan": ["planner", "operator"],
+    "administer": ["administrator", "operator"],
+}
 DEFAULT_PERSONA_CATALOG = {
     "personas": [
         {
@@ -147,7 +194,7 @@ DEFAULT_PERSONA_CATALOG = {
             "name": "Operator",
             "description": "Day-to-day runtime operations and service switching.",
             "default": True,
-            "focus_lanes": ["start", "observe", "change"],
+            "focus_purposes": ["operate", "observe", "learn"],
             "default_favorites": [
                 "service:ops_portal",
                 "service:homepage",
@@ -161,7 +208,7 @@ DEFAULT_PERSONA_CATALOG = {
             "name": "Observer",
             "description": "Monitoring, drift, assurance, and incident triage.",
             "default": False,
-            "focus_lanes": ["observe", "recover", "change"],
+            "focus_purposes": ["observe", "operate", "administer"],
             "default_favorites": [
                 "service:grafana",
                 "service:realtime",
@@ -175,7 +222,7 @@ DEFAULT_PERSONA_CATALOG = {
             "name": "Planner",
             "description": "Planning work, reviewing docs, and coordinating changes.",
             "default": False,
-            "focus_lanes": ["start", "learn", "change"],
+            "focus_purposes": ["plan", "learn", "operate"],
             "default_favorites": [
                 "service:plane",
                 "service:outline",
@@ -189,7 +236,7 @@ DEFAULT_PERSONA_CATALOG = {
             "name": "Administrator",
             "description": "Identity, secrets, control-plane, and platform administration.",
             "default": False,
-            "focus_lanes": ["recover", "change", "observe"],
+            "focus_purposes": ["administer", "operate", "observe"],
             "default_favorites": [
                 "service:keycloak",
                 "service:openbao",
@@ -203,6 +250,33 @@ DEFAULT_PERSONA_CATALOG = {
 LAUNCHER_RECENT_LIMIT = 6
 LAUNCHER_FAVORITE_LIMIT = 8
 LIVE_APPLY_RECEIPT_EXCLUDED_PARTS = {"evidence", "preview"}
+ACTIVATION_SESSION_KEY = "activation_checklist"
+ACTIVATION_STATUS_ORDER = {"todo": 0, "skipped": 1, "completed": 2}
+DEFAULT_ACTIVATION_CHECKLIST = {
+    "schema_version": "1.0.0",
+    "stages": [],
+    "progressive_reveal": {
+        "advanced_stage_id": "",
+        "required_stage_ids": [],
+        "locked_launcher_purposes": [],
+        "locked_service_actions": [],
+        "locked_runbook_execution_classes": [],
+    },
+}
+
+
+def browser_usable_url(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    candidate = value.strip()
+    if candidate.startswith(("http://", "https://")):
+        return candidate
+    return None
+
+
+def include_live_apply_receipt_path(path: Path) -> bool:
+    return not any(part in LIVE_APPLY_RECEIPT_EXCLUDED_PARTS for part in path.parts)
+
 
 DEFAULT_SERVICE_CATEGORY_NAVIGATION = {
     "automation": {
@@ -250,11 +324,7 @@ DEFAULT_SERVICE_CATEGORY_NAVIGATION = {
 }
 
 
-def normalize_navigation_contract(
-    payload: Any,
-    *,
-    default_lane: str = "start",
-) -> dict[str, Any]:
+def normalize_navigation_contract(payload: Any, *, default_lane: str = "start") -> dict[str, Any]:
     payload = payload if isinstance(payload, dict) else {}
     primary_lane = normalize_task_lane(payload.get("primary_lane"), default=default_lane)
     secondary_lanes = [
@@ -264,14 +334,13 @@ def normalize_navigation_contract(
     next_failure_lane = normalize_task_lane(payload.get("next_failure_lane"), default="recover")
     return {
         "primary_lane": primary_lane,
-        "secondary_lanes": secondary_lanes,
-        "next_success_lane": next_success_lane,
-        "next_failure_lane": next_failure_lane,
         "primary_lane_label": TASK_LANE_LABELS[primary_lane],
-        "secondary_lane_labels": [TASK_LANE_LABELS[lane] for lane in secondary_lanes],
+        "secondary_lanes": secondary_lanes,
+        "secondary_lanes_csv": ",".join(secondary_lanes),
+        "next_success_lane": next_success_lane,
         "next_success_lane_label": TASK_LANE_LABELS[next_success_lane],
+        "next_failure_lane": next_failure_lane,
         "next_failure_lane_label": TASK_LANE_LABELS[next_failure_lane],
-        "primary_question": TASK_LANE_QUESTIONS[primary_lane],
     }
 
 
@@ -288,7 +357,9 @@ def normalize_workbench_information_architecture(payload: Any) -> dict[str, Any]
     category_defaults = {
         category: normalize_navigation_contract(definition, default_lane=definition.get("primary_lane", "start"))
         for category, definition in (
-            payload.get("service_category_defaults", {}) if isinstance(payload.get("service_category_defaults"), dict) else {}
+            payload.get("service_category_defaults", {})
+            if isinstance(payload.get("service_category_defaults"), dict)
+            else {}
         ).items()
     }
     for category, definition in DEFAULT_SERVICE_CATEGORY_NAVIGATION.items():
@@ -319,6 +390,7 @@ def normalize_workbench_information_architecture(payload: Any) -> dict[str, Any]
         for key, value in raw_workflow_defaults.items():
             if key in {"diagnostic", "mutation"}:
                 workflow_defaults[key] = normalize_navigation_contract(value, default_lane="change")
+
     runbook_defaults = {}
     raw_runbook_defaults = payload.get("runbook_defaults")
     if isinstance(raw_runbook_defaults, dict):
@@ -362,22 +434,34 @@ def normalize_workbench_information_architecture(payload: Any) -> dict[str, Any]
         "workflow_defaults": {
             "diagnostic": workflow_defaults.get(
                 "diagnostic",
-                normalize_navigation_contract({"primary_lane": "observe", "secondary_lanes": ["learn"]}, default_lane="observe"),
+                normalize_navigation_contract(
+                    {"primary_lane": "observe", "secondary_lanes": ["learn"]},
+                    default_lane="observe",
+                ),
             ),
             "mutation": workflow_defaults.get(
                 "mutation",
-                normalize_navigation_contract({"primary_lane": "change", "secondary_lanes": ["observe"]}, default_lane="change"),
+                normalize_navigation_contract(
+                    {"primary_lane": "change", "secondary_lanes": ["observe"]},
+                    default_lane="change",
+                ),
             ),
         },
         "workflow_overrides": index_contracts(payload.get("workflow_overrides"), "workflow_id", default_lane="change"),
         "runbook_defaults": {
             "diagnostic": runbook_defaults.get(
                 "diagnostic",
-                normalize_navigation_contract({"primary_lane": "learn", "secondary_lanes": ["observe"]}, default_lane="learn"),
+                normalize_navigation_contract(
+                    {"primary_lane": "learn", "secondary_lanes": ["observe"]},
+                    default_lane="learn",
+                ),
             ),
             "mutation": runbook_defaults.get(
                 "mutation",
-                normalize_navigation_contract({"primary_lane": "change", "secondary_lanes": ["recover"]}, default_lane="change"),
+                normalize_navigation_contract(
+                    {"primary_lane": "change", "secondary_lanes": ["recover"]},
+                    default_lane="change",
+                ),
             ),
         },
         "runbook_overrides": index_contracts(payload.get("runbook_overrides"), "runbook_id", default_lane="learn"),
@@ -420,19 +504,6 @@ def build_shell_navigation(
     return groups
 
 
-def browser_usable_url(value: Any) -> str | None:
-    if not isinstance(value, str):
-        return None
-    candidate = value.strip()
-    if candidate.startswith(("http://", "https://")):
-        return candidate
-    return None
-
-
-def include_live_apply_receipt_path(path: Path) -> bool:
-    return not any(part in LIVE_APPLY_RECEIPT_EXCLUDED_PARTS for part in path.parts)
-
-
 def service_navigation_contract(
     service: dict[str, Any],
     workbench_ia: dict[str, Any],
@@ -468,6 +539,14 @@ def runbook_navigation_contract(runbook: dict[str, Any], workbench_ia: dict[str,
     return dict(workbench_ia.get("runbook_defaults", {}).get(execution_class, {}))
 
 
+def launcher_purpose_for_service(service: dict[str, Any]) -> str:
+    service_id = str(service.get("id", ""))
+    if service_id in LAUNCHER_PURPOSE_OVERRIDES:
+        return LAUNCHER_PURPOSE_OVERRIDES[service_id]
+    category = str(service.get("category", ""))
+    return LAUNCHER_PURPOSE_BY_CATEGORY.get(category, "operate")
+
+
 def default_launcher_personas(primary_lane: str) -> list[str]:
     return default_personas_for_task_lane(primary_lane)
 
@@ -494,9 +573,7 @@ def normalize_persona_catalog(payload: Any) -> list[dict[str, Any]]:
         if persona_id in seen_ids:
             continue
         seen_ids.add(persona_id)
-        focus_lanes = normalize_task_lane_list(
-            item.get("focus_lanes", item.get("focus_purposes", [])),
-        )
+        focus_lanes = normalize_task_lane_list(item.get("focus_lanes", item.get("focus_purposes", [])))
         default_favorites = [
             favorite
             for favorite in item.get("default_favorites", [])
@@ -520,6 +597,263 @@ def normalize_persona_catalog(payload: Any) -> list[dict[str, Any]]:
     if not any(persona["default"] for persona in personas):
         personas[0]["default"] = True
     return personas
+
+
+def normalize_activation_catalog(payload: Any) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        payload = DEFAULT_ACTIVATION_CHECKLIST
+    stages = payload.get("stages")
+    if not isinstance(stages, list):
+        stages = []
+    progressive_reveal = payload.get("progressive_reveal")
+    if not isinstance(progressive_reveal, dict):
+        progressive_reveal = {}
+    return {
+        "schema_version": str(payload.get("schema_version", "1.0.0")),
+        "stages": [stage for stage in stages if isinstance(stage, dict)],
+        "progressive_reveal": {
+            "advanced_stage_id": str(progressive_reveal.get("advanced_stage_id", "")).strip(),
+            "required_stage_ids": [
+                stage_id
+                for stage_id in progressive_reveal.get("required_stage_ids", [])
+                if isinstance(stage_id, str) and stage_id.strip()
+            ],
+            "locked_launcher_purposes": [
+                purpose
+                for purpose in progressive_reveal.get("locked_launcher_purposes", [])
+                if isinstance(purpose, str) and purpose.strip()
+            ],
+            "locked_service_actions": [
+                action
+                for action in progressive_reveal.get("locked_service_actions", [])
+                if isinstance(action, str) and action.strip()
+            ],
+            "locked_runbook_execution_classes": [
+                item
+                for item in progressive_reveal.get("locked_runbook_execution_classes", [])
+                if isinstance(item, str) and item.strip()
+            ],
+        },
+    }
+
+
+def service_href_from_catalog(service_id: str, services: list[dict[str, Any]]) -> str | None:
+    for service in services:
+        if str(service.get("id", "")) != service_id:
+            continue
+        href = browser_usable_url(service.get("public_url")) or browser_usable_url(service.get("internal_url"))
+        if href:
+            return "/" if service_id == "ops_portal" else href
+    return None
+
+
+def resolve_activation_link(
+    link: dict[str, Any],
+    *,
+    services: list[dict[str, Any]],
+    docs_base_url: str,
+) -> dict[str, str] | None:
+    link_type = str(link.get("type", "")).strip()
+    label = str(link.get("label", "")).strip()
+    value = str(link.get("value", "")).strip()
+    if not link_type or not label or not value:
+        return None
+    if link_type == "docs":
+        href = f"{docs_base_url}/{value.lstrip('/')}"
+    elif link_type == "portal_anchor":
+        href = f"/#{value.lstrip('#')}"
+    elif link_type == "service":
+        href = service_href_from_catalog(value, services)
+        if href is None:
+            return None
+    elif link_type == "url":
+        href = value
+    else:
+        return None
+    return {"label": label, "href": href}
+
+
+def activation_item_catalog(catalog: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    items: dict[str, dict[str, Any]] = {}
+    for stage in catalog.get("stages", []):
+        for item in stage.get("items", []):
+            item_id = str(item.get("id", "")).strip()
+            if item_id:
+                items[item_id] = item
+    return items
+
+
+def normalize_activation_session_state(session: dict[str, Any], catalog: dict[str, Any]) -> dict[str, Any]:
+    valid_item_ids = set(activation_item_catalog(catalog))
+    raw_state = session.get(ACTIVATION_SESSION_KEY)
+    if not isinstance(raw_state, dict):
+        raw_state = {}
+    raw_items = raw_state.get("items")
+    items: dict[str, dict[str, str]] = {}
+    if isinstance(raw_items, dict):
+        for item_id, payload in raw_items.items():
+            if item_id not in valid_item_ids or not isinstance(payload, dict):
+                continue
+            status = str(payload.get("status", "")).strip()
+            if status not in {"todo", "completed", "skipped"}:
+                continue
+            items[item_id] = {
+                "status": status,
+                "updated_at": str(payload.get("updated_at", "")).strip(),
+            }
+
+    override = bool(raw_state.get("advanced_override"))
+    override_updated_at = str(raw_state.get("advanced_override_updated_at", "")).strip()
+    normalized = {
+        "items": items,
+        "advanced_override": override,
+        "advanced_override_updated_at": override_updated_at,
+    }
+    session[ACTIVATION_SESSION_KEY] = normalized
+    return normalized
+
+
+def write_activation_item_state(
+    session: dict[str, Any],
+    catalog: dict[str, Any],
+    *,
+    item_id: str,
+    status: str,
+) -> dict[str, Any]:
+    state = normalize_activation_session_state(session, catalog)
+    if item_id not in activation_item_catalog(catalog):
+        return state
+    if status == "todo":
+        state["items"].pop(item_id, None)
+    elif status in {"completed", "skipped"}:
+        state["items"][item_id] = {"status": status, "updated_at": isoformat(utc_now())}
+    session[ACTIVATION_SESSION_KEY] = state
+    return state
+
+
+def set_activation_override(session: dict[str, Any], catalog: dict[str, Any], *, enabled: bool) -> dict[str, Any]:
+    state = normalize_activation_session_state(session, catalog)
+    state["advanced_override"] = enabled
+    state["advanced_override_updated_at"] = isoformat(utc_now()) if enabled else ""
+    session[ACTIVATION_SESSION_KEY] = state
+    return state
+
+
+def build_activation_context(
+    catalog: dict[str, Any],
+    state: dict[str, Any],
+    *,
+    services: list[dict[str, Any]],
+    docs_base_url: str,
+) -> dict[str, Any]:
+    stage_models: list[dict[str, Any]] = []
+    item_catalog = activation_item_catalog(catalog)
+    required_stage_ids = set(catalog.get("progressive_reveal", {}).get("required_stage_ids", []))
+    required_item_ids: set[str] = set()
+    completed_required_items = 0
+
+    for stage in catalog.get("stages", []):
+        stage_id = str(stage.get("id", "")).strip()
+        stage_items = stage.get("items", [])
+        item_models: list[dict[str, Any]] = []
+        completed_items = 0
+        for item in stage_items:
+            item_id = str(item.get("id", "")).strip()
+            item_state = state.get("items", {}).get(item_id, {})
+            item_status = str(item_state.get("status", "todo")) or "todo"
+            links = [
+                resolved
+                for resolved in (
+                    resolve_activation_link(link, services=services, docs_base_url=docs_base_url)
+                    for link in item.get("links", [])
+                )
+                if resolved is not None
+            ]
+            is_done = item_status in {"completed", "skipped"}
+            if is_done:
+                completed_items += 1
+            if stage_id in required_stage_ids:
+                required_item_ids.add(item_id)
+                if is_done:
+                    completed_required_items += 1
+            item_models.append(
+                {
+                    "id": item_id,
+                    "title": str(item.get("title", item_id)),
+                    "description": str(item.get("description", "")),
+                    "status": item_status,
+                    "status_label": (
+                        "Completed"
+                        if item_status == "completed"
+                        else "Skipped"
+                        if item_status == "skipped"
+                        else "To do"
+                    ),
+                    "updated_at": item_state.get("updated_at"),
+                    "links": links,
+                }
+            )
+
+        stage_models.append(
+            {
+                "id": stage_id,
+                "title": str(stage.get("title", stage_id)),
+                "description": str(stage.get("description", "")),
+                "items": item_models,
+                "item_count": len(item_models),
+                "completed_items": completed_items,
+                "required": stage_id in required_stage_ids,
+                "status": (
+                    "completed"
+                    if item_models and completed_items == len(item_models)
+                    else "in_progress"
+                    if completed_items
+                    else "todo"
+                ),
+                "status_label": (
+                    "Complete"
+                    if item_models and completed_items == len(item_models)
+                    else "In progress"
+                    if completed_items
+                    else "To do"
+                ),
+            }
+        )
+
+    required_complete = completed_required_items >= len(required_item_ids) if required_item_ids else True
+    advanced_override = bool(state.get("advanced_override"))
+    advanced_unlocked = required_complete or advanced_override
+    advanced_stage_id = str(catalog.get("progressive_reveal", {}).get("advanced_stage_id", "")).strip()
+    for stage in stage_models:
+        if stage["id"] == advanced_stage_id:
+            stage["status"] = "completed" if advanced_unlocked else "todo"
+            stage["status_label"] = (
+                "Revealed for this session"
+                if advanced_override
+                else "Ready"
+                if advanced_unlocked
+                else "Locked"
+            )
+            break
+
+    return {
+        "stages": stage_models,
+        "required_item_total": len(required_item_ids),
+        "required_item_completed": completed_required_items,
+        "required_complete": required_complete,
+        "advanced_unlocked": advanced_unlocked,
+        "advanced_override": advanced_override,
+        "advanced_override_updated_at": state.get("advanced_override_updated_at", ""),
+        "locked_launcher_purposes": set(
+            catalog.get("progressive_reveal", {}).get("locked_launcher_purposes", [])
+        ),
+        "locked_service_actions": set(
+            catalog.get("progressive_reveal", {}).get("locked_service_actions", [])
+        ),
+        "locked_runbook_execution_classes": set(
+            catalog.get("progressive_reveal", {}).get("locked_runbook_execution_classes", [])
+        ),
+    }
 
 
 def default_persona_id(personas: list[dict[str, Any]]) -> str:
@@ -696,6 +1030,7 @@ def build_launcher_entries(
         service_id = str(service.get("id", "")).strip()
         if not service_id:
             continue
+        purpose = launcher_purpose_for_service(service)
         navigation = service_navigation_contract(service, workbench_ia)
         publications_for_service = publications_by_service.get(service_id, [])
         primary_publication = next(
@@ -721,6 +1056,8 @@ def build_launcher_entries(
                 "description": description,
                 "href": "/" if service_id == "ops_portal" else href,
                 **navigation,
+                "purpose": purpose,
+                "purpose_label": LAUNCHER_PURPOSE_LABELS[purpose],
                 "personas": default_launcher_personas(navigation["primary_lane"]),
                 "summary_line": " / ".join(str(item) for item in (fqdn, audience, access_model) if item),
                 "badges": [
@@ -770,6 +1107,15 @@ def build_launcher_entries(
                     default_lane=declared_lane,
                 ),
             }
+        purpose = str(launcher.get("purpose", "")).strip()
+        if purpose not in LAUNCHER_PURPOSE_LABELS:
+            purpose = {
+                "start": "plan",
+                "observe": "observe",
+                "change": "operate",
+                "learn": "learn",
+                "recover": "administer",
+            }.get(navigation["primary_lane"], "operate")
         personas = [
             persona_id
             for persona_id in launcher.get("personas", [])
@@ -787,6 +1133,8 @@ def build_launcher_entries(
                 "description": description,
                 "href": href,
                 **navigation,
+                "purpose": purpose,
+                "purpose_label": LAUNCHER_PURPOSE_LABELS[purpose],
                 "personas": personas,
                 "summary_line": str(workflow.get("owner_runbook", "")).strip(),
                 "badges": [
@@ -806,6 +1154,46 @@ def build_launcher_entries(
         )
 
     return sorted(entries, key=lambda item: (TASK_LANE_ORDER.index(item["primary_lane"]), item["kind"], item["name"]))
+
+
+def launcher_entry_locked(entry: dict[str, Any], activation: dict[str, Any]) -> bool:
+    return not activation.get("advanced_unlocked", True) and entry.get("purpose") in activation.get(
+        "locked_launcher_purposes",
+        set(),
+    )
+
+
+def split_launcher_entries(
+    entries: list[dict[str, Any]],
+    *,
+    activation: dict[str, Any],
+    persona_id: str,
+    query: str,
+    favorite_ids: set[str],
+    recent_ids: set[str],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    visible_entries: list[dict[str, Any]] = []
+    locked_entries: list[dict[str, Any]] = []
+    for entry in entries:
+        if not launcher_entry_visible(entry, persona_id, query):
+            continue
+        if launcher_entry_locked(entry, activation):
+            locked_entries.append(decorate_launcher_entry(entry, favorite_ids, recent_ids))
+            continue
+        visible_entries.append(entry)
+    locked_entries.sort(key=lambda item: (item["kind"], item["name"]))
+    return visible_entries, locked_entries
+
+
+def runbook_locked(runbook: dict[str, Any], activation: dict[str, Any]) -> bool:
+    return (
+        not activation.get("advanced_unlocked", True)
+        and str(runbook.get("execution_class", "workflow")) in activation.get("locked_runbook_execution_classes", set())
+    )
+
+
+def action_locked(action_id: str, activation: dict[str, Any]) -> bool:
+    return not activation.get("advanced_unlocked", True) and action_id in activation.get("locked_service_actions", set())
 
 
 @dataclass(frozen=True)
@@ -1032,6 +1420,11 @@ class PortalRepository:
         capabilities = payload.get("capabilities", [])
         return capabilities if isinstance(capabilities, list) else []
 
+    def load_activation_checklist(self) -> dict[str, Any]:
+        activation_path = self.settings.service_catalog_path.parent / "activation-checklist.json"
+        payload = load_json_file(activation_path, DEFAULT_ACTIVATION_CHECKLIST)
+        return normalize_activation_catalog(payload)
+
     def load_workflow_catalog(self) -> list[dict[str, Any]]:
         payload = load_json_file(self.settings.workflow_catalog_path, {"workflows": {}})
         workflows = []
@@ -1046,6 +1439,7 @@ class PortalRepository:
                     "description": workflow.get("description", workflow_id),
                     "owner_runbook": workflow.get("owner_runbook"),
                     "entrypoint": workflow.get("preferred_entrypoint", {}),
+                    "execution_class": workflow.get("execution_class", "workflow"),
                     "live_impact": workflow.get("live_impact", "unknown"),
                 }
             )
@@ -1639,6 +2033,7 @@ def build_service_models(
     maintenance_windows: list[dict[str, Any]],
     deployments: list[dict[str, Any]],
     settings: PortalSettings,
+    activation: dict[str, Any],
 ) -> list[dict[str, Any]]:
     latest_deploy_by_service: dict[str, dict[str, Any]] = {}
     for deployment in deployments:
@@ -1691,6 +2086,8 @@ def build_service_models(
                 "maintenance_windows": windows_by_service.get(service_id, []) + windows_by_service.get("all", []),
                 "last_deployment": deployment,
                 "logs_url": build_logs_url(settings.grafana_logs_url, service_id),
+                "actions_locked": not activation.get("advanced_unlocked", True),
+                "locked_actions": sorted(activation.get("locked_service_actions", set())),
                 "publications": [
                     {
                         "fqdn": publication["fqdn"],
@@ -1750,7 +2147,11 @@ def template_root() -> Path:
     return Path(__file__).resolve().parent
 
 
-def build_runbook_models(runbooks: list[dict[str, Any]], workbench_ia: dict[str, Any]) -> list[dict[str, Any]]:
+def build_runbook_models(
+    runbooks: list[dict[str, Any]],
+    activation: dict[str, Any],
+    workbench_ia: dict[str, Any],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     featured_ids = {"validation-gate-status"}
     normalized: list[dict[str, Any]] = []
     for item in runbooks:
@@ -1765,7 +2166,34 @@ def build_runbook_models(runbooks: list[dict[str, Any]], workbench_ia: dict[str,
     featured = [item for item in normalized if item["id"] in featured_ids]
     remainder = [item for item in normalized if item["id"] not in featured_ids]
     combined = featured + remainder
-    return combined[:6]
+    visible: list[dict[str, Any]] = []
+    locked: list[dict[str, Any]] = []
+    for item in combined[:6]:
+        if runbook_locked(item, activation):
+            locked.append(item)
+        else:
+            visible.append(item)
+    return visible, locked
+
+
+def enrich_runbook_metadata(
+    runbooks: list[dict[str, Any]],
+    workflows: dict[str, Any],
+) -> list[dict[str, Any]]:
+    enriched: list[dict[str, Any]] = []
+    for item in runbooks:
+        if not isinstance(item, dict):
+            continue
+        runbook = dict(item)
+        runbook_id = str(runbook.get("id", "")).strip()
+        workflow = workflows.get(runbook_id, {}) if runbook_id else {}
+        if not isinstance(workflow, dict):
+            workflow = {}
+        for field in ("description", "owner_runbook", "execution_class", "live_impact"):
+            if not runbook.get(field) and workflow.get(field):
+                runbook[field] = workflow[field]
+        enriched.append(runbook)
+    return enriched
 
 
 async def build_launcher_panel_context(request: Request, *, query: str = "") -> dict[str, Any]:
@@ -1775,8 +2203,16 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
     services = repository.load_service_catalog()
     publications = repository.load_publication_registry()
     workflows = repository.load_workflow_definitions()
-    personas = repository.load_persona_catalog()
     workbench_ia = repository.load_workbench_information_architecture()
+    personas = repository.load_persona_catalog()
+    activation_catalog = repository.load_activation_checklist()
+    activation_state = normalize_activation_session_state(request.session, activation_catalog)
+    activation = build_activation_context(
+        activation_catalog,
+        activation_state,
+        services=services,
+        docs_base_url=request.app.state.settings.docs_base_url,
+    )
 
     entries = build_launcher_entries(services, publications, workflows, workbench_ia)
     valid_entry_ids = {entry["id"] for entry in entries}
@@ -1784,7 +2220,15 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
     selected_persona = preferences["selected_persona"]
     favorite_ids = set(preferences["favorite_ids"])
     recent_ids = set(preferences["recent_ids"])
-    entry_index = {entry["id"]: entry for entry in entries}
+    visible_entries, locked_entries = split_launcher_entries(
+        entries,
+        activation=activation,
+        persona_id=str(selected_persona["id"]),
+        query=query,
+        favorite_ids=favorite_ids,
+        recent_ids=recent_ids,
+    )
+    entry_index = {entry["id"]: entry for entry in visible_entries}
 
     favorites = [
         decorate_launcher_entry(entry_index[item_id], favorite_ids, recent_ids)
@@ -1797,7 +2241,7 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
         if item_id in entry_index and launcher_entry_visible(entry_index[item_id], str(selected_persona["id"]), query)
     ]
     groups = build_launcher_groups(
-        entries,
+        visible_entries,
         persona=selected_persona,
         favorite_ids=favorite_ids,
         recent_ids=recent_ids,
@@ -1813,10 +2257,14 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
             "favorites": favorites,
             "recents": recents,
             "groups": groups,
-            "match_count": sum(len(group["entries"]) for group in groups),
+            "locked_entries": locked_entries,
+            "locked_count": len(locked_entries),
+            "advanced_unlocked": activation["advanced_unlocked"],
+            "match_count": sum(len(group["entries"]) for group in groups) + len(locked_entries),
             "entry_index": entry_index,
             "page_lane": workbench_ia["pages_by_id"].get("ops_portal_launcher"),
         },
+        "activation": activation,
     }
 
 
@@ -1871,9 +2319,11 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     repository: PortalRepository = request.app.state.repository
     gateway: Any = request.app.state.gateway_client
     launcher_context = await build_launcher_panel_context(request)
+    activation = launcher_context["activation"]
 
     services = repository.load_service_catalog()
     publications = repository.load_publication_registry()
+    workflows = repository.load_workflow_definitions()
     workbench_ia = repository.load_workbench_information_architecture()
 
     capability_contracts = repository.load_capability_contract_catalog()
@@ -1914,7 +2364,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     runtime_assurance = normalize_runtime_assurance(runtime_assurance_payload, services)
     coordination = normalize_agent_coordination(coordination_payload)
     raw_runbooks = runbook_payload.get("runbooks") if isinstance(runbook_payload, dict) else []
-    runbooks = raw_runbooks if isinstance(raw_runbooks, list) else []
+    runbooks = enrich_runbook_metadata(raw_runbooks if isinstance(raw_runbooks, list) else [], workflows)
     capability_models, capability_summary = build_capability_contract_models(capability_contracts, services)
     service_models = build_service_models(
         services,
@@ -1924,6 +2374,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         maintenance_windows,
         deployments,
         request.app.state.settings,
+        activation,
     )
     assurance_rows, assurance_summary = build_runtime_assurance_models(
         services,
@@ -1951,17 +2402,21 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     }
     shell_navigation = build_shell_navigation(workbench_ia["pages"], section_counts)
 
+    visible_runbooks, locked_runbooks = build_runbook_models(runbooks, activation, workbench_ia)
+
     return {
         "request": request,
         "operator": session,
         "services": service_models,
+        "activation": activation,
         "runtime_assurance_rows": assurance_rows,
         "runtime_assurance_summary": assurance_summary,
         "capability_contracts": capability_models,
         "capability_contract_summary": capability_summary,
         "maintenance_windows": active_maintenance,
         "maintenance_count": len(active_maintenance),
-        "runbooks": build_runbook_models(runbooks, workbench_ia),
+        "runbooks": visible_runbooks,
+        "locked_runbooks": locked_runbooks,
         "deployments": deployments[:10],
         "changelog_notes": changelog_notes,
         "drift_report": drift_report,
@@ -1987,6 +2442,15 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "shell_page": workbench_ia["pages_by_id"].get("ops_portal_shell"),
         "page_sections": workbench_ia["pages_by_section"],
         "shell_navigation": shell_navigation,
+    }
+
+
+async def build_activation_panel_context(request: Request) -> dict[str, Any]:
+    launcher_context = await build_launcher_panel_context(request)
+    return {
+        "request": request,
+        "activation": launcher_context["activation"],
+        "docs_base_url": request.app.state.settings.docs_base_url,
     }
 
 
@@ -2036,6 +2500,11 @@ def create_app(
         context = await build_launcher_panel_context(request, query=query)
         context["page_lane"] = context["launcher"].get("page_lane")
         return templates.TemplateResponse(request=request, name="partials/launcher.html", context=context)
+
+    @app.get("/partials/activation", response_class=HTMLResponse)
+    async def activation_partial(request: Request) -> HTMLResponse:
+        context = await build_activation_panel_context(request)
+        return templates.TemplateResponse(request=request, name="partials/activation.html", context=context)
 
     @app.get("/partials/overview", response_class=HTMLResponse)
     async def overview_partial(request: Request) -> HTMLResponse:
@@ -2119,12 +2588,35 @@ def create_app(
             context["page_lane"] = context["launcher"].get("page_lane")
         return templates.TemplateResponse(request=request, name="partials/launcher.html", context=context)
 
+    @app.post("/actions/activation/items/{item_id}", response_class=HTMLResponse)
+    async def activation_item_action(
+        request: Request,
+        item_id: str,
+        status: str = Form(default="completed"),
+    ) -> HTMLResponse:
+        repository: PortalRepository = request.app.state.repository
+        activation_catalog = repository.load_activation_checklist()
+        write_activation_item_state(request.session, activation_catalog, item_id=item_id, status=status)
+        context = await build_activation_panel_context(request)
+        return templates.TemplateResponse(request=request, name="partials/activation.html", context=context)
+
+    @app.post("/actions/activation/override", response_class=HTMLResponse)
+    async def activation_override_action(
+        request: Request,
+        enabled: bool = Form(default=True),
+    ) -> HTMLResponse:
+        repository: PortalRepository = request.app.state.repository
+        activation_catalog = repository.load_activation_checklist()
+        set_activation_override(request.session, activation_catalog, enabled=enabled)
+        context = await build_activation_panel_context(request)
+        return templates.TemplateResponse(request=request, name="partials/activation.html", context=context)
+
     @app.get("/launcher/go/{item_id}")
     async def launcher_go(request: Request, item_id: str) -> RedirectResponse:
         context = await build_launcher_panel_context(request)
         entry = context["launcher"]["entry_index"].get(item_id)
         if entry is None:
-            return RedirectResponse(url="/", status_code=303)
+            return RedirectResponse(url="/#activation", status_code=303)
         record_launcher_recent(request.session, item_id, set(context["launcher"]["entry_index"]))
         return RedirectResponse(url=str(entry["href"]), status_code=303)
 
@@ -2162,6 +2654,20 @@ def create_app(
         session = await ensure_session(request)
         gateway = request.app.state.gateway_client
         broker: EventBroker = request.app.state.event_broker
+        activation_context = (await build_activation_panel_context(request))["activation"]
+        action_id = "restart" if restart_only else "deploy"
+        if action_locked(action_id, activation_context):
+            context = {
+                "request": request,
+                "result": {
+                    "title": f"{'Restart' if restart_only else 'Deploy'}: {service_id}",
+                    "status": "blocked",
+                    "detail": "Complete the activation checklist or explicitly reveal advanced tools for this session before launching mutating service actions.",
+                    "tone": "warn",
+                    "timestamp": isoformat(utc_now()),
+                },
+            }
+            return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
         try:
             result = await gateway.trigger_deploy(
                 service_id,
@@ -2202,6 +2708,19 @@ def create_app(
         session = await ensure_session(request)
         gateway = request.app.state.gateway_client
         broker: EventBroker = request.app.state.event_broker
+        activation_context = (await build_activation_panel_context(request))["activation"]
+        if action_locked("rotate_secret", activation_context):
+            context = {
+                "request": request,
+                "result": {
+                    "title": f"Rotate secret: {service_id}",
+                    "status": "blocked",
+                    "detail": "Complete the activation checklist or explicitly reveal advanced tools for this session before rotating production secrets.",
+                    "tone": "warn",
+                    "timestamp": isoformat(utc_now()),
+                },
+            }
+            return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
         try:
             result = await gateway.rotate_secret(
                 service_id,
@@ -2236,6 +2755,25 @@ def create_app(
         session = await ensure_session(request)
         gateway = request.app.state.gateway_client
         broker: EventBroker = request.app.state.event_broker
+        dashboard_context = await build_dashboard_context(request)
+        runbook_lookup = {
+            str(item.get("id")): item
+            for item in [*dashboard_context.get("runbooks", []), *dashboard_context.get("locked_runbooks", [])]
+            if isinstance(item, dict)
+        }
+        runbook_model = runbook_lookup.get(runbook_id, {})
+        if runbook_locked(runbook_model, dashboard_context["activation"]):
+            context = {
+                "request": request,
+                "result": {
+                    "title": f"Runbook: {runbook_id}",
+                    "status": "blocked",
+                    "detail": "This mutating runbook stays disabled until the activation checklist is complete or advanced tools are explicitly revealed for the session.",
+                    "tone": "warn",
+                    "timestamp": isoformat(utc_now()),
+                },
+            }
+            return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
         try:
             parsed_parameters = json.loads(parameters) if parameters.strip() else {}
             if not isinstance(parsed_parameters, dict):

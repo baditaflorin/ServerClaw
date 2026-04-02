@@ -80,6 +80,24 @@ The app now includes a `Guided Onboarding` launcher:
 - `Onboard Admin Or Operator` and `Onboard Viewer` give role-specific walkthroughs
 - dismissed tours can be resumed from the same launcher without restarting the page
 
+Provisioning access is no longer the end of the browser-first onboarding path.
+After the Windmill-backed identity step succeeds, direct the operator to
+`https://ops.lv3.org#activation` so they complete the ADR 0310 first-run
+activation checklist before they use advanced launcher destinations or live
+mutating controls.
+
+## Post-Provisioning Activation
+
+Once the operator exists in Keycloak and the governed backend has returned the
+bootstrap credentials:
+
+1. have the operator sign in through the protected portal path at `ops.lv3.org`
+2. review the **First-Run Activation** panel at `#activation`
+3. complete the linked onboarding and portal-orientation checklist items
+4. use the runbook launcher's validation-gate status path as the safe first task
+5. only reveal advanced tools for the session when a supervised early bypass is
+   actually required
+
 ## Controller-Local Fallback
 
 If you need the controller-side script path, forward the guest-host OpenBao automation listener first:

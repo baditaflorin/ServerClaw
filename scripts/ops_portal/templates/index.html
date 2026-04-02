@@ -4,6 +4,33 @@
 {% block title %}LV3 Interactive Ops Portal{% endblock %}
 
 {% block content %}
+  <section id="activation" class="pf-v5-c-page__main-section portal-section">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Operator Readiness</p>
+        <h2>Checklist-driven first-run activation and guarded reveal</h2>
+      </div>
+      <div class="section-meta">
+        <span class="pill">{{ activation.required_item_completed }}/{{ activation.required_item_total }} required items</span>
+        <span class="pill">
+          {% if activation.advanced_unlocked %}
+          Advanced tools revealed
+          {% else %}
+          Advanced tools locked
+          {% endif %}
+        </span>
+      </div>
+    </div>
+    <div
+      id="activation-panel"
+      class="shell-live-panel"
+      hx-get="/partials/activation"
+      hx-trigger="load"
+      hx-swap="outerHTML">
+      {% include "partials/activation.html" %}
+    </div>
+  </section>
+
   <section id="overview" class="pf-v5-c-page__main-section portal-section">
     <div class="section-head">
       <div>
