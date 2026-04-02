@@ -15500,8 +15500,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0304-mainline
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0304-live-apply.md
+    worktree_path: .worktrees/ws-0304-mainline
+    doc: docs/workstreams/ws-0304-live-apply.md
     depends_on:
       - adr-0043-compose-based-service-layout
       - adr-0044-openbao-as-secrets-manager
@@ -15516,7 +15516,7 @@ workstreams:
       - docs/adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
       - docs/runbooks/configure-atlas.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.143.md
+      - docs/release-notes/0.177.144.md
       - docs/adr/.index.yaml
       - docs/diagrams/agent-coordination-map.excalidraw
       - RELEASE.md
@@ -15551,19 +15551,19 @@ workstreams:
       - tests/test_config_merge_windmill.py
       - receipts/live-applies/
       - receipts/live-applies/2026-04-02-adr-0304-atlas-mainline-live-apply.json
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-step-ca-r4-0.177.142.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-openbao-r3-0.177.142.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-windmill-r6-0.177.142.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-refresh-snapshots-r4-0.177.142.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-validate-r4-0.177.142.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-lint-r3-0.177.142.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-drift-check-r4-0.177.142.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-drift-check-seeded-r4-0.177.142.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-targeted-pytest-r3-0.177.142.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r3-0.177.143.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-generated-docs-r1-0.177.143.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-agent-standards-r3-0.177.143.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-diff-check-r2-0.177.143.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-step-ca-r6-0.177.142.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-openbao-r4-0.177.142.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-windmill-r7-0.177.142.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-refresh-snapshots-r5-0.177.142.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-validate-r5-0.177.142.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-lint-r4-0.177.142.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-drift-check-r5-0.177.142.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-drift-check-seeded-r5-0.177.142.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-targeted-pytest-r4-0.177.142.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r4-0.177.144.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-generated-docs-r2-0.177.144.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-agent-standards-r4-0.177.144.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-diff-check-r3-0.177.144.txt
       - receipts/atlas-drift/
     ownership_manifest:
       owned_surfaces:
@@ -15583,7 +15583,7 @@ workstreams:
             - docs/adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
             - docs/runbooks/configure-atlas.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.143.md
+            - docs/release-notes/0.177.144.md
             - docs/diagrams/agent-coordination-map.excalidraw
             - RELEASE.md
             - VERSION
@@ -15617,19 +15617,19 @@ workstreams:
             - tests/test_config_merge_windmill.py
             - receipts/live-applies/
             - receipts/live-applies/2026-04-02-adr-0304-atlas-mainline-live-apply.json
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-step-ca-r4-0.177.142.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-openbao-r3-0.177.142.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-windmill-r6-0.177.142.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-refresh-snapshots-r4-0.177.142.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-validate-r4-0.177.142.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-lint-r3-0.177.142.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-drift-check-r4-0.177.142.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-drift-check-seeded-r4-0.177.142.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-targeted-pytest-r3-0.177.142.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r3-0.177.143.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-generated-docs-r1-0.177.143.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-agent-standards-r3-0.177.143.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-diff-check-r2-0.177.143.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-step-ca-r6-0.177.142.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-openbao-r4-0.177.142.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-windmill-r7-0.177.142.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-refresh-snapshots-r5-0.177.142.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-validate-r5-0.177.142.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-lint-r4-0.177.142.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-drift-check-r5-0.177.142.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-drift-check-seeded-r5-0.177.142.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-targeted-pytest-r4-0.177.142.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r4-0.177.144.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-generated-docs-r2-0.177.144.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-agent-standards-r4-0.177.144.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-diff-check-r3-0.177.144.txt
             - receipts/atlas-drift/
           mode: exclusive
     ready_to_merge: true
@@ -15637,7 +15637,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0304 by adding Atlas-backed schema validation, pre-migration linting, snapshot refresh, and verified Windmill drift detection with OpenBao-delivered runtime credentials on the latest mainline replay
       release_bump: patch
-      included_in_repo_version: 0.177.143
+      included_in_repo_version: 0.177.144
       latest_receipts:
         database_schema: 2026-04-02-adr-0304-atlas-mainline-live-apply
   - id: ws-0307-0308-operator-adrs
