@@ -16177,6 +16177,38 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
       - tests/test_common_docker_bridge_chains_helper.py
       - tests/test_docker_runtime_role.py
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws0325_investigation_doc
+          paths:
+            - docs/workstreams/ws-0325-service-uptime-investigation.md
+          mode: exclusive
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: ws0325_bridge_chain_decision
+          paths:
+            - docs/adr/0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
+            - docs/runbooks/docker-runtime-bridge-chain-loss.md
+          mode: exclusive
+        - id: ws0325_bridge_chain_helper
+          paths:
+            - roles/common/tasks/docker_bridge_chains.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+            - tests/test_common_docker_bridge_chains_helper.py
+            - tests/test_docker_runtime_role.py
+          mode: exclusive
+    canonical_truth:
+      changelog_entry: hardens shared docker-runtime bridge-chain checks so missing DOCKER and DOCKER-FORWARD chains fail safe before a host-wide Docker restart, records ADR 0329, and adds the runtime bridge-chain loss runbook used to diagnose the 2026-04-01 uptime incident on docker-runtime-lv3
+      release_bump: patch
+      included_in_repo_version: 0.177.136
     blockers: []
     ready_to_merge: true
     live_applied: false
