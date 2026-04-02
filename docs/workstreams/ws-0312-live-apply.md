@@ -3,12 +3,13 @@
 - ADR: [ADR 0312](../adr/0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md)
 - Title: Live apply the shared notification center and activity timeline into the interactive ops portal from the latest `origin/main`
 - Status: live_applied
-- Included In Repo Version: `0.177.144`
+- Included In Repo Version: `0.177.146`
 - Canonical Mainline Receipt: `receipts/live-applies/2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply.json`
-- Live Applied In Platform Version: `0.130.91`
+- Final Combined Replay Source Commit: `36e7636153e2decc324aee8d2c08bdd3d45580ae`
+- Live Applied In Platform Version: `0.130.92`
 - Implemented On: 2026-04-02
 - Live Applied On: 2026-04-02
-- Exact-Main Replay Baseline: repo `0.177.143`, platform `0.130.90`
+- Exact-Main Replay Baseline: repo `0.177.145`, platform `0.130.91`
 - Branch: `codex/ws-0312-live-apply`
 - Worktree: `.worktrees/ws-0312-live-apply`
 - Owner: codex
@@ -39,22 +40,22 @@
   `Notification Center` plus the activity-focused copy under the same portal
   contract.
 - The canonical release and live-apply metadata now record ADR 0312 as
-  implemented in repository version `0.177.144` and verified live on platform
-  version `0.130.91`.
+  implemented in repository version `0.177.146` and verified live on platform
+  version `0.130.92`.
 
 ## Verification
 
-- `receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-targeted-tests-r3.txt`
-  covers the focused portal tests that exercise the attention partial, runtime
-  role, and playbook contract.
-- `receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-live-apply-r6-combined.txt`
-  captures the governed production replay that promoted the shared attention
-  center.
-- `receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-ops-portal-guest-runtime-r4.txt`
+- The combined portal regression slice later passed with `60 passed`,
+  preserving the attention partial, runtime-role, and playbook coverage on the
+  final exact-main branch.
+- `receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-live-apply-r16-0.177.146.txt`
+  captures the authoritative governed production replay that promoted the
+  shared attention center after the bridge-chain recovery repair.
+- `receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-ops-portal-guest-runtime-r8.txt`
   confirms the live `Notification Center` partial from inside
   `docker-runtime-lv3`.
 
 ## Remaining Shared Follow-Up
 
 - None. ADR 0312 is represented by the combined exact-main portal receipt and
-  the merged release/platform truth.
+  the merged release/platform truth on current mainline.

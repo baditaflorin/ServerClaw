@@ -2,8 +2,8 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.177.144
-- Implemented In Platform Version: 0.130.91
+- Implemented In Repo Version: 0.177.146
+- Implemented In Platform Version: 0.130.92
 - Implemented On: 2026-04-02
 - Date: 2026-03-31
 
@@ -74,6 +74,21 @@ The first implementation should aggregate from:
   the full deployment-history portal.
 - This ADR does not require all third-party products to stop showing their own
   native alerts.
+
+## Implemented Live Replay
+
+- The refreshed exact-main replay on 2026-04-02 used source commit
+  `36e7636153e2decc324aee8d2c08bdd3d45580ae`, cut repository version
+  `0.177.146`, advanced the platform lineage from `0.130.91` to `0.130.92`,
+  and recorded the shared-shell proof in
+  `receipts/live-applies/2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply.json`
+  because ADR 0312 shipped in the same combined portal bundle.
+- Guest-local verification confirmed the live `Notification Center` partial and
+  the dashboard-level `Attention Center`, `Runbook Launcher`, and
+  `Activity Timeline` markers from inside `docker-runtime-lv3`.
+- The same correction loop evidence preserves the first failed exact-main
+  replay and the successful final rerun after the Docker bridge-chain recovery
+  repair.
 
 ## Related ADRs
 

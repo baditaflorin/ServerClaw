@@ -173,7 +173,7 @@ drawer strings from the guest-local runtime:
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 \
-  'curl -fsS http://127.0.0.1:8092/ | rg "Contextual Help|Live apply|Escalation Path"'
+  'curl -fsS http://127.0.0.1:8092/ | grep -E "Contextual Help|Live apply|Escalation Path"'
 ```
 
 ## Publication Boundary
@@ -303,7 +303,7 @@ Guest-local verification should include:
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 \
-  'curl -fsS http://127.0.0.1:8092/entry?neutral=1 | rg "Journey-Aware Start Surface|Pin as home|Skip for now"'
+  'curl -fsS http://127.0.0.1:8092/entry?neutral=1 | grep -E "Journey-Aware Start Surface|Pin as home|Skip for now"'
 ```
 
 ## First-Run Activation Checklist
@@ -409,7 +409,7 @@ Operator flow:
 Internal verification from a trusted network path:
 
 ```bash
-curl -sf http://10.10.10.20:8092/partials/overview | rg 'Attested|Declared-live'
+curl -sf http://10.10.10.20:8092/partials/overview | grep -E 'Attested|Declared-live'
 curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/attestation
 ```
 
