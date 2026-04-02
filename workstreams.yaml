@@ -16,6 +16,73 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0316-live-apply
+    adr: "0316"
+    title: Live apply journey analytics and onboarding success scorecards from latest origin/main
+    status: in-progress
+    owner: codex
+    branch: codex/ws-0316-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0316-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0316-live-apply.md
+    depends_on:
+      - adr-0242-guided-human-onboarding-via-shepherd-tours
+      - adr-0281-glitchtip-as-the-sentry-compatible-application-error-tracker
+      - adr-0283-plausible-analytics-as-the-privacy-first-web-traffic-analytics-layer
+      - adr-0310-first-run-activation-checklists-and-progressive-capability-reveal
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0316-live-apply.md
+      - docs/adr/0316-journey-analytics-and-onboarding-success-scorecards.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-windmill.md
+      - docs/runbooks/configure-plausible.md
+      - docs/runbooks/windmill-operator-access-admin.md
+      - inventory/host_vars/proxmox_florin.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/**
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+      - config/windmill/scripts/**
+      - scripts/journey_scorecards.py
+      - tests/test_journey_scorecards.py
+      - tests/test_windmill_operator_admin_app.py
+      - receipts/live-applies/2026-04-02-adr-0316-journey-analytics-live-apply.json
+      - receipts/live-applies/evidence/*ws-0316-*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0316_docs
+          paths:
+            - docs/workstreams/ws-0316-live-apply.md
+            - docs/adr/0316-journey-analytics-and-onboarding-success-scorecards.md
+            - docs/runbooks/configure-windmill.md
+            - docs/runbooks/configure-plausible.md
+            - docs/runbooks/windmill-operator-access-admin.md
+            - receipts/live-applies/2026-04-02-adr-0316-journey-analytics-live-apply.json
+            - receipts/live-applies/evidence/*ws-0316-*
+          mode: exclusive
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: plausible_and_windmill_contracts
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/**
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+            - config/windmill/scripts/**
+            - scripts/journey_scorecards.py
+            - tests/test_journey_scorecards.py
+            - tests/test_windmill_operator_admin_app.py
+          mode: shared_contract
+          contract: journey-analytics-contract-v1
+    ready_to_merge: false
+    live_applied: false
+    blockers: []
   - id: ws-0296-education-refresh
     adr: "0224"
     title: Refresh education_wemeshup from upstream main through a named repo-deploy profile

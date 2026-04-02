@@ -166,6 +166,7 @@ windmill_worker_repo_checkout_compat_root: /Users/live/Documents/GITHUB_PROJECTS
 windmill_worker_secret_manifest_path: "{{ playbook_execution_controller_secret_manifest_path }}"
 windmill_worker_secret_mirror_ids:
   - bootstrap_ssh_private_key
+  - glitchtip_platform_findings_event_url
   - nats_jetstream_admin_password
   - ntfy_alertmanager_password
 windmill_worker_proxmox_api_token_payload_dir: "{{ windmill_worker_repo_checkout_host_path }}/.local/proxmox-api"
@@ -191,6 +192,8 @@ windmill_worker_repo_mutable_directories:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/integration-tests"
     mode: "0777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/stage-smoke-suites"
+    mode: "0777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/state/journey-analytics"
     mode: "0777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/logs"
     mode: "0777"
@@ -626,6 +629,16 @@ windmill_seed_scripts:
     language: python3
     summary: Operator access inventory
     description: Repo-managed helper that runs the operator inventory report and returns structured JSON for the admin app.
+  - path: f/lv3/operator_journey_event
+    local_file: "{{ windmill_seed_script_root_local_dir }}/operator-journey-event.py"
+    language: python3
+    summary: ADR 0316 journey milestone recorder
+    description: Repo-managed helper that records privacy-preserving onboarding and recovery milestones for the operator admin app.
+  - path: f/lv3/operator_journey_scorecards
+    local_file: "{{ windmill_seed_script_root_local_dir }}/operator-journey-scorecards.py"
+    language: python3
+    summary: ADR 0316 onboarding success scorecards
+    description: Repo-managed helper that renders the current onboarding success scorecards and Plausible route aggregates from the worker checkout.
   - path: f/lv3/operator_update_notes
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/operator-update-notes.py"
     language: python3
@@ -868,6 +881,17 @@ windmill_seed_schedules:
     enabled: true
     summary: ADR 0108 quarterly access review
     description: Repo-managed Monday trigger that only delivers the ADR 0108 quarterly access review on the first Monday of January, April, July, and October.
+    no_flow_overlap: true
+  - path: f/lv3/operator_journey_scorecards_daily
+    schedule: "0 15 8 * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/operator_journey_scorecards
+    args:
+      window_days: 30
+      write_latest: true
+    enabled: true
+    summary: ADR 0316 onboarding success scorecards
+    description: Repo-managed daily scorecard refresh that keeps the latest onboarding journey report current in the worker checkout.
     no_flow_overlap: true
   - path: f/lv3/k6_load_weekly
     schedule: "0 0 5 * * 7"

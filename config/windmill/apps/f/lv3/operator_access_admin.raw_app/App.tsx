@@ -37,6 +37,18 @@ import {
 } from "./schemas";
 import { backend } from "./wmill";
 import {
+  CHECKLIST_ITEMS,
+  canonicalJourneyUrl,
+  completeChecklistItem,
+  createFlowId,
+  emitJourneyEvent,
+  readJourneyProgress,
+  recordInitialSessionStart,
+  type ChecklistItemId,
+  type JourneyProgress,
+  type JourneyEventInput,
+} from "./journeyAnalytics";
+import {
   readTourProgress,
   startOperatorAccessTour,
   tourIntentLabel,
@@ -198,6 +210,65 @@ const RUNBOOK_URLS = {
   validation: `${DOCS_BASE_URL}/runbooks/validate-repository-automation/`,
 } as const;
 
+type JourneyScorecardMetric = {
+  status: string;
+  [key: string]: unknown;
+};
+
+type JourneyScorecardsReport = {
+  status: string;
+  generated_at: string;
+  population: {
+    visitors: number;
+    sessions: number;
+    events: number;
+  };
+  scorecards: {
+    time_to_first_safe_action: JourneyScorecardMetric;
+    onboarding_checklist_completion: JourneyScorecardMetric;
+    search_to_destination_success: JourneyScorecardMetric;
+    alert_handoffs: JourneyScorecardMetric;
+    resumable_task_completion: JourneyScorecardMetric;
+    help_to_successful_recovery: JourneyScorecardMetric;
+  };
+  route_aggregates: {
+    status: string;
+    pageviews?: Record<string, number>;
+    reason?: string;
+  };
+  failure_signals: {
+    glitchtip_events: number;
+  };
+};
+
+type SearchFlowState = {
+  flowId: string;
+  startedAt: number;
+  queryBucket: string;
+};
+
+type HelpFlowState = {
+  flowId: string;
+  openedAt: number;
+  context: string;
+};
+
+type JourneyAlertState = {
+  flowId: string;
+  source: string;
+  fingerprint: string;
+  message: string;
+  startedAt: number;
+  acknowledgedAt?: number;
+};
+
+type TourFlowState = {
+  flowId: string;
+  intent: TourIntent;
+  startedAt: number;
+  resumed: boolean;
+};
+
 const operatorGridTheme = themeQuartz.withParams({
   spacing: 7,
   accentColor: "#a5411c",
@@ -212,6 +283,7 @@ const queryKeys = {
   operatorRoster: () => ["operator-roster"] as const,
   operatorInventory: (operatorId: string) => ["operator-inventory", operatorId] as const,
   operatorInventoryRoot: () => ["operator-inventory"] as const,
+  operatorJourneyScorecards: () => ["operator-journey-scorecards"] as const,
 };
 
 function ToolbarButton({ label, onClick, active = false, disabled = false }: ToolbarButtonProps) {
@@ -523,6 +595,48 @@ function actionHelpLinks(title: string): GuidanceLink[] {
   return baseHelpLinks();
 }
 
+function formatDurationSeconds(value: unknown): string {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    return "n/a";
+  }
+  if (value < 60) {
+    return `${Math.round(value)}s`;
+  }
+  const minutes = value / 60;
+  if (minutes < 60) {
+    return `${minutes.toFixed(1)}m`;
+  }
+  return `${(minutes / 60).toFixed(1)}h`;
+}
+
+function bucketSearchLength(value: string): string {
+  const length = value.trim().length;
+  if (length <= 0) {
+    return "empty";
+  }
+  if (length <= 3) {
+    return "1-3";
+  }
+  if (length <= 8) {
+    return "4-8";
+  }
+  if (length <= 16) {
+    return "9-16";
+  }
+  return "17+";
+}
+
+function assertScorecardsPayload(payload: unknown): JourneyScorecardsReport {
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Windmill returned an invalid journey scorecards payload.");
+  }
+  const candidate = payload as Partial<JourneyScorecardsReport>;
+  if (candidate.status !== "ok" || !candidate.scorecards || !candidate.population) {
+    throw new Error("Windmill returned an incomplete journey scorecards payload.");
+  }
+  return candidate as JourneyScorecardsReport;
+}
+
 async function fetchRoster(): Promise<RosterPayload> {
   const payload = await backend.list_operators({});
   if (!isRosterPayload(payload)) {
@@ -538,6 +652,15 @@ async function fetchInventory(operatorId: string): Promise<InventoryPayload> {
     dry_run: false,
   })) as InventoryPayload;
   return assertActionOk(payload as ActionPayload, "Windmill returned an invalid operator inventory payload.") as InventoryPayload;
+}
+
+async function fetchJourneyScorecards(): Promise<JourneyScorecardsReport> {
+  const payload = await backend.journey_scorecards({
+    window_days: 30,
+    write_latest: true,
+  });
+  const report = (payload as { report?: unknown }).report ?? payload;
+  return assertScorecardsPayload(report);
 }
 
 function FieldShell({
@@ -662,9 +785,21 @@ function App() {
     title: "No action executed yet",
     kind: "idle",
   });
+  const [journeyProgress, setJourneyProgress] = useState<JourneyProgress>(() => readJourneyProgress());
+  const [helpDrawerOpen, setHelpDrawerOpen] = useState(false);
+  const [activeAlert, setActiveAlert] = useState<JourneyAlertState | null>(null);
   const [tourProgress, setTourProgress] = useState<TourProgress>(() => readTourProgress());
   const [tourRunning, setTourRunning] = useState(false);
   const tourRef = useRef<Tour | null>(null);
+  const sessionStartedRef = useRef(false);
+  const searchFlowRef = useRef<SearchFlowState | null>(null);
+  const helpFlowRef = useRef<HelpFlowState | null>(null);
+  const alertFlowRef = useRef<JourneyAlertState | null>(null);
+  const tourFlowRef = useRef<TourFlowState | null>(null);
+  const lastQuickFilterValueRef = useRef("");
+  const lastInventorySuccessRef = useRef(0);
+  const lastActionStateRef = useRef<string>("");
+  const lastAlertFingerprintRef = useRef("");
   const onboardForm = useForm<OnboardFormValues>({
     resolver: zodResolver(onboardFormSchema),
     defaultValues: onboardFormDefaults,
@@ -693,6 +828,13 @@ function App() {
     enabled: selectedOperatorId.length > 0,
     staleTime: 20_000,
     refetchInterval: selectedOperatorId ? 45_000 : false,
+    retry: 1,
+  });
+  const scorecardsQuery = useQuery({
+    queryKey: queryKeys.operatorJourneyScorecards(),
+    queryFn: fetchJourneyScorecards,
+    staleTime: 60_000,
+    refetchInterval: 120_000,
     retry: 1,
   });
 
@@ -819,6 +961,166 @@ function App() {
         ? "Paused"
         : "Ready";
 
+  function recordJourney(input: JourneyEventInput) {
+    emitJourneyEvent(backend, input);
+  }
+
+  function markChecklist(itemId: ChecklistItemId, input: Omit<JourneyEventInput, "eventType" | "checklistItem">) {
+    setJourneyProgress(completeChecklistItem(backend, itemId, input));
+  }
+
+  function openHelpDrawer(context: string) {
+    setHelpDrawerOpen(true);
+    if (helpFlowRef.current) {
+      return;
+    }
+    const flowId = createFlowId();
+    helpFlowRef.current = {
+      flowId,
+      openedAt: Date.now(),
+      context,
+    };
+    recordJourney({
+      eventType: "help_opened",
+      stage: "help",
+      milestone: "drawer_opened",
+      result: "started",
+      flowId,
+      route: canonicalJourneyUrl("/journeys/operator-access-admin/help"),
+      plausible: {
+        pagePath: "/journeys/operator-access-admin/help",
+        eventName: "Journey Help Opened",
+      },
+      properties: {
+        help_context: context,
+      },
+    });
+  }
+
+  function completeHelpFlow(outcome: string) {
+    if (!helpFlowRef.current) {
+      return;
+    }
+    const durationMs = Date.now() - helpFlowRef.current.openedAt;
+    recordJourney({
+      eventType: "help_task_completed",
+      stage: "help",
+      milestone: outcome,
+      result: "success",
+      flowId: helpFlowRef.current.flowId,
+      durationMs,
+      route: canonicalJourneyUrl("/journeys/operator-access-admin/help-success"),
+      plausible: {
+        pagePath: "/journeys/operator-access-admin/help-success",
+        eventName: "Journey Help Completed",
+      },
+      properties: {
+        help_context: helpFlowRef.current.context,
+      },
+    });
+    markChecklist("help_recovery", {
+      stage: "help",
+      milestone: outcome,
+      route: canonicalJourneyUrl("/journeys/operator-access-admin/help-success"),
+      durationMs,
+      properties: {
+        help_context: helpFlowRef.current.context,
+      },
+    });
+    helpFlowRef.current = null;
+    setHelpDrawerOpen(false);
+  }
+
+  function emitAlert(source: string, message: string) {
+    const fingerprint = `${source}:${message}`;
+    if (lastAlertFingerprintRef.current === fingerprint || alertFlowRef.current?.fingerprint === fingerprint) {
+      return;
+    }
+    lastAlertFingerprintRef.current = fingerprint;
+    const alertState: JourneyAlertState = {
+      flowId: createFlowId(),
+      source,
+      fingerprint,
+      message,
+      startedAt: Date.now(),
+    };
+    alertFlowRef.current = alertState;
+    setActiveAlert(alertState);
+    recordJourney({
+      eventType: "alert_emitted",
+      stage: "alert",
+      milestone: source,
+      result: "error",
+      flowId: alertState.flowId,
+      route: canonicalJourneyUrl("/journeys/operator-access-admin/alert"),
+      plausible: {
+        pagePath: "/journeys/operator-access-admin/alert",
+        eventName: "Journey Alert Emitted",
+      },
+      glitchtip: {
+        requested: true,
+        level: "error",
+        message: `Journey alert emitted for ${source}`,
+      },
+      properties: {
+        alert_source: source,
+      },
+    });
+  }
+
+  function acknowledgeActiveAlert() {
+    if (!alertFlowRef.current || alertFlowRef.current.acknowledgedAt) {
+      return;
+    }
+    const acknowledgedAt = Date.now();
+    alertFlowRef.current = {
+      ...alertFlowRef.current,
+      acknowledgedAt,
+    };
+    setActiveAlert(alertFlowRef.current);
+    recordJourney({
+      eventType: "alert_acknowledged",
+      stage: "alert",
+      milestone: alertFlowRef.current.source,
+      result: "acknowledged",
+      flowId: alertFlowRef.current.flowId,
+      durationMs: acknowledgedAt - alertFlowRef.current.startedAt,
+      route: canonicalJourneyUrl("/journeys/operator-access-admin/alert"),
+      plausible: {
+        pagePath: "/journeys/operator-access-admin/alert",
+        eventName: "Journey Alert Acknowledged",
+      },
+      properties: {
+        alert_source: alertFlowRef.current.source,
+      },
+    });
+  }
+
+  function resolveActiveAlert(outcome: string) {
+    if (!alertFlowRef.current) {
+      return;
+    }
+    recordJourney({
+      eventType: "alert_resolved",
+      stage: "alert",
+      milestone: outcome,
+      result: "success",
+      flowId: alertFlowRef.current.flowId,
+      durationMs: Date.now() - alertFlowRef.current.startedAt,
+      route: canonicalJourneyUrl("/journeys/operator-access-admin/alert"),
+      plausible: {
+        pagePath: "/journeys/operator-access-admin/alert",
+        eventName: "Journey Alert Resolved",
+      },
+      properties: {
+        alert_source: alertFlowRef.current.source,
+      },
+    });
+    alertFlowRef.current = null;
+    lastAlertFingerprintRef.current = "";
+    setActiveAlert(null);
+  }
+
   function updateDisplayedOperatorCount(api: GridApi<OperatorRecord>) {
     setDisplayedOperatorCount(api.getDisplayedRowCount());
   }
@@ -922,6 +1224,13 @@ function App() {
   }, [selectedOperator?.id, selectedOperatorNotes]);
 
   useEffect(() => {
+    if (!rosterQuery.isPending && !rosterQuery.isError && !sessionStartedRef.current) {
+      sessionStartedRef.current = true;
+      setJourneyProgress(recordInitialSessionStart(backend));
+    }
+  }, [rosterQuery.isError, rosterQuery.isPending]);
+
+  useEffect(() => {
     setEditorMarkdown(editor, notesMarkdown);
   }, [editor, notesMarkdown]);
 
@@ -933,6 +1242,107 @@ function App() {
     syncGridSelection(api);
     updateDisplayedOperatorCount(api);
   }, [operators, selectedOperatorId]);
+
+  useEffect(() => {
+    const nextValue = quickFilterText.trim();
+    if (nextValue && !lastQuickFilterValueRef.current) {
+      const flowId = createFlowId();
+      searchFlowRef.current = {
+        flowId,
+        startedAt: Date.now(),
+        queryBucket: bucketSearchLength(nextValue),
+      };
+      recordJourney({
+        eventType: "search_started",
+        stage: "search",
+        milestone: "quick_filter_started",
+        result: "started",
+        flowId,
+        route: canonicalJourneyUrl("/journeys/operator-access-admin/search"),
+        plausible: {
+          pagePath: "/journeys/operator-access-admin/search",
+          eventName: "Journey Search Started",
+        },
+        properties: {
+          query_bucket: bucketSearchLength(nextValue),
+        },
+      });
+    }
+    if (!nextValue) {
+      searchFlowRef.current = null;
+    }
+    lastQuickFilterValueRef.current = nextValue;
+  }, [quickFilterText]);
+
+  useEffect(() => {
+    if (inventoryQuery.dataUpdatedAt <= 0 || inventoryQuery.dataUpdatedAt === lastInventorySuccessRef.current) {
+      return;
+    }
+    if (inventoryQuery.status !== "success") {
+      return;
+    }
+    lastInventorySuccessRef.current = inventoryQuery.dataUpdatedAt;
+    if (!journeyProgress.checklist.safe_first_task) {
+      recordJourney({
+        eventType: "safe_task_completed",
+        stage: "safe_first_task",
+        milestone: "inventory_reviewed",
+        result: "success",
+        route: canonicalJourneyUrl("/journeys/operator-access-admin/safe-task"),
+        plausible: {
+          pagePath: "/journeys/operator-access-admin/safe-task",
+          eventName: "Journey Safe Task Completed",
+        },
+        properties: {
+          task: "inventory_review",
+        },
+      });
+      markChecklist("safe_first_task", {
+        stage: "safe_first_task",
+        milestone: "inventory_reviewed",
+        route: canonicalJourneyUrl("/journeys/operator-access-admin/safe-task"),
+        properties: {
+          task: "inventory_review",
+        },
+      });
+    }
+    if (searchFlowRef.current) {
+      const currentSearch = searchFlowRef.current;
+      recordJourney({
+        eventType: "search_destination_opened",
+        stage: "search",
+        milestone: "inventory_destination_opened",
+        result: "success",
+        flowId: currentSearch.flowId,
+        durationMs: Date.now() - currentSearch.startedAt,
+        route: canonicalJourneyUrl("/journeys/operator-access-admin/search-result"),
+        plausible: {
+          pagePath: "/journeys/operator-access-admin/search-result",
+          eventName: "Journey Search Success",
+        },
+        properties: {
+          query_bucket: currentSearch.queryBucket,
+        },
+      });
+      markChecklist("search_success", {
+        stage: "search",
+        milestone: "inventory_destination_opened",
+        route: canonicalJourneyUrl("/journeys/operator-access-admin/search-result"),
+        durationMs: Date.now() - currentSearch.startedAt,
+        properties: {
+          query_bucket: currentSearch.queryBucket,
+        },
+      });
+      searchFlowRef.current = null;
+    }
+    if (helpFlowRef.current) {
+      completeHelpFlow("inventory_reviewed");
+    }
+    if (alertFlowRef.current) {
+      resolveActiveAlert("inventory_refreshed");
+    }
+    void queryClient.invalidateQueries({ queryKey: queryKeys.operatorJourneyScorecards() });
+  }, [inventoryQuery.dataUpdatedAt, inventoryQuery.status, journeyProgress.checklist.safe_first_task, queryClient]);
 
   useEffect(() => {
     return () => {
@@ -957,6 +1367,35 @@ function App() {
       tourRef.current.steps.forEach((step) => step.destroy());
       tourRef.current = null;
     }
+    const activeTourFlow =
+      options.resume && tourFlowRef.current
+        ? {
+            ...tourFlowRef.current,
+            resumed: true,
+          }
+        : {
+            flowId: createFlowId(),
+            intent,
+            startedAt: Date.now(),
+            resumed: false,
+          };
+    tourFlowRef.current = activeTourFlow;
+    recordJourney({
+      eventType: options.resume ? "tour_resumed" : "tour_started",
+      stage: "orientation",
+      milestone: intent,
+      result: options.resume ? "resumed" : "started",
+      flowId: activeTourFlow.flowId,
+      route: canonicalJourneyUrl(options.resume ? "/journeys/operator-access-admin/resume" : "/journeys/operator-access-admin/start"),
+      plausible: {
+        pagePath: options.resume ? "/journeys/operator-access-admin/resume" : "/journeys/operator-access-admin/start",
+        eventName: options.resume ? "Journey Tour Resumed" : "Journey Tour Started",
+      },
+      properties: {
+        tour_intent: intent,
+        auto_prompted: shouldMarkAutoPrompted,
+      },
+    });
     tourRef.current = startOperatorAccessTour({
       intent,
       autoPrompted: shouldMarkAutoPrompted,
@@ -967,7 +1406,63 @@ function App() {
         selectedOperatorStatus: selectedOperator?.status ?? null,
         hasOperators: operators.length > 0,
       },
-      onProgress: setTourProgress,
+      onProgress: (progress) => {
+        setTourProgress(progress);
+        if (!tourFlowRef.current) {
+          return;
+        }
+        if (progress.lastOutcome === "dismissed") {
+          recordJourney({
+            eventType: "tour_dismissed",
+            stage: "orientation",
+            milestone: intent,
+            result: "dismissed",
+            flowId: tourFlowRef.current.flowId,
+            durationMs: Date.now() - tourFlowRef.current.startedAt,
+            route: canonicalJourneyUrl("/journeys/operator-access-admin/resume"),
+            plausible: {
+              pagePath: "/journeys/operator-access-admin/resume",
+              eventName: "Journey Tour Paused",
+            },
+            properties: {
+              tour_intent: intent,
+            },
+          });
+          return;
+        }
+        if (progress.lastOutcome === "completed") {
+          recordJourney({
+            eventType: "tour_completed",
+            stage: "orientation",
+            milestone: intent,
+            result: "success",
+            flowId: tourFlowRef.current.flowId,
+            durationMs: Date.now() - tourFlowRef.current.startedAt,
+            route: canonicalJourneyUrl("/journeys/operator-access-admin/checklist"),
+            plausible: {
+              pagePath: "/journeys/operator-access-admin/checklist",
+              eventName: "Journey Tour Completed",
+            },
+            properties: {
+              tour_intent: intent,
+              resumed: tourFlowRef.current.resumed,
+            },
+          });
+          markChecklist("orientation", {
+            stage: "orientation",
+            milestone: intent,
+            route: canonicalJourneyUrl("/journeys/operator-access-admin/checklist"),
+            durationMs: Date.now() - tourFlowRef.current.startedAt,
+            properties: {
+              tour_intent: intent,
+              resumed: tourFlowRef.current.resumed,
+            },
+          });
+          if (helpFlowRef.current) {
+            completeHelpFlow("tour_completed");
+          }
+        }
+      },
       onRunningChange: setTourRunning,
     });
   }
@@ -977,6 +1472,39 @@ function App() {
       launchTour("first_run", { autoPrompted: true });
     }
   }, [rosterQuery.isError, rosterQuery.isPending, tourProgress.autoPrompted, tourRunning]);
+
+  useEffect(() => {
+    if (rosterQuery.error) {
+      emitAlert("roster", getErrorMessage(rosterQuery.error));
+    }
+  }, [rosterQuery.error]);
+
+  useEffect(() => {
+    if (inventoryQuery.error) {
+      emitAlert("inventory", getErrorMessage(inventoryQuery.error));
+    }
+  }, [inventoryQuery.error]);
+
+  useEffect(() => {
+    const fingerprint = `${actionResult.kind}:${actionResult.updatedAt ?? 0}:${actionResult.title}`;
+    if (fingerprint === lastActionStateRef.current) {
+      return;
+    }
+    lastActionStateRef.current = fingerprint;
+    if (actionResult.kind === "error" && actionResult.error) {
+      emitAlert("mutation", actionResult.error);
+      return;
+    }
+    if (actionResult.kind === "success") {
+      if (helpFlowRef.current) {
+        completeHelpFlow("mutation_success");
+      }
+      if (alertFlowRef.current) {
+        resolveActiveAlert("mutation_success");
+      }
+      void queryClient.invalidateQueries({ queryKey: queryKeys.operatorJourneyScorecards() });
+    }
+  }, [actionResult.error, actionResult.kind, actionResult.title, actionResult.updatedAt, queryClient]);
 
   function selectOperator(nextId: string) {
     if (nextId !== selectedOperatorId && notesDirty && !window.confirm("Discard unsaved note edits for the current operator?")) {
@@ -1219,6 +1747,15 @@ function App() {
           toneClass: "pillNeutral",
           detail: "Select an operator to start live inventory polling.",
         };
+  const scorecardsFeedback = getQueryFeedback(
+    scorecardsQuery.isPending,
+    scorecardsQuery.isFetching,
+    scorecardsQuery.isError,
+    scorecardsQuery.isStale,
+    scorecardsQuery.dataUpdatedAt,
+    scorecardsQuery.failureCount,
+    "Journey scorecards refresh every 120 seconds and combine worker receipts with Plausible route aggregates.",
+  );
   const actionResultPreview =
     actionResult.kind === "error"
       ? prettyJson({ status: "error", message: actionResult.error })
@@ -1733,6 +2270,18 @@ function App() {
     validationIssues,
   ]);
 
+  const checklistCompletedCount = CHECKLIST_ITEMS.filter((item) => journeyProgress.checklist[item.id]).length;
+  const checklistCompletionRate = Number(
+    scorecardsQuery.data?.scorecards.onboarding_checklist_completion.completion_rate ?? 0,
+  );
+  const medianSafeAction = formatDurationSeconds(
+    scorecardsQuery.data?.scorecards.time_to_first_safe_action.median_seconds,
+  );
+  const resumableCompletionRate = Number(
+    scorecardsQuery.data?.scorecards.resumable_task_completion.completion_rate ?? 0,
+  );
+  const routePageviews = scorecardsQuery.data?.route_aggregates.pageviews ?? {};
+
   return (
     <div className="shell">
       <section className="hero">
@@ -1757,6 +2306,18 @@ function App() {
           <div className="heroCard stat">
             <span className="statLabel">Inactive</span>
             <span className="statValue">{rosterQuery.data?.inactive_count ?? "…"}</span>
+          </div>
+          <div className="heroCard stat">
+            <span className="statLabel">Checklist Completion</span>
+            <span className="statValue">{checklistCompletionRate.toFixed(1)}%</span>
+          </div>
+          <div className="heroCard stat">
+            <span className="statLabel">Median Safe Action</span>
+            <span className="statValue">{medianSafeAction}</span>
+          </div>
+          <div className="heroCard stat">
+            <span className="statLabel">Resume Success</span>
+            <span className="statValue">{resumableCompletionRate.toFixed(1)}%</span>
           </div>
         </div>
       </section>
@@ -1804,6 +2365,9 @@ function App() {
           <button className="buttonGhost" onClick={() => launchTour("inventory")} disabled={tourRunning}>
             Review Inventory
           </button>
+          <button className="buttonGhost" onClick={() => openHelpDrawer("guided_onboarding")} disabled={tourRunning}>
+            Open Help Drawer
+          </button>
         </div>
         <p className="tourFootnote">
           Need the full operating procedure?{" "}
@@ -1813,6 +2377,25 @@ function App() {
           .
         </p>
       </section>
+
+      {activeAlert ? (
+        <section className="banner bannerError alertBanner">
+          <div>
+            <strong>Journey alert:</strong> {activeAlert.message}
+          </div>
+          <div className="toolbar">
+            <button className="buttonGhost" type="button" onClick={acknowledgeActiveAlert}>
+              {activeAlert.acknowledgedAt ? "Acknowledged" : "Acknowledge"}
+            </button>
+            <button className="buttonGhost" type="button" onClick={() => openHelpDrawer("alert_recovery")}>
+              Open Help Drawer
+            </button>
+            <button className="buttonGhost" type="button" onClick={() => void rosterQuery.refetch()}>
+              Retry Roster
+            </button>
+          </div>
+        </section>
+      ) : null}
 
       <StateGuidanceCard state={pageState} eyebrow="ADR 0315 Page Guidance" />
 
@@ -2041,6 +2624,160 @@ function App() {
         </div>
 
         <aside className="sidebar">
+          <section className="panel scorecardPanel">
+            <div className="panelHeader">
+              <div>
+                <h3>Onboarding Success Scorecard</h3>
+                <p>
+                  Privacy-preserving ADR 0316 scorecards combine browser milestones, governed worker receipts,
+                  Plausible route aliases, and Glitchtip failure signals.
+                </p>
+              </div>
+              <div className="toolbar">
+                <button
+                  className="buttonGhost"
+                  type="button"
+                  onClick={() => void scorecardsQuery.refetch()}
+                  disabled={scorecardsQuery.isFetching}
+                >
+                  {scorecardsQuery.isFetching ? "Refreshing…" : "Refresh"}
+                </button>
+              </div>
+            </div>
+
+            <div className="statusRow">
+              <span className={`pill ${scorecardsFeedback.toneClass}`}>{scorecardsFeedback.label}</span>
+              <span className="statusMeta">{scorecardsFeedback.detail}</span>
+            </div>
+
+            <div className="scorecardSummary">
+              <div className="scorecardMetric">
+                <span className="statLabel">This Browser</span>
+                <strong>
+                  {checklistCompletedCount}/{CHECKLIST_ITEMS.length}
+                </strong>
+              </div>
+              <div className="scorecardMetric">
+                <span className="statLabel">Visitors</span>
+                <strong>{scorecardsQuery.data?.population.visitors ?? 0}</strong>
+              </div>
+              <div className="scorecardMetric">
+                <span className="statLabel">Glitchtip Signals</span>
+                <strong>{scorecardsQuery.data?.failure_signals.glitchtip_events ?? 0}</strong>
+              </div>
+            </div>
+
+            <div className="checklistList">
+              {CHECKLIST_ITEMS.map((item) => {
+                const completedAt = journeyProgress.checklist[item.id];
+                return (
+                  <div key={item.id} className="checklistItem">
+                    <div>
+                      <strong>{item.title}</strong>
+                      <p>{item.hint}</p>
+                    </div>
+                    <div className="checklistMeta">
+                      <span className={`pill ${completedAt ? "pillSuccess" : "pillWarning"}`}>
+                        {completedAt ? "Complete" : "Pending"}
+                      </span>
+                      <span className="muted">{completedAt ? formatDate(completedAt) : "Not yet completed"}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="scorecardGrid">
+              <div className="scorecardMetric">
+                <span className="statLabel">Search Success</span>
+                <strong>
+                  {Number(scorecardsQuery.data?.scorecards.search_to_destination_success.success_rate ?? 0).toFixed(1)}%
+                </strong>
+              </div>
+              <div className="scorecardMetric">
+                <span className="statLabel">Alert Resolution</span>
+                <strong>
+                  {formatDurationSeconds(scorecardsQuery.data?.scorecards.alert_handoffs.median_resolution_seconds)}
+                </strong>
+              </div>
+              <div className="scorecardMetric">
+                <span className="statLabel">Help To Success</span>
+                <strong>
+                  {Number(scorecardsQuery.data?.scorecards.help_to_successful_recovery.success_rate ?? 0).toFixed(1)}%
+                </strong>
+              </div>
+            </div>
+
+            <div className="routeAggregateList">
+              <div className="routeAggregateItem">
+                <span className="muted">Start route</span>
+                <strong>{routePageviews["/journeys/operator-access-admin/start"] ?? 0}</strong>
+              </div>
+              <div className="routeAggregateItem">
+                <span className="muted">Search route</span>
+                <strong>{routePageviews["/journeys/operator-access-admin/search"] ?? 0}</strong>
+              </div>
+              <div className="routeAggregateItem">
+                <span className="muted">Help route</span>
+                <strong>{routePageviews["/journeys/operator-access-admin/help"] ?? 0}</strong>
+              </div>
+            </div>
+          </section>
+
+          <section className={`panel helpDrawer ${helpDrawerOpen ? "isOpen" : ""}`} data-tour-target="help-drawer">
+            <div className="panelHeader">
+              <div>
+                <h3>Contextual Help Drawer</h3>
+                <p>
+                  Use guided recovery paths instead of guessing when onboarding stalls, an alert appears, or you
+                  need the safe next action fast.
+                </p>
+              </div>
+              <div className="toolbar">
+                <button
+                  className="buttonGhost"
+                  type="button"
+                  onClick={() => (helpDrawerOpen ? setHelpDrawerOpen(false) : openHelpDrawer("manual_open"))}
+                >
+                  {helpDrawerOpen ? "Close" : "Open"}
+                </button>
+              </div>
+            </div>
+
+            {helpDrawerOpen ? (
+              <div className="helpDrawerBody">
+                <div className="helpActionList">
+                  <button className="button" type="button" onClick={() => launchTour("first_run")}>
+                    Start First-Run Tour
+                  </button>
+                  <button className="buttonGhost" type="button" onClick={() => void inventoryQuery.refetch()} disabled={!selectedOperatorId}>
+                    Refresh Inventory
+                  </button>
+                  <button className="buttonGhost" type="button" onClick={() => void rosterQuery.refetch()}>
+                    Refresh Roster
+                  </button>
+                </div>
+                <div className="helpLinks">
+                  <a className="inlineLink" href="https://docs.lv3.org/runbooks/windmill-operator-access-admin/" target="_blank" rel="noreferrer">
+                    Operator admin runbook
+                  </a>
+                  <a className="inlineLink" href="https://docs.lv3.org/runbooks/operator-onboarding/" target="_blank" rel="noreferrer">
+                    Operator onboarding runbook
+                  </a>
+                  <a className="inlineLink" href="https://docs.lv3.org/runbooks/operator-offboarding/" target="_blank" rel="noreferrer">
+                    Operator off-boarding runbook
+                  </a>
+                </div>
+                <p className="muted">
+                  Help success is counted only when a later inventory refresh, guided tour completion, or governed
+                  mutation finishes successfully.
+                </p>
+              </div>
+            ) : (
+              <p className="muted">Open the drawer to start a recoverable help flow without leaving the current page.</p>
+            )}
+          </section>
+
           <div className="forms">
             <form className="panel" onSubmit={handleOnboardSubmit} noValidate data-tour-target="onboard-form">
               <div className="panelHeader">

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook documents the browser-first operator administration surface introduced by ADR 0122, the data-dense AG Grid roster from ADR 0238, the bounded rich-notes editing from ADR 0241, and the guided in-app onboarding added for ADR 0242.
+This runbook documents the browser-first operator administration surface introduced by ADR 0122, the data-dense AG Grid roster from ADR 0238, the bounded rich-notes editing from ADR 0241, the guided in-app onboarding added for ADR 0242, and the privacy-preserving journey analytics and onboarding scorecards added for ADR 0316.
 
 It wraps the existing ADR 0108 backend so operators can:
 
@@ -13,6 +13,7 @@ It wraps the existing ADR 0108 backend so operators can:
 - inspect one operator's access inventory
 - edit bounded rich operator notes through the ADR 0241 Tiptap surface while still storing markdown in `config/operators.yaml`
 - launch or resume task-specific guided tours for those workflows
+- surface live onboarding success scorecards, alert handoff feedback, and contextual help recovery affordances without creating a second mutation path
 
 The roster uses **AG Grid Community** for the data-dense operator view, so operators can sort, filter, page, pin or resize columns, and move through the selection with the keyboard instead of relying on a hand-built HTML table.
 
@@ -106,6 +107,28 @@ The `Latest Result` panel is now part of the recovery model, not just a log
 dump. Treat its structured JSON payload as the canonical handoff artifact when
 you need another operator to continue the task.
 
+## Journey Analytics And Scorecards
+
+ADR 0316 adds three operator-visible helpers to the same private raw app:
+
+- an `Onboarding Success Scorecard` panel that summarizes checklist completion, first safe-action speed, search success, alert resolution speed, help recovery, and resumable-tour completion
+- a `Contextual Help Drawer` that records privacy-preserving help opens and successful recovery completions without storing free-form operator content
+- a transient alert banner that offers acknowledgement, drawer handoff, and retry affordances when the roster, inventory, or a governed mutation returns an error
+
+The durable scorecard path stays repo-managed:
+
+- browser milestones emit only bounded categorical events
+- `f/lv3/operator_journey_event` records those milestones into `.local/state/journey-analytics/`
+- `f/lv3/operator_journey_scorecards` renders the current report and writes the latest JSON snapshot for scheduled review
+- Plausible receives canonical route milestones for `ops.lv3.org`
+- Glitchtip receives bounded failure signals only when a journey event explicitly requests it
+
+Privacy constraints:
+
+- raw operator notes, query text, secrets, markdown, and stack traces are not allowed in recorded journey-event properties
+- quick-filter analytics use length buckets instead of raw search terms
+- the repo-local ledger under `.local/state/journey-analytics/` is the authoritative source for the scorecard report
+
 ## Operator Workflows Backed By The App
 
 - onboarding: `f/lv3/operator_onboard`
@@ -114,6 +137,8 @@ you need another operator to continue the task.
 - inventory lookup: `f/lv3/operator_inventory`
 - roster listing: `f/lv3/operator_roster`
 - rich note persistence: `f/lv3/operator_update_notes`
+- journey event recording: `f/lv3/operator_journey_event`
+- journey scorecard report rendering: `f/lv3/operator_journey_scorecards`
 
 ## Guided Tours
 
@@ -171,8 +196,9 @@ docker run --rm \
   ghcr.io/windmill-labs/windmill:1.662.0@sha256:13d5456a80500822446ce0154f68d5fd5089628df82e77e2bd9cb24ff898d58d \
   sh -lc 'cd /workspace && wmill generate-metadata f/lv3/operator_access_admin.raw_app --base-url http://100.64.0.1:8005 --workspace lv3 --token "$WM_TOKEN" --lock-only --skip-scripts --skip-flows --yes'
 uv run --with pytest --with pyyaml python -m pytest tests/test_windmill_operator_admin_app.py -q
+uv run --with pytest python -m pytest tests/test_journey_scorecards.py tests/test_windmill_operator_admin_app.py -q
 uv run --with pytest --with pyyaml python -m pytest tests/test_operator_manager.py tests/test_windmill_operator_admin_app.py -q
-python3 -m py_compile scripts/operator_manager.py config/windmill/scripts/operator-roster.py config/windmill/scripts/operator-inventory.py config/windmill/scripts/operator-update-notes.py
+python3 -m py_compile scripts/operator_manager.py scripts/journey_scorecards.py config/windmill/scripts/operator-roster.py config/windmill/scripts/operator-inventory.py config/windmill/scripts/operator-update-notes.py config/windmill/scripts/operator-journey-event.py config/windmill/scripts/operator-journey-scorecards.py
 ANSIBLE_CONFIG=ansible.cfg ANSIBLE_COLLECTIONS_PATH=collections uvx --from ansible-core ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --syntax-check
 tmpdir="$(mktemp -d)" && mkdir -p "$tmpdir/f/lv3" && rsync -a config/windmill/apps/f/lv3/operator_access_admin.raw_app/ "$tmpdir/f/lv3/operator_access_admin.raw_app/" && cd "$tmpdir/f/lv3/operator_access_admin.raw_app" && npm ci --no-audit --no-fund && npx tsc --noEmit
 ```
@@ -183,11 +209,10 @@ tmpdir="$(mktemp -d)" && mkdir -p "$tmpdir/f/lv3" && rsync -a config/windmill/ap
 - The app depends on the worker checkout being mounted at `/srv/proxmox_florin_server`; the Windmill runtime now bind-mounts that host checkout into both worker pools.
 - The AG Grid roster keeps the browser experience dense, but the actual access mutations still flow only through the repo-governed ADR 0108 scripts.
 - The app now relies on repo-managed frontend dependencies staged during raw-app sync, so new browser libraries must be added to the raw app `package.json` and verified through `make converge-windmill`.
-- The AG Grid roster keeps the browser experience dense, but the actual access mutations still flow only through the repo-governed ADR 0108 scripts.
-- The app now relies on repo-managed frontend dependencies staged during raw-app sync, so new browser libraries must be added to the raw app `package.json` and verified through `make converge-windmill`.
 - The app is a Windmill-private admin surface; `ops.lv3.org` remains a separate portal.
 - ADR 0241 keeps the stored source format as markdown even though the editor is rich text, so repo diffs, sync workflows, and later migrations stay inspectable.
 - Inline validation mirrors the frontend schema only; the governed backend scripts remain the authoritative enforcement path for live identity mutations.
 - Guided tours are browser-local helpers only; they do not change the governed backend path or replace the runbooks.
 - Repo-managed Windmill raw apps with frontend dependencies should commit `package-lock.json`; the runtime now prefers `npm ci` before raw-app sync and only falls back to `npm install --no-package-lock` when no lockfile exists.
 - Raw-app dependency changes must refresh `config/windmill/apps/wmill-lock.yaml` with `wmill generate-metadata` before the next live Windmill sync, or the remote bundle step can fail with unresolved package imports.
+- The ADR 0316 scorecards intentionally combine browser milestones, worker-side ledger events, Plausible route aggregates, and Glitchtip failure counts. If the panel looks stale, re-run `f/lv3/operator_journey_scorecards` and inspect `.local/state/journey-analytics/operator-access-admin-latest.json` in the worker checkout before assuming the browser bundle is wrong.

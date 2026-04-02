@@ -38,6 +38,8 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "f/lv3/quarterly_access_review",
         "f/lv3/operator_roster",
         "f/lv3/operator_inventory",
+        "f/lv3/operator_journey_event",
+        "f/lv3/operator_journey_scorecards",
         "f/lv3/operator_update_notes",
     }.issubset(script_paths)
     assert "f/lv3/operator_access_admin" in raw_app_paths
@@ -81,7 +83,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
         "config/windmill/scripts/sbom-refresh.py",
         "config/windmill/scripts/stage-smoke-suites.py",
-    }.issubset(set(defaults["windmill_worker_checkout_integrity_files"]))
+    } == set(defaults["windmill_worker_checkout_integrity_files"])
     assert defaults["windmill_seed_repo_root_local_dir"] == "{{ windmill_worker_checkout_repo_root_local_dir }}"
     assert defaults["windmill_seed_script_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/scripts"
     assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
@@ -144,6 +146,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/network-impairment-matrix", "mode": "0777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/integration-tests", "mode": "0777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/stage-smoke-suites", "mode": "0777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/journey-analytics", "mode": "0777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/logs", "mode": "0777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/receipts", "mode": "0777"}.items()),
     }.issubset(mutable_directories)
@@ -190,6 +193,12 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert quarterly_schedule["schedule"] == "0 0 9 * * 1"
     assert quarterly_schedule["timezone"] == "Europe/Bucharest"
     assert quarterly_schedule["args"]["schedule_guard"] == "first_monday_of_quarter"
+    journey_schedule = next(
+        entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/operator_journey_scorecards_daily"
+    )
+    assert journey_schedule["script_path"] == "f/lv3/operator_journey_scorecards"
+    assert journey_schedule["enabled"] is True
+    assert journey_schedule["args"]["window_days"] == 30
 
 
 def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> None:
@@ -201,8 +210,12 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     package_lock = json.loads((app_dir / "package-lock.json").read_text())
     index_source = (app_dir / "index.tsx").read_text()
     app_source = (app_dir / "App.tsx").read_text()
+    journey_source = (app_dir / "journeyAnalytics.ts").read_text()
     schema_source = (app_dir / "schemas.ts").read_text()
+    tsconfig = json.loads((app_dir / "tsconfig.json").read_text())
     tour_source = (app_dir / "touring.ts").read_text()
+    journey_event_script = (REPO_ROOT / "config/windmill/scripts/operator-journey-event.py").read_text()
+    journey_scorecards_script = (REPO_ROOT / "config/windmill/scripts/operator-journey-scorecards.py").read_text()
 
     assert app_config["summary"] == "LV3 operator access admin console"
     assert package["dependencies"]["@hookform/resolvers"] == "^5.1.1"
@@ -234,6 +247,7 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert "useMutation" in app_source
     assert "queryKeys.operatorRoster()" in app_source
     assert "queryKeys.operatorInventoryRoot()" in app_source
+    assert "queryKeys.operatorJourneyScorecards()" in app_source
     assert "invalidateQueries" in app_source
     assert "refetchInterval: 60_000" in app_source
     assert "refetchInterval: selectedOperatorId ? 45_000 : false" in app_source
@@ -309,6 +323,26 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert "toggleTaskList" in app_source
     assert "insertTable" in app_source
     assert "insertOperatorMention" in app_source
+    assert "Onboarding Success Scorecard" in app_source
+    assert "Contextual Help Drawer" in app_source
+    assert "Journey alert:" in app_source
+    assert "recordInitialSessionStart(backend)" in app_source
+    assert "openHelpDrawer(" in app_source
+    assert "scorecardsQuery" in app_source
+    assert "JourneyAlertState" in app_source
+    assert "JourneyScorecardsReport" in app_source
+    assert 'const PLAUSIBLE_ENDPOINT = "https://analytics.lv3.org/api/event";' in journey_source
+    assert 'const PLAUSIBLE_SITE_DOMAIN = "ops.lv3.org";' in journey_source
+    assert 'const JOURNEY_STORAGE_KEY = "lv3.operator_access_admin.journey.v1";' in journey_source
+    assert 'mode: "no-cors"' in journey_source
+    assert "record_journey_event({ event_json: JSON.stringify(payload) })" in journey_source
+    assert "Journey Session Started" in journey_source
+    assert "journeyAnalytics.ts" in tsconfig["include"]
+    assert "journey_scorecards.py" in journey_event_script
+    assert '"record"' in journey_event_script
+    assert "journey_scorecards.py" in journey_scorecards_script
+    assert '"report"' in journey_scorecards_script
+    assert "--write-latest" in journey_scorecards_script
 
     expected_backend_refs = {
         "list_operators.yaml": "f/lv3/operator_roster",
@@ -317,6 +351,8 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
         "sync_operators.yaml": "f/lv3/sync_operators",
         "operator_inventory.yaml": "f/lv3/operator_inventory",
         "update_operator_notes.yaml": "f/lv3/operator_update_notes",
+        "record_journey_event.yaml": "f/lv3/operator_journey_event",
+        "journey_scorecards.yaml": "f/lv3/operator_journey_scorecards",
     }
     for file_name, expected_path in expected_backend_refs.items():
         payload = yaml.safe_load((app_dir / "backend" / file_name).read_text())
