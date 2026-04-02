@@ -392,7 +392,7 @@ platform_guest_catalog:
       macaddr: BC:24:11:AA:99:7C
       cores: 4
       memory_mb: 24576
-      disk_gb: 96
+      disk_gb: 160
       tags:
         - docker
         - runtime
@@ -642,7 +642,7 @@ platform_guest_catalog:
       macaddr: BC:24:11:AA:99:7C
       cores: 4
       memory_mb: 24576
-      disk_gb: 96
+      disk_gb: 160
       tags:
         - docker
         - runtime
@@ -900,7 +900,7 @@ platform_guest_catalog:
       macaddr: BC:24:11:AA:99:7C
       cores: 4
       memory_mb: 24576
-      disk_gb: 96
+      disk_gb: 160
       tags:
         - docker
         - runtime

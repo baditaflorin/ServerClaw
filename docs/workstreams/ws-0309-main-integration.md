@@ -19,7 +19,7 @@ the governed branch replay stopped at the protected canonical-truth refresh.
 - merge `codex/ws-0309-live-apply` onto the latest `origin/main`
 - refresh the protected integration files in the correct place:
   `README.md`, `VERSION`, `changelog.md`, `versions/stack.yaml`, generated
-  release/docs artifacts, and ADR metadata
+  release/docs artifacts, generated platform vars, and ADR metadata
 - rerun the full validation path from the integrated tree
 - perform the production `ops_portal` replay from this exact-main candidate
 - push the resulting `main` branch once the integrated replay is verified

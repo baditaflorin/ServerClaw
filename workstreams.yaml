@@ -613,6 +613,7 @@ workstreams:
       - VERSION
       - changelog.md
       - versions/stack.yaml
+      - inventory/group_vars/platform.yml
       - build/platform-manifest.json
       - docs/diagrams/agent-coordination-map.excalidraw
       - docs/release-notes/README.md
@@ -663,6 +664,7 @@ workstreams:
             - VERSION
             - changelog.md
             - versions/stack.yaml
+            - inventory/group_vars/platform.yml
             - build/platform-manifest.json
             - docs/diagrams/agent-coordination-map.excalidraw
             - docs/release-notes/**
