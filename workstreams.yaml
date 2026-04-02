@@ -16397,7 +16397,7 @@ workstreams:
     canonical_truth:
       changelog_entry: adds a repo-managed cmdk command palette to the Windmill operator access admin surface, backed by ADR 0121 search-fabric results and browser-local favorites/recents without bypassing governed mutations
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.141
       latest_receipts:
         command_palette: 2026-04-02-adr-0311-global-command-palette-live-apply
     blockers: []
