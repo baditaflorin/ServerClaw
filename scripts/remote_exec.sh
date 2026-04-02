@@ -226,6 +226,10 @@ compute_validation_lane_context() {
       ;;
   esac
 
+  if [[ -n "$LV3_VALIDATION_BASE_REF" && -n "$LV3_VALIDATION_CHANGED_FILES_JSON" ]]; then
+    return 0
+  fi
+
   current_branch="$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
   if [[ "$current_branch" == "main" || "$current_branch" == "HEAD" || -z "$current_branch" ]]; then
     return 0
@@ -331,6 +335,7 @@ cleanup_snapshot_build_dir() {
 build_snapshot() {
   [[ -n "${LV3_SNAPSHOT_ID:-}" ]] && [[ -n "${LV3_SNAPSHOT_ARCHIVE:-}" ]] && return 0
 
+  local run_label="${COMMAND_LABEL//[^[:alnum:]._-]/-}"
   SNAPSHOT_BUILD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/lv3-repo-snapshot.XXXXXX")"
   eval "$(
     "$PYTHON_BIN" "$REPO_ROOT/scripts/repository_snapshot.py" build \
@@ -341,7 +346,8 @@ build_snapshot() {
   )"
 
   REMOTE_SNAPSHOT_ARCHIVE="$WORKSPACE_ROOT/.lv3-snapshots/${LV3_SNAPSHOT_ID}.tar.gz"
-  REMOTE_RUN_ROOT="$WORKSPACE_ROOT/.lv3-runs/$(date -u +%Y%m%dT%H%M%SZ)-${LV3_SNAPSHOT_ID:0:12}"
+  [[ -n "$run_label" ]] || run_label="run"
+  REMOTE_RUN_ROOT="$WORKSPACE_ROOT/.lv3-runs/$(date -u +%Y%m%dT%H%M%SZ)-${run_label}-${LV3_SNAPSHOT_ID:0:12}-$$"
   RUN_WORKSPACE_ROOT="$REMOTE_RUN_ROOT/repo"
   export LV3_SNAPSHOT_ID LV3_SNAPSHOT_ARCHIVE LV3_SNAPSHOT_GENERATED_AT \
     LV3_SNAPSHOT_SOURCE_COMMIT LV3_SNAPSHOT_BRANCH LV3_SNAPSHOT_FILE_COUNT
@@ -575,7 +581,7 @@ remote_remove_paths() {
 prepare_remote_run_namespace() {
   local remote_manifest_path="$REMOTE_RUN_ROOT/metadata/manifest.json"
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" \
-    "rm -rf $(quote_shell "$REMOTE_RUN_ROOT") && mkdir -p $(quote_shell "$REMOTE_RUN_ROOT") && tar -xzf $(quote_shell "$REMOTE_SNAPSHOT_ARCHIVE") -C $(quote_shell "$REMOTE_RUN_ROOT") && test -f $(quote_shell "$remote_manifest_path")" \
+    "rm -rf $(quote_shell "$REMOTE_RUN_ROOT") && mkdir -p $(quote_shell "$REMOTE_RUN_ROOT") $(quote_shell "$REMOTE_RUN_ROOT/repo") $(quote_shell "$REMOTE_RUN_ROOT/metadata") && tar -xzf $(quote_shell "$REMOTE_SNAPSHOT_ARCHIVE") -C $(quote_shell "$REMOTE_RUN_ROOT") && test -f $(quote_shell "$remote_manifest_path")" \
     >/dev/null
 }
 
