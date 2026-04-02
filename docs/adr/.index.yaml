@@ -5429,7 +5429,7 @@ adr_index:
       - linting
     summary: We will integrate Atlas as the migration linting and drift detection layer
     filename: 0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
-    implemented_version: 0.177.135
+    implemented_version: 0.177.141
   - adr: '0305'
     title: k6 For Continuous Load Testing And SLO Error Budget Burn Validation
     status: Accepted

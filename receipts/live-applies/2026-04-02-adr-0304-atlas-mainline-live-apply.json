@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-02-adr-0304-atlas-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-02",
+  "recorded_on": "2026-04-02",
+  "recorded_at": "2026-04-02T08:54:50Z",
+  "recorded_by": "codex",
+  "source_commit": "cf255eeca51d0b6c1e65ce19a5924d55ed2ed7a4",
+  "repo_version_context": "0.177.140",
+  "platform_version_context": "0.130.88",
+  "workflow_id": "adr-0304-atlas-mainline-live-apply",
+  "adr": "0304",
+  "summary": "Applied ADR 0304 from the latest origin/main baseline by replaying Step-CA, OpenBao, and Windmill on top of repo version 0.177.140, re-verifying Atlas snapshot refresh and drift detection after the live runtime re-converge, confirming the seeded Windmill atlas_drift_check job end to end, and then integrating the exact-main release surfaces for repo version 0.177.141 and platform version 0.130.89.",
+  "targets": [
+    {
+      "kind": "hypervisor",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Windmill operator proxy",
+      "address": "http://100.64.0.1:8005"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Exact-main Step-CA replay",
+      "result": "pass",
+      "observed": "make converge-step-ca env=production succeeded from the rebased ADR 0304 worktree with final recap docker-runtime-lv3 : ok=145 changed=4 failed=0 and proxmox_florin : ok=54 changed=4 failed=0."
+    },
+    {
+      "check": "Exact-main OpenBao replay",
+      "result": "pass",
+      "observed": "make converge-openbao env=production succeeded from the rebased ADR 0304 worktree with final recap docker-runtime-lv3 : ok=385 changed=8 failed=0 and postgres-lv3 : ok=75 changed=1 failed=0."
+    },
+    {
+      "check": "Exact-main Windmill replay",
+      "result": "pass",
+      "observed": "make converge-windmill env=production hit a transient missing nat DOCKER chain on docker-runtime-lv3 during guest-firewall evaluation, exercised the built-in Docker recovery path, and still finished with final recap docker-runtime-lv3 : ok=384 changed=53 failed=0 rescued=1, postgres-lv3 : ok=95 changed=6 failed=0, and proxmox_florin : ok=41 changed=4 failed=0."
+    },
+    {
+      "check": "Repo Atlas automation path",
+      "result": "pass",
+      "observed": "make atlas-validate and make atlas-lint passed immediately from the rebased tree, the first atlas-refresh-snapshots attempt timed out before the live replay, and the post-replay atlas-refresh-snapshots, atlas-validate, and atlas-drift-check commands all completed successfully with drift_count 0 across the 20 cataloged PostgreSQL databases."
+    },
+    {
+      "check": "Seeded Windmill Atlas drift job",
+      "result": "pass",
+      "observed": "scripts/windmill_run_wait_result.py against f/lv3/atlas_drift_check returned status ok with report.status clean, drift_count 0, and no published notifications."
+    },
+    {
+      "check": "Repository validation and closeout",
+      "result": "pass",
+      "observed": "The targeted repository slice passed with 68 tests, the final validation-runner contracts validated cleanly, agent-standards passed from the release-cut tree, and git diff --check reported no whitespace or conflict-marker defects before the mainline push."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md",
+    "docs/workstreams/ws-0304-live-apply.md",
+    "docs/runbooks/configure-atlas.md",
+    "docs/release-notes/0.177.141.md",
+    "RELEASE.md",
+    "VERSION",
+    "changelog.md",
+    "versions/stack.yaml",
+    "workstreams.yaml",
+    "build/platform-manifest.json",
+    "README.md",
+    "scripts/atlas_schema.py",
+    "config/windmill/scripts/atlas-drift-check.py",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2",
+    "tests/test_validation_gate.py",
+    "tests/test_windmill_operator_admin_app.py",
+    "receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json",
+    "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-step-ca-r1-0.177.140.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-openbao-r1-0.177.140.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-windmill-r1-0.177.140.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-validate-r1-0.177.140.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-lint-r1-0.177.140.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-refresh-snapshots-r1-0.177.140.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-refresh-snapshots-r2-0.177.140.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-validate-r2-0.177.140.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-drift-check-r2-0.177.140.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-drift-check-seeded-r1-0.177.140.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-targeted-pytest-r1-0.177.140.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r2-0.177.141.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-agent-standards-r2-0.177.141.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-diff-check-r1-0.177.141.txt"
+  ],
+  "notes": [
+    "This receipt supersedes receipts/live-applies/2026-04-01-adr-0304-atlas-mainline-live-apply.json as the authoritative exact-main proof for ADR 0304.",
+    "The first current-main atlas-refresh-snapshots attempt timed out before the live replay; the successful post-replay atlas refresh and drift evidence from the same rebased tree is the authoritative latest-main verification set.",
+    "This is the exact-main receipt that justifies the platform version bump from 0.130.88 to 0.130.89 after the merged ADR 0304 workstream was replayed from the latest origin/main baseline."
+  ]
+}

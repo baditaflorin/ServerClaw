@@ -161,6 +161,8 @@ live_apply_evidence:
     keycloak_direct_api: 2026-04-02-adr-0317-keycloak-direct-api-mainline-live-apply
     journey_analytics: 2026-04-02-adr-0316-journey-analytics-mainline-live-apply
     glitchtip: 2026-04-03-adr-0281-glitchtip-mainline-live-apply
+    command_palette: 2026-04-02-adr-0311-global-command-palette-mainline-live-apply
+    database_schema: 2026-04-02-adr-0304-atlas-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated

@@ -240,7 +240,6 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/archive", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/locks", "mode": "1777"}.items()),
     }.issubset({frozenset(item.items()) for item in defaults["windmill_worker_runtime_writable_directories"]})
-    }.issubset({frozenset(item.items()) for item in defaults["windmill_worker_runtime_writable_directories"]})
     weekly_schedule = next(entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/build_cache_maintenance_weekly")
     assert weekly_schedule["schedule"] == "0 0 4 * * 7"
     atlas_schedule = next(entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/atlas_drift_check_daily")

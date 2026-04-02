@@ -129,6 +129,13 @@ same tree should recover once the shared hosts are quiet enough.
   backend allowed-role reconciliation task. The AppRole and policy can be
   present while the database backend config still lags the expected
   `allowed_roles` list.
+- If `make atlas-refresh-snapshots` fails with `<urlopen error timed out>` on a
+  latest-main replay, treat that as a live-runtime dependency problem first:
+  rerun `make converge-step-ca env=production`,
+  `make converge-openbao env=production`, and
+  `make converge-windmill env=production` from the same tree, then rerun the
+  Atlas snapshot refresh. The 2026-04-02 exact-main ADR 0304 replay cleared
+  that timeout without code changes to `scripts/atlas_schema.py`.
 - The current implementation pins the Atlas image by digest in
   `config/atlas/catalog.json`. If Harbor is not serving the mirror yet, record
   that temporary exception in the live-apply receipt instead of silently

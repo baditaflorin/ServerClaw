@@ -15516,7 +15516,7 @@ workstreams:
       - docs/adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
       - docs/runbooks/configure-atlas.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.135.md
+      - docs/release-notes/0.177.141.md
       - docs/adr/.index.yaml
       - docs/diagrams/agent-coordination-map.excalidraw
       - RELEASE.md
@@ -15550,13 +15550,15 @@ workstreams:
       - tests/test_openbao_systemd_credentials_helper.py
       - tests/test_config_merge_windmill.py
       - receipts/live-applies/
-      - receipts/live-applies/2026-04-01-adr-0304-atlas-mainline-live-apply.json
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-push-gate-regressions-r1-0.177.135.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-push-gate-regressions-r2-0.177.135.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r1-0.177.135.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r2-0.177.135.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-agent-standards-r2-0.177.135.txt
-      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-diff-check-r1-0.177.135.txt
+      - receipts/live-applies/2026-04-02-adr-0304-atlas-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-step-ca-r1-0.177.140.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-openbao-r1-0.177.140.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-windmill-r1-0.177.140.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-drift-check-seeded-r1-0.177.140.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-targeted-pytest-r1-0.177.140.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r2-0.177.141.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-agent-standards-r2-0.177.141.txt
+      - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-diff-check-r1-0.177.141.txt
       - receipts/atlas-drift/
     ownership_manifest:
       owned_surfaces:
@@ -15576,7 +15578,7 @@ workstreams:
             - docs/adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
             - docs/runbooks/configure-atlas.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.135.md
+            - docs/release-notes/0.177.141.md
             - docs/diagrams/agent-coordination-map.excalidraw
             - RELEASE.md
             - VERSION
@@ -15609,13 +15611,15 @@ workstreams:
             - tests/test_openbao_systemd_credentials_helper.py
             - tests/test_config_merge_windmill.py
             - receipts/live-applies/
-            - receipts/live-applies/2026-04-01-adr-0304-atlas-mainline-live-apply.json
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-push-gate-regressions-r1-0.177.135.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-push-gate-regressions-r2-0.177.135.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r1-0.177.135.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r2-0.177.135.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-agent-standards-r2-0.177.135.txt
-            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-diff-check-r1-0.177.135.txt
+            - receipts/live-applies/2026-04-02-adr-0304-atlas-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-step-ca-r1-0.177.140.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-openbao-r1-0.177.140.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-windmill-r1-0.177.140.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-drift-check-seeded-r1-0.177.140.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-targeted-pytest-r1-0.177.140.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-validation-runner-contracts-validate-r2-0.177.141.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-agent-standards-r2-0.177.141.txt
+            - receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-diff-check-r1-0.177.141.txt
             - receipts/atlas-drift/
           mode: exclusive
     ready_to_merge: true
@@ -15623,9 +15627,9 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0304 by adding Atlas-backed schema validation, pre-migration linting, snapshot refresh, and verified Windmill drift detection with OpenBao-delivered runtime credentials on the latest mainline replay
       release_bump: patch
-      included_in_repo_version: 0.177.135
+      included_in_repo_version: 0.177.141
       latest_receipts:
-        database_schema: 2026-04-01-adr-0304-atlas-mainline-live-apply
+        database_schema: 2026-04-02-adr-0304-atlas-mainline-live-apply
   - id: ws-0307-0308-operator-adrs
     adr: "0307"
     title: Temporary guest operator accounts and LLM agent execution surface contracts

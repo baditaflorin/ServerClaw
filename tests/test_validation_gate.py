@@ -459,7 +459,8 @@ def test_gate_status_reports_latest_bypass_and_runs(tmp_path: Path, capsys) -> N
     assert "Last gate run: passed" in captured.out
     assert "Last post-merge gate run: failed" in captured.out
     assert "Latest bypass receipt:" in captured.out
-    assert "Waiver summary:" not in captured.out
+    assert "Waiver summary: 0 open, 0 legacy, 0 warnings, 0 release blockers" in captured.out
+    assert "Invalid waiver receipt:" in captured.out
 
 
 def test_gate_status_supports_json_output(tmp_path: Path, capsys) -> None:
@@ -507,7 +508,16 @@ def test_gate_status_supports_json_output(tmp_path: Path, capsys) -> None:
     assert payload["last_run"] is None
     assert payload["post_merge_run"] is None
     assert payload["latest_bypass"] is None
-    assert "waiver_summary" not in payload
+    assert payload["waiver_summary"]["totals"] == {
+        "all_receipts": 0,
+        "legacy_receipts": 0,
+        "compliant_receipts": 0,
+        "open_waivers": 0,
+        "expired_waivers": 0,
+        "invalid_receipts": 0,
+    }
+    assert payload["waiver_summary"]["release_blockers"] == []
+    assert payload["waiver_summary"]["warnings"] == []
 
 
 def test_gate_status_resolves_default_paths_from_repo_root(tmp_path: Path) -> None:
