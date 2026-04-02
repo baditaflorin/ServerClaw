@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-04-02",
   "recorded_on": "2026-04-02",
-  "recorded_at": "2026-04-01T23:14:29Z",
+  "recorded_at": "2026-04-02T01:09:01Z",
   "recorded_by": "codex",
-  "source_commit": "b97c0d5bc20619229829525d49a7e07f6a48ebbf",
-  "repo_version_context": "0.177.136",
-  "platform_version_context": "0.130.85",
+  "source_commit": "2592ab846fa95548e920eac10f28b17e0f818fae",
+  "repo_version_context": "0.177.137",
+  "platform_version_context": "0.130.86",
   "workflow_id": "adr-0308-operator-provisioning-connectivity-live-apply",
   "adr": "0308",
-  "summary": "Replayed ADR 0308 from the latest synchronized origin/main baseline at repository version 0.177.136 and platform version 0.130.85, verified the operator provisioning execution surface end to end, repaired the Windmill gate-status and detached-worktree checkout path, and then fixed a latest-main regression in the shared Docker bridge-chain assertion that the exact-main Windmill converge exposed. The branch-local closeout also refreshed the generated platform manifest and agent-coordination diagram, reconciled shared-contract ownership for the overlapping ADR 0308 and validation surfaces, and proved that the remaining branch-local automation delta before merge-to-main is only the intentional pending-release changelog update.",
+  "summary": "Replayed ADR 0308 first from synchronized origin/main at repository version 0.177.136 and platform version 0.130.85, then rebased onto newer origin/main at repository version 0.177.137 and platform version 0.130.86 and re-verified the operator provisioning execution surface end to end. The workstream made operator-onboard preflight fail closed on dependency outages, repaired the Windmill gate-status and detached-worktree checkout path, fixed the shared Docker bridge-chain false failure that the exact-main Windmill converge exposed, recorded the refreshed docker-runtime SBOM snapshot, refreshed generated truth, and proved that the only remaining branch-local automation delta before merge-to-main is the intentional protected changelog update.",
   "targets": [
     {
       "kind": "host",
@@ -51,42 +51,42 @@
     {
       "check": "Exact-main operator-onboard preflight",
       "result": "pass",
-      "observed": "make preflight WORKFLOW=operator-onboard passed on the rebased exact-main tree and proved the new fail-closed health checks for Keycloak discovery, the private OpenBao mTLS listener, and the private Windmill API."
+      "observed": "make preflight WORKFLOW=operator-onboard passed on the rebased exact-main tree at repository version 0.177.137 and proved the fail-closed health checks for Keycloak discovery, the private OpenBao mTLS listener, and the private Windmill API."
     },
     {
       "check": "Focused ADR 0308 test bundle",
       "result": "pass",
-      "observed": "The exact-main test bundle covering Docker bridge-chain retries, controller worktree path resolution, validation-gate Windmill contracts, operator-manager dry-run behavior, and the operator-onboard preflight controller path passed with 45 tests."
+      "observed": "The rebased exact-main test bundle covering Docker bridge-chain retries, controller worktree path resolution, validation-gate Windmill contracts, operator-manager dry-run behavior, and the operator-onboard preflight controller path passed with 45 tests."
     },
     {
-      "check": "Exact-main Windmill converge regression discovery and repair",
+      "check": "Exact-main Windmill converge regression discovery, repair, and rebased replay",
       "result": "pass",
-      "observed": "The first exact-main make converge-windmill env=production replay failed truthfully because the shared Docker nat-chain assertion evaluated stale post-retry state after the chain had already recovered. Refreshing the final nat and forward probes in collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml removed the false failure, and the second exact-main replay then passed with docker-runtime-lv3 ok=331 changed=45 failed=0, postgres-lv3 ok=93 changed=2 failed=0, and proxmox_florin ok=41 changed=4 failed=0."
+      "observed": "The first exact-main make converge-windmill env=production replay on 0.177.136 failed truthfully because the shared Docker nat-chain assertion evaluated stale post-retry state after the chain had already recovered. Refreshing the final nat and forward probes in collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml removed the false failure, the repaired replay passed on 0.177.136, and the rebased replay on 0.177.137 then passed with docker-runtime-lv3 ok=331 changed=46 failed=0, postgres-lv3 ok=93 changed=2 failed=0, and proxmox_florin ok=41 changed=4 failed=0."
     },
     {
       "check": "Windmill operator-onboard dry run",
       "result": "pass",
-      "observed": "The exact-main Windmill dry run against f/lv3/operator_onboard returned status ok, preserved the generated operator state path under /srv/proxmox_florin_server/.local/state/operator-access/, and resolved the managed roster path config/operators.yaml."
+      "observed": "The rebased exact-main Windmill dry run against f/lv3/operator_onboard returned status ok, preserved the generated operator state path under /srv/proxmox_florin_server/.local/state/operator-access/, and resolved the managed roster path config/operators.yaml."
     },
     {
       "check": "Controller-local OpenBao tunnel fallback",
       "result": "pass",
-      "observed": "The controller-local fallback path succeeded from the detached git worktree after platform/repo.py learned how to resolve shared .local assets from the parent repository root, proving the controller can still inspect operator inventory through the Proxmox jump path."
+      "observed": "The controller-local fallback path succeeded from the detached git worktree after platform/repo.py learned how to resolve shared .local assets from the parent repository root, proving the controller can still inspect operator inventory through the Proxmox jump path on the rebased exact-main tree."
     },
     {
       "check": "Branch-local receipt and ownership validation",
       "result": "pass",
-      "observed": "scripts/live_apply_receipts.py --validate and scripts/validate_repo.sh agent-standards both passed. The first full validate replay then exposed overlapping exclusive ownership claims on ADR 0308 and other shared platform surfaces; after converting those paths to shared-contract ownership and adding the generated artifact surfaces, scripts/validate_repo.sh workstream-surfaces passed and the rerun reduced the remaining local failure to the intentional pre-release canonical-truth delta on changelog.md."
+      "observed": "The final rebased branch-local closeout passed scripts/live_apply_receipts.py --validate, scripts/validate_repo.sh agent-standards, scripts/validate_repo.sh workstream-surfaces, and git diff --check after the receipt and workstream metadata were updated. scripts/validate_repo.sh generated-docs still truthfully isolates the single remaining branch-local delta on changelog.md, which is intentionally deferred to the protected mainline release step."
     },
     {
       "check": "Remote validate replay after generated artifact refresh",
       "result": "pass",
-      "observed": "The first remote-validate replay exposed stale build/platform-manifest.json and docs/diagrams/agent-coordination-map.excalidraw after the new receipt and workstream metadata landed. Regenerating those artifacts and updating the ownership manifest let the third replay pass every remote lane, including workstream-surfaces, schema-validation, dependency-graph, ansible-syntax, and iac-policy-scan."
+      "observed": "The first rebased remote-validate replay exposed stale build/platform-manifest.json after the new SBOM ownership surface landed. Refreshing build/platform-manifest.json and rerunning generate_diagrams.py restored generated truth, and the second rebased replay then passed every remote lane, including workstream-surfaces, schema-validation, dependency-graph, ansible-syntax, and iac-policy-scan."
     },
     {
       "check": "Pre-push gate closeout on branch-local truth",
       "result": "pass",
-      "observed": "make pre-push-gate passed every heavy lane on both the remote primary path and the local fallback, and isolated the only remaining branch-local failure to generated-docs because changelog.md intentionally still reflects the pre-release truth until merge-to-main updates the protected release surfaces."
+      "observed": "The rebased make pre-push-gate replay passed every heavy lane on both the remote primary path and the local fallback, including ansible-lint, semgrep-sast, security-scan, generated-portals, packer-validate, and integration-tests. The only remaining branch-local failure is generated-docs because changelog.md intentionally still reflects the pre-release truth until merge-to-main updates the protected release surfaces."
     }
   ],
   "evidence_refs": [
@@ -107,29 +107,32 @@
     "tests/test_controller_automation_toolkit.py",
     "tests/test_common_docker_bridge_chains_helper.py",
     "tests/test_docker_runtime_role.py",
-    "receipts/live-applies/evidence/2026-04-02-ws-0308-preflight-r2-0.177.136.txt",
-    "receipts/live-applies/evidence/2026-04-02-ws-0308-pytest-r4-0.177.136.txt",
-    "receipts/live-applies/evidence/2026-04-02-ws-0308-workstream-surfaces-r1-0.177.136.txt",
-    "receipts/live-applies/evidence/2026-04-02-ws-0308-workstream-surfaces-r2-0.177.136.txt",
+    "receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json",
     "receipts/live-applies/evidence/2026-04-02-ws-0308-workstream-surfaces-r3-0.177.136.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-preflight-r3-0.177.137.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-pytest-r5-0.177.137.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0308-validate-r1-0.177.136.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0308-validate-r2-0.177.136.txt",
-    "receipts/live-applies/evidence/2026-04-02-ws-0308-platform-manifest-write-r1-0.177.136.txt",
-    "receipts/live-applies/evidence/2026-04-02-ws-0308-generate-diagrams-r1-0.177.136.txt",
-    "receipts/live-applies/evidence/2026-04-02-ws-0308-remote-validate-r1-0.177.136.txt",
-    "receipts/live-applies/evidence/2026-04-02-ws-0308-remote-validate-r2-0.177.136.txt",
-    "receipts/live-applies/evidence/2026-04-02-ws-0308-remote-validate-r3-0.177.136.txt",
-    "receipts/live-applies/evidence/2026-04-02-ws-0308-pre-push-gate-r1-0.177.136.txt",
-    "receipts/live-applies/evidence/2026-04-02-ws-0308-git-diff-check-r1-0.177.136.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-live-apply-receipts-validate-r4-0.177.137.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-agent-standards-r3-0.177.137.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-workstream-surfaces-r5-0.177.137.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-git-diff-check-r4-0.177.137.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-canonical-truth-check-r3-0.177.137.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r3-0.177.136.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r4-0.177.136.txt",
-    "receipts/live-applies/evidence/2026-04-02-ws-0308-windmill-dry-run-r3-0.177.136.txt",
-    "receipts/live-applies/evidence/2026-04-02-ws-0308-controller-fallback-r3-0.177.136.txt"
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r5-0.177.137.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-windmill-dry-run-r4-0.177.137.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-controller-fallback-r4-0.177.137.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-platform-manifest-write-r2-0.177.137.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-generate-diagrams-r2-0.177.137.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-remote-validate-r4-0.177.137.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-remote-validate-r5-0.177.137.txt",
+    "receipts/live-applies/evidence/2026-04-02-ws-0308-pre-push-gate-r2-0.177.137.txt"
   ],
   "notes": [
-    "The committed replay source for the exact-main verification is b97c0d5bc20619229829525d49a7e07f6a48ebbf, which already includes the Docker bridge-chain assertion repair discovered during the latest-main converge replay.",
-    "The first live platform implementation of ADR 0308 was already true on platform version 0.130.85; this receipt captures the exact-main replay, the contract corrections, and the repo automation needed to make that live shape reproducible from source control.",
-    "Protected integration surfaces still remain for merge-to-main after this branch-local receipt: VERSION, changelog.md, the top-level README.md summary, and versions/stack.yaml should only move when the final integrated mainline tree is ready.",
-    "The branch-local validation bundle is intentionally truthful rather than artificially green: make validate and make pre-push-gate now isolate the same single remaining delta, the pending changelog.md update that belongs to the protected mainline release step."
+    "The latest rebased exact-main replay source is 2592ab846fa95548e920eac10f28b17e0f818fae. The final branch closeout commit only records refreshed evidence, generated truth, and merge-safe workstream metadata on top of that replay source.",
+    "The first live platform implementation of ADR 0308 was already true on platform version 0.130.85; this receipt captures the contract corrections, the exact-main replays, and the repo automation needed to keep that live shape reproducible from source control while the synchronized verification base has advanced to repository version 0.177.137 and platform version 0.130.86.",
+    "Protected integration surfaces still remain for merge-to-main after this branch-local receipt: VERSION, changelog.md, the top-level README.md summary, versions/stack.yaml, and ADR 0308's Implemented In Repo Version metadata should only move when the final integrated mainline tree is ready.",
+    "The rebased branch-local validation bundle is intentionally truthful rather than artificially green: scripts/validate_repo.sh generated-docs and make pre-push-gate now isolate the same single remaining delta, the pending changelog.md update that belongs to the protected mainline release step."
   ]
 }
