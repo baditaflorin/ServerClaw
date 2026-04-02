@@ -433,7 +433,7 @@
           }}
       when: not ntfy_runtime_docker_bridge_chain_missing
 
-    - name: Stop the partially started ntfy stack before Docker recovery
+    - name: Reset stale ntfy compose resources after startup failure
       ansible.builtin.command:
         argv:
           - docker
@@ -444,11 +444,11 @@
           - --remove-orphans
       args:
         chdir: "{{ ntfy_runtime_site_dir }}"
-      register: ntfy_runtime_down_after_failure
+      register: ntfy_runtime_compose_down_retry
       changed_when: >-
-        'Stopping' in (ntfy_runtime_down_after_failure.stdout | default(''))
-        or 'Removing' in (ntfy_runtime_down_after_failure.stdout | default(''))
-        or 'Removing' in (ntfy_runtime_down_after_failure.stderr | default(''))
+        'Stopping' in (ntfy_runtime_compose_down_retry.stdout | default(''))
+        or 'Removing' in (ntfy_runtime_compose_down_retry.stdout | default(''))
+        or 'Removing' in (ntfy_runtime_compose_down_retry.stderr | default(''))
       failed_when: false
       when: ntfy_runtime_docker_bridge_chain_missing
 
@@ -476,11 +476,15 @@
           - "{{ ntfy_runtime_compose_file }}"
           - up
           - -d
+          - --force-recreate
           - --remove-orphans
       args:
         chdir: "{{ ntfy_runtime_site_dir }}"
-      register: ntfy_runtime_up
-      changed_when: true
+      register: ntfy_runtime_up_retry
+      changed_when: >-
+        'Creating' in ntfy_runtime_up_retry.stdout
+        or 'Recreating' in ntfy_runtime_up_retry.stdout
+        or 'Starting' in ntfy_runtime_up_retry.stdout
       when: ntfy_runtime_docker_bridge_chain_missing
 
 - name: Inspect current ntfy container port bindings

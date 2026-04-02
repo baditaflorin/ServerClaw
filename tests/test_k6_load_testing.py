@@ -14,6 +14,10 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 import k6_load_testing  # noqa: E402
 
 
+def test_default_ntfy_warn_topic_uses_hyphenated_slug() -> None:
+    assert k6_load_testing.DEFAULT_NTFY_WARN_TOPIC == "platform-slo-warn"
+
+
 def test_build_targets_uses_smoke_dedup_and_load_profiles(tmp_path: Path) -> None:
     (tmp_path / "config" / "k6" / "scripts").mkdir(parents=True)
     (tmp_path / "config" / "slo-catalog.json").write_text(

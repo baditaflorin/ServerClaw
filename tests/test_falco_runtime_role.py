@@ -200,6 +200,12 @@ def test_ntfy_runtime_restarts_container_when_auth_config_changes() -> None:
 
     render_config = next(task for task in tasks if task["name"] == "Render ntfy server config")
     render_compose = next(task for task in tasks if task["name"] == "Render ntfy compose file")
+    ensure_bridge_chains = next(
+        task for task in tasks if task["name"] == "Ensure Docker bridge networking chains are ready before ntfy startup"
+    )
+    startup_recovery = next(
+        task for task in tasks if task["name"] == "Start the ntfy stack and recover Docker bridge-chain failures"
+    )
     snapshot_acl = next(task for task in tasks if task["name"] == "Snapshot provisioned ntfy ACL state")
     repair_acl = next(task for task in tasks if task["name"] == "Force-recreate the ntfy stack when provisioned ACL entries are stale")
     restart_handler = next(task for task in handlers if task["name"] == "Restart ntfy stack")
@@ -209,12 +215,22 @@ def test_ntfy_runtime_restarts_container_when_auth_config_changes() -> None:
         if task["name"] == "Verify provisioned ntfy ACL topics are writable for the managed publisher"
     )
 
+    assert defaults["ntfy_runtime_image"] == "binwiederhier/ntfy:v2.21.0"
     assert defaults["ntfy_runtime_expected_write_topics"] == [
         "platform-alerts",
         "platform-alerts-sbom-verify",
-        "platform.slo.warn",
+        "platform-slo-warn",
         "platform-security-critical",
     ]
+    assert ensure_bridge_chains["ansible.builtin.include_role"]["tasks_from"] == "docker_bridge_chains"
+    assert ensure_bridge_chains["vars"]["common_docker_bridge_chains_service_name"] == "docker"
+    assert ensure_bridge_chains["vars"]["common_docker_bridge_chains_require_nat_chain"] is True
+    startup_rescue_names = [task["name"] for task in startup_recovery["rescue"]]
+    assert startup_recovery["block"][0]["name"] == "Start the ntfy stack"
+    assert "Flag Docker bridge-chain failures during ntfy startup" in startup_rescue_names
+    assert "Reset stale ntfy compose resources after startup failure" in startup_rescue_names
+    assert "Ensure Docker bridge networking chains are present before retrying ntfy startup" in startup_rescue_names
+    assert "Retry ntfy startup after Docker bridge-chain recovery" in startup_rescue_names
     assert render_config["notify"] == "Restart ntfy stack"
     assert render_compose["notify"] == "Restart ntfy stack"
     assert snapshot_acl["environment"]["NTFY_RUNTIME_EXPECTED_TOPICS"] == "{{ ntfy_runtime_expected_write_topics | to_json }}"

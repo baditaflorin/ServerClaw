@@ -653,6 +653,7 @@
           "required": false,
           "source": "config/controller-local-secrets.json",
           "description": "Controller-local ntfy Windmill publisher token used when the load probe publishes error-budget warnings to the governed platform-slo-warn topic."
+          "description": "Controller-local ntfy Windmill publisher token used when the load probe publishes error-budget warnings to the governed platform-slo-warn topic."
         }
       ],
       "expected_preconditions": [
@@ -704,6 +705,7 @@
           "kind": "controller_secret",
           "required": false,
           "source": "config/controller-local-secrets.json",
+          "description": "Controller-local ntfy Windmill publisher token used when the soak probe publishes error-budget warnings to the governed platform-slo-warn topic."
           "description": "Controller-local ntfy Windmill publisher token used when the soak probe publishes error-budget warnings to the governed platform-slo-warn topic."
         }
       ],

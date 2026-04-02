@@ -91,7 +91,9 @@ Three k6 test scenario types are defined:
   rates under load, complementing the availability-based Uptime Kuma signal
 - services with an error budget below 20% remaining trigger an ntfy
   `platform-slo-warn` notification (ADR 0299) and block Renovate version bump
-  PRs for that service (via a Gitea Actions check that reads the latest k6 receipt)
+  PRs for that service (via a Gitea Actions check that reads the latest k6
+  receipt); the ntfy slug stays hyphenated because the live ntfy surface rejects
+  dotted topic patterns
 
 ### Implemented live replay
 

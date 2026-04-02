@@ -75,6 +75,10 @@ The Windmill worker seeds `f/lv3/k6_load_testing` and schedules:
 - If a load or soak receipt shows `error_budget_remaining_pct < 20`, treat it as
   a service-health warning and review the latest receipt before approving a
   version promotion for that service.
+- Keep the k6 ntfy warning topic hyphenated. The live ntfy runtime rejects
+  dotted topic patterns, so the repo-managed warning slug is
+  `platform-slo-warn` even though related platform event subjects remain
+  dotted.
 - Controller-side exact-main `make k6-load` and `make k6-soak` runs now fail
   fast if the configured NATS regression-publication endpoint is unreachable and
   preserve the receipts with a warning instead of hanging in the post-run

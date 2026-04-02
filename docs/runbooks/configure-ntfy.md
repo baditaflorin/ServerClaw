@@ -67,6 +67,15 @@ Compatibility topics retained during rollout:
 - `scripts/ntfy_publish.py` is the preferred publication path for repo-managed publishers because it validates topic registration, publisher authorization, and controller-local auth material before sending.
 - `scripts/ntfy_publish.py` normalizes logical `--sequence-id` values into ntfy-safe identifiers because ntfy accepts only `[-_A-Za-z0-9]{1,64}` for sequence IDs.
 - Declarative `auth-users`, `auth-tokens`, and `auth-access` entries are applied into ntfy's `user.db` on container startup, so repo-managed auth changes require a container recreate rather than a bare health check.
-- Keep the Falco critical topic hyphenated. The live ntfy HTTP publish surface rejected the dotted `platform.security.critical` variant during replay.
+- If ntfy startup fails with Docker publication errors such as `Unable to
+  enable DNAT rule`, rerun the repo-managed converge rather than patching the
+  host by hand; the role now restarts Docker, reasserts bridge chains, and
+  retries the ntfy stack automatically.
+- Keep the repo-managed ntfy image at or above the live schema level already
+  recorded in `/var/lib/ntfy`. Replaying an older image against a newer schema
+  causes the container to crash-loop before the health check can recover it.
+- Keep ntfy topics hyphenated when their corresponding event or NATS subject is
+  dotted. The live ntfy runtime rejected dotted topic patterns during replay,
+  including `platform.security.critical` and `platform.slo.warn`.
 - Treat `.local/ntfy/` as secret material and keep it outside git.
 - If a publisher still uses a compatibility topic or direct basic-auth publish path, keep that exception documented until it is migrated onto the governed registry helper.
