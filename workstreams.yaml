@@ -58,12 +58,16 @@ workstreams:
           paths:
             - docs/workstreams/ws-0316-live-apply.md
             - docs/adr/0316-journey-analytics-and-onboarding-success-scorecards.md
-            - docs/runbooks/configure-windmill.md
-            - docs/runbooks/configure-plausible.md
-            - docs/runbooks/windmill-operator-access-admin.md
             - receipts/live-applies/2026-04-02-adr-0316-journey-analytics-live-apply.json
             - receipts/live-applies/evidence/*ws-0316-*
           mode: exclusive
+        - id: adr_0316_runbooks
+          paths:
+            - docs/runbooks/configure-windmill.md
+            - docs/runbooks/configure-plausible.md
+            - docs/runbooks/windmill-operator-access-admin.md
+          mode: shared_contract
+          contract: journey-analytics-runbooks-v1
         - id: adr_index_generation
           paths:
             - docs/adr/.index.yaml
