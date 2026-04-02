@@ -37,6 +37,13 @@ def collect_release_versions(include_version: str | None = None) -> list[str]:
     return sorted(versions, key=parse_semver, reverse=True)
 
 
+def collect_changelog_release_versions(changelog_text: str) -> set[str]:
+    return {
+        match.group(1)
+        for match in re.finditer(r"\[(\d+\.\d+\.\d+) release notes\]\(", changelog_text)
+    }
+
+
 def render_release_note_link(version: str, *, from_release_index: bool) -> str:
     path = f"{version}.md" if from_release_index else f"docs/release-notes/{version}.md"
     return f"- [{version} release notes]({path})"
@@ -91,7 +98,11 @@ def update_changelog_for_release(changelog_text: str, version: str) -> str:
     updated = changelog_text[: match.start()] + f"{match.group(1)}{match.group(3)}" + changelog_text[match.end() :]
     if "## Unreleased" not in updated:
         raise ValueError("failed to clear the changelog Unreleased section")
-    versions = collect_release_versions(include_version=version)
+    versions = sorted(
+        set(collect_release_versions(include_version=version)) | collect_changelog_release_versions(changelog_text),
+        key=parse_semver,
+        reverse=True,
+    )
     latest = versions[0]
     previous = versions[1:]
     latest_block = "## Latest Release\n\n" + render_release_note_link(latest, from_release_index=False) + "\n"

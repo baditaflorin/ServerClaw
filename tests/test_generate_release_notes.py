@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import generate_release_notes as notes
 
 
@@ -47,3 +49,32 @@ def test_render_release_notes_includes_structured_sections() -> None:
     assert "## Summary" in rendered
     assert "## Platform Impact" in rendered
     assert "## Upgrade Guide" in rendered
+
+
+def test_update_changelog_preserves_historical_release_links_without_note_files(
+    monkeypatch, tmp_path: Path
+) -> None:
+    changelog = """# Changelog
+
+## Unreleased
+
+- added release manager
+
+## Latest Release
+
+- [0.1.0 release notes](docs/release-notes/0.1.0.md)
+
+## Previous Releases
+
+- [0.0.9 release notes](docs/release-notes/0.0.9.md)
+"""
+
+    monkeypatch.setattr(notes, "RELEASE_NOTES_DIR", tmp_path / "docs" / "release-notes")
+    (notes.RELEASE_NOTES_DIR / "0.1.0.md").parent.mkdir(parents=True, exist_ok=True)
+    (notes.RELEASE_NOTES_DIR / "0.1.0.md").write_text("# Release 0.1.0\n", encoding="utf-8")
+
+    updated = notes.update_changelog_for_release(changelog, "0.1.1")
+
+    assert "0.1.1 release notes" in updated
+    assert "0.1.0 release notes" in updated
+    assert "0.0.9 release notes" in updated
