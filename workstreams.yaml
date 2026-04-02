@@ -16154,5 +16154,10 @@ workstreams:
           paths:
             - scripts/provision_operator.py
           mode: exclusive
+        - id: ws0318v2_generated_diagrams
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: ws0318v2-generated-diagrams-v1
     ready_to_merge: true
     live_applied: false
