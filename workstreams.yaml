@@ -1880,15 +1880,15 @@ workstreams:
     canonical_truth:
       changelog_entry: integrates ADR 0281 into main by re-verifying the latest realistic origin/main GlitchTip replay, preserving the repo-managed `errors.lv3.org` error-tracking publication and Keycloak OIDC handoff, and recording truthful public health plus end-to-end event-ingest evidence from the merged tree
       release_bump: patch
-      included_in_repo_version: 0.177.132
+      included_in_repo_version: 0.177.140
       latest_receipts:
         glitchtip: 2026-04-01-adr-0281-glitchtip-mainline-live-apply
     ready_to_merge: false
     live_applied: true
     blockers:
-      - 'The branch is still rebased onto latest realistic `origin/main` `cbb0c99f3f69c3ab2bb7658daf443c45df9ea49b` / `0.177.135`, but the exact-main public verification still cannot start honestly because active ws-0303 monitoring-stack, ws-0289 Label Studio, ws-0275 Tika, and ws-0247 Keycloak/Dify playbooks are mutating `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`, and the latest 900-second quiet-window waiter still failed to acquire a safe window.'
+      - 'The branch is now rebased onto latest realistic `origin/main` `cf255eeca51d0b6c1e65ce19a5924d55ed2ed7a4` / `0.177.140`, but the exact-main public verification still cannot start honestly because active ws-0303 monitoring-stack, ws-0247 Langfuse, ws-0304 Step CA, ws-0319 runtime-ai-pool, and ws-0308 ops-portal playbooks are mutating `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`, so there is still no safe quiet window.'
       - 'Fresh read-only public checks on 2026-04-02 still show `errors.lv3.org` drifted away from the repo-managed GlitchTip publication: it resolves to `65.108.75.123` but serves certificate `CN=nginx.lv3.org` and `308` redirects `/health/` to `https://nginx.lv3.org/health/`, so the exact-main live apply must be rerun and verified from the integrated tree before any truthful merge.'
-      - 'Repo automation is mostly green from the rebased tree: `make remote-validate` and `make check-build-server` pass, and `make validate` plus `make pre-push-gate` are both reduced to protected canonical-truth regeneration of the top-level `README.md`; do not merge until the live replay succeeds and that final generated-docs decision is handled truthfully.'
+      - 'Repo automation is close but not fully reconfirmed on `0.177.140`: `make check-build-server` passes, the focused rebased test slice passes (`42 passed`), generated SLO/diagram/dashboard/platform-manifest fallout has been repaired locally, and the newest `make remote-validate` rerun only needs to settle after the refreshed platform manifest before any truthful merge decision can be made.'
   - id: ws-0292-live-apply
     adr: "0292"
     title: Live apply Lago as the usage metering and billing API layer from latest origin/main

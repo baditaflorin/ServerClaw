@@ -231,7 +231,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://errors.lv3.org",
-        "last_live_apply": "2026-04-01T00:00:00Z",
+        "last_live_apply": "2026-04-02T00:00:00Z",
         "slo_status": "unknown"
       },
       "gotenberg": {

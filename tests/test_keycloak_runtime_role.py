@@ -66,6 +66,8 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_jupyterhub_client_secret_local_file"].endswith("/.local/keycloak/jupyterhub-client-secret.txt")
     assert defaults["keycloak_superset_client_id"] == "superset"
     assert defaults["keycloak_superset_client_secret_local_file"].endswith("/.local/keycloak/superset-client-secret.txt")
+    assert defaults["keycloak_glitchtip_client_id"] == "glitchtip"
+    assert defaults["keycloak_glitchtip_client_secret_local_file"].endswith("/.local/keycloak/glitchtip-client-secret.txt")
     assert defaults["keycloak_serverclaw_runtime_client_id"] == "serverclaw-runtime"
     assert defaults["keycloak_serverclaw_runtime_client_secret_local_file"].endswith(
         "/.local/keycloak/serverclaw-runtime-client-secret.txt"
@@ -87,6 +89,12 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
         "{{ keycloak_grist_root_url }}",
         "{{ keycloak_grist_root_url }}/",
         "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
+    ]
+    assert defaults["keycloak_glitchtip_root_url"] == "https://errors.lv3.org"
+    assert defaults["keycloak_glitchtip_post_logout_redirect_uris"] == [
+        "{{ keycloak_glitchtip_root_url }}",
+        "{{ keycloak_glitchtip_root_url }}/",
+        "{{ keycloak_glitchtip_root_url }}/login",
     ]
     assert defaults["keycloak_outline_post_logout_redirect_uris"] == [
         "{{ keycloak_outline_root_url }}",
@@ -506,7 +514,7 @@ def test_realm_reconciliation_retries_client_secret_reads() -> None:
         if task.get("name", "").startswith("Read the ") and task.get("name", "").endswith(" client secret")
     ]
 
-    assert len(read_secret_tasks) == 14
+    assert len(read_secret_tasks) == 15
     for task in read_secret_tasks:
         assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
         assert task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
@@ -919,9 +927,6 @@ def test_role_manages_glitchtip_client_secret() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
     realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
-    glitchtip_client_task = next(
-        task for task in realm_block["block"] if task.get("name") == "Ensure the GlitchTip OAuth client exists"
-    )
     read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the GlitchTip client secret")
     mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the GlitchTip client secret to the control machine")
 
@@ -933,13 +938,6 @@ def test_role_manages_glitchtip_client_secret() -> None:
         "{{ keycloak_glitchtip_root_url }}/",
         "{{ keycloak_glitchtip_root_url }}/login",
     ]
-    assert glitchtip_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_glitchtip_client_id }}"
-    assert glitchtip_client_task["community.general.keycloak_client"]["redirect_uris"] == [
-        "{{ keycloak_glitchtip_root_url }}/accounts/oidc/keycloak/login/callback/"
-    ]
-    assert glitchtip_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
-        "{{ keycloak_glitchtip_post_logout_redirect_uris }}"
-    )
     assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == (
         "{{ keycloak_glitchtip_client_id }}"
     )
