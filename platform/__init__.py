@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import datetime as _datetime
 import importlib
 import importlib.util
 import sysconfig
 from pathlib import Path
+
+# Python 3.9/3.10 compat: datetime.UTC was added in 3.11
+if not hasattr(_datetime, "UTC"):
+    _datetime.UTC = _datetime.timezone.utc  # type: ignore[attr-defined]
 
 
 _STDLIB_PLATFORM_PATH = Path(sysconfig.get_path("stdlib")) / "platform.py"
