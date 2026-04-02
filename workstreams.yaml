@@ -16376,6 +16376,7 @@ workstreams:
       - playbooks/mail-platform-send-gmail.yml
       - playbooks/mail-platform.yml
       - playbooks/nats-jetstream.yml
+      - playbooks/ops-portal.yml
       - playbooks/uptime-kuma.yml
       - playbooks/nomad.yml
       - playbooks/openbao.yml
@@ -16387,6 +16388,7 @@ workstreams:
       - playbooks/windmill.yml
       - collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml
       - collections/ansible_collections/lv3/platform/playbooks/mailpit.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
       - collections/ansible_collections/lv3/platform/roles/runtime_pool_substrate/**
       - docs/runbooks/configure-runtime-general-pool.md
       - docs/runbooks/configure-runtime-control-pool.md
@@ -16453,6 +16455,12 @@ workstreams:
             - docs/site-generated/architecture/dependency-graph.md
           mode: shared_contract
           contract: latest-main-generated-truth-v1
+        - id: ws0330_latest_main_merge_normalization
+          paths:
+            - playbooks/ops-portal.yml
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+          mode: shared_contract
+          contract: latest-main-merge-normalization-v1
         - id: ws0330_platform_truth_generation
           paths:
             - build/platform-manifest.json
