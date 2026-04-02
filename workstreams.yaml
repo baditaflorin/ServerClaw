@@ -15983,8 +15983,8 @@ workstreams:
     title: Live apply the first runtime-ai pool split with Nomad, Traefik, and Dapr on the latest mainline
     status: live_applied
     owner: codex
-    branch: codex/ws-0319-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-live-apply
+    branch: codex/ws-0319-main-integration
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0319-live-apply.md
     depends_on:
       - adr-0232-nomad-for-durable-batch-and-long-running-internal-jobs
@@ -16012,11 +16012,18 @@ workstreams:
       - playbooks/nomad.yml
       - collections/ansible_collections/lv3/platform/playbooks/tika.yml
       - collections/ansible_collections/lv3/platform/playbooks/tesseract-ocr.yml
-      - collections/ansible_collections/lv3/platform/roles/runtime_pool_substrate/
-      - collections/ansible_collections/lv3/platform/roles/nomad_namespace/
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/*
+      - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/*
+      - collections/ansible_collections/lv3/platform/roles/nomad_namespace/*
+      - collections/ansible_collections/lv3/platform/roles/proxmox_guests/templates/user-data.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/runtime_pool_substrate/*
       - config/execution-lanes.yaml
       - config/ansible-execution-scopes.yaml
+      - config/ansible-role-idempotency.yml
       - config/api-gateway-catalog.json
+      - config/dependency-graph.json
+      - config/grafana/dashboards/slo-overview.json
+      - config/prometheus/rules/slo_alerts.yml
       - config/service-capability-catalog.json
       - config/health-probe-catalog.json
       - config/slo-catalog.json
@@ -16025,17 +16032,28 @@ workstreams:
       - config/prometheus/file_sd/slo_targets.yml
       - config/uptime-kuma/monitors.json
       - config/capacity-model.json
-      - config/contracts/runtime-pools/runtime-ai/
+      - config/contracts/runtime-pools/runtime-ai/*
+      - docs/schema/service-capability-catalog.schema.json
+      - docs/site-generated/architecture/dependency-graph.md
       - tests/test_runtime_ai_pool_playbook.py
       - tests/test_runtime_pool_substrate_role.py
+      - tests/test_docker_runtime_role.py
       - tests/test_generate_platform_vars.py
       - tests/test_gotenberg_runtime_role.py
+      - tests/test_linux_guest_firewall_role.py
       - tests/test_tika_playbook.py
       - tests/test_tika_runtime_role.py
+      - tests/test_proxmox_guests_role.py
       - tests/test_tesseract_ocr_runtime_role.py
       - tests/test_nomad_playbook.py
+      - docs/diagrams/agent-coordination-map.excalidraw
       - receipts/live-applies/
       - receipts/live-applies/evidence/
+      - receipts/live-applies/2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-04-02-ws-0319-*
+      - receipts/restic-backups/20260401T235848Z.json
+      - receipts/restic-backups/20260402T081812Z.json
+      - receipts/restic-snapshots-latest.json
       - README.md
       - RELEASE.md
       - VERSION
@@ -16082,11 +16100,18 @@ workstreams:
             - playbooks/nomad.yml
             - collections/ansible_collections/lv3/platform/playbooks/tika.yml
             - collections/ansible_collections/lv3/platform/playbooks/tesseract-ocr.yml
-            - collections/ansible_collections/lv3/platform/roles/runtime_pool_substrate/
-            - collections/ansible_collections/lv3/platform/roles/nomad_namespace/
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/*
+            - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/*
+            - collections/ansible_collections/lv3/platform/roles/nomad_namespace/*
+            - collections/ansible_collections/lv3/platform/roles/proxmox_guests/templates/user-data.yml.j2
+            - collections/ansible_collections/lv3/platform/roles/runtime_pool_substrate/*
             - config/execution-lanes.yaml
             - config/ansible-execution-scopes.yaml
+            - config/ansible-role-idempotency.yml
             - config/api-gateway-catalog.json
+            - config/dependency-graph.json
+            - config/grafana/dashboards/slo-overview.json
+            - config/prometheus/rules/slo_alerts.yml
             - config/service-capability-catalog.json
             - config/health-probe-catalog.json
             - config/slo-catalog.json
@@ -16095,15 +16120,21 @@ workstreams:
             - config/prometheus/file_sd/slo_targets.yml
             - config/uptime-kuma/monitors.json
             - config/capacity-model.json
-            - config/contracts/runtime-pools/runtime-ai/
+            - config/contracts/runtime-pools/runtime-ai/*
+            - docs/schema/service-capability-catalog.schema.json
+            - docs/site-generated/architecture/dependency-graph.md
             - tests/test_runtime_ai_pool_playbook.py
             - tests/test_runtime_pool_substrate_role.py
+            - tests/test_docker_runtime_role.py
             - tests/test_generate_platform_vars.py
             - tests/test_gotenberg_runtime_role.py
+            - tests/test_linux_guest_firewall_role.py
             - tests/test_tika_playbook.py
             - tests/test_tika_runtime_role.py
+            - tests/test_proxmox_guests_role.py
             - tests/test_tesseract_ocr_runtime_role.py
             - tests/test_nomad_playbook.py
+            - docs/diagrams/agent-coordination-map.excalidraw
           mode: exclusive
         - id: ws0319_live_apply_release_surfaces
           paths:
@@ -16119,10 +16150,21 @@ workstreams:
           contract: canonical-truth-v1
         - id: ws0319_live_apply_receipts
           paths:
-            - receipts/live-applies/
-            - receipts/live-applies/evidence/
+            - receipts/live-applies/2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-04-02-ws-0319-*
+            - receipts/restic-backups/20260401T235848Z.json
+            - receipts/restic-backups/20260402T081812Z.json
+            - receipts/restic-snapshots-latest.json
           mode: exclusive
-    blockers:
-      - exact-main replay and canonical-truth update are still required because origin/main advanced to 0.177.137 while the branch-local live apply was being verified
+    blockers: []
     ready_to_merge: true
     live_applied: true
+    canonical_truth:
+      changelog_entry: introduced the first dedicated runtime-ai pool on production with Nomad, Traefik, and Dapr, moving Apache Tika, Gotenberg, and Tesseract OCR off docker-runtime-lv3 while preserving the authenticated /v1/gotenberg route
+      release_bump: patch
+      included_in_repo_version: 0.177.141
+      latest_receipts:
+        gotenberg: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
+        nomad_scheduler: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
+        tesseract_ocr: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
+        tika: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply

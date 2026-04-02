@@ -433,6 +433,9 @@ playbook_execution_required_hosts:
   docker_build:
     production: docker-build-lv3
     staging: docker-build-staging-lv3
+  runtime_ai:
+    production: runtime-ai-lv3
+    staging: docker-runtime-staging-lv3
   monitoring:
     production: monitoring-lv3
     staging: monitoring-staging-lv3

@@ -1495,7 +1495,7 @@
         "y": 49
       },
       "options": {
-        "content": "### gotenberg-availability\n\nThe private Gotenberg document rendering API remains reachable on docker-runtime-lv3 for synchronous PDF conversion workflows.\n\nService: `gotenberg`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=gotenberg-availability)",
+        "content": "### gotenberg-availability\n\nThe private Gotenberg document rendering API remains reachable on runtime-ai-lv3 for synchronous PDF conversion workflows.\n\nService: `gotenberg`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=gotenberg-availability)",
         "mode": "markdown"
       }
     },
@@ -7825,7 +7825,7 @@
         "y": 259
       },
       "options": {
-        "content": "### tika-availability\n\nThe private Apache Tika extraction API remains reachable on docker-runtime-lv3 for synchronous document text and metadata extraction workflows.\n\nService: `tika`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tika-availability)",
+        "content": "### tika-availability\n\nThe private Apache Tika extraction API remains reachable on runtime-ai-lv3 for synchronous document text and metadata extraction workflows.\n\nService: `tika`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tika-availability)",
         "mode": "markdown"
       }
     },
@@ -8036,7 +8036,7 @@
         "y": 266
       },
       "options": {
-        "content": "### tesseract-ocr-availability\n\nThe private Tesseract OCR runtime remains reachable on docker-runtime-lv3 for scanned-image and image-only document fallback extraction.\n\nService: `tesseract_ocr`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tesseract-ocr-availability)",
+        "content": "### tesseract-ocr-availability\n\nThe private Tesseract OCR runtime remains reachable on runtime-ai-lv3 for scanned-image and image-only document fallback extraction.\n\nService: `tesseract_ocr`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tesseract-ocr-availability)",
         "mode": "markdown"
       }
     },

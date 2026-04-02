@@ -28,7 +28,7 @@
 # Author: LV3 Platform
 # Last Updated: 2026-04-02
 - name: Converge Apache Tika on the runtime-ai pool guest
-  hosts: "{{ playbook_execution_host_patterns.runtime_ai[playbook_execution_env] }}"
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-ai-lv3' }}"
   become: true
   gather_facts: true
   tags:

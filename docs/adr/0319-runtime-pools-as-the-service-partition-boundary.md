@@ -1,10 +1,10 @@
 # ADR 0319: Runtime Pools As The Service Partition Boundary
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
-- Implemented On: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.177.141
+- Implemented In Platform Version: 0.130.89
+- Implemented On: 2026-04-02
 - Date: 2026-04-01
 
 ## Context

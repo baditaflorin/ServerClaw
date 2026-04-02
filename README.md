@@ -72,6 +72,8 @@ MinIO is now live on `docker-runtime-lv3` and published at `https://minio.lv3.or
 
 ADR 0292 Lago billing is now re-verified on production from `main`: `https://billing.lv3.org` keeps the browser surface behind the shared oauth2-proxy sign-in flow, anonymous `https://billing.lv3.org/api/health` requests now fail closed at the API gateway with the canonical `401` envelope, and the 2026-04-01 exact-main replay on release `0.177.128` re-verified public smoke event ingest plus current-usage aggregation on platform version `0.130.81`.
 
+ADR 0319 and ADR 0320 are now live on production from current `main`: the 2026-04-02 exact-main replay on repository release `0.177.141` established the first dedicated `runtime-ai-lv3` pool with Nomad, Traefik, and Dapr, moved Apache Tika, Gotenberg, and Tesseract OCR off `docker-runtime-lv3`, and re-verified the authenticated `https://api.lv3.org/v1/gotenberg/health` path on platform version `0.130.89`.
+
 Signed release bundles are now live through that private Gitea path: the repo-managed `release-bundle` workflow publishes tarball, checksum, and Sigstore bundle assets into private Gitea Releases, and controller-side replay now verifies those assets with Cosign against the committed public key before treating them as eligible runtime input.
 
 Renovate is now live through that same private Gitea Actions path on `docker-build-lv3`: the Harbor-pinned `registry.lv3.org/check-runner/renovate:42.76.4` runtime mints a short-lived scoped Gitea token from the OpenBao-rendered bootstrap bundle at job start, maintains the private `Renovate Dashboard`, and now opens governed `main`-targeted update PRs against `ops/proxmox_florin_server`.
@@ -219,9 +221,9 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.140` |
-| Platform version | `0.130.88` |
-| Observed check date | `2026-03-31` |
+| Repository version | `0.177.141` |
+| Platform version | `0.130.89` |
+| Observed check date | `2026-04-02` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
 | Observed kernel | `6.17.13-2-pve` |
@@ -237,6 +239,7 @@ and OpenFGA load failure `14/1182` (`1.18%`).
 | 151 | `postgres-replica-lv3` | `10.10.10.51` | `false` |
 | 160 | `backup-lv3` | `10.10.10.60` | `true` |
 | 170 | `coolify-lv3` | `10.10.10.70` | `true` |
+| 190 | `runtime-ai-lv3` | `10.10.10.90` | `true` |
 
 Template VM: `9000` `debian13-cloud-template`
 
@@ -327,7 +330,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `flagsmith` | `2026-03-30-adr-0288-flagsmith-mainline-live-apply` |
 | `gitea` | `2026-03-26-adr-0143-gitea-live-apply` |
 | `gitea_actions_runners` | `2026-03-28-adr-0229-gitea-actions-runners-live-apply` |
-| `gotenberg` | `2026-03-30-adr-0278-gotenberg-mainline-live-apply` |
+| `gotenberg` | `2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply` |
 | `grist` | `2026-04-01-adr-0279-grist-mainline-live-apply` |
 | `guest_network_policy` | `2026-03-22-adr-0067-guest-network-policy-live-apply` |
 | `harbor` | `2026-03-29-adr-0201-harbor-mainline-live-apply` |
@@ -360,7 +363,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `netbox` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `network_impairment_matrix` | `2026-03-27-adr-0189-network-impairment-matrix-live-apply` |
 | `nextcloud` | `2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply` |
-| `nomad_scheduler` | `2026-03-29-adr-0232-nomad-mainline-live-apply` |
+| `nomad_scheduler` | `2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply` |
 | `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
 | `observation_to_action_closure_loop` | `2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply` |
@@ -432,8 +435,8 @@ Template VM: `9000` `debian13-cloud-template`
 | `superset` | `2026-04-01-adr-0292-superset-mainline-live-apply` |
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `temporal` | `2026-03-30-adr-0293-temporal-mainline-live-apply` |
-| `tesseract_ocr` | `2026-03-30-adr-0286-tesseract-ocr-live-apply` |
-| `tika` | `2026-03-30-adr-0275-apache-tika-live-apply` |
+| `tesseract_ocr` | `2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply` |
+| `tika` | `2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply` |
 | `typesense` | `2026-03-31-adr-0277-typesense-mainline-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
 | `validation_gate` | `2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply` |
@@ -1585,8 +1588,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.140` |
-| Platform version | `0.130.88` |
+| Repository version | `0.177.141` |
+| Platform version | `0.130.89` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1888,6 +1891,7 @@ This repository is intentionally opinionated:
 | `0313` | Live apply contextual help, glossary, and escalation drawer across the first-party portal surfaces | `live_applied` | [ws-0313-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0313-live-apply.md) |
 | `0315` | Live apply canonical page states and next-best-action guidance on the Windmill operator admin surface | `live_applied` | [ws-0315-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-live-apply.md) |
 | `0317` | Live apply ADR 0317 Keycloak direct-API operator provisioning via SSH proxy | `live_applied` | [ws-0317-live-apply.md](docs/workstreams/ws-0317-live-apply.md) |
+| `0319` | Live apply the first runtime-ai pool split with Nomad, Traefik, and Dapr on the latest mainline | `live_applied` | [ws-0319-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0319-live-apply.md) |
 | `0319` | Split the overloaded shared runtime into pool-scoped lanes with higher memory headroom and bounded autoscaling | `merged` | [adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md) |
 | `0319` | Investigate recurring service restarts and uptime failures across the runtime pools | `merged` | [ws-0325-service-uptime-investigation.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0325-service-uptime-investigation.md) |
 | `0319` | Refine the runtime-pool ADR bundle with battle-tested API-first OSS recommendations | `merged` | [ws-0329-runtime-library-fit.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0329-runtime-library-fit.md) |

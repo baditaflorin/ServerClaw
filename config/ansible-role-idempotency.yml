@@ -196,6 +196,9 @@ roles:
   nomad_cluster_member:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  nomad_namespace:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   nats_jetstream_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -236,6 +239,9 @@ roles:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   plausible_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  runtime_pool_substrate:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   openbao_postgres_backend:

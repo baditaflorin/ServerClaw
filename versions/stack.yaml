@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.140
-platform_version: 0.130.88
+repo_version: 0.177.141
+platform_version: 0.130.89
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -121,7 +121,7 @@ live_apply_evidence:
     docs_portal: 2026-04-02-adr-0313-contextual-help-mainline-live-apply
     harbor: 2026-03-29-adr-0201-harbor-mainline-live-apply
     ops_portal_visualizations: 2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply
-    nomad_scheduler: 2026-03-29-adr-0232-nomad-mainline-live-apply
+    nomad_scheduler: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
     serverclaw: 2026-04-01-adr-0294-one-api-mainline-live-apply
     serverclaw_memory: 2026-03-29-adr-0263-serverclaw-memory-substrate-mainline-live-apply
     route_dns_assertion_ledger: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
@@ -133,17 +133,17 @@ live_apply_evidence:
     validation_runner_contracts: 2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply
     matrix_synapse: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
     stage_smoke_suites: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
-    gotenberg: 2026-03-30-adr-0278-gotenberg-mainline-live-apply
+    gotenberg: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
     nextcloud: 2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply
     browser_runner: 2026-03-30-adr-0261-playwright-browser-runners-live-apply
     mailpit: 2026-03-30-adr-0282-mailpit-mainline-live-apply
     plausible_analytics: 2026-03-30-adr-0283-plausible-analytics-mainline-live-apply
     changedetection: 2026-03-30-adr-0280-changedetection-mainline-live-apply
-    tika: 2026-03-30-adr-0275-apache-tika-live-apply
+    tika: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
     artifact_cache_vm: 2026-03-30-adr-0296-dedicated-artifact-cache-vm-mainline-live-apply
     repo_deploy_base_image_cache: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
     vulnerability_budget_gate: 2026-03-30-adr-0269-vulnerability-budget-gates-mainline-live-apply
-    tesseract_ocr: 2026-03-30-adr-0286-tesseract-ocr-live-apply
+    tesseract_ocr: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
     directus: 2026-03-30-adr-0289-directus-mainline-live-apply
     temporal: 2026-03-30-adr-0293-temporal-mainline-live-apply
     jupyterhub: 2026-03-30-adr-0291-jupyterhub-mainline-live-apply
@@ -186,6 +186,7 @@ desired_state:
     postgres_replica_vm: 10.10.10.51
     backup_vm: 10.10.10.60
     coolify_vm: 10.10.10.70
+    runtime_ai_vm: 10.10.10.90
   guest_provisioning:
     template_vmid: 9000
     template_name: debian13-cloud-template
@@ -198,6 +199,7 @@ desired_state:
       postgres_replica_vm: 151
       backup_vm: 160
       coolify_vm: 170
+      runtime_ai_vm: 190
   traffic_model:
     guest_default_gateway: 10.10.10.1
     guest_outbound_via_host_nat: true
@@ -475,7 +477,7 @@ desired_state:
       - wiki.lv3.org
 
 observed_state:
-  checked_at: 2026-03-31
+  checked_at: 2026-04-02
   access:
     ssh_bootstrap_key_working: true
     host_ops_user_working: true
@@ -646,6 +648,10 @@ observed_state:
       - vmid: 170
         name: coolify-lv3
         ipv4: 10.10.10.70
+        running: true
+      - vmid: 190
+        name: runtime-ai-lv3
+        ipv4: 10.10.10.90
         running: true
     access:
       ssh_proxyjump_via_proxmox_host_working: true
@@ -1112,8 +1118,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.140
+    current: 0.177.141
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.88
+    current: 0.130.89
     meaning: intended platform release for the actual server configuration
