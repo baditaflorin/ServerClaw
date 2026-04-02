@@ -178,8 +178,8 @@ the required first-run stages are complete or explicitly revealed.
 
 ## Results
 
-- ADR 0310 is now live on the interactive ops portal runtime and recorded as
-  the latest canonical `ops_portal` receipt.
+- ADR 0310 is live on the interactive ops portal runtime and preserved by its
+  standalone exact-main receipt.
 - Repository version `0.177.144` and platform version `0.130.91` now describe
   one exact-main activation-checklist replay, including the server-side
   launcher, runbook, and service-action guardrails.
@@ -192,12 +192,13 @@ the required first-run stages are complete or explicitly revealed.
   with stale session workspaces, so completing the intended remote validation
   path required a documented manual cleanup of two abandoned April 1
   workspaces.
-- The integrated release tree is ready for the final `origin/main` push once
-  the last receipt and git sync checks complete on this worktree.
+- The later combined ws-0308 exact-main replay carried the same activation
+  behavior forward as the current mainline `ops_portal` receipt at repository
+  version `0.177.146` and platform version `0.130.92`.
 
 ## Mainline Note
 
-The protected release and canonical-truth surfaces now reflect the exact-main
-ADR 0310 replay on `codex/ws-0310-main-integration`. No merge-only repo
-surfaces remain; the only remaining operational steps are the last validation
-pass, the final push to `origin/main`, and removal of the temporary worktree.
+The protected release and canonical-truth surfaces from the standalone ADR 0310
+replay remain preserved by its receipt, and the later combined ws-0308 portal
+bundle now carries that activation contract on the current mainline. No
+separate ws-0310 merge-only repo surfaces remain.

@@ -1,0 +1,125 @@
+{% from "macros/states.html" import empty_state %}
+<span id="portal-toolbar-attention-count" class="portal-toolbar-badge" hx-swap-oob="outerHTML">{{ attention_summary.active_count }}</span>
+<span id="portal-nav-attention-count" class="portal-shell-nav-count" hx-swap-oob="outerHTML">{{ attention_summary.active_count }}</span>
+
+<div class="overview-grid attention-summary-grid">
+  <section class="pf-v5-c-card panel summary-panel">
+    <div class="stat-block">
+      <span class="label">Active</span>
+      <strong>{{ attention_summary.active_count }}</strong>
+    </div>
+    <div class="stat-block">
+      <span class="label">Acknowledged</span>
+      <strong>{{ attention_summary.acknowledged_count }}</strong>
+    </div>
+    <div class="stat-block">
+      <span class="label">Dismissed</span>
+      <strong>{{ attention_summary.dismissed_count }}</strong>
+    </div>
+    <div class="stat-block">
+      <span class="label">Recent activity</span>
+      <strong>{{ attention_summary.activity_count }}</strong>
+    </div>
+  </section>
+</div>
+
+<div class="attention-grid">
+  <section class="pf-v5-c-card panel">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Notification Center</p>
+        <h3>Actionable items routed into one shared queue</h3>
+      </div>
+      <span class="pill">{{ attention_summary.active_count }} active</span>
+    </div>
+
+    {% if attention.groups.active %}
+    <div class="attention-list">
+      {% for item in attention.groups.active %}
+      <article class="attention-card attention-card--{{ item.tone }}">
+        <div class="attention-card__head">
+          <div>
+            <p class="service-category">{{ item.source_label }}</p>
+            <h4>{{ item.title }}</h4>
+          </div>
+          <span class="status-dot {{ item.tone }}">{{ item.tone }}</span>
+        </div>
+        <p class="muted">{{ item.summary }}</p>
+        <p class="attention-card__detail">{{ item.detail }}</p>
+        <p class="muted">{{ item.occurred_at|humanize_timestamp }}</p>
+        {% if item.links %}
+        <div class="link-row compact-links">
+          {% for link in item.links %}
+          <a href="{{ link.href }}" {% if link.href.startswith('http') %}target="_blank" rel="noreferrer"{% endif %}>{{ link.label }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+        <div class="action-row">
+          <form hx-post="/actions/attention/{{ item.id }}" hx-target="#attention-panel" hx-swap="innerHTML">
+            <input type="hidden" name="action" value="acknowledged">
+            <button class="action-button secondary" type="submit">Acknowledge</button>
+          </form>
+          <form hx-post="/actions/attention/{{ item.id }}" hx-target="#attention-panel" hx-swap="innerHTML">
+            <input type="hidden" name="action" value="dismissed">
+            <button class="action-button ghost" type="submit">Dismiss</button>
+          </form>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    {{ empty_state("No active notifications", "The shared notification center is currently clear. New actionable items will appear here before they disappear into product-local logs.") }}
+    {% endif %}
+  </section>
+
+  <section class="pf-v5-c-card panel attention-sidecar">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Resolved States</p>
+        <h3>Acknowledged and dismissed items still keep an audit trail</h3>
+      </div>
+    </div>
+
+    {% if attention.groups.acknowledged %}
+    <section class="attention-subsection">
+      <h4>Acknowledged</h4>
+      <ul class="compact-list">
+        {% for item in attention.groups.acknowledged[:6] %}
+        <li>
+          <strong>{{ item.title }}</strong>
+          <span>{{ item.updated_at|humanize_timestamp }}</span>
+          <span class="muted">{% if item.updated_by %}{{ item.updated_by }}{% else %}operator{% endif %}</span>
+          <form hx-post="/actions/attention/{{ item.id }}" hx-target="#attention-panel" hx-swap="innerHTML">
+            <input type="hidden" name="action" value="reopened">
+            <button class="action-button secondary" type="submit">Reopen</button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    {% if attention.groups.dismissed %}
+    <section class="attention-subsection">
+      <h4>Dismissed</h4>
+      <ul class="compact-list">
+        {% for item in attention.groups.dismissed[:6] %}
+        <li>
+          <strong>{{ item.title }}</strong>
+          <span>{{ item.updated_at|humanize_timestamp }}</span>
+          <span class="muted">{% if item.updated_by %}{{ item.updated_by }}{% else %}operator{% endif %}</span>
+          <form hx-post="/actions/attention/{{ item.id }}" hx-target="#attention-panel" hx-swap="innerHTML">
+            <input type="hidden" name="action" value="reopened">
+            <button class="action-button secondary" type="submit">Reopen</button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    {% if not attention.groups.acknowledged and not attention.groups.dismissed %}
+    {{ empty_state("No acknowledged history yet", "Once an operator acknowledges or dismisses an item, the action lands here and also appears in the shared activity timeline.") }}
+    {% endif %}
+  </section>
+</div>

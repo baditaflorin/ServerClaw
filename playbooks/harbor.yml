@@ -1,6 +1,6 @@
 ---
 # Playbook: harbor.yml
-# Purpose: Deploy Harbor on docker-runtime-lv3 and publish registry.lv3.org through the shared NGINX edge.
+# Purpose: Deploy Harbor on runtime-control-lv3 and publish registry.lv3.org through the shared NGINX edge.
 # Use case: Run when provisioning or updating the managed Harbor registry runtime and its public edge publication.
 #
 # Inputs (required):
@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): Guest SSH path for the Docker runtime and edge VMs.
 #
 # Outputs:
-#   - Harbor runtime converged on docker-runtime-lv3 under /opt/harbor.
+#   - Harbor runtime converged on runtime-control-lv3 under /opt/harbor.
 #   - registry.lv3.org published through nginx-lv3.
 #
 # Idempotency: Fully idempotent
@@ -18,7 +18,7 @@
 #
 # Dependencies:
 #   - ADR 0201: Harbor with CVE scanning is the service being deployed.
-#   - Requires: docker-runtime-lv3, nginx-lv3, and Keycloak on docker-runtime-lv3 to be reachable.
+#   - Requires: runtime-control-lv3, nginx-lv3, and Keycloak on runtime-control-lv3 to be reachable.
 #   - Role: harbor_runtime — installs Harbor, bootstraps local runtime secrets, and verifies core services.
 #   - Role: nginx_edge_publication — renders the public reverse-proxy publication for registry.lv3.org.
 #
@@ -29,8 +29,8 @@
 # Last Updated: 2026-03-28
 # =============================================================================
 
-- name: Converge Harbor on the Docker runtime VM
-  hosts: docker-runtime-lv3
+- name: Converge Harbor on the runtime-control VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
   gather_facts: true
   vars:

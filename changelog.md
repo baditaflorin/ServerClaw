@@ -14,10 +14,13 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.177.144 release notes](docs/release-notes/0.177.144.md)
+- [0.177.147 release notes](docs/release-notes/0.177.147.md)
 
 ## Previous Releases
 
+- [0.177.146 release notes](docs/release-notes/0.177.146.md)
+- [0.177.145 release notes](docs/release-notes/0.177.145.md)
+- [0.177.144 release notes](docs/release-notes/0.177.144.md)
 - [0.177.143 release notes](docs/release-notes/0.177.143.md)
 - [0.177.142 release notes](docs/release-notes/0.177.142.md)
 - [0.177.141 release notes](docs/release-notes/0.177.141.md)

@@ -19,6 +19,12 @@ ALLOWED_EXECUTION_CLASSES = {"mutation", "diagnostic"}
 LIST_HOSTS_HEADER_PATTERN = re.compile(r"^\s+hosts \(\d+\):$")
 IMPORT_PLAYBOOK_PATTERN = re.compile(r"^\s*-\s*import_playbook:\s*(?P<path>.+?)\s*$")
 SHARD_COMPAT_EXCLUDES = {".ansible", ".git"}
+ENV_DEFAULT_EXPR_PATTERN = re.compile(
+    r"{{\s*env\s*\|\s*default\(\s*['\"](?P<default>[^'\"]+)['\"]\s*\)\s*}}"
+)
+ENV_TERNARY_EXPR_PATTERN = re.compile(
+    r"{{\s*['\"](?P<when_true>[^'\"]+)['\"]\s*if\s*\(\s*env\s*\|\s*default\(\s*['\"](?P<default>[^'\"]+)['\"]\s*\)\s*\)\s*==\s*['\"](?P<expected>[^'\"]+)['\"]\s*else\s*['\"](?P<when_false>[^'\"]+)['\"]\s*}}"
+)
 
 
 class AnsibleExecutionScopeError(RuntimeError):
@@ -163,6 +169,138 @@ def _unique_preserving_order(values: list[str]) -> tuple[str, ...]:
     return tuple(ordered)
 
 
+def _render_hosts_expression(raw_hosts: str, *, env: str) -> str:
+    rendered = " ".join(raw_hosts.split())
+
+    def _replace_ternary(match: re.Match[str]) -> str:
+        effective_env = env or match.group("default")
+        return match.group("when_true") if effective_env == match.group("expected") else match.group("when_false")
+
+    def _replace_env_default(match: re.Match[str]) -> str:
+        return env or match.group("default")
+
+    previous = None
+    while rendered != previous:
+        previous = rendered
+        rendered = ENV_TERNARY_EXPR_PATTERN.sub(_replace_ternary, rendered)
+        rendered = ENV_DEFAULT_EXPR_PATTERN.sub(_replace_env_default, rendered)
+
+    if "{{" in rendered or "}}" in rendered:
+        raise AnsibleExecutionScopeError(f"unsupported hosts expression: {raw_hosts!r}")
+    return rendered.strip()
+
+
+def _collect_inventory_hosts(payload: Any) -> tuple[str, ...]:
+    hosts: list[str] = []
+
+    def visit(node: Any) -> None:
+        if not isinstance(node, dict):
+            return
+        node_hosts = node.get("hosts")
+        if isinstance(node_hosts, dict):
+            hosts.extend(str(host) for host in node_hosts.keys())
+        children = node.get("children")
+        if isinstance(children, dict):
+            for child in children.values():
+                visit(child)
+        for value in node.values():
+            if value is node_hosts or value is children:
+                continue
+            visit(value)
+
+    visit(payload)
+    return _unique_preserving_order(hosts)
+
+
+def _expand_inventory_limit(
+    limit_expression: str,
+    *,
+    env: str,
+    inventory_path: Path,
+    repo_root: Path,
+    ansible_inventory_bin: str,
+) -> tuple[str, ...]:
+    if limit_expression == "localhost":
+        return ("localhost",)
+    command = [
+        ansible_inventory_bin,
+        "-i",
+        str(inventory_path),
+        "-l",
+        limit_expression,
+        "--list",
+        "--yaml",
+        "-e",
+        f"env={env}",
+    ]
+    result = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, check=False)
+    if result.returncode != 0:
+        raise AnsibleExecutionScopeError(
+            f"failed to expand inventory limit '{limit_expression}': {result.stderr.strip() or result.stdout.strip()}"
+        )
+    try:
+        import yaml
+    except ModuleNotFoundError as exc:  # pragma: no cover - runtime guard
+        raise AnsibleExecutionScopeError("PyYAML is required to expand inventory host limits") from exc
+    payload = yaml.safe_load(result.stdout) or {}
+    hosts = _collect_inventory_hosts(payload)
+    if not hosts:
+        raise AnsibleExecutionScopeError(f"inventory limit '{limit_expression}' resolved no hosts for env '{env}'")
+    return hosts
+
+
+def _discover_playbook_host_patterns(
+    playbook: str | Path,
+    *,
+    env: str,
+    repo_root: Path,
+    _stack: tuple[str, ...] = (),
+) -> tuple[str, ...]:
+    playbook_path = normalize_repo_path(playbook, repo_root=repo_root)
+    if playbook_path in _stack:
+        cycle = " -> ".join([*_stack, playbook_path])
+        raise AnsibleExecutionScopeError(f"import_playbook cycle detected while discovering hosts: {cycle}")
+
+    candidate = (repo_root / playbook_path).resolve()
+    if not candidate.exists():
+        raise AnsibleExecutionScopeError(f"playbook '{playbook_path}' does not exist")
+
+    try:
+        import yaml
+    except ModuleNotFoundError as exc:  # pragma: no cover - runtime guard
+        raise AnsibleExecutionScopeError("PyYAML is required to inspect playbook host expressions") from exc
+
+    payload = yaml.safe_load(candidate.read_text(encoding="utf-8"))
+    if payload is None:
+        return ()
+    if not isinstance(payload, list):
+        raise AnsibleExecutionScopeError(f"playbook '{playbook_path}' must contain a top-level list")
+
+    patterns: list[str] = []
+    for item in payload:
+        if not isinstance(item, dict):
+            continue
+        raw_import = item.get("import_playbook")
+        if isinstance(raw_import, str) and raw_import.strip():
+            resolved_import = normalize_repo_path(candidate.parent / raw_import.strip().strip("'\""), repo_root=repo_root)
+            patterns.extend(
+                _discover_playbook_host_patterns(
+                    resolved_import,
+                    env=env,
+                    repo_root=repo_root,
+                    _stack=(*_stack, playbook_path),
+                )
+            )
+        raw_hosts = item.get("hosts")
+        if raw_hosts is None:
+            continue
+        if not isinstance(raw_hosts, str) or not raw_hosts.strip():
+            raise AnsibleExecutionScopeError(f"playbook '{playbook_path}' has a non-string hosts entry")
+        patterns.append(_render_hosts_expression(raw_hosts, env=env))
+
+    return _unique_preserving_order(patterns)
+
+
 def _aggregate_imported_scope(playbook_path: str, child_scopes: list[ResolvedPlaybookScope]) -> ResolvedPlaybookScope:
     if not child_scopes:
         raise AnsibleExecutionScopeError(f"playbook '{playbook_path}' does not define imports or a leaf catalog entry")
@@ -270,39 +408,24 @@ def discover_target_hosts(
     inventory_path: Path = INVENTORY_PATH,
     repo_root: Path = REPO_ROOT,
     ansible_playbook_bin: str = "ansible-playbook",
+    ansible_inventory_bin: str = "ansible-inventory",
 ) -> tuple[str, ...]:
+    del ansible_playbook_bin
     playbook_path = normalize_repo_path(playbook, repo_root=repo_root)
-    command = [
-        ansible_playbook_bin,
-        "-i",
-        str(inventory_path),
-        str(repo_root / playbook_path),
-        "--list-hosts",
-        "-e",
-        f"env={env}",
-    ]
-    result = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, check=False)
-    if result.returncode != 0:
-        raise AnsibleExecutionScopeError(
-            f"failed to discover target hosts for '{playbook_path}': {result.stderr.strip() or result.stdout.strip()}"
-        )
-
+    host_patterns = _discover_playbook_host_patterns(playbook_path, env=env, repo_root=repo_root)
+    if not host_patterns:
+        raise AnsibleExecutionScopeError(f"playbook '{playbook_path}' resolved no host patterns for env '{env}'")
     hosts: list[str] = []
-    in_hosts_block = False
-    for line in result.stdout.splitlines():
-        if LIST_HOSTS_HEADER_PATTERN.match(line):
-            in_hosts_block = True
-            continue
-        if not in_hosts_block:
-            continue
-        if not line.startswith("      "):
-            in_hosts_block = False
-            continue
-        host = line.strip()
-        if host:
-            hosts.append(host)
-    if not hosts:
-        raise AnsibleExecutionScopeError(f"playbook '{playbook_path}' resolved no target hosts for env '{env}'")
+    for pattern in host_patterns:
+        hosts.extend(
+            _expand_inventory_limit(
+                pattern,
+                env=env,
+                inventory_path=inventory_path,
+                repo_root=repo_root,
+                ansible_inventory_bin=ansible_inventory_bin,
+            )
+        )
     return _unique_preserving_order(hosts)
 
 
@@ -404,6 +527,7 @@ def plan_playbook_execution(
         inventory_path=inventory_path,
         repo_root=repo_root,
         ansible_playbook_bin=ansible_playbook_bin,
+        ansible_inventory_bin=ansible_inventory_bin,
     )
     non_local_hosts = [host for host in target_hosts if host != "localhost"]
     if resolved_scope.mutation_scope == "host" and len(non_local_hosts) != 1:
@@ -537,6 +661,23 @@ def run_scoped_playbook(
         ansible_playbook_bin=ansible_playbook_bin,
         ansible_inventory_bin=ansible_inventory_bin,
     )
+    return run_planned_playbook(
+        plan,
+        passthrough_args=passthrough_args,
+        inventory_path=inventory_path,
+        repo_root=repo_root,
+        ansible_playbook_bin=ansible_playbook_bin,
+    )
+
+
+def run_planned_playbook(
+    plan: PlannedPlaybookExecution,
+    *,
+    passthrough_args: list[str] | None = None,
+    inventory_path: Path = INVENTORY_PATH,
+    repo_root: Path = REPO_ROOT,
+    ansible_playbook_bin: str = "ansible-playbook",
+) -> subprocess.CompletedProcess[str]:
     command = [
         ansible_playbook_bin,
         "-i",
@@ -547,7 +688,7 @@ def run_scoped_playbook(
         plan.limit_expression,
         str(repo_root / plan.playbook_path),
         "-e",
-        f"env={env}",
+        f"env={plan.env}",
         *(passthrough_args or []),
     ]
     return subprocess.run(command, cwd=repo_root, text=True, check=False)

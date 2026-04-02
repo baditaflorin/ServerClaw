@@ -1,7 +1,8 @@
 playbooks:
   playbooks/api-gateway.yml:
     playbook_id: api-gateway
-    mutation_scope: host
+    mutation_scope: lane
+    target_lane: lane:runtime-control
     shared_surfaces:
       - service:api-gateway
       - config/api-gateway-catalog.json
@@ -165,7 +166,8 @@ playbooks:
       - inventory/host_vars/proxmox_florin.yml
   playbooks/homepage.yml:
     playbook_id: homepage
-    mutation_scope: platform
+    mutation_scope: lane
+    target_lane: lane:runtime-general
     shared_surfaces:
       - service:homepage
       - inventory/host_vars/proxmox_florin.yml
@@ -201,7 +203,8 @@ playbooks:
       - inventory/host_vars/proxmox_florin.yml
   playbooks/mailpit.yml:
     playbook_id: mailpit
-    mutation_scope: platform
+    mutation_scope: lane
+    target_lane: lane:runtime-general
     shared_surfaces:
       - service:mailpit
       - inventory/host_vars/proxmox_florin.yml
@@ -221,6 +224,29 @@ playbooks:
       - config/execution-lanes.yaml
       - config/api-gateway-catalog.json
       - config/service-capability-catalog.json
+  playbooks/runtime-general-pool.yml:
+    playbook_id: runtime-general-pool
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-general-pool
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - config/execution-lanes.yaml
+      - config/health-probe-catalog.json
+      - config/service-capability-catalog.json
+  playbooks/runtime-control-pool.yml:
+    playbook_id: runtime-control-pool
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-control-pool
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - config/execution-lanes.yaml
+      - config/api-gateway-catalog.json
+      - config/health-probe-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
   playbooks/mattermost.yml:
     playbook_id: mattermost
     mutation_scope: platform
@@ -254,7 +280,8 @@ playbooks:
   playbooks/nats-jetstream.yml:
     playbook_id: nats-jetstream
     canonical_service_id: nats_jetstream
-    mutation_scope: host
+    mutation_scope: lane
+    target_lane: lane:runtime-control
     shared_surfaces:
       - service:nats-jetstream
       - inventory/host_vars/proxmox_florin.yml
@@ -452,7 +479,8 @@ playbooks:
       - inventory/host_vars/proxmox_florin.yml
   playbooks/uptime-kuma.yml:
     playbook_id: uptime-kuma
-    mutation_scope: platform
+    mutation_scope: lane
+    target_lane: lane:runtime-general
     shared_surfaces:
       - service:uptime-kuma
       - inventory/host_vars/proxmox_florin.yml
@@ -493,6 +521,19 @@ playbooks:
     shared_surfaces:
       - service:harbor
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/runtime-control-pool.yml:
+    playbook_id: runtime-control-pool
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-control-pool
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - config/execution-lanes.yaml
+      - config/api-gateway-catalog.json
+      - config/health-probe-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
   playbooks/services/nextcloud.yml:
     playbook_id: nextcloud
     mutation_scope: platform
@@ -525,9 +566,17 @@ playbooks:
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/mailpit.yml:
     playbook_id: mailpit
-    mutation_scope: platform
+    mutation_scope: lane
+    target_lane: lane:runtime-general
     shared_surfaces:
       - service:mailpit
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/homepage.yml:
+    playbook_id: homepage
+    mutation_scope: lane
+    target_lane: lane:runtime-general
+    shared_surfaces:
+      - service:homepage
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/piper.yml:
     playbook_id: piper
@@ -625,6 +674,23 @@ playbooks:
       - config/execution-lanes.yaml
       - config/api-gateway-catalog.json
       - config/service-capability-catalog.json
+  playbooks/services/runtime-general-pool.yml:
+    playbook_id: runtime-general-pool
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-general-pool
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - config/execution-lanes.yaml
+      - config/health-probe-catalog.json
+      - config/service-capability-catalog.json
+  playbooks/services/uptime-kuma.yml:
+    playbook_id: uptime-kuma
+    mutation_scope: lane
+    target_lane: lane:runtime-general
+    shared_surfaces:
+      - service:uptime-kuma
+      - inventory/host_vars/proxmox_florin.yml
   collections/ansible_collections/lv3/platform/playbooks/dozzle.yml:
     playbook_id: dozzle
     mutation_scope: platform

@@ -21,6 +21,7 @@ services:
       - {{ ops_portal_env_file }}
     volumes:
       - {{ ops_portal_data_dir }}:/srv/ops-portal/data:ro
+      - {{ ops_portal_state_dir }}:/srv/ops-portal/state
     healthcheck:
       test:
         - CMD

@@ -54,7 +54,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def load_optional_json(path: Path) -> dict[str, Any] | None:
     if not path.is_file():
         return None
-    return json.loads(path.read_text(encoding="utf-8"))
+    content = path.read_text(encoding="utf-8").strip()
+    if not content:
+        return None
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        return None
 
 
 def latest_bypass_receipt(directory: Path) -> tuple[Path, dict[str, Any]] | None:

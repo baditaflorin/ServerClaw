@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Journey-Aware Start Surface{% endblock %}
+
+{% block content %}
+  <section class="pf-v5-c-page__main-section portal-section">
+    <div class="journey-entry-shell">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Journey-Aware Start Surface</p>
+          <h2>{{ journey.mode_label }}</h2>
+        </div>
+        <div class="section-meta">
+          <span class="pill">{{ journey.role_label }}</span>
+          {% if journey.activation_skipped %}
+          <span class="pill">Activation skipped</span>
+          {% else %}
+          <span class="pill">{{ journey.activation_completed_count }}/{{ journey.activation_total_steps }} steps complete</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <p class="muted">{{ journey.mode_description }}</p>
+      <p class="muted">
+        Deep links win first, onboarding work wins before saved preferences, then your pinned home or role default decides where you land.
+      </p>
+
+      {% if journey.invalid_requested_url %}
+      <div class="banner warning journey-banner">
+        <strong>Ignored an unsupported deep link.</strong>
+        <span>Only local paths and `https://*.lv3.org` URLs are allowed through the entry router.</span>
+      </div>
+      {% endif %}
+
+      <div class="journey-grid">
+        <article class="panel journey-panel">
+          <div class="journey-panel__head">
+            <div>
+              <p class="section-kicker">Activation Checklist</p>
+              <h3>Complete the activation checklist or skip it before pinning a preferred home.</h3>
+            </div>
+            <span class="pill">
+              {% if journey.activation_ready %}
+              Ready to pin
+              {% else %}
+              Setup in progress
+              {% endif %}
+            </span>
+          </div>
+
+          <ul class="journey-checklist">
+            {% for step in journey.activation_steps %}
+            <li class="journey-checklist__item{% if step.completed %} is-complete{% endif %}">
+              <div>
+                <strong>{{ step.title }}</strong>
+                <p class="muted">{{ step.description }}</p>
+              </div>
+              <div class="journey-checklist__actions">
+                {% if step.completed %}
+                <span class="pill">Done</span>
+                {% else %}
+                <form method="post" action="/actions/journey/activation/steps/{{ step.id }}">
+                  <input type="hidden" name="redirect_to" value="{{ journey.neutral_entry_url }}">
+                  <button class="action-button secondary" type="submit">Mark complete</button>
+                </form>
+                {% endif %}
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+
+          <div class="link-row">
+            <form method="post" action="/actions/journey/activation/skip">
+              <input type="hidden" name="redirect_to" value="{{ journey.neutral_entry_url }}">
+              <button class="action-button secondary" type="submit">Skip for now</button>
+            </form>
+            <form method="post" action="/actions/journey/activation/reset">
+              <input type="hidden" name="redirect_to" value="{{ journey.neutral_entry_url }}">
+              <button class="action-button ghost" type="submit">Reset checklist</button>
+            </form>
+            <a class="action-button secondary" href="{{ journey.portal_runbook_url }}" target="_blank" rel="noreferrer">
+              Portal runbook
+            </a>
+            <a class="action-button secondary" href="{{ journey.runbook_url }}" target="_blank" rel="noreferrer">
+              Orientation runbook
+            </a>
+          </div>
+        </article>
+
+        <article class="panel journey-panel">
+          <div class="journey-panel__head">
+            <div>
+              <p class="section-kicker">Saved Home</p>
+              <h3>Pick the surface that should greet you after the first-run steps are out of the way.</h3>
+            </div>
+            {% if journey.saved_home_label %}
+            <span class="pill">Pinned {{ journey.saved_home_label }}</span>
+            {% else %}
+            <span class="pill">Role default {{ journey.default_home_label or "Start surface" }}</span>
+            {% endif %}
+          </div>
+
+          <div class="journey-home-grid">
+            {% for entry in journey.home_destinations %}
+            <article class="journey-home-card{% if entry.is_saved_home %} is-saved{% elif entry.is_default_home %} is-default{% endif %}">
+              <div class="journey-home-card__header">
+                <div>
+                  <h4>{{ entry.name }}</h4>
+                  <p class="muted">{{ entry.home_description }}</p>
+                </div>
+                <div class="journey-home-card__badges">
+                  <span class="pill">{{ entry.purpose_label }}</span>
+                  {% if entry.is_saved_home %}
+                  <span class="pill">Pinned</span>
+                  {% elif entry.is_default_home %}
+                  <span class="pill">Role default</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              {% if entry.summary_line %}
+              <p class="muted">{{ entry.summary_line }}</p>
+              {% endif %}
+
+              <div class="link-row">
+                <a class="action-button secondary" href="{{ entry.entry_url }}">Open</a>
+                {% if entry.pin_allowed %}
+                <form method="post" action="/actions/journey/home/{{ entry.id }}">
+                  <input type="hidden" name="redirect_to" value="{{ journey.neutral_entry_url }}">
+                  <button class="action-button" type="submit">
+                    {% if entry.is_saved_home %}
+                    Re-pin home
+                    {% else %}
+                    Pin as home
+                    {% endif %}
+                  </button>
+                </form>
+                {% else %}
+                <span class="muted">Finish or skip activation before pinning.</span>
+                {% endif %}
+              </div>
+            </article>
+            {% endfor %}
+          </div>
+
+          <div class="link-row">
+            {% if journey.saved_home_label %}
+            <form method="post" action="/actions/journey/home/clear">
+              <input type="hidden" name="redirect_to" value="{{ journey.neutral_entry_url }}">
+              <button class="action-button ghost" type="submit">Clear saved home</button>
+            </form>
+            {% endif %}
+            <a class="action-button secondary" href="/entry">Run default routing now</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+{% endblock %}

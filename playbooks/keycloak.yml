@@ -4,7 +4,7 @@
 # Use case: Run during production or staging Keycloak deployment, upgrade, or recovery when the identity provider must match repo truth.
 #
 # Inputs (required):
-#   - env (string, required): Target environment selector used to choose the postgres and docker-runtime guests.
+#   - env (string, required): Target environment selector used to choose the postgres and runtime-control guests.
 #
 # Inputs (optional):
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
@@ -16,7 +16,7 @@
 #
 # Dependencies:
 #   - ADR 0097: Keycloak provides the shared identity plane for authenticated platform services.
-#   - Requires: PostgreSQL, docker-runtime, and the shared edge stack to already exist.
+#   - Requires: PostgreSQL, runtime-control, and the shared edge stack to already exist.
 #   - Role: lv3.platform.keycloak_postgres - provisions the Keycloak database and role.
 #   - Role: lv3.platform.keycloak_runtime - converges the application runtime and publication flow.
 #
@@ -59,8 +59,8 @@
     - role: lv3.platform.postgres_vm
     - role: lv3.platform.keycloak_postgres
 
-- name: Converge Keycloak on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+- name: Converge Keycloak on the runtime-control VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
   gather_facts: true
 
@@ -72,7 +72,7 @@
         playbook_execution_audit_action: playbook.start.keycloak
         playbook_execution_audit_target: keycloak
         required_hosts:
-          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+          - "{{ playbook_execution_required_hosts.runtime_control[playbook_execution_env] }}"
 
   roles:
     - role: lv3.platform.docker_runtime
@@ -114,4 +114,4 @@
   roles:
     - role: lv3.platform.grafana_sso
       vars:
-        grafana_sso_client_secret: "{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].keycloak_grafana_client_secret }}"
+        grafana_sso_client_secret: "{{ hostvars[playbook_execution_host_patterns.runtime_control[playbook_execution_env]].keycloak_grafana_client_secret }}"

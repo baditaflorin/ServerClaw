@@ -16,6 +16,7 @@ from platform.ansible.execution_scopes import (
     CATALOG_PATH,
     INVENTORY_PATH,
     plan_playbook_execution,
+    run_planned_playbook,
     run_scoped_playbook,
     validate_scope_catalog,
 )
@@ -90,13 +91,22 @@ def handle_run(args: argparse.Namespace) -> int:
     passthrough_args = list(args.ansible_args)
     if passthrough_args and passthrough_args[0] == "--":
         passthrough_args = passthrough_args[1:]
-    result = run_scoped_playbook(
+    print(f"Planning scoped playbook: {args.playbook} (env={args.env})", flush=True)
+    plan = plan_playbook_execution(
         args.playbook,
         env=args.env,
-        passthrough_args=passthrough_args,
         run_id=args.run_id,
         shard_root=args.shard_root,
         catalog_path=args.catalog,
+        inventory_path=args.inventory,
+    )
+    print(
+        f"Running scoped playbook: {plan.playbook_path} limit={plan.limit_expression} shard={plan.inventory_shard_path}",
+        flush=True,
+    )
+    result = run_planned_playbook(
+        plan,
+        passthrough_args=passthrough_args,
         inventory_path=args.inventory,
     )
     return result.returncode

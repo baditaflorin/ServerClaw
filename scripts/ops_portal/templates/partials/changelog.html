@@ -14,19 +14,27 @@
   </section>
 
   <section class="pf-v5-c-card panel">
-    <h3>Recent Live Applies</h3>
-    {% if deployments %}
+    <h3>Recent Activity</h3>
+    {% if activities %}
     <ul class="timeline">
-      {% for deployment in deployments %}
+      {% for activity in activities %}
       <li>
-        <strong>{{ deployment.summary }}</strong>
-        <span>{{ deployment.recorded_on|humanize_timestamp }}</span>
-        <span class="muted">{{ deployment.recorded_by }}</span>
+        <strong>{{ activity.title }}</strong>
+        <span>{{ activity.occurred_at|humanize_timestamp }}</span>
+        <span class="muted">{{ activity.source_label }}{% if activity.meta %} · {{ activity.meta }}{% endif %}</span>
+        <span class="muted">{{ activity.summary }}</span>
+        {% if activity.links %}
+        <div class="link-row compact-links">
+          {% for link in activity.links %}
+          <a href="{{ link.href }}" {% if link.href.startswith('http') %}target="_blank" rel="noreferrer"{% endif %}>{{ link.label }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
       </li>
       {% endfor %}
     </ul>
     {% else %}
-    {{ empty_state("No live-apply receipts mirrored", "The portal data set does not yet include any recent live-apply evidence.") }}
+    {{ empty_state("No recent activity mirrored", "The portal data set does not yet include receipts or notification actions recent enough to populate the shared activity timeline.") }}
     {% endif %}
   </section>
 

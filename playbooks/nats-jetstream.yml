@@ -1,12 +1,12 @@
 ---
-# Purpose: Converge the private NATS JetStream runtime and its local verification path on docker-runtime-lv3.
+# Purpose: Converge the private NATS JetStream runtime and its local verification path on runtime-control-lv3.
 # Use case: Run during ADR 0276 rollout, runtime recovery, or later drift reconciliation from version-controlled automation.
 # Inputs: env (optional), proxmox_guest_ssh_connection_mode, and nats_jetstream_* overrides when needed.
 # Outputs: A running lv3-nats-jetstream container plus repo-rendered compose/config files under /opt/nats-jetstream.
 # Idempotency: Yes; the playbook replays docker compose safely after deterministic config renders.
-# Dependencies: ADR 0079, ADR 0124, ADR 0165, ADR 0276, and docker-runtime-lv3.
+# Dependencies: ADR 0079, ADR 0124, ADR 0165, ADR 0276, and runtime-control-lv3.
 - name: Converge NATS JetStream runtime
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
   gather_facts: true
   tags:
@@ -22,7 +22,7 @@
         playbook_execution_audit_action: playbook.start.nats_jetstream
         playbook_execution_audit_target: nats-jetstream
         required_hosts:
-          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+          - "{{ playbook_execution_required_hosts.runtime_control[playbook_execution_env] }}"
 
   roles:
     - role: lv3.platform.docker_runtime

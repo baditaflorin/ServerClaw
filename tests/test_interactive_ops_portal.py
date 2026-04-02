@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import json
 import os
 import shutil
@@ -18,6 +19,7 @@ from scripts.ops_portal.app import (
     build_live_apply_timeline_chart,
     create_app,
     normalize_health,
+    stable_token,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -313,11 +315,13 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
     data_root = tmp_path / "data"
     (data_root / "config").mkdir(parents=True)
     (data_root / "receipts" / "live-applies").mkdir(parents=True)
+    (data_root / "receipts" / "promotions").mkdir(parents=True)
     (data_root / "receipts" / "drift-reports").mkdir(parents=True)
     (data_root / "config" / "activation-checklist.json").write_text(
         (REPO_ROOT / "config" / "activation-checklist.json").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
+    (tmp_path / "state").mkdir(parents=True)
 
     (data_root / "config" / "service-capability-catalog.json").write_text(
         json.dumps(
@@ -349,11 +353,41 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "name": "Platform Operations Portal",
                         "description": "Interactive control surface.",
                         "category": "access",
-                        "lifecycle_status": "planned",
+                        "lifecycle_status": "active",
                         "public_url": "https://ops.lv3.org",
                         "internal_url": "http://10.10.10.20:8092",
                         "runbook": "docs/runbooks/ops-portal-down.md",
                         "adr": "0093",
+                    },
+                    {
+                        "id": "homepage",
+                        "name": "Homepage",
+                        "description": "Shared service discovery and status landing page.",
+                        "category": "experience",
+                        "lifecycle_status": "active",
+                        "public_url": "https://home.lv3.org",
+                        "runbook": "docs/runbooks/configure-homepage.md",
+                        "adr": "0152",
+                    },
+                    {
+                        "id": "docs_portal",
+                        "name": "Docs Portal",
+                        "description": "Reference portal for ADRs and runbooks.",
+                        "category": "knowledge",
+                        "lifecycle_status": "active",
+                        "public_url": "https://docs.lv3.org",
+                        "runbook": "docs/runbooks/developer-portal.md",
+                        "adr": "0094",
+                    },
+                    {
+                        "id": "changelog_portal",
+                        "name": "Changelog Portal",
+                        "description": "Recent releases, live applies, and deployment history.",
+                        "category": "knowledge",
+                        "lifecycle_status": "active",
+                        "public_url": "https://changelog.lv3.org",
+                        "runbook": "docs/runbooks/deployment-history-portal.md",
+                        "adr": "0134",
                     },
                 ]
             },
@@ -703,6 +737,20 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
         + "\n",
         encoding="utf-8",
     )
+    (data_root / "receipts" / "promotions" / "2026-03-24-promote-ops-portal.json").write_text(
+        json.dumps(
+            {
+                "promotion_id": "promotion-ops-portal",
+                "ts": "2026-03-24T19:15:00Z",
+                "branch": "main",
+                "playbook": "playbooks/services/ops_portal.yml",
+                "gate_actor": {"id": "ops"},
+                "gate_decision": "approved",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (data_root / "receipts" / "live-applies" / "._2026-03-24-grafana-runtime-assurance.json").write_bytes(
         b"\xa3\x00\x00not-json"
     )
@@ -737,7 +785,9 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
         workflow_catalog_path=data_root / "config" / "workflow-catalog.json",
         changelog_path=data_root / "changelog.md",
         live_applies_dir=data_root / "receipts" / "live-applies",
+        promotions_dir=data_root / "receipts" / "promotions",
         drift_receipts_dir=data_root / "receipts" / "drift-reports",
+        attention_state_path=tmp_path / "state" / "attention-state.json",
         maintenance_windows_path=None,
         docs_base_url="https://docs.lv3.org",
         grafana_logs_url="https://grafana.lv3.org/explore?service={service}",
@@ -751,6 +801,16 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
 def portal_client(portal_runtime: tuple[TestClient, FakeGatewayClient, Path]) -> tuple[TestClient, FakeGatewayClient]:
     client, gateway, _data_root = portal_runtime
     return client, gateway
+
+
+def auth_headers(*, groups: str | None = None, token_claims: dict[str, object] | None = None) -> dict[str, str]:
+    headers: dict[str, str] = {}
+    if groups:
+        headers["x-auth-request-groups"] = groups
+    if token_claims is not None:
+        encoded_payload = base64.urlsafe_b64encode(json.dumps(token_claims).encode("utf-8")).decode("ascii").rstrip("=")
+        headers["authorization"] = f"Bearer header.{encoded_payload}.signature"
+    return headers
 
 
 def complete_required_activation(client: TestClient) -> None:
@@ -778,6 +838,8 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Contextual Help" in response.text
     assert "Escalation Path" in response.text
     assert "Live apply" in response.text
+    assert "Journey-Aware Home" in response.text
+    assert "Change home selection" in response.text
     assert "First-Run Activation" in response.text
     assert "Advanced tools locked" in response.text
     assert "Platform Overview" in response.text
@@ -786,6 +848,8 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Change" in response.text
     assert "Learn" in response.text
     assert "Recover" in response.text
+    assert "Attention Center" in response.text
+    assert "Shared notification center for work that needs a human" in response.text
     assert "Runtime Assurance" in response.text
     assert "Scoreboard and rollup by active service and environment" in response.text
     assert "Deployment Console" in response.text
@@ -800,7 +864,7 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Validation Gate Status" in response.text
     assert "Advanced runbooks remain locked" in response.text
     assert "Drift Status" in response.text
-    assert "Recent Live Applies" in response.text
+    assert "Recent Activity" in response.text
     assert "shared-edge / platform-sso" in response.text
     assert "ops.lv3.org · operator · shared-edge · platform-sso" in response.text
     assert "Capability Contracts" in response.text
@@ -854,7 +918,7 @@ def test_dashboard_ignores_metadata_sidecars_in_receipts(
     response = client.get("/")
 
     assert response.status_code == 200
-    assert "Recent Live Applies" in response.text
+    assert "Recent Activity" in response.text
     assert "Dashboard permissions drifted" in response.text
 
 
@@ -883,6 +947,7 @@ def test_dashboard_ignores_macos_metadata_receipts(
     assert "Interactive Ops Portal" in response.text
     assert "Dashboard permissions drifted" in response.text
     assert "Applied ops portal runtime" in response.text
+    assert "Promoted main via playbooks/services/ops_portal.yml; gate approved" in response.text
 
 
 def test_build_health_mix_chart_groups_service_tones() -> None:
@@ -1001,6 +1066,34 @@ def test_launcher_persona_switch_updates_selection(portal_client: tuple[TestClie
     assert "Recover" in response.text
 
 
+def test_attention_actions_persist_and_append_to_activity_timeline(
+    portal_runtime: tuple[TestClient, FakeGatewayClient, Path],
+) -> None:
+    client, _gateway, data_root = portal_runtime
+    item_id = f"runtime-assurance:{stable_token('ops_portal', 'production', 'edge_browser_surface')}"
+
+    acknowledged = client.post(f"/actions/attention/{item_id}", data={"action": "acknowledged"})
+
+    assert acknowledged.status_code == 200
+    assert "Acknowledged" in acknowledged.text
+    assert "Platform Operations Portal needs runtime follow-up" in acknowledged.text
+
+    state_path = data_root.parent / "state" / "attention-state.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    assert state["items"][item_id]["current"]["action"] == "acknowledged"
+    assert state["items"][item_id]["history"][-1]["action"] == "acknowledged"
+
+    timeline = client.get("/partials/changelog")
+    assert timeline.status_code == 200
+    assert "Platform Operations Portal needs runtime follow-up was acknowledged" in timeline.text
+
+    reopened = client.post(f"/actions/attention/{item_id}", data={"action": "reopened"})
+
+    assert reopened.status_code == 200
+    reopened_state = json.loads(state_path.read_text(encoding="utf-8"))
+    assert "current" not in reopened_state["items"][item_id]
+
+
 def test_launcher_search_filters_results(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
     client, _gateway = portal_client
 
@@ -1098,6 +1191,151 @@ def test_activation_override_reveals_advanced_tools_for_session(
     assert gateway.runbook_calls == [
         {"runbook_id": "converge-ops-portal", "parameters": {}, "token": "test-token"}
     ]
+
+
+def test_entry_renders_start_surface_before_activation(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+
+    response = client.get("/entry")
+
+    assert response.status_code == 200
+    assert "Journey-Aware Start Surface" in response.text
+    assert "Complete the activation checklist or skip it before pinning a preferred home." in response.text
+    assert "Homepage" in response.text
+    assert "Docs Portal" in response.text
+    assert "Changelog Portal" in response.text
+    assert "Platform Operations Portal" in response.text
+
+
+def test_entry_redirects_to_safe_next_url(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+
+    response = client.get(
+        "/entry",
+        params={"next": "https://docs.lv3.org/runbooks/platform-operations-portal/"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "https://docs.lv3.org/runbooks/platform-operations-portal/"
+
+
+def test_entry_invalid_next_url_stays_on_start_surface_even_after_activation(
+    portal_client: tuple[TestClient, FakeGatewayClient],
+) -> None:
+    client, _gateway = portal_client
+    operator_headers = auth_headers(groups="lv3-platform-operators")
+
+    for step_id in ("compare-home-surfaces", "verify-launcher-path", "open-orientation-runbook"):
+        step_response = client.post(
+            f"/actions/journey/activation/steps/{step_id}",
+            data={"redirect_to": "/entry?neutral=1"},
+            headers=operator_headers,
+            follow_redirects=False,
+        )
+        assert step_response.status_code == 303
+
+    response = client.get("/entry", params={"next": "https://example.com/not-allowed"}, headers=operator_headers)
+
+    assert response.status_code == 200
+    assert "Ignored an unsupported deep link." in response.text
+    assert "Journey-Aware Start Surface" in response.text
+
+
+def test_entry_redirects_to_operator_default_home_after_activation(
+    portal_client: tuple[TestClient, FakeGatewayClient],
+) -> None:
+    client, _gateway = portal_client
+    operator_headers = auth_headers(groups="lv3-platform-operators")
+
+    for step_id in ("compare-home-surfaces", "verify-launcher-path", "open-orientation-runbook"):
+        step_response = client.post(
+            f"/actions/journey/activation/steps/{step_id}",
+            data={"redirect_to": "/entry?neutral=1"},
+            headers=operator_headers,
+            follow_redirects=False,
+        )
+        assert step_response.status_code == 303
+
+    response = client.get("/entry", headers=operator_headers, follow_redirects=False)
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/?entry_mode=operate-first"
+
+
+def test_saved_home_selection_overrides_role_default(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+    operator_headers = auth_headers(groups="lv3-platform-operators")
+
+    skip_response = client.post(
+        "/actions/journey/activation/skip",
+        data={"redirect_to": "/entry?neutral=1"},
+        headers=operator_headers,
+        follow_redirects=False,
+    )
+    assert skip_response.status_code == 303
+
+    home_response = client.post(
+        "/actions/journey/home/service:docs_portal",
+        data={"redirect_to": "/entry?neutral=1"},
+        headers=operator_headers,
+        follow_redirects=False,
+    )
+
+    assert home_response.status_code == 303
+    assert "lv3_workbench_home=" in home_response.headers.get("set-cookie", "")
+
+    routed = client.get("/entry", headers=operator_headers, follow_redirects=False)
+    assert routed.status_code == 303
+    assert routed.headers["location"] == "https://docs.lv3.org"
+
+
+def test_clear_saved_home_restores_role_default(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+    operator_headers = auth_headers(groups="lv3-platform-operators")
+
+    client.post(
+        "/actions/journey/activation/skip",
+        data={"redirect_to": "/entry?neutral=1"},
+        headers=operator_headers,
+        follow_redirects=False,
+    )
+    client.post(
+        "/actions/journey/home/service:docs_portal",
+        data={"redirect_to": "/entry?neutral=1"},
+        headers=operator_headers,
+        follow_redirects=False,
+    )
+
+    clear_response = client.post(
+        "/actions/journey/home/clear",
+        data={"redirect_to": "/entry?neutral=1"},
+        headers=operator_headers,
+        follow_redirects=False,
+    )
+
+    assert clear_response.status_code == 303
+
+    routed = client.get("/entry", headers=operator_headers, follow_redirects=False)
+    assert routed.status_code == 303
+    assert routed.headers["location"] == "/?entry_mode=operate-first"
+
+
+def test_entry_role_resolution_accepts_jwt_claims(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+    admin_headers = auth_headers(token_claims={"realm_access": {"roles": ["platform-admin"]}})
+
+    client.post(
+        "/actions/journey/activation/skip",
+        data={"redirect_to": "/entry?neutral=1"},
+        headers=admin_headers,
+        follow_redirects=False,
+    )
+
+    response = client.get("/entry", headers=admin_headers, follow_redirects=False)
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/?entry_mode=govern-and-change"
 
 
 def test_health_check_action_returns_fragment(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -1314,7 +1552,9 @@ def test_load_live_apply_receipts_ignores_unreadable_receipts(tmp_path: Path) ->
         workflow_catalog_path=config_dir / "workflow-catalog.json",
         changelog_path=data_root / "changelog.md",
         live_applies_dir=live_applies_dir,
+        promotions_dir=data_root / "receipts" / "promotions",
         drift_receipts_dir=drift_receipts_dir,
+        attention_state_path=tmp_path / "state" / "attention-state.json",
         maintenance_windows_path=None,
         docs_base_url="https://docs.lv3.org",
         grafana_logs_url="https://grafana.lv3.org/explore?service={service}",

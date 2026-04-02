@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook converges ADR 0042 by deploying a private `step-ca` on `docker-runtime-lv3`, exposing it through the Proxmox host Tailscale address, and wiring SSH CA trust into the Proxmox host and managed guests.
+This runbook converges ADR 0042 by deploying a private `step-ca` on `runtime-control-lv3`, exposing it through the Proxmox host Tailscale address, and wiring SSH CA trust into the Proxmox host and managed guests.
 
 ## Entry Point
 
@@ -21,13 +21,13 @@ make syntax-check-step-ca
 ## Preconditions
 
 1. The controller SSH key exists at `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519`.
-2. `docker-runtime-lv3` is reachable through the Proxmox jump path.
+2. `runtime-control-lv3` is reachable through the Proxmox jump path.
 3. The Proxmox host Tailscale path is working at `100.64.0.1`.
 
 ## What The Workflow Changes
 
 1. Installs `step` CLI tooling where needed.
-2. Initializes a private CA under `/opt/step-ca` on `docker-runtime-lv3`.
+2. Initializes a private CA under `/opt/step-ca` on `runtime-control-lv3`.
 3. Creates separate JWK provisioners for `humans`, `agents`, `services`, and `hosts`.
 4. Starts a Compose-managed `step-ca` container on private port `9000`.
 5. Publishes the CA API at `https://100.64.0.1:9443` through the Proxmox host Tailscale proxy.
@@ -56,7 +56,7 @@ Treat the `secrets/` subtree as sensitive material and keep it out of git.
 Basic runtime checks:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/step-ca/docker-compose.yml ps'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.92 'docker compose --file /opt/step-ca/docker-compose.yml ps'
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl status lv3-tailscale-proxy-step-ca.socket --no-pager'
 curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://100.64.0.1:9443/health
 ```
@@ -93,7 +93,7 @@ ssh \
   -o UserKnownHostsFile=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/ssh/known_hosts \
   -o StrictHostKeyChecking=yes \
   -o ProxyCommand="ssh -i $tmpdir/ops-ed25519 -o IdentitiesOnly=yes -o CertificateFile=$tmpdir/ops-ed25519-cert.pub -o UserKnownHostsFile=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/ssh/known_hosts -o StrictHostKeyChecking=yes ops@100.64.0.1 -W %h:%p" \
-  ops@10.10.10.20 hostname
+  ops@10.10.10.92 hostname
 ```
 
 Issue and validate a private X.509 leaf certificate:

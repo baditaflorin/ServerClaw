@@ -7,10 +7,10 @@
   tasks:
     - name: Record mail verification start
       ansible.builtin.debug:
-        msg: "Starting mail platform live verification for {{ playbook_execution_env }}."
+        msg: "Starting mail platform live verification for {{ env | default('production') }}."
 
 - name: Prepare the mail verification target state
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
   gather_facts: true
 
@@ -86,10 +86,10 @@
         message['From'] = 'monitor-probe@lv3.org'
         message['To'] = 'server@lv3.org'
         message['Subject'] = 'LV3 inbound SMTP probe {{ mail_platform_probe_id | default("manual") }} private'
-        message.set_content('Inbound SMTP probe delivered through 10.10.10.20')
+        message.set_content('Inbound SMTP probe delivered through 10.10.10.92')
 
-        with smtplib.SMTP('10.10.10.20', 25, timeout=30) as client:
-            client.send_message(message)
+        with smtplib.SMTP('10.10.10.92', 25, timeout=30) as client:
+          client.send_message(message)
 
         print('sent')
         PY
@@ -125,7 +125,7 @@
       when: playbook_execution_env == 'staging'
 
 - name: Verify the SMTP verification outcome
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
   gather_facts: true
 

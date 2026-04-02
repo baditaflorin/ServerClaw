@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-04-02'
 total_adrs: 359
 implementation_status_summary:
-  Implemented: 303
+  Implemented: 308
   Partial: 11
-  Not Implemented: 44
+  Not Implemented: 39
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5499,7 +5499,7 @@ adr_index:
   - adr: 0308
     title: Journey-Aware Entry Routing And Saved Home Selection
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -5511,6 +5511,7 @@ adr_index:
       - selection
     summary: We will use a journey-aware entry router and a saved home model for
     filename: 0308-journey-aware-entry-routing-and-saved-home-selection.md
+    implemented_version: 0.177.146
   - adr: 0308
     title: LLM Agent Execution Surface and Connectivity Contracts for Operator Provisioning
     status: Accepted
@@ -5580,7 +5581,7 @@ adr_index:
   - adr: '0312'
     title: Shared Notification Center And Activity Timeline Across Human Surfaces
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -5594,6 +5595,7 @@ adr_index:
       - surfaces
     summary: We will provide a shared notification center for actionable items and a
     filename: 0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md
+    implemented_version: 0.177.146
   - adr: '0313'
     title: Contextual Help, Glossary, And Escalation Drawer
     status: Accepted
@@ -5722,7 +5724,7 @@ adr_index:
   - adr: '0321'
     title: Runtime Pool Memory Envelopes And Reserved Host Headroom
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-04-01'
     concern: platform
     keywords:
@@ -5735,10 +5737,11 @@ adr_index:
       - headroom
     summary: We will replace the single shared runtime memory budget with runtime-pool
     filename: 0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md
+    implemented_version: 0.177.145
   - adr: '0322'
     title: Memory-Pressure Autoscaling For Elastic Runtime Pools
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-04-01'
     concern: platform
     keywords:
@@ -5749,10 +5752,11 @@ adr_index:
       - pools
     summary: We will add a memory-pressure autoscaling control loop for elastic runtime
     filename: 0322-memory-pressure-autoscaling-for-elastic-runtime-pools.md
+    implemented_version: 0.177.145
   - adr: '0323'
     title: Service Mobility Tiers And Migration Waves For Runtime Pools
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-04-01'
     concern: platform
     keywords:
@@ -5765,6 +5769,7 @@ adr_index:
       - pools
     summary: We will classify services into mobility tiers and move them through
     filename: 0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md
+    implemented_version: 0.177.145
   - adr: '0324'
     title: Service Definition Shards And Generated Service Catalog Assembly
     status: Accepted

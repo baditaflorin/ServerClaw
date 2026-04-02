@@ -1,3 +1,9 @@
+# Purpose: Verify that the repo-managed ops portal responds locally and renders the expected launcher, activation, help, and runtime assurance surfaces.
+# Use case: Include after ops_portal_runtime reconciliation or from role-specific verify tasks.
+# Inputs: ops_portal_verify_* variables plus the rendered ops portal runtime and HTTP listener.
+# Outputs: Assertion-only verification state for the local ops portal runtime.
+# Idempotency: Fully idempotent; verification tasks only read local runtime state and assert expected content.
+# Dependencies: ADR 0165, ADR 0310, ops_portal_runtime defaults, and a running local Docker runtime.
 ---
 - name: Verify the ops portal container is running
   ansible.builtin.command:
@@ -56,6 +62,26 @@
       - "'Live apply' in ops_portal_verify_root.content"
       - "'Escalation Path' in ops_portal_verify_root.content"
     fail_msg: "Ops portal root page rendered without the ADR 0313 contextual help drawer."
+
+- name: Verify the journey-aware entry surface renders locally
+  ansible.builtin.uri:
+    url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/entry?neutral=1"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: ops_portal_verify_entry
+  changed_when: false
+  retries: 20
+  delay: 3
+  until: ops_portal_verify_entry.status == 200
+
+- name: Assert the journey-aware entry surface is present
+  ansible.builtin.assert:
+    that:
+      - "'Journey-Aware Start Surface' in ops_portal_verify_entry.content"
+      - "'Complete the activation checklist or skip it before pinning a preferred home.' in ops_portal_verify_entry.content"
+      - "'Pin as home' in ops_portal_verify_entry.content or 'Finish or skip activation before pinning.' in ops_portal_verify_entry.content"
+    fail_msg: "Ops portal entry route rendered without the ADR 0308 journey-routing surface."
 
 - name: Verify the runtime assurance scoreboard partial renders locally
   ansible.builtin.uri:
@@ -118,6 +144,25 @@
       - "'Checklist progress and progressive capability reveal' in ops_portal_verify_activation.content"
       - "'Reveal advanced tools for this session' in ops_portal_verify_activation.content or 'Restore guardrails' in ops_portal_verify_activation.content"
     fail_msg: "Ops portal activation checklist partial did not render the ADR 0310 surface."
+
+- name: Verify the attention center partial renders locally
+  ansible.builtin.uri:
+    url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/partials/attention"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: ops_portal_verify_attention
+  changed_when: false
+  retries: 18
+  delay: 5
+  until: ops_portal_verify_attention.status == 200
+
+- name: Assert the attention center is present
+  ansible.builtin.assert:
+    that:
+      - "'Notification Center' in ops_portal_verify_attention.content"
+      - "'Actionable items routed into one shared queue' in ops_portal_verify_attention.content"
+    fail_msg: "Ops portal attention center partial rendered without the ADR 0312 notification surface."
 
 - name: Verify the runtime assurance matrix partial renders locally
   ansible.builtin.uri:

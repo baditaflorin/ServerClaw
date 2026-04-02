@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+import base64
+import hashlib
 import json
 import os
 import uuid
@@ -11,10 +13,11 @@ from datetime import date, datetime, timedelta, timezone
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import httpx
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -128,6 +131,112 @@ def normalize_text(value: str) -> str:
     return " ".join("".join(ch.lower() if ch.isalnum() else " " for ch in value).split())
 
 
+def normalize_boolish(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if not isinstance(value, str):
+        return False
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def parse_collection_claim(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if not isinstance(value, str):
+        return []
+    candidate = value.strip()
+    if not candidate:
+        return []
+    if candidate.startswith("[") and candidate.endswith("]"):
+        try:
+            payload = json.loads(candidate)
+        except json.JSONDecodeError:
+            payload = None
+        if isinstance(payload, list):
+            return [str(item).strip() for item in payload if str(item).strip()]
+    normalized = candidate.replace(";", ",")
+    return [item.strip() for item in normalized.split(",") if item.strip()]
+
+
+def decode_unverified_jwt_claims(token: str | None) -> dict[str, Any]:
+    if not isinstance(token, str) or token.count(".") < 2:
+        return {}
+    payload = token.split(".", 2)[1]
+    padding = "=" * (-len(payload) % 4)
+    try:
+        decoded = base64.urlsafe_b64decode((payload + padding).encode("ascii")).decode("utf-8")
+        claims = json.loads(decoded)
+    except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
+        return {}
+    return claims if isinstance(claims, dict) else {}
+
+
+def normalize_claim_roles(claims: dict[str, Any]) -> list[str]:
+    roles: list[str] = []
+    realm_access = claims.get("realm_access")
+    if isinstance(realm_access, dict):
+        roles.extend(parse_collection_claim(realm_access.get("roles")))
+    roles.extend(parse_collection_claim(claims.get("roles")))
+    normalized: list[str] = []
+    for role in roles:
+        if role not in normalized:
+            normalized.append(role)
+    return normalized
+
+
+def resolve_operator_role(groups: list[str], roles: list[str]) -> str:
+    group_set = {group.strip() for group in groups if group.strip()}
+    role_set = {role.strip() for role in roles if role.strip()}
+    for role_name, known_groups, known_roles in WORKBENCH_ROLE_GROUP_PRIORITY:
+        if group_set.intersection(known_groups) or role_set.intersection(known_roles):
+            return role_name
+    return "viewer"
+
+
+def append_query_param(url: str, key: str, value: str) -> str:
+    parsed = urlsplit(url)
+    query_items = [(name, item) for name, item in parse_qsl(parsed.query, keep_blank_values=True) if name != key]
+    query_items.append((key, value))
+    return urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query_items), parsed.fragment))
+
+
+def safe_requested_url(value: str | None) -> str | None:
+    if not isinstance(value, str):
+        return None
+    candidate = value.strip()
+    if not candidate:
+        return None
+    if candidate.startswith("/") and not candidate.startswith("//"):
+        return candidate
+    parsed = urlsplit(candidate)
+    if parsed.scheme != "https":
+        return None
+    host = parsed.hostname or ""
+    if host == "lv3.org" or host.endswith(".lv3.org"):
+        return candidate
+    return None
+
+
+def safe_local_redirect(value: str | None, default: str = "/entry?neutral=1") -> str:
+    candidate = safe_requested_url(value)
+    if candidate and candidate.startswith("/"):
+        return candidate
+    return default
+
+
+def activation_steps_from_request(request: Request) -> list[str]:
+    allowed_steps = {step["id"] for step in WORKBENCH_ACTIVATION_STEPS}
+    return [
+        step_id
+        for step_id in parse_collection_claim(request.cookies.get(WORKBENCH_ACTIVATION_STEPS_COOKIE))
+        if step_id in allowed_steps
+    ]
+
+
+def activation_skipped_from_request(request: Request) -> bool:
+    return normalize_boolish(request.cookies.get(WORKBENCH_ACTIVATION_SKIP_COOKIE))
+
+
 TONE_META = {
     "ok": {"label": "Healthy", "color": "#2a6f4f"},
     "warn": {"label": "Needs attention", "color": "#b26a00"},
@@ -140,6 +249,74 @@ EDGE_META = {
     "startup_only": {"color": "#d97706", "line_type": "dashed", "width": 2.1},
     "soft": {"color": "#7d8597", "line_type": "dotted", "width": 1.6},
 }
+
+WORKBENCH_HOME_COOKIE = "lv3_workbench_home"
+WORKBENCH_ACTIVATION_STEPS_COOKIE = "lv3_workbench_activation_steps"
+WORKBENCH_ACTIVATION_SKIP_COOKIE = "lv3_workbench_activation_skip"
+WORKBENCH_PREFERENCE_COOKIE_MAX_AGE = 180 * 24 * 60 * 60
+WORKBENCH_HOME_CANDIDATE_IDS = (
+    "service:homepage",
+    "service:ops_portal",
+    "service:docs_portal",
+    "service:changelog_portal",
+)
+WORKBENCH_DEFAULT_HOME_BY_ROLE = {
+    "viewer": "service:homepage",
+    "operator": "service:ops_portal",
+    "admin": "service:ops_portal",
+}
+WORKBENCH_ROLE_HOME_META = {
+    "viewer": {
+        "role_label": "Viewer",
+        "entry_mode": "observe-first",
+        "mode_label": "Observe-first home",
+        "mode_description": "Start from the Homepage so status, discovery, and read-only references are the first things you see.",
+    },
+    "operator": {
+        "role_label": "Operator",
+        "entry_mode": "operate-first",
+        "mode_label": "Operate-first home",
+        "mode_description": "Start from the ops portal so governed actions, drift, and live operations are front and center.",
+    },
+    "admin": {
+        "role_label": "Admin",
+        "entry_mode": "govern-and-change",
+        "mode_label": "Govern-and-change home",
+        "mode_description": "Start from the ops portal with the administration lane in view for identity, control-plane, and change-heavy work.",
+    },
+}
+WORKBENCH_HOME_DESCRIPTIONS = {
+    "service:homepage": "Discovery dashboard for observe-first entry and broad service orientation.",
+    "service:ops_portal": "Governed control surface for operations, drift review, and bounded platform change.",
+    "service:docs_portal": "Reference-first home for ADRs, runbooks, and repo-governed explanations.",
+    "service:changelog_portal": "Change-history home for deployment review, receipts, and recent platform movement.",
+}
+WORKBENCH_ACTIVATION_STEPS = (
+    {
+        "id": "compare-home-surfaces",
+        "title": "Compare the available home surfaces",
+        "description": "Review Homepage, Ops Portal, Docs, and Changelog before you pin a preferred home.",
+    },
+    {
+        "id": "verify-launcher-path",
+        "title": "Verify the shared launcher path",
+        "description": "Use the shared application launcher so switching surfaces stays one click away after sign-in.",
+    },
+    {
+        "id": "open-orientation-runbook",
+        "title": "Open the orientation runbook",
+        "description": "Keep the authoritative onboarding and portal guidance one click away while you settle on a home surface.",
+    },
+)
+WORKBENCH_ROLE_GROUP_PRIORITY = (
+    ("admin", {"/lv3-platform-admins", "lv3-platform-admins"}, {"platform-admin"}),
+    ("operator", {"/lv3-platform-operators", "lv3-platform-operators"}, {"platform-operator"}),
+    (
+        "viewer",
+        {"/lv3-platform-viewers", "lv3-platform-viewers", "/grafana-viewers", "grafana-viewers"},
+        {"platform-read"},
+    ),
+)
 
 LAUNCHER_PURPOSE_ORDER = ("operate", "observe", "learn", "plan", "administer")
 LAUNCHER_PURPOSE_LABELS = {
@@ -1156,6 +1333,100 @@ def build_launcher_entries(
     return sorted(entries, key=lambda item: (TASK_LANE_ORDER.index(item["primary_lane"]), item["kind"], item["name"]))
 
 
+def journey_redirect_url(entry: dict[str, Any], role: str) -> str:
+    href = str(entry.get("href", "/")).strip() or "/"
+    role_meta = WORKBENCH_ROLE_HOME_META.get(role, WORKBENCH_ROLE_HOME_META["viewer"])
+    if entry.get("id") == "service:ops_portal":
+        return append_query_param(href, "entry_mode", str(role_meta["entry_mode"]))
+    return href
+
+
+def build_workbench_context(
+    request: Request,
+    *,
+    entry_index: dict[str, dict[str, Any]],
+    docs_base_url: str,
+) -> dict[str, Any]:
+    role = str(request.session.get("operator_role", "viewer"))
+    if role not in WORKBENCH_ROLE_HOME_META:
+        role = "viewer"
+    role_meta = WORKBENCH_ROLE_HOME_META[role]
+    completed_steps = activation_steps_from_request(request)
+    completed_set = set(completed_steps)
+    skipped = activation_skipped_from_request(request)
+    activation_ready = skipped or len(completed_set) == len(WORKBENCH_ACTIVATION_STEPS)
+
+    activation_steps: list[dict[str, Any]] = []
+    for step in WORKBENCH_ACTIVATION_STEPS:
+        activation_steps.append(
+            {
+                **step,
+                "completed": step["id"] in completed_set,
+            }
+        )
+
+    default_home_id = WORKBENCH_DEFAULT_HOME_BY_ROLE.get(role, WORKBENCH_DEFAULT_HOME_BY_ROLE["viewer"])
+    default_home = entry_index.get(default_home_id)
+    saved_home_id = request.cookies.get(WORKBENCH_HOME_COOKIE, "").strip()
+    saved_home = entry_index.get(saved_home_id) if saved_home_id in WORKBENCH_HOME_CANDIDATE_IDS else None
+
+    home_destinations: list[dict[str, Any]] = []
+    for entry_id in WORKBENCH_HOME_CANDIDATE_IDS:
+        entry = entry_index.get(entry_id)
+        if entry is None:
+            continue
+        model = dict(entry)
+        model["entry_url"] = f"/entry?item_id={entry_id}"
+        model["pin_allowed"] = activation_ready
+        model["is_saved_home"] = saved_home is not None and saved_home.get("id") == entry_id
+        model["is_default_home"] = default_home is not None and default_home.get("id") == entry_id
+        model["home_description"] = WORKBENCH_HOME_DESCRIPTIONS.get(entry_id, model.get("description", ""))
+        home_destinations.append(model)
+
+    runbook_url = f"{docs_base_url}/runbooks/operator-onboarding/"
+    portal_runbook_url = f"{docs_base_url}/runbooks/platform-operations-portal/"
+
+    return {
+        "role": role,
+        "role_label": role_meta["role_label"],
+        "mode_label": role_meta["mode_label"],
+        "mode_description": role_meta["mode_description"],
+        "activation_steps": activation_steps,
+        "activation_completed_steps": completed_steps,
+        "activation_completed_count": len(completed_set),
+        "activation_remaining_count": max(len(WORKBENCH_ACTIVATION_STEPS) - len(completed_set), 0),
+        "activation_total_steps": len(WORKBENCH_ACTIVATION_STEPS),
+        "activation_skipped": skipped,
+        "activation_ready": activation_ready,
+        "default_home": default_home,
+        "default_home_redirect": journey_redirect_url(default_home, role) if default_home else "/",
+        "saved_home": saved_home,
+        "saved_home_redirect": journey_redirect_url(saved_home, role) if saved_home else None,
+        "home_destinations": home_destinations,
+        "neutral_entry_url": "/entry?neutral=1",
+        "runbook_url": runbook_url,
+        "portal_runbook_url": portal_runbook_url,
+        "saved_home_label": saved_home.get("name") if isinstance(saved_home, dict) else None,
+        "default_home_label": default_home.get("name") if isinstance(default_home, dict) else None,
+    }
+
+
+def set_preference_cookie(response: HTMLResponse | RedirectResponse, request: Request, key: str, value: str) -> None:
+    response.set_cookie(
+        key=key,
+        value=value,
+        max_age=WORKBENCH_PREFERENCE_COOKIE_MAX_AGE,
+        httponly=True,
+        samesite="lax",
+        secure=request.url.scheme == "https",
+        path="/",
+    )
+
+
+def delete_preference_cookie(response: HTMLResponse | RedirectResponse, key: str) -> None:
+    response.delete_cookie(key=key, path="/")
+
+
 def launcher_entry_locked(entry: dict[str, Any], activation: dict[str, Any]) -> bool:
     return not activation.get("advanced_unlocked", True) and entry.get("purpose") in activation.get(
         "locked_launcher_purposes",
@@ -1208,7 +1479,9 @@ class PortalSettings:
     workflow_catalog_path: Path
     changelog_path: Path
     live_applies_dir: Path
+    promotions_dir: Path
     drift_receipts_dir: Path
+    attention_state_path: Path
     maintenance_windows_path: Path | None
     docs_base_url: str
     grafana_logs_url: str
@@ -1246,8 +1519,14 @@ class PortalSettings:
             live_applies_dir=Path(
                 os.getenv("OPS_PORTAL_LIVE_APPLIES_DIR", data_root / "receipts" / "live-applies")
             ),
+            promotions_dir=Path(
+                os.getenv("OPS_PORTAL_PROMOTIONS_DIR", data_root / "receipts" / "promotions")
+            ),
             drift_receipts_dir=Path(
                 os.getenv("OPS_PORTAL_DRIFT_RECEIPTS_DIR", data_root / "receipts" / "drift-reports")
+            ),
+            attention_state_path=Path(
+                os.getenv("OPS_PORTAL_ATTENTION_STATE_FILE", "/srv/ops-portal/state/attention-state.json")
             ),
             maintenance_windows_path=Path(maintenance_file) if maintenance_file else None,
             docs_base_url=os.getenv("OPS_PORTAL_DOCS_BASE_URL", "https://docs.lv3.org").rstrip("/"),
@@ -1516,11 +1795,60 @@ class PortalRepository:
             receipt["_path"] = str(receipt_path)
             receipt["_normalized_text"] = text
             receipt["_matched_services"] = sorted(set(matched))
+            verification = [item for item in receipt.get("verification", []) if isinstance(item, dict)]
+            verification_results = [str(item.get("result", "")).strip().lower() for item in verification]
+            if any(result == "fail" for result in verification_results):
+                receipt["_outcome"] = "failure"
+            elif any(result == "partial" for result in verification_results):
+                receipt["_outcome"] = "partial"
+            else:
+                receipt["_outcome"] = "success"
             receipt["_environment"] = (
                 str(receipt.get("environment", "")).strip().lower()
                 or ("staging" if "staging" in receipt_path.parts else "production")
             )
             receipts.append(receipt)
+        return receipts
+
+    def load_promotion_receipts(self, services: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        service_keywords = self._service_keywords(services)
+        receipts: list[dict[str, Any]] = []
+        for receipt_path in sorted(self.settings.promotions_dir.rglob("*.json"), reverse=True):
+            receipt = load_optional_json_document(receipt_path)
+            if not isinstance(receipt, dict):
+                continue
+            text = normalize_text(json.dumps(receipt, sort_keys=True))
+            matched = []
+            for service_id, keywords in service_keywords.items():
+                if any(keyword and keyword in text for keyword in keywords):
+                    matched.append(service_id)
+            branch = str(receipt.get("branch", "")).strip()
+            playbook = str(receipt.get("playbook", "")).strip()
+            gate_decision = str(receipt.get("gate_decision", "")).strip().lower()
+            title_parts = [f"Promoted {branch or 'unknown branch'}"]
+            if playbook:
+                title_parts.append(f"via {playbook}")
+            summary = " ".join(title_parts)
+            if gate_decision:
+                summary = f"{summary}; gate {gate_decision}"
+            receipts.append(
+                {
+                    "promotion_id": str(receipt.get("promotion_id", receipt_path.stem)),
+                    "summary": summary,
+                    "recorded_on": receipt.get("ts"),
+                    "recorded_by": (
+                        str(receipt.get("gate_actor", {}).get("id", "")).strip()
+                        if isinstance(receipt.get("gate_actor"), dict)
+                        else ""
+                    )
+                    or "promotion-gate",
+                    "services": sorted(set(matched)),
+                    "path": str(receipt_path),
+                    "outcome": "success" if gate_decision == "approved" else "partial",
+                    "branch": branch,
+                    "playbook": playbook,
+                }
+            )
         return receipts
 
     def recent_deployments(
@@ -1542,6 +1870,8 @@ class PortalRepository:
                     "recorded_by": receipt.get("recorded_by", "unknown"),
                     "services": list(receipt.get("_matched_services", [])),
                     "path": str(receipt.get("_path", "")),
+                    "outcome": str(receipt.get("_outcome", "success")),
+                    "source": "live_apply",
                 }
             )
         return receipts_out
@@ -1561,6 +1891,358 @@ class PortalRepository:
             if in_unreleased and stripped.startswith("- "):
                 notes.append(stripped[2:])
         return notes
+
+
+def stable_token(*parts: Any) -> str:
+    raw = "||".join(str(part) for part in parts if part is not None)
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:12]
+
+
+class AttentionStateStore:
+    def __init__(self, path: Path) -> None:
+        self.path = path
+
+    def _default_state(self) -> dict[str, Any]:
+        return {"version": 1, "items": {}}
+
+    def load(self) -> dict[str, Any]:
+        payload = load_optional_json_document(self.path)
+        if not isinstance(payload, dict):
+            return self._default_state()
+        items = payload.get("items")
+        if not isinstance(items, dict):
+            payload["items"] = {}
+        return payload
+
+    def _write(self, payload: dict[str, Any]) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        tmp_path = self.path.with_suffix(".tmp")
+        tmp_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        os.replace(tmp_path, self.path)
+
+    def current_by_item(self) -> dict[str, dict[str, Any]]:
+        current: dict[str, dict[str, Any]] = {}
+        payload = self.load()
+        for item_id, record in payload.get("items", {}).items():
+            if not isinstance(record, dict):
+                continue
+            entry = record.get("current")
+            if isinstance(entry, dict):
+                current[str(item_id)] = entry
+        return current
+
+    def apply(
+        self,
+        item_id: str,
+        *,
+        action: str,
+        actor_id: str,
+        snapshot: dict[str, Any] | None = None,
+    ) -> None:
+        if action not in {"acknowledged", "dismissed", "reopened"}:
+            return
+        payload = self.load()
+        items = payload.setdefault("items", {})
+        record = items.setdefault(item_id, {"history": []})
+        if snapshot:
+            record["snapshot"] = snapshot
+        history = record.setdefault("history", [])
+        if not isinstance(history, list):
+            history = []
+            record["history"] = history
+        event = {"action": action, "actor_id": actor_id or "operator", "ts": isoformat(utc_now())}
+        history.append(event)
+        if action == "reopened":
+            record.pop("current", None)
+        else:
+            record["current"] = {
+                "action": action,
+                "actor_id": actor_id or "operator",
+                "updated_at": event["ts"],
+            }
+        self._write(payload)
+
+    def history_events(self, *, limit: int = 20) -> list[dict[str, Any]]:
+        payload = self.load()
+        events: list[dict[str, Any]] = []
+        for item_id, record in payload.get("items", {}).items():
+            if not isinstance(record, dict):
+                continue
+            snapshot = record.get("snapshot") if isinstance(record.get("snapshot"), dict) else {}
+            history = record.get("history")
+            if not isinstance(history, list):
+                continue
+            for index, entry in enumerate(history):
+                if not isinstance(entry, dict):
+                    continue
+                events.append(
+                    {
+                        "id": f"attention-action:{item_id}:{index}",
+                        "item_id": item_id,
+                        "action": str(entry.get("action", "")),
+                        "actor_id": str(entry.get("actor_id", "operator")),
+                        "occurred_at": entry.get("ts"),
+                        "snapshot": snapshot,
+                    }
+                )
+        events.sort(
+            key=lambda item: parse_timestamp(item.get("occurred_at")) or datetime(1970, 1, 1, tzinfo=UTC),
+            reverse=True,
+        )
+        return events[:limit]
+
+
+def docs_href(base_url: str, path: Any) -> str | None:
+    if not isinstance(path, str):
+        return None
+    candidate = path.strip()
+    if not candidate:
+        return None
+    if candidate.startswith(("http://", "https://", "#", "/")):
+        return candidate
+    normalized = candidate.removeprefix("./")
+    return f"{base_url}/{normalized}"
+
+
+def notification_sort_key(item: dict[str, Any]) -> tuple[int, int, float, str]:
+    state_rank = {"active": 0, "acknowledged": 1, "dismissed": 2}
+    tone_rank = {"danger": 0, "warn": 1, "ok": 2, "neutral": 3}
+    parsed = parse_timestamp(item.get("occurred_at")) or datetime(1970, 1, 1, tzinfo=UTC)
+    return (
+        state_rank.get(str(item.get("state", "active")), 3),
+        tone_rank.get(str(item.get("tone", "neutral")), 4),
+        -parsed.timestamp(),
+        str(item.get("title", "")),
+    )
+
+
+def build_attention_notifications(
+    *,
+    services: list[dict[str, Any]],
+    runtime_assurance: dict[str, Any],
+    coordination: dict[str, Any],
+    drift_report: dict[str, Any],
+    maintenance_windows: list[dict[str, Any]],
+    live_apply_receipts: list[dict[str, Any]],
+    docs_base_url: str,
+    state_by_item: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    service_index = {str(service.get("id")): service for service in services if isinstance(service, dict)}
+    items: list[dict[str, Any]] = []
+
+    for window in maintenance_windows:
+        service_id = str(window.get("service_id", "all")).strip() or "all"
+        service = service_index.get(service_id, {})
+        reason = str(window.get("reason") or "A maintenance window is currently open.")
+        item_id = f"maintenance:{stable_token(service_id, window.get('opened_at'), reason)}"
+        links = [{"label": "Open overview", "href": "#overview"}]
+        runbook_href = docs_href(docs_base_url, service.get("runbook"))
+        if runbook_href:
+            links.append({"label": "Runbook", "href": runbook_href})
+        items.append(
+            {
+                "id": item_id,
+                "title": f"Maintenance window open for {service.get('name', service_id)}",
+                "summary": reason,
+                "detail": str(window.get("service_id", "all")),
+                "occurred_at": window.get("opened_at"),
+                "tone": "warn",
+                "source_label": "Maintenance window",
+                "links": links,
+            }
+        )
+
+    for entry in runtime_assurance.get("entries", []):
+        if not isinstance(entry, dict):
+            continue
+        overall_status = str(entry.get("overall_status", "unknown"))
+        if overall_status == "pass":
+            continue
+        exception_titles = entry.get("exception_titles")
+        detail = (
+            ", ".join(str(title) for title in exception_titles[:3])
+            if isinstance(exception_titles, list) and exception_titles
+            else "Fresh governed evidence is still missing for this surface."
+        )
+        links = [{"label": "Open runtime assurance", "href": "#runtime-assurance"}]
+        runbook_href = docs_href(docs_base_url, entry.get("runbook"))
+        if runbook_href:
+            links.append({"label": "Runbook", "href": runbook_href})
+        if browser_usable_url(entry.get("primary_url")):
+            links.append({"label": "Surface", "href": str(entry.get("primary_url"))})
+        item_id = f"runtime-assurance:{stable_token(entry.get('service_id'), entry.get('environment'), entry.get('profile_id'))}"
+        items.append(
+            {
+                "id": item_id,
+                "title": f"{entry.get('service_name', entry.get('service_id', 'surface'))} needs runtime follow-up",
+                "summary": f"{entry.get('profile_title', 'Runtime assurance')} is {overall_status}.",
+                "detail": detail,
+                "occurred_at": runtime_assurance.get("generated_at"),
+                "tone": status_tone(overall_status),
+                "source_label": "Runtime assurance",
+                "links": links,
+            }
+        )
+
+    for entry in coordination.get("entries", []):
+        if not isinstance(entry, dict):
+            continue
+        status = str(entry.get("status", "unknown"))
+        if status not in {"blocked", "escalated"}:
+            continue
+        blocked_reason = str(entry.get("blocked_reason") or "This session needs human follow-up.")
+        item_id = f"coordination:{stable_token(entry.get('agent_id'), entry.get('current_phase'), status)}"
+        items.append(
+            {
+                "id": item_id,
+                "title": f"{entry.get('session_label', entry.get('agent_id', 'agent session'))} is {status}",
+                "summary": blocked_reason,
+                "detail": str(entry.get("current_target") or entry.get("current_workflow_id") or "No target recorded"),
+                "occurred_at": entry.get("last_heartbeat") or entry.get("started_at"),
+                "tone": status_tone(status),
+                "source_label": "Agent coordination",
+                "links": [{"label": "Open agent coordination", "href": "#agents"}],
+            }
+        )
+
+    drift_summary = drift_report.get("summary", {}) if isinstance(drift_report, dict) else {}
+    drift_generated_at = drift_report.get("generated_at") if isinstance(drift_report, dict) else None
+    for record in drift_report.get("records", []) if isinstance(drift_report, dict) else []:
+        if not isinstance(record, dict):
+            continue
+        service_id = str(record.get("service") or record.get("resource") or "platform")
+        service = service_index.get(service_id, {})
+        severity = str(record.get("severity") or drift_summary.get("status") or "warn")
+        links = [{"label": "Open drift panel", "href": "#drift"}]
+        runbook_href = docs_href(docs_base_url, service.get("runbook"))
+        if runbook_href:
+            links.append({"label": "Runbook", "href": runbook_href})
+        item_id = f"drift:{stable_token(service_id, record.get('source'), record.get('detail'))}"
+        items.append(
+            {
+                "id": item_id,
+                "title": f"Drift detected for {service.get('name', service_id)}",
+                "summary": str(record.get("detail") or "Repo and live state diverged."),
+                "detail": str(record.get("source") or "drift report"),
+                "occurred_at": drift_generated_at,
+                "tone": status_tone(severity),
+                "source_label": "Drift report",
+                "links": links,
+            }
+        )
+
+    for receipt in live_apply_receipts:
+        if str(receipt.get("_outcome", "success")) == "success":
+            continue
+        matched_services = receipt.get("_matched_services")
+        if not isinstance(matched_services, list):
+            matched_services = []
+        item_id = f"live-apply:{stable_token(receipt.get('receipt_id'), receipt.get('_path'))}"
+        items.append(
+            {
+                "id": item_id,
+                "title": str(receipt.get("summary") or "Live apply needs review"),
+                "summary": f"Latest recorded outcome: {receipt.get('_outcome', 'unknown')}.",
+                "detail": ", ".join(str(service_id) for service_id in matched_services) or "Affected services not inferred.",
+                "occurred_at": receipt.get("recorded_on") or receipt.get("applied_on"),
+                "tone": "danger" if receipt.get("_outcome") == "failure" else "warn",
+                "source_label": "Live apply receipt",
+                "links": [{"label": "Open activity timeline", "href": "#changelog"}],
+            }
+        )
+
+    for item in items:
+        state = state_by_item.get(item["id"], {})
+        action = str(state.get("action", "")).strip().lower()
+        if action == "acknowledged":
+            item["state"] = "acknowledged"
+        elif action == "dismissed":
+            item["state"] = "dismissed"
+        else:
+            item["state"] = "active"
+        item["updated_at"] = state.get("updated_at")
+        item["updated_by"] = state.get("actor_id")
+
+    ordered = sorted(items, key=notification_sort_key)
+    groups = {
+        "active": [item for item in ordered if item["state"] == "active"],
+        "acknowledged": [item for item in ordered if item["state"] == "acknowledged"],
+        "dismissed": [item for item in ordered if item["state"] == "dismissed"],
+    }
+    return {
+        "all": ordered,
+        "groups": groups,
+        "summary": {
+            "active_count": len(groups["active"]),
+            "acknowledged_count": len(groups["acknowledged"]),
+            "dismissed_count": len(groups["dismissed"]),
+        },
+    }
+
+
+def build_activity_items(
+    *,
+    deployments: list[dict[str, Any]],
+    promotions: list[dict[str, Any]],
+    attention_history: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    items: list[dict[str, Any]] = []
+
+    for deployment in deployments:
+        services = deployment.get("services")
+        if not isinstance(services, list):
+            services = []
+        items.append(
+            {
+                "id": f"activity:deployment:{deployment.get('id')}",
+                "title": str(deployment.get("summary") or deployment.get("id") or "Live apply"),
+                "summary": ", ".join(str(service_id) for service_id in services) or "Service inference unavailable.",
+                "occurred_at": deployment.get("recorded_on"),
+                "tone": "danger" if deployment.get("outcome") == "failure" else status_tone(str(deployment.get("outcome", "success"))),
+                "source_label": "Live apply",
+                "meta": str(deployment.get("recorded_by", "unknown")),
+                "links": [{"label": "Open activity timeline", "href": "#changelog"}],
+            }
+        )
+
+    for promotion in promotions:
+        items.append(
+            {
+                "id": f"activity:promotion:{promotion.get('promotion_id')}",
+                "title": str(promotion.get("summary") or promotion.get("promotion_id") or "Promotion"),
+                "summary": ", ".join(str(service_id) for service_id in promotion.get("services", []))
+                or "Promotion metadata did not resolve a concrete service set.",
+                "occurred_at": promotion.get("recorded_on"),
+                "tone": status_tone(str(promotion.get("outcome", "partial"))),
+                "source_label": "Promotion",
+                "meta": str(promotion.get("recorded_by", "promotion-gate")),
+                "links": [{"label": "Open activity timeline", "href": "#changelog"}],
+            }
+        )
+
+    for history in attention_history:
+        snapshot = history.get("snapshot") if isinstance(history.get("snapshot"), dict) else {}
+        action = str(history.get("action", "updated"))
+        title = str(snapshot.get("title") or "Notification state changed")
+        actor = str(history.get("actor_id", "operator"))
+        items.append(
+            {
+                "id": str(history.get("id")),
+                "title": f"{title} was {action}",
+                "summary": str(snapshot.get("summary") or "Notification center state changed without deleting the source event."),
+                "occurred_at": history.get("occurred_at"),
+                "tone": "warn" if action == "dismissed" else "ok" if action == "acknowledged" else "neutral",
+                "source_label": "Notification center",
+                "meta": actor,
+                "links": [{"label": "Open notification center", "href": str(snapshot.get("href") or "#attention")}],
+            }
+        )
+
+    items.sort(
+        key=lambda item: parse_timestamp(item.get("occurred_at")) or datetime(1970, 1, 1, tzinfo=UTC),
+        reverse=True,
+    )
+    return items[:16]
 
 
 def normalize_health(payload: dict[str, Any], services: list[dict[str, Any]]) -> dict[str, dict[str, str]]:
@@ -2122,19 +2804,35 @@ def deployment_console_seed() -> list[dict[str, Any]]:
 
 async def ensure_session(request: Request) -> dict[str, str]:
     session = request.session
-    if "operator_id" not in session:
-        session["operator_id"] = request.headers.get("x-auth-request-user", "operator")
-        session["operator_email"] = request.headers.get("x-auth-request-email", "")
-    if "api_token" not in session:
-        forwarded_token = request.headers.get("x-forwarded-access-token") or request.headers.get("authorization", "")
-        if forwarded_token.startswith("Bearer "):
-            forwarded_token = forwarded_token.removeprefix("Bearer ").strip()
-        if forwarded_token:
-            session["api_token"] = forwarded_token
+    operator_id = request.headers.get("x-auth-request-user", "").strip()
+    operator_email = request.headers.get("x-auth-request-email", "").strip()
+    if operator_id:
+        session["operator_id"] = operator_id
+    elif "operator_id" not in session:
+        session["operator_id"] = "operator"
+    if operator_email:
+        session["operator_email"] = operator_email
+    elif "operator_email" not in session:
+        session["operator_email"] = ""
+
+    forwarded_token = request.headers.get("x-forwarded-access-token") or request.headers.get("authorization", "")
+    if forwarded_token.startswith("Bearer "):
+        forwarded_token = forwarded_token.removeprefix("Bearer ").strip()
+    if forwarded_token:
+        session["api_token"] = forwarded_token
+
+    claims = decode_unverified_jwt_claims(session.get("api_token", ""))
+    groups = parse_collection_claim(request.headers.get("x-auth-request-groups"))
+    if not groups:
+        groups = parse_collection_claim(claims.get("groups"))
+    roles = normalize_claim_roles(claims)
+    session["operator_groups"] = groups
+    session["operator_role"] = resolve_operator_role(groups, roles)
     return {
         "operator_id": session.get("operator_id", "operator"),
         "operator_email": session.get("operator_email", ""),
         "api_token": session.get("api_token", ""),
+        "operator_role": session.get("operator_role", "viewer"),
     }
 
 
@@ -2197,7 +2895,7 @@ def enrich_runbook_metadata(
 
 
 async def build_launcher_panel_context(request: Request, *, query: str = "") -> dict[str, Any]:
-    await ensure_session(request)
+    operator = await ensure_session(request)
     repository: PortalRepository = request.app.state.repository
 
     services = repository.load_service_catalog()
@@ -2247,9 +2945,32 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
         recent_ids=recent_ids,
         query=query,
     )
+    journey = build_workbench_context(
+        request,
+        entry_index=entry_index,
+        docs_base_url=request.app.state.settings.docs_base_url,
+    )
 
     return {
         "request": request,
+        "operator": operator,
+        "services": [],
+        "deployments": [],
+        "runbooks": [],
+        "changelog_notes": [],
+        "coordination": {"summary": {"count": 0}},
+        "generated_at": isoformat(utc_now()),
+        "docs_base_url": request.app.state.settings.docs_base_url,
+        "maintenance_count": 0,
+        "drift_summary": {"unsuppressed_count": 0},
+        "attention_summary": {
+            "active_count": 0,
+            "acknowledged_count": 0,
+            "dismissed_count": 0,
+            "activity_count": 0,
+        },
+        "contextual_help": build_ops_portal_help(request.app.state.settings.docs_base_url),
+        "search_collections": available_collections(),
         "launcher": {
             "query": query,
             "personas": personas,
@@ -2264,6 +2985,7 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
             "entry_index": entry_index,
             "page_lane": workbench_ia["pages_by_id"].get("ops_portal_launcher"),
         },
+        "journey": journey,
         "activation": activation,
     }
 
@@ -2318,6 +3040,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     session = await ensure_session(request)
     repository: PortalRepository = request.app.state.repository
     gateway: Any = request.app.state.gateway_client
+    attention_store: AttentionStateStore = request.app.state.attention_store
     launcher_context = await build_launcher_panel_context(request)
     activation = launcher_context["activation"]
 
@@ -2330,6 +3053,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     dependency_graph = repository.load_dependency_graph()
     maintenance_windows = repository.load_maintenance_windows()
     live_apply_receipts = repository.load_live_apply_receipts(services)
+    promotion_receipts = repository.load_promotion_receipts(services)
     deployments = repository.recent_deployments(services, receipts=live_apply_receipts)
     drift_report = repository.latest_drift_report()
     changelog_notes = repository.changelog_notes()
@@ -2383,6 +3107,21 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         live_apply_receipts,
     )
     active_maintenance = [window for window in maintenance_windows if window.get("service_id")]
+    attention_notifications = build_attention_notifications(
+        services=service_models,
+        runtime_assurance=runtime_assurance,
+        coordination=coordination,
+        drift_report=drift_report,
+        maintenance_windows=active_maintenance,
+        live_apply_receipts=live_apply_receipts,
+        docs_base_url=request.app.state.settings.docs_base_url,
+        state_by_item=attention_store.current_by_item(),
+    )
+    activity_items = build_activity_items(
+        deployments=deployments,
+        promotions=promotion_receipts,
+        attention_history=attention_store.history_events(),
+    )
     drift_summary = drift_report.get("summary", {})
     chart_models = {
         "health_mix": build_health_mix_chart(service_models),
@@ -2417,6 +3156,17 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "maintenance_count": len(active_maintenance),
         "runbooks": visible_runbooks,
         "locked_runbooks": locked_runbooks,
+        "attention": attention_notifications,
+        "attention_notification_index": {
+            item["id"]: item for item in attention_notifications["all"]
+        },
+        "attention_summary": {
+            **attention_notifications["summary"],
+            "activity_count": len(activity_items),
+        },
+        "activities": activity_items,
+        "runbooks": visible_runbooks,
+        "locked_runbooks": locked_runbooks,
         "deployments": deployments[:10],
         "changelog_notes": changelog_notes,
         "drift_report": drift_report,
@@ -2438,6 +3188,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "search_query": "",
         "search_collection": "",
         "launcher": launcher_context["launcher"],
+        "journey": launcher_context["journey"],
         "contextual_help": build_ops_portal_help(request.app.state.settings.docs_base_url),
         "shell_page": workbench_ia["pages_by_id"].get("ops_portal_shell"),
         "page_sections": workbench_ia["pages_by_section"],
@@ -2485,6 +3236,7 @@ def create_app(
     app.state.repository = PortalRepository(settings)
     app.state.gateway_client = portal_gateway_client
     app.state.event_broker = EventBroker()
+    app.state.attention_store = AttentionStateStore(settings.attention_state_path)
 
     @app.get("/health")
     async def health() -> JSONResponse:
@@ -2494,6 +3246,44 @@ def create_app(
     async def dashboard(request: Request) -> HTMLResponse:
         context = await build_dashboard_context(request)
         return templates.TemplateResponse(request=request, name="index.html", context=context)
+
+    @app.get("/entry", response_class=HTMLResponse)
+    async def journey_entry(request: Request, item_id: str = "", neutral: bool = False) -> Response:
+        context = await build_launcher_panel_context(request)
+        entry_index = context["launcher"]["entry_index"]
+        journey = dict(context["journey"])
+        requested_url = safe_requested_url(request.query_params.get("next"))
+        invalid_requested_url = bool(request.query_params.get("next")) and requested_url is None
+
+        if item_id:
+            entry = entry_index.get(item_id)
+            if entry is not None:
+                record_launcher_recent(request.session, item_id, set(entry_index))
+                return RedirectResponse(url=journey_redirect_url(entry, journey["role"]), status_code=303)
+
+        if requested_url:
+            return RedirectResponse(url=requested_url, status_code=303)
+
+        if invalid_requested_url:
+            journey["invalid_requested_url"] = True
+            return templates.TemplateResponse(request=request, name="entry.html", context={**context, "journey": journey})
+
+        if not neutral and not journey["activation_ready"]:
+            journey["invalid_requested_url"] = invalid_requested_url
+            return templates.TemplateResponse(request=request, name="entry.html", context={**context, "journey": journey})
+
+        if not neutral and journey["saved_home"] is not None:
+            saved_home = journey["saved_home"]
+            record_launcher_recent(request.session, str(saved_home["id"]), set(entry_index))
+            return RedirectResponse(url=str(journey["saved_home_redirect"]), status_code=303)
+
+        if not neutral and journey["default_home"] is not None:
+            default_home = journey["default_home"]
+            record_launcher_recent(request.session, str(default_home["id"]), set(entry_index))
+            return RedirectResponse(url=str(journey["default_home_redirect"]), status_code=303)
+
+        journey["invalid_requested_url"] = invalid_requested_url
+        return templates.TemplateResponse(request=request, name="entry.html", context={**context, "journey": journey})
 
     @app.get("/partials/launcher", response_class=HTMLResponse)
     async def launcher_partial(request: Request, query: str = "") -> HTMLResponse:
@@ -2511,6 +3301,11 @@ def create_app(
         context = await build_dashboard_context(request)
         context["page_lane"] = context["page_sections"].get("overview")
         return templates.TemplateResponse(request=request, name="partials/overview.html", context=context)
+
+    @app.get("/partials/attention", response_class=HTMLResponse)
+    async def attention_partial(request: Request) -> HTMLResponse:
+        context = await build_dashboard_context(request)
+        return templates.TemplateResponse(request=request, name="partials/attention.html", context=context)
 
     @app.get("/partials/drift", response_class=HTMLResponse)
     async def drift_partial(request: Request) -> HTMLResponse:
@@ -2588,6 +3383,65 @@ def create_app(
             context["page_lane"] = context["launcher"].get("page_lane")
         return templates.TemplateResponse(request=request, name="partials/launcher.html", context=context)
 
+    @app.post("/actions/journey/home/clear")
+    async def clear_saved_home_action(
+        request: Request,
+        redirect_to: str = Form(default="/entry?neutral=1"),
+    ) -> RedirectResponse:
+        response = RedirectResponse(url=safe_local_redirect(redirect_to), status_code=303)
+        delete_preference_cookie(response, WORKBENCH_HOME_COOKIE)
+        return response
+
+    @app.post("/actions/journey/home/{item_id}")
+    async def select_saved_home_action(
+        request: Request,
+        item_id: str,
+        redirect_to: str = Form(default="/entry?neutral=1"),
+    ) -> RedirectResponse:
+        context = await build_launcher_panel_context(request)
+        journey = context["journey"]
+        response = RedirectResponse(url=safe_local_redirect(redirect_to), status_code=303)
+        candidate_ids = {str(entry["id"]) for entry in journey["home_destinations"]}
+        if journey["activation_ready"] and item_id in candidate_ids:
+            set_preference_cookie(response, request, WORKBENCH_HOME_COOKIE, item_id)
+        return response
+
+    @app.post("/actions/journey/activation/skip")
+    async def skip_activation_action(
+        request: Request,
+        redirect_to: str = Form(default="/entry?neutral=1"),
+    ) -> RedirectResponse:
+        response = RedirectResponse(url=safe_local_redirect(redirect_to), status_code=303)
+        set_preference_cookie(response, request, WORKBENCH_ACTIVATION_SKIP_COOKIE, "1")
+        return response
+
+    @app.post("/actions/journey/activation/reset")
+    async def reset_activation_action(
+        request: Request,
+        redirect_to: str = Form(default="/entry?neutral=1"),
+    ) -> RedirectResponse:
+        response = RedirectResponse(url=safe_local_redirect(redirect_to), status_code=303)
+        delete_preference_cookie(response, WORKBENCH_ACTIVATION_STEPS_COOKIE)
+        delete_preference_cookie(response, WORKBENCH_ACTIVATION_SKIP_COOKIE)
+        return response
+
+    @app.post("/actions/journey/activation/steps/{step_id}")
+    async def complete_activation_step_action(
+        request: Request,
+        step_id: str,
+        redirect_to: str = Form(default="/entry?neutral=1"),
+    ) -> RedirectResponse:
+        response = RedirectResponse(url=safe_local_redirect(redirect_to), status_code=303)
+        allowed_steps = {step["id"] for step in WORKBENCH_ACTIVATION_STEPS}
+        if step_id not in allowed_steps:
+            return response
+        completed_steps = activation_steps_from_request(request)
+        if step_id not in completed_steps:
+            completed_steps.append(step_id)
+        set_preference_cookie(response, request, WORKBENCH_ACTIVATION_STEPS_COOKIE, ",".join(completed_steps))
+        delete_preference_cookie(response, WORKBENCH_ACTIVATION_SKIP_COOKIE)
+        return response
+
     @app.post("/actions/activation/items/{item_id}", response_class=HTMLResponse)
     async def activation_item_action(
         request: Request,
@@ -2610,6 +3464,29 @@ def create_app(
         set_activation_override(request.session, activation_catalog, enabled=enabled)
         context = await build_activation_panel_context(request)
         return templates.TemplateResponse(request=request, name="partials/activation.html", context=context)
+
+    @app.post("/actions/attention/{item_id}", response_class=HTMLResponse)
+    async def attention_action(
+        request: Request,
+        item_id: str,
+        action: str = Form(default="acknowledged"),
+    ) -> HTMLResponse:
+        context = await build_dashboard_context(request)
+        item = context["attention_notification_index"].get(item_id)
+        normalized_action = action.strip().lower()
+        if item and normalized_action in {"acknowledged", "dismissed", "reopened"}:
+            request.app.state.attention_store.apply(
+                item_id,
+                action=normalized_action,
+                actor_id=str(context["operator"].get("operator_id") or "operator"),
+                snapshot={
+                    "title": item.get("title"),
+                    "summary": item.get("summary"),
+                    "href": item.get("links", [{}])[0].get("href") if item.get("links") else "#attention",
+                },
+            )
+            context = await build_dashboard_context(request)
+        return templates.TemplateResponse(request=request, name="partials/attention.html", context=context)
 
     @app.get("/launcher/go/{item_id}")
     async def launcher_go(request: Request, item_id: str) -> RedirectResponse:

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook defines the repo-managed Semaphore runtime for private Ansible job management on `docker-runtime-lv3`.
+This runbook defines the repo-managed Semaphore runtime for private Ansible job management on `runtime-control-lv3`.
 
 Semaphore is private-only on this platform. Repository automation remains the source of truth; Semaphore provides a bounded UI and API for running repo-managed jobs.
 
@@ -67,7 +67,7 @@ After a converge:
 2. `curl -fsS http://100.118.189.95:8020/api/ping`
 3. `make semaphore-manage ACTION=list-projects`
 4. `make semaphore-manage ACTION=run-template SEMAPHORE_ARGS='--template "Semaphore Self-Test" --wait'`
-5. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/semaphore/docker-compose.yml ps && sudo ls -l /run/lv3-secrets/semaphore /srv/proxmox_florin_server-semaphore'`
+5. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.92 'docker compose --file /opt/semaphore/docker-compose.yml ps && sudo ls -l /run/lv3-secrets/semaphore /srv/proxmox_florin_server-semaphore'`
 
 ## Operating Rules
 

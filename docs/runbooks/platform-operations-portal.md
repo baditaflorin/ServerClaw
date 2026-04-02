@@ -204,7 +204,7 @@ drawer strings and the task-lane shell cues from the guest-local runtime:
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 \
-  'curl -fsS http://127.0.0.1:8092/ | rg "Contextual Help|Live apply|Escalation Path|Platform Overview|Start|Observe|Change|Learn|Recover"'
+  'curl -fsS http://127.0.0.1:8092/ | grep -E "Contextual Help|Live apply|Escalation Path|Journey-Aware Home|Attention Center|Platform Overview|Start|Observe|Change|Learn|Recover"'
 ```
 
 ## Publication Boundary
@@ -288,6 +288,58 @@ A failed live replay that serves `/health` but returns `404` for
 `/partials/launcher` indicates sync drift or a clobbered guest-side portal tree,
 not a healthy launcher rollout.
 
+## Journey-Aware Entry Routing
+
+ADR 0308 adds a dedicated entry route at `https://ops.lv3.org/entry` and the
+local neutral view `http://127.0.0.1:8092/entry?neutral=1`.
+
+The entry router now applies this order after sign-in:
+
+1. a permitted deep link from `next=` or a curated `item_id=`
+2. unfinished activation work
+3. a saved home pinned by the operator
+4. a role-derived default home
+5. the neutral start surface
+
+Current role defaults are:
+
+- `viewer` -> Homepage (`observe-first`)
+- `operator` -> Ops Portal (`operate-first`)
+- `admin` -> Ops Portal (`govern-and-change`)
+
+The start surface keeps activation state and saved-home preference in
+browser cookies:
+
+- `lv3_workbench_activation_steps`
+- `lv3_workbench_activation_skip`
+- `lv3_workbench_home`
+
+Pinning a preferred home stays blocked until the activation checklist is
+completed or explicitly skipped. Invalid `next=` URLs fail closed back to the
+neutral start surface; only local paths and `https://*.lv3.org` URLs are
+accepted.
+
+The safest live verification path is:
+
+1. open `https://ops.lv3.org/entry` and confirm the unauthenticated edge still
+   redirects through `oauth2-proxy`
+2. authenticate and open `/entry?neutral=1`
+3. confirm **Journey-Aware Start Surface** renders with the activation
+   checklist and the four curated home destinations
+4. mark the activation steps complete or use **Skip for now**
+5. pin `Docs Portal` or another curated home, revisit `/entry`, and confirm the
+   router now sends the session to the saved home instead of the role default
+6. clear the saved home and confirm the next `/entry` visit falls back to the
+   role default again
+
+Guest-local verification should include:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 \
+  'curl -fsS http://127.0.0.1:8092/entry?neutral=1 | grep -E "Journey-Aware Start Surface|Pin as home|Skip for now"'
+```
+
 ## First-Run Activation Checklist
 
 ADR 0310 adds the first-run activation panel directly to the interactive ops
@@ -330,6 +382,34 @@ Expected verification path:
    triggered, `/partials/launcher` exposes admin destinations and mutating
    actions no longer render as locked
 
+## Shared Attention Center
+
+ADR 0312 adds a shared notification center plus a browser-visible activity
+timeline to the interactive portal.
+
+Operator flow:
+
+1. Open `https://ops.lv3.org`.
+2. Scroll to **Attention Center**.
+3. Review the active queue for drift, runtime assurance, blocked coordination,
+   maintenance, or live-apply follow-up items.
+4. Use **Acknowledge** when a human has taken ownership, or **Dismiss** when the
+   item is no longer useful in the active queue.
+5. Reopen an acknowledged or dismissed item if it still needs human attention.
+6. Confirm the action also appears in **Activity Timeline** so the change is
+   auditable without deleting the underlying source signal.
+
+The current implementation persists attention state under the managed runtime
+path `/opt/ops-portal/state/attention-state.json` on `docker-runtime-lv3`
+instead of keeping it only in browser session data.
+
+The safest live verification path is:
+
+1. open **Attention Center**
+2. acknowledge one runtime assurance or drift item
+3. refresh the page and confirm the item remains under the acknowledged section
+4. open **Activity Timeline** and confirm the acknowledgement event is present
+
 ## Structured Runbook Launcher
 
 The interactive portal runbook panel now loads its entries from the platform API gateway instead of maintaining a separate local workflow-only list.
@@ -363,7 +443,7 @@ Operator flow:
 Internal verification from a trusted network path:
 
 ```bash
-curl -sf http://10.10.10.20:8092/partials/overview | rg 'Attested|Declared-live'
+curl -sf http://10.10.10.20:8092/partials/overview | grep -E 'Attested|Declared-live'
 curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/attestation
 ```
 

@@ -19,7 +19,7 @@
 # Dependencies:
 #   - ADR 0043: Defines OpenBao as the platform secrets authority and dynamic credential plane.
 #   - ADR 0165: Requires the playbook metadata contract for repo-managed automation.
-#   - Requires: docker-runtime-lv3, the target PostgreSQL lane, and the controller-local OpenBao bootstrap artifacts.
+#   - Requires: runtime-control-lv3, the target PostgreSQL lane, and the controller-local OpenBao bootstrap artifacts.
 #   - Role: lv3.platform.openbao_postgres_backend - configures PostgreSQL for managed OpenBao dynamic credentials.
 #   - Role: lv3.platform.openbao_runtime - converges OpenBao and restores the unsealed runtime state when needed.
 #
@@ -50,8 +50,8 @@
     - role: lv3.platform.postgres_vm
     - role: lv3.platform.openbao_postgres_backend
 
-- name: Converge OpenBao on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+- name: Converge OpenBao on the runtime-control VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
   gather_facts: true
   tags:
@@ -67,7 +67,7 @@
         playbook_execution_audit_action: playbook.start.openbao
         playbook_execution_audit_target: openbao
         required_hosts:
-          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+          - "{{ playbook_execution_required_hosts.runtime_control[playbook_execution_env] }}"
 
   roles:
     - role: lv3.platform.linux_guest_firewall
@@ -85,7 +85,7 @@
         playbook_execution_notification_service: openbao
 
 - name: Ensure OpenBao remains unsealed before PostgreSQL end-to-end verification
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
   gather_facts: false
   tags:
@@ -148,7 +148,7 @@
           secret_id: "{{ openbao_verify_controller_approle.secret_id }}"
         return_content: true
         status_code: 200
-      delegate_to: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+      delegate_to: "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
       become: false
       register: openbao_verify_controller_login
       no_log: true
@@ -161,7 +161,7 @@
           X-Vault-Token: "{{ openbao_verify_controller_login.json.auth.client_token }}"
         return_content: true
         status_code: 200
-      delegate_to: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+      delegate_to: "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
       become: false
       register: openbao_verify_postgres_dynamic_credential
       retries: 6
@@ -195,7 +195,7 @@
         fail_msg: "The OpenBao-issued PostgreSQL dynamic credential could not authenticate successfully."
 
 - name: Refresh persisted OpenBao AppRole artifacts after end-to-end verification
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
   gather_facts: true
   tags:

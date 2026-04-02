@@ -54,9 +54,16 @@
             Contextual Help
           </button>
           {% endif %}
-          <a class="pf-v5-c-button pf-m-secondary portal-toolbar-link" href="#drift">
+          <a
+            class="pf-v5-c-button pf-m-link portal-toolbar-link"
+            href="{{ docs_base_url }}/runbooks/ops-portal-down.md"
+            target="_blank"
+            rel="noreferrer">
+            Help
+          </a>
+          <a class="pf-v5-c-button pf-m-secondary portal-toolbar-link" href="#attention">
             Notifications
-            <span class="portal-toolbar-badge">{{ maintenance_count + (drift_summary.unsuppressed_count or 0) }}</span>
+            <span id="portal-toolbar-attention-count" class="portal-toolbar-badge">{{ attention_summary.active_count }}</span>
           </a>
           <details class="portal-user-menu">
             <summary class="pf-v5-c-button pf-m-plain portal-user-menu__toggle">
@@ -69,9 +76,14 @@
               {% if operator.operator_email %}
               <span class="muted">{{ operator.operator_email }}</span>
               {% endif %}
+              <span class="muted">Journey role {{ journey.role_label }}</span>
               <span class="muted">Launcher persona {{ launcher.selected_persona.name }}</span>
+              <span class="muted">
+                Preferred home {{ journey.saved_home_label or journey.default_home_label or 'Start surface' }}
+              </span>
               <span class="muted">Rendered {{ generated_at|humanize_timestamp }}</span>
               <div class="link-row">
+                <a href="/entry?neutral=1">Entry routing</a>
                 <a href="#activation">Activation</a>
                 <a href="#runbooks">Runbooks</a>
                 <a href="#changelog">Recent changes</a>
@@ -116,6 +128,12 @@
                 </a>
               </li>
               <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#attention">
+                  <span class="pf-v5-c-nav__link-text">Attention</span>
+                  <span id="portal-nav-attention-count" class="portal-shell-nav-count">{{ attention_summary.active_count }}</span>
+                </a>
+              </li>
+              <li class="pf-v5-c-nav__item">
                 <a class="pf-v5-c-nav__link" href="#deployments">
                   <span class="pf-v5-c-nav__link-text">Deployments</span>
                   <span class="portal-shell-nav-count">{{ deployments|length }}</span>
@@ -147,8 +165,8 @@
               </li>
               <li class="pf-v5-c-nav__item">
                 <a class="pf-v5-c-nav__link" href="#changelog">
-                  <span class="pf-v5-c-nav__link-text">Changelog</span>
-                  <span class="portal-shell-nav-count">{{ changelog_notes|length }}</span>
+                  <span class="pf-v5-c-nav__link-text">Activity</span>
+                  <span class="portal-shell-nav-count">{{ activities|length }}</span>
                 </a>
               </li>
             </ul>

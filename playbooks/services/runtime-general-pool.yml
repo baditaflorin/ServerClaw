@@ -1,0 +1,29 @@
+---
+# Playbook: services/runtime-general-pool.yml
+# Purpose: Provide the canonical live-apply entrypoint for the dedicated runtime-general pool migration.
+# Use case: Run through `make live-apply-service service=runtime-general-pool env=production` for the ADR 0319 and 0320 runtime-general rollout.
+#
+# Inputs (required):
+#   - env (str, required): Deployment environment selector passed through the shared execution wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the live apply.
+#
+# Outputs:
+#   - Imports the root runtime-general pool playbook used by the governed service live-apply wrapper.
+#
+# Idempotency: Fully idempotent
+#              This wrapper only imports the root runtime-general pool playbook and does not mutate state on its own.
+#
+# Dependencies:
+#   - ADR 0319: Defines the runtime-general pool substrate decision.
+#   - ADR 0320: Defines the pool-scoped deploy surface and execution lane contract.
+#   - Requires: playbooks/runtime-general-pool.yml.
+#
+# Related ADRs: 0319, 0320, 0323
+# Related Runbooks: docs/runbooks/configure-runtime-general-pool.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-02
+
+- import_playbook: ../runtime-general-pool.yml

@@ -7,9 +7,9 @@ verifies the guest-network HTTP and SMTP capture path end to end.
 
 ## Result
 
-- `docker-runtime-lv3` runs Mailpit from `/opt/dev-tools/mailpit`
-- Mailpit listens privately on `10.10.10.20:8025` for the UI and REST API
-- Mailpit listens privately on `10.10.10.20:1025` for unauthenticated SMTP capture
+- `runtime-general-lv3` runs Mailpit from `/opt/dev-tools/mailpit`
+- Mailpit listens privately on `10.10.10.91:8025` for the UI and REST API
+- Mailpit listens privately on `10.10.10.91:1025` for unauthenticated SMTP capture
 - staging and other non-production SMTP-aware automation can point at `mailpit`
   on the `dev-tools_default` Docker network instead of the production Stalwart relay
 
@@ -38,13 +38,13 @@ ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=mailpit env=product
 
 ## Verification
 
-Verify the private Mailpit info endpoint on `docker-runtime-lv3`:
+Verify the private Mailpit info endpoint on `runtime-general-lv3`:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
-  ops@10.10.10.20 \
+  ops@10.10.10.91 \
   'curl -fsS http://127.0.0.1:8025/api/v1/info'
 ```
 
@@ -54,7 +54,7 @@ Verify Mailpit captures an SMTP probe through the REST API:
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
-  ops@10.10.10.20 \
+  ops@10.10.10.91 \
   'python3 - <<'"'"'PY'"'"'
 import json
 import smtplib
@@ -99,6 +99,7 @@ ansible-playbook -i inventory/hosts.yml playbooks/mail-platform-verify.yml \
 
 - Mailpit is intentionally private-only. Do not publish it on the public NGINX edge.
 - Mailpit is intentionally stateless. Restarting or re-creating the container clears captured messages.
+- Mailpit now belongs to `runtime-general-lv3`, not the shared `docker-runtime-lv3` guest.
 - The governed Mailpit converge now retries automatically if Docker reports a
   stale compose-network error such as `failed to create endpoint mailpit ...
   network ... does not exist`; prefer rerunning the repo-managed workflow over

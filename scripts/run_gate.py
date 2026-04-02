@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -357,7 +358,17 @@ def build_status_payload(
 
 def write_status(status_file: Path, payload: dict[str, Any]) -> None:
     status_file.parent.mkdir(parents=True, exist_ok=True)
-    status_file.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    with tempfile.NamedTemporaryFile(
+        prefix=f"{status_file.stem}-",
+        suffix=status_file.suffix or ".json",
+        dir=status_file.parent,
+        delete=False,
+        mode="w",
+        encoding="utf-8",
+    ) as temp_file:
+        temp_file.write(json.dumps(payload, indent=2) + "\n")
+        temp_path = Path(temp_file.name)
+    temp_path.replace(status_file)
 
 
 def main(argv: list[str] | None = None) -> int:

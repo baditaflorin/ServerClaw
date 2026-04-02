@@ -6,7 +6,7 @@ This runbook converges the Harbor registry from ADR 0201 and validates the live 
 
 It covers:
 
-- Harbor runtime deployment on `docker-runtime-lv3`
+- Harbor runtime deployment on `runtime-control-lv3`
 - shared edge publication for `https://registry.lv3.org`
 - repo-managed Keycloak OIDC bootstrap for Harbor operators
 - repo-managed `check-runner` Harbor project bootstrap
@@ -18,8 +18,8 @@ It covers:
 Before running the workflow, confirm:
 
 1. the controller has the SSH key at `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519`
-2. `docker-runtime-lv3`, `docker-build-lv3`, and `nginx-lv3` are reachable through the Proxmox jump path
-3. Keycloak is already live on `docker-runtime-lv3`
+2. `runtime-control-lv3`, `docker-build-lv3`, and `nginx-lv3` are reachable through the Proxmox jump path
+3. Keycloak is already live on `runtime-control-lv3`
 4. `HETZNER_DNS_API_TOKEN` is available in the shell that runs the converge
 
 ## Entrypoints
@@ -33,7 +33,7 @@ Before running the workflow, confirm:
 
 The workflow manages these live surfaces:
 
-- Harbor runtime under `/opt/harbor` on `docker-runtime-lv3`
+- Harbor runtime under `/opt/harbor` on `runtime-control-lv3`
 - Harbor data under `/opt/harbor/data`
 - Harbor logs under `/var/log/harbor`
 - shared public hostname `https://registry.lv3.org`
@@ -59,14 +59,14 @@ Run these checks after converge:
 
 1. `make syntax-check-harbor`
 2. `curl -fsS https://registry.lv3.org/api/v2.0/ping`
-3. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' ops@10.10.10.20 'docker compose -f /opt/harbor/installer/harbor/docker-compose.yml ps'`
+3. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' ops@10.10.10.92 'docker compose -f /opt/harbor/installer/harbor/docker-compose.yml ps'`
 4. `curl -fsS -u "admin:$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/harbor/admin-password.txt)" https://registry.lv3.org/api/v2.0/projects/check-runner`
 5. `jq -r '.username + \":\" + .secret' /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/harbor/check-runner-robot.json`
 6. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' ops@10.10.10.30 'docker pull registry.lv3.org/check-runner/python:3.12.10 && docker image inspect registry.lv3.org/check-runner/python:3.12.10 --format '"'"'{{index .RepoDigests 0}}'"'"''`
 
 ## Troubleshooting
 
-- If `make converge-harbor` exits cleanly but `https://registry.lv3.org/api/v2.0/ping` still returns `502 Bad Gateway`, `http://127.0.0.1:8095/api/v2.0/ping` is connection refused on `docker-runtime-lv3`, or `docker pull registry.lv3.org/check-runner/...` fails on `docker-build-lv3` with `received unexpected HTTP status: 502 Bad Gateway`, replay `make converge-docker-publication-assurance env=production` from the same checkout and rerun the full verification list above.
+- If `make converge-harbor` exits cleanly but `https://registry.lv3.org/api/v2.0/ping` still returns `502 Bad Gateway`, `http://127.0.0.1:8095/api/v2.0/ping` is connection refused on `runtime-control-lv3`, or `docker pull registry.lv3.org/check-runner/...` fails on `docker-build-lv3` with `received unexpected HTTP status: 502 Bad Gateway`, replay `make converge-docker-publication-assurance env=production` from the same checkout and rerun the full verification list above.
 - This failure mode indicates stale Docker publication drift on the Harbor edge path: the Harbor containers may still appear present, but the published registry port binding or compose network membership can be incomplete until the publication-assurance replay re-establishes the canonical bridge and port-forward state.
 
 ## Notes

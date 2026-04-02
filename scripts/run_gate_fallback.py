@@ -89,7 +89,13 @@ def resolve_status_file(path: Path, workspace: Path) -> Path:
 def load_optional_json(path: Path) -> dict[str, Any] | None:
     if not path.is_file():
         return None
-    return json.loads(path.read_text(encoding="utf-8"))
+    content = path.read_text(encoding="utf-8").strip()
+    if not content:
+        return None
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        return None
 
 
 def is_remote_gate_payload(payload: dict[str, Any] | None) -> bool:
@@ -310,7 +316,17 @@ def merge_status_payloads(
 
 def write_status(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    with tempfile.NamedTemporaryFile(
+        prefix=f"{path.stem}-",
+        suffix=path.suffix or ".json",
+        dir=path.parent,
+        delete=False,
+        mode="w",
+        encoding="utf-8",
+    ) as temp_file:
+        temp_file.write(json.dumps(payload, indent=2) + "\n")
+        temp_path = Path(temp_file.name)
+    temp_path.replace(path)
 
 
 def run_fallback_gate(argv: list[str] | None = None) -> int:

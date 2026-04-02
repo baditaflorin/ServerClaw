@@ -5,6 +5,28 @@
 
 {% block content %}
   <section id="activation" class="pf-v5-c-page__main-section portal-section">
+    <div class="journey-home-card">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Journey-Aware Home</p>
+          <h2>{{ journey.mode_label }}</h2>
+        </div>
+        <div class="section-meta">
+          <span class="pill">{{ journey.role_label }}</span>
+          {% if journey.saved_home_label %}
+          <span class="pill">Saved home {{ journey.saved_home_label }}</span>
+          {% else %}
+          <span class="pill">Default home {{ journey.default_home_label }}</span>
+          {% endif %}
+        </div>
+      </div>
+      <p class="muted">{{ journey.mode_description }}</p>
+      <div class="link-row">
+        <a class="action-button secondary" href="/entry?neutral=1">Change home selection</a>
+        <a class="action-button secondary" href="/entry">Re-run entry routing</a>
+      </div>
+    </div>
+
     <div class="section-head">
       <div>
         <p class="section-kicker">Operator Readiness</p>
@@ -51,6 +73,22 @@
       hx-trigger="load, every 30s"
       hx-swap="innerHTML">
       {% include "partials/overview.html" %}
+    </div>
+  </section>
+
+  <section id="attention" class="pf-v5-c-page__main-section portal-section">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Attention Center</p>
+        <h2>Shared notification center for work that needs a human</h2>
+      </div>
+      <div class="section-meta">
+        <span class="pill">{{ attention_summary.active_count }} active</span>
+        <span class="pill">{{ attention_summary.acknowledged_count }} acknowledged</span>
+      </div>
+    </div>
+    <div id="attention-panel" class="shell-live-panel" hx-get="/partials/attention" hx-trigger="load, every 30s" hx-swap="innerHTML">
+      {% include "partials/attention.html" %}
     </div>
   </section>
 
@@ -150,9 +188,9 @@
   <section id="changelog" class="pf-v5-c-page__main-section portal-section">
     <div class="section-head">
       <div>
-        <p class="section-kicker">{{ page_sections["changelog"].primary_lane_label }} Lane</p>
+        <p class="section-kicker">{{ page_sections["changelog"].primary_lane_label }} Lane · Activity Timeline</p>
         <h2>{{ page_sections["changelog"].title }}</h2>
-        <p class="muted">Recent live-apply receipts and unreleased notes.</p>
+        <p class="muted">Recent platform history across receipts, promotions, and unreleased notes.</p>
         {{ lane_banner(page_sections["changelog"]) }}
       </div>
     </div>

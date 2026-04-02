@@ -152,10 +152,36 @@ class ReservationModel:
 
 
 @dataclass(frozen=True)
+class RuntimePoolMemoryEnvelope:
+    identifier: str
+    baseline_ram_gb: float
+    max_ram_gb: float
+    admission_priority: int
+    notes: str | None = None
+
+
+@dataclass(frozen=True)
+class RuntimePoolMemoryGovernance:
+    host_free_memory_floor_gb: float
+    metrics_source: str
+    control_surface: str
+    pools: tuple[RuntimePoolMemoryEnvelope, ...]
+
+    @property
+    def combined_baseline_ram_gb(self) -> float:
+        return sum(pool.baseline_ram_gb for pool in self.pools)
+
+    @property
+    def combined_max_ram_gb(self) -> float:
+        return sum(pool.max_ram_gb for pool in self.pools)
+
+
+@dataclass(frozen=True)
 class CapacityModel:
     host: HostModel
     guests: tuple[GuestModel, ...]
     reservations: tuple[ReservationModel, ...]
+    runtime_pool_memory: RuntimePoolMemoryGovernance | None = None
 
 
 @dataclass(frozen=True)
@@ -198,9 +224,20 @@ def resource_from_mapping(value: Any, path: str) -> ResourceAmount:
     )
 
 
-def load_capacity_model(path: Path = CAPACITY_MODEL_PATH) -> CapacityModel:
+def load_capacity_model(
+    path: Path = CAPACITY_MODEL_PATH,
+    *,
+    service_catalog_path: Path | None = None,
+    inventory_path: Path | None = None,
+) -> CapacityModel:
+    service_catalog_path = service_catalog_path or SERVICE_CATALOG_PATH
+    inventory_path = inventory_path or INVENTORY_PATH
     payload = require_mapping(load_json(path), str(path))
-    validate_capacity_model_payload(payload)
+    validate_capacity_model_payload(
+        payload,
+        service_catalog_path=service_catalog_path,
+        inventory_path=inventory_path,
+    )
 
     host_payload = require_mapping(payload["host"], f"{path}.host")
     host = HostModel(
@@ -344,11 +381,73 @@ def load_capacity_model(path: Path = CAPACITY_MODEL_PATH) -> CapacityModel:
             )
         )
 
-    return CapacityModel(host=host, guests=tuple(guests), reservations=tuple(reservations))
+    runtime_pool_memory = None
+    runtime_pool_memory_payload = payload.get("runtime_pool_memory")
+    if runtime_pool_memory_payload is not None:
+        governance = require_mapping(runtime_pool_memory_payload, f"{path}.runtime_pool_memory")
+        measurement = require_mapping(
+            governance.get("measurement_and_control"),
+            f"{path}.runtime_pool_memory.measurement_and_control",
+        )
+        runtime_pool_memory = RuntimePoolMemoryGovernance(
+            host_free_memory_floor_gb=require_number(
+                governance.get("host_free_memory_floor_gb"),
+                f"{path}.runtime_pool_memory.host_free_memory_floor_gb",
+                0,
+            ),
+            metrics_source=require_str(
+                measurement.get("metrics_source"),
+                f"{path}.runtime_pool_memory.measurement_and_control.metrics_source",
+            ),
+            control_surface=require_str(
+                measurement.get("control_surface"),
+                f"{path}.runtime_pool_memory.measurement_and_control.control_surface",
+            ),
+            pools=tuple(
+                RuntimePoolMemoryEnvelope(
+                    identifier=require_str(
+                        pool.get("id"),
+                        f"{path}.runtime_pool_memory.pools[{index}].id",
+                    ),
+                    baseline_ram_gb=require_number(
+                        pool.get("baseline_ram_gb"),
+                        f"{path}.runtime_pool_memory.pools[{index}].baseline_ram_gb",
+                        0,
+                    ),
+                    max_ram_gb=require_number(
+                        pool.get("max_ram_gb"),
+                        f"{path}.runtime_pool_memory.pools[{index}].max_ram_gb",
+                        0,
+                    ),
+                    admission_priority=int(
+                        require_number(
+                            pool.get("admission_priority"),
+                            f"{path}.runtime_pool_memory.pools[{index}].admission_priority",
+                            1,
+                        )
+                    ),
+                    notes=pool.get("notes"),
+                )
+                for index, pool in enumerate(
+                    require_list(
+                        governance.get("pools"),
+                        f"{path}.runtime_pool_memory.pools",
+                    )
+                )
+            ),
+        )
+
+    return CapacityModel(
+        host=host,
+        guests=tuple(guests),
+        reservations=tuple(reservations),
+        runtime_pool_memory=runtime_pool_memory,
+    )
 
 
-def load_inventory_hosts() -> dict[str, str]:
-    inventory = require_mapping(load_yaml(INVENTORY_PATH), str(INVENTORY_PATH))
+def load_inventory_hosts(path: Path | None = None) -> dict[str, str]:
+    path = path or INVENTORY_PATH
+    inventory = require_mapping(load_yaml(path), str(path))
     children = require_mapping(inventory.get("all"), "inventory/hosts.yml.all").get("children", {})
     children = require_mapping(children, "inventory/hosts.yml.all.children")
     hosts: dict[str, str] = {}
@@ -385,7 +484,14 @@ def bootstrap_key_path() -> Path | None:
     return None
 
 
-def validate_capacity_model_payload(payload: dict[str, Any]) -> None:
+def validate_capacity_model_payload(
+    payload: dict[str, Any],
+    *,
+    service_catalog_path: Path | None = None,
+    inventory_path: Path | None = None,
+) -> None:
+    service_catalog_path = service_catalog_path or SERVICE_CATALOG_PATH
+    inventory_path = inventory_path or INVENTORY_PATH
     require_str(payload.get("$schema"), "config/capacity-model.json.$schema")
     if payload["$schema"] != "docs/schema/capacity-model.schema.json":
         raise ValueError("config/capacity-model.json.$schema must reference docs/schema/capacity-model.schema.json")
@@ -395,7 +501,7 @@ def validate_capacity_model_payload(payload: dict[str, Any]) -> None:
     require_str(host.get("id"), "config/capacity-model.json.host.id")
     require_str(host.get("name"), "config/capacity-model.json.host.name")
     require_str(host.get("metrics_host"), "config/capacity-model.json.host.metrics_host")
-    resource_from_mapping(host.get("physical"), "config/capacity-model.json.host.physical")
+    host_physical = resource_from_mapping(host.get("physical"), "config/capacity-model.json.host.physical")
 
     target = require_mapping(
         host.get("target_utilisation"),
@@ -411,19 +517,27 @@ def validate_capacity_model_payload(payload: dict[str, Any]) -> None:
             raise ValueError(
                 f"config/capacity-model.json.host.target_utilisation.{field} must be <= 100"
             )
-    resource_from_mapping(
+    host_reserved_for_platform = resource_from_mapping(
         host.get("reserved_for_platform"),
         "config/capacity-model.json.host.reserved_for_platform",
     )
 
-    services_payload = require_mapping(load_json(SERVICE_CATALOG_PATH), str(SERVICE_CATALOG_PATH))
+    services_payload = require_mapping(load_json(service_catalog_path), str(service_catalog_path))
+    service_entries = require_list(services_payload.get("services"), f"{service_catalog_path}.services")
     known_service_ids = {
-        require_str(entry.get("id"), f"{SERVICE_CATALOG_PATH}.services[{index}].id")
-        for index, entry in enumerate(require_list(services_payload.get("services"), f"{SERVICE_CATALOG_PATH}.services"))
+        require_str(entry.get("id"), f"{service_catalog_path}.services[{index}].id")
+        for index, entry in enumerate(service_entries)
         if isinstance(entry, dict)
     }
+    declared_runtime_pool_ids = {
+        require_str(entry.get("runtime_pool"), f"{service_catalog_path}.services[{index}].runtime_pool")
+        for index, entry in enumerate(service_entries)
+        if isinstance(entry, dict)
+        and isinstance(entry.get("runtime_pool"), str)
+        and entry["runtime_pool"].startswith("runtime-")
+    }
 
-    inventory_hosts = load_inventory_hosts()
+    inventory_hosts = load_inventory_hosts(inventory_path)
     proxmox_host = inventory_hosts.get("proxmox_florin")
     if not proxmox_host:
         raise ValueError("inventory/hosts.yml must define proxmox_florin under proxmox_hosts")
@@ -506,6 +620,7 @@ def validate_capacity_model_payload(payload: dict[str, Any]) -> None:
         )
 
     seen_reservations: set[str] = set()
+    reservation_ram_total = 0.0
     for index, item in enumerate(
         require_list(payload.get("reservations"), "config/capacity-model.json.reservations")
     ):
@@ -534,10 +649,11 @@ def validate_capacity_model_payload(payload: dict[str, Any]) -> None:
             raise ValueError(
                 f"config/capacity-model.json.reservations[{index}].status must be reserved or planned"
             )
-        resource_from_mapping(
+        reserved = resource_from_mapping(
             reservation.get("reserved"),
             f"config/capacity-model.json.reservations[{index}].reserved",
         )
+        reservation_ram_total += reserved.ram_gb
         capacity_class = reservation.get("capacity_class")
         if capacity_class is not None:
             require_str(
@@ -619,6 +735,140 @@ def validate_capacity_model_payload(payload: dict[str, Any]) -> None:
         if kind == "planned_growth" and capacity_class == "ha_reserved":
             raise ValueError(
                 f"config/capacity-model.json.reservations[{index}] planned_growth must not use ha_reserved; use a planned standby guest or standby reservation instead"
+            )
+
+    runtime_pool_memory = payload.get("runtime_pool_memory")
+    if runtime_pool_memory is not None:
+        governance = require_mapping(runtime_pool_memory, "config/capacity-model.json.runtime_pool_memory")
+        host_free_memory_floor_gb = require_number(
+            governance.get("host_free_memory_floor_gb"),
+            "config/capacity-model.json.runtime_pool_memory.host_free_memory_floor_gb",
+            0,
+        )
+        if host_free_memory_floor_gb < 20:
+            raise ValueError(
+                "config/capacity-model.json.runtime_pool_memory.host_free_memory_floor_gb must be at least 20"
+            )
+        measurement = require_mapping(
+            governance.get("measurement_and_control"),
+            "config/capacity-model.json.runtime_pool_memory.measurement_and_control",
+        )
+        metrics_source = require_str(
+            measurement.get("metrics_source"),
+            "config/capacity-model.json.runtime_pool_memory.measurement_and_control.metrics_source",
+        )
+        control_surface = require_str(
+            measurement.get("control_surface"),
+            "config/capacity-model.json.runtime_pool_memory.measurement_and_control.control_surface",
+        )
+        if metrics_source != "prometheus":
+            raise ValueError(
+                "config/capacity-model.json.runtime_pool_memory.measurement_and_control.metrics_source must be 'prometheus'"
+            )
+        if control_surface != "nomad-autoscaler":
+            raise ValueError(
+                "config/capacity-model.json.runtime_pool_memory.measurement_and_control.control_surface must be 'nomad-autoscaler'"
+            )
+
+        pool_entries = require_list(
+            governance.get("pools"),
+            "config/capacity-model.json.runtime_pool_memory.pools",
+        )
+        seen_runtime_pool_ids: set[str] = set()
+        seen_priorities: set[int] = set()
+        combined_baseline_ram_gb = 0.0
+        combined_max_ram_gb = 0.0
+        control_priority: int | None = None
+        for index, item in enumerate(pool_entries):
+            entry = require_mapping(
+                item,
+                f"config/capacity-model.json.runtime_pool_memory.pools[{index}]",
+            )
+            pool_id = require_str(
+                entry.get("id"),
+                f"config/capacity-model.json.runtime_pool_memory.pools[{index}].id",
+            )
+            if pool_id in seen_runtime_pool_ids:
+                raise ValueError(f"duplicate runtime_pool_memory entry '{pool_id}'")
+            seen_runtime_pool_ids.add(pool_id)
+            if pool_id not in declared_runtime_pool_ids:
+                raise ValueError(
+                    "config/capacity-model.json.runtime_pool_memory.pools["
+                    f"{index}].id references unknown runtime pool '{pool_id}'"
+                )
+            baseline_ram_gb = require_number(
+                entry.get("baseline_ram_gb"),
+                f"config/capacity-model.json.runtime_pool_memory.pools[{index}].baseline_ram_gb",
+                0,
+            )
+            max_ram_gb = require_number(
+                entry.get("max_ram_gb"),
+                f"config/capacity-model.json.runtime_pool_memory.pools[{index}].max_ram_gb",
+                0,
+            )
+            if baseline_ram_gb > max_ram_gb:
+                raise ValueError(
+                    "config/capacity-model.json.runtime_pool_memory.pools["
+                    f"{index}] baseline_ram_gb must not exceed max_ram_gb"
+                )
+            priority = int(
+                require_number(
+                    entry.get("admission_priority"),
+                    f"config/capacity-model.json.runtime_pool_memory.pools[{index}].admission_priority",
+                    1,
+                )
+            )
+            if priority in seen_priorities:
+                raise ValueError(
+                    "config/capacity-model.json.runtime_pool_memory.pools["
+                    f"{index}].admission_priority duplicates {priority}"
+                )
+            seen_priorities.add(priority)
+            if "notes" in entry:
+                require_str(
+                    entry.get("notes"),
+                    f"config/capacity-model.json.runtime_pool_memory.pools[{index}].notes",
+                )
+            if pool_id == "runtime-control":
+                control_priority = priority
+            combined_baseline_ram_gb += baseline_ram_gb
+            combined_max_ram_gb += max_ram_gb
+
+        if seen_runtime_pool_ids != declared_runtime_pool_ids:
+            missing = sorted(declared_runtime_pool_ids - seen_runtime_pool_ids)
+            extra = sorted(seen_runtime_pool_ids - declared_runtime_pool_ids)
+            reasons: list[str] = []
+            if missing:
+                reasons.append("missing " + ", ".join(missing))
+            if extra:
+                reasons.append("unexpected " + ", ".join(extra))
+            raise ValueError(
+                "config/capacity-model.json.runtime_pool_memory.pools must cover every declared runtime-* partition: "
+                + "; ".join(reasons)
+            )
+        if control_priority != 1:
+            raise ValueError(
+                "config/capacity-model.json.runtime_pool_memory must reserve runtime-control first with admission_priority=1"
+            )
+        if combined_baseline_ram_gb < 40:
+            raise ValueError(
+                "config/capacity-model.json.runtime_pool_memory combined baseline RAM must be at least 40 GB"
+            )
+        if combined_max_ram_gb > 64:
+            raise ValueError(
+                "config/capacity-model.json.runtime_pool_memory combined max RAM must not exceed 64 GB"
+            )
+        remaining_ram_after_runtime_pool_max = (
+            host_physical.ram_gb
+            - host_reserved_for_platform.ram_gb
+            - reservation_ram_total
+            - combined_max_ram_gb
+        )
+        if remaining_ram_after_runtime_pool_max < host_free_memory_floor_gb:
+            raise ValueError(
+                "config/capacity-model.json.runtime_pool_memory combined max RAM leaves "
+                f"{remaining_ram_after_runtime_pool_max:.1f} GB below the required host free-memory floor "
+                f"of {host_free_memory_floor_gb:.1f} GB"
             )
 
     seen_profile_service_ids: set[str] = set()
@@ -1051,6 +1301,18 @@ def totals_for_reservations(reservations: list[ReservationModel]) -> ResourceAmo
     return total
 
 
+def runtime_pool_memory_headroom_after_max(model: CapacityModel) -> float | None:
+    governance = model.runtime_pool_memory
+    if governance is None:
+        return None
+    return (
+        model.host.physical.ram_gb
+        - model.host.reserved_for_platform.ram_gb
+        - totals_for_reservations(list(model.reservations)).ram_gb
+        - governance.combined_max_ram_gb
+    )
+
+
 def calculate_committed(model: CapacityModel, *, include_planned: bool = False, include_reservations: bool = False) -> ResourceAmount:
     guests = [guest for guest in model.guests if guest.status == "active" or (include_planned and guest.status == "planned")]
     total = model.host.reserved_for_platform.add(totals_for_guests(guests, "allocated"))
@@ -1126,6 +1388,35 @@ def render_text(report: CapacityReport) -> str:
         cpu_text = "CPU n/a" if actuals.cpu_used_cores_p95 is None else f"{actuals.cpu_used_cores_p95:.2f} cores CPU p95"
         disk_text = "disk n/a" if actuals.disk_used_gb is None else f"{actuals.disk_used_gb:.1f}GB disk"
         lines.append(base + f"actual={actuals.memory_used_gb:.1f}GB RAM, {cpu_text}, {disk_text}")
+
+    if model.runtime_pool_memory is not None:
+        governance = model.runtime_pool_memory
+        remaining_ram = runtime_pool_memory_headroom_after_max(model)
+        lines.extend(
+            [
+                "",
+                "Runtime pool memory governance:",
+                (
+                    "- Combined runtime-pool envelope: baseline "
+                    f"{governance.combined_baseline_ram_gb:.1f} GB, max {governance.combined_max_ram_gb:.1f} GB"
+                ),
+                (
+                    "- Host free-memory floor: "
+                    f"{governance.host_free_memory_floor_gb:.1f} GB (remaining at pool max "
+                    f"{remaining_ram:.1f} GB)"
+                ),
+                (
+                    "- Measurement and control: "
+                    f"{governance.metrics_source} via {governance.control_surface}"
+                ),
+            ]
+        )
+        for pool in sorted(governance.pools, key=lambda item: item.admission_priority):
+            lines.append(
+                "- "
+                f"{pool.identifier} priority={pool.admission_priority} "
+                f"baseline={pool.baseline_ram_gb:.1f}GB max={pool.max_ram_gb:.1f}GB"
+            )
 
     if model.reservations:
         lines.extend(["", "Reservations:"])
@@ -1210,6 +1501,29 @@ def render_json(report: CapacityReport) -> str:
     model = report.model
     current = calculate_committed(model, include_planned=False, include_reservations=False)
     projected = calculate_committed(model, include_planned=True, include_reservations=True)
+    runtime_pool_memory = None
+    if model.runtime_pool_memory is not None:
+        governance = model.runtime_pool_memory
+        runtime_pool_memory = {
+            "host_free_memory_floor_gb": governance.host_free_memory_floor_gb,
+            "combined_baseline_ram_gb": governance.combined_baseline_ram_gb,
+            "combined_max_ram_gb": governance.combined_max_ram_gb,
+            "remaining_ram_after_pool_max_gb": runtime_pool_memory_headroom_after_max(model),
+            "measurement_and_control": {
+                "metrics_source": governance.metrics_source,
+                "control_surface": governance.control_surface,
+            },
+            "pools": [
+                {
+                    "id": pool.identifier,
+                    "baseline_ram_gb": pool.baseline_ram_gb,
+                    "max_ram_gb": pool.max_ram_gb,
+                    "admission_priority": pool.admission_priority,
+                    "notes": pool.notes,
+                }
+                for pool in sorted(governance.pools, key=lambda item: item.admission_priority)
+            ],
+        }
     payload = {
         "host": {
             "id": model.host.identifier,
@@ -1264,6 +1578,7 @@ def render_json(report: CapacityReport) -> str:
             }
             for state in summarize_capacity_classes(model)
         ],
+        "runtime_pool_memory": runtime_pool_memory,
     }
     return json.dumps(payload, indent=2) + "\n"
 
@@ -1340,6 +1655,27 @@ def render_prometheus(report: CapacityReport) -> str:
         lines.append(
             f'lv3_capacity_class_available_disk_gb{{host="{model.host.identifier}",capacity_class="{state.identifier}"}} {state.available.disk_gb:.6f}'
         )
+    if model.runtime_pool_memory is not None:
+        governance = model.runtime_pool_memory
+        lines.append(
+            f'lv3_runtime_pool_host_free_memory_floor_gb{{host="{model.host.identifier}"}} {governance.host_free_memory_floor_gb:.6f}'
+        )
+        lines.append(
+            f'lv3_runtime_pool_combined_baseline_ram_gb{{host="{model.host.identifier}"}} {governance.combined_baseline_ram_gb:.6f}'
+        )
+        lines.append(
+            f'lv3_runtime_pool_combined_max_ram_gb{{host="{model.host.identifier}"}} {governance.combined_max_ram_gb:.6f}'
+        )
+        remaining_ram = runtime_pool_memory_headroom_after_max(model)
+        if remaining_ram is not None:
+            lines.append(
+                f'lv3_runtime_pool_remaining_ram_after_max_gb{{host="{model.host.identifier}"}} {remaining_ram:.6f}'
+            )
+        for pool in governance.pools:
+            labels = f'host="{model.host.identifier}",pool="{pool.identifier}"'
+            lines.append(f"lv3_runtime_pool_baseline_ram_gb{{{labels}}} {pool.baseline_ram_gb:.6f}")
+            lines.append(f"lv3_runtime_pool_max_ram_gb{{{labels}}} {pool.max_ram_gb:.6f}")
+            lines.append(f"lv3_runtime_pool_admission_priority{{{labels}}} {pool.admission_priority:.6f}")
     return "\n".join(lines) + "\n"
 
 

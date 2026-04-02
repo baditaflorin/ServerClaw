@@ -583,7 +583,10 @@ a {
 .runbook-card,
 .drift-panel,
 .chart-panel,
-.assurance-stat {
+.assurance-stat,
+.journey-home-card,
+.journey-entry-shell,
+.journey-panel {
   padding: 1.2rem;
 }
 
@@ -643,6 +646,98 @@ a {
 .status-neutral {
   color: var(--ink-soft);
   background: rgba(20, 33, 61, 0.08);
+}
+
+.journey-entry-shell,
+.journey-panel,
+.journey-home-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.journey-banner {
+  margin-top: 0;
+}
+
+.journey-grid,
+.journey-home-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.journey-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.journey-home-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.journey-panel__head,
+.journey-home-card__header,
+.journey-home-card__badges,
+.journey-checklist__item,
+.journey-checklist__actions {
+  display: flex;
+  gap: 0.9rem;
+}
+
+.journey-panel__head,
+.journey-home-card__header,
+.journey-checklist__item {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.journey-home-card {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 253, 248, 0.92);
+  box-shadow: 0 10px 30px rgba(20, 33, 61, 0.06);
+}
+
+.journey-home-card.is-saved {
+  border-color: rgba(42, 111, 79, 0.28);
+}
+
+.journey-home-card.is-default {
+  border-color: rgba(20, 33, 61, 0.2);
+}
+
+.journey-home-card h4,
+.journey-panel h3 {
+  margin: 0;
+  font-family: "IBM Plex Serif", Georgia, serif;
+}
+
+.journey-home-card__badges,
+.journey-checklist__actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.journey-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.journey-checklist__item {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.94);
+}
+
+.journey-checklist__item.is-complete {
+  border-color: rgba(42, 111, 79, 0.22);
+  background: rgba(42, 111, 79, 0.06);
+}
+
+.journey-checklist__item p {
+  margin: 0.35rem 0 0;
 }
 
 .hint-strip,
@@ -871,6 +966,63 @@ select {
   gap: 1rem;
 }
 
+.attention-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(18rem, 0.9fr);
+  gap: 1rem;
+}
+
+.attention-summary-grid {
+  grid-template-columns: 1fr;
+}
+
+.attention-list,
+.attention-subsection {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.attention-card {
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 253, 248, 0.78);
+  display: grid;
+  gap: 0.5rem;
+}
+
+.attention-card--warn {
+  border-color: rgba(178, 106, 0, 0.2);
+  background: rgba(242, 211, 164, 0.18);
+}
+
+.attention-card--danger {
+  border-color: rgba(163, 48, 44, 0.22);
+  background: rgba(163, 48, 44, 0.08);
+}
+
+.attention-card__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.attention-card__head h4,
+.attention-subsection h4 {
+  margin: 0;
+  font-family: "IBM Plex Serif", Georgia, serif;
+}
+
+.attention-card__detail {
+  margin: 0;
+  color: rgba(20, 33, 61, 0.78);
+}
+
+.attention-sidecar {
+  align-self: start;
+}
+
 @media (max-width: 920px) {
   .page-shell {
     padding: 1rem;
@@ -924,6 +1076,10 @@ select {
   .activation-stage-meta,
   .activation-item-actions {
     justify-content: flex-start;
+  }
+
+  .attention-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1327,6 +1483,21 @@ select {
 
   .portal-toolbar-actions {
     width: 100%;
+    justify-content: flex-start;
+  }
+
+  .journey-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .journey-panel__head,
+  .journey-home-card__header,
+  .journey-checklist__item {
+    flex-direction: column;
+  }
+
+  .journey-home-card__badges,
+  .journey-checklist__actions {
     justify-content: flex-start;
   }
 }

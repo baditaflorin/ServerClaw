@@ -52,7 +52,7 @@ def test_temporal_playbook_bootstraps_schema_from_localhost_and_deploys_runtime(
     assert postgres_play["vars"]["temporal_controller_database_host"] == "{{ temporal_controller_database_url | urlsplit('hostname') }}"
     assert (
         postgres_play["vars"]["temporal_schema_tool_delegate_host"]
-        == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+        == "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
     )
     assert schema_probe_task["ansible.builtin.command"]["argv"][1:4] == ["-d", "{{ temporal_database_name }}", "-Atqc"]
     assert schema_probe_task["become"] is True
@@ -73,6 +73,7 @@ def test_temporal_playbook_bootstraps_schema_from_localhost_and_deploys_runtime(
     assert schema_update_task["ansible.builtin.command"]["argv"][10] == "{{ temporal_database_host }}"
     assert schema_update_task["ansible.builtin.command"]["argv"][12] == "5432"
     assert schema_update_task["ansible.builtin.command"]["argv"][5] == "{{ temporal_admin_tools_image }}"
+    assert runtime_play["hosts"] == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
     assert [role["role"] for role in runtime_play["roles"]] == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.docker_runtime",

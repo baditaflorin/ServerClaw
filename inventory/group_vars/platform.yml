@@ -31,7 +31,7 @@ platform_host:
       - 7881
     public_ingress_tcp_forwards:
       - listen_port: 25
-        target_host: 10.10.10.20
+        target_host: 10.10.10.92
         target_port: 25
       - listen_port: 80
         target_host: 10.10.10.10
@@ -40,10 +40,10 @@ platform_host:
         target_host: 10.10.10.10
         target_port: 443
       - listen_port: 587
-        target_host: 10.10.10.20
+        target_host: 10.10.10.92
         target_port: 587
       - listen_port: 993
-        target_host: 10.10.10.20
+        target_host: 10.10.10.92
         target_port: 993
       - listen_port: 7881
         target_host: 10.10.10.20
@@ -67,7 +67,7 @@ platform_host:
       - name: windmill
         listen_address: 100.64.0.1
         listen_port: 8005
-        upstream_host: 10.10.10.20
+        upstream_host: 10.10.10.92
         upstream_port: 8000
       - name: nomad
         listen_address: 100.64.0.1
@@ -87,7 +87,7 @@ platform_host:
       - name: gitea
         listen_address: 100.64.0.1
         listen_port: 3009
-        upstream_host: 10.10.10.20
+        upstream_host: 10.10.10.92
         upstream_port: 3003
       - name: netbox
         listen_address: 100.64.0.1
@@ -102,22 +102,22 @@ platform_host:
       - name: step-ca
         listen_address: 100.64.0.1
         listen_port: 9443
-        upstream_host: 10.10.10.20
+        upstream_host: 10.10.10.92
         upstream_port: 9000
       - name: openbao
         listen_address: 100.64.0.1
         listen_port: 8200
-        upstream_host: 10.10.10.20
+        upstream_host: 10.10.10.92
         upstream_port: 8200
       - name: openfga
         listen_address: 100.64.0.1
         listen_port: 8014
-        upstream_host: 10.10.10.20
+        upstream_host: 10.10.10.92
         upstream_port: 8098
       - name: semaphore
         listen_address: 100.64.0.1
         listen_port: 8020
-        upstream_host: 10.10.10.20
+        upstream_host: 10.10.10.92
         upstream_port: 3004
       - name: plane
         listen_address: 100.64.0.1
@@ -605,6 +605,50 @@ platform_guest_catalog:
         anti_affinity_group: runtime-ai
         co_location_exceptions: []
       packages: []
+    - vmid: 191
+      name: runtime-general-lv3
+      role: runtime-general
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.91
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:91
+      cores: 4
+      memory_mb: 12288
+      disk_gb: 128
+      tags:
+        - docker
+        - runtime
+        - general
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-general
+        co_location_exceptions: []
+      packages: []
+    - vmid: 192
+      name: runtime-control-lv3
+      role: runtime-control
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.92
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:92
+      cores: 4
+      memory_mb: 12288
+      disk_gb: 128
+      tags:
+        - docker
+        - runtime
+        - control
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-control
+        co_location_exceptions: []
+      packages: []
   by_name:
     nginx-lv3:
       vmid: 110
@@ -861,6 +905,52 @@ platform_guest_catalog:
         failure_domain: host:proxmox_florin
         placement_class: primary
         anti_affinity_group: runtime-ai
+        co_location_exceptions: []
+      packages: []
+    runtime-general-lv3:
+      vmid: 191
+      name: runtime-general-lv3
+      role: runtime-general
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.91
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:91
+      cores: 4
+      memory_mb: 12288
+      disk_gb: 128
+      tags:
+        - docker
+        - runtime
+        - general
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-general
+        co_location_exceptions: []
+      packages: []
+    runtime-control-lv3:
+      vmid: 192
+      name: runtime-control-lv3
+      role: runtime-control
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.92
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:92
+      cores: 4
+      memory_mb: 12288
+      disk_gb: 128
+      tags:
+        - docker
+        - runtime
+        - control
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-control
         co_location_exceptions: []
       packages: []
   by_role:
@@ -1121,6 +1211,52 @@ platform_guest_catalog:
         anti_affinity_group: runtime-ai
         co_location_exceptions: []
       packages: []
+    runtime-general:
+      vmid: 191
+      name: runtime-general-lv3
+      role: runtime-general
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.91
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:91
+      cores: 4
+      memory_mb: 12288
+      disk_gb: 128
+      tags:
+        - docker
+        - runtime
+        - general
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-general
+        co_location_exceptions: []
+      packages: []
+    runtime-control:
+      vmid: 192
+      name: runtime-control-lv3
+      role: runtime-control
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.92
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:92
+      cores: 4
+      memory_mb: 12288
+      disk_gb: 128
+      tags:
+        - docker
+        - runtime
+        - control
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-control
+        co_location_exceptions: []
+      packages: []
 platform_service_topology:
   nginx_edge:
     service_name: nginx-edge
@@ -1149,6 +1285,11 @@ platform_service_topology:
       meta: Use the named subdomains for the actual service entry points exposed at
         the edge.
     service_id: nginx_edge
+    runtime_pool: dedicated-edge
+    deployment_surface: playbooks/services/public-edge.yml
+    restart_domain: dedicated-edge-publication
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-edge
+    mobility_tier: anchor
     ports: {}
     urls:
       public: https://nginx.lv3.org
@@ -1181,6 +1322,11 @@ platform_service_topology:
         - path: /api/health
           status: 404
     service_id: grafana
+    runtime_pool: dedicated-monitoring
+    deployment_surface: playbooks/services/grafana.yml
+    restart_domain: dedicated-monitoring-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
+    mobility_tier: anchor
     ports:
       internal: 3000
     urls:
@@ -1216,6 +1362,11 @@ platform_service_topology:
       server_sent_events: true
       upstream: http://10.10.10.40:19999
     service_id: realtime
+    runtime_pool: dedicated-monitoring
+    deployment_surface: playbooks/services/realtime.yml
+    restart_domain: dedicated-monitoring-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
+    mobility_tier: movable_singleton
     ports:
       internal: 19999
     urls:
@@ -1243,6 +1394,11 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.1:8080
     service_id: headscale
+    runtime_pool: host-management
+    deployment_surface: playbooks/services/headscale.yml
+    restart_domain: host-management-access
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/host-management
+    mobility_tier: anchor
     ports:
       internal: 8080
     urls:
@@ -1257,6 +1413,11 @@ platform_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: alertmanager
+    runtime_pool: dedicated-monitoring
+    deployment_surface: playbooks/monitoring-stack.yml
+    restart_domain: dedicated-monitoring-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
+    mobility_tier: anchor
     ports:
       internal: 9093
     urls:
@@ -1289,6 +1450,11 @@ platform_service_topology:
       action_label: Open Private Proxmox UI
       meta: Use Tailscale host access for routine Proxmox administration.
     service_id: proxmox_ui
+    runtime_pool: host-management
+    deployment_surface: playbooks/proxmox-install.yml
+    restart_domain: host-management-access
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/host-management
+    mobility_tier: anchor
     ports:
       controller: 8006
     urls:
@@ -1321,6 +1487,11 @@ platform_service_topology:
       meta: Public application endpoints should be published deliberately through
         the NGINX edge when needed.
     service_id: docker_runtime
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/docker-runtime.yml
+    restart_domain: runtime-general-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: anchor
     ports: {}
     urls:
       public: https://docker.lv3.org
@@ -1351,13 +1522,18 @@ platform_service_topology:
       meta: Reach the build VM through the approved operator access path rather than
         the public edge.
     service_id: docker_build
+    runtime_pool: dedicated-build
+    deployment_surface: playbooks/services/build-artifact-cache.yml
+    restart_domain: dedicated-build-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-build
+    mobility_tier: anchor
     ports: {}
     urls:
       public: https://build.lv3.org
   uptime_kuma:
     service_name: uptime-kuma
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     public_hostname: uptime.lv3.org
     exposure_model: edge-published
     observability:
@@ -1374,17 +1550,22 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:3001
+      upstream: http://10.10.10.91:3001
     service_id: uptime_kuma
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/uptime-kuma.yml
+    restart_domain: runtime-general-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 3001
     urls:
       public: https://uptime.lv3.org
-      internal: http://10.10.10.20:3001
+      internal: http://10.10.10.91:3001
   status_page:
     service_name: status-page
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     public_hostname: status.lv3.org
     exposure_model: edge-published
     observability:
@@ -1401,18 +1582,23 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:3001
+      upstream: http://10.10.10.91:3001
       root_proxy_path: /status/lv3-platform
     service_id: status_page
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/uptime-kuma.yml
+    restart_domain: runtime-general-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: elastic_stateless
     ports:
       internal: 3001
     urls:
       public: https://status.lv3.org
-      internal: http://10.10.10.20:3001
+      internal: http://10.10.10.91:3001
   mail_platform:
     service_name: mail-platform
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: mail.lv3.org
     exposure_model: informational-only
     observability:
@@ -1436,6 +1622,11 @@ platform_service_topology:
       meta: Use the declared mail protocols on ports 587 and 993 instead of expecting
         a public web application at this hostname.
     service_id: mail_platform
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/mail-platform.yml
+    restart_domain: runtime-control-communications
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       private_api: 8081
     urls:
@@ -1443,19 +1634,24 @@ platform_service_topology:
       private_api: http://10.10.10.20:8081
   mailpit:
     service_name: mailpit
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     exposure_model: private-only
     observability:
       guest_dashboard: false
       service_telemetry: false
     service_id: mailpit
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/mailpit.yml
+    restart_domain: runtime-general-communications
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8025
       smtp: 1025
     urls:
-      internal: http://10.10.10.20:8025
-      smtp: smtp://10.10.10.20:1025
+      internal: http://10.10.10.91:8025
+      smtp: smtp://10.10.10.91:1025
   livekit:
     service_name: livekit
     owning_vm: docker-runtime-lv3
@@ -1481,6 +1677,11 @@ platform_service_topology:
       proxy_send_timeout_seconds: 3600
       upstream: http://10.10.10.20:7880
     service_id: livekit
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/livekit.yml
+    restart_domain: runtime-general-collaboration
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 7880
       media_tcp: 7881
@@ -1497,6 +1698,11 @@ platform_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: redpanda
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/redpanda.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: anchor
     ports:
       internal: 9092
       admin: 9644
@@ -1509,8 +1715,8 @@ platform_service_topology:
       schema_registry: http://10.10.10.20:8104
   step_ca:
     service_name: step-ca
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1519,11 +1725,16 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: https://100.64.0.1:9443
     service_id: step_ca
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/step-ca.yml
+    restart_domain: runtime-control-secrets
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 9000
       controller: 9443
     urls:
-      internal: https://10.10.10.20:9000
+      internal: https://10.10.10.92:9000
       controller: https://100.64.0.1:9443
   tika:
     service_name: tika
@@ -1538,6 +1749,7 @@ platform_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: tika
+    mobility_tier: burst_batch
     ports:
       internal: 9998
     urls:
@@ -1555,14 +1767,15 @@ platform_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: tesseract_ocr
+    mobility_tier: burst_batch
     ports:
       internal: 3008
     urls:
       internal: http://10.10.10.90:3008
   semaphore:
     service_name: semaphore
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1571,16 +1784,21 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8020
     service_id: semaphore
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/semaphore.yml
+    restart_domain: runtime-control-automation
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 3004
       controller: 8020
     urls:
-      internal: http://10.10.10.20:3004
+      internal: http://10.10.10.92:3004
       controller: http://100.64.0.1:8020
   windmill:
     service_name: windmill
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1589,11 +1807,16 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8005
     service_id: windmill
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/windmill.yml
+    restart_domain: runtime-control-automation
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 8000
       controller: 8005
     urls:
-      internal: http://10.10.10.20:8000
+      internal: http://10.10.10.92:8000
       controller: http://100.64.0.1:8005
   nomad:
     service_name: nomad
@@ -1607,6 +1830,11 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: https://100.64.0.1:8013
     service_id: nomad
+    runtime_pool: dedicated-monitoring
+    deployment_surface: playbooks/services/nomad.yml
+    restart_domain: dedicated-monitoring-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
+    mobility_tier: anchor
     ports:
       internal: 4646
       controller: 8013
@@ -1615,8 +1843,8 @@ platform_service_topology:
       controller: https://100.64.0.1:8013
   gitea:
     service_name: gitea
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: git.lv3.org
     exposure_model: private-only
     observability:
@@ -1633,12 +1861,17 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:3009
     service_id: gitea
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/gitea.yml
+    restart_domain: runtime-control-supply-chain
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 3003
       controller: 3009
     urls:
       public: http://git.lv3.org:3009
-      internal: http://10.10.10.20:3003
+      internal: http://10.10.10.92:3003
       controller: http://100.64.0.1:3009
   mattermost:
     service_name: mattermost
@@ -1652,6 +1885,11 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8066
     service_id: mattermost
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/mattermost.yml
+    restart_domain: runtime-general-collaboration
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8065
       controller: 8066
@@ -1684,6 +1922,11 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8015
     service_id: matrix_synapse
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/matrix-synapse.yml
+    restart_domain: runtime-general-collaboration
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8008
       controller: 8015
@@ -1703,6 +1946,11 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8004
     service_id: netbox
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/netbox.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8082
       controller: 8004
@@ -1721,6 +1969,11 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8016
     service_id: typesense
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/typesense.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8108
       controller: 8016
@@ -1747,6 +2000,11 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:80
     service_id: searxng
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/searxng.yml
+    restart_domain: runtime-general-automation
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8881
       controller: 80
@@ -1777,6 +2035,11 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:3002
     service_id: langfuse
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/langfuse.yml
+    restart_domain: runtime-general-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 3002
     urls:
@@ -1805,6 +2068,11 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8017
     service_id: flagsmith
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/flagsmith.yml
+    restart_domain: runtime-general-product-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8017
     urls:
@@ -1835,6 +2103,11 @@ platform_service_topology:
       security_headers_enabled: false
       preserve_upstream_security_headers: true
     service_id: plausible
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/plausible.yml
+    restart_domain: runtime-general-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8016
     urls:
@@ -1876,6 +2149,11 @@ platform_service_topology:
       security_headers_enabled: false
       crawl_policy_enabled: false
     service_id: minio
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/minio.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: anchor
     ports:
       internal: 9010
       console: 9011
@@ -1910,6 +2188,11 @@ platform_service_topology:
         - path: /api/
           upstream: http://10.10.10.20:8099
     service_id: lago
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/lago.yml
+    restart_domain: runtime-general-product-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8100
       api: 8099
@@ -1940,6 +2223,11 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8094
     service_id: dify
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/dify.yml
+    restart_domain: runtime-ai-inference
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: movable_singleton
     ports:
       internal: 8094
     urls:
@@ -1971,6 +2259,11 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8011
     service_id: plane
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/plane.yml
+    restart_domain: runtime-general-product-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8093
       controller: 8011
@@ -2004,6 +2297,11 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8017
     service_id: woodpecker
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/woodpecker.yml
+    restart_domain: runtime-general-automation
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8102
       controller: 8017
@@ -2034,6 +2332,11 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:3006
     service_id: outline
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/outline.yml
+    restart_domain: runtime-general-collaboration
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 3006
     urls:
@@ -2062,6 +2365,11 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8484
     service_id: grist
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/grist.yml
+    restart_domain: runtime-general-product-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8484
     urls:
@@ -2096,6 +2404,11 @@ platform_service_topology:
       security_headers_enabled: false
       preserve_upstream_security_headers: true
     service_id: paperless
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/paperless.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8018
     urls:
@@ -2124,6 +2437,11 @@ platform_service_topology:
       server_sent_events: true
       upstream: http://10.10.10.20:8089
     service_id: dozzle
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/dozzle.yml
+    restart_domain: runtime-general-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: elastic_stateless
     ports:
       internal: 8089
     urls:
@@ -2154,6 +2472,11 @@ platform_service_topology:
         - path: /socket.io/
           upstream: http://10.10.10.20:3096
     service_id: excalidraw
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/excalidraw.yml
+    restart_domain: runtime-general-collaboration
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 3095
     urls:
@@ -2171,6 +2494,11 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8008
     service_id: open_webui
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/open-webui.yml
+    restart_domain: runtime-ai-operator-ui
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: movable_singleton
     ports:
       internal: 8088
       controller: 8008
@@ -2189,6 +2517,11 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8018
     service_id: one_api
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/one-api.yml
+    restart_domain: runtime-ai-inference
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: elastic_stateless
     ports:
       internal: 8101
       controller: 8018
@@ -2210,6 +2543,7 @@ platform_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: gotenberg
+    mobility_tier: burst_batch
     ports:
       internal: 3007
     urls:
@@ -2237,6 +2571,11 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.70:8096
     service_id: serverclaw
+    runtime_pool: dedicated-coolify
+    deployment_surface: playbooks/serverclaw.yml
+    restart_domain: dedicated-coolify-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify
+    mobility_tier: movable_singleton
     ports:
       internal: 8096
     urls:
@@ -2251,6 +2590,11 @@ platform_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: ollama
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/ollama.yml
+    restart_domain: runtime-ai-inference
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: burst_batch
     ports:
       internal: 11434
     urls:
@@ -2264,6 +2608,11 @@ platform_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: piper
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/piper.yml
+    restart_domain: runtime-ai-inference
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: burst_batch
     ports:
       internal: 8100
     urls:
@@ -2290,6 +2639,11 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:5678
     service_id: n8n
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/n8n.yml
+    restart_domain: runtime-general-automation
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 5678
     urls:
@@ -2331,6 +2685,11 @@ platform_service_topology:
           location: /remote.php/dav/
           status: 301
     service_id: nextcloud
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/nextcloud.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8084
     urls:
@@ -2362,6 +2721,11 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8012
     service_id: coolify
+    runtime_pool: dedicated-coolify
+    deployment_surface: playbooks/services/coolify.yml
+    restart_domain: dedicated-coolify-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify
+    mobility_tier: anchor
     ports:
       internal: 8000
       controller: 8012
@@ -2396,6 +2760,11 @@ platform_service_topology:
       security_headers_enabled: false
       preserve_upstream_security_headers: true
     service_id: coolify_apps
+    runtime_pool: dedicated-coolify
+    deployment_surface: playbooks/services/coolify.yml
+    restart_domain: dedicated-coolify-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify
+    mobility_tier: anchor
     ports:
       internal: 443
     urls:
@@ -2403,8 +2772,8 @@ platform_service_topology:
       internal: https://10.10.10.70:443
   api_gateway:
     service_name: api-gateway
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: api.lv3.org
     exposure_model: edge-published
     observability:
@@ -2421,13 +2790,18 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8083
+      upstream: http://10.10.10.92:8083
     service_id: api_gateway
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/api-gateway.yml
+    restart_domain: runtime-control-ingress
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 8083
     urls:
       public: https://api.lv3.org
-      internal: http://10.10.10.20:8083
+      internal: http://10.10.10.92:8083
   browser_runner:
     service_name: browser-runner
     owning_vm: docker-runtime-lv3
@@ -2437,6 +2811,11 @@ platform_service_topology:
       guest_dashboard: false
       service_telemetry: true
     service_id: browser_runner
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/browser-runner.yml
+    restart_domain: runtime-ai-execution
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: burst_batch
     ports:
       internal: 8096
     urls:
@@ -2450,6 +2829,11 @@ platform_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: changedetection
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/changedetection.yml
+    restart_domain: runtime-general-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 5000
     urls:
@@ -2463,6 +2847,11 @@ platform_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: crawl4ai
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/crawl4ai.yml
+    restart_domain: runtime-ai-execution
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: burst_batch
     ports:
       internal: 11235
     urls:
@@ -2479,6 +2868,11 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8010
     service_id: platform_context_api
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/rag-context.yml
+    restart_domain: runtime-ai-inference
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: elastic_stateless
     ports:
       internal: 8010
       controller: 8010
@@ -2487,8 +2881,8 @@ platform_service_topology:
       controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -2505,15 +2899,20 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8091
+      upstream: http://10.10.10.92:8091
     service_id: keycloak
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/keycloak.yml
+    restart_domain: runtime-control-identity
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports: {}
     urls:
       public: https://sso.lv3.org
   harbor:
     service_name: harbor
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: registry.lv3.org
     exposure_model: edge-published
     observability:
@@ -2530,18 +2929,23 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8095
+      upstream: http://10.10.10.92:8095
       client_max_body_size: 0
       chunked_transfer_encoding: true
       proxy_request_buffering: false
       proxy_read_timeout_seconds: 900
       proxy_send_timeout_seconds: 900
     service_id: harbor
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/harbor.yml
+    restart_domain: runtime-control-supply-chain
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 8095
     urls:
       public: https://registry.lv3.org
-      internal: http://10.10.10.20:8095
+      internal: http://10.10.10.92:8095
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
@@ -2564,6 +2968,11 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8092
     service_id: ops_portal
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/ops-portal.yml
+    restart_domain: runtime-general-operator-ui
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8092
     urls:
@@ -2571,8 +2980,8 @@ platform_service_topology:
       internal: http://10.10.10.20:8092
   homepage:
     service_name: homepage
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     public_hostname: home.lv3.org
     exposure_model: edge-published
     observability:
@@ -2589,17 +2998,22 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:3090
+      upstream: http://10.10.10.91:3090
     service_id: homepage
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/homepage.yml
+    restart_domain: runtime-general-operator-ui
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: elastic_stateless
     ports:
       internal: 3090
     urls:
       public: https://home.lv3.org
-      internal: http://10.10.10.20:3090
+      internal: http://10.10.10.91:3090
   openbao:
     service_name: openbao
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -2608,16 +3022,21 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: https://100.64.0.1:8200
     service_id: openbao
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/openbao.yml
+    restart_domain: runtime-control-secrets
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 8200
       controller: 8200
     urls:
-      internal: https://10.10.10.20:8200
+      internal: https://10.10.10.92:8200
       controller: https://100.64.0.1:8200
   openfga:
     service_name: openfga
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -2626,16 +3045,21 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8014
     service_id: openfga
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/openfga.yml
+    restart_domain: runtime-control-identity
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 8098
       controller: 8014
     urls:
-      internal: http://10.10.10.20:8098
+      internal: http://10.10.10.92:8098
       controller: http://100.64.0.1:8014
   temporal:
     service_name: temporal
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -2644,6 +3068,11 @@ platform_service_topology:
       kind: ssh-tunnel
       url: grpc://127.0.0.1:7233
     service_id: temporal
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/temporal.yml
+    restart_domain: runtime-control-automation
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports: {}
     urls: {}
   ntfy:
@@ -2655,6 +3084,11 @@ platform_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: ntfy
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/ntfy.yml
+    restart_domain: runtime-general-communications
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 2586
     urls:
@@ -2671,6 +3105,11 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:3001
     service_id: ntopng
+    runtime_pool: host-management
+    deployment_surface: playbooks/ntopng.yml
+    restart_domain: host-management-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/host-management
+    mobility_tier: anchor
     ports:
       internal: 3000
       controller: 3001
@@ -2689,6 +3128,11 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: https://100.64.0.1:9444
     service_id: portainer
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/portainer.yml
+    restart_domain: runtime-general-operator-ui
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 9443
       controller: 9444
@@ -2697,8 +3141,8 @@ platform_service_topology:
       controller: https://100.64.0.1:9444
   vaultwarden:
     service_name: vaultwarden
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: vault.lv3.org
     exposure_model: private-only
     observability:
@@ -2715,12 +3159,17 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: https://vault.lv3.org
     service_id: vaultwarden
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/vaultwarden.yml
+    restart_domain: runtime-control-secrets
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 8222
       controller: 443
     urls:
       public: https://vault.lv3.org
-      internal: https://10.10.10.20:8222
+      internal: https://10.10.10.92:8222
       controller: https://vault.lv3.org
   postgres:
     service_name: postgres
@@ -2739,6 +3188,11 @@ platform_service_topology:
       target: 100.64.0.1
       ttl: 60
     service_id: postgres
+    runtime_pool: dedicated-postgres
+    deployment_surface: playbooks/services/postgres-vm.yml
+    restart_domain: dedicated-postgres-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-postgres
+    mobility_tier: anchor
     ports:
       internal: 5432
       controller: 5432
@@ -2755,6 +3209,11 @@ platform_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: backup_pbs
+    runtime_pool: dedicated-backup
+    deployment_surface: playbooks/services/backup-vm.yml
+    restart_domain: dedicated-backup-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-backup
+    mobility_tier: anchor
     ports: {}
     urls: {}
   directus:
@@ -2780,6 +3239,11 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8055
     service_id: directus
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/directus.yml
+    restart_domain: runtime-general-product-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8055
     urls:
@@ -2811,6 +3275,11 @@ platform_service_topology:
       proxy_send_timeout_seconds: 3600
       upstream: http://10.10.10.20:8097
     service_id: jupyterhub
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/jupyterhub.yml
+    restart_domain: runtime-ai-execution
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: burst_batch
     ports:
       internal: 8097
     urls:
@@ -2839,6 +3308,11 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8105
     service_id: superset
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/superset.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8105
     urls:
@@ -3111,6 +3585,11 @@ public_edge_service_topology:
       meta: Use the named subdomains for the actual service entry points exposed at
         the edge.
     service_id: nginx_edge
+    runtime_pool: dedicated-edge
+    deployment_surface: playbooks/services/public-edge.yml
+    restart_domain: dedicated-edge-publication
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-edge
+    mobility_tier: anchor
     ports: {}
     urls:
       public: https://nginx.lv3.org
@@ -3143,6 +3622,11 @@ public_edge_service_topology:
         - path: /api/health
           status: 404
     service_id: grafana
+    runtime_pool: dedicated-monitoring
+    deployment_surface: playbooks/services/grafana.yml
+    restart_domain: dedicated-monitoring-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
+    mobility_tier: anchor
     ports:
       internal: 3000
     urls:
@@ -3178,6 +3662,11 @@ public_edge_service_topology:
       server_sent_events: true
       upstream: http://10.10.10.40:19999
     service_id: realtime
+    runtime_pool: dedicated-monitoring
+    deployment_surface: playbooks/services/realtime.yml
+    restart_domain: dedicated-monitoring-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
+    mobility_tier: movable_singleton
     ports:
       internal: 19999
     urls:
@@ -3205,6 +3694,11 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.1:8080
     service_id: headscale
+    runtime_pool: host-management
+    deployment_surface: playbooks/services/headscale.yml
+    restart_domain: host-management-access
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/host-management
+    mobility_tier: anchor
     ports:
       internal: 8080
     urls:
@@ -3219,6 +3713,11 @@ public_edge_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: alertmanager
+    runtime_pool: dedicated-monitoring
+    deployment_surface: playbooks/monitoring-stack.yml
+    restart_domain: dedicated-monitoring-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
+    mobility_tier: anchor
     ports:
       internal: 9093
     urls:
@@ -3251,6 +3750,11 @@ public_edge_service_topology:
       action_label: Open Private Proxmox UI
       meta: Use Tailscale host access for routine Proxmox administration.
     service_id: proxmox_ui
+    runtime_pool: host-management
+    deployment_surface: playbooks/proxmox-install.yml
+    restart_domain: host-management-access
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/host-management
+    mobility_tier: anchor
     ports:
       controller: 8006
     urls:
@@ -3283,6 +3787,11 @@ public_edge_service_topology:
       meta: Public application endpoints should be published deliberately through
         the NGINX edge when needed.
     service_id: docker_runtime
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/docker-runtime.yml
+    restart_domain: runtime-general-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: anchor
     ports: {}
     urls:
       public: https://docker.lv3.org
@@ -3313,13 +3822,18 @@ public_edge_service_topology:
       meta: Reach the build VM through the approved operator access path rather than
         the public edge.
     service_id: docker_build
+    runtime_pool: dedicated-build
+    deployment_surface: playbooks/services/build-artifact-cache.yml
+    restart_domain: dedicated-build-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-build
+    mobility_tier: anchor
     ports: {}
     urls:
       public: https://build.lv3.org
   uptime_kuma:
     service_name: uptime-kuma
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     public_hostname: uptime.lv3.org
     exposure_model: edge-published
     observability:
@@ -3336,17 +3850,22 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:3001
+      upstream: http://10.10.10.91:3001
     service_id: uptime_kuma
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/uptime-kuma.yml
+    restart_domain: runtime-general-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 3001
     urls:
       public: https://uptime.lv3.org
-      internal: http://10.10.10.20:3001
+      internal: http://10.10.10.91:3001
   status_page:
     service_name: status-page
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     public_hostname: status.lv3.org
     exposure_model: edge-published
     observability:
@@ -3363,18 +3882,23 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:3001
+      upstream: http://10.10.10.91:3001
       root_proxy_path: /status/lv3-platform
     service_id: status_page
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/uptime-kuma.yml
+    restart_domain: runtime-general-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: elastic_stateless
     ports:
       internal: 3001
     urls:
       public: https://status.lv3.org
-      internal: http://10.10.10.20:3001
+      internal: http://10.10.10.91:3001
   mail_platform:
     service_name: mail-platform
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: mail.lv3.org
     exposure_model: informational-only
     observability:
@@ -3398,6 +3922,11 @@ public_edge_service_topology:
       meta: Use the declared mail protocols on ports 587 and 993 instead of expecting
         a public web application at this hostname.
     service_id: mail_platform
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/mail-platform.yml
+    restart_domain: runtime-control-communications
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       private_api: 8081
     urls:
@@ -3405,19 +3934,24 @@ public_edge_service_topology:
       private_api: http://10.10.10.20:8081
   mailpit:
     service_name: mailpit
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     exposure_model: private-only
     observability:
       guest_dashboard: false
       service_telemetry: false
     service_id: mailpit
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/mailpit.yml
+    restart_domain: runtime-general-communications
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8025
       smtp: 1025
     urls:
-      internal: http://10.10.10.20:8025
-      smtp: smtp://10.10.10.20:1025
+      internal: http://10.10.10.91:8025
+      smtp: smtp://10.10.10.91:1025
   livekit:
     service_name: livekit
     owning_vm: docker-runtime-lv3
@@ -3443,6 +3977,11 @@ public_edge_service_topology:
       proxy_send_timeout_seconds: 3600
       upstream: http://10.10.10.20:7880
     service_id: livekit
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/livekit.yml
+    restart_domain: runtime-general-collaboration
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 7880
       media_tcp: 7881
@@ -3459,6 +3998,11 @@ public_edge_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: redpanda
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/redpanda.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: anchor
     ports:
       internal: 9092
       admin: 9644
@@ -3471,8 +4015,8 @@ public_edge_service_topology:
       schema_registry: http://10.10.10.20:8104
   step_ca:
     service_name: step-ca
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -3481,11 +4025,16 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: https://100.64.0.1:9443
     service_id: step_ca
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/step-ca.yml
+    restart_domain: runtime-control-secrets
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 9000
       controller: 9443
     urls:
-      internal: https://10.10.10.20:9000
+      internal: https://10.10.10.92:9000
       controller: https://100.64.0.1:9443
   tika:
     service_name: tika
@@ -3500,6 +4049,7 @@ public_edge_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: tika
+    mobility_tier: burst_batch
     ports:
       internal: 9998
     urls:
@@ -3517,14 +4067,15 @@ public_edge_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: tesseract_ocr
+    mobility_tier: burst_batch
     ports:
       internal: 3008
     urls:
       internal: http://10.10.10.90:3008
   semaphore:
     service_name: semaphore
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -3533,16 +4084,21 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8020
     service_id: semaphore
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/semaphore.yml
+    restart_domain: runtime-control-automation
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 3004
       controller: 8020
     urls:
-      internal: http://10.10.10.20:3004
+      internal: http://10.10.10.92:3004
       controller: http://100.64.0.1:8020
   windmill:
     service_name: windmill
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -3551,11 +4107,16 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8005
     service_id: windmill
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/windmill.yml
+    restart_domain: runtime-control-automation
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 8000
       controller: 8005
     urls:
-      internal: http://10.10.10.20:8000
+      internal: http://10.10.10.92:8000
       controller: http://100.64.0.1:8005
   nomad:
     service_name: nomad
@@ -3569,6 +4130,11 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: https://100.64.0.1:8013
     service_id: nomad
+    runtime_pool: dedicated-monitoring
+    deployment_surface: playbooks/services/nomad.yml
+    restart_domain: dedicated-monitoring-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
+    mobility_tier: anchor
     ports:
       internal: 4646
       controller: 8013
@@ -3577,8 +4143,8 @@ public_edge_service_topology:
       controller: https://100.64.0.1:8013
   gitea:
     service_name: gitea
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: git.lv3.org
     exposure_model: private-only
     observability:
@@ -3595,12 +4161,17 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:3009
     service_id: gitea
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/gitea.yml
+    restart_domain: runtime-control-supply-chain
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 3003
       controller: 3009
     urls:
       public: http://git.lv3.org:3009
-      internal: http://10.10.10.20:3003
+      internal: http://10.10.10.92:3003
       controller: http://100.64.0.1:3009
   mattermost:
     service_name: mattermost
@@ -3614,6 +4185,11 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8066
     service_id: mattermost
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/mattermost.yml
+    restart_domain: runtime-general-collaboration
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8065
       controller: 8066
@@ -3646,6 +4222,11 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8015
     service_id: matrix_synapse
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/matrix-synapse.yml
+    restart_domain: runtime-general-collaboration
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8008
       controller: 8015
@@ -3665,6 +4246,11 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8004
     service_id: netbox
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/netbox.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8082
       controller: 8004
@@ -3683,6 +4269,11 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8016
     service_id: typesense
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/typesense.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8108
       controller: 8016
@@ -3709,6 +4300,11 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:80
     service_id: searxng
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/searxng.yml
+    restart_domain: runtime-general-automation
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8881
       controller: 80
@@ -3739,6 +4335,11 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:3002
     service_id: langfuse
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/langfuse.yml
+    restart_domain: runtime-general-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 3002
     urls:
@@ -3767,6 +4368,11 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8017
     service_id: flagsmith
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/flagsmith.yml
+    restart_domain: runtime-general-product-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8017
     urls:
@@ -3797,6 +4403,11 @@ public_edge_service_topology:
       security_headers_enabled: false
       preserve_upstream_security_headers: true
     service_id: plausible
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/plausible.yml
+    restart_domain: runtime-general-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8016
     urls:
@@ -3838,6 +4449,11 @@ public_edge_service_topology:
       security_headers_enabled: false
       crawl_policy_enabled: false
     service_id: minio
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/minio.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: anchor
     ports:
       internal: 9010
       console: 9011
@@ -3872,6 +4488,11 @@ public_edge_service_topology:
         - path: /api/
           upstream: http://10.10.10.20:8099
     service_id: lago
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/lago.yml
+    restart_domain: runtime-general-product-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8100
       api: 8099
@@ -3902,6 +4523,11 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8094
     service_id: dify
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/dify.yml
+    restart_domain: runtime-ai-inference
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: movable_singleton
     ports:
       internal: 8094
     urls:
@@ -3933,6 +4559,11 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8011
     service_id: plane
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/plane.yml
+    restart_domain: runtime-general-product-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8093
       controller: 8011
@@ -3966,6 +4597,11 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8017
     service_id: woodpecker
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/woodpecker.yml
+    restart_domain: runtime-general-automation
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8102
       controller: 8017
@@ -3996,6 +4632,11 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:3006
     service_id: outline
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/outline.yml
+    restart_domain: runtime-general-collaboration
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 3006
     urls:
@@ -4024,6 +4665,11 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8484
     service_id: grist
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/grist.yml
+    restart_domain: runtime-general-product-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8484
     urls:
@@ -4058,6 +4704,11 @@ public_edge_service_topology:
       security_headers_enabled: false
       preserve_upstream_security_headers: true
     service_id: paperless
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/paperless.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8018
     urls:
@@ -4086,6 +4737,11 @@ public_edge_service_topology:
       server_sent_events: true
       upstream: http://10.10.10.20:8089
     service_id: dozzle
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/dozzle.yml
+    restart_domain: runtime-general-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: elastic_stateless
     ports:
       internal: 8089
     urls:
@@ -4116,6 +4772,11 @@ public_edge_service_topology:
         - path: /socket.io/
           upstream: http://10.10.10.20:3096
     service_id: excalidraw
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/excalidraw.yml
+    restart_domain: runtime-general-collaboration
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 3095
     urls:
@@ -4133,6 +4794,11 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8008
     service_id: open_webui
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/open-webui.yml
+    restart_domain: runtime-ai-operator-ui
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: movable_singleton
     ports:
       internal: 8088
       controller: 8008
@@ -4151,6 +4817,11 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8018
     service_id: one_api
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/one-api.yml
+    restart_domain: runtime-ai-inference
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: elastic_stateless
     ports:
       internal: 8101
       controller: 8018
@@ -4172,6 +4843,7 @@ public_edge_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: gotenberg
+    mobility_tier: burst_batch
     ports:
       internal: 3007
     urls:
@@ -4199,6 +4871,11 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.70:8096
     service_id: serverclaw
+    runtime_pool: dedicated-coolify
+    deployment_surface: playbooks/serverclaw.yml
+    restart_domain: dedicated-coolify-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify
+    mobility_tier: movable_singleton
     ports:
       internal: 8096
     urls:
@@ -4213,6 +4890,11 @@ public_edge_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: ollama
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/ollama.yml
+    restart_domain: runtime-ai-inference
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: burst_batch
     ports:
       internal: 11434
     urls:
@@ -4226,6 +4908,11 @@ public_edge_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: piper
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/piper.yml
+    restart_domain: runtime-ai-inference
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: burst_batch
     ports:
       internal: 8100
     urls:
@@ -4252,6 +4939,11 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:5678
     service_id: n8n
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/n8n.yml
+    restart_domain: runtime-general-automation
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 5678
     urls:
@@ -4293,6 +4985,11 @@ public_edge_service_topology:
           location: /remote.php/dav/
           status: 301
     service_id: nextcloud
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/nextcloud.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8084
     urls:
@@ -4324,6 +5021,11 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8012
     service_id: coolify
+    runtime_pool: dedicated-coolify
+    deployment_surface: playbooks/services/coolify.yml
+    restart_domain: dedicated-coolify-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify
+    mobility_tier: anchor
     ports:
       internal: 8000
       controller: 8012
@@ -4358,6 +5060,11 @@ public_edge_service_topology:
       security_headers_enabled: false
       preserve_upstream_security_headers: true
     service_id: coolify_apps
+    runtime_pool: dedicated-coolify
+    deployment_surface: playbooks/services/coolify.yml
+    restart_domain: dedicated-coolify-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify
+    mobility_tier: anchor
     ports:
       internal: 443
     urls:
@@ -4365,8 +5072,8 @@ public_edge_service_topology:
       internal: https://10.10.10.70:443
   api_gateway:
     service_name: api-gateway
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: api.lv3.org
     exposure_model: edge-published
     observability:
@@ -4383,13 +5090,18 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8083
+      upstream: http://10.10.10.92:8083
     service_id: api_gateway
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/api-gateway.yml
+    restart_domain: runtime-control-ingress
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 8083
     urls:
       public: https://api.lv3.org
-      internal: http://10.10.10.20:8083
+      internal: http://10.10.10.92:8083
   browser_runner:
     service_name: browser-runner
     owning_vm: docker-runtime-lv3
@@ -4399,6 +5111,11 @@ public_edge_service_topology:
       guest_dashboard: false
       service_telemetry: true
     service_id: browser_runner
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/browser-runner.yml
+    restart_domain: runtime-ai-execution
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: burst_batch
     ports:
       internal: 8096
     urls:
@@ -4412,6 +5129,11 @@ public_edge_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: changedetection
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/changedetection.yml
+    restart_domain: runtime-general-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 5000
     urls:
@@ -4425,6 +5147,11 @@ public_edge_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: crawl4ai
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/crawl4ai.yml
+    restart_domain: runtime-ai-execution
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: burst_batch
     ports:
       internal: 11235
     urls:
@@ -4441,6 +5168,11 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8010
     service_id: platform_context_api
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/rag-context.yml
+    restart_domain: runtime-ai-inference
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: elastic_stateless
     ports:
       internal: 8010
       controller: 8010
@@ -4449,8 +5181,8 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -4467,15 +5199,20 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8091
+      upstream: http://10.10.10.92:8091
     service_id: keycloak
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/keycloak.yml
+    restart_domain: runtime-control-identity
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports: {}
     urls:
       public: https://sso.lv3.org
   harbor:
     service_name: harbor
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: registry.lv3.org
     exposure_model: edge-published
     observability:
@@ -4492,18 +5229,23 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8095
+      upstream: http://10.10.10.92:8095
       client_max_body_size: 0
       chunked_transfer_encoding: true
       proxy_request_buffering: false
       proxy_read_timeout_seconds: 900
       proxy_send_timeout_seconds: 900
     service_id: harbor
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/harbor.yml
+    restart_domain: runtime-control-supply-chain
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 8095
     urls:
       public: https://registry.lv3.org
-      internal: http://10.10.10.20:8095
+      internal: http://10.10.10.92:8095
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
@@ -4526,6 +5268,11 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8092
     service_id: ops_portal
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/ops-portal.yml
+    restart_domain: runtime-general-operator-ui
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8092
     urls:
@@ -4533,8 +5280,8 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8092
   homepage:
     service_name: homepage
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-general-lv3
+    private_ip: 10.10.10.91
     public_hostname: home.lv3.org
     exposure_model: edge-published
     observability:
@@ -4551,17 +5298,22 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:3090
+      upstream: http://10.10.10.91:3090
     service_id: homepage
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/homepage.yml
+    restart_domain: runtime-general-operator-ui
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: elastic_stateless
     ports:
       internal: 3090
     urls:
       public: https://home.lv3.org
-      internal: http://10.10.10.20:3090
+      internal: http://10.10.10.91:3090
   openbao:
     service_name: openbao
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -4570,16 +5322,21 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: https://100.64.0.1:8200
     service_id: openbao
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/openbao.yml
+    restart_domain: runtime-control-secrets
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 8200
       controller: 8200
     urls:
-      internal: https://10.10.10.20:8200
+      internal: https://10.10.10.92:8200
       controller: https://100.64.0.1:8200
   openfga:
     service_name: openfga
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -4588,16 +5345,21 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8014
     service_id: openfga
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/openfga.yml
+    restart_domain: runtime-control-identity
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 8098
       controller: 8014
     urls:
-      internal: http://10.10.10.20:8098
+      internal: http://10.10.10.92:8098
       controller: http://100.64.0.1:8014
   temporal:
     service_name: temporal
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -4606,6 +5368,11 @@ public_edge_service_topology:
       kind: ssh-tunnel
       url: grpc://127.0.0.1:7233
     service_id: temporal
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/temporal.yml
+    restart_domain: runtime-control-automation
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports: {}
     urls: {}
   ntfy:
@@ -4617,6 +5384,11 @@ public_edge_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: ntfy
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/ntfy.yml
+    restart_domain: runtime-general-communications
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 2586
     urls:
@@ -4633,6 +5405,11 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:3001
     service_id: ntopng
+    runtime_pool: host-management
+    deployment_surface: playbooks/ntopng.yml
+    restart_domain: host-management-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/host-management
+    mobility_tier: anchor
     ports:
       internal: 3000
       controller: 3001
@@ -4651,6 +5428,11 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: https://100.64.0.1:9444
     service_id: portainer
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/portainer.yml
+    restart_domain: runtime-general-operator-ui
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 9443
       controller: 9444
@@ -4659,8 +5441,8 @@ public_edge_service_topology:
       controller: https://100.64.0.1:9444
   vaultwarden:
     service_name: vaultwarden
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: vault.lv3.org
     exposure_model: private-only
     observability:
@@ -4677,12 +5459,17 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: https://vault.lv3.org
     service_id: vaultwarden
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/services/vaultwarden.yml
+    restart_domain: runtime-control-secrets
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 8222
       controller: 443
     urls:
       public: https://vault.lv3.org
-      internal: https://10.10.10.20:8222
+      internal: https://10.10.10.92:8222
       controller: https://vault.lv3.org
   postgres:
     service_name: postgres
@@ -4701,6 +5488,11 @@ public_edge_service_topology:
       target: 100.64.0.1
       ttl: 60
     service_id: postgres
+    runtime_pool: dedicated-postgres
+    deployment_surface: playbooks/services/postgres-vm.yml
+    restart_domain: dedicated-postgres-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-postgres
+    mobility_tier: anchor
     ports:
       internal: 5432
       controller: 5432
@@ -4717,6 +5509,11 @@ public_edge_service_topology:
       guest_dashboard: false
       service_telemetry: false
     service_id: backup_pbs
+    runtime_pool: dedicated-backup
+    deployment_surface: playbooks/services/backup-vm.yml
+    restart_domain: dedicated-backup-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-backup
+    mobility_tier: anchor
     ports: {}
     urls: {}
   directus:
@@ -4742,6 +5539,11 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8055
     service_id: directus
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/directus.yml
+    restart_domain: runtime-general-product-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8055
     urls:
@@ -4773,6 +5575,11 @@ public_edge_service_topology:
       proxy_send_timeout_seconds: 3600
       upstream: http://10.10.10.20:8097
     service_id: jupyterhub
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/services/jupyterhub.yml
+    restart_domain: runtime-ai-execution
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: burst_batch
     ports:
       internal: 8097
     urls:
@@ -4801,6 +5608,11 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8105
     service_id: superset
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/superset.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8105
     urls:
@@ -4808,8 +5620,8 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8105
 uptime_kuma_service_topology:
   service_name: uptime-kuma
-  owning_vm: docker-runtime-lv3
-  private_ip: 10.10.10.20
+  owning_vm: runtime-general-lv3
+  private_ip: 10.10.10.91
   public_hostname: uptime.lv3.org
   exposure_model: edge-published
   observability:
@@ -4826,18 +5638,23 @@ uptime_kuma_service_topology:
     enabled: true
     tls: true
     kind: proxy
-    upstream: http://10.10.10.20:3001
+    upstream: http://10.10.10.91:3001
   service_id: uptime_kuma
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/uptime-kuma.yml
+  restart_domain: runtime-general-observability
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
   ports:
     internal: 3001
   urls:
     public: https://uptime.lv3.org
-    internal: http://10.10.10.20:3001
+    internal: http://10.10.10.91:3001
 hetzner_dns_records: *id001
 platform_postgres_host: database.lv3.org
 openbao_postgres_host: 10.10.10.50
 openbao_http_extra_bind_addresses:
-  - 10.10.10.20
+  - 10.10.10.92
 openbao_controller_url: https://100.64.0.1:8200
 openfga_http_port: 8098
 openfga_host_proxy_port: 8014
@@ -4850,7 +5667,7 @@ one_api_openai_base_url: http://10.10.10.20:8101/v1
 one_api_controller_openai_base_url: http://100.64.0.1:8018/v1
 semaphore_server_port: 3004
 semaphore_host_proxy_port: 8020
-semaphore_private_base_url: http://10.10.10.20:3004
+semaphore_private_base_url: http://10.10.10.92:3004
 semaphore_controller_url: http://100.64.0.1:8020
 netbox_host_proxy_port: 8004
 netbox_controller_url: http://100.64.0.1:8004
@@ -4869,7 +5686,7 @@ woodpecker_private_base_url: http://10.10.10.20:8102
 woodpecker_controller_url: http://100.64.0.1:8017
 api_gateway_internal_port: 8083
 api_gateway_public_url: https://api.lv3.org
-api_gateway_internal_url: http://10.10.10.20:8083
+api_gateway_internal_url: http://10.10.10.92:8083
 headscale_http_port: 8080
 headscale_public_url: https://headscale.lv3.org
 headscale_internal_url: http://10.10.10.1:8080
@@ -4887,7 +5704,7 @@ matrix_synapse_public_url: https://matrix.lv3.org
 gitea_http_port: 3003
 gitea_host_proxy_port: 3009
 gitea_root_url: http://git.lv3.org:3009
-gitea_private_base_url: http://10.10.10.20:3003
+gitea_private_base_url: http://10.10.10.92:3003
 gitea_controller_url: http://100.64.0.1:3009
 minio_public_url: https://minio.lv3.org
 minio_console_public_url: https://minio-console.lv3.org
@@ -4901,7 +5718,7 @@ vaultwarden_https_port: 8222
 vaultwarden_controller_url: https://vault.lv3.org
 step_ca_api_port: 9000
 step_ca_proxy_port: 9443
-step_ca_internal_url: https://10.10.10.20:9000
+step_ca_internal_url: https://10.10.10.92:9000
 step_ca_controller_url: https://100.64.0.1:9443
 windmill_host_proxy_port: 8005
 windmill_controller_url: http://100.64.0.1:8005

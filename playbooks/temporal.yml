@@ -1,10 +1,10 @@
 ---
 # Playbook: temporal.yml
-# Purpose: Converge the private Temporal runtime, its PostgreSQL backing stores, and the repo-managed namespace bootstrap on docker-runtime-lv3.
+# Purpose: Converge the private Temporal runtime, its PostgreSQL backing stores, and the repo-managed namespace bootstrap on runtime-control-lv3.
 # Use case: Run during ADR 0293 rollout, recovery, or later drift reconciliation when the durable workflow engine must match repo truth.
 #
 # Inputs (required):
-#   - env (string, required): Target environment selector used to choose the postgres and docker-runtime guests.
+#   - env (string, required): Target environment selector used to choose the postgres and runtime-control guests.
 #
 # Inputs (optional):
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
@@ -16,7 +16,7 @@
 #
 # Dependencies:
 #   - ADR 0293: Temporal as the durable workflow and task queue engine.
-#   - Requires: OpenBao, PostgreSQL, and docker-runtime-lv3 to already exist.
+#   - Requires: OpenBao, PostgreSQL, and runtime-control-lv3 to already exist.
 #
 # Related ADRs: 0042, 0077, 0086, 0165, 0293
 # Related Runbooks: docs/runbooks/configure-temporal.md
@@ -39,7 +39,7 @@
     temporal_controller_database_url: "{{ hostvars['proxmox_florin'].platform_service_topology.postgres.urls.controller }}"
     temporal_controller_database_host: "{{ temporal_controller_database_url | urlsplit('hostname') }}"
     temporal_controller_database_port: "{{ temporal_controller_database_url | urlsplit('port') | default('5432', true) }}"
-    temporal_schema_tool_delegate_host: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+    temporal_schema_tool_delegate_host: "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
     temporal_runtime_compose_file: /opt/temporal/docker-compose.yml
     temporal_schema_bootstrap_report_local_file: "{{ temporal_local_artifact_dir }}/schema-bootstrap-report.json"
 
@@ -277,8 +277,8 @@
       become: false
       run_once: true
 
-- name: Converge Temporal on docker-runtime-lv3
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+- name: Converge Temporal on runtime-control-lv3
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
   gather_facts: true
 
@@ -290,7 +290,7 @@
         playbook_execution_audit_action: playbook.start.temporal
         playbook_execution_audit_target: temporal
         required_hosts:
-          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+          - "{{ playbook_execution_required_hosts.runtime_control[playbook_execution_env] }}"
 
   roles:
     - role: lv3.platform.linux_guest_firewall

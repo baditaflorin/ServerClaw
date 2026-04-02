@@ -67,7 +67,10 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     compose_template = COMPOSE_TEMPLATE_PATH.read_text(encoding="utf-8")
 
     assert 'ops_portal_build_context_dir: "{{ ops_portal_site_dir }}/build-context"' in defaults
+    assert 'ops_portal_state_dir: "{{ ops_portal_site_dir }}/state"' in defaults
+    assert 'ops_portal_attention_state_file: "{{ ops_portal_state_dir }}/attention-state.json"' in defaults
     assert "ops_portal_build_context_dir" in tasks
+    assert "ops_portal_state_dir" in tasks
     assert "Remove stale ops portal service sources before sync" in tasks
     assert "Discover the ops portal application directories on the controller" in tasks
     assert "Ensure the synced ops portal application file parent directories exist" in tasks
@@ -79,6 +82,9 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert "Reset the synced search fabric package tree before refresh" in tasks
     assert "Sync the shared search fabric files" in tasks
     assert "ops_portal_service_dir ~ '/search_fabric/'" in tasks
+    assert "register: search_fabric_copy_result" in tasks
+    assert "retries: 3" in tasks
+    assert "until: search_fabric_copy_result is succeeded" in tasks
     assert "Sync the ops portal service build inputs explicitly" in tasks
     assert '{{ ops_portal_repo_root }}/scripts/publication_contract.py' in tasks
     assert '{{ ops_portal_repo_root }}/scripts/stage_smoke.py' in tasks
@@ -86,35 +92,45 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert '{{ ops_portal_repo_root }}/requirements/ops-portal.txt' in tasks
     assert 'patterns:' in defaults
     assert '"*.json"' in defaults
+    assert 'depth: 1' in defaults
     assert 'excludes:' in defaults
     assert '- evidence' in defaults
     assert '- preview' in defaults
+    assert "receipts/live-applies/staging/" in defaults
+    assert "ops_portal_pruned_data_paths:" in defaults
+    assert "{{ ops_portal_data_dir }}/receipts/live-applies/evidence" in defaults
+    assert "{{ ops_portal_data_dir }}/receipts/live-applies/preview" in defaults
+    assert "Remove stale excluded ops portal data directories before sync" in tasks
+    assert "Discover the ops portal directory-backed data files on the controller" in tasks
+    assert "depth: \"{{ item.depth | default(omit) }}\"" in tasks
     assert "item.excludes | default([])" in tasks
+    assert "Ensure the synced ops portal directory-backed data subdirectories exist" in tasks
+    assert "select('in', item.1.path.split('/'))" in tasks
+    assert "ops_portal_directory_source_files.results | subelements('files', skip_missing=True)" in tasks
     assert "Sync the ops portal directory-backed data source files" in tasks
-    assert "ansible.posix.synchronize" in tasks
-    assert "--prune-empty-dirs" in tasks
-    assert "rsync_path: \"sudo rsync\"" in tasks
     assert "Remove stale ops portal build-context ignore and metadata files" in tasks
     assert "{{ ops_portal_build_context_dir }}/._publication_contract.py" in tasks
     assert "{{ ops_portal_build_context_dir }}/._stage_smoke.py" in tasks
     assert "Remove stale ops portal build-context entries before sync" in tasks
     assert "Sync the clean ops portal Docker build-context directories" in tasks
-    assert "Render the clean ops portal build-context Dockerfile" in tasks
     assert "Sync the clean ops portal Docker build-context root files" in tasks
-    assert 'src: "{{ ops_portal_repo_root }}/scripts/ops_portal/"' in tasks
+    assert "remote_src: true" in tasks
+    assert "{{ ops_portal_data_dir }}/receipts/promotions" in tasks
+    assert 'src: "{{ ops_portal_service_dir }}/ops_portal/"' in tasks
     assert 'dest: "{{ ops_portal_build_context_dir }}/ops_portal/"' in tasks
-    assert 'src: "{{ ops_portal_repo_root }}/scripts/search_fabric/"' in tasks
+    assert 'src: "{{ ops_portal_service_dir }}/search_fabric/"' in tasks
     assert 'dest: "{{ ops_portal_build_context_dir }}/search_fabric/"' in tasks
+    assert "{{ ops_portal_service_dir }}/Dockerfile" in tasks
     assert "{{ ops_portal_build_context_dir }}/publication_contract.py" in tasks
     assert "{{ ops_portal_build_context_dir }}/stage_smoke.py" in tasks
     assert "{{ ops_portal_build_context_dir }}/workbench_information_architecture.py" in tasks
     assert "{{ ops_portal_build_context_dir }}/requirements.txt" in tasks
-    assert "{{ ops_portal_build_context_dir }}/Dockerfile" in tasks
     assert "Discover macOS metadata files in the synced ops portal data tree" in tasks
     assert "Remove macOS metadata files from the synced ops portal data tree" in tasks
     assert "lookup('ansible.builtin.file', item.path)" not in tasks
     assert "lookup('ansible.builtin.file', item.src)" not in tasks
     assert "context: {{ ops_portal_build_context_dir }}" in compose_template
+    assert "{{ ops_portal_state_dir }}:/srv/ops-portal/state" in compose_template
 
 
 def test_ops_portal_dockerfile_depends_on_synced_helper_files() -> None:
@@ -134,6 +150,10 @@ def test_ops_portal_verify_checks_launcher_and_runtime_assurance_partials() -> N
     assert "Assert the contextual help drawer is present on the ops portal root page" in verify_tasks
     assert "'Contextual Help' in ops_portal_verify_root.content" in verify_tasks
     assert "'Escalation Path' in ops_portal_verify_root.content" in verify_tasks
+    assert "Verify the journey-aware entry surface renders locally" in verify_tasks
+    assert "/entry?neutral=1" in verify_tasks
+    assert "'Journey-Aware Start Surface' in ops_portal_verify_entry.content" in verify_tasks
+    assert "'Complete the activation checklist or skip it before pinning a preferred home.' in ops_portal_verify_entry.content" in verify_tasks
     assert "Verify the application launcher partial renders locally" in verify_tasks
     assert '/partials/launcher' in verify_tasks
     assert "Application Launcher" in verify_tasks
@@ -142,6 +162,10 @@ def test_ops_portal_verify_checks_launcher_and_runtime_assurance_partials() -> N
     assert '/partials/activation' in verify_tasks
     assert "First-Run Activation" in verify_tasks
     assert "Checklist progress and progressive capability reveal" in verify_tasks
+    assert "Verify the attention center partial renders locally" in verify_tasks
+    assert '/partials/attention' in verify_tasks
+    assert "Notification Center" in verify_tasks
+    assert "Actionable items routed into one shared queue" in verify_tasks
     assert "Verify the runtime assurance matrix partial renders locally" in verify_tasks
     assert '/partials/runtime-assurance' in verify_tasks
     assert "Ops portal runtime assurance matrix partial did not render the ADR 0244 view." in verify_tasks
@@ -152,9 +176,11 @@ def test_ops_portal_verify_checks_launcher_and_runtime_assurance_partials() -> N
 def test_ops_portal_runtime_file_sources_include_launcher_and_activation_assets() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
 
+    assert "scripts/ops_portal/templates/entry.html" in defaults
     assert "config/activation-checklist.json" in defaults
     assert "config/workbench-information-architecture.json" in defaults
     assert "scripts/workbench_information_architecture.py" in defaults
     assert "scripts/ops_portal/templates/partials/activation.html" in defaults
     assert "scripts/ops_portal/templates/partials/launcher.html" in defaults
     assert "scripts/ops_portal/templates/partials/runtime_assurance.html" in defaults
+    assert "scripts/ops_portal/templates/partials/attention.html" in defaults

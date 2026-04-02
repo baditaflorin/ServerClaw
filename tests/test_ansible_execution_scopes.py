@@ -169,21 +169,6 @@ def test_plan_playbook_execution_discovers_hosts_and_writes_inventory_shard(
     def fake_run(command: list[str], cwd: Path, text: bool, capture_output: bool, check: bool = False):
         del cwd, text, capture_output, check
         calls.append(command)
-        if command[0] == "ansible-playbook":
-            return subprocess.CompletedProcess(
-                command,
-                0,
-                stdout="""
-playbook: playbooks/leaf-alpha.yml
-
-  play #1 (alpha): Example\tTAGS: []
-    pattern: ['alpha']
-    hosts (1):
-      alpha
-""".strip()
-                + "\n",
-                stderr="",
-            )
         if command[0] == "ansible-inventory":
             return subprocess.CompletedProcess(
                 command,
@@ -223,8 +208,78 @@ playbook: playbooks/leaf-alpha.yml
     assert Path(plan.inventory_shard_path).read_text(encoding="utf-8")
     assert (repo_root / ".ansible" / "shards" / "config").is_symlink()
     assert (repo_root / ".ansible" / "shards" / "config").resolve() == (repo_root / "config").resolve()
-    assert calls[0][0] == "ansible-playbook"
+    assert calls[0][0] == "ansible-inventory"
     assert calls[1][0] == "ansible-inventory"
+
+
+def test_discover_target_hosts_renders_env_based_host_expressions(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_root, catalog_path, inventory_path = make_repo(tmp_path)
+    del catalog_path
+    write(
+        repo_root / "playbooks" / "env-hosts.yml",
+        """
+---
+- hosts: "{{ 'proxmox_hosts:&staging' if (env | default('production')) == 'staging' else 'proxmox_hosts:&production' }}"
+""".strip()
+        + "\n",
+    )
+    write(
+        inventory_path,
+        """
+all:
+  children:
+    production:
+      hosts:
+        alpha:
+    staging:
+      hosts:
+        beta:
+    proxmox_hosts:
+      hosts:
+        alpha:
+        beta:
+""".strip()
+        + "\n",
+    )
+
+    calls: list[list[str]] = []
+
+    def fake_run(command: list[str], cwd: Path, text: bool, capture_output: bool, check: bool = False):
+        del cwd, text, capture_output, check
+        calls.append(command)
+        if command[0] != "ansible-inventory":
+            raise AssertionError(command)
+        selected_hosts = {"alpha": {"ansible_host": "10.0.0.10"}}
+        if "proxmox_hosts:&staging" in command:
+            selected_hosts = {"beta": {"ansible_host": "10.0.0.20"}}
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            stdout=yaml.safe_dump({"all": {"children": {"selected": {"hosts": selected_hosts}}}}),
+            stderr="",
+        )
+
+    monkeypatch.setattr(scopes.subprocess, "run", fake_run)
+
+    production_hosts = scopes.discover_target_hosts(
+        "playbooks/env-hosts.yml",
+        env="production",
+        repo_root=repo_root,
+        inventory_path=inventory_path,
+    )
+    staging_hosts = scopes.discover_target_hosts(
+        "playbooks/env-hosts.yml",
+        env="staging",
+        repo_root=repo_root,
+        inventory_path=inventory_path,
+    )
+
+    assert production_hosts == ("alpha",)
+    assert staging_hosts == ("beta",)
+    assert calls[0][calls[0].index("-l") + 1] == "proxmox_hosts:&production"
+    assert calls[1][calls[1].index("-l") + 1] == "proxmox_hosts:&staging"
 
 
 def test_run_scoped_playbook_uses_primary_inventory_for_group_vars_and_shard_for_scope(
@@ -304,7 +359,8 @@ def test_real_repo_scope_resolution_for_live_apply_paths() -> None:
         catalog_path=REPO_ROOT / "config" / "ansible-execution-scopes.yaml",
     )
 
-    assert api_scope.mutation_scope == "host"
+    assert api_scope.mutation_scope == "lane"
+    assert api_scope.target_lane == "lane:runtime-control"
     assert api_scope.source_leaf_playbooks == ("playbooks/api-gateway.yml",)
     assert plausible_scope.mutation_scope == "platform"
     assert plausible_scope.source_leaf_playbooks == ("playbooks/plausible.yml",)

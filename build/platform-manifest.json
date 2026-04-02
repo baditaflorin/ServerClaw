@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.144",
-  "platform_version": "0.130.91",
-  "generated_at": "2026-04-02T13:00:26Z",
-  "next_refresh_at": "2026-04-02T14:00:26Z",
+  "repo_version": "0.177.147",
+  "platform_version": "0.130.92",
+  "generated_at": "2026-04-02T17:14:54Z",
+  "next_refresh_at": "2026-04-02T18:14:54Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -370,7 +370,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "http://10.10.10.20:8025",
+        "primary_url": "http://10.10.10.91:8025",
         "last_live_apply": "2026-04-02T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -428,7 +428,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
-        "primary_url": "nats://10.10.10.20:4222",
+        "primary_url": "nats://10.10.10.92:4222",
         "last_live_apply": "2026-04-02T00:00:00Z"
       },
       "netbox": {
@@ -554,7 +554,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "http://10.10.10.20:8098",
+        "primary_url": "http://10.10.10.92:8098",
         "last_live_apply": "2026-04-02T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -1732,7 +1732,7 @@
       },
       {
         "id": "converge-homepage",
-        "description": "Deploy the Homepage unified service dashboard on docker-runtime-lv3 and publish it at home.lv3.org through the shared authenticated edge.",
+        "description": "Deploy the Homepage unified service dashboard on runtime-general-lv3 and publish it at home.lv3.org through the shared authenticated edge.",
         "tags": [
           "converge-homepage",
           "guest-live",
@@ -1914,7 +1914,7 @@
       },
       {
         "id": "converge-mailpit",
-        "description": "Deploy the private Mailpit SMTP interceptor on docker-runtime-lv3 for staging and development mail capture plus REST-API assertions.",
+        "description": "Deploy the private Mailpit SMTP interceptor on runtime-general-lv3 for staging and development mail capture plus REST-API assertions.",
         "tags": [
           "converge-mailpit",
           "guest-live",
@@ -2122,7 +2122,7 @@
       },
       {
         "id": "converge-nomad",
-        "description": "Converge the private Nomad scheduler on monitoring-lv3 plus the runtime, runtime-ai, and build clients, including controller-local TLS and ACL bootstrap artifacts and repo-managed smoke jobs.",
+        "description": "Converge the private Nomad scheduler on monitoring-lv3 plus the runtime, runtime-general, runtime-ai, and build clients, including controller-local TLS and ACL bootstrap artifacts and repo-managed smoke jobs.",
         "tags": [
           "converge-nomad",
           "host-and-guest-live",
@@ -3032,7 +3032,7 @@
       },
       {
         "id": "deploy-uptime-kuma",
-        "description": "Deploy Uptime Kuma on the Docker runtime VM and publish it at uptime.lv3.org.",
+        "description": "Deploy Uptime Kuma on the runtime-general VM and publish it at uptime.lv3.org.",
         "tags": [
           "deploy-uptime-kuma",
           "host-and-guest-live",
@@ -5083,7 +5083,7 @@
         "id": "configure-nomad",
         "title": "Configure Nomad",
         "agent_trust_required": "T3",
-        "steps": 15,
+        "steps": 19,
         "path": "docs/runbooks/configure-nomad.md",
         "workflow_ids": [
           "converge-nomad"
@@ -5629,7 +5629,7 @@
         "id": "platform-operations-portal",
         "title": "Platform Operations Portal",
         "agent_trust_required": "T3",
-        "steps": 24,
+        "steps": 45,
         "path": "docs/runbooks/platform-operations-portal.md",
         "workflow_ids": [
           "converge-ops-portal"
@@ -5987,10 +5987,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.143",
+    "last_version": "0.177.146",
     "deployed_at": "2026-04-02",
-    "summary": "implements ADR 0310 by adding a first-run activation checklist, progressive capability reveal, and server-side launcher, runbook, and service-action guardrails to the interactive ops portal",
-    "release_notes_url": "docs/release-notes/0.177.144.md"
+    "summary": "records ADR 0312 exact-main verification on the current mainline by preserving the already-live shared notification center and activity timeline from repository version 0.177.146 and platform version 0.130.92 while hardening validation-gate status handling and remote execution against empty state files and concurrent snapshot-run collisions",
+    "release_notes_url": "docs/release-notes/0.177.147.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
