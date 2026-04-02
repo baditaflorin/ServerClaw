@@ -58,6 +58,7 @@ def test_ops_portal_package_import_works_in_image_build_layout(tmp_path: Path) -
         ],
         capture_output=True,
         check=False,
+        cwd=image_root,
         env=env,
         text=True,
     )
