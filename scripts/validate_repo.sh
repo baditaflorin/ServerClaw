@@ -293,13 +293,16 @@ PY
     collection
     install
   )
+  galaxy_server_args=()
   if [[ -n "${LV3_ANSIBLE_GALAXY_SERVER:-}" ]]; then
-    install_cmd+=(--server "$LV3_ANSIBLE_GALAXY_SERVER")
+    galaxy_server_args=(--server "$LV3_ANSIBLE_GALAXY_SERVER")
+  else
+    galaxy_server_args=(--server "$VALIDATION_GALAXY_SERVER")
   fi
   install_cmd+=(
+    "${galaxy_server_args[@]}"
     -r "$requirements_file"
     -p "$ANSIBLE_COLLECTIONS_DIR"
-    --server "$VALIDATION_GALAXY_SERVER"
     --force-with-deps
   )
 

@@ -552,24 +552,24 @@ set -euo pipefail
 mkdir -p $(quote_shell "$WORKSPACE_ROOT") $(quote_shell "$WORKSPACE_ROOT/.lv3-snapshots") $(quote_shell "$WORKSPACE_ROOT/.lv3-runs") $(quote_shell "$session_root")
 find $(quote_shell "$session_root") -mindepth 1 -maxdepth 1 -type d ! -name $(quote_shell "$LV3_SESSION_SLUG") -mtime +$SESSION_RETENTION_DAYS -exec rm -rf {} + >/dev/null 2>&1 || true
 if [ "$SESSION_KEEP_COUNT" -gt 0 ]; then
-  mapfile -t stale_session_dirs < <(find $(quote_shell "$session_root") -mindepth 1 -maxdepth 1 -type d ! -name $(quote_shell "$LV3_SESSION_SLUG") -printf '%T@ %p\n' | sort -n | head -n -$SESSION_KEEP_COUNT | cut -d' ' -f2-)
-  if [ "\${#stale_session_dirs[@]}" -gt 0 ]; then
-    rm -rf "\${stale_session_dirs[@]}" >/dev/null 2>&1 || true
-  fi
+  find $(quote_shell "$session_root") -mindepth 1 -maxdepth 1 -type d ! -name $(quote_shell "$LV3_SESSION_SLUG") -printf '%T@ %p\n' | sort -n | head -n -$SESSION_KEEP_COUNT | cut -d' ' -f2- | while IFS= read -r stale_session_dir; do
+    [ -n "\$stale_session_dir" ] || continue
+    rm -rf "\$stale_session_dir" >/dev/null 2>&1 || true
+  done
 fi
 find $(quote_shell "$WORKSPACE_ROOT/.lv3-runs") -mindepth 1 -maxdepth 1 -type d -mtime +$RUN_RETENTION_DAYS -exec rm -rf {} + >/dev/null 2>&1 || true
 if [ "$RUN_KEEP_COUNT" -gt 0 ]; then
-  mapfile -t stale_run_dirs < <(find $(quote_shell "$WORKSPACE_ROOT/.lv3-runs") -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' | sort -n | head -n -$RUN_KEEP_COUNT | cut -d' ' -f2-)
-  if [ "\${#stale_run_dirs[@]}" -gt 0 ]; then
-    rm -rf "\${stale_run_dirs[@]}" >/dev/null 2>&1 || true
-  fi
+  find $(quote_shell "$WORKSPACE_ROOT/.lv3-runs") -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' | sort -n | head -n -$RUN_KEEP_COUNT | cut -d' ' -f2- | while IFS= read -r stale_run_dir; do
+    [ -n "\$stale_run_dir" ] || continue
+    rm -rf "\$stale_run_dir" >/dev/null 2>&1 || true
+  done
 fi
 find $(quote_shell "$WORKSPACE_ROOT/.lv3-snapshots") -mindepth 1 -maxdepth 1 -type f -mtime +$SNAPSHOT_RETENTION_DAYS -delete >/dev/null 2>&1 || true
 if [ "$SNAPSHOT_KEEP_COUNT" -gt 0 ]; then
-  mapfile -t stale_snapshot_files < <(find $(quote_shell "$WORKSPACE_ROOT/.lv3-snapshots") -mindepth 1 -maxdepth 1 -type f -printf '%T@ %p\n' | sort -n | head -n -$SNAPSHOT_KEEP_COUNT | cut -d' ' -f2-)
-  if [ "\${#stale_snapshot_files[@]}" -gt 0 ]; then
-    rm -f "\${stale_snapshot_files[@]}" >/dev/null 2>&1 || true
-  fi
+  find $(quote_shell "$WORKSPACE_ROOT/.lv3-snapshots") -mindepth 1 -maxdepth 1 -type f -printf '%T@ %p\n' | sort -n | head -n -$SNAPSHOT_KEEP_COUNT | cut -d' ' -f2- | while IFS= read -r stale_snapshot_file; do
+    [ -n "\$stale_snapshot_file" ] || continue
+    rm -f "\$stale_snapshot_file" >/dev/null 2>&1 || true
+  done
 fi
 EOF
 }

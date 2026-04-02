@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.146",
+  "repo_version": "0.177.147",
   "platform_version": "0.130.92",
-  "generated_at": "2026-04-02T16:07:05Z",
-  "next_refresh_at": "2026-04-02T17:07:05Z",
+  "generated_at": "2026-04-02T17:14:54Z",
+  "next_refresh_at": "2026-04-02T18:14:54Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5987,10 +5987,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.145",
+    "last_version": "0.177.146",
     "deployed_at": "2026-04-02",
-    "summary": "implements ADRs 0308 and 0312 on top of the ADR 0310 exact-main portal baseline by adding the journey-aware `/entry` router, saved-home selection, shared notification center and activity timeline, and hardening scoped live-apply host discovery plus resilient search-fabric sync for the interactive ops portal runtime",
-    "release_notes_url": "docs/release-notes/0.177.146.md"
+    "summary": "records ADR 0312 exact-main verification on the current mainline by preserving the already-live shared notification center and activity timeline from repository version 0.177.146 and platform version 0.130.92 while hardening validation-gate status handling and remote execution against empty state files and concurrent snapshot-run collisions",
+    "release_notes_url": "docs/release-notes/0.177.147.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

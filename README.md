@@ -43,7 +43,7 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.146` |
+| Repository version | `0.177.147` |
 | Platform version | `0.130.92` |
 | Observed check date | `2026-04-02` |
 | Observed OS | `Debian 13` |
@@ -303,7 +303,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.146` |
+| Repository version | `0.177.147` |
 | Platform version | `0.130.92` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -585,6 +585,7 @@ Current values on `main`:
 | `0310` | Implement the first-run activation checklist and progressive capability reveal inside the interactive ops portal | `live_applied` | [ws-0310-live-apply.md](docs/workstreams/ws-0310-live-apply.md) |
 | `0311` | Live apply a repo-managed cmdk command palette and universal open dialog on the Windmill operator access admin surface | `merged` | [ws-0311-live-apply.md](docs/workstreams/ws-0311-live-apply.md) |
 | `0312` | Live apply the shared notification center and activity timeline across human surfaces | `live_applied` | [ws-0312-live-apply.md](docs/workstreams/ws-0312-live-apply.md) |
+| `0312` | Integrate ADR 0312 exact-main verification and validation-gate hardening onto current origin/main | `merged` | [ws-0312-main-integration.md](docs/workstreams/ws-0312-main-integration.md) |
 | `0313` | Live apply contextual help, glossary, and escalation drawer across the first-party portal surfaces | `live_applied` | [ws-0313-live-apply.md](docs/workstreams/ws-0313-live-apply.md) |
 | `0315` | Live apply canonical page states and next-best-action guidance on the Windmill operator admin surface | `live_applied` | [ws-0315-live-apply.md](docs/workstreams/ws-0315-live-apply.md) |
 | `0316` | Live apply journey analytics and onboarding success scorecards from latest origin/main | `merged` | [ws-0316-live-apply.md](docs/workstreams/ws-0316-live-apply.md) |

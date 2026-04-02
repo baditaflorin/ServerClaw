@@ -16951,6 +16951,69 @@ workstreams:
       included_in_repo_version: 0.177.146
     ready_to_merge: true
     live_applied: true
+  - id: ws-0312-main-integration
+    adr: "0312"
+    title: Integrate ADR 0312 exact-main verification and validation-gate hardening onto current origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0312-main-integration
+    worktree_path: .worktrees/ws-0312-live-apply
+    doc: docs/workstreams/ws-0312-main-integration.md
+    depends_on:
+      - ws-0312-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0312-main-integration.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.147.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - scripts/validate_repo.sh
+      - scripts/gate_status.py
+      - scripts/remote_exec.sh
+      - scripts/run_gate.py
+      - scripts/run_gate_fallback.py
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: integration_truth
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.147.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: main-integration-truth-v1
+        - id: adr_0312_main_integration
+          paths:
+            - docs/workstreams/ws-0312-main-integration.md
+            - scripts/validate_repo.sh
+            - scripts/gate_status.py
+            - scripts/remote_exec.sh
+            - scripts/run_gate.py
+            - scripts/run_gate_fallback.py
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: records ADR 0312 exact-main verification on the current mainline by preserving the already-live shared notification center and activity timeline from repository version 0.177.146 and platform version 0.130.92 while hardening validation-gate status handling and remote execution against empty state files and concurrent snapshot-run collisions
+      release_bump: patch
+      included_in_repo_version: 0.177.147
   - id: ws-0319-live-apply
     adr: "0319"
     title: Live apply the first runtime-ai pool split with Nomad, Traefik, and Dapr on the latest mainline
