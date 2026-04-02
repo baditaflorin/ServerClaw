@@ -3,6 +3,30 @@
 {% block title %}LV3 Interactive Ops Portal{% endblock %}
 
 {% block content %}
+  <section class="pf-v5-c-page__main-section portal-section">
+    <div class="journey-home-card">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Journey-Aware Home</p>
+          <h2>{{ journey.mode_label }}</h2>
+        </div>
+        <div class="section-meta">
+          <span class="pill">{{ journey.role_label }}</span>
+          {% if journey.saved_home_label %}
+          <span class="pill">Saved home {{ journey.saved_home_label }}</span>
+          {% else %}
+          <span class="pill">Default home {{ journey.default_home_label }}</span>
+          {% endif %}
+        </div>
+      </div>
+      <p class="muted">{{ journey.mode_description }}</p>
+      <div class="link-row">
+        <a class="action-button secondary" href="/entry?neutral=1">Change home selection</a>
+        <a class="action-button secondary" href="/entry">Re-run entry routing</a>
+      </div>
+    </div>
+  </section>
+
   <section id="overview" class="pf-v5-c-page__main-section portal-section">
     <div class="section-head">
       <div>

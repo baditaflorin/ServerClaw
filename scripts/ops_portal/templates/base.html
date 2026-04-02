@@ -69,9 +69,14 @@
               {% if operator.operator_email %}
               <span class="muted">{{ operator.operator_email }}</span>
               {% endif %}
+              <span class="muted">Journey role {{ journey.role_label }}</span>
               <span class="muted">Launcher persona {{ launcher.selected_persona.name }}</span>
+              <span class="muted">
+                Preferred home {{ journey.saved_home_label or journey.default_home_label or 'Start surface' }}
+              </span>
               <span class="muted">Rendered {{ generated_at|humanize_timestamp }}</span>
               <div class="link-row">
+                <a href="/entry?neutral=1">Entry routing</a>
                 <a href="#runbooks">Runbooks</a>
                 <a href="#changelog">Recent changes</a>
               </div>

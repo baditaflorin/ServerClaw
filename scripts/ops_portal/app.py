@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import base64
 import json
 import os
 import uuid
@@ -11,6 +12,7 @@ from datetime import date, datetime, timedelta, timezone
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import httpx
 from fastapi import FastAPI, Form, Request
@@ -105,6 +107,112 @@ def normalize_text(value: str) -> str:
     return " ".join("".join(ch.lower() if ch.isalnum() else " " for ch in value).split())
 
 
+def normalize_boolish(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if not isinstance(value, str):
+        return False
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def parse_collection_claim(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if not isinstance(value, str):
+        return []
+    candidate = value.strip()
+    if not candidate:
+        return []
+    if candidate.startswith("[") and candidate.endswith("]"):
+        try:
+            payload = json.loads(candidate)
+        except json.JSONDecodeError:
+            payload = None
+        if isinstance(payload, list):
+            return [str(item).strip() for item in payload if str(item).strip()]
+    normalized = candidate.replace(";", ",")
+    return [item.strip() for item in normalized.split(",") if item.strip()]
+
+
+def decode_unverified_jwt_claims(token: str | None) -> dict[str, Any]:
+    if not isinstance(token, str) or token.count(".") < 2:
+        return {}
+    payload = token.split(".", 2)[1]
+    padding = "=" * (-len(payload) % 4)
+    try:
+        decoded = base64.urlsafe_b64decode((payload + padding).encode("ascii")).decode("utf-8")
+        claims = json.loads(decoded)
+    except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
+        return {}
+    return claims if isinstance(claims, dict) else {}
+
+
+def normalize_claim_roles(claims: dict[str, Any]) -> list[str]:
+    roles: list[str] = []
+    realm_access = claims.get("realm_access")
+    if isinstance(realm_access, dict):
+        roles.extend(parse_collection_claim(realm_access.get("roles")))
+    roles.extend(parse_collection_claim(claims.get("roles")))
+    normalized: list[str] = []
+    for role in roles:
+        if role not in normalized:
+            normalized.append(role)
+    return normalized
+
+
+def resolve_operator_role(groups: list[str], roles: list[str]) -> str:
+    group_set = {group.strip() for group in groups if group.strip()}
+    role_set = {role.strip() for role in roles if role.strip()}
+    for role_name, known_groups, known_roles in WORKBENCH_ROLE_GROUP_PRIORITY:
+        if group_set.intersection(known_groups) or role_set.intersection(known_roles):
+            return role_name
+    return "viewer"
+
+
+def append_query_param(url: str, key: str, value: str) -> str:
+    parsed = urlsplit(url)
+    query_items = [(name, item) for name, item in parse_qsl(parsed.query, keep_blank_values=True) if name != key]
+    query_items.append((key, value))
+    return urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query_items), parsed.fragment))
+
+
+def safe_requested_url(value: str | None) -> str | None:
+    if not isinstance(value, str):
+        return None
+    candidate = value.strip()
+    if not candidate:
+        return None
+    if candidate.startswith("/") and not candidate.startswith("//"):
+        return candidate
+    parsed = urlsplit(candidate)
+    if parsed.scheme != "https":
+        return None
+    host = parsed.hostname or ""
+    if host == "lv3.org" or host.endswith(".lv3.org"):
+        return candidate
+    return None
+
+
+def safe_local_redirect(value: str | None, default: str = "/entry?neutral=1") -> str:
+    candidate = safe_requested_url(value)
+    if candidate and candidate.startswith("/"):
+        return candidate
+    return default
+
+
+def activation_steps_from_request(request: Request) -> list[str]:
+    allowed_steps = {step["id"] for step in WORKBENCH_ACTIVATION_STEPS}
+    return [
+        step_id
+        for step_id in parse_collection_claim(request.cookies.get(WORKBENCH_ACTIVATION_STEPS_COOKIE))
+        if step_id in allowed_steps
+    ]
+
+
+def activation_skipped_from_request(request: Request) -> bool:
+    return normalize_boolish(request.cookies.get(WORKBENCH_ACTIVATION_SKIP_COOKIE))
+
+
 TONE_META = {
     "ok": {"label": "Healthy", "color": "#2a6f4f"},
     "warn": {"label": "Needs attention", "color": "#b26a00"},
@@ -117,6 +225,74 @@ EDGE_META = {
     "startup_only": {"color": "#d97706", "line_type": "dashed", "width": 2.1},
     "soft": {"color": "#7d8597", "line_type": "dotted", "width": 1.6},
 }
+
+WORKBENCH_HOME_COOKIE = "lv3_workbench_home"
+WORKBENCH_ACTIVATION_STEPS_COOKIE = "lv3_workbench_activation_steps"
+WORKBENCH_ACTIVATION_SKIP_COOKIE = "lv3_workbench_activation_skip"
+WORKBENCH_PREFERENCE_COOKIE_MAX_AGE = 180 * 24 * 60 * 60
+WORKBENCH_HOME_CANDIDATE_IDS = (
+    "service:homepage",
+    "service:ops_portal",
+    "service:docs_portal",
+    "service:changelog_portal",
+)
+WORKBENCH_DEFAULT_HOME_BY_ROLE = {
+    "viewer": "service:homepage",
+    "operator": "service:ops_portal",
+    "admin": "service:ops_portal",
+}
+WORKBENCH_ROLE_HOME_META = {
+    "viewer": {
+        "role_label": "Viewer",
+        "entry_mode": "observe-first",
+        "mode_label": "Observe-first home",
+        "mode_description": "Start from the Homepage so status, discovery, and read-only references are the first things you see.",
+    },
+    "operator": {
+        "role_label": "Operator",
+        "entry_mode": "operate-first",
+        "mode_label": "Operate-first home",
+        "mode_description": "Start from the ops portal so governed actions, drift, and live operations are front and center.",
+    },
+    "admin": {
+        "role_label": "Admin",
+        "entry_mode": "govern-and-change",
+        "mode_label": "Govern-and-change home",
+        "mode_description": "Start from the ops portal with the administration lane in view for identity, control-plane, and change-heavy work.",
+    },
+}
+WORKBENCH_HOME_DESCRIPTIONS = {
+    "service:homepage": "Discovery dashboard for observe-first entry and broad service orientation.",
+    "service:ops_portal": "Governed control surface for operations, drift review, and bounded platform change.",
+    "service:docs_portal": "Reference-first home for ADRs, runbooks, and repo-governed explanations.",
+    "service:changelog_portal": "Change-history home for deployment review, receipts, and recent platform movement.",
+}
+WORKBENCH_ACTIVATION_STEPS = (
+    {
+        "id": "compare-home-surfaces",
+        "title": "Compare the available home surfaces",
+        "description": "Review Homepage, Ops Portal, Docs, and Changelog before you pin a preferred home.",
+    },
+    {
+        "id": "verify-launcher-path",
+        "title": "Verify the shared launcher path",
+        "description": "Use the shared application launcher so switching surfaces stays one click away after sign-in.",
+    },
+    {
+        "id": "open-orientation-runbook",
+        "title": "Open the orientation runbook",
+        "description": "Keep the authoritative onboarding and portal guidance one click away while you settle on a home surface.",
+    },
+)
+WORKBENCH_ROLE_GROUP_PRIORITY = (
+    ("admin", {"/lv3-platform-admins", "lv3-platform-admins"}, {"platform-admin"}),
+    ("operator", {"/lv3-platform-operators", "lv3-platform-operators"}, {"platform-operator"}),
+    (
+        "viewer",
+        {"/lv3-platform-viewers", "lv3-platform-viewers", "/grafana-viewers", "grafana-viewers"},
+        {"platform-read"},
+    ),
+)
 
 LAUNCHER_PURPOSE_ORDER = ("operate", "observe", "learn", "plan", "administer")
 LAUNCHER_PURPOSE_LABELS = {
@@ -576,6 +752,99 @@ def build_launcher_entries(
         )
 
     return sorted(entries, key=lambda item: (LAUNCHER_PURPOSE_ORDER.index(item["purpose"]), item["kind"], item["name"]))
+
+
+def journey_redirect_url(entry: dict[str, Any], role: str) -> str:
+    href = str(entry.get("href", "/")).strip() or "/"
+    role_meta = WORKBENCH_ROLE_HOME_META.get(role, WORKBENCH_ROLE_HOME_META["viewer"])
+    if entry.get("id") == "service:ops_portal":
+        return append_query_param(href, "entry_mode", str(role_meta["entry_mode"]))
+    return href
+
+
+def build_workbench_context(
+    request: Request,
+    *,
+    entry_index: dict[str, dict[str, Any]],
+    docs_base_url: str,
+) -> dict[str, Any]:
+    role = str(request.session.get("operator_role", "viewer"))
+    if role not in WORKBENCH_ROLE_HOME_META:
+        role = "viewer"
+    role_meta = WORKBENCH_ROLE_HOME_META[role]
+    completed_steps = activation_steps_from_request(request)
+    completed_set = set(completed_steps)
+    skipped = activation_skipped_from_request(request)
+    activation_ready = skipped or len(completed_set) == len(WORKBENCH_ACTIVATION_STEPS)
+
+    activation_steps: list[dict[str, Any]] = []
+    for step in WORKBENCH_ACTIVATION_STEPS:
+        activation_steps.append(
+            {
+                **step,
+                "completed": step["id"] in completed_set,
+            }
+        )
+
+    default_home_id = WORKBENCH_DEFAULT_HOME_BY_ROLE.get(role, WORKBENCH_DEFAULT_HOME_BY_ROLE["viewer"])
+    default_home = entry_index.get(default_home_id)
+    saved_home_id = request.cookies.get(WORKBENCH_HOME_COOKIE, "").strip()
+    saved_home = entry_index.get(saved_home_id) if saved_home_id in WORKBENCH_HOME_CANDIDATE_IDS else None
+
+    home_destinations: list[dict[str, Any]] = []
+    for entry_id in WORKBENCH_HOME_CANDIDATE_IDS:
+        entry = entry_index.get(entry_id)
+        if entry is None:
+            continue
+        model = dict(entry)
+        model["entry_url"] = f"/entry?item_id={entry_id}"
+        model["pin_allowed"] = activation_ready
+        model["is_saved_home"] = saved_home is not None and saved_home.get("id") == entry_id
+        model["is_default_home"] = default_home is not None and default_home.get("id") == entry_id
+        model["home_description"] = WORKBENCH_HOME_DESCRIPTIONS.get(entry_id, model.get("description", ""))
+        home_destinations.append(model)
+
+    runbook_url = f"{docs_base_url}/runbooks/operator-onboarding/"
+    portal_runbook_url = f"{docs_base_url}/runbooks/platform-operations-portal/"
+
+    return {
+        "role": role,
+        "role_label": role_meta["role_label"],
+        "mode_label": role_meta["mode_label"],
+        "mode_description": role_meta["mode_description"],
+        "activation_steps": activation_steps,
+        "activation_completed_steps": completed_steps,
+        "activation_completed_count": len(completed_set),
+        "activation_total_steps": len(WORKBENCH_ACTIVATION_STEPS),
+        "activation_skipped": skipped,
+        "activation_ready": activation_ready,
+        "default_home": default_home,
+        "default_home_redirect": journey_redirect_url(default_home, role) if default_home else "/",
+        "saved_home": saved_home,
+        "saved_home_redirect": journey_redirect_url(saved_home, role) if saved_home else None,
+        "home_destinations": home_destinations,
+        "neutral_entry_url": "/entry?neutral=1",
+        "runbook_url": runbook_url,
+        "portal_runbook_url": portal_runbook_url,
+        "saved_home_label": saved_home.get("name") if isinstance(saved_home, dict) else None,
+        "default_home_label": default_home.get("name") if isinstance(default_home, dict) else None,
+    }
+
+
+def set_preference_cookie(response: HTMLResponse | RedirectResponse, request: Request, key: str, value: str) -> None:
+    response.set_cookie(
+        key=key,
+        value=value,
+        max_age=WORKBENCH_PREFERENCE_COOKIE_MAX_AGE,
+        httponly=True,
+        samesite="lax",
+        secure=request.url.scheme == "https",
+        path="/",
+    )
+
+
+def delete_preference_cookie(response: HTMLResponse | RedirectResponse, key: str) -> None:
+    response.delete_cookie(key=key, path="/")
 
 
 @dataclass(frozen=True)
@@ -1484,19 +1753,35 @@ def deployment_console_seed() -> list[dict[str, Any]]:
 
 async def ensure_session(request: Request) -> dict[str, str]:
     session = request.session
-    if "operator_id" not in session:
-        session["operator_id"] = request.headers.get("x-auth-request-user", "operator")
-        session["operator_email"] = request.headers.get("x-auth-request-email", "")
-    if "api_token" not in session:
-        forwarded_token = request.headers.get("x-forwarded-access-token") or request.headers.get("authorization", "")
-        if forwarded_token.startswith("Bearer "):
-            forwarded_token = forwarded_token.removeprefix("Bearer ").strip()
-        if forwarded_token:
-            session["api_token"] = forwarded_token
+    operator_id = request.headers.get("x-auth-request-user", "").strip()
+    operator_email = request.headers.get("x-auth-request-email", "").strip()
+    if operator_id:
+        session["operator_id"] = operator_id
+    elif "operator_id" not in session:
+        session["operator_id"] = "operator"
+    if operator_email:
+        session["operator_email"] = operator_email
+    elif "operator_email" not in session:
+        session["operator_email"] = ""
+
+    forwarded_token = request.headers.get("x-forwarded-access-token") or request.headers.get("authorization", "")
+    if forwarded_token.startswith("Bearer "):
+        forwarded_token = forwarded_token.removeprefix("Bearer ").strip()
+    if forwarded_token:
+        session["api_token"] = forwarded_token
+
+    claims = decode_unverified_jwt_claims(session.get("api_token", ""))
+    groups = parse_collection_claim(request.headers.get("x-auth-request-groups"))
+    if not groups:
+        groups = parse_collection_claim(claims.get("groups"))
+    roles = normalize_claim_roles(claims)
+    session["operator_groups"] = groups
+    session["operator_role"] = resolve_operator_role(groups, roles)
     return {
         "operator_id": session.get("operator_id", "operator"),
         "operator_email": session.get("operator_email", ""),
         "api_token": session.get("api_token", ""),
+        "operator_role": session.get("operator_role", "viewer"),
     }
 
 
@@ -1518,7 +1803,7 @@ def build_runbook_models(runbooks: list[dict[str, Any]]) -> list[dict[str, Any]]
 
 
 async def build_launcher_panel_context(request: Request, *, query: str = "") -> dict[str, Any]:
-    await ensure_session(request)
+    operator = await ensure_session(request)
     repository: PortalRepository = request.app.state.repository
 
     services = repository.load_service_catalog()
@@ -1551,9 +1836,19 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
         recent_ids=recent_ids,
         query=query,
     )
+    journey = build_workbench_context(
+        request,
+        entry_index=entry_index,
+        docs_base_url=request.app.state.settings.docs_base_url,
+    )
 
     return {
         "request": request,
+        "operator": operator,
+        "generated_at": isoformat(utc_now()),
+        "docs_base_url": request.app.state.settings.docs_base_url,
+        "maintenance_count": 0,
+        "drift_summary": {"unsuppressed_count": 0},
         "launcher": {
             "query": query,
             "personas": personas,
@@ -1564,6 +1859,7 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
             "match_count": sum(len(group["entries"]) for group in groups),
             "entry_index": entry_index,
         },
+        "journey": journey,
     }
 
 
@@ -1718,6 +2014,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "search_query": "",
         "search_collection": "",
         "launcher": launcher_context["launcher"],
+        "journey": launcher_context["journey"],
         "contextual_help": build_ops_portal_help(request.app.state.settings.docs_base_url),
     }
 
@@ -1762,6 +2059,40 @@ def create_app(
     async def dashboard(request: Request) -> HTMLResponse:
         context = await build_dashboard_context(request)
         return templates.TemplateResponse(request=request, name="index.html", context=context)
+
+    @app.get("/entry", response_class=HTMLResponse)
+    async def journey_entry(request: Request, item_id: str = "", neutral: bool = False) -> HTMLResponse | RedirectResponse:
+        context = await build_launcher_panel_context(request)
+        entry_index = context["launcher"]["entry_index"]
+        journey = dict(context["journey"])
+        requested_url = safe_requested_url(request.query_params.get("next"))
+        invalid_requested_url = bool(request.query_params.get("next")) and requested_url is None
+
+        if item_id:
+            entry = entry_index.get(item_id)
+            if entry is not None:
+                record_launcher_recent(request.session, item_id, set(entry_index))
+                return RedirectResponse(url=journey_redirect_url(entry, journey["role"]), status_code=303)
+
+        if requested_url:
+            return RedirectResponse(url=requested_url, status_code=303)
+
+        if not neutral and not journey["activation_ready"]:
+            journey["invalid_requested_url"] = invalid_requested_url
+            return templates.TemplateResponse(request=request, name="entry.html", context={**context, "journey": journey})
+
+        if not neutral and journey["saved_home"] is not None:
+            saved_home = journey["saved_home"]
+            record_launcher_recent(request.session, str(saved_home["id"]), set(entry_index))
+            return RedirectResponse(url=str(journey["saved_home_redirect"]), status_code=303)
+
+        if not neutral and journey["default_home"] is not None:
+            default_home = journey["default_home"]
+            record_launcher_recent(request.session, str(default_home["id"]), set(entry_index))
+            return RedirectResponse(url=str(journey["default_home_redirect"]), status_code=303)
+
+        journey["invalid_requested_url"] = invalid_requested_url
+        return templates.TemplateResponse(request=request, name="entry.html", context={**context, "journey": journey})
 
     @app.get("/partials/launcher", response_class=HTMLResponse)
     async def launcher_partial(request: Request, query: str = "") -> HTMLResponse:
@@ -1838,6 +2169,65 @@ def create_app(
             request.session["launcher_persona"] = persona_id
             context = await build_launcher_panel_context(request, query=query)
         return templates.TemplateResponse(request=request, name="partials/launcher.html", context=context)
+
+    @app.post("/actions/journey/home/clear")
+    async def clear_saved_home_action(
+        request: Request,
+        redirect_to: str = Form(default="/entry?neutral=1"),
+    ) -> RedirectResponse:
+        response = RedirectResponse(url=safe_local_redirect(redirect_to), status_code=303)
+        delete_preference_cookie(response, WORKBENCH_HOME_COOKIE)
+        return response
+
+    @app.post("/actions/journey/home/{item_id}")
+    async def select_saved_home_action(
+        request: Request,
+        item_id: str,
+        redirect_to: str = Form(default="/entry?neutral=1"),
+    ) -> RedirectResponse:
+        context = await build_launcher_panel_context(request)
+        journey = context["journey"]
+        response = RedirectResponse(url=safe_local_redirect(redirect_to), status_code=303)
+        candidate_ids = {str(entry["id"]) for entry in journey["home_destinations"]}
+        if journey["activation_ready"] and item_id in candidate_ids:
+            set_preference_cookie(response, request, WORKBENCH_HOME_COOKIE, item_id)
+        return response
+
+    @app.post("/actions/journey/activation/skip")
+    async def skip_activation_action(
+        request: Request,
+        redirect_to: str = Form(default="/entry?neutral=1"),
+    ) -> RedirectResponse:
+        response = RedirectResponse(url=safe_local_redirect(redirect_to), status_code=303)
+        set_preference_cookie(response, request, WORKBENCH_ACTIVATION_SKIP_COOKIE, "1")
+        return response
+
+    @app.post("/actions/journey/activation/reset")
+    async def reset_activation_action(
+        request: Request,
+        redirect_to: str = Form(default="/entry?neutral=1"),
+    ) -> RedirectResponse:
+        response = RedirectResponse(url=safe_local_redirect(redirect_to), status_code=303)
+        delete_preference_cookie(response, WORKBENCH_ACTIVATION_STEPS_COOKIE)
+        delete_preference_cookie(response, WORKBENCH_ACTIVATION_SKIP_COOKIE)
+        return response
+
+    @app.post("/actions/journey/activation/steps/{step_id}")
+    async def complete_activation_step_action(
+        request: Request,
+        step_id: str,
+        redirect_to: str = Form(default="/entry?neutral=1"),
+    ) -> RedirectResponse:
+        response = RedirectResponse(url=safe_local_redirect(redirect_to), status_code=303)
+        allowed_steps = {step["id"] for step in WORKBENCH_ACTIVATION_STEPS}
+        if step_id not in allowed_steps:
+            return response
+        completed_steps = activation_steps_from_request(request)
+        if step_id not in completed_steps:
+            completed_steps.append(step_id)
+        set_preference_cookie(response, request, WORKBENCH_ACTIVATION_STEPS_COOKIE, ",".join(completed_steps))
+        delete_preference_cookie(response, WORKBENCH_ACTIVATION_SKIP_COOKIE)
+        return response
 
     @app.get("/launcher/go/{item_id}")
     async def launcher_go(request: Request, item_id: str) -> RedirectResponse:
