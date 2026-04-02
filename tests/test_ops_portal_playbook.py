@@ -78,3 +78,17 @@ def test_ops_portal_runtime_retries_local_health_and_root_checks() -> None:
     assert attention_task["retries"] == 18
     assert attention_task["delay"] == 5
     assert attention_task["until"] == "ops_portal_verify_attention.status == 200"
+
+
+def test_ops_portal_runtime_prunes_stale_excluded_data_dirs_before_receipt_sync() -> None:
+    tasks = yaml.safe_load((ROLE_TASKS_PATH / "main.yml").read_text())
+    prune_task = next(
+        task for task in tasks if task["name"] == "Remove stale excluded ops portal data directories before sync"
+    )
+    find_task = next(
+        task for task in tasks if task["name"] == "Discover the ops portal directory-backed data files on the controller"
+    )
+
+    assert prune_task["ansible.builtin.file"]["state"] == "absent"
+    assert prune_task["loop"] == "{{ ops_portal_pruned_data_paths }}"
+    assert find_task["ansible.builtin.find"]["depth"] == "{{ item.depth | default(omit) }}"

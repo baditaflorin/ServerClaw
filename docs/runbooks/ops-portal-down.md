@@ -139,12 +139,15 @@ controller-side sync can read from the top-level checkout instead of the active
 worktree and fail on missing live inputs such as `runtime_assurance.py` or
 `portal.js`.
 
-The runtime data mirror now syncs only structured production/staging `*.json`
-live-apply and drift receipts into `/opt/ops-portal/data/receipts/`. Evidence
-transcripts under `receipts/live-applies/evidence/` and preview payloads under
-`receipts/live-applies/preview/` stay in the repo for audit history and
-non-production validation, but they are intentionally excluded from the guest
-sync because the runtime only reads production and staging receipt JSON files.
+The runtime data mirror now syncs only structured production root `*.json`,
+`staging/*.json`, and drift receipts into `/opt/ops-portal/data/receipts/`.
+Evidence transcripts under `receipts/live-applies/evidence/` and preview
+payloads under `receipts/live-applies/preview/` stay in the repo for audit
+history and non-production validation, but they are intentionally excluded from
+the guest sync because the runtime only reads production and staging receipt
+JSON files. Converges also prune any stale guest-side `evidence/` and
+`preview/` mirrors before the receipt sync so replay time does not grow with
+controller-only audit history.
 
 If a Codex-managed local replay exits with signal `15` before the first remote
 task output appears, treat that as a controller-local interruption rather than

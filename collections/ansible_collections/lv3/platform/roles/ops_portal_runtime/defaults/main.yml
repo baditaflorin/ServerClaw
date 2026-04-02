@@ -76,15 +76,26 @@ ops_portal_directory_sources:
     dest: "{{ ops_portal_data_dir }}/receipts/live-applies/"
     patterns:
       - "*.json"
+    depth: 1
     excludes:
       - evidence
       - preview
+  - src: "{{ ops_portal_repo_root }}/receipts/live-applies/staging/"
+    dest: "{{ ops_portal_data_dir }}/receipts/live-applies/staging/"
+    patterns:
+      - "*.json"
+    depth: 1
   - src: "{{ ops_portal_repo_root }}/receipts/promotions/"
     dest: "{{ ops_portal_data_dir }}/receipts/promotions/"
+    depth: 1
   - src: "{{ ops_portal_repo_root }}/receipts/drift-reports/"
     dest: "{{ ops_portal_data_dir }}/receipts/drift-reports/"
     patterns:
       - "*.json"
+    depth: 1
+ops_portal_pruned_data_paths:
+  - "{{ ops_portal_data_dir }}/receipts/live-applies/evidence"
+  - "{{ ops_portal_data_dir }}/receipts/live-applies/preview"
 ops_portal_runtime_file_sources:
   - src: "{{ ops_portal_repo_root }}/scripts/ops_portal/__init__.py"
     dest: "{{ ops_portal_service_dir }}/ops_portal/__init__.py"

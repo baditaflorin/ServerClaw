@@ -318,10 +318,17 @@
     mode: "0755"
   loop: "{{ ops_portal_directory_sources }}"
 
+- name: Remove stale excluded ops portal data directories before sync
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ ops_portal_pruned_data_paths }}"
+
 - name: Discover the ops portal directory-backed data files on the controller
   ansible.builtin.find:
     paths: "{{ item.src }}"
     recurse: true
+    depth: "{{ item.depth | default(omit) }}"
     file_type: file
     patterns: "{{ item.patterns | default(['*.json']) }}"
     excludes: "{{ (item.excludes | default([])) + ['._*', '.DS_Store'] }}"
