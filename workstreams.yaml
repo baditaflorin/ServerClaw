@@ -15103,6 +15103,103 @@ workstreams:
       included_in_repo_version: 0.177.138
       latest_receipts:
         operator_provisioning_connectivity: 2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply
+  - id: ws-0308-journey-live-apply
+    adr: "0308"
+    title: Live apply ADR 0308 journey-aware entry routing and saved home selection from latest origin/main
+    status: ready
+    owner: codex
+    branch: codex/ws-0308-live-apply-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0308-live-apply-r2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0308-journey-live-apply.md
+    depends_on:
+      - adr-0093-interactive-ops-portal
+      - adr-0152-homepage
+      - adr-0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher
+      - adr-0242-guided-human-onboarding-via-shepherd-tours
+      - adr-0313-contextual-help-glossary-and-escalation-drawer
+    conflicts_with:
+      - ws-0308-live-apply
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0308-journey-live-apply.md
+      - docs/workstreams/adr-0307-platform-app-cohesion-bundle.md
+      - docs/adr/0308-journey-aware-entry-routing-and-saved-home-selection.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/platform-operations-portal.md
+      - scripts/ops_portal/app.py
+      - scripts/ops_portal/templates/base.html
+      - scripts/ops_portal/templates/entry.html
+      - scripts/ops_portal/templates/index.html
+      - scripts/ops_portal/static/portal.css
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+      - tests/test_interactive_ops_portal.py
+      - tests/test_ops_portal_runtime_role.py
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - receipts/live-applies/*journey-entry-routing*
+      - receipts/live-applies/evidence/*journey-entry-routing*
+      - receipts/live-applies/evidence/*ws-0308-journey*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws0308_journey_docs
+          paths:
+            - docs/workstreams/ws-0308-journey-live-apply.md
+            - docs/workstreams/adr-0307-platform-app-cohesion-bundle.md
+            - docs/adr/0308-journey-aware-entry-routing-and-saved-home-selection.md
+            - docs/runbooks/platform-operations-portal.md
+          mode: exclusive
+        - id: ws0308_journey_runtime
+          paths:
+            - scripts/ops_portal/app.py
+            - scripts/ops_portal/templates/base.html
+            - scripts/ops_portal/templates/entry.html
+            - scripts/ops_portal/templates/index.html
+            - scripts/ops_portal/static/portal.css
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+            - tests/test_interactive_ops_portal.py
+            - tests/test_ops_portal_runtime_role.py
+          mode: exclusive
+        - id: ws0308_journey_release_surfaces
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: release-management-v1
+        - id: ws0308_journey_live_apply_receipts
+          paths:
+            - receipts/live-applies/*journey-entry-routing*
+            - receipts/live-applies/evidence/*journey-entry-routing*
+            - receipts/live-applies/evidence/*ws-0308-journey*
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    blockers: []
+    ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implements ADR 0308 by adding a journey-aware `/entry` router, activation-first home selection, and saved-home persistence to the interactive ops portal
+      release_bump: patch
+      included_in_repo_version: 0.177.140
+      latest_receipts: {}
   - id: ws-0292-superset-live-apply
     adr: "0292"
     title: Live apply ADR 0292 Apache Superset from latest origin/main

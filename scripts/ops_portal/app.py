@@ -16,7 +16,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import httpx
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -815,6 +815,7 @@ def build_workbench_context(
         "activation_steps": activation_steps,
         "activation_completed_steps": completed_steps,
         "activation_completed_count": len(completed_set),
+        "activation_remaining_count": max(len(WORKBENCH_ACTIVATION_STEPS) - len(completed_set), 0),
         "activation_total_steps": len(WORKBENCH_ACTIVATION_STEPS),
         "activation_skipped": skipped,
         "activation_ready": activation_ready,
@@ -1845,10 +1846,17 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
     return {
         "request": request,
         "operator": operator,
+        "services": [],
+        "deployments": [],
+        "runbooks": [],
+        "changelog_notes": [],
+        "coordination": {"summary": {"count": 0}},
         "generated_at": isoformat(utc_now()),
         "docs_base_url": request.app.state.settings.docs_base_url,
         "maintenance_count": 0,
         "drift_summary": {"unsuppressed_count": 0},
+        "contextual_help": build_ops_portal_help(request.app.state.settings.docs_base_url),
+        "search_collections": available_collections(),
         "launcher": {
             "query": query,
             "personas": personas,
@@ -2061,7 +2069,7 @@ def create_app(
         return templates.TemplateResponse(request=request, name="index.html", context=context)
 
     @app.get("/entry", response_class=HTMLResponse)
-    async def journey_entry(request: Request, item_id: str = "", neutral: bool = False) -> HTMLResponse | RedirectResponse:
+    async def journey_entry(request: Request, item_id: str = "", neutral: bool = False) -> Response:
         context = await build_launcher_panel_context(request)
         entry_index = context["launcher"]["entry_index"]
         journey = dict(context["journey"])
@@ -2076,6 +2084,10 @@ def create_app(
 
         if requested_url:
             return RedirectResponse(url=requested_url, status_code=303)
+
+        if invalid_requested_url:
+            journey["invalid_requested_url"] = True
+            return templates.TemplateResponse(request=request, name="entry.html", context={**context, "journey": journey})
 
         if not neutral and not journey["activation_ready"]:
             journey["invalid_requested_url"] = invalid_requested_url

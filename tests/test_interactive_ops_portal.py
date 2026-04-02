@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import json
 import os
 import shutil
@@ -330,11 +331,41 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "name": "Platform Operations Portal",
                         "description": "Interactive control surface.",
                         "category": "access",
-                        "lifecycle_status": "planned",
+                        "lifecycle_status": "active",
                         "public_url": "https://ops.lv3.org",
                         "internal_url": "http://10.10.10.20:8092",
                         "runbook": "docs/runbooks/ops-portal-down.md",
                         "adr": "0093",
+                    },
+                    {
+                        "id": "homepage",
+                        "name": "Homepage",
+                        "description": "Shared service discovery and status landing page.",
+                        "category": "experience",
+                        "lifecycle_status": "active",
+                        "public_url": "https://home.lv3.org",
+                        "runbook": "docs/runbooks/configure-homepage.md",
+                        "adr": "0152",
+                    },
+                    {
+                        "id": "docs_portal",
+                        "name": "Docs Portal",
+                        "description": "Reference portal for ADRs and runbooks.",
+                        "category": "knowledge",
+                        "lifecycle_status": "active",
+                        "public_url": "https://docs.lv3.org",
+                        "runbook": "docs/runbooks/developer-portal.md",
+                        "adr": "0094",
+                    },
+                    {
+                        "id": "changelog_portal",
+                        "name": "Changelog Portal",
+                        "description": "Recent releases, live applies, and deployment history.",
+                        "category": "knowledge",
+                        "lifecycle_status": "active",
+                        "public_url": "https://changelog.lv3.org",
+                        "runbook": "docs/runbooks/deployment-history-portal.md",
+                        "adr": "0134",
                     },
                 ]
             },
@@ -670,6 +701,16 @@ def portal_client(portal_runtime: tuple[TestClient, FakeGatewayClient, Path]) ->
     return client, gateway
 
 
+def auth_headers(*, groups: str | None = None, token_claims: dict[str, object] | None = None) -> dict[str, str]:
+    headers: dict[str, str] = {}
+    if groups:
+        headers["x-auth-request-groups"] = groups
+    if token_claims is not None:
+        encoded_payload = base64.urlsafe_b64encode(json.dumps(token_claims).encode("utf-8")).decode("ascii").rstrip("=")
+        headers["authorization"] = f"Bearer header.{encoded_payload}.signature"
+    return headers
+
+
 def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
     client, gateway = portal_client
 
@@ -684,6 +725,8 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Contextual Help" in response.text
     assert "Escalation Path" in response.text
     assert "Live apply" in response.text
+    assert "Journey-Aware Home" in response.text
+    assert "Change home selection" in response.text
     assert "Platform Overview" in response.text
     assert "Runtime Assurance" in response.text
     assert "Scoreboard and rollup by active service and environment" in response.text
@@ -890,6 +933,151 @@ def test_launcher_search_filters_results(portal_client: tuple[TestClient, FakeGa
     assert response.status_code == 200
     assert "Drift Status" in response.text
     assert "Keycloak" not in response.text
+
+
+def test_entry_renders_start_surface_before_activation(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+
+    response = client.get("/entry")
+
+    assert response.status_code == 200
+    assert "Journey-Aware Start Surface" in response.text
+    assert "Complete the activation checklist or skip it before pinning a preferred home." in response.text
+    assert "Homepage" in response.text
+    assert "Docs Portal" in response.text
+    assert "Changelog Portal" in response.text
+    assert "Platform Operations Portal" in response.text
+
+
+def test_entry_redirects_to_safe_next_url(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+
+    response = client.get(
+        "/entry",
+        params={"next": "https://docs.lv3.org/runbooks/platform-operations-portal/"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "https://docs.lv3.org/runbooks/platform-operations-portal/"
+
+
+def test_entry_invalid_next_url_stays_on_start_surface_even_after_activation(
+    portal_client: tuple[TestClient, FakeGatewayClient],
+) -> None:
+    client, _gateway = portal_client
+    operator_headers = auth_headers(groups="lv3-platform-operators")
+
+    for step_id in ("compare-home-surfaces", "verify-launcher-path", "open-orientation-runbook"):
+        step_response = client.post(
+            f"/actions/journey/activation/steps/{step_id}",
+            data={"redirect_to": "/entry?neutral=1"},
+            headers=operator_headers,
+            follow_redirects=False,
+        )
+        assert step_response.status_code == 303
+
+    response = client.get("/entry", params={"next": "https://example.com/not-allowed"}, headers=operator_headers)
+
+    assert response.status_code == 200
+    assert "Ignored an unsupported deep link." in response.text
+    assert "Journey-Aware Start Surface" in response.text
+
+
+def test_entry_redirects_to_operator_default_home_after_activation(
+    portal_client: tuple[TestClient, FakeGatewayClient],
+) -> None:
+    client, _gateway = portal_client
+    operator_headers = auth_headers(groups="lv3-platform-operators")
+
+    for step_id in ("compare-home-surfaces", "verify-launcher-path", "open-orientation-runbook"):
+        step_response = client.post(
+            f"/actions/journey/activation/steps/{step_id}",
+            data={"redirect_to": "/entry?neutral=1"},
+            headers=operator_headers,
+            follow_redirects=False,
+        )
+        assert step_response.status_code == 303
+
+    response = client.get("/entry", headers=operator_headers, follow_redirects=False)
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/?entry_mode=operate-first"
+
+
+def test_saved_home_selection_overrides_role_default(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+    operator_headers = auth_headers(groups="lv3-platform-operators")
+
+    skip_response = client.post(
+        "/actions/journey/activation/skip",
+        data={"redirect_to": "/entry?neutral=1"},
+        headers=operator_headers,
+        follow_redirects=False,
+    )
+    assert skip_response.status_code == 303
+
+    home_response = client.post(
+        "/actions/journey/home/service:docs_portal",
+        data={"redirect_to": "/entry?neutral=1"},
+        headers=operator_headers,
+        follow_redirects=False,
+    )
+
+    assert home_response.status_code == 303
+    assert "lv3_workbench_home=" in home_response.headers.get("set-cookie", "")
+
+    routed = client.get("/entry", headers=operator_headers, follow_redirects=False)
+    assert routed.status_code == 303
+    assert routed.headers["location"] == "https://docs.lv3.org"
+
+
+def test_clear_saved_home_restores_role_default(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+    operator_headers = auth_headers(groups="lv3-platform-operators")
+
+    client.post(
+        "/actions/journey/activation/skip",
+        data={"redirect_to": "/entry?neutral=1"},
+        headers=operator_headers,
+        follow_redirects=False,
+    )
+    client.post(
+        "/actions/journey/home/service:docs_portal",
+        data={"redirect_to": "/entry?neutral=1"},
+        headers=operator_headers,
+        follow_redirects=False,
+    )
+
+    clear_response = client.post(
+        "/actions/journey/home/clear",
+        data={"redirect_to": "/entry?neutral=1"},
+        headers=operator_headers,
+        follow_redirects=False,
+    )
+
+    assert clear_response.status_code == 303
+
+    routed = client.get("/entry", headers=operator_headers, follow_redirects=False)
+    assert routed.status_code == 303
+    assert routed.headers["location"] == "/?entry_mode=operate-first"
+
+
+def test_entry_role_resolution_accepts_jwt_claims(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+    admin_headers = auth_headers(token_claims={"realm_access": {"roles": ["platform-admin"]}})
+
+    client.post(
+        "/actions/journey/activation/skip",
+        data={"redirect_to": "/entry?neutral=1"},
+        headers=admin_headers,
+        follow_redirects=False,
+    )
+
+    response = client.get("/entry", headers=admin_headers, follow_redirects=False)
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/?entry_mode=govern-and-change"
 
 
 def test_health_check_action_returns_fragment(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:

@@ -130,6 +130,10 @@ def test_ops_portal_verify_checks_launcher_and_runtime_assurance_partials() -> N
     assert "Assert the contextual help drawer is present on the ops portal root page" in verify_tasks
     assert "'Contextual Help' in ops_portal_verify_root.content" in verify_tasks
     assert "'Escalation Path' in ops_portal_verify_root.content" in verify_tasks
+    assert "Verify the journey-aware entry surface renders locally" in verify_tasks
+    assert "/entry?neutral=1" in verify_tasks
+    assert "'Journey-Aware Start Surface' in ops_portal_verify_entry.content" in verify_tasks
+    assert "'Complete the activation checklist or skip it before pinning a preferred home.' in ops_portal_verify_entry.content" in verify_tasks
     assert "Verify the application launcher partial renders locally" in verify_tasks
     assert '/partials/launcher' in verify_tasks
     assert "Application Launcher" in verify_tasks
@@ -144,4 +148,5 @@ def test_ops_portal_verify_checks_launcher_and_runtime_assurance_partials() -> N
 def test_ops_portal_runtime_file_sources_include_launcher_partial() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
 
+    assert "scripts/ops_portal/templates/entry.html" in defaults
     assert "scripts/ops_portal/templates/partials/launcher.html" in defaults

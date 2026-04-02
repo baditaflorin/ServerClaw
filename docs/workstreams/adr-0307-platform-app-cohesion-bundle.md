@@ -72,8 +72,11 @@
 - canonical truth regeneration updates the repo-version fields in `README.md`
   and `versions/stack.yaml`, plus the generated workstream count in the agent
   coordination diagram
-- the next implementation steps should start with ADR 0308 through ADR 0313 so
-  users feel the entry, help, and attention improvements before deeper polish
+- ADR 0308 now continues under
+  [`ws-0308-journey-live-apply`](ws-0308-journey-live-apply.md), which
+  implements the entry-routing, activation, and saved-home contract on the
+  interactive ops portal despite the separate duplicate-numbered operator ADR
+  already using `ws-0308-live-apply`
 
 ## Verification
 
@@ -91,8 +94,9 @@
 
 ## Notes For The Next Assistant
 
-- implement ADR 0308, ADR 0310, and ADR 0312 together first so home routing,
-  onboarding progress, and attention flows tell one coherent story
+- continue with ADR 0310 and ADR 0312 next so the newly live ADR 0308 entry
+  router, activation progress, and notification flows still tell one coherent
+  story
 - implement ADR 0311 and ADR 0313 after the task-lane metadata exists, or the
   command palette and help drawer will feel underpowered
 - treat ADR 0315 and ADR 0316 as the contracts that keep future UX changes

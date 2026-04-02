@@ -57,6 +57,26 @@
       - "'Escalation Path' in ops_portal_verify_root.content"
     fail_msg: "Ops portal root page rendered without the ADR 0313 contextual help drawer."
 
+- name: Verify the journey-aware entry surface renders locally
+  ansible.builtin.uri:
+    url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/entry?neutral=1"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: ops_portal_verify_entry
+  changed_when: false
+  retries: 20
+  delay: 3
+  until: ops_portal_verify_entry.status == 200
+
+- name: Assert the journey-aware entry surface is present
+  ansible.builtin.assert:
+    that:
+      - "'Journey-Aware Start Surface' in ops_portal_verify_entry.content"
+      - "'Complete the activation checklist or skip it before pinning a preferred home.' in ops_portal_verify_entry.content"
+      - "'Pin as home' in ops_portal_verify_entry.content or 'Finish or skip activation before pinning.' in ops_portal_verify_entry.content"
+    fail_msg: "Ops portal entry route rendered without the ADR 0308 journey-routing surface."
+
 - name: Verify the runtime assurance scoreboard partial renders locally
   ansible.builtin.uri:
     url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/partials/overview"
