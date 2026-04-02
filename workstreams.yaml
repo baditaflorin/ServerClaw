@@ -5,7 +5,7 @@ delivery_model:
   branch_prefix: codex/
   allowed_extra_prefixes:
     - claude/
-  workstream_doc_root: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams
+  workstream_doc_root: docs/workstreams
   registry_owner: main
 
 release_policy:
@@ -13,17 +13,100 @@ release_policy:
   platform_version_bump_on: live_apply_from_main
   changelog_working_section: Unreleased
   versions_stack_branch_policy: main_only
-  breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
+  breaking_change_criteria: config/version-semantics.json
 
 workstreams:
+  - id: ws-0330-public-github-readiness
+    adr: "0330"
+    title: Prepare the repository for public GitHub publication as a generic and forkable reference platform
+    status: merged
+    owner: codex
+    branch: codex/ws-0327-public-github-readiness
+    worktree_path: .worktrees/ws-0327-public-github-readiness
+    doc: docs/workstreams/adr-0330-public-github-readiness-bundle.md
+    depends_on:
+      - adr-0038-generated-status-documents-from-canonical-state
+      - adr-0163-repository-structure-index-for-agent-discovery
+      - adr-0167-agent-handoff-and-context-preservation
+      - adr-0168-automated-enforcement-of-agent-standards
+    conflicts_with: []
+    shared_surfaces:
+      - README.md
+      - AGENTS.md
+      - .repo-structure.yaml
+      - workstreams.yaml
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/adr/.index.yaml
+      - docs/workstreams/adr-0330-public-github-readiness-bundle.md
+      - docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+      - docs/adr/0331-repository-relative-paths-for-public-metadata-and-generated-docs.md
+      - docs/adr/0332-relative-release-and-status-links-in-generated-root-surfaces.md
+      - docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+      - docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md
+      - docs/adr/0335-public-safe-agent-onboarding-entrypoints.md
+      - docs/adr/0336-public-entrypoint-leakage-validation.md
+      - docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
+      - docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
+      - docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+      - scripts/generate_status_docs.py
+      - scripts/generate_release_notes.py
+      - scripts/validate_repo.sh
+      - scripts/validate_repository_data_models.py
+      - scripts/workstream_surface_ownership.py
+      - scripts/validate_public_entrypoints.py
+      - RELEASE.md
+      - VERSION
+      - docs/release-notes/*.md
+    ownership_manifest:
+      owned_surfaces:
+        - id: public_github_readiness_bundle
+          paths:
+            - README.md
+            - AGENTS.md
+            - .repo-structure.yaml
+            - workstreams.yaml
+            - changelog.md
+            - RELEASE.md
+            - VERSION
+            - build/platform-manifest.json
+            - versions/stack.yaml
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/adr/.index.yaml
+            - docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+            - docs/adr/0331-repository-relative-paths-for-public-metadata-and-generated-docs.md
+            - docs/adr/0332-relative-release-and-status-links-in-generated-root-surfaces.md
+            - docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+            - docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md
+            - docs/adr/0335-public-safe-agent-onboarding-entrypoints.md
+            - docs/adr/0336-public-entrypoint-leakage-validation.md
+            - docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
+            - docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
+            - docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+            - docs/workstreams/adr-0330-public-github-readiness-bundle.md
+            - scripts/generate_release_notes.py
+            - scripts/generate_status_docs.py
+            - scripts/validate_public_entrypoints.py
+            - scripts/validate_repo.sh
+            - scripts/validate_repository_data_models.py
+            - scripts/workstream_surface_ownership.py
+          mode: exclusive
+    canonical_truth:
+      changelog_entry: implements ADRs 0330-0339 by turning public GitHub readiness into a first-class repository lifecycle, making workstream and generated-doc metadata repository-relative, simplifying root onboarding docs into a generic forkable template, and enforcing new public-entrypoint leakage validation
+      release_bump: patch
+      included_in_repo_version: 0.177.143
+    ready_to_merge: true
+    live_applied: false
   - id: ws-0316-live-apply
     adr: "0316"
     title: Live apply journey analytics and onboarding success scorecards from latest origin/main
     status: merged
     owner: codex
     branch: codex/ws-0316-main-integration
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0316-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0316-live-apply.md
+    worktree_path: .worktrees/ws-0316-live-apply
+    doc: docs/workstreams/ws-0316-live-apply.md
     depends_on:
       - adr-0242-guided-human-onboarding-via-shepherd-tours
       - adr-0281-glitchtip-as-the-sentry-compatible-application-error-tracker
@@ -141,8 +224,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0296-education-refresh
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-education-refresh
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-education-refresh.md
+    worktree_path: .worktrees/ws-0296-education-refresh
+    doc: docs/workstreams/ws-0296-education-refresh.md
     depends_on:
       - adr-0194-coolify-paas-deploy-from-repo
       - adr-0224-self-service-repo-intake-and-agent-assisted-deployments
@@ -210,8 +293,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0297-live-apply-r2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-live-apply-r2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-live-apply.md
+    worktree_path: .worktrees/ws-0297-live-apply-r2
+    doc: docs/workstreams/ws-0297-live-apply.md
     depends_on:
       - adr-0068-container-image-policy-and-supply-chain-integrity
       - adr-0077-compose-runtime-secrets-injection
@@ -382,8 +465,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0297-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0297-main-merge.md
+    worktree_path: .worktrees/ws-0297-main-merge
+    doc: docs/workstreams/ws-0297-main-merge.md
     depends_on:
       - ws-0297-live-apply
     conflicts_with: []
@@ -477,8 +560,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0315-gitea-followups
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0315-gitea-followups
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-gitea-followups.md
+    worktree_path: .worktrees/ws-0315-gitea-followups
+    doc: docs/workstreams/ws-0315-gitea-followups.md
     depends_on:
       - ws-0297-main-merge
     conflicts_with: []
@@ -638,8 +721,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0313-main-integration
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0313-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0313-live-apply.md
+    worktree_path: .worktrees/ws-0313-live-apply
+    doc: docs/workstreams/ws-0313-live-apply.md
     depends_on:
       - adr-0093-interactive-ops-portal
       - adr-0094-developer-portal-and-documentation-site
@@ -798,8 +881,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0315-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0315-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0315-live-apply.md
+    worktree_path: .worktrees/ws-0315-live-apply
+    doc: docs/workstreams/ws-0315-live-apply.md
     depends_on:
       - adr-0122-windmill-operator-access-admin
       - adr-0234-shared-human-app-shell-and-navigation-via-patternfly
@@ -914,8 +997,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0266-main-integration-r3
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0266-main-integration-r2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0266-validation-runner-capability-contracts-live-apply.md
+    worktree_path: .worktrees/ws-0266-main-integration-r2
+    doc: docs/workstreams/adr-0266-validation-runner-capability-contracts-live-apply.md
     depends_on:
       - adr-0082-remote-build-gateway
       - adr-0083-docker-check-runner
@@ -1130,8 +1213,8 @@ workstreams:
     status: ready_for_merge
     owner: codex
     branch: codex/ws-0279-main-publish-r2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0279-main-merge.md
+    worktree_path: .worktrees/ws-0279-main-publish-r1
+    doc: docs/workstreams/ws-0279-main-merge.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
@@ -1315,8 +1398,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0292-main-integration-r1
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-live-apply.md
+    worktree_path: .worktrees/ws-0292-live-apply-r2
+    doc: docs/workstreams/ws-0292-live-apply.md
     depends_on:
       - adr-0021-public-subdomain-publication
       - adr-0042-postgresql-as-the-shared-relational-database
@@ -1521,8 +1604,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0295-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0295-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md
+    worktree_path: .worktrees/ws-0295-live-apply
+    doc: docs/workstreams/ws-0295-live-apply.md
     depends_on:
       - ws-0274-artifact-cache-plane
       - adr-0089-build-cache
@@ -1550,8 +1633,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0294-main-integration
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-main-integration
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0294-live-apply.md
+    worktree_path: .worktrees/ws-0294-main-integration
+    doc: docs/workstreams/ws-0294-live-apply.md
     depends_on:
       - adr-0042-postgresql-as-the-shared-relational-database
       - adr-0077-openbao-managed-compose-secrets
@@ -1789,8 +1872,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0274-mainline-refresh-v6
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0274-minio-live-apply.md
+    worktree_path: .worktrees/ws-0274-mainline-refresh-v6
+    doc: docs/workstreams/ws-0274-minio-live-apply.md
     depends_on:
       - adr-0021-public-subdomain-publication-at-the-nginx-edge
       - adr-0077-compose-secrets-injection
@@ -2087,8 +2170,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0274-artifact-cache-plane
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-artifact-cache-plane
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md
+    worktree_path: .worktrees/ws-0274-artifact-cache-plane
+    doc: docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md
     depends_on:
       - adr-0068-container-image-policy
       - adr-0082-remote-build-gateway
@@ -2168,8 +2251,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0268-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0268-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0268-live-apply.md
+    worktree_path: .worktrees/ws-0268-live-apply
+    doc: docs/workstreams/ws-0268-live-apply.md
     depends_on:
       - adr-0034-controller-local-secret-manifest-and-preflight
       - adr-0035-workflow-catalog-and-machine-readable-execution-contracts
@@ -2271,8 +2354,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0268-main-integration
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0268-main-integration
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0268-main-integration.md
+    worktree_path: .worktrees/ws-0268-main-integration
+    doc: docs/workstreams/ws-0268-main-integration.md
     depends_on:
       - ws-0268-live-apply
     conflicts_with: []
@@ -2378,8 +2461,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/adr-0272-restore-readiness-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0272-restore-readiness
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md
+    worktree_path: .worktrees/adr-0272-restore-readiness
+    doc: docs/workstreams/ws-0272-live-apply.md
     depends_on:
       - adr-0099-backup-restore-verification
       - adr-0190-synthetic-transaction-replay
@@ -2444,8 +2527,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0251-live-apply-r2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply-r2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-live-apply-r2.md
+    worktree_path: .worktrees/ws-0251-live-apply-r2
+    doc: docs/workstreams/ws-0251-live-apply-r2.md
     depends_on:
       - adr-0073-promotion-gate
       - adr-0111-integration-test-suite
@@ -2519,8 +2602,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0251-main-integration
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply-r2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-main-integration.md
+    worktree_path: .worktrees/ws-0251-live-apply-r2
+    doc: docs/workstreams/ws-0251-main-integration.md
     depends_on:
       - ws-0251-live-apply
       - ws-0251-live-apply-r2
@@ -2604,8 +2687,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/adr-0255-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0255-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0255-live-apply.md
+    worktree_path: .worktrees/adr-0255-live-apply
+    doc: docs/workstreams/ws-0255-live-apply.md
     depends_on:
       - adr-0023-docker-runtime-vm-baseline
       - adr-0026-dedicated-postgresql-vm-baseline
@@ -2751,8 +2834,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0255-main-integration-r2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0255-main-integration
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0255-main-integration.md
+    worktree_path: .worktrees/ws-0255-main-integration
+    doc: docs/workstreams/ws-0255-main-integration.md
     depends_on:
       - ws-0255-live-apply
     conflicts_with: []
@@ -2940,8 +3023,8 @@ workstreams:
     status: ready_for_merge
     owner: codex
     branch: codex/ws-0224-repo-intake
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-repo-intake
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md
+    worktree_path: .worktrees/ws-0224-repo-intake
+    doc: docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md
     depends_on:
       - adr-0156-agent-session-workspace-isolation
       - adr-0185-branch-scoped-ephemeral-preview-environments
@@ -3011,8 +3094,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0201-main-final
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0201-main-merge-r2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0201-live-apply.md
+    worktree_path: .worktrees/ws-0201-main-merge-r2
+    doc: docs/workstreams/ws-0201-live-apply.md
     depends_on:
       - adr-0056-keycloak
       - adr-0083-docker-check-runner
@@ -3067,8 +3150,8 @@ workstreams:
     status: merged
     owner: codex
     branch: main
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0246-main-push
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0201-main-merge.md
+    worktree_path: .worktrees/ws-0246-main-push
+    doc: docs/workstreams/ws-0201-main-merge.md
     depends_on:
       - ws-0201-live-apply
     conflicts_with: []
@@ -3113,8 +3196,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0264-receipt-driven-resilience-adrs-r3
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md
+    worktree_path: ../proxmox_florin_server
+    doc: docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md
     depends_on:
       - adr-0036-live-apply-receipts
       - adr-0087-validation-gate
@@ -3201,8 +3284,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/adr-0264-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0264-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-live-apply.md
+    worktree_path: .worktrees/adr-0264-live-apply
+    doc: docs/workstreams/ws-0264-live-apply.md
     depends_on:
       - ws-0264-receipt-driven-resilience-adrs
       - adr-0087-validation-gate
@@ -3312,8 +3395,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/adr-0264-main-integration
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0264-main-integration
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-main-merge.md
+    worktree_path: .worktrees/adr-0264-main-integration
+    doc: docs/workstreams/ws-0264-main-merge.md
     depends_on:
       - ws-0264-live-apply
     conflicts_with: []
@@ -3445,8 +3528,8 @@ workstreams:
     status: ready_for_merge
     owner: codex
     branch: codex/adr-0269-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0269-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0269-live-apply/docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+    worktree_path: ../worktree-adr-0269-live-apply
+    doc: ../worktree-adr-0269-live-apply/docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
     depends_on:
       - adr-0068-container-image-policy-and-supply-chain-integrity
       - adr-0102-security-posture-reporting
@@ -3550,8 +3633,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0253-live-apply-r2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0253-live-apply-r2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0253-live-apply.md
+    worktree_path: .worktrees/ws-0253-live-apply-r2
+    doc: docs/workstreams/ws-0253-live-apply.md
     depends_on:
       - adr-0093-interactive-ops-portal
       - adr-0113-world-state-materializer
@@ -3643,8 +3726,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0245-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0245-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0245-live-apply.md
+    worktree_path: .worktrees/ws-0245-live-apply
+    doc: docs/workstreams/ws-0245-live-apply.md
     depends_on:
       - adr-0075-service-capability-catalog
       - adr-0113-world-state-materializer
@@ -3726,8 +3809,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0265-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0265-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+    worktree_path: .worktrees/ws-0265-live-apply
+    doc: docs/workstreams/adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
     depends_on:
       - adr-0082-remote-build-execution-gateway
       - adr-0083-docker-check-runners-for-repository-validation
@@ -3790,8 +3873,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0252-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0252-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-live-apply.md
+    worktree_path: .worktrees/ws-0252-live-apply
+    doc: docs/workstreams/ws-0252-live-apply.md
     depends_on:
       - adr-0021-public-subdomain-publication-at-the-nginx-edge
       - adr-0076-subdomain-governance-and-dns-lifecycle
@@ -3905,8 +3988,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0252-live-apply-r4
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0252-live-apply-r4
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-mainline-replay.md
+    worktree_path: .worktrees/ws-0252-live-apply-r4
+    doc: docs/workstreams/ws-0252-mainline-replay.md
     depends_on:
       - ws-0252-live-apply
     conflicts_with: []
@@ -3950,8 +4033,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0252-main-merge-r3
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0252-main-merge-r3
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-main-merge.md
+    worktree_path: .worktrees/ws-0252-main-merge-r3
+    doc: docs/workstreams/ws-0252-main-merge.md
     depends_on:
       - ws-0252-mainline-replay
     conflicts_with: []
@@ -4005,8 +4088,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0273-public-endpoint-admission-control
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0273-public-endpoint-admission-control
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md
+    worktree_path: .worktrees/ws-0273-public-endpoint-admission-control
+    doc: docs/workstreams/adr-0273-public-endpoint-admission-control.md
     depends_on:
       - adr-0101-automated-certificate-lifecycle-management
       - adr-0139-subdomain-exposure-audit-and-registry
@@ -4097,8 +4180,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0277-main-closeout-r2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0277-main-closeout
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0277-live-apply.md
+    worktree_path: .worktrees/ws-0277-main-closeout
+    doc: docs/workstreams/ws-0277-live-apply.md
     depends_on:
       - adr-0077-compose-runtime-secrets
       - adr-0092-unified-platform-api-gateway
@@ -4272,8 +4355,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0254-serverclaw-adrs
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0254-serverclaw-adrs
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md
+    worktree_path: .worktrees/ws-0254-serverclaw-adrs
+    doc: docs/workstreams/adr-0254-serverclaw-architecture-bundle.md
     depends_on:
       - adr-0060-open-webui-workbench
       - adr-0069-agent-tool-registry
@@ -4358,8 +4441,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0251-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-live-apply.md
+    worktree_path: .worktrees/ws-0251-live-apply
+    doc: docs/workstreams/ws-0251-live-apply.md
     depends_on:
       - adr-0036-live-apply-receipts
       - adr-0044-windmill-for-background-automation
@@ -4550,8 +4633,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/adr-0259-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0259-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-live-apply.md
+    worktree_path: .worktrees/adr-0259-live-apply
+    doc: docs/workstreams/ws-0259-live-apply.md
     depends_on:
       - adr-0151-n8n
       - adr-0206-ports-and-adapters
@@ -4645,8 +4728,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0259-main-integration
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0259-main-integration
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-main-merge.md
+    worktree_path: .worktrees/ws-0259-main-integration
+    doc: docs/workstreams/ws-0259-main-merge.md
     depends_on:
       - ws-0259-live-apply
     conflicts_with: []
@@ -4698,8 +4781,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0244-runtime-assurance-adrs
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0244-runtime-assurance-adrs
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md
+    worktree_path: .worktrees/ws-0244-runtime-assurance-adrs
+    doc: docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md
     depends_on:
       - adr-0064-health-probes
       - adr-0123-uptime-contracts
@@ -4778,8 +4861,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0244-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0244-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0244-live-apply.md
+    worktree_path: .worktrees/ws-0244-live-apply
+    doc: docs/workstreams/ws-0244-live-apply.md
     depends_on:
       - adr-0064-health-probes
       - adr-0075-service-capability-catalog
@@ -4880,8 +4963,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0249-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0249-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0249-live-apply.md
+    worktree_path: .worktrees/ws-0249-live-apply
+    doc: docs/workstreams/ws-0249-live-apply.md
     depends_on:
       - adr-0096-slo-tracking
       - adr-0101-certificate-lifecycle
@@ -4965,8 +5048,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0237-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0237-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0237-live-apply.md
+    worktree_path: .worktrees/ws-0237-live-apply
+    doc: docs/workstreams/ws-0237-live-apply.md
     depends_on:
       - adr-0108-operator-onboarding-and-offboarding
       - adr-0122-windmill-operator-access-admin
@@ -5015,8 +5098,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0237-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0237-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0237-main-merge.md
+    worktree_path: .worktrees/ws-0237-main-merge
+    doc: docs/workstreams/ws-0237-main-merge.md
     depends_on:
       - ws-0237-live-apply
     conflicts_with: []
@@ -5098,8 +5181,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0238-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0238-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0238-live-apply.md
+    worktree_path: .worktrees/ws-0238-live-apply
+    doc: docs/workstreams/ws-0238-live-apply.md
     depends_on:
       - adr-0108-operator-onboarding
       - adr-0122-operator-access-admin
@@ -5180,8 +5263,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0244-main-merge-r3
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0244-main-merge-r3
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0244-main-merge.md
+    worktree_path: .worktrees/ws-0244-main-merge-r3
+    doc: docs/workstreams/ws-0244-main-merge.md
     depends_on:
       - ws-0244-live-apply
     conflicts_with: []
@@ -5261,8 +5344,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0238-main-integration
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0238-main-integration
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0238-main-integration.md
+    worktree_path: .worktrees/ws-0238-main-integration
+    doc: docs/workstreams/ws-0238-main-integration.md
     depends_on:
       - ws-0238-live-apply
     conflicts_with: []
@@ -5356,8 +5439,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0246-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0246-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0246-live-apply.md
+    worktree_path: .worktrees/ws-0246-live-apply
+    doc: docs/workstreams/ws-0246-live-apply.md
     depends_on:
       - adr-0064-health-probe-contracts
       - adr-0123-service-uptime-contracts
@@ -5444,8 +5527,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0246-main-merge-v2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0246-main-merge-v2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0246-main-merge.md
+    worktree_path: .worktrees/ws-0246-main-merge-v2
+    doc: docs/workstreams/ws-0246-main-merge.md
     depends_on:
       - ws-0246-live-apply
     conflicts_with: []
@@ -5541,8 +5624,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0232-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0232-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0232-live-apply.md
+    worktree_path: .worktrees/ws-0232-live-apply
+    doc: docs/workstreams/ws-0232-live-apply.md
     depends_on:
       - adr-0044-windmill
       - adr-0179-service-redundancy-tier-matrix
@@ -5637,8 +5720,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0232-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0232-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0232-main-merge.md
+    worktree_path: .worktrees/ws-0232-main-merge
+    doc: docs/workstreams/ws-0232-main-merge.md
     depends_on:
       - ws-0232-live-apply
     conflicts_with: []
@@ -5767,8 +5850,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0248-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0248-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0248-live-apply.md
+    worktree_path: .worktrees/ws-0248-live-apply
+    doc: docs/workstreams/ws-0248-live-apply.md
     depends_on:
       - adr-0056-keycloak-for-operator-and-agent-sso
       - adr-0133-portal-authentication-by-default
@@ -5849,8 +5932,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0248-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0248-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0248-main-merge.md
+    worktree_path: .worktrees/ws-0248-main-merge
+    doc: docs/workstreams/ws-0248-main-merge.md
     depends_on:
       - ws-0248-live-apply
     conflicts_with: []
@@ -5974,8 +6057,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0234-human-ux-adrs
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0234-human-ux-adrs
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md
+    worktree_path: .worktrees/ws-0234-human-ux-adrs
+    doc: docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md
     depends_on:
       - adr-0093-interactive-ops-portal
       - adr-0094-developer-portal
@@ -6054,8 +6137,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0234-live-apply-r2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0234-live-apply-r2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0234-live-apply.md
+    worktree_path: .worktrees/ws-0234-live-apply-r2
+    doc: docs/workstreams/ws-0234-live-apply.md
     depends_on:
       - adr-0093-interactive-ops-portal
       - adr-0133-portal-authentication-by-default
@@ -6148,8 +6231,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0242-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0242-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0242-live-apply.md
+    worktree_path: .worktrees/ws-0242-live-apply
+    doc: docs/workstreams/ws-0242-live-apply.md
     depends_on:
       - adr-0108-operator-onboarding-and-offboarding
       - adr-0122-windmill-operator-access-admin
@@ -6207,8 +6290,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0242-main-integration
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0242-main-integration
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0242-main-merge.md
+    worktree_path: .worktrees/ws-0242-main-integration
+    doc: docs/workstreams/ws-0242-main-merge.md
     depends_on:
       - ws-0242-live-apply
     conflicts_with: []
@@ -6280,8 +6363,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0236-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0236-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0236-live-apply.md
+    worktree_path: .worktrees/ws-0236-live-apply
+    doc: docs/workstreams/ws-0236-live-apply.md
     depends_on:
       - adr-0122-windmill-operator-access-admin
       - adr-0209-use-case-services-and-thin-delivery-adapters
@@ -6353,8 +6436,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0236-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0236-mainline
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0236-main-merge.md
+    worktree_path: .worktrees/ws-0236-mainline
+    doc: docs/workstreams/ws-0236-main-merge.md
     depends_on:
       - ws-0236-live-apply
     conflicts_with: []
@@ -6447,8 +6530,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0240-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0240-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0240-live-apply.md
+    worktree_path: .worktrees/ws-0240-live-apply
+    doc: docs/workstreams/ws-0240-live-apply.md
     depends_on:
       - adr-0093-interactive-ops-portal
       - adr-0104-service-dependency-graph
@@ -6507,8 +6590,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0240-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0240-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0240-main-merge.md
+    worktree_path: .worktrees/ws-0240-main-merge
+    doc: docs/workstreams/ws-0240-main-merge.md
     depends_on:
       - ws-0240-live-apply
     conflicts_with: []
@@ -6583,8 +6666,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0239-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0239-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-live-apply.md
+    worktree_path: .worktrees/ws-0239-live-apply
+    doc: docs/workstreams/ws-0239-live-apply.md
     depends_on:
       - adr-0094-developer-portal
       - adr-0121-local-search-and-indexing-fabric
@@ -6664,8 +6747,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0239-main-merge-r2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0239-main-merge-r2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-main-merge.md
+    worktree_path: .worktrees/ws-0239-main-merge-r2
+    doc: docs/workstreams/ws-0239-main-merge.md
     depends_on:
       - ws-0239-live-apply
     conflicts_with: []
@@ -6759,8 +6842,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0241-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0241-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0241-live-apply.md
+    worktree_path: .worktrees/ws-0241-live-apply
+    doc: docs/workstreams/ws-0241-live-apply.md
     depends_on:
       - adr-0108-operator-onboarding-and-offboarding
       - adr-0122-windmill-operator-access-admin
@@ -6825,8 +6908,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0241-main-merge-r3
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0241-main-merge-r3
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0241-main-merge.md
+    worktree_path: .worktrees/ws-0241-main-merge-r3
+    doc: docs/workstreams/ws-0241-main-merge.md
     depends_on:
       - ws-0241-live-apply
     conflicts_with: []
@@ -6905,8 +6988,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0235-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0235-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0235-live-apply.md
+    worktree_path: .worktrees/ws-0235-live-apply
+    doc: docs/workstreams/ws-0235-live-apply.md
     depends_on:
       - adr-0093-interactive-ops-portal
       - adr-0152-homepage
@@ -6986,8 +7069,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0235-main-merge-r3
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0235-main-merge-r3
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0235-main-merge.md
+    worktree_path: .worktrees/ws-0235-main-merge-r3
+    doc: docs/workstreams/ws-0235-main-merge.md
     depends_on:
       - ws-0235-live-apply
     conflicts_with: []
@@ -7075,8 +7158,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0230-live-apply-r2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0230-live-apply-r2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0230-live-apply.md
+    worktree_path: .worktrees/ws-0230-live-apply-r2
+    doc: docs/workstreams/ws-0230-live-apply.md
     depends_on:
       - adr-0048-command-catalog
       - adr-0073-promotion-pipeline
@@ -7176,8 +7259,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0233-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0233-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-live-apply.md
+    worktree_path: .worktrees/ws-0233-live-apply
+    doc: docs/workstreams/ws-0233-live-apply.md
     depends_on:
       - adr-0143-gitea-for-self-hosted-git-and-ci
       - adr-0168-automated-validation-gate
@@ -7250,8 +7333,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0233-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0233-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-main-merge.md
+    worktree_path: .worktrees/ws-0233-main-merge
+    doc: docs/workstreams/ws-0233-main-merge.md
     depends_on:
       - ws-0233-live-apply
     conflicts_with: []
@@ -7348,8 +7431,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0231-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0231-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-live-apply.md
+    worktree_path: .worktrees/ws-0231-live-apply
+    doc: docs/workstreams/ws-0231-live-apply.md
     depends_on:
       - adr-0043-openbao
       - adr-0051-control-plane-backup-recovery-and-break-glass
@@ -7408,8 +7491,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0231-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0231-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-main-merge.md
+    worktree_path: .worktrees/ws-0231-main-merge
+    doc: docs/workstreams/ws-0231-main-merge.md
     depends_on:
       - ws-0231-live-apply
     conflicts_with: []
@@ -7496,8 +7579,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0206-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0206-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-live-apply.md
+    worktree_path: .worktrees/ws-0206-live-apply
+    doc: docs/workstreams/ws-0206-live-apply.md
     depends_on:
       - adr-0108-operator-onboarding-and-offboarding
       - adr-0122-windmill-operator-access-admin
@@ -7564,8 +7647,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0206-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0206-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-main-merge.md
+    worktree_path: .worktrees/ws-0206-main-merge
+    doc: docs/workstreams/ws-0206-main-merge.md
     depends_on:
       - ws-0206-live-apply
     conflicts_with: []
@@ -7618,8 +7701,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0228-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0228-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0228-main-merge.md
+    worktree_path: .worktrees/ws-0228-main-merge
+    doc: docs/workstreams/ws-0228-main-merge.md
     depends_on:
       - adr-0044-windmill
       - adr-0141-token-lifecycle-management
@@ -7782,8 +7865,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0224-server-resident-ops-adrs-r2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-server-resident-ops-adrs-r2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md
+    worktree_path: .worktrees/ws-0224-server-resident-ops-adrs-r2
+    doc: docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md
     depends_on:
       - adr-0043-openbao
       - adr-0044-windmill
@@ -7856,8 +7939,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0226-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0226-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-live-apply.md
+    worktree_path: .worktrees/ws-0226-live-apply
+    doc: docs/workstreams/ws-0226-live-apply.md
     depends_on:
       - adr-0204-self-correcting-automation-loops
       - adr-0220-bootstrap-and-recovery-sequencing-for-environment-cells
@@ -7913,8 +7996,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0226-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0226-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-main-merge.md
+    worktree_path: .worktrees/ws-0226-main-merge
+    doc: docs/workstreams/ws-0226-main-merge.md
     depends_on:
       - ws-0226-live-apply
     conflicts_with: []
@@ -7999,8 +8082,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0224-live-apply-r3
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-live-apply-r3
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0224-live-apply.md
+    worktree_path: .worktrees/ws-0224-live-apply-r3
+    doc: docs/workstreams/ws-0224-live-apply.md
     depends_on:
       - adr-0143-gitea
       - adr-0204-self-correcting-automation-loops
@@ -8086,8 +8169,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0210-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-ws-0210-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0210-live-apply.md
+    worktree_path: ../worktree-ws-0210-live-apply
+    doc: docs/workstreams/ws-0210-live-apply.md
     depends_on:
       - adr-0074-human-navigation-and-platform-ops-portal
       - adr-0076-subdomain-governance
@@ -8186,8 +8269,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0214-ha-replication-adrs
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0214-ha-replication-adrs
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0214-ha-replication-architecture-bundle.md
+    worktree_path: .worktrees/ws-0214-ha-replication-adrs
+    doc: docs/workstreams/adr-0214-ha-replication-architecture-bundle.md
     depends_on:
       - adr-0072-staging-production-topology
       - adr-0073-promotion-pipeline
@@ -8261,8 +8344,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0211-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0211-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0211-main-merge.md
+    worktree_path: .worktrees/ws-0211-main-merge
+    doc: docs/workstreams/ws-0211-main-merge.md
     depends_on:
       - ws-0211-live-apply
     conflicts_with: []
@@ -8347,8 +8430,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0194-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0194-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0194-main-merge.md
+    worktree_path: .worktrees/ws-0194-main-merge
+    doc: docs/workstreams/ws-0194-main-merge.md
     depends_on:
       - ws-0194-live-apply
     conflicts_with: []
@@ -8469,8 +8552,8 @@ workstreams:
     status: ready
     owner: codex
     branch: codex/ws-0197-main-finish
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0197-main-finish
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0197-live-apply.md
+    worktree_path: .worktrees/ws-0197-main-finish
+    doc: docs/workstreams/ws-0197-live-apply.md
     depends_on:
       - adr-0044-windmill
       - adr-0146-langfuse
@@ -8627,8 +8710,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0209-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0209-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0209-live-apply.md
+    worktree_path: .worktrees/ws-0209-live-apply
+    doc: docs/workstreams/ws-0209-live-apply.md
     depends_on:
       - adr-0129-runbook-automation-executor
       - adr-0204-architecture-governance
@@ -8744,8 +8827,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: "codex/ws-0193-main-merge"
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0193-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0193-main-merge.md
+    worktree_path: .worktrees/ws-0193-main-merge
+    doc: docs/workstreams/ws-0193-main-merge.md
     depends_on:
       - ws-0193-live-apply
     conflicts_with: []
@@ -8922,8 +9005,8 @@ workstreams:
     status: merged
     owner: codex
     branch: "codex/ws-0193-live-apply"
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0193-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0193-plane-kanban-task-board.md
+    worktree_path: .worktrees/ws-0193-live-apply
+    doc: docs/workstreams/adr-0193-plane-kanban-task-board.md
     depends_on:
       - adr-0041-mail-platform-and-notification-relay
       - adr-0096-openbao
@@ -9080,8 +9163,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0192-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0192-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0192-live-apply.md
+    worktree_path: .worktrees/ws-0192-live-apply
+    doc: docs/workstreams/ws-0192-live-apply.md
     depends_on:
       - adr-0105-capacity-model
       - adr-0180-standby-capacity
@@ -9145,8 +9228,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0186-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0186-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0186-live-apply.md
+    worktree_path: .worktrees/ws-0186-live-apply
+    doc: docs/workstreams/ws-0186-live-apply.md
     depends_on:
       - adr-0088-ephemeral-fixtures
       - adr-0105-capacity-model
@@ -9215,8 +9298,8 @@ workstreams:
     status: implemented
     owner: codex
     branch: codex/ws-0196-main-merge-v2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0196-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0196-netdata-realtime-streaming-metrics.md
+    worktree_path: .worktrees/ws-0196-live-apply
+    doc: docs/workstreams/adr-0196-netdata-realtime-streaming-metrics.md
     depends_on:
       - adr-0011-monitoring
       - adr-0071-agent-observation-loop
@@ -9304,8 +9387,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0196-main-merge-v2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0196-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0196-live-apply.md
+    worktree_path: .worktrees/ws-0196-live-apply
+    doc: docs/workstreams/ws-0196-live-apply.md
     depends_on:
       - adr-0011-monitoring
       - adr-0071-agent-observation-loop
@@ -9361,8 +9444,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0194-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0194-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0194-coolify-paas-deploy-from-repo.md
+    worktree_path: .worktrees/ws-0194-live-apply
+    doc: docs/workstreams/adr-0194-coolify-paas-deploy-from-repo.md
     depends_on:
       - adr-0025-docker-compose-stacks
       - adr-0056-keycloak-sso
@@ -9506,8 +9589,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0185-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/docs/workstreams/adr-0185-branch-scoped-ephemeral-preview-environments.md
+    worktree_path: .worktrees/ws-0185-live-apply
+    doc: .worktrees/ws-0185-live-apply/docs/workstreams/adr-0185-branch-scoped-ephemeral-preview-environments.md
     depends_on:
       - adr-0088-ephemeral-fixtures
       - adr-0106-ephemeral-environment-lifecycle
@@ -9573,8 +9656,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0199-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0199-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0199-live-apply/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md
+    worktree_path: .worktrees/ws-0199-live-apply
+    doc: .worktrees/ws-0199-live-apply/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md
     depends_on:
       - adr-0043-openbao
       - adr-0056-keycloak
@@ -9714,8 +9797,8 @@ workstreams:
     status: implemented
     owner: codex
     branch: codex/adr-0180-standby-capacity
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0180-standby-capacity
-    doc: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0180-standby-capacity/docs/workstreams/adr-0180-standby-capacity-reservation-and-placement-rules.md
+    worktree_path: ../worktree-adr-0180-standby-capacity
+    doc: ../worktree-adr-0180-standby-capacity/docs/workstreams/adr-0180-standby-capacity-reservation-and-placement-rules.md
     depends_on:
       - adr-0105-capacity-model
       - adr-0157-per-vm-concurrency-budget
@@ -9791,8 +9874,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/adr-0176-inventory-sharding
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0176-inventory-sharding
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0176-inventory-sharding.md
+    worktree_path: ../worktree-adr-0176-inventory-sharding
+    doc: docs/workstreams/adr-0176-inventory-sharding.md
     depends_on:
       - adr-0048-command-catalog
       - adr-0154-vm-scoped-parallel-execution-lanes
@@ -9848,7 +9931,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0163-retry-taxonomy
     worktree_path: .worktrees/adr-0163
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0163-retry-taxonomy.md
+    doc: docs/workstreams/adr-0163-retry-taxonomy.md
     depends_on:
       - adr-0044-windmill
       - adr-0058-nats-event-bus
@@ -9874,7 +9957,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0162-deadlock-detector
     worktree_path: .worktrees/adr-0162-deadlock-detector
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0162-deadlock-detector.md
+    doc: docs/workstreams/adr-0162-deadlock-detector.md
     depends_on:
       - adr-0115-mutation-ledger
       - adr-0119-budgeted-scheduler
@@ -9897,7 +9980,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0138-published-artifact-secret-scanning
     worktree_path: .worktrees/adr-0138
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0138-published-artifact-secret-scanning.md
+    doc: docs/workstreams/adr-0138-published-artifact-secret-scanning.md
     depends_on:
       - adr-0081-changelog-portal
       - adr-0087-validation-gate
@@ -9918,8 +10001,8 @@ workstreams:
     status: implemented
     owner: codex
     branch: "codex/ws-0198-live-apply"
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0198-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0198-qdrant-vector-search-semantic-rag.md
+    worktree_path: .worktrees/ws-0198-live-apply
+    doc: docs/workstreams/adr-0198-qdrant-vector-search-semantic-rag.md
     depends_on:
       - adr-0070-rag-context
       - adr-0145-private-ollama
@@ -9998,7 +10081,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0011-monitoring
     worktree_path: ../proxmox_florin_server-monitoring
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md
+    doc: docs/workstreams/adr-0011-monitoring.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
@@ -10015,7 +10098,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0149-semaphore
     worktree_path: ../proxmox_florin_server-adr-0149
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0149-semaphore.md
+    doc: docs/workstreams/adr-0149-semaphore.md
     depends_on:
       - adr-0023-docker-runtime
       - adr-0026-postgres-vm
@@ -10082,7 +10165,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0014-tailscale
     worktree_path: ../proxmox_florin_server-tailscale
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0014-tailscale.md
+    doc: docs/workstreams/adr-0014-tailscale.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
@@ -10099,7 +10182,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0144-headscale
     worktree_path: ../proxmox_florin_server-headscale
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0144-headscale.md
+    doc: docs/workstreams/adr-0144-headscale.md
     depends_on:
       - adr-0014-tailscale
     conflicts_with: []
@@ -10165,7 +10248,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0020-backups
     worktree_path: ../proxmox_florin_server-backups
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0020-backups.md
+    doc: docs/workstreams/adr-0020-backups.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
@@ -10183,7 +10266,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0026-backup-vm
     worktree_path: ../proxmox_florin_server-backup-vm
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0029-backup-vm.md
+    doc: docs/workstreams/adr-0029-backup-vm.md
     depends_on:
       - adr-0020-backups
     conflicts_with: []
@@ -10231,7 +10314,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0023-docker-runtime
     worktree_path: ../proxmox_florin_server-docker-runtime
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0023-docker-runtime.md
+    doc: docs/workstreams/adr-0023-docker-runtime.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
@@ -10248,7 +10331,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0024-docker-security
     worktree_path: ../proxmox_florin_server-docker-security
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0024-docker-security.md
+    doc: docs/workstreams/adr-0024-docker-security.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
@@ -10266,7 +10349,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0178-dependency-wave
     worktree_path: ../worktree-adr-0178-dependency-wave
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0178-dependency-wave-manifests.md
+    doc: docs/workstreams/adr-0178-dependency-wave-manifests.md
     depends_on:
       - adr-0153-distributed-resource-lock-registry
       - adr-0154-vm-scoped-execution-lanes
@@ -10291,7 +10374,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0174-canonical-truth
     worktree_path: ../worktree-adr-0174-canonical-truth
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0174-canonical-truth-assembly.md
+    doc: docs/workstreams/adr-0174-canonical-truth-assembly.md
     depends_on:
       - adr-0110-platform-versioning
     conflicts_with: []
@@ -10321,7 +10404,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0025-docker-compose-stacks
     worktree_path: ../proxmox_florin_server-docker-compose-stacks
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0025-docker-compose-stacks.md
+    doc: docs/workstreams/adr-0025-docker-compose-stacks.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
@@ -10339,7 +10422,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0025-postgres-vm
     worktree_path: ../proxmox_florin_server-postgres-vm
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0026-postgres-vm.md
+    doc: docs/workstreams/adr-0026-postgres-vm.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
@@ -10359,7 +10442,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0022-uptime-kuma
     worktree_path: ../proxmox_florin_server-uptime-kuma
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0027-uptime-kuma.md
+    doc: docs/workstreams/adr-0027-uptime-kuma.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
@@ -10378,7 +10461,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0028-build-telemetry
     worktree_path: ../proxmox_florin_server-build-telemetry
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0028-build-telemetry.md
+    doc: docs/workstreams/adr-0028-build-telemetry.md
     depends_on:
       - adr-0011-monitoring
     conflicts_with: []
@@ -10397,7 +10480,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0151-n8n
     worktree_path: .worktrees/adr-0151
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md
+    doc: docs/workstreams/adr-0151-n8n.md
     depends_on:
       - adr-0025-docker-compose-stacks
       - adr-0026-postgres-vm
@@ -10422,7 +10505,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0040-runtime-container-telemetry
     worktree_path: ../proxmox_florin_server-runtime-container-telemetry
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0040-runtime-container-telemetry.md
+    doc: docs/workstreams/adr-0040-runtime-container-telemetry.md
     depends_on:
       - adr-0011-monitoring
     conflicts_with: []
@@ -10441,7 +10524,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0040-email-platform
     worktree_path: ../proxmox_florin_server-email-platform
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform.md
+    doc: docs/workstreams/adr-0041-email-platform.md
     depends_on:
       - adr-0011-monitoring
       - adr-0023-docker-runtime
@@ -10462,7 +10545,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0041-email-platform-live
     worktree_path: ../proxmox_florin_server-email-platform-live
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform-live.md
+    doc: docs/workstreams/adr-0041-email-platform-live.md
     depends_on:
       - adr-0041-email-platform
       - adr-0011-monitoring
@@ -10486,7 +10569,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0042-step-ca
     worktree_path: ../proxmox_florin_server-step-ca
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0042-step-ca.md
+    doc: docs/workstreams/adr-0042-step-ca.md
     depends_on:
       - adr-0014-tailscale
     conflicts_with: []
@@ -10505,7 +10588,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0043-openbao
     worktree_path: ../proxmox_florin_server-openbao
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0043-openbao.md
+    doc: docs/workstreams/adr-0043-openbao.md
     depends_on:
       - adr-0023-docker-runtime
     conflicts_with: []
@@ -10524,7 +10607,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0044-windmill
     worktree_path: ../proxmox_florin_server-windmill
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0044-windmill.md
+    doc: docs/workstreams/adr-0044-windmill.md
     depends_on:
       - adr-0026-postgres-vm
     conflicts_with: []
@@ -10543,7 +10626,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0045-communication-lanes
     worktree_path: ../proxmox_florin_server-communication-lanes
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0045-communication-lanes.md
+    doc: docs/workstreams/adr-0045-communication-lanes.md
     depends_on:
       - adr-0014-tailscale
       - adr-0041-email-platform
@@ -10563,7 +10646,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0046-identity-classes
     worktree_path: ../proxmox_florin_server-identity-classes
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0046-identity-classes.md
+    doc: docs/workstreams/adr-0046-identity-classes.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
@@ -10581,7 +10664,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0047-short-lived-creds
     worktree_path: ../proxmox_florin_server-short-lived-creds
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0047-short-lived-creds.md
+    doc: docs/workstreams/adr-0047-short-lived-creds.md
     depends_on:
       - adr-0042-step-ca
       - adr-0043-openbao
@@ -10602,7 +10685,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0048-command-catalog
     worktree_path: ../proxmox_florin_server-command-catalog
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0048-command-catalog.md
+    doc: docs/workstreams/adr-0048-command-catalog.md
     depends_on:
       - adr-0044-windmill
       - adr-0046-identity-classes
@@ -10622,7 +10705,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0049-private-first-api-publication-model
     worktree_path: ../proxmox_florin_server-adr-0049
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0049-private-api-publication.md
+    doc: docs/workstreams/adr-0049-private-api-publication.md
     depends_on:
       - adr-0045-communication-lanes
       - adr-0047-short-lived-creds
@@ -10641,7 +10724,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0050-notification-profiles
     worktree_path: ../proxmox_florin_server-notification-profiles
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0050-notification-profiles.md
+    doc: docs/workstreams/adr-0050-notification-profiles.md
     depends_on:
       - adr-0041-email-platform
       - adr-0046-identity-classes
@@ -10661,7 +10744,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0051-control-plane-backup-recovery-break-glass
     worktree_path: ../proxmox_florin_server-adr-0051
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0051-control-plane-recovery.md
+    doc: docs/workstreams/adr-0051-control-plane-recovery.md
     depends_on:
       - adr-0029-backup-vm
       - adr-0042-step-ca
@@ -10684,7 +10767,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0052-loki-logs
     worktree_path: ../proxmox_florin_server-loki-logs
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0052-loki-logs.md
+    doc: docs/workstreams/adr-0052-loki-logs.md
     depends_on:
       - adr-0011-monitoring
     conflicts_with: []
@@ -10704,7 +10787,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0053-tempo-traces
     worktree_path: ../proxmox_florin_server-tempo-traces
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0053-tempo-traces.md
+    doc: docs/workstreams/adr-0053-tempo-traces.md
     depends_on:
       - adr-0011-monitoring
       - adr-0052-loki-logs
@@ -10724,7 +10807,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0054-netbox-topology
     worktree_path: ../proxmox_florin_server-netbox-topology
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0054-netbox-topology.md
+    doc: docs/workstreams/adr-0054-netbox-topology.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
@@ -10742,7 +10825,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0055-portainer-operations
     worktree_path: ../proxmox_florin_server-portainer-operations
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0055-portainer-operations.md
+    doc: docs/workstreams/adr-0055-portainer-operations.md
     depends_on:
       - adr-0023-docker-runtime
       - adr-0025-docker-compose-stacks
@@ -10763,7 +10846,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0056-keycloak-sso
     worktree_path: ../proxmox_florin_server-keycloak-sso
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0056-keycloak-sso.md
+    doc: docs/workstreams/adr-0056-keycloak-sso.md
     depends_on:
       - adr-0046-identity-classes
       - adr-0047-short-lived-creds
@@ -10784,7 +10867,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0057-mattermost-chatops
     worktree_path: ../proxmox_florin_server-mattermost-chatops
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0057-mattermost-chatops.md
+    doc: docs/workstreams/adr-0057-mattermost-chatops.md
     depends_on:
       - adr-0045-communication-lanes
       - adr-0050-notification-profiles
@@ -10804,7 +10887,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0058-nats-event-bus
     worktree_path: ../proxmox_florin_server-nats-event-bus
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0058-nats-event-bus.md
+    doc: docs/workstreams/adr-0058-nats-event-bus.md
     depends_on:
       - adr-0045-communication-lanes
       - adr-0046-identity-classes
@@ -10849,7 +10932,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0059-ntopng
     worktree_path: ../proxmox_florin_server-ntopng
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0059-ntopng-network-visibility.md
+    doc: docs/workstreams/adr-0059-ntopng-network-visibility.md
     depends_on:
       - adr-0011-monitoring
       - adr-0012-proxmox-host-bridge-and-nat-network
@@ -10870,7 +10953,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0060-open-webui-workbench
     worktree_path: ../proxmox_florin_server-open-webui-workbench
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0060-open-webui-workbench.md
+    doc: docs/workstreams/adr-0060-open-webui-workbench.md
     depends_on:
       - adr-0044-windmill
       - adr-0048-command-catalog
@@ -10892,7 +10975,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0061-glitchtip-failure-signals
     worktree_path: ../proxmox_florin_server-glitchtip-failure-signals
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0061-glitchtip-failure-signals.md
+    doc: docs/workstreams/adr-0061-glitchtip-failure-signals.md
     depends_on:
       - adr-0026-postgres-vm
       - adr-0049-private-api-publication
@@ -10937,7 +11020,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0062-role-composability
     worktree_path: ../proxmox_florin_server-role-composability
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0062-role-composability.md
+    doc: docs/workstreams/adr-0062-role-composability.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
@@ -10955,7 +11038,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0063-platform-vars-library
     worktree_path: ../proxmox_florin_server-platform-vars-library
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0063-platform-vars-library.md
+    doc: docs/workstreams/adr-0063-platform-vars-library.md
     depends_on:
       - adr-0062-role-composability
     conflicts_with: []
@@ -10974,7 +11057,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0064-health-probe-contracts
     worktree_path: ../proxmox_florin_server-health-probe-contracts
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0064-health-probe-contracts.md
+    doc: docs/workstreams/adr-0064-health-probe-contracts.md
     depends_on:
       - adr-0027-uptime-kuma
       - adr-0062-role-composability
@@ -10994,7 +11077,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0065-secret-rotation
     worktree_path: ../proxmox_florin_server-secret-rotation
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0065-secret-rotation-automation.md
+    doc: docs/workstreams/adr-0065-secret-rotation-automation.md
     depends_on:
       - adr-0043-openbao
       - adr-0044-windmill
@@ -11016,7 +11099,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0066-mutation-audit-log
     worktree_path: ../proxmox_florin_server-mutation-audit-log
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0066-mutation-audit-log.md
+    doc: docs/workstreams/adr-0066-mutation-audit-log.md
     depends_on:
       - adr-0052-loki-logs
       - adr-0048-command-catalog
@@ -11079,7 +11162,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0067-guest-network-policy
     worktree_path: ../proxmox_florin_server-guest-network-policy
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0067-guest-network-policy.md
+    doc: docs/workstreams/adr-0067-guest-network-policy.md
     depends_on:
       - adr-0012-proxmox-host-bridge-and-nat-network
       - adr-0013-public-ingress
@@ -11099,7 +11182,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0068-container-image-policy
     worktree_path: ../proxmox_florin_server-container-image-policy
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0068-container-image-policy.md
+    doc: docs/workstreams/adr-0068-container-image-policy.md
     depends_on:
       - adr-0023-docker-runtime
       - adr-0025-docker-compose-stacks
@@ -11120,7 +11203,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0069-agent-tool-registry
     worktree_path: ../proxmox_florin_server-agent-tool-registry
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0069-agent-tool-registry.md
+    doc: docs/workstreams/adr-0069-agent-tool-registry.md
     depends_on:
       - adr-0048-command-catalog
       - adr-0049-private-api-publication
@@ -11141,7 +11224,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0070-rag-platform-context
     worktree_path: ../proxmox_florin_server-rag-platform-context
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0070-rag-platform-context.md
+    doc: docs/workstreams/adr-0070-rag-platform-context.md
     depends_on:
       - adr-0044-windmill
       - adr-0049-private-api-publication
@@ -11164,7 +11247,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0071-agent-observation-loop
     worktree_path: ../proxmox_florin_server-agent-observation-loop
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0071-agent-observation-loop.md
+    doc: docs/workstreams/adr-0071-agent-observation-loop.md
     depends_on:
       - adr-0044-windmill
       - adr-0057-mattermost-chatops
@@ -11190,7 +11273,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0072-staging-production-topology
     worktree_path: ../proxmox_florin_server-adr-0072-staging-production-topology
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0072-staging-production-topology.md
+    doc: docs/workstreams/adr-0072-staging-production-topology.md
     depends_on:
       - adr-0074-ops-portal
       - adr-0075-service-capability-catalog
@@ -11211,7 +11294,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0073-promotion-pipeline
     worktree_path: .worktrees/adr-0073
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0073-promotion-pipeline.md
+    doc: docs/workstreams/adr-0073-promotion-pipeline.md
     depends_on:
       - adr-0072-staging-production-topology
       - adr-0044-windmill
@@ -11237,7 +11320,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0074-ops-portal
     worktree_path: ../proxmox_florin_server__adr_0074
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0074-ops-portal.md
+    doc: docs/workstreams/adr-0074-ops-portal.md
     depends_on:
       - adr-0075-service-capability-catalog
       - adr-0076-subdomain-governance
@@ -11259,7 +11342,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0075-service-capability-catalog
     worktree_path: ../proxmox_florin_server-service-capability-catalog
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0075-service-capability-catalog.md
+    doc: docs/workstreams/adr-0075-service-capability-catalog.md
     depends_on:
       - adr-0064-health-probe-contracts
       - adr-0068-container-image-policy
@@ -11282,7 +11365,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0076-subdomain-governance
     worktree_path: .worktrees/adr-0076
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0076-subdomain-governance.md
+    doc: docs/workstreams/adr-0076-subdomain-governance.md
     depends_on:
       - adr-0042-step-ca
       - adr-0021-nginx-edge-publication
@@ -11307,7 +11390,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0077-compose-secrets-injection
     worktree_path: ./.worktrees/adr-0077
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0077-compose-secrets-injection.md
+    doc: docs/workstreams/adr-0077-compose-secrets-injection.md
     depends_on:
       - adr-0043-openbao
       - adr-0025-docker-compose-stacks
@@ -11330,7 +11413,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0079-playbook-decomposition-and-shared-execution-model
     worktree_path: .worktrees/adr-0079
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0079-playbook-decomposition.md
+    doc: docs/workstreams/adr-0079-playbook-decomposition.md
     depends_on:
       - adr-0062-role-composability
       - adr-0063-platform-vars-library
@@ -11354,7 +11437,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0080-maintenance-windows
     worktree_path: ../proxmox_florin_server-maintenance-windows
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0080-maintenance-windows.md
+    doc: docs/workstreams/adr-0080-maintenance-windows.md
     depends_on:
       - adr-0058-nats-event-bus
       - adr-0044-windmill
@@ -11378,7 +11461,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0081-changelog-portal
     worktree_path: ../proxmox_florin_server-changelog-portal
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0081-changelog-portal.md
+    doc: docs/workstreams/adr-0081-changelog-portal.md
     depends_on:
       - adr-0074-ops-portal
       - adr-0066-mutation-audit-log
@@ -11402,7 +11485,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0082-remote-build-gateway
     worktree_path: ../proxmox_florin_server-remote-build-gateway
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0082-remote-build-gateway.md
+    doc: docs/workstreams/adr-0082-remote-build-gateway.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
@@ -11421,7 +11504,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0083-docker-check-runner
     worktree_path: .worktrees/adr-0083
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0083-docker-check-runner.md
+    doc: docs/workstreams/adr-0083-docker-check-runner.md
     depends_on:
       - adr-0082-remote-build-gateway
     conflicts_with: []
@@ -11441,7 +11524,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0084-packer-vm-template-pipeline
     worktree_path: ../proxmox_florin_server-adr-0084
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0084-packer-pipeline.md
+    doc: docs/workstreams/adr-0084-packer-pipeline.md
     depends_on:
       - adr-0082-remote-build-gateway
       - adr-0083-docker-check-runner
@@ -11465,7 +11548,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0085-opentofu-vm-lifecycle
     worktree_path: ../proxmox_florin_server-opentofu-vm-lifecycle
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0085-opentofu-vm-lifecycle.md
+    doc: docs/workstreams/adr-0085-opentofu-vm-lifecycle.md
     depends_on:
       - adr-0082-remote-build-gateway
       - adr-0083-docker-check-runner
@@ -11489,7 +11572,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0086-ansible-collections
     worktree_path: ../proxmox_florin_server-ansible-collections
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0086-ansible-collections.md
+    doc: docs/workstreams/adr-0086-ansible-collections.md
     depends_on:
       - adr-0082-remote-build-gateway
       - adr-0083-docker-check-runner
@@ -11513,7 +11596,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0087-validation-gate
     worktree_path: ../proxmox_florin_server-validation-gate
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0087-validation-gate.md
+    doc: docs/workstreams/adr-0087-validation-gate.md
     depends_on:
       - adr-0082-remote-build-gateway
       - adr-0083-docker-check-runner
@@ -11538,7 +11621,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0088-ephemeral-fixtures
     worktree_path: .worktrees/adr-0088-ephemeral-fixtures
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0088-ephemeral-fixtures.md
+    doc: docs/workstreams/adr-0088-ephemeral-fixtures.md
     depends_on:
       - adr-0072-staging-production-topology
       - adr-0082-remote-build-gateway
@@ -11563,7 +11646,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0089-build-cache
     worktree_path: ../proxmox_florin_server-build-cache
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0089-build-cache.md
+    doc: docs/workstreams/adr-0089-build-cache.md
     depends_on:
       - adr-0082-remote-build-gateway
       - adr-0083-docker-check-runner
@@ -11586,7 +11669,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0090-platform-cli
     worktree_path: ../proxmox_florin_server-platform-cli
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0090-platform-cli.md
+    doc: docs/workstreams/adr-0090-platform-cli.md
     depends_on:
       - adr-0075-service-capability-catalog
       - adr-0082-remote-build-gateway
@@ -11609,7 +11692,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0078-mainline-rebuild
     worktree_path: .worktrees/adr-0078-mainline-rebuild
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0078-service-scaffold.md
+    doc: docs/workstreams/adr-0078-service-scaffold.md
     depends_on:
       - adr-0062-role-composability
       - adr-0075-service-capability-catalog
@@ -11641,7 +11724,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0091-drift-detection
     worktree_path: ../proxmox_florin_server-drift-detection
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md
+    doc: docs/workstreams/adr-0091-drift-detection.md
     depends_on:
       - adr-0058-nats-event-bus
       - adr-0074-ops-portal
@@ -11674,7 +11757,7 @@ workstreams:
     owner: codex
     branch: codex/integration-0092-live
     worktree_path: .worktrees/integration-0092
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0092-platform-api-gateway.md
+    doc: docs/workstreams/adr-0092-platform-api-gateway.md
     depends_on:
       - adr-0021-nginx-edge
       - adr-0045-communication-lanes
@@ -11700,7 +11783,7 @@ workstreams:
     owner: codex
     branch: codex/live-apply-0093
     worktree_path: .worktrees/live-apply-0093
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0093-interactive-ops-portal.md
+    doc: docs/workstreams/adr-0093-interactive-ops-portal.md
     depends_on:
       - adr-0092-platform-api-gateway
       - adr-0056-keycloak
@@ -11725,7 +11808,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0094-developer-portal
     worktree_path: ../proxmox_florin_server-developer-portal
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0094-developer-portal.md
+    doc: docs/workstreams/adr-0094-developer-portal.md
     depends_on:
       - adr-0021-nginx-edge
       - adr-0033-service-catalog
@@ -11748,7 +11831,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0095-unified-search
     worktree_path: ../proxmox_florin_server-unified-search
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0095-unified-search.md
+    doc: docs/workstreams/adr-0095-unified-search.md
     depends_on:
       - adr-0092-platform-api-gateway
       - adr-0054-netbox
@@ -11806,7 +11889,7 @@ workstreams:
     owner: codex
     branch: codex/ws-0121-live-apply
     worktree_path: .worktrees/ws-0121-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md
+    doc: docs/workstreams/adr-0121-search-indexing-fabric.md
     depends_on:
       - adr-0048-command-catalog
       - adr-0052-loki-logs
@@ -11839,7 +11922,7 @@ workstreams:
     owner: codex
     branch: codex/live-apply-0096
     worktree_path: .worktrees/adr-0096
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0096-slo-tracking.md
+    doc: docs/workstreams/adr-0096-slo-tracking.md
     depends_on:
       - adr-0011-monitoring
       - adr-0064-health-probes
@@ -11865,7 +11948,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0097-alerting-routing
     worktree_path: ../.worktrees/adr-0097-alerting-routing
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0097-alerting-routing.md
+    doc: docs/workstreams/adr-0097-alerting-routing.md
     depends_on:
       - adr-0011-monitoring
       - adr-0057-mattermost
@@ -11887,7 +11970,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0098-postgres-ha
     worktree_path: ../proxmox_florin_server-postgres-ha
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0098-postgres-ha.md
+    doc: docs/workstreams/adr-0098-postgres-ha.md
     depends_on:
       - adr-0026-postgres-vm
       - adr-0064-health-probes
@@ -11911,7 +11994,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0099-backup-restore-verification
     worktree_path: ../proxmox_florin_server-backup-restore-verification
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0099-backup-restore-verification.md
+    doc: docs/workstreams/adr-0099-backup-restore-verification.md
     depends_on:
       - adr-0020-backups
       - adr-0029-backup-vm
@@ -11935,7 +12018,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0100-dr-playbook
     worktree_path: .worktrees/adr-0100
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0100-disaster-recovery-playbook.md
+    doc: docs/workstreams/adr-0100-disaster-recovery-playbook.md
     depends_on:
       - adr-0020-backups
       - adr-0029-backup-vm
@@ -11960,7 +12043,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0101-certificate-lifecycle
     worktree_path: ../proxmox_florin_server-certificate-lifecycle
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0101-certificate-lifecycle.md
+    doc: docs/workstreams/adr-0101-certificate-lifecycle.md
     depends_on:
       - adr-0042-step-ca
       - adr-0047-short-lived-creds
@@ -11984,7 +12067,7 @@ workstreams:
     owner: codex
     branch: codex/ws-0101-live-apply
     worktree_path: .worktrees/ws-0101-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0101-live-apply.md
+    doc: docs/workstreams/ws-0101-live-apply.md
     depends_on:
       - adr-0101-certificate-lifecycle
     conflicts_with: []
@@ -12006,7 +12089,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0102-security-posture
     worktree_path: ../proxmox_florin_server-security-posture
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0102-security-posture-reporting.md
+    doc: docs/workstreams/adr-0102-security-posture-reporting.md
     depends_on:
       - adr-0006-security-baseline
       - adr-0044-windmill
@@ -12037,7 +12120,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0103
     worktree_path: .worktrees/codex-adr-0103
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0103-data-retention-policy.md
+    doc: docs/workstreams/adr-0103-data-retention-policy.md
     depends_on:
       - adr-0043-openbao
       - adr-0052-loki-log-aggregation
@@ -12061,7 +12144,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0104-service-dependency-graph
     worktree_path: .worktrees/adr-0104
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0104-dependency-graph.md
+    doc: docs/workstreams/adr-0104-dependency-graph.md
     depends_on:
       - adr-0033-service-catalog
       - adr-0073-promotion-gate
@@ -12085,7 +12168,7 @@ workstreams:
     owner: codex
     branch: codex/ws-0105-live-apply
     worktree_path: ../proxmox_florin_server-ws-0105-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0105-capacity-model.md
+    doc: docs/workstreams/adr-0105-capacity-model.md
     depends_on:
       - adr-0010-vm-topology
       - adr-0073-promotion-gate
@@ -12113,7 +12196,7 @@ workstreams:
     owner: codex
     branch: codex/ws-0105-live-apply
     worktree_path: ../proxmox_florin_server-ws-0105-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md
+    doc: docs/workstreams/ws-0105-live-apply.md
     depends_on:
       - adr-0011-monitoring
       - adr-0097-alerting-routing
@@ -12135,8 +12218,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0189-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0189-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0189-live-apply.md
+    worktree_path: .worktrees/ws-0189-live-apply
+    doc: docs/workstreams/ws-0189-live-apply.md
     depends_on:
       - adr-0088-ephemeral-fixtures
       - adr-0167-graceful-degradation-mode-declarations
@@ -12208,7 +12291,7 @@ workstreams:
     owner: codex
     branch: codex/ws-0187-live-apply
     worktree_path: .worktrees/ws-0187-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0187-live-apply.md
+    doc: docs/workstreams/ws-0187-live-apply.md
     depends_on:
       - adr-0088-ephemeral-fixtures
       - adr-0099-backup-restore-verification
@@ -12270,7 +12353,7 @@ workstreams:
     owner: codex
     branch: codex/ws-0106-main-merge
     worktree_path: .worktrees/ws-0106-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0106-ephemeral-lifecycle.md
+    doc: docs/workstreams/adr-0106-ephemeral-lifecycle.md
     depends_on:
       - adr-0072-staging-production-topology
       - adr-0085-opentofu-vm-lifecycle
@@ -12295,7 +12378,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0107-extension-model
     worktree_path: ../proxmox_florin_server-extension-model
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0107-extension-model.md
+    doc: docs/workstreams/adr-0107-extension-model.md
     depends_on:
       - adr-0033-service-catalog
       - adr-0064-health-probes
@@ -12319,7 +12402,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0108-operator-onboarding
     worktree_path: .worktrees/adr-0108
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0108-operator-onboarding.md
+    doc: docs/workstreams/adr-0108-operator-onboarding.md
     depends_on:
       - adr-0014-tailscale
       - adr-0042-step-ca
@@ -12343,7 +12426,7 @@ workstreams:
     owner: codex
     branch: codex/ws-0108-main-merge-v5
     worktree_path: .worktrees/ws-0108-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0108-live-apply.md
+    doc: docs/workstreams/ws-0108-live-apply.md
     depends_on:
       - adr-0042-step-ca
       - adr-0043-openbao
@@ -12379,7 +12462,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0109-implementation
     worktree_path: .worktrees/adr-0109
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0109-public-status-page.md
+    doc: docs/workstreams/adr-0109-public-status-page.md
     depends_on:
       - adr-0015-dns-subdomains
       - adr-0021-nginx-edge
@@ -12407,7 +12490,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0110-platform-versioning
     worktree_path: ../proxmox_florin_server-platform-versioning
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0110-platform-versioning.md
+    doc: docs/workstreams/adr-0110-platform-versioning.md
     depends_on:
       - adr-0008-versioning-model
       - adr-0017-adr-lifecycle
@@ -12431,7 +12514,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0111-integration-tests
     worktree_path: .worktrees/adr-0111
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0111-integration-test-suite.md
+    doc: docs/workstreams/adr-0111-integration-test-suite.md
     depends_on:
       - adr-0044-windmill
       - adr-0056-keycloak
@@ -12464,7 +12547,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0112-goal-compiler
     worktree_path: .worktrees/adr-0112
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0112-goal-compiler.md
+    doc: docs/workstreams/adr-0112-goal-compiler.md
     depends_on:
       - adr-0048-command-catalog
       - adr-0069-agent-tool-registry
@@ -12489,7 +12572,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0116-risk-scoring
     worktree_path: .worktrees/adr-0116
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0116-change-risk-scoring.md
+    doc: docs/workstreams/adr-0116-change-risk-scoring.md
     depends_on:
       - adr-0075-service-capability-catalog
       - adr-0080-maintenance-windows
@@ -12516,7 +12599,7 @@ workstreams:
     owner: codex
     branch: codex/ws-0117-live-apply
     worktree_path: ../proxmox_florin_server_ws-0117-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0117-dependency-graph-runtime.md
+    doc: docs/workstreams/adr-0117-dependency-graph-runtime.md
     depends_on:
       - adr-0048-command-catalog
       - adr-0054-netbox-topology
@@ -12544,7 +12627,7 @@ workstreams:
     owner: codex
     branch: codex/ws-0119-main-final
     worktree_path: .worktrees/ws-0119-main-final
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0119-budgeted-workflow-scheduler.md
+    doc: docs/workstreams/adr-0119-budgeted-workflow-scheduler.md
     depends_on:
       - adr-0044-windmill
       - adr-0048-command-catalog
@@ -12580,7 +12663,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0120-diff-engine
     worktree_path: ../proxmox_florin_server-diff-engine
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0120-dry-run-diff-engine.md
+    doc: docs/workstreams/adr-0120-dry-run-diff-engine.md
     depends_on:
       - adr-0048-command-catalog
       - adr-0085-opentofu-vm-lifecycle
@@ -12608,7 +12691,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0115-mutation-ledger
     worktree_path: ../proxmox_florin_server-mutation-ledger
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0115-mutation-ledger.md
+    doc: docs/workstreams/adr-0115-mutation-ledger.md
     depends_on:
       - adr-0058-nats-event-bus
       - adr-0066-mutation-audit-log
@@ -12632,7 +12715,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0114-incident-triage
     worktree_path: .worktrees/adr-0114
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0114-incident-triage-engine.md
+    doc: docs/workstreams/adr-0114-incident-triage-engine.md
     depends_on:
       - adr-0052-loki-log-aggregation
       - adr-0057-mattermost-chatops
@@ -12662,7 +12745,7 @@ workstreams:
     owner: codex
     branch: codex/ws-0113-main-live-apply
     worktree_path: .worktrees/ws-0113-main-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0113-world-state-materializer.md
+    doc: docs/workstreams/adr-0113-world-state-materializer.md
     depends_on:
       - adr-0054-netbox-topology
       - adr-0058-nats-event-bus
@@ -12688,7 +12771,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0122-operator-admin-ui
     worktree_path: .worktrees/adr-0122-operator-admin-ui
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0122-operator-access-admin.md
+    doc: docs/workstreams/adr-0122-operator-access-admin.md
     depends_on:
       - adr-0044-windmill
       - adr-0056-keycloak
@@ -12710,7 +12793,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0123-service-uptime-contract
     worktree_path: .worktrees/adr-0123
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0123-service-uptime-contracts.md
+    doc: docs/workstreams/adr-0123-service-uptime-contracts.md
     depends_on:
       - adr-0027-uptime-kuma
       - adr-0064-health-probe-contracts
@@ -12736,7 +12819,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0124-platform-event-taxonomy
     worktree_path: .worktrees/adr-0124
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0124-platform-event-taxonomy.md
+    doc: docs/workstreams/adr-0124-platform-event-taxonomy.md
     depends_on:
       - adr-0058-nats-event-bus
       - adr-0071-agent-observation-loop
@@ -12765,7 +12848,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0125-agent-capability-bounds
     worktree_path: .worktrees/adr-0125
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0125-agent-capability-bounds.md
+    doc: docs/workstreams/adr-0125-agent-capability-bounds.md
     depends_on:
       - adr-0046-identity-classes
       - adr-0069-agent-tool-registry
@@ -12791,7 +12874,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0126-logic-loop-clean
     worktree_path: ../proxmox_florin_server-adr-0126-logic-loop-clean
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0126-observation-to-action-closure-loop.md
+    doc: docs/workstreams/adr-0126-observation-to-action-closure-loop.md
     depends_on:
       - adr-0048-command-catalog
       - adr-0064-health-probe-contracts
@@ -12823,7 +12906,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0127-conflict-mgmt
     worktree_path: ../proxmox_florin_server-adr-0127
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0127-intent-conflict-resolution.md
+    doc: docs/workstreams/adr-0127-intent-conflict-resolution.md
     depends_on:
       - adr-0112-goal-compiler
       - adr-0115-mutation-ledger
@@ -12846,7 +12929,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0128-health-composite-index
     worktree_path: .worktrees/adr-0128
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0128-platform-health-composite-index.md
+    doc: docs/workstreams/adr-0128-platform-health-composite-index.md
     depends_on:
       - adr-0064-health-probe-contracts
       - adr-0080-maintenance-windows
@@ -12876,7 +12959,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0160-live-apply
     worktree_path: .worktrees/adr-0160-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0160-parallel-dry-run-fan-out.md
+    doc: docs/workstreams/adr-0160-parallel-dry-run-fan-out.md
     depends_on:
       - adr-0112-goal-compiler
       - adr-0115-mutation-ledger
@@ -12898,7 +12981,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0130-agent-state
     worktree_path: .worktrees/adr-0130-agent-state
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0130-agent-state-persistence.md
+    doc: docs/workstreams/adr-0130-agent-state-persistence.md
     depends_on:
       - adr-0044-windmill
       - adr-0098-postgres-ha
@@ -12919,7 +13002,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0129-runbook-automation-executor
     worktree_path: .worktrees/adr-0129
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0129-runbook-automation-executor.md
+    doc: docs/workstreams/adr-0129-runbook-automation-executor.md
     depends_on:
       - adr-0044-windmill
       - adr-0066-mutation-audit-log
@@ -12942,7 +13025,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0131-handoff-protocol
     worktree_path: .worktrees/adr-0131
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0131-agent-handoff-protocol.md
+    doc: docs/workstreams/adr-0131-agent-handoff-protocol.md
     depends_on:
       - adr-0090-platform-cli
       - adr-0115-mutation-ledger
@@ -12963,7 +13046,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0132-platform-manifest-v2
     worktree_path: .worktrees/adr-0132-v2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0132-self-describing-platform-manifest.md
+    doc: docs/workstreams/adr-0132-self-describing-platform-manifest.md
     depends_on:
       - adr-0037-schema-validated-repository-data-models
       - adr-0087-validation-gate
@@ -12992,7 +13075,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0133-portal-auth-default
     worktree_path: .worktrees/adr-0133-auth-default
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0133-portal-authentication-by-default.md
+    doc: docs/workstreams/adr-0133-portal-authentication-by-default.md
     depends_on:
       - adr-0011-monitoring
       - adr-0056-keycloak-sso
@@ -13016,7 +13099,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0134-changelog-redaction
     worktree_path: .worktrees/adr-0134
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0134-changelog-redaction.md
+    doc: docs/workstreams/adr-0134-changelog-redaction.md
     depends_on:
       - adr-0081-changelog-portal
       - adr-0115-mutation-ledger
@@ -13038,7 +13121,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0135-data-governance-mainline
     worktree_path: .worktrees/adr-0135-mainline
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md
+    doc: docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md
     depends_on:
       - adr-0094-developer-portal
       - adr-0110-platform-versioning
@@ -13060,7 +13143,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0137-public-surface
     worktree_path: .worktrees/adr-0137
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0137-robots-and-crawl-policy.md
+    doc: docs/workstreams/adr-0137-robots-and-crawl-policy.md
     depends_on:
       - adr-0076-subdomain-governance
       - adr-0101-certificate-lifecycle
@@ -13083,7 +13166,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0139-subdomain-exposure-audit
     worktree_path: .worktrees/adr-0139
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0139-subdomain-exposure-audit.md
+    doc: docs/workstreams/adr-0139-subdomain-exposure-audit.md
     depends_on:
       - adr-0076-subdomain-governance
       - adr-0091-drift-detection
@@ -13105,7 +13188,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0140-grafana-hardening
     worktree_path: .worktrees/adr-0140-grafana-hardening
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md
+    doc: docs/workstreams/adr-0140-grafana-public-access-hardening.md
     depends_on:
       - adr-0011-monitoring
       - adr-0056-keycloak-sso
@@ -13128,7 +13211,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0141-token-lifecycle
     worktree_path: .worktrees/adr-0141
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0141-api-token-lifecycle.md
+    doc: docs/workstreams/adr-0141-api-token-lifecycle.md
     depends_on:
       - adr-0043-openbao
       - adr-0044-windmill
@@ -13154,7 +13237,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0142-public-surface-scan
     worktree_path: .worktrees/adr-0142
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0142-public-surface-security-scan.md
+    doc: docs/workstreams/adr-0142-public-surface-security-scan.md
     depends_on:
       - adr-0044-windmill
       - adr-0057-mattermost-chatops
@@ -13180,7 +13263,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0136-http-security-headers
     worktree_path: .worktrees/adr-0136
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0136-http-security-headers.md
+    doc: docs/workstreams/adr-0136-http-security-headers.md
     depends_on:
       - adr-0021-public-subdomain-publication
       - adr-0133-portal-auth-by-default
@@ -13202,7 +13285,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0145-ollama
     worktree_path: ../proxmox_florin_server-ollama
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0145-ollama.md
+    doc: docs/workstreams/adr-0145-ollama.md
     depends_on:
       - adr-0060-open-webui-workbench
       - adr-0112-goal-compiler
@@ -13226,7 +13309,7 @@ workstreams:
     owner: codex
     branch: codex/integration-0143-main-refresh-v2
     worktree_path: .worktrees/integration-0134-main/.worktrees/integration-0143-main-refresh-v2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0143-gitea-ci.md
+    doc: docs/workstreams/adr-0143-gitea-ci.md
     depends_on:
       - adr-0044-windmill
       - adr-0056-keycloak
@@ -13286,7 +13369,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0146-ai-observability
     worktree_path: .worktrees/adr-0146-ai-observability
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0146-ai-observability.md
+    doc: docs/workstreams/adr-0146-ai-observability.md
     depends_on:
       - adr-0043-openbao
       - adr-0056-keycloak-sso
@@ -13314,7 +13397,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0147-vaultwarden
     worktree_path: .worktrees/adr-0147
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0147-vaultwarden.md
+    doc: docs/workstreams/adr-0147-vaultwarden.md
     depends_on:
       - adr-0026-postgres-vm
       - adr-0042-step-ca
@@ -13337,7 +13420,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0148-searxng-web-search
     worktree_path: .worktrees/adr-0148-searxng-web-search
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0148-searxng-web-search.md
+    doc: docs/workstreams/adr-0148-searxng-web-search.md
     depends_on:
       - adr-0023-docker-runtime
       - adr-0060-open-webui-workbench
@@ -13365,7 +13448,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0153-distributed-resource-lock-registry
     worktree_path: .worktrees/adr-0153
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0153-distributed-resource-lock-registry.md
+    doc: docs/workstreams/adr-0153-distributed-resource-lock-registry.md
     depends_on:
       - adr-0112-goal-compiler
       - adr-0115-mutation-ledger
@@ -13391,7 +13474,7 @@ workstreams:
     owner: codex
     branch: codex/live-apply-0154-main-v3
     worktree_path: .worktrees/live-apply-0154-main-v3
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0154-vm-scoped-execution-lanes.md
+    doc: docs/workstreams/adr-0154-vm-scoped-execution-lanes.md
     depends_on:
       - adr-0044-windmill
       - adr-0075-service-capability-catalog
@@ -13419,8 +13502,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/adr-0155-main-live
-    worktree_path: /private/tmp/proxmox_florin_server-main-0155-v2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0155-intent-queue-with-release-triggered-scheduling.md
+    worktree_path: .worktrees/proxmox_florin_server-main-0155-v2
+    doc: docs/workstreams/adr-0155-intent-queue-with-release-triggered-scheduling.md
     depends_on:
       - adr-0044-windmill
       - adr-0119-budgeted-workflow-scheduler
@@ -13447,7 +13530,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0156-agent-session-workspace-isolation
     worktree_path: .worktrees/adr-0156
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0156-agent-session-workspace-isolation.md
+    doc: docs/workstreams/adr-0156-agent-session-workspace-isolation.md
     depends_on:
       - adr-0082-remote-build-gateway
       - adr-0087-validation-gate
@@ -13474,7 +13557,7 @@ workstreams:
     owner: codex
     branch: codex/live-apply-0157
     worktree_path: .worktrees/live-apply-0157
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0157-per-vm-concurrency-budget.md
+    doc: docs/workstreams/adr-0157-per-vm-concurrency-budget.md
     depends_on:
       - adr-0119-budgeted-workflow-scheduler
     conflicts_with:
@@ -13499,7 +13582,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0158-config-merge-protocol
     worktree_path: .worktrees/adr-0158-config-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0158-config-merge-protocol.md
+    doc: docs/workstreams/adr-0158-config-merge-protocol.md
     depends_on:
       - adr-0044-windmill
       - adr-0075-service-capability-catalog
@@ -13531,7 +13614,7 @@ workstreams:
     owner: codex
     branch: codex/integration-0152-homepage-v3
     worktree_path: ../proxmox_florin_server-homepage-mainline-v2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0152-homepage.md
+    doc: docs/workstreams/adr-0152-homepage.md
     depends_on:
       - adr-0075-service-capability-catalog
       - adr-0076-subdomain-governance
@@ -13556,7 +13639,7 @@ workstreams:
     owner: codex
     branch: codex/live-apply-0159
     worktree_path: ../proxmox_florin_server-live-apply-0159
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0159-speculative-parallel-execution.md
+    doc: docs/workstreams/adr-0159-speculative-parallel-execution.md
     depends_on:
       - adr-0115-mutation-ledger
       - adr-0119-budgeted-workflow-scheduler
@@ -13580,7 +13663,7 @@ workstreams:
     owner: codex
     branch: codex/live-apply-0164
     worktree_path: .worktrees/live-apply-0164
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0164-circuit-breaker-pattern.md
+    doc: docs/workstreams/adr-0164-circuit-breaker-pattern.md
     depends_on:
       - adr-0058-nats-event-bus
       - adr-0092-platform-api-gateway
@@ -13607,7 +13690,7 @@ workstreams:
     owner: codex
     branch: codex/live-apply-0165
     worktree_path: .worktrees/live-apply-0165
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0165-workflow-idempotency.md
+    doc: docs/workstreams/adr-0165-workflow-idempotency.md
     depends_on:
       - adr-0044-windmill
       - adr-0058-nats-event-bus
@@ -13638,7 +13721,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0167-graceful-degradation-mode-declarations
     worktree_path: .worktrees/adr-0167-graceful-degradation
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md
+    doc: docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md
     depends_on:
       - adr-0075-service-capability-catalog
       - adr-0092-platform-api-gateway
@@ -13666,7 +13749,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0172-watchdog
     worktree_path: .worktrees/codex-adr-0172-watchdog
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md
+    doc: docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md
     depends_on:
       - adr-0044-windmill
       - adr-0115-mutation-ledger
@@ -13690,7 +13773,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0173-ownership-manifest
     worktree_path: ../worktree-adr-0173-ownership-manifest
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0173-workstream-surface-ownership-manifest.md
+    doc: docs/workstreams/adr-0173-workstream-surface-ownership-manifest.md
     depends_on:
       - adr-0156-agent-session-workspace-isolation
       - adr-0172-watchdog-escalation
@@ -13751,7 +13834,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0175-interface-contracts
     worktree_path: ../worktree-adr-0175-interface-contracts
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0175-cross-workstream-interface-contracts.md
+    doc: docs/workstreams/adr-0175-cross-workstream-interface-contracts.md
     depends_on:
       - adr-0079-playbook-decomposition
       - adr-0158-config-merge-protocol
@@ -13780,7 +13863,7 @@ workstreams:
     owner: codex
     branch: codex/live-apply-0166
     worktree_path: .worktrees/live-apply-0166
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0166-canonical-error-response-format.md
+    doc: docs/workstreams/adr-0166-canonical-error-response-format.md
     depends_on:
       - adr-0031-validation-pipeline
       - adr-0070-rag-platform-context
@@ -13805,7 +13888,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0168-idempotency-ci
     worktree_path: .worktrees/adr-0168-idempotency-ci
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0168-idempotency-ci.md
+    doc: docs/workstreams/adr-0168-idempotency-ci.md
     depends_on:
       - adr-0083-docker-check-runner
       - adr-0087-validation-gate
@@ -13827,7 +13910,7 @@ workstreams:
     owner: codex
     branch: codex/live-apply-0169-main-v2
     worktree_path: .worktrees/live-apply-0169-main-v2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0169-structured-log-field-contract.md
+    doc: docs/workstreams/adr-0169-structured-log-field-contract.md
     depends_on:
       - adr-0052-loki-logs
       - adr-0075-service-capability-catalog
@@ -13855,7 +13938,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0161-main-integration
     worktree_path: .worktrees/adr-0161-main
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0161-real-time-agent-coordination-map.md
+    doc: docs/workstreams/adr-0161-real-time-agent-coordination-map.md
     depends_on:
       - adr-0058-nats
       - adr-0092-platform-api-gateway
@@ -13883,7 +13966,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0170-timeout-hierarchy
     worktree_path: ../proxmox_florin_server-timeout-hierarchy
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0170-timeout-hierarchy.md
+    doc: docs/workstreams/adr-0170-timeout-hierarchy.md
     depends_on:
       - adr-0092-platform-api-gateway
       - adr-0113-world-state-materializer
@@ -13914,7 +13997,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0171-fault-injection
     worktree_path: .worktrees/adr-0171-fault-injection
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0171-controlled-fault-injection.md
+    doc: docs/workstreams/adr-0171-controlled-fault-injection.md
     depends_on:
       - adr-0043-openbao
       - adr-0044-windmill
@@ -13939,7 +14022,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0177-namespace-partitioning
     worktree_path: ../worktree-adr-0177-namespace-partitioning
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0177-run-namespace-partitioning.md
+    doc: docs/workstreams/adr-0177-run-namespace-partitioning.md
     depends_on:
       - adr-0156-agent-session-workspace-isolation
       - adr-0160-parallel-dry-run-fan-out
@@ -13967,7 +14050,7 @@ workstreams:
     owner: codex
     branch: codex/live-apply-0150
     worktree_path: .worktrees/live-apply-0150
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0150-dozzle.md
+    doc: docs/workstreams/adr-0150-dozzle.md
     depends_on:
       - adr-0023-docker-runtime
       - adr-0052-loki-logs
@@ -13991,7 +14074,7 @@ workstreams:
     owner: codex
     branch: codex/adr-0181-metadata-replication
     worktree_path: ../worktree-adr-0181-metadata-replication
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0181-off-host-witness-replication.md
+    doc: docs/workstreams/adr-0181-off-host-witness-replication.md
     depends_on:
       - adr-0051-control-plane-recovery
       - adr-0100-rto-rpo-targets
@@ -14017,8 +14100,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/adr-0179-redundancy-tier
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0179-redundancy-tier
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0179-service-redundancy-tier-matrix.md
+    worktree_path: ../worktree-adr-0179-redundancy-tier
+    doc: docs/workstreams/adr-0179-service-redundancy-tier-matrix.md
     depends_on:
       - adr-0075-service-capability-catalog
       - adr-0100-disaster-recovery-playbook
@@ -14041,8 +14124,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/adr-0182-live-apply-landing
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0182-live-apply-landing
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0182-live-apply-merge-train-and-rollback-bundle.md
+    worktree_path: ../worktree-adr-0182-live-apply-landing
+    doc: docs/workstreams/adr-0182-live-apply-merge-train-and-rollback-bundle.md
     depends_on:
       - adr-0155-intent-queue-with-release-triggered-scheduling
       - adr-0173-workstream-surface-ownership-manifest
@@ -14068,8 +14151,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/adr-0183-main-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0183-main-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0183-multi-environment-live-lanes.md
+    worktree_path: ../worktree-adr-0183-main-live-apply
+    doc: docs/workstreams/adr-0183-multi-environment-live-lanes.md
     depends_on:
       - adr-0072-staging-production-topology
       - adr-0073-promotion-pipeline
@@ -14147,8 +14230,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0184-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-ws-0184-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0184-live-apply.md
+    worktree_path: ../worktree-ws-0184-live-apply
+    doc: docs/workstreams/ws-0184-live-apply.md
     depends_on:
       - adr-0179-service-redundancy-tier-matrix
       - adr-0180-standby-capacity
@@ -14201,8 +14284,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0188-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-ws-0188-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/worktree-ws-0188-live-apply/docs/workstreams/ws-0188-live-apply.md
+    worktree_path: ../worktree-ws-0188-live-apply
+    doc: ../worktree-ws-0188-live-apply/docs/workstreams/ws-0188-live-apply.md
     depends_on:
       - adr-0098-postgres-ha
       - adr-0099-restore-verification
@@ -14233,8 +14316,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0191-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0191-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0191-live-apply.md
+    worktree_path: .worktrees/ws-0191-live-apply
+    doc: docs/workstreams/ws-0191-live-apply.md
     depends_on:
       - adr-0179-service-redundancy-tier-matrix
       - adr-0182-live-apply-merge-train
@@ -14309,7 +14392,7 @@ workstreams:
     owner: codex
     branch: codex/ws-0190-live-apply
     worktree_path: .worktrees/ws-0190-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0190-live-apply.md
+    doc: docs/workstreams/ws-0190-live-apply.md
     depends_on:
       - adr-0099-backup-restore-verification
       - adr-0105-capacity-model
@@ -14363,8 +14446,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: "codex/ws-0202-live-apply"
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-ws-0202-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md
+    worktree_path: ../worktree-ws-0202-live-apply
+    doc: docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md
     depends_on:
       - adr-0038-generated-status-docs
       - adr-0075-service-capability-catalog
@@ -14400,8 +14483,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/adr-0204-architecture-governance
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0204-architecture-governance
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0204-architecture-governance.md
+    worktree_path: .worktrees/adr-0204-architecture-governance
+    doc: docs/workstreams/adr-0204-architecture-governance.md
     depends_on:
       - adr-0030-role-interface-contracts
       - adr-0062-role-composability
@@ -14482,8 +14565,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0211-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0211-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0211-shared-policy-packs-and-rule-registries.md
+    worktree_path: .worktrees/ws-0211-live-apply
+    doc: docs/workstreams/adr-0211-shared-policy-packs-and-rule-registries.md
     depends_on:
       - adr-0179-service-redundancy-tier-matrix
       - adr-0180-standby-capacity-reservation-and-placement-rules
@@ -14561,8 +14644,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0212-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0212-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0212-live-apply.md
+    worktree_path: .worktrees/ws-0212-live-apply
+    doc: docs/workstreams/ws-0212-live-apply.md
     depends_on:
       - adr-0205-capability-contracts-before-product-selection
       - adr-0213-architecture-fitness-functions-in-the-validation-gate
@@ -14668,8 +14751,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0204-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0204-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0204-live-apply.md
+    worktree_path: .worktrees/ws-0204-live-apply
+    doc: docs/workstreams/ws-0204-live-apply.md
     depends_on:
       - adr-0204-architecture-governance
       - adr-0126-observation-to-action-closure-loop
@@ -14763,8 +14846,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/wiki-edge-cert-fix
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/wiki-edge-cert-fix
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0021-edge-cert-repair.md
+    worktree_path: .worktrees/wiki-edge-cert-fix
+    doc: docs/workstreams/ws-0021-edge-cert-repair.md
     depends_on:
       - adr-0021-public-subdomain-publication
       - adr-0033-declarative-service-topology-catalog
@@ -14806,8 +14889,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0250-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0250-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0250-live-apply.md
+    worktree_path: .worktrees/ws-0250-live-apply
+    doc: docs/workstreams/ws-0250-live-apply.md
     depends_on:
       - adr-0011-monitoring
       - adr-0052-loki-logs
@@ -14875,8 +14958,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0271-backup-coverage-ledger
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0271-backup-coverage-ledger
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0271-live-apply.md
+    worktree_path: .worktrees/ws-0271-backup-coverage-ledger
+    doc: docs/workstreams/ws-0271-live-apply.md
     depends_on:
       - adr-0029-dedicated-backup-vm
       - adr-0099-backup-restore-verification
@@ -14922,7 +15005,7 @@ workstreams:
     status: ready_for_merge
     owner: claude
     branch: claude/focused-chaum
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.claude/worktrees/focused-chaum
+    worktree_path: .claude/worktrees/focused-chaum
     doc: docs/adr/0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
     depends_on:
       - adr-0108-operator-onboarding-and-offboarding
@@ -14991,8 +15074,8 @@ workstreams:
     status: ready_for_merge
     owner: codex
     branch: codex/ws-0308-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0308-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0308-live-apply.md
+    worktree_path: .worktrees/ws-0308-live-apply
+    doc: docs/workstreams/ws-0308-live-apply.md
     depends_on:
       - adr-0044-windmill-for-agent-and-operator-workflows
       - adr-0056-keycloak-for-operator-and-agent-sso
@@ -15123,8 +15206,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0292-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-superset-live-apply.md
+    worktree_path: .worktrees/ws-0292-live-apply
+    doc: docs/workstreams/ws-0292-superset-live-apply.md
     depends_on:
       - adr-0021-public-subdomain-publication-at-the-nginx-edge
       - adr-0042-postgresql-as-the-shared-relational-database
@@ -15344,7 +15427,7 @@ workstreams:
     status: ready_for_merge
     owner: claude
     branch: claude/adr-0317-keycloak-provisioning
-    worktree_path: /tmp/adr-0317-worktree
+    worktree_path: .worktrees/adr-0317-worktree
     doc: docs/adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md
     depends_on:
       - adr-0307-temporary-guest-operator-accounts-with-72-hour-expiry
@@ -15385,7 +15468,7 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0317-main-integration
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0317-main-integration
+    worktree_path: .worktrees/ws-0317-main-integration
     doc: docs/workstreams/ws-0317-live-apply.md
     depends_on:
       - adr-0307-temporary-guest-operator-accounts-with-72-hour-expiry
@@ -15480,7 +15563,7 @@ workstreams:
     status: ready_for_merge
     owner: claude
     branch: claude/adr-0318-operator-onboarding
-    worktree_path: /tmp/onboard-worktree
+    worktree_path: .worktrees/onboard-worktree
     doc: docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md
     depends_on:
       - adr-0108-operator-onboarding-and-offboarding
@@ -15532,7 +15615,7 @@ workstreams:
     status: ready_for_merge
     owner: claude
     branch: claude/push-all-pending
-    worktree_path: /tmp/push-all-worktree
+    worktree_path: .worktrees/push-all-worktree
     doc: docs/adr/0286-vikunja-as-the-task-and-project-management-rest-api.md
     depends_on:
       - adr-0021-platform-service-inventory
@@ -15606,8 +15689,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0293-live-apply-r2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-livekit-live-apply.md
+    worktree_path: .worktrees/ws-0293-live-apply-r2
+    doc: docs/workstreams/ws-0293-livekit-live-apply.md
     depends_on:
       - adr-0021-public-subdomain-publication
       - adr-0077-compose-secret-injection
@@ -15766,8 +15849,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0293-main-integration-r1
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-main-integration-r1
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-main-integration.md
+    worktree_path: .worktrees/ws-0293-main-integration-r1
+    doc: docs/workstreams/ws-0293-main-integration.md
     depends_on:
       - ws-0293-livekit-live-apply
     conflicts_with: []
@@ -15936,8 +16019,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/adr-0319-main-integration
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0319-runtime-cells/.worktrees/adr-0319-main-integration
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md
+    worktree_path: .worktrees/adr-0319-runtime-cells/.worktrees/adr-0319-main-integration
+    doc: docs/workstreams/adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md
     depends_on:
       - adr-0105-platform-capacity-model
       - adr-0154-vm-scoped-parallel-execution-lanes
@@ -16015,8 +16098,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0324-programmatic-doc-shards
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-programmatic-doc-shards
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0324-programmatic-doc-shards.md
+    worktree_path: .worktrees/ws-0324-programmatic-doc-shards
+    doc: docs/workstreams/ws-0324-programmatic-doc-shards.md
     depends_on:
       - adr-0038-generated-status-documents-from-canonical-state
       - adr-0163-repository-structure-index
@@ -16098,8 +16181,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/adr-0319-library-fit-main
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0319-library-fit/.worktrees/adr-0319-library-fit-main
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0329-runtime-library-fit.md
+    worktree_path: .worktrees/adr-0319-library-fit/.worktrees/adr-0319-library-fit-main
+    doc: docs/workstreams/ws-0329-runtime-library-fit.md
     depends_on:
       - adr-0319-runtime-pools-as-the-service-partition-boundary
       - adr-0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes
@@ -16174,8 +16257,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0325-service-uptime-investigation
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0325-service-uptime-investigation
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0325-service-uptime-investigation.md
+    worktree_path: .worktrees/ws-0325-service-uptime-investigation
+    doc: docs/workstreams/ws-0325-service-uptime-investigation.md
     depends_on:
       - adr-0123-service-uptime-contracts
       - adr-0196-realtime-metrics
@@ -16200,8 +16283,8 @@ workstreams:
     status: live_applied
     owner: codex
     branch: codex/ws-0319-main-integration
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0319-live-apply.md
+    worktree_path: .worktrees/ws-0319-main-integration
+    doc: docs/workstreams/ws-0319-live-apply.md
     depends_on:
       - adr-0232-nomad-for-durable-batch-and-long-running-internal-jobs
       - adr-0319-runtime-pools-as-the-service-partition-boundary
@@ -16392,7 +16475,7 @@ workstreams:
     status: ready_for_merge
     owner: claude
     branch: claude/provision-operator-v2
-    worktree_path: /tmp/provision-v2-worktree
+    worktree_path: .worktrees/provision-v2-worktree
     doc: docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md
     depends_on:
       - adr-0318-repeatable-operator-onboarding-with-cc-audit-trail
@@ -16424,8 +16507,8 @@ workstreams:
     status: merged
     owner: codex
     branch: codex/ws-0311-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0311-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0311-live-apply.md
+    worktree_path: .worktrees/ws-0311-live-apply
+    doc: docs/workstreams/ws-0311-live-apply.md
     depends_on:
       - adr-0108-operator-onboarding-and-offboarding
       - adr-0121-local-search-and-indexing-fabric

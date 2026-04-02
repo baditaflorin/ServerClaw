@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.142",
+  "repo_version": "0.177.143",
   "platform_version": "0.130.90",
-  "generated_at": "2026-04-02T10:52:48Z",
-  "next_refresh_at": "2026-04-02T11:52:48Z",
+  "generated_at": "2026-04-02T11:55:16Z",
+  "next_refresh_at": "2026-04-02T12:55:16Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5987,10 +5987,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.141",
+    "last_version": "0.177.142",
     "deployed_at": "2026-04-02",
-    "summary": "introduces the first dedicated runtime-ai pool on production with Nomad, Traefik, and Dapr, moving Apache Tika, Gotenberg, and Tesseract OCR off `docker-runtime-lv3` while preserving the authenticated shared `/v1/gotenberg` route",
-    "release_notes_url": "docs/release-notes/0.177.142.md"
+    "summary": "implements ADRs 0330-0339 by turning public GitHub readiness into a first-class repository lifecycle, making workstream and generated-doc metadata repository-relative, simplifying root onboarding docs into a generic forkable template, and enforcing new public-entrypoint leakage validation",
+    "release_notes_url": "docs/release-notes/0.177.143.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
