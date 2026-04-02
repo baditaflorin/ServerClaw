@@ -85,9 +85,12 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert "ansible.builtin.import_tasks: sync_service_tree.yml" in tasks
     assert "Remove stale ops portal service sources before sync" in sync_tasks
     assert "Discover the ops portal application directories on the controller" in sync_tasks
+    assert "Ensure the synced ops portal application file parent directories exist" in sync_tasks
     assert "Sync the ops portal application files" in sync_tasks
+    assert "ops_portal_service_dir ~ '/ops_portal/'" in sync_tasks
     assert 'src: "{{ item.path }}"' in sync_tasks
     assert "Ensure the ops portal overlay directories exist" in sync_tasks
+    assert "Ensure the critical ops portal runtime file parent directories exist" in sync_tasks
     assert "Sync critical ops portal runtime files explicitly" in sync_tasks
     assert "Reset the synced search fabric package tree before refresh" in sync_tasks
     assert "Sync the shared search fabric files" in sync_tasks
@@ -96,18 +99,30 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert 'ops_portal_build_file_sources' in defaults
     assert '{{ ops_portal_repo_root }}/scripts/publication_contract.py' in defaults
     assert '{{ ops_portal_repo_root }}/scripts/stage_smoke.py' in defaults
+    assert '{{ ops_portal_repo_root }}/scripts/workbench_information_architecture.py' in defaults
     assert '{{ ops_portal_repo_root }}/requirements/ops-portal.txt' in defaults
     assert 'patterns:' in defaults
     assert '"*.json"' in defaults
     assert 'excludes:' in defaults
     assert '- evidence' in defaults
     assert '- preview' in defaults
-    assert "Discover the ops portal directory-backed data files on the controller" in tasks
-    assert "item.excludes | default([])" in tasks
-    assert "Ensure the synced ops portal directory-backed data subdirectories exist" in tasks
-    assert "select('in', item.1.path.split('/'))" in tasks
+    assert "- rsync" in tasks
     assert "Sync the ops portal directory-backed data source files" in tasks
-    assert "ops_portal_directory_source_files.results | subelements('files', skip_missing=True)" in tasks
+    assert "ansible.builtin.command:" in tasks
+    assert "'rsync'" in tasks
+    assert "'--archive'" in tasks
+    assert "'--prune-empty-dirs'" in tasks
+    assert "ops_portal_directory_source_patterns" in tasks
+    assert "ops_portal_directory_source_excludes" in tasks
+    assert "'--rsync-path=sudo rsync'" in tasks
+    assert "'--include=*/'" in tasks
+    assert "map('regex_replace', '^', '--include=')" in tasks
+    assert "map('regex_replace', '^', '--exclude=/')" in tasks
+    assert "map('regex_replace', '$', '/***')" in tasks
+    assert tasks.index("map('regex_replace', '^', '--exclude=/')") < tasks.index("map('regex_replace', '^', '--include=')")
+    assert "'--exclude=.DS_Store'" in tasks
+    assert "delegate_to: localhost" in tasks
+    assert "ops_portal_directory_source_sync" in tasks
     assert "Remove stale ops portal build-context ignore and metadata files" in tasks
     assert "{{ ops_portal_build_context_dir }}/._publication_contract.py" in tasks
     assert "{{ ops_portal_build_context_dir }}/._stage_smoke.py" in tasks
@@ -143,6 +158,7 @@ def test_ops_portal_dockerfile_depends_on_synced_helper_files() -> None:
     assert "COPY requirements.txt ./requirements.txt" in dockerfile
     assert "COPY publication_contract.py ./publication_contract.py" in dockerfile
     assert "COPY stage_smoke.py ./stage_smoke.py" in dockerfile
+    assert "COPY workbench_information_architecture.py ./workbench_information_architecture.py" in dockerfile
     assert "COPY ops_portal/ ./ops_portal/" in dockerfile
     assert "COPY search_fabric/ ./search_fabric/" in dockerfile
 

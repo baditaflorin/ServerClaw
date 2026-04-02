@@ -133,5 +133,7 @@ ops_portal_build_file_sources:
     filename: publication_contract.py
   - src: "{{ ops_portal_repo_root }}/scripts/stage_smoke.py"
     filename: stage_smoke.py
+  - src: "{{ ops_portal_repo_root }}/scripts/workbench_information_architecture.py"
+    filename: workbench_information_architecture.py
   - src: "{{ ops_portal_repo_root }}/requirements/ops-portal.txt"
     filename: requirements.txt

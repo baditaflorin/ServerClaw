@@ -781,7 +781,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0309 by adding the task-oriented Start, Observe, Change, Learn, and Recover information architecture across the live ops portal shell, launcher, runbook surfaces, and supporting catalogs, then carrying the exact-main validation and replay path onto main
       release_bump: patch
-      included_in_repo_version: 0.177.142
+      included_in_repo_version: 0.177.144
       latest_receipts: {}
   - id: ws-0315-gitea-followups
     adr: "0297"

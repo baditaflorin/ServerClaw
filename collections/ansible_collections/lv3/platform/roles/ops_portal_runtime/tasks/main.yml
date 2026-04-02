@@ -31,6 +31,7 @@
   ansible.builtin.apt:
     name:
       - docker-compose-plugin
+      - rsync
     state: present
     update_cache: true
     force_apt_get: true
@@ -131,57 +132,83 @@
     mode: "0755"
   loop: "{{ ops_portal_directory_sources }}"
 
-- name: Discover the ops portal directory-backed data files on the controller
-  ansible.builtin.find:
-    paths: "{{ item.src }}"
-    recurse: true
-    file_type: file
-    patterns: "{{ item.patterns | default(['*.json']) }}"
-    excludes: "{{ (item.excludes | default([])) + ['._*', '.DS_Store'] }}"
+- name: Sync the ops portal directory-backed data source files
+  vars:
+    ops_portal_directory_source_patterns: "{{ item.patterns | default(['*.json']) }}"
+    ops_portal_directory_source_excludes: "{{ item.excludes | default([]) }}"
+  ansible.builtin.command:
+    argv: >-
+      {{
+        [
+          'rsync',
+          '--archive',
+          '--compress',
+          '--prune-empty-dirs',
+          '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+          '--out-format=<<CHANGED>>%i %n%L',
+          '--rsh=ssh -i '
+          ~ (
+            ansible_private_key_file
+            | default(
+              (
+                playbook_execution_secret_manifest.secrets.bootstrap_ssh_private_key.path
+                if (
+                  playbook_execution_secret_manifest is defined
+                  and playbook_execution_secret_manifest.secrets is defined
+                  and playbook_execution_secret_manifest.secrets.bootstrap_ssh_private_key is defined
+                )
+                else ''
+              ),
+              true
+            )
+          )
+          ~ ' -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null '
+          ~ (
+            (
+              ansible_ssh_common_args
+              | default('', true)
+            )
+            or
+            (
+              proxmox_guest_ssh_common_args[proxmox_guest_ssh_connection_mode]
+              | default('', true)
+            )
+          ),
+          '--rsync-path=sudo rsync',
+          '--include=*/',
+        ]
+        + (
+          ops_portal_directory_source_excludes
+          | map('regex_replace', '^', '--exclude=/')
+          | map('regex_replace', '$', '/***')
+          | list
+        )
+        + (
+          ops_portal_directory_source_patterns
+          | map('regex_replace', '^', '--include=')
+          | list
+        )
+        + [
+          '--exclude=._*',
+          '--exclude=.DS_Store',
+          '--exclude=*',
+          item.src,
+          (
+            hostvars[inventory_hostname].ansible_user
+            ~ '@'
+            ~ hostvars[inventory_hostname].ansible_host
+            ~ ':'
+            ~ item.dest
+          ),
+        ]
+      }}
   loop: "{{ ops_portal_directory_sources }}"
   loop_control:
     label: "{{ item.dest | replace(ops_portal_data_dir ~ '/', '') }}"
-  register: ops_portal_directory_source_files
   delegate_to: localhost
   become: false
-
-- name: Ensure the synced ops portal directory-backed data subdirectories exist
-  ansible.builtin.file:
-    path: "{{ (item.0.item.dest ~ (item.1.path | replace(item.0.item.src, ''))) | dirname }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-  loop: "{{ ops_portal_directory_source_files.results | subelements('files', skip_missing=True) }}"
-  loop_control:
-    label: >-
-      {{ ((item.0.item.dest ~ (item.1.path | replace(item.0.item.src, ''))) | dirname)
-      | replace(ops_portal_data_dir ~ '/', '') }}
-  when: >-
-    (
-      item.0.item.excludes | default([])
-      | select('in', item.1.path.split('/'))
-      | list
-      | length
-    ) == 0
-
-- name: Sync the ops portal directory-backed data source files
-  ansible.builtin.copy:
-    src: "{{ item.1.path }}"
-    dest: "{{ item.0.item.dest }}{{ item.1.path | replace(item.0.item.src, '') }}"
-    owner: root
-    group: root
-    mode: "0644"
-  loop: "{{ ops_portal_directory_source_files.results | subelements('files', skip_missing=True) }}"
-  loop_control:
-    label: "{{ (item.0.item.dest ~ (item.1.path | replace(item.0.item.src, ''))) | replace(ops_portal_data_dir ~ '/', '') }}"
-  when: >-
-    (
-      item.0.item.excludes | default([])
-      | select('in', item.1.path.split('/'))
-      | list
-      | length
-    ) == 0
+  register: ops_portal_directory_source_sync
+  changed_when: "'<<CHANGED>>' in ops_portal_directory_source_sync.stdout"
 
 - name: Discover macOS metadata files in the synced ops portal data tree
   ansible.builtin.find:
