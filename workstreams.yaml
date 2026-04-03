@@ -18312,7 +18312,7 @@ workstreams:
   - id: ws-0340-implementation
     adr: "0340"
     title: Dedicated Coolify Apps VM Separation — introduce coolify-apps-lv3 as the Coolify deployment server
-    status: in_progress
+    status: completed
     owner: claude
     branch: claude/affectionate-galileo
     worktree_path: .claude/worktrees/affectionate-galileo
@@ -18386,5 +18386,5 @@ workstreams:
             - tests/test_coolify_tool.py
           mode: exclusive
     blockers: []
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true

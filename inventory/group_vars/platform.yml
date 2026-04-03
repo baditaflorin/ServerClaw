@@ -2859,7 +2859,7 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: https://10.10.10.71:443
+      upstream: http://10.10.10.71:80
       aliases:
         - '*.apps.lv3.org'
       crawl_policy_enabled: false
@@ -2872,10 +2872,10 @@ platform_service_topology:
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify-apps
     mobility_tier: anchor
     ports:
-      internal: 443
+      internal: 80
     urls:
       public: https://apps.lv3.org
-      internal: https://10.10.10.71:443
+      internal: http://10.10.10.71:80
   api_gateway:
     service_name: api-gateway
     owning_vm: runtime-control-lv3
@@ -5218,7 +5218,7 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: https://10.10.10.71:443
+      upstream: http://10.10.10.71:80
       aliases:
         - '*.apps.lv3.org'
       crawl_policy_enabled: false
@@ -5231,10 +5231,10 @@ public_edge_service_topology:
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify-apps
     mobility_tier: anchor
     ports:
-      internal: 443
+      internal: 80
     urls:
       public: https://apps.lv3.org
-      internal: https://10.10.10.71:443
+      internal: http://10.10.10.71:80
   api_gateway:
     service_name: api-gateway
     owning_vm: runtime-control-lv3
