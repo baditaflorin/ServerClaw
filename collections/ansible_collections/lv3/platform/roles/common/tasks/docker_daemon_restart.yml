@@ -1,0 +1,38 @@
+# Purpose: Refuse unsafe Docker daemon restarts on protected shared runtime hosts unless an operator explicitly approves them.
+# Use case: Include from service roles that would otherwise restart Docker to recover local bridge-chain or published-port failures.
+# Inputs: common_docker_daemon_restart_* variables describing the service name, restart reason, maintenance override, and protected hosts.
+# Outputs: Either a controlled Docker restart on a safe host or a clear failure on a protected shared-runtime host.
+# Idempotency: Conditionally idempotent; the helper only evaluates guard state unless it deliberately restarts the Docker daemon.
+# Dependencies: ADR 0165 metadata standard, the common role defaults, and a systemd-managed Docker service.
+---
+- name: Validate common docker_daemon_restart entrypoint inputs
+  ansible.builtin.assert:
+    that:
+      - common_docker_daemon_restart_service_name | length > 0
+      - common_docker_daemon_restart_reason | length > 0
+    fail_msg: "common.docker_daemon_restart requires a service name and a human-readable reason."
+    quiet: true
+
+- name: Decide whether the Docker daemon restart is blocked on this host
+  ansible.builtin.set_fact:
+    common_docker_daemon_restart_blocked: >-
+      {{
+        inventory_hostname in common_docker_daemon_restart_protected_hosts
+        and not (common_docker_daemon_restart_force | bool)
+      }}
+
+- name: Fail closed before an unsafe Docker daemon restart on a protected shared-runtime host
+  ansible.builtin.fail:
+    msg: >-
+      Refusing to restart {{ common_docker_daemon_restart_service_name }} on
+      protected shared-runtime host {{ inventory_hostname }} during
+      {{ common_docker_daemon_restart_reason }}. Recover the target service
+      without a host-wide Docker restart or rerun in an explicitly approved
+      maintenance window with common_docker_daemon_restart_force=true.
+  when: common_docker_daemon_restart_blocked | bool
+
+- name: Restart the managed Docker daemon
+  ansible.builtin.systemd_service:
+    name: "{{ common_docker_daemon_restart_service_name }}"
+    state: restarted
+  when: not (common_docker_daemon_restart_blocked | bool)

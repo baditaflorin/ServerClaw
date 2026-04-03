@@ -17696,7 +17696,7 @@ workstreams:
     live_applied: false
   - id: ws-0333-service-uptime-recovery
     adr: "0319"
-    title: Fail closed before runtime-pool retirement can take down legacy services
+    title: Fail closed before runtime-pool retirement or shared-runtime recovery can take down legacy services
     status: in_progress
     owner: codex
     branch: codex/ws-0333-service-uptime-recovery
@@ -17715,6 +17715,21 @@ workstreams:
       - docs/runbooks/configure-runtime-general-pool.md
       - docs/runbooks/configure-runtime-control-pool.md
       - docs/runbooks/configure-runtime-ai-pool.md
+      - docs/runbooks/configure-keycloak.md
+      - docs/runbooks/configure-openbao.md
+      - roles/common/defaults/main.yml
+      - roles/common/meta/argument_specs.yml
+      - roles/common/tasks/docker_daemon_restart.yml
+      - roles/keycloak_runtime/tasks/main.yml
+      - roles/openbao_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_daemon_restart.yml
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+      - tests/test_common_docker_daemon_restart_helper.py
+      - tests/test_keycloak_runtime_role.py
+      - tests/test_openbao_runtime_role.py
       - tests/test_runtime_general_pool_playbook.py
       - tests/test_runtime_control_pool_playbook.py
       - tests/test_runtime_ai_pool_playbook.py
@@ -17737,6 +17752,21 @@ workstreams:
             - docs/runbooks/configure-runtime-general-pool.md
             - docs/runbooks/configure-runtime-control-pool.md
             - docs/runbooks/configure-runtime-ai-pool.md
+            - docs/runbooks/configure-keycloak.md
+            - docs/runbooks/configure-openbao.md
+            - roles/common/defaults/main.yml
+            - roles/common/meta/argument_specs.yml
+            - roles/common/tasks/docker_daemon_restart.yml
+            - roles/keycloak_runtime/tasks/main.yml
+            - roles/openbao_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_daemon_restart.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+            - tests/test_common_docker_daemon_restart_helper.py
+            - tests/test_keycloak_runtime_role.py
+            - tests/test_openbao_runtime_role.py
             - tests/test_runtime_general_pool_playbook.py
             - tests/test_runtime_control_pool_playbook.py
             - tests/test_runtime_ai_pool_playbook.py

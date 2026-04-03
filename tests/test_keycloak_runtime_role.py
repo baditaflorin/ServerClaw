@@ -225,7 +225,10 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
         if task.get("name") == "Check whether the current Keycloak readiness endpoint is healthy before startup"
     )
     assert nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
-    assert nat_restore["ansible.builtin.service"]["name"] == "docker"
+    assert nat_restore["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert nat_restore["ansible.builtin.include_role"]["tasks_from"] == "docker_daemon_restart"
+    assert nat_restore["vars"]["common_docker_daemon_restart_service_name"] == "docker"
+    assert nat_restore["vars"]["common_docker_daemon_restart_reason"] == "Keycloak startup nat-chain recovery"
     assert bridge_chain_helper["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
     assert bridge_chain_helper["ansible.builtin.include_role"]["tasks_from"] == "docker_bridge_chains"
     assert bridge_chain_helper["vars"]["common_docker_bridge_chains_service_name"] == "docker"
@@ -265,6 +268,17 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert "Restart Docker to restore bridge networking before retrying the Keycloak force-recreate" in rescue_names
     assert "Ensure Docker bridge networking chains are present before retrying the Keycloak force-recreate" in rescue_names
     assert "Retry the Keycloak service force-recreate after Docker networking recovery" in rescue_names
+    rescue_restart = next(
+        task
+        for task in force_recreate_block["rescue"]
+        if task.get("name") == "Restart Docker to restore bridge networking before retrying the Keycloak force-recreate"
+    )
+    assert rescue_restart["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert rescue_restart["ansible.builtin.include_role"]["tasks_from"] == "docker_daemon_restart"
+    assert rescue_restart["vars"]["common_docker_daemon_restart_service_name"] == "docker"
+    assert rescue_restart["vars"]["common_docker_daemon_restart_reason"] == (
+        "Keycloak force-recreate bridge-chain recovery"
+    )
     force_recreate = force_recreate_block["block"][0]
     force_recreate_shell = force_recreate["ansible.builtin.shell"]
     assert "docker network inspect" in force_recreate_shell

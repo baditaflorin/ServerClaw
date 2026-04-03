@@ -27,6 +27,12 @@ common_docker_bridge_chains_service_name: docker
 common_docker_bridge_chains_require_nat_chain: true
 common_docker_bridge_chains_retries: 10
 common_docker_bridge_chains_delay: 2
+common_docker_daemon_restart_service_name: docker
+common_docker_daemon_restart_reason: ""
+common_docker_daemon_restart_force: false
+common_docker_daemon_restart_protected_hosts:
+  - docker-runtime-lv3
+  - docker-runtime-staging-lv3
 
 common_wait_port_host: 127.0.0.1
 common_wait_port_port: 0

@@ -1,4 +1,4 @@
-# Workstream ws-0333-service-uptime-recovery: Fail Closed Before Runtime-Pool Retirement Can Take Down Legacy Services
+# Workstream ws-0333-service-uptime-recovery: Fail Closed Before Runtime-Pool Retirement Or Shared-Runtime Recovery Can Take Down Legacy Services
 
 - ADR: [ADR 0319](../adr/0319-runtime-pools-as-the-service-partition-boundary.md), [ADR 0320](../adr/0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes.md)
 - Title: Add fail-closed retirement gates for runtime-pool migrations after the April 3 shared-runtime outage
@@ -31,14 +31,24 @@ down even when the repo models the migration correctly on paper:
   `playbooks/runtime-control-pool.yml`, and `playbooks/runtime-ai-pool.yml`
   behind controller-local facts that are set only after the destination pool
   verification succeeds
+- add a shared helper that refuses service-specific Docker daemon restarts on
+  protected shared-runtime hosts unless an operator explicitly approves a
+  maintenance-window override
+- route the observed Keycloak and OpenBao bridge-chain recovery paths through
+  that helper so the default converge path fails closed instead of restarting
+  Docker on `docker-runtime-lv3`
 - update the runtime-pool runbooks to warn operators not to bypass the new
   fail-closed retirement guard with retirement-only or limited-scope replays
+- update the Keycloak and OpenBao runbooks so their stated recovery path matches
+  the new shared-runtime Docker restart guard
 - add regression coverage so future refactors cannot remove the guard silently
 
 ## Verification Plan
 
 - run the runtime-pool playbook regression tests that assert the new
   controller-local readiness facts and retirement assertions
+- run targeted Keycloak, OpenBao, and common-helper tests that assert the new
+  shared-runtime Docker restart guard
 - run `scripts/validate_repo.sh agent-standards workstream-surfaces` after the
   workstream registry update
 - sanity-check the edited playbooks with `git diff --check`

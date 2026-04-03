@@ -280,9 +280,12 @@
   failed_when: false
 
 - name: Restore Docker networking when the nat chain is missing before Keycloak startup
-  ansible.builtin.service:
-    name: docker
-    state: restarted
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_daemon_restart
+  vars:
+    common_docker_daemon_restart_service_name: docker
+    common_docker_daemon_restart_reason: Keycloak startup nat-chain recovery
   when: keycloak_docker_nat_chain.rc != 0
 
 - name: Ensure Docker bridge networking chains are present before Keycloak startup
@@ -572,9 +575,12 @@
       when: keycloak_force_recreate_bridge_chains_missing
 
     - name: Restart Docker to restore bridge networking before retrying the Keycloak force-recreate
-      ansible.builtin.service:
-        name: docker
-        state: restarted
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_daemon_restart
+      vars:
+        common_docker_daemon_restart_service_name: docker
+        common_docker_daemon_restart_reason: Keycloak force-recreate bridge-chain recovery
       when: keycloak_force_recreate_bridge_chains_missing
 
     - name: Ensure Docker bridge networking chains are present before retrying the Keycloak force-recreate

@@ -124,7 +124,19 @@ curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local
 
 ## Recovery Notes From The 2026-03-26 Live Apply
 
-As of the `2026-03-29` replay, `make converge-openbao` automatically recovers the recurring Docker publish regression by rechecking the guest `DOCKER` and `DOCKER-FORWARD` chains, restarting Docker when they are missing, waiting for the chain rechecks to settle after that restart, and recreating the named `lv3-openbao` container before `docker compose up`.
+As of the `2026-04-03` uptime hardening, `make converge-openbao` still performs
+bounded Docker bridge-chain recovery on a dedicated `runtime-control-lv3` host,
+but it now fails closed before any automatic Docker daemon restart on protected
+shared-runtime hosts such as legacy `docker-runtime-lv3` or
+`docker-runtime-staging-lv3`. If that guard fires, stop the replay and either
+finish the runtime-pool migration or rerun only in an explicitly approved
+maintenance window with `-e common_docker_daemon_restart_force=true`.
+
+On a dedicated `runtime-control-lv3` host, the role automatically recovers the
+recurring Docker publish regression by rechecking the guest `DOCKER` and
+`DOCKER-FORWARD` chains, restarting Docker when they are missing, waiting for
+the chain rechecks to settle after that restart, and recreating the named
+`lv3-openbao` container before `docker compose up`.
 
 The same replay also hardened the post-unseal verification path: after a restart-and-unseal cycle, the role now retries the controller AppRole PostgreSQL dynamic credential request for a short bounded window because OpenBao can briefly close loopback HTTP requests while the database backend resumes.
 

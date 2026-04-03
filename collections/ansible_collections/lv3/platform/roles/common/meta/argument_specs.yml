@@ -141,6 +141,35 @@ argument_specs:
         default: 2
         description:
           - Delay in seconds between Docker bridge chain recheck attempts.
+  docker_daemon_restart:
+    short_description: Restart Docker only when the target host is not a protected shared runtime, unless an operator explicitly forces it.
+    options:
+      common_docker_daemon_restart_service_name:
+        type: str
+        required: false
+        default: docker
+        description:
+          - Name of the Docker systemd unit that would be restarted.
+      common_docker_daemon_restart_reason:
+        type: str
+        required: true
+        description:
+          - Human-readable reason included in the failure message when the restart is refused.
+      common_docker_daemon_restart_force:
+        type: bool
+        required: false
+        default: false
+        description:
+          - Whether an explicitly approved maintenance window allows the restart on a protected host.
+      common_docker_daemon_restart_protected_hosts:
+        type: list
+        elements: str
+        required: false
+        default:
+          - docker-runtime-lv3
+          - docker-runtime-staging-lv3
+        description:
+          - Inventory hosts where automatic Docker daemon restarts must fail closed by default.
   wait_port:
     short_description: Wait for a TCP listener with shared retry defaults.
     options:

@@ -280,9 +280,12 @@
   failed_when: openbao_docker_forward_chain_check.rc not in [0, 1]
 
 - name: Restart Docker when required chains are missing before OpenBao startup
-  ansible.builtin.systemd:
-    name: docker
-    state: restarted
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_daemon_restart
+  vars:
+    common_docker_daemon_restart_service_name: docker
+    common_docker_daemon_restart_reason: OpenBao startup bridge-chain recovery
   when: openbao_docker_nat_chain_check.rc == 1 or openbao_docker_forward_chain_check.rc == 1
 
 - name: Recheck Docker nat chain before OpenBao startup
@@ -409,9 +412,12 @@
       when: not openbao_docker_bridge_chain_missing
 
     - name: Restart Docker to restore bridge chains before retrying OpenBao startup
-      ansible.builtin.service:
-        name: docker
-        state: restarted
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_daemon_restart
+      vars:
+        common_docker_daemon_restart_service_name: docker
+        common_docker_daemon_restart_reason: OpenBao retry bridge-chain recovery
       when: openbao_docker_bridge_chain_missing
 
     - name: Reset SSH connection before retrying OpenBao startup after Docker recovery

@@ -87,6 +87,22 @@ PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH = (
 GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "all.yml"
 
 
+def load_openbao_runtime_tasks() -> list[dict]:
+    raw_tasks = yaml.safe_load(TASKS_PATH.read_text())
+    flattened: list[dict] = []
+
+    def visit(task_list: list[dict]) -> None:
+        for task in task_list:
+            flattened.append(task)
+            for nested_key in ("block", "rescue", "always"):
+                nested_tasks = task.get(nested_key)
+                if nested_tasks:
+                    visit(nested_tasks)
+
+    visit(raw_tasks)
+    return flattened
+
+
 def read_openbao_runtime_tasks_text() -> str:
     return TASKS_PATH.read_text(encoding="utf-8") + "\n" + SEEDED_SECRET_TASKS_PATH.read_text(encoding="utf-8")
 
@@ -238,6 +254,25 @@ def test_openbao_runtime_recovers_dnat_chain_failures_during_compose_startup() -
     assert "- name: Remove the failed OpenBao container before retrying startup" in tasks
     assert "- name: Remove the detached managed OpenBao default network before retrying startup" in tasks
     assert "- name: Retry OpenBao startup after Docker bridge-chain recovery" in tasks
+
+
+def test_openbao_runtime_uses_the_shared_docker_restart_guard_for_bridge_chain_recovery() -> None:
+    tasks = load_openbao_runtime_tasks()
+    startup_restart = next(
+        task for task in tasks if task.get("name") == "Restart Docker when required chains are missing before OpenBao startup"
+    )
+    retry_restart = next(
+        task for task in tasks if task.get("name") == "Restart Docker to restore bridge chains before retrying OpenBao startup"
+    )
+
+    assert startup_restart["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert startup_restart["ansible.builtin.include_role"]["tasks_from"] == "docker_daemon_restart"
+    assert startup_restart["vars"]["common_docker_daemon_restart_service_name"] == "docker"
+    assert startup_restart["vars"]["common_docker_daemon_restart_reason"] == "OpenBao startup bridge-chain recovery"
+    assert retry_restart["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert retry_restart["ansible.builtin.include_role"]["tasks_from"] == "docker_daemon_restart"
+    assert retry_restart["vars"]["common_docker_daemon_restart_service_name"] == "docker"
+    assert retry_restart["vars"]["common_docker_daemon_restart_reason"] == "OpenBao retry bridge-chain recovery"
 
 
 def test_openbao_runtime_persisted_approles_use_reusable_secret_ids() -> None:

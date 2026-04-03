@@ -121,6 +121,11 @@ The password recovery action:
 - The named operator account is created with a bootstrap password and a required `CONFIGURE_TOTP` action so MFA enrollment happens on first successful interactive login.
 - Because the named operator remains MFA-first, the Keycloak converge does not
   verify a repo-managed direct-grant token for that human identity.
+- If this workflow is temporarily redirected at a shared runtime host such as
+  legacy `docker-runtime-lv3` during migration recovery, the Keycloak role now
+  fails closed before a host-wide Docker restart. Treat
+  `common.docker_daemon_restart` failures as a maintenance-window decision or a
+  runtime-pool migration gap, not as a signal to keep retrying the same replay.
 - Password resets and required-action mail use `lv3-mail-stalwart:1587` over the shared `mail-platform_default` Docker network. This avoids Docker host-port hairpin failures and avoids STARTTLS certificate mismatch on the internal container DNS name.
 - As of the 2026-03-29 ADR 0270 live apply, the repo-managed user reconciliation
   path now force-recreates the Keycloak service and retries once when the local
