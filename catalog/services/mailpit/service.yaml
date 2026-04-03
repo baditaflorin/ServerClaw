@@ -12,7 +12,7 @@ service:
   exposure: private-only
   health_probe_id: mailpit
   image_catalog_ids:
-  - mailpit_runtime
+    - mailpit_runtime
   adr: 0282
   runbook: docs/runbooks/configure-mailpit.md
   runtime_pool: runtime-general
@@ -21,10 +21,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
   tags:
-  - mail
-  - smtp
-  - development
-  - testing
+    - mail
+    - smtp
+    - development
+    - testing
   environments:
     production:
       status: active
@@ -48,8 +48,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_191
+    - git_repository
+    - pbs_vm_191
   standby:
     kind: cold
     location: runtime-general-lv3
@@ -81,7 +81,7 @@ health:
     url: http://127.0.0.1:8025/api/v1/info
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: command
     description: Mailpit accepts a local SMTP probe and exposes the captured message
@@ -90,44 +90,44 @@ health:
     retries: 1
     delay_seconds: 0
     argv:
-    - python3
-    - -c
-    - import json, smtplib, urllib.request; from email.message import EmailMessage;
-      subject = 'LV3 health-probe Mailpit'; delete_request = urllib.request.Request('http://127.0.0.1:8025/api/v1/messages',
-      method='DELETE'); urllib.request.urlopen(delete_request, timeout=30).read();
-      message = EmailMessage(); message['From'] = 'healthcheck@lv3.org'; message['To']
-      = 'mailpit-health@lv3.org'; message['Subject'] = subject; message.set_content('Mailpit
-      readiness probe'); client = smtplib.SMTP('127.0.0.1', 1025, timeout=30); client.send_message(message);
-      client.quit(); response = urllib.request.urlopen('http://127.0.0.1:8025/api/v1/messages',
-      timeout=30); payload = json.loads(response.read().decode('utf-8')); messages
-      = payload.get('messages', []); raise SystemExit(0 if any(item.get('Subject')
-      == subject for item in messages) else 1)
+      - python3
+      - -c
+      - import json, smtplib, urllib.request; from email.message import EmailMessage;
+        subject = 'LV3 health-probe Mailpit'; delete_request = urllib.request.Request('http://127.0.0.1:8025/api/v1/messages',
+        method='DELETE'); urllib.request.urlopen(delete_request, timeout=30).read();
+        message = EmailMessage(); message['From'] = 'healthcheck@lv3.org'; message['To']
+        = 'mailpit-health@lv3.org'; message['Subject'] = subject; message.set_content('Mailpit
+        readiness probe'); client = smtplib.SMTP('127.0.0.1', 1025, timeout=30); client.send_message(message);
+        client.quit(); response = urllib.request.urlopen('http://127.0.0.1:8025/api/v1/messages',
+        timeout=30); payload = json.loads(response.read().decode('utf-8')); messages
+        = payload.get('messages', []); raise SystemExit(0 if any(item.get('Subject')
+        == subject for item in messages) else 1)
     success_rc: 0
   uptime_kuma:
     enabled: false
     reason: Mailpit is intentionally private-only and is verified through role-level
       HTTP and SMTP probes instead of an always-on public monitor.
 data:
-- id: mailpit-captured-messages
-  service: mailpit
-  name: Mailpit captured message cache
-  class: internal
-  retention_days: null
-  backup_included: false
-  access_role: platform-operator
-  pii_risk: medium
-  locations:
-  - Mailpit in-memory message store on docker-runtime-lv3
-  notes: Mailpit intentionally keeps intercepted staging and development messages
-    in ephemeral in-memory storage so assertion traffic is inspectable but lost on
-    restart.
+  - id: mailpit-captured-messages
+    service: mailpit
+    name: Mailpit captured message cache
+    class: internal
+    retention_days: null
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: medium
+    locations:
+      - Mailpit in-memory message store on docker-runtime-lv3
+    notes: Mailpit intentionally keeps intercepted staging and development messages
+      in ephemeral in-memory storage so assertion traffic is inspectable but lost
+      on restart.
 slos:
-- id: mailpit-availability
-  service_id: mailpit
-  indicator: availability
-  objective_percent: 99.0
-  window_days: 30
-  target_url: http://10.10.10.91:8025/api/v1/info
-  probe_module: http_2xx_follow_redirects
-  description: Mailpit remains reachable on the private guest-network listener for
-    staging and development SMTP capture flows.
+  - id: mailpit-availability
+    service_id: mailpit
+    indicator: availability
+    objective_percent: 99.0
+    window_days: 30
+    target_url: http://10.10.10.91:8025/api/v1/info
+    probe_module: http_2xx_follow_redirects
+    description: Mailpit remains reachable on the private guest-network listener for
+      staging and development SMTP capture flows.

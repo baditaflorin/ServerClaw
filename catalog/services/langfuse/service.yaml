@@ -15,16 +15,16 @@ service:
   uptime_monitor_name: Langfuse Public Health
   health_probe_id: langfuse
   image_catalog_ids:
-  - langfuse_runtime
-  - langfuse_worker_runtime
-  - langfuse_clickhouse_runtime
-  - langfuse_redis_runtime
+    - langfuse_runtime
+    - langfuse_worker_runtime
+    - langfuse_clickhouse_runtime
+    - langfuse_redis_runtime
   secret_catalog_ids:
-  - langfuse_database_password
-  - langfuse_bootstrap_user_password
-  - langfuse_minio_secret_key
-  - langfuse_project_secret_key
-  - keycloak_langfuse_client_secret
+    - langfuse_database_password
+    - langfuse_bootstrap_user_password
+    - langfuse_minio_secret_key
+    - langfuse_project_secret_key
+    - keycloak_langfuse_client_secret
   adr: '0146'
   runbook: docs/runbooks/configure-langfuse.md
   runtime_pool: runtime-general
@@ -33,10 +33,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
   tags:
-  - llm
-  - traces
-  - evaluations
-  - observability
+    - llm
+    - traces
+    - evaluations
+    - observability
   environments:
     production:
       status: active
@@ -55,8 +55,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -74,32 +74,32 @@ dependency:
     category: observability
     adr: '0146'
   outbound_edges:
-  - from: langfuse
-    to: keycloak
-    type: soft
-    description: Keycloak provides the preferred OIDC browser sign-in path, but a
-      repo-managed bootstrap user remains the break-glass fallback.
-  - from: langfuse
-    to: minio
-    type: soft
-    description: Langfuse event export and media attachment flows depend on the shared
-      MinIO bucket, while core trace and project metadata remain available from Postgres
-      and ClickHouse.
-  - from: langfuse
-    to: nginx_edge
-    type: soft
-    description: Public access to langfuse.lv3.org depends on the shared NGINX edge
-      publication path.
-  - from: langfuse
-    to: openbao
-    type: startup_only
-    description: Langfuse starts from OpenBao-rendered runtime secrets mirrored into
-      its compose environment.
-  - from: langfuse
-    to: postgres
-    type: hard
-    description: Langfuse stores application metadata, users, projects, and bootstrap
-      state in Postgres.
+    - from: langfuse
+      to: keycloak
+      type: soft
+      description: Keycloak provides the preferred OIDC browser sign-in path, but
+        a repo-managed bootstrap user remains the break-glass fallback.
+    - from: langfuse
+      to: minio
+      type: soft
+      description: Langfuse event export and media attachment flows depend on the
+        shared MinIO bucket, while core trace and project metadata remain available
+        from Postgres and ClickHouse.
+    - from: langfuse
+      to: nginx_edge
+      type: soft
+      description: Public access to langfuse.lv3.org depends on the shared NGINX edge
+        publication path.
+    - from: langfuse
+      to: openbao
+      type: startup_only
+      description: Langfuse starts from OpenBao-rendered runtime secrets mirrored
+        into its compose environment.
+    - from: langfuse
+      to: postgres
+      type: hard
+      description: Langfuse stores application metadata, users, projects, and bootstrap
+        state in Postgres.
 health:
   service_name: langfuse
   owning_vm: docker-runtime-lv3
@@ -115,7 +115,7 @@ health:
     url: http://127.0.0.1:3002/auth/sign-in
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: The Langfuse public health endpoint responds on the local runtime
@@ -126,7 +126,7 @@ health:
     url: http://127.0.0.1:3002/api/public/health
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The Langfuse sign-in page renders locally after the web and worker
@@ -137,14 +137,14 @@ health:
     url: http://127.0.0.1:3002/auth/sign-in
     method: GET
     expected_status:
-    - 200
+      - 200
     docker_publication:
       container_name: langfuse-web
       bindings:
-      - host: 10.10.10.20
-        port: 3002
+        - host: 10.10.10.20
+          port: 3002
       required_networks:
-      - langfuse_default
+        - langfuse_default
   uptime_kuma:
     enabled: true
     monitor:
@@ -158,41 +158,41 @@ health:
       maxretries: 0
       maxredirects: 5
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 data:
-- id: langfuse-object-storage
-  service: langfuse
-  name: Langfuse event and media object storage
-  class: confidential
-  retention_days: 90
-  backup_included: false
-  access_role: platform-operator
-  pii_risk: high
-  locations:
-  - /opt/langfuse/data/minio/langfuse/events
-  - /opt/langfuse/data/minio/langfuse/media
-  notes: Blob-backed event uploads and media attachments may contain raw prompts,
-    responses, and attached evidence artifacts.
-- id: langfuse-trace-store
-  service: langfuse
-  name: Langfuse trace and observation store
-  class: confidential
-  retention_days: 90
-  backup_included: false
-  access_role: platform-operator
-  pii_risk: high
-  locations:
-  - Langfuse PostgreSQL database
-  - /opt/langfuse/data/clickhouse
-  notes: Langfuse captures prompt, trace, and generation payloads that may contain
-    operator-entered context and model outputs.
+  - id: langfuse-object-storage
+    service: langfuse
+    name: Langfuse event and media object storage
+    class: confidential
+    retention_days: 90
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: high
+    locations:
+      - /opt/langfuse/data/minio/langfuse/events
+      - /opt/langfuse/data/minio/langfuse/media
+    notes: Blob-backed event uploads and media attachments may contain raw prompts,
+      responses, and attached evidence artifacts.
+  - id: langfuse-trace-store
+    service: langfuse
+    name: Langfuse trace and observation store
+    class: confidential
+    retention_days: 90
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: high
+    locations:
+      - Langfuse PostgreSQL database
+      - /opt/langfuse/data/clickhouse
+    notes: Langfuse captures prompt, trace, and generation payloads that may contain
+      operator-entered context and model outputs.
 slos:
-- id: langfuse-availability
-  service_id: langfuse
-  indicator: availability
-  objective_percent: 99.5
-  window_days: 30
-  target_url: https://langfuse.lv3.org/api/public/health
-  probe_module: http_2xx_follow_redirects
-  description: Langfuse remains reachable through the public LV3 edge for trace ingestion
-    and operator access.
+  - id: langfuse-availability
+    service_id: langfuse
+    indicator: availability
+    objective_percent: 99.5
+    window_days: 30
+    target_url: https://langfuse.lv3.org/api/public/health
+    probe_module: http_2xx_follow_redirects
+    description: Langfuse remains reachable through the public LV3 edge for trace
+      ingestion and operator access.

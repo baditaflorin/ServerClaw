@@ -14,9 +14,9 @@ service:
   exposure: edge-published
   health_probe_id: coolify
   secret_catalog_ids:
-  - coolify_root_password
-  - coolify_api_token
-  - coolify_server_ssh_private_key
+    - coolify_root_password
+    - coolify_api_token
+    - coolify_server_ssh_private_key
   adr: 0194
   runbook: docs/runbooks/configure-coolify.md
   runtime_pool: dedicated-coolify
@@ -25,10 +25,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify
   mobility_tier: anchor
   tags:
-  - paas
-  - git
-  - deployments
-  - applications
+    - paas
+    - git
+    - deployments
+    - applications
   environments:
     production:
       status: active
@@ -53,8 +53,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_170
+    - git_repository
+    - pbs_vm_170
   standby:
     kind: cold
     location: coolify-lv3
@@ -72,18 +72,18 @@ dependency:
     category: infrastructure
     adr: 0194
   outbound_edges:
-  - from: coolify
-    to: keycloak
-    type: soft
-    description: Authenticated browser access to coolify.lv3.org depends on the shared
-      Keycloak-backed edge auth path, while the private controller remains reachable
-      over the management network.
-  - from: coolify
-    to: nginx_edge
-    type: soft
-    description: Public dashboard access to coolify.lv3.org depends on the shared
-      NGINX edge publication, while the private controller proxy remains reachable
-      directly.
+    - from: coolify
+      to: keycloak
+      type: soft
+      description: Authenticated browser access to coolify.lv3.org depends on the
+        shared Keycloak-backed edge auth path, while the private controller remains
+        reachable over the management network.
+    - from: coolify
+      to: nginx_edge
+      type: soft
+      description: Public dashboard access to coolify.lv3.org depends on the shared
+        NGINX edge publication, while the private controller proxy remains reachable
+        directly.
 health:
   service_name: coolify
   owning_vm: coolify-lv3
@@ -99,7 +99,7 @@ health:
     url: http://127.0.0.1:8000/api/health
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The guest-local Coolify health endpoint remains reachable after repo-managed
@@ -111,14 +111,14 @@ health:
     url: http://127.0.0.1:8000/api/health
     method: GET
     expected_status:
-    - 200
+      - 200
     docker_publication:
       container_name: coolify
       bindings:
-      - host: 10.10.10.70
-        port: 8000
+        - host: 10.10.10.70
+          port: 8000
       required_networks:
-      - coolify
+        - coolify
   uptime_kuma:
     enabled: false
     reason: The dashboard is OIDC-gated and the repo-managed role plus live-apply

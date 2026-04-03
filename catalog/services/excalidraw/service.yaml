@@ -23,10 +23,10 @@ service:
   mobility_tier: movable_singleton
   dashboard_url: https://grafana.lv3.org/d/lv3-excalidraw/lv3-excalidraw
   tags:
-  - architecture
-  - diagramming
-  - excalidraw
-  - operator
+    - architecture
+    - diagramming
+    - excalidraw
+    - operator
   environments:
     production:
       status: active
@@ -50,8 +50,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -69,20 +69,20 @@ dependency:
     category: access
     adr: '0202'
   outbound_edges:
-  - from: excalidraw
-    to: docker_runtime
-    type: hard
-    description: The Excalidraw frontend and collaboration room are hosted on docker-runtime-lv3.
-  - from: excalidraw
-    to: keycloak
-    type: soft
-    description: Operator access to draw.lv3.org depends on the shared Keycloak-backed
-      oauth2-proxy edge flow, while the private runtime can still be verified locally.
-  - from: excalidraw
-    to: nginx_edge
-    type: hard
-    description: The private diagram surface is published at draw.lv3.org through
-      the shared NGINX edge, including the routed /socket.io/ collaboration path.
+    - from: excalidraw
+      to: docker_runtime
+      type: hard
+      description: The Excalidraw frontend and collaboration room are hosted on docker-runtime-lv3.
+    - from: excalidraw
+      to: keycloak
+      type: soft
+      description: Operator access to draw.lv3.org depends on the shared Keycloak-backed
+        oauth2-proxy edge flow, while the private runtime can still be verified locally.
+    - from: excalidraw
+      to: nginx_edge
+      type: hard
+      description: The private diagram surface is published at draw.lv3.org through
+        the shared NGINX edge, including the routed /socket.io/ collaboration path.
 health:
   service_name: excalidraw
   owning_vm: docker-runtime-lv3
@@ -97,7 +97,7 @@ health:
     url: http://10.10.10.20:3095/
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The Excalidraw collaboration room responds on its local socket service
@@ -108,7 +108,7 @@ health:
     url: http://10.10.10.20:3096/
     method: GET
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: true
     monitor:
@@ -122,28 +122,28 @@ health:
       maxretries: 0
       maxredirects: 5
       accepted_statuscodes:
-      - 200-399
+        - 200-399
 data:
-- id: excalidraw-generated-scenes
-  service: excalidraw
-  name: Generated Excalidraw scene set
-  class: internal
-  retention_days: 365
-  backup_included: true
-  access_role: platform-read
-  pii_risk: low
-  locations:
-  - docs/diagrams/*.excalidraw
-  - /opt/excalidraw/bootstrap-app.sh
-  notes: The committed architecture scene sources are regenerated from repo truth
-    and remain part of normal repository backup scope.
+  - id: excalidraw-generated-scenes
+    service: excalidraw
+    name: Generated Excalidraw scene set
+    class: internal
+    retention_days: 365
+    backup_included: true
+    access_role: platform-read
+    pii_risk: low
+    locations:
+      - docs/diagrams/*.excalidraw
+      - /opt/excalidraw/bootstrap-app.sh
+    notes: The committed architecture scene sources are regenerated from repo truth
+      and remain part of normal repository backup scope.
 slos:
-- id: excalidraw-availability
-  service_id: excalidraw
-  indicator: availability
-  objective_percent: 99.5
-  window_days: 30
-  target_url: https://draw.lv3.org
-  probe_module: http_2xx_follow_redirects
-  description: The private Excalidraw publication remains reachable through the authenticated
-    LV3 edge.
+  - id: excalidraw-availability
+    service_id: excalidraw
+    indicator: availability
+    objective_percent: 99.5
+    window_days: 30
+    target_url: https://draw.lv3.org
+    probe_module: http_2xx_follow_redirects
+    description: The private Excalidraw publication remains reachable through the
+      authenticated LV3 edge.

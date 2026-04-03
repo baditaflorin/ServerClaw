@@ -18,10 +18,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
   mobility_tier: anchor
   tags:
-  - events
-  - nats
-  - jetstream
-  - private
+    - events
+    - nats
+    - jetstream
+    - private
   notes: The monitoring endpoint stays loopback-only on runtime-control-lv3 at http://127.0.0.1:8222/healthz.
   environments:
     production:
@@ -40,8 +40,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_192
+    - git_repository
+    - pbs_vm_192
   standby:
     kind: cold
     location: runtime-control-lv3

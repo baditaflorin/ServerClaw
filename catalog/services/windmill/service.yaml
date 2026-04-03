@@ -13,11 +13,11 @@ service:
   uptime_monitor_name: Windmill Private
   health_probe_id: windmill
   image_catalog_ids:
-  - windmill_extra_runtime
-  - windmill_runtime
+    - windmill_extra_runtime
+    - windmill_runtime
   secret_catalog_ids:
-  - windmill_database_password
-  - windmill_superadmin_secret
+    - windmill_database_password
+    - windmill_superadmin_secret
   adr: '0044'
   runbook: docs/runbooks/configure-windmill.md
   runtime_pool: runtime-control
@@ -26,24 +26,24 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
   mobility_tier: anchor
   degradation_modes:
-  - dependency: postgres
-    dependency_type: hard
-    degraded_behaviour: Windmill cannot accept or persist workflow state without PostgreSQL.
-      Requests fail until database connectivity returns.
-    degraded_for_seconds_max: 0
-    recovery_signal: Windmill database connection succeeds again
-    tested_by: fault:postgres-unavailable
+    - dependency: postgres
+      dependency_type: hard
+      degraded_behaviour: Windmill cannot accept or persist workflow state without
+        PostgreSQL. Requests fail until database connectivity returns.
+      degraded_for_seconds_max: 0
+      recovery_signal: Windmill database connection succeeds again
+      tested_by: fault:postgres-unavailable
   tags:
-  - workflow
-  - automation
-  - jobs
+    - workflow
+    - automation
+    - jobs
   environments:
     production:
       status: active
       url: http://100.64.0.1:8005
       stage_ready: true
       smoke_suite_ids:
-      - production-windmill-primary-path
+        - production-windmill-primary-path
 completeness:
   service_type: compose
   requires_subdomain: false
@@ -57,8 +57,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_192
+    - git_repository
+    - pbs_vm_192
   standby:
     kind: cold
     location: runtime-control-lv3
@@ -76,20 +76,21 @@ dependency:
     category: automation
     adr: '0044'
   outbound_edges:
-  - from: windmill
-    to: ntfy
-    type: soft
-    description: The repo-seeded Windmill resource and NATS bridge publish high-priority
-      operator push notifications through ntfy.
-  - from: windmill
-    to: openbao
-    type: startup_only
-    description: Windmill workers and the server runtime load mirrored secrets from
-      the OpenBao agent before the containers start.
-  - from: windmill
-    to: postgres
-    type: hard
-    description: Windmill persists workflow metadata, run history, and state in Postgres.
+    - from: windmill
+      to: ntfy
+      type: soft
+      description: The repo-seeded Windmill resource and NATS bridge publish high-priority
+        operator push notifications through ntfy.
+    - from: windmill
+      to: openbao
+      type: startup_only
+      description: Windmill workers and the server runtime load mirrored secrets from
+        the OpenBao agent before the containers start.
+    - from: windmill
+      to: postgres
+      type: hard
+      description: Windmill persists workflow metadata, run history, and state in
+        Postgres.
 health:
   service_name: windmill
   owning_vm: runtime-control-lv3
@@ -104,7 +105,7 @@ health:
     url: http://127.0.0.1:8000/api/version
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The Windmill API version endpoint remains reachable after workspace
@@ -115,7 +116,7 @@ health:
     url: http://127.0.0.1:8000/api/version
     method: GET
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: true
     monitor:
@@ -128,27 +129,27 @@ health:
       maxretries: 0
       maxredirects: 10
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 data:
-- id: windmill-run-history
-  service: windmill
-  name: Windmill job history
-  class: internal
-  retention_days: 60
-  backup_included: true
-  access_role: platform-operator
-  pii_risk: medium
-  locations:
-  - Windmill PostgreSQL data
-  - Windmill workspace logs
-  notes: Workflow logs can contain operator context and transient execution metadata
-    but do not need indefinite retention.
+  - id: windmill-run-history
+    service: windmill
+    name: Windmill job history
+    class: internal
+    retention_days: 60
+    backup_included: true
+    access_role: platform-operator
+    pii_risk: medium
+    locations:
+      - Windmill PostgreSQL data
+      - Windmill workspace logs
+    notes: Workflow logs can contain operator context and transient execution metadata
+      but do not need indefinite retention.
 slos:
-- id: windmill-availability
-  service_id: windmill
-  indicator: availability
-  objective_percent: 99.5
-  window_days: 30
-  target_url: http://10.10.10.92:8000/api/version
-  probe_module: http_2xx_follow_redirects
-  description: Windmill API stays reachable for scheduled automation.
+  - id: windmill-availability
+    service_id: windmill
+    indicator: availability
+    objective_percent: 99.5
+    window_days: 30
+    target_url: http://10.10.10.92:8000/api/version
+    probe_module: http_2xx_follow_redirects
+    description: Windmill API stays reachable for scheduled automation.

@@ -12,7 +12,7 @@ service:
   uptime_monitor_name: Step CA Private
   health_probe_id: step_ca
   image_catalog_ids:
-  - step_ca_runtime
+    - step_ca_runtime
   adr: '0042'
   runbook: docs/runbooks/configure-step-ca.md
   runtime_pool: runtime-control
@@ -21,10 +21,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
   mobility_tier: anchor
   tags:
-  - ca
-  - certificates
-  - ssh
-  - tls
+    - ca
+    - certificates
+    - ssh
+    - tls
   environments:
     production:
       status: active
@@ -42,8 +42,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_192
+    - git_repository
+    - pbs_vm_192
   standby:
     kind: cold
     location: runtime-control-lv3
@@ -81,34 +81,34 @@ health:
     retries: 1
     delay_seconds: 0
     argv:
-    - step
-    - ca
-    - certificate
-    - step-ca-service-test.lv3.internal
-    - /opt/step-ca/service-test.crt
-    - /opt/step-ca/service-test.key
-    - --force
-    - --ca-url
-    - https://10.10.10.92:9000
-    - --root
-    - /opt/step-ca/home/certs/root_ca.crt
-    - --provisioner
-    - services
-    - --provisioner-password-file
-    - /opt/step-ca/secrets/services-password.txt
-    - --password-file
-    - /opt/step-ca/secrets/services-password.txt
-    - --san
-    - step-ca-service-test.lv3.internal
-    - --not-after
-    - 1h
+      - step
+      - ca
+      - certificate
+      - step-ca-service-test.lv3.internal
+      - /opt/step-ca/service-test.crt
+      - /opt/step-ca/service-test.key
+      - --force
+      - --ca-url
+      - https://10.10.10.92:9000
+      - --root
+      - /opt/step-ca/home/certs/root_ca.crt
+      - --provisioner
+      - services
+      - --provisioner-password-file
+      - /opt/step-ca/secrets/services-password.txt
+      - --password-file
+      - /opt/step-ca/secrets/services-password.txt
+      - --san
+      - step-ca-service-test.lv3.internal
+      - --not-after
+      - 1h
     success_rc: 0
     docker_publication:
       container_name: step-ca
       required_networks:
-      - step-ca_default
+        - step-ca_default
   tls_certificate_ids:
-  - step-ca-proxy
+    - step-ca-proxy
   uptime_kuma:
     enabled: true
     monitor:
@@ -121,19 +121,19 @@ health:
       maxretries: 0
       maxredirects: 10
       accepted_statuscodes:
-      - 200-299
+        - 200-299
       ignoreTls: true
 data:
-- id: tls-private-keys
-  service: step_ca
-  name: TLS private keys
-  class: secret
-  retention_days: 7
-  backup_included: false
-  access_role: service_account
-  pii_risk: low
-  locations:
-  - step-ca runtime volumes
-  - /etc/pve/local/pve-ssl.*
-  notes: Runtime keys are rotated with certificate renewal and old material should
-    not persist beyond the overlap window.
+  - id: tls-private-keys
+    service: step_ca
+    name: TLS private keys
+    class: secret
+    retention_days: 7
+    backup_included: false
+    access_role: service_account
+    pii_risk: low
+    locations:
+      - step-ca runtime volumes
+      - /etc/pve/local/pve-ssl.*
+    notes: Runtime keys are rotated with certificate renewal and old material should
+      not persist beyond the overlap window.

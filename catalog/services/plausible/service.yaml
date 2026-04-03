@@ -15,14 +15,14 @@ service:
   uptime_monitor_name: Plausible Public Health
   health_probe_id: plausible
   image_catalog_ids:
-  - plausible_runtime
-  - plausible_postgres_runtime
-  - plausible_clickhouse_runtime
+    - plausible_runtime
+    - plausible_postgres_runtime
+    - plausible_clickhouse_runtime
   secret_catalog_ids:
-  - plausible_database_password
-  - plausible_secret_key_base
-  - plausible_bootstrap_user_password
-  - mail_platform_server_mailbox_password
+    - plausible_database_password
+    - plausible_secret_key_base
+    - plausible_bootstrap_user_password
+    - mail_platform_server_mailbox_password
   adr: 0283
   runbook: docs/runbooks/configure-plausible.md
   runtime_pool: runtime-general
@@ -31,10 +31,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
   tags:
-  - analytics
-  - privacy
-  - observability
-  - edge-authenticated
+    - analytics
+    - privacy
+    - observability
+    - edge-authenticated
   notes: The dashboard uses the shared edge OIDC boundary while the tracker, event
     ingestion path, and health endpoints remain intentionally public for instrumentation
     and probe traffic.
@@ -62,8 +62,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -82,26 +82,26 @@ dependency:
     category: observability
     adr: 0283
   outbound_edges:
-  - from: plausible
-    to: docker_runtime
-    type: hard
-    description: The Plausible runtime, bundled PostgreSQL, and bundled ClickHouse
-      analytics store run on docker-runtime-lv3.
-  - from: plausible
-    to: mail_platform
-    type: soft
-    description: SMTP delivery for notifications and password recovery uses the repo-managed
-      server mailbox and internal submission relay on mail-platform.
-  - from: plausible
-    to: nginx_edge
-    type: soft
-    description: Dashboard publication at analytics.lv3.org and tracker injection
-      on selected public hostnames depend on the shared NGINX edge publication path.
-  - from: plausible
-    to: openbao
-    type: startup_only
-    description: Plausible starts from OpenBao-rendered runtime secrets mirrored into
-      its compose environment before the main container launches.
+    - from: plausible
+      to: docker_runtime
+      type: hard
+      description: The Plausible runtime, bundled PostgreSQL, and bundled ClickHouse
+        analytics store run on docker-runtime-lv3.
+    - from: plausible
+      to: mail_platform
+      type: soft
+      description: SMTP delivery for notifications and password recovery uses the
+        repo-managed server mailbox and internal submission relay on mail-platform.
+    - from: plausible
+      to: nginx_edge
+      type: soft
+      description: Dashboard publication at analytics.lv3.org and tracker injection
+        on selected public hostnames depend on the shared NGINX edge publication path.
+    - from: plausible
+      to: openbao
+      type: startup_only
+      description: Plausible starts from OpenBao-rendered runtime secrets mirrored
+        into its compose environment before the main container launches.
 health:
   service_name: plausible
   owning_vm: docker-runtime-lv3
@@ -117,7 +117,7 @@ health:
     url: http://127.0.0.1:8016/api/health
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: The local Plausible liveness endpoint continues to answer on docker-runtime-lv3.
@@ -127,7 +127,7 @@ health:
     url: http://127.0.0.1:8016/api/system/health/live
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The public Plausible readiness endpoint answers through the shared
@@ -139,14 +139,14 @@ health:
     url: https://analytics.lv3.org/api/system/health/ready
     method: GET
     expected_status:
-    - 200
+      - 200
     docker_publication:
       container_name: plausible
       bindings:
-      - host: 10.10.10.20
-        port: 8016
+        - host: 10.10.10.20
+          port: 8016
       required_networks:
-      - plausible_default
+        - plausible_default
   uptime_kuma:
     enabled: true
     monitor:
@@ -160,40 +160,40 @@ health:
       maxretries: 0
       maxredirects: 5
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 data:
-- id: plausible-analytics-events
-  service: plausible
-  name: Plausible analytics event store
-  class: confidential
-  retention_days: 365
-  backup_included: true
-  access_role: platform-operator
-  pii_risk: low
-  locations:
-  - Docker volume plausible-event-data
-  notes: ClickHouse stores privacy-preserving pageview and referral aggregates for
-    the declared public LV3 sites without raw IP retention.
-- id: plausible-site-metadata
-  service: plausible
-  name: Plausible site, user, and configuration metadata
-  class: confidential
-  retention_days: 365
-  backup_included: true
-  access_role: platform-operator
-  pii_risk: medium
-  locations:
-  - Docker volume plausible-db-data
-  - Docker volume plausible-data
-  notes: PostgreSQL-backed site configuration, dashboard state, and the bootstrap
-    recovery user metadata remain restorable with the runtime volumes.
+  - id: plausible-analytics-events
+    service: plausible
+    name: Plausible analytics event store
+    class: confidential
+    retention_days: 365
+    backup_included: true
+    access_role: platform-operator
+    pii_risk: low
+    locations:
+      - Docker volume plausible-event-data
+    notes: ClickHouse stores privacy-preserving pageview and referral aggregates for
+      the declared public LV3 sites without raw IP retention.
+  - id: plausible-site-metadata
+    service: plausible
+    name: Plausible site, user, and configuration metadata
+    class: confidential
+    retention_days: 365
+    backup_included: true
+    access_role: platform-operator
+    pii_risk: medium
+    locations:
+      - Docker volume plausible-db-data
+      - Docker volume plausible-data
+    notes: PostgreSQL-backed site configuration, dashboard state, and the bootstrap
+      recovery user metadata remain restorable with the runtime volumes.
 slos:
-- id: plausible-availability
-  service_id: plausible
-  indicator: availability
-  objective_percent: 99.5
-  window_days: 30
-  target_url: https://analytics.lv3.org/api/system/health/ready
-  probe_module: http_2xx_follow_redirects
-  description: The public Plausible readiness endpoint remains reachable for dashboard
-    access, tracker delivery, and synthetic event verification.
+  - id: plausible-availability
+    service_id: plausible
+    indicator: availability
+    objective_percent: 99.5
+    window_days: 30
+    target_url: https://analytics.lv3.org/api/system/health/ready
+    probe_module: http_2xx_follow_redirects
+    description: The public Plausible readiness endpoint remains reachable for dashboard
+      access, tracker delivery, and synthetic event verification.

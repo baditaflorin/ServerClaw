@@ -12,7 +12,7 @@ service:
   exposure: private-only
   health_probe_id: changedetection
   image_catalog_ids:
-  - changedetection_runtime
+    - changedetection_runtime
   adr: 0280
   runbook: docs/runbooks/configure-changedetection.md
   runtime_pool: runtime-general
@@ -22,10 +22,10 @@ service:
   mobility_tier: movable_singleton
   dashboard_url: https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=changedetection-availability
   tags:
-  - change-detection
-  - external-dependencies
-  - observability
-  - private
+    - change-detection
+    - external-dependencies
+    - observability
+    - private
   environments:
     production:
       status: active
@@ -48,8 +48,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -67,27 +67,27 @@ dependency:
     category: observability
     adr: 0280
   outbound_edges:
-  - from: changedetection
-    to: api_gateway
-    type: soft
-    description: Authenticated operator and automation access to Changedetection is
-      brokered through the governed API gateway route, while the private runtime remains
-      directly verifiable on docker-runtime-lv3.
-  - from: changedetection
-    to: docker_runtime
-    type: hard
-    description: The Changedetection.io runtime and its datastore volume are hosted
-      on docker-runtime-lv3.
-  - from: changedetection
-    to: mattermost
-    type: soft
-    description: Repo-managed watch groups route platform-ops notifications through
-      the existing Mattermost webhook manifest.
-  - from: changedetection
-    to: ntfy
-    type: soft
-    description: Security-advisory watches publish repo-managed operator push notifications
-      through the governed ntfy channel.
+    - from: changedetection
+      to: api_gateway
+      type: soft
+      description: Authenticated operator and automation access to Changedetection
+        is brokered through the governed API gateway route, while the private runtime
+        remains directly verifiable on docker-runtime-lv3.
+    - from: changedetection
+      to: docker_runtime
+      type: hard
+      description: The Changedetection.io runtime and its datastore volume are hosted
+        on docker-runtime-lv3.
+    - from: changedetection
+      to: mattermost
+      type: soft
+      description: Repo-managed watch groups route platform-ops notifications through
+        the existing Mattermost webhook manifest.
+    - from: changedetection
+      to: ntfy
+      type: soft
+      description: Security-advisory watches publish repo-managed operator push notifications
+        through the governed ntfy channel.
 health:
   service_name: changedetection
   owning_vm: docker-runtime-lv3
@@ -103,7 +103,7 @@ health:
     url: http://127.0.0.1:5000/
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: Changedetection keeps serving the private root page on docker-runtime-lv3.
@@ -113,7 +113,7 @@ health:
     url: http://127.0.0.1:5000/
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: command
     description: Changedetection accepts the repo-managed API token and reports the
@@ -122,14 +122,14 @@ health:
     retries: 3
     delay_seconds: 5
     argv:
-    - /bin/bash
-    - -lc
-    - 'set -euo pipefail; token=$(cat /etc/lv3/changedetection/api-token); systeminfo=$(mktemp);
-      tags=$(mktemp); trap ''rm -f "${systeminfo}" "${tags}"'' EXIT; curl -fsS http://127.0.0.1:5000/api/v1/systeminfo
-      -H "x-api-key: ${token}" > "${systeminfo}"; curl -fsS http://127.0.0.1:5000/api/v1/tags
-      -H "x-api-key: ${token}" > "${tags}"; python3 -c ''import json, pathlib, sys;
-      payload=json.loads(pathlib.Path(sys.argv[1]).read_text()); tags=json.loads(pathlib.Path(sys.argv[2]).read_text());
-      assert payload["watch_count"] >= 1 and len(tags) >= 1'' "${systeminfo}" "${tags}"'
+      - /bin/bash
+      - -lc
+      - 'set -euo pipefail; token=$(cat /etc/lv3/changedetection/api-token); systeminfo=$(mktemp);
+        tags=$(mktemp); trap ''rm -f "${systeminfo}" "${tags}"'' EXIT; curl -fsS http://127.0.0.1:5000/api/v1/systeminfo
+        -H "x-api-key: ${token}" > "${systeminfo}"; curl -fsS http://127.0.0.1:5000/api/v1/tags
+        -H "x-api-key: ${token}" > "${tags}"; python3 -c ''import json, pathlib, sys;
+        payload=json.loads(pathlib.Path(sys.argv[1]).read_text()); tags=json.loads(pathlib.Path(sys.argv[2]).read_text());
+        assert payload["watch_count"] >= 1 and len(tags) >= 1'' "${systeminfo}" "${tags}"'
     success_rc: 0
   uptime_kuma:
     enabled: false
@@ -137,27 +137,27 @@ health:
       repo-managed runtime verification plus the governed API gateway check are the
       supported health path.
 data:
-- id: changedetection-watch-history
-  service: changedetection
-  name: Changedetection watch history and diff datastore
-  class: internal
-  retention_days: 365
-  backup_included: true
-  access_role: platform-operator
-  pii_risk: low
-  locations:
-  - Docker volume changedetection-datastore on docker-runtime-lv3
-  - /etc/lv3/changedetection/watch-catalog.json
-  - /opt/changedetection/watch-sync-report.json
-  notes: Changedetection stores repo-managed watch metadata, snapshots, diff history,
-    and the most recent drift-free sync report for upstream content monitoring.
+  - id: changedetection-watch-history
+    service: changedetection
+    name: Changedetection watch history and diff datastore
+    class: internal
+    retention_days: 365
+    backup_included: true
+    access_role: platform-operator
+    pii_risk: low
+    locations:
+      - Docker volume changedetection-datastore on docker-runtime-lv3
+      - /etc/lv3/changedetection/watch-catalog.json
+      - /opt/changedetection/watch-sync-report.json
+    notes: Changedetection stores repo-managed watch metadata, snapshots, diff history,
+      and the most recent drift-free sync report for upstream content monitoring.
 slos:
-- id: changedetection-availability
-  service_id: changedetection
-  indicator: availability
-  objective_percent: 99.0
-  window_days: 30
-  target_url: http://10.10.10.20:5000/
-  probe_module: http_2xx_follow_redirects
-  description: The private Changedetection.io runtime remains reachable on docker-runtime-lv3
-    for governed upstream release, advisory, and API change monitoring.
+  - id: changedetection-availability
+    service_id: changedetection
+    indicator: availability
+    objective_percent: 99.0
+    window_days: 30
+    target_url: http://10.10.10.20:5000/
+    probe_module: http_2xx_follow_redirects
+    description: The private Changedetection.io runtime remains reachable on docker-runtime-lv3
+      for governed upstream release, advisory, and API change monitoring.

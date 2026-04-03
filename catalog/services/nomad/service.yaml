@@ -12,10 +12,10 @@ service:
   exposure: private-only
   health_probe_id: nomad
   secret_catalog_ids:
-  - nomad_acl_management_token
-  - nomad_tls_ca_key
-  - nomad_tls_server_key
-  - nomad_tls_client_key
+    - nomad_acl_management_token
+    - nomad_tls_ca_key
+    - nomad_tls_server_key
+    - nomad_tls_client_key
   adr: '0232'
   runbook: docs/runbooks/configure-nomad.md
   runtime_pool: dedicated-monitoring
@@ -24,26 +24,26 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
   mobility_tier: anchor
   degradation_modes:
-  - dependency: docker_runtime
-    dependency_type: soft
-    degraded_behaviour: Runtime-targeted jobs cannot place while the docker-runtime
-      Nomad client is unavailable. The Nomad server and build-targeted jobs continue
-      to operate.
-    degraded_for_seconds_max: -1
-    recovery_signal: docker-runtime-lv3 rejoins the Nomad client set
-    tested_by: fault:docker-runtime-unavailable
-  - dependency: docker_build
-    dependency_type: soft
-    degraded_behaviour: Build-targeted or long-running helper jobs pinned to the build
-      pool cannot place while the docker-build Nomad client is unavailable. The Nomad
-      server and runtime-targeted jobs continue to operate.
-    degraded_for_seconds_max: -1
-    recovery_signal: docker-build-lv3 rejoins the Nomad client set
-    tested_by: fault:docker-build-unavailable
+    - dependency: docker_runtime
+      dependency_type: soft
+      degraded_behaviour: Runtime-targeted jobs cannot place while the docker-runtime
+        Nomad client is unavailable. The Nomad server and build-targeted jobs continue
+        to operate.
+      degraded_for_seconds_max: -1
+      recovery_signal: docker-runtime-lv3 rejoins the Nomad client set
+      tested_by: fault:docker-runtime-unavailable
+    - dependency: docker_build
+      dependency_type: soft
+      degraded_behaviour: Build-targeted or long-running helper jobs pinned to the
+        build pool cannot place while the docker-build Nomad client is unavailable.
+        The Nomad server and runtime-targeted jobs continue to operate.
+      degraded_for_seconds_max: -1
+      recovery_signal: docker-build-lv3 rejoins the Nomad client set
+      tested_by: fault:docker-build-unavailable
   tags:
-  - scheduler
-  - batch
-  - jobs
+    - scheduler
+    - batch
+    - jobs
   environments:
     production:
       status: active
@@ -61,8 +61,8 @@ redundancy:
     rto_minutes: 60
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_140
+    - git_repository
+    - pbs_vm_140
   standby:
     kind: cold
     location: monitoring-lv3
@@ -80,16 +80,16 @@ dependency:
     category: automation
     adr: '0232'
   outbound_edges:
-  - from: nomad
-    to: docker_build
-    type: soft
-    description: Long-running internal helper services pinned to the build pool depend
-      on the docker-build Nomad client remaining available for placement.
-  - from: nomad
-    to: docker_runtime
-    type: soft
-    description: Runtime-targeted batch jobs and internal helper workloads depend
-      on the docker-runtime Nomad client remaining available for placement.
+    - from: nomad
+      to: docker_build
+      type: soft
+      description: Long-running internal helper services pinned to the build pool
+        depend on the docker-build Nomad client remaining available for placement.
+    - from: nomad
+      to: docker_runtime
+      type: soft
+      description: Runtime-targeted batch jobs and internal helper workloads depend
+        on the docker-runtime Nomad client remaining available for placement.
 health:
   service_name: nomad
   owning_vm: monitoring-lv3
@@ -111,10 +111,10 @@ health:
     retries: 6
     delay_seconds: 5
     argv:
-    - /usr/local/bin/lv3-nomad
-    - node
-    - status
-    - -json
+      - /usr/local/bin/lv3-nomad
+      - node
+      - status
+      - -json
     success_rc: 0
   uptime_kuma:
     enabled: false

@@ -19,9 +19,9 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
   tags:
-  - chatops
-  - collaboration
-  - private
+    - chatops
+    - collaboration
+    - private
   environments:
     production:
       status: active
@@ -39,8 +39,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -58,15 +58,15 @@ dependency:
     category: communication
     adr: '0057'
   outbound_edges:
-  - from: mattermost
-    to: openbao
-    type: startup_only
-    description: Mattermost starts from OpenBao-rendered runtime secrets mirrored
-      into its compose environment.
-  - from: mattermost
-    to: postgres
-    type: hard
-    description: Mattermost stores channels, users, and message history in Postgres.
+    - from: mattermost
+      to: openbao
+      type: startup_only
+      description: Mattermost starts from OpenBao-rendered runtime secrets mirrored
+        into its compose environment.
+    - from: mattermost
+      to: postgres
+      type: hard
+      description: Mattermost stores channels, users, and message history in Postgres.
 health:
   service_name: mattermost
   owning_vm: docker-runtime-lv3
@@ -82,7 +82,7 @@ health:
     url: http://127.0.0.1:8065/api/v4/system/ping
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: command
     description: The repo-managed Mattermost webhook manifest is rendered after bootstrap.
@@ -90,9 +90,9 @@ health:
     retries: 1
     delay_seconds: 0
     argv:
-    - test
-    - -s
-    - /etc/lv3/mattermost/incoming-webhooks.json
+      - test
+      - -s
+      - /etc/lv3/mattermost/incoming-webhooks.json
     success_rc: 0
   uptime_kuma:
     enabled: true
@@ -106,18 +106,18 @@ health:
       maxretries: 0
       maxredirects: 10
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 data:
-- id: mattermost-messages
-  service: mattermost
-  name: Mattermost messages and attachments
-  class: confidential
-  retention_days: 730
-  backup_included: true
-  access_role: platform-operator
-  pii_risk: medium
-  locations:
-  - mattermost PostgreSQL database
-  - /opt/mattermost/volumes/app/mattermost
-  notes: ChatOps history supports incident reconstruction and should retain two years
-    of operator discussion.
+  - id: mattermost-messages
+    service: mattermost
+    name: Mattermost messages and attachments
+    class: confidential
+    retention_days: 730
+    backup_included: true
+    access_role: platform-operator
+    pii_risk: medium
+    locations:
+      - mattermost PostgreSQL database
+      - /opt/mattermost/volumes/app/mattermost
+    notes: ChatOps history supports incident reconstruction and should retain two
+      years of operator discussion.

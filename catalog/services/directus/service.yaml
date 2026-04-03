@@ -15,14 +15,14 @@ service:
   uptime_monitor_name: Directus Public Health
   health_probe_id: directus
   image_catalog_ids:
-  - directus_runtime
+    - directus_runtime
   secret_catalog_ids:
-  - directus_database_password
-  - directus_key
-  - directus_secret
-  - directus_admin_password
-  - directus_service_registry_token
-  - keycloak_directus_client_secret
+    - directus_database_password
+    - directus_key
+    - directus_secret
+    - directus_admin_password
+    - directus_service_registry_token
+    - keycloak_directus_client_secret
   adr: 0289
   adr_file: docs/adr/0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md
   runbook: docs/runbooks/configure-directus.md
@@ -32,12 +32,12 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
   tags:
-  - data-api
-  - directus
-  - graphql
-  - postgres
-  - rest
-  - oidc
+    - data-api
+    - directus
+    - graphql
+    - postgres
+    - rest
+    - oidc
   notes: Directus runs on docker-runtime-lv3, uses a dedicated PostgreSQL database
     named directus, publishes data.lv3.org through the shared NGINX edge, delegates
     routine browser sign-in to Keycloak, and retains a repo-managed break-glass local
@@ -67,9 +67,9 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
-  - pbs_vm_130
+    - git_repository
+    - pbs_vm_120
+    - pbs_vm_130
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -87,31 +87,31 @@ dependency:
     category: access
     adr: 0289
   outbound_edges:
-  - from: directus
-    to: docker_runtime
-    type: hard
-    description: The Directus runtime container and guest-local listener are hosted
-      on docker-runtime-lv3.
-  - from: directus
-    to: keycloak
-    type: soft
-    description: Routine browser sign-in delegates to Keycloak via OIDC while the
-      local Directus admin remains break-glass only.
-  - from: directus
-    to: nginx_edge
-    type: soft
-    description: The shared NGINX edge publishes data.lv3.org directly to Directus
-      on docker-runtime-lv3.
-  - from: directus
-    to: openbao
-    type: startup_only
-    description: Directus consumes OpenBao-delivered runtime secrets during converge
-      and container startup.
-  - from: directus
-    to: postgres
-    type: hard
-    description: Directus persists its system state and governed collections in the
-      dedicated PostgreSQL database directus on postgres-lv3.
+    - from: directus
+      to: docker_runtime
+      type: hard
+      description: The Directus runtime container and guest-local listener are hosted
+        on docker-runtime-lv3.
+    - from: directus
+      to: keycloak
+      type: soft
+      description: Routine browser sign-in delegates to Keycloak via OIDC while the
+        local Directus admin remains break-glass only.
+    - from: directus
+      to: nginx_edge
+      type: soft
+      description: The shared NGINX edge publishes data.lv3.org directly to Directus
+        on docker-runtime-lv3.
+    - from: directus
+      to: openbao
+      type: startup_only
+      description: Directus consumes OpenBao-delivered runtime secrets during converge
+        and container startup.
+    - from: directus
+      to: postgres
+      type: hard
+      description: Directus persists its system state and governed collections in
+        the dedicated PostgreSQL database directus on postgres-lv3.
 health:
   service_name: directus
   owning_vm: docker-runtime-lv3
@@ -127,7 +127,7 @@ health:
     url: http://127.0.0.1:8055/server/health
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: Directus keeps serving the loopback /server/health contract on docker-runtime-lv3.
@@ -137,7 +137,7 @@ health:
     url: http://127.0.0.1:8055/server/health
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: Directus serves the managed health contract locally and keeps the
@@ -148,14 +148,14 @@ health:
     url: http://127.0.0.1:8055/server/health
     method: GET
     expected_status:
-    - 200
+      - 200
     docker_publication:
       container_name: directus
       bindings:
-      - host: 10.10.10.92
-        port: 8055
+        - host: 10.10.10.92
+          port: 8055
       required_networks:
-      - directus_default
+        - directus_default
   uptime_kuma:
     enabled: true
     monitor:
@@ -169,31 +169,31 @@ health:
       maxretries: 0
       maxredirects: 5
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 data:
-- id: directus_primary_data
-  service: directus
-  name: Directus operational metadata database
-  class: internal
-  retention_days: null
-  backup_included: true
-  access_role: platform-operator
-  pii_risk: low
-  locations:
-  - PostgreSQL database directus on postgres-lv3
-  - Directus system tables plus governed collections in the public schema of the dedicated
-    directus database
-  notes: Directus persists repo-governed operational metadata in a dedicated PostgreSQL
-    database. Upstream Directus 11.17.0 keeps both system tables and managed collections
-    in the public schema of that dedicated database, so schema isolation is enforced
-    at the database boundary rather than by a separate PostgreSQL schema.
+  - id: directus_primary_data
+    service: directus
+    name: Directus operational metadata database
+    class: internal
+    retention_days: null
+    backup_included: true
+    access_role: platform-operator
+    pii_risk: low
+    locations:
+      - PostgreSQL database directus on postgres-lv3
+      - Directus system tables plus governed collections in the public schema of the
+        dedicated directus database
+    notes: Directus persists repo-governed operational metadata in a dedicated PostgreSQL
+      database. Upstream Directus 11.17.0 keeps both system tables and managed collections
+      in the public schema of that dedicated database, so schema isolation is enforced
+      at the database boundary rather than by a separate PostgreSQL schema.
 slos:
-- id: directus-availability
-  service_id: directus
-  indicator: availability
-  objective_percent: 99.5
-  window_days: 30
-  target_url: https://data.lv3.org/server/health
-  probe_module: http_2xx_follow_redirects
-  description: Directus should keep the public health contract on data.lv3.org reachable
-    through the shared edge.
+  - id: directus-availability
+    service_id: directus
+    indicator: availability
+    objective_percent: 99.5
+    window_days: 30
+    target_url: https://data.lv3.org/server/health
+    probe_module: http_2xx_follow_redirects
+    description: Directus should keep the public health contract on data.lv3.org reachable
+      through the shared edge.

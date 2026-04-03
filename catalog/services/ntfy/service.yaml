@@ -15,17 +15,17 @@ service:
   uptime_monitor_name: ntfy Public
   health_probe_id: ntfy
   image_catalog_ids:
-  - ntfy_runtime
+    - ntfy_runtime
   secret_catalog_ids:
-  - ntfy_alertmanager_password
-  - ntfy_ansible_password
-  - ntfy_ansible_token
-  - ntfy_changedetection_password
-  - ntfy_gitea_actions_password
-  - ntfy_gitea_actions_token
-  - ntfy_ops_password
-  - ntfy_windmill_password
-  - ntfy_windmill_token
+    - ntfy_alertmanager_password
+    - ntfy_ansible_password
+    - ntfy_ansible_token
+    - ntfy_changedetection_password
+    - ntfy_gitea_actions_password
+    - ntfy_gitea_actions_token
+    - ntfy_ops_password
+    - ntfy_windmill_password
+    - ntfy_windmill_token
   adr: 0299
   runbook: docs/runbooks/configure-ntfy.md
   runtime_pool: runtime-general
@@ -34,10 +34,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
   tags:
-  - notifications
-  - push
-  - automation
-  - public
+    - notifications
+    - push
+    - automation
+    - public
   environments:
     production:
       status: active
@@ -58,8 +58,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -77,15 +77,16 @@ dependency:
     category: communication
     adr: 0299
   outbound_edges:
-  - from: ntfy
-    to: docker_runtime
-    type: hard
-    description: The ntfy runtime, topic registry, and auth state are hosted on docker-runtime-lv3.
-  - from: ntfy
-    to: nginx_edge
-    type: soft
-    description: Public operator access to ntfy.lv3.org depends on the shared NGINX
-      edge publication path, while the private runtime remains directly verifiable.
+    - from: ntfy
+      to: docker_runtime
+      type: hard
+      description: The ntfy runtime, topic registry, and auth state are hosted on
+        docker-runtime-lv3.
+    - from: ntfy
+      to: nginx_edge
+      type: soft
+      description: Public operator access to ntfy.lv3.org depends on the shared NGINX
+        edge publication path, while the private runtime remains directly verifiable.
 health:
   service_name: ntfy
   owning_vm: docker-runtime-lv3
@@ -100,7 +101,7 @@ health:
     url: http://127.0.0.1:2586/v1/health
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The ntfy health endpoint remains reachable after governed auth and
@@ -111,7 +112,7 @@ health:
     url: http://127.0.0.1:2586/v1/health
     method: GET
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: true
     monitor:
@@ -124,4 +125,4 @@ health:
       maxretries: 0
       maxredirects: 5
       accepted_statuscodes:
-      - 200-299
+        - 200-299

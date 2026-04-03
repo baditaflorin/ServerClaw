@@ -1,0 +1,58 @@
+Service definition bundle validation
+Repository data model validation
+Service definition bundle validation
+Generated status document validation
+Generated portal validation
+
+[31m │  ⚠  Warning from the Material for MkDocs team[0m
+[31m │[0m
+[31m │[0m  MkDocs 2.0, the underlying framework of Material for MkDocs,
+[31m │[0m  will introduce backward-incompatible changes, including:
+[31m │[0m
+[31m │  × [0mAll plugins will stop working – the plugin system has been removed
+[31m │  × [0mAll theme overrides will break – the theming system has been rewritten
+[31m │  × [0mNo migration path exists – existing projects cannot be upgraded
+[31m │  × [0mClosed contribution model – community members can't report bugs
+[31m │  × [0mCurrently unlicensed – unsuitable for production use
+[31m │[0m
+[31m │[0m  Our full analysis:
+[31m │[0m
+[31m │[0m  [4mhttps://squidfunk.github.io/mkdocs-material/blog/2026/02/18/mkdocs-2.0/[0m
+[0m
+INFO    -  Cleaning site directory
+INFO    -  Building documentation to directory: /private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/lv3-docs-portal.yoHRJe
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/scripts/platform_observation_tool.py', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/.local/platform-observation/latest', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/.local/open-webui/platform-findings-daily.md', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/health-probe-catalog.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/secret-catalog.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/image-catalog.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/docs/schema/platform-finding.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/controller-local-secrets.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/control-plane-lanes.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/api-publication.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/roles/windmill_runtime/defaults/main.yml', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/roles/windmill_runtime/tasks/main.yml', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/docs/runbooks/agent-observation-loop.md', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/platform/graph', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/migrations/0012_graph_schema.sql', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/config/dependency-graph.yaml', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/config/windmill/scripts/graph', it was left as is.
+INFO    -  Doc file 'runbooks/cert-expired.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-certificate-lifecycle/config/certificate-catalog.json', it was left as is.
+INFO    -  mkdocs_swagger_ui_tag: Processing file 'api/openapi.md'
+INFO    -  mkdocs_swagger_ui_tag: Copying swagger ui assets.
+INFO    -  Documentation built in 9.42 seconds
+Alert rule validation
+Agent standards validation (ADR 0163-0168)
+Workstream surface ownership validation
+Workstream surface ownership validation failed: workstream surface ownership validation failed:
+- docs/diagrams/agent-coordination-map.excalidraw: outside declared owned surfaces for ws-0324-live-apply
+- receipts/live-applies/evidence/2026-04-03-ws-0324-rebased-generate-diagrams-r1-0.178.3.txt: outside declared owned surfaces for ws-0324-live-apply
+- receipts/live-applies/evidence/2026-04-03-ws-0324-rebased-git-diff-check-r1-0.178.3.txt: outside declared owned surfaces for ws-0324-live-apply
+- receipts/live-applies/evidence/2026-04-03-ws-0324-rebased-git-diff-check-r2-0.178.3.txt: outside declared owned surfaces for ws-0324-live-apply
+- receipts/live-applies/evidence/2026-04-03-ws-0324-rebased-pytest-r1-0.178.3.txt: outside declared owned surfaces for ws-0324-live-apply
+- receipts/live-applies/evidence/2026-04-03-ws-0324-rebased-pytest-r2-0.178.3.txt: outside declared owned surfaces for ws-0324-live-apply
+- receipts/live-applies/evidence/2026-04-03-ws-0324-rebased-validate-repo-r1-0.178.3.txt: outside declared owned surfaces for ws-0324-live-apply
+- receipts/live-applies/evidence/2026-04-03-ws-0324-rebased-validate-repo-r2-0.178.3.txt: outside declared owned surfaces for ws-0324-live-apply
+- receipts/live-applies/evidence/2026-04-03-ws-0324-rebased-validate-repo-r3-0.178.3.txt: outside declared owned surfaces for ws-0324-live-apply
+- receipts/live-applies/evidence/2026-04-03-ws-0324-rebased-validate-repo-r4-0.178.3.txt: outside declared owned surfaces for ws-0324-live-apply

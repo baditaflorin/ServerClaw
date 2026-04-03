@@ -13,10 +13,10 @@ service:
   exposure: private-only
   health_probe_id: vaultwarden
   image_catalog_ids:
-  - vaultwarden_runtime
+    - vaultwarden_runtime
   secret_catalog_ids:
-  - vaultwarden_admin_token
-  - vaultwarden_database_password
+    - vaultwarden_admin_token
+    - vaultwarden_database_password
   adr: '0147'
   runbook: docs/runbooks/configure-vaultwarden.md
   runtime_pool: runtime-control
@@ -26,10 +26,10 @@ service:
   mobility_tier: anchor
   dashboard_url: https://grafana.lv3.org/d/lv3-vaultwarden/lv3-vaultwarden
   tags:
-  - credentials
-  - totp
-  - vault
-  - private
+    - credentials
+    - totp
+    - vault
+    - private
   environments:
     production:
       status: active
@@ -50,8 +50,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_192
+    - git_repository
+    - pbs_vm_192
   standby:
     kind: cold
     location: runtime-control-lv3
@@ -69,16 +69,16 @@ dependency:
     category: security
     adr: '0147'
   outbound_edges:
-  - from: vaultwarden
-    to: postgres
-    type: hard
-    description: Vaultwarden stores encrypted vault metadata and shared credential
-      state in PostgreSQL.
-  - from: vaultwarden
-    to: step_ca
-    type: startup_only
-    description: Vaultwarden uses step-ca issued private TLS certificates for the
-      Tailscale-only HTTPS surface and managed renewal path.
+    - from: vaultwarden
+      to: postgres
+      type: hard
+      description: Vaultwarden stores encrypted vault metadata and shared credential
+        state in PostgreSQL.
+    - from: vaultwarden
+      to: step_ca
+      type: startup_only
+      description: Vaultwarden uses step-ca issued private TLS certificates for the
+        Tailscale-only HTTPS surface and managed renewal path.
 health:
   service_name: vaultwarden
   owning_vm: runtime-control-lv3
@@ -102,42 +102,42 @@ health:
     url: https://10.10.10.92:8222/alive
     method: GET
     expected_status:
-    - 200
+      - 200
     validate_tls: false
     docker_publication:
       container_name: vaultwarden
       bindings:
-      - host: 10.10.10.92
-        port: 8222
+        - host: 10.10.10.92
+          port: 8222
       derive_bindings_from_probes: false
       required_networks:
-      - vaultwarden_default
+        - vaultwarden_default
   tls_certificate_ids:
-  - vaultwarden-private
+    - vaultwarden-private
   uptime_kuma:
     enabled: false
     reason: Vaultwarden is private-only and uses an internal CA trust chain, so repo-managed
       role verification is the current health contract.
 data:
-- id: vaultwarden-shared-vault
-  service: vaultwarden
-  name: Vaultwarden shared credential vault
-  class: secret
-  retention_days: null
-  backup_included: true
-  access_role: platform-operator
-  pii_risk: high
-  locations:
-  - Vaultwarden PostgreSQL database
-  - /opt/vaultwarden/data
-  notes: Shared operator credentials, recovery codes, and TOTP seeds remain until
-    explicit deletion or rotation removes them from the private vault.
+  - id: vaultwarden-shared-vault
+    service: vaultwarden
+    name: Vaultwarden shared credential vault
+    class: secret
+    retention_days: null
+    backup_included: true
+    access_role: platform-operator
+    pii_risk: high
+    locations:
+      - Vaultwarden PostgreSQL database
+      - /opt/vaultwarden/data
+    notes: Shared operator credentials, recovery codes, and TOTP seeds remain until
+      explicit deletion or rotation removes them from the private vault.
 slos:
-- id: vaultwarden-availability
-  service_id: vaultwarden
-  indicator: availability
-  objective_percent: 99.5
-  window_days: 30
-  target_url: https://vault.lv3.org/alive
-  probe_module: http_2xx_insecure_tls
-  description: Vaultwarden remains reachable on the private Tailscale operator path.
+  - id: vaultwarden-availability
+    service_id: vaultwarden
+    indicator: availability
+    objective_percent: 99.5
+    window_days: 30
+    target_url: https://vault.lv3.org/alive
+    probe_module: http_2xx_insecure_tls
+    description: Vaultwarden remains reachable on the private Tailscale operator path.

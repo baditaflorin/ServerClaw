@@ -12,11 +12,11 @@ service:
   uptime_monitor_name: Semaphore Private
   health_probe_id: semaphore
   image_catalog_ids:
-  - semaphore_runtime
+    - semaphore_runtime
   secret_catalog_ids:
-  - semaphore_database_password
-  - semaphore_admin_password
-  - semaphore_api_token
+    - semaphore_database_password
+    - semaphore_admin_password
+    - semaphore_api_token
   adr: 0149
   runbook: docs/runbooks/configure-semaphore.md
   runtime_pool: runtime-control
@@ -25,9 +25,9 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
   mobility_tier: anchor
   tags:
-  - ansible
-  - automation
-  - jobs
+    - ansible
+    - automation
+    - jobs
   environments:
     production:
       status: active
@@ -44,8 +44,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_192
+    - git_repository
+    - pbs_vm_192
   standby:
     kind: cold
     location: runtime-control-lv3
@@ -63,16 +63,16 @@ dependency:
     category: automation
     adr: 0149
   outbound_edges:
-  - from: semaphore
-    to: openbao
-    type: startup_only
-    description: Semaphore loads database and bootstrap secrets from the OpenBao agent
-      before the container starts.
-  - from: semaphore
-    to: postgres
-    type: hard
-    description: Semaphore persists project metadata, inventories, templates, and
-      task history in Postgres.
+    - from: semaphore
+      to: openbao
+      type: startup_only
+      description: Semaphore loads database and bootstrap secrets from the OpenBao
+        agent before the container starts.
+    - from: semaphore
+      to: postgres
+      type: hard
+      description: Semaphore persists project metadata, inventories, templates, and
+        task history in Postgres.
 health:
   service_name: semaphore
   owning_vm: runtime-control-lv3
@@ -88,7 +88,7 @@ health:
     url: http://127.0.0.1:3004/api/ping
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: Semaphore keeps the local ping endpoint reachable after project bootstrap.
@@ -98,7 +98,7 @@ health:
     url: http://127.0.0.1:3004/api/ping
     method: GET
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: true
     monitor:
@@ -111,28 +111,28 @@ health:
       maxretries: 0
       maxredirects: 10
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 data:
-- id: semaphore-task-history
-  service: semaphore
-  name: Semaphore task history
-  class: internal
-  retention_days: 90
-  backup_included: true
-  access_role: platform-operator
-  pii_risk: medium
-  locations:
-  - Semaphore PostgreSQL data
-  - /opt/semaphore/data
-  notes: Task output can contain operator context, playbook names, and limited execution
-    logs, so it should stay private and be retained long enough for incident review.
+  - id: semaphore-task-history
+    service: semaphore
+    name: Semaphore task history
+    class: internal
+    retention_days: 90
+    backup_included: true
+    access_role: platform-operator
+    pii_risk: medium
+    locations:
+      - Semaphore PostgreSQL data
+      - /opt/semaphore/data
+    notes: Task output can contain operator context, playbook names, and limited execution
+      logs, so it should stay private and be retained long enough for incident review.
 slos:
-- id: semaphore-availability
-  service_id: semaphore
-  indicator: availability
-  objective_percent: 99.5
-  window_days: 30
-  target_url: http://10.10.10.92:3004/api/ping
-  probe_module: http_2xx_follow_redirects
-  description: Semaphore stays reachable for private Ansible job launches and API-based
-    task inspection.
+  - id: semaphore-availability
+    service_id: semaphore
+    indicator: availability
+    objective_percent: 99.5
+    window_days: 30
+    target_url: http://10.10.10.92:3004/api/ping
+    probe_module: http_2xx_follow_redirects
+    description: Semaphore stays reachable for private Ansible job launches and API-based
+      task inspection.

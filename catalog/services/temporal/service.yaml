@@ -12,11 +12,11 @@ service:
   exposure: private-only
   health_probe_id: temporal
   image_catalog_ids:
-  - temporal_server_runtime
-  - temporal_admin_tools_runtime
-  - temporal_ui_runtime
+    - temporal_server_runtime
+    - temporal_admin_tools_runtime
+    - temporal_ui_runtime
   secret_catalog_ids:
-  - temporal_database_password
+    - temporal_database_password
   adr: 0293
   adr_file: docs/adr/0293-temporal-as-the-durable-workflow-and-task-queue-engine.md
   runbook: docs/runbooks/configure-temporal.md
@@ -26,10 +26,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
   mobility_tier: anchor
   tags:
-  - workflow
-  - durable
-  - temporal
-  - private
+    - workflow
+    - durable
+    - temporal
+    - private
   notes: The frontend gRPC port, HTTP port, and UI are intentionally loopback-only
     on runtime-control-lv3; operators reach them through SSH tunneling or repo-managed
     admin-tools commands.
@@ -57,9 +57,9 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_192
-  - pbs_vm_150
+    - git_repository
+    - pbs_vm_192
+    - pbs_vm_150
   standby:
     kind: cold
     location: runtime-control-lv3
@@ -78,16 +78,16 @@ dependency:
     category: automation
     adr: 0293
   outbound_edges:
-  - from: temporal
-    to: openbao
-    type: startup_only
-    description: Temporal reads its mirrored PostgreSQL password from the OpenBao-backed
-      runtime secret path before startup.
-  - from: temporal
-    to: postgres
-    type: hard
-    description: Temporal stores workflow history, task queues, and visibility records
-      in PostgreSQL.
+    - from: temporal
+      to: openbao
+      type: startup_only
+      description: Temporal reads its mirrored PostgreSQL password from the OpenBao-backed
+        runtime secret path before startup.
+    - from: temporal
+      to: postgres
+      type: hard
+      description: Temporal stores workflow history, task queues, and visibility records
+        in PostgreSQL.
 health:
   service_name: temporal
   owning_vm: runtime-control-lv3
@@ -101,19 +101,19 @@ health:
     retries: 24
     delay_seconds: 5
     argv:
-    - docker
-    - compose
-    - --profile
-    - tools
-    - --file
-    - /opt/temporal/docker-compose.yml
-    - run
-    - --rm
-    - temporal-admin-tools
-    - temporal
-    - operator
-    - cluster
-    - health
+      - docker
+      - compose
+      - --profile
+      - tools
+      - --file
+      - /opt/temporal/docker-compose.yml
+      - run
+      - --rm
+      - temporal-admin-tools
+      - temporal
+      - operator
+      - cluster
+      - health
     success_rc: 0
   liveness:
     kind: http
@@ -125,7 +125,7 @@ health:
     url: http://127.0.0.1:8100
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: command
     description: Temporal is ready once the repo-managed `lv3` namespace can be described
@@ -134,21 +134,21 @@ health:
     retries: 24
     delay_seconds: 5
     argv:
-    - docker
-    - compose
-    - --profile
-    - tools
-    - --file
-    - /opt/temporal/docker-compose.yml
-    - run
-    - --rm
-    - temporal-admin-tools
-    - temporal
-    - operator
-    - namespace
-    - describe
-    - --namespace
-    - lv3
+      - docker
+      - compose
+      - --profile
+      - tools
+      - --file
+      - /opt/temporal/docker-compose.yml
+      - run
+      - --rm
+      - temporal-admin-tools
+      - temporal
+      - operator
+      - namespace
+      - describe
+      - --namespace
+      - lv3
     success_rc: 0
   uptime_kuma:
     enabled: false
@@ -156,16 +156,16 @@ health:
       admin-tools and smoke workflow verification path provides the authoritative
       health signal.
 data:
-- id: temporal-workflow-history
-  service: temporal
-  name: Temporal workflow history and visibility
-  class: confidential
-  retention_days: 7
-  backup_included: true
-  access_role: platform-operator
-  pii_risk: medium
-  locations:
-  - PostgreSQL temporal database on postgres-lv3
-  - PostgreSQL temporal_visibility database on postgres-lv3
-  notes: Temporal persists workflow event history, timers, and visibility records
-    for the repo-managed `lv3` namespace using the declared retention window.
+  - id: temporal-workflow-history
+    service: temporal
+    name: Temporal workflow history and visibility
+    class: confidential
+    retention_days: 7
+    backup_included: true
+    access_role: platform-operator
+    pii_risk: medium
+    locations:
+      - PostgreSQL temporal database on postgres-lv3
+      - PostgreSQL temporal_visibility database on postgres-lv3
+    notes: Temporal persists workflow event history, timers, and visibility records
+      for the repo-managed `lv3` namespace using the declared retention window.

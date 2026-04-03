@@ -21,9 +21,9 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: elastic_stateless
   tags:
-  - status
-  - uptime
-  - public
+    - status
+    - uptime
+    - public
   environments:
     production:
       status: active
@@ -42,8 +42,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_191
+    - git_repository
+    - pbs_vm_191
   standby:
     kind: cold
     location: runtime-general-lv3
@@ -61,16 +61,16 @@ dependency:
     category: observability
     adr: 0109
   outbound_edges:
-  - from: status_page
-    to: nginx_edge
-    type: hard
-    description: The public status page is published at status.lv3.org through the
-      shared NGINX edge hostname.
-  - from: status_page
-    to: uptime_kuma
-    type: hard
-    description: The public status page is rendered by the Uptime Kuma runtime and
-      cannot function if that service is unavailable.
+    - from: status_page
+      to: nginx_edge
+      type: hard
+      description: The public status page is published at status.lv3.org through the
+        shared NGINX edge hostname.
+    - from: status_page
+      to: uptime_kuma
+      type: hard
+      description: The public status page is rendered by the Uptime Kuma runtime and
+        cannot function if that service is unavailable.
 health:
   service_name: status-page
   owning_vm: runtime-general-lv3
@@ -85,7 +85,7 @@ health:
     url: http://127.0.0.1:3001/status/lv3-platform
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The public status page route responds through the shared edge host
@@ -96,7 +96,7 @@ health:
     url: https://127.0.0.1/
     method: GET
     expected_status:
-    - 200
+      - 200
     headers:
       Host: status.lv3.org
     validate_tls: false
@@ -105,12 +105,12 @@ health:
     reason: The status page should not recursively monitor itself from the same Uptime
       Kuma instance; independent coverage is delegated to Uptime Robot.
 slos:
-- id: status-page-availability
-  service_id: status_page
-  indicator: availability
-  objective_percent: 99.9
-  window_days: 30
-  target_url: https://status.lv3.org
-  probe_module: http_2xx_follow_redirects
-  description: The public status page remains externally reachable as the last-resort
-    platform signal.
+  - id: status-page-availability
+    service_id: status_page
+    indicator: availability
+    objective_percent: 99.9
+    window_days: 30
+    target_url: https://status.lv3.org
+    probe_module: http_2xx_follow_redirects
+    description: The public status page remains externally reachable as the last-resort
+      platform signal.

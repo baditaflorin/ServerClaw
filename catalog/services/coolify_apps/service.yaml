@@ -21,10 +21,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify-apps
   mobility_tier: anchor
   tags:
-  - paas
-  - ingress
-  - applications
-  - wildcard
+    - paas
+    - ingress
+    - applications
+    - wildcard
   environments:
     production:
       status: active
@@ -53,8 +53,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_171
+    - git_repository
+    - pbs_vm_171
   standby:
     kind: cold
     location: coolify-apps-lv3
@@ -73,16 +73,16 @@ dependency:
     category: infrastructure
     adr: 0194
   outbound_edges:
-  - from: coolify_apps
-    to: coolify
-    type: hard
-    description: The shared applications ingress is configured and served by the Coolify
-      runtime and its managed proxy.
-  - from: coolify_apps
-    to: nginx_edge
-    type: soft
-    description: Public access to apps.lv3.org depends on the shared NGINX edge publication
-      while the guest-local ingress remains reachable for direct verification.
+    - from: coolify_apps
+      to: coolify
+      type: hard
+      description: The shared applications ingress is configured and served by the
+        Coolify runtime and its managed proxy.
+    - from: coolify_apps
+      to: nginx_edge
+      type: soft
+      description: Public access to apps.lv3.org depends on the shared NGINX edge
+        publication while the guest-local ingress remains reachable for direct verification.
 health:
   service_name: coolify-apps
   owning_vm: coolify-apps-lv3
@@ -98,7 +98,7 @@ health:
     url: http://127.0.0.1/
     method: GET
     expected_status:
-    - 200
+      - 200
     headers:
       Host: apps.lv3.org
   readiness:
@@ -111,7 +111,7 @@ health:
     url: http://127.0.0.1/
     method: GET
     expected_status:
-    - 200
+      - 200
     headers:
       Host: apps.lv3.org
   uptime_kuma:

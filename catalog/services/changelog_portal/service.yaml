@@ -19,9 +19,9 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-edge
   mobility_tier: movable_singleton
   tags:
-  - portal
-  - history
-  - deployments
+    - portal
+    - history
+    - deployments
   environments:
     production:
       status: active
@@ -40,8 +40,8 @@ redundancy:
     rto_minutes: 30
     rpo_minutes: 0
   backup_sources:
-  - git_repository
-  - pbs_vm_110
+    - git_repository
+    - pbs_vm_110
   standby:
     kind: cold
     location: nginx-lv3
@@ -59,7 +59,7 @@ dependency:
     category: communication
     adr: 0081
   outbound_edges:
-  - from: changelog_portal
-    to: nginx_edge
-    type: hard
-    description: The changelog portal is served as generated static content on nginx-lv3.
+    - from: changelog_portal
+      to: nginx_edge
+      type: hard
+      description: The changelog portal is served as generated static content on nginx-lv3.

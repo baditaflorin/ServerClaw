@@ -12,11 +12,11 @@ service:
   uptime_monitor_name: NetBox Private
   health_probe_id: netbox
   image_catalog_ids:
-  - netbox_redis_runtime
-  - netbox_runtime
+    - netbox_redis_runtime
+    - netbox_runtime
   secret_catalog_ids:
-  - netbox_api_token
-  - netbox_superuser_password
+    - netbox_api_token
+    - netbox_superuser_password
   adr: '0054'
   runbook: docs/runbooks/configure-netbox.md
   runtime_pool: runtime-general
@@ -25,9 +25,9 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
   tags:
-  - inventory
-  - ipam
-  - topology
+    - inventory
+    - ipam
+    - topology
   environments:
     production:
       status: active
@@ -45,8 +45,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -64,15 +64,15 @@ dependency:
     category: data
     adr: '0054'
   outbound_edges:
-  - from: netbox
-    to: openbao
-    type: startup_only
-    description: NetBox receives its database and Redis credentials from the OpenBao
-      agent before the application containers start.
-  - from: netbox
-    to: postgres
-    type: hard
-    description: NetBox stores all inventory, topology, and IPAM data in Postgres.
+    - from: netbox
+      to: openbao
+      type: startup_only
+      description: NetBox receives its database and Redis credentials from the OpenBao
+        agent before the application containers start.
+    - from: netbox
+      to: postgres
+      type: hard
+      description: NetBox stores all inventory, topology, and IPAM data in Postgres.
 health:
   service_name: netbox
   owning_vm: docker-runtime-lv3
@@ -88,7 +88,7 @@ health:
     url: http://127.0.0.1:8082/api/users/users/?limit=1
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: The NetBox login page responds on the local runtime listener.
@@ -98,7 +98,7 @@ health:
     url: http://127.0.0.1:8082/login/
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The repo-managed NetBox API token can read the users API.
@@ -108,7 +108,7 @@ health:
     url: http://127.0.0.1:8082/api/users/users/?limit=1
     method: GET
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: true
     monitor:
@@ -121,26 +121,26 @@ health:
       maxretries: 0
       maxredirects: 10
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 data:
-- id: netbox-change-log
-  service: netbox
-  name: NetBox object change log
-  class: internal
-  retention_days: 180
-  backup_included: true
-  access_role: platform-read
-  pii_risk: low
-  locations:
-  - NetBox PostgreSQL extras_objectchange table
-  notes: Object-change history should remain available through at least one quarterly
-    planning cycle without growing unbounded.
+  - id: netbox-change-log
+    service: netbox
+    name: NetBox object change log
+    class: internal
+    retention_days: 180
+    backup_included: true
+    access_role: platform-read
+    pii_risk: low
+    locations:
+      - NetBox PostgreSQL extras_objectchange table
+    notes: Object-change history should remain available through at least one quarterly
+      planning cycle without growing unbounded.
 slos:
-- id: netbox-availability
-  service_id: netbox
-  indicator: availability
-  objective_percent: 99.5
-  window_days: 30
-  target_url: http://10.10.10.20:8082/login/
-  probe_module: http_2xx_follow_redirects
-  description: NetBox remains reachable for inventory, IPAM, and topology workflows.
+  - id: netbox-availability
+    service_id: netbox
+    indicator: availability
+    objective_percent: 99.5
+    window_days: 30
+    target_url: http://10.10.10.20:8082/login/
+    probe_module: http_2xx_follow_redirects
+    description: NetBox remains reachable for inventory, IPAM, and topology workflows.

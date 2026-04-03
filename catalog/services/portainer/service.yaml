@@ -12,9 +12,9 @@ service:
   uptime_monitor_name: Portainer Private
   health_probe_id: portainer
   image_catalog_ids:
-  - portainer_runtime
+    - portainer_runtime
   secret_catalog_ids:
-  - portainer_admin_password
+    - portainer_admin_password
   adr: '0055'
   runbook: docs/runbooks/configure-portainer.md
   runtime_pool: runtime-general
@@ -23,9 +23,9 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
   tags:
-  - docker
-  - operations
-  - runtime
+    - docker
+    - operations
+    - runtime
   environments:
     production:
       status: active
@@ -43,8 +43,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -84,10 +84,10 @@ health:
     url: https://127.0.0.1:9443/api/status
     method: GET
     expected_status:
-    - 200
+      - 200
     validate_tls: false
   tls_certificate_ids:
-  - portainer-proxy
+    - portainer-proxy
   uptime_kuma:
     enabled: true
     monitor:
@@ -100,5 +100,5 @@ health:
       maxretries: 0
       maxredirects: 10
       accepted_statuscodes:
-      - 200-299
+        - 200-299
       ignoreTls: true

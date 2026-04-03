@@ -15,7 +15,7 @@ service:
   uptime_monitor_name: Homepage Public
   health_probe_id: homepage
   image_catalog_ids:
-  - homepage_runtime
+    - homepage_runtime
   adr: '0152'
   runbook: docs/runbooks/configure-homepage.md
   runtime_pool: runtime-general
@@ -24,9 +24,9 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: elastic_stateless
   tags:
-  - dashboard
-  - homepage
-  - operator
+    - dashboard
+    - homepage
+    - operator
   environments:
     production:
       status: active
@@ -50,8 +50,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_191
+    - git_repository
+    - pbs_vm_191
   standby:
     kind: cold
     location: runtime-general-lv3
@@ -69,16 +69,16 @@ dependency:
     category: access
     adr: '0152'
   outbound_edges:
-  - from: homepage
-    to: keycloak
-    type: hard
-    description: Public operator access to Homepage is intentionally gated through
-      the shared Keycloak-backed oauth2-proxy flow on the NGINX edge.
-  - from: homepage
-    to: nginx_edge
-    type: hard
-    description: The unified dashboard is published at home.lv3.org through the shared
-      NGINX edge and is not exposed directly on the public internet.
+    - from: homepage
+      to: keycloak
+      type: hard
+      description: Public operator access to Homepage is intentionally gated through
+        the shared Keycloak-backed oauth2-proxy flow on the NGINX edge.
+    - from: homepage
+      to: nginx_edge
+      type: hard
+      description: The unified dashboard is published at home.lv3.org through the
+        shared NGINX edge and is not exposed directly on the public internet.
 health:
   service_name: homepage
   owning_vm: runtime-general-lv3
@@ -93,7 +93,7 @@ health:
     url: http://10.10.10.91:3090/
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: Homepage renders the repo-managed dashboard shell locally after startup.
@@ -103,11 +103,11 @@ health:
     url: http://10.10.10.91:3090/
     method: GET
     expected_status:
-    - 200
+      - 200
     docker_publication:
       container_name: homepage
       required_networks:
-      - homepage_default
+        - homepage_default
   uptime_kuma:
     enabled: true
     monitor:
@@ -121,27 +121,27 @@ health:
       maxretries: 0
       maxredirects: 5
       accepted_statuscodes:
-      - 200-399
+        - 200-399
 data:
-- id: homepage-config
-  service: homepage
-  name: Homepage generated dashboard config
-  class: internal
-  retention_days: 30
-  backup_included: true
-  access_role: platform-read
-  pii_risk: low
-  locations:
-  - /opt/homepage/config
-  notes: Homepage stores only repo-generated dashboard configuration and lightweight
-    runtime state for the unified service dashboard.
+  - id: homepage-config
+    service: homepage
+    name: Homepage generated dashboard config
+    class: internal
+    retention_days: 30
+    backup_included: true
+    access_role: platform-read
+    pii_risk: low
+    locations:
+      - /opt/homepage/config
+    notes: Homepage stores only repo-generated dashboard configuration and lightweight
+      runtime state for the unified service dashboard.
 slos:
-- id: homepage-availability
-  service_id: homepage
-  indicator: availability
-  objective_percent: 99.5
-  window_days: 30
-  target_url: https://home.lv3.org
-  probe_module: http_2xx_follow_redirects
-  description: The unified operator dashboard remains reachable through the authenticated
-    LV3 edge.
+  - id: homepage-availability
+    service_id: homepage
+    indicator: availability
+    objective_percent: 99.5
+    window_days: 30
+    target_url: https://home.lv3.org
+    probe_module: http_2xx_follow_redirects
+    description: The unified operator dashboard remains reachable through the authenticated
+      LV3 edge.

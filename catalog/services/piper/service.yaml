@@ -21,10 +21,10 @@ service:
   mobility_tier: burst_batch
   dashboard_url: https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=piper-availability
   tags:
-  - tts
-  - speech
-  - voice
-  - private
+    - tts
+    - speech
+    - voice
+    - private
   environments:
     production:
       status: active
@@ -47,8 +47,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -81,7 +81,7 @@ health:
     url: http://127.0.0.1:8100/healthz
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: The private Piper health endpoint responds on docker-runtime-lv3.
@@ -91,7 +91,7 @@ health:
     url: http://127.0.0.1:8100/healthz
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: command
     description: Piper reports the declared voice and synthesizes a WAV payload from
@@ -100,55 +100,55 @@ health:
     retries: 3
     delay_seconds: 5
     argv:
-    - python3
-    - -c
-    - 'import json, urllib.request; voices=json.loads(urllib.request.urlopen(''http://127.0.0.1:8100/api/voices'',
-      timeout=60).read().decode(''utf-8'')); assert ''en_US-ryan-medium'' in voices[''voices''];
-      request=urllib.request.Request(''http://127.0.0.1:8100/api/tts?voice=en_US-ryan-medium'',
-      data=b''LV3 Piper readiness'', headers={''Content-Type'': ''text/plain; charset=utf-8''},
-      method=''POST''); response=urllib.request.urlopen(request, timeout=180); payload=response.read();
-      content_type=response.headers.get(''Content-Type'', ''''); assert content_type.startswith(''audio/wav'');
-      assert payload[:4] == b''RIFF''; assert payload[8:12] == b''WAVE''; assert len(payload)
-      > 1024'
+      - python3
+      - -c
+      - 'import json, urllib.request; voices=json.loads(urllib.request.urlopen(''http://127.0.0.1:8100/api/voices'',
+        timeout=60).read().decode(''utf-8'')); assert ''en_US-ryan-medium'' in voices[''voices''];
+        request=urllib.request.Request(''http://127.0.0.1:8100/api/tts?voice=en_US-ryan-medium'',
+        data=b''LV3 Piper readiness'', headers={''Content-Type'': ''text/plain; charset=utf-8''},
+        method=''POST''); response=urllib.request.urlopen(request, timeout=180); payload=response.read();
+        content_type=response.headers.get(''Content-Type'', ''''); assert content_type.startswith(''audio/wav'');
+        assert payload[:4] == b''RIFF''; assert payload[8:12] == b''WAVE''; assert
+        len(payload) > 1024'
     success_rc: 0
   uptime_kuma:
     enabled: false
     reason: Piper is intentionally private-only and is verified through the repo-managed
       health, voice-catalog, and WAV synthesis probes instead of a public monitor.
 data:
-- id: piper-transient-synthesis-payloads
-  service: piper
-  name: Piper transient synthesis payloads
-  class: confidential
-  retention_days: null
-  backup_included: false
-  access_role: platform-operator
-  pii_risk: high
-  locations:
-  - Transient request and response buffers inside the piper container on docker-runtime-lv3
-  - Ephemeral synthesized WAV bytes returned synchronously to callers on docker-runtime-lv3
-  notes: Piper does not persist input text or synthesized audio after each request
-    completes, but both may contain sensitive operator or agent content while the
-    request is in flight.
-- id: piper-voice-model-cache
-  service: piper
-  name: Piper voice model cache
-  class: internal
-  retention_days: null
-  backup_included: false
-  access_role: platform-operator
-  pii_risk: low
-  locations:
-  - Docker volume piper-models on docker-runtime-lv3
-  notes: Piper stores downloaded voice models in a named Docker volume so the private
-    TTS runtime can restart without re-fetching the declared model set.
+  - id: piper-transient-synthesis-payloads
+    service: piper
+    name: Piper transient synthesis payloads
+    class: confidential
+    retention_days: null
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: high
+    locations:
+      - Transient request and response buffers inside the piper container on docker-runtime-lv3
+      - Ephemeral synthesized WAV bytes returned synchronously to callers on docker-runtime-lv3
+    notes: Piper does not persist input text or synthesized audio after each request
+      completes, but both may contain sensitive operator or agent content while the
+      request is in flight.
+  - id: piper-voice-model-cache
+    service: piper
+    name: Piper voice model cache
+    class: internal
+    retention_days: null
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: low
+    locations:
+      - Docker volume piper-models on docker-runtime-lv3
+    notes: Piper stores downloaded voice models in a named Docker volume so the private
+      TTS runtime can restart without re-fetching the declared model set.
 slos:
-- id: piper-availability
-  service_id: piper
-  indicator: availability
-  objective_percent: 99.0
-  window_days: 30
-  target_url: http://10.10.10.20:8100/healthz
-  probe_module: http_2xx_follow_redirects
-  description: The private Piper TTS health endpoint remains reachable on docker-runtime-lv3
-    for real-time voice synthesis workflows.
+  - id: piper-availability
+    service_id: piper
+    indicator: availability
+    objective_percent: 99.0
+    window_days: 30
+    target_url: http://10.10.10.20:8100/healthz
+    probe_module: http_2xx_follow_redirects
+    description: The private Piper TTS health endpoint remains reachable on docker-runtime-lv3
+      for real-time voice synthesis workflows.

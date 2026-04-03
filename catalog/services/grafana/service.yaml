@@ -14,9 +14,9 @@ service:
   uptime_monitor_name: Grafana Public
   health_probe_id: grafana
   secret_catalog_ids:
-  - loki_minio_secret_key
-  - monitoring_guest_writer_token
-  - monitoring_proxmox_writer_token
+    - loki_minio_secret_key
+    - monitoring_guest_writer_token
+    - monitoring_proxmox_writer_token
   adr: '0011'
   runbook: docs/runbooks/monitoring-stack.md
   runtime_pool: dedicated-monitoring
@@ -26,9 +26,9 @@ service:
   mobility_tier: anchor
   dashboard_url: https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview
   tags:
-  - metrics
-  - dashboards
-  - observability
+    - metrics
+    - dashboards
+    - observability
   environments:
     production:
       status: active
@@ -52,8 +52,8 @@ redundancy:
     rto_minutes: 30
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_140
+    - git_repository
+    - pbs_vm_140
   standby:
     kind: cold
     location: monitoring-lv3
@@ -71,22 +71,22 @@ dependency:
     category: observability
     adr: '0011'
   outbound_edges:
-  - from: grafana
-    to: keycloak
-    type: soft
-    description: Grafana uses Keycloak for the preferred SSO path, but local admin
-      remains the break-glass fallback.
-  - from: grafana
-    to: minio
-    type: soft
-    description: Loki chunk persistence now depends on the shared MinIO bucket, while
-      metrics and trace dashboards can still serve partial observability if object
-      storage is degraded.
-  - from: grafana
-    to: nginx_edge
-    type: soft
-    description: Public access to grafana.lv3.org depends on the shared NGINX edge;
-      private reachability remains available if the edge is degraded.
+    - from: grafana
+      to: keycloak
+      type: soft
+      description: Grafana uses Keycloak for the preferred SSO path, but local admin
+        remains the break-glass fallback.
+    - from: grafana
+      to: minio
+      type: soft
+      description: Loki chunk persistence now depends on the shared MinIO bucket,
+        while metrics and trace dashboards can still serve partial observability if
+        object storage is degraded.
+    - from: grafana
+      to: nginx_edge
+      type: soft
+      description: Public access to grafana.lv3.org depends on the shared NGINX edge;
+        private reachability remains available if the edge is degraded.
 health:
   service_name: grafana
   owning_vm: monitoring-lv3
@@ -101,7 +101,7 @@ health:
     url: http://127.0.0.1:3000/api/health
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: Grafana serves its local health endpoint after provisioning completes.
@@ -111,9 +111,9 @@ health:
     url: http://127.0.0.1:3000/api/health
     method: GET
     expected_status:
-    - 200
+      - 200
   tls_certificate_ids:
-  - grafana-edge
+    - grafana-edge
   uptime_kuma:
     enabled: true
     monitor:
@@ -126,52 +126,52 @@ health:
       maxretries: 0
       maxredirects: 10
       accepted_statuscodes:
-      - 200-399
+        - 200-399
 data:
-- id: grafana-annotations
-  service: grafana
-  name: Grafana annotations
-  class: internal
-  retention_days: 90
-  backup_included: true
-  access_role: platform-read
-  pii_risk: low
-  locations:
-  - Grafana SQLite/PostgreSQL annotation store
-  notes: Annotations capture deployment and incident context that remains useful longer
-    than raw logs.
-- id: loki-logs
-  service: grafana
-  name: Loki log store
-  class: internal
-  retention_days: 30
-  backup_included: false
-  access_role: platform-read
-  pii_risk: low
-  locations:
-  - /var/lib/loki
-  - Grafana Loki datasource
-  notes: Operational logs may contain internal IP addresses, usernames, and error
-    details.
-- id: tempo-traces
-  service: grafana
-  name: Tempo trace blocks
-  class: internal
-  retention_days: 14
-  backup_included: false
-  access_role: platform-read
-  pii_risk: low
-  locations:
-  - /var/lib/tempo/blocks
-  - Grafana Tempo datasource
-  notes: Trace payloads support short-lived troubleshooting and should remain bounded
-    to protect monitoring disk capacity.
+  - id: grafana-annotations
+    service: grafana
+    name: Grafana annotations
+    class: internal
+    retention_days: 90
+    backup_included: true
+    access_role: platform-read
+    pii_risk: low
+    locations:
+      - Grafana SQLite/PostgreSQL annotation store
+    notes: Annotations capture deployment and incident context that remains useful
+      longer than raw logs.
+  - id: loki-logs
+    service: grafana
+    name: Loki log store
+    class: internal
+    retention_days: 30
+    backup_included: false
+    access_role: platform-read
+    pii_risk: low
+    locations:
+      - /var/lib/loki
+      - Grafana Loki datasource
+    notes: Operational logs may contain internal IP addresses, usernames, and error
+      details.
+  - id: tempo-traces
+    service: grafana
+    name: Tempo trace blocks
+    class: internal
+    retention_days: 14
+    backup_included: false
+    access_role: platform-read
+    pii_risk: low
+    locations:
+      - /var/lib/tempo/blocks
+      - Grafana Tempo datasource
+    notes: Trace payloads support short-lived troubleshooting and should remain bounded
+      to protect monitoring disk capacity.
 slos:
-- id: grafana-availability
-  service_id: grafana
-  indicator: availability
-  objective_percent: 99.5
-  window_days: 30
-  target_url: https://grafana.lv3.org
-  probe_module: http_2xx_follow_redirects
-  description: Grafana remains reachable through the public LV3 edge.
+  - id: grafana-availability
+    service_id: grafana
+    indicator: availability
+    objective_percent: 99.5
+    window_days: 30
+    target_url: https://grafana.lv3.org
+    probe_module: http_2xx_follow_redirects
+    description: Grafana remains reachable through the public LV3 edge.

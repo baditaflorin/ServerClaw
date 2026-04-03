@@ -13,7 +13,7 @@ service:
   uptime_monitor_name: Headscale Public Health
   health_probe_id: headscale
   secret_catalog_ids:
-  - headscale_api_key
+    - headscale_api_key
   adr: '0144'
   runbook: docs/runbooks/configure-headscale.md
   runtime_pool: host-management
@@ -22,10 +22,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/host-management
   mobility_tier: anchor
   tags:
-  - mesh
-  - vpn
-  - headscale
-  - zero-trust
+    - mesh
+    - vpn
+    - headscale
+    - zero-trust
   environments:
     production:
       status: active
@@ -44,8 +44,8 @@ redundancy:
     rto_minutes: 240
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - host_reinstall_runbooks
+    - git_repository
+    - host_reinstall_runbooks
   standby:
     kind: none
     location: none
@@ -63,11 +63,11 @@ dependency:
     category: access
     adr: '0144'
   outbound_edges:
-  - from: headscale
-    to: nginx_edge
-    type: soft
-    description: Public registration and control-plane reachability for headscale.lv3.org
-      depends on the shared NGINX edge publication path.
+    - from: headscale
+      to: nginx_edge
+      type: soft
+      description: Public registration and control-plane reachability for headscale.lv3.org
+        depends on the shared NGINX edge publication path.
 health:
   service_name: headscale
   owning_vm: proxmox_florin
@@ -82,7 +82,7 @@ health:
     url: http://127.0.0.1:8080/health
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: command
     description: The Headscale CLI can query the managed user catalog through the
@@ -91,13 +91,13 @@ health:
     retries: 1
     delay_seconds: 0
     argv:
-    - headscale
-    - --config
-    - /etc/headscale/config.yaml
-    - users
-    - list
-    - --output
-    - json
+      - headscale
+      - --config
+      - /etc/headscale/config.yaml
+      - users
+      - list
+      - --output
+      - json
     success_rc: 0
   uptime_kuma:
     enabled: true
@@ -112,4 +112,4 @@ health:
       maxretries: 0
       maxredirects: 5
       accepted_statuscodes:
-      - 200-299
+        - 200-299

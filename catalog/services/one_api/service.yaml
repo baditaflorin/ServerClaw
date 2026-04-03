@@ -12,12 +12,12 @@ service:
   exposure: private-only
   health_probe_id: one_api
   image_catalog_ids:
-  - one_api_runtime
+    - one_api_runtime
   secret_catalog_ids:
-  - one_api_database_password
-  - one_api_session_secret
-  - one_api_root_access_token
-  - one_api_root_password
+    - one_api_database_password
+    - one_api_session_secret
+    - one_api_root_access_token
+    - one_api_root_password
   adr: 0294
   adr_file: docs/adr/0294-one-api-as-the-unified-llm-api-proxy-and-router.md
   runbook: docs/runbooks/configure-one-api.md
@@ -28,10 +28,10 @@ service:
   mobility_tier: elastic_stateless
   dashboard_url: https://grafana.lv3.org/d/lv3-one-api/lv3-one-api
   tags:
-  - llm
-  - proxy
-  - routing
-  - openai-compatible
+    - llm
+    - proxy
+    - routing
+    - openai-compatible
   environments:
     production:
       status: active
@@ -53,8 +53,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -72,11 +72,11 @@ dependency:
     category: automation
     adr: 0294
   outbound_edges:
-  - from: one_api
-    to: ollama
-    type: hard
-    description: One-API forwards local chat and embedding aliases to the private
-      Ollama runtime.
+    - from: one_api
+      to: ollama
+      type: hard
+      description: One-API forwards local chat and embedding aliases to the private
+        Ollama runtime.
 health:
   service_name: one-api
   owning_vm: docker-runtime-lv3
@@ -92,7 +92,7 @@ health:
     url: http://127.0.0.1:8101/api/status
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: The One-API local status endpoint continues to answer on docker-runtime-lv3.
@@ -102,7 +102,7 @@ health:
     url: http://127.0.0.1:8101/api/status
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The repo-managed One-API runtime status endpoint is ready for authenticated
@@ -113,33 +113,33 @@ health:
     url: http://127.0.0.1:8101/api/status
     method: GET
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: false
     reason: The private One-API surface is verified through repo-managed local status
       and authenticated admin API probes instead of an unauthenticated Uptime Kuma
       monitor.
 data:
-- id: one-api-routing-state
-  service: one_api
-  name: One-API routing state and usage ledger
-  class: confidential
-  retention_days: 90
-  backup_included: true
-  access_role: platform-operator
-  pii_risk: medium
-  locations:
-  - PostgreSQL oneapi database on postgres-lv3
-  notes: One-API persists channel definitions, consumer token metadata, quotas, and
-    aggregate local LLM usage records in PostgreSQL so the proxy contract and audit
-    trail survive restarts.
+  - id: one-api-routing-state
+    service: one_api
+    name: One-API routing state and usage ledger
+    class: confidential
+    retention_days: 90
+    backup_included: true
+    access_role: platform-operator
+    pii_risk: medium
+    locations:
+      - PostgreSQL oneapi database on postgres-lv3
+    notes: One-API persists channel definitions, consumer token metadata, quotas,
+      and aggregate local LLM usage records in PostgreSQL so the proxy contract and
+      audit trail survive restarts.
 slos:
-- id: one-api-availability
-  service_id: one_api
-  indicator: availability
-  objective_percent: 99.0
-  window_days: 30
-  target_url: http://10.10.10.20:8101/api/status
-  probe_module: http_2xx_follow_redirects
-  description: One-API remains reachable on the private runtime network for governed
-    local LLM proxy traffic.
+  - id: one-api-availability
+    service_id: one_api
+    indicator: availability
+    objective_percent: 99.0
+    window_days: 30
+    target_url: http://10.10.10.20:8101/api/status
+    probe_module: http_2xx_follow_redirects
+    description: One-API remains reachable on the private runtime network for governed
+      local LLM proxy traffic.

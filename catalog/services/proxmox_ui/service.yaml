@@ -13,7 +13,7 @@ service:
   uptime_monitor_name: Proxmox UI Port
   health_probe_id: proxmox_ui
   secret_catalog_ids:
-  - proxmox_api_token_payload
+    - proxmox_api_token_payload
   adr: '0004'
   runbook: docs/runbooks/initial-access.md
   runtime_pool: host-management
@@ -22,9 +22,9 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/host-management
   mobility_tier: anchor
   tags:
-  - proxmox
-  - host
-  - management
+    - proxmox
+    - host
+    - management
   environments:
     production:
       status: active
@@ -43,8 +43,8 @@ redundancy:
     rto_minutes: 240
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - host_reinstall_runbooks
+    - git_repository
+    - host_reinstall_runbooks
   standby:
     kind: none
     location: none
@@ -84,11 +84,11 @@ health:
     url: https://10.10.10.1:8006/api2/json/version
     method: GET
     expected_status:
-    - 200
+      - 200
     validate_tls: false
   tls_certificate_ids:
-  - proxmox-ui
-  - proxmox-edge-page
+    - proxmox-ui
+    - proxmox-edge-page
   uptime_kuma:
     enabled: true
     monitor:
@@ -101,4 +101,4 @@ health:
       retryInterval: 60
       maxretries: 0
       accepted_statuscodes:
-      - 200-299
+        - 200-299

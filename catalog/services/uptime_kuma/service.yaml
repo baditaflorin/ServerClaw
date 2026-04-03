@@ -15,7 +15,7 @@ service:
   uptime_monitor_name: Uptime Kuma Public
   health_probe_id: uptime_kuma
   image_catalog_ids:
-  - uptime_kuma_runtime
+    - uptime_kuma_runtime
   adr: '0027'
   runbook: docs/runbooks/deploy-uptime-kuma.md
   runtime_pool: runtime-general
@@ -24,9 +24,9 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
   tags:
-  - monitoring
-  - synthetics
-  - health
+    - monitoring
+    - synthetics
+    - health
   environments:
     production:
       status: active
@@ -50,8 +50,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_191
+    - git_repository
+    - pbs_vm_191
   standby:
     kind: cold
     location: runtime-general-lv3
@@ -81,14 +81,14 @@ health:
     retries: 1
     delay_seconds: 0
     argv:
-    - docker
-    - ps
-    - --filter
-    - name=uptime-kuma
-    - --filter
-    - status=running
-    - --format
-    - '{{.Names}}'
+      - docker
+      - ps
+      - --filter
+      - name=uptime-kuma
+      - --filter
+      - status=running
+      - --format
+      - '{{.Names}}'
     success_rc: 0
   readiness:
     kind: http
@@ -99,9 +99,9 @@ health:
     url: http://127.0.0.1:3001
     method: GET
     expected_status:
-    - 200
+      - 200
   tls_certificate_ids:
-  - uptime-kuma-edge
+    - uptime-kuma-edge
   uptime_kuma:
     enabled: true
     monitor:
@@ -114,13 +114,13 @@ health:
       maxretries: 0
       maxredirects: 10
       accepted_statuscodes:
-      - 200-399
+        - 200-399
 slos:
-- id: uptime-kuma-availability
-  service_id: uptime_kuma
-  indicator: availability
-  objective_percent: 99.9
-  window_days: 30
-  target_url: https://uptime.lv3.org
-  probe_module: http_2xx_follow_redirects
-  description: Uptime Kuma remains reachable through the public status surface.
+  - id: uptime-kuma-availability
+    service_id: uptime_kuma
+    indicator: availability
+    objective_percent: 99.9
+    window_days: 30
+    target_url: https://uptime.lv3.org
+    probe_module: http_2xx_follow_redirects
+    description: Uptime Kuma remains reachable through the public status surface.

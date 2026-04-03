@@ -19,9 +19,9 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
   mobility_tier: anchor
   tags:
-  - alerts
-  - routing
-  - monitoring
+    - alerts
+    - routing
+    - monitoring
   environments:
     production:
       status: active
@@ -39,8 +39,8 @@ redundancy:
     rto_minutes: 30
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_140
+    - git_repository
+    - pbs_vm_140
   standby:
     kind: cold
     location: monitoring-lv3
@@ -58,18 +58,18 @@ dependency:
     category: observability
     adr: 0097
   outbound_edges:
-  - from: alertmanager
-    to: mattermost
-    type: soft
-    description: Alertmanager forwards warning, info, and mirrored critical notifications
-      into Mattermost channels, but operators can still inspect active alerts directly
-      if chat delivery is degraded.
-  - from: alertmanager
-    to: ntfy
-    type: soft
-    description: Critical Alertmanager notifications publish into the governed ntfy
-      topic registry for operator push delivery, while Mattermost still provides the
-      team-visible fallback channel.
+    - from: alertmanager
+      to: mattermost
+      type: soft
+      description: Alertmanager forwards warning, info, and mirrored critical notifications
+        into Mattermost channels, but operators can still inspect active alerts directly
+        if chat delivery is degraded.
+    - from: alertmanager
+      to: ntfy
+      type: soft
+      description: Critical Alertmanager notifications publish into the governed ntfy
+        topic registry for operator push delivery, while Mattermost still provides
+        the team-visible fallback channel.
 health:
   service_name: alertmanager
   owning_vm: monitoring-lv3
@@ -84,7 +84,7 @@ health:
     url: http://127.0.0.1:9093/-/healthy
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: Alertmanager responds on its local readiness endpoint after routing
@@ -95,7 +95,7 @@ health:
     url: http://127.0.0.1:9093/-/ready
     method: GET
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: false
     reason: Alertmanager is private-only and its operator value is already covered

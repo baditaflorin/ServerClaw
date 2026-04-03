@@ -15,10 +15,10 @@ service:
   uptime_monitor_name: Grist Public Status
   health_probe_id: grist
   image_catalog_ids:
-  - grist_runtime
+    - grist_runtime
   secret_catalog_ids:
-  - grist_session_secret
-  - keycloak_grist_client_secret
+    - grist_session_secret
+    - keycloak_grist_client_secret
   adr: 0279
   runbook: docs/runbooks/configure-grist.md
   runtime_pool: runtime-general
@@ -27,11 +27,11 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
   tags:
-  - grist
-  - spreadsheet
-  - database
-  - operations
-  - oidc
+    - grist
+    - spreadsheet
+    - database
+    - operations
+    - oidc
   notes: Live-apply evidence is tracked on the workstream branch; merge-to-main still
     must update the integrated README, VERSION, changelog, and versions/stack.yaml
     surfaces.
@@ -58,8 +58,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -77,21 +77,21 @@ dependency:
     category: automation
     adr: 0279
   outbound_edges:
-  - from: grist
-    to: keycloak
-    type: soft
-    description: Grist delegates routine browser sign-in to the shared Keycloak OIDC
-      broker.
-  - from: grist
-    to: nginx_edge
-    type: soft
-    description: Public access to grist.lv3.org depends on the shared NGINX edge publication
-      path.
-  - from: grist
-    to: openbao
-    type: startup_only
-    description: Grist starts from OpenBao-rendered runtime secrets mirrored into
-      its compose environment.
+    - from: grist
+      to: keycloak
+      type: soft
+      description: Grist delegates routine browser sign-in to the shared Keycloak
+        OIDC broker.
+    - from: grist
+      to: nginx_edge
+      type: soft
+      description: Public access to grist.lv3.org depends on the shared NGINX edge
+        publication path.
+    - from: grist
+      to: openbao
+      type: startup_only
+      description: Grist starts from OpenBao-rendered runtime secrets mirrored into
+        its compose environment.
 health:
   service_name: grist
   owning_vm: docker-runtime-lv3
@@ -107,7 +107,7 @@ health:
     url: https://grist.lv3.org/status
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: The local Grist status endpoint responds on the runtime listener.
@@ -117,7 +117,7 @@ health:
     url: http://127.0.0.1:8484/status
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The public Grist status endpoint renders through the shared edge
@@ -128,7 +128,7 @@ health:
     url: https://grist.lv3.org/status
     method: GET
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: true
     monitor:
@@ -142,28 +142,28 @@ health:
       maxretries: 0
       maxredirects: 5
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 data:
-- id: grist-document-store
-  service: grist
-  name: Grist document and instance store
-  class: confidential
-  retention_days: 365
-  backup_included: true
-  access_role: platform-operator
-  pii_risk: medium
-  locations:
-  - /opt/grist/persist/docs
-  - /opt/grist/persist/home.sqlite3
-  notes: Grist persists operator-managed spreadsheet documents and instance metadata
-    as SQLite files under /persist on docker-runtime-lv3.
+  - id: grist-document-store
+    service: grist
+    name: Grist document and instance store
+    class: confidential
+    retention_days: 365
+    backup_included: true
+    access_role: platform-operator
+    pii_risk: medium
+    locations:
+      - /opt/grist/persist/docs
+      - /opt/grist/persist/home.sqlite3
+    notes: Grist persists operator-managed spreadsheet documents and instance metadata
+      as SQLite files under /persist on docker-runtime-lv3.
 slos:
-- id: grist-availability
-  service_id: grist
-  indicator: availability
-  objective_percent: 99.5
-  window_days: 30
-  target_url: https://grist.lv3.org/status
-  probe_module: http_2xx_follow_redirects
-  description: Grist remains reachable through the public LV3 edge for operator-managed
-    spreadsheet databases and workflow tables.
+  - id: grist-availability
+    service_id: grist
+    indicator: availability
+    objective_percent: 99.5
+    window_days: 30
+    target_url: https://grist.lv3.org/status
+    probe_module: http_2xx_follow_redirects
+    description: Grist remains reachable through the public LV3 edge for operator-managed
+      spreadsheet databases and workflow tables.

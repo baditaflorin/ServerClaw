@@ -2,8 +2,8 @@ schema_version: 1.0.0
 service:
   id: open_webui
   name: Open WebUI
-  description: Private operator and agent workbench with Keycloak-backed routine
-    sign-in and a retained local break-glass admin path.
+  description: Private operator and agent workbench with Keycloak-backed routine sign-in
+    and a retained local break-glass admin path.
   category: access
   lifecycle_status: active
   vm: docker-runtime-lv3
@@ -13,11 +13,11 @@ service:
   uptime_monitor_name: Open WebUI Private
   health_probe_id: open_webui
   image_catalog_ids:
-  - open_webui_runtime
+    - open_webui_runtime
   secret_catalog_ids:
-  - open_webui_admin_password
-  - open_webui_oidc_client_secret
-  - open_webui_secret_key
+    - open_webui_admin_password
+    - open_webui_oidc_client_secret
+    - open_webui_secret_key
   adr: '0060'
   runbook: docs/runbooks/configure-open-webui.md
   runtime_pool: runtime-ai
@@ -26,9 +26,9 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
   mobility_tier: movable_singleton
   tags:
-  - agents
-  - operators
-  - workbench
+    - agents
+    - operators
+    - workbench
   environments:
     production:
       status: active
@@ -49,8 +49,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -68,31 +68,31 @@ dependency:
     category: automation
     adr: '0060'
   outbound_edges:
-  - from: open_webui
-    to: keycloak
-    type: soft
-    description: Open WebUI can be configured for Keycloak OIDC, but the current runtime
-      can still fall back to local login if OIDC is unavailable.
-  - from: open_webui
-    to: ollama
-    type: hard
-    description: Open WebUI routes the repo-managed local model connector to the private
-      Ollama runtime on docker-runtime-lv3.
-  - from: open_webui
-    to: one_api
-    type: hard
-    description: Open WebUI uses the private One-API runtime for repo-managed local
-      model access.
-  - from: open_webui
-    to: openbao
-    type: startup_only
-    description: Open WebUI consumes mirrored runtime secrets and optional OIDC client
-      credentials from the OpenBao sidecar.
-  - from: open_webui
-    to: searxng
-    type: soft
-    description: Open WebUI delegates optional web-search requests to the private
-      SearXNG runtime when the feature is enabled.
+    - from: open_webui
+      to: keycloak
+      type: soft
+      description: Open WebUI can be configured for Keycloak OIDC, but the current
+        runtime can still fall back to local login if OIDC is unavailable.
+    - from: open_webui
+      to: ollama
+      type: hard
+      description: Open WebUI routes the repo-managed local model connector to the
+        private Ollama runtime on docker-runtime-lv3.
+    - from: open_webui
+      to: one_api
+      type: hard
+      description: Open WebUI uses the private One-API runtime for repo-managed local
+        model access.
+    - from: open_webui
+      to: openbao
+      type: startup_only
+      description: Open WebUI consumes mirrored runtime secrets and optional OIDC
+        client credentials from the OpenBao sidecar.
+    - from: open_webui
+      to: searxng
+      type: soft
+      description: Open WebUI delegates optional web-search requests to the private
+        SearXNG runtime when the feature is enabled.
 health:
   service_name: open-webui
   owning_vm: docker-runtime-lv3
@@ -108,7 +108,7 @@ health:
     url: http://127.0.0.1:8088/api/v1/auths/signin
     method: POST
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: The Open WebUI root page responds on the local listener.
@@ -118,7 +118,7 @@ health:
     url: http://127.0.0.1:8088
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The repo-managed Open WebUI admin account can sign in successfully.
@@ -128,7 +128,7 @@ health:
     url: http://127.0.0.1:8088/api/v1/auths/signin
     method: POST
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: true
     monitor:
@@ -141,27 +141,27 @@ health:
       maxretries: 0
       maxredirects: 10
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 data:
-- id: open-webui-workbench-state
-  service: open_webui
-  name: Open WebUI workbench state
-  class: confidential
-  retention_days: 90
-  backup_included: false
-  access_role: platform-operator
-  pii_risk: high
-  locations:
-  - /opt/open-webui/data
-  - http://100.64.0.1:8008
-  notes: Open WebUI persists conversations, workspace artifacts, prompt history, and
-    user-specific workbench settings in its local runtime data volume on docker-runtime-lv3.
+  - id: open-webui-workbench-state
+    service: open_webui
+    name: Open WebUI workbench state
+    class: confidential
+    retention_days: 90
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: high
+    locations:
+      - /opt/open-webui/data
+      - http://100.64.0.1:8008
+    notes: Open WebUI persists conversations, workspace artifacts, prompt history,
+      and user-specific workbench settings in its local runtime data volume on docker-runtime-lv3.
 slos:
-- id: open-webui-availability
-  service_id: open_webui
-  indicator: availability
-  objective_percent: 99.0
-  window_days: 30
-  target_url: http://10.10.10.20:8088
-  probe_module: http_2xx_follow_redirects
-  description: Open WebUI remains reachable on the private runtime network.
+  - id: open-webui-availability
+    service_id: open_webui
+    indicator: availability
+    objective_percent: 99.0
+    window_days: 30
+    target_url: http://10.10.10.20:8088
+    probe_module: http_2xx_follow_redirects
+    description: Open WebUI remains reachable on the private runtime network.

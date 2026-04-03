@@ -6,9 +6,9 @@ service:
     applications.
   category: access
   lifecycle_status: active
-  vm: runtime-control-lv3
-  vmid: 192
-  internal_url: http://10.10.10.92:18080
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:8091
   public_url: https://sso.lv3.org
   subdomain: sso.lv3.org
   exposure: edge-published
@@ -16,10 +16,10 @@ service:
   health_probe_id: keycloak
   adr: '0056'
   tags:
-  - identity
-  - oidc
-  - sso
-  - tokens
+    - identity
+    - oidc
+    - sso
+    - tokens
   environments:
     production:
       status: active
@@ -48,14 +48,14 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_192
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
-    location: runtime-control-lv3
-    failover_trigger: Restore runtime-control-lv3 when Keycloak or its dependent runtime
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when Keycloak or its dependent runtime
       state cannot be recovered in place.
-    failback_method: Restore or rebuild runtime-control-lv3, then rerun the Keycloak
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Keycloak
       converge and identity verification flow.
 dependency:
   node:
@@ -67,33 +67,33 @@ dependency:
     category: access
     adr: '0056'
   outbound_edges:
-  - from: keycloak
-    to: mailpit
-    type: soft
-    description: Staging and non-production Keycloak runs can relay SMTP through Mailpit
-      for assertion-level mail verification without sending real email.
-  - from: keycloak
-    to: nginx_edge
-    type: soft
-    description: Public reachability for sso.lv3.org depends on the shared edge publication
-      path.
-  - from: keycloak
-    to: openbao
-    type: startup_only
-    description: Keycloak reads its mirrored database and bootstrap secrets through
-      the OpenBao agent before startup.
-  - from: keycloak
-    to: postgres
-    type: hard
-    description: Keycloak stores realm, client, and session state in Postgres.
-  - from: keycloak
-    to: step_ca
-    type: startup_only
-    description: Keycloak depends on the internal certificate authority when repo-managed
-      internal TLS material is refreshed.
+    - from: keycloak
+      to: mailpit
+      type: soft
+      description: Staging and non-production Keycloak runs can relay SMTP through
+        Mailpit for assertion-level mail verification without sending real email.
+    - from: keycloak
+      to: nginx_edge
+      type: soft
+      description: Public reachability for sso.lv3.org depends on the shared edge
+        publication path.
+    - from: keycloak
+      to: openbao
+      type: startup_only
+      description: Keycloak reads its mirrored database and bootstrap secrets through
+        the OpenBao agent before startup.
+    - from: keycloak
+      to: postgres
+      type: hard
+      description: Keycloak stores realm, client, and session state in Postgres.
+    - from: keycloak
+      to: step_ca
+      type: startup_only
+      description: Keycloak depends on the internal certificate authority when repo-managed
+        internal TLS material is refreshed.
 health:
   service_name: keycloak
-  owning_vm: runtime-control-lv3
+  owning_vm: docker-runtime-lv3
   role: keycloak_runtime
   verify_file: roles/keycloak_runtime/tasks/verify.yml
   startup:
@@ -106,7 +106,7 @@ health:
     url: http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: The Keycloak management liveness endpoint responds on the loopback
@@ -117,7 +117,7 @@ health:
     url: http://127.0.0.1:19000/health/live
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The Keycloak realm discovery endpoint responds locally with the expected
@@ -128,17 +128,17 @@ health:
     url: http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration
     method: GET
     expected_status:
-    - 200
+      - 200
     docker_publication:
       container_name: keycloak-keycloak-1
       bindings:
-      - host: 10.10.10.92
-        port: 8091
+        - host: 10.10.10.20
+          port: 8091
       required_networks:
-      - keycloak_default
-      - mail-platform_default
+        - keycloak_default
+        - mail-platform_default
   tls_certificate_ids:
-  - keycloak-edge
+    - keycloak-edge
   uptime_kuma:
     enabled: true
     monitor:
@@ -152,22 +152,22 @@ health:
       maxretries: 0
       maxredirects: 5
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 slos:
-- id: keycloak-availability
-  service_id: keycloak
-  indicator: availability
-  objective_percent: 99.7
-  window_days: 30
-  target_url: https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
-  probe_module: http_2xx_follow_redirects
-  description: Keycloak discovery remains reachable for operator and service authentication.
-- id: keycloak-latency
-  service_id: keycloak
-  indicator: latency
-  objective_percent: 95.0
-  window_days: 30
-  target_url: https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
-  probe_module: http_2xx_follow_redirects
-  latency_threshold_ms: 500
-  description: Keycloak discovery responds in under 500ms for 95% of probes.
+  - id: keycloak-availability
+    service_id: keycloak
+    indicator: availability
+    objective_percent: 99.7
+    window_days: 30
+    target_url: https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+    probe_module: http_2xx_follow_redirects
+    description: Keycloak discovery remains reachable for operator and service authentication.
+  - id: keycloak-latency
+    service_id: keycloak
+    indicator: latency
+    objective_percent: 95.0
+    window_days: 30
+    target_url: https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+    probe_module: http_2xx_follow_redirects
+    latency_threshold_ms: 500
+    description: Keycloak discovery responds in under 500ms for 95% of probes.

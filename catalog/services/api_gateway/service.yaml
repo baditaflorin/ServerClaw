@@ -23,27 +23,27 @@ service:
   mobility_tier: anchor
   dashboard_url: https://grafana.lv3.org/d/lv3-platform-api-gateway/lv3-platform-api-gateway
   degradation_modes:
-  - dependency: keycloak
-    dependency_type: soft
-    degraded_behaviour: Use cached JWKS for bearer-token validation until the cache
-      expires. After cache expiry, return GATE_CIRCUIT_OPEN with Retry-After 30 for
-      auth-gated requests.
-    degraded_for_seconds_max: 300
-    recovery_signal: successful JWKS refresh from Keycloak
-    tested_by: fault:keycloak-unavailable
-  - dependency: nats
-    dependency_type: soft
-    degraded_behaviour: Buffer platform.api.request events in the gateway-local outbox
-      under /data/nats-outbox.jsonl and flush them when NATS publication succeeds
-      again.
-    degraded_for_seconds_max: -1
-    recovery_signal: successful outbox flush to NATS
-    tested_by: fault:nats-unavailable
+    - dependency: keycloak
+      dependency_type: soft
+      degraded_behaviour: Use cached JWKS for bearer-token validation until the cache
+        expires. After cache expiry, return GATE_CIRCUIT_OPEN with Retry-After 30
+        for auth-gated requests.
+      degraded_for_seconds_max: 300
+      recovery_signal: successful JWKS refresh from Keycloak
+      tested_by: fault:keycloak-unavailable
+    - dependency: nats
+      dependency_type: soft
+      degraded_behaviour: Buffer platform.api.request events in the gateway-local
+        outbox under /data/nats-outbox.jsonl and flush them when NATS publication
+        succeeds again.
+      degraded_for_seconds_max: -1
+      recovery_signal: successful outbox flush to NATS
+      tested_by: fault:nats-unavailable
   tags:
-  - api
-  - gateway
-  - platform
-  - oidc
+    - api
+    - gateway
+    - platform
+    - oidc
   environments:
     production:
       status: active
@@ -51,7 +51,7 @@ service:
       subdomain: api.lv3.org
       stage_ready: true
       smoke_suite_ids:
-      - production-api-gateway-operator-path
+        - production-api-gateway-operator-path
       notes: Repository automation is ready; live publication still requires apply
         from main.
 completeness:
@@ -67,8 +67,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_192
+    - git_repository
+    - pbs_vm_192
   standby:
     kind: cold
     location: runtime-control-lv3
@@ -86,21 +86,21 @@ dependency:
     category: automation
     adr: 0092
   outbound_edges:
-  - from: api_gateway
-    to: keycloak
-    type: hard
-    description: The unified API gateway validates caller JWTs against Keycloak before
-      serving authenticated platform routes.
-  - from: api_gateway
-    to: nginx_edge
-    type: soft
-    description: Public access to api.lv3.org depends on the shared edge publication
-      path, but the internal gateway remains reachable directly.
-  - from: api_gateway
-    to: typesense
-    type: soft
-    description: The structured-search endpoints delegate keyword and facet queries
-      to the private Typesense runtime when it is available.
+    - from: api_gateway
+      to: keycloak
+      type: hard
+      description: The unified API gateway validates caller JWTs against Keycloak
+        before serving authenticated platform routes.
+    - from: api_gateway
+      to: nginx_edge
+      type: soft
+      description: Public access to api.lv3.org depends on the shared edge publication
+        path, but the internal gateway remains reachable directly.
+    - from: api_gateway
+      to: typesense
+      type: soft
+      description: The structured-search endpoints delegate keyword and facet queries
+        to the private Typesense runtime when it is available.
 health:
   service_name: api-gateway
   owning_vm: runtime-control-lv3
@@ -116,7 +116,7 @@ health:
     url: http://127.0.0.1:8083/v1/health
     method: GET
     expected_status:
-    - 401
+      - 401
   liveness:
     kind: http
     description: The local API gateway health endpoint responds on runtime-control-lv3.
@@ -126,7 +126,7 @@ health:
     url: http://127.0.0.1:8083/healthz
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The authenticated aggregate health endpoint rejects anonymous requests
@@ -137,7 +137,7 @@ health:
     url: http://127.0.0.1:8083/v1/health
     method: GET
     expected_status:
-    - 401
+      - 401
   uptime_kuma:
     enabled: true
     monitor:
@@ -150,4 +150,4 @@ health:
       maxretries: 0
       maxredirects: 5
       accepted_statuscodes:
-      - 200-299
+        - 200-299

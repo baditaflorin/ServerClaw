@@ -12,7 +12,7 @@ service:
   exposure: private-only
   health_probe_id: gotenberg
   image_catalog_ids:
-  - gotenberg_runtime
+    - gotenberg_runtime
   adr: 0278
   runbook: docs/runbooks/configure-gotenberg.md
   runtime_pool: runtime-ai
@@ -22,10 +22,10 @@ service:
   mobility_tier: burst_batch
   dashboard_url: https://grafana.lv3.org/d/lv3-gotenberg/lv3-gotenberg
   tags:
-  - documents
-  - pdf
-  - rendering
-  - private
+    - documents
+    - pdf
+    - rendering
+    - private
   environments:
     production:
       status: active
@@ -47,8 +47,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_190
+    - git_repository
+    - pbs_vm_190
   standby:
     kind: cold
     location: runtime-ai-lv3
@@ -66,16 +66,17 @@ dependency:
     category: automation
     adr: 0278
   outbound_edges:
-  - from: gotenberg
-    to: api_gateway
-    type: soft
-    description: Authenticated operator and cross-service access can be brokered through
-      the shared API gateway route, while private guest-network callers can still
-      use the internal listener directly.
-  - from: gotenberg
-    to: docker_runtime
-    type: hard
-    description: The Gotenberg Chromium and LibreOffice renderers are hosted on runtime-ai-lv3.
+    - from: gotenberg
+      to: api_gateway
+      type: soft
+      description: Authenticated operator and cross-service access can be brokered
+        through the shared API gateway route, while private guest-network callers
+        can still use the internal listener directly.
+    - from: gotenberg
+      to: docker_runtime
+      type: hard
+      description: The Gotenberg Chromium and LibreOffice renderers are hosted on
+        runtime-ai-lv3.
 health:
   service_name: gotenberg
   owning_vm: runtime-ai-lv3
@@ -91,7 +92,7 @@ health:
     url: http://127.0.0.1:3007/health
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: The Gotenberg health endpoint responds on the local listener.
@@ -101,7 +102,7 @@ health:
     url: http://127.0.0.1:3007/health
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: command
     description: A minimal HTML document renders to a PDF through the Chromium conversion
@@ -110,40 +111,40 @@ health:
     retries: 3
     delay_seconds: 5
     argv:
-    - /bin/bash
-    - -lc
-    - set -euo pipefail; html=$(mktemp --suffix=.html); pdf=$(mktemp); trap 'rm -f
-      "$html" "$pdf"' EXIT; printf '<html><body><h1>LV3 Gotenberg readiness</h1></body></html>'
-      >"$html"; curl -fsS -o "$pdf" -F "files=@${html};filename=index.html;type=text/html"
-      http://127.0.0.1:3007/forms/chromium/convert/html; head -c 4 "$pdf" | grep -q
-      '%PDF'
+      - /bin/bash
+      - -lc
+      - set -euo pipefail; html=$(mktemp --suffix=.html); pdf=$(mktemp); trap 'rm
+        -f "$html" "$pdf"' EXIT; printf '<html><body><h1>LV3 Gotenberg readiness</h1></body></html>'
+        >"$html"; curl -fsS -o "$pdf" -F "files=@${html};filename=index.html;type=text/html"
+        http://127.0.0.1:3007/forms/chromium/convert/html; head -c 4 "$pdf" | grep
+        -q '%PDF'
     success_rc: 0
   uptime_kuma:
     enabled: false
     reason: The Gotenberg runtime stays private to runtime-ai-lv3 and is verified
       through repo-managed readiness probes plus authenticated API gateway checks.
 data:
-- id: gotenberg-transient-render-buffers
-  service: gotenberg
-  name: Gotenberg transient render buffers
-  class: internal
-  retention_days: null
-  backup_included: false
-  access_role: platform-operator
-  pii_risk: medium
-  locations:
-  - Transient request and response buffers inside the gotenberg container on docker-runtime-lv3
-  - Ephemeral temporary files created during Chromium and LibreOffice conversions
-    on docker-runtime-lv3
-  notes: Gotenberg is stateless and does not persist source documents or rendered
-    PDFs after each synchronous conversion finishes.
+  - id: gotenberg-transient-render-buffers
+    service: gotenberg
+    name: Gotenberg transient render buffers
+    class: internal
+    retention_days: null
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: medium
+    locations:
+      - Transient request and response buffers inside the gotenberg container on docker-runtime-lv3
+      - Ephemeral temporary files created during Chromium and LibreOffice conversions
+        on docker-runtime-lv3
+    notes: Gotenberg is stateless and does not persist source documents or rendered
+      PDFs after each synchronous conversion finishes.
 slos:
-- id: gotenberg-availability
-  service_id: gotenberg
-  indicator: availability
-  objective_percent: 99.0
-  window_days: 30
-  target_url: http://10.10.10.90:3007/health
-  probe_module: http_2xx_follow_redirects
-  description: The private Gotenberg document rendering API remains reachable on runtime-ai-lv3
-    for synchronous PDF conversion workflows.
+  - id: gotenberg-availability
+    service_id: gotenberg
+    indicator: availability
+    objective_percent: 99.0
+    window_days: 30
+    target_url: http://10.10.10.90:3007/health
+    probe_module: http_2xx_follow_redirects
+    description: The private Gotenberg document rendering API remains reachable on
+      runtime-ai-lv3 for synchronous PDF conversion workflows.

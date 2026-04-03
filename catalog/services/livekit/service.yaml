@@ -14,10 +14,10 @@ service:
   exposure: edge-published
   health_probe_id: livekit
   image_catalog_ids:
-  - livekit_runtime
+    - livekit_runtime
   secret_catalog_ids:
-  - livekit_api_key
-  - livekit_api_secret
+    - livekit_api_key
+    - livekit_api_secret
   adr: 0293
   adr_file: docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
   runbook: docs/runbooks/configure-livekit.md
@@ -27,10 +27,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
   tags:
-  - agents
-  - voice
-  - webrtc
-  - realtime
+    - agents
+    - voice
+    - webrtc
+    - realtime
   notes: Signal traffic is published through the shared NGINX edge at livekit.lv3.org
     while media TCP and UDP listeners are forwarded directly by the Proxmox host to
     docker-runtime-lv3.
@@ -59,8 +59,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -78,20 +78,20 @@ dependency:
     category: communication
     adr: 0293
   outbound_edges:
-  - from: livekit
-    to: docker_runtime
-    type: hard
-    description: LiveKit runs as a repo-managed Docker Compose workload on docker-runtime-lv3.
-  - from: livekit
-    to: nginx_edge
-    type: soft
-    description: Public signalling at livekit.lv3.org depends on the shared NGINX
-      edge publication path.
-  - from: livekit
-    to: openbao
-    type: startup_only
-    description: LiveKit reads its API key pair from the OpenBao-backed runtime env
-      contract before the service is verified.
+    - from: livekit
+      to: docker_runtime
+      type: hard
+      description: LiveKit runs as a repo-managed Docker Compose workload on docker-runtime-lv3.
+    - from: livekit
+      to: nginx_edge
+      type: soft
+      description: Public signalling at livekit.lv3.org depends on the shared NGINX
+        edge publication path.
+    - from: livekit
+      to: openbao
+      type: startup_only
+      description: LiveKit reads its API key pair from the OpenBao-backed runtime
+        env contract before the service is verified.
 health:
   service_name: livekit
   owning_vm: docker-runtime-lv3
@@ -122,22 +122,22 @@ health:
     retries: 12
     delay_seconds: 5
     argv:
-    - python3
-    - /opt/livekit/livekit_tool.py
-    - verify-room-lifecycle
-    - --url
-    - http://127.0.0.1:7880
-    - --runtime-env-file
-    - /run/lv3-secrets/livekit/runtime.env
-    - --room-prefix
-    - lv3-livekit-readiness
-    - --identity
-    - livekit-readiness-probe
-    - --timeout-seconds
-    - '120'
+      - python3
+      - /opt/livekit/livekit_tool.py
+      - verify-room-lifecycle
+      - --url
+      - http://127.0.0.1:7880
+      - --runtime-env-file
+      - /run/lv3-secrets/livekit/runtime.env
+      - --room-prefix
+      - lv3-livekit-readiness
+      - --identity
+      - livekit-readiness-probe
+      - --timeout-seconds
+      - '120'
     success_rc: 0
   tls_certificate_ids:
-  - livekit-edge
+    - livekit-edge
   uptime_kuma:
     enabled: false
     reason: LiveKit room access is token-gated and the repo-managed local plus public

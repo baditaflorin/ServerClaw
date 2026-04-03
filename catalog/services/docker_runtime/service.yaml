@@ -21,9 +21,9 @@ service:
   mobility_tier: anchor
   dashboard_url: https://grafana.lv3.org/d/lv3-vm-docker-runtime-lv3/lv3-vm-docker-runtime-lv3
   tags:
-  - docker
-  - runtime
-  - control-plane
+    - docker
+    - runtime
+    - control-plane
   environments:
     production:
       status: active
@@ -42,8 +42,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -81,13 +81,13 @@ health:
     retries: 1
     delay_seconds: 0
     argv:
-    - docker
-    - info
-    - --format
-    - '{{.ServerVersion}}'
+      - docker
+      - info
+      - --format
+      - '{{.ServerVersion}}'
     success_rc: 0
   tls_certificate_ids:
-  - docker-runtime-edge
+    - docker-runtime-edge
   uptime_kuma:
     enabled: false
     reason: Docker daemon health is enforced by the role verify task and does not

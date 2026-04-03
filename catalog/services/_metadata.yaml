@@ -40,10 +40,10 @@ outputs:
         failure_domain_count: 1
         max_supported_tier: R2
         notes:
-        - The current platform has one physical Hetzner host, so guest- or software-level
-          warm standbys can be implemented but cross-host active redundancy cannot.
-        - Any future R3 declaration remains a design target until a second failure
-          domain exists and live apply is allowed to converge both domains.
+          - The current platform has one physical Hetzner host, so guest- or software-level
+            warm standbys can be implemented but cross-host active redundancy cannot.
+          - Any future R3 declaration remains a design target until a second failure
+            domain exists and live apply is allowed to converge both domains.
         rehearsal_gate:
           tiers:
             R1:

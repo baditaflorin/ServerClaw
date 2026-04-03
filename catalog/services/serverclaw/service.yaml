@@ -15,11 +15,11 @@ service:
   uptime_monitor_name: ServerClaw
   health_probe_id: serverclaw
   image_catalog_ids:
-  - open_webui_runtime
+    - open_webui_runtime
   secret_catalog_ids:
-  - serverclaw_admin_password
-  - serverclaw_secret_key
-  - serverclaw_oidc_client_secret
+    - serverclaw_admin_password
+    - serverclaw_secret_key
+    - serverclaw_oidc_client_secret
   adr: '0254'
   runbook: docs/runbooks/configure-serverclaw.md
   runtime_pool: dedicated-coolify
@@ -28,10 +28,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify
   mobility_tier: movable_singleton
   tags:
-  - agents
-  - chat
-  - assistant
-  - public
+    - agents
+    - chat
+    - assistant
+    - public
   environments:
     production:
       status: active
@@ -55,8 +55,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_170
+    - git_repository
+    - pbs_vm_170
   standby:
     kind: cold
     location: coolify-lv3
@@ -74,36 +74,36 @@ dependency:
     category: access
     adr: '0254'
   outbound_edges:
-  - from: serverclaw
-    to: keycloak
-    type: soft
-    description: ServerClaw prefers Keycloak-backed browser sign-in while retaining
-      a repo-managed bootstrap admin as the break-glass fallback.
-  - from: serverclaw
-    to: nginx_edge
-    type: soft
-    description: Public access to chat.lv3.org depends on the shared NGINX edge publication
-      path.
-  - from: serverclaw
-    to: ollama
-    type: hard
-    description: ServerClaw routes its default local model connector to the private
-      Ollama runtime on docker-runtime-lv3.
-  - from: serverclaw
-    to: one_api
-    type: hard
-    description: ServerClaw uses the private One-API runtime for repo-managed local
-      model access.
-  - from: serverclaw
-    to: openbao
-    type: startup_only
-    description: ServerClaw consumes mirrored runtime secrets and the dedicated OIDC
-      client secret from the OpenBao sidecar.
-  - from: serverclaw
-    to: searxng
-    type: soft
-    description: ServerClaw delegates optional web-search requests to the private
-      SearXNG runtime when the feature is enabled.
+    - from: serverclaw
+      to: keycloak
+      type: soft
+      description: ServerClaw prefers Keycloak-backed browser sign-in while retaining
+        a repo-managed bootstrap admin as the break-glass fallback.
+    - from: serverclaw
+      to: nginx_edge
+      type: soft
+      description: Public access to chat.lv3.org depends on the shared NGINX edge
+        publication path.
+    - from: serverclaw
+      to: ollama
+      type: hard
+      description: ServerClaw routes its default local model connector to the private
+        Ollama runtime on docker-runtime-lv3.
+    - from: serverclaw
+      to: one_api
+      type: hard
+      description: ServerClaw uses the private One-API runtime for repo-managed local
+        model access.
+    - from: serverclaw
+      to: openbao
+      type: startup_only
+      description: ServerClaw consumes mirrored runtime secrets and the dedicated
+        OIDC client secret from the OpenBao sidecar.
+    - from: serverclaw
+      to: searxng
+      type: soft
+      description: ServerClaw delegates optional web-search requests to the private
+        SearXNG runtime when the feature is enabled.
 health:
   service_name: serverclaw
   owning_vm: coolify-lv3
@@ -119,7 +119,7 @@ health:
     url: http://127.0.0.1:8096
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: The ServerClaw root page responds on the local listener.
@@ -129,7 +129,7 @@ health:
     url: http://127.0.0.1:8096
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The ServerClaw local listener still answers after the role-level
@@ -140,7 +140,7 @@ health:
     url: http://127.0.0.1:8096
     method: GET
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: true
     monitor:
@@ -154,29 +154,29 @@ health:
       maxretries: 0
       maxredirects: 10
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 data:
-- id: serverclaw-workspace-store
-  service: serverclaw
-  name: ServerClaw workspace and chat state
-  class: confidential
-  retention_days: 90
-  backup_included: false
-  access_role: platform-operator
-  pii_risk: high
-  locations:
-  - /opt/serverclaw/data
-  - https://chat.lv3.org
-  notes: ServerClaw persists chat history, workspace metadata, uploaded knowledge
-    artifacts, and user-facing assistant settings in its Open WebUI data volume on
-    coolify-lv3.
+  - id: serverclaw-workspace-store
+    service: serverclaw
+    name: ServerClaw workspace and chat state
+    class: confidential
+    retention_days: 90
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: high
+    locations:
+      - /opt/serverclaw/data
+      - https://chat.lv3.org
+    notes: ServerClaw persists chat history, workspace metadata, uploaded knowledge
+      artifacts, and user-facing assistant settings in its Open WebUI data volume
+      on coolify-lv3.
 slos:
-- id: serverclaw-availability
-  service_id: serverclaw
-  indicator: availability
-  objective_percent: 99.0
-  window_days: 30
-  target_url: https://chat.lv3.org
-  probe_module: http_2xx_follow_redirects
-  description: ServerClaw remains reachable through the public LV3 edge for chat-first
-    assistant access.
+  - id: serverclaw-availability
+    service_id: serverclaw
+    indicator: availability
+    objective_percent: 99.0
+    window_days: 30
+    target_url: https://chat.lv3.org
+    probe_module: http_2xx_follow_redirects
+    description: ServerClaw remains reachable through the public LV3 edge for chat-first
+      assistant access.

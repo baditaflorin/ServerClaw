@@ -13,7 +13,7 @@ service:
   exposure: edge-published
   health_probe_id: dozzle
   image_catalog_ids:
-  - dozzle_runtime
+    - dozzle_runtime
   adr: '0150'
   runbook: docs/runbooks/configure-dozzle.md
   runtime_pool: runtime-general
@@ -22,10 +22,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: elastic_stateless
   tags:
-  - logs
-  - docker
-  - realtime
-  - observability
+    - logs
+    - docker
+    - realtime
+    - observability
   environments:
     production:
       status: active
@@ -43,8 +43,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -62,18 +62,18 @@ dependency:
     category: observability
     adr: '0150'
   outbound_edges:
-  - from: dozzle
-    to: keycloak
-    type: soft
-    description: Authenticated browser access to logs.lv3.org depends on the shared
-      Keycloak-backed edge auth path, but the private hub remains reachable for controlled
-      operator verification.
-  - from: dozzle
-    to: nginx_edge
-    type: soft
-    description: Public operator access to logs.lv3.org depends on the shared NGINX
-      edge publication while the private runtime remains reachable inside the guest
-      network.
+    - from: dozzle
+      to: keycloak
+      type: soft
+      description: Authenticated browser access to logs.lv3.org depends on the shared
+        Keycloak-backed edge auth path, but the private hub remains reachable for
+        controlled operator verification.
+    - from: dozzle
+      to: nginx_edge
+      type: soft
+      description: Public operator access to logs.lv3.org depends on the shared NGINX
+        edge publication while the private runtime remains reachable inside the guest
+        network.
 health:
   service_name: dozzle
   owning_vm: docker-runtime-lv3
@@ -88,7 +88,7 @@ health:
     url: http://127.0.0.1:8089/healthcheck
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The Dozzle hub responds on the local healthcheck endpoint.
@@ -98,7 +98,7 @@ health:
     url: http://127.0.0.1:8089/healthcheck
     method: GET
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: true
     monitor:
@@ -111,29 +111,29 @@ health:
       maxretries: 0
       maxredirects: 10
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 data:
-- id: dozzle-live-log-stream
-  service: dozzle
-  name: Dozzle live log stream cache
-  class: internal
-  retention_days: null
-  backup_included: false
-  access_role: platform-read
-  pii_risk: medium
-  locations:
-  - Docker stdout and stderr log buffers on docker-runtime-lv3
-  - Docker stdout and stderr log buffers on docker-build-lv3
-  - Docker stdout and stderr log buffers on monitoring-lv3
-  notes: Dozzle is read-only and does not persist its own datastore; it exposes recent
-    container log buffers from the managed Docker hosts for real-time debugging.
+  - id: dozzle-live-log-stream
+    service: dozzle
+    name: Dozzle live log stream cache
+    class: internal
+    retention_days: null
+    backup_included: false
+    access_role: platform-read
+    pii_risk: medium
+    locations:
+      - Docker stdout and stderr log buffers on docker-runtime-lv3
+      - Docker stdout and stderr log buffers on docker-build-lv3
+      - Docker stdout and stderr log buffers on monitoring-lv3
+    notes: Dozzle is read-only and does not persist its own datastore; it exposes
+      recent container log buffers from the managed Docker hosts for real-time debugging.
 slos:
-- id: dozzle-availability
-  service_id: dozzle
-  indicator: availability
-  objective_percent: 99.0
-  window_days: 30
-  target_url: http://10.10.10.20:8089/healthcheck
-  probe_module: http_2xx_follow_redirects
-  description: The Dozzle hub remains reachable on the private runtime network for
-    real-time container log access.
+  - id: dozzle-availability
+    service_id: dozzle
+    indicator: availability
+    objective_percent: 99.0
+    window_days: 30
+    target_url: http://10.10.10.20:8089/healthcheck
+    probe_module: http_2xx_follow_redirects
+    description: The Dozzle hub remains reachable on the private runtime network for
+      real-time container log access.

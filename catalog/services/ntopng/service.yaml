@@ -18,9 +18,9 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/host-management
   mobility_tier: anchor
   tags:
-  - flows
-  - network
-  - traffic
+    - flows
+    - network
+    - traffic
   environments:
     production:
       status: active
@@ -38,8 +38,8 @@ redundancy:
     rto_minutes: 240
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - host_reinstall_runbooks
+    - git_repository
+    - host_reinstall_runbooks
   standby:
     kind: none
     location: none
@@ -71,8 +71,8 @@ health:
     url: http://127.0.0.1:3000/
     method: GET
     expected_status:
-    - 200
-    - 302
+      - 200
+      - 302
   readiness:
     kind: http
     description: ntopng exposes the managed interface inventory over its authenticated
@@ -83,7 +83,7 @@ health:
     url: http://127.0.0.1:3000/lua/rest/v2/get/ntopng/interfaces.lua
     method: GET
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: false
     reason: The useful ntopng readiness signal requires authenticated API access and

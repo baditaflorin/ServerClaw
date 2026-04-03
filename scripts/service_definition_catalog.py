@@ -136,6 +136,13 @@ class _NoAliasDumper(yaml.SafeDumper):
     def ignore_aliases(self, data: Any) -> bool:  # pragma: no cover - exercised through dump
         return True
 
+    def increase_indent(
+        self, flow: bool = False, indentless: bool = False
+    ) -> Any:  # pragma: no cover - exercised through dump
+        # Keep sequence entries indented beneath their parent key so the emitted
+        # bundle YAML satisfies the repository yamllint profile.
+        return super().increase_indent(flow, False)
+
 
 def write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -145,7 +152,14 @@ def write_json(path: Path, payload: Any) -> None:
 def write_yaml(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
-        yaml.dump(payload, Dumper=_NoAliasDumper, sort_keys=False, allow_unicode=False),
+        yaml.dump(
+            payload,
+            Dumper=_NoAliasDumper,
+            sort_keys=False,
+            allow_unicode=False,
+            default_flow_style=False,
+            indent=2,
+        ),
         encoding="utf-8",
     )
 

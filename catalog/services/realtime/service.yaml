@@ -21,10 +21,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
   mobility_tier: movable_singleton
   tags:
-  - metrics
-  - netdata
-  - observability
-  - realtime
+    - metrics
+    - netdata
+    - observability
+    - realtime
   environments:
     production:
       status: active
@@ -44,8 +44,8 @@ redundancy:
     rto_minutes: 30
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_140
+    - git_repository
+    - pbs_vm_140
   standby:
     kind: cold
     location: monitoring-lv3
@@ -63,18 +63,18 @@ dependency:
     category: observability
     adr: 0196
   outbound_edges:
-  - from: realtime
-    to: keycloak
-    type: soft
-    description: Public operator access to realtime.lv3.org depends on the shared
-      Keycloak-backed edge auth path, but the private Netdata parent remains reachable
-      on monitoring-lv3.
-  - from: realtime
-    to: nginx_edge
-    type: soft
-    description: Public operator access to realtime.lv3.org depends on the shared
-      NGINX edge publication while the private Netdata parent remains reachable on
-      the guest network.
+    - from: realtime
+      to: keycloak
+      type: soft
+      description: Public operator access to realtime.lv3.org depends on the shared
+        Keycloak-backed edge auth path, but the private Netdata parent remains reachable
+        on monitoring-lv3.
+    - from: realtime
+      to: nginx_edge
+      type: soft
+      description: Public operator access to realtime.lv3.org depends on the shared
+        NGINX edge publication while the private Netdata parent remains reachable
+        on the guest network.
 health:
   service_name: realtime
   owning_vm: monitoring-lv3
@@ -89,7 +89,7 @@ health:
     url: http://127.0.0.1:19999/api/v1/info
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The Netdata parent exporter responds with consolidated metrics on
@@ -100,7 +100,7 @@ health:
     url: http://127.0.0.1:19999/api/v1/allmetrics?format=prometheus_all_hosts&source=as-collected
     method: GET
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: true
     monitor:
@@ -113,28 +113,28 @@ health:
       maxretries: 0
       maxredirects: 10
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 data:
-- id: netdata-realtime-metrics
-  service: realtime
-  name: Netdata realtime metrics store
-  class: internal
-  retention_days: 1
-  backup_included: false
-  access_role: platform-read
-  pii_risk: low
-  locations:
-  - /var/cache/netdata
-  - https://realtime.lv3.org
-  notes: Netdata stores short-lived host and guest metrics for live operator troubleshooting
-    and anomaly triage; long-term retention remains outside the scope of this service.
+  - id: netdata-realtime-metrics
+    service: realtime
+    name: Netdata realtime metrics store
+    class: internal
+    retention_days: 1
+    backup_included: false
+    access_role: platform-read
+    pii_risk: low
+    locations:
+      - /var/cache/netdata
+      - https://realtime.lv3.org
+    notes: Netdata stores short-lived host and guest metrics for live operator troubleshooting
+      and anomaly triage; long-term retention remains outside the scope of this service.
 slos:
-- id: realtime-availability
-  service_id: realtime
-  indicator: availability
-  objective_percent: 99.0
-  window_days: 30
-  target_url: http://10.10.10.40:19999/api/v1/info
-  probe_module: http_2xx_follow_redirects
-  description: The Netdata parent remains reachable on monitoring-lv3 for real-time
-    streamed platform metrics.
+  - id: realtime-availability
+    service_id: realtime
+    indicator: availability
+    objective_percent: 99.0
+    window_days: 30
+    target_url: http://10.10.10.40:19999/api/v1/info
+    probe_module: http_2xx_follow_redirects
+    description: The Netdata parent remains reachable on monitoring-lv3 for real-time
+      streamed platform metrics.

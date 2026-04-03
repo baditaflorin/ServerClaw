@@ -20,28 +20,28 @@ service:
   uptime_monitor_name: GlitchTip Public Health
   health_probe_id: glitchtip
   image_catalog_ids:
-  - glitchtip_runtime
-  - glitchtip_valkey_runtime
+    - glitchtip_runtime
+    - glitchtip_valkey_runtime
   secret_catalog_ids:
-  - glitchtip_database_password
-  - glitchtip_secret_key
-  - glitchtip_valkey_password
-  - glitchtip_admin_password
-  - glitchtip_api_token
-  - glitchtip_mail_gateway_dsn
-  - glitchtip_windmill_jobs_dsn
-  - glitchtip_platform_findings_event_url
-  - keycloak_glitchtip_client_secret
-  - mail_platform_server_mailbox_password
+    - glitchtip_database_password
+    - glitchtip_secret_key
+    - glitchtip_valkey_password
+    - glitchtip_admin_password
+    - glitchtip_api_token
+    - glitchtip_mail_gateway_dsn
+    - glitchtip_windmill_jobs_dsn
+    - glitchtip_platform_findings_event_url
+    - keycloak_glitchtip_client_secret
+    - mail_platform_server_mailbox_password
   adr: 0281
   runbook: docs/runbooks/configure-glitchtip.md
   dashboard_url: https://grafana.lv3.org/d/lv3-glitchtip/lv3-glitchtip
   tags:
-  - errors
-  - sentry-compatible
-  - glitchtip
-  - oidc
-  - observability
+    - errors
+    - sentry-compatible
+    - glitchtip
+    - oidc
+    - observability
   notes: Browser sign-in is delegated to the in-app Keycloak OIDC flow, while the
     public DSN store path and health endpoint remain reachable for SDK delivery and
     verification traffic.
@@ -67,9 +67,9 @@ completeness:
 redundancy:
   tier: R1
   backup_sources:
-  - git_repository
-  - pbs_vm_120
-  - pbs_vm_150
+    - git_repository
+    - pbs_vm_120
+    - pbs_vm_150
   recovery_objective:
     rpo_minutes: 1440
     rto_minutes: 120
@@ -91,46 +91,46 @@ dependency:
     category: observability
     adr: 0281
   outbound_edges:
-  - from: glitchtip
-    to: docker_runtime
-    type: hard
-    description: The GlitchTip web runtime, project bootstrap flow, and supporting
-      Valkey container run on docker-runtime-lv3.
-  - from: glitchtip
-    to: keycloak
-    type: soft
-    description: GlitchTip delegates browser sign-in to the shared Keycloak OIDC broker
-      through a repo-managed confidential client.
-  - from: glitchtip
-    to: mail_platform
-    type: soft
-    description: Digest delivery and password-recovery mail use the repo-managed server
-      mailbox and internal submission relay on mail-platform.
-  - from: glitchtip
-    to: mattermost
-    type: soft
-    description: New issue alerts are routed to the platform-ops Mattermost webhook
-      manifest.
-  - from: glitchtip
-    to: nginx_edge
-    type: soft
-    description: Public access to errors.lv3.org depends on the shared NGINX edge
-      publication path.
-  - from: glitchtip
-    to: ntfy
-    type: soft
-    description: High-priority regression notifications are delivered through the
-      private ntfy paging gateway.
-  - from: glitchtip
-    to: openbao
-    type: startup_only
-    description: GlitchTip starts from OpenBao-rendered runtime secrets mirrored into
-      its compose environment before the main container launches.
-  - from: glitchtip
-    to: postgres
-    type: hard
-    description: GlitchTip stores issues, grouped events, and project metadata in
-      the shared PostgreSQL cluster.
+    - from: glitchtip
+      to: docker_runtime
+      type: hard
+      description: The GlitchTip web runtime, project bootstrap flow, and supporting
+        Valkey container run on docker-runtime-lv3.
+    - from: glitchtip
+      to: keycloak
+      type: soft
+      description: GlitchTip delegates browser sign-in to the shared Keycloak OIDC
+        broker through a repo-managed confidential client.
+    - from: glitchtip
+      to: mail_platform
+      type: soft
+      description: Digest delivery and password-recovery mail use the repo-managed
+        server mailbox and internal submission relay on mail-platform.
+    - from: glitchtip
+      to: mattermost
+      type: soft
+      description: New issue alerts are routed to the platform-ops Mattermost webhook
+        manifest.
+    - from: glitchtip
+      to: nginx_edge
+      type: soft
+      description: Public access to errors.lv3.org depends on the shared NGINX edge
+        publication path.
+    - from: glitchtip
+      to: ntfy
+      type: soft
+      description: High-priority regression notifications are delivered through the
+        private ntfy paging gateway.
+    - from: glitchtip
+      to: openbao
+      type: startup_only
+      description: GlitchTip starts from OpenBao-rendered runtime secrets mirrored
+        into its compose environment before the main container launches.
+    - from: glitchtip
+      to: postgres
+      type: hard
+      description: GlitchTip stores issues, grouped events, and project metadata in
+        the shared PostgreSQL cluster.
 health:
   service_name: glitchtip
   owning_vm: docker-runtime-lv3
@@ -146,7 +146,7 @@ health:
     url: http://127.0.0.1:3005/api/0/internal/health/
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: The local GlitchTip health endpoint continues to answer on docker-runtime-lv3.
@@ -156,7 +156,7 @@ health:
     url: http://127.0.0.1:3005/api/0/internal/health/
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The public GlitchTip health endpoint answers through the shared NGINX
@@ -167,16 +167,16 @@ health:
     url: https://errors.lv3.org/api/0/internal/health/
     method: GET
     expected_status:
-    - 200
+      - 200
     docker_publication:
       container_name: glitchtip
       bindings:
-      - host: 10.10.10.20
-        port: 3005
+        - host: 10.10.10.20
+          port: 3005
       required_networks:
-      - glitchtip_default
+        - glitchtip_default
   tls_certificate_ids:
-  - errors-edge
+    - errors-edge
   uptime_kuma:
     enabled: true
     monitor:
@@ -190,30 +190,30 @@ health:
       maxretries: 0
       maxredirects: 5
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 data:
-- id: glitchtip-issues-and-project-artifacts
-  service: glitchtip
-  name: GlitchTip grouped issues, events, and DSN project artifacts
-  class: confidential
-  retention_days: 365
-  backup_included: true
-  access_role: platform-operator
-  pii_risk: high
-  locations:
-  - PostgreSQL database glitchtip on postgres-lv3
-  - /opt/glitchtip/data/uploads on docker-runtime-lv3
-  - .local/glitchtip/projects.json on the control machine
-  notes: GlitchTip stores grouped exception payloads, issue metadata, notification
-    state, uploaded artifacts, and the repo-managed DSN project catalogue for first-party
-    producers.
+  - id: glitchtip-issues-and-project-artifacts
+    service: glitchtip
+    name: GlitchTip grouped issues, events, and DSN project artifacts
+    class: confidential
+    retention_days: 365
+    backup_included: true
+    access_role: platform-operator
+    pii_risk: high
+    locations:
+      - PostgreSQL database glitchtip on postgres-lv3
+      - /opt/glitchtip/data/uploads on docker-runtime-lv3
+      - .local/glitchtip/projects.json on the control machine
+    notes: GlitchTip stores grouped exception payloads, issue metadata, notification
+      state, uploaded artifacts, and the repo-managed DSN project catalogue for first-party
+      producers.
 slos:
-- id: glitchtip-availability
-  service_id: glitchtip
-  description: The public GlitchTip health endpoint remains reachable for browser
-    sign-in, DSN ingestion, and repo-managed smoke verification.
-  indicator: availability
-  objective_percent: 99.5
-  probe_module: http_2xx_follow_redirects
-  target_url: https://errors.lv3.org/api/0/internal/health/
-  window_days: 30
+  - id: glitchtip-availability
+    service_id: glitchtip
+    description: The public GlitchTip health endpoint remains reachable for browser
+      sign-in, DSN ingestion, and repo-managed smoke verification.
+    indicator: availability
+    objective_percent: 99.5
+    probe_module: http_2xx_follow_redirects
+    target_url: https://errors.lv3.org/api/0/internal/health/
+    window_days: 30

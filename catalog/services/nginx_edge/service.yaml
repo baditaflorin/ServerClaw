@@ -22,10 +22,10 @@ service:
   mobility_tier: anchor
   dashboard_url: https://grafana.lv3.org/d/lv3-vm-nginx-lv3/lv3-vm-nginx-lv3
   tags:
-  - nginx
-  - edge
-  - tls
-  - ingress
+    - nginx
+    - edge
+    - tls
+    - ingress
   environments:
     production:
       status: active
@@ -44,8 +44,8 @@ redundancy:
     rto_minutes: 30
     rpo_minutes: 0
   backup_sources:
-  - git_repository
-  - pbs_vm_110
+    - git_repository
+    - pbs_vm_110
   standby:
     kind: cold
     location: nginx-lv3
@@ -85,7 +85,7 @@ health:
     url: https://127.0.0.1/
     method: GET
     expected_status:
-    - 200
+      - 200
     headers:
       Host: nginx.lv3.org
     validate_tls: false
@@ -101,13 +101,13 @@ health:
       maxretries: 0
       maxredirects: 10
       accepted_statuscodes:
-      - 200-399
+        - 200-399
 slos:
-- id: nginx-edge-availability
-  service_id: nginx_edge
-  indicator: availability
-  objective_percent: 99.95
-  window_days: 30
-  target_url: https://nginx.lv3.org
-  probe_module: http_2xx_follow_redirects
-  description: The edge reverse proxy remains reachable for published services.
+  - id: nginx-edge-availability
+    service_id: nginx_edge
+    indicator: availability
+    objective_percent: 99.95
+    window_days: 30
+    target_url: https://nginx.lv3.org
+    probe_module: http_2xx_follow_redirects
+    description: The edge reverse proxy remains reachable for published services.

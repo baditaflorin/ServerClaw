@@ -11,11 +11,11 @@ service:
   exposure: private-only
   health_probe_id: openbao
   image_catalog_ids:
-  - openbao_runtime
+    - openbao_runtime
   secret_catalog_ids:
-  - openbao_controller_approle
-  - openbao_atlas_approle
-  - openbao_mail_platform_approle
+    - openbao_controller_approle
+    - openbao_atlas_approle
+    - openbao_mail_platform_approle
   adr: '0043'
   runbook: docs/runbooks/configure-openbao.md
   runtime_pool: runtime-control
@@ -24,17 +24,17 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
   mobility_tier: anchor
   degradation_modes:
-  - dependency: postgres
-    dependency_type: hard
-    degraded_behaviour: OpenBao cannot persist state without PostgreSQL. Secret reads
-      and writes fail until the storage backend reconnects.
-    degraded_for_seconds_max: 0
-    recovery_signal: OpenBao storage reconnect succeeds
-    tested_by: fault:postgres-unavailable
+    - dependency: postgres
+      dependency_type: hard
+      degraded_behaviour: OpenBao cannot persist state without PostgreSQL. Secret
+        reads and writes fail until the storage backend reconnects.
+      degraded_for_seconds_max: 0
+      recovery_signal: OpenBao storage reconnect succeeds
+      tested_by: fault:postgres-unavailable
   tags:
-  - secrets
-  - vault
-  - pki
+    - secrets
+    - vault
+    - pki
   environments:
     production:
       status: active
@@ -52,8 +52,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_192
+    - git_repository
+    - pbs_vm_192
   standby:
     kind: cold
     location: runtime-control-lv3
@@ -86,7 +86,7 @@ health:
     url: http://127.0.0.1:8201/v1/sys/health
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: OpenBao exposes the local seal-status endpoint.
@@ -96,7 +96,7 @@ health:
     url: http://127.0.0.1:8201/v1/sys/seal-status
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: OpenBao reports the active node as ready on the local health endpoint.
@@ -106,31 +106,31 @@ health:
     url: http://127.0.0.1:8201/v1/sys/health
     method: GET
     expected_status:
-    - 200
+      - 200
     docker_publication:
       container_name: lv3-openbao
       bindings:
-      - host: 10.10.10.92
-        port: 8200
+        - host: 10.10.10.92
+          port: 8200
       required_networks:
-      - openbao_default
+        - openbao_default
   tls_certificate_ids:
-  - openbao-proxy
+    - openbao-proxy
   uptime_kuma:
     enabled: false
     reason: The operator-facing TLS surface requires client-certificate authentication,
       so Uptime Kuma only tracks this contract indirectly through role verification.
 data:
-- id: openbao-secrets
-  service: openbao
-  name: OpenBao KV secrets
-  class: secret
-  retention_days: null
-  backup_included: true
-  access_role: break_glass
-  pii_risk: medium
-  locations:
-  - kv/services/*
-  - kv/controller/*
-  notes: Secret material is retained until explicit deletion or rotation removes the
-    prior value.
+  - id: openbao-secrets
+    service: openbao
+    name: OpenBao KV secrets
+    class: secret
+    retention_days: null
+    backup_included: true
+    access_role: break_glass
+    pii_risk: medium
+    locations:
+      - kv/services/*
+      - kv/controller/*
+    notes: Secret material is retained until explicit deletion or rotation removes
+      the prior value.

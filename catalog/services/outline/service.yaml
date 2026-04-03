@@ -15,17 +15,17 @@ service:
   uptime_monitor_name: Outline Public Health
   health_probe_id: outline
   image_catalog_ids:
-  - outline_runtime
-  - minio_runtime
-  - langfuse_redis_runtime
+    - outline_runtime
+    - minio_runtime
+    - langfuse_redis_runtime
   secret_catalog_ids:
-  - outline_database_password
-  - outline_secret_key
-  - outline_utils_secret
-  - outline_redis_password
-  - outline_minio_root_password
-  - outline_api_token
-  - keycloak_outline_client_secret
+    - outline_database_password
+    - outline_secret_key
+    - outline_utils_secret
+    - outline_redis_password
+    - outline_minio_root_password
+    - outline_api_token
+    - keycloak_outline_client_secret
   adr: 0199
   runbook: docs/runbooks/configure-outline.md
   runtime_pool: runtime-general
@@ -34,10 +34,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
   tags:
-  - wiki
-  - knowledge
-  - outline
-  - oidc
+    - wiki
+    - knowledge
+    - outline
+    - oidc
   notes: Live-apply evidence is tracked on the workstream branch; merge-to-main still
     must update the integrated README, VERSION, changelog, and versions/stack.yaml
     surfaces.
@@ -62,9 +62,9 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
-  - pbs_vm_150
+    - git_repository
+    - pbs_vm_120
+    - pbs_vm_150
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -82,25 +82,25 @@ dependency:
     category: access
     adr: 0199
   outbound_edges:
-  - from: outline
-    to: keycloak
-    type: soft
-    description: Outline delegates routine browser sign-in to the shared Keycloak
-      OIDC broker.
-  - from: outline
-    to: nginx_edge
-    type: soft
-    description: Public access to wiki.lv3.org depends on the shared NGINX edge publication
-      path.
-  - from: outline
-    to: openbao
-    type: startup_only
-    description: Outline starts from OpenBao-rendered runtime secrets mirrored into
-      its compose environment.
-  - from: outline
-    to: postgres
-    type: hard
-    description: Outline stores workspace, user, and document metadata in Postgres.
+    - from: outline
+      to: keycloak
+      type: soft
+      description: Outline delegates routine browser sign-in to the shared Keycloak
+        OIDC broker.
+    - from: outline
+      to: nginx_edge
+      type: soft
+      description: Public access to wiki.lv3.org depends on the shared NGINX edge
+        publication path.
+    - from: outline
+      to: openbao
+      type: startup_only
+      description: Outline starts from OpenBao-rendered runtime secrets mirrored into
+        its compose environment.
+    - from: outline
+      to: postgres
+      type: hard
+      description: Outline stores workspace, user, and document metadata in Postgres.
 health:
   service_name: outline
   owning_vm: docker-runtime-lv3
@@ -116,7 +116,7 @@ health:
     url: https://wiki.lv3.org/_health
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: The local Outline health endpoint responds on the runtime listener.
@@ -126,7 +126,7 @@ health:
     url: http://127.0.0.1:3006/_health
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The public Outline health endpoint renders through the shared edge
@@ -137,14 +137,14 @@ health:
     url: https://wiki.lv3.org/_health
     method: GET
     expected_status:
-    - 200
+      - 200
     docker_publication:
       container_name: outline
       bindings:
-      - host: 10.10.10.20
-        port: 3006
+        - host: 10.10.10.20
+          port: 3006
       required_networks:
-      - outline_default
+        - outline_default
   uptime_kuma:
     enabled: true
     monitor:
@@ -158,39 +158,39 @@ health:
       maxretries: 0
       maxredirects: 5
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 data:
-- id: outline-attachment-storage
-  service: outline
-  name: Outline attachment storage
-  class: confidential
-  retention_days: 365
-  backup_included: false
-  access_role: platform-operator
-  pii_risk: medium
-  locations:
-  - /opt/outline/data/minio/outline
-  notes: S3-compatible MinIO storage holds attachment objects and future uploaded
-    evidence referenced from wiki documents.
-- id: outline-knowledge-metadata
-  service: outline
-  name: Outline knowledge metadata
-  class: confidential
-  retention_days: 365
-  backup_included: false
-  access_role: platform-operator
-  pii_risk: medium
-  locations:
-  - Outline PostgreSQL database
-  notes: Outline stores workspace, user, collection, and document metadata that may
-    include operator identities and operational text.
+  - id: outline-attachment-storage
+    service: outline
+    name: Outline attachment storage
+    class: confidential
+    retention_days: 365
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: medium
+    locations:
+      - /opt/outline/data/minio/outline
+    notes: S3-compatible MinIO storage holds attachment objects and future uploaded
+      evidence referenced from wiki documents.
+  - id: outline-knowledge-metadata
+    service: outline
+    name: Outline knowledge metadata
+    class: confidential
+    retention_days: 365
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: medium
+    locations:
+      - Outline PostgreSQL database
+    notes: Outline stores workspace, user, collection, and document metadata that
+      may include operator identities and operational text.
 slos:
-- id: outline-availability
-  service_id: outline
-  indicator: availability
-  objective_percent: 99.5
-  window_days: 30
-  target_url: https://wiki.lv3.org/_health
-  probe_module: http_2xx_follow_redirects
-  description: Outline remains reachable through the public LV3 edge for living knowledge
-    browsing and sync automation.
+  - id: outline-availability
+    service_id: outline
+    indicator: availability
+    objective_percent: 99.5
+    window_days: 30
+    target_url: https://wiki.lv3.org/_health
+    probe_module: http_2xx_follow_redirects
+    description: Outline remains reachable through the public LV3 edge for living
+      knowledge browsing and sync automation.

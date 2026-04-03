@@ -23,9 +23,9 @@ service:
   mobility_tier: anchor
   dashboard_url: https://grafana.lv3.org/d/lv3-vm-docker-build-lv3/lv3-vm-docker-build-lv3
   tags:
-  - build
-  - docker
-  - worker
+    - build
+    - docker
+    - worker
   environments:
     production:
       status: active
@@ -44,8 +44,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_130
+    - git_repository
+    - pbs_vm_130
   standby:
     kind: cold
     location: docker-build-lv3
@@ -86,7 +86,7 @@ health:
     host: 10.10.10.30
     port: 22
   tls_certificate_ids:
-  - build-edge
+    - build-edge
   uptime_kuma:
     enabled: true
     monitor:
@@ -99,4 +99,4 @@ health:
       retryInterval: 60
       maxretries: 0
       accepted_statuscodes:
-      - 200-299
+        - 200-299

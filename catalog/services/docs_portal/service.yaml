@@ -19,9 +19,9 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-edge
   mobility_tier: movable_singleton
   tags:
-  - portal
-  - documentation
-  - developer-experience
+    - portal
+    - documentation
+    - developer-experience
   environments:
     production:
       status: active
@@ -40,8 +40,8 @@ redundancy:
     rto_minutes: 30
     rpo_minutes: 0
   backup_sources:
-  - git_repository
-  - pbs_vm_110
+    - git_repository
+    - pbs_vm_110
   standby:
     kind: cold
     location: nginx-lv3
@@ -59,8 +59,8 @@ dependency:
     category: access
     adr: 0094
   outbound_edges:
-  - from: docs_portal
-    to: nginx_edge
-    type: hard
-    description: The generated developer portal is published as static content on
-      nginx-lv3.
+    - from: docs_portal
+      to: nginx_edge
+      type: hard
+      description: The generated developer portal is published as static content on
+        nginx-lv3.

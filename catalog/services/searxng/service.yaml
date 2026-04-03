@@ -14,10 +14,10 @@ service:
   exposure: private-only
   health_probe_id: searxng
   image_catalog_ids:
-  - searxng_runtime
-  - searxng_valkey_runtime
+    - searxng_runtime
+    - searxng_valkey_runtime
   secret_catalog_ids:
-  - searxng_secret_key
+    - searxng_secret_key
   adr: 0148
   runbook: docs/runbooks/configure-searxng.md
   runtime_pool: runtime-general
@@ -26,10 +26,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
   tags:
-  - search
-  - web
-  - agents
-  - privacy
+    - search
+    - web
+    - agents
+    - privacy
   environments:
     production:
       status: active
@@ -49,8 +49,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -82,7 +82,7 @@ health:
     url: http://127.0.0.1:8881/
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The SearXNG JSON search endpoint returns a structured payload for
@@ -93,7 +93,7 @@ health:
     url: http://127.0.0.1:8881/search?q=proxmox%20ve&format=json
     method: GET
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: false
     reason: The SearXNG interface is intentionally tailnet-only and verified by its

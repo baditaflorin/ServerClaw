@@ -15,11 +15,11 @@ service:
   uptime_monitor_name: n8n Public Health
   health_probe_id: n8n
   image_catalog_ids:
-  - n8n_runtime
+    - n8n_runtime
   secret_catalog_ids:
-  - n8n_database_password
-  - n8n_owner_password
-  - n8n_encryption_key
+    - n8n_database_password
+    - n8n_owner_password
+    - n8n_encryption_key
   adr: '0151'
   runbook: docs/runbooks/configure-n8n.md
   runtime_pool: runtime-general
@@ -28,12 +28,12 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
   tags:
-  - automation
-  - webhooks
-  - integrations
-  - workflows
-  - serverclaw
-  - connector-fabric
+    - automation
+    - webhooks
+    - integrations
+    - workflows
+    - serverclaw
+    - connector-fabric
   environments:
     production:
       status: active
@@ -55,8 +55,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -74,25 +74,25 @@ dependency:
     category: automation
     adr: '0151'
   outbound_edges:
-  - from: n8n
-    to: keycloak
-    type: soft
-    description: The public n8n editor path is gated behind oauth2-proxy and Keycloak-backed
-      browser authentication.
-  - from: n8n
-    to: nginx_edge
-    type: soft
-    description: Public reachability for n8n.lv3.org depends on the shared edge publication
-      path.
-  - from: n8n
-    to: openbao
-    type: startup_only
-    description: n8n reads its mirrored database password and encryption key through
-      the OpenBao agent before startup.
-  - from: n8n
-    to: postgres
-    type: hard
-    description: n8n stores workflow, credential, and execution state in Postgres.
+    - from: n8n
+      to: keycloak
+      type: soft
+      description: The public n8n editor path is gated behind oauth2-proxy and Keycloak-backed
+        browser authentication.
+    - from: n8n
+      to: nginx_edge
+      type: soft
+      description: Public reachability for n8n.lv3.org depends on the shared edge
+        publication path.
+    - from: n8n
+      to: openbao
+      type: startup_only
+      description: n8n reads its mirrored database password and encryption key through
+        the OpenBao agent before startup.
+    - from: n8n
+      to: postgres
+      type: hard
+      description: n8n stores workflow, credential, and execution state in Postgres.
 health:
   service_name: n8n
   owning_vm: docker-runtime-lv3
@@ -108,7 +108,7 @@ health:
     url: http://127.0.0.1:5678/healthz/readiness
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: The n8n health endpoint responds on the local listener.
@@ -118,7 +118,7 @@ health:
     url: http://127.0.0.1:5678/healthz
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The n8n readiness endpoint reports a ready runtime after startup
@@ -129,7 +129,7 @@ health:
     url: http://127.0.0.1:5678/healthz/readiness
     method: GET
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: true
     monitor:
@@ -143,4 +143,4 @@ health:
       maxretries: 0
       maxredirects: 5
       accepted_statuscodes:
-      - 200-299
+        - 200-299

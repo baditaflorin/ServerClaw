@@ -8,7 +8,7 @@
 - Owner: codex
 - Depends On: `adr-0075-service-capability-catalog`, `adr-0107-platform-extension-model`, `adr-0174-integration-only-canonical-truth-assembly`, `adr-0179-service-redundancy-tier-matrix`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0324-live-apply.md`, `docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md`, `docs/adr/.index.yaml`, `.repo-structure.yaml`, `.config-locations.yaml`, `catalog/services/`, `config/service-capability-catalog.json`, `config/health-probe-catalog.json`, `config/service-completeness.json`, `config/service-redundancy-catalog.json`, `config/dependency-graph.json`, `config/data-catalog.json`, `config/slo-catalog.json`, `config/prometheus/rules/slo_rules.yml`, `config/prometheus/rules/slo_alerts.yml`, `config/prometheus/file_sd/slo_targets.yml`, `config/grafana/dashboards/slo-overview.json`, `docs/schema/service-definition-*.json`, `docs/schema/health-probe-catalog.schema.json`, `docs/runbooks/service-capability-catalog.md`, `docs/runbooks/add-a-new-service.md`, `docs/runbooks/scaffold-new-service.md`, `Makefile`, `scripts/service_definition_catalog.py`, `scripts/service_catalog.py`, `scripts/scaffold_service.py`, `scripts/validate_repo.sh`, `tests/test_service_definition_catalog.py`, `tests/test_scaffold_service.py`, `tests/test_validate_service_catalog.py`, `receipts/live-applies/`, `receipts/live-applies/evidence/`, `README.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `versions/stack.yaml`, `build/platform-manifest.json`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0324-live-apply.md`, `docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md`, `docs/adr/.index.yaml`, `.repo-structure.yaml`, `.config-locations.yaml`, `catalog/services/`, `config/service-capability-catalog.json`, `config/health-probe-catalog.json`, `config/service-completeness.json`, `config/service-redundancy-catalog.json`, `config/dependency-graph.json`, `config/data-catalog.json`, `config/slo-catalog.json`, `config/prometheus/rules/slo_rules.yml`, `config/prometheus/rules/slo_alerts.yml`, `config/prometheus/file_sd/slo_targets.yml`, `config/grafana/dashboards/slo-overview.json`, `docs/schema/service-definition-*.json`, `docs/schema/health-probe-catalog.schema.json`, `docs/runbooks/service-capability-catalog.md`, `docs/runbooks/add-a-new-service.md`, `docs/runbooks/scaffold-new-service.md`, `.yamllint`, `Makefile`, `scripts/service_definition_catalog.py`, `scripts/service_catalog.py`, `scripts/scaffold_service.py`, `scripts/validate_repo.sh`, `tests/test_service_definition_catalog.py`, `tests/test_scaffold_service.py`, `tests/test_validate_service_catalog.py`, `docs/diagrams/agent-coordination-map.excalidraw`, `receipts/live-applies/*0324*`, `receipts/live-applies/evidence/2026-04-03-ws-0324-*`, `README.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `versions/stack.yaml`, `build/platform-manifest.json`
 
 ## Scope
 
@@ -50,11 +50,15 @@
 - `docs/runbooks/service-capability-catalog.md`
 - `docs/runbooks/add-a-new-service.md`
 - `docs/runbooks/scaffold-new-service.md`
+- `.yamllint`
 - `docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md`
 - `docs/workstreams/ws-0324-live-apply.md`
 - `tests/test_service_definition_catalog.py`
 - `tests/test_scaffold_service.py`
 - `tests/test_validate_service_catalog.py`
+- `docs/diagrams/agent-coordination-map.excalidraw`
+- `receipts/live-applies/*0324*`
+- `receipts/live-applies/evidence/2026-04-03-ws-0324-*`
 
 ## Expected Live Surfaces
 

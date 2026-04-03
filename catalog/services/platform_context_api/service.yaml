@@ -12,7 +12,7 @@ service:
   uptime_monitor_name: Platform Context Private
   health_probe_id: platform_context_api
   secret_catalog_ids:
-  - platform_context_minio_secret_key
+    - platform_context_minio_secret_key
   adr: '0070'
   runbook: docs/runbooks/rag-platform-context.md
   runtime_pool: runtime-ai
@@ -21,10 +21,10 @@ service:
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
   mobility_tier: elastic_stateless
   tags:
-  - api
-  - context
-  - rag
-  - search
+    - api
+    - context
+    - rag
+    - search
   environments:
     production:
       status: active
@@ -42,8 +42,8 @@ redundancy:
     rto_minutes: 120
     rpo_minutes: 1440
   backup_sources:
-  - git_repository
-  - pbs_vm_120
+    - git_repository
+    - pbs_vm_120
   standby:
     kind: cold
     location: docker-runtime-lv3
@@ -61,22 +61,22 @@ dependency:
     category: automation
     adr: '0070'
   outbound_edges:
-  - from: platform_context_api
-    to: minio
-    type: soft
-    description: Raw document upload staging depends on the shared MinIO bucket, while
-      read-only query access can still run against the indexed corpus if staging is
-      unavailable.
-  - from: platform_context_api
-    to: openbao
-    type: startup_only
-    description: The platform context API loads its bearer token and runtime configuration
-      from OpenBao-rendered environment files.
-  - from: platform_context_api
-    to: step_ca
-    type: reads_from
-    description: The indexed corpus includes step-ca ADR and runbook content for operator
-      query grounding.
+    - from: platform_context_api
+      to: minio
+      type: soft
+      description: Raw document upload staging depends on the shared MinIO bucket,
+        while read-only query access can still run against the indexed corpus if staging
+        is unavailable.
+    - from: platform_context_api
+      to: openbao
+      type: startup_only
+      description: The platform context API loads its bearer token and runtime configuration
+        from OpenBao-rendered environment files.
+    - from: platform_context_api
+      to: step_ca
+      type: reads_from
+      description: The indexed corpus includes step-ca ADR and runbook content for
+        operator query grounding.
 health:
   service_name: platform-context-api
   owning_vm: docker-runtime-lv3
@@ -92,7 +92,7 @@ health:
     url: http://127.0.0.1:8010/openapi.json
     method: GET
     expected_status:
-    - 200
+      - 200
   liveness:
     kind: http
     description: The platform-context health endpoint responds on the local listener.
@@ -102,7 +102,7 @@ health:
     url: http://127.0.0.1:8010/healthz
     method: GET
     expected_status:
-    - 200
+      - 200
   readiness:
     kind: http
     description: The private platform-context OpenAPI document is served locally after
@@ -113,7 +113,7 @@ health:
     url: http://127.0.0.1:8010/openapi.json
     method: GET
     expected_status:
-    - 200
+      - 200
   uptime_kuma:
     enabled: true
     monitor:
@@ -126,27 +126,27 @@ health:
       maxretries: 0
       maxredirects: 10
       accepted_statuscodes:
-      - 200-299
+        - 200-299
 data:
-- id: platform-context-staging-objects
-  service: platform_context_api
-  name: Platform-context staging object storage
-  class: confidential
-  retention_days: 14
-  backup_included: false
-  access_role: platform-operator
-  pii_risk: high
-  locations:
-  - s3://rag-staging
-  notes: Raw document uploads stage in the shared MinIO bucket before extraction and
-    should expire quickly to limit retained sensitive source material.
+  - id: platform-context-staging-objects
+    service: platform_context_api
+    name: Platform-context staging object storage
+    class: confidential
+    retention_days: 14
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: high
+    locations:
+      - s3://rag-staging
+    notes: Raw document uploads stage in the shared MinIO bucket before extraction
+      and should expire quickly to limit retained sensitive source material.
 slos:
-- id: platform-context-api-availability
-  service_id: platform_context_api
-  indicator: availability
-  objective_percent: 99.0
-  window_days: 30
-  target_url: http://10.10.10.20:8010/healthz
-  probe_module: http_2xx_follow_redirects
-  description: The platform context API remains reachable for agent-assisted operator
-    workflows.
+  - id: platform-context-api-availability
+    service_id: platform_context_api
+    indicator: availability
+    objective_percent: 99.0
+    window_days: 30
+    target_url: http://10.10.10.20:8010/healthz
+    probe_module: http_2xx_follow_redirects
+    description: The platform context API remains reachable for agent-assisted operator
+      workflows.

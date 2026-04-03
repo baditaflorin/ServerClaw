@@ -150,3 +150,22 @@ def test_bundle_directory_name_must_match_service_id() -> None:
             assert "directory name" in str(exc)
         else:  # pragma: no cover - defensive failure path
             raise AssertionError("expected the directory/service id mismatch to fail")
+
+
+def test_write_yaml_indents_sequences_under_parent_keys() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        output = Path(tmp) / "service.yaml"
+        service_definition_catalog.write_yaml(
+            output,
+            {
+                "service": {
+                    "id": "fixture",
+                    "image_catalog_ids": ["fixture_runtime"],
+                    "tags": ["alpha", "beta"],
+                }
+            },
+        )
+
+        assert output.read_text(encoding="utf-8") == (
+            "service:\n  id: fixture\n  image_catalog_ids:\n    - fixture_runtime\n  tags:\n    - alpha\n    - beta\n"
+        )
