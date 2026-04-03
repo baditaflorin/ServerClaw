@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-04-03'
 total_adrs: 360
 implementation_status_summary:
-  Implemented: 315
+  Implemented: 316
   Partial: 10
-  Not Implemented: 34
+  Not Implemented: 33
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5811,7 +5811,7 @@ adr_index:
   - adr: '0326'
     title: Workstream Registry Shards With Active And Archive Assembly
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-04-01'
     concern: platform
     keywords:

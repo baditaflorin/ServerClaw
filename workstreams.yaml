@@ -25,7 +25,7 @@ workstreams:
   adr: '0326'
   title: Implement shard-backed workstream registry source files with generated compatibility
     assembly
-  status: in_progress
+  status: ready_for_merge
   owner: codex
   branch: codex/ws-0326-live-apply
   worktree_path: .worktrees/ws-0326-live-apply
@@ -67,6 +67,9 @@ workstreams:
   - tests/test_workstream_surface_ownership.py
   - tests/test_interface_contracts.py
   - docs/diagrams/agent-coordination-map.excalidraw
+  - build/platform-manifest.json
+  - receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-live-apply.json
+  - receipts/live-applies/evidence/2026-04-03-ws-0326-*
   ownership_manifest:
     owned_surfaces:
     - id: workstream_registry
@@ -122,9 +125,23 @@ workstreams:
       - docs/diagrams/agent-coordination-map.excalidraw
       mode: shared_contract
       contract: latest-main-generated-truth-v1
-  blockers: []
-  ready_to_merge: false
-  live_applied: false
+    - id: ws0326_platform_manifest
+      paths:
+      - build/platform-manifest.json
+      mode: shared_contract
+      contract: canonical-truth-v1
+    - id: ws0326_live_apply_receipts
+      paths:
+      - receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-live-apply.json
+      - receipts/live-applies/evidence/2026-04-03-ws-0326-*
+      mode: exclusive
+  blockers:
+  - Remote `make remote-validate` on 2026-04-03 could not create a workspace under
+    the build-host workspace root because the host was out of disk space; rerun the
+    remote gate after build-host cleanup if a clean remote pass is required before
+    merging.
+  ready_to_merge: true
+  live_applied: true
   canonical_truth:
     changelog_entry: implements ADR 0326 by making per-workstream shard files the
       authored source of truth, generating a compact active-only workstreams.yaml
@@ -132,7 +149,8 @@ workstreams:
       the sharded registry safely
     release_bump: patch
     included_in_repo_version: null
-    latest_receipts: {}
+    latest_receipts:
+      workstream_registry_shards: 2026-04-03-adr-0326-workstream-registry-shards-live-apply
 - id: ws-0318-provision-operator-v2
   adr: 0318
   title: 'provision_operator.py v2: Headscale + step-ca fingerprint in single onboarding

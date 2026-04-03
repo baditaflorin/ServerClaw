@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-03-adr-0326-workstream-registry-shards-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-03",
+  "recorded_on": "2026-04-03",
+  "recorded_at": "2026-04-03T16:21:42Z",
+  "recorded_by": "codex",
+  "source_commit": "aa1985d9b585fb8eb9091795b28301f47dd646ec",
+  "repo_version_context": "0.178.1",
+  "platform_version_context": "0.130.97",
+  "workflow_id": "adr-0326-workstream-registry-shards-live-apply",
+  "adr": "0326",
+  "summary": "Live-applied ADR 0326 on the rebased `codex/ws-0326-live-apply` worktree by making shard files under `workstreams/` the authored source of truth, regenerating the active-only `workstreams.yaml` compatibility surface, absorbing the concurrent `ws-0333-service-uptime-recovery` mainline change as an archive shard during rebase, and validating the new registry flow locally while preserving the protected `VERSION`, `changelog.md`, top-level `README.md` summary, and `versions/stack.yaml` updates for a separate exact-main integration step.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    },
+    {
+      "kind": "artifact",
+      "name": "workstreams.yaml"
+    },
+    {
+      "kind": "artifact",
+      "name": "build/platform-manifest.json"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0326 regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest tests/test_workstream_registry.py tests/test_canonical_truth.py tests/test_workstream_surface_ownership.py tests/test_interface_contracts.py -q` returned `27 passed in 2.97s`."
+    },
+    {
+      "check": "Rebased local validation bundle",
+      "result": "pass",
+      "observed": "`./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-portals` passed after the rebased branch declared the evidence paths and refreshed the generated registry, ADR index, diagrams, and platform manifest as needed, and the follow-on `./scripts/validate_repo.sh agent-standards workstream-surfaces` pass confirmed the final receipt paths are owned correctly."
+    },
+    {
+      "check": "Protected generated-docs lane",
+      "result": "partial",
+      "observed": "`./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs generated-portals` exercised the generated-docs lane and failed only because `scripts/canonical_truth.py --check` correctly reported the protected `changelog.md` release-bookkeeping delta that this workstream branch is intentionally not allowed to write."
+    },
+    {
+      "check": "Platform manifest refresh",
+      "result": "pass",
+      "observed": "After the remote replay surfaced stale generated truth, `uv run --with pyyaml --with jsonschema python scripts/platform_manifest.py --write` refreshed `build/platform-manifest.json` and the follow-on `--check` passed cleanly."
+    },
+    {
+      "check": "Remote validation entrypoint replay",
+      "result": "partial",
+      "observed": "`make remote-validate` hit a real build-host capacity issue because the managed workspace root was out of space, then fell back locally as designed. In that fallback, `agent-standards`, `workstream-surfaces`, `schema-validation`, `policy-validation`, `iac-policy-scan`, `alert-rule-validation`, `type-check`, and `dependency-graph` all executed, but the run still ended partial because `schema-validation` first caught the stale platform manifest and `ansible-syntax` timed out under the large concurrent validation load."
+    },
+    {
+      "check": "Merge safety on latest mainline truth",
+      "result": "pass",
+      "observed": "The branch rebased onto `origin/main@d36f1b1d92180aab4ec32e911e82d574338aa7fd`, imported the newly merged `ws-0333-service-uptime-recovery` archive shard, regenerated `workstreams.yaml` from shard source instead of hand-merging the generated file, and passed `git diff --check` afterward."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md",
+    "docs/adr/.index.yaml",
+    "docs/runbooks/workstream-registry-shards.md",
+    "docs/runbooks/canonical-truth-assembly.md",
+    "docs/runbooks/cross-workstream-interface-contracts.md",
+    "docs/runbooks/validate-repository-automation.md",
+    "docs/workstreams/adr-0326-workstream-registry-shards.md",
+    "platform/workstream_registry.py",
+    "scripts/workstream_registry.py",
+    "scripts/workstream_tool.py",
+    "scripts/canonical_truth.py",
+    "scripts/generate_diagrams.py",
+    "scripts/generate_status_docs.py",
+    "scripts/validate_repo.sh",
+    "scripts/validate_repository_data_models.py",
+    "workstreams.yaml",
+    "workstreams/policy.yaml",
+    "workstreams/active/ws-0326-live-apply.yaml",
+    "workstreams/archive/2026/ws-0333-service-uptime-recovery.yaml",
+    "build/platform-manifest.json",
+    "docs/diagrams/agent-coordination-map.excalidraw",
+    "receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-focused-tests-r1-0.178.1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-final-surfaces-r1-0.178.1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-generate-adr-index-r1-0.178.1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-git-diff-check-r1-0.178.1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-platform-manifest-write-r1-0.178.1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-platform-manifest-check-r1-0.178.1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-remote-validate-r1-0.178.1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-validate-repo-r1-0.178.1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-validate-repo-r2-0.178.1.txt"
+  ],
+  "notes": [
+    "This is a branch-local live-apply receipt for a repo-coordination ADR; it intentionally leaves `VERSION`, `changelog.md`, the top-level `README.md` summary, and `versions/stack.yaml` untouched on the workstream branch.",
+    "Merge-to-main still needs the protected release bookkeeping on `main`, plus the final ADR metadata promotion from `Implemented on workstream branch` to `Implemented` with the first integrated repo version.",
+    "The remote builder currently cannot create a workspace in its managed workspace root because the build host is out of disk space; the remote validation proof therefore relies on the documented local fallback path for this run.",
+    "The local fallback remote replay also hit an `ansible-syntax` timeout while another workstream was exercising the same remote-validation infrastructure concurrently, so the remote result is preserved as partial rather than overstated as a clean pass."
+  ]
+}

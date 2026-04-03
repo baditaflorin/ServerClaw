@@ -1,9 +1,10 @@
 # ADR 0326: Workstream Registry Shards With Active And Archive Assembly
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
+- Implementation Status: Implemented on workstream branch
+- Implemented In Repo Version: not yet
 - Implemented In Platform Version: N/A
+- Implemented On: 2026-04-03
 - Date: 2026-04-01
 - Tags: workstreams, registry, archive, sharding, coordination
 
