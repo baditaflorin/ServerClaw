@@ -1,0 +1,28 @@
+---
+# Playbook: services/runtime-comms-pool.yml
+# Purpose: Provide the canonical live-apply entrypoint for the dedicated runtime-comms pool migration.
+# Use case: Run through `make live-apply-service service=runtime-comms-pool env=production` for the ADR 0347 runtime-comms rollout.
+#
+# Inputs (required):
+#   - env (str, required): Deployment environment selector passed through the shared execution wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the live apply.
+#
+# Outputs:
+#   - Imports the root runtime-comms pool playbook used by the governed service live-apply wrapper.
+#
+# Idempotency: Fully idempotent
+#              This wrapper only imports the root runtime-comms pool playbook and does not mutate state on its own.
+#
+# Dependencies:
+#   - ADR 0347: Defines the runtime-comms pool substrate decision.
+#   - Requires: playbooks/runtime-comms-pool.yml.
+#
+# Related ADRs: 0329, 0347
+# Related Runbooks: docs/runbooks/configure-runtime-comms-pool.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-04
+
+- import_playbook: ../runtime-comms-pool.yml

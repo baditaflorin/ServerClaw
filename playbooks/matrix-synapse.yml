@@ -105,7 +105,7 @@
         hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
 
 - name: Converge PostgreSQL access for Matrix Synapse
-  hosts: postgres-lv3
+  hosts: postgres-apps-lv3
   become: true
   gather_facts: true
   tags:
@@ -128,7 +128,7 @@
     - role: lv3.platform.matrix_synapse_postgres
 
 - name: Converge Matrix Synapse on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: runtime-comms-lv3
   become: true
   gather_facts: true
   tags:

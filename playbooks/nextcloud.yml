@@ -107,7 +107,7 @@
     - role: lv3.platform.nextcloud_postgres
 
 - name: Converge Nextcloud on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-apps-lv3' }}"
   become: true
   gather_facts: true
 
@@ -146,7 +146,7 @@
     - role: lv3.platform.nginx_edge_publication
 
 - name: Verify Nextcloud publication after edge convergence
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-apps-lv3' }}"
   become: true
   gather_facts: false
 

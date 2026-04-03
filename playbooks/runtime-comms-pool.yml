@@ -1,0 +1,105 @@
+# Playbook: runtime-comms-pool.yml
+# Purpose: Provision the dedicated runtime-comms guest, converge the Docker pool substrate, and migrate communications services (Mattermost, Matrix-Synapse, LiveKit, Redpanda) from docker-runtime-lv3.
+# Use case: Run for ADR 0347 follow-on work when the production runtime-comms pool must become true end to end.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (path, required via make targets): SSH private key used for the Proxmox host and guest jump path.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Deployment environment selector.
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH routing mode.
+#   - platform_trace_id (string, optional): Mutation-audit trace identifier.
+#
+# Outputs:
+#   - Dedicated VM `runtime-comms-lv3` (VMID 121, 10.10.10.21) provisioned on Proxmox with Docker runtime,
+#     guest firewall policy, and ready to receive Mattermost, Matrix-Synapse, LiveKit, and Redpanda.
+#
+# Idempotency: Partially idempotent
+#
+# Dependencies:
+#   - ADR 0347: Defines the runtime-comms pool and the communications workload split.
+#   - Role: lv3.platform.proxmox_guests — provisions the dedicated guest from the managed template catalog.
+#   - Role: lv3.platform.proxmox_network — replays the Proxmox host firewall.
+#   - Role: lv3.platform.docker_runtime — converges Docker daemon and baseline runtime.
+#
+# Related ADRs: 0329, 0347
+# Related Runbooks: docs/runbooks/configure-runtime-comms-pool.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-04
+---
+- name: Ensure the runtime-comms VM is provisioned on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - automation
+    - service-runtime-comms-pool
+  vars:
+    runtime_comms_vm_vmid: 121
+    proxmox_guests_active: >-
+      {{
+        proxmox_guests
+        | selectattr('vmid', 'equalto', runtime_comms_vm_vmid)
+        | list
+      }}
+
+  roles:
+    - role: lv3.platform.proxmox_guests
+      tags:
+        - guests
+        - runtime-comms-pool
+    - role: lv3.platform.proxmox_network
+      tags:
+        - guests
+        - runtime-comms-pool
+
+  post_tasks:
+    - name: Stop the runtime-comms VM from Proxmox after qm set changes
+      ansible.builtin.command: "qm stop {{ runtime_comms_vm_vmid }} --skiplock 1"
+      register: runtime_comms_vm_stop
+      failed_when: runtime_comms_vm_stop.rc not in [0, 255]
+      changed_when: true
+      tags:
+        - guests
+        - runtime-comms-pool
+
+    - name: Start the runtime-comms VM from Proxmox after the forced stop
+      ansible.builtin.command: "qm start {{ runtime_comms_vm_vmid }}"
+      register: runtime_comms_vm_start_after_stop
+      failed_when: runtime_comms_vm_start_after_stop.rc not in [0, 255]
+      changed_when: runtime_comms_vm_start_after_stop.rc == 0
+      tags:
+        - guests
+        - runtime-comms-pool
+
+- name: Converge Docker runtime baseline on runtime-comms-lv3
+  hosts: runtime-comms-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - docker
+    - service-runtime-comms-pool
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+      tags:
+        - firewall
+        - runtime-comms-pool
+    - role: lv3.platform.linux_access
+      tags:
+        - access
+        - runtime-comms-pool
+    - role: lv3.platform.docker_runtime
+      tags:
+        - docker
+        - runtime-comms-pool

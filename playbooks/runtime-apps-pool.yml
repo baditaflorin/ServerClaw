@@ -1,0 +1,105 @@
+# Playbook: runtime-apps-pool.yml
+# Purpose: Provision the dedicated runtime-apps guest, converge the Docker pool substrate, and migrate application services (Nextcloud) from docker-runtime-lv3.
+# Use case: Run for ADR 0346 follow-on work when the production runtime-apps pool must become true end to end.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (path, required via make targets): SSH private key used for the Proxmox host and guest jump path.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Deployment environment selector.
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH routing mode.
+#   - platform_trace_id (string, optional): Mutation-audit trace identifier.
+#
+# Outputs:
+#   - Dedicated VM `runtime-apps-lv3` (VMID 122, 10.10.10.22) provisioned on Proxmox with Docker runtime,
+#     guest firewall policy, and ready to receive Nextcloud and other application workloads.
+#
+# Idempotency: Partially idempotent
+#
+# Dependencies:
+#   - ADR 0346: Defines the runtime-apps pool and the application workload split.
+#   - Role: lv3.platform.proxmox_guests — provisions the dedicated guest from the managed template catalog.
+#   - Role: lv3.platform.proxmox_network — replays the Proxmox host firewall.
+#   - Role: lv3.platform.docker_runtime — converges Docker daemon and baseline runtime.
+#
+# Related ADRs: 0329, 0346
+# Related Runbooks: docs/runbooks/configure-runtime-apps-pool.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-04
+---
+- name: Ensure the runtime-apps VM is provisioned on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - automation
+    - service-runtime-apps-pool
+  vars:
+    runtime_apps_vm_vmid: 122
+    proxmox_guests_active: >-
+      {{
+        proxmox_guests
+        | selectattr('vmid', 'equalto', runtime_apps_vm_vmid)
+        | list
+      }}
+
+  roles:
+    - role: lv3.platform.proxmox_guests
+      tags:
+        - guests
+        - runtime-apps-pool
+    - role: lv3.platform.proxmox_network
+      tags:
+        - guests
+        - runtime-apps-pool
+
+  post_tasks:
+    - name: Stop the runtime-apps VM from Proxmox after qm set changes
+      ansible.builtin.command: "qm stop {{ runtime_apps_vm_vmid }} --skiplock 1"
+      register: runtime_apps_vm_stop
+      failed_when: runtime_apps_vm_stop.rc not in [0, 255]
+      changed_when: true
+      tags:
+        - guests
+        - runtime-apps-pool
+
+    - name: Start the runtime-apps VM from Proxmox after the forced stop
+      ansible.builtin.command: "qm start {{ runtime_apps_vm_vmid }}"
+      register: runtime_apps_vm_start_after_stop
+      failed_when: runtime_apps_vm_start_after_stop.rc not in [0, 255]
+      changed_when: runtime_apps_vm_start_after_stop.rc == 0
+      tags:
+        - guests
+        - runtime-apps-pool
+
+- name: Converge Docker runtime baseline on runtime-apps-lv3
+  hosts: runtime-apps-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - docker
+    - service-runtime-apps-pool
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+      tags:
+        - firewall
+        - runtime-apps-pool
+    - role: lv3.platform.linux_access
+      tags:
+        - access
+        - runtime-apps-pool
+    - role: lv3.platform.docker_runtime
+      tags:
+        - docker
+        - runtime-apps-pool

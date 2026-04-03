@@ -36,7 +36,7 @@
     - role: lv3.platform.proxmox_security
 
 - name: Converge PostgreSQL access for Mattermost
-  hosts: postgres-lv3
+  hosts: postgres-apps-lv3
   become: true
   gather_facts: true
 
@@ -59,7 +59,7 @@
         state: restarted
 
 - name: Converge Mattermost on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: runtime-comms-lv3
   become: true
   gather_facts: true
 
