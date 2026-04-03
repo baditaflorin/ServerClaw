@@ -1,9 +1,10 @@
 # ADR 0328: Size-Budgeted Root Summaries And Automatic Rollover Ledgers
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: not yet
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-04-03
 - Date: 2026-04-01
 - Tags: summaries, generation, rollover, readme, changelog
 

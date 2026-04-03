@@ -19,6 +19,8 @@ This runbook documents ADR 0174: integration-only assembly of the top-level cano
 - `README.md`
 - `VERSION`-aligned release fields in `versions/stack.yaml`
 - `changelog.md`
+- `docs/status/history/*.md`
+- `docs/release-notes/index/*.md`
 
 ## Workstream Metadata
 
@@ -63,6 +65,7 @@ make check-canonical-truth
 ```
 
 This check is part of `scripts/validate_repo.sh generated-docs` and is also executed before the live-apply make targets continue.
+The same validation now also fails if the regenerated root README, changelog, or release-note index exceeds its ADR 0328 line budget.
 
 ## Release Flow
 
@@ -78,6 +81,30 @@ The release manager now:
 - keeps `versions/stack.yaml.repo_version` and `release_tracks.repo_versioning.current` in sync
 - marks pending workstreams as released in the shard source, moves completed shards from `workstreams/active/` into `workstreams/archive/<year>/`, and regenerates `workstreams.yaml`
 - reruns canonical-truth assembly so `README.md` and `changelog.md` match the cut release
+- refreshes the ADR 0328 rollover ledgers under `docs/status/history/` and `docs/release-notes/index/`
+
+## Root Summary Budgets
+
+ADR 0328 adds explicit budgets for the top-level summary surfaces:
+
+- `README.md` keeps only recent live-apply evidence and recent merged-workstream highlights
+- `changelog.md` keeps `Unreleased`, the latest release, and a bounded recent previous-release list
+- `docs/release-notes/README.md` keeps a bounded recent-release index
+
+The governing policy lives in `config/root-summary-budgets.yaml`.
+
+Refresh those surfaces directly with:
+
+```bash
+make generate-status-docs
+```
+
+Or the underlying scripts:
+
+```bash
+uv run --with pyyaml python3 scripts/generate_release_notes.py --write-root-summaries
+uvx --from pyyaml python3 scripts/generate_status_docs.py --write
+```
 
 ## Live Apply
 

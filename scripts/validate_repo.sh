@@ -539,6 +539,7 @@ validate_generated_docs() {
   echo "Generated status document validation"
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_discovery_artifacts.py" --check >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/canonical_truth.py" --check >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_release_notes.py" --check-root-summaries >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
   run_uv_python jsonschema -- "$REPO_ROOT/scripts/generate_dependency_diagram.py" --check >/dev/null
   run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_diagrams.py" --check >/dev/null

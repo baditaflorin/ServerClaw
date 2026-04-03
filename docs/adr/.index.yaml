@@ -5843,7 +5843,7 @@ adr_index:
   - adr: 0328
     title: Size-Budgeted Root Summaries And Automatic Rollover Ledgers
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-04-01'
     concern: platform
     keywords:

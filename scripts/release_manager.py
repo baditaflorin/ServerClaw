@@ -26,6 +26,7 @@ from generate_release_notes import (
     RELEASE_NOTES_INDEX_PATH,
     extract_unreleased_items,
     update_changelog_for_release,
+    write_root_summary_documents,
     write_release_artifacts,
 )
 
@@ -413,6 +414,30 @@ def sync_outline_knowledge_surface() -> None:
 def refresh_generated_truth_surfaces() -> None:
     commands = [
         (
+            "root summary documents",
+            [
+                "uv",
+                "run",
+                "--with",
+                "pyyaml",
+                "python3",
+                str(repo_path("scripts", "generate_release_notes.py")),
+                "--write-root-summaries",
+            ],
+        ),
+        (
+            "generated status docs",
+            [
+                "uv",
+                "run",
+                "--with",
+                "pyyaml",
+                "python3",
+                str(repo_path("scripts", "generate_status_docs.py")),
+                "--write",
+            ],
+        ),
+        (
             "platform manifest",
             [
                 "uv",
@@ -466,7 +491,7 @@ def write_release(version: str, *, platform_impact: str, released_on: str | None
             workstreams=workstreams,
         )
     )
-    CHANGELOG_PATH.write_text(update_changelog_for_release(assembled_changelog, version))
+    CHANGELOG_PATH.write_text(update_changelog_for_release(assembled_changelog, version, released_on=released_on))
     write_release_artifacts(
         version,
         notes=notes,
@@ -475,6 +500,7 @@ def write_release(version: str, *, platform_impact: str, released_on: str | None
     )
     canonical_truth.mark_pending_workstreams_released(version)
     canonical_truth.write_assembled_truth(update_readme=True)
+    write_root_summary_documents()
     refresh_generated_truth_surfaces()
     sync_outline_knowledge_surface()
     return {"version": version, "notes": notes}

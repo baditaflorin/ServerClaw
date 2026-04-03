@@ -386,6 +386,7 @@ scaffold-service:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_service_scaffold.py --repo-root $(REPO_ROOT) --name "$(NAME)" --type "$(TYPE)" $(if $(DESCRIPTION),--description "$(DESCRIPTION)",) $(if $(CATEGORY),--category "$(CATEGORY)",) $(if $(VM),--vm "$(VM)",) $(if $(VMID),--vmid $(VMID),) $(if $(DEPENDS_ON),--depends-on "$(DEPENDS_ON)",) $(if $(PORT),--port $(PORT),) $(if $(SUBDOMAIN),--subdomain "$(SUBDOMAIN)",) $(if $(EXPOSURE),--exposure "$(EXPOSURE)",) --$(if $(filter true,$(OIDC)),,no-)oidc --$(if $(filter true,$(HAS_SECRETS)),,no-)has-secrets $(if $(IMAGE),--image "$(IMAGE)",)
 
 generate-status-docs:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_release_notes.py --write-root-summaries
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_status_docs.py --write
 
 generate-diagrams:
@@ -427,6 +428,7 @@ deploy-docs-portal: generate-edge-static-sites
 generate-status: generate-slo-rules generate-status-docs generate-platform-manifest generate-ops-portal generate-changelog-portal generate-diagrams docs
 
 validate-generated-docs:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_release_notes.py --check-root-summaries
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_status_docs.py --check
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_diagrams.py --check
 

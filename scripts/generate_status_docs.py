@@ -10,6 +10,13 @@ from typing import Any
 from api_publication import ALLOWED_PUBLICATION_TIERS, load_api_publication_catalog
 from control_plane_lanes import ALLOWED_LANE_IDS, load_lane_catalog
 from controller_automation_toolkit import README_PATH, emit_cli_error, load_yaml, repo_path
+from platform.root_summary import (
+    collect_live_apply_evidence_records,
+    collect_merged_workstream_records,
+    enforce_line_budget,
+    load_root_summary_budgets,
+    relative_markdown_link,
+)
 from platform.workstream_registry import load_workstreams
 
 
@@ -43,6 +50,8 @@ CORE_DOCUMENTS = [
     ("Workstreams registry", REPO_ROOT / "workstreams.yaml"),
     ("Workstreams guide", REPO_ROOT / "docs" / "workstreams" / "README.md"),
 ]
+
+
 def read_heading(path: Path) -> str:
     for line in path.read_text().splitlines():
         if line.startswith("# "):
@@ -66,6 +75,7 @@ def render_table(headers: list[str], rows: list[list[str]]) -> str:
 
 
 def render_platform_status() -> str:
+    budgets = load_root_summary_budgets()
     stack = load_yaml(STACK_PATH)
     host_vars = load_yaml(HOST_VARS_PATH)
 
@@ -94,9 +104,9 @@ def render_platform_status() -> str:
 
     exposure_rows = [[f"`{model}`", str(count)] for model, count in sorted(exposure_counts.items())]
 
-    receipt_rows = []
-    for capability, receipt_id in sorted(stack["live_apply_evidence"]["latest_receipts"].items()):
-        receipt_rows.append([f"`{capability}`", f"`{receipt_id}`"])
+    receipt_records = collect_live_apply_evidence_records(stack["live_apply_evidence"]["latest_receipts"])
+    recent_receipts = receipt_records[: budgets.readme.recent_live_apply_entries]
+    receipt_rows = [[f"`{record.capability}`", f"`{record.receipt_id}`"] for record in recent_receipts]
 
     parts = [
         GENERATED_NOTICE,
@@ -112,6 +122,11 @@ def render_platform_status() -> str:
         "",
         "### Latest Live-Apply Evidence",
         render_table(["Capability", "Receipt"], receipt_rows),
+        "",
+        (
+            f"Showing {len(recent_receipts)} of {len(receipt_records)} capability receipts. "
+            f"Full history: {relative_markdown_link('live-apply evidence history', from_path=README_PATH, target_path=REPO_ROOT / budgets.readme.live_apply_history_path)}"
+        ),
     ]
     return "\n".join(parts).strip()
 
@@ -199,26 +214,84 @@ def render_version_summary() -> str:
 
 
 def render_merged_workstreams() -> str:
+    budgets = load_root_summary_budgets()
     workstreams = load_workstreams(repo_root=REPO_ROOT, include_archive=True)
-    merged_rows = []
-    for workstream in sorted(workstreams, key=lambda item: (int(item["adr"]), item["id"])):
-        if workstream["status"] not in {"merged", "live_applied"}:
-            continue
-        merged_rows.append(
-            [
-                f"`{workstream['adr']}`",
-                workstream["title"],
-                f"`{workstream['status']}`",
-                repo_relative_link(Path(workstream["doc"]).name, Path(workstream["doc"])),
-            ]
-        )
+    merged_records = collect_merged_workstream_records(workstreams)
+    recent_records = merged_records[: budgets.readme.recent_merged_workstream_entries]
+    merged_rows = [
+        [
+            f"`{record.adr}`",
+            record.title,
+            f"`{record.status}`",
+            repo_relative_link(record.doc_path.name, record.doc_path),
+        ]
+        for record in recent_records
+    ]
     return "\n".join(
         [
             GENERATED_NOTICE,
             "",
+            (
+                f"Showing {len(recent_records)} of {len(merged_records)} merged or live-applied workstreams. "
+                f"Full history: {relative_markdown_link('merged workstream history', from_path=README_PATH, target_path=REPO_ROOT / budgets.readme.merged_workstream_history_path)}"
+            ),
+            "",
             render_table(["ADR", "Title", "Status", "Doc"], merged_rows),
         ]
     ).strip()
+
+
+def render_live_apply_history() -> str:
+    budgets = load_root_summary_budgets()
+    stack = load_yaml(STACK_PATH)
+    history_path = REPO_ROOT / budgets.readme.live_apply_history_path
+    receipt_rows = [
+        [f"`{record.capability}`", f"`{record.receipt_id}`"]
+        for record in collect_live_apply_evidence_records(stack["live_apply_evidence"]["latest_receipts"])
+    ]
+    return "\n".join(
+        [
+            "# Live-Apply Evidence History",
+            "",
+            "This generated ledger records every capability-to-receipt mapping currently tracked in `versions/stack.yaml`.",
+            "",
+            f"- README summary: {relative_markdown_link('README.md', from_path=history_path, target_path=README_PATH)}",
+            "",
+            "## Receipts",
+            "",
+            render_table(["Capability", "Receipt"], receipt_rows),
+            "",
+        ]
+    )
+
+
+def render_merged_workstream_history() -> str:
+    budgets = load_root_summary_budgets()
+    history_path = REPO_ROOT / budgets.readme.merged_workstream_history_path
+    workstreams = load_workstreams(repo_root=REPO_ROOT, include_archive=True)
+    rows = [
+        [
+            f"`{record.adr}`",
+            record.title,
+            f"`{record.status}`",
+            relative_markdown_link(record.doc_path.name, from_path=history_path, target_path=REPO_ROOT / record.doc_path),
+        ]
+        for record in collect_merged_workstream_records(workstreams)
+    ]
+    return "\n".join(
+        [
+            "# Merged Workstream History",
+            "",
+            "This generated ledger preserves the full merged and live-applied workstream history after the README summary rolls older rows away.",
+            "",
+            f"- README summary: {relative_markdown_link('README.md', from_path=history_path, target_path=README_PATH)}",
+            "",
+            "## Workstreams",
+            "",
+            render_table(["ADR", "Title", "Status", "Doc"], rows),
+            "",
+        ]
+    )
 
 
 def replace_generated_block(readme_text: str, marker: str, content: str) -> str:
@@ -247,20 +320,37 @@ def render_readme() -> str:
     return readme_text
 
 
+def render_generated_docs() -> dict[Path, str]:
+    budgets = load_root_summary_budgets()
+    rendered = {
+        README_PATH: render_readme(),
+        REPO_ROOT / budgets.readme.live_apply_history_path: render_live_apply_history(),
+        REPO_ROOT / budgets.readme.merged_workstream_history_path: render_merged_workstream_history(),
+    }
+    enforce_line_budget(rendered[README_PATH], label="README.md", max_lines=budgets.readme.max_lines)
+    return rendered
+
+
 def write_generated_docs() -> int:
-    rendered = render_readme()
-    README_PATH.write_text(rendered)
-    print(f"Updated generated status docs: {README_PATH}")
+    rendered = render_generated_docs()
+    for path, text in rendered.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+    print(f"Updated generated status docs: {', '.join(str(path.relative_to(REPO_ROOT)) for path in rendered)}")
     return 0
 
 
 def check_generated_docs() -> int:
-    rendered = render_readme()
-    current = README_PATH.read_text()
-    if rendered != current:
+    rendered = render_generated_docs()
+    stale_paths = []
+    for path, expected_text in rendered.items():
+        if not path.exists() or path.read_text(encoding="utf-8") != expected_text:
+            stale_paths.append(path.relative_to(REPO_ROOT).as_posix())
+    if stale_paths:
         print(
             "Generated status docs are stale. Run "
-            "'uvx --from pyyaml python scripts/generate_status_docs.py --write' or 'make generate-status-docs'.",
+            "'uvx --from pyyaml python scripts/generate_status_docs.py --write' or 'make generate-status-docs'. "
+            f"Stale paths: {', '.join(stale_paths)}",
             file=sys.stderr,
         )
         return 2

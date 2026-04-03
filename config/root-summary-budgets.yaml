@@ -1,0 +1,17 @@
+schema_version: 1.0.0
+readme:
+  max_lines: 320
+  live_apply_evidence:
+    recent_entries: 20
+    history_path: docs/status/history/live-apply-evidence.md
+  merged_workstreams:
+    recent_entries: 25
+    history_path: docs/status/history/merged-workstreams.md
+changelog:
+  max_lines: 90
+  previous_release_entries: 12
+  archive_index_path: docs/release-notes/index/README.md
+release_notes_index:
+  max_lines: 90
+  recent_entries: 20
+  archive_index_path: docs/release-notes/index/README.md
