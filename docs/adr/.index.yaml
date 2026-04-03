@@ -14,8 +14,8 @@ adr_number_range:
   last: '0345'
   next_available: '0346'
 implementation_status_summary:
-  Implemented: 321
-  Partial: 13
+  Implemented: 322
+  Partial: 12
   Not Implemented: 30
   Deprecated: 1
 decision_status_summary:
@@ -104,11 +104,11 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 321
+      count: 322
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 13
+      count: 12
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
@@ -136,9 +136,10 @@ latest_adrs:
     path: docs/adr/0344-single-source-environment-topology.md
   - adr: '0343'
     title: Operator Tool Interface Contract
-    implementation_status: Partial
+    implementation_status: Implemented
     concern: automation
     path: docs/adr/0343-operator-tool-interface-contract.md
+    implemented_on: '2026-04-04'
   - adr: '0342'
     title: Zero-SSH Guest Operations via Proxmox QAPI
     implementation_status: Implemented

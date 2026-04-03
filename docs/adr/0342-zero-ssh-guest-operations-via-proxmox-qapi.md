@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.178.4
+- Implemented In Repo Version: 0.178.5
 - Implemented In Platform Version: 0.130.97
 - Implemented On: 2026-04-04
 - Date: 2026-04-04
@@ -195,6 +195,22 @@ when those commands migrate (ADR 0345).
   split into smaller operations or use a timeout-aware loop.
 - Proxmox QAPI exec does not support interactive TTY; commands must be
   non-interactive (pass `-y` flags, avoid pagers).
+
+## Implementation Notes
+
+- `ProxmoxClient.guest_exec()` in `scripts/proxmox_tool.py` is the primary implementation of the QAPI exec transport. It handles the exec/poll loop, timeout, and structured `(returncode, stdout, stderr)` return.
+- `proxmox_guest_exec()` wrapper in `scripts/controller_automation_toolkit.py` provides the shared primitive for application-layer tools. ADR 0343 implements this wrapper so that tools such as `coolify_tool.py` import a single well-tested function rather than duplicating polling logic.
+- Coolify-specific guest operations (`coolify-db-exec`, `coolify-clear-cache`, `coolify-migrate-apps`, `coolify-install-deploy-key`) live in `scripts/coolify_tool.py` per ADR 0345. They call the toolkit primitive; they do not shell out to `proxmox_tool.py`.
+- The flat topology file (`topology.yaml`) is superseded by the generated `scripts/topology-snapshot.json` per ADR 0344. `ProxmoxClient` and toolkit functions accept a snapshot entry rather than a hand-edited YAML key.
+- Live verification example:
+
+  ```bash
+  python3 scripts/proxmox_tool.py \
+    --auth-file .local/proxmox-api/lv3-automation-primary.json \
+    --env prod docker-ps --vmid 171
+  ```
+
+  This lists Docker containers on `coolify-apps-lv3` (VMID 171) without any direct SSH connection to the VM.
 
 ## Related ADRs
 

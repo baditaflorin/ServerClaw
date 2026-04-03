@@ -910,13 +910,13 @@ adrs:
     summary: All controller-initiated imperative operations targeting VM guests will use the
     filename: 0342-zero-ssh-guest-operations-via-proxmox-qapi.md
     path: docs/adr/0342-zero-ssh-guest-operations-via-proxmox-qapi.md
-    implemented_in_repo_version: 0.178.4
+    implemented_in_repo_version: 0.178.5
     implemented_in_platform_version: 0.130.97
     implemented_on: '2026-04-04'
   - adr: '0343'
     title: Operator Tool Interface Contract
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-04-04'
     concern: automation
     keywords:
@@ -933,7 +933,8 @@ adrs:
     summary: All scripts/ operator tools that perform imperative platform operations
     filename: 0343-operator-tool-interface-contract.md
     path: docs/adr/0343-operator-tool-interface-contract.md
-    implemented_in_repo_version: 0.178.4
+    implemented_in_repo_version: 0.178.5
+    implemented_on: '2026-04-04'
   - adr: '0344'
     title: Single-Source Environment Topology
     status: Accepted

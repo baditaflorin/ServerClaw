@@ -1154,6 +1154,29 @@ observed_state:
       latest_restore_verification_receipt: receipts/restic-restore-verifications/20260331T055701Z.json
       latest_snapshot_receipt: receipts/restic-snapshots-latest.json
 
+operator_tooling:
+  adrs_implemented:
+    - adr: "0342"
+      title: "Zero-SSH Guest Operations via Proxmox QAPI"
+      implemented_version: "0.178.5"
+      implemented_on: "2026-04-04"
+      implementation_notes: "proxmox_tool.py ProxmoxClient.guest_exec is the canonical transport primitive; shared via controller_automation_toolkit.proxmox_guest_exec"
+    - adr: "0343"
+      title: "Operator Tool Interface Contract"
+      implemented_version: "0.178.5"
+      implemented_on: "2026-04-04"
+      implementation_notes: "load_proxmox_auth, tool_output, tool_exit_noop, tool_exit_error, load_topology_snapshot added to controller_automation_toolkit"
+    - adr: "0344"
+      title: "Single-Source Environment Topology"
+      implemented_version: "0.178.5"
+      implemented_on: "2026-04-04"
+      implementation_notes: "generate_topology_snapshot.py reads inventory, outputs scripts/topology-snapshot.json; validate_repo.sh adds freshness gate"
+    - adr: "0345"
+      title: "Layered Operator Tool Separation"
+      implemented_version: "0.178.5"
+      implemented_on: "2026-04-04"
+      implementation_notes: "coolify-db-exec, coolify-clear-cache, coolify-migrate-apps, coolify-install-deploy-key moved from proxmox_tool.py to coolify_tool.py; load_auth centralized in toolkit"
+
 release_tracks:
   delivery_model:
     mode: parallel_workstreams
