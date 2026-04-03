@@ -558,7 +558,7 @@ workstreams:
   - id: ws-0309-live-apply
     adr: "0309"
     title: Live apply task-oriented information architecture across the platform workbench from latest origin/main
-    status: ready_for_merge
+    status: live_applied
     owner: codex
     branch: codex/ws-0309-live-apply
     worktree_path: .worktrees/ws-0309-live-apply
@@ -672,11 +672,11 @@ workstreams:
           contract: adr-0309-task-navigation-v1
     blockers: []
     ready_to_merge: true
-    live_applied: false
+    live_applied: true
   - id: ws-0309-main-integration
     adr: "0309"
     title: Integrate ADR 0309 task-oriented information architecture onto main and replay it from exact mainline truth
-    status: ready_for_merge
+    status: live_applied
     owner: codex
     branch: codex/ws-0309-main-integration
     worktree_path: .worktrees/ws-0309-main-integration
@@ -711,18 +711,22 @@ workstreams:
       - docs/schema/workbench-information-architecture.schema.json
       - scripts/workbench_information_architecture.py
       - scripts/workflow_catalog.py
+      - scripts/generate_release_notes.py
       - scripts/validate_repository_data_models.py
       - scripts/ops_portal/
       - roles/ops_portal_runtime/defaults/main.yml
       - roles/ops_portal_runtime/tasks/main.yml
       - roles/ops_portal_runtime/tasks/sync_service_tree.yml
       - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/
+      - tests/test_generate_release_notes.py
       - tests/test_interactive_ops_portal.py
       - tests/test_ops_portal.py
       - tests/test_ops_portal_playbook.py
       - tests/test_ops_portal_runtime_role.py
       - receipts/live-applies/*adr-0309*
       - receipts/live-applies/evidence/*ws-0309*
+      - receipts/restic-backups/20260403T001854Z.json
+      - receipts/restic-snapshots-latest.json
       - receipts/ops-portal-snapshot.html
     ownership_manifest:
       owned_surfaces:
@@ -761,29 +765,34 @@ workstreams:
             - docs/schema/workbench-information-architecture.schema.json
             - scripts/workbench_information_architecture.py
             - scripts/workflow_catalog.py
+            - scripts/generate_release_notes.py
             - scripts/validate_repository_data_models.py
             - scripts/ops_portal/**
             - roles/ops_portal_runtime/defaults/main.yml
             - roles/ops_portal_runtime/tasks/main.yml
             - roles/ops_portal_runtime/tasks/sync_service_tree.yml
             - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/**
+            - tests/test_generate_release_notes.py
             - tests/test_interactive_ops_portal.py
             - tests/test_ops_portal.py
             - tests/test_ops_portal_playbook.py
             - tests/test_ops_portal_runtime_role.py
             - receipts/live-applies/*adr-0309*
             - receipts/live-applies/evidence/*ws-0309*
+            - receipts/restic-backups/20260403T001854Z.json
+            - receipts/restic-snapshots-latest.json
             - receipts/ops-portal-snapshot.html
           mode: shared_contract
           contract: adr-0309-main-integration-v1
     blockers: []
     ready_to_merge: true
-    live_applied: false
+    live_applied: true
     canonical_truth:
       changelog_entry: implements ADR 0309 by adding the task-oriented Start, Observe, Change, Learn, and Recover information architecture across the live ops portal shell, launcher, runbook surfaces, and supporting catalogs, then carrying the exact-main validation and replay path onto main
       release_bump: patch
-      included_in_repo_version: 0.177.144
-      latest_receipts: {}
+      included_in_repo_version: 0.177.148
+      latest_receipts:
+        ops_portal: 2026-04-03-adr-0309-task-oriented-information-architecture-mainline-live-apply
   - id: ws-0315-gitea-followups
     adr: "0297"
     title: Resolve Gitea release bundle retention and Renovate PR validation checkout drift

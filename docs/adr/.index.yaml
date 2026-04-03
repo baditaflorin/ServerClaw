@@ -6,12 +6,12 @@
 # ============================================================================
 
 schema_version: 1
-generated: '2026-04-02'
+generated: '2026-04-03'
 total_adrs: 359
 implementation_status_summary:
-  Implemented: 308
+  Implemented: 309
   Partial: 11
-  Not Implemented: 39
+  Not Implemented: 38
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5533,7 +5533,7 @@ adr_index:
   - adr: 0309
     title: Task-Oriented Information Architecture Across The Platform Workbench
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -5545,6 +5545,7 @@ adr_index:
       - workbench
     summary: We will organize first-party navigation and routing around five task-oriented
     filename: 0309-task-oriented-information-architecture-across-the-platform-workbench.md
+    implemented_version: 0.177.148
   - adr: '0310'
     title: First-Run Activation Checklists And Progressive Capability Reveal
     status: Accepted

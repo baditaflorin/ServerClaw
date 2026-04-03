@@ -1,0 +1,114 @@
+# ws-0309 mainline guest/runtime verification
+2026-04-03T00:14:36Z
+
+## management host reachability
+Debian-trixie-latest-amd64-base
+2026-04-03T00:14:37Z
+
+## guest-local health
+{
+   "exitcode" : 0,
+   "exited" : 1,
+   "out-data" : "{\"status\":\"ok\"}",
+   "out-truncated" : 0
+}
+
+## guest-local lane and help markers
+{
+   "exitcode" : 0,
+   "exited" : 1,
+   "out-data" : "            Contextual Help\n              <strong>Changelog</strong>\n              <span>Observe dashboards and alerts</span>\n        Observer\n            <span class=\"launcher-badge highlighted\">Observe</span>\n            <span class=\"launcher-badge highlighted\">Learn</span>\n            <span class=\"launcher-badge highlighted\">Observe</span>\n      <h3>Observe</h3>\n          <a class=\"launcher-entry-link\" href=\"/launcher/go/service:changedetection\">Changedetection.io</a>\n            aria-label=\"Add Changedetection.io to favorites\">\n      <h3>Learn</h3>\n            <h2>Contextual Help</h2>\n              <strong>Live apply</strong>\n          <h3>Escalation Path</h3>\n          <p class=\"muted\">Learn the shared shell, where status lives, and which browser surface should be your next stop.</p>\n          <p class=\"muted\">Start with a read-only or reversible operator action so you can succeed before you unlock higher-risk controls.</p>\n        <p class=\"section-kicker\">Platform Overview</p>\n            <strong>Changedetection.io</strong>\n        <h3>Changedetection.io</h3>\n        hx-confirm=\"Deploy Changedetection.io through the platform gateway?\"\n        hx-confirm=\"Rotate secrets for Changedetection.io?\"\n        hx-confirm=\"Restart Changedetection.io via deployment pipeline?\"\n        <p class=\"section-kicker\">Attention Center</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n            <p class=\"service-category\">Live apply receipt</p>\n          <h3>Changedetection.io</h3>\n        <span class=\"muted\">Live apply Â· codex</span>\n        <span class=\"muted\">Live apply Â· codex</span>\n        <strong>Recovered and re-verified ADR 0317 from the dedicated live-apply worktree by restoring the repo-managed Keycloak runtime, proving fresh master-realm admin-token issuance and existing operator assignment lookups against `sso.lv3.org`, and hardening `scripts/provision_operator.py` so the direct-API fallback reuses the shared `.local/` secrets tree correctly from `.worktrees/` while supporting an email-free replay path for exact-main verification.</strong>\n        <span class=\"muted\">Live apply Â· codex</span>\n        <span class=\"muted\">Live apply Â· codex</span>\n        <span class=\"muted\">Live apply Â· codex</span>\n        <span class=\"muted\">Live apply Â· codex</span>\n",
+   "out-truncated" : 0
+}
+
+## deployed service tree and data files
+{
+   "exitcode" : 0,
+   "exited" : 1,
+   "out-data" : "/opt/ops-portal/build-context/Dockerfile\n/opt/ops-portal/build-context/datetime_compat.py\n/opt/ops-portal/build-context/ops_portal/__init__.py\n/opt/ops-portal/build-context/ops_portal/app.py\n/opt/ops-portal/build-context/ops_portal/contextual_help.py\n/opt/ops-portal/build-context/ops_portal/runtime_assurance.py\n/opt/ops-portal/build-context/publication_contract.py\n/opt/ops-portal/build-context/requirements.txt\n/opt/ops-portal/build-context/search_fabric/__init__.py\n/opt/ops-portal/build-context/search_fabric/client.py\n/opt/ops-portal/build-context/search_fabric/indexer.py\n/opt/ops-portal/build-context/search_fabric/models.py\n/opt/ops-portal/build-context/search_fabric/utils.py\n/opt/ops-portal/build-context/stage_smoke.py\n/opt/ops-portal/data/changelog.md\n/opt/ops-portal/data/config/activation-checklist.json\n/opt/ops-portal/data/config/capability-contract-catalog.json\n/opt/ops-portal/data/config/dependency-graph.json\n/opt/ops-portal/data/config/persona-catalog.json\n/opt/ops-portal/data/config/service-capability-catalog.json\n/opt/ops-portal/data/config/subdomain-exposure-registry.json\n/opt/ops-portal/data/config/workbench-information-architecture.json\n/opt/ops-portal/data/config/workflow-catalog.json\n/opt/ops-portal/docker-compose.yml\n/opt/ops-portal/ops-portal.env\n/opt/ops-portal/service/Dockerfile\n/opt/ops-portal/service/datetime_compat.py\n/opt/ops-portal/service/ops_portal/__init__.py\n/opt/ops-portal/service/ops_portal/app.py\n/opt/ops-portal/service/ops_portal/contextual_help.py\n/opt/ops-portal/service/ops_portal/runtime_assurance.py\n/opt/ops-portal/service/publication_contract.py\n/opt/ops-portal/service/requirements.txt\n/opt/ops-portal/service/search_fabric/__init__.py\n/opt/ops-portal/service/search_fabric/client.py\n/opt/ops-portal/service/search_fabric/indexer.py\n/opt/ops-portal/service/search_fabric/models.py\n/opt/ops-portal/service/search_fabric/utils.py\n/opt/ops-portal/service/stage_smoke.py\n/opt/ops-portal/service/workbench_information_architecture.py\n/opt/ops-portal/state/attention-state.json\n",
+   "out-truncated" : 0
+}
+
+## deployed workbench references
+{
+   "exitcode" : 0,
+   "exited" : 1,
+   "out-data" : "helper_present\nconfig_present\n",
+   "out-truncated" : 0
+}
+
+## container status
+{
+   "exitcode" : 0,
+   "exited" : 1,
+   "out-data" : "NAMES                               IMAGE                                          STATUS\napi-gateway                         lv3-platform-api-gateway:latest                Up About a minute (healthy)\nharbor-portal                       goharbor/harbor-portal:v2.15.0                 Up About a minute (healthy)\nnginx                               goharbor/nginx-photon:v2.15.0                  Up 59 seconds (healthy)\nops-portal                          lv3-ops-portal:latest                          Up About a minute (healthy)\nlv3-openbao                         openbao/openbao:2.5.1                          Up About a minute\nstep-ca                             smallstep/step-ca:0.30.1                       Up About a minute (health: starting)\nminio                               minio/minio:RELEASE.2025-07-23T15-54-02Z       Up About a minute\nwindmill-windmill_worker-1          ghcr.io/windmill-labs/windmill:1.662.0         Up About a minute\nwindmill-windmill_worker_native-1   ghcr.io/windmill-labs/windmill:1.662.0         Up About a minute\nwindmill-windmill_server-1          ghcr.io/windmill-labs/windmill:1.662.0         Up About a minute\nharbor-log                          goharbor/harbor-log:v2.15.0                    Up About a minute (healthy)\nharbor-jobservice                   goharbor/harbor-jobservice:v2.15.0             Up 59 seconds (healthy)\nharbor-core                         goharbor/harbor-core:v2.15.0                   Up About a minute (healthy)\ntrivy-adapter                       goharbor/trivy-adapter-photon:v2.15.0          Up About a minute (healthy)\nredis                               goharbor/redis-photon:v2.15.0                  Up About a minute (healthy)\nregistry                            goharbor/registry-photon:v2.15.0               Up About a minute (healthy)\nharbor-db                           goharbor/harbor-db:v2.15.0                     Up About a minute (healthy)\nregistryctl                         goharbor/harbor-registryctl:v2.15.0            Up About a minute (healthy)\nwindmill-openbao-agent              openbao/openbao:2.5.1                          Up About a minute (health: starting)\n",
+   "out-truncated" : 0
+}
+
+## ops-portal mounts
+{
+   "exitcode" : 0,
+   "exited" : 1,
+   "out-data" : "[{\"Type\":\"bind\",\"Source\":\"/opt/ops-portal/data\",\"Destination\":\"/srv/ops-portal/data\",\"Mode\":\"ro\",\"RW\":false,\"Propagation\":\"rprivate\"},{\"Type\":\"bind\",\"Source\":\"/opt/ops-portal/state\",\"Destination\":\"/srv/ops-portal/state\",\"Mode\":\"rw\",\"RW\":true,\"Propagation\":\"rprivate\"}]\n",
+   "out-truncated" : 0
+}
+
+## internal edge redirect contract
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0   138    0     0    0     0 HTTP/2 302
+server: nginx
+date: Fri, 03 Apr 2026 00:14:54 GMT
+content-type: text/html
+content-length: 138
+location: https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://unpkg.com; font-src 'self' data: https://unpkg.com; connect-src 'self'; manifest-src 'self'
+x-robots-tag: noindex, nofollow
+
+     0      0 --:--:-- --:--:-- --:--:--     0
+
+## public endpoint contract
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0    31    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+HTTP/2 405
+server: nginx
+date: Fri, 03 Apr 2026 00:14:54 GMT
+content-type: application/json
+content-length: 31
+allow: GET
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://unpkg.com; font-src 'self' data: https://unpkg.com; connect-src 'self'; manifest-src 'self'
+x-robots-tag: noindex, nofollow
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0   138    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+HTTP/2 302
+server: nginx
+date: Fri, 03 Apr 2026 00:14:55 GMT
+content-type: text/html
+content-length: 138
+location: https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://unpkg.com; font-src 'self' data: https://unpkg.com; connect-src 'self'; manifest-src 'self'
+x-robots-tag: noindex, nofollow

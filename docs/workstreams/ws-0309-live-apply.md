@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0309](../adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md)
 - Title: Deliver task-oriented navigation lanes across the live ops portal, launcher, and supporting catalogs from the latest mainline baseline
-- Status: in_progress
+- Status: live_applied
 - Branch: `codex/ws-0309-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0309-live-apply`
 - Owner: codex
@@ -59,53 +59,49 @@ and `Recover` instead of relying on product-first launcher taxonomy alone.
 - `receipts/live-applies/*adr-0309*`
 - `receipts/live-applies/evidence/*ws-0309*`
 
-## Current Progress
+## Final State
 
-- branch-local implementation is in progress in the isolated worktree created
-  from the former `origin/main` commit `cbb0c99f3f69c3ab2bb7658daf443c45df9ea49b`
-- the current branch already includes a new
-  `config/workbench-information-architecture.json` overlay, schema support, and
-  portal runtime changes that start mapping services, workflows, runbooks, and
-  pages onto task lanes
-- after the workstream started, `origin/main` advanced to
-  `5f93f0cf809ffcc755a41be2678e76350933ed37`, including overlapping
-  `ops_portal` changes from later ADRs, so the next critical step is to refresh
-  this workstream onto that newer mainline before final validation and live
-  apply
-- the workstream has now been rebased onto `5f93f0cf809ffcc755a41be2678e76350933ed37`,
-  and the latest-main branch tree passes:
-  `33` focused portal tests, `python3 scripts/validate_repository_data_models.py --validate`,
-  `python3 scripts/generate_ops_portal.py --check`, `make syntax-check-ops-portal`,
-  and `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-portals`
+- the task-lane catalog and runtime wiring landed in the branch-local worktree,
+  then the exact-main integration replay carried the result onto release
+  `0.177.148`
+- the canonical `ops_portal` runtime now serves the five ADR 0309 lanes
+  `Start`, `Observe`, `Change`, `Learn`, and `Recover` together with the later
+  ADR 0310, ADR 0312, and ADR 0313 surfaces already present on `origin/main`
+- the focused portal slice passed before the mainline replay:
+  `53` targeted tests, `python3 -m py_compile` for the affected Python entry
+  points, `scripts/validate_repository_data_models.py --validate`,
+  `scripts/generate_ops_portal.py --check`, `make syntax-check-ops-portal`,
+  and the owned `validate_repo.sh` gates
 
 ## Branch-Local Replay Status
 
-- the first isolated-worktree production replay attempt is preserved in
+- the first isolated-worktree replay is still preserved in
   `receipts/live-applies/evidence/2026-04-02-ws-0309-branch-live-apply.txt`
-- preflight succeeded and regenerated the required portal artifacts, but the
-  governed wrapper then stopped at `make check-canonical-truth` because
-  `workstreams.yaml` changed and the generated top-level `README.md` summary was
-  therefore stale
-- per the workstream rules, that README refresh is an integration-only surface
-  and should land only in the final exact-main step, so the actual production
-  replay continues in the dedicated latest-main integration worktree rather than
-  by force-writing protected truth onto this branch
+- that branch-local run failed closed at canonical-truth refresh because the
+  protected top-level `README.md` summary had to be regenerated from the final
+  integration branch instead of from the workstream branch
+- no branch-local integration-only surfaces remain; the exact-main replay,
+  release cut, and live verification completed in
+  `codex/ws-0309-main-integration`
 
-## Verification Plan
+## Verification Outcome
 
-- run focused portal and role tests after the latest-main refresh
-- run the repository data-model and portal generation checks
-- perform the governed `ops_portal` live apply from this worktree
-- verify the live root page and partials on `docker-runtime-lv3`
-- record the branch-local receipt and evidence bundle
-- replay the exact integrated result from `main`, then update ADR metadata with
-  the first repo/platform versions where implementation is true
+- guest-local verification on `docker-runtime-lv3` confirmed
+  `{"status":"ok"}`, the task-lane/help markers, the deployed
+  `workbench_information_architecture.py` helper, the synced
+  `workbench-information-architecture.json` catalog, and a healthy
+  `ops-portal` container
+- internal edge publication still returns the expected `302` to
+  `https://ops.lv3.org/oauth2/sign_in?...` for unauthenticated requests
+- the post-apply restic trigger initially failed because the local OpenBao API
+  was sealed; a narrow repo-managed unseal replay recovered that state and the
+  follow-on backup succeeded with receipt `receipts/restic-backups/20260403T001854Z.json`
 
 ## Merge Notes
 
-- do not bump `VERSION`, update numbered release sections in `changelog.md`,
-  edit the top-level README integrated status summary, or change
-  `versions/stack.yaml` while this remains the workstream branch
-- if the branch completes the live apply before the protected mainline refresh,
-  keep the branch-local receipt and evidence here and state explicitly which
-  integration-only files remain for the final `main` step
+- merged through the exact-main integration branch on repository version
+  `0.177.148`
+- first verified live on platform version `0.130.93`
+- a later `origin/main` sync added repo-local operator tooling at
+  `ef412b0f061517b64920b7328102e23b89b0774d`; that closeout sync does not
+  change the already-live `ops_portal` runtime payload for ADR 0309

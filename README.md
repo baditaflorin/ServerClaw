@@ -43,9 +43,9 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.147` |
-| Platform version | `0.130.92` |
-| Observed check date | `2026-04-02` |
+| Repository version | `0.177.148` |
+| Platform version | `0.130.93` |
+| Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
 | Observed kernel | `6.17.13-2-pve` |
@@ -163,7 +163,7 @@ rewriting one operator's workstation paths.
 | `operator_access_runbooks` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_validation` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_workflows` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
-| `ops_portal` | `2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply` |
+| `ops_portal` | `2026-04-03-adr-0309-task-oriented-information-architecture-mainline-live-apply` |
 | `ops_portal_visualizations` | `2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply` |
 | `outline` | `2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply` |
 | `paperless` | `2026-03-31-adr-0285-paperless-live-apply` |
@@ -303,8 +303,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.147` |
-| Platform version | `0.130.92` |
+| Repository version | `0.177.148` |
+| Platform version | `0.130.93` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -582,6 +582,8 @@ Current values on `main`:
 | `0297` | Integrate ADR 0297 live-apply evidence and release updates on main | `merged` | [ws-0297-main-merge.md](docs/workstreams/ws-0297-main-merge.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
 | `0308` | Live apply ADR 0308 journey-aware entry routing and saved home selection from latest origin/main | `live_applied` | [ws-0308-journey-live-apply.md](docs/workstreams/ws-0308-journey-live-apply.md) |
+| `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
+| `0309` | Integrate ADR 0309 task-oriented information architecture onto main and replay it from exact mainline truth | `live_applied` | [ws-0309-main-integration.md](docs/workstreams/ws-0309-main-integration.md) |
 | `0310` | Implement the first-run activation checklist and progressive capability reveal inside the interactive ops portal | `live_applied` | [ws-0310-live-apply.md](docs/workstreams/ws-0310-live-apply.md) |
 | `0311` | Live apply a repo-managed cmdk command palette and universal open dialog on the Windmill operator access admin surface | `merged` | [ws-0311-live-apply.md](docs/workstreams/ws-0311-live-apply.md) |
 | `0312` | Live apply the shared notification center and activity timeline across human surfaces | `live_applied` | [ws-0312-live-apply.md](docs/workstreams/ws-0312-live-apply.md) |

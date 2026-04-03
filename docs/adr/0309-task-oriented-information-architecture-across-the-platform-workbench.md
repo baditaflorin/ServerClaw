@@ -1,9 +1,10 @@
 # ADR 0309: Task-Oriented Information Architecture Across The Platform Workbench
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.148
+- Implemented In Platform Version: 0.130.93
+- Implemented On: 2026-04-03
 - Date: 2026-03-31
 
 ## Context
