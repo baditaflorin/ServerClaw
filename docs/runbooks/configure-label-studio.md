@@ -69,9 +69,11 @@ The playbook performs these steps:
    database on `postgres-lv3`.
 3. Creates the runtime secrets, compose env, project catalog, and Label Studio
    runtime on `docker-runtime-lv3`.
-4. Reconciles the repo-managed project catalog through the private Label Studio
+4. Reconciles the shared Typesense runtime on `docker-runtime-lv3` before the
+   API gateway structured-search catalog refresh runs.
+5. Reconciles the repo-managed project catalog through the private Label Studio
    admin token.
-5. Publishes Label Studio through the shared NGINX edge and verifies the public
+6. Publishes Label Studio through the shared NGINX edge and verifies the public
    UI and API redirect into the shared auth boundary.
 
 ## Verification
@@ -128,8 +130,14 @@ The verification helper checks:
 
 - Re-run `make converge-label-studio` for drift correction or after rebuilding
   `docker-runtime-lv3`, `postgres-lv3`, or the shared edge configuration.
+- `make converge-label-studio` now also replays the shared Typesense runtime on
+  `docker-runtime-lv3`, so it is the preferred recovery path when a Docker
+  daemon restart or firewall reconciliation leaves the API gateway structured
+  search dependency unavailable.
 - If the public UI or API stops redirecting through oauth2-proxy, reconverge
-  `playbooks/public-edge.yml` and then rerun `make converge-label-studio`.
+  `make converge-keycloak env=production`, then rerun
+  `make converge-label-studio`. The shared auth boundary can drift even when
+  the Label Studio private runtime itself is healthy.
 - If the private API works but the public redirect fails, inspect the Label
   Studio `annotate.lv3.org` edge publication and oauth2-proxy routing before
   changing in-app auth.

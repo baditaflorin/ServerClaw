@@ -78,6 +78,10 @@ def test_label_studio_runtime_tasks_manage_openbao_sync_and_verification_flow() 
     assert "label_studio_sync_script | length > 0" in required_inputs
     assert openbao_helper["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
     assert openbao_helper["ansible.builtin.include_role"]["tasks_from"] == "openbao_compose_env"
+    assert (
+        openbao_helper["vars"]["common_openbao_compose_env_agent_template_file"]
+        == "{{ label_studio_openbao_agent_dir }}/label-studio.env.ctmpl"
+    )
     assert pull_task["retries"] == 5
     assert pull_task["delay"] == 5
     assert pull_task["until"] == "label_studio_pull.rc == 0"
@@ -89,10 +93,11 @@ def test_label_studio_runtime_tasks_manage_openbao_sync_and_verification_flow() 
     assert "{{ label_studio_sync_script }} sync" in sync_task["ansible.builtin.script"]
     assert "--token-file {{ label_studio_admin_token_remote_file }}" in sync_task["ansible.builtin.script"]
     assert "--project-catalog {{ label_studio_project_catalog_file }}" in sync_task["ansible.builtin.script"]
-    assert sync_task["retries"] == 6
+    assert sync_task["retries"] == 12
     assert sync_task["delay"] == 5
     assert sync_task["until"] == "label_studio_project_sync.rc == 0"
     assert verify_before["ansible.builtin.import_tasks"] == "verify.yml"
+    assert verify_before["vars"]["label_studio_verify_project_catalog"] is False
     assert verify_after["ansible.builtin.import_tasks"] == "verify.yml"
 
 
@@ -102,6 +107,7 @@ def test_label_studio_verify_tasks_cover_local_runtime_public_redirects_and_proj
 
     version_task = next(task for task in verify_tasks if task["name"] == "Verify the Label Studio version endpoint")
     container_task = next(task for task in verify_tasks if task["name"] == "Verify the Label Studio container is running")
+    health_task = next(task for task in verify_tasks if task["name"] == "Wait for the Label Studio container health check to pass")
     project_verify_task = next(task for task in verify_tasks if task["name"] == "Verify the repo-managed Label Studio project catalog")
     ui_redirect_task = next(
         task for task in public_tasks if task["name"] == "Verify the public Label Studio UI redirects into the shared edge auth boundary"
@@ -113,7 +119,6 @@ def test_label_studio_verify_tasks_cover_local_runtime_public_redirects_and_proj
         task for task in public_tasks if task["name"] == "Assert the Label Studio public redirects target the shared auth boundary"
     )
 
-    assert version_task["ansible.builtin.uri"]["url"] == "{{ label_studio_internal_base_url }}{{ label_studio_health_path }}"
     assert container_task["ansible.builtin.command"]["argv"] == [
         "docker",
         "inspect",
@@ -121,11 +126,29 @@ def test_label_studio_verify_tasks_cover_local_runtime_public_redirects_and_proj
         '{{ "{{.State.Running}}" }}',
         "{{ label_studio_container_name }}",
     ]
+    assert health_task["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "inspect",
+        "--format",
+        '{{ "{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}" }}',
+        "{{ label_studio_container_name }}",
+    ]
+    assert health_task["retries"] == 36
+    assert health_task["delay"] == 5
+    assert health_task["until"] == "label_studio_container_health.stdout | trim == 'healthy'"
+    assert version_task["ansible.builtin.uri"]["url"] == "{{ label_studio_internal_base_url }}{{ label_studio_health_path }}"
+    assert version_task["retries"] == 12
+    assert version_task["delay"] == 5
+    assert (
+        version_task["until"]
+        == "label_studio_version_verify.status == 200 and (label_studio_version_verify.json.release | default('') | length) > 0"
+    )
     assert "{{ label_studio_sync_script }} verify" in project_verify_task["ansible.builtin.script"]
+    assert project_verify_task["when"] == "label_studio_verify_project_catalog | default(true) | bool"
     assert ui_redirect_task["ansible.builtin.uri"]["url"] == "{{ label_studio_public_base_url }}/"
     assert api_redirect_task["ansible.builtin.uri"]["url"] == "{{ label_studio_public_base_url }}/api/projects"
-    assert "oauth2/start" in redirect_assert["ansible.builtin.assert"]["that"][0]
-    assert "oauth2/start" in redirect_assert["ansible.builtin.assert"]["that"][1]
+    assert "oauth2/(sign_in|start)" in redirect_assert["ansible.builtin.assert"]["that"][0]
+    assert "oauth2/(sign_in|start)" in redirect_assert["ansible.builtin.assert"]["that"][1]
 
 
 def test_label_studio_templates_bind_private_port_and_render_expected_env_contract() -> None:

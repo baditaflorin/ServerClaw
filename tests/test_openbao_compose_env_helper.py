@@ -77,6 +77,7 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "- name: Ensure the local OpenBao API is unsealed before runtime secret injection" in tasks
     assert "include_tasks: unseal_openbao_api.yml" in tasks
     assert 'common_openbao_unseal_context: "runtime secret injection for {{ common_openbao_compose_env_service_name }}"' in tasks
+    assert 'common_openbao_unseal_api_url: "http://127.0.0.1:{{ openbao_http_port }}"' in tasks
     assert "Read OpenBao seal status before" in unseal_tasks
     assert "common_openbao_unseal_completed" in unseal_tasks
     assert "include_tasks: unseal_openbao_api_key.yml" in unseal_tasks

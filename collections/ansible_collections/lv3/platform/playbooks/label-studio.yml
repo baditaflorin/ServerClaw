@@ -10,19 +10,21 @@
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - Label Studio DNS, PostgreSQL role/database, runtime secrets, repo-managed project catalog, API gateway route, and shared-edge publication match repo truth.
+#   - Label Studio DNS, PostgreSQL role/database, runtime secrets, repo-managed project catalog,
+#     shared Typesense structured-search availability, API gateway route, and shared-edge publication
+#     match repo truth.
 #
 # Idempotency: Partially idempotent; convergence is repeatable, while the repo-managed project sync reconciles live Label Studio projects in place when required.
 #
 # Dependencies:
 #   - ADR 0289: Label Studio is the human-in-the-loop data annotation platform.
-#   - Requires: postgres_vm, docker_runtime, label_studio_postgres, label_studio_runtime, api_gateway_runtime, public_edge_oidc_auth, and nginx_edge_publication.
+#   - Requires: postgres_vm, docker_runtime, label_studio_postgres, label_studio_runtime, typesense_runtime, api_gateway_runtime, public_edge_oidc_auth, and nginx_edge_publication.
 #
 # Related ADRs: 0021, 0042, 0077, 0086, 0289
 # Related Runbooks: docs/runbooks/configure-label-studio.md
 #
 # Author: LV3 Platform
-# Last Updated: 2026-03-31
+# Last Updated: 2026-04-03
 
 - name: Ensure Hetzner DNS publication for Label Studio
   hosts: localhost
@@ -122,6 +124,7 @@
     - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.docker_runtime
     - role: lv3.platform.label_studio_runtime
+    - role: lv3.platform.typesense_runtime
     - role: lv3.platform.api_gateway_runtime
 
 - name: Publish Label Studio through the NGINX edge

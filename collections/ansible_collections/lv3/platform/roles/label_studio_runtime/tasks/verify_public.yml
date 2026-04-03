@@ -30,6 +30,16 @@
 - name: Assert the Label Studio public redirects target the shared auth boundary
   ansible.builtin.assert:
     that:
-      - "'oauth2/start' in (label_studio_public_ui_redirect.location | default(label_studio_public_ui_redirect.headers.Location | default('')))"
-      - "'oauth2/start' in (label_studio_public_api_redirect.location | default(label_studio_public_api_redirect.headers.Location | default('')))"
+      - >-
+        (
+          label_studio_public_ui_redirect.location
+          | default(label_studio_public_ui_redirect.headers.Location | default(''))
+          | regex_search('oauth2/(sign_in|start)')
+        ) is not none
+      - >-
+        (
+          label_studio_public_api_redirect.location
+          | default(label_studio_public_api_redirect.headers.Location | default(''))
+          | regex_search('oauth2/(sign_in|start)')
+        ) is not none
     fail_msg: "The public Label Studio publication is not redirecting through the shared edge auth boundary."

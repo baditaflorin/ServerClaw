@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 from typing import Any
 from urllib import error, parse, request
@@ -148,6 +149,19 @@ def verify_version(base_url: str) -> dict[str, Any]:
     return payload
 
 
+def wait_for_version(base_url: str, attempts: int = 12, delay: float = 5.0) -> dict[str, Any]:
+    last_error: Exception | None = None
+    for attempt in range(attempts):
+        try:
+            return verify_version(base_url)
+        except (RuntimeError, error.URLError, json.JSONDecodeError) as exc:
+            last_error = exc
+            if attempt == attempts - 1:
+                raise
+            time.sleep(delay)
+    raise RuntimeError(f"Unable to verify {base_url}/api/version") from last_error
+
+
 def apply_sync_plan(base_url: str, token: str, plan: dict[str, Any]) -> dict[str, list[Any]]:
     created: list[Any] = []
     updated: list[Any] = []
@@ -218,7 +232,7 @@ def main(argv: list[str]) -> int:
 
     base_url = args.base_url.rstrip("/")
     catalog = load_catalog(Path(args.project_catalog))
-    version = verify_version(base_url)
+    version = wait_for_version(base_url)
     existing = list_projects(base_url, token)
     plan = build_sync_plan(catalog, existing)
     report_path = Path(args.report_file) if args.report_file else None

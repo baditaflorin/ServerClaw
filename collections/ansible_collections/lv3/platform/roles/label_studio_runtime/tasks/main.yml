@@ -373,6 +373,8 @@
 
 - name: Verify the Label Studio runtime before project synchronization
   ansible.builtin.import_tasks: verify.yml
+  vars:
+    label_studio_verify_project_catalog: false
 
 - name: Synchronize the repo-managed Label Studio project catalog
   ansible.builtin.script: >-
@@ -382,7 +384,7 @@
     --project-catalog {{ label_studio_project_catalog_file }}
     --report-file {{ label_studio_sync_report_file }}
   register: label_studio_project_sync
-  retries: 6
+  retries: 12
   delay: 5
   until: label_studio_project_sync.rc == 0
   changed_when: "'\"changed\": true' in (label_studio_project_sync.stdout | default(''))"

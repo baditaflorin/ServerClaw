@@ -1,6 +1,7 @@
 import importlib.util
 import json
 from pathlib import Path
+from urllib import error
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -92,3 +93,39 @@ def test_apply_sync_plan_issues_post_and_patch_requests(monkeypatch) -> None:
         "created": [{"ok": True, "url": "http://label-studio.internal/api/projects"}],
         "updated": [{"ok": True, "url": "http://label-studio.internal/api/projects/17"}],
     }
+
+
+def test_wait_for_version_retries_until_verify_version_succeeds(monkeypatch) -> None:
+    attempts: list[int] = []
+    sleeps: list[float] = []
+
+    def fake_verify_version(base_url: str) -> dict[str, str]:
+        attempts.append(1)
+        if len(attempts) < 3:
+            raise error.URLError("connection refused")
+        return {"release": "1.0.0"}
+
+    monkeypatch.setattr(label_studio_sync, "verify_version", fake_verify_version)
+    monkeypatch.setattr(label_studio_sync.time, "sleep", lambda delay: sleeps.append(delay))
+
+    version = label_studio_sync.wait_for_version("http://label-studio.internal", attempts=4, delay=0.25)
+
+    assert version == {"release": "1.0.0"}
+    assert len(attempts) == 3
+    assert sleeps == [0.25, 0.25]
+
+
+def test_wait_for_version_raises_after_exhausting_retries(monkeypatch) -> None:
+    monkeypatch.setattr(
+        label_studio_sync,
+        "verify_version",
+        lambda base_url: (_ for _ in ()).throw(RuntimeError("not ready")),
+    )
+    monkeypatch.setattr(label_studio_sync.time, "sleep", lambda delay: None)
+
+    try:
+        label_studio_sync.wait_for_version("http://label-studio.internal", attempts=2, delay=0)
+    except RuntimeError as exc:
+        assert str(exc) == "not ready"
+    else:  # pragma: no cover - defensive
+        raise AssertionError("wait_for_version should raise after exhausting retries")

@@ -533,10 +533,14 @@
             "No chain/target/match by that name",
             "driver failed programming external connectivity",
         )
+        TRANSIENT_DOCKER_NETWORK_RETRY_ATTEMPTS = 12
+        TRANSIENT_DOCKER_NETWORK_RETRY_DELAY_SECONDS = 5
         STALE_COMPOSE_ENDPOINT_ERRORS = (
             "failed to create endpoint",
             "does not exist",
         )
+        DOCKER_NAT_CHAIN_COMMAND = ["iptables", "-t", "nat", "-S", "DOCKER"]
+        DOCKER_SERVICE_ACTIVE_COMMAND = ["systemctl", "is-active", "docker"]
         OPENBAO_HEALTH_URL = "http://127.0.0.1:8201/v1/sys/health"
         OPENBAO_SEAL_STATUS_URL = "http://127.0.0.1:8201/v1/sys/seal-status"
         OPENBAO_UNSEAL_URL = "http://127.0.0.1:8201/v1/sys/unseal"
@@ -567,7 +571,78 @@
             return combined_output(getattr(exc, "output", ""), getattr(exc, "stderr", ""))
 
 
-        def run_with_retry(command, cwd=None, attempts=3, delay_seconds=3, retry_on_any_error=False):
+        def wait_for_docker_nat_chain(retries=12, delay_seconds=2):
+            for _ in range(retries):
+                result = subprocess.run(
+                    DOCKER_NAT_CHAIN_COMMAND,
+                    text=True,
+                    capture_output=True,
+                )
+                if result.returncode == 0:
+                    return True
+                time.sleep(delay_seconds)
+            return False
+
+
+        def docker_service_is_active():
+            result = subprocess.run(
+                DOCKER_SERVICE_ACTIVE_COMMAND,
+                text=True,
+                capture_output=True,
+            )
+            return result.returncode == 0 and (result.stdout or "").strip() == "active"
+
+
+        def restart_docker_service_for_recovery():
+            reset_result = subprocess.run(
+                ["systemctl", "reset-failed", "docker.service"],
+                text=True,
+                capture_output=True,
+            )
+            if reset_result.returncode != 0:
+                raise subprocess.CalledProcessError(
+                    reset_result.returncode,
+                    reset_result.args,
+                    output=reset_result.stdout,
+                    stderr=reset_result.stderr,
+                )
+
+            restart_result = subprocess.run(
+                ["systemctl", "restart", "docker.service"],
+                text=True,
+                capture_output=True,
+            )
+            if restart_result.returncode != 0:
+                raise subprocess.CalledProcessError(
+                    restart_result.returncode,
+                    restart_result.args,
+                    output=restart_result.stdout,
+                    stderr=restart_result.stderr,
+                )
+
+            if not wait_for_docker_nat_chain():
+                raise RuntimeError(
+                    "docker.service restarted during container recovery, but the DOCKER nat chain did not return"
+                )
+
+
+        def ensure_docker_service_ready():
+            if not docker_service_is_active():
+                restart_docker_service_for_recovery()
+                return
+
+            if not wait_for_docker_nat_chain(retries=3, delay_seconds=1):
+                restart_docker_service_for_recovery()
+
+
+        def run_with_retry(
+            command,
+            cwd=None,
+            attempts=TRANSIENT_DOCKER_NETWORK_RETRY_ATTEMPTS,
+            delay_seconds=TRANSIENT_DOCKER_NETWORK_RETRY_DELAY_SECONDS,
+            retry_on_any_error=False,
+        ):
+            ensure_docker_service_ready()
             for attempt in range(1, attempts + 1):
                 result = subprocess.run(command, cwd=cwd, text=True, capture_output=True)
                 if result.returncode == 0:
@@ -588,6 +663,7 @@
                         stderr=output,
                     )
 
+                ensure_docker_service_ready()
                 time.sleep(delay_seconds)
 
         def read_openbao_json(url):
@@ -707,6 +783,12 @@
             working_dir = labels.get("com.docker.compose.project.working_dir") or ""
             config_files = labels.get("com.docker.compose.project.config_files") or ""
             service = labels.get("com.docker.compose.service") or ""
+            compose_depends_on = labels.get("com.docker.compose.depends_on") or ""
+            dependency_services = [
+                entry.split(":", 1)[0].strip()
+                for entry in compose_depends_on.split(",")
+                if entry.split(":", 1)[0].strip()
+            ]
 
             if working_dir and service:
                 compose_group = compose_groups.setdefault(
@@ -714,6 +796,7 @@
                     {"services": set(), "container_names": set()},
                 )
                 compose_group["services"].add(service)
+                compose_group["services"].update(dependency_services)
                 if name:
                     compose_group["container_names"].add(name)
                 continue
@@ -923,6 +1006,7 @@
       }}
   register: docker_runtime_recover_stopped_containers
   changed_when: docker_runtime_stopped_pre_restart_container_names | length > 0
+  failed_when: false
   when: docker_runtime_stopped_pre_restart_container_names | default([]) | length > 0
 
 - name: Confirm pre-restart containers recovered after Docker restarts
@@ -938,6 +1022,78 @@
         NONPERSISTENT_RESTART_POLICIES = set({{ docker_runtime_nonpersistent_restart_policies | to_json }})
         SUCCESSFUL_EXIT_RESTART_POLICIES = NONPERSISTENT_RESTART_POLICIES | {"on-failure"}
 
+
+        def inspect_container(name):
+            result = subprocess.run(
+                ["docker", "inspect", name],
+                text=True,
+                capture_output=True,
+            )
+            if result.returncode == 0:
+                payload = json.loads(result.stdout or "[]")
+                return payload[0] if payload else {}
+
+            stderr = (result.stderr or "").lower()
+            if "no such object" in stderr:
+                return None
+
+            raise subprocess.CalledProcessError(
+                result.returncode,
+                result.args,
+                output=result.stdout,
+                stderr=result.stderr,
+            )
+
+
+        def inspect_compose_replacement(container):
+            labels = (container.get("Config") or {}).get("Labels") or {}
+            compose_project = str(labels.get("com.docker.compose.project") or "").strip()
+            compose_service = str(labels.get("com.docker.compose.service") or "").strip()
+            if not compose_project or not compose_service:
+                return None
+
+            result = subprocess.run(
+                [
+                    "docker",
+                    "ps",
+                    "-aq",
+                    "--filter",
+                    f"label=com.docker.compose.project={compose_project}",
+                    "--filter",
+                    f"label=com.docker.compose.service={compose_service}",
+                ],
+                text=True,
+                capture_output=True,
+            )
+            if result.returncode != 0:
+                raise subprocess.CalledProcessError(
+                    result.returncode,
+                    result.args,
+                    output=result.stdout,
+                    stderr=result.stderr,
+                )
+
+            replacements = []
+            for container_id in result.stdout.splitlines():
+                container_id = container_id.strip()
+                if not container_id:
+                    continue
+                replacement = inspect_container(container_id)
+                if replacement is not None:
+                    replacements.append(replacement)
+
+            if not replacements:
+                return None
+
+            replacements.sort(
+                key=lambda item: (
+                    not bool((item.get("State") or {}).get("Running")),
+                    str((item.get("State") or {}).get("Status") or ""),
+                    str(item.get("Name") or ""),
+                )
+            )
+            return replacements[0]
+
         containers = json.load(sys.stdin)
         statuses = []
         all_running = True
@@ -947,14 +1103,8 @@
             restart_policy = (container.get("HostConfig") or {}).get("RestartPolicy") or {}
             restart_policy_name = str(restart_policy.get("Name") or "").strip().lower()
             require_running = restart_policy_name not in SUCCESSFUL_EXIT_RESTART_POLICIES
-            result = subprocess.run(
-                ["docker", "inspect", container_name],
-                text=True,
-                capture_output=True,
-            )
-            if result.returncode == 0:
-                payload = json.loads(result.stdout or "[]")
-                live_container = payload[0] if payload else {}
+            live_container = inspect_container(container_name)
+            if live_container is not None:
                 state = live_container.get("State", {})
                 running = bool(state.get("Running"))
                 status = str(state.get("Status") or "")
@@ -980,31 +1130,49 @@
                 all_running = all_running and healthy
                 continue
 
-            stderr = (result.stderr or "").lower()
-            if "no such object" in stderr:
-                healthy = not require_running
+            live_container = inspect_compose_replacement(container)
+            if live_container is not None:
+                state = live_container.get("State", {})
+                running = bool(state.get("Running"))
+                status = str(state.get("Status") or "")
+                exit_code = state.get("ExitCode")
+                healthy = running or (
+                    restart_policy_name in SUCCESSFUL_EXIT_RESTART_POLICIES
+                    and status == "exited"
+                    and exit_code == 0
+                )
                 statuses.append(
                     {
                         "requested_name": container_name,
-                        "full_name": f"/{container_name}",
-                        "exists": False,
+                        "full_name": live_container.get("Name") or f"/{container_name}",
+                        "exists": True,
                         "restart_policy_name": restart_policy_name,
                         "require_running": require_running,
-                        "running": False,
-                        "status": "missing",
-                        "exit_code": None,
+                        "running": running,
+                        "status": status,
+                        "exit_code": exit_code,
                         "healthy": healthy,
                     }
                 )
                 all_running = all_running and healthy
                 continue
 
-            raise subprocess.CalledProcessError(
-                result.returncode,
-                result.args,
-                output=result.stdout,
-                stderr=result.stderr,
+            healthy = not require_running
+
+            statuses.append(
+                {
+                    "requested_name": container_name,
+                    "full_name": f"/{container_name}",
+                    "exists": False,
+                    "restart_policy_name": restart_policy_name,
+                    "require_running": require_running,
+                    "running": False,
+                    "status": "missing",
+                    "exit_code": None,
+                    "healthy": False,
+                }
             )
+            all_running = False
 
         print(json.dumps(statuses))
         sys.exit(0 if all_running else 1)

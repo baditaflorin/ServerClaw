@@ -53,6 +53,7 @@ def test_label_studio_playbook_converges_dns_database_runtime_edge_and_public_ve
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.docker_runtime",
         "lv3.platform.label_studio_runtime",
+        "lv3.platform.typesense_runtime",
         "lv3.platform.api_gateway_runtime",
     ]
     assert [role["role"] for role in edge_play["roles"]] == [
