@@ -1,326 +1,76 @@
 # ============================================================================
-# Repository Structure Index - ADR 0163
+# Repository Structure Entry Point - ADR 0163 / ADR 0327
 # ============================================================================
-# Purpose: Machine-readable directory map enabling LLM agents to discover the
-#          full repository layout in a single read - no exploration needed.
-# Usage:   Read this file first. Use 'for_agents' hints to navigate task work.
-# Updated: 2026-04-02
-# Maintained by: Integration agent (human review on major reorganisations)
+# GENERATED FILE - do not edit by hand
+# Regenerate: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
 # ============================================================================
-
 repository: proxmox_reference_platform
 schema_version: 1
-last_updated: "2026-04-02"
-purpose: |
-  Infrastructure-as-code for a Debian 13 host running Proxmox VE 9. Manages
-  bootstrap, VM provisioning, networking, backup, monitoring, security, and
-  service deployments as declarative automation in a forkable reference repo.
-
-# ---- AGENT QUICK-START -------------------------------------------------------
+generated: '2026-04-03'
+source_root: docs/discovery/repo-structure
+pack_manifest: docs/discovery/onboarding-packs.yaml
+purpose: Generated root repository discovery entrypoint. Read this first for quick orientation, then open the deeper section files under docs/discovery/repo-structure/ when you need detail.
 quick_start_for_agents:
-  step_1: "Read README.md for current project status and deployment state"
-  step_2: "Read AGENTS.md for working rules, conventions, and handoff protocol"
-  step_3: "Read this file (.repo-structure.yaml) to navigate directories"
-  step_4: "Read .config-locations.yaml to find where specific configs live"
-  step_5: "Read docs/adr/.index.yaml to search all 320+ decisions by keyword"
-  step_6: "Check workstreams.yaml for active coordination and workstreams/ when editing registry source shards"
-  note: >
-    Do NOT glob-explore the tree. All key paths are listed below.
-    Token budget: 6 reads to be fully oriented.
-
-# ---- TOP-LEVEL FILES ---------------------------------------------------------
-top_level_files:
-  README.md:
-    purpose: Project overview, deployment status, current topology, next steps
-    for_agents: "START HERE - current state of the platform"
-  AGENTS.md:
-    purpose: Rules and conventions for LLM agents; handoff protocol (ADR 0167)
-    for_agents: "MUST READ before making any changes"
-  RELEASE.md:
-    purpose: Current release notes and upgrade instructions
-    for_agents: "Check before bumping VERSION or writing release notes"
-  VERSION:
-    purpose: Current repository semantic version (X.Y.Z)
-    for_agents: "Bump when merging to main; read to identify release boundaries"
-  changelog.md:
-    purpose: Human-readable changelog index pointing to versioned release notes
-    for_agents: "Update when cutting a new version"
-  workstreams.yaml:
-    purpose: Generated compatibility assembly for active workstream coordination
-    for_agents: "Read this first for current active work; regenerate it after shard edits"
-  Makefile:
-    purpose: Task runner - validate, test, build, deploy, generate docs
-    for_agents: "Run 'make validate-data-models' before pushing"
-  ansible.cfg:
-    purpose: Ansible configuration and collection paths
-    for_agents: "Understand Ansible runtime behaviour"
-  mkdocs.yml:
-    purpose: MkDocs documentation-site configuration
-    for_agents: "Understand how docs are published for your fork or docs site"
-  pyproject.toml:
-    purpose: Python project metadata, tool config (black, ruff, mypy)
-    for_agents: "Check Python dependencies and linting settings"
-  .repo-structure.yaml:
-    purpose: "THIS FILE - machine-readable directory index"
-    for_agents: "Use to navigate; keep updated when adding new directories"
-  .config-locations.yaml:
-    purpose: Registry of every canonical configuration file and its purpose
-    for_agents: "Find where specific config lives; where to write changes"
-
-# ---- DIRECTORIES -------------------------------------------------------------
-directories:
-
-  docs/adr:
-    purpose: Architecture Decision Records - every major design decision
-    contains: "ADR markdown files plus .index.yaml for machine-readable search"
-    concern: governance, architecture
-    keywords: [decisions, architecture, history, rationale, consequences, adr]
-    for_agents: >
-      Read .index.yaml to find relevant ADRs by keyword - do not enumerate
-      all 320+ files. Start here for project direction and design rationale.
-    key_files:
-      ".index.yaml": "Machine-readable ADR catalog - search by keyword/concern"
-
-  docs/runbooks:
-    purpose: Operational runbooks and procedures for routine tasks
-    contains: Step-by-step guides for deployment, troubleshooting, recovery
-    concern: operations
-    keywords: [procedures, operational, how-to, runbook, recovery, deployment]
-    for_agents: Find specific operational procedures and recovery steps
-
-  docs/workstreams:
-    purpose: ADR-style documentation for active workstreams
-    contains: "adr-XXXX-workstream-name.md files for each active branch"
-    concern: project-management, branch-work
-    keywords: [workstreams, parallel, branch, in-progress, tasks]
-    for_agents: Understand what work is in progress and planned; create one here
-
-  workstreams:
-    purpose: Shard-backed workstream registry source files and archive history
-    contains: "policy.yaml plus active/<id>.yaml and archive/<year>/<id>.yaml"
-    concern: project-management, branch-work, coordination
-    keywords: [workstreams, registry, shards, archive, coordination]
-    for_agents: >
-      Edit workstream metadata here, then regenerate workstreams.yaml with
-      scripts/workstream_registry.py --write.
-
-  docs/release-notes:
-    purpose: Versioned release notes and generated release-history indexes
-    contains: "X.Y.Z.md files for each platform release plus index/*.md archive ledgers"
-    concern: release, versioning
-    keywords: [release, notes, version, changelog]
-    for_agents: "Check before writing release notes; create here on new release"
-
-  docs/status/history:
-    purpose: Generated history ledgers for bounded root summaries
-    contains: "Full live-apply evidence and merged-workstream history once the root README rolls older rows away"
-    concern: documentation, generated, history
-    keywords: [history, status, generated, rollover, readme]
-    for_agents: "Generated by status-doc tooling; refresh through make generate-status-docs"
-
-  docs/site-generated:
-    purpose: Auto-generated documentation artefacts (do not edit)
-    contains: architecture diagrams, dependency graphs, status documents
-    concern: documentation, generated
-    keywords: [generated, diagram, architecture, auto]
-    for_agents: "READ ONLY - regenerated by 'make generate-docs'; do not edit"
-
-  playbooks:
-    purpose: Ansible playbooks for host and VM provisioning
-    contains: "site.yml, bootstrap.yml, per-service playbooks, groups/"
-    concern: automation, infrastructure-deployment
-    keywords: [ansible, playbooks, deployment, automation, idempotent, provision]
-    for_agents: >
-      Check metadata header (first 30 lines) of each playbook for Purpose,
-      Inputs, Outputs, Dependencies. Template at playbooks/.metadata-template.yml
-    key_files:
-      "site.yml": "Full host bootstrap from bare Debian 13"
-      "bootstrap.yml": "First-run SSH and base packages"
-      ".metadata-template.yml": "Standard metadata header for new playbooks"
-
-  roles:
-    purpose: Ansible roles referenced by playbooks (legacy location)
-    contains: Reusable role implementations
-    concern: automation, shared-logic
-    keywords: [roles, reusable, task-groups, handlers]
-    for_agents: >
-      Most roles live in collections/ansible_collections/lv3/platform/roles/.
-      Check meta/main.yml for each role's documented contract.
-
-  collections/ansible_collections/lv3/platform:
-    purpose: Custom Ansible collection - all modern platform roles/plugins
-    contains: roles/, plugins/, modules/ specific to this infrastructure
-    concern: shared-automation, extensibility
-    keywords: [collection, custom, modules, plugins, reusable, lv3]
-    for_agents: "PRIMARY location for roles; check roles/ subdirectory"
-
-  inventory:
-    purpose: Ansible inventory, host groups, and variable definitions
-    contains: "hosts.yml, group_vars/, host_vars/"
-    concern: infrastructure-topology, declarative-state
-    keywords: [inventory, hosts, groups, variables, topology, ansible]
-    for_agents: >
-      hosts.yml defines all VMs; group_vars/all.yml has shared vars;
-      host_vars/<name>.yml has per-host overrides.
-
-  config:
-    purpose: Service and application configuration (YAML/JSON/CONF)
-    contains: Per-service config directories for all deployed services
-    concern: service-configuration, applications
-    keywords: [config, templates, services, settings, configuration]
-    for_agents: >
-      One subdirectory per service (e.g., config/gitea/, config/keycloak/).
-      Read .config-locations.yaml for which file controls which behaviour.
-    key_files:
-      "network-impairment-matrix.yaml": "ADR 0189 governed preview/staging network impairment catalog"
-      "stage-smoke-suites.json": "ADR 0251 catalog of stage-scoped smoke suites mapped to service/environment bindings"
-
-  policy:
-    purpose: Shared Rego policy bundles and tests for OPA and Conftest
-    contains: "decisions/, conftest/, tests/"
-    concern: policy, validation, shared-decision-logic
-    keywords: [policy, opa, conftest, rego, approvals, promotion]
-    for_agents: >
-      Shared decision logic lives here for command approval, promotion
-      eligibility, and repository invariants. Validate changes with
-      scripts/policy_checks.py before updating callers.
-
-  scripts:
-    purpose: Utility and helper scripts (Python, Bash)
-    contains: Validation, data generation, CI helpers, operational utilities
-    concern: automation, tooling, ci
-    keywords: [scripts, utilities, helpers, tools, validation, python]
-    for_agents: >
-      validate_repo.sh runs all local checks.
-      generate_adr_index.py regenerates docs/adr/.index.yaml.
-      platform_manifest.py generates build/platform-manifest.json.
-    key_files:
-      "network_impairment_matrix.py": "ADR 0189 CLI and validation helper for governed network impairment scenarios"
-      "policy_checks.py": "ADR 0230 validator for the shared OPA and Conftest policy bundle and toolchain"
-      "stage_smoke_suites.py": "ADR 0251 validator and runner for stage-scoped smoke suite catalogs and receipt-ready evidence"
-
-  tests:
-    purpose: Test suites for automated validation
-    contains: "pytest unit + integration tests, molecule scenarios"
-    concern: validation, quality-assurance
-    keywords: [tests, validation, pytest, molecule, integration]
-    for_agents: "Run 'pytest tests/' before pushing; check tests/ for test patterns"
-
-  versions:
-    purpose: Canonical deployed state and version snapshots
-    contains: "stack.yaml (canonical services), version metadata"
-    concern: state-tracking, versioning
-    keywords: [versions, state, stack, canonical, deployed, services]
-    for_agents: >
-      versions/stack.yaml is the source of truth for deployed service versions.
-      Update ONLY after a successful deployment.
-
-  receipts:
-    purpose: Operational receipts and audit trail
-    contains: "live-applies/, gate-bypasses/, deployment receipts"
-    concern: audit, operational-history
-    keywords: [receipts, audit, history, deployment, live-apply]
-    for_agents: >
-      Create a receipt here for every live-apply or deployment.
-      gate-bypasses/ records --no-verify overrides with justification.
-
-  build:
-    purpose: Generated build artefacts (do not commit manually)
-    contains: "platform-manifest.json, changelog-portal/"
-    concern: build, generated
-    keywords: [build, generated, manifest, artefacts]
-    for_agents: "READ ONLY - generated by build scripts; do not edit"
-
-  tofu:
-    purpose: OpenTofu/Terraform infrastructure code
-    contains: Infrastructure-as-code for cloud resources
-    concern: infrastructure-provisioning, iac
-    keywords: [tofu, terraform, provisioning, iac, cloud]
-    for_agents: Find infrastructure code for cloud provisioning
-
-  packer:
-    purpose: Packer templates for VM image building
-    contains: "Debian cloud-init templates, image build configurations"
-    concern: image-building, templates
-    keywords: [packer, image, template, vm, cloud-init]
-    for_agents: Understand how VM images are built from templates
-
-  docker:
-    purpose: Docker Compose definitions for service stacks
-    contains: "docker-compose.yml variants per VM"
-    concern: containerisation, service-deployment
-    keywords: [docker, container, compose, image, stack]
-    for_agents: Find container and compose definitions for deployed services
-
-  windmill:
-    purpose: Windmill workflow definitions and scheduled automations
-    contains: YAML workflow definitions for scheduled and triggered tasks
-    concern: workflow-automation, scheduling
-    keywords: [windmill, workflow, automation, scheduled, trigger]
-    for_agents: Find scheduled automation and workflow configuration
-
-  molecule:
-    purpose: Molecule test scenarios for Ansible role testing
-    contains: Test scenarios for validating Ansible roles in containers
-    concern: testing, role-validation
-    keywords: [molecule, testing, scenarios, validation, ansible-role]
-    for_agents: Find role-testing configurations and scenarios
-
-  migrations:
-    purpose: Database and schema migration scripts
-    contains: Timestamped migration files for data changes
-    concern: data-management, backward-compatibility
-    keywords: [migrations, database, schema, evolution]
-    for_agents: Find data schema changes and migration history
-
-  platform:
-    purpose: Platform management tooling (CLI, utilities)
-    contains: Platform CLI and helper utilities
-    concern: tooling, platform-management
-    keywords: [platform, cli, tooling, management]
-    for_agents: Platform-level management utilities
-    key_files:
-      "faults/network_impairment_matrix.py": "ADR 0189 typed loader and execution helpers for governed network impairment profiles"
-      "policy/engine.py": "ADR 0230 shared OPA evaluation helpers for command approval and promotion gating"
-      "runtime_assurance/declared_live_attestation.py": "ADR 0245 declared-to-live witness collection shared by the CLI and API gateway"
-
-  keys:
-    purpose: SSH keys and cryptographic material (bootstrap and automation)
-    contains: "bootstrap keys, operator keys, automation keys"
-    concern: security, credentials
-    keywords: [keys, ssh, credentials, security, cryptographic]
-    for_agents: "Understand key structure - NEVER expose or log key content"
-
-  requirements:
-    purpose: Python, system, and dependency specifications
-    contains: "requirements.txt, requirements-dev.txt, system package lists"
-    concern: dependencies, versions
-    keywords: [requirements, dependencies, packages, versions, python]
-    for_agents: Check Python dependencies and their versions
-
-  .github:
-    purpose: GitHub Actions workflows (legacy/external mirror)
-    contains: GitHub Actions YAML workflows
-    concern: ci, external-automation
-    keywords: [github, ci, actions, workflows, external]
-    for_agents: "Legacy CI - primary CI runs on Gitea (.gitea/)"
-
-  .gitea:
-    purpose: Gitea Actions workflows (PRIMARY local CI)
-    contains: Gitea Actions YAML workflows running on self-hosted runner
-    concern: ci, local-automation
-    keywords: [gitea, ci, actions, workflows, local, primary]
-    for_agents: "PRIMARY CI - runs on docker-build-lv3 self-hosted runner"
-
-# ---- CROSS-CUTTING CONCERNS --------------------------------------------------
-concerns:
-  bootstrap: [playbooks/site.yml, playbooks/bootstrap.yml, roles/proxmox_bootstrap]
-  networking: [inventory/group_vars/, config/nginx/]
-  security: [roles/security_baseline, config/keycloak/, scripts/validate_repo.sh]
-  monitoring: [config/grafana/, config/prometheus/, config/alertmanager/]
-  backup: [playbooks/backup-vm.yml, config/pbs/]
-  ci_cd: [.gitea/, scripts/validate_repo.sh, Makefile]
-  automation: [playbooks/, collections/ansible_collections/lv3/platform/]
-  state_tracking: [versions/stack.yaml, receipts/, VERSION]
-  documentation: [docs/adr/, docs/runbooks/, docs/workstreams/]
-  agent_discovery: [.repo-structure.yaml, .config-locations.yaml, docs/adr/.index.yaml, AGENTS.md]
+  step_1: Read README.md for current project status and merged deployment truth
+  step_2: Read AGENTS.md for working rules, conventions, and handoff protocol
+  step_3: Read this file (.repo-structure.yaml) for a concise section map
+  step_4: Read .config-locations.yaml to find the right config section
+  step_5: Read docs/adr/.index.yaml to search ADRs by keyword or concern
+  step_6: Check workstreams.yaml for active work and ownership contracts
+  note: Use the section files under docs/discovery/ and the generated onboarding packs under build/onboarding/ when you need deeper task-specific discovery without loading every registry.
+entrypoint_files:
+  README.md: Current project status, merged platform truth, and fork-level orientation.
+  AGENTS.md: Working rules, handoff protocol, and collaboration conventions for agents.
+  .repo-structure.yaml: Generated root discovery entrypoint for repository layout and section navigation.
+  .config-locations.yaml: Generated root discovery entrypoint for canonical configuration locations.
+  docs/adr/.index.yaml: Generated ADR discovery index for keyword and concern queries.
+  workstreams.yaml: Active workstream registry plus ownership contracts and merge state.
+section_index:
+  - id: root-entrypoints
+    title: Root Entrypoints And Governance
+    file: docs/discovery/repo-structure/root-entrypoints.yaml
+    summary: The top-level files every agent reads first, plus release and workflow control surfaces.
+    when_to_read: Start here when orienting a worktree, checking repo-wide rules, or finding the primary human entrypoints.
+    entry_counts:
+      top_level_files: 12
+  - id: documentation-and-history
+    title: Documentation And Operational History
+    file: docs/discovery/repo-structure/documentation-and-history.yaml
+    summary: Narrative ADRs, runbooks, workstreams, release notes, discovery sources, and audit evidence.
+    when_to_read: Use this section when you need design rationale, operator procedures, or historical receipts.
+    entry_counts:
+      directories: 10
+  - id: automation-and-infrastructure
+    title: Automation And Infrastructure Surfaces
+    file: docs/discovery/repo-structure/automation-and-infrastructure.yaml
+    summary: Ansible, IaC, policy, inventory, scripts, and tests that define and validate the platform.
+    when_to_read: Use this section when changing provisioning, topology, repo automation, or validation logic.
+    entry_counts:
+      directories: 13
+  - id: runtime-and-delivery
+    title: Runtime Packaging And Delivery
+    file: docs/discovery/repo-structure/runtime-and-delivery.yaml
+    summary: Container, workflow, credential, dependency, and CI surfaces used to package and deliver the platform.
+    when_to_read: Use this section when tracing runtime composition, workflow automation, or CI execution paths.
+    entry_counts:
+      directories: 6
+  - id: cross-cutting-concerns
+    title: Cross-Cutting Concern Index
+    file: docs/discovery/repo-structure/cross-cutting-concerns.yaml
+    summary: Concern-oriented shortcuts that map common task areas to the most relevant repo surfaces.
+    when_to_read: Use this section when you know the concern area but not the exact path yet.
+    entry_counts:
+      concerns: 10
+onboarding_packs:
+  - id: agent-core
+    title: Agent Core Onboarding
+    file: build/onboarding/agent-core.yaml
+    summary: The minimum repo-orientation pack for any new agent or contributor.
+  - id: automation
+    title: Automation Onboarding
+    file: build/onboarding/automation.yaml
+    summary: Discovery surfaces for infrastructure automation, validation, and runtime tooling work.
+  - id: service-catalog
+    title: Service Catalog Onboarding
+    file: build/onboarding/service-catalog.yaml
+    summary: Discovery surfaces for locating service topology, runtime config, and generated service-related truth.

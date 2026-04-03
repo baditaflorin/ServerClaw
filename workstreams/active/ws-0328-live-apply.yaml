@@ -22,6 +22,8 @@ shared_surfaces:
 - docs/runbooks/validate-repository-automation.md
 - .repo-structure.yaml
 - .config-locations.yaml
+- docs/discovery/config-locations/versioning.yaml
+- docs/discovery/repo-structure/documentation-and-history.yaml
 - config/root-summary-budgets.yaml
 - platform/root_summary.py
 - scripts/generate_release_notes.py
@@ -42,6 +44,7 @@ shared_surfaces:
 - versions/stack.yaml
 - build/platform-manifest.json
 - docs/diagrams/agent-coordination-map.excalidraw
+- build/onboarding/*.yaml
 - receipts/live-applies/2026-04-03-adr-0328-root-summary-rollover-live-apply.json
 - receipts/live-applies/2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply.json
 - receipts/live-applies/evidence/2026-04-03-ws-0328-*
@@ -91,6 +94,9 @@ ownership_manifest:
     paths:
     - .repo-structure.yaml
     - .config-locations.yaml
+    - docs/discovery/config-locations/versioning.yaml
+    - docs/discovery/repo-structure/documentation-and-history.yaml
+    - build/onboarding/*.yaml
     mode: exclusive
   - id: ws0328_release_management_surfaces
     paths:

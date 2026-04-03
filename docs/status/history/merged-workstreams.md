@@ -9,6 +9,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
 | `0328` | Implement size-budgeted root summaries and automatic rollover ledgers | `live_applied` | [ws-0328-live-apply.md](../../workstreams/ws-0328-live-apply.md) |
+| `0327` | Live apply sectional agent discovery registries and generated onboarding packs from latest origin/main | `live_applied` | [ws-0327-live-apply.md](../../workstreams/ws-0327-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](../../workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](../../workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](../../workstreams/ws-0295-live-apply.md) |

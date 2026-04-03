@@ -75,6 +75,7 @@ rewriting one operator's workstation paths.
 | --- | --- |
 | `workstream_registry_shards` | `2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply` |
 | `uptime_kuma` | `2026-04-03-ws-0332-homepage-triage-mainline-live-apply` |
+| `sectional_agent_discovery` | `2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply` |
 | `root_summary_rollover` | `2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply` |
 | `ops_portal` | `2026-04-03-adr-0309-task-oriented-information-architecture-mainline-live-apply` |
 | `operator_onboarding` | `2026-04-03-adr-0318-repeatable-operator-onboarding-mainline-live-apply` |
@@ -92,9 +93,8 @@ rewriting one operator's workstation paths.
 | `keycloak_direct_api` | `2026-04-02-adr-0317-keycloak-direct-api-mainline-live-apply` |
 | `journey_analytics` | `2026-04-02-adr-0316-journey-analytics-mainline-live-apply` |
 | `gotenberg` | `2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply` |
-| `docs_portal` | `2026-04-02-adr-0313-contextual-help-mainline-live-apply` |
 
-Showing 20 of 164 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
+Showing 20 of 165 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
 
 The current access posture is:
@@ -194,11 +194,12 @@ Current values on `main`:
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 286 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 287 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
 | `0328` | Implement size-budgeted root summaries and automatic rollover ledgers | `live_applied` | [ws-0328-live-apply.md](docs/workstreams/ws-0328-live-apply.md) |
+| `0327` | Live apply sectional agent discovery registries and generated onboarding packs from latest origin/main | `live_applied` | [ws-0327-live-apply.md](docs/workstreams/ws-0327-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
@@ -222,7 +223,6 @@ Showing 25 of 286 merged or live-applied workstreams. Full history: [merged work
 | `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](docs/workstreams/adr-0168-idempotency-ci.md) |
 | `0167` | Graceful degradation mode declarations | `live_applied` | [adr-0167-graceful-degradation-mode-declarations.md](docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md) |
 | `0166` | Canonical error response format and error code registry | `live_applied` | [adr-0166-canonical-error-response-format.md](docs/workstreams/adr-0166-canonical-error-response-format.md) |
-| `0165` | Workflow idempotency keys and double-execution prevention | `live_applied` | [adr-0165-workflow-idempotency.md](docs/workstreams/adr-0165-workflow-idempotency.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Next For Forks

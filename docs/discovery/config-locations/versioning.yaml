@@ -18,13 +18,13 @@ entries:
     - 'docs/release-notes/X.Y.Z.md: Detailed notes for this version'
     - 'workstreams.yaml: What is included in this version'
   changelog.md:
-    purpose: Human-readable changelog index pointing to versioned release notes
+    purpose: Human-readable changelog scratchpad plus bounded recent-release index
     owner: human
-    format: "Markdown \u2014 links to docs/release-notes/X.Y.Z.md files"
-    use_for: Understanding what changed in each release
+    format: "Markdown \u2014 `Unreleased`, latest release, bounded previous-release list, and archive links"
+    use_for: Understanding pending changes, the latest cut, and where deeper release history moved
     update_when: When VERSION changes
     update_by: Integration agent or human
-    structure: '## Unreleased
+    structure: "## Unreleased
 
       ## Latest Release
 
@@ -32,12 +32,28 @@ entries:
 
       ## Previous Releases
 
-      '
+      ## Release Archives
+      "
+    related_files:
+    - 'config/root-summary-budgets.yaml: entry and line budgets for root summaries'
+    - 'docs/release-notes/index/README.md: generated archive overview after rollover'
   docs/release-notes/:
-    purpose: Versioned detailed release notes
+    purpose: Versioned detailed release notes plus generated archive indexes
     owner: human
-    format: "Markdown \u2014 one file per version: X.Y.Z.md"
-    use_for: Detailed change description per release
+    format: "Markdown \u2014 one file per version: X.Y.Z.md plus generated index/*.md ledgers"
+    use_for: Detailed change description per release and deeper release-history navigation after rollover
     update_when: When cutting a new version
     update_by: Integration agent or human
     naming_convention: X.Y.Z.md
+  config/root-summary-budgets.yaml:
+    purpose: Canonical ADR 0328 budget and rollover policy for the root README, changelog, and release-note index
+    owner: human
+    format: YAML \u2014 per-surface line budgets, recent-entry limits, and archive ledger paths
+    use_for: Keeping top-level summary documents concise while routing older history into generated ledgers
+    update_when: Tuning root-summary budgets, archive locations, or rollover limits
+    update_by: Agent or human implementing ADR 0328 follow-ups
+    validation: "`uv run --with pyyaml python scripts/generate_release_notes.py --check-root-summaries` and `uvx --from pyyaml python scripts/generate_status_docs.py --check`"
+    related_files:
+    - 'platform/root_summary.py: shared budget loader and archive helpers'
+    - 'docs/status/history/: generated README history ledgers'
+    - 'docs/release-notes/index/: generated release-note archive indexes'
