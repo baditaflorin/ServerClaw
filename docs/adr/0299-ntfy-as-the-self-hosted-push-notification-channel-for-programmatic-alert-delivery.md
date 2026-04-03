@@ -67,11 +67,11 @@ to it.
   topic via the platform's Windmill resource `res:ntfy/platform`; this resource
   holds the access token and base URL, injected from OpenBao
 - **Ansible playbooks**: Ansible roles that perform irreversible mutations publish
-  a `platform.ansible.warn` notification at the start and a
-  `platform.ansible.info` notification on successful completion; failures publish
-  to `platform.ansible.critical`
+  a `platform-ansible-warn` notification at the start and a
+  `platform-ansible-info` notification on successful completion; failures publish
+  to `platform-ansible-critical`
 - **Gitea Actions**: the CI validation gate (ADR 0087) publishes a
-  `platform.ci.critical` notification when a gate failure blocks a merge; this
+  `platform-ci-critical` notification when a gate failure blocks a merge; this
   reaches the operator without requiring them to poll the Gitea UI
 - **NATS bridge**: a lightweight Windmill subscription job bridges selected
   high-priority NATS subjects (`platform.security.cve_delta`,

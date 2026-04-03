@@ -906,7 +906,7 @@ def test_post_ntfy_notification_uses_human_readable_title(monkeypatch) -> None:
             "controller_host": {
                 "ntfy": {
                     "url": "http://10.10.10.20:2586",
-                    "topic": "platform.backup.critical",
+                    "topic": "platform-backup-critical",
                     "publisher": "windmill",
                 }
             }
@@ -920,7 +920,7 @@ def test_post_ntfy_notification_uses_human_readable_title(monkeypatch) -> None:
     assert "--publisher" in argv
     assert argv[argv.index("--publisher") + 1] == "windmill"
     assert "--topic" in argv
-    assert argv[argv.index("--topic") + 1] == "platform.backup.critical"
+    assert argv[argv.index("--topic") + 1] == "platform-backup-critical"
     assert "--title" in argv
     assert argv[argv.index("--title") + 1] == "Restic backup critical"
     assert "--message" in argv

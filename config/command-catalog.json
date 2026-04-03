@@ -652,7 +652,7 @@
           "kind": "controller_secret",
           "required": false,
           "source": "config/controller-local-secrets.json",
-          "description": "Controller-local ntfy Windmill publisher token used when the load probe publishes error-budget warnings to the governed platform.slo.warn topic."
+          "description": "Controller-local ntfy Windmill publisher token used when the load probe publishes error-budget warnings to the governed platform-slo-warn topic."
         }
       ],
       "expected_preconditions": [
@@ -662,7 +662,7 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the generated k6 load receipts, the raw summary export, any platform.slo.k6_regression event publication, and any platform.slo.warn notification that was emitted."
+        "notes": "Record the generated k6 load receipts, the raw summary export, any platform.slo.k6_regression event publication, and any platform-slo-warn notification that was emitted."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -704,7 +704,7 @@
           "kind": "controller_secret",
           "required": false,
           "source": "config/controller-local-secrets.json",
-          "description": "Controller-local ntfy Windmill publisher token used when the soak probe publishes error-budget warnings to the governed platform.slo.warn topic."
+          "description": "Controller-local ntfy Windmill publisher token used when the soak probe publishes error-budget warnings to the governed platform-slo-warn topic."
         }
       ],
       "expected_preconditions": [
@@ -714,7 +714,7 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the generated k6 soak receipts, the raw summary export, any platform.slo.k6_regression event publication, and any platform.slo.warn notification that was emitted."
+        "notes": "Record the generated k6 soak receipts, the raw summary export, any platform.slo.k6_regression event publication, and any platform-slo-warn notification that was emitted."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -3598,7 +3598,7 @@
       }
     },
     "converge-ntfy": {
-      "description": "Converge the published ntfy push channel, governed topic registry, and repo-managed publisher credentials on docker-runtime-lv3.",
+      "description": "Converge the published ntfy push channel, governed topic registry, repo-managed publisher credentials, and shared edge route for ntfy.lv3.org.",
       "workflow_id": "converge-ntfy",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -3609,6 +3609,13 @@
           "required": true,
           "source": "config/controller-local-secrets.json",
           "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish ntfy.lv3.org and expand the shared edge certificate SAN set."
         }
       ],
       "expected_preconditions": [

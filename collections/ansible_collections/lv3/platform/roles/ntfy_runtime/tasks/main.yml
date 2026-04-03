@@ -151,9 +151,9 @@
 - name: Ensure controller-local ntfy tokens exist
   ansible.builtin.shell: |
     set -euo pipefail
-    if [ ! -s "{{ item.token_path }}" ]; then
+    if [ ! -s "{{ item.token_path }}" ] || ! grep -Eq '^tk_[a-z0-9]{29}$' "{{ item.token_path }}"; then
       umask 077
-      printf 'tk_%s\n' "$(openssl rand -hex 24)" > "{{ item.token_path }}"
+      python3 -c 'import secrets,string; alphabet = string.ascii_lowercase + string.digits; print("tk_" + "".join(secrets.choice(alphabet) for _ in range(29)))' > "{{ item.token_path }}"
       echo changed
     fi
   args:
@@ -313,6 +313,10 @@
       {%- endfor -%}
       {%- endfor -%}
       {{ access }}
+  no_log: true
+
+- name: Render ntfy auth configuration lines
+  ansible.builtin.set_fact:
     ntfy_runtime_auth_user_lines: >-
       {%- set users = [] -%}
       {%- for user in ntfy_runtime_auth_users -%}
@@ -382,7 +386,148 @@
     or 'Downloaded newer image' in ntfy_runtime_pull.stdout
     or 'Pull complete' in ntfy_runtime_pull.stdout
 
-- name: Start the ntfy stack
+- name: Ensure Docker bridge networking chains are ready before ntfy startup
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: true
+
+- name: Start the ntfy stack and recover Docker bridge-chain failures
+  block:
+    - name: Start the ntfy stack
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ ntfy_runtime_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ ntfy_runtime_site_dir }}"
+      register: ntfy_runtime_up
+      changed_when: >-
+        'Creating' in ntfy_runtime_up.stdout
+        or 'Recreating' in ntfy_runtime_up.stdout
+        or 'Starting' in ntfy_runtime_up.stdout
+  rescue:
+    - name: Flag Docker bridge-chain failures during ntfy startup
+      ansible.builtin.set_fact:
+        ntfy_runtime_docker_bridge_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
+            or 'driver failed programming external connectivity' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected ntfy startup failures
+      ansible.builtin.fail:
+        msg: >-
+          {{
+            ansible_failed_result.stderr
+            | default(ansible_failed_result.stdout)
+            | default(ansible_failed_result.msg | default('Unknown ntfy compose startup failure.'))
+          }}
+      when: not ntfy_runtime_docker_bridge_chain_missing
+
+    - name: Stop the partially started ntfy stack before Docker recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ ntfy_runtime_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ ntfy_runtime_site_dir }}"
+      register: ntfy_runtime_down_after_failure
+      changed_when: >-
+        'Stopping' in (ntfy_runtime_down_after_failure.stdout | default(''))
+        or 'Removing' in (ntfy_runtime_down_after_failure.stdout | default(''))
+        or 'Removing' in (ntfy_runtime_down_after_failure.stderr | default(''))
+      failed_when: false
+      when: ntfy_runtime_docker_bridge_chain_missing
+
+    - name: Restart Docker to restore bridge chains before retrying ntfy startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: ntfy_runtime_docker_bridge_chain_missing
+
+    - name: Ensure Docker bridge networking chains are present before retrying ntfy startup
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+      when: ntfy_runtime_docker_bridge_chain_missing
+
+    - name: Retry ntfy startup after Docker bridge-chain recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ ntfy_runtime_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ ntfy_runtime_site_dir }}"
+      register: ntfy_runtime_up
+      changed_when: true
+      when: ntfy_runtime_docker_bridge_chain_missing
+
+- name: Inspect current ntfy container port bindings
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - --format
+      - "{{ '{{json .HostConfig.PortBindings}}' }}"
+      - "{{ ntfy_runtime_container_name }}"
+  register: ntfy_runtime_port_bindings_raw
+  changed_when: false
+  failed_when: false
+
+- name: Parse current ntfy container port bindings
+  ansible.builtin.set_fact:
+    ntfy_runtime_expected_port_key: "{{ ntfy_runtime_port | string ~ '/tcp' }}"
+    ntfy_runtime_port_bindings: >-
+      {{
+        (
+          ntfy_runtime_port_bindings_raw.stdout
+          | default('{}')
+          | trim
+          | from_json
+        )
+        if ntfy_runtime_port_bindings_raw.rc == 0
+        and (ntfy_runtime_port_bindings_raw.stdout | default('') | trim | length > 0)
+        else {}
+      }}
+
+- name: Detect ntfy host port binding drift
+  ansible.builtin.set_fact:
+    ntfy_runtime_host_port_binding_missing: >-
+      {{
+        ntfy_runtime_port_bindings_raw.rc != 0
+        or ntfy_runtime_expected_port_key not in ntfy_runtime_port_bindings
+        or (
+          ntfy_runtime_port | string
+        ) not in (
+          ntfy_runtime_port_bindings[ntfy_runtime_expected_port_key]
+          | default([])
+          | map(attribute='HostPort')
+          | list
+        )
+      }}
+
+- name: Recreate ntfy stack when host port binding drifts
   ansible.builtin.command:
     argv:
       - docker
@@ -391,14 +536,13 @@
       - "{{ ntfy_runtime_compose_file }}"
       - up
       - -d
+      - --force-recreate
       - --remove-orphans
   args:
     chdir: "{{ ntfy_runtime_site_dir }}"
-  register: ntfy_runtime_up
-  changed_when: >-
-    'Creating' in ntfy_runtime_up.stdout
-    or 'Recreating' in ntfy_runtime_up.stdout
-    or 'Starting' in ntfy_runtime_up.stdout
+  register: ntfy_runtime_port_binding_recreate
+  changed_when: true
+  when: ntfy_runtime_host_port_binding_missing
 
 - name: Read the host ntfy config for drift detection
   ansible.builtin.slurp:

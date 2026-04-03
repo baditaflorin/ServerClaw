@@ -24,6 +24,6 @@
   "ntfy": {
     "base_url": "http://10.10.10.20:2586",
     "publisher": "windmill",
-    "topic": "platform.security.warn"
+    "topic": "platform-security-warn"
   }
 }

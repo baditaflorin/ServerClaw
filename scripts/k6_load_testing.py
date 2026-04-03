@@ -42,7 +42,7 @@ DEFAULT_SOAK_DURATION = "30m"
 DEFAULT_REGRESSION_THRESHOLD = 0.20
 DEFAULT_NATS_URL = "nats://127.0.0.1:4222"
 DEFAULT_NTFY_PUBLISHER = "windmill"
-DEFAULT_NTFY_WARN_TOPIC = "platform.slo.warn"
+DEFAULT_NTFY_WARN_TOPIC = "platform-slo-warn"
 
 
 def require_mapping(value: Any, path: str) -> dict[str, Any]:

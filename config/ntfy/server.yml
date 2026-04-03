@@ -7,9 +7,9 @@ cache-file: "{{ ntfy_runtime_cache_file }}"
 attachment-cache-dir: "{{ ntfy_runtime_attachment_dir }}"
 auth-file: "{{ ntfy_runtime_auth_file }}"
 auth-default-access: deny-all
-visitor-request-limit-burst: "{{ ntfy_runtime_visitor_request_limit_burst }}"
+visitor-request-limit-burst: {{ ntfy_runtime_visitor_request_limit_burst }}
 visitor-request-limit-replenish: "{{ ntfy_runtime_visitor_request_limit_replenish }}"
-visitor-message-daily-limit: "{{ ntfy_runtime_visitor_message_daily_limit }}"
+visitor-message-daily-limit: {{ ntfy_runtime_visitor_message_daily_limit }}
 auth-users: {{ ntfy_runtime_auth_user_lines | to_json }}
 auth-tokens: {{ ntfy_runtime_auth_token_lines | to_json }}
 auth-access: {{ ntfy_runtime_auth_access_lines | to_json }}

@@ -344,7 +344,7 @@ def publish_ntfy_failure_best_effort(
         "--publisher",
         "ansible",
         "--topic",
-        "platform.ansible.critical",
+        "platform-ansible-critical",
         "--message",
         format_ntfy_failure_message(event),
         "--sequence-id",

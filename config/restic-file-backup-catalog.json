@@ -17,7 +17,7 @@
     },
     "ntfy": {
       "url": "http://10.10.10.20:2586",
-      "topic": "platform.backup.critical",
+      "topic": "platform-backup-critical",
       "publisher": "windmill"
     }
   },

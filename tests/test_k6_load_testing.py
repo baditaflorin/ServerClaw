@@ -585,12 +585,12 @@ def test_notify_ntfy_uses_governed_helper(monkeypatch, tmp_path: Path) -> None:
         receipt_path=tmp_path / "receipts" / "k6" / "load-grafana.json",
     )
 
-    assert topic == "platform.slo.warn"
+    assert topic == "platform-slo-warn"
     argv = captured["argv"]
     assert "--publisher" in argv
     assert argv[argv.index("--publisher") + 1] == "windmill"
     assert "--topic" in argv
-    assert argv[argv.index("--topic") + 1] == "platform.slo.warn"
+    assert argv[argv.index("--topic") + 1] == "platform-slo-warn"
     assert "--base-url" in argv
     assert argv[argv.index("--base-url") + 1] == "http://10.10.10.20:2586"
 

@@ -31,7 +31,7 @@ IMAGE_CATALOG_PATH = repo_path("config", "image-catalog.json")
 NTFY_TOPIC_REGISTRY_PATH = repo_path("config", "ntfy", "topics.yaml")
 NTFY_PUBLISH_SCRIPT_PATH = repo_path("scripts", "ntfy_publish.py")
 DEFAULT_NTFY_PUBLISHER = "windmill"
-DEFAULT_NTFY_TOPIC = "platform.security.warn"
+DEFAULT_NTFY_TOPIC = "platform-security-warn"
 
 
 def load_image_catalog(path: Path) -> dict[str, Any]:

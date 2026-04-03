@@ -2707,6 +2707,10 @@ lv3_service_topology:
       tls: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.ntfy_port }}"
+      chunked_transfer_encoding: true
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 900
+      proxy_send_timeout_seconds: 900
   ntopng:
     service_name: ntopng
     owning_vm: proxmox_florin

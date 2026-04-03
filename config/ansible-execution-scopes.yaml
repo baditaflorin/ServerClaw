@@ -287,9 +287,13 @@ playbooks:
       - inventory/host_vars/proxmox_florin.yml
   playbooks/ntfy.yml:
     playbook_id: ntfy
-    mutation_scope: host
+    mutation_scope: platform
     shared_surfaces:
       - service:ntfy
+      - vm:110/service:nginx_edge_publication
+      - vm:120
+      - vm:120/service:ntfy
+      - config/subdomain-catalog.json
       - inventory/host_vars/proxmox_florin.yml
   playbooks/ntopng.yml:
     playbook_id: ntopng

@@ -3131,6 +3131,10 @@ platform_service_topology:
       tls: true
       kind: proxy
       upstream: http://10.10.10.20:2586
+      chunked_transfer_encoding: true
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 900
+      proxy_send_timeout_seconds: 900
     service_id: ntfy
     runtime_pool: runtime-general
     deployment_surface: playbooks/ntfy.yml

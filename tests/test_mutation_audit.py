@@ -55,7 +55,7 @@ def test_publish_ntfy_failure_best_effort_builds_governed_command(monkeypatch, t
     assert "--publisher" in command
     assert command[command.index("--publisher") + 1] == "ansible"
     assert "--topic" in command
-    assert command[command.index("--topic") + 1] == "platform.ansible.critical"
+    assert command[command.index("--topic") + 1] == "platform-ansible-critical"
     assert "--sequence-id" in command
     assert command[command.index("--sequence-id") + 1] == "ansible:ansible:test-correlation:failure"
     assert "--dedupe-state-file" in command

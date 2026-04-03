@@ -10,7 +10,7 @@ alertmanager_runtime_url: http://127.0.0.1:9093
 alertmanager_runtime_rules_dir: /etc/prometheus/rules
 alertmanager_runtime_platform_rules_source: "{{ inventory_dir | dirname }}/config/alertmanager/rules/platform.yml"
 alertmanager_runtime_ntfy_username: alertmanager
-alertmanager_runtime_ntfy_publish_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('ntfy', 'internal') }}/platform.monitoring.critical"
+alertmanager_runtime_ntfy_publish_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('ntfy', 'internal') }}/platform-monitoring-critical"
 alertmanager_runtime_ntfy_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/alertmanager-password.txt
 alertmanager_runtime_ntfy_password_file: /etc/alertmanager/ntfy-password
 alertmanager_runtime_mattermost_webhook_manifest_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/incoming-webhooks.json

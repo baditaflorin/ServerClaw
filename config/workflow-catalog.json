@@ -5065,17 +5065,18 @@
       }
     },
     "converge-ntfy": {
-      "description": "Deploy the published ntfy push channel on docker-runtime-lv3 and persist the repo-managed credential and token bundle used by governed publishers.",
+      "description": "Deploy the published ntfy push channel on docker-runtime-lv3, publish ntfy.lv3.org through Hetzner DNS and the shared edge, and persist the repo-managed credential and token bundle used by governed publishers.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
         "target": "converge-ntfy",
-        "command": "make converge-ntfy"
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-ntfy"
       },
       "preflight": {
         "required": true,
         "required_secret_ids": [
-          "bootstrap_ssh_private_key"
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
         ],
         "generated_secret_ids": [
           "ntfy_alertmanager_password",
@@ -5099,11 +5100,17 @@
         "Makefile",
         "playbooks/ntfy.yml",
         "playbooks/services/ntfy.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/ntfy.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/ntfy.yml",
         "roles/ntfy_runtime",
         "inventory/host_vars/proxmox_florin.yml",
+        "inventory/group_vars/platform.yml",
+        "scripts/generate_platform_vars.py",
         "config/ntfy/server.yml",
         "config/ntfy/topics.yaml",
-        "config/subdomain-catalog.json"
+        "config/subdomain-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/service-capability-catalog.json"
       ],
       "outputs": [
         "A published ntfy runtime on docker-runtime-lv3 with the governed topic registry, controller-local publisher credentials, and ntfy.lv3.org edge contract mirrored from the repository."

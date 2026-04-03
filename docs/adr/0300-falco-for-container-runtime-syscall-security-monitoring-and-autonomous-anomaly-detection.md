@@ -75,7 +75,7 @@ the platform's Loki and NATS pipelines.
   to a lightweight Windmill webhook endpoint that:
   1. publishes the event to the NATS `platform.security.falco` subject (ADR 0276)
   2. for `CRITICAL` events, publishes an ntfy notification to
-     `platform.security.critical` (ADR 0299)
+     `platform-security-critical` (ADR 0299)
   3. records the event in the mutation audit log (ADR 0066) as a
      `security_anomaly_detected` entry
 - `INFO`-level events remain in Loki only; they do not trigger the NATS or ntfy

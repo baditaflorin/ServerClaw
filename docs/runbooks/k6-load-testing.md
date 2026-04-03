@@ -36,7 +36,7 @@ The Windmill worker seeds `f/lv3/k6_load_testing` and schedules:
 - Receipts: `receipts/k6/<scenario>-<service>-<timestamp>.json`
 - Raw summary exports: `receipts/k6/raw/<timestamp>-<scenario>-summary.json`
 - Optional NATS regression event: `platform.slo.k6_regression`
-- Optional ntfy warning topic: `platform.slo.warn`
+- Optional ntfy warning topic: `platform-slo-warn`
 
 ## Live-Apply Notes
 

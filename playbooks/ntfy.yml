@@ -1,5 +1,96 @@
 ---
-- name: Converge ntfy runtime
+# Playbook: ntfy.yml
+# Purpose: Converge the repo-managed ntfy runtime, public DNS publication, and shared edge route for ADR 0299.
+# Use case: Run during ADR 0299 rollout, recovery, or replay when ntfy.lv3.org and its governed publisher contracts must match repo truth.
+#
+# Inputs (required):
+#   - env (string, required): Target environment selector used to choose the docker-runtime and nginx guests.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
+#
+# Outputs:
+#   - ntfy is running on docker-runtime-lv3 with repo-managed auth, ntfy.lv3.org resolves through Hetzner DNS, and the shared NGINX edge publishes the public health endpoint.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0299: ntfy as the self-hosted push notification channel for programmatic alert delivery.
+#   - Requires: the existing Docker runtime baseline on docker-runtime-lv3, linux_guest_firewall, nginx_edge_publication, and Hetzner DNS access for the public hostname.
+#   - Role: lv3.platform.ntfy_runtime - converges the ntfy runtime plus governed topic and credential contracts, including Docker publication self-heal during ntfy startup.
+#   - Role: lv3.platform.nginx_edge_publication - publishes ntfy.lv3.org through the shared edge certificate and proxy path.
+#
+# Related ADRs: 0068, 0077, 0087, 0095, 0204, 0276, 0280, 0299
+# Related Runbooks: docs/runbooks/configure-ntfy.md docs/runbooks/subdomain-governance.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-02
+
+- name: Ensure Hetzner DNS publication for ntfy
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
+    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
+    subdomain_fqdn: ntfy.lv3.org
+  tags:
+    - tier-2
+    - communication
+    - service-ntfy
+
+  tasks:
+    - name: Load controller defaults
+      ansible.builtin.include_vars:
+        file: "{{ inventory_defaults_path }}"
+
+    - name: Load the subdomain catalog
+      ansible.builtin.include_vars:
+        file: "{{ subdomain_catalog_path }}"
+        name: subdomain_catalog
+
+    - name: Select the ntfy subdomain entry
+      ansible.builtin.set_fact:
+        selected_subdomain: >-
+          {{
+            (
+              subdomain_catalog.subdomains
+              | selectattr('fqdn', 'equalto', subdomain_fqdn)
+              | list
+              | first
+            ) | default({})
+          }}
+
+    - name: Assert the ntfy subdomain is catalogued
+      ansible.builtin.assert:
+        that:
+          - selected_subdomain != {}
+          - selected_subdomain.status in ['active', 'planned']
+          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
+        fail_msg: "ntfy.lv3.org must exist in config/subdomain-catalog.json before live apply."
+
+    - name: Derive the managed Hetzner record name
+      ansible.builtin.set_fact:
+        selected_subdomain_record_name: >-
+          {{
+            '@'
+            if selected_subdomain.fqdn == hetzner_dns_zone_name
+            else (
+              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
+            )
+          }}
+
+    - name: Converge the ntfy Hetzner DNS record
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_record
+      vars:
+        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
+        hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
+        hetzner_dns_record_type: A
+        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
+        hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
+
+- name: Converge ntfy on the Docker runtime VM
   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
   become: true
   gather_facts: true
@@ -19,6 +110,7 @@
           - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
 
   roles:
+    - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.ntfy_runtime
 
   post_tasks:
@@ -31,3 +123,47 @@
       ansible.builtin.import_tasks: tasks/notify.yml
       vars:
         playbook_execution_notification_service: ntfy
+
+- name: Publish ntfy through the NGINX edge
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+  tags:
+    - tier-2
+    - communication
+    - service-ntfy
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication
+
+- name: Verify the ntfy public health endpoint from the controller
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tags:
+    - tier-2
+    - communication
+    - service-ntfy
+
+  tasks:
+    - name: Verify the ntfy public health endpoint responds
+      ansible.builtin.uri:
+        url: https://ntfy.lv3.org/v1/health
+        method: GET
+        status_code: 200
+      register: ntfy_public_health
+      retries: 12
+      delay: 5
+      until: ntfy_public_health.status == 200
+      changed_when: false

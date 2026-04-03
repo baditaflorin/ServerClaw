@@ -74,6 +74,21 @@
 - keep compatibility only where a client forces it, but move governed publishers onto ADR 0299 topic names on this workstream
 - validate both `make converge-ntfy` and the generic `make live-apply-service service=ntfy env=production` path before calling the branch complete
 
+## 2026-04-03 Verification Notes
+
+- `make converge-ntfy env=production` completed successfully after catalog and edge publication fixes, including Hetzner DNS convergence, ntfy runtime convergence on `docker-runtime-lv3`, `ntfy.lv3.org` edge publication on `nginx-lv3`, and a controller-side `https://ntfy.lv3.org/v1/health` check.
+- direct controller verification of `https://ntfy.lv3.org/platform-ansible-info` no longer times out after adding ntfy-specific edge proxy tuning (`chunked_transfer_encoding`, disabled request buffering, and longer proxy timeouts); the public POST path now returns immediately.
+- the remaining runtime mismatch is ntfy authentication reconciliation on `docker-runtime-lv3`: the live `server.yml` still exposes only the older `alertmanager` auth contract, so the public publish path currently returns `401 unauthorized` instead of accepting the governed `ansible` credentials.
+- a later branch-local `make converge-ntfy env=production` replay was interrupted after concurrent Docker-runtime activity from other active workstreams left the automation path stuck; the stale run was terminated rather than left contending with shared host changes.
+- `make converge-monitoring env=production` advanced through monitoring-stack verification, generated updated host SBOM receipts, and then was intentionally interrupted during later observability replay because it had moved beyond the ntfy-specific verification needed for this workstream pass.
+
+## Remaining For Final Mainline Closeout
+
+- rebase this workstream onto the latest `origin/main` before final integration so the live apply originates from the current mainline truth
+- replay ntfy from merged `main`, not the stale branch tip, and verify `python3 scripts/ntfy_publish.py --publisher ansible --topic platform-ansible-info ...` succeeds end to end with repo-managed credentials
+- once the merged-main replay succeeds, update ADR 0299 metadata to `Implementation Status: Implemented` and record the first repo version, first platform version, and implementation date
+- update the protected integration files on `main` only: `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml`
+
 ## Merge-To-Main Reminder
 
 - if the branch completes the live apply before the final main integration step, leave the exact remaining protected-file updates spelled out here before ending the session

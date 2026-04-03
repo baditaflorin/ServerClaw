@@ -78,6 +78,25 @@ def test_build_platform_vars_includes_livekit_publication_topology() -> None:
     assert livekit["edge"]["kind"] == "proxy"
 
 
+def test_build_platform_vars_includes_ntfy_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    ntfy = platform_vars["platform_service_topology"]["ntfy"]
+    dns_records = {
+        (record["name"], record["type"], record["value"], record["ttl"])
+        for record in platform_vars["hetzner_dns_records"]
+    }
+
+    assert ntfy["public_hostname"] == "ntfy.lv3.org"
+    assert ntfy["dns"]["name"] == "ntfy"
+    assert ntfy["ports"]["internal"] == 2586
+    assert ntfy["urls"]["public"] == "https://ntfy.lv3.org"
+    assert ntfy["urls"]["internal"] == "http://10.10.10.20:2586"
+    assert ntfy["edge"]["kind"] == "proxy"
+    assert ntfy["edge"]["upstream"] == "http://10.10.10.20:2586"
+    assert ("ntfy", "A", "65.108.75.123", 60) in dns_records
+    assert platform_vars["ntfy_port"] == 2586
+
+
 def test_build_platform_vars_includes_dify_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     dify = platform_vars["platform_service_topology"]["dify"]
