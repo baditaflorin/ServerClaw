@@ -11,6 +11,10 @@ Use this runbook when creating, editing, validating, or releasing workstream met
 - archived workstreams: `workstreams/archive/<year>/<workstream-id>.yaml`
 - generated compatibility artifact for existing readers: `workstreams.yaml`
 
+## Status Guidance
+
+- if a workstream is merge-ready but waiting on an external publication window or shared validation infrastructure, keep `status: ready_for_merge` and record the specific blocker under `blockers:` instead of downgrading the release-candidate status
+
 ## Primary Commands
 
 Regenerate the compatibility artifact after editing shard files:

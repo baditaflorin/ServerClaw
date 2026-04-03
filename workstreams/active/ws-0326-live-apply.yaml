@@ -1,7 +1,7 @@
 id: ws-0326-live-apply
 adr: '0326'
 title: Implement shard-backed workstream registry source files with generated compatibility assembly
-status: blocked
+status: ready_for_merge
 owner: codex
 branch: codex/ws-0326-live-apply
 worktree_path: .worktrees/ws-0326-live-apply

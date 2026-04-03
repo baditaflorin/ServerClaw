@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0326](../adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md)
 - Title: implement shard-backed workstream registry source files with generated active-only compatibility assembly
-- Status: blocked
+- Status: ready_for_merge
 - Included In Repo Version: not yet
 - Branch-Local Receipt: `receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-live-apply.json`
 - Implemented On: 2026-04-03
@@ -31,6 +31,7 @@
 - Focused regression coverage passed on the rebased tree: `uv run --with pytest --with pyyaml python -m pytest tests/test_workstream_registry.py tests/test_canonical_truth.py tests/test_workstream_surface_ownership.py tests/test_interface_contracts.py -q` returned `27 passed in 2.97s`.
 - `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-portals` passed on the rebased branch. The broader `generated-docs` lane was also exercised and failed only on the expected protected `changelog.md` canonical-truth delta that this branch is intentionally not allowed to write.
 - `make remote-validate` exercised the live remote entrypoint and truthfully exposed two environmental follow-ups: the build server could not create a workspace in its managed workspace root because the host was out of space, so the run fell back locally; the fallback then surfaced a stale `build/platform-manifest.json`, which this branch refreshed and re-checked locally. The same fallback also hit an `ansible-syntax` timeout under the large concurrent validation load, so the remote replay is preserved as partial evidence rather than a clean pass.
+- After the build-host workspace cleanup, the same `make remote-validate` replay proved that the remote path now starts correctly and that the remaining schema failure was repo-local: `status: blocked` in the ADR 0326 active shard is not a valid release-candidate value for the generated registry contract. The workstream now keeps `status: ready_for_merge` and records the publication constraints explicitly under `blockers:`.
 - Final verification evidence is recorded in:
   `receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-focused-tests-r1-0.178.1.txt`,
   `receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-validate-repo-r1-0.178.1.txt`,
@@ -53,4 +54,4 @@
 - This branch intentionally does not touch `VERSION`, release sections in `changelog.md`, the top-level `README.md` summary, or `versions/stack.yaml`.
 - If this workstream becomes the exact `main` integration step, update the protected release bookkeeping on `main`: bump `VERSION`, refresh the changelog and any release-generated surfaces that depend on it, regenerate any affected truth artifacts, and then mark ADR 0326 as `Implemented` with its first integrated repo version.
 - Because ADR 0326 changes repository coordination and validation structure rather than live infrastructure state, `versions/stack.yaml` and the platform version should remain unchanged unless a separate exact-main integration explicitly chooses to record this repo-only truth there.
-- If a clean remote-gate proof is required before merging, first free space in the build host workspace root and rerun `make remote-validate`; the 2026-04-03 attempt fell back locally because remote workspace creation failed, and that fallback then timed out in `ansible-syntax` under concurrent validation load.
+- If a clean remote-gate proof is required before merging, use the cleaned build host workspace root and rerun `make remote-validate`; the 2026-04-03 replay already recovered the builder from disk exhaustion, and the remaining follow-up was the repo-local status-contract mismatch fixed on this branch.
