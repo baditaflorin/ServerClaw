@@ -326,12 +326,22 @@ def wait_for_tunnel(process: subprocess.Popen[str], port: int) -> None:
     raise RuntimeError(f"Timed out waiting for SSH tunnel on localhost:{port}")
 
 
+def resolve_nats_tunnel_target(context: dict[str, Any]) -> str:
+    guests = context.get("guests", {})
+    if "runtime-control-lv3" in guests:
+        return "runtime-control-lv3"
+    if "docker-runtime-lv3" in guests:
+        return "docker-runtime-lv3"
+    raise KeyError("no governed NATS guest was found in the controller context")
+
+
 @contextmanager
 def nats_tunnel(context: dict[str, Any]) -> Iterator[int]:
     local_port = reserve_local_port()
+    target = resolve_nats_tunnel_target(context)
     command = build_guest_ssh_tunnel_command(
         context,
-        "docker-runtime-lv3",
+        target,
         local_bind=f"127.0.0.1:{local_port}",
         remote_bind="127.0.0.1:4222",
     )

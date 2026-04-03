@@ -24,6 +24,7 @@ COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
 EVENT_TAXONOMY_PATH = REPO_ROOT / "config" / "event-taxonomy.yaml"
 NTFY_CONFIG_PATH = REPO_ROOT / "config" / "ntfy" / "server.yml"
+NTFY_TOPIC_REGISTRY_PATH = REPO_ROOT / "config" / "ntfy" / "topics.yaml"
 FALCO_SUPPRESSIONS_PATH = REPO_ROOT / "config" / "falco" / "suppressions.yaml"
 NTFY_ROLE_DEFAULTS = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "ntfy_runtime" / "defaults" / "main.yml"
 NTFY_ROLE_TASKS = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "ntfy_runtime" / "tasks" / "main.yml"
@@ -105,6 +106,7 @@ def test_bridge_defaults_reuse_private_nats_and_ntfy_contracts() -> None:
     assert defaults["falco_event_bridge_service_name"] == "lv3-falco-event-bridge"
     assert defaults["falco_event_bridge_listen_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.falco_event_bridge_port }}"
     assert defaults["falco_event_bridge_nats_subject"] == "platform.security.falco"
+    assert "runtime-control-lv3" in defaults["falco_event_bridge_nats_host"]
     assert defaults["falco_event_bridge_ntfy_topic"] == "platform-security-critical"
 
 
@@ -190,7 +192,10 @@ def test_ansible_scopes_taxonomy_ntfy_and_mutation_audit_cover_falco() -> None:
     ]
 
     ntfy_config = NTFY_CONFIG_PATH.read_text(encoding="utf-8")
-    assert "{{ ntfy_runtime_username }}:platform-security-critical:rw" in ntfy_config
+    ntfy_registry = NTFY_TOPIC_REGISTRY_PATH.read_text(encoding="utf-8")
+    assert "platform-security-critical:" in ntfy_registry
+    assert "publish_topics:\n      - platform-alerts\n      - platform-alerts-sbom-verify\n      - platform-monitoring-critical\n      - platform-slo-warn\n      - platform-security-critical" in ntfy_registry
+    assert "auth-access: {{ ntfy_runtime_auth_access_lines | to_json }}" in ntfy_config
 
 
 def test_ntfy_runtime_restarts_container_when_auth_config_changes() -> None:
@@ -218,7 +223,7 @@ def test_ntfy_runtime_restarts_container_when_auth_config_changes() -> None:
         if task["name"] == "Verify provisioned ntfy ACL topics are writable for the managed publisher"
     )
 
-    assert defaults["ntfy_runtime_image"] == "binwiederhier/ntfy:v2.21.0"
+    assert defaults["ntfy_runtime_image"] == "{{ container_image_catalog.images.ntfy_runtime.ref }}"
     assert defaults["ntfy_runtime_expected_write_topics"] == [
         "platform-alerts",
         "platform-alerts-sbom-verify",

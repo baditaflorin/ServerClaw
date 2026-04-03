@@ -10,7 +10,15 @@ falco_event_bridge_source_host: docker-runtime-lv3
 falco_event_bridge_actor_id: falco-event-bridge
 falco_event_bridge_event_topic: platform.security.falco
 falco_event_bridge_nats_subject: platform.security.falco
-falco_event_bridge_nats_host: 127.0.0.1
+falco_event_bridge_nats_host: >-
+  {{
+    (
+      hostvars['proxmox_florin'].proxmox_guests
+      | selectattr('name', 'equalto', 'runtime-control-lv3')
+      | map(attribute='ipv4')
+      | first
+    ) | default('127.0.0.1', true)
+  }}
 falco_event_bridge_nats_port: 4222
 falco_event_bridge_nats_username: jetstream-admin
 falco_event_bridge_nats_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt

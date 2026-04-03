@@ -223,6 +223,25 @@ def test_build_guest_ssh_command_makes_proxy_non_interactive(tmp_path: Path) -> 
     assert "UserKnownHostsFile=/dev/null" in joined
 
 
+def test_resolve_nats_tunnel_target_prefers_runtime_control() -> None:
+    target = drift_lib.resolve_nats_tunnel_target(
+        {
+            "guests": {
+                "docker-runtime-lv3": "10.10.10.20",
+                "runtime-control-lv3": "10.10.10.92",
+            }
+        }
+    )
+
+    assert target == "runtime-control-lv3"
+
+
+def test_resolve_nats_tunnel_target_falls_back_to_docker_runtime() -> None:
+    target = drift_lib.resolve_nats_tunnel_target({"guests": {"docker-runtime-lv3": "10.10.10.20"}})
+
+    assert target == "docker-runtime-lv3"
+
+
 def test_inventory_guest_proxy_command_is_non_interactive() -> None:
     group_vars = (REPO_ROOT / "inventory" / "group_vars" / "all.yml").read_text(encoding="utf-8")
 

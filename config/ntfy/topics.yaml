@@ -100,6 +100,7 @@ users:
       - platform-alerts-sbom-verify
       - platform-monitoring-critical
       - platform-slo-warn
+      - platform-security-critical
   changedetection:
     username: changedetection
     password_secret_id: ntfy_changedetection_password
