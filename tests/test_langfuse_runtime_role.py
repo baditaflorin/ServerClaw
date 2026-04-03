@@ -78,6 +78,35 @@ def test_tasks_recover_stale_compose_network_during_langfuse_startup() -> None:
     assert "Retry Langfuse stack startup after compose-network recovery" in rescue_names
 
 
+def test_tasks_force_recreate_langfuse_when_network_attachment_is_missing() -> None:
+    tasks = load_tasks()
+    network_check = next(
+        task for task in tasks if task.get("name") == "Check whether Langfuse has an attached Docker network"
+    )
+    recovery_block = next(
+        task for task in tasks if task.get("name") == "Force-recreate Langfuse when Docker network attachment is missing"
+    )
+    network_cleanup = next(
+        task
+        for task in recovery_block["block"]
+        if task.get("name") == "Remove the stale Langfuse compose network before retrying startup"
+    )
+    retry_up = next(
+        task
+        for task in recovery_block["block"]
+        if task.get("name") == "Force-recreate Langfuse after local network attachment recovery"
+    )
+    network_recheck = next(
+        task for task in tasks if task.get("name") == "Recheck Langfuse Docker network attachment"
+    )
+
+    assert "{{json .NetworkSettings.Networks}}" in network_check["ansible.builtin.shell"]
+    assert recovery_block["when"] == "langfuse_network_attachment_check.stdout | trim in ['', '{}', 'null']"
+    assert "^{{ langfuse_site_dir | basename }}_default$" in network_cleanup["ansible.builtin.shell"]
+    assert retry_up["ansible.builtin.command"]["argv"][-4:] == ["up", "-d", "--force-recreate", "--remove-orphans"]
+    assert network_recheck["until"] == "langfuse_network_attachment_recheck.stdout | trim not in ['', '{}', 'null']"
+
+
 def test_verify_retries_bootstrap_project_api_until_langfuse_db_recovers() -> None:
     verify_tasks = load_verify_tasks()
     verify_task = next(

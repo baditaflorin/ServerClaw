@@ -102,7 +102,10 @@ def test_one_api_runtime_bootstraps_openbao_env_and_root_contract() -> None:
     bridge_helper = find_task(tasks, "Ensure Docker bridge chains are healthy before One-API startup")
     nat_chain_flag = find_task(tasks, "Flag Docker nat-chain failures during One-API startup")
     unexpected_failure = find_task(tasks, "Surface unexpected One-API startup failures")
-    nat_chain_restart = find_task(tasks, "Restart Docker to restore nat chain before retrying One-API startup")
+    nat_chain_restart = find_task(
+        tasks,
+        "Fail closed before an unsafe Docker daemon restart while restoring the One-API nat chain",
+    )
     rescue_bridge_helper = find_task(tasks, "Repair Docker bridge chains before force recreate")
     up_task = find_task(tasks, "Converge the One-API runtime stack")
     port_binding_check = find_task(tasks, "Check whether One-API publishes the expected host port")
@@ -131,7 +134,11 @@ def test_one_api_runtime_bootstraps_openbao_env_and_root_contract() -> None:
     assert bridge_helper["ansible.builtin.include_role"]["tasks_from"] == "docker_bridge_chains"
     assert "Unable to enable DNAT rule" in nat_chain_flag["ansible.builtin.set_fact"]["one_api_docker_nat_chain_missing"]
     assert "one-api compose up failed" in unexpected_failure["ansible.builtin.fail"]["msg"]
-    assert nat_chain_restart["ansible.builtin.service"]["name"] == "docker"
+    restart_helper = nat_chain_restart["ansible.builtin.include_role"]
+    assert restart_helper["name"] == "lv3.platform.common"
+    assert restart_helper["tasks_from"] == "docker_daemon_restart"
+    assert nat_chain_restart["vars"]["common_docker_daemon_restart_service_name"] == "docker"
+    assert nat_chain_restart["vars"]["common_docker_daemon_restart_reason"] == "One-API startup nat-chain recovery"
     assert rescue_bridge_helper["ansible.builtin.include_role"]["tasks_from"] == "docker_bridge_chains"
     assert up_task["ansible.builtin.command"]["argv"][-2:] == ["-d", "--remove-orphans"]
     assert port_binding_check["ansible.builtin.command"]["argv"] == [
@@ -143,6 +150,8 @@ def test_one_api_runtime_bootstraps_openbao_env_and_root_contract() -> None:
     assert "{{json .NetworkSettings.Networks}}" in network_attachment_check["ansible.builtin.shell"]
     assert "one_api_port_binding_check.stdout | trim == ''" in network_recovery["when"]
     assert "^{{ one_api_site_dir | basename }}_default$" in network_cleanup["ansible.builtin.shell"]
+    recovery_names = [task["name"] for task in network_recovery["block"]]
+    assert "Restart Docker to restore bridge networking before retrying One-API startup" not in recovery_names
     assert port_binding_recheck["retries"] == 5
     assert "{{json .NetworkSettings.Networks}}" in network_attachment_recheck["ansible.builtin.shell"]
     assert force_recreate_task["ansible.builtin.command"]["argv"][-1] == "--force-recreate"

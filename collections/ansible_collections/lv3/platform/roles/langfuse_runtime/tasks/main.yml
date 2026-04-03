@@ -372,6 +372,82 @@
         or 'Starting' in langfuse_up.stdout
       when: langfuse_compose_network_missing
 
+- name: Check whether Langfuse has an attached Docker network
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker inspect "{{ langfuse_web_container_name }}" --format '{{ "{{json .NetworkSettings.Networks}}" }}'
+  args:
+    executable: /bin/bash
+  register: langfuse_network_attachment_check
+  changed_when: false
+  failed_when: false
+
+- name: Force-recreate Langfuse when Docker network attachment is missing
+  when: langfuse_network_attachment_check.stdout | trim in ['', '{}', 'null']
+  block:
+    - name: Reset stale Langfuse compose resources after missing network attachment detection
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ langfuse_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ langfuse_site_dir }}"
+      register: langfuse_network_recovery_down
+      changed_when: >-
+        'Stopping' in (langfuse_network_recovery_down.stdout | default(''))
+        or 'Removing' in (langfuse_network_recovery_down.stdout | default(''))
+        or 'Removing' in (langfuse_network_recovery_down.stderr | default(''))
+      failed_when: false
+
+    - name: Remove the stale Langfuse compose network before retrying startup
+      ansible.builtin.shell: |
+        set -euo pipefail
+        stale_networks="$(docker network ls -q --filter name=^{{ langfuse_site_dir | basename }}_default$)"
+        if [ -n "${stale_networks}" ]; then
+          docker network rm ${stale_networks}
+          echo changed
+        fi
+      args:
+        chdir: "{{ langfuse_site_dir }}"
+        executable: /bin/bash
+      register: langfuse_network_cleanup
+      changed_when: "'changed' in langfuse_network_cleanup.stdout"
+
+    - name: Force-recreate Langfuse after local network attachment recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ langfuse_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ langfuse_site_dir }}"
+      register: langfuse_network_recovery_up
+      changed_when: >-
+        'Creating' in langfuse_network_recovery_up.stdout
+        or 'Recreating' in langfuse_network_recovery_up.stdout
+        or 'Starting' in langfuse_network_recovery_up.stdout
+
+- name: Recheck Langfuse Docker network attachment
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker inspect "{{ langfuse_web_container_name }}" --format '{{ "{{json .NetworkSettings.Networks}}" }}'
+  args:
+    executable: /bin/bash
+  register: langfuse_network_attachment_recheck
+  changed_when: false
+  retries: 5
+  delay: 2
+  until: langfuse_network_attachment_recheck.stdout | trim not in ['', '{}', 'null']
+
 - name: Wait for Langfuse to listen locally
   ansible.builtin.wait_for:
     host: 127.0.0.1

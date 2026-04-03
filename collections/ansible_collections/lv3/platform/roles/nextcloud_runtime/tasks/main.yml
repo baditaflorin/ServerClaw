@@ -351,11 +351,14 @@
       failed_when: false
       when: nextcloud_compose_network_missing
 
-    - name: Restart Docker to restore bridge chains before retrying Nextcloud startup
-      ansible.builtin.service:
-        name: docker
-        state: restarted
-      when: nextcloud_docker_bridge_chain_missing or nextcloud_compose_network_missing
+    - name: Fail closed before an unsafe Docker daemon restart while repairing Nextcloud bridge chains
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_daemon_restart
+      vars:
+        common_docker_daemon_restart_service_name: docker
+        common_docker_daemon_restart_reason: Nextcloud startup bridge-chain recovery
+      when: nextcloud_docker_bridge_chain_missing
 
     - name: Ensure Docker bridge networking chains are present before retrying Nextcloud startup
       ansible.builtin.include_role:
@@ -364,7 +367,7 @@
       vars:
         common_docker_bridge_chains_service_name: docker
         common_docker_bridge_chains_require_nat_chain: true
-      when: nextcloud_docker_bridge_chain_missing or nextcloud_compose_network_missing
+      when: nextcloud_docker_bridge_chain_missing
 
     - name: Retry Nextcloud startup after resetting stale compose resources
       ansible.builtin.command:
@@ -386,6 +389,83 @@
         or 'Recreating' in nextcloud_compose_up_retry.stdout
         or 'Running' in nextcloud_compose_up_retry.stdout
       when: nextcloud_docker_bridge_chain_missing or nextcloud_compose_network_missing
+
+- name: Check whether Nextcloud has an attached Docker network
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker inspect "{{ nextcloud_container_name }}" --format '{{ "{{json .NetworkSettings.Networks}}" }}'
+  args:
+    executable: /bin/bash
+  register: nextcloud_network_attachment_check
+  changed_when: false
+  failed_when: false
+
+- name: Force-recreate Nextcloud when Docker network attachment is missing
+  when: nextcloud_network_attachment_check.stdout | trim in ['', '{}', 'null']
+  block:
+    - name: Reset stale Nextcloud compose resources after missing network attachment detection
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ nextcloud_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ nextcloud_site_dir }}"
+      register: nextcloud_network_recovery_down
+      changed_when: >-
+        'Stopping' in (nextcloud_network_recovery_down.stdout | default(''))
+        or 'Removing' in (nextcloud_network_recovery_down.stdout | default(''))
+        or 'Removing' in (nextcloud_network_recovery_down.stderr | default(''))
+      failed_when: false
+
+    - name: Remove the stale Nextcloud compose network before retrying startup
+      ansible.builtin.shell: |
+        set -euo pipefail
+        stale_networks="$(docker network ls -q --filter name=^{{ nextcloud_site_dir | basename }}_default$)"
+        if [ -n "${stale_networks}" ]; then
+          docker network rm ${stale_networks}
+          echo changed
+        fi
+      args:
+        chdir: "{{ nextcloud_site_dir }}"
+        executable: /bin/bash
+      register: nextcloud_network_cleanup
+      changed_when: "'changed' in nextcloud_network_cleanup.stdout"
+
+    - name: Force-recreate Nextcloud after local network attachment recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ nextcloud_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+          - --force-recreate
+      args:
+        chdir: "{{ nextcloud_site_dir }}"
+      register: nextcloud_network_recovery_up
+      changed_when: >-
+        'Creating' in nextcloud_network_recovery_up.stdout
+        or 'Recreating' in nextcloud_network_recovery_up.stdout
+        or 'Starting' in nextcloud_network_recovery_up.stdout
+        or 'Running' in nextcloud_network_recovery_up.stdout
+
+- name: Recheck Nextcloud Docker network attachment
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker inspect "{{ nextcloud_container_name }}" --format '{{ "{{json .NetworkSettings.Networks}}" }}'
+  args:
+    executable: /bin/bash
+  register: nextcloud_network_attachment_recheck
+  changed_when: false
+  retries: 5
+  delay: 2
+  until: nextcloud_network_attachment_recheck.stdout | trim not in ['', '{}', 'null']
 
 - name: Wait for Nextcloud local status
   ansible.builtin.uri:

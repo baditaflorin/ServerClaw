@@ -1,0 +1,44 @@
+id: ws-0335-service-recovery-followup
+adr: 0319
+title: Investigate and recover the remaining degraded services after the runtime-pool stabilization merges
+status: in_progress
+owner: codex
+branch: codex/ws-0335-service-recovery-followup
+worktree_path: .worktrees/ws-0335-service-recovery-followup
+doc: docs/workstreams/ws-0335-service-recovery-followup.md
+depends_on:
+- ws-0332-homepage-triage
+- ws-0333-service-uptime-recovery
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- workstreams/active/ws-0335-service-recovery-followup.yaml
+- docs/workstreams/ws-0335-service-recovery-followup.md
+- receipts/live-applies/
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws0335_service_recovery_registry_source
+    paths:
+    - workstreams/active/ws-0335-service-recovery-followup.yaml
+    mode: exclusive
+  - id: ws0335_service_recovery_doc
+    paths:
+    - docs/workstreams/ws-0335-service-recovery-followup.md
+    mode: exclusive
+  - id: ws0335_live_recovery_receipts
+    paths:
+    - receipts/live-applies/
+    mode: shared_contract
+    contract: live-apply-receipts-v1
+canonical_truth:
+  changelog_entry: null
+  release_bump: null
+  included_in_repo_version: null
+blockers: []
+ready_to_merge: false
+live_applied: false

@@ -162,7 +162,7 @@ def test_runtime_resets_stale_compose_networks_before_retrying_startup() -> None
     restart_docker = next(
         task
         for task in startup["rescue"]
-        if task.get("name") == "Restart Docker to restore bridge chains before retrying Nextcloud startup"
+        if task.get("name") == "Fail closed before an unsafe Docker daemon restart while repairing Nextcloud bridge chains"
     )
     reassert_chains = next(
         task
@@ -184,16 +184,49 @@ def test_runtime_resets_stale_compose_networks_before_retrying_startup() -> None
     assert retry_reset["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
     assert retry_reset["when"] == "nextcloud_compose_network_missing"
     assert retry_reset["failed_when"] is False
-    assert restart_docker["ansible.builtin.service"] == {"name": "docker", "state": "restarted"}
-    assert restart_docker["when"] == "nextcloud_docker_bridge_chain_missing or nextcloud_compose_network_missing"
+    restart_helper = restart_docker["ansible.builtin.include_role"]
+    assert restart_helper["name"] == "lv3.platform.common"
+    assert restart_helper["tasks_from"] == "docker_daemon_restart"
+    assert restart_docker["vars"]["common_docker_daemon_restart_service_name"] == "docker"
+    assert restart_docker["vars"]["common_docker_daemon_restart_reason"] == "Nextcloud startup bridge-chain recovery"
+    assert restart_docker["when"] == "nextcloud_docker_bridge_chain_missing"
     include_role = reassert_chains["ansible.builtin.include_role"]
     assert include_role["name"] == "lv3.platform.common"
     assert include_role["tasks_from"] == "docker_bridge_chains"
     assert reassert_chains["vars"]["common_docker_bridge_chains_service_name"] == "docker"
     assert reassert_chains["vars"]["common_docker_bridge_chains_require_nat_chain"] is True
-    assert reassert_chains["when"] == "nextcloud_docker_bridge_chain_missing or nextcloud_compose_network_missing"
+    assert reassert_chains["when"] == "nextcloud_docker_bridge_chain_missing"
     assert retry_start["ansible.builtin.command"]["argv"][-4:] == ["up", "-d", "--remove-orphans", "--force-recreate"]
     assert retry_start["when"] == "nextcloud_docker_bridge_chain_missing or nextcloud_compose_network_missing"
+
+
+def test_runtime_force_recreates_nextcloud_when_network_attachment_is_missing() -> None:
+    tasks = load_tasks(ROLE_TASKS)
+    network_check = next(
+        task for task in tasks if task.get("name") == "Check whether Nextcloud has an attached Docker network"
+    )
+    recovery_block = next(
+        task for task in tasks if task.get("name") == "Force-recreate Nextcloud when Docker network attachment is missing"
+    )
+    network_cleanup = next(
+        task
+        for task in recovery_block["block"]
+        if task.get("name") == "Remove the stale Nextcloud compose network before retrying startup"
+    )
+    retry_up = next(
+        task
+        for task in recovery_block["block"]
+        if task.get("name") == "Force-recreate Nextcloud after local network attachment recovery"
+    )
+    network_recheck = next(
+        task for task in tasks if task.get("name") == "Recheck Nextcloud Docker network attachment"
+    )
+
+    assert "{{json .NetworkSettings.Networks}}" in network_check["ansible.builtin.shell"]
+    assert recovery_block["when"] == "nextcloud_network_attachment_check.stdout | trim in ['', '{}', 'null']"
+    assert "^{{ nextcloud_site_dir | basename }}_default$" in network_cleanup["ansible.builtin.shell"]
+    assert retry_up["ansible.builtin.command"]["argv"][-4:] == ["up", "-d", "--remove-orphans", "--force-recreate"]
+    assert network_recheck["until"] == "nextcloud_network_attachment_recheck.stdout | trim not in ['', '{}', 'null']"
 
 
 def test_postgres_role_provisions_named_database_and_role() -> None:
