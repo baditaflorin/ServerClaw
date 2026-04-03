@@ -77,17 +77,19 @@ def test_load_auth_valid(tmp_path: Path) -> None:
 
 
 def test_load_auth_missing_file(tmp_path: Path) -> None:
-    """load_auth raises FileNotFoundError when the file does not exist."""
-    with pytest.raises(FileNotFoundError, match="not found"):
+    """load_auth exits 1 (via toolkit) when the file does not exist."""
+    with pytest.raises(SystemExit) as exc_info:
         tool.load_auth(str(tmp_path / "nonexistent.json"))
+    assert exc_info.value.code == 1
 
 
 def test_load_auth_missing_keys(tmp_path: Path) -> None:
-    """load_auth raises ValueError when required keys are absent."""
+    """load_auth exits 1 (via toolkit) when required keys are absent."""
     bad = tmp_path / "bad.json"
     bad.write_text(json.dumps({"api_url": "https://example.com"}), encoding="utf-8")
-    with pytest.raises(ValueError, match="missing required keys"):
+    with pytest.raises(SystemExit) as exc_info:
         tool.load_auth(str(bad))
+    assert exc_info.value.code == 1
 
 
 # ---------------------------------------------------------------------------
