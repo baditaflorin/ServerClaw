@@ -608,6 +608,7 @@ Current values on `main`:
 | `0319` | Refine the runtime-pool ADR bundle with battle-tested API-first OSS recommendations | `merged` | [ws-0329-runtime-library-fit.md](docs/workstreams/ws-0329-runtime-library-fit.md) |
 | `0319` | Complete the phased runtime-pool transition after the first runtime-ai split | `merged` | [ws-0330-runtime-pool-transition-program.md](docs/workstreams/ws-0330-runtime-pool-transition-program.md) |
 | `0324` | Programmatic sharding roadmap for oversized service, ADR, discovery, and workstream surfaces | `merged` | [ws-0324-programmatic-doc-shards.md](docs/workstreams/ws-0324-programmatic-doc-shards.md) |
+| `0340` | Dedicated Coolify Apps VM Separation — introduce coolify-apps-lv3 as the Coolify deployment server | `merged` | [0340-dedicated-coolify-apps-vm-separation.md](docs/adr/0340-dedicated-coolify-apps-vm-separation.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Next For Forks

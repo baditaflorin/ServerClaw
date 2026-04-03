@@ -18470,6 +18470,8 @@ workstreams:
       - receipts/image-scans/2026-03-31-label-studio-runtime.json
       - receipts/image-scans/2026-03-31-label-studio-runtime.trivy.json
       - receipts/live-applies/*label-studio*
+      - receipts/live-applies/2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply.json
+      - receipts/live-applies/evidence/2026-04-03-ws-0340-mainline-receipt-backfill-r1-0.177.153.txt
       - README.md
       - RELEASE.md
       - VERSION
@@ -18564,6 +18566,12 @@ workstreams:
             - receipts/live-applies/*label-studio*
           mode: shared_contract
           contract: adr-0289-label-studio-live-apply-v1
+        - id: latest_main_receipt_repairs
+          paths:
+            - receipts/live-applies/2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply.json
+            - receipts/live-applies/evidence/2026-04-03-ws-0340-mainline-receipt-backfill-r1-0.177.153.txt
+          mode: shared_contract
+          contract: latest-main-receipt-repair-v1
         - id: release_management_surfaces
           paths:
             - README.md
