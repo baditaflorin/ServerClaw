@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.149",
+  "repo_version": "0.177.150",
   "platform_version": "0.130.93",
-  "generated_at": "2026-04-03T02:45:06Z",
-  "next_refresh_at": "2026-04-03T03:45:06Z",
+  "generated_at": "2026-04-03T03:53:22Z",
+  "next_refresh_at": "2026-04-03T04:53:22Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -441,7 +441,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "nats://10.10.10.92:4222",
-        "last_live_apply": "2026-04-02T00:00:00Z"
+        "last_live_apply": "2026-04-03T00:00:00Z"
       },
       "netbox": {
         "service_name": "NetBox",
@@ -911,6 +911,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/compose-secrets-injection.md"
+      },
+      {
+        "id": "atlas-drift-check",
+        "description": "Run the ADR 0304 Atlas schema drift check against the live PostgreSQL databases and publish structured receipts plus notifications for drift findings.",
+        "tags": [
+          "atlas-drift-check",
+          "diagnostic",
+          "guest-live",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 220,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/configure-atlas.md"
       },
       {
         "id": "audit-token-inventory",
@@ -4786,6 +4812,16 @@
         ]
       },
       {
+        "id": "configure-atlas",
+        "title": "Configure Atlas",
+        "agent_trust_required": "T2",
+        "steps": 13,
+        "path": "docs/runbooks/configure-atlas.md",
+        "workflow_ids": [
+          "atlas-drift-check"
+        ]
+      },
+      {
         "id": "configure-backup-vm",
         "title": "Configure Backup VM",
         "agent_trust_required": "T3",
@@ -6035,10 +6071,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.148",
+    "last_version": "0.177.149",
     "deployed_at": "2026-04-03",
-    "summary": "integrates ADR 0281 into main by promoting the April 3 exact-main GlitchTip replay, preserving the already-current platform version `0.130.93`, and recording truthful public health, Keycloak OIDC, and end-to-end event-ingest evidence for `errors.lv3.org`",
-    "release_notes_url": "docs/release-notes/0.177.149.md"
+    "summary": "integrates ADR 0304 into `main` by carrying the already-live Atlas-backed schema validation, pre-migration linting, committed schema snapshots, and Windmill drift-detection path forward onto the latest `origin/main` baseline after replaying the latest realistic live path and refreshing Atlas snapshots preserves the already-current platform version `0.130.93` while promoting the first verified ADR 0304 live-apply baseline from platform version `0.130.90` into repository release `0.177.150`",
+    "release_notes_url": "docs/release-notes/0.177.150.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-04-03'
 total_adrs: 359
 implementation_status_summary:
-  Implemented: 310
+  Implemented: 311
   Partial: 11
-  Not Implemented: 37
+  Not Implemented: 36
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5429,7 +5429,7 @@ adr_index:
       - linting
     summary: We will integrate Atlas as the migration linting and drift detection layer
     filename: 0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
-    implemented_version: 0.177.143
+    implemented_version: 0.177.150
   - adr: '0305'
     title: k6 For Continuous Load Testing And SLO Error Budget Burn Validation
     status: Accepted

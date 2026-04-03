@@ -1881,7 +1881,7 @@ workstreams:
     canonical_truth:
       changelog_entry: integrates ADR 0281 into main by promoting the April 3 exact-main GlitchTip replay, preserving the already-current platform version `0.130.93`, and recording truthful public health, Keycloak OIDC, and end-to-end event-ingest evidence for `errors.lv3.org`
       release_bump: patch
-      included_in_repo_version: 0.177.149
+      included_in_repo_version: 0.177.150
       latest_receipts:
         glitchtip: 2026-04-03-adr-0281-glitchtip-mainline-live-apply
     ready_to_merge: true
@@ -15629,7 +15629,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0304 by adding Atlas-backed schema validation, pre-migration linting, snapshot refresh, and verified Windmill drift detection with OpenBao-delivered runtime credentials on the latest mainline replay
       release_bump: patch
-      included_in_repo_version: 0.177.148
+      included_in_repo_version: 0.177.149
       latest_receipts:
         database_schema: 2026-04-02-adr-0304-atlas-mainline-live-apply
   - id: ws-0307-0308-operator-adrs

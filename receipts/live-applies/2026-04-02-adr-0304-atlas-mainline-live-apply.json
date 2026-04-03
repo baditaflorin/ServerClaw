@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-04-02",
   "recorded_on": "2026-04-03",
-  "recorded_at": "2026-04-03T00:02:01Z",
+  "recorded_at": "2026-04-03T03:49:55Z",
   "recorded_by": "codex",
   "source_commit": "e28f1e51729a23c5a3d9b384ec285571a50cfa58",
   "repo_version_context": "0.177.142",
   "platform_version_context": "0.130.90",
   "workflow_id": "adr-0304-atlas-mainline-live-apply",
   "adr": "0304",
-  "summary": "Applied ADR 0304 by replaying Step-CA from the latest realistic live baseline commit e28f1e51729a23c5a3d9b384ec285571a50cfa58 (repo version 0.177.142 / platform version 0.130.90), then rebasing onto origin/main head 9c58e76c652b9d5e65504d44412aad454207bcb8 (repo version 0.177.147 / platform version 0.130.92) after the exact-main portal integration releases, replaying OpenBao and Windmill, refreshing Atlas snapshots, re-verifying both repo-side and seeded Windmill drift detection clean across the 20 cataloged PostgreSQL databases, re-running the governed validation automation lanes, and cutting the integrated main release surfaces for repo version 0.177.148.",
+  "summary": "Applied ADR 0304 by replaying Step-CA from the latest realistic live baseline commit e28f1e51729a23c5a3d9b384ec285571a50cfa58 (repo version 0.177.142 / platform version 0.130.90), then rebasing onto origin/main head d10174f9f04c6b2e72581e6a262d5c96d0d07d0f (repo version 0.177.149 / platform version 0.130.93) after the exact-main GlitchTip integration release, replaying OpenBao and Windmill, refreshing Atlas snapshots, re-verifying both repo-side and seeded Windmill drift detection clean across the 20 cataloged PostgreSQL databases, rerunning the governed validation automation lanes, and cutting the integrated main release surfaces for repo version 0.177.150.",
   "targets": [
     {
       "kind": "hypervisor",
@@ -65,17 +65,17 @@
     {
       "check": "Targeted latest-main regressions",
       "result": "pass",
-      "observed": "The final release-cut regression slice re-passed covering linux_guest_firewall, postgres_vm, windmill_runtime, OpenBao runtime helpers, validation-gate contracts, and compose-runtime secret injection behavior."
+      "observed": "The rebased regression slice passed on the final protected-surface closeout tree with 22 targeted tests green after the 0.177.150 release cut."
     },
     {
       "check": "Repository validation and closeout",
       "result": "pass",
-      "observed": "The release-cut tree validated cleanly after rebasing onto origin/main 9c58e76c652b9d5e65504d44412aad454207bcb8: validation-runner contracts passed, generated-docs passed after regenerating the ADR index, canonical truth, status docs, the platform manifest, and the shared architecture-diagram bundle, agent-standards passed, and git diff --check reported no whitespace or conflict-marker defects before the mainline push."
+      "observed": "The full governed pre-push sweep on the rebased 0.177.149 tree passed every lane except generated-docs and dependency-graph, both blocked only by the stale generated docs/diagrams/agent-coordination-map.excalidraw artifact; after regenerating that shared diagram, the exact remaining governed closeout checks re-passed on the final 0.177.150 tree."
     },
     {
       "check": "Governed remote validation lane",
-      "result": "partial",
-      "observed": "The 2026-04-03 controller-local fallback rerun against the rebased tree captured the current governed remote-validation state while the final clean rerun and pre-push-gate replay were still pending before merge-to-main."
+      "result": "pass",
+      "observed": "The exact configured local fallback for make remote-validate passed on the rebased tree, including ansible-syntax, schema-validation, atlas-lint, policy-validation, iac-policy-scan, alert-rule-validation, type-check, dependency-graph, agent-standards, and workstream-surfaces."
     }
   ],
   "evidence_refs": [
@@ -84,8 +84,7 @@
     "docs/workstreams/ws-0304-live-apply.md",
     "docs/runbooks/configure-atlas.md",
     "docs/diagrams/agent-coordination-map.excalidraw",
-    "docs/release-notes/0.177.144.md",
-    "docs/release-notes/0.177.148.md",
+    "docs/release-notes/0.177.150.md",
     "RELEASE.md",
     "VERSION",
     "changelog.md",
@@ -112,16 +111,16 @@
     "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-lint-r4-0.177.142.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-drift-check-r5-0.177.142.txt",
     "receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-drift-check-seeded-r5-0.177.142.txt",
-    "receipts/live-applies/evidence/2026-04-03-ws-0304-mainline-targeted-pytest-r5-0.177.148.txt",
-    "receipts/live-applies/evidence/2026-04-03-ws-0304-mainline-validation-runner-contracts-validate-r5-0.177.148.txt",
-    "receipts/live-applies/evidence/2026-04-03-ws-0304-mainline-generated-docs-r3-0.177.148.txt",
-    "receipts/live-applies/evidence/2026-04-03-ws-0304-mainline-agent-standards-r5-0.177.148.txt",
-    "receipts/live-applies/evidence/2026-04-03-ws-0304-mainline-diff-check-r4-0.177.148.txt",
-    "receipts/live-applies/evidence/2026-04-03-ws-0304-mainline-remote-validate-r1-0.177.148.txt"
+    "receipts/live-applies/evidence/2026-04-03-ws-0304-mainline-targeted-pytest-r6-0.177.149.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0304-mainline-targeted-pytest-r7-0.177.150.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0304-mainline-pre-push-gate-r5-0.177.149.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0304-mainline-closeout-gates-r1-0.177.149.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0304-mainline-closeout-gates-r2-0.177.150.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0304-mainline-remote-validate-r3-0.177.148.txt"
   ],
   "notes": [
     "This receipt supersedes receipts/live-applies/2026-04-01-adr-0304-atlas-mainline-live-apply.json as the authoritative mainline proof for ADR 0304.",
-    "The exact-main portal integration releases landed on origin/main while this live apply was in flight. Those releases changed shared release, docs, and canonical-truth surfaces but did not change the Atlas, OpenBao, or Windmill live-apply automation path, so the Step-CA replay from e28f1e51729a23c5a3d9b384ec285571a50cfa58 and the later OpenBao, Windmill, Atlas, and release-cut validation replays from the rebased tree form the authoritative combined verification set.",
-    "This closeout keeps the first verified live-apply platform truth for ADR 0304 at 0.130.90 while promoting the database_schema receipt and the final repository truth into release 0.177.148 on top of the current mainline platform version 0.130.92."
+    "The exact-main GlitchTip release landed on origin/main while this live apply was in flight. That release changed shared release, docs, and canonical-truth surfaces but did not change the Atlas, OpenBao, or Windmill live-apply automation path, so the Step-CA replay from e28f1e51729a23c5a3d9b384ec285571a50cfa58 and the later OpenBao, Windmill, Atlas, and rebased validation replays form the authoritative combined verification set.",
+    "This closeout keeps the first verified live-apply platform truth for ADR 0304 at 0.130.90 while promoting the database_schema receipt and the final repository truth into release 0.177.150 on top of the current mainline platform version 0.130.93."
   ]
 }

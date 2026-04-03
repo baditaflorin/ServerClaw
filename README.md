@@ -43,7 +43,7 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.149` |
+| Repository version | `0.177.150` |
 | Platform version | `0.130.93` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -87,6 +87,7 @@ rewriting one operator's workstation paths.
 | `certificate_lifecycle` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
 | `changedetection` | `2026-03-30-adr-0280-changedetection-mainline-live-apply` |
 | `command_catalog` | `2026-03-28-adr-0230-policy-decisions-live-apply` |
+| `command_palette` | `2026-04-02-adr-0311-global-command-palette-mainline-live-apply` |
 | `config_merge` | `2026-03-26-adr-0158-config-merge-live-apply` |
 | `control_metadata_witness` | `2026-03-27-adr-0181-control-metadata-witness-live-apply` |
 | `control_plane_lanes` | `2026-03-22-adr-0045-control-plane-communication-lanes-live-apply` |
@@ -94,6 +95,7 @@ rewriting one operator's workstation paths.
 | `coolify` | `2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply` |
 | `coolify_apps` | `2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply` |
 | `crawl4ai` | `2026-03-31-adr-0288-crawl4ai-mainline-live-apply` |
+| `database_schema` | `2026-04-02-adr-0304-atlas-mainline-live-apply` |
 | `deadlock_detector` | `2026-03-26-adr-0162-deadlock-detector-live-apply` |
 | `dependency_graph_runtime` | `2026-03-26-adr-0117-dependency-graph-live-apply` |
 | `dify` | `2026-03-28-adr-0197-dify-mainline-live-apply` |
@@ -254,12 +256,12 @@ password SSH disabled on host and guests
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
 | `api` | API Lane | `https` | 16 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
-| `event` | Event Lane | `mixed` | 15 | Event sinks must be documented and intentionally reachable. |
+| `event` | Event Lane | `mixed` | 16 | Event sinks must be documented and intentionally reachable. |
 
 ### API Publication Tiers
 | Tier | Title | Surfaces | Summary |
 | --- | --- | --- | --- |
-| `internal-only` | Internal-Only | 19 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
+| `internal-only` | Internal-Only | 20 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
 | `operator-only` | Operator-Only | 9 | Reachable only from approved operator devices over private access such as Tailscale. |
 | `public-edge` | Public Edge | 3 | Intentionally published on a public domain through the named edge model. |
 <!-- END GENERATED: control-plane-lanes -->
@@ -304,7 +306,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.149` |
+| Repository version | `0.177.150` |
 | Platform version | `0.130.93` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -583,6 +585,7 @@ Current values on `main`:
 | `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `merged` | [ws-0297-live-apply.md](docs/workstreams/ws-0297-live-apply.md) |
 | `0297` | Integrate ADR 0297 live-apply evidence and release updates on main | `merged` | [ws-0297-main-merge.md](docs/workstreams/ws-0297-main-merge.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
+| `0304` | Live apply ADR 0304 from latest origin/main | `merged` | [ws-0304-live-apply.md](docs/workstreams/ws-0304-live-apply.md) |
 | `0308` | Live apply ADR 0308 journey-aware entry routing and saved home selection from latest origin/main | `live_applied` | [ws-0308-journey-live-apply.md](docs/workstreams/ws-0308-journey-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
 | `0309` | Integrate ADR 0309 task-oriented information architecture onto main and replay it from exact mainline truth | `live_applied` | [ws-0309-main-integration.md](docs/workstreams/ws-0309-main-integration.md) |
