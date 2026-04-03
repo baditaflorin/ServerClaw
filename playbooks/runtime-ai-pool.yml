@@ -254,6 +254,12 @@
       register: runtime_ai_dapr_tika_route
       changed_when: false
 
+    - name: Record runtime-ai retirement readiness on the controller
+      ansible.builtin.set_fact:
+        runtime_ai_retirement_ready: true
+      delegate_to: localhost
+      delegate_facts: true
+
 - name: Retire the legacy document-extraction copies from docker-runtime-lv3
   hosts: docker-runtime-lv3
   become: true
@@ -269,6 +275,15 @@
       - /opt/tesseract-ocr/docker-compose.yml
 
   pre_tasks:
+    - name: Assert runtime-ai verification completed before retiring legacy copies
+      ansible.builtin.assert:
+        that:
+          - hostvars['localhost'].runtime_ai_retirement_ready | default(false)
+        fail_msg: >-
+          Refusing to retire the legacy runtime-ai document-extraction
+          services on docker-runtime-lv3 until this run verifies the
+          replacement runtime-ai-lv3 routes.
+
     - name: Gather the legacy document-extraction compose files
       ansible.builtin.stat:
         path: "{{ item }}"

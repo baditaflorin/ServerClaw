@@ -76,9 +76,25 @@ def test_runtime_ai_pool_playbook_covers_provisioning_substrate_namespace_migrat
     assert dapr_post_task["ansible.builtin.command"]["argv"][-1] == (
         "http://127.0.0.1:3500/v1.0/invoke/http://127.0.0.1:9080/method/tika/version"
     )
+    readiness_task = next(
+        task
+        for task in playbook[4]["post_tasks"]
+        if task["name"] == "Record runtime-ai retirement readiness on the controller"
+    )
+    assert readiness_task["ansible.builtin.set_fact"] == {"runtime_ai_retirement_ready": True}
+    assert readiness_task["delegate_to"] == "localhost"
+    assert readiness_task["delegate_facts"] is True
 
     assert playbook[5]["hosts"] == "docker-runtime-lv3"
     assert "roles" not in playbook[5]
+    retirement_assert = next(
+        task
+        for task in playbook[5]["pre_tasks"]
+        if task["name"] == "Assert runtime-ai verification completed before retiring legacy copies"
+    )
+    assert retirement_assert["ansible.builtin.assert"]["that"] == [
+        "hostvars['localhost'].runtime_ai_retirement_ready | default(false)"
+    ]
     down_task = next(
         task for task in playbook[5]["tasks"] if task["name"] == "Stop the legacy document-extraction compose stacks on docker-runtime-lv3"
     )

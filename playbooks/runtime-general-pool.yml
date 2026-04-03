@@ -321,6 +321,12 @@
         timeout: 30
       changed_when: false
 
+    - name: Record runtime-general retirement readiness on the controller
+      ansible.builtin.set_fact:
+        runtime_general_retirement_ready: true
+      delegate_to: localhost
+      delegate_facts: true
+
 - name: Retire the legacy support-service copies from docker-runtime-lv3
   hosts: docker-runtime-lv3
   become: true
@@ -336,6 +342,15 @@
       - /opt/dev-tools/mailpit/docker-compose.yml
 
   pre_tasks:
+    - name: Assert runtime-general verification completed before retiring legacy copies
+      ansible.builtin.assert:
+        that:
+          - hostvars['localhost'].runtime_general_retirement_ready | default(false)
+        fail_msg: >-
+          Refusing to retire the legacy runtime-general support services on
+          docker-runtime-lv3 until this run verifies the replacement
+          runtime-general-lv3 routes and the shared edge publication.
+
     - name: Gather the legacy support-service compose files
       ansible.builtin.stat:
         path: "{{ item }}"

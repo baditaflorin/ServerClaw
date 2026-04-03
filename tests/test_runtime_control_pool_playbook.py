@@ -80,9 +80,25 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
     assert dapr_task["ansible.builtin.command"]["argv"][-1] == (
         "http://127.0.0.1:3500/v1.0/invoke/http://127.0.0.1:9080/method/openfga/healthz"
     )
+    readiness_task = next(
+        task
+        for task in playbook[17]["tasks"]
+        if task["name"] == "Record runtime-control retirement readiness on the controller"
+    )
+    assert readiness_task["ansible.builtin.set_fact"] == {"runtime_control_retirement_ready": True}
+    assert readiness_task["delegate_to"] == "localhost"
+    assert readiness_task["delegate_facts"] is True
 
     assert playbook[18]["name"] == "Retire the legacy control-plane copies from docker-runtime-lv3"
     assert playbook[18]["hosts"] == "docker-runtime-lv3"
+    retirement_assert = next(
+        task
+        for task in playbook[18]["pre_tasks"]
+        if task["name"] == "Assert runtime-control verification completed before retiring legacy copies"
+    )
+    assert retirement_assert["ansible.builtin.assert"]["that"] == [
+        "hostvars['localhost'].runtime_control_retirement_ready | default(false)"
+    ]
     down_task = next(
         task
         for task in playbook[18]["tasks"]

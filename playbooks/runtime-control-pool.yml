@@ -289,6 +289,12 @@
       register: runtime_control_dapr_openfga_route
       changed_when: false
 
+    - name: Record runtime-control retirement readiness on the controller
+      ansible.builtin.set_fact:
+        runtime_control_retirement_ready: true
+      delegate_to: localhost
+      delegate_facts: true
+
 - name: Retire the legacy control-plane copies from docker-runtime-lv3
   hosts: docker-runtime-lv3
   become: true
@@ -314,6 +320,15 @@
       - /opt/windmill/docker-compose.yml
 
   pre_tasks:
+    - name: Assert runtime-control verification completed before retiring legacy copies
+      ansible.builtin.assert:
+        that:
+          - hostvars['localhost'].runtime_control_retirement_ready | default(false)
+        fail_msg: >-
+          Refusing to retire the legacy runtime-control services on
+          docker-runtime-lv3 until this run verifies the replacement
+          runtime-control-lv3 routes.
+
     - name: Gather the legacy control-plane compose files
       ansible.builtin.stat:
         path: "{{ item }}"

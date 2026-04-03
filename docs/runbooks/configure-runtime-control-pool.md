@@ -114,6 +114,10 @@ ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv
   the host and `lv3.platform.linux_guest_firewall` on `monitoring-lv3` because
   the Nomad scheduler and host proxy catalog must learn about the new guest
   before the control-plane services move.
+- The legacy-retirement phase now fails closed unless the same playbook run has
+  already verified the `runtime-control-lv3` routes. Do not bypass that guard
+  with `--start-at-task`, `--limit docker-runtime-lv3`, or ad hoc
+  retirement-only replays.
 - Public edge publications for `api.lv3.org`, `registry.lv3.org`, and
   `sso.lv3.org` still terminate on `nginx-lv3`; the runtime-control substrate
   remains private-only.

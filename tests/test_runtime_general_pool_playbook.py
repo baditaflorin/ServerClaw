@@ -81,8 +81,24 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.nginx_edge_publication",
     ]
+    readiness_task = next(
+        task
+        for task in playbook[5]["post_tasks"]
+        if task["name"] == "Record runtime-general retirement readiness on the controller"
+    )
+    assert readiness_task["ansible.builtin.set_fact"] == {"runtime_general_retirement_ready": True}
+    assert readiness_task["delegate_to"] == "localhost"
+    assert readiness_task["delegate_facts"] is True
 
     assert playbook[6]["hosts"] == "docker-runtime-lv3"
+    retirement_assert = next(
+        task
+        for task in playbook[6]["pre_tasks"]
+        if task["name"] == "Assert runtime-general verification completed before retiring legacy copies"
+    )
+    assert retirement_assert["ansible.builtin.assert"]["that"] == [
+        "hostvars['localhost'].runtime_general_retirement_ready | default(false)"
+    ]
     down_task = next(
         task
         for task in playbook[6]["tasks"]
