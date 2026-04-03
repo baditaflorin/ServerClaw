@@ -1,9 +1,10 @@
 # ADR 0300: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.178.0
+- Implemented In Platform Version: 0.130.96
+- Implemented On: 2026-04-03
 - Date: 2026-03-29
 
 ## Context

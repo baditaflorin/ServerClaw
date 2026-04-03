@@ -43,8 +43,8 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.152` |
-| Platform version | `0.130.95` |
+| Repository version | `0.178.0` |
+| Platform version | `0.130.96` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -106,6 +106,7 @@ rewriting one operator's workstation paths.
 | `dozzle` | `2026-03-26-adr-0150-dozzle-live-apply` |
 | `excalidraw` | `2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply` |
 | `failure_domain_policy` | `2026-03-27-adr-0184-failure-domain-labels-live-apply` |
+| `falco` | `2026-04-03-adr-0300-falco-mainline-live-apply` |
 | `fixture_pools` | `2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply` |
 | `flagsmith` | `2026-03-30-adr-0288-flagsmith-mainline-live-apply` |
 | `gitea` | `2026-03-26-adr-0143-gitea-live-apply` |
@@ -307,8 +308,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.152` |
-| Platform version | `0.130.95` |
+| Repository version | `0.178.0` |
+| Platform version | `0.130.96` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -588,6 +589,7 @@ Current values on `main`:
 | `0297` | Integrate ADR 0297 live-apply evidence and release updates on main | `merged` | [ws-0297-main-merge.md](docs/workstreams/ws-0297-main-merge.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
 | `0299` | Live apply ntfy as the self-hosted push notification channel from latest origin/main | `merged` | [ws-0299-live-apply.md](docs/workstreams/ws-0299-live-apply.md) |
+| `0300` | ADR 0300 live apply from latest origin/main | `merged` | [ws-0300-live-apply.md](docs/workstreams/ws-0300-live-apply.md) |
 | `0304` | Live apply ADR 0304 from latest origin/main | `merged` | [ws-0304-live-apply.md](docs/workstreams/ws-0304-live-apply.md) |
 | `0308` | Live apply ADR 0308 journey-aware entry routing and saved home selection from latest origin/main | `live_applied` | [ws-0308-journey-live-apply.md](docs/workstreams/ws-0308-journey-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
@@ -607,6 +609,7 @@ Current values on `main`:
 | `0319` | Complete the phased runtime-pool transition after the first runtime-ai split | `merged` | [ws-0330-runtime-pool-transition-program.md](docs/workstreams/ws-0330-runtime-pool-transition-program.md) |
 | `0324` | Programmatic sharding roadmap for oversized service, ADR, discovery, and workstream surfaces | `merged` | [ws-0324-programmatic-doc-shards.md](docs/workstreams/ws-0324-programmatic-doc-shards.md) |
 | `0330` | Prepare the repository for public GitHub publication as a generic and forkable reference platform | `merged` | [adr-0330-public-github-readiness-bundle.md](docs/workstreams/adr-0330-public-github-readiness-bundle.md) |
+| `0340` | Dedicated Coolify Apps VM Separation — introduce coolify-apps-lv3 as the Coolify deployment server | `merged` | [0340-dedicated-coolify-apps-vm-separation.md](docs/adr/0340-dedicated-coolify-apps-vm-separation.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Next For Forks

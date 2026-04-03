@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: ws-0340-implementation (branch claude/affectionate-galileo)
+- Implemented In Repo Version: 0.178.0
 - Implemented In Platform Version: N/A (pending live apply)
 - Implemented On: 2026-04-03
 - Date: 2026-04-03

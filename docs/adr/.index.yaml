@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-04-03'
 total_adrs: 360
 implementation_status_summary:
-  Implemented: 313
+  Implemented: 314
   Partial: 10
-  Not Implemented: 36
+  Not Implemented: 35
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5347,7 +5347,7 @@ adr_index:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: security
     keywords:
@@ -5361,6 +5361,7 @@ adr_index:
       - anomaly
     summary: We will deploy Falco as a systemd service on each selected production VM,
     filename: 0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md
+    implemented_version: 0.178.0
   - adr: '0301'
     title: Semgrep For SAST And Application Code Security Scanning In The CI Gate
     status: Accepted
@@ -6036,3 +6037,4 @@ adr_index:
       - separation
     summary: We introduce a second dedicated guest, coolify-apps-lv3 (proposed VMID 171,
     filename: 0340-dedicated-coolify-apps-vm-separation.md
+    implemented_version: 0.178.0

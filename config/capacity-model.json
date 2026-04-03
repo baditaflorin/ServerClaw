@@ -172,6 +172,27 @@
       "notes": "Declared from inventory for ADR 0194 Coolify rollout."
     },
     {
+      "vmid": 171,
+      "name": "coolify-apps-lv3",
+      "status": "active",
+      "environment": "production",
+      "metrics_host": "coolify-apps-lv3",
+      "allocated": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 128
+      },
+      "budget": {
+        "ram_gb": 12,
+        "vcpu": 6,
+        "disk_gb": 160
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Declared from inventory for ADR 0340 dedicated Coolify apps runtime separation."
+    },
+    {
       "vmid": 180,
       "name": "artifact-cache-lv3",
       "status": "active",

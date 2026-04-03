@@ -18,10 +18,16 @@ It delivers:
 - WARNING+ event fan-out to NATS subject `platform.security.falco`
 - CRITICAL push notifications on ntfy topic `platform-security-critical`
 - legacy mutation-audit JSONL entries with `surface="falco"`
+- WARNING+ event delivery through the managed NATS JetStream bus on
+  `runtime-control-lv3`, reached from the controller and the bridge via the
+  repo-managed internal runtime-control target instead of a loopback-only
+  assumption
 
 ## Entrypoints
 
 - syntax check: `make syntax-check-falco`
+- verify NATS streams: `make check-nats-streams`
+- repair NATS streams when missing: `make apply-nats-streams`
 - converge: `make converge-falco`
 
 ## Managed Artifacts
@@ -37,14 +43,20 @@ It delivers:
 ## Verification
 
 1. `make syntax-check-falco`
-2. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a 'systemctl is-active lv3-falco-event-bridge falco-modern-bpf && curl -fsS http://127.0.0.1:18084/healthz' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
-3. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3:docker-build-lv3:monitoring-lv3:postgres-lv3 -m shell -a 'systemctl is-active falco-modern-bpf && falco --version' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
-4. Trigger the repo-managed smoke marker on each host and confirm one `platform.security.falco` envelope plus one `surface="falco"` audit entry per host, plus CRITICAL delivery into ntfy topic `platform-security-critical`.
+2. `make check-nats-streams`
+3. If the platform event streams are missing or drifted, run `make apply-nats-streams` and then rerun `make check-nats-streams`.
+4. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a 'systemctl is-active lv3-falco-event-bridge falco-modern-bpf && curl -fsS http://127.0.0.1:18084/healthz' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+5. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3:docker-build-lv3:monitoring-lv3:postgres-lv3 -m shell -a 'systemctl is-active falco-modern-bpf && falco --version' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+6. Trigger the repo-managed smoke marker on each host and confirm one `platform.security.falco` envelope plus one `surface="falco"` audit entry per host, plus CRITICAL delivery into ntfy topic `platform-security-critical`.
 
 ## Notes
 
 - The bridge is intentionally private and stays on `docker-runtime-lv3`; other
   guests only post Falco HTTP events over the internal guest network.
+- The bridge publishes into the NATS JetStream runtime on
+  `runtime-control-lv3`; controller-side verification helpers now prefer that
+  governed target and only fall back to `docker-runtime-lv3` when the runtime
+  control lane is unavailable.
 - The rollout uses one repo-managed ntfy credential already shared with the
   private Alertmanager topic; ntfy grants that same identity publish rights to
   `platform-security-critical`, so `make converge-falco` also replays

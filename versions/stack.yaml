@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.152
-platform_version: 0.130.95
+repo_version: 0.178.0
+platform_version: 0.130.96
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -20,6 +20,7 @@ live_apply_evidence:
     docker_publication: 2026-03-30-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     dozzle: 2026-03-26-adr-0150-dozzle-live-apply
+    falco: 2026-04-03-adr-0300-falco-mainline-live-apply
     gitea: 2026-03-26-adr-0143-gitea-live-apply
     grist: 2026-04-01-adr-0279-grist-mainline-live-apply
     homepage: 2026-03-26-adr-0152-homepage-live-apply
@@ -1144,8 +1145,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.152
+    current: 0.178.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.95
+    current: 0.130.96
     meaning: intended platform release for the actual server configuration
