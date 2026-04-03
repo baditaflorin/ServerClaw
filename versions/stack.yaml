@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.178.1
-platform_version: 0.130.97
+repo_version: 0.178.2
+platform_version: 0.130.98
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -23,12 +23,12 @@ live_apply_evidence:
     falco: 2026-04-03-adr-0300-falco-mainline-live-apply
     gitea: 2026-03-26-adr-0143-gitea-live-apply
     grist: 2026-04-01-adr-0279-grist-mainline-live-apply
-    homepage: 2026-03-26-adr-0152-homepage-live-apply
+    homepage: 2026-04-03-ws-0332-homepage-triage-mainline-live-apply
     langfuse: 2026-03-26-adr-0146-langfuse-live-apply
     livekit: 2026-04-01-adr-0293-livekit-mainline-live-apply
     lago: 2026-04-01-adr-0292-lago-mainline-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
-    uptime_kuma: 2026-03-22-adr-0027-uptime-kuma-live-apply
+    uptime_kuma: 2026-04-03-ws-0332-homepage-triage-mainline-live-apply
     build_telemetry: 2026-03-22-adr-0028-build-telemetry-live-apply
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
     backup_coverage: 2026-03-29-adr-0271-backup-coverage-ledger-mainline-live-apply
@@ -1154,8 +1154,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.1
+    current: 0.178.2
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.97
+    current: 0.130.98
     meaning: intended platform release for the actual server configuration

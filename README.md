@@ -43,8 +43,8 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.1` |
-| Platform version | `0.130.97` |
+| Repository version | `0.178.2` |
+| Platform version | `0.130.98` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -116,7 +116,7 @@ rewriting one operator's workstation paths.
 | `grist` | `2026-04-01-adr-0279-grist-mainline-live-apply` |
 | `guest_network_policy` | `2026-03-22-adr-0067-guest-network-policy-live-apply` |
 | `harbor` | `2026-03-29-adr-0201-harbor-mainline-live-apply` |
-| `homepage` | `2026-03-26-adr-0152-homepage-live-apply` |
+| `homepage` | `2026-04-03-ws-0332-homepage-triage-mainline-live-apply` |
 | `host_control_loops` | `2026-03-28-adr-0226-host-control-loops-mainline-live-apply` |
 | `https_tls_assurance` | `2026-03-29-adr-0255-matrix-synapse-mainline-live-apply` |
 | `iac_policy_scanning` | `2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply` |
@@ -223,7 +223,7 @@ rewriting one operator's workstation paths.
 | `tesseract_ocr` | `2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply` |
 | `tika` | `2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply` |
 | `typesense` | `2026-03-31-adr-0277-typesense-mainline-live-apply` |
-| `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
+| `uptime_kuma` | `2026-04-03-ws-0332-homepage-triage-mainline-live-apply` |
 | `validation_gate` | `2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply` |
 | `validation_runner_contracts` | `2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply` |
 | `vaultwarden` | `2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply` |
@@ -309,8 +309,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.1` |
-| Platform version | `0.130.97` |
+| Repository version | `0.178.2` |
+| Platform version | `0.130.98` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -454,6 +454,7 @@ Current values on `main`:
 | `0150` | Dozzle for real-time container log access | `live_applied` | [adr-0150-dozzle.md](docs/workstreams/adr-0150-dozzle.md) |
 | `0151` | n8n for webhook and API integration automation | `live_applied` | [adr-0151-n8n.md](docs/workstreams/adr-0151-n8n.md) |
 | `0152` | Homepage for unified service dashboard | `live_applied` | [adr-0152-homepage.md](docs/workstreams/adr-0152-homepage.md) |
+| `0152` | Triage failing Homepage services and restore safe runtime health | `live_applied` | [ws-0332-homepage-triage.md](docs/workstreams/ws-0332-homepage-triage.md) |
 | `0153` | Distributed resource lock registry | `merged` | [adr-0153-distributed-resource-lock-registry.md](docs/workstreams/adr-0153-distributed-resource-lock-registry.md) |
 | `0154` | VM-scoped parallel execution lanes | `live_applied` | [adr-0154-vm-scoped-execution-lanes.md](docs/workstreams/adr-0154-vm-scoped-execution-lanes.md) |
 | `0155` | Intent queue with release-triggered scheduling | `live_applied` | [adr-0155-intent-queue-with-release-triggered-scheduling.md](docs/workstreams/adr-0155-intent-queue-with-release-triggered-scheduling.md) |

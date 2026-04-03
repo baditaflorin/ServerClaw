@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.0",
-  "platform_version": "0.130.97",
-  "generated_at": "2026-04-03T12:59:11Z",
-  "next_refresh_at": "2026-04-03T13:59:11Z",
+  "repo_version": "0.178.2",
+  "platform_version": "0.130.98",
+  "generated_at": "2026-04-03T16:37:48Z",
+  "next_refresh_at": "2026-04-03T17:37:48Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6155,10 +6155,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.153",
+    "last_version": "0.178.1",
     "deployed_at": "2026-04-03",
-    "summary": "implements ADR 0300 by adding repo-managed Falco syscall monitoring across docker-runtime-lv3, docker-build-lv3, monitoring-lv3, and postgres-lv3, restoring the runtime-control NATS fan-out path and streams, and verifying four-host NATS, ntfy, Loki, and mutation-audit delivery",
-    "release_notes_url": "docs/release-notes/0.178.0.md"
+    "summary": "repairs the runtime-general Homepage and Uptime Kuma recovery path by restoring migrated Uptime Kuma state, aligning Docker guest public-edge host alias pinning, teaching the Uptime Kuma role to use the Compose plugin contract, and binding Homepage on loopback so Traefik and the shared edge can re-verify home.lv3.org safely",
+    "release_notes_url": "docs/release-notes/0.178.2.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
