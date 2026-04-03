@@ -321,6 +321,7 @@ workstreams:
   - scripts/validate_repo.sh
   - tests/test_generate_adr_index.py
   - tests/test_adr_query_tool.py
+  - tests/test_generate_discovery_artifacts.py
   - tests/test_validation_lanes.py
   - README.md
   - changelog.md
@@ -400,6 +401,7 @@ workstreams:
       - scripts/generate_discovery_artifacts.py
       - tests/test_generate_adr_index.py
       - tests/test_adr_query_tool.py
+      - tests/test_generate_discovery_artifacts.py
       mode: exclusive
     - id: ws0325_release_management_surfaces
       paths:
