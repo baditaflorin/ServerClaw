@@ -752,7 +752,7 @@ def command_register_deployment_server(args: argparse.Namespace) -> int:
         "user": "root",
         "private_key_uuid": key_uuid,
     }
-    result = client._request("POST", "/api/v1/servers", payload=payload)
+    result = client._request("POST", "/api/v1/servers", payload=payload, expected=(200, 201))
     print(json.dumps({"status": "registered", "result": result}, indent=2, sort_keys=True))
     return 0
 
@@ -787,13 +787,32 @@ def command_migrate_deployment_server(args: argparse.Namespace) -> int:
     for app in applications:
         app_uuid = str(app.get("uuid", ""))
         app_name = str(app.get("name", app_uuid))
-        if app.get("server", {}).get("uuid") == to_uuid:
+        # Coolify API may return server info under top-level "server" or nested under "destination.server"
+        app_server_uuid = (
+            (app.get("server") or {}).get("uuid")
+            or (app.get("destination") or {}).get("server", {}).get("uuid")
+            or ""
+        )
+        if app_server_uuid == to_uuid:
             skipped.append(app_name)
             continue
-        if app.get("server", {}).get("uuid") != from_uuid:
+        if app_server_uuid != from_uuid:
             skipped.append(app_name)
             continue
-        client._request("PATCH", f"/api/v1/applications/{app_uuid}", {"server_uuid": to_uuid})
+        try:
+            client._request(
+                "PATCH",
+                f"/api/v1/applications/{app_uuid}",
+                payload={"destination_uuid": to_uuid},
+                expected=(200, 201),
+            )
+        except RuntimeError as exc:
+            if "422" in str(exc) or "not allowed" in str(exc).lower():
+                # Coolify API v1 does not support programmatic server migration
+                # via destination_uuid. Use the Coolify UI to move the application.
+                skipped.append(f"{app_name}:api_limitation")
+                continue
+            raise
         migrated.append(app_name)
 
     result = {"migrated": migrated, "skipped": skipped, "migration_count": len(migrated)}

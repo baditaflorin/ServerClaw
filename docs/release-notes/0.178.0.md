@@ -4,7 +4,7 @@
 
 ## Summary
 - implements ADR 0300 by adding repo-managed Falco syscall monitoring across docker-runtime-lv3, docker-build-lv3, monitoring-lv3, and postgres-lv3, restoring the runtime-control NATS fan-out path and streams, and verifying four-host NATS, ntfy, Loki, and mutation-audit delivery
-- implements ADR 0340 by introducing coolify-apps-lv3 as the dedicated Coolify deployment runtime, separating repo-deployed applications from the Coolify control-plane VM, and wiring the supporting inventory, edge, health, and service-partition contracts into mainline truth
+- advances ADR 0340 by carrying the dedicated coolify-apps-lv3 runtime, canonical inventory and service-partition truth, and the latest live-apply recovery fixes onto main while application migration remains pending in the Coolify UI
 
 ## Platform Impact
 - Falco runtime syscall monitoring is now live on the governed guests with NATS, ntfy, Loki, and mutation-audit verification.

@@ -244,6 +244,7 @@ workstreams:
       - docs/runbooks/configure-ntfy.md
       - docs/runbooks/k6-load-testing.md
       - docs/adr/.index.yaml
+      - docs/adr/0340-dedicated-coolify-apps-vm-separation.md
       - README.md
       - RELEASE.md
       - VERSION
@@ -254,6 +255,11 @@ workstreams:
       - .ansible-lint-ignore
       - .config-locations.yaml
       - build/platform-manifest.json
+      - config/capacity-model.json
+      - config/prometheus/file_sd/https_tls_targets.yml
+      - config/prometheus/rules/https_tls_alerts.yml
+      - config/service-capability-catalog.json
+      - config/subdomain-exposure-registry.json
       - docs/diagrams/agent-coordination-map.excalidraw
       - inventory/host_vars/proxmox_florin.yml
       - inventory/group_vars/platform.yml
@@ -271,12 +277,14 @@ workstreams:
       - config/ntfy/topics.yaml
       - config/controller-local-secrets.json
       - config/falco/
+      - scripts/coolify_tool.py
       - scripts/drift_lib.py
       - scripts/falco_event_bridge.py
       - scripts/falco_event_bridge_server.py
       - scripts/nats_streams.py
       - scripts/k6_load_testing.py
       - scripts/validate_nats_topics.py
+      - playbooks/coolify.yml
       - playbooks/falco.yml
       - playbooks/services/falco.yml
       - playbooks/services/nats-jetstream.yml
@@ -288,6 +296,7 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/falco_event_bridge_runtime/
       - collections/ansible_collections/lv3/platform/roles/loki_log_agent/templates/config.alloy.j2
       - tests/test_docker_runtime_role.py
+      - tests/test_coolify_tool.py
       - tests/test_falco_event_bridge.py
       - tests/test_falco_runtime_role.py
       - tests/test_nats_jetstream_runtime_role.py
@@ -299,7 +308,9 @@ workstreams:
       - tests/unit/test_event_taxonomy.py
       - receipts/live-applies/
       - receipts/live-applies/2026-04-03-adr-0300-falco-mainline-live-apply.json
+      - receipts/live-applies/2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply.json
       - receipts/live-applies/evidence/2026-04-03-adr-0300-*
+      - receipts/gate-bypasses/*.json
       - receipts/restic-backups/20260403T092200Z.json
       - receipts/restic-snapshots-latest.json
       - receipts/security-reports/20260403T090506Z.json
@@ -331,6 +342,15 @@ workstreams:
             - build/platform-manifest.json
           mode: shared_contract
           contract: canonical-truth-v1
+        - id: falco_latest_main_generated_truth
+          paths:
+            - config/capacity-model.json
+            - config/prometheus/file_sd/https_tls_targets.yml
+            - config/prometheus/rules/https_tls_alerts.yml
+            - config/service-capability-catalog.json
+            - config/subdomain-exposure-registry.json
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
         - id: falco_generated_truth
           paths:
             - docs/diagrams/agent-coordination-map.excalidraw
@@ -342,6 +362,7 @@ workstreams:
             - docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
             - docs/adr/0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md
             - docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+            - docs/adr/0340-dedicated-coolify-apps-vm-separation.md
             - docs/runbooks/configure-falco-runtime.md
             - docs/runbooks/configure-ntfy.md
             - docs/runbooks/k6-load-testing.md
@@ -400,6 +421,13 @@ workstreams:
             - tests/test_ntfy_runtime_config.py
             - tests/unit/test_event_taxonomy.py
           mode: exclusive
+        - id: falco_latest_main_coolify_surfaces
+          paths:
+            - playbooks/coolify.yml
+            - scripts/coolify_tool.py
+            - tests/test_coolify_tool.py
+          mode: shared_contract
+          contract: latest-main-integration-v1
         - id: falco_nats_runtime_surfaces
           paths:
             - scripts/drift_lib.py
@@ -431,7 +459,9 @@ workstreams:
         - id: falco_mainline_receipts
           paths:
             - receipts/live-applies/2026-04-03-adr-0300-falco-mainline-live-apply.json
+            - receipts/live-applies/2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply.json
             - receipts/live-applies/evidence/2026-04-03-adr-0300-*
+            - receipts/gate-bypasses/*.json
             - receipts/restic-backups/20260403T092200Z.json
             - receipts/restic-snapshots-latest.json
             - receipts/security-reports/20260403T090506Z.json
@@ -18616,6 +18646,6 @@ workstreams:
     ready_to_merge: true
     live_applied: false
     canonical_truth:
-      changelog_entry: implements ADR 0340 by introducing coolify-apps-lv3 as the dedicated Coolify deployment runtime, separating repo-deployed applications from the Coolify control-plane VM, and wiring the supporting inventory, edge, health, and service-partition contracts into mainline truth
+      changelog_entry: advances ADR 0340 by carrying the dedicated coolify-apps-lv3 runtime, canonical inventory and service-partition truth, and the latest live-apply recovery fixes onto main while application migration remains pending in the Coolify UI
       release_bump: patch
       included_in_repo_version: 0.178.0

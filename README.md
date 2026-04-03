@@ -93,7 +93,7 @@ rewriting one operator's workstation paths.
 | `control_plane_lanes` | `2026-03-22-adr-0045-control-plane-communication-lanes-live-apply` |
 | `control_plane_recovery` | `2026-03-28-adr-0231-local-secret-delivery-live-apply` |
 | `coolify` | `2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply` |
-| `coolify_apps` | `2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply` |
+| `coolify_apps` | `2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply` |
 | `crawl4ai` | `2026-03-31-adr-0288-crawl4ai-mainline-live-apply` |
 | `database_schema` | `2026-04-02-adr-0304-atlas-mainline-live-apply` |
 | `deadlock_detector` | `2026-03-26-adr-0162-deadlock-detector-live-apply` |
