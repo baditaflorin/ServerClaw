@@ -7,7 +7,7 @@
 
 schema_version: 1
 generated: '2026-04-03'
-total_adrs: 359
+total_adrs: 360
 implementation_status_summary:
   Implemented: 312
   Partial: 10
@@ -391,6 +391,7 @@ concerns:
     - '0307'
     - 0308
     - '0317'
+    - '0340'
 discovery_queries:
   how do we bootstrap:
     - '0001'
@@ -6021,3 +6022,17 @@ adr_index:
       - profiles
     summary: We will provide reference deployment samples and replaceable provider profiles
     filename: 0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+  - adr: '0340'
+    title: Dedicated Coolify Apps VM Separation
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-04-03'
+    concern: vm-topology
+    keywords:
+      - dedicated
+      - coolify
+      - apps
+      - vm
+      - separation
+    summary: We introduce a second dedicated guest, coolify-apps-lv3 (proposed VMID 171,
+    filename: 0340-dedicated-coolify-apps-vm-separation.md

@@ -562,6 +562,29 @@ platform_guest_catalog:
       packages:
         - docker.io
         - git
+    - vmid: 171
+      name: coolify-apps-lv3
+      role: coolify-apps
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.71
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:C7:84:1B
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 128
+      tags:
+        - paas
+        - coolify-apps
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: paas-apps-runtime
+        co_location_exceptions: []
+      packages:
+        - docker.io
+        - git
     - vmid: 180
       name: artifact-cache-lv3
       role: artifact-cache
@@ -858,6 +881,30 @@ platform_guest_catalog:
         failure_domain: host:proxmox_florin
         placement_class: primary
         anti_affinity_group: paas-control-plane
+        co_location_exceptions: []
+      packages:
+        - docker.io
+        - git
+    coolify-apps-lv3:
+      vmid: 171
+      name: coolify-apps-lv3
+      role: coolify-apps
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.71
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:C7:84:1B
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 128
+      tags:
+        - paas
+        - coolify-apps
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: paas-apps-runtime
         co_location_exceptions: []
       packages:
         - docker.io
@@ -1162,6 +1209,30 @@ platform_guest_catalog:
         failure_domain: host:proxmox_florin
         placement_class: primary
         anti_affinity_group: paas-control-plane
+        co_location_exceptions: []
+      packages:
+        - docker.io
+        - git
+    coolify-apps:
+      vmid: 171
+      name: coolify-apps-lv3
+      role: coolify-apps
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.71
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:C7:84:1B
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 128
+      tags:
+        - paas
+        - coolify-apps
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: paas-apps-runtime
         co_location_exceptions: []
       packages:
         - docker.io
@@ -2770,8 +2841,8 @@ platform_service_topology:
       controller: http://100.64.0.1:8012
   coolify_apps:
     service_name: coolify-apps
-    owning_vm: coolify-lv3
-    private_ip: 10.10.10.70
+    owning_vm: coolify-apps-lv3
+    private_ip: 10.10.10.71
     public_hostname: apps.lv3.org
     exposure_model: edge-published
     observability:
@@ -2788,23 +2859,23 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: https://10.10.10.70:443
+      upstream: https://10.10.10.71:443
       aliases:
         - '*.apps.lv3.org'
       crawl_policy_enabled: false
       security_headers_enabled: false
       preserve_upstream_security_headers: true
     service_id: coolify_apps
-    runtime_pool: dedicated-coolify
+    runtime_pool: dedicated-coolify-apps
     deployment_surface: playbooks/services/coolify.yml
-    restart_domain: dedicated-coolify-core
-    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify
+    restart_domain: dedicated-coolify-apps-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify-apps
     mobility_tier: anchor
     ports:
       internal: 443
     urls:
       public: https://apps.lv3.org
-      internal: https://10.10.10.70:443
+      internal: https://10.10.10.71:443
   api_gateway:
     service_name: api-gateway
     owning_vm: runtime-control-lv3
@@ -5129,8 +5200,8 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8012
   coolify_apps:
     service_name: coolify-apps
-    owning_vm: coolify-lv3
-    private_ip: 10.10.10.70
+    owning_vm: coolify-apps-lv3
+    private_ip: 10.10.10.71
     public_hostname: apps.lv3.org
     exposure_model: edge-published
     observability:
@@ -5147,23 +5218,23 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: https://10.10.10.70:443
+      upstream: https://10.10.10.71:443
       aliases:
         - '*.apps.lv3.org'
       crawl_policy_enabled: false
       security_headers_enabled: false
       preserve_upstream_security_headers: true
     service_id: coolify_apps
-    runtime_pool: dedicated-coolify
+    runtime_pool: dedicated-coolify-apps
     deployment_surface: playbooks/services/coolify.yml
-    restart_domain: dedicated-coolify-core
-    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify
+    restart_domain: dedicated-coolify-apps-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify-apps
     mobility_tier: anchor
     ports:
       internal: 443
     urls:
       public: https://apps.lv3.org
-      internal: https://10.10.10.70:443
+      internal: https://10.10.10.71:443
   api_gateway:
     service_name: api-gateway
     owning_vm: runtime-control-lv3

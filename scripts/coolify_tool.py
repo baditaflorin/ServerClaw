@@ -16,6 +16,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from script_bootstrap import ensure_repo_root_on_path
 
 ensure_repo_root_on_path(__file__)
@@ -30,6 +32,27 @@ DEFAULT_AUTH_FILE = Path(
 DEFAULT_BOOTSTRAP_KEY = Path(
     "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519"
 )
+
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+_STACK_YAML = _REPO_ROOT / "versions" / "stack.yaml"
+
+
+def _default_deployment_server() -> str:
+    """Read the canonical deployment server name from versions/stack.yaml.
+
+    This avoids hardcoding 'coolify-lv3' or 'coolify-apps-lv3' in the tool.
+    The stack.yaml is updated atomically on each live apply, so this is always
+    consistent with the deployed state (ADR 0340).
+    """
+    try:
+        data = yaml.safe_load(_STACK_YAML.read_text())
+        name = data.get("observed_state", {}).get("coolify", {}).get("deployment_server_name", "")
+        if name:
+            return name
+    except Exception:
+        pass
+    # Fallback to auth file server_name if stack.yaml is unavailable
+    return ""
 
 
 class SSHTunnel:
@@ -703,6 +726,81 @@ def pause_before_retry(delay_seconds: float, *, retry_reason: str) -> None:
     )
 
 
+def command_register_deployment_server(args: argparse.Namespace) -> int:
+    """Register a new Coolify deployment server via the Coolify API (ADR 0340).
+
+    Idempotent: if a server with the given name already exists, prints its UUID
+    and exits 0 without creating a duplicate.
+    """
+    client = CoolifyClient(load_auth(args.auth_file))
+    target_name = args.host
+    target_ip = args.ip
+
+    existing_servers = client.servers()
+    for server in existing_servers:
+        if server.get("name") == target_name:
+            print(json.dumps({"status": "already_registered", "server": server}, indent=2, sort_keys=True))
+            return 0
+
+    # Build minimal server creation payload
+    private_keys = client.private_keys()
+    key_uuid = private_keys[0]["uuid"] if private_keys else None
+    payload: dict[str, Any] = {
+        "name": target_name,
+        "ip": target_ip,
+        "port": 22,
+        "user": "root",
+        "private_key_uuid": key_uuid,
+    }
+    result = client._request("POST", "/api/v1/servers", payload=payload)
+    print(json.dumps({"status": "registered", "result": result}, indent=2, sort_keys=True))
+    return 0
+
+
+def command_migrate_deployment_server(args: argparse.Namespace) -> int:
+    """Re-assign all applications from one Coolify server to another (ADR 0340).
+
+    Idempotent: applications already on the target server are skipped.
+    Exit code 2 means no applications needed migration (already done or none exist).
+    """
+    client = CoolifyClient(load_auth(args.auth_file))
+    from_name = args.from_server
+    to_name = args.to_server
+
+    servers = client.servers()
+    from_server = next((s for s in servers if s.get("name") == from_name), None)
+    to_server = next((s for s in servers if s.get("name") == to_name), None)
+
+    if not from_server:
+        raise RuntimeError(f"Source server '{from_name}' not found in Coolify")
+    if not to_server:
+        raise RuntimeError(
+            f"Target server '{to_name}' not found in Coolify — run register-deployment-server first"
+        )
+
+    from_uuid = from_server["uuid"]
+    to_uuid = to_server["uuid"]
+
+    applications = client.applications()
+    migrated: list[str] = []
+    skipped: list[str] = []
+    for app in applications:
+        app_uuid = str(app.get("uuid", ""))
+        app_name = str(app.get("name", app_uuid))
+        if app.get("server", {}).get("uuid") == to_uuid:
+            skipped.append(app_name)
+            continue
+        if app.get("server", {}).get("uuid") != from_uuid:
+            skipped.append(app_name)
+            continue
+        client._request("PATCH", f"/api/v1/applications/{app_uuid}", {"server_uuid": to_uuid})
+        migrated.append(app_name)
+
+    result = {"migrated": migrated, "skipped": skipped, "migration_count": len(migrated)}
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0 if migrated else 2
+
+
 def command_whoami(args: argparse.Namespace) -> int:
     client = CoolifyClient(load_auth(args.auth_file))
     team = client.current_team()
@@ -898,6 +996,34 @@ def build_parser() -> argparse.ArgumentParser:
 
     apps_parser = subparsers.add_parser("list-applications", help="List Coolify-managed applications.")
     apps_parser.set_defaults(func=command_list_applications)
+
+    register_server_parser = subparsers.add_parser(
+        "register-deployment-server",
+        help="Register a new Coolify deployment server (ADR 0340). Idempotent.",
+    )
+    register_server_parser.add_argument("--host", required=True, help="Hostname of the deployment server to register.")
+    register_server_parser.add_argument("--ip", required=True, help="IP address of the deployment server.")
+    register_server_parser.set_defaults(func=command_register_deployment_server)
+
+    migrate_server_parser = subparsers.add_parser(
+        "migrate-deployment-server",
+        help="Re-assign all Coolify applications from one server to another (ADR 0340). Exit 2 if nothing to migrate.",
+    )
+    migrate_server_parser.add_argument(
+        "--from",
+        dest="from_server",
+        required=True,
+        default=_default_deployment_server() or "coolify-lv3",
+        help="Source server name to migrate apps away from.",
+    )
+    migrate_server_parser.add_argument(
+        "--to",
+        dest="to_server",
+        required=True,
+        default=_default_deployment_server() or "coolify-apps-lv3",
+        help="Target server name to migrate apps to.",
+    )
+    migrate_server_parser.set_defaults(func=command_migrate_deployment_server)
 
     deploy_parser = subparsers.add_parser("deploy-repo", help="Create or update one repo-backed Coolify application and deploy it.")
     deploy_parser.add_argument("--repo", required=True, help="Repository URL.")

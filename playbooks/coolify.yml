@@ -1,7 +1,7 @@
 ---
 # Playbook: coolify.yml
-# Purpose: Provision the dedicated Coolify VM, converge the Coolify control plane, and publish its edge and private access paths.
-# Use case: Run for ADR 0194 live apply and later reconciles of the repo-managed Coolify platform surface.
+# Purpose: Provision the Coolify control-plane VM and dedicated apps runtime VM, converge both, and publish edge and private access paths.
+# Use case: Run for ADR 0194 (control plane) and ADR 0340 (apps VM separation) live applies and subsequent reconciles.
 #
 # Inputs (required):
 #   - bootstrap_ssh_private_key (controller secret, required): Controller-side SSH key used through the Proxmox jump path.
@@ -12,24 +12,27 @@
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): Guest SSH path used by scoped runs.
 #
 # Outputs:
-#   - The dedicated coolify-lv3 VM exists and runs the repo-managed Coolify stack.
-#   - The Proxmox host private controller proxy and NGINX edge publication include the Coolify routes.
+#   - coolify-lv3 VM exists and runs the repo-managed Coolify control-plane stack.
+#   - coolify-apps-lv3 VM exists, runs Docker, and is registered as the Coolify deployment server (ADR 0340).
+#   - The Proxmox host private controller proxy and NGINX edge publication include both Coolify routes.
 #   - Controller-local Coolify bootstrap artifacts are refreshed under .local/coolify.
 #
 # Idempotency: Partially idempotent
-#              The runtime converge is idempotent, but the live deployment server validation and API token rotation intentionally refresh state on each run.
+#              VM provisioning and runtime convergence are idempotent.
+#              Deployment server registration and API token rotation intentionally refresh state on each run.
 #
 # Dependencies:
 #   - ADR 0194: Coolify PaaS deploy from repo.
+#   - ADR 0340: Dedicated Coolify apps VM separation.
 #   - Requires: Existing Proxmox host access, shared NGINX edge VM, and Docker-host VM template support.
-#   - Role: lv3.platform.proxmox_guests — ensures the dedicated Coolify VM exists.
-#   - Role: lv3.platform.coolify_runtime — converges Coolify, bootstrap auth, and the local deployment server.
+#   - Role: lv3.platform.proxmox_guests — ensures both Coolify VMs exist (coolify-lv3 and coolify-apps-lv3).
+#   - Role: lv3.platform.coolify_runtime — converges Coolify control plane, bootstrap auth, and deployment server registration.
 #
-# Related ADRs: 0025, 0056, 0143, 0176
+# Related ADRs: 0025, 0056, 0143, 0176, 0340
 # Related Runbooks: docs/runbooks/configure-coolify.md
 #
 # Author: LV3 Platform
-# Last Updated: 2026-03-27
+# Last Updated: 2026-04-03
 
 - name: Ensure the Coolify VM is provisioned on the Proxmox host
   hosts: proxmox_hosts
@@ -64,6 +67,41 @@
       register: coolify_vm_start_after_stop
       failed_when: coolify_vm_start_after_stop.rc not in [0, 255]
       changed_when: coolify_vm_start_after_stop.rc == 0
+
+- name: Ensure the Coolify apps runtime VM is provisioned on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+  tags:
+    - tier-1
+    - automation
+    - service-coolify
+    - service-coolify-apps
+  vars:
+    proxmox_guests_active: >-
+      {{
+        proxmox_guests
+        | selectattr('role', 'equalto', 'coolify-apps')
+        | list
+      }}
+
+  roles:
+    - role: lv3.platform.proxmox_guests
+
+  post_tasks:
+    - name: Stop the Coolify apps VM from Proxmox after qm set changes
+      ansible.builtin.command: "qm stop {{ proxmox_guests_active[0].vmid }} --skiplock 1"
+      register: coolify_apps_vm_stop
+      failed_when: coolify_apps_vm_stop.rc not in [0, 255]
+      changed_when: true
+
+    - name: Start the Coolify apps VM from Proxmox after the forced stop
+      ansible.builtin.command: "qm start {{ proxmox_guests_active[0].vmid }}"
+      register: coolify_apps_vm_start_after_stop
+      failed_when: coolify_apps_vm_start_after_stop.rc not in [0, 255]
+      changed_when: coolify_apps_vm_start_after_stop.rc == 0
 
 - name: Converge the Coolify private controller proxy and host firewall
   hosts: proxmox_hosts
@@ -147,6 +185,88 @@
       ansible.builtin.import_tasks: tasks/notify.yml
       vars:
         playbook_execution_notification_service: coolify
+
+- name: Converge the Coolify apps runtime on the dedicated apps guest
+  hosts: "{{ 'coolify-apps-lv3' if (env | default('production')) == 'production' else 'coolify-apps-staging-lv3' }}"
+  become: true
+  gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+  tags:
+    - tier-2
+    - automation
+    - service-coolify
+    - service-coolify-apps
+
+  pre_tasks:
+    - name: Wait for the Coolify apps guest SSH service to be reachable
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Gather facts after SSH is ready
+      ansible.builtin.setup:
+
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.coolify-apps
+        playbook_execution_audit_target: coolify-apps
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.coolify_apps[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.repo_deploy_image_cache
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: coolify_apps
+        playbook_execution_post_verify_audit_action: playbook.verify.coolify-apps
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: coolify-apps
+
+- name: Register coolify-apps-lv3 as the Coolify deployment server
+  hosts: localhost
+  gather_facts: false
+  tags:
+    - tier-3
+    - automation
+    - service-coolify
+    - service-coolify-apps
+
+  tasks:
+    - name: Register coolify-apps-lv3 as the active Coolify deployment server
+      ansible.builtin.command: >
+        python3 scripts/coolify_tool.py register-deployment-server
+        --host coolify-apps-lv3
+        --ip "{{ hostvars['coolify-apps-lv3']['ansible_host'] }}"
+      delegate_to: localhost
+      become: false
+      register: coolify_server_registration
+      changed_when: "'registered' in coolify_server_registration.stdout"
+      failed_when: coolify_server_registration.rc != 0
+      tags:
+        - coolify-deploy-server-registration
+
+    - name: Migrate existing app deployments to coolify-apps-lv3
+      ansible.builtin.command: >
+        python3 scripts/coolify_tool.py migrate-deployment-server
+        --from coolify-lv3
+        --to coolify-apps-lv3
+      delegate_to: localhost
+      become: false
+      register: coolify_server_migration
+      changed_when: "'migrated' in coolify_server_migration.stdout"
+      failed_when: coolify_server_migration.rc not in [0, 2]
+      tags:
+        - coolify-deploy-server-migration
 
 - name: Publish Coolify on the NGINX edge
   hosts: "{{ 'nginx-lv3' if (env | default('production')) == 'production' else 'nginx-staging-lv3' }}"

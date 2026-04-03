@@ -406,6 +406,9 @@ playbook_execution_host_patterns:
   coolify:
     production: coolify-lv3
     staging: coolify-staging-lv3
+  coolify_apps:
+    production: coolify-apps-lv3
+    staging: coolify-apps-staging-lv3
   nginx_edge:
     production: nginx-lv3
     staging: nginx-staging-lv3
@@ -470,3 +473,6 @@ playbook_execution_required_hosts:
   coolify:
     production: coolify-lv3
     staging: coolify-staging-lv3
+  coolify_apps:
+    production: coolify-apps-lv3
+    staging: coolify-apps-staging-lv3
