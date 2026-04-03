@@ -1,9 +1,9 @@
 # ADR 0340: Dedicated Coolify Apps VM Separation
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: 0.178.0
-- Implemented In Platform Version: 0.130.96 (partial — app migration via UI pending)
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.153
+- Implemented In Platform Version: 0.130.96
 - Implemented On: 2026-04-03
 - Date: 2026-04-03
 - Tags: coolify, vm-topology, paas, apps, separation-of-concerns, dry
@@ -555,18 +555,45 @@ In practice, the apps VM assertions were added directly to
 `tests/test_coolify_playbook.py` which already owned playbook structure
 validation. This avoids creating a split test ownership for a single file.
 
-### Finding 7: Coolify API v1 does not support programmatic app-to-server migration
+### Finding 7: Coolify API v1 does not support programmatic app-to-server migration — resolved via direct DB update
 
 During live apply, `migrate-deployment-server` tried `PATCH /api/v1/applications/{uuid}`
 with `{"server_uuid": <target>}` and `{"destination_uuid": <target>}`. Both return
 HTTP 422 "This field is not allowed." The Coolify v1 API does not expose an endpoint
 for moving applications between servers programmatically.
 
-Existing apps (`repo-smoke`, `education-wemeshup`) remain on `coolify-lv3` and must be
-migrated via the Coolify UI: **Settings → Application → Move to server**.
-This is tracked in `versions/stack.yaml` as `apps_migration_status: pending_ui`.
+**Resolution:** Migration was performed via direct PostgreSQL update on the `coolify-db`
+container on `coolify-lv3`:
+
+```sql
+-- Find standalone_dockers destination ID for coolify-apps-lv3
+SELECT id, server_id, network FROM standalone_dockers;  -- id=34 for coolify-apps-lv3
+
+-- Migrate all apps from coolify-lv3 (destination_id=1) to coolify-apps-lv3 (destination_id=34)
+UPDATE applications SET destination_id = 34 WHERE destination_id = 1;
+```
+
+Run via: `qm guest exec 170 -- docker exec coolify-db psql -U coolify -c "<SQL>"`
+After migration, Coolify cache was cleared: `php artisan cache:clear && config:clear`
+via `qm guest exec 170 -- docker exec coolify bash -c "<cmd>"`.
+
+Both `repo-smoke` and `education-wemeshup` now run on `coolify-apps-lv3`.
 `migrate-deployment-server` was updated to handle the 422 gracefully with
-`app_name:api_limitation` in the skipped list rather than crashing.
+`app_name:migrated_via_db` in the skipped list rather than crashing.
+
+### Finding 10: NGINX edge upstream must use HTTP not HTTPS to Caddy (coolify-proxy)
+
+The initial NGINX edge route for `*.apps.lv3.org` was configured with
+`upstream: https://10.10.10.71:443`. This caused Caddy (the `coolify-proxy` container)
+to attempt its own ACME TLS certificate issuance for each app domain. The HTTP-01 ACME
+challenge failed because NGINX intercepts `/.well-known/acme-challenge/` and serves it
+from `/var/www/lv3-edge-acme` (only contains NGINX-managed challenges). Result: Caddy
+had no valid cert → port 443 returned 503 for all app requests.
+
+**Resolution:** Updated `upstream: http://10.10.10.71:80` in `platform.yml` (both
+production and staging service entries). NGINX terminates TLS for `*.apps.lv3.org`
+using the lv3-edge wildcard cert and proxies to Caddy on port 80, which serves apps
+correctly. This matches the same pattern used by `coolify-lv3` (`http://10.10.10.70:8000`).
 
 ### Finding 8: Controller SSH tunnel fails; direct `controller_url` access works
 

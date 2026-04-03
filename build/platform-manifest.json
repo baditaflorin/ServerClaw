@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.0",
   "platform_version": "0.130.96",
-  "generated_at": "2026-04-03T10:28:19Z",
-  "next_refresh_at": "2026-04-03T11:28:19Z",
+  "generated_at": "2026-04-03T12:36:10Z",
+  "next_refresh_at": "2026-04-03T13:36:10Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6109,7 +6109,7 @@
   "recent_changes": {
     "last_version": "0.177.152",
     "deployed_at": "2026-04-03",
-    "summary": "implements ADR 0300 by adding repo-managed Falco syscall monitoring across docker-runtime-lv3, docker-build-lv3, monitoring-lv3, and postgres-lv3, restoring the runtime-control NATS fan-out path and streams, and verifying four-host NATS, ntfy, Loki, and mutation-audit delivery advances ADR 0340 by carrying the dedicated coolify-apps-lv3 runtime, canonical inventory and service-partition truth, and the latest live-apply recovery fixes onto main while application migration remains pending in the Coolify UI",
+    "summary": "implements ADR 0300 by adding repo-managed Falco syscall monitoring across docker-runtime-lv3, docker-build-lv3, monitoring-lv3, and postgres-lv3, restoring the runtime-control NATS fan-out path and streams, and verifying four-host NATS, ntfy, Loki, and mutation-audit delivery carries forward the now-live ADR 0340 dedicated coolify-apps-lv3 runtime, including the completed application migration, HTTP edge upstream correction, and repo-smoke verification on `*.apps.lv3.org`",
     "release_notes_url": "docs/release-notes/0.178.0.md"
   },
   "agentic_architecture": {

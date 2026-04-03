@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-04-03",
   "recorded_on": "2026-04-03",
-  "recorded_at": "2026-04-03T09:56:14Z",
+  "recorded_at": "2026-04-03T13:40:00Z",
   "recorded_by": "codex",
-  "source_commit": "26e6849be13d757df637aff4544ebec0c8f02813",
-  "repo_version_context": "0.178.0",
+  "source_commit": "591eb347cfda43a4e2ae8d26499211df9536d7b5",
+  "repo_version_context": "0.177.153",
   "platform_version_context": "0.130.96",
   "workflow_id": "adr-0340-coolify-apps-vm-separation-live-apply",
   "adr": "0340",
-  "summary": "Backfilled the canonical partial live-apply receipt for ADR 0340 after the merged ws-0340 recovery commit updated the stack truth to use `coolify-apps-lv3` as the dedicated deployment server, preserved the Coolify registration and migration-recovery fixes, and recorded that application migration remains pending through the Coolify UI.",
+  "summary": "Backfilled the canonical live-apply receipt for ADR 0340 after the latest `origin/main` closeout recorded `coolify-apps-lv3` as the dedicated deployment server, migrated the existing Coolify applications onto it via the documented database repair path, corrected the public edge upstream to `http://10.10.10.71:80`, and verified the repo-smoke ingress on `*.apps.lv3.org`.",
   "targets": [
     {
       "kind": "guest",
@@ -35,21 +35,22 @@
     {
       "check": "Dedicated deployment server recorded in canonical stack truth",
       "result": "pass",
-      "observed": "`versions/stack.yaml` now records `deployment_server_name: coolify-apps-lv3`, `deployment_server_reachable: true`, `deployment_server_usable: true`, and `apps_migration_status: pending_ui`, preserving the honest partial-state contract for platform version `0.130.96`."
+      "observed": "`versions/stack.yaml` now records `deployment_server_name: coolify-apps-lv3`, `deployment_server_uuid: upsaaj0eoynvncqlorp7y2yj`, `deployment_server_registered: true`, `deployment_server_reachable: true`, `deployment_server_usable: true`, `apps_migration_status: migrated_via_db`, `nginx_edge_updated: true`, and `repo_smoke_public_http_verified: true` for platform version `0.130.96`."
     },
     {
-      "check": "Latest-main Coolify recovery fixes preserved",
+      "check": "Latest-main Coolify migration and edge fixes preserved",
       "result": "pass",
-      "observed": "Merged commit `26e6849be13d757df637aff4544ebec0c8f02813` records the live-apply recovery findings and carries the repo changes in `playbooks/coolify.yml`, `scripts/coolify_tool.py`, and `tests/test_coolify_tool.py` to handle playbook `chdir`, explicit auth-file wiring, `POST /servers` returning `201`, `destination_uuid` migration fallback, and graceful `422` handling when the Coolify API cannot programmatically move applications."
+      "observed": "Merged commit `591eb347cfda43a4e2ae8d26499211df9536d7b5` records the final live-apply recovery findings and carries the repo changes in `inventory/group_vars/platform.yml`, `scripts/coolify_tool.py`, and `tests/test_coolify_tool.py` to keep `*.apps.lv3.org` on the corrected HTTP upstream, preserve the direct DB migration note, and retain the graceful `422` handling when the Coolify API cannot programmatically move applications."
     },
     {
-      "check": "Partial implementation state documented explicitly",
+      "check": "Implementation state documented explicitly",
       "result": "pass",
-      "observed": "`docs/adr/0340-dedicated-coolify-apps-vm-separation.md` records ADR 0340 as `Implementation Status: Partial` with repository version `0.178.0` and platform version `0.130.96 (partial — app migration via UI pending)`, matching the current observed stack contract instead of overstating the migration as complete."
+      "observed": "`docs/adr/0340-dedicated-coolify-apps-vm-separation.md` records ADR 0340 as `Implementation Status: Implemented` with repository version `0.177.153` and platform version `0.130.96`, matching the current observed stack contract."
     }
   ],
   "evidence_refs": [
     "docs/adr/0340-dedicated-coolify-apps-vm-separation.md",
+    "inventory/group_vars/platform.yml",
     "playbooks/coolify.yml",
     "scripts/coolify_tool.py",
     "tests/test_coolify_tool.py",
@@ -60,7 +61,7 @@
   ],
   "notes": [
     "This receipt backfills the missing canonical live-apply artifact for ADR 0340 so `versions/stack.yaml` references a real receipt instead of a nonexistent filename.",
-    "No new Coolify live mutation was performed as part of the ADR 0300 workstream; this file records the already-merged ADR 0340 partial live apply and its current canonical state.",
-    "The dedicated deployment server is live, but application migration remains pending in the Coolify UI because the Coolify API still rejects programmatic server moves with `422`."
+    "No new Coolify live mutation was performed as part of the ADR 0300 workstream; this file records the already-merged ADR 0340 live apply and its current canonical state.",
+    "The application migration completed through the documented direct PostgreSQL repair path because the Coolify API still rejects programmatic server moves with `422`."
   ]
 }
