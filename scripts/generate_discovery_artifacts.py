@@ -222,15 +222,21 @@ def _serialize_section(section: DiscoverySection) -> dict[str, Any]:
     }
 
 
+def generated_date() -> str:
+    return dt.datetime.now(dt.timezone.utc).date().isoformat()
+
+
 def build_repo_structure_root(
     repo_sections: list[DiscoverySection],
     packs: list[PackDefinition],
+    *,
+    generated_on: str,
 ) -> dict[str, Any]:
     ordered_sections = _sort_sections(repo_sections, REPO_SECTION_ORDER)
     return {
         "repository": "proxmox_reference_platform",
         "schema_version": 1,
-        "generated": dt.date.today().isoformat(),
+        "generated": generated_on,
         "source_root": _relative(REPO_STRUCTURE_SOURCE_DIR),
         "pack_manifest": _relative(PACK_MANIFEST_PATH),
         "purpose": (
@@ -265,11 +271,13 @@ def build_repo_structure_root(
 def build_config_locations_root(
     config_sections: list[DiscoverySection],
     packs: list[PackDefinition],
+    *,
+    generated_on: str,
 ) -> dict[str, Any]:
     ordered_sections = _sort_sections(config_sections, CONFIG_SECTION_ORDER)
     return {
         "schema_version": 1,
-        "generated": dt.date.today().isoformat(),
+        "generated": generated_on,
         "source_root": _relative(CONFIG_LOCATIONS_SOURCE_DIR),
         "pack_manifest": _relative(PACK_MANIFEST_PATH),
         "purpose": (
@@ -304,6 +312,8 @@ def build_onboarding_pack(
     pack: PackDefinition,
     repo_section_map: dict[str, DiscoverySection],
     config_section_map: dict[str, DiscoverySection],
+    *,
+    generated_on: str,
 ) -> dict[str, Any]:
     missing_repo_sections = [section_id for section_id in pack.repo_structure_sections if section_id not in repo_section_map]
     missing_config_sections = [
@@ -334,7 +344,7 @@ def build_onboarding_pack(
 
     return {
         "schema_version": 1,
-        "generated": dt.date.today().isoformat(),
+        "generated": generated_on,
         "generated_from": generated_from,
         "pack": {
             "id": pack.pack_id,
@@ -376,23 +386,24 @@ def render_outputs() -> dict[Path, str]:
     packs = load_pack_manifest()
     repo_section_map = _section_by_id(repo_sections)
     config_section_map = _section_by_id(config_sections)
+    generated_on = generated_date()
 
     outputs: dict[Path, str] = {
         REPO_STRUCTURE_OUTPUT: _render_output(
             "Repository Structure Entry Point - ADR 0163 / ADR 0327",
-            build_repo_structure_root(repo_sections, packs),
+            build_repo_structure_root(repo_sections, packs, generated_on=generated_on),
             GENERATOR_COMMAND,
         ),
         CONFIG_LOCATIONS_OUTPUT: _render_output(
             "Configuration Locations Entry Point - ADR 0166 / ADR 0327",
-            build_config_locations_root(config_sections, packs),
+            build_config_locations_root(config_sections, packs, generated_on=generated_on),
             GENERATOR_COMMAND,
         ),
     }
     for pack in packs:
         outputs[ONBOARDING_OUTPUT_DIR / f"{pack.pack_id}.yaml"] = _render_output(
             f"Onboarding Pack - {pack.title}",
-            build_onboarding_pack(pack, repo_section_map, config_section_map),
+            build_onboarding_pack(pack, repo_section_map, config_section_map, generated_on=generated_on),
             GENERATOR_COMMAND,
         )
     return outputs

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime as dt
 import sys
 from pathlib import Path
 
@@ -61,3 +62,17 @@ def test_generated_root_outputs_keep_concise_section_summaries() -> None:
     assert payload["section_index"][0]["id"] == "root-entrypoints"
     assert payload["section_index"][0]["entry_counts"]["top_level_files"] >= 6
     assert payload["onboarding_packs"][0]["id"] == "agent-core"
+
+
+def test_render_outputs_use_one_utc_generated_date(monkeypatch) -> None:
+    monkeypatch.setattr(generator, "generated_date", lambda: dt.date(2026, 4, 3).isoformat())
+
+    outputs = generator.render_outputs()
+
+    repo_payload = _load_generated_yaml(outputs[generator.REPO_STRUCTURE_OUTPUT])
+    config_payload = _load_generated_yaml(outputs[generator.CONFIG_LOCATIONS_OUTPUT])
+    pack_payload = _load_generated_yaml(outputs[generator.ONBOARDING_OUTPUT_DIR / "agent-core.yaml"])
+
+    assert repo_payload["generated"] == "2026-04-03"
+    assert config_payload["generated"] == "2026-04-03"
+    assert pack_payload["generated"] == "2026-04-03"
