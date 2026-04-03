@@ -127,4 +127,5 @@ canonical_truth:
   changelog_entry: implements ADR 0328 by enforcing explicit line budgets for the root README, changelog, and release-note index, rolling older release and status rows into generated archive ledgers, and teaching the validation plus release automation to keep those bounded summaries current
   release_bump: patch
   included_in_repo_version: null
-  latest_receipts: {}
+  latest_receipts:
+    root_summary_rollover: 2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply

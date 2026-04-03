@@ -10,6 +10,7 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | --- | --- |
 | `workstream_registry_shards` | `2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply` |
 | `uptime_kuma` | `2026-04-03-ws-0332-homepage-triage-mainline-live-apply` |
+| `root_summary_rollover` | `2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply` |
 | `ops_portal` | `2026-04-03-adr-0309-task-oriented-information-architecture-mainline-live-apply` |
 | `operator_onboarding` | `2026-04-03-adr-0318-repeatable-operator-onboarding-mainline-live-apply` |
 | `open_webui` | `2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply` |

@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-03",
+  "recorded_on": "2026-04-03",
+  "recorded_at": "2026-04-03T20:16:22Z",
+  "recorded_by": "codex",
+  "source_commit": "981a77de54794bb8028bb009bf451b46c42fe54e",
+  "repo_version_context": "0.178.3",
+  "platform_version_context": "0.130.98",
+  "workflow_id": "adr-0328-root-summary-rollover-mainline-live-apply",
+  "adr": "0328",
+  "summary": "Replayed ADR 0328 on the exact-main tree by promoting the workstream to live-applied repository truth, wiring its canonical mainline receipt into `versions/stack.yaml`, regenerating the bounded README, changelog, release-note archive indexes, status history pages, platform manifest, and diagrams from the latest `origin/main`, and re-verifying the integrated state through receipt validation, repository validation, and the full pre-push gate while the fresh repo release cut remains blocked only by unrelated open waiver receipts.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    },
+    {
+      "kind": "artifact",
+      "name": "README.md"
+    },
+    {
+      "kind": "artifact",
+      "name": "changelog.md"
+    },
+    {
+      "kind": "artifact",
+      "name": "versions/stack.yaml"
+    },
+    {
+      "kind": "artifact",
+      "name": "build/platform-manifest.json"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Branch-local live apply and validation proof",
+      "result": "pass",
+      "observed": "The branch-local ADR 0328 receipt already proved the size-budgeted root-summary rollout end to end from the dedicated worktree, including focused tests, repository validation, remote validation, and the repaired pre-push gate replay, preserved in `receipts/live-applies/2026-04-03-adr-0328-root-summary-rollover-live-apply.json`."
+    },
+    {
+      "check": "Exact-main canonical truth and generated surfaces",
+      "result": "pass",
+      "observed": "`python3 scripts/workstream_registry.py --write`, `uv run --with pyyaml python3 scripts/canonical_truth.py --write`, `uv run --with pyyaml python3 scripts/canonical_truth.py --check`, `uv run --with pyyaml python3 scripts/generate_release_notes.py --write-root-summaries`, `uv run --with pyyaml python3 scripts/generate_status_docs.py --write`, `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --write`, and `uv run --with pyyaml --with jsonschema python3 scripts/generate_diagrams.py --write` refreshed the integrated README, changelog, release-note indexes, versions stack, manifest, and diagrams so the exact-main tree records ADR 0328 in current repository truth without cutting a blocked release, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-registry-r1.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-canonical-truth-r1.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-canonical-truth-check-r1.txt`, and `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-generated-surfaces-r1.txt`."
+    },
+    {
+      "check": "Exact-main release readiness snapshot",
+      "result": "partial",
+      "observed": "`uv run --with pyyaml python3 scripts/release_manager.py status --json` now reports repository version `0.178.3`, platform version `0.130.98`, and `0 workstreams in progress`, with a blocked release cut only because the three earlier `controller_dependency_gap` waiver receipts remain open through 2026-04-06, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-release-status-r1.json`."
+    },
+    {
+      "check": "Exact-main receipt, repository, and gate validation",
+      "result": "pass",
+      "observed": "`python3 scripts/live_apply_receipts.py --validate`, `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs generated-portals`, and `make pre-push-gate` passed on the integrated exact-main tree, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-live-apply-receipts-r2.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-validate-repo-r2.txt`, and `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-pre-push-gate-r1.txt`."
+      }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "changelog.md",
+    "versions/stack.yaml",
+    "build/platform-manifest.json",
+    "docs/diagrams/agent-coordination-map.excalidraw",
+    "docs/adr/.index.yaml",
+    "docs/adr/0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md",
+    "docs/workstreams/ws-0328-live-apply.md",
+    "docs/release-notes/README.md",
+    "docs/release-notes/index/README.md",
+    "docs/release-notes/index/2026.md",
+    "docs/status/history/live-apply-evidence.md",
+    "docs/status/history/merged-workstreams.md",
+    "workstreams.yaml",
+    "workstreams/active/ws-0328-live-apply.yaml",
+    "receipts/live-applies/2026-04-03-adr-0328-root-summary-rollover-live-apply.json",
+    "receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-registry-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-canonical-truth-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-canonical-truth-check-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-generated-surfaces-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-release-status-r1.json",
+    "receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-live-apply-receipts-r2.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-validate-repo-r2.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-pre-push-gate-r1.txt"
+  ],
+  "notes": [
+    "This exact-main receipt separates repository integration proof from the earlier branch-local live-apply mutation so the root-summary rollover and the protected-surface replay stay independently auditable.",
+    "ADR 0328 is implemented on `main`, but `Implemented In Repo Version` remains `not yet` because the global release manager still refuses a fresh version cut while unrelated open `controller_dependency_gap` waivers remain active.",
+    "Because ADR 0328 is a repo-only control-plane change, the live platform version remains `0.130.98` and no platform version bump should accompany this merge."
+  ]
+}

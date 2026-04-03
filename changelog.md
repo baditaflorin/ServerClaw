@@ -13,6 +13,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 ## Unreleased
 
 - implements ADR 0327 by splitting the root agent-discovery registries into sectional source files, generating concise public-safe root entrypoints, tracking generated onboarding packs under build/onboarding, and validating the discovery artifacts plus public entrypoints through the rebased exact-main automation gates
+- implements ADR 0328 by enforcing explicit line budgets for the root README, changelog, and release-note index, rolling older release and status rows into generated archive ledgers, and teaching the validation plus release automation to keep those bounded summaries current
 
 ## Latest Release
 

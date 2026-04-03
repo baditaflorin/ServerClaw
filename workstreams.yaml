@@ -153,7 +153,8 @@ workstreams:
       automation to keep those bounded summaries current
     release_bump: patch
     included_in_repo_version: null
-    latest_receipts: {}
+    latest_receipts:
+      root_summary_rollover: 2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply
 - id: ws-0318-provision-operator-v2
   adr: 0318
   title: 'provision_operator.py v2: Headscale + step-ca fingerprint in single onboarding

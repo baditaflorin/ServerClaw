@@ -169,6 +169,7 @@ live_apply_evidence:
     operator_onboarding: 2026-04-03-adr-0318-repeatable-operator-onboarding-mainline-live-apply
     workstream_registry_shards: 2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply
     sectional_agent_discovery: 2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply
+    root_summary_rollover: 2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
