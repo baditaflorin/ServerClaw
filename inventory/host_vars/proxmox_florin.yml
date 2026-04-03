@@ -476,6 +476,29 @@ proxmox_guests:
     packages:
       - docker.io
       - git
+  - vmid: 171
+    name: coolify-apps-lv3
+    role: coolify-apps
+    template_key: lv3-debian-base
+    ipv4: 10.10.10.71
+    cidr: 24
+    gateway4: 10.10.10.1
+    macaddr: BC:24:11:C7:84:1B
+    cores: 4
+    memory_mb: 8192
+    disk_gb: 128
+    tags:
+      - paas
+      - coolify-apps
+      - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: paas-apps-runtime
+      co_location_exceptions: []
+    packages:
+      - docker.io
+      - git
   - vmid: 180
     name: artifact-cache-lv3
     role: artifact-cache
@@ -1258,7 +1281,7 @@ network_policy:
           protocol: tcp
           ports:
             - 22
-          description: Docker bridge access for Coolify self-managed deployment server SSH validation
+          description: Docker bridge access for Coolify control plane SSH to coolify-apps-lv3 deployment server
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -1266,7 +1289,36 @@ network_policy:
             - 443
             - 8000
             - 8096
-          description: Shared edge publication for the Coolify dashboard and wildcard app ingress
+          description: Shared edge publication for the Coolify dashboard
+        - source: coolify-apps-lv3
+          protocol: tcp
+          ports:
+            - 8000
+          description: Coolify apps VM calls back to the Coolify API during deployment
+    coolify-apps-lv3:
+      allow_container_forwarding: true
+      allowed_inbound:
+        - source: management
+          protocol: tcp
+          ports:
+            - 22
+          description: Operator and Ansible SSH access
+        - source: coolify-lv3
+          protocol: tcp
+          ports:
+            - 22
+          description: Coolify control plane SSH access to manage the deployment server
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 80
+            - 443
+          description: Shared edge publication for wildcard app ingress on apps.lv3.org
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 22
+          description: Docker bridge access for Coolify deployment agent SSH validation
     artifact-cache-lv3:
       allowed_inbound:
         - source: management
@@ -2485,8 +2537,8 @@ lv3_service_topology:
       url: "{{ coolify_controller_url }}"
   coolify_apps:
     service_name: coolify-apps
-    owning_vm: coolify-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: coolify-apps-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-apps-lv3') | map(attribute='ipv4') | first) }}"
     public_hostname: apps.lv3.org
     exposure_model: edge-published
     observability:
@@ -2503,7 +2555,7 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:443"
+      upstream: "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-apps-lv3') | map(attribute='ipv4') | first) }}:443"
       aliases:
         - "*.apps.lv3.org"
       crawl_policy_enabled: false

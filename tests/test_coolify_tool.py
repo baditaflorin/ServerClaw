@@ -646,3 +646,162 @@ def test_command_deploy_repo_cancels_active_deployments_before_redeploy(monkeypa
             "status": "cancelled-by-user",
         }
     ]
+
+
+# ---------------------------------------------------------------------------
+# ADR 0340: register-deployment-server and migrate-deployment-server
+# ---------------------------------------------------------------------------
+
+
+def test_register_deployment_server_creates_new_server(monkeypatch, tmp_path: Path, capsys) -> None:
+    """register-deployment-server posts a new server when name is not already registered."""
+    client = make_client(tmp_path)
+    auth_file = tmp_path / "auth.json"
+    auth_file.write_text(
+        '{"controller_url": "http://127.0.0.1:8000", "api_token": "tok"}', encoding="utf-8"
+    )
+
+    call_log: list[tuple[str, str]] = []
+
+    def fake_request(self, method: str, path: str, payload=None):  # type: ignore
+        call_log.append((method, path))
+        if path == "/api/v1/servers" and method == "GET":
+            return []  # no existing servers
+        if path == "/api/v1/security/keys" and method == "GET":
+            return [{"uuid": "key-1", "name": "default"}]
+        if path == "/api/v1/servers" and method == "POST":
+            assert payload["name"] == "coolify-apps-lv3"
+            assert payload["ip"] == "10.10.10.71"
+            return {"uuid": "srv-new", "name": "coolify-apps-lv3"}
+        raise AssertionError(f"unexpected {method} {path}")
+
+    monkeypatch.setattr(tool.CoolifyClient, "_request", fake_request)
+
+    exit_code = tool.main(
+        [
+            "--auth-file", str(auth_file),
+            "register-deployment-server",
+            "--host", "coolify-apps-lv3",
+            "--ip", "10.10.10.71",
+        ]
+    )
+    out = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert out["status"] == "registered"
+
+
+def test_register_deployment_server_is_idempotent(monkeypatch, tmp_path: Path, capsys) -> None:
+    """register-deployment-server exits 0 without creating a duplicate when name already exists."""
+    client = make_client(tmp_path)
+    auth_file = tmp_path / "auth.json"
+    auth_file.write_text(
+        '{"controller_url": "http://127.0.0.1:8000", "api_token": "tok"}', encoding="utf-8"
+    )
+    post_called = {"count": 0}
+
+    def fake_request(self, method: str, path: str, payload=None):  # type: ignore
+        if path == "/api/v1/servers" and method == "GET":
+            return [{"uuid": "srv-existing", "name": "coolify-apps-lv3", "ip": "10.10.10.71"}]
+        if method == "POST":
+            post_called["count"] += 1
+        return {}
+
+    monkeypatch.setattr(tool.CoolifyClient, "_request", fake_request)
+
+    exit_code = tool.main(
+        [
+            "--auth-file", str(auth_file),
+            "register-deployment-server",
+            "--host", "coolify-apps-lv3",
+            "--ip", "10.10.10.71",
+        ]
+    )
+    out = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert out["status"] == "already_registered"
+    assert post_called["count"] == 0
+
+
+def test_migrate_deployment_server_moves_apps(monkeypatch, tmp_path: Path, capsys) -> None:
+    """migrate-deployment-server re-assigns applications from source to target server."""
+    auth_file = tmp_path / "auth.json"
+    auth_file.write_text(
+        '{"controller_url": "http://127.0.0.1:8000", "api_token": "tok"}', encoding="utf-8"
+    )
+    patched: list[dict] = []
+
+    def fake_request(self, method: str, path: str, payload=None):  # type: ignore
+        if path == "/api/v1/servers" and method == "GET":
+            return [
+                {"uuid": "src-uuid", "name": "coolify-lv3"},
+                {"uuid": "dst-uuid", "name": "coolify-apps-lv3"},
+            ]
+        if path == "/api/v1/applications" and method == "GET":
+            return [
+                {"uuid": "app-1", "name": "smoke-app", "server": {"uuid": "src-uuid"}},
+                {"uuid": "app-2", "name": "already-moved", "server": {"uuid": "dst-uuid"}},
+            ]
+        if method == "PATCH":
+            patched.append({"path": path, "payload": payload})
+            return {}
+        return {}
+
+    monkeypatch.setattr(tool.CoolifyClient, "_request", fake_request)
+
+    exit_code = tool.main(
+        [
+            "--auth-file", str(auth_file),
+            "migrate-deployment-server",
+            "--from", "coolify-lv3",
+            "--to", "coolify-apps-lv3",
+        ]
+    )
+    out = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "smoke-app" in out["migrated"]
+    assert "already-moved" in out["skipped"]
+    assert out["migration_count"] == 1
+    assert len(patched) == 1
+    assert patched[0]["payload"] == {"server_uuid": "dst-uuid"}
+
+
+def test_migrate_deployment_server_returns_2_when_nothing_to_migrate(monkeypatch, tmp_path: Path) -> None:
+    """migrate-deployment-server exits 2 when all apps are already on the target server."""
+    auth_file = tmp_path / "auth.json"
+    auth_file.write_text(
+        '{"controller_url": "http://127.0.0.1:8000", "api_token": "tok"}', encoding="utf-8"
+    )
+
+    def fake_request(self, method: str, path: str, payload=None):  # type: ignore
+        if path == "/api/v1/servers" and method == "GET":
+            return [
+                {"uuid": "src-uuid", "name": "coolify-lv3"},
+                {"uuid": "dst-uuid", "name": "coolify-apps-lv3"},
+            ]
+        if path == "/api/v1/applications" and method == "GET":
+            return [{"uuid": "app-1", "name": "already-moved", "server": {"uuid": "dst-uuid"}}]
+        return {}
+
+    monkeypatch.setattr(tool.CoolifyClient, "_request", fake_request)
+
+    exit_code = tool.main(
+        [
+            "--auth-file", str(auth_file),
+            "migrate-deployment-server",
+            "--from", "coolify-lv3",
+            "--to", "coolify-apps-lv3",
+        ]
+    )
+    assert exit_code == 2
+
+
+def test_default_deployment_server_reads_from_stack_yaml(tmp_path: Path, monkeypatch) -> None:
+    """_default_deployment_server() derives the server name from versions/stack.yaml (ADR 0340 DRY fix)."""
+    stack_yaml = tmp_path / "versions" / "stack.yaml"
+    stack_yaml.parent.mkdir(parents=True)
+    stack_yaml.write_text(
+        "observed_state:\n  coolify:\n    deployment_server_name: coolify-apps-lv3\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(tool, "_STACK_YAML", stack_yaml)
+    assert tool._default_deployment_server() == "coolify-apps-lv3"

@@ -191,6 +191,7 @@ desired_state:
     postgres_replica_vm: 10.10.10.51
     backup_vm: 10.10.10.60
     coolify_vm: 10.10.10.70
+    coolify_apps_vm: 10.10.10.71
     artifact_cache_vm: 10.10.10.80
     runtime_ai_vm: 10.10.10.90
     runtime_general_vm: 10.10.10.91
@@ -207,6 +208,7 @@ desired_state:
       postgres_replica_vm: 151
       backup_vm: 160
       coolify_vm: 170
+      coolify_apps_vm: 171
       artifact_cache_vm: 180
       runtime_ai_vm: 190
       runtime_general_vm: 191
@@ -895,15 +897,16 @@ observed_state:
       - approved-agent-clients
   coolify:
     runtime_vm: 10.10.10.70
+    apps_runtime_vm: 10.10.10.71
     private_controller_url: http://100.64.0.1:8012
     public_url: https://coolify.lv3.org
     apps_public_url: https://apps.lv3.org
     dashboard_version: 4.0.0-beta.470
-    deployment_server_name: coolify-lv3
-    deployment_server_reachable: true
-    deployment_server_usable: true
+    deployment_server_name: coolify-apps-lv3
+    deployment_server_reachable: false
+    deployment_server_usable: false
     repo_smoke_app_url: https://repo-smoke.apps.lv3.org
-    repo_smoke_public_http_verified: true
+    repo_smoke_public_http_verified: false
     apps_apex_default_unassigned: true
   outline:
     runtime_vm: 10.10.10.20
