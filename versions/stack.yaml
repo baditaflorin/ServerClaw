@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.178.0
+repo_version: 0.178.1
 platform_version: 0.130.97
 
 live_apply_evidence:
@@ -664,6 +664,10 @@ observed_state:
         name: coolify-lv3
         ipv4: 10.10.10.70
         running: true
+      - vmid: 171
+        name: coolify-apps-lv3
+        ipv4: 10.10.10.71
+        running: true
       - vmid: 180
         name: artifact-cache-lv3
         ipv4: 10.10.10.80
@@ -1150,7 +1154,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.0
+    current: 0.178.1
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.97

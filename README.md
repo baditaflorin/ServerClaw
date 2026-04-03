@@ -43,7 +43,7 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.0` |
+| Repository version | `0.178.1` |
 | Platform version | `0.130.97` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -53,8 +53,8 @@ rewriting one operator's workstation paths.
 ### Topology Summary
 | Field | Value |
 | --- | --- |
-| Managed guest count | 12 |
-| Running guest count | 9 |
+| Managed guest count | 13 |
+| Running guest count | 10 |
 | Template VM present | `true` |
 | Declared services | 72 |
 | Publicly published services | 45 |
@@ -309,7 +309,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.0` |
+| Repository version | `0.178.1` |
 | Platform version | `0.130.97` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -609,6 +609,7 @@ Current values on `main`:
 | `0319` | Investigate recurring service restarts and uptime failures across the runtime pools | `merged` | [ws-0325-service-uptime-investigation.md](docs/workstreams/ws-0325-service-uptime-investigation.md) |
 | `0319` | Refine the runtime-pool ADR bundle with battle-tested API-first OSS recommendations | `merged` | [ws-0329-runtime-library-fit.md](docs/workstreams/ws-0329-runtime-library-fit.md) |
 | `0319` | Complete the phased runtime-pool transition after the first runtime-ai split | `merged` | [ws-0330-runtime-pool-transition-program.md](docs/workstreams/ws-0330-runtime-pool-transition-program.md) |
+| `0319` | Fail closed before runtime-pool retirement or shared-runtime recovery can take down legacy services | `merged` | [ws-0333-service-uptime-recovery.md](docs/workstreams/ws-0333-service-uptime-recovery.md) |
 | `0324` | Programmatic sharding roadmap for oversized service, ADR, discovery, and workstream surfaces | `merged` | [ws-0324-programmatic-doc-shards.md](docs/workstreams/ws-0324-programmatic-doc-shards.md) |
 | `0330` | Prepare the repository for public GitHub publication as a generic and forkable reference platform | `merged` | [adr-0330-public-github-readiness-bundle.md](docs/workstreams/adr-0330-public-github-readiness-bundle.md) |
 | `0340` | Dedicated Coolify Apps VM Separation — introduce coolify-apps-lv3 as the Coolify deployment server | `merged` | [0340-dedicated-coolify-apps-vm-separation.md](docs/adr/0340-dedicated-coolify-apps-vm-separation.md) |

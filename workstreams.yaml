@@ -17697,7 +17697,7 @@ workstreams:
   - id: ws-0333-service-uptime-recovery
     adr: "0319"
     title: Fail closed before runtime-pool retirement or shared-runtime recovery can take down legacy services
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/ws-0333-service-uptime-recovery
     worktree_path: .worktrees/ws-0333-service-uptime-recovery
@@ -17774,12 +17774,11 @@ workstreams:
             - tests/test_runtime_ai_pool_playbook.py
           mode: exclusive
     canonical_truth:
-      changelog_entry: null
-      release_bump: null
-      included_in_repo_version: null
-    blockers:
-      - docker-runtime-lv3 is still exposed to service-specific Docker daemon restarts during live converges, so this guard should merge before any further runtime-pool retirement replay
-    ready_to_merge: false
+      changelog_entry: hardens runtime-pool retirement and shared-runtime recovery so legacy services cannot be retired before destination pools are verified and routine Keycloak or OpenBao converges cannot restart Docker on docker-runtime-lv3
+      release_bump: patch
+      included_in_repo_version: 0.178.1
+    blockers: []
+    ready_to_merge: true
     live_applied: false
   - id: ws-0330-runtime-pool-transition-program
     adr: "0319"
