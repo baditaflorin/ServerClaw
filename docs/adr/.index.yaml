@@ -9,7 +9,7 @@ schema_version: 1
 generated: '2026-04-03'
 total_adrs: 360
 implementation_status_summary:
-  Implemented: 312
+  Implemented: 313
   Partial: 10
   Not Implemented: 36
   Deprecated: 1
@@ -6024,8 +6024,8 @@ adr_index:
     filename: 0339-reference-deployment-samples-and-replaceable-provider-profiles.md
   - adr: '0340'
     title: Dedicated Coolify Apps VM Separation
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Accepted
+    implementation_status: Implemented
     date: '2026-04-03'
     concern: vm-topology
     keywords:
