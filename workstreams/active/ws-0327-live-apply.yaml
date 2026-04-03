@@ -1,7 +1,7 @@
 id: ws-0327-live-apply
-adr: 0327
+adr: "0327"
 title: Live apply sectional agent discovery registries and generated onboarding packs from latest origin/main
-status: in_progress
+status: live_applied
 owner: codex
 branch: codex/ws-0327-live-apply
 worktree_path: .worktrees/ws-0327-live-apply
@@ -16,6 +16,7 @@ depends_on:
 conflicts_with: []
 shared_surfaces:
 - workstreams.yaml
+- workstreams/active/ws-0327-live-apply.yaml
 - docs/workstreams/ws-0327-live-apply.md
 - docs/adr/0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md
 - docs/adr/.index.yaml
@@ -24,6 +25,9 @@ shared_surfaces:
 - .repo-structure.yaml
 - .config-locations.yaml
 - docs/diagrams/agent-coordination-map.excalidraw
+- README.md
+- changelog.md
+- versions/stack.yaml
 - docs/discovery/onboarding-packs.yaml
 - docs/discovery/repo-structure/**
 - docs/discovery/config-locations/**
@@ -37,6 +41,7 @@ shared_surfaces:
 - tests/test_validate_public_entrypoints.py
 - tests/test_validate_repo_cache.py
 - receipts/live-applies/2026-04-03-adr-0327-sectional-agent-discovery-live-apply.json
+- receipts/live-applies/2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply.json
 - receipts/live-applies/evidence/2026-04-03-ws-0327-*
 ownership_manifest:
   owned_surfaces:
@@ -74,6 +79,13 @@ ownership_manifest:
     - docs/diagrams/agent-coordination-map.excalidraw
     mode: shared_contract
     contract: latest-main-generated-truth-v1
+  - id: ws0327_canonical_truth
+    paths:
+    - README.md
+    - changelog.md
+    - versions/stack.yaml
+    mode: shared_contract
+    contract: canonical-truth-v1
   - id: ws0327_discovery_tooling
     paths:
     - scripts/generate_discovery_artifacts.py
@@ -88,7 +100,19 @@ ownership_manifest:
   - id: ws0327_live_apply_receipts
     paths:
     - receipts/live-applies/2026-04-03-adr-0327-sectional-agent-discovery-live-apply.json
+    - receipts/live-applies/2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply.json
     - receipts/live-applies/evidence/2026-04-03-ws-0327-*
     mode: exclusive
-ready_to_merge: false
-live_applied: false
+blockers: []
+ready_to_merge: true
+live_applied: true
+canonical_truth:
+  changelog_entry: implements ADR 0327 by splitting the root agent-discovery registries
+    into sectional source files, generating concise public-safe root entrypoints,
+    tracking generated onboarding packs under build/onboarding, and validating the
+    discovery artifacts plus public entrypoints through the rebased exact-main automation
+    gates
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts:
+    sectional_agent_discovery: 2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply

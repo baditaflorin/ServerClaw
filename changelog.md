@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- implements ADR 0327 by splitting the root agent-discovery registries into sectional source files, generating concise public-safe root entrypoints, tracking generated onboarding packs under build/onboarding, and validating the discovery artifacts plus public entrypoints through the rebased exact-main automation gates
+
 ## Latest Release
 
 - [0.178.3 release notes](docs/release-notes/0.178.3.md)

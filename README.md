@@ -204,6 +204,7 @@ rewriting one operator's workstation paths.
 | `sbom_cve_scanning` | `2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply` |
 | `searxng` | `2026-03-26-adr-0148-searxng-live-apply` |
 | `secret_rotation` | `2026-03-23-adr-0065-secret-rotation-live-apply` |
+| `sectional_agent_discovery` | `2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply` |
 | `security_posture_reporting` | `2026-03-26-adr-0102-security-posture-live-apply` |
 | `seed_data_snapshots` | `2026-03-28-adr-0187-anonymized-seed-data-snapshots-mainline-live-apply` |
 | `self_correcting_automation_loops` | `2026-03-28-adr-0204-self-correcting-automation-loops-live-apply` |
@@ -619,6 +620,7 @@ Current values on `main`:
 | `0319` | Fail closed before runtime-pool retirement or shared-runtime recovery can take down legacy services | `merged` | [ws-0333-service-uptime-recovery.md](docs/workstreams/ws-0333-service-uptime-recovery.md) |
 | `0324` | Programmatic sharding roadmap for oversized service, ADR, discovery, and workstream surfaces | `merged` | [ws-0324-programmatic-doc-shards.md](docs/workstreams/ws-0324-programmatic-doc-shards.md) |
 | `0326` | Implement shard-backed workstream registry source files with generated compatibility assembly | `live_applied` | [adr-0326-workstream-registry-shards.md](docs/workstreams/adr-0326-workstream-registry-shards.md) |
+| `0327` | Live apply sectional agent discovery registries and generated onboarding packs from latest origin/main | `live_applied` | [ws-0327-live-apply.md](docs/workstreams/ws-0327-live-apply.md) |
 | `0330` | Prepare the repository for public GitHub publication as a generic and forkable reference platform | `merged` | [adr-0330-public-github-readiness-bundle.md](docs/workstreams/adr-0330-public-github-readiness-bundle.md) |
 | `0340` | Dedicated Coolify Apps VM Separation — introduce coolify-apps-lv3 as the Coolify deployment server | `merged` | [0340-dedicated-coolify-apps-vm-separation.md](docs/adr/0340-dedicated-coolify-apps-vm-separation.md) |
 | `0341` | Integrate Open WebUI into Keycloak-backed routine operator authentication | `live_applied` | [ws-0334-auth-convergence.md](docs/workstreams/ws-0334-auth-convergence.md) |
