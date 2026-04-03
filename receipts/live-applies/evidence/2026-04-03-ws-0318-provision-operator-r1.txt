@@ -1,0 +1,13 @@
+[0] Will write a new password to /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/.local/keycloak/florin.badita-tmp-002-password.txt after Keycloak user creation
+Traceback (most recent call last):
+  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 680, in <module>
+    main()
+    ~~~~^^
+  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 676, in main
+    provision(args, dry_run=args.dry_run)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 527, in provision
+    bootstrap_pass = read_required_text(BOOTSTRAP_PASS_FILE, "Keycloak bootstrap password")
+  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 115, in read_required_text
+    raise FileNotFoundError(f"Missing {label}: {path}")
+FileNotFoundError: Missing Keycloak bootstrap password: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/.local/keycloak/bootstrap-admin-password.txt

@@ -160,8 +160,24 @@ Notes:
 
 - `scripts/provision_operator.py` now resolves `.local/` from the shared repo root, so it is safe
   to run from a dedicated git worktree under `.worktrees/`.
+- When the public Keycloak edge is degraded but the legacy direct fallback lane on
+  `docker-runtime-lv3` is still healthy, forward `127.0.0.1:18080` from
+  `ops@10.10.10.20` and run the script with
+  `LV3_KEYCLOAK_URL=http://127.0.0.1:18080`.
+- If the controller-local bootstrap password file is stale relative to the live
+  Keycloak runtime, pass the current value ephemerally with
+  `LV3_KEYCLOAK_BOOTSTRAP_PASSWORD=...` instead of rewriting the shared secret
+  file first.
+- If the controller-local transactional SMTP password file is stale relative to
+  the live mail runtime, pass the current value ephemerally with
+  `LV3_PLATFORM_SMTP_PASSWORD=...` instead of rewriting the shared secret file
+  first.
+- `scripts/provision_operator.py` derives its role and group mappings from the canonical
+  `scripts/operator_manager.py` contract, so the fallback path stays aligned with the
+  roster-first Windmill flow.
 - Use `--skip-email` when re-verifying an existing account from exact `main`; this preserves the
-  direct-API provisioning and assignment checks without sending duplicate onboarding mail.
+  direct-API provisioning and assignment checks without generating a new Headscale auth key or
+  sending duplicate onboarding mail.
 
 Dry-run support:
 

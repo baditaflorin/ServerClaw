@@ -25,6 +25,15 @@ def test_discover_local_root_prefers_shared_repo_root_for_worktrees(tmp_path: Pa
     assert provision_operator.discover_local_root(worktree_root, repo_root) == repo_root / ".local"
 
 
+def test_discover_local_root_ignores_worktree_shadow_local_dir(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    worktree_root = repo_root / ".worktrees" / "ws-0318"
+    (repo_root / ".local").mkdir(parents=True)
+    (worktree_root / ".local" / "keycloak").mkdir(parents=True)
+
+    assert provision_operator.discover_local_root(worktree_root, repo_root) == repo_root / ".local"
+
+
 def test_repo_path_routes_dot_local_to_shared_checkout(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     worktree_root = repo_root / ".worktrees" / "ws-0317"
@@ -48,6 +57,41 @@ def test_role_definitions_align_with_operator_manager() -> None:
         assert tuple(observed["realm_roles"]) == expected.keycloak_roles
         assert tuple(observed["groups"]) == expected.keycloak_groups
         assert tuple(observed["openbao_policies"]) == expected.openbao_policies
+
+
+def test_configured_url_prefers_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LV3_KEYCLOAK_URL", "http://127.0.0.1:18080/")
+    assert provision_operator.configured_url("LV3_KEYCLOAK_URL", provision_operator.DEFAULT_KEYCLOAK_URL) == (
+        "http://127.0.0.1:18080"
+    )
+
+
+def test_configured_url_falls_back_to_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("LV3_HEADSCALE_URL", raising=False)
+    assert (
+        provision_operator.configured_url("LV3_HEADSCALE_URL", provision_operator.DEFAULT_HEADSCALE_URL)
+        == provision_operator.DEFAULT_HEADSCALE_URL
+    )
+
+
+def test_read_keycloak_bootstrap_password_prefers_env_override(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    bootstrap_file = tmp_path / "bootstrap-admin-password.txt"
+    bootstrap_file.write_text("stale-file-password\n", encoding="utf-8")
+
+    monkeypatch.setattr(provision_operator, "BOOTSTRAP_PASS_FILE", bootstrap_file)
+    monkeypatch.setenv("LV3_KEYCLOAK_BOOTSTRAP_PASSWORD", "live-runtime-password")
+
+    assert provision_operator.read_keycloak_bootstrap_password() == "live-runtime-password"
+
+
+def test_read_platform_smtp_password_prefers_env_override(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    smtp_file = tmp_path / "platform-transactional-mailbox-password.txt"
+    smtp_file.write_text("stale-file-password\n", encoding="utf-8")
+
+    monkeypatch.setattr(provision_operator, "SMTP_PASS_FILE", smtp_file)
+    monkeypatch.setenv("LV3_PLATFORM_SMTP_PASSWORD", "live-runtime-password")
+
+    assert provision_operator.read_platform_smtp_password() == "live-runtime-password"
 
 
 def test_provision_skip_email_verifies_existing_assignments(

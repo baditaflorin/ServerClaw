@@ -3,7 +3,9 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Date: 2026-04-01
-- Implemented In Repo Version: 0.0.0
+- Implemented In Repo Version: not yet
+- Implemented In Platform Version: 0.130.97
+- Implemented On: 2026-04-03
 - Tags: operator-provisioning, iac, email, audit-trail, llm-agent
 
 ## Context
@@ -30,6 +32,8 @@ This ADR codifies:
 - A standardised onboarding email template with **CC to the requester** as a mandatory
   audit record.
 - The `operators.yaml` update procedure that must follow provisioning.
+- Dedicated git worktree safety: the script must resolve `.local/` from the shared
+  repository root when invoked from `.worktrees/<name>`.
 
 ## Decision
 
@@ -55,23 +59,30 @@ python3 scripts/provision_operator.py \
 
 | Step | Action |
 |------|--------|
-| 0 | Check `.local/keycloak/<username>-password.txt` — reuse if exists, generate if not |
-| 1 | Check if Keycloak user already exists (skip creation if yes) |
-| 2 | Create Keycloak user with credentials |
-| 3 | Assign realm roles (derived from `--role` tier; see table below) |
-| 4 | Assign groups (derived from `--role` tier) |
-| 5 | Verify role and group assignments |
-| 6 | Send onboarding email to operator **CC requester** |
+| 0 | Resolve `.local/` from the shared checkout, then reuse or generate `.local/keycloak/<username>-password.txt` |
+| 1 | Check if the Keycloak user already exists (skip creation if yes; fail if the user exists but the local password file is missing) |
+| 2 | Create the Keycloak user with the generated credentials when needed |
+| 3 | Assign canonical realm roles derived from `scripts/operator_manager.py` |
+| 4 | Assign canonical groups derived from `scripts/operator_manager.py` |
+| 5 | Verify the expected role and group assignments end to end |
+| 6 | Unless `--skip-email` is used, create or reuse a Headscale auth key and send the onboarding email to the operator **CC requester** |
 
-The script is safe to run twice: re-running skips creation, re-sends the email.
+The script is safe to run twice from either the main checkout or a dedicated worktree:
+re-running skips user creation, preserves the local password file, and re-sends the
+email unless `--skip-email` is used for verification-only replay.
 
 ### 2. Role tier → Keycloak mappings
 
 | `--role` | Realm role | Groups | OpenBao policy |
 |---|---|---|---|
 | `admin` | `platform-admin` | `lv3-platform-admins`, `grafana-admins` | `platform-admin` |
-| `operator` | `platform-operator` | `lv3-platform-operators` | `platform-operator` |
-| `viewer` | `platform-viewer` | `lv3-platform-viewers` | `platform-read` |
+| `operator` | `platform-operator` | `lv3-platform-operators`, `grafana-viewers` | `platform-operator` |
+| `viewer` | `platform-read` | `lv3-platform-viewers`, `grafana-viewers` | `platform-read` |
+
+These mappings are not maintained separately inside ADR prose or a script-local table.
+`scripts/provision_operator.py` now derives them from the canonical
+`scripts/operator_manager.py` role definitions so the fallback onboarding path cannot
+drift from the roster-first ADR 0108 flow.
 
 ### 3. CC-to-requester email as mandatory audit record
 
@@ -134,6 +145,15 @@ touching Keycloak or sending email:
 python3 scripts/provision_operator.py ... --dry-run
 ```
 
+For exact-main verification of an already onboarded operator, use `--skip-email`:
+
+```bash
+python3 scripts/provision_operator.py ... --skip-email
+```
+
+`--skip-email` keeps the Keycloak provisioning and assignment checks live while skipping
+Headscale authkey generation and duplicate onboarding email delivery.
+
 ## Infrastructure requirements
 
 | Requirement | How it is met |
@@ -144,6 +164,21 @@ python3 scripts/provision_operator.py ... --dry-run
 | Token TTL | Script re-authenticates per Keycloak call (60-second token lifetime) |
 
 All secrets live in `.local/` (gitignored). No secrets are committed to the repository.
+
+When the public Keycloak edge is degraded but the documented direct lane on
+`docker-runtime-lv3` remains healthy, the script can now target that fallback
+explicitly with `LV3_KEYCLOAK_URL=http://127.0.0.1:18080` after forwarding the
+guest loopback port over SSH.
+
+If the controller-local Keycloak bootstrap password file is stale relative to
+the active runtime, the script can also take the live value ephemerally through
+`LV3_KEYCLOAK_BOOTSTRAP_PASSWORD` instead of requiring a pre-run secret-file
+rewrite.
+
+If the controller-local transactional SMTP password file is stale relative to
+the active mail runtime, the script can also take the live value ephemerally
+through `LV3_PLATFORM_SMTP_PASSWORD` instead of requiring a pre-run secret-file
+rewrite.
 
 ## LLM agent discovery hints
 
@@ -169,6 +204,9 @@ python3 scripts/provision_operator.py \
 # 5. Run for real
 python3 scripts/provision_operator.py ... # without --dry-run
 
+# 5a. Or re-verify an existing operator without sending duplicate email
+python3 scripts/provision_operator.py ... --skip-email
+
 # 6. Add operators.yaml entry, commit, push
 ```
 
@@ -177,11 +215,13 @@ python3 scripts/provision_operator.py ... # without --dry-run
 **Positive**
 
 - A single command provisions a complete operator account: Keycloak user, role, groups,
-  email with credentials — no manual steps.
+  Headscale auth key, and onboarding email with credentials — no manual steps.
 - The CC-to-requester pattern creates an automatic, time-stamped audit record without
   requiring a separate audit log write.
 - Idempotency means the script can be re-run safely if something fails mid-way.
 - `--dry-run` makes the script safe to test in CI or during agent planning.
+- The fallback path is now safe from dedicated git worktrees because `.local/` resolves
+  from the shared repository root instead of a worktree-local shadow path.
 - LLM agents can discover and execute the full flow from a single ADR + script, without
   reading ADR 0108, 0307, and 0317 sequentially.
 
@@ -193,6 +233,9 @@ python3 scripts/provision_operator.py ... # without --dry-run
 - The SMTP relay requires SSH proxy access. If `100.64.0.1` is unreachable, email
   delivery fails; the Keycloak account is still created. The password file at
   `.local/keycloak/<username>-password.txt` remains the fallback.
+- If the Keycloak user already exists but the matching local password file is absent, the
+  script now fails fast instead of guessing a replacement password that would not match the
+  live account.
 - Keycloak tokens expire in 60 seconds. The script re-authenticates per call, adding
   ~1 second of latency per step.
 
