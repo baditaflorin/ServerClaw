@@ -41,6 +41,7 @@
     name: "{{ docker_runtime_prereq_packages }}"
     state: present
     update_cache: true
+    cache_valid_time: 3600
     lock_timeout: "{{ docker_runtime_apt_lock_timeout }}"
     force_apt_get: true
 
@@ -76,6 +77,7 @@
     name: "{{ docker_runtime_engine_packages }}"
     state: present
     update_cache: true
+    cache_valid_time: 3600
     lock_timeout: "{{ docker_runtime_apt_lock_timeout }}"
     force_apt_get: true
 

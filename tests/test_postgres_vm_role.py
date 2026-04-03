@@ -33,10 +33,13 @@ def test_defaults_enable_pgaudit_and_repo_managed_sensitive_table_catalog() -> N
 
 def test_main_tasks_install_cluster_specific_pgaudit_package_and_extension() -> None:
     tasks = load_yaml(TASKS_PATH)
+    install_task = next(task for task in tasks if task.get("name") == "Install PostgreSQL guest packages")
     package_task = next(task for task in tasks if task.get("name") == "Ensure PostgreSQL pgaudit package is present")
     extension_task = next(task for task in tasks if task.get("name") == "Create pgaudit extension in writable databases")
 
+    assert install_task["ansible.builtin.apt"]["cache_valid_time"] == 3600
     assert package_task["ansible.builtin.apt"]["name"] == "postgresql-{{ postgres_vm_cluster_major_version }}-pgaudit"
+    assert package_task["ansible.builtin.apt"]["cache_valid_time"] == 3600
     assert package_task["when"] == [
         "postgres_vm_pgaudit_enabled | bool",
         "'pgaudit' in postgres_vm_shared_preload_libraries",

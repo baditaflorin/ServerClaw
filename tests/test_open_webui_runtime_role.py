@@ -26,12 +26,15 @@ def load_health_probes() -> dict:
     return json.loads(HEALTH_PROBE_CATALOG.read_text())["services"]
 
 
-def test_defaults_expose_public_oidc_runtime_inputs() -> None:
+def test_defaults_expose_internal_keycloak_discovery_and_oidc_runtime_inputs() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text())
 
     assert defaults["open_webui_enable_oidc"] is True
     assert defaults["open_webui_oidc_client_id"] == "open-webui"
-    assert defaults["open_webui_oidc_provider_url"] == "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration"
+    assert (
+        defaults["open_webui_oidc_provider_url"]
+        == "{{ platform_service_topology.keycloak.urls.internal }}/realms/lv3/.well-known/openid-configuration"
+    )
     assert defaults["open_webui_webui_name"] == "Open WebUI"
     assert defaults["open_webui_oidc_provider_name"] == "Keycloak"
     assert defaults["open_webui_oidc_scopes"] == "openid email profile"
@@ -73,7 +76,9 @@ def test_ctmpl_template_reads_oidc_secret_from_openbao() -> None:
 def test_tasks_only_prepare_openbao_when_the_sidecar_is_enabled() -> None:
     tasks = load_tasks()
 
+    package_task = next(task for task in tasks if task.get("name") == "Ensure the Open WebUI runtime packages are present")
     helper_task = next(task for task in tasks if task.get("name") == "Prepare OpenBao agent runtime secret injection for Open WebUI")
+    assert package_task["ansible.builtin.apt"]["cache_valid_time"] == 3600
     assert helper_task["when"] == "open_webui_enable_openbao_agent | bool"
 
 

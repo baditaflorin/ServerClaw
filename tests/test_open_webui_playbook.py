@@ -17,7 +17,7 @@ def test_open_webui_playbook_reconciles_keycloak_client_before_runtime() -> None
 
     assert play_names == [
         "Converge the Tailscale operator proxy for Open WebUI",
-        "Converge the Open WebUI Keycloak client on the runtime-control VM",
+        "Converge the Open WebUI Keycloak client on the Docker runtime VM",
         "Converge Open WebUI on the Docker runtime VM",
     ]
 
@@ -29,7 +29,7 @@ def test_open_webui_playbook_reconciles_keycloak_client_before_runtime() -> None
 
     keycloak_preflight = next(task for task in playbook[1]["pre_tasks"] if task["name"] == "Run shared preflight checks")
     assert keycloak_preflight["vars"]["required_hosts"] == [
-        "{{ playbook_execution_required_hosts.runtime_control[playbook_execution_env] }}"
+        "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
     ]
     keycloak_roles = [role["role"] for role in playbook[1]["roles"]]
     assert keycloak_roles == ["lv3.platform.docker_runtime"]

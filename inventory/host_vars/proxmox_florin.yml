@@ -2663,8 +2663,8 @@ lv3_service_topology:
       url: "{{ platform_context_controller_url }}"
   keycloak:
     service_name: keycloak
-    owning_vm: runtime-control-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -2681,7 +2681,10 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:8091"
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:8091"
+    urls:
+      internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:8091"
+      public: https://sso.lv3.org
   harbor:
     service_name: harbor
     owning_vm: runtime-control-lv3

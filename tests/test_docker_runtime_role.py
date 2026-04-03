@@ -1101,6 +1101,7 @@ def test_docker_runtime_waits_out_background_apt_maintenance() -> None:
     assert prereq_apt["name"] == "{{ docker_runtime_prereq_packages }}"
     assert prereq_apt["state"] == "present"
     assert prereq_apt["update_cache"] is True
+    assert prereq_apt["cache_valid_time"] == 3600
     assert prereq_apt["lock_timeout"] == "{{ docker_runtime_apt_lock_timeout }}"
     assert prereq_apt["force_apt_get"] is True
 
@@ -1111,6 +1112,7 @@ def test_docker_runtime_waits_out_background_apt_maintenance() -> None:
     assert install_runtime_apt["name"] == "{{ docker_runtime_engine_packages }}"
     assert install_runtime_apt["state"] == "present"
     assert install_runtime_apt["update_cache"] is True
+    assert install_runtime_apt["cache_valid_time"] == 3600
     assert install_runtime_apt["lock_timeout"] == "{{ docker_runtime_apt_lock_timeout }}"
     assert install_runtime_apt["force_apt_get"] is True
 

@@ -162,6 +162,13 @@ def test_role_requires_local_mail_submission_secret() -> None:
     assert "password-reset and required-action mail" in fail_task["ansible.builtin.fail"]["msg"]
 
 
+def test_role_reuses_recent_apt_cache_for_runtime_packages() -> None:
+    tasks = load_tasks()
+    package_task = next(task for task in tasks if task.get("name") == "Ensure the Keycloak runtime packages are present")
+
+    assert package_task["ansible.builtin.apt"]["cache_valid_time"] == 3600
+
+
 def test_realm_task_applies_repo_managed_smtp_settings() -> None:
     tasks = load_tasks()
     realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
