@@ -146,6 +146,7 @@ proxmox_api_token_acl_path: /
 proxmox_api_token_privsep: true
 proxmox_api_token_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api
 proxmox_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json
+proxmox_tool_topology_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api/topology.yaml
 
 hetzner_dns_api_base_url: https://dns.hetzner.com/api/v1
 hetzner_dns_zone_name: lv3.org
