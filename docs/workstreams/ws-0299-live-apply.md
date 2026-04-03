@@ -1,95 +1,68 @@
-# Workstream ws-0299-live-apply: ADR 0299 Live Apply From Latest `origin/main`
+# Workstream ws-0299-live-apply: Live Apply ADR 0299 From Latest `origin/main`
 
 - ADR: [ADR 0299](../adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md)
-- Title: promote ntfy from the private paging gateway into the governed self-hosted push notification channel
-- Status: in_progress
-- Branch: `codex/ws-0299-live-apply`
+- Title: Live apply ntfy as the self-hosted push notification channel from the latest realistic `origin/main`
+- Status: merged
+- Included In Repo Version: 0.177.152
+- Branch-Local Evidence: `receipts/live-applies/evidence/2026-04-03-ws-0299-branch-verification.txt`
+- Canonical Mainline Receipt: `receipts/live-applies/2026-04-03-adr-0299-ntfy-mainline-live-apply.json`
+- Live Applied In Platform Version: 0.130.95
+- Implemented On: 2026-04-03
+- Live Applied On: 2026-04-03
+- Exact-Main Replay Baseline: repo `0.177.151`, platform `0.130.94`
+- Workstream Branch: `codex/ws-0299-live-apply`
+- Integrated Branch: `main`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0299-live-apply`
 - Owner: codex
-- Depends On: `adr-0043`, `adr-0068`, `adr-0077`, `adr-0087`, `adr-0095`, `adr-0172`, `adr-0204`, `adr-0276`, `adr-0280`
+- Depends On: `adr-0043-openbao-for-platform-secrets-and-dynamic-credentials`, `adr-0068-container-image-publication-and-pinning-policy`, `adr-0077-compose-runtime-secret-injection`, `adr-0087-repository-validation-gate`, `adr-0095-edge-ingress-and-publication-model`, `adr-0172-watchdog-escalation-and-stale-job-self-healing`, `adr-0204-self-correcting-automation-loops`, `adr-0276-nats-jetstream-as-the-platform-event-bus`, `adr-0280-changedetection-io-for-external-content-and-api-change-monitoring`
 - Conflicts With: none
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0299-live-apply.md`, `docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md`, `docs/runbooks/configure-ntfy.md`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `scripts/ntfy_publish.py`, `scripts/restic_config_backup.py`, `tests/test_ntfy_publish.py`, `tests/test_restic_config_backup.py`, `receipts/live-applies/2026-04-03-adr-0299-ntfy-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-04-03-adr-0299-*`, `receipts/live-applies/evidence/2026-04-03-ws-0299-*`, `receipts/restic-backups/20260403T080214Z.json`, `receipts/restic-snapshots-latest.json`, `receipts/sbom/host-docker-runtime-lv3-2026-04-03.cdx.json`
 
 ## Scope
 
-- convert ntfy from the private `platform-alerts` paging gateway into the repo-governed public `ntfy.lv3.org` push surface described by ADR 0299
-- add the topic registry, image pinning, controller-local secret contracts, OpenBao token seeding, and the service-wrapper automation needed for governed replay
-- update Alertmanager, Changedetection, Ansible notifications, Gitea validation failures, and Windmill watchdog or security bridges to use the new ntfy contracts
-- live-apply the change from this isolated latest-main worktree, verify the public and private paths end to end, and leave clear receipts plus merge-safe notes behind
+- promote ntfy from the private paging gateway into the governed public `ntfy.lv3.org` push surface described by ADR 0299
+- wire the topic registry, credential contracts, edge publication, OpenBao seeding, and downstream publishers onto the governed ntfy contract
+- prove both the direct ntfy converge path and the generic `live-apply-service` path from the latest realistic `origin/main`
+- leave exact-main receipts, validation evidence, and merge-safe metadata behind for the canonical repository history
 
-## Protected-File Boundaries
+## Non-Goals
 
-- Do not bump `VERSION` on this branch.
-- Do not edit numbered release sections in `changelog.md` on this branch.
-- Do not update the top-level integrated `README.md` status summary on this branch.
-- Do not update `versions/stack.yaml` unless this workstream becomes the final verified integration step on `main`.
+- rewriting unrelated release-manager integrations beyond the bounded evidence recorded here
+- hiding shared wrapper failures behind a false-green service receipt
+- rewriting the broader immutable-guest live-apply policy for `edge_and_stateful` services
 
-## Shared Surfaces
+## Ownership Notes
 
-- `workstreams.yaml`
-- `docs/workstreams/ws-0299-live-apply.md`
-- `docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md`
-- `docs/runbooks/configure-ntfy.md`
-- `inventory/host_vars/proxmox_florin.yml`
-- `inventory/group_vars/platform.yml`
-- `scripts/generate_platform_vars.py`
-- `Makefile`
-- `playbooks/ntfy.yml`
-- `playbooks/services/ntfy.yml`
-- `playbooks/tasks/preflight.yml`
-- `playbooks/tasks/notify.yml`
-- `collections/ansible_collections/lv3/platform/playbooks/ntfy.yml`
-- `collections/ansible_collections/lv3/platform/playbooks/tasks/preflight.yml`
-- `collections/ansible_collections/lv3/platform/playbooks/tasks/notify.yml`
-- `collections/ansible_collections/lv3/platform/plugins/callback/mutation_audit.py`
-- `collections/ansible_collections/lv3/platform/roles/ntfy_runtime/`
-- `collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/`
-- `collections/ansible_collections/lv3/platform/roles/changedetection_runtime/`
-- `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`
-- `collections/ansible_collections/lv3/platform/roles/windmill_runtime/`
-- `config/ntfy/server.yml`
-- `config/ntfy/topics.yaml`
-- `config/subdomain-catalog.json`
-- `config/image-catalog.json`
-- `config/controller-local-secrets.json`
-- `config/secret-catalog.json`
-- `config/health-probe-catalog.json`
-- `config/service-capability-catalog.json`
-- `config/service-completeness.json`
-- `config/service-redundancy-catalog.json`
-- `config/dependency-graph.json`
-- `config/command-catalog.json`
-- `config/workflow-catalog.json`
-- `config/ansible-execution-scopes.yaml`
-- `config/alertmanager/alertmanager.yml`
-- `config/windmill/scripts/`
-- `scripts/mutation_audit.py`
-- `scripts/ntfy_publish.py`
-- `.gitea/workflows/validate.yml`
-- `receipts/image-scans/`
-- `receipts/live-applies/`
+- this workstream owns the ADR 0299 implementation surfaces, the ntfy topic and token contract updates, and the exact-main replay evidence
+- the protected release and canonical-truth files were intentionally deferred until the exact-main integration step, then written on `main` as repository version `0.177.152` and platform version `0.130.95`
+- the `live-apply-service` wrapper for `ntfy` legitimately requires `ALLOW_IN_PLACE_MUTATION=true` because the service remains classified as `edge_and_stateful`; the blocked run is preserved as evidence rather than bypassed silently
+- the post-live-apply restic backup hook exposed a real contract bug on exact main: the backup script required `ntfy_token` even for `--live-apply-trigger` runs that never emit ntfy notifications; this workstream fixed that bug and reran the wrapper to green
 
-## Current Plan
+## Branch-Local Verification
 
-- add the topic and credential registry first so the runtime, secret manifests, and downstream integrations all consume one declared contract
-- keep compatibility only where a client forces it, but move governed publishers onto ADR 0299 topic names on this workstream
-- validate both `make converge-ntfy` and the generic `make live-apply-service service=ntfy env=production` path before calling the branch complete
+- `make converge-ntfy env=production` completed successfully from the rebased latest-main worktree and the controller-side `https://ntfy.lv3.org/v1/health` verification passed
+- the live host config at `/opt/ntfy/server.yml` confirmed the governed auth contract, including the expected users, bearer tokens, and ACLs for the Ansible, Gitea Actions, and Windmill publishers
+- the governed public publish path accepted a direct POST to `https://ntfy.lv3.org/platform-ansible-info` with the Ansible token
+- `uv run python3 scripts/ntfy_publish.py --publisher ansible --topic platform-ansible-info ... --sequence-id ws-0299:latest-main:verify ...` succeeded end to end after normalizing logical sequence IDs into ntfy-safe values, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0299-branch-verification.txt`
 
-## 2026-04-03 Verification Notes
+## Exact-Main Verification
 
-- `make converge-ntfy env=production` completed successfully after the latest `origin/main` rebase, including Hetzner DNS convergence, ntfy runtime convergence on `docker-runtime-lv3`, `ntfy.lv3.org` edge publication on `nginx-lv3`, and a controller-side `https://ntfy.lv3.org/v1/health` check.
-- `ssh -J ops@100.64.0.1 ops@10.10.10.20 'sudo sed -n "1,80p" /opt/ntfy/server.yml'` now shows the governed ntfy auth contract rendered live: all expected users are present, bearer tokens use the `tk_...` format, and the governed ACL list includes the Ansible, Gitea Actions, and Windmill publishers.
-- direct controller verification of `https://ntfy.lv3.org/platform-ansible-info` now returns `HTTP 200` with the governed `ansible` bearer token; the public POST path is healthy end to end.
-- `uv run python3 scripts/ntfy_publish.py --publisher ansible --topic platform-ansible-info ... --sequence-id ws-0299:latest-main:verify ...` now succeeds end to end after normalizing logical sequence IDs into ntfy-safe values.
-- `make live-apply-service service=ntfy env=production` clears its bootstrap preflight on this branch and then stops at `check-canonical-truth` because the workstream branch intentionally defers protected canonical-truth files (`README.md`, `changelog.md`, `versions/stack.yaml`) to the final mainline integration step.
-- `make converge-monitoring env=production` advanced through monitoring-stack verification, generated updated host SBOM receipts, and then was intentionally interrupted during later observability replay because it had moved beyond the ntfy-specific verification needed for this workstream pass.
+- `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-release-manager-r1-0.177.152.txt` shows the protected-surface cut to repository version `0.177.152`; the repo-local write succeeded, but the external Outline sync returned `502`, so the evidence preserves that external dependency failure instead of pretending the first run was clean
+- `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-release-manager-r2-0.177.152.txt` confirms the rerun with `LV3_SKIP_OUTLINE_SYNC=1` found no remaining `Unreleased` bullets because the first run had already consumed the release state correctly
+- `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-live-apply-r1-0.177.152.txt` records the intentional exact-main guardrail: `make live-apply-service service=ntfy env=production` stopped at the immutable-guest policy because `ntfy` is classified as `edge_and_stateful`
+- `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-live-apply-r2-0.177.152.txt` records the next exact-main failure after the in-place mutation exception: the ntfy converge and public health checks passed, but the shared post-run restic hook failed because the runtime credential payload was missing `ntfy_token`
+- this workstream then narrowed the restic contract so `scripts/restic_config_backup.py` still requires `ntfy_token` for scheduled backup runs but does not fail `--live-apply-trigger` backups before any ntfy notification path is even reachable; the focused guardrail tests are preserved in `tests/test_restic_config_backup.py`
+- `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-live-apply-r3-0.177.152.txt` is the final exact-main green replay: `docker-runtime-lv3 : ok=110 changed=2 failed=0`, `localhost : ok=19 changed=0 failed=0`, `nginx-lv3 : ok=49 changed=5 failed=0`, the public `https://ntfy.lv3.org/v1/health` probe passed, and the post-run restic hook returned `status: ok`
+- the successful exact-main wrapper synced `receipts/restic-backups/20260403T080214Z.json` and refreshed `receipts/restic-snapshots-latest.json`, with the live-apply-trigger backup protecting the governed `config` and `versions_stack` sources while explicitly keeping `falco_overrides` inactive because that optional source is not present on `docker-runtime-lv3`
 
-## Remaining For Final Mainline Closeout
+## Exact-Main Validation
 
-- merge this workstream onto the latest `main`, then update the protected canonical-truth files there so `check-canonical-truth` passes legitimately
-- replay `make live-apply-service service=ntfy env=production` from merged `main` once the protected canonical-truth files are updated, because that wrapper hard-requires `check-canonical-truth`
-- once the merged-main replay succeeds, update ADR 0299 metadata to `Implementation Status: Implemented` and record the first repo version, first platform version, and implementation date
-- update the protected integration files on `main` only: `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml`
+- after the workstream/ADR metadata refresh, receipt creation, and generator reruns, the exact-main tree reran the focused ntfy and restic tests plus the repository validation bundle before the `main` push
+- the canonical mainline receipt records the final successful validation suite, including the focused pytest replay, repository data-model validation, live-apply receipt validation, workstream-surface and agent-standard validation, generated-doc refresh, pre-push validation, and `git diff --check`
+- `make pre-push-gate` finished green on the completed exact-main tree while preserving one shared remote-builder quirk: the remote Atlas lane timed out reaching its disposable PostgreSQL dev database, then the gate reran the unresolved `atlas-lint` check locally and merged that passing fallback result into the final gate status
 
-## Merge-To-Main Reminder
+## Final Notes
 
-- if the branch completes the live apply before the final main integration step, leave the exact remaining protected-file updates spelled out here before ending the session
+- ADR 0299 is now the canonical ntfy contract on `main` at repository version `0.177.152` and platform version `0.130.95`
+- the remaining non-green evidence in this workstream is external and intentionally preserved: the first release-manager run hit an Outline `502`, but the protected repository surfaces were already written correctly and the exact-main service replay itself is now green
+- `receipts/live-applies/2026-04-03-adr-0299-ntfy-mainline-live-apply.json` is the canonical proof for this live apply

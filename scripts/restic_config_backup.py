@@ -126,7 +126,11 @@ def ensure_directory(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
 
-def load_runtime_credentials(path: Path | None = None) -> dict[str, str]:
+def load_runtime_credentials(
+    path: Path | None = None,
+    *,
+    required_fields: tuple[str, ...] = ("restic_password", "minio_secret_key", "nats_password", "ntfy_token"),
+) -> dict[str, str]:
     candidate = path
     if candidate is None:
         credential_dir = os.environ.get("CREDENTIALS_DIRECTORY", "").strip()
@@ -135,8 +139,7 @@ def load_runtime_credentials(path: Path | None = None) -> dict[str, str]:
     if candidate is None:
         raise ValueError("systemd runtime credentials are unavailable")
     payload = json.loads(Path(candidate).read_text(encoding="utf-8"))
-    required = ("restic_password", "minio_secret_key", "nats_password", "ntfy_token")
-    missing = [field for field in required if not str(payload.get(field) or "").strip()]
+    missing = [field for field in required_fields if not str(payload.get(field) or "").strip()]
     if missing:
         raise ValueError("runtime credential payload is missing " + ", ".join(missing))
     return {str(key): str(value).strip() for key, value in payload.items() if isinstance(value, (str, int, float))}
@@ -1241,7 +1244,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         repo_root = args.repo_root
         catalog, raw_sources = load_catalog(args.catalog)
-        credentials = load_runtime_credentials(args.credential_file)
+        required_fields = ("restic_password", "minio_secret_key", "nats_password")
+        if args.mode == "backup" and not args.live_apply_trigger:
+            required_fields += ("ntfy_token",)
+        credentials = load_runtime_credentials(args.credential_file, required_fields=required_fields)
         ensure_directory(args.cache_dir)
         ensure_directory(args.runtime_state_dir)
         lock_path = args.runtime_state_dir / DEFAULT_LOCK_FILENAME

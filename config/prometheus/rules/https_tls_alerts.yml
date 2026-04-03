@@ -1413,6 +1413,51 @@ groups:
           description: https://100.64.0.1:8013/ has less than 14 days remaining before
             certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_ntfy_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="ntfy-public"} ==
+          0
+        for: 5m
+        labels:
+          service_id: ntfy
+          assurance_id: ntfy-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: ntfy-public HTTPS probe is failing.
+          description: https://ntfy.lv3.org:443/v1/health is no longer completing
+            a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_ntfy_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="ntfy-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: ntfy
+          assurance_id: ntfy-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: ntfy-public TLS certificate is approaching expiry.
+          description: https://ntfy.lv3.org:443/v1/health has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_ntfy_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="ntfy-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: ntfy
+          assurance_id: ntfy-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: ntfy-public TLS certificate is within the critical expiry window.
+          description: https://ntfy.lv3.org:443/v1/health has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_openbao_internal
         expr: probe_success{job="https-tls-blackbox",assurance_id="openbao-internal"}
           == 0

@@ -9,8 +9,8 @@ schema_version: 1
 generated: '2026-04-03'
 total_adrs: 359
 implementation_status_summary:
-  Implemented: 311
-  Partial: 11
+  Implemented: 312
+  Partial: 10
   Not Implemented: 36
   Deprecated: 1
 concerns:
@@ -5328,7 +5328,7 @@ adr_index:
   - adr: 0299
     title: Ntfy As The Self-Hosted Push Notification Channel For Programmatic Alert Delivery
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -5342,6 +5342,7 @@ adr_index:
       - alert
     summary: We will formalise ntfy as the platform's self-hosted push notification channel
     filename: 0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
+    implemented_version: 0.177.152
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
     status: Accepted

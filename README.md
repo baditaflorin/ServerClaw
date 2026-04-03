@@ -43,8 +43,8 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.151` |
-| Platform version | `0.130.94` |
+| Repository version | `0.177.152` |
+| Platform version | `0.130.95` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -57,15 +57,15 @@ rewriting one operator's workstation paths.
 | Running guest count | 9 |
 | Template VM present | `true` |
 | Declared services | 71 |
-| Publicly published services | 43 |
+| Publicly published services | 44 |
 
 ### Service Exposure Summary
 | Exposure Model | Services |
 | --- | --- |
-| `edge-published` | 34 |
+| `edge-published` | 35 |
 | `edge-static` | 1 |
 | `informational-only` | 4 |
-| `private-only` | 32 |
+| `private-only` | 31 |
 
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
@@ -147,6 +147,7 @@ rewriting one operator's workstation paths.
 | `nextcloud` | `2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply` |
 | `nomad_scheduler` | `2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply` |
 | `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |
+| `ntfy` | `2026-04-03-adr-0299-ntfy-mainline-live-apply` |
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
 | `observation_to_action_closure_loop` | `2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply` |
 | `ollama` | `2026-03-27-adr-0176-inventory-sharding-mainline-live-apply` |
@@ -306,8 +307,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.151` |
-| Platform version | `0.130.94` |
+| Repository version | `0.177.152` |
+| Platform version | `0.130.95` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -586,6 +587,7 @@ Current values on `main`:
 | `0297` | Live apply Renovate as the automated stack version upgrade proposer from latest origin/main | `merged` | [ws-0297-live-apply.md](docs/workstreams/ws-0297-live-apply.md) |
 | `0297` | Integrate ADR 0297 live-apply evidence and release updates on main | `merged` | [ws-0297-main-merge.md](docs/workstreams/ws-0297-main-merge.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
+| `0299` | Live apply ntfy as the self-hosted push notification channel from latest origin/main | `merged` | [ws-0299-live-apply.md](docs/workstreams/ws-0299-live-apply.md) |
 | `0304` | Live apply ADR 0304 from latest origin/main | `merged` | [ws-0304-live-apply.md](docs/workstreams/ws-0304-live-apply.md) |
 | `0308` | Live apply ADR 0308 journey-aware entry routing and saved home selection from latest origin/main | `live_applied` | [ws-0308-journey-live-apply.md](docs/workstreams/ws-0308-journey-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |

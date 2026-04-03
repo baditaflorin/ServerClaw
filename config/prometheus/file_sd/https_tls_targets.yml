@@ -557,6 +557,24 @@
     policy_critical: '14'
     display_url: https://100.64.0.1:8013/
 - targets:
+    - https://10.10.10.10:443/v1/health
+  labels:
+    assurance_id: ntfy-public
+    service_id: ntfy
+    service_name: ntfy
+    environment: production
+    scope: public
+    exposure: edge-published
+    auth_requirement: upstream_auth
+    probe_module: http_2xx_follow_redirects
+    probe_hostname: ntfy.lv3.org
+    certificate_id: ntfy-edge
+    expected_issuer: letsencrypt
+    policy_unit: days
+    policy_warn: '21'
+    policy_critical: '14'
+    display_url: https://ntfy.lv3.org:443/v1/health
+- targets:
     - https://100.64.0.1:8200/v1/sys/health
   labels:
     assurance_id: openbao-internal

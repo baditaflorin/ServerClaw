@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.151",
-  "platform_version": "0.130.94",
-  "generated_at": "2026-04-03T06:49:19Z",
-  "next_refresh_at": "2026-04-03T07:49:19Z",
+  "repo_version": "0.177.152",
+  "platform_version": "0.130.95",
+  "generated_at": "2026-04-03T08:25:20Z",
+  "next_refresh_at": "2026-04-03T09:25:20Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -372,7 +372,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://mail.lv3.org",
-        "last_live_apply": "2026-04-02T00:00:00Z"
+        "last_live_apply": "2026-04-03T00:00:00Z"
       },
       "mailpit": {
         "service_name": "Mailpit",
@@ -498,7 +498,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "http://10.10.10.20:2586",
+        "primary_url": "https://ntfy.lv3.org",
         "last_live_apply": "2026-04-03T00:00:00Z"
       },
       "ntopng": {
@@ -2212,7 +2212,7 @@
       },
       {
         "id": "converge-ntfy",
-        "description": "Deploy the private ntfy paging gateway on docker-runtime-lv3 and persist the repo-managed credential used by Alertmanager critical routing.",
+        "description": "Deploy the published ntfy push channel on docker-runtime-lv3, publish ntfy.lv3.org through Hetzner DNS and the shared edge, and persist the repo-managed credential and token bundle used by governed publishers.",
         "tags": [
           "converge-ntfy",
           "guest-live",
@@ -5177,7 +5177,7 @@
         "id": "configure-ntfy",
         "title": "Configure Ntfy",
         "agent_trust_required": "T3",
-        "steps": 3,
+        "steps": 5,
         "path": "docs/runbooks/configure-ntfy.md",
         "workflow_ids": [
           "converge-ntfy"
@@ -6071,10 +6071,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.150",
+    "last_version": "0.177.151",
     "deployed_at": "2026-04-03",
-    "summary": "refreshes ADR 0275 on the latest exact mainline by replacing the shared runtime-ai pool receipt with a dedicated Apache Tika receipt, re-verifying the private extraction path on runtime-ai-lv3, and aligning the document-runtime validation tests with the syntax-check-safe host selection contract",
-    "release_notes_url": "docs/release-notes/0.177.151.md"
+    "summary": "implements ADR 0299 by promoting ntfy to the governed self-hosted push notification channel, wiring the governed topic and credential contracts across Ansible, Gitea, Windmill, SBOM, and k6 publishers, and verifying the public publish path plus the mainline service replay",
+    "release_notes_url": "docs/release-notes/0.177.152.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

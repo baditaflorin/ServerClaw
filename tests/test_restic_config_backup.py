@@ -7,6 +7,8 @@ import types
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = REPO_ROOT / "scripts" / "restic_config_backup.py"
@@ -29,6 +31,48 @@ def _load_module(path: Path, name: str):
 
 restic_backup = _load_module(SCRIPT_PATH, "restic_config_backup")
 trigger = _load_module(TRIGGER_SCRIPT_PATH, "trigger_restic_live_apply")
+
+
+def test_load_runtime_credentials_requires_ntfy_token_by_default(tmp_path: Path) -> None:
+    credential_path = tmp_path / "runtime-config.json"
+    credential_path.write_text(
+        json.dumps(
+            {
+                "restic_password": "pw",
+                "minio_secret_key": "secret",
+                "nats_password": "nats",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="runtime credential payload is missing ntfy_token"):
+        restic_backup.load_runtime_credentials(credential_path)
+
+
+def test_load_runtime_credentials_allows_live_apply_payload_without_ntfy_token(tmp_path: Path) -> None:
+    credential_path = tmp_path / "runtime-config.json"
+    credential_path.write_text(
+        json.dumps(
+            {
+                "restic_password": "pw",
+                "minio_secret_key": "secret",
+                "nats_password": "nats",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    credentials = restic_backup.load_runtime_credentials(
+        credential_path,
+        required_fields=("restic_password", "minio_secret_key", "nats_password"),
+    )
+
+    assert credentials == {
+        "restic_password": "pw",
+        "minio_secret_key": "secret",
+        "nats_password": "nats",
+    }
 
 
 def test_filter_sources_splits_scheduled_and_live_apply_sources() -> None:
@@ -877,6 +921,88 @@ def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkey
         "sync_repo_root": "/srv/proxmox_florin_server",
         "sync_report": {"summary": {"protected": 1}},
     }
+
+
+def test_main_live_apply_backup_omits_ntfy_requirement(monkeypatch, tmp_path: Path) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_load_runtime_credentials(path, *, required_fields):
+        captured["required_fields"] = required_fields
+        return {
+            "restic_password": "pw",
+            "minio_secret_key": "secret",
+            "nats_password": "nats",
+        }
+
+    monkeypatch.setattr(
+        restic_backup,
+        "load_catalog",
+        lambda path: ({"controller_host": {"minio": {"bucket": "restic-config-backup"}}}, []),
+    )
+    monkeypatch.setattr(restic_backup, "load_runtime_credentials", fake_load_runtime_credentials)
+    monkeypatch.setattr(restic_backup, "ensure_directory", lambda path: None)
+    monkeypatch.setattr(
+        restic_backup,
+        "runtime_lock",
+        lambda **kwargs: types.SimpleNamespace(__enter__=lambda self: None, __exit__=lambda self, exc_type, exc, tb: False),
+    )
+    monkeypatch.setattr(restic_backup, "resolve_minio_endpoint", lambda catalog: ("10.10.10.20", "http://10.10.10.20:9000"))
+    monkeypatch.setattr(restic_backup, "ensure_restic_repository", lambda **kwargs: None)
+    monkeypatch.setattr(restic_backup, "resolve_source_paths", lambda raw_sources, repo_root: [])
+    monkeypatch.setattr(restic_backup, "filter_sources", lambda sources, only_live_apply: [])
+    monkeypatch.setattr(
+        restic_backup,
+        "restic_call",
+        lambda *args, **kwargs: types.SimpleNamespace(returncode=0, stdout="", stderr=""),
+    )
+    monkeypatch.setattr(restic_backup, "load_existing_latest_snapshot_receipt", lambda path: None)
+    monkeypatch.setattr(
+        restic_backup,
+        "build_live_apply_latest_snapshot_receipt",
+        lambda **kwargs: {"summary": {"protected": 0, "governed_sources": 0, "uncovered": 0}, "sources": []},
+    )
+    monkeypatch.setattr(restic_backup, "write_json", lambda path, payload: None)
+    monkeypatch.setattr(restic_backup, "repo_source_commit", lambda repo_root: "abc123")
+    monkeypatch.setattr(restic_backup, "build_backup_receipt", lambda **kwargs: {"status": "ok"})
+    monkeypatch.setattr(restic_backup, "utc_now", lambda: datetime(2026, 4, 3, 10, 0, tzinfo=UTC))
+
+    class _FakeLock:
+        def __enter__(self):
+            return None
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(restic_backup, "runtime_lock", lambda **kwargs: _FakeLock())
+
+    result = restic_backup.main(
+        [
+            "--repo-root",
+            str(tmp_path / "repo"),
+            "--catalog",
+            str(tmp_path / "catalog.json"),
+            "--backup-receipts-dir",
+            str(tmp_path / "receipts" / "backups"),
+            "--latest-snapshot-receipt",
+            str(tmp_path / "receipts" / "latest.json"),
+            "--restore-verification-dir",
+            str(tmp_path / "receipts" / "restore"),
+            "--runtime-state-dir",
+            str(tmp_path / "state"),
+            "--cache-dir",
+            str(tmp_path / "cache"),
+            "--credential-file",
+            str(tmp_path / "runtime-config.json"),
+            "--mode",
+            "backup",
+            "--triggered-by",
+            "live-apply-service",
+            "--live-apply-trigger",
+        ]
+    )
+
+    assert result == 0
+    assert captured["required_fields"] == ("restic_password", "minio_secret_key", "nats_password")
 
 def test_make_live_apply_targets_bootstrap_pyyaml_for_restic_trigger() -> None:
     makefile = MAKEFILE_PATH.read_text(encoding="utf-8")

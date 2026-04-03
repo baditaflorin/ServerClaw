@@ -1,9 +1,10 @@
 # ADR 0299: Ntfy As The Self-Hosted Push Notification Channel For Programmatic Alert Delivery
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.177.152
+- Implemented In Platform Version: 0.130.95
+- Implemented On: 2026-04-03
 - Date: 2026-03-29
 
 ## Context

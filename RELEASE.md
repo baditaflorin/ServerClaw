@@ -1,12 +1,12 @@
-# Release 0.177.151
+# Release 0.177.152
 
 - Date: 2026-04-03
 
 ## Summary
-- refreshes ADR 0275 on the latest exact mainline by replacing the shared runtime-ai pool receipt with a dedicated Apache Tika receipt, re-verifying the private extraction path on runtime-ai-lv3, and aligning the document-runtime validation tests with the syntax-check-safe host selection contract
+- implements ADR 0299 by promoting ntfy to the governed self-hosted push notification channel, wiring the governed topic and credential contracts across Ansible, Gitea, Windmill, SBOM, and k6 publishers, and verifying the public publish path plus the mainline service replay
 
 ## Platform Impact
-- advances the verified live platform truth to `0.130.94` after the exact-main Apache Tika replay on `runtime-ai-lv3` and replaces the shared runtime-ai pool receipt with a dedicated Tika receipt
+- Implements ADR 0299 by promoting ntfy to the governed self-hosted push notification channel and validating the mainline replay.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
