@@ -21,6 +21,124 @@ archive_summary:
   by_year:
     '2026': 286
 workstreams:
+- id: ws-0334-auth-convergence
+  adr: '0341'
+  title: Integrate Open WebUI into Keycloak-backed routine operator authentication
+  status: live_applied
+  owner: codex
+  branch: codex/ws-0334-auth-convergence-clean
+  worktree_path: .worktrees/ws-0334-auth-convergence
+  doc: docs/workstreams/ws-0334-auth-convergence.md
+  depends_on:
+  - adr-0056-keycloak-for-operator-and-agent-sso
+  - adr-0060-open-webui-for-operator-and-agent-workbench
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0334-auth-convergence.yaml
+  - docs/workstreams/ws-0334-auth-convergence.md
+  - docs/adr/0341-open-webui-keycloak-oidc-with-break-glass-fallback.md
+  - docs/adr/.index.yaml
+  - docs/runbooks/configure-open-webui.md
+  - docs/runbooks/configure-keycloak.md
+  - playbooks/open-webui.yml
+  - playbooks/keycloak.yml
+  - collections/ansible_collections/lv3/platform/playbooks/open-webui.yml
+  - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/open_webui_client.yml
+  - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/tasks/verify.yml
+  - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml
+  - inventory/group_vars/platform.yml
+  - inventory/host_vars/proxmox_florin.yml
+  - config/api-publication.json
+  - config/command-catalog.json
+  - config/controller-local-secrets.json
+  - config/secret-catalog.json
+  - config/service-capability-catalog.json
+  - config/service-completeness.json
+  - config/workflow-catalog.json
+  - tests/test_docker_runtime_role.py
+  - tests/test_keycloak_playbook.py
+  - tests/test_keycloak_runtime_role.py
+  - tests/test_open_webui_playbook.py
+  - tests/test_open_webui_runtime_role.py
+  - tests/test_postgres_vm_role.py
+  - receipts/live-applies/2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply.json
+  ownership_manifest:
+    owned_surfaces:
+    - id: workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws0334_workstream_source
+      paths:
+      - workstreams/active/ws-0334-auth-convergence.yaml
+      mode: exclusive
+    - id: adr_index_generation
+      paths:
+      - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: adr-index-generator-v1
+    - id: ws0334_open_webui_auth_docs
+      paths:
+      - docs/workstreams/ws-0334-auth-convergence.md
+      - docs/adr/0341-open-webui-keycloak-oidc-with-break-glass-fallback.md
+      - docs/runbooks/configure-open-webui.md
+      - docs/runbooks/configure-keycloak.md
+      mode: exclusive
+    - id: ws0334_open_webui_auth_runtime
+      paths:
+      - playbooks/keycloak.yml
+      - playbooks/open-webui.yml
+      - collections/ansible_collections/lv3/platform/playbooks/open-webui.yml
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/open_webui_client.yml
+      - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/tasks/verify.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml
+      - inventory/group_vars/platform.yml
+      - inventory/host_vars/proxmox_florin.yml
+      mode: exclusive
+    - id: ws0334_open_webui_auth_catalogs
+      paths:
+      - config/api-publication.json
+      - config/command-catalog.json
+      - config/controller-local-secrets.json
+      - config/secret-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-completeness.json
+      - config/workflow-catalog.json
+      - tests/test_docker_runtime_role.py
+      - tests/test_keycloak_playbook.py
+      - tests/test_keycloak_runtime_role.py
+      - tests/test_open_webui_playbook.py
+      - tests/test_open_webui_runtime_role.py
+      - tests/test_postgres_vm_role.py
+      mode: exclusive
+    - id: ws0334_live_apply_receipt
+      paths:
+      - receipts/live-applies/2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply.json
+      mode: exclusive
+  blockers: []
+  ready_to_merge: true
+  live_applied: true
+  canonical_truth:
+    changelog_entry: implements ADR 0341 by making Open WebUI use a repo-managed Keycloak
+      OIDC client for routine operator sign-in, keeping the local bootstrap admin
+      as a break-glass path, and aligning the stale Keycloak topology and client reconciliation
+      surfaces with the live docker-runtime placement
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts:
+      open_webui: 2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply
 - id: ws-0326-live-apply
   adr: '0326'
   title: Implement shard-backed workstream registry source files with generated compatibility

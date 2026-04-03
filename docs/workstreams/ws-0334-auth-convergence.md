@@ -2,13 +2,13 @@
 
 - ADR: [ADR 0341](../adr/0341-open-webui-keycloak-oidc-with-break-glass-fallback.md)
 - Title: Make Open WebUI use repo-managed Keycloak OIDC for routine sign-in while keeping local recovery
-- Status: in_progress
-- Branch: `codex/ws-0334-auth-convergence`
+- Status: live_applied
+- Branch: `codex/ws-0334-auth-convergence-clean`
 - Worktree: `.worktrees/ws-0334-auth-convergence`
 - Owner: codex
 - Depends On: `adr-0056-keycloak-for-operator-and-agent-sso`, `adr-0060-open-webui-for-operator-and-agent-workbench`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0334-auth-convergence.md`, `docs/adr/0341-open-webui-keycloak-oidc-with-break-glass-fallback.md`, `docs/adr/.index.yaml`, `docs/runbooks/configure-open-webui.md`, `docs/runbooks/configure-keycloak.md`, `playbooks/open-webui.yml`, `playbooks/keycloak.yml`, `collections/ansible_collections/lv3/platform/playbooks/open-webui.yml`, `roles/open_webui_runtime/**`, `roles/keycloak_runtime/defaults/main.yml`, `roles/keycloak_runtime/tasks/main.yml`, `roles/keycloak_runtime/tasks/open_webui_client.yml`, `collections/ansible_collections/lv3/platform/roles/open_webui_runtime/**`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/open_webui_client.yml`, `collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml`, `inventory/group_vars/platform.yml`, `inventory/host_vars/proxmox_florin.yml`, `config/api-publication.json`, `config/command-catalog.json`, `config/controller-local-secrets.json`, `config/secret-catalog.json`, `config/service-capability-catalog.json`, `config/service-completeness.json`, `config/workflow-catalog.json`, `tests/test_docker_runtime_role.py`, `tests/test_keycloak_playbook.py`, `tests/test_keycloak_runtime_role.py`, `tests/test_open_webui_playbook.py`, `tests/test_open_webui_runtime_role.py`, `tests/test_postgres_vm_role.py`
+- Shared Surfaces: `workstreams.yaml`, `workstreams/active/ws-0334-auth-convergence.yaml`, `docs/workstreams/ws-0334-auth-convergence.md`, `docs/adr/0341-open-webui-keycloak-oidc-with-break-glass-fallback.md`, `docs/adr/.index.yaml`, `docs/runbooks/configure-open-webui.md`, `docs/runbooks/configure-keycloak.md`, `playbooks/open-webui.yml`, `playbooks/keycloak.yml`, `collections/ansible_collections/lv3/platform/playbooks/open-webui.yml`, `roles/open_webui_runtime/**`, `roles/keycloak_runtime/defaults/main.yml`, `roles/keycloak_runtime/tasks/main.yml`, `roles/keycloak_runtime/tasks/open_webui_client.yml`, `collections/ansible_collections/lv3/platform/roles/open_webui_runtime/**`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/open_webui_client.yml`, `collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml`, `inventory/group_vars/platform.yml`, `inventory/host_vars/proxmox_florin.yml`, `config/api-publication.json`, `config/command-catalog.json`, `config/controller-local-secrets.json`, `config/secret-catalog.json`, `config/service-capability-catalog.json`, `config/service-completeness.json`, `config/workflow-catalog.json`, `tests/test_docker_runtime_role.py`, `tests/test_keycloak_playbook.py`, `tests/test_keycloak_runtime_role.py`, `tests/test_open_webui_playbook.py`, `tests/test_open_webui_runtime_role.py`, `tests/test_postgres_vm_role.py`, `receipts/live-applies/2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply.json`
 
 ## Scope
 
@@ -43,3 +43,12 @@
 - operators use the existing Keycloak identity plane for normal Open WebUI sign-in
 - Open WebUI no longer depends on a separately provided controller-local OIDC secret file
 - the bootstrap admin remains available for recovery, smoke verification, and controlled break-glass access
+
+## Current State
+
+- clean source commits `37933c499` and `2d29892b0` now carry the full Open WebUI and Keycloak auth convergence on top of current `origin/main`
+- production `make converge-open-webui` passed on 2026-04-03 with recap `docker-runtime-lv3 ok=273 changed=3 failed=0` and `proxmox_florin ok=40 changed=4 failed=0`
+- public SSO discovery now returns `HTTP 200` from `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration`
+- Open WebUI now redirects `http://100.64.0.1:8008/oauth/oidc/login` to the Keycloak `open-webui` client on `sso.lv3.org`
+- the break-glass login path still works at `http://100.64.0.1:8008/api/v1/auths/signin` for `ops@lv3.org`
+- the canonical live evidence for this replay is `receipts/live-applies/2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply.json`
