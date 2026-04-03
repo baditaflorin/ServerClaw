@@ -48,27 +48,31 @@ keeps the annotation-platform delivery merge-safe by using an explicit
 
 ## Validation Status
 
-- the rebased branch replays cleanly on top of the latest fetched `origin/main`
-- `uv run --with pytest --with pyyaml --with jsonschema python -m pytest -q tests/test_label_studio_playbook.py tests/test_label_studio_runtime_role.py tests/test_label_studio_sync.py tests/test_generate_platform_vars.py tests/test_dependency_graph.py tests/test_edge_publication_playbooks.py tests/test_nginx_edge_publication_role.py tests/test_subdomain_catalog.py` passed with `86 passed`
-- `make syntax-check-label-studio`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `./scripts/validate_repo.sh agent-standards workstream-surfaces health-probes`, `git diff --check`, and `make preflight WORKFLOW=converge-label-studio` all passed on `2026-04-01`
-- `make pre-push-gate` exercised the full remote and local fallback automation path on `2026-04-01`; every selected lane passed except `generated-docs`, which failed only because `README.md` canonical truth is intentionally deferred on this workstream branch until exact-main integration
-- a branch push attempt hit the same expected `generated-docs` / `README.md` canonical-truth gate, so the branch remains local until the final mainline integration step updates the protected canonical truth surfaces
+- the pre-rebase exact-main replay remained based on fetched `origin/main`
+  commit `cbf9b1ec38d4cfdb43eef6beb7b71b44f0a7b7cc` with integrated repo version
+  `0.177.151` and platform version `0.130.94`
+- `uv run --with pytest --with pyyaml --with jsonschema python -m pytest -q tests/test_label_studio_playbook.py tests/test_label_studio_runtime_role.py tests/test_label_studio_sync.py tests/test_generate_platform_vars.py tests/test_dependency_graph.py tests/test_edge_publication_playbooks.py tests/test_nginx_edge_publication_role.py tests/test_subdomain_catalog.py tests/test_docker_runtime_role.py tests/test_openbao_compose_env_helper.py tests/test_compose_runtime_secret_injection.py` passed with `128 passed`
+- `make syntax-check-label-studio`, `make preflight WORKFLOW=converge-label-studio`, `./scripts/validate_repo.sh agent-standards workstream-surfaces health-probes`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, and `git diff --check` all passed before that pre-rebase exact-main live apply
 
-## Current Blocker
+## Current Branch State
 
-- live apply is blocked by active exclusive ADR 0153 locks held by
-  `agent:codex/ws-0293-live-apply-r2` on `host:proxmox_florin`, `vm:110`, and
-  `vm:120`; their expiry continued to heartbeat forward through at least
-  `2026-04-01T15:06:11Z`
-- wait-acquire sessions are already queued for `host:proxmox_florin`,
-  `vm:110`, and `vm:120` under
-  `agent:codex/ws-0289-label-studio-live-apply-r1` so this workstream can
-  start the live converge immediately after the current holder releases them
-
-## Remaining For Main Integration
-
-- finish the focused repository validation and branch-local live apply
-- capture the branch-local receipt and evidence bundle
-- replay the change onto exact `main`, then update `README.md`, `VERSION`,
-  `changelog.md`, `versions/stack.yaml`, and any generated canonical truth
-  files only after the mainline verification passes
+- the first exact-main converge attempt failed only because
+  `config/subdomain-exposure-registry.json` was stale versus the branch
+  contract; that failure is preserved in
+  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r1.txt`
+- after refreshing the exposure registry from the repo contract, `make
+  converge-label-studio env=production` succeeded on `2026-04-03` across
+  `postgres-lv3`, `docker-runtime-lv3`, `nginx-lv3`, and controller-local
+  shared-edge verification; the successful replay is preserved in
+  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r2.txt`
+- the successful pre-rebase replay verified the private runtime container
+  health, the private version endpoint, the repo-managed project catalog
+  reconciliation, the shared Typesense/API gateway dependency path, and the
+  public `annotate.lv3.org` browser/API redirects through the shared auth
+  boundary
+- standalone public curl verification is preserved in
+  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-public-head-r1.txt`
+- `origin/main` then advanced to ADR 0299 ntfy release `0.177.152` at platform
+  version `0.130.95`, so this workstream must replay the exact-main branch on
+  that newer baseline before the Label Studio receipt, protected release
+  surfaces, and canonical truth can be promoted safely

@@ -19,7 +19,7 @@ workstreams:
   - id: ws-0330-public-github-readiness
     adr: "0330"
     title: Prepare the repository for public GitHub publication as a generic and forkable reference platform
-    status: merged
+    status: in_progress
     owner: codex
     branch: codex/ws-0327-public-github-readiness
     worktree_path: .worktrees/ws-0327-public-github-readiness
@@ -217,8 +217,8 @@ workstreams:
       included_in_repo_version: 0.177.141
       latest_receipts:
         journey_analytics: 2026-04-02-adr-0316-journey-analytics-mainline-live-apply
-    ready_to_merge: true
-    live_applied: true
+    ready_to_merge: false
+    live_applied: false
   - id: ws-0296-education-refresh
     adr: "0224"
     title: Refresh education_wemeshup from upstream main through a named repo-deploy profile
@@ -18312,7 +18312,7 @@ workstreams:
   - id: ws-0289-label-studio-live-apply
     adr: "0289"
     title: Live apply ADR 0289 Label Studio from latest origin/main
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/ws-0289-label-studio-live-apply-r2
     worktree_path: .worktrees/ws-0289-label-studio-live-apply-r1
@@ -18491,5 +18491,10 @@ workstreams:
           mode: shared_contract
           contract: canonical-truth-v1
     blockers: []
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0289 by deploying Label Studio as the shared-edge-protected human-in-the-loop annotation platform on docker-runtime-lv3 with PostgreSQL-backed state, repo-managed project catalog reconciliation, and verified exact-main public and private apply evidence
+      release_bump: patch
+      latest_receipts:
+        label_studio: 2026-04-03-adr-0289-label-studio-mainline-live-apply
