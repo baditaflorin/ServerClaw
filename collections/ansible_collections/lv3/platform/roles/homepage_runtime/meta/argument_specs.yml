@@ -33,6 +33,11 @@ argument_specs:
         required: true
         description:
           - Guest-side listener address used for the published Homepage port binding.
+      homepage_loopback_bind_host:
+        type: str
+        required: true
+        description:
+          - Loopback listener address used by same-guest reverse proxies and health checks.
       homepage_port:
         type: int
         required: true

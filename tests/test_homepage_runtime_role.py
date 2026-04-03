@@ -20,11 +20,14 @@ class HomepageRuntimeRoleTests(unittest.TestCase):
 
     def test_defaults_bind_to_guest_address_and_public_host(self) -> None:
         self.assertEqual(self.defaults["homepage_bind_host"], "{{ ansible_host }}")
+        self.assertEqual(self.defaults["homepage_loopback_bind_host"], "127.0.0.1")
         self.assertIn("{{ homepage_public_host }}", self.defaults["homepage_allowed_hosts"])
         self.assertIn("{{ homepage_bind_host }}:{{ homepage_port }}", self.defaults["homepage_allowed_hosts"])
+        self.assertIn("{{ homepage_loopback_bind_host }}:{{ homepage_port }}", self.defaults["homepage_allowed_hosts"])
 
     def test_template_binds_private_port_and_mounts_generated_config(self) -> None:
         self.assertIn("{{ homepage_bind_host }}:{{ homepage_port }}:3000", self.template)
+        self.assertIn("{{ homepage_loopback_bind_host }}:{{ homepage_port }}:3000", self.template)
         self.assertIn("HOMEPAGE_ALLOWED_HOSTS", self.template)
         self.assertIn("{{ homepage_config_dir }}:/app/config", self.template)
 

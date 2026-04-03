@@ -1029,7 +1029,15 @@ def test_docker_runtime_pins_public_edge_hostnames_and_address_pools() -> None:
     tasks = load_tasks()
     pin_hosts = next(task for task in tasks if task["name"] == "Pin public edge hostnames to the internal edge for Docker guests")
 
-    assert pin_hosts["loop"] == "{{ docker_runtime_public_edge_host_aliases | default([]) }}"
+    config = pin_hosts["ansible.builtin.blockinfile"]
+    assert config["path"] == "/etc/hosts"
+    assert config["marker"] == "# {mark} ANSIBLE MANAGED BLOCK: lv3 docker public edge aliases"
+    assert "{% for alias in docker_runtime_public_edge_host_aliases | default([]) if alias | length > 0 %}" in config["block"]
+    assert "{{ docker_runtime_public_edge_ipv4 }} {{ alias }}" in config["block"]
+    assert pin_hosts["when"] == [
+        "docker_runtime_public_edge_ipv4 | default('') | length > 0",
+        "docker_runtime_public_edge_host_aliases | default([]) | reject('equalto', '') | list | length > 0",
+    ]
 
 
 def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() -> None:

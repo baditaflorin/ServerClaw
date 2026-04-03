@@ -3,5 +3,5 @@ dependencies:
   - role: lv3.platform.preflight
     vars:
       preflight_required_vars:
-        - uptime_kuma_compose_project_dir
+        - uptime_kuma_site_dir
         - uptime_kuma_port

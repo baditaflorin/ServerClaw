@@ -8,6 +8,7 @@
       - homepage_container_name | length > 0
       - homepage_image | length > 0
       - homepage_bind_host | length > 0
+      - homepage_loopback_bind_host | length > 0
       - homepage_port | int > 0
       - homepage_internal_url | length > 0
       - homepage_public_url | length > 0

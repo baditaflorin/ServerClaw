@@ -18,7 +18,7 @@
 - name: Ensure Uptime Kuma runtime packages are present
   ansible.builtin.apt:
     name:
-      - docker-compose
+      - docker-compose-plugin
     state: present
     update_cache: true
     force_apt_get: true
@@ -45,8 +45,9 @@
 - name: Pull the Uptime Kuma image
   ansible.builtin.command:
     argv:
-      - docker-compose
-      - -f
+      - docker
+      - compose
+      - --file
       - "{{ uptime_kuma_compose_file }}"
       - pull
   args:
@@ -60,8 +61,9 @@
 - name: Start the Uptime Kuma stack
   ansible.builtin.command:
     argv:
-      - docker-compose
-      - -f
+      - docker
+      - compose
+      - --file
       - "{{ uptime_kuma_compose_file }}"
       - up
       - -d

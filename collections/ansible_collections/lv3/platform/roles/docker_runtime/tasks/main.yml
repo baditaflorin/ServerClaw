@@ -92,15 +92,17 @@
   loop: "{{ docker_runtime_admin_users }}"
 
 - name: Pin public edge hostnames to the internal edge for Docker guests
-  ansible.builtin.lineinfile:
+  ansible.builtin.blockinfile:
     path: /etc/hosts
-    regexp: '^\s*\d+\.\d+\.\d+\.\d+\s+{{ item | regex_escape() }}(?:\s|$)'
-    line: "{{ docker_runtime_public_edge_ipv4 }} {{ item }}"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: lv3 docker public edge aliases"
+    block: |-
+      {% for alias in docker_runtime_public_edge_host_aliases | default([]) if alias | length > 0 %}
+      {{ docker_runtime_public_edge_ipv4 }} {{ alias }}
+      {% endfor %}
     state: present
-  loop: "{{ docker_runtime_public_edge_host_aliases | default([]) }}"
   when:
     - docker_runtime_public_edge_ipv4 | default('') | length > 0
-    - item | length > 0
+    - docker_runtime_public_edge_host_aliases | default([]) | reject('equalto', '') | list | length > 0
 
 - name: Check whether the current Docker daemon config exists
   ansible.builtin.stat:

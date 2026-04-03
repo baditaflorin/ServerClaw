@@ -51,6 +51,15 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
     assert [role["role"] for role in playbook[3]["roles"]] == ["lv3.platform.nomad_namespace"]
 
     assert playbook[4]["hosts"] == "runtime-general-lv3"
+    assert playbook[4]["vars"]["runtime_general_legacy_uptime_kuma_host"] == "docker-runtime-lv3"
+    assert playbook[4]["vars"]["runtime_general_legacy_uptime_kuma_data_dir"] == "/opt/uptime-kuma/data"
+    assert playbook[4]["vars"]["runtime_general_uptime_kuma_restore_marker"] == "/opt/uptime-kuma/.legacy-data-restored"
+    pre_task_names = [task["name"] for task in playbook[4]["pre_tasks"]]
+    assert "Detect whether runtime-general already restored legacy Uptime Kuma data" in pre_task_names
+    assert "Detect whether legacy Uptime Kuma data exists on docker-runtime-lv3" in pre_task_names
+    assert "Stop the fresh runtime-general Uptime Kuma container before restoring legacy data" in pre_task_names
+    assert "Restore legacy Uptime Kuma data onto runtime-general-lv3" in pre_task_names
+    assert "Record that runtime-general restored legacy Uptime Kuma data" in pre_task_names
     assert [role["role"] for role in playbook[4]["roles"]] == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.docker_runtime",
@@ -66,6 +75,13 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
     assert "http://127.0.0.1:9080/uptime-kuma" in post_task_urls
     assert "http://127.0.0.1:9080/homepage" in post_task_urls
     assert "http://127.0.0.1:9080/mailpit/api/v1/info" in post_task_urls
+    uptime_route_task = next(
+        task
+        for task in playbook[4]["post_tasks"]
+        if task["name"] == "Verify the runtime-general Traefik route to Uptime Kuma"
+    )
+    assert uptime_route_task["ansible.builtin.uri"]["follow_redirects"] == "none"
+    assert uptime_route_task["ansible.builtin.uri"]["status_code"] == [200, 302]
 
     dapr_post_task = next(
         task
@@ -81,6 +97,13 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.nginx_edge_publication",
     ]
+    homepage_public_route_task = next(
+        task
+        for task in playbook[5]["post_tasks"]
+        if task["name"] == "Verify the Homepage public route through the shared edge"
+    )
+    assert homepage_public_route_task["ansible.builtin.uri"]["follow_redirects"] == "none"
+    assert homepage_public_route_task["ansible.builtin.uri"]["status_code"] == [200, 302, 303]
     readiness_task = next(
         task
         for task in playbook[5]["post_tasks"]

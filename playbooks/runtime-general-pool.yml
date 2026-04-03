@@ -209,10 +209,146 @@
   hosts: runtime-general-lv3
   become: true
   gather_facts: true
+  vars:
+    runtime_general_legacy_uptime_kuma_host: docker-runtime-lv3
+    runtime_general_legacy_uptime_kuma_data_dir: /opt/uptime-kuma/data
+    runtime_general_uptime_kuma_data_dir: /opt/uptime-kuma/data
+    runtime_general_uptime_kuma_restore_archive: /tmp/runtime-general-uptime-kuma-data.tar.gz
+    runtime_general_uptime_kuma_restore_marker: /opt/uptime-kuma/.legacy-data-restored
   tags:
     - tier-2
     - automation
     - service-runtime-general-pool
+
+  pre_tasks:
+    - name: Detect whether runtime-general already restored legacy Uptime Kuma data
+      ansible.builtin.stat:
+        path: "{{ runtime_general_uptime_kuma_restore_marker }}"
+      register: runtime_general_uptime_kuma_restore_marker_stat
+
+    - name: Detect whether legacy Uptime Kuma data exists on docker-runtime-lv3
+      ansible.builtin.stat:
+        path: "{{ runtime_general_legacy_uptime_kuma_data_dir }}/kuma.db"
+      delegate_to: "{{ runtime_general_legacy_uptime_kuma_host }}"
+      register: runtime_general_legacy_uptime_kuma_db
+
+    - name: Create a controller-local staging directory for Uptime Kuma migration
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: runtime-general-uptime-kuma-
+      delegate_to: localhost
+      become: false
+      register: runtime_general_uptime_kuma_staging_dir
+      when:
+        - not runtime_general_uptime_kuma_restore_marker_stat.stat.exists
+        - runtime_general_legacy_uptime_kuma_db.stat.exists
+
+    - name: Archive legacy Uptime Kuma data on docker-runtime-lv3
+      ansible.builtin.command:
+        argv:
+          - tar
+          - -C
+          - "{{ runtime_general_legacy_uptime_kuma_data_dir }}"
+          - -czf
+          - "{{ runtime_general_uptime_kuma_restore_archive }}"
+          - .
+      delegate_to: "{{ runtime_general_legacy_uptime_kuma_host }}"
+      when:
+        - not runtime_general_uptime_kuma_restore_marker_stat.stat.exists
+        - runtime_general_legacy_uptime_kuma_db.stat.exists
+      changed_when: true
+
+    - name: Fetch archived legacy Uptime Kuma data to the controller
+      ansible.builtin.fetch:
+        src: "{{ runtime_general_uptime_kuma_restore_archive }}"
+        dest: "{{ runtime_general_uptime_kuma_staging_dir.path }}/uptime-kuma-data.tar.gz"
+        flat: true
+      delegate_to: "{{ runtime_general_legacy_uptime_kuma_host }}"
+      when:
+        - not runtime_general_uptime_kuma_restore_marker_stat.stat.exists
+        - runtime_general_legacy_uptime_kuma_db.stat.exists
+
+    - name: Ensure the runtime-general Uptime Kuma data directory exists before restore
+      ansible.builtin.file:
+        path: "{{ runtime_general_uptime_kuma_data_dir }}"
+        state: directory
+        mode: "0755"
+      when:
+        - not runtime_general_uptime_kuma_restore_marker_stat.stat.exists
+        - runtime_general_legacy_uptime_kuma_db.stat.exists
+
+    - name: Stop the fresh runtime-general Uptime Kuma container before restoring legacy data
+      ansible.builtin.command:
+        argv:
+          - docker
+          - rm
+          - --force
+          - uptime-kuma
+      register: runtime_general_uptime_kuma_container_remove
+      failed_when: >-
+        runtime_general_uptime_kuma_container_remove.rc not in [0, 1]
+        or (
+          runtime_general_uptime_kuma_container_remove.rc == 1
+          and 'No such container' not in runtime_general_uptime_kuma_container_remove.stderr
+        )
+      changed_when: runtime_general_uptime_kuma_container_remove.rc == 0
+      when:
+        - not runtime_general_uptime_kuma_restore_marker_stat.stat.exists
+        - runtime_general_legacy_uptime_kuma_db.stat.exists
+
+    - name: Copy archived legacy Uptime Kuma data onto runtime-general-lv3
+      ansible.builtin.copy:
+        src: "{{ runtime_general_uptime_kuma_staging_dir.path }}/uptime-kuma-data.tar.gz"
+        dest: "{{ runtime_general_uptime_kuma_restore_archive }}"
+        mode: "0600"
+      when:
+        - not runtime_general_uptime_kuma_restore_marker_stat.stat.exists
+        - runtime_general_legacy_uptime_kuma_db.stat.exists
+
+    - name: Restore legacy Uptime Kuma data onto runtime-general-lv3
+      ansible.builtin.unarchive:
+        src: "{{ runtime_general_uptime_kuma_restore_archive }}"
+        dest: "{{ runtime_general_uptime_kuma_data_dir }}"
+        remote_src: true
+      when:
+        - not runtime_general_uptime_kuma_restore_marker_stat.stat.exists
+        - runtime_general_legacy_uptime_kuma_db.stat.exists
+
+    - name: Record that runtime-general restored legacy Uptime Kuma data
+      ansible.builtin.file:
+        path: "{{ runtime_general_uptime_kuma_restore_marker }}"
+        state: touch
+        mode: "0644"
+      when:
+        - not runtime_general_uptime_kuma_restore_marker_stat.stat.exists
+        - runtime_general_legacy_uptime_kuma_db.stat.exists
+
+    - name: Remove the archived Uptime Kuma migration bundle from runtime-general-lv3
+      ansible.builtin.file:
+        path: "{{ runtime_general_uptime_kuma_restore_archive }}"
+        state: absent
+      when:
+        - not runtime_general_uptime_kuma_restore_marker_stat.stat.exists
+        - runtime_general_legacy_uptime_kuma_db.stat.exists
+
+    - name: Remove the archived Uptime Kuma migration bundle from docker-runtime-lv3
+      ansible.builtin.file:
+        path: "{{ runtime_general_uptime_kuma_restore_archive }}"
+        state: absent
+      delegate_to: "{{ runtime_general_legacy_uptime_kuma_host }}"
+      when:
+        - not runtime_general_uptime_kuma_restore_marker_stat.stat.exists
+        - runtime_general_legacy_uptime_kuma_db.stat.exists
+
+    - name: Remove the controller-local Uptime Kuma migration staging directory
+      ansible.builtin.file:
+        path: "{{ runtime_general_uptime_kuma_staging_dir.path }}"
+        state: absent
+      delegate_to: localhost
+      become: false
+      when:
+        - runtime_general_uptime_kuma_staging_dir is defined
+        - runtime_general_uptime_kuma_staging_dir.path is defined
 
   roles:
     - role: lv3.platform.linux_guest_firewall
@@ -228,6 +364,8 @@
         method: GET
         status_code:
           - 200
+          - 302
+        follow_redirects: none
         return_content: true
         timeout: 30
       register: runtime_general_uptime_route
@@ -314,6 +452,7 @@
         headers:
           Host: home.lv3.org
         validate_certs: false
+        follow_redirects: none
         status_code:
           - 200
           - 302
