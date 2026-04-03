@@ -252,14 +252,16 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert 'attempts=5,' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'delay_seconds=5,' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "run_with_retry(" in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert "run_with_retry(command, cwd=working_dir or None)" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "cwd=working_dir or None" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "wait_for_docker_nat_chain()" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def is_local_openbao_group(" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'normalized_working_dir == "/opt/openbao"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert '"lv3-openbao" in container_names' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "restart_policy_name not in NONPERSISTENT_RESTART_POLICIES" in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'if "openbao-agent" in services:' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'if "openbao" in services:' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'service == "openbao-agent" or service.endswith("-openbao-agent")' in (
+        recover_containers["ansible.builtin.command"]["argv"][2]
+    )
+    assert 'service == "openbao"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "if services_provide_local_openbao(services):" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "elif services_need_local_openbao(services):" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def compose_group_recovery_sort_key(item):" in recover_containers["ansible.builtin.command"]["argv"][2]
@@ -267,7 +269,7 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert "if services_need_local_openbao(services) and not local_openbao_group:" in (
         recover_containers["ansible.builtin.command"]["argv"][2]
     )
-    assert "key=compose_group_sort_key" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "key=compose_group_recovery_sort_key" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'remove_command = ["docker", "rm", "-f", *container_names]' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'recovery_command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'down_command.extend(["down", "--remove-orphans"])' in recover_containers["ansible.builtin.command"]["argv"][2]
@@ -602,6 +604,10 @@ def test_docker_runtime_retries_compose_recovery_long_enough_for_transient_nat_c
         task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
     )
     script = recover_containers["ansible.builtin.command"]["argv"][2]
+    script = script.replace(
+        "{{ docker_runtime_nonpersistent_restart_policies | to_json }}",
+        json.dumps(load_defaults()["docker_runtime_nonpersistent_restart_policies"]),
+    )
     script = re.sub(
         r"OPENBAO_UNSEAL_KEYS = \{\{.*?\n\s*OPENBAO_RECOVERY_TIMEOUT_SECONDS =",
         'OPENBAO_UNSEAL_KEYS = []\nOPENBAO_RECOVERY_TIMEOUT_SECONDS =',
@@ -706,6 +712,10 @@ def test_docker_runtime_restarts_docker_when_daemon_is_not_active(tmp_path: Path
         task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
     )
     script = recover_containers["ansible.builtin.command"]["argv"][2]
+    script = script.replace(
+        "{{ docker_runtime_nonpersistent_restart_policies | to_json }}",
+        json.dumps(load_defaults()["docker_runtime_nonpersistent_restart_policies"]),
+    )
     script = re.sub(
         r"OPENBAO_UNSEAL_KEYS = \{\{.*?\n\s*OPENBAO_RECOVERY_TIMEOUT_SECONDS =",
         'OPENBAO_UNSEAL_KEYS = []\nOPENBAO_RECOVERY_TIMEOUT_SECONDS =',
@@ -812,6 +822,10 @@ def test_docker_runtime_recovery_includes_compose_dependencies(tmp_path: Path) -
         task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
     )
     script = recover_containers["ansible.builtin.command"]["argv"][2]
+    script = script.replace(
+        "{{ docker_runtime_nonpersistent_restart_policies | to_json }}",
+        json.dumps(load_defaults()["docker_runtime_nonpersistent_restart_policies"]),
+    )
     script = re.sub(
         r"OPENBAO_UNSEAL_KEYS = \{\{.*?\n\s*OPENBAO_RECOVERY_TIMEOUT_SECONDS =",
         'OPENBAO_UNSEAL_KEYS = []\nOPENBAO_RECOVERY_TIMEOUT_SECONDS =',

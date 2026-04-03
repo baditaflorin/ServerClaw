@@ -3434,6 +3434,11 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8110
     service_id: label_studio
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/label-studio.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8110
     urls:
@@ -5825,6 +5830,11 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8110
     service_id: label_studio
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/label-studio.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 8110
     urls:

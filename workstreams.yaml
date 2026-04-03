@@ -18361,15 +18361,21 @@ workstreams:
       - playbooks/services/label-studio.yml
       - collections/ansible_collections/lv3/platform/playbooks/label-studio.yml
       - collections/ansible_collections/lv3/platform/playbooks/services/label-studio.yml
+      - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent.hcl.j2
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/label_studio_postgres/**
       - collections/ansible_collections/lv3/platform/roles/label_studio_runtime/**
       - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
+      - config/contracts/service-partitions/catalog.json
       - scripts/label_studio_sync.py
+      - tests/test_compose_runtime_secret_injection.py
+      - tests/test_docker_runtime_role.py
       - tests/test_generate_platform_vars.py
       - tests/test_label_studio_playbook.py
       - tests/test_label_studio_runtime_role.py
       - tests/test_label_studio_sync.py
       - tests/test_dependency_graph.py
+      - tests/test_openbao_compose_env_helper.py
       - tests/test_subdomain_catalog.py
       - tests/test_nginx_edge_publication_role.py
       - tests/test_edge_publication_playbooks.py
@@ -18422,7 +18428,11 @@ workstreams:
             - inventory/host_vars/proxmox_florin.yml
             - scripts/generate_platform_vars.py
             - Makefile
+            - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent.hcl.j2
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
             - config/api-gateway-catalog.json
+            - config/contracts/service-partitions/catalog.json
             - config/health-probe-catalog.json
             - config/service-capability-catalog.json
             - config/certificate-catalog.json
@@ -18451,8 +18461,11 @@ workstreams:
             - docs/diagrams/service-dependency-graph.excalidraw
             - docs/site-generated/architecture/dependency-graph.md
             - receipts/ops-portal-snapshot.html
+            - tests/test_compose_runtime_secret_injection.py
+            - tests/test_docker_runtime_role.py
             - tests/test_generate_platform_vars.py
             - tests/test_dependency_graph.py
+            - tests/test_openbao_compose_env_helper.py
             - tests/test_subdomain_catalog.py
             - tests/test_nginx_edge_publication_role.py
             - tests/test_edge_publication_playbooks.py

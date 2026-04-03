@@ -138,9 +138,8 @@ def test_local_openbao_recovery_helper_recovers_compose_runtime_when_api_is_down
     assert "- name: Ensure the local OpenBao log directory retains managed ownership before helper API calls" in tasks
     assert "- name: Ensure the local OpenBao audit log file retains managed ownership before helper API calls" in tasks
     assert "- name: Probe whether the local OpenBao API already answers" in tasks
-    assert "- name: Ensure the local OpenBao log directory exists with managed ownership before helper recovery" in tasks
-    assert "- name: Ensure the local OpenBao audit log file exists with managed ownership before helper recovery" in tasks
-    assert 'path: "{{ common_local_openbao_runtime_log_dir }}/audit.log"' in tasks
+    assert 'path: "{{ common_local_openbao_runtime_log_dir }}"' in tasks
+    assert 'path: "{{ common_local_openbao_runtime_audit_log_file }}"' in tasks
     assert "- name: Inspect current OpenBao container networks before local recovery" in tasks
     assert "- name: Inspect current OpenBao published ports before local recovery" in tasks
     assert "common_local_openbao_runtime_detached" in tasks
