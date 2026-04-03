@@ -83,7 +83,7 @@
     {
       "id": "keycloak",
       "name": "Keycloak",
-      "upstream": "http://10.10.10.92:18080",
+      "upstream": "http://10.10.10.20:8091",
       "gateway_prefix": "/v1/keycloak",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",

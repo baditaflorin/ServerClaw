@@ -6,6 +6,7 @@ Detailed per-change deployment history is generated separately in the deployment
 
 ## Releases
 
+- [0.178.3](0.178.3.md)
 - [0.178.2](0.178.2.md)
 - [0.178.1](0.178.1.md)
 - [0.178.0](0.178.0.md)

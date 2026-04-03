@@ -97,5 +97,6 @@ canonical_truth:
   release_bump: patch
   latest_receipts:
     operator_onboarding: 2026-04-03-adr-0318-repeatable-operator-onboarding-mainline-live-apply
+  included_in_repo_version: 0.178.3
 ready_to_merge: true
 live_applied: true

@@ -3010,6 +3010,8 @@ platform_service_topology:
       tls: true
       kind: proxy
       upstream: http://10.10.10.20:8091
+    urls:
+      public: https://sso.lv3.org
     service_id: keycloak
     runtime_pool: runtime-control
     deployment_surface: playbooks/keycloak.yml
@@ -3017,9 +3019,6 @@ platform_service_topology:
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
     mobility_tier: anchor
     ports: {}
-    urls:
-      internal: http://10.10.10.20:8091
-      public: https://sso.lv3.org
   harbor:
     service_name: harbor
     owning_vm: runtime-control-lv3
@@ -5407,6 +5406,8 @@ public_edge_service_topology:
       tls: true
       kind: proxy
       upstream: http://10.10.10.20:8091
+    urls:
+      public: https://sso.lv3.org
     service_id: keycloak
     runtime_pool: runtime-control
     deployment_surface: playbooks/keycloak.yml
@@ -5414,9 +5415,6 @@ public_edge_service_topology:
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
     mobility_tier: anchor
     ports: {}
-    urls:
-      internal: http://10.10.10.20:8091
-      public: https://sso.lv3.org
   harbor:
     service_name: harbor
     owning_vm: runtime-control-lv3

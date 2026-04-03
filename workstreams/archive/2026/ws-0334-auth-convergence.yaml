@@ -108,8 +108,11 @@ blockers: []
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implements ADR 0341 by making Open WebUI use a repo-managed Keycloak OIDC client for routine operator sign-in, keeping the local bootstrap admin as a break-glass path, and aligning the stale Keycloak topology and client reconciliation surfaces with the live docker-runtime placement
+  changelog_entry: implements ADR 0341 by making Open WebUI use a repo-managed Keycloak
+    OIDC client for routine operator sign-in, keeping the local bootstrap admin as
+    a break-glass path, and aligning the stale Keycloak topology and client reconciliation
+    surfaces with the live docker-runtime placement
   release_bump: patch
-  included_in_repo_version: null
+  included_in_repo_version: 0.178.3
   latest_receipts:
     open_webui: 2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply

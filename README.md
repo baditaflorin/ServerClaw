@@ -46,7 +46,7 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.2` |
+| Repository version | `0.178.3` |
 | Platform version | `0.130.98` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -157,7 +157,7 @@ rewriting one operator's workstation paths.
 | `observation_to_action_closure_loop` | `2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply` |
 | `ollama` | `2026-03-27-adr-0176-inventory-sharding-mainline-live-apply` |
 | `one_api` | `2026-04-01-adr-0294-one-api-mainline-live-apply` |
-| `open_webui` | `2026-04-01-adr-0294-one-api-mainline-live-apply` |
+| `open_webui` | `2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply` |
 | `openbao` | `2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
 | `openbao_operator_entity` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `openbao_operator_policy` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
@@ -314,7 +314,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.2` |
+| Repository version | `0.178.3` |
 | Platform version | `0.130.98` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -621,6 +621,7 @@ Current values on `main`:
 | `0326` | Implement shard-backed workstream registry source files with generated compatibility assembly | `live_applied` | [adr-0326-workstream-registry-shards.md](docs/workstreams/adr-0326-workstream-registry-shards.md) |
 | `0330` | Prepare the repository for public GitHub publication as a generic and forkable reference platform | `merged` | [adr-0330-public-github-readiness-bundle.md](docs/workstreams/adr-0330-public-github-readiness-bundle.md) |
 | `0340` | Dedicated Coolify Apps VM Separation — introduce coolify-apps-lv3 as the Coolify deployment server | `merged` | [0340-dedicated-coolify-apps-vm-separation.md](docs/adr/0340-dedicated-coolify-apps-vm-separation.md) |
+| `0341` | Integrate Open WebUI into Keycloak-backed routine operator authentication | `live_applied` | [ws-0334-auth-convergence.md](docs/workstreams/ws-0334-auth-convergence.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Next For Forks

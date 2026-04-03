@@ -1,6 +1,7 @@
 id: ws-0326-live-apply
 adr: '0326'
-title: Implement shard-backed workstream registry source files with generated compatibility assembly
+title: Implement shard-backed workstream registry source files with generated compatibility
+  assembly
 status: live_applied
 owner: codex
 branch: codex/ws-0326-live-apply
@@ -123,8 +124,11 @@ blockers: []
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implements ADR 0326 by making per-workstream shard files the authored source of truth, generating a compact active-only workstreams.yaml compatibility surface, and teaching release and validation automation to consume the sharded registry safely
+  changelog_entry: implements ADR 0326 by making per-workstream shard files the authored
+    source of truth, generating a compact active-only workstreams.yaml compatibility
+    surface, and teaching release and validation automation to consume the sharded
+    registry safely
   release_bump: patch
-  included_in_repo_version: null
+  included_in_repo_version: 0.178.3
   latest_receipts:
     workstream_registry_shards: 2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply

@@ -488,7 +488,7 @@
           "container_name": "directus",
           "bindings": [
             {
-              "host": "10.10.10.92",
+              "host": "10.10.10.20",
               "port": 8055
             }
           ],
@@ -1067,7 +1067,7 @@
     },
     "keycloak": {
       "service_name": "keycloak",
-      "owning_vm": "runtime-control-lv3",
+      "owning_vm": "docker-runtime-lv3",
       "role": "keycloak_runtime",
       "verify_file": "roles/keycloak_runtime/tasks/verify.yml",
       "startup": {

@@ -482,9 +482,9 @@
       ],
       "standby": {
         "kind": "cold",
-        "location": "runtime-control-lv3",
-        "failover_trigger": "Restore runtime-control-lv3 when Keycloak or its dependent runtime state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Keycloak converge and identity verification flow."
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Keycloak or its dependent runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Keycloak converge and identity verification flow."
       }
     },
     "langfuse": {

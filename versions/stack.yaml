@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.178.2
+repo_version: 0.178.3
 platform_version: 0.130.98
 
 live_apply_evidence:
@@ -66,7 +66,7 @@ live_apply_evidence:
     platform_context: 2026-04-01-adr-0294-one-api-mainline-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
     openfga: 2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply
-    open_webui: 2026-04-01-adr-0294-one-api-mainline-live-apply
+    open_webui: 2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply
     remote_build_gateway: 2026-03-29-adr-0265-immutable-validation-snapshots-mainline-live-apply
     iac_policy_scanning: 2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
@@ -955,7 +955,9 @@ observed_state:
     bootstrap_admin_email: ops@lv3.org
     bootstrap_admin_login_verified: true
     password_auth_enabled: true
-    oidc_enabled: false
+    oidc_enabled: true
+    oidc_login_redirect_verified: true
+    keycloak_oidc_verified: true
     approved_provider_env_present: true
     web_search_permission: true
     web_search_provider: searxng
@@ -1156,7 +1158,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.2
+    current: 0.178.3
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.98

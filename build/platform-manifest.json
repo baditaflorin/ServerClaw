@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.2",
+  "repo_version": "0.178.3",
   "platform_version": "0.130.98",
-  "generated_at": "2026-04-03T17:55:07Z",
-  "next_refresh_at": "2026-04-03T18:55:07Z",
+  "generated_at": "2026-04-03T18:41:02Z",
+  "next_refresh_at": "2026-04-03T19:41:02Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -2380,7 +2380,7 @@
       },
       {
         "id": "converge-open-webui",
-        "description": "Deploy private Open WebUI on docker-runtime-lv3 with repo-managed bootstrap auth and an operator-only Tailscale proxy on the Proxmox host.",
+        "description": "Deploy private Open WebUI with a repo-managed Keycloak OIDC client, routine SSO sign-in, retained break-glass admin auth, and an operator-only Tailscale proxy on the Proxmox host.",
         "tags": [
           "converge-open-webui",
           "host-and-guest-live",
@@ -5121,7 +5121,7 @@
         "id": "configure-keycloak",
         "title": "Configure Keycloak",
         "agent_trust_required": "T3",
-        "steps": 11,
+        "steps": 16,
         "path": "docs/runbooks/configure-keycloak.md",
         "workflow_ids": [
           "converge-keycloak"
@@ -6155,10 +6155,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.1",
+    "last_version": "0.178.2",
     "deployed_at": "2026-04-03",
-    "summary": "repairs the runtime-general Homepage and Uptime Kuma recovery path by restoring migrated Uptime Kuma state, aligning Docker guest public-edge host alias pinning, teaching the Uptime Kuma role to use the Compose plugin contract, and binding Homepage on loopback so Traefik and the shared edge can re-verify home.lv3.org safely",
-    "release_notes_url": "docs/release-notes/0.178.2.md"
+    "summary": "proves ADR 0318 end to end from a dedicated worktree by making the fallback onboarding script worktree-safe, role-contract aligned, and recoverable with ephemeral runtime secret overrides while live-provisioning and auditing the temporary admin operator florin-tmp-002 implements ADR 0326 by making per-workstream shard files the authored source of truth, generating a compact active-only workstreams.yaml compatibility surface, and teaching release and validation automation to consume the sharded registry safely",
+    "release_notes_url": "docs/release-notes/0.178.3.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

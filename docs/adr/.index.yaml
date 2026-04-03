@@ -9,8 +9,8 @@ schema_version: 1
 generated: '2026-04-03'
 total_adrs: 361
 implementation_status_summary:
-  Implemented: 316
-  Partial: 11
+  Implemented: 317
+  Partial: 10
   Not Implemented: 33
   Deprecated: 1
 concerns:
@@ -6043,7 +6043,7 @@ adr_index:
   - adr: '0341'
     title: Open WebUI Keycloak OIDC With Break-Glass Fallback
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-04-03'
     concern: security
     keywords:
@@ -6055,3 +6055,4 @@ adr_index:
       - fallback
     summary: Open WebUI will use a dedicated repo-managed Keycloak OIDC client for routine
     filename: 0341-open-webui-keycloak-oidc-with-break-glass-fallback.md
+    implemented_version: 0.178.3

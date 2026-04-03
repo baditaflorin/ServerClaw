@@ -76,7 +76,7 @@
     "scripts/validate_repository_data_models.py",
     "workstreams.yaml",
     "workstreams/policy.yaml",
-    "workstreams/active/ws-0326-live-apply.yaml",
+    "workstreams/archive/2026/ws-0326-live-apply.yaml",
     "workstreams/archive/2026/ws-0332-homepage-triage.yaml",
     "workstreams/archive/2026/ws-0333-service-uptime-recovery.yaml",
     "build/platform-manifest.json",
