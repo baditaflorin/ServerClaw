@@ -1,980 +1,997 @@
 {
-    "schema_version": "1.0.0",
-    "reserved_prefixes": [
+  "schema_version": "1.0.0",
+  "reserved_prefixes": [
+    {
+      "prefix": "ops",
+      "owner_adr": "0074",
+      "allowed_fqdns": [
+        "ops.lv3.org",
+        "ops.staging.lv3.org"
+      ],
+      "notes": "Reserved for the generated operations portal and its staged hostname."
+    },
+    {
+      "prefix": "docs",
+      "owner_adr": "0094",
+      "allowed_fqdns": [
+        "docs.lv3.org"
+      ],
+      "notes": "Reserved for the generated developer portal and documentation site."
+    },
+    {
+      "prefix": "draw",
+      "owner_adr": "0202",
+      "allowed_fqdns": [
+        "draw.lv3.org"
+      ],
+      "notes": "Reserved for the private Excalidraw architecture diagram surface."
+    },
+    {
+      "prefix": "git",
+      "owner_adr": "0143",
+      "allowed_fqdns": [
+        "git.lv3.org"
+      ],
+      "notes": "Reserved for the private self-hosted Gitea control-plane surface."
+    },
+    {
+      "prefix": "internal",
+      "owner_adr": "0076",
+      "notes": "Reserved for future internal-only routing or split-horizon publication."
+    },
+    {
+      "prefix": "staging",
+      "owner_adr": "0072",
+      "notes": "Reserved for environment delegation and should not become a service hostname."
+    },
+    {
+      "prefix": "api",
+      "owner_adr": "0049",
+      "allowed_fqdns": [
+        "api.lv3.org"
+      ],
+      "notes": "Reserved for a future governed API gateway surface."
+    },
+    {
+      "prefix": "agents",
+      "owner_adr": "0197",
+      "allowed_fqdns": [
+        "agents.lv3.org"
+      ],
+      "notes": "Reserved for the Dify visual workflow canvas edge surface."
+    },
+    {
+      "prefix": "smtp",
+      "owner_adr": "0041",
+      "notes": "Reserved for mail submission and transport naming."
+    },
+    {
+      "prefix": "imap",
+      "owner_adr": "0041",
+      "notes": "Reserved for mail retrieval naming."
+    },
+    {
+      "prefix": "mail",
+      "owner_adr": "0041",
+      "allowed_fqdns": [
+        "mail.lv3.org"
+      ],
+      "notes": "Reserved for the primary platform mail surface."
+    },
+    {
+      "prefix": "logs",
+      "owner_adr": "0150",
+      "allowed_fqdns": [
+        "logs.lv3.org"
+      ],
+      "notes": "Reserved for the Dozzle real-time container log surface."
+    },
+    {
+      "prefix": "registry",
+      "owner_adr": "0201",
+      "allowed_fqdns": [
+        "registry.lv3.org"
+      ],
+      "notes": "Reserved for the Harbor-backed container registry surface."
+    }
+  ],
+  "subdomains": [
+    {
+      "fqdn": "agents.lv3.org",
+      "service_id": "dify",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0197",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+    },
+    {
+      "fqdn": "analytics.lv3.org",
+      "service_id": "plausible",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0283",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "The dashboard is protected by the shared edge oauth2-proxy and Keycloak flow while /js/, /api/event, and health endpoints stay public for tracker delivery and probe traffic."
+    },
+    {
+      "fqdn": "api.lv3.org",
+      "service_id": "api_gateway",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0092",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published publicly through the shared NGINX edge and verified live from current main."
+    },
+    {
+      "fqdn": "apps.lv3.org",
+      "service_id": "coolify_apps",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "none",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0340",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications. Upstream routes to coolify-apps-lv3 (10.10.10.71) \u2014 ADR 0340.",
+      "upstream_vm": "coolify-apps-lv3",
+      "upstream_ip": "10.10.10.71"
+    },
+    {
+      "fqdn": "bi.lv3.org",
+      "service_id": "superset",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0292",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge while browser authentication remains service-native through the repo-managed Keycloak OIDC client."
+    },
+    {
+      "fqdn": "build.lv3.org",
+      "service_id": "docker_build",
+      "environment": "production",
+      "status": "active",
+      "exposure": "informational-only",
+      "auth_requirement": "none",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0028",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
+      "fqdn": "changelog.lv3.org",
+      "service_id": "changelog_portal",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0081",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+    },
+    {
+      "fqdn": "chat.lv3.org",
+      "service_id": "serverclaw",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0254",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "ServerClaw is published through the shared NGINX edge and delegates browser authentication to its in-app Keycloak OIDC flow."
+    },
+    {
+      "fqdn": "cloud.lv3.org",
+      "service_id": "nextcloud",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0260",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge while Nextcloud itself enforces browser and DAV authentication plus .well-known DAV discovery redirects."
+    },
+    {
+      "fqdn": "coolify.lv3.org",
+      "service_id": "coolify",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0194",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Coolify dashboard published through the shared authenticated NGINX edge with the private controller API proxied on the management tailnet."
+    },
+    {
+      "fqdn": "ci.lv3.org",
+      "service_id": "woodpecker",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0287",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge and authenticated through Woodpecker's delegated Gitea OAuth flow."
+    },
+    {
+      "fqdn": "database.lv3.org",
+      "service_id": "postgres",
+      "environment": "production",
+      "status": "active",
+      "exposure": "private-only",
+      "auth_requirement": "private_network",
+      "target": "100.64.0.1",
+      "target_port": 5432,
+      "owner_adr": "0026",
+      "tls": {
+        "provider": "none",
+        "auto_renew": false
+      },
+      "notes": "Tailnet-only TCP proxy through the Proxmox host."
+    },
+    {
+      "fqdn": "docker.lv3.org",
+      "service_id": "docker_runtime",
+      "environment": "production",
+      "status": "active",
+      "exposure": "informational-only",
+      "auth_requirement": "none",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0023",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
+      "fqdn": "docs.lv3.org",
+      "service_id": "docs_portal",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0094",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+    },
+    {
+      "fqdn": "errors.lv3.org",
+      "service_id": "glitchtip",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0281",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge while GlitchTip itself delegates browser sign-in to the repo-managed Keycloak OIDC flow; health and DSN ingestion remain intentionally reachable for probes and SDK traffic."
+    },
+    {
+      "fqdn": "draw.lv3.org",
+      "service_id": "excalidraw",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0202",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Private Excalidraw publication for repo-generated architecture scenes through the shared authenticated NGINX edge."
+    },
+    {
+      "fqdn": "flags.lv3.org",
+      "service_id": "flagsmith",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0288",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "The shared edge leaves `/health` public for probes while the Flagsmith UI and browser management API remain behind oauth2-proxy and Keycloak."
+    },
+    {
+      "fqdn": "git.lv3.org",
+      "service_id": "gitea",
+      "environment": "production",
+      "status": "active",
+      "exposure": "private-only",
+      "auth_requirement": "private_network",
+      "target": "100.64.0.1",
+      "target_port": 3009,
+      "owner_adr": "0143",
+      "tls": {
+        "provider": "none",
+        "auto_renew": false
+      },
+      "notes": "Tailnet-only TCP proxy for the private Gitea runtime on docker-runtime-lv3."
+    },
+    {
+      "fqdn": "grafana.lv3.org",
+      "service_id": "grafana",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0011",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
+      "fqdn": "grafana.staging.lv3.org",
+      "service_id": "grafana",
+      "environment": "staging",
+      "status": "planned",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0072",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Planned staging hostname on the shared NGINX edge."
+    },
+    {
+      "fqdn": "headscale.lv3.org",
+      "service_id": "headscale",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0144",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge and proxied to the Proxmox host Headscale listener on 10.10.10.1:8080."
+    },
+    {
+      "fqdn": "home.lv3.org",
+      "service_id": "homepage",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0152",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Unified service dashboard published through the shared NGINX edge and protected by the repo-managed Keycloak oauth2-proxy flow."
+    },
+    {
+      "fqdn": "langfuse.lv3.org",
+      "service_id": "langfuse",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0146",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
+      "fqdn": "notebooks.lv3.org",
+      "service_id": "jupyterhub",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0291",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge while JupyterHub itself delegates browser authentication to the repo-managed Keycloak OIDC client."
+    },
+    {
+      "fqdn": "livekit.lv3.org",
+      "service_id": "livekit",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0293",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "The shared NGINX edge proxies signalling at https://livekit.lv3.org while public TCP 7881 and UDP 7882 are forwarded directly to docker-runtime-lv3 for WebRTC media."
+    },
+    {
+      "fqdn": "logs.lv3.org",
+      "service_id": "dozzle",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0150",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+    },
+    {
+      "fqdn": "lv3.org",
+      "service_id": "nginx_edge",
+      "environment": "production",
+      "status": "active",
+      "exposure": "informational-only",
+      "auth_requirement": "none",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "expected_dns_records": [
         {
-            "prefix": "ops",
-            "owner_adr": "0074",
-            "allowed_fqdns": [
-                "ops.lv3.org",
-                "ops.staging.lv3.org"
-            ],
-            "notes": "Reserved for the generated operations portal and its staged hostname."
-        },
-        {
-            "prefix": "docs",
-            "owner_adr": "0094",
-            "allowed_fqdns": [
-                "docs.lv3.org"
-            ],
-            "notes": "Reserved for the generated developer portal and documentation site."
-        },
-        {
-            "prefix": "draw",
-            "owner_adr": "0202",
-            "allowed_fqdns": [
-                "draw.lv3.org"
-            ],
-            "notes": "Reserved for the private Excalidraw architecture diagram surface."
-        },
-        {
-            "prefix": "git",
-            "owner_adr": "0143",
-            "allowed_fqdns": [
-                "git.lv3.org"
-            ],
-            "notes": "Reserved for the private self-hosted Gitea control-plane surface."
-        },
-        {
-            "prefix": "internal",
-            "owner_adr": "0076",
-            "notes": "Reserved for future internal-only routing or split-horizon publication."
-        },
-        {
-            "prefix": "staging",
-            "owner_adr": "0072",
-            "notes": "Reserved for environment delegation and should not become a service hostname."
-        },
-        {
-            "prefix": "api",
-            "owner_adr": "0049",
-            "allowed_fqdns": [
-                "api.lv3.org"
-            ],
-            "notes": "Reserved for a future governed API gateway surface."
-        },
-        {
-            "prefix": "agents",
-            "owner_adr": "0197",
-            "allowed_fqdns": [
-                "agents.lv3.org"
-            ],
-            "notes": "Reserved for the Dify visual workflow canvas edge surface."
-        },
-        {
-            "prefix": "smtp",
-            "owner_adr": "0041",
-            "notes": "Reserved for mail submission and transport naming."
-        },
-        {
-            "prefix": "imap",
-            "owner_adr": "0041",
-            "notes": "Reserved for mail retrieval naming."
-        },
-        {
-            "prefix": "mail",
-            "owner_adr": "0041",
-            "allowed_fqdns": [
-                "mail.lv3.org"
-            ],
-            "notes": "Reserved for the primary platform mail surface."
-        },
-        {
-            "prefix": "logs",
-            "owner_adr": "0150",
-            "allowed_fqdns": [
-                "logs.lv3.org"
-            ],
-            "notes": "Reserved for the Dozzle real-time container log surface."
-        },
-        {
-            "prefix": "registry",
-            "owner_adr": "0201",
-            "allowed_fqdns": [
-                "registry.lv3.org"
-            ],
-            "notes": "Reserved for the Harbor-backed container registry surface."
+          "type": "A",
+          "value": "65.108.75.123"
         }
-    ],
-    "subdomains": [
-        {
-            "fqdn": "agents.lv3.org",
-            "service_id": "dify",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0197",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
-        },
-        {
-            "fqdn": "analytics.lv3.org",
-            "service_id": "plausible",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0283",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "The dashboard is protected by the shared edge oauth2-proxy and Keycloak flow while /js/, /api/event, and health endpoints stay public for tracker delivery and probe traffic."
-        },
-        {
-            "fqdn": "api.lv3.org",
-            "service_id": "api_gateway",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0092",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published publicly through the shared NGINX edge and verified live from current main."
-        },
-        {
-            "fqdn": "apps.lv3.org",
-            "service_id": "coolify_apps",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "none",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0340",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications. Upstream routes to coolify-apps-lv3 (10.10.10.71) \u2014 ADR 0340.",
-            "upstream_vm": "coolify-apps-lv3",
-            "upstream_ip": "10.10.10.71"
-        },
-        {
-            "fqdn": "bi.lv3.org",
-            "service_id": "superset",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0292",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge while browser authentication remains service-native through the repo-managed Keycloak OIDC client."
-        },
-        {
-            "fqdn": "build.lv3.org",
-            "service_id": "docker_build",
-            "environment": "production",
-            "status": "active",
-            "exposure": "informational-only",
-            "auth_requirement": "none",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0028",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            }
-        },
-        {
-            "fqdn": "changelog.lv3.org",
-            "service_id": "changelog_portal",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0081",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
-        },
-        {
-            "fqdn": "chat.lv3.org",
-            "service_id": "serverclaw",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0254",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "ServerClaw is published through the shared NGINX edge and delegates browser authentication to its in-app Keycloak OIDC flow."
-        },
-        {
-            "fqdn": "cloud.lv3.org",
-            "service_id": "nextcloud",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0260",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge while Nextcloud itself enforces browser and DAV authentication plus .well-known DAV discovery redirects."
-        },
-        {
-            "fqdn": "coolify.lv3.org",
-            "service_id": "coolify",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0194",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Coolify dashboard published through the shared authenticated NGINX edge with the private controller API proxied on the management tailnet."
-        },
-        {
-            "fqdn": "ci.lv3.org",
-            "service_id": "woodpecker",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0287",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge and authenticated through Woodpecker's delegated Gitea OAuth flow."
-        },
-        {
-            "fqdn": "database.lv3.org",
-            "service_id": "postgres",
-            "environment": "production",
-            "status": "active",
-            "exposure": "private-only",
-            "auth_requirement": "private_network",
-            "target": "100.64.0.1",
-            "target_port": 5432,
-            "owner_adr": "0026",
-            "tls": {
-                "provider": "none",
-                "auto_renew": false
-            },
-            "notes": "Tailnet-only TCP proxy through the Proxmox host."
-        },
-        {
-            "fqdn": "docker.lv3.org",
-            "service_id": "docker_runtime",
-            "environment": "production",
-            "status": "active",
-            "exposure": "informational-only",
-            "auth_requirement": "none",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0023",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            }
-        },
-        {
-            "fqdn": "docs.lv3.org",
-            "service_id": "docs_portal",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0094",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
-        },
-        {
-            "fqdn": "errors.lv3.org",
-            "service_id": "glitchtip",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0281",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge while GlitchTip itself delegates browser sign-in to the repo-managed Keycloak OIDC flow; health and DSN ingestion remain intentionally reachable for probes and SDK traffic."
-        },
-        {
-            "fqdn": "draw.lv3.org",
-            "service_id": "excalidraw",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0202",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Private Excalidraw publication for repo-generated architecture scenes through the shared authenticated NGINX edge."
-        },
-        {
-            "fqdn": "flags.lv3.org",
-            "service_id": "flagsmith",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0288",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "The shared edge leaves `/health` public for probes while the Flagsmith UI and browser management API remain behind oauth2-proxy and Keycloak."
-        },
-        {
-            "fqdn": "git.lv3.org",
-            "service_id": "gitea",
-            "environment": "production",
-            "status": "active",
-            "exposure": "private-only",
-            "auth_requirement": "private_network",
-            "target": "100.64.0.1",
-            "target_port": 3009,
-            "owner_adr": "0143",
-            "tls": {
-                "provider": "none",
-                "auto_renew": false
-            },
-            "notes": "Tailnet-only TCP proxy for the private Gitea runtime on docker-runtime-lv3."
-        },
-        {
-            "fqdn": "grafana.lv3.org",
-            "service_id": "grafana",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0011",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            }
-        },
-        {
-            "fqdn": "grafana.staging.lv3.org",
-            "service_id": "grafana",
-            "environment": "staging",
-            "status": "planned",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0072",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Planned staging hostname on the shared NGINX edge."
-        },
-        {
-            "fqdn": "headscale.lv3.org",
-            "service_id": "headscale",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0144",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge and proxied to the Proxmox host Headscale listener on 10.10.10.1:8080."
-        },
-        {
-            "fqdn": "home.lv3.org",
-            "service_id": "homepage",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0152",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Unified service dashboard published through the shared NGINX edge and protected by the repo-managed Keycloak oauth2-proxy flow."
-        },
-        {
-            "fqdn": "langfuse.lv3.org",
-            "service_id": "langfuse",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0146",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            }
-        },
-        {
-            "fqdn": "notebooks.lv3.org",
-            "service_id": "jupyterhub",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0291",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge while JupyterHub itself delegates browser authentication to the repo-managed Keycloak OIDC client."
-        },
-        {
-            "fqdn": "livekit.lv3.org",
-            "service_id": "livekit",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0293",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "The shared NGINX edge proxies signalling at https://livekit.lv3.org while public TCP 7881 and UDP 7882 are forwarded directly to docker-runtime-lv3 for WebRTC media."
-        },
-        {
-            "fqdn": "logs.lv3.org",
-            "service_id": "dozzle",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0150",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
-        },
-        {
-            "fqdn": "lv3.org",
-            "service_id": "nginx_edge",
-            "environment": "production",
-            "status": "active",
-            "exposure": "informational-only",
-            "auth_requirement": "none",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "expected_dns_records": [
-                {
-                    "type": "A",
-                    "value": "65.108.75.123"
-                }
-            ],
-            "owner_adr": "0021",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "The apex hostname is governed as a crawl-suppressed informational redirect to the shared NGINX edge entrypoint."
-        },
-        {
-            "fqdn": "mail.lv3.org",
-            "service_id": "mail_platform",
-            "environment": "production",
-            "status": "active",
-            "exposure": "informational-only",
-            "auth_requirement": "none",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0041",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published as an informational HTTPS surface on the shared edge while the live mail service itself is reached over SMTP submission and IMAPS."
-        },
-        {
-            "fqdn": "matrix.lv3.org",
-            "service_id": "matrix_synapse",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0255",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "The public hostname terminates at the shared edge and forwards only the Matrix client listener; authentication is enforced by Synapse and federation stays disabled for this ADR."
-        },
-        {
-            "fqdn": "minio.lv3.org",
-            "service_id": "minio",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "none",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0274",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "The public MinIO S3-compatible API is published through the shared NGINX edge and proxies to the docker-runtime guest listener on port 9010."
-        },
-        {
-            "fqdn": "minio-console.lv3.org",
-            "service_id": "minio",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0274",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "The MinIO browser console is published through the shared authenticated edge path and proxied to the docker-runtime guest listener on port 9011."
-        },
-        {
-            "fqdn": "n8n.lv3.org",
-            "service_id": "n8n",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0151",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "The editor is protected by the shared oauth2-proxy and Keycloak edge flow while /healthz and /webhook* remain intentionally unauthenticated for machine callers."
-        },
-        {
-            "fqdn": "nginx.lv3.org",
-            "service_id": "nginx_edge",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "none",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0021",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            }
-        },
-        {
-            "fqdn": "ops.lv3.org",
-            "service_id": "ops_portal",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0093",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Interactive runtime is live behind oauth2-proxy and Keycloak on the shared NGINX edge."
-        },
-        {
-            "fqdn": "ops.staging.lv3.org",
-            "service_id": "ops_portal",
-            "environment": "staging",
-            "status": "planned",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0072",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Planned staging portal generated from the canonical service and environment catalogs."
-        },
-        {
-            "fqdn": "proxmox.lv3.org",
-            "service_id": "proxmox_ui",
-            "environment": "production",
-            "status": "active",
-            "exposure": "informational-only",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0004",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            }
-        },
-        {
-            "fqdn": "realtime.lv3.org",
-            "service_id": "realtime",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0196",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
-        },
-        {
-            "fqdn": "registry.lv3.org",
-            "service_id": "harbor",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "none",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0201",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Harbor registry published through the shared NGINX edge with browser sign-in delegated at the Harbor application layer."
-        },
-        {
-            "fqdn": "billing.lv3.org",
-            "service_id": "lago",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0292",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "The shared edge protects the Lago browser UI while `/api/health` and `/api/v1/events` intentionally stay reachable for probes and governed producer ingest through the API gateway adapter."
-        },
-        {
-            "fqdn": "search.lv3.org",
-            "service_id": "searxng",
-            "environment": "production",
-            "status": "active",
-            "exposure": "private-only",
-            "auth_requirement": "private_network",
-            "target": "100.64.0.1",
-            "target_port": 80,
-            "owner_adr": "0148",
-            "tls": {
-                "provider": "none",
-                "auto_renew": false
-            },
-            "notes": "Tailnet-only HTTP publication through the Proxmox host Tailscale proxy to docker-runtime-lv3."
-        },
-        {
-            "fqdn": "sso.lv3.org",
-            "service_id": "keycloak",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0056",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            }
-        },
-        {
-            "fqdn": "sso.staging.lv3.org",
-            "service_id": "keycloak",
-            "environment": "staging",
-            "status": "planned",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0072",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Planned staging identity hostname on the shared NGINX edge."
-        },
-        {
-            "fqdn": "status.lv3.org",
-            "service_id": "status_page",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "none",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0109",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            }
-        },
-        {
-            "fqdn": "tasks.lv3.org",
-            "service_id": "plane",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "edge_oidc",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0193",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
-        },
-        {
-            "fqdn": "uptime.lv3.org",
-            "service_id": "uptime_kuma",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0027",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            }
-        },
-        {
-            "fqdn": "uptime.staging.lv3.org",
-            "service_id": "uptime_kuma",
-            "environment": "staging",
-            "status": "planned",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0072",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Planned staged monitoring hostname on the shared NGINX edge."
-        },
-        {
-            "fqdn": "vault.lv3.org",
-            "service_id": "vaultwarden",
-            "environment": "production",
-            "status": "active",
-            "exposure": "private-only",
-            "auth_requirement": "private_network",
-            "target": "100.64.0.1",
-            "target_port": 443,
-            "owner_adr": "0147",
-            "tls": {
-                "provider": "step-ca",
-                "cert_path": "/opt/vaultwarden/tls",
-                "auto_renew": true
-            },
-            "notes": "Tailnet-only HTTPS publication through the Proxmox host using an LV3 internal CA certificate."
-        },
-        {
-            "fqdn": "grist.lv3.org",
-            "service_id": "grist",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0279",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge while Grist itself delegates operator browser sign-in to the repo-managed Keycloak OIDC client."
-        },
-        {
-            "fqdn": "wiki.lv3.org",
-            "service_id": "outline",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0199",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge while Outline itself delegates browser authentication to the repo-managed Keycloak OIDC client."
-        },
-        {
-            "fqdn": "paperless.lv3.org",
-            "service_id": "paperless",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0285",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge; docs.lv3.org remains reserved for the developer portal from ADR 0094."
-        },
-        {
-            "fqdn": "data.lv3.org",
-            "service_id": "directus",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0289",
-            "tls": {
-                "provider": "letsencrypt",
-                "auto_renew": true,
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/"
-            },
-            "notes": "The shared NGINX edge publishes data.lv3.org directly to Directus. Browser users authenticate upstream through Keycloak and API consumers authenticate with Directus-issued bearer tokens."
-        },
-        {
-            "fqdn": "ntfy.lv3.org",
-            "service_id": "ntfy",
-            "environment": "production",
-            "status": "active",
-            "exposure": "edge-published",
-            "auth_requirement": "upstream_auth",
-            "target": "65.108.75.123",
-            "target_port": 443,
-            "owner_adr": "0299",
-            "tls": {
-                "provider": "letsencrypt",
-                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-                "auto_renew": true
-            },
-            "notes": "Published through the shared NGINX edge; ntfy itself enforces repo-managed topic authentication for governed operator push delivery."
-        }
-    ]
+      ],
+      "owner_adr": "0021",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "The apex hostname is governed as a crawl-suppressed informational redirect to the shared NGINX edge entrypoint."
+    },
+    {
+      "fqdn": "mail.lv3.org",
+      "service_id": "mail_platform",
+      "environment": "production",
+      "status": "active",
+      "exposure": "informational-only",
+      "auth_requirement": "none",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0041",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published as an informational HTTPS surface on the shared edge while the live mail service itself is reached over SMTP submission and IMAPS."
+    },
+    {
+      "fqdn": "matrix.lv3.org",
+      "service_id": "matrix_synapse",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0255",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "The public hostname terminates at the shared edge and forwards only the Matrix client listener; authentication is enforced by Synapse and federation stays disabled for this ADR."
+    },
+    {
+      "fqdn": "minio.lv3.org",
+      "service_id": "minio",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "none",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0274",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "The public MinIO S3-compatible API is published through the shared NGINX edge and proxies to the docker-runtime guest listener on port 9010."
+    },
+    {
+      "fqdn": "minio-console.lv3.org",
+      "service_id": "minio",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0274",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "The MinIO browser console is published through the shared authenticated edge path and proxied to the docker-runtime guest listener on port 9011."
+    },
+    {
+      "fqdn": "n8n.lv3.org",
+      "service_id": "n8n",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0151",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "The editor is protected by the shared oauth2-proxy and Keycloak edge flow while /healthz and /webhook* remain intentionally unauthenticated for machine callers."
+    },
+    {
+      "fqdn": "nginx.lv3.org",
+      "service_id": "nginx_edge",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "none",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0021",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
+      "fqdn": "ops.lv3.org",
+      "service_id": "ops_portal",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0093",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Interactive runtime is live behind oauth2-proxy and Keycloak on the shared NGINX edge."
+    },
+    {
+      "fqdn": "ops.staging.lv3.org",
+      "service_id": "ops_portal",
+      "environment": "staging",
+      "status": "planned",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0072",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Planned staging portal generated from the canonical service and environment catalogs."
+    },
+    {
+      "fqdn": "proxmox.lv3.org",
+      "service_id": "proxmox_ui",
+      "environment": "production",
+      "status": "active",
+      "exposure": "informational-only",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0004",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
+      "fqdn": "realtime.lv3.org",
+      "service_id": "realtime",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0196",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+    },
+    {
+      "fqdn": "registry.lv3.org",
+      "service_id": "harbor",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "none",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0201",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Harbor registry published through the shared NGINX edge with browser sign-in delegated at the Harbor application layer."
+    },
+    {
+      "fqdn": "billing.lv3.org",
+      "service_id": "lago",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0292",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "The shared edge protects the Lago browser UI while `/api/health` and `/api/v1/events` intentionally stay reachable for probes and governed producer ingest through the API gateway adapter."
+    },
+    {
+      "fqdn": "search.lv3.org",
+      "service_id": "searxng",
+      "environment": "production",
+      "status": "active",
+      "exposure": "private-only",
+      "auth_requirement": "private_network",
+      "target": "100.64.0.1",
+      "target_port": 80,
+      "owner_adr": "0148",
+      "tls": {
+        "provider": "none",
+        "auto_renew": false
+      },
+      "notes": "Tailnet-only HTTP publication through the Proxmox host Tailscale proxy to docker-runtime-lv3."
+    },
+    {
+      "fqdn": "sso.lv3.org",
+      "service_id": "keycloak",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0056",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
+      "fqdn": "sso.staging.lv3.org",
+      "service_id": "keycloak",
+      "environment": "staging",
+      "status": "planned",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0072",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Planned staging identity hostname on the shared NGINX edge."
+    },
+    {
+      "fqdn": "status.lv3.org",
+      "service_id": "status_page",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "none",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0109",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
+      "fqdn": "tasks.lv3.org",
+      "service_id": "plane",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0193",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+    },
+    {
+      "fqdn": "uptime.lv3.org",
+      "service_id": "uptime_kuma",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0027",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
+      "fqdn": "uptime.staging.lv3.org",
+      "service_id": "uptime_kuma",
+      "environment": "staging",
+      "status": "planned",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0072",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Planned staged monitoring hostname on the shared NGINX edge."
+    },
+    {
+      "fqdn": "vault.lv3.org",
+      "service_id": "vaultwarden",
+      "environment": "production",
+      "status": "active",
+      "exposure": "private-only",
+      "auth_requirement": "private_network",
+      "target": "100.64.0.1",
+      "target_port": 443,
+      "owner_adr": "0147",
+      "tls": {
+        "provider": "step-ca",
+        "cert_path": "/opt/vaultwarden/tls",
+        "auto_renew": true
+      },
+      "notes": "Tailnet-only HTTPS publication through the Proxmox host using an LV3 internal CA certificate."
+    },
+    {
+      "fqdn": "grist.lv3.org",
+      "service_id": "grist",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0279",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge while Grist itself delegates operator browser sign-in to the repo-managed Keycloak OIDC client."
+    },
+    {
+      "fqdn": "wiki.lv3.org",
+      "service_id": "outline",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0199",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge while Outline itself delegates browser authentication to the repo-managed Keycloak OIDC client."
+    },
+    {
+      "fqdn": "paperless.lv3.org",
+      "service_id": "paperless",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0285",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge; docs.lv3.org remains reserved for the developer portal from ADR 0094."
+    },
+    {
+      "fqdn": "data.lv3.org",
+      "service_id": "directus",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0289",
+      "tls": {
+        "provider": "letsencrypt",
+        "auto_renew": true,
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/"
+      },
+      "notes": "The shared NGINX edge publishes data.lv3.org directly to Directus. Browser users authenticate upstream through Keycloak and API consumers authenticate with Directus-issued bearer tokens."
+    },
+    {
+      "fqdn": "annotate.lv3.org",
+      "service_id": "label_studio",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0289",
+      "tls": {
+        "provider": "letsencrypt",
+        "auto_renew": true,
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/"
+      },
+      "notes": "Published through the shared NGINX edge and protected by the shared oauth2-proxy plus Keycloak boundary; repo-managed Label Studio tokens remain the current app-local automation path."
+    },
+    {
+      "fqdn": "ntfy.lv3.org",
+      "service_id": "ntfy",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0299",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge; ntfy itself enforces repo-managed topic authentication for governed operator push delivery."
+    }
+  ]
 }

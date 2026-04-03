@@ -1,0 +1,45 @@
+# Purpose: Verify the public Label Studio publication remains protected by the shared edge auth boundary.
+# Use case: Imported by playbooks/label-studio.yml after the runtime and NGINX publication have converged.
+# Inputs: label_studio_public_base_url.
+# Outputs: Fails fast if the public UI or API path no longer redirects through the shared edge auth boundary.
+# Idempotency: Fully idempotent because the tasks only perform remote HTTP reads.
+# Dependencies: ADR 0021, ADR 0133, and ADR 0289.
+---
+- name: Verify the public Label Studio UI redirects into the shared edge auth boundary
+  ansible.builtin.uri:
+    url: "{{ label_studio_public_base_url }}/"
+    method: GET
+    follow_redirects: none
+    status_code:
+      - 302
+      - 303
+  register: label_studio_public_ui_redirect
+  changed_when: false
+
+- name: Verify the public Label Studio API redirects into the shared edge auth boundary
+  ansible.builtin.uri:
+    url: "{{ label_studio_public_base_url }}/api/projects"
+    method: GET
+    follow_redirects: none
+    status_code:
+      - 302
+      - 303
+  register: label_studio_public_api_redirect
+  changed_when: false
+
+- name: Assert the Label Studio public redirects target the shared auth boundary
+  ansible.builtin.assert:
+    that:
+      - >-
+        (
+          label_studio_public_ui_redirect.location
+          | default(label_studio_public_ui_redirect.headers.Location | default(''))
+          | regex_search('oauth2/(sign_in|start)')
+        ) is not none
+      - >-
+        (
+          label_studio_public_api_redirect.location
+          | default(label_studio_public_api_redirect.headers.Location | default(''))
+          | regex_search('oauth2/(sign_in|start)')
+        ) is not none
+    fail_msg: "The public Label Studio publication is not redirecting through the shared edge auth boundary."

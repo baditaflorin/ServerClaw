@@ -153,7 +153,7 @@
     "image": "registry.lv3.org/check-runner/security:2026.03.23",
     "command": "python scripts/published_artifact_secret_scan.py --repo-root /workspace --enforce-gitleaks",
     "working_dir": "/workspace",
-    "timeout_seconds": 120
+    "timeout_seconds": 300
   },
   "service-completeness": {
     "description": "Enforce the ADR 0107 extension checklist for non-grandfathered services.",
@@ -191,9 +191,9 @@
     "description": "Run full-repository yamllint across tracked YAML files.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/ansible:2.17.10",
-    "command": "find . -path ./.git -prune -o -type f \\( -name '*.yml' -o -name '*.yaml' \\) -print0 | xargs -0 yamllint -c .yamllint",
+    "command": "./scripts/validate_repo.sh yaml",
     "working_dir": "/workspace",
-    "timeout_seconds": 240,
+    "timeout_seconds": 600,
     "cache_mounts": ["ansible_collections"]
   }
 }

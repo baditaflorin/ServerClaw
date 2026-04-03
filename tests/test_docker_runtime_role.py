@@ -205,10 +205,18 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
         "{{(docker_runtime_stopped_pre_restart_container_details|default([]))|to_json}}"
     )
     assert "TRANSIENT_DOCKER_NETWORK_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "TRANSIENT_DOCKER_NETWORK_RETRY_ATTEMPTS = 12" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "TRANSIENT_DOCKER_NETWORK_RETRY_DELAY_SECONDS = 5" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "STALE_COMPOSE_ENDPOINT_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "retry_on_any_error=False" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def combined_output(stdout, stderr):" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def exception_output(exc):" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'DOCKER_NAT_CHAIN_COMMAND = ["iptables", "-t", "nat", "-S", "DOCKER"]' in (
+        recover_containers["ansible.builtin.command"]["argv"][2]
+    )
+    assert 'DOCKER_SERVICE_ACTIVE_COMMAND = ["systemctl", "is-active", "docker"]' in (
+        recover_containers["ansible.builtin.command"]["argv"][2]
+    )
     assert "OPENBAO_HEALTH_URL" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "OPENBAO_SEAL_STATUS_URL" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "OPENBAO_UNSEAL_URL" in recover_containers["ansible.builtin.command"]["argv"][2]
@@ -225,19 +233,34 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert '"http://127.0.0.1:8201/v1/sys/seal-status"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert '"http://127.0.0.1:8201/v1/sys/unseal"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "OPENBAO_READY_STATUS_CODES = {200, 429, 472, 473, 501, 503}" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "def wait_for_docker_nat_chain(retries=12, delay_seconds=2):" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "def docker_service_is_active():" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "def restart_docker_service_for_recovery():" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "def ensure_docker_service_ready():" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def compose_group_sort_key(item):" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "NONPERSISTENT_RESTART_POLICIES" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert '["systemctl", "reset-failed", "docker.service"]' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert '["systemctl", "restart", "docker.service"]' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'compose_depends_on = labels.get("com.docker.compose.depends_on") or ""' in (
+        recover_containers["ansible.builtin.command"]["argv"][2]
+    )
+    assert 'compose_group["services"].update(dependency_services)' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "No chain/target/match by that name" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "failed to create endpoint" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "ensure_docker_service_ready()" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "retry_on_any_error=True" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'attempts=5,' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'delay_seconds=5,' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "run_with_retry(" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "cwd=working_dir or None" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "wait_for_docker_nat_chain()" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def is_local_openbao_group(" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'normalized_working_dir == "/opt/openbao"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert '"lv3-openbao" in container_names' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "restart_policy_name not in NONPERSISTENT_RESTART_POLICIES" in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'service.endswith("-openbao-agent")' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'service == "openbao-agent" or service.endswith("-openbao-agent")' in (
+        recover_containers["ansible.builtin.command"]["argv"][2]
+    )
     assert 'service == "openbao"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "if services_provide_local_openbao(services):" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "elif services_need_local_openbao(services):" in recover_containers["ansible.builtin.command"]["argv"][2]
@@ -246,6 +269,7 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert "if services_need_local_openbao(services) and not local_openbao_group:" in (
         recover_containers["ansible.builtin.command"]["argv"][2]
     )
+    assert "key=compose_group_recovery_sort_key" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'remove_command = ["docker", "rm", "-f", *container_names]' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'recovery_command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'down_command.extend(["down", "--remove-orphans"])' in recover_containers["ansible.builtin.command"]["argv"][2]
@@ -256,6 +280,7 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert "com.docker.compose.project.working_dir" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "docker_compose_up" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert recover_containers["failed_when"] is False
     assert 'stopped = [container for container in containers if not container.get("State", {}).get("Running")]' not in (
         recover_containers["ansible.builtin.command"]["argv"][2]
     )
@@ -264,9 +289,13 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert confirm_recovery["ansible.builtin.command"]["stdin"] == (
         "{{ docker_runtime_pre_restart_container_details | default([]) | to_json }}"
     )
-    assert '["docker", "inspect", container_name]' in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert '["docker", "inspect", name]' in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert "NONPERSISTENT_RESTART_POLICIES" in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert "SUCCESSFUL_EXIT_RESTART_POLICIES" in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert "def inspect_container(name):" in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert "def inspect_compose_replacement(container):" in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert 'f"label=com.docker.compose.project={compose_project}"' in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert 'f"label=com.docker.compose.service={compose_service}"' in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert "restart_policy_name" in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert (
         'SUCCESSFUL_EXIT_RESTART_POLICIES = NONPERSISTENT_RESTART_POLICIES | {"on-failure"}'
@@ -337,6 +366,79 @@ exit 1
             "require_running": False,
             "running": False,
             "status": "exited",
+            "exit_code": 0,
+            "healthy": True,
+        }
+    ]
+
+
+def test_docker_runtime_accepts_compose_managed_replacement_container_after_restart(tmp_path: Path) -> None:
+    tasks = load_tasks()
+    confirm_recovery = next(task for task in tasks if task["name"] == "Confirm pre-restart containers recovered after Docker restarts")
+    script = confirm_recovery["ansible.builtin.command"]["argv"][2]
+    script = script.replace(
+        "{{ docker_runtime_nonpersistent_restart_policies | to_json }}",
+        json.dumps(load_defaults()["docker_runtime_nonpersistent_restart_policies"]),
+    )
+    fake_docker = tmp_path / "docker"
+    fake_docker.write_text(
+        """#!/bin/sh
+if [ "$1" = "inspect" ] && [ "$2" = "59540cf44274_nginx" ]; then
+  echo 'Error: No such object: 59540cf44274_nginx' >&2
+  exit 1
+fi
+if [ "$1" = "ps" ] && [ "$2" = "-aq" ]; then
+  printf '%s\\n' replacement-nginx-id
+  exit 0
+fi
+if [ "$1" = "inspect" ] && [ "$2" = "replacement-nginx-id" ]; then
+  cat <<'JSON'
+[{"Name":"/nginx","State":{"Running":true,"Status":"running","ExitCode":0}}]
+JSON
+  exit 0
+fi
+echo "unexpected command: $*" >&2
+exit 1
+"""
+    )
+    fake_docker.chmod(0o755)
+
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        input=json.dumps(
+            [
+                {
+                    "Name": "/59540cf44274_nginx",
+                    "HostConfig": {"RestartPolicy": {"Name": "always"}},
+                    "Config": {
+                        "Labels": {
+                            "com.docker.compose.project": "59540cf44274",
+                            "com.docker.compose.service": "nginx",
+                        }
+                    },
+                }
+            ]
+        ),
+        text=True,
+        capture_output=True,
+        env={
+            **os.environ,
+            "PATH": f"{tmp_path}:{os.environ['PATH']}",
+        },
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    statuses = json.loads(result.stdout)
+    assert statuses == [
+        {
+            "requested_name": "59540cf44274_nginx",
+            "full_name": "/nginx",
+            "exists": True,
+            "restart_policy_name": "always",
+            "require_running": True,
+            "running": True,
+            "status": "running",
             "exit_code": 0,
             "healthy": True,
         }
@@ -428,6 +530,37 @@ exit 1
     )
     fake_docker.chmod(0o755)
 
+    fake_iptables = tmp_path / "iptables"
+    fake_iptables.write_text(
+        """#!/bin/sh
+if [ "$1" = "-t" ] && [ "$2" = "nat" ] && [ "$3" = "-S" ] && [ "$4" = "DOCKER" ]; then
+  exit 0
+fi
+echo "unexpected iptables command: $*" >&2
+exit 1
+"""
+    )
+    fake_iptables.chmod(0o755)
+
+    fake_systemctl = tmp_path / "systemctl"
+    fake_systemctl.write_text(
+        """#!/bin/sh
+if [ "$1" = "is-active" ] && [ "$2" = "docker" ]; then
+  echo active
+  exit 0
+fi
+if [ "$1" = "reset-failed" ] && [ "$2" = "docker.service" ]; then
+  exit 0
+fi
+if [ "$1" = "restart" ] && [ "$2" = "docker.service" ]; then
+  exit 0
+fi
+echo "unexpected systemctl command: $*" >&2
+exit 1
+"""
+    )
+    fake_systemctl.chmod(0o755)
+
     compose_file = tmp_path / "docker-compose.yml"
     compose_file.write_text("services: {}\n")
 
@@ -463,6 +596,323 @@ exit 1
     assert result.returncode == 0, result.stderr or result.stdout
     assert OpenBaoState.unseal_attempts == 2
     assert OpenBaoState.sealed is False
+
+
+def test_docker_runtime_retries_compose_recovery_long_enough_for_transient_nat_chain_errors(tmp_path: Path) -> None:
+    tasks = load_tasks()
+    recover_containers = next(
+        task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
+    )
+    script = recover_containers["ansible.builtin.command"]["argv"][2]
+    script = script.replace(
+        "{{ docker_runtime_nonpersistent_restart_policies | to_json }}",
+        json.dumps(load_defaults()["docker_runtime_nonpersistent_restart_policies"]),
+    )
+    script = re.sub(
+        r"OPENBAO_UNSEAL_KEYS = \{\{.*?\n\s*OPENBAO_RECOVERY_TIMEOUT_SECONDS =",
+        'OPENBAO_UNSEAL_KEYS = []\nOPENBAO_RECOVERY_TIMEOUT_SECONDS =',
+        script,
+        flags=re.DOTALL,
+    )
+    script = script.replace("{{ docker_runtime_openbao_recovery_timeout_seconds | int }}", "5")
+    script = script.replace("{{ docker_runtime_openbao_recovery_delay_seconds | int }}", "0")
+
+    fake_docker = tmp_path / "docker"
+    fake_docker.write_text(
+        """#!/bin/sh
+STATE_FILE="$TMPDIR/compose-attempts.txt"
+ATTEMPTS=0
+if [ -f "$STATE_FILE" ]; then
+  ATTEMPTS="$(cat "$STATE_FILE")"
+fi
+if [ "$1" = "compose" ]; then
+  ATTEMPTS=$((ATTEMPTS + 1))
+  printf '%s' "$ATTEMPTS" > "$STATE_FILE"
+  if [ "$ATTEMPTS" -lt 5 ]; then
+    echo "driver failed programming external connectivity" >&2
+    echo "No chain/target/match by that name" >&2
+    exit 1
+  fi
+  exit 0
+fi
+echo "unexpected command: $*" >&2
+exit 1
+"""
+    )
+    fake_docker.chmod(0o755)
+
+    fake_iptables = tmp_path / "iptables"
+    fake_iptables.write_text(
+        """#!/bin/sh
+if [ "$1" = "-t" ] && [ "$2" = "nat" ] && [ "$3" = "-S" ] && [ "$4" = "DOCKER" ]; then
+  exit 0
+fi
+echo "unexpected iptables command: $*" >&2
+exit 1
+"""
+    )
+    fake_iptables.chmod(0o755)
+
+    fake_systemctl = tmp_path / "systemctl"
+    fake_systemctl.write_text(
+        """#!/bin/sh
+if [ "$1" = "is-active" ] && [ "$2" = "docker" ]; then
+  echo active
+  exit 0
+fi
+if [ "$1" = "reset-failed" ] && [ "$2" = "docker.service" ]; then
+  exit 0
+fi
+if [ "$1" = "restart" ] && [ "$2" = "docker.service" ]; then
+  exit 0
+fi
+echo "unexpected systemctl command: $*" >&2
+exit 1
+"""
+    )
+    fake_systemctl.chmod(0o755)
+
+    compose_file = tmp_path / "docker-compose.yml"
+    compose_file.write_text("services: {}\n")
+
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        input=json.dumps(
+            [
+                {
+                    "Name": "/one-api",
+                    "Config": {
+                        "Labels": {
+                            "com.docker.compose.project.working_dir": str(tmp_path),
+                            "com.docker.compose.project.config_files": str(compose_file),
+                            "com.docker.compose.service": "one-api",
+                        }
+                    },
+                }
+            ]
+        ),
+        text=True,
+        capture_output=True,
+        env={
+            **os.environ,
+            "PATH": f"{tmp_path}:{os.environ['PATH']}",
+            "TMPDIR": str(tmp_path),
+        },
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    attempts = int((tmp_path / "compose-attempts.txt").read_text())
+    assert attempts == 5
+
+
+def test_docker_runtime_restarts_docker_when_daemon_is_not_active(tmp_path: Path) -> None:
+    tasks = load_tasks()
+    recover_containers = next(
+        task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
+    )
+    script = recover_containers["ansible.builtin.command"]["argv"][2]
+    script = script.replace(
+        "{{ docker_runtime_nonpersistent_restart_policies | to_json }}",
+        json.dumps(load_defaults()["docker_runtime_nonpersistent_restart_policies"]),
+    )
+    script = re.sub(
+        r"OPENBAO_UNSEAL_KEYS = \{\{.*?\n\s*OPENBAO_RECOVERY_TIMEOUT_SECONDS =",
+        'OPENBAO_UNSEAL_KEYS = []\nOPENBAO_RECOVERY_TIMEOUT_SECONDS =',
+        script,
+        flags=re.DOTALL,
+    )
+    script = script.replace("{{ docker_runtime_openbao_recovery_timeout_seconds | int }}", "5")
+    script = script.replace("{{ docker_runtime_openbao_recovery_delay_seconds | int }}", "0")
+
+    fake_docker = tmp_path / "docker"
+    fake_docker.write_text(
+        """#!/bin/sh
+if [ "$1" = "compose" ]; then
+  printf '%s\n' "$*" >> "$TMPDIR/compose-commands.txt"
+  exit 0
+fi
+echo "unexpected command: $*" >&2
+exit 1
+"""
+    )
+    fake_docker.chmod(0o755)
+
+    fake_iptables = tmp_path / "iptables"
+    fake_iptables.write_text(
+        """#!/bin/sh
+if [ "$1" = "-t" ] && [ "$2" = "nat" ] && [ "$3" = "-S" ] && [ "$4" = "DOCKER" ]; then
+  if [ -f "$TMPDIR/docker-restarted.flag" ]; then
+    exit 0
+  fi
+  exit 1
+fi
+echo "unexpected iptables command: $*" >&2
+exit 1
+"""
+    )
+    fake_iptables.chmod(0o755)
+
+    fake_systemctl = tmp_path / "systemctl"
+    fake_systemctl.write_text(
+        """#!/bin/sh
+if [ "$1" = "is-active" ] && [ "$2" = "docker" ]; then
+  if [ -f "$TMPDIR/docker-restarted.flag" ]; then
+    echo active
+    exit 0
+  fi
+  echo deactivating
+  exit 3
+fi
+if [ "$1" = "reset-failed" ] && [ "$2" = "docker.service" ]; then
+  printf '%s\n' "$*" >> "$TMPDIR/systemctl-commands.txt"
+  exit 0
+fi
+if [ "$1" = "restart" ] && [ "$2" = "docker.service" ]; then
+  : > "$TMPDIR/docker-restarted.flag"
+  printf '%s\n' "$*" >> "$TMPDIR/systemctl-commands.txt"
+  exit 0
+fi
+echo "unexpected systemctl command: $*" >&2
+exit 1
+"""
+    )
+    fake_systemctl.chmod(0o755)
+
+    compose_file = tmp_path / "docker-compose.yml"
+    compose_file.write_text("services: {}\n")
+
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        input=json.dumps(
+            [
+                {
+                    "Name": "/ntfy",
+                    "Config": {
+                        "Labels": {
+                            "com.docker.compose.project.working_dir": str(tmp_path),
+                            "com.docker.compose.project.config_files": str(compose_file),
+                            "com.docker.compose.service": "ntfy",
+                        }
+                    },
+                }
+            ]
+        ),
+        text=True,
+        capture_output=True,
+        env={
+            **os.environ,
+            "PATH": f"{tmp_path}:{os.environ['PATH']}",
+            "TMPDIR": str(tmp_path),
+        },
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    systemctl_commands = (tmp_path / "systemctl-commands.txt").read_text()
+    assert "reset-failed docker.service" in systemctl_commands
+    assert "restart docker.service" in systemctl_commands
+    compose_commands = (tmp_path / "compose-commands.txt").read_text()
+    assert "--force-recreate ntfy" in compose_commands
+
+
+def test_docker_runtime_recovery_includes_compose_dependencies(tmp_path: Path) -> None:
+    tasks = load_tasks()
+    recover_containers = next(
+        task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
+    )
+    script = recover_containers["ansible.builtin.command"]["argv"][2]
+    script = script.replace(
+        "{{ docker_runtime_nonpersistent_restart_policies | to_json }}",
+        json.dumps(load_defaults()["docker_runtime_nonpersistent_restart_policies"]),
+    )
+    script = re.sub(
+        r"OPENBAO_UNSEAL_KEYS = \{\{.*?\n\s*OPENBAO_RECOVERY_TIMEOUT_SECONDS =",
+        'OPENBAO_UNSEAL_KEYS = []\nOPENBAO_RECOVERY_TIMEOUT_SECONDS =',
+        script,
+        flags=re.DOTALL,
+    )
+    script = script.replace("{{ docker_runtime_openbao_recovery_timeout_seconds | int }}", "5")
+    script = script.replace("{{ docker_runtime_openbao_recovery_delay_seconds | int }}", "0")
+    script = script.replace("wait_for_local_openbao()", "None")
+
+    fake_docker = tmp_path / "docker"
+    fake_docker.write_text(
+        """#!/bin/sh
+if [ "$1" = "compose" ]; then
+  printf '%s\n' "$*" >> "$TMPDIR/compose-commands.txt"
+  exit 0
+fi
+echo "unexpected command: $*" >&2
+exit 1
+"""
+    )
+    fake_docker.chmod(0o755)
+
+    fake_iptables = tmp_path / "iptables"
+    fake_iptables.write_text(
+        """#!/bin/sh
+if [ "$1" = "-t" ] && [ "$2" = "nat" ] && [ "$3" = "-S" ] && [ "$4" = "DOCKER" ]; then
+  exit 0
+fi
+echo "unexpected iptables command: $*" >&2
+exit 1
+"""
+    )
+    fake_iptables.chmod(0o755)
+
+    fake_systemctl = tmp_path / "systemctl"
+    fake_systemctl.write_text(
+        """#!/bin/sh
+if [ "$1" = "is-active" ] && [ "$2" = "docker" ]; then
+  echo active
+  exit 0
+fi
+if [ "$1" = "reset-failed" ] && [ "$2" = "docker.service" ]; then
+  exit 0
+fi
+if [ "$1" = "restart" ] && [ "$2" = "docker.service" ]; then
+  exit 0
+fi
+echo "unexpected systemctl command: $*" >&2
+exit 1
+"""
+    )
+    fake_systemctl.chmod(0o755)
+
+    compose_file = tmp_path / "docker-compose.yml"
+    compose_file.write_text("services: {}\n")
+
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        input=json.dumps(
+            [
+                {
+                    "Name": "/glitchtip",
+                    "Config": {
+                        "Labels": {
+                            "com.docker.compose.project.working_dir": str(tmp_path),
+                            "com.docker.compose.project.config_files": str(compose_file),
+                            "com.docker.compose.service": "glitchtip",
+                            "com.docker.compose.depends_on": "openbao-agent:service_healthy:false,valkey:service_healthy:false",
+                        }
+                    },
+                }
+            ]
+        ),
+        text=True,
+        capture_output=True,
+        env={
+            **os.environ,
+            "PATH": f"{tmp_path}:{os.environ['PATH']}",
+            "TMPDIR": str(tmp_path),
+        },
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    compose_commands = (tmp_path / "compose-commands.txt").read_text()
+    assert "--force-recreate glitchtip openbao-agent valkey" in compose_commands
 
 
 def test_common_docker_bridge_chains_warms_control_socket_before_failing_safe() -> None:

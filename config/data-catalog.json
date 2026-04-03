@@ -941,6 +941,34 @@
       "notes": "The repo-managed platform service catalog is materialized into Typesense as a derived full-text and faceted-search index and can be replayed from git after restore."
     },
     {
+      "id": "label-studio-annotation-database",
+      "service": "label_studio",
+      "name": "Label Studio annotation metadata database",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "PostgreSQL database label_studio on postgres-lv3"
+      ],
+      "notes": "Label Studio stores project metadata, task assignments, task payload references, and completed annotations in the dedicated PostgreSQL database."
+    },
+    {
+      "id": "label-studio-runtime-state",
+      "service": "label_studio",
+      "name": "Label Studio local runtime state",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/label-studio/data on docker-runtime-lv3"
+      ],
+      "notes": "The Label Studio data directory stores local imports, exports, and attachment cache material that accompanies the repo-managed project catalog."
+    },
+    {
       "id": "superset-metadata-and-managed-assets",
       "service": "superset",
       "name": "Superset metadata and managed BI assets",

@@ -261,11 +261,33 @@
       tags:
         - coolify-deploy-server-registration
 
-    - name: Migrate existing app deployments to coolify-apps-lv3
+    - name: Install Coolify SSH deploy key on coolify-apps-lv3
       ansible.builtin.command: >
-        python3 scripts/coolify_tool.py
-        --auth-file "{{ coolify_admin_auth_local_file }}"
-        migrate-deployment-server
+        python3 scripts/proxmox_tool.py
+        --auth-file "{{ proxmox_api_token_local_file }}"
+        --topology-file "{{ proxmox_tool_topology_file }}"
+        --env "{{ env | default('prod') }}"
+        coolify-install-deploy-key
+        --vmid "{{ hostvars['coolify-apps-lv3']['vmid'] | default(171) }}"
+        --pubkey "{{ coolify_deploy_ssh_pubkey }}"
+      args:
+        chdir: "{{ playbook_dir }}/.."
+      delegate_to: localhost
+      become: false
+      register: coolify_deploy_key_install
+      changed_when: "'\"status\": \"installed\"' in coolify_deploy_key_install.stdout"
+      failed_when: coolify_deploy_key_install.rc not in [0, 2]
+      when: coolify_deploy_ssh_pubkey is defined and coolify_deploy_ssh_pubkey | length > 0
+      tags:
+        - coolify-deploy-key-install
+
+    - name: Migrate existing app deployments to coolify-apps-lv3 via DB
+      ansible.builtin.command: >
+        python3 scripts/proxmox_tool.py
+        --auth-file "{{ proxmox_api_token_local_file }}"
+        --topology-file "{{ proxmox_tool_topology_file }}"
+        --env "{{ env | default('prod') }}"
+        coolify-migrate-apps
         --from coolify-lv3
         --to coolify-apps-lv3
       args:
@@ -273,7 +295,7 @@
       delegate_to: localhost
       become: false
       register: coolify_server_migration
-      changed_when: "'migrated' in coolify_server_migration.stdout"
+      changed_when: "'\"status\": \"migrated\"' in coolify_server_migration.stdout"
       failed_when: coolify_server_migration.rc not in [0, 2]
       tags:
         - coolify-deploy-server-migration

@@ -1,0 +1,160 @@
+---
+# Playbook: label-studio.yml
+# Purpose: Converge the Label Studio PostgreSQL backend, runtime, shared-edge OIDC publication, and operator gateway route.
+# Use case: Run during production or staging live apply of the repo-managed Label Studio annotation platform.
+#
+# Inputs (required):
+#   - env (string, required): Target environment selector used to choose the postgres, docker-runtime, and nginx guests.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
+#
+# Outputs:
+#   - Label Studio DNS, PostgreSQL role/database, runtime secrets, repo-managed project catalog,
+#     shared Typesense structured-search availability, API gateway route, and shared-edge publication
+#     match repo truth.
+#
+# Idempotency: Partially idempotent; convergence is repeatable, while the repo-managed project sync reconciles live Label Studio projects in place when required.
+#
+# Dependencies:
+#   - ADR 0289: Label Studio is the human-in-the-loop data annotation platform.
+#   - Requires: postgres_vm, docker_runtime, label_studio_postgres, label_studio_runtime, typesense_runtime, api_gateway_runtime, public_edge_oidc_auth, and nginx_edge_publication.
+#
+# Related ADRs: 0021, 0042, 0063, 0077, 0086, 0289
+# Related Runbooks: docs/runbooks/configure-label-studio.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-03
+
+- name: Ensure Hetzner DNS publication for Label Studio
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
+    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
+    subdomain_fqdn: annotate.lv3.org
+
+  tasks:
+    - name: Load controller defaults
+      ansible.builtin.include_vars:
+        file: "{{ inventory_defaults_path }}"
+
+    - name: Load the subdomain catalog
+      ansible.builtin.include_vars:
+        file: "{{ subdomain_catalog_path }}"
+        name: subdomain_catalog
+
+    - name: Select the Label Studio subdomain entry
+      ansible.builtin.set_fact:
+        selected_subdomain: >-
+          {{
+            (
+              subdomain_catalog.subdomains
+              | selectattr('fqdn', 'equalto', subdomain_fqdn)
+              | list
+              | first
+            ) | default({})
+          }}
+
+    - name: Assert the Label Studio subdomain is catalogued
+      ansible.builtin.assert:
+        that:
+          - selected_subdomain != {}
+          - selected_subdomain.status in ['active', 'planned']
+          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
+        fail_msg: "annotate.lv3.org must exist in config/subdomain-catalog.json before live apply."
+
+    - name: Derive the managed Hetzner record name
+      ansible.builtin.set_fact:
+        selected_subdomain_record_name: >-
+          {{
+            '@'
+            if selected_subdomain.fqdn == hetzner_dns_zone_name
+            else (
+              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
+            )
+          }}
+
+    - name: Converge the Label Studio Hetzner DNS record
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_record
+      vars:
+        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
+        hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
+        hetzner_dns_record_type: A
+        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
+        hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
+
+- name: Prepare PostgreSQL for Label Studio
+  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.postgres_vm
+    - role: lv3.platform.label_studio_postgres
+
+- name: Converge Label Studio on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.label_studio
+        playbook_execution_audit_target: label_studio
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.label_studio_runtime
+    - role: lv3.platform.typesense_runtime
+    - role: lv3.platform.api_gateway_runtime
+
+- name: Publish Label Studio through the NGINX edge
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.public_edge_oidc_auth
+    - role: lv3.platform.nginx_edge_publication
+
+- name: Verify the public Label Studio shared-edge publication
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Verify the Label Studio public UI and API redirect through the shared edge auth boundary
+      ansible.builtin.include_role:
+        name: lv3.platform.label_studio_runtime
+        tasks_from: verify_public.yml

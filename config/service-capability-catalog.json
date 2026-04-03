@@ -333,7 +333,7 @@
           "status": "active",
           "url": "https://apps.lv3.org",
           "subdomain": "apps.lv3.org",
-          "notes": "Shared entrypoint for repo-managed Coolify applications, with wildcard alias coverage handled by the edge topology."
+          "notes": "Shared entrypoint for repo-managed Coolify applications, with wildcard alias coverage handled by the edge topology on coolify-apps-lv3."
         }
       }
     },
@@ -2235,6 +2235,53 @@
           "status": "active",
           "url": "https://notebooks.lv3.org",
           "subdomain": "notebooks.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "label_studio",
+      "name": "Label Studio",
+      "description": "Repo-managed human-in-the-loop data annotation platform with deterministic project catalog reconciliation.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8110",
+      "public_url": "https://annotate.lv3.org",
+      "subdomain": "annotate.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "label_studio",
+      "image_catalog_ids": [
+        "label_studio_runtime"
+      ],
+      "secret_catalog_ids": [
+        "label_studio_database_password",
+        "label_studio_admin_password",
+        "label_studio_admin_token"
+      ],
+      "adr": "0289",
+      "adr_file": "docs/adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md",
+      "runbook": "docs/runbooks/configure-label-studio.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/services/label-studio.yml",
+      "restart_domain": "runtime-general-data-apps",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
+      "mobility_tier": "movable_singleton",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=label-studio-availability",
+      "tags": [
+        "annotation",
+        "human-in-the-loop",
+        "postgres",
+        "edge-authenticated",
+        "ml-data"
+      ],
+      "notes": "Label Studio runs on docker-runtime-lv3 with a dedicated PostgreSQL database and repo-managed project catalog sync. Browser access is enforced by the shared edge oauth2-proxy and Keycloak flow, while app-local admin and token auth remain the current Community Edition-compatible recovery and automation path.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://annotate.lv3.org",
+          "subdomain": "annotate.lv3.org",
+          "notes": "Repo automation verifies the local /api/version contract, the shared-edge auth redirects, and the repo-managed project catalog through the private runtime token."
         }
       }
     },

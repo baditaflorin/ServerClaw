@@ -1,0 +1,62 @@
+# Purpose: Describe the required runtime variables for the Label Studio stack.
+# Use case: Run during syntax and role-argument validation before converging Label Studio.
+# Inputs: label_studio_* variables consumed by the runtime tasks and templates.
+# Outputs: Machine-readable argument specs for the label_studio_runtime role.
+# Idempotency: Fully idempotent because this file only validates role inputs.
+# Dependencies: ADR 0165, ADR 0042, ADR 0077, and ADR 0289.
+---
+argument_specs:
+  main:
+    short_description: Converge the Label Studio runtime, project catalog sync, and local verification path.
+    options:
+      label_studio_site_dir:
+        type: path
+        required: true
+      label_studio_data_dir:
+        type: path
+        required: true
+      label_studio_secret_dir:
+        type: path
+        required: true
+      label_studio_compose_file:
+        type: path
+        required: true
+      label_studio_env_file:
+        type: path
+        required: true
+      label_studio_image:
+        type: str
+        required: true
+      label_studio_internal_port:
+        type: int
+        required: true
+      label_studio_internal_base_url:
+        type: str
+        required: true
+      label_studio_public_base_url:
+        type: str
+        required: true
+      label_studio_database_host:
+        type: str
+        required: true
+      label_studio_database_name:
+        type: str
+        required: true
+      label_studio_database_user:
+        type: str
+        required: true
+      label_studio_database_password_local_file:
+        type: path
+        required: true
+      label_studio_admin_password_local_file:
+        type: path
+        required: true
+      label_studio_admin_token_local_file:
+        type: path
+        required: true
+      label_studio_sync_script:
+        type: path
+        required: true
+      label_studio_project_catalog_file:
+        type: path
+        required: true

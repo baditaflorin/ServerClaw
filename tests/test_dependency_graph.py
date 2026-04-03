@@ -20,7 +20,10 @@ def test_compute_impact_for_postgres_includes_direct_and_transitive_failures() -
         "directus",
         "flagsmith",
         "gitea",
+        "glitchtip",
+        "label_studio",
         "keycloak",
+        "lago",
         "langfuse",
         "mattermost",
         "matrix_synapse",
@@ -29,11 +32,14 @@ def test_compute_impact_for_postgres_includes_direct_and_transitive_failures() -
         "netbox",
         "openfga",
         "outline",
+        "paperless",
         "plane",
         "semaphore",
+        "superset",
         "temporal",
         "vaultwarden",
         "windmill",
+        "woodpecker",
     }
     assert set(impact.transitive_hard) == {"api_gateway", "homepage", "ops_portal"}
 

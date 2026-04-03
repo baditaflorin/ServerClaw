@@ -1,0 +1,62 @@
+# Purpose: Verify the Label Studio loopback health contract and repo-managed annotation project catalog.
+# Use case: Imported by the Label Studio runtime role after startup and after project synchronization.
+# Inputs: label_studio_* runtime paths, admin token, and project catalog defaults.
+# Outputs: Fails fast if the local Label Studio runtime or project catalog drifts from repo truth.
+# Idempotency: Fully idempotent because the tasks only inspect live state.
+# Dependencies: ADR 0165, ADR 0042, ADR 0077, and ADR 0289.
+---
+- name: Verify the Label Studio container is running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - --format
+      - '{{ "{{.State.Running}}" }}'
+      - "{{ label_studio_container_name }}"
+  register: label_studio_container_running
+  changed_when: false
+
+- name: Assert the Label Studio container is running
+  ansible.builtin.assert:
+    that:
+      - label_studio_container_running.stdout | trim == 'true'
+    fail_msg: "The Label Studio container is not running."
+
+- name: Wait for the Label Studio container health check to pass
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - --format
+      - '{{ "{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}" }}'
+      - "{{ label_studio_container_name }}"
+  register: label_studio_container_health
+  retries: 36
+  delay: 5
+  until: label_studio_container_health.stdout | trim == 'healthy'
+  changed_when: false
+
+- name: Verify the Label Studio version endpoint
+  ansible.builtin.uri:
+    url: "{{ label_studio_internal_base_url }}{{ label_studio_health_path }}"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: label_studio_version_verify
+  retries: 12
+  delay: 5
+  until: >-
+    label_studio_version_verify.status == 200
+    and (label_studio_version_verify.json.release | default('') | length) > 0
+  changed_when: false
+
+- name: Verify the repo-managed Label Studio project catalog
+  ansible.builtin.script: >-
+    {{ label_studio_sync_script }} verify
+    --base-url {{ label_studio_internal_base_url }}
+    --token-file {{ label_studio_admin_token_remote_file }}
+    --project-catalog {{ label_studio_project_catalog_file }}
+    --report-file {{ label_studio_verify_report_file }}
+  register: label_studio_project_verify
+  changed_when: false
+  when: label_studio_verify_project_catalog | default(true) | bool

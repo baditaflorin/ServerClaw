@@ -1,0 +1,38 @@
+# proxmox-tool-topology.yaml.example
+#
+# Copy to .local/proxmox-api/topology.yaml and adjust VMIDs for your environment.
+# This file is read by scripts/proxmox_tool.py via --topology-file .
+#
+# Usage:
+#   python3 scripts/proxmox_tool.py \
+#     --auth-file .local/proxmox-api/lv3-automation-primary.json \
+#     --topology-file .local/proxmox-api/topology.yaml \
+#     --env prod \
+#     coolify-migrate-apps --from coolify-lv3 --to coolify-apps-lv3
+#
+# Environments map 1:1 to Proxmox node + VM topology.
+# Add a new env block for each deployment ring (dev / staging / prod).
+
+prod:
+  node: pve                       # Proxmox node name (qm list shows the node)
+  coolify_vmid: 170               # VMID of coolify-lv3 (Coolify control plane)
+  coolify_apps_vmid: 171          # VMID of coolify-apps-lv3 (apps runtime)
+  coolify_db_container: coolify-db
+  coolify_db_user: coolify
+  coolify_container: coolify      # Coolify app container (for cache clear)
+
+staging:
+  node: pve
+  coolify_vmid: 180               # Adjust to actual staging VMIDs
+  coolify_apps_vmid: 181
+  coolify_db_container: coolify-db
+  coolify_db_user: coolify
+  coolify_container: coolify
+
+dev:
+  node: pve
+  coolify_vmid: 190               # Adjust to actual dev VMIDs
+  coolify_apps_vmid: 191
+  coolify_db_container: coolify-db
+  coolify_db_user: coolify
+  coolify_container: coolify

@@ -395,6 +395,24 @@
     policy_critical: '14'
     display_url: https://sso.lv3.org:443/realms/lv3/.well-known/openid-configuration
 - targets:
+    - https://10.10.10.10:443/
+  labels:
+    assurance_id: label-studio-public
+    service_id: label_studio
+    service_name: Label Studio
+    environment: production
+    scope: public
+    exposure: edge-published
+    auth_requirement: edge_oidc
+    probe_module: http_2xx_follow_redirects
+    probe_hostname: annotate.lv3.org
+    certificate_id: annotate-edge
+    expected_issuer: letsencrypt
+    policy_unit: days
+    policy_warn: '21'
+    policy_critical: '14'
+    display_url: https://annotate.lv3.org:443/
+- targets:
     - https://10.10.10.10:443/api/health
   labels:
     assurance_id: lago-public

@@ -432,6 +432,28 @@
         "converge-typesense"
       ]
     },
+    "label_studio_runtime": {
+      "kind": "runtime",
+      "service_id": "label_studio",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "label-studio",
+      "registry_ref": "docker.io/heartexlabs/label-studio",
+      "tag": "1.23.0",
+      "digest": "sha256:aa461572e8f9d86a1bf9520c1db620204e86160fd2f80dd7e9d40ac84a8828ea",
+      "ref": "docker.io/heartexlabs/label-studio:1.23.0@sha256:aa461572e8f9d86a1bf9520c1db620204e86160fd2f80dd7e9d40ac84a8828ea",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-31",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-31-label-studio-runtime.json",
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/label_studio_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-label-studio"
+      ]
+    },
     "homepage_runtime": {
       "kind": "runtime",
       "service_id": "homepage",

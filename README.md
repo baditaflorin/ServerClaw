@@ -44,7 +44,7 @@ rewriting one operator's workstation paths.
 | Field | Value |
 | --- | --- |
 | Repository version | `0.178.0` |
-| Platform version | `0.130.96` |
+| Platform version | `0.130.97` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -56,13 +56,13 @@ rewriting one operator's workstation paths.
 | Managed guest count | 12 |
 | Running guest count | 9 |
 | Template VM present | `true` |
-| Declared services | 71 |
-| Publicly published services | 44 |
+| Declared services | 72 |
+| Publicly published services | 45 |
 
 ### Service Exposure Summary
 | Exposure Model | Services |
 | --- | --- |
-| `edge-published` | 35 |
+| `edge-published` | 36 |
 | `edge-static` | 1 |
 | `informational-only` | 4 |
 | `private-only` | 31 |
@@ -128,6 +128,7 @@ rewriting one operator's workstation paths.
 | `keycloak` | `2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply` |
 | `keycloak_direct_api` | `2026-04-02-adr-0317-keycloak-direct-api-mainline-live-apply` |
 | `keycloak_operator_access` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
+| `label_studio` | `2026-04-03-adr-0289-label-studio-mainline-live-apply` |
 | `lago` | `2026-04-01-adr-0292-lago-mainline-live-apply` |
 | `langfuse` | `2026-03-26-adr-0146-langfuse-live-apply` |
 | `livekit` | `2026-04-01-adr-0293-livekit-mainline-live-apply` |
@@ -309,11 +310,11 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.178.0` |
-| Platform version | `0.130.96` |
+| Platform version | `0.130.97` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
-| Declared services | 71 |
+| Declared services | 72 |
 <!-- END GENERATED: version-summary -->
 
 ## Delivery Model
@@ -578,6 +579,7 @@ Current values on `main`:
 | `0277` | Live apply the private Typesense structured-search plane from latest origin/main | `live_applied` | [ws-0277-live-apply.md](docs/workstreams/ws-0277-live-apply.md) |
 | `0279` | Integrate ADR 0279 exact-main replay onto current origin/main | `live_applied` | [ws-0279-main-merge.md](docs/workstreams/ws-0279-main-merge.md) |
 | `0281` | Live apply the GlitchTip application error tracking stack from latest origin/main | `live_applied` | [ws-0281-live-apply.md](docs/workstreams/ws-0281-live-apply.md) |
+| `0289` | Live apply ADR 0289 Label Studio from latest origin/main | `live_applied` | [ws-0289-label-studio-live-apply.md](docs/workstreams/ws-0289-label-studio-live-apply.md) |
 | `0292` | Live apply Lago as the usage metering and billing API layer from latest origin/main | `merged` | [ws-0292-live-apply.md](docs/workstreams/ws-0292-live-apply.md) |
 | `0292` | Live apply ADR 0292 Apache Superset from latest origin/main | `live_applied` | [ws-0292-superset-live-apply.md](docs/workstreams/ws-0292-superset-live-apply.md) |
 | `0293` | Live apply LiveKit as the real-time audio and voice channel for agents from latest origin/main | `live_applied` | [ws-0293-livekit-live-apply.md](docs/workstreams/ws-0293-livekit-live-apply.md) |

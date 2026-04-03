@@ -2,9 +2,9 @@
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
   "repo_version": "0.178.0",
-  "platform_version": "0.130.96",
-  "generated_at": "2026-04-03T12:36:10Z",
-  "next_refresh_at": "2026-04-03T13:36:10Z",
+  "platform_version": "0.130.97",
+  "generated_at": "2026-04-03T12:59:11Z",
+  "next_refresh_at": "2026-04-03T13:59:11Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -326,6 +326,18 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://sso.lv3.org",
+        "last_live_apply": "2026-04-03T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "label_studio": {
+        "service_name": "Label Studio",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://annotate.lv3.org",
         "last_live_apply": "2026-04-03T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -1897,6 +1909,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-keycloak.md"
+      },
+      {
+        "id": "converge-label-studio",
+        "description": "Converge Label Studio on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish annotate.lv3.org through the shared edge, and verify the repo-managed project catalog plus auth redirects.",
+        "tags": [
+          "converge-label-studio",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-label-studio.md"
       },
       {
         "id": "converge-lago",
@@ -5090,6 +5128,16 @@
         ]
       },
       {
+        "id": "configure-label-studio",
+        "title": "Configure Label Studio",
+        "agent_trust_required": "T3",
+        "steps": 6,
+        "path": "docs/runbooks/configure-label-studio.md",
+        "workflow_ids": [
+          "converge-label-studio"
+        ]
+      },
+      {
         "id": "configure-lago",
         "title": "Configure Lago",
         "agent_trust_required": "T3",
@@ -6107,9 +6155,9 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.152",
+    "last_version": "0.177.153",
     "deployed_at": "2026-04-03",
-    "summary": "implements ADR 0300 by adding repo-managed Falco syscall monitoring across docker-runtime-lv3, docker-build-lv3, monitoring-lv3, and postgres-lv3, restoring the runtime-control NATS fan-out path and streams, and verifying four-host NATS, ntfy, Loki, and mutation-audit delivery carries forward the now-live ADR 0340 dedicated coolify-apps-lv3 runtime, including the completed application migration, HTTP edge upstream correction, and repo-smoke verification on `*.apps.lv3.org`",
+    "summary": "implements ADR 0300 by adding repo-managed Falco syscall monitoring across docker-runtime-lv3, docker-build-lv3, monitoring-lv3, and postgres-lv3, restoring the runtime-control NATS fan-out path and streams, and verifying four-host NATS, ntfy, Loki, and mutation-audit delivery",
     "release_notes_url": "docs/release-notes/0.178.0.md"
   },
   "agentic_architecture": {

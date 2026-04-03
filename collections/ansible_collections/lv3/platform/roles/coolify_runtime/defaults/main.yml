@@ -1,3 +1,9 @@
+# Purpose: Define the default Coolify runtime images, paths, controller artifacts, and network/publication settings.
+# Use case: Loaded whenever the Coolify runtime role converges or verifies the repo-managed Coolify control plane and apps ingress surface.
+# Inputs: Platform service topology, host inventory, and controller-local artifact paths for bootstrap and smoke verification.
+# Outputs: Supplies stable runtime defaults consumed by the coolify_runtime tasks and templates.
+# Idempotency: Fully idempotent because this file only declares desired defaults.
+# Dependencies: ADR 0165 and ADR 0340.
 ---
 coolify_app_image: ghcr.io/coollabsio/coolify:latest
 coolify_realtime_image: ghcr.io/coollabsio/coolify-realtime:1.0.11
@@ -54,6 +60,9 @@ coolify_api_token_local_file: "{{ coolify_local_artifact_dir }}/api-token.txt"
 coolify_server_key_local_file: "{{ coolify_local_artifact_dir }}/server-key"
 coolify_server_key_public_local_file: "{{ coolify_local_artifact_dir }}/server-key.pub"
 coolify_admin_auth_local_file: "{{ coolify_local_artifact_dir }}/admin-auth.json"
+# Public key string used by proxmox_tool.py coolify-install-deploy-key.
+# Resolved at playbook runtime from the local artifact file written by coolify_runtime.
+coolify_deploy_ssh_pubkey: "{{ lookup('file', coolify_server_key_public_local_file, errors='ignore') | default('') }}"
 
 coolify_smoke_project_name: LV3 Apps
 coolify_smoke_environment_name: production

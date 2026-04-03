@@ -235,6 +235,17 @@
       "healthcheck_path": "/hub/health"
     },
     {
+      "id": "label_studio",
+      "name": "Label Studio",
+      "upstream": "http://10.10.10.20:8110",
+      "gateway_prefix": "/v1/label-studio",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 60,
+      "healthcheck_path": "/api/version"
+    },
+    {
       "id": "lago",
       "name": "Lago",
       "upstream": "http://10.10.10.20:8099",

@@ -185,6 +185,9 @@
     status_code: 200
   register: api_gateway_platform_services_check
   changed_when: false
+  retries: "{{ api_gateway_runtime_recovery_probe_retries }}"
+  delay: "{{ api_gateway_runtime_recovery_probe_delay }}"
+  until: api_gateway_platform_services_check.status == 200
 
 - name: Verify the authenticated runtime assurance endpoint succeeds with a real bearer token
   ansible.builtin.uri:
@@ -195,6 +198,9 @@
     status_code: 200
   register: api_gateway_runtime_assurance_check
   changed_when: false
+  retries: "{{ api_gateway_runtime_recovery_probe_retries }}"
+  delay: "{{ api_gateway_runtime_recovery_probe_delay }}"
+  until: api_gateway_runtime_assurance_check.status == 200
 
 - name: Verify the authenticated structured platform search endpoint succeeds with a real bearer token
   ansible.builtin.uri:

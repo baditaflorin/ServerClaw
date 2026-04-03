@@ -220,6 +220,7 @@ platform_ports:
   outline_port: 3006
   directus_port: 8055
   jupyterhub_port: 8097
+  label_studio_port: 8110
   superset_port: 8105
   piper_port: 8100
   paperless_port: 8018
@@ -323,6 +324,7 @@ platform_port_assignments:
   outline_port: 3006
   directus_port: 8055
   jupyterhub_port: 8097
+  label_studio_port: 8110
   superset_port: 8105
   piper_port: 8100
   paperless_port: 8018
@@ -3411,6 +3413,39 @@ platform_service_topology:
     urls:
       public: https://notebooks.lv3.org
       internal: http://10.10.10.20:8097
+  label_studio:
+    service_name: label_studio
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: annotate.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: annotate
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8110
+    service_id: label_studio
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/label-studio.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
+    ports:
+      internal: 8110
+    urls:
+      public: https://annotate.lv3.org
+      internal: http://10.10.10.20:8110
   superset:
     service_name: superset
     owning_vm: docker-runtime-lv3
@@ -3622,6 +3657,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: notebooks
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: annotate
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -5770,6 +5809,39 @@ public_edge_service_topology:
     urls:
       public: https://notebooks.lv3.org
       internal: http://10.10.10.20:8097
+  label_studio:
+    service_name: label_studio
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: annotate.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: annotate
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8110
+    service_id: label_studio
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/label-studio.yml
+    restart_domain: runtime-general-data-apps
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
+    ports:
+      internal: 8110
+    urls:
+      public: https://annotate.lv3.org
+      internal: http://10.10.10.20:8110
   superset:
     service_name: superset
     owning_vm: docker-runtime-lv3
@@ -5979,6 +6051,7 @@ grist_port: 8484
 outline_port: 3006
 directus_port: 8055
 jupyterhub_port: 8097
+label_studio_port: 8110
 superset_port: 8105
 piper_port: 8100
 paperless_port: 8018

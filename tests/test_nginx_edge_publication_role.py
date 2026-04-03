@@ -91,6 +91,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             [
                 "agents.lv3.org",
                 "analytics.lv3.org",
+                "annotate.lv3.org",
                 "billing.lv3.org",
                 "changelog.lv3.org",
                 "coolify.lv3.org",
@@ -108,6 +109,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             ],
         )
         self.assertEqual(protected_sites["analytics.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
+        self.assertEqual(protected_sites["annotate.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
+        self.assertNotIn("unauthenticated_paths", protected_sites["annotate.lv3.org"])
         self.assertEqual(
             protected_sites["analytics.lv3.org"]["unauthenticated_paths"],
             [
@@ -239,12 +242,14 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertEqual(security_defaults["cross_origin_resource_policy"], "same-origin")
         self.assertEqual(security_defaults["x_content_type_options"], "nosniff")
         self.assertIn("frame-ancestors 'none'", security_defaults["content_security_policy"])
+        self.assertIn("annotate.lv3.org", security_overrides)
         self.assertIn("coolify.lv3.org", security_overrides)
         self.assertIn("draw.lv3.org", security_overrides)
         self.assertIn("grafana.lv3.org", security_overrides)
         self.assertIn("logs.lv3.org", security_overrides)
         self.assertIn("tasks.lv3.org", security_overrides)
         self.assertIn("realtime.lv3.org", security_overrides)
+        self.assertIn("https://annotate.lv3.org", security_overrides["annotate.lv3.org"]["content_security_policy"])
         self.assertIn("'unsafe-eval'", security_overrides["coolify.lv3.org"]["content_security_policy"])
         self.assertIn("wss://draw.lv3.org", security_overrides["draw.lv3.org"]["content_security_policy"])
         self.assertIn("'unsafe-eval'", security_overrides["grafana.lv3.org"]["content_security_policy"])

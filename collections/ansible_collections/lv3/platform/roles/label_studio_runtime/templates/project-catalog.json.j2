@@ -1,0 +1,12 @@
+{
+  "projects": [
+{% for project in label_studio_projects %}
+    {
+      "id": {{ project.id | to_json }},
+      "title": {{ project.title | to_json }},
+      "description": {{ project.description | to_json }},
+      "label_config": {{ project.label_config | to_json }}
+    }{% if not loop.last %},{% endif %}
+{% endfor %}
+  ]
+}

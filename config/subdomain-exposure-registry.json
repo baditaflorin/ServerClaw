@@ -159,6 +159,78 @@
       "notes": "The dashboard is protected by the shared edge oauth2-proxy and Keycloak flow while /js/, /api/event, and health endpoints stay public for tracker delivery and probe traffic."
     },
     {
+      "fqdn": "annotate.lv3.org",
+      "service_id": "label_studio",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0289",
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
+      },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "label_studio",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.label_studio_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
+      },
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "oauth2_proxy",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "label_studio",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "noindex": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.label_studio_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "auto_renew": true,
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/"
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "Published through the shared NGINX edge and protected by the shared oauth2-proxy plus Keycloak boundary; repo-managed Label Studio tokens remain the current app-local automation path."
+    },
+    {
       "fqdn": "api.lv3.org",
       "service_id": "api_gateway",
       "environment": "production",
@@ -3792,12 +3864,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 52,
-    "active_total": 48,
-    "active_public_total": 44,
+    "catalog_total": 53,
+    "active_total": 49,
+    "active_public_total": 45,
     "active_private_total": 4,
     "planned_total": 4,
-    "shared_edge_total": 43,
-    "platform_sso_total": 17
+    "shared_edge_total": 44,
+    "platform_sso_total": 18
   }
 }

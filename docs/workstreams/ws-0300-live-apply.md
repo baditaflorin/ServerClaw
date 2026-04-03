@@ -9,7 +9,7 @@
 - Live Applied In Platform Version: 0.130.96
 - Implemented On: 2026-04-03
 - Live Applied On: 2026-04-03
-- Latest-Main Baseline: repo `0.177.152`, platform `0.130.95`
+- Latest-Main Baseline: repo `0.177.153`, platform `0.130.97`
 - Workstream Branch: `codex/ws-0300-live-apply`
 - Integrated Branch: `main`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply`
@@ -39,6 +39,10 @@
 - the successful service replay also synced the governed restic backup receipts;
   `falco_overrides` remains intentionally inactive in that backup summary
   because no optional source path exists on the runtime host
+- the final exact-main merge also carried forward the already-merged
+  Label Studio runtime surfaces and the new `scripts/proxmox_tool.py`
+  controller helper so the branch truthfully matches the current
+  `origin/main` baseline it is promoting
 
 ## Latest-Main Live Verification
 
@@ -65,10 +69,22 @@
 
 ## Repository Validation
 
-- the focused repository replay for the Falco, event-bridge, JetStream, and
-  security-posture surfaces passed before the final release cut, and the final
-  exact validation bundle is preserved in
-  `receipts/live-applies/evidence/2026-04-03-adr-0300-*`
+- the final exact-main focused pytest replay passed with `178 passed in 41.66s`
+  across the Falco, Coolify, Label Studio, and Proxmox helper surfaces,
+  preserved in
+  `receipts/live-applies/evidence/2026-04-03-adr-0300-mainline-pytest-r4.txt`
+- `make validate-data-models` and `./scripts/validate_repo.sh workstream-surfaces`
+  both passed on the merged `0.178.0` candidate, preserved in
+  `receipts/live-applies/evidence/2026-04-03-adr-0300-mainline-validate-data-models-r10.txt`
+  and
+  `receipts/live-applies/evidence/2026-04-03-adr-0300-mainline-workstream-surfaces-r5.txt`
+- `python3 scripts/release_manager.py --dry-run` confirmed the
+  `0.177.153 -> 0.178.0` cut, while the full release-manager write correctly
+  stopped on unrelated repo-wide readiness blockers under
+  `receipts/live-applies/evidence/2026-04-03-adr-0300-mainline-release-manager-r6-0.178.0.txt`;
+  the same lower-level canonical-truth and release-note helpers were then
+  executed directly to produce the protected `0.178.0` surfaces, preserved in
+  `receipts/live-applies/evidence/2026-04-03-adr-0300-mainline-release-lower-level-r1-0.178.0.txt`
 - `receipts/security-reports/20260403T090506Z.json` covers
   `runtime-control-lv3` and the governed Falco guests with summary status
   `warn` from pre-existing hardening debt, satisfying the vulnerability-budget
@@ -76,7 +92,8 @@
 
 ## Final Notes
 
-- ADR 0300 is now canonical on `main` at repository version `0.178.0` and
-  platform version `0.130.96`
+- ADR 0300 is now canonical on `main` at repository version `0.178.0`; the
+  live apply first became true at platform version `0.130.96`, while the
+  current exact-main platform baseline remains `0.130.97`
 - `receipts/live-applies/2026-04-03-adr-0300-falco-mainline-live-apply.json`
   is the canonical proof for this live apply

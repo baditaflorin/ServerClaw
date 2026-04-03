@@ -22,7 +22,7 @@ template_config {
 }
 
 template {
-  source               = "/openbao-agent/runtime.env.ctmpl"
+  source               = "/openbao-agent/{{ common_openbao_compose_env_agent_template_file | basename }}"
   destination          = "{{ common_openbao_compose_env_env_file }}"
   create_dest_dirs     = true
   perms                = "0600"

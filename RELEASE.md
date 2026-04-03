@@ -4,10 +4,9 @@
 
 ## Summary
 - implements ADR 0300 by adding repo-managed Falco syscall monitoring across docker-runtime-lv3, docker-build-lv3, monitoring-lv3, and postgres-lv3, restoring the runtime-control NATS fan-out path and streams, and verifying four-host NATS, ntfy, Loki, and mutation-audit delivery
-- carries forward the now-live ADR 0340 dedicated coolify-apps-lv3 runtime, including the completed application migration, HTTP edge upstream correction, and repo-smoke verification on `*.apps.lv3.org`
 
 ## Platform Impact
-- Falco runtime syscall monitoring is now live on the governed guests with NATS, ntfy, Loki, and mutation-audit verification.
+- no live platform version bump; this release records the verified ADR 0300 Falco latest-main replay while the integrated platform baseline remains 0.130.97 after the current exact-main merges
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -1,1314 +1,1332 @@
 {
-    "$schema": "docs/schema/service-redundancy-catalog.schema.json",
-    "schema_version": "1.0.0",
-    "platform": {
-        "failure_domain_count": 1,
-        "max_supported_tier": "R2",
-        "notes": [
-            "The current platform has one physical Hetzner host, so guest- or software-level warm standbys can be implemented but cross-host active redundancy cannot.",
-            "Any future R3 declaration remains a design target until a second failure domain exists and live apply is allowed to converge both domains."
-        ],
-        "rehearsal_gate": {
-            "tiers": {
-                "R1": {
-                    "exercise": "restore_to_preview",
-                    "freshness_window_days": 90
-                },
-                "R2": {
-                    "exercise": "standby_switchover_or_promotion",
-                    "freshness_window_days": 30
-                },
-                "R3": {
-                    "exercise": "cross_domain_failover",
-                    "freshness_window_days": 30
-                }
-            }
+  "$schema": "docs/schema/service-redundancy-catalog.schema.json",
+  "schema_version": "1.0.0",
+  "platform": {
+    "failure_domain_count": 1,
+    "max_supported_tier": "R2",
+    "notes": [
+      "The current platform has one physical Hetzner host, so guest- or software-level warm standbys can be implemented but cross-host active redundancy cannot.",
+      "Any future R3 declaration remains a design target until a second failure domain exists and live apply is allowed to converge both domains."
+    ],
+    "rehearsal_gate": {
+      "tiers": {
+        "R1": {
+          "exercise": "restore_to_preview",
+          "freshness_window_days": 90
+        },
+        "R2": {
+          "exercise": "standby_switchover_or_promotion",
+          "freshness_window_days": 30
+        },
+        "R3": {
+          "exercise": "cross_domain_failover",
+          "freshness_window_days": 30
         }
-    },
-    "services": {
-        "alertmanager": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 30,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_140"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "monitoring-lv3",
-                "failover_trigger": "Restore or rebuild monitoring-lv3 when Alertmanager or the guest cannot be recovered in place.",
-                "failback_method": "Replay the monitoring stack converge on monitoring-lv3 after the restored guest is healthy."
-            }
-        },
-        "api_gateway": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_192"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-control-lv3",
-                "failover_trigger": "Restore runtime-control-lv3 when the API gateway container, config, or shared runtime data cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the API gateway converge from git."
-            }
-        },
-        "backup_pbs": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 240,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "proxmox_offsite_vm_160"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "backup-lv3",
-                "failover_trigger": "Restore backup-lv3 from the off-site Proxmox copy when the local PBS VM or datastore is lost or corrupted.",
-                "failback_method": "Bring backup-lv3 back from the off-site copy, confirm the datastore, then resume scheduled Proxmox backups."
-            }
-        },
-        "browser_runner": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when the browser-runner runtime, its Playwright image build, or its artifact path cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the browser-runner converge and smoke verification from git."
-            }
-        },
-        "changedetection": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when the Changedetection runtime, its watch datastore, or the shared runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Changedetection converge and gateway verification workflow."
-            }
-        },
-        "crawl4ai": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when the Crawl4AI runtime, its browser-backed crawl path, or the shared runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Crawl4AI converge and private guest-network verification workflow."
-            }
-        },
-        "changelog_portal": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 30,
-                "rpo_minutes": 0
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_110"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "nginx-lv3",
-                "failover_trigger": "Restore or rebuild nginx-lv3 when the published static portal or its edge files cannot be recovered in place.",
-                "failback_method": "Restore nginx-lv3, regenerate the portal, and replay edge publication from git."
-            }
-        },
-        "docker_build": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_130"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-build-lv3",
-                "failover_trigger": "Restore docker-build-lv3 when the build worker guest or its persistent workspace cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-build-lv3, then rerun the documented build-host converge and cache warm-up."
-            }
-        },
-        "docker_runtime": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when the runtime VM or its shared service state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then replay the required service converges from git."
-            }
-        },
-        "dify": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Dify or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Dify converge from git."
-            }
-        },
-        "coolify": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_170"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "coolify-lv3",
-                "failover_trigger": "Restore coolify-lv3 when the Coolify control plane or its managed runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild coolify-lv3, then rerun the Coolify converge and smoke deployment verification from git."
-            }
-        },
-        "coolify_apps": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_171"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "coolify-apps-lv3",
-                "failover_trigger": "Restore coolify-apps-lv3 when the Coolify applications runtime or its managed proxy state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild coolify-apps-lv3, register it as the Coolify deployment server, then rerun the Coolify converge and repo-backed smoke deployment verification from git."
-            }
-        },
-        "docs_portal": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 30,
-                "rpo_minutes": 0
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_110"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "nginx-lv3",
-                "failover_trigger": "Restore or rebuild nginx-lv3 when the published docs files or edge publication cannot be recovered in place.",
-                "failback_method": "Restore nginx-lv3, regenerate the docs portal, and replay edge publication from git."
-            }
-        },
-        "dozzle": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Dozzle or the shared runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Dozzle converge from git."
-            }
-        },
-        "excalidraw": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Excalidraw, the room backend, or the shared runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Excalidraw converge from git."
-            }
-        },
-        "gitea": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_192"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-control-lv3",
-                "failover_trigger": "Restore runtime-control-lv3 when the Gitea runtime or its persistent state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Gitea converge and runner reconnect workflow."
-            }
-        },
-        "gotenberg": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_190"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-ai-lv3",
-                "failover_trigger": "Restore runtime-ai-lv3 when Gotenberg or the runtime-ai document-extraction pool state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-ai-lv3, then rerun the Gotenberg converge and gateway verification workflow."
-            }
-        },
-        "grist": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Grist or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Grist converge from git."
-            }
-        },
-        "glitchtip": {
-            "tier": "R1",
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120",
-                "pbs_vm_150"
-            ],
-            "recovery_objective": {
-                "rpo_minutes": 1440,
-                "rto_minutes": 120
-            },
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when the GlitchTip runtime, DSN bootstrap state, or notification wiring cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, rerun the GlitchTip converge from git, and repeat the public health plus synthetic event verification before resuming operator use."
-            }
-        },
-        "grafana": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 30,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_140"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "monitoring-lv3",
-                "failover_trigger": "Restore or rebuild monitoring-lv3 when Grafana or the monitoring guest cannot be recovered in place.",
-                "failback_method": "Replay the monitoring stack converge on monitoring-lv3 after the restored guest is healthy."
-            }
-        },
-        "harbor": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_192"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-control-lv3",
-                "failover_trigger": "Restore runtime-control-lv3 when Harbor or its persisted registry state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Harbor converge and registry verification workflow."
-            }
-        },
-        "headscale": {
-            "tier": "R0",
-            "recovery_objective": {
-                "rto_minutes": 240,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "host_reinstall_runbooks"
-            ],
-            "standby": {
-                "kind": "none",
-                "location": "none",
-                "failover_trigger": "No cold or warm standby exists; rebuild the host-local service from git and backups after host recovery.",
-                "failback_method": "Reapply the host-local Headscale automation on the rebuilt primary host."
-            }
-        },
-        "homepage": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_191"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-general-lv3",
-                "failover_trigger": "Restore runtime-general-lv3 when Homepage or the runtime-general operator surface cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-general-lv3, then rerun the Homepage converge from git."
-            }
-        },
-        "flagsmith": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120",
-                "pbs_vm_150"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 or the shared postgres leader when Flagsmith, its seeded control-plane metadata, or the authenticated edge publication path cannot be recovered in place.",
-                "failback_method": "Restore the affected guest, confirm postgres leadership and OpenBao state, then rerun the Flagsmith converge and seeded-state verification from git."
-            }
-        },
-        "plausible": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Plausible, its bundled databases, or its analytics publication state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, rerun the Plausible converge from git, and replay the synthetic tracker verification before resuming operator use."
-            }
-        },
-        "realtime": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 30,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_140"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "monitoring-lv3",
-                "failover_trigger": "Restore or rebuild monitoring-lv3 when the Netdata parent or its short-retention metric cache cannot be recovered in place.",
-                "failback_method": "Replay the realtime Netdata converge on monitoring-lv3 after the restored guest is healthy."
-            }
-        },
-        "keycloak": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_192"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-control-lv3",
-                "failover_trigger": "Restore runtime-control-lv3 when Keycloak or its dependent runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Keycloak converge and identity verification flow."
-            }
-        },
-        "langfuse": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Langfuse or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Langfuse converge from git."
-            }
-        },
-        "lago": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Lago, its shared PostgreSQL-backed billing state, or its local runtime companions cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Lago converge and public-ingest verification workflow from git."
-            }
-        },
-        "livekit": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when LiveKit, its public signalling path, or its media listener contract cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the LiveKit converge from git."
-            }
-        },
-        "mail_platform": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_192"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-control-lv3",
-                "failover_trigger": "Restore runtime-control-lv3 when the mail platform or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the mail-platform converge from git."
-            }
-        },
-        "mailpit": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_191"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-general-lv3",
-                "failover_trigger": "Restore runtime-general-lv3 when Mailpit or its private SMTP capture surface cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-general-lv3, then rerun the Mailpit converge from git."
-            }
-        },
-        "minio": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when the shared MinIO object store or its bucket data cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the MinIO converge from git."
-            }
-        },
-        "redpanda": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when the Redpanda runtime or its durable log volume cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Redpanda converge from git."
-            }
-        },
-        "mattermost": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Mattermost or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Mattermost converge from git."
-            }
-        },
-        "matrix_synapse": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Matrix Synapse or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Matrix Synapse converge from git."
-            }
-        },
-        "n8n": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when n8n or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the n8n converge from git."
-            }
-        },
-        "nats_jetstream": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_192"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-control-lv3",
-                "failover_trigger": "Restore runtime-control-lv3 when the NATS JetStream runtime or its persisted stream state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the NATS JetStream converge and stream reconcile from git."
-            }
-        },
-        "nextcloud": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120",
-                "pbs_vm_150"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Nextcloud or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Nextcloud converge from git."
-            }
-        },
-        "netbox": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when NetBox or its persistent state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the NetBox converge from git."
-            }
-        },
-        "nginx_edge": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 30,
-                "rpo_minutes": 0
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_110"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "nginx-lv3",
-                "failover_trigger": "Restore or rebuild nginx-lv3 when edge publication cannot be recovered in place.",
-                "failback_method": "Restore nginx-lv3 and replay the ingress and edge-publication converges from git."
-            }
-        },
-        "nomad": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 60,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_140"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "monitoring-lv3",
-                "failover_trigger": "Restore monitoring-lv3 when the Nomad server or its local Raft state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild monitoring-lv3, then replay the Nomad converge and smoke-job verification from git."
-            }
-        },
-        "ntfy": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when the ntfy runtime or its published edge contract cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the repo-managed ntfy converge from git."
-            }
-        },
-        "ntopng": {
-            "tier": "R0",
-            "recovery_objective": {
-                "rto_minutes": 240,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "host_reinstall_runbooks"
-            ],
-            "standby": {
-                "kind": "none",
-                "location": "none",
-                "failover_trigger": "No cold or warm standby exists; rebuild the host-local ntopng service after host recovery.",
-                "failback_method": "Reapply the host-local ntopng automation on the rebuilt primary host."
-            }
-        },
-        "ollama": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Ollama or its model-serving state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Ollama converge from git."
-            }
-        },
-        "piper": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Piper or its voice-model cache cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Piper converge and synthesis verification workflow from git."
-            }
-        },
-        "open_webui": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Open WebUI or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Open WebUI converge from git."
-            }
-        },
-        "one_api": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when One-API or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the One-API converge and bootstrap verification workflow from git."
-            }
-        },
-        "serverclaw": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_170"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "coolify-lv3",
-                "failover_trigger": "Restore coolify-lv3 when ServerClaw or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild coolify-lv3, then rerun the ServerClaw converge from git."
-            }
-        },
-        "openbao": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_192"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-control-lv3",
-                "failover_trigger": "Restore runtime-control-lv3 when OpenBao or its sealed runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the OpenBao converge and unseal workflow from git."
-            }
-        },
-        "openfga": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_192"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-control-lv3",
-                "failover_trigger": "Restore runtime-control-lv3 when OpenFGA, its private host proxy contract, or its delegated authorization runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-control-lv3, rerun the OpenFGA converge and API gateway converge from git, and replay the repo-managed delegated authorization bootstrap verification."
-            }
-        },
-        "temporal": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_192",
-                "pbs_vm_150"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-control-lv3",
-                "failover_trigger": "Restore runtime-control-lv3 or postgres-lv3 when the Temporal runtime, namespace bootstrap, or workflow history stores cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-control-lv3 and postgres-lv3 as needed, then rerun the Temporal converge from git and replay the smoke verification."
-            }
-        },
-        "ops_portal": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when the ops portal runtime cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then regenerate and redeploy the ops portal from git."
-            }
-        },
-        "outline": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120",
-                "pbs_vm_150"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Outline or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Outline converge from git."
-            }
-        },
-        "jupyterhub": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when JupyterHub or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the JupyterHub converge and smoke-spawn verification workflow."
-            }
-        },
-        "paperless": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 240,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120",
-                "pbs_vm_150"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 or postgres-lv3 when the Paperless archive runtime or metadata store cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3 and postgres-lv3, rerun the Paperless converge workflow from git, and replay the repo-managed taxonomy plus smoke verification."
-            }
-        },
-        "platform_context_api": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when the platform context API or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the platform-context converge from git."
-            }
-        },
-        "portainer": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Portainer or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Portainer converge from git."
-            }
-        },
-        "postgres": {
-            "tier": "R2",
-            "recovery_objective": {
-                "rto_minutes": 1,
-                "rpo_minutes": 0
-            },
-            "backup_sources": [
-                "patroni_replication",
-                "pbs_vm_150"
-            ],
-            "standby": {
-                "kind": "warm",
-                "location": "postgres-replica-lv3",
-                "failover_trigger": "Promote postgres-replica-lv3 through the documented Patroni failover path when postgres-lv3 or the current leader becomes unavailable.",
-                "failback_method": "Rebuild the old primary as a replica, let it resync, and only then move the writable VIP back if a planned failback is required."
-            },
-            "rehearsal": {
-                "proofs": [
-                    {
-                        "proves_tier": "R2",
-                        "result": "fail",
-                        "performed_on": "2026-03-27",
-                        "exercise": "standby_switchover_or_promotion",
-                        "trigger": "Operator-initiated planned PostgreSQL failover rehearsal from ws-0188-live-apply.",
-                        "target_environment": "production",
-                        "duration_minutes": 7,
-                        "observed_rto_seconds": 0,
-                        "observed_data_loss": "No switchover occurred because the standby guest and VIP path were both unavailable, so no data-loss window was exercised.",
-                        "health_verification": "VM 151 is absent from `qm list`, `/etc/patroni` on VM 150 only contains template inputs, both `patroni` and `keepalived` are inactive on postgres-lv3, and the Proxmox host can open `10.10.10.50:5432` but not the expected VIP `10.10.10.55:5432`.",
-                        "rollback_result": "Not applicable because no promotion or failback was performed.",
-                        "evidence_ref": "receipts/live-applies/2026-03-27-adr-0188-postgres-rehearsal-evidence.md"
-                    }
-                ]
-            }
-        },
-        "proxmox_ui": {
-            "tier": "R0",
-            "recovery_objective": {
-                "rto_minutes": 240,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "host_reinstall_runbooks"
-            ],
-            "standby": {
-                "kind": "none",
-                "location": "none",
-                "failover_trigger": "No cold or warm standby exists; restore host access after host recovery and Proxmox reinstall.",
-                "failback_method": "Reapply the host bootstrap and Proxmox access automation on the rebuilt primary host."
-            }
-        },
-        "searxng": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when SearXNG or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the SearXNG converge from git."
-            }
-        },
-        "semaphore": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_192"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-control-lv3",
-                "failover_trigger": "Restore runtime-control-lv3 when Semaphore or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Semaphore converge from git."
-            }
-        },
-        "status_page": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_191"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-general-lv3",
-                "failover_trigger": "Restore runtime-general-lv3 when the status page runtime cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-general-lv3, then rerun the status-page converge from git."
-            }
-        },
-        "step_ca": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_192"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-control-lv3",
-                "failover_trigger": "Restore runtime-control-lv3 when step-ca or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the step-ca converge from git."
-            }
-        },
-        "superset": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120",
-                "pbs_vm_150"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 or postgres-lv3 when Superset, its managed metadata schema, or the published bi.lv3.org surface cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3 and postgres-lv3 as needed, then rerun the Superset converge plus public datasource inventory verification from git."
-            }
-        },
-        "tika": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_190"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-ai-lv3",
-                "failover_trigger": "Restore runtime-ai-lv3 when Apache Tika or the runtime-ai document-extraction pool state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-ai-lv3, then rerun the Tika converge and extraction verification workflow."
-            }
-        },
-        "tesseract_ocr": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_190"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-ai-lv3",
-                "failover_trigger": "Restore runtime-ai-lv3 when Tesseract OCR or the runtime-ai document-extraction pool state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-ai-lv3, then rerun the Tika and Tesseract OCR converges from git."
-            }
-        },
-        "typesense": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Typesense, its private controller proxy contract, or the derived search index volume cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Typesense converge and API gateway converge from git to rebuild the repo-managed structured-search collections."
-            }
-        },
-        "uptime_kuma": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_191"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-general-lv3",
-                "failover_trigger": "Restore runtime-general-lv3 when Uptime Kuma or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-general-lv3, then rerun the Uptime Kuma converge from git."
-            }
-        },
-        "vaultwarden": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_192"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-control-lv3",
-                "failover_trigger": "Restore runtime-control-lv3 when Vaultwarden or its persistent state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Vaultwarden converge from git."
-            }
-        },
-        "windmill": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_192"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "runtime-control-lv3",
-                "failover_trigger": "Restore runtime-control-lv3 when Windmill or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Windmill converge from git."
-            }
-        },
-        "woodpecker": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when Woodpecker or its runtime state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Woodpecker converge from git."
-            }
-        },
-        "plane": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 when the Plane runtime or its shared state cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Plane converge from git."
-            }
-        },
-        "directus": {
-            "tier": "R1",
-            "recovery_objective": {
-                "rto_minutes": 120,
-                "rpo_minutes": 1440
-            },
-            "backup_sources": [
-                "git_repository",
-                "pbs_vm_120",
-                "pbs_vm_130"
-            ],
-            "standby": {
-                "kind": "cold",
-                "location": "docker-runtime-lv3",
-                "failover_trigger": "Restore docker-runtime-lv3 or postgres-lv3 when Directus or the dedicated directus database cannot be recovered in place.",
-                "failback_method": "Restore or rebuild docker-runtime-lv3 and postgres-lv3 as needed, then rerun the Directus converge plus public token verification workflow."
-            }
-        }
+      }
     }
+  },
+  "services": {
+    "alertmanager": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 30,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_140"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "monitoring-lv3",
+        "failover_trigger": "Restore or rebuild monitoring-lv3 when Alertmanager or the guest cannot be recovered in place.",
+        "failback_method": "Replay the monitoring stack converge on monitoring-lv3 after the restored guest is healthy."
+      }
+    },
+    "api_gateway": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_192"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when the API gateway container, config, or shared runtime data cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the API gateway converge from git."
+      }
+    },
+    "backup_pbs": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 240,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "proxmox_offsite_vm_160"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "backup-lv3",
+        "failover_trigger": "Restore backup-lv3 from the off-site Proxmox copy when the local PBS VM or datastore is lost or corrupted.",
+        "failback_method": "Bring backup-lv3 back from the off-site copy, confirm the datastore, then resume scheduled Proxmox backups."
+      }
+    },
+    "browser_runner": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when the browser-runner runtime, its Playwright image build, or its artifact path cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the browser-runner converge and smoke verification from git."
+      }
+    },
+    "changedetection": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when the Changedetection runtime, its watch datastore, or the shared runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Changedetection converge and gateway verification workflow."
+      }
+    },
+    "crawl4ai": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when the Crawl4AI runtime, its browser-backed crawl path, or the shared runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Crawl4AI converge and private guest-network verification workflow."
+      }
+    },
+    "changelog_portal": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 30,
+        "rpo_minutes": 0
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_110"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "nginx-lv3",
+        "failover_trigger": "Restore or rebuild nginx-lv3 when the published static portal or its edge files cannot be recovered in place.",
+        "failback_method": "Restore nginx-lv3, regenerate the portal, and replay edge publication from git."
+      }
+    },
+    "docker_build": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_130"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-build-lv3",
+        "failover_trigger": "Restore docker-build-lv3 when the build worker guest or its persistent workspace cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-build-lv3, then rerun the documented build-host converge and cache warm-up."
+      }
+    },
+    "docker_runtime": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when the runtime VM or its shared service state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then replay the required service converges from git."
+      }
+    },
+    "dify": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Dify or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Dify converge from git."
+      }
+    },
+    "coolify": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_170"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "coolify-lv3",
+        "failover_trigger": "Restore coolify-lv3 when the Coolify control plane or its managed runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild coolify-lv3, then rerun the Coolify converge and smoke deployment verification from git."
+      }
+    },
+    "coolify_apps": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_171"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "coolify-apps-lv3",
+        "failover_trigger": "Restore coolify-apps-lv3 when the Coolify applications runtime or its managed proxy state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild coolify-apps-lv3, register it as the Coolify deployment server, then rerun the Coolify converge and repo-backed smoke deployment verification from git."
+      }
+    },
+    "docs_portal": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 30,
+        "rpo_minutes": 0
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_110"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "nginx-lv3",
+        "failover_trigger": "Restore or rebuild nginx-lv3 when the published docs files or edge publication cannot be recovered in place.",
+        "failback_method": "Restore nginx-lv3, regenerate the docs portal, and replay edge publication from git."
+      }
+    },
+    "dozzle": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Dozzle or the shared runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Dozzle converge from git."
+      }
+    },
+    "excalidraw": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Excalidraw, the room backend, or the shared runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Excalidraw converge from git."
+      }
+    },
+    "gitea": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_192"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when the Gitea runtime or its persistent state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Gitea converge and runner reconnect workflow."
+      }
+    },
+    "gotenberg": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_190"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-ai-lv3",
+        "failover_trigger": "Restore runtime-ai-lv3 when Gotenberg or the runtime-ai document-extraction pool state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-ai-lv3, then rerun the Gotenberg converge and gateway verification workflow."
+      }
+    },
+    "grist": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Grist or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Grist converge from git."
+      }
+    },
+    "glitchtip": {
+      "tier": "R1",
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120",
+        "pbs_vm_150"
+      ],
+      "recovery_objective": {
+        "rpo_minutes": 1440,
+        "rto_minutes": 120
+      },
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when the GlitchTip runtime, DSN bootstrap state, or notification wiring cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, rerun the GlitchTip converge from git, and repeat the public health plus synthetic event verification before resuming operator use."
+      }
+    },
+    "grafana": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 30,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_140"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "monitoring-lv3",
+        "failover_trigger": "Restore or rebuild monitoring-lv3 when Grafana or the monitoring guest cannot be recovered in place.",
+        "failback_method": "Replay the monitoring stack converge on monitoring-lv3 after the restored guest is healthy."
+      }
+    },
+    "harbor": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_192"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when Harbor or its persisted registry state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Harbor converge and registry verification workflow."
+      }
+    },
+    "headscale": {
+      "tier": "R0",
+      "recovery_objective": {
+        "rto_minutes": 240,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "host_reinstall_runbooks"
+      ],
+      "standby": {
+        "kind": "none",
+        "location": "none",
+        "failover_trigger": "No cold or warm standby exists; rebuild the host-local service from git and backups after host recovery.",
+        "failback_method": "Reapply the host-local Headscale automation on the rebuilt primary host."
+      }
+    },
+    "homepage": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_191"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-general-lv3",
+        "failover_trigger": "Restore runtime-general-lv3 when Homepage or the runtime-general operator surface cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-general-lv3, then rerun the Homepage converge from git."
+      }
+    },
+    "flagsmith": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120",
+        "pbs_vm_150"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 or the shared postgres leader when Flagsmith, its seeded control-plane metadata, or the authenticated edge publication path cannot be recovered in place.",
+        "failback_method": "Restore the affected guest, confirm postgres leadership and OpenBao state, then rerun the Flagsmith converge and seeded-state verification from git."
+      }
+    },
+    "plausible": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Plausible, its bundled databases, or its analytics publication state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, rerun the Plausible converge from git, and replay the synthetic tracker verification before resuming operator use."
+      }
+    },
+    "realtime": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 30,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_140"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "monitoring-lv3",
+        "failover_trigger": "Restore or rebuild monitoring-lv3 when the Netdata parent or its short-retention metric cache cannot be recovered in place.",
+        "failback_method": "Replay the realtime Netdata converge on monitoring-lv3 after the restored guest is healthy."
+      }
+    },
+    "keycloak": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_192"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when Keycloak or its dependent runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Keycloak converge and identity verification flow."
+      }
+    },
+    "langfuse": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Langfuse or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Langfuse converge from git."
+      }
+    },
+    "lago": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Lago, its shared PostgreSQL-backed billing state, or its local runtime companions cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Lago converge and public-ingest verification workflow from git."
+      }
+    },
+    "livekit": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when LiveKit, its public signalling path, or its media listener contract cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the LiveKit converge from git."
+      }
+    },
+    "mail_platform": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_192"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when the mail platform or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the mail-platform converge from git."
+      }
+    },
+    "mailpit": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_191"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-general-lv3",
+        "failover_trigger": "Restore runtime-general-lv3 when Mailpit or its private SMTP capture surface cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-general-lv3, then rerun the Mailpit converge from git."
+      }
+    },
+    "minio": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when the shared MinIO object store or its bucket data cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the MinIO converge from git."
+      }
+    },
+    "redpanda": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when the Redpanda runtime or its durable log volume cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Redpanda converge from git."
+      }
+    },
+    "mattermost": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Mattermost or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Mattermost converge from git."
+      }
+    },
+    "matrix_synapse": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Matrix Synapse or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Matrix Synapse converge from git."
+      }
+    },
+    "n8n": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when n8n or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the n8n converge from git."
+      }
+    },
+    "nats_jetstream": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_192"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when the NATS JetStream runtime or its persisted stream state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the NATS JetStream converge and stream reconcile from git."
+      }
+    },
+    "nextcloud": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120",
+        "pbs_vm_150"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Nextcloud or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Nextcloud converge from git."
+      }
+    },
+    "netbox": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when NetBox or its persistent state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the NetBox converge from git."
+      }
+    },
+    "nginx_edge": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 30,
+        "rpo_minutes": 0
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_110"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "nginx-lv3",
+        "failover_trigger": "Restore or rebuild nginx-lv3 when edge publication cannot be recovered in place.",
+        "failback_method": "Restore nginx-lv3 and replay the ingress and edge-publication converges from git."
+      }
+    },
+    "nomad": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 60,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_140"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "monitoring-lv3",
+        "failover_trigger": "Restore monitoring-lv3 when the Nomad server or its local Raft state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild monitoring-lv3, then replay the Nomad converge and smoke-job verification from git."
+      }
+    },
+    "ntfy": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when the ntfy runtime or its published edge contract cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the repo-managed ntfy converge from git."
+      }
+    },
+    "ntopng": {
+      "tier": "R0",
+      "recovery_objective": {
+        "rto_minutes": 240,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "host_reinstall_runbooks"
+      ],
+      "standby": {
+        "kind": "none",
+        "location": "none",
+        "failover_trigger": "No cold or warm standby exists; rebuild the host-local ntopng service after host recovery.",
+        "failback_method": "Reapply the host-local ntopng automation on the rebuilt primary host."
+      }
+    },
+    "ollama": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Ollama or its model-serving state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Ollama converge from git."
+      }
+    },
+    "piper": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Piper or its voice-model cache cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Piper converge and synthesis verification workflow from git."
+      }
+    },
+    "open_webui": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Open WebUI or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Open WebUI converge from git."
+      }
+    },
+    "one_api": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when One-API or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the One-API converge and bootstrap verification workflow from git."
+      }
+    },
+    "serverclaw": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_170"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "coolify-lv3",
+        "failover_trigger": "Restore coolify-lv3 when ServerClaw or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild coolify-lv3, then rerun the ServerClaw converge from git."
+      }
+    },
+    "openbao": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_192"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when OpenBao or its sealed runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the OpenBao converge and unseal workflow from git."
+      }
+    },
+    "openfga": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_192"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when OpenFGA, its private host proxy contract, or its delegated authorization runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, rerun the OpenFGA converge and API gateway converge from git, and replay the repo-managed delegated authorization bootstrap verification."
+      }
+    },
+    "temporal": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_192",
+        "pbs_vm_150"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 or postgres-lv3 when the Temporal runtime, namespace bootstrap, or workflow history stores cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3 and postgres-lv3 as needed, then rerun the Temporal converge from git and replay the smoke verification."
+      }
+    },
+    "ops_portal": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when the ops portal runtime cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then regenerate and redeploy the ops portal from git."
+      }
+    },
+    "outline": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120",
+        "pbs_vm_150"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Outline or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Outline converge from git."
+      }
+    },
+    "jupyterhub": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when JupyterHub or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the JupyterHub converge and smoke-spawn verification workflow."
+      }
+    },
+    "label_studio": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120",
+        "pbs_vm_150"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 or the shared postgres leader when Label Studio, its project catalog state, or its local annotation metadata cannot be recovered in place.",
+        "failback_method": "Restore the affected guest, confirm postgres leadership and OpenBao state, then rerun the Label Studio converge and project verification workflow from git."
+      }
+    },
+    "paperless": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 240,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120",
+        "pbs_vm_150"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 or postgres-lv3 when the Paperless archive runtime or metadata store cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3 and postgres-lv3, rerun the Paperless converge workflow from git, and replay the repo-managed taxonomy plus smoke verification."
+      }
+    },
+    "platform_context_api": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when the platform context API or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the platform-context converge from git."
+      }
+    },
+    "portainer": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Portainer or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Portainer converge from git."
+      }
+    },
+    "postgres": {
+      "tier": "R2",
+      "recovery_objective": {
+        "rto_minutes": 1,
+        "rpo_minutes": 0
+      },
+      "backup_sources": [
+        "patroni_replication",
+        "pbs_vm_150"
+      ],
+      "standby": {
+        "kind": "warm",
+        "location": "postgres-replica-lv3",
+        "failover_trigger": "Promote postgres-replica-lv3 through the documented Patroni failover path when postgres-lv3 or the current leader becomes unavailable.",
+        "failback_method": "Rebuild the old primary as a replica, let it resync, and only then move the writable VIP back if a planned failback is required."
+      },
+      "rehearsal": {
+        "proofs": [
+          {
+            "proves_tier": "R2",
+            "result": "fail",
+            "performed_on": "2026-03-27",
+            "exercise": "standby_switchover_or_promotion",
+            "trigger": "Operator-initiated planned PostgreSQL failover rehearsal from ws-0188-live-apply.",
+            "target_environment": "production",
+            "duration_minutes": 7,
+            "observed_rto_seconds": 0,
+            "observed_data_loss": "No switchover occurred because the standby guest and VIP path were both unavailable, so no data-loss window was exercised.",
+            "health_verification": "VM 151 is absent from `qm list`, `/etc/patroni` on VM 150 only contains template inputs, both `patroni` and `keepalived` are inactive on postgres-lv3, and the Proxmox host can open `10.10.10.50:5432` but not the expected VIP `10.10.10.55:5432`.",
+            "rollback_result": "Not applicable because no promotion or failback was performed.",
+            "evidence_ref": "receipts/live-applies/2026-03-27-adr-0188-postgres-rehearsal-evidence.md"
+          }
+        ]
+      }
+    },
+    "proxmox_ui": {
+      "tier": "R0",
+      "recovery_objective": {
+        "rto_minutes": 240,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "host_reinstall_runbooks"
+      ],
+      "standby": {
+        "kind": "none",
+        "location": "none",
+        "failover_trigger": "No cold or warm standby exists; restore host access after host recovery and Proxmox reinstall.",
+        "failback_method": "Reapply the host bootstrap and Proxmox access automation on the rebuilt primary host."
+      }
+    },
+    "searxng": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when SearXNG or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the SearXNG converge from git."
+      }
+    },
+    "semaphore": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_192"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when Semaphore or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Semaphore converge from git."
+      }
+    },
+    "status_page": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_191"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-general-lv3",
+        "failover_trigger": "Restore runtime-general-lv3 when the status page runtime cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-general-lv3, then rerun the status-page converge from git."
+      }
+    },
+    "step_ca": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_192"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when step-ca or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the step-ca converge from git."
+      }
+    },
+    "superset": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120",
+        "pbs_vm_150"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 or postgres-lv3 when Superset, its managed metadata schema, or the published bi.lv3.org surface cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3 and postgres-lv3 as needed, then rerun the Superset converge plus public datasource inventory verification from git."
+      }
+    },
+    "tika": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_190"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-ai-lv3",
+        "failover_trigger": "Restore runtime-ai-lv3 when Apache Tika or the runtime-ai document-extraction pool state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-ai-lv3, then rerun the Tika converge and extraction verification workflow."
+      }
+    },
+    "tesseract_ocr": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_190"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-ai-lv3",
+        "failover_trigger": "Restore runtime-ai-lv3 when Tesseract OCR or the runtime-ai document-extraction pool state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-ai-lv3, then rerun the Tika and Tesseract OCR converges from git."
+      }
+    },
+    "typesense": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Typesense, its private controller proxy contract, or the derived search index volume cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Typesense converge and API gateway converge from git to rebuild the repo-managed structured-search collections."
+      }
+    },
+    "uptime_kuma": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_191"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-general-lv3",
+        "failover_trigger": "Restore runtime-general-lv3 when Uptime Kuma or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-general-lv3, then rerun the Uptime Kuma converge from git."
+      }
+    },
+    "vaultwarden": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_192"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when Vaultwarden or its persistent state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Vaultwarden converge from git."
+      }
+    },
+    "windmill": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_192"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-control-lv3",
+        "failover_trigger": "Restore runtime-control-lv3 when Windmill or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-control-lv3, then rerun the Windmill converge from git."
+      }
+    },
+    "woodpecker": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Woodpecker or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Woodpecker converge from git."
+      }
+    },
+    "plane": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when the Plane runtime or its shared state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Plane converge from git."
+      }
+    },
+    "directus": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120",
+        "pbs_vm_130"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 or postgres-lv3 when Directus or the dedicated directus database cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3 and postgres-lv3 as needed, then rerun the Directus converge plus public token verification workflow."
+      }
+    }
+  }
 }
