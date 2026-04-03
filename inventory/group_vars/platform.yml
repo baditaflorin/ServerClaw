@@ -2187,6 +2187,11 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:3005
     service_id: glitchtip
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/glitchtip.yml
+    restart_domain: runtime-general-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 3005
     urls:
@@ -4519,6 +4524,11 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:3005
     service_id: glitchtip
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/glitchtip.yml
+    restart_domain: runtime-general-observability
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports:
       internal: 3005
     urls:

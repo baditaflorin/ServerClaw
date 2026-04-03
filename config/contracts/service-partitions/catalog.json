@@ -32,6 +32,7 @@
         "docker_runtime",
         "dozzle",
         "excalidraw",
+        "glitchtip",
         "flagsmith",
         "homepage",
         "langfuse",

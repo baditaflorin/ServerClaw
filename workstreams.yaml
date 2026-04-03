@@ -1695,8 +1695,8 @@ workstreams:
     status: in_progress
     owner: codex
     branch: codex/ws-0281-mainline-v2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0281-live-apply.md
+    worktree_path: .worktrees/ws-0281-mainline-v2
+    doc: docs/workstreams/ws-0281-live-apply.md
     depends_on:
       - adr-0021-public-subdomain-publication-at-the-nginx-edge
       - adr-0042-postgresql-as-the-shared-relational-database
@@ -1775,6 +1775,7 @@ workstreams:
             - config/certificate-catalog.json
             - config/command-catalog.json
             - config/controller-local-secrets.json
+            - config/contracts/service-partitions/catalog.json
             - config/data-catalog.json
             - config/dependency-graph.json
             - config/grafana/dashboards/slo-overview.json

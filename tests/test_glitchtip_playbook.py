@@ -36,7 +36,8 @@ def test_glitchtip_playbook_converges_postgres_runtime_edge_and_public_verify_ro
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
 
     postgres_roles = [role["role"] for role in plays[1]["roles"]]
-    runtime_roles = [role["role"] for role in plays[2]["roles"]]
+    runtime_play = plays[2]
+    runtime_roles = [role["role"] for role in runtime_play["roles"]]
     edge_roles = [role["role"] for role in plays[3]["roles"]]
     publish_task = plays[4]["tasks"][0]
 
@@ -51,6 +52,7 @@ def test_glitchtip_playbook_converges_postgres_runtime_edge_and_public_verify_ro
         "lv3.platform.keycloak_runtime",
         "lv3.platform.glitchtip_runtime",
     ]
+    assert runtime_play["vars"]["linux_guest_firewall_recover_missing_docker_bridge_chains"] is True
     assert edge_roles == ["lv3.platform.nginx_edge_publication"]
     assert publish_task["ansible.builtin.include_role"] == {
         "name": "lv3.platform.glitchtip_runtime",
@@ -74,6 +76,7 @@ def test_converge_glitchtip_target_uses_the_canonical_playbook_and_publication_p
     assert "uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate" in converge_block
     assert "$(MAKE) generate-edge-static-sites" in converge_block
     assert "$(REPO_ROOT)/playbooks/glitchtip.yml" in converge_block
+    assert "$(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)" in converge_block
 
 
 def test_glitchtip_workflow_and_command_catalogs_declare_the_live_apply_entrypoint() -> None:

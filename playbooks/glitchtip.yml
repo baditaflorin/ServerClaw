@@ -88,6 +88,8 @@
   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
   become: true
   gather_facts: true
+  vars:
+    linux_guest_firewall_recover_missing_docker_bridge_chains: true
 
   pre_tasks:
     - name: Run shared preflight checks
