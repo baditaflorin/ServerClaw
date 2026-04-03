@@ -156,13 +156,15 @@
       "auth_requirement": "none",
       "target": "65.108.75.123",
       "target_port": 443,
-      "owner_adr": "0194",
+      "owner_adr": "0340",
       "tls": {
         "provider": "letsencrypt",
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
         "auto_renew": true
       },
-      "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications."
+      "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications. Upstream routes to coolify-apps-lv3 (10.10.10.71) \u2014 ADR 0340.",
+      "upstream_vm": "coolify-apps-lv3",
+      "upstream_ip": "10.10.10.71"
     },
     {
       "fqdn": "bi.lv3.org",

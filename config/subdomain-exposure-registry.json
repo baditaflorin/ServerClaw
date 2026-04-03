@@ -306,7 +306,7 @@
       "service_id": "coolify_apps",
       "environment": "production",
       "status": "active",
-      "owner_adr": "0194",
+      "owner_adr": "0340",
       "publication": {
         "delivery_model": "shared-edge",
         "access_model": "open",
@@ -321,7 +321,7 @@
           "service_id": "coolify_apps",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:443",
+          "target": "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-apps-lv3') | map(attribute='ipv4') | first) }}:443",
           "target_port": 443
         }
       },
@@ -361,7 +361,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:443",
+          "upstream": "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-apps-lv3') | map(attribute='ipv4') | first) }}:443",
           "crawl_policy_enabled": false,
           "security_headers_enabled": false,
           "preserve_upstream_security_headers": true
@@ -373,7 +373,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications."
+      "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications. Upstream routes to coolify-apps-lv3 (10.10.10.71) \u2014 ADR 0340."
     },
     {
       "fqdn": "bi.lv3.org",

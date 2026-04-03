@@ -342,8 +342,8 @@
     },
     "coolify_apps": {
       "service_name": "coolify-apps",
-      "owning_vm": "coolify-lv3",
-      "role": "coolify_runtime",
+      "owning_vm": "coolify-apps-lv3",
+      "role": "coolify_apps_runtime",
       "verify_file": "roles/coolify_runtime/tasks/verify.yml",
       "liveness": {
         "kind": "http",
