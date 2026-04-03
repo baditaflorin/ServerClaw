@@ -1,0 +1,1 @@
+platform_manifest_check_ok

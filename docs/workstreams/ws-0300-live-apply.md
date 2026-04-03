@@ -12,7 +12,7 @@
 - Owner: codex
 - Depends On: `adr-0052`, `adr-0066`, `adr-0124`, `adr-0276`, `adr-0300`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0299`, `docs/adr/0300`, `docs/workstreams/ws-0300-live-apply.md`, `docs/runbooks/configure-falco-runtime.md`, `docs/runbooks/configure-ntfy.md`, `.ansible-lint-ignore`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `scripts/matrix_admin_register.py`, `scripts/matrix_bridge_smoke.py`, `config/falco/`, `config/ntfy/server.yml`, `config/event-taxonomy.yaml`, `config/workflow-catalog.json`, `config/command-catalog.json`, `config/ansible-execution-scopes.yaml`, `playbooks/falco.yml`, `playbooks/services/falco.yml`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/ntfy_runtime/`, `roles/falco_runtime`, `roles/falco_event_bridge_runtime`, `scripts/falco_event_bridge.py`, `scripts/falco_event_bridge_server.py`, `receipts/live-applies/`
+- Shared Surfaces: `docs/adr/0299`, `docs/adr/0300`, `docs/workstreams/ws-0300-live-apply.md`, `docs/runbooks/configure-falco-runtime.md`, `docs/runbooks/configure-ntfy.md`, `.ansible-lint-ignore`, `.config-locations.yaml`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `scripts/matrix_admin_register.py`, `scripts/matrix_bridge_smoke.py`, `config/falco/`, `config/ntfy/server.yml`, `config/event-taxonomy.yaml`, `config/workflow-catalog.json`, `config/command-catalog.json`, `config/ansible-execution-scopes.yaml`, `config/ansible-role-idempotency.yml`, `playbooks/falco.yml`, `playbooks/services/falco.yml`, `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/ntfy_runtime/`, `collections/ansible_collections/lv3/platform/roles/falco_runtime/`, `collections/ansible_collections/lv3/platform/roles/falco_event_bridge_runtime/`, `scripts/falco_event_bridge.py`, `scripts/falco_event_bridge_server.py`, `tests/test_docker_runtime_role.py`, `tests/test_falco_runtime_role.py`, `tests/test_ntfy_runtime_config.py`, `receipts/live-applies/`
 
 ## Scope
 
@@ -36,6 +36,9 @@
 - `docs/runbooks/configure-falco-runtime.md`
 - `docs/runbooks/configure-ntfy.md`
 - `.ansible-lint-ignore`
+- `.config-locations.yaml`
+- `build/platform-manifest.json`
+- `docs/diagrams/agent-coordination-map.excalidraw`
 - `inventory/host_vars/proxmox_florin.yml`
 - `inventory/group_vars/platform.yml`
 - `scripts/generate_platform_vars.py`
@@ -50,12 +53,16 @@
 - `config/ansible-role-idempotency.yml`
 - `playbooks/falco.yml`
 - `playbooks/services/falco.yml`
+- `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`
 - `collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml`
 - `collections/ansible_collections/lv3/platform/roles/ntfy_runtime/`
 - `collections/ansible_collections/lv3/platform/roles/falco_runtime/`
 - `collections/ansible_collections/lv3/platform/roles/falco_event_bridge_runtime/`
 - `scripts/falco_event_bridge.py`
 - `scripts/falco_event_bridge_server.py`
+- `tests/test_docker_runtime_role.py`
+- `tests/test_falco_runtime_role.py`
+- `tests/test_ntfy_runtime_config.py`
 - `receipts/live-applies/`
 
 ## Expected Live Surfaces
@@ -84,48 +91,50 @@
 
 ## Current State
 
-- Latest fetched `origin/main` as of `2026-04-02T11:06:50Z` is
-  `cf255eeca51d0b6c1e65ce19a5924d55ed2ed7a4`, which carries repo version
-  `0.177.140`.
-- The branch now carries three repo-managed ntfy hardening changes required to
-  finish ADR 0300 live apply safely:
-  1. the k6 warning topic was changed from the rejected dotted slug
-     `platform.slo.warn` to the live-compatible hyphenated slug
-     `platform-slo-warn`
-  2. the ntfy image pin was raised from `binwiederhier/ntfy:v2.14.0` to
-     `binwiederhier/ntfy:v2.21.0` so the repo-managed runtime matches the live
-     schema already present under `/var/lib/ntfy`
-  3. the ntfy role now reasserts Docker bridge chains and retries compose
-     startup when Docker reports `Unable to enable DNAT rule` or a missing
-     chain during container recreation
-- Targeted repo validation for those changes now passes:
-  `25 passed` for `tests/test_falco_runtime_role.py` and
-  `tests/test_k6_load_testing.py`, plus `make syntax-check-ntfy` and
-  `make syntax-check-falco`.
-- Live receipts captured on the branch show:
-  1. `receipts/live-applies/evidence/2026-04-02-ws-0300-converge-falco-r2.txt`
-     successfully replayed Falco after the ntfy topic slug fix
-  2. `receipts/live-applies/evidence/2026-04-02-ws-0300-smoke-r1.json`
-     proved the remaining end-to-end gaps were NATS and ntfy delivery
-  3. `receipts/live-applies/evidence/2026-04-02-ws-0300-nats-jetstream-direct-r1.txt`
-     restored the repo-managed NATS runtime when the workflow wrapper was gated
-     by protected-file policy
-  4. `receipts/live-applies/evidence/2026-04-02-ws-0300-converge-falco-r3.txt`
-     failed because the repo-managed ntfy image was older than the live schema
-  5. `receipts/live-applies/evidence/2026-04-02-ws-0300-converge-falco-r4.txt`
-     moved past the ntfy schema check and exposed the missing Docker
-     bridge-chain recovery path that is now implemented in the ntfy role
-- Current observed live state on `docker-runtime-lv3` after that recovery work:
-  Docker is `active`, the ntfy container is running on
-  `0.0.0.0:2586 -> 2586/tcp`, and `curl http://127.0.0.1:2586/v1/health`
-  returns `{"healthy":true}`.
+- Latest fetched `origin/main` as of `2026-04-03T06:47:00Z` is
+  `8e4b9a2164c23f679f1ca9b3c33cacbd6fa06521`, which carries repo version
+  `0.177.150`.
+- The exact-main replay now carries two additional repository hardening fixes
+  beyond the earlier ntfy topic and image compatibility work:
+  1. `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`
+     now accepts either the nftables `DOCKER-FORWARD` chain or the legacy
+     filter-table `DOCKER` chain on guests where Docker bridge networking is
+     otherwise healthy
+  2. `collections/ansible_collections/lv3/platform/roles/ntfy_runtime/`
+     now force-recreates the ntfy stack with a bounded recovery path for the
+     duplicate container-name conflict seen during exact-main handler replay
+- Targeted repo validation for the exact-main fixes now passes:
+  `26 passed` for `tests/test_docker_runtime_role.py`,
+  `tests/test_falco_runtime_role.py`, and
+  `tests/test_ntfy_runtime_config.py`, plus
+  `make syntax-check-falco` and `make preflight WORKFLOW=converge-falco`.
+- Latest exact-main live receipts captured on the branch show:
+  1. `receipts/live-applies/evidence/2026-04-03-ws-0300-converge-falco-mainline-r1.txt`
+     failed on `docker-build-lv3` because the guest exposed Docker's legacy
+     filter-table `DOCKER` chain instead of `DOCKER-FORWARD`
+  2. `receipts/live-applies/evidence/2026-04-03-ws-0300-converge-falco-mainline-r2.txt`
+     moved past that Docker bridge-chain check and failed later in the ntfy
+     restart handler on a duplicate container-name conflict while force-
+     recreating the stack
+- Targeted branch-local validation cleanup now passes after refreshing
+  `build/platform-manifest.json`, regenerating
+  `docs/diagrams/agent-coordination-map.excalidraw`, removing the duplicate
+  `grist_runtime` key from `config/ansible-role-idempotency.yml`, and expanding
+  the ws-0300 surface registry for the helper/test artifacts above.
+  Evidence:
+  1. `receipts/live-applies/evidence/2026-04-03-ws-0300-platform-manifest-write-r2-0.177.150.txt`
+  2. `receipts/live-applies/evidence/2026-04-03-ws-0300-generate-diagrams-r1-0.177.150.txt`
+  3. `receipts/live-applies/evidence/2026-04-03-ws-0300-platform-manifest-check-r2-0.177.150.txt`
+  4. `receipts/live-applies/evidence/2026-04-03-ws-0300-dependency-graph-checks-r1-0.177.150.txt`
+  5. `receipts/live-applies/evidence/2026-04-03-ws-0300-closeout-gates-r2-0.177.150.txt`
+  6. `receipts/live-applies/evidence/2026-04-03-ws-0300-ansible-lint-targeted-r1-0.177.150.txt`
 
 ## Current Blockers
 
 - `vm:120` cannot be reacquired for a full-VM Falco replay yet because the
   shared lock registry currently holds both `vm:120/service:ops_portal` until
-  `2026-04-02T13:03:30Z` and `vm:120/service:api_gateway` until
-  `2026-04-02T13:05:20Z`.
+  `2026-04-03T08:44:52Z` and `vm:120/service:api_gateway` until
+  `2026-04-03T08:44:52Z`.
 - Once that lock window clears, the remaining work is:
   1. reacquire `vm:120`, `vm:130`, `vm:140`, and `vm:150`
   2. rerun `make converge-falco env=production`

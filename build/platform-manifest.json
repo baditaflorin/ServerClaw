@@ -1613,6 +1613,32 @@
         "runbook": "docs/runbooks/configure-excalidraw.md"
       },
       {
+        "id": "converge-falco",
+        "description": "Converge the private Falco event bridge on docker-runtime-lv3 plus Falco syscall monitoring on the selected production guests.",
+        "tags": [
+          "converge-falco",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-falco-runtime.md"
+      },
+      {
         "id": "converge-flagsmith",
         "description": "Converge Flagsmith on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish flags.lv3.org through the shared edge, and verify seeded feature state plus environment keys.",
         "tags": [
@@ -4941,6 +4967,16 @@
         "path": "docs/runbooks/configure-excalidraw.md",
         "workflow_ids": [
           "converge-excalidraw"
+        ]
+      },
+      {
+        "id": "configure-falco-runtime",
+        "title": "Configure Falco Runtime",
+        "agent_trust_required": "T3",
+        "steps": 4,
+        "path": "docs/runbooks/configure-falco-runtime.md",
+        "workflow_ids": [
+          "converge-falco"
         ]
       },
       {
