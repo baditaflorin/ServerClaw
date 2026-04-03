@@ -950,10 +950,19 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "failed_when: false" in verify_tasks
     assert "retries: 6" in verify_tasks
     assert "recover_verification_runtime.yml" in verify_tasks
-    assert "Check whether the Windmill runtime API is reachable before {{ windmill_verify_runtime_reconcile_reason }}" in recover_verify_tasks
+    assert (
+        "Check whether the Windmill runtime API is reachable before verification recovery for {{ windmill_verify_runtime_reconcile_reason }}"
+        in recover_verify_tasks
+    )
     assert "docker compose --file \"{{ windmill_compose_file }}\" up -d --remove-orphans" in recover_verify_tasks
-    assert "Wait for the Windmill runtime API after verification recovery before {{ windmill_verify_runtime_reconcile_reason }}" in recover_verify_tasks
-    assert "Wait for Windmill workers to register before {{ windmill_verify_runtime_reconcile_reason }}" in recover_verify_tasks
+    assert (
+        "Wait for the Windmill runtime API after verification recovery for {{ windmill_verify_runtime_reconcile_reason }}"
+        in recover_verify_tasks
+    )
+    assert (
+        "Wait for Windmill workers to register before verification recovery for {{ windmill_verify_runtime_reconcile_reason }}"
+        in recover_verify_tasks
+    )
     assert "import_tasks: wait_for_workers.yml" in recover_verify_tasks
     assert "windmill_verify_critical_seed_scripts.status == 200" in verify_tasks
     assert "windmill_verify_critical_seed_scripts.json | default({})" in verify_tasks

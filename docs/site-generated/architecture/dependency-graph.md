@@ -17,8 +17,8 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Keycloak, Lago, Langfuse, LiveKit, Matrix Synapse, Mattermost, NetBox, Nextcloud, One-API, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n |
+| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, SearXNG, Uptime Kuma, ntopng, step-ca |
+| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Keycloak, Lago, Langfuse, LiveKit, Matrix Synapse, Mattermost, NetBox, Nextcloud, One-API, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n, ntfy |
 | `3` | Homepage, Open WebUI, Platform API Gateway, ServerClaw, Woodpecker CI |
 | `4` | Ops Portal |
 
@@ -43,7 +43,6 @@ graph TD
     realtime["Netdata Realtime Metrics\nTier 1"]
     nginx_edge["NGINX Edge\nTier 1"]
     nomad["Nomad\nTier 1"]
-    ntfy["ntfy\nTier 1"]
     ntopng["ntopng\nTier 1"]
     ollama["Ollama\nTier 1"]
     openbao["OpenBao\nTier 1"]
@@ -81,6 +80,7 @@ graph TD
     n8n["n8n\nTier 2"]
     netbox["NetBox\nTier 2"]
     nextcloud["Nextcloud\nTier 2"]
+    ntfy["ntfy\nTier 2"]
     one_api["One-API\nTier 2"]
     openfga["OpenFGA\nTier 2"]
     outline["Outline\nTier 2"]
@@ -143,6 +143,7 @@ graph TD
     gitea -->|soft| docker_build
     gitea -->|soft| keycloak
     gitea -->|soft| minio
+    gitea -->|soft| ntfy
     gitea -->|startup_only| openbao
     gitea -->|hard| postgres
     glitchtip -->|hard| docker_runtime
@@ -209,6 +210,8 @@ graph TD
     nextcloud -->|hard| postgres
     nomad -->|soft| docker_build
     nomad -->|soft| docker_runtime
+    ntfy -->|hard| docker_runtime
+    ntfy -->|soft| nginx_edge
     one_api -->|hard| ollama
     open_webui -->|soft| keycloak
     open_webui -->|hard| ollama
@@ -269,6 +272,7 @@ graph TD
     typesense -->|startup_only| openbao
     vaultwarden -->|hard| postgres
     vaultwarden -->|startup_only| step_ca
+    windmill -->|soft| ntfy
     windmill -->|startup_only| openbao
     windmill -->|hard| postgres
     woodpecker -->|hard| gitea

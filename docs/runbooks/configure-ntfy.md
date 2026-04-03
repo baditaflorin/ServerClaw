@@ -43,7 +43,7 @@ Generated controller-local artifacts:
 2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/ntfy/docker-compose.yml ps'`
 3. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:2586/v1/health'`
 4. `curl -fsS https://ntfy.lv3.org/v1/health`
-5. `python3 scripts/ntfy_publish.py --publisher ansible --topic platform-ansible-info --message 'ADR 0299 verification publish' --sequence-id ws-0299:verify:ansible-info --dedupe-state-file .local/state/ntfy/runbook-verify.json --dedupe-window-seconds 1`
+5. `python3 scripts/ntfy_publish.py --publisher ansible --topic platform-ansible-info --message 'ADR 0299 verification publish' --sequence-id ws-0299-verify-ansible-info --dedupe-state-file .local/state/ntfy/runbook-verify.json --dedupe-window-seconds 1`
 
 ## Governed Topics
 
@@ -63,5 +63,6 @@ Compatibility topics retained during rollout:
 ## Notes
 
 - `scripts/ntfy_publish.py` is the preferred publication path for repo-managed publishers because it validates topic registration, publisher authorization, and controller-local auth material before sending.
+- `scripts/ntfy_publish.py` normalizes logical `--sequence-id` values into ntfy-safe identifiers because ntfy accepts only `[-_A-Za-z0-9]{1,64}` for sequence IDs.
 - Treat `.local/ntfy/` as secret material and keep it outside git.
 - If a publisher still uses a compatibility topic or direct basic-auth publish path, keep that exception documented until it is migrated onto the governed registry helper.

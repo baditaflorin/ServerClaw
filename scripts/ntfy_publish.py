@@ -4,8 +4,10 @@ from __future__ import annotations
 import argparse
 import base64
 import datetime as dt
+import hashlib
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.parse
@@ -30,6 +32,12 @@ if str(REPO_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from controller_automation_toolkit import emit_cli_error, load_yaml  # noqa: E402
+
+
+NTFY_SEQUENCE_ID_REGEX = re.compile(r"^[-_A-Za-z0-9]{1,64}$")
+NTFY_SEQUENCE_ID_INVALID_CHARS = re.compile(r"[^-_A-Za-z0-9]+")
+NTFY_SEQUENCE_ID_HASH_LEN = 12
+NTFY_SEQUENCE_ID_FALLBACK_PREFIX = "seq"
 
 
 def require_mapping(value: Any, path: str) -> dict[str, Any]:
@@ -161,6 +169,25 @@ def now_utc() -> dt.datetime:
     return dt.datetime.now(dt.timezone.utc)
 
 
+def normalize_sequence_id(value: str) -> str:
+    raw = value.strip()
+    if not raw:
+        raise ValueError("ntfy sequence id must be a non-empty string")
+    if NTFY_SEQUENCE_ID_REGEX.fullmatch(raw):
+        return raw
+
+    normalized = NTFY_SEQUENCE_ID_INVALID_CHARS.sub("-", raw)
+    normalized = re.sub(r"-{2,}", "-", normalized).strip("-_")
+    digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:NTFY_SEQUENCE_ID_HASH_LEN]
+    prefix = normalized or NTFY_SEQUENCE_ID_FALLBACK_PREFIX
+    max_prefix_length = 64 - len(digest) - 1
+    prefix = prefix[:max_prefix_length].rstrip("-_") or NTFY_SEQUENCE_ID_FALLBACK_PREFIX
+    candidate = f"{prefix}-{digest}"
+    if not NTFY_SEQUENCE_ID_REGEX.fullmatch(candidate):
+        raise ValueError("Unable to derive an ntfy-safe sequence id")
+    return candidate
+
+
 def load_dedupe_state(path: Path) -> dict[str, str]:
     if not path.exists():
         return {}
@@ -238,7 +265,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--password-file", help="Path to a Basic-auth password file.")
     parser.add_argument(
         "--sequence-id",
-        help="Stable sequence id used to update or deduplicate a logical event.",
+        help="Stable logical sequence id used to update or deduplicate a logical event. Values are normalized into ntfy-safe ids.",
     )
     parser.add_argument(
         "--dedupe-state-file",
@@ -272,7 +299,8 @@ def main(argv: list[str] | None = None) -> int:
             password_file=args.password_file,
         )
 
-        sequence_id = (args.sequence_id or "").strip()
+        requested_sequence_id = (args.sequence_id or "").strip()
+        sequence_id = normalize_sequence_id(requested_sequence_id) if requested_sequence_id else ""
         title = (args.title or topic_config.get("default_title") or "").strip()
         tags = (args.tags or ",".join(topic_config.get("default_tags", []))).strip()
         priority = args.priority or topic_config.get("default_priority")
@@ -285,6 +313,8 @@ def main(argv: list[str] | None = None) -> int:
                         "topic": args.topic,
                         "publisher": args.publisher or "",
                         "reason": "dedupe_window",
+                        "sequence_id": sequence_id,
+                        "requested_sequence_id": requested_sequence_id,
                     },
                     indent=2,
                 )
@@ -313,6 +343,8 @@ def main(argv: list[str] | None = None) -> int:
                         "publisher": args.publisher or "",
                         "base_url": base_url,
                         "auth_mode": auth_mode,
+                        "sequence_id": sequence_id,
+                        "requested_sequence_id": requested_sequence_id,
                         "headers": headers,
                     },
                     indent=2,
@@ -341,6 +373,8 @@ def main(argv: list[str] | None = None) -> int:
                     "topic": args.topic,
                     "publisher": args.publisher or "",
                     "auth_mode": auth_mode,
+                    "sequence_id": sequence_id,
+                    "requested_sequence_id": requested_sequence_id,
                     "response": payload,
                 },
                 indent=2,

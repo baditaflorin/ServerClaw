@@ -561,8 +561,8 @@ workstreams:
     status: in_progress
     owner: codex
     branch: codex/ws-0299-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0299-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0299-live-apply.md
+    worktree_path: .worktrees/ws-0299-live-apply
+    doc: docs/workstreams/ws-0299-live-apply.md
     depends_on:
       - adr-0043-openbao-for-platform-secrets-and-dynamic-credentials
       - adr-0068-container-image-publication-and-pinning-policy
@@ -578,8 +578,14 @@ workstreams:
       - workstreams.yaml
       - docs/workstreams/ws-0299-live-apply.md
       - docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
+      - docs/adr/0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md
+      - docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
       - docs/adr/.index.yaml
       - docs/runbooks/configure-ntfy.md
+      - docs/runbooks/k6-load-testing.md
+      - docs/runbooks/monitoring-stack.md
+      - docs/runbooks/sbom-cve-scanning.md
+      - docs/site-generated/architecture/dependency-graph.md
       - inventory/group_vars/all.yml
       - inventory/host_vars/proxmox_florin.yml
       - inventory/group_vars/platform.yml
@@ -602,6 +608,8 @@ workstreams:
       - config/ntfy/server.yml
       - config/ntfy/topics.yaml
       - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
+      - config/certificate-catalog.json
       - config/image-catalog.json
       - config/controller-local-secrets.json
       - config/secret-catalog.json
@@ -609,29 +617,48 @@ workstreams:
       - config/service-capability-catalog.json
       - config/service-completeness.json
       - config/service-redundancy-catalog.json
+      - config/dependency-wave-playbooks.yaml
       - config/dependency-graph.json
       - config/command-catalog.json
+      - config/restic-file-backup-catalog.json
+      - config/sbom-scanner.json
+      - config/uptime-kuma/monitors.json
       - config/workflow-catalog.json
       - config/ansible-execution-scopes.yaml
       - config/alertmanager/alertmanager.yml
       - config/windmill/scripts/
       - .gitea/workflows/validate.yml
       - scripts/mutation_audit.py
+      - scripts/k6_load_testing.py
       - scripts/ntfy_publish.py
       - scripts/ntfy_nats_bridge.py
+      - scripts/restic_config_backup.py
+      - scripts/sbom_refresh.py
       - scripts/sync_windmill_resources.py
+      - scripts/validate_nats_topics.py
       - tests/test_alertmanager_runtime_role.py
       - tests/test_changedetection_runtime_role.py
       - tests/test_changedetection_sync.py
+      - tests/test_edge_publication_playbooks.py
       - tests/test_gitea_runtime_role.py
+      - tests/test_k6_load_testing.py
+      - tests/test_mutation_audit.py
       - tests/test_mutation_audit_callback.py
+      - tests/test_ntfy_playbook.py
+      - tests/test_ntfy_publish.py
+      - tests/test_ntfy_runtime_config.py
       - tests/test_post_verify_tasks.py
       - tests/test_preflight_controller_local.py
+      - tests/test_restic_config_backup.py
+      - tests/test_sbom_refresh.py
       - tests/test_subdomain_catalog.py
       - tests/test_generate_platform_vars.py
       - tests/test_windmill_operator_admin_app.py
+      - collections/ansible_collections/lv3/platform/roles/restic_config_backup/
+      - receipts/cve/
       - receipts/image-scans/
       - receipts/live-applies/
+      - receipts/sbom/
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -648,7 +675,13 @@ workstreams:
           paths:
             - docs/workstreams/ws-0299-live-apply.md
             - docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
+            - docs/adr/0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md
+            - docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
             - docs/runbooks/configure-ntfy.md
+            - docs/runbooks/k6-load-testing.md
+            - docs/runbooks/monitoring-stack.md
+            - docs/runbooks/sbom-cve-scanning.md
+            - docs/site-generated/architecture/dependency-graph.md
           mode: exclusive
         - id: ntfy_platform_contract
           paths:
@@ -676,6 +709,8 @@ workstreams:
         - id: ntfy_service_catalog_contract
           paths:
             - config/subdomain-catalog.json
+            - config/subdomain-exposure-registry.json
+            - config/certificate-catalog.json
             - config/image-catalog.json
             - config/controller-local-secrets.json
             - config/secret-catalog.json
@@ -683,9 +718,14 @@ workstreams:
             - config/service-capability-catalog.json
             - config/service-completeness.json
             - config/service-redundancy-catalog.json
+            - config/restic-file-backup-catalog.json
+            - config/sbom-scanner.json
+            - config/uptime-kuma/monitors.json
             - config/dependency-graph.json
+            - config/dependency-wave-playbooks.yaml
             - config/alertmanager/alertmanager.yml
             - tests/test_subdomain_catalog.py
+            - tests/test_edge_publication_playbooks.py
           mode: shared_contract
           contract: service-catalogs-v1
         - id: ntfy_runtime_surfaces
@@ -703,20 +743,36 @@ workstreams:
             - collections/ansible_collections/lv3/platform/roles/changedetection_runtime/**
             - collections/ansible_collections/lv3/platform/roles/gitea_runtime/**
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/restic_config_backup/**
             - config/ntfy/server.yml
             - config/ntfy/topics.yaml
             - config/windmill/scripts/**
             - scripts/ntfy_publish.py
             - scripts/ntfy_nats_bridge.py
+            - scripts/k6_load_testing.py
+            - scripts/restic_config_backup.py
+            - scripts/sbom_refresh.py
             - scripts/sync_windmill_resources.py
+            - scripts/validate_nats_topics.py
             - tests/test_alertmanager_runtime_role.py
             - tests/test_changedetection_runtime_role.py
             - tests/test_changedetection_sync.py
             - tests/test_gitea_runtime_role.py
+            - tests/test_k6_load_testing.py
+            - tests/test_mutation_audit.py
+            - tests/test_ntfy_playbook.py
+            - tests/test_ntfy_publish.py
+            - tests/test_ntfy_runtime_config.py
+            - tests/test_restic_config_backup.py
+            - tests/test_sbom_refresh.py
             - tests/test_windmill_operator_admin_app.py
             - receipts/image-scans/2026-03-31-ntfy-*
+            - receipts/image-scans/2026-04-01-ntfy-*
+            - receipts/cve/28cb21ed7011-*.grype.json
+            - receipts/sbom/28cb21ed7011.cdx.json
             - receipts/live-applies/2026-03-31-adr-0299-*
             - receipts/live-applies/evidence/2026-03-31-ws-0299-*
+            - receipts/live-applies/evidence/2026-04-03-ws-0299-*
           mode: shared_contract
           contract: ntfy-runtime-contract-v1
     ready_to_merge: false
