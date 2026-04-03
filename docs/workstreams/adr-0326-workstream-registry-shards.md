@@ -8,7 +8,7 @@
 - Implemented On: 2026-04-03
 - Live Applied On: 2026-04-03
 - Live Applied In Platform Version: N/A (repo-only control-plane change)
-- Latest Verified Base: `origin/main@d36f1b1d92180aab4ec32e911e82d574338aa7fd` (`repo 0.178.1`, `platform 0.130.97`)
+- Latest Verified Base: `origin/main@6b9117310ef45ccc8e08855f33b4ddeeb746e4ee` (`repo 0.178.2`, `platform 0.130.98`)
 - Branch: `codex/ws-0326-live-apply`
 - Worktree: `.worktrees/ws-0326-live-apply`
 - Owner: codex
@@ -25,33 +25,25 @@
 
 ## Verification
 
-- The branch was created from latest `origin/main`, then rebased onto `origin/main@d36f1b1d92180aab4ec32e911e82d574338aa7fd` after `ws-0333-service-uptime-recovery` landed so the shard source also carries that newly archived workstream.
-- The migration is now committed automation, not a one-off transform: `platform/workstream_registry.py` owns load, assemble, write, and migrate behavior; `scripts/workstream_registry.py` exposes the CLI; `scripts/canonical_truth.py`, `scripts/workstream_tool.py`, `scripts/generate_status_docs.py`, `scripts/generate_diagrams.py`, `scripts/drift_lib.py`, `scripts/workstream_surface_ownership.py`, `scripts/validate_repository_data_models.py`, and `scripts/validate_repo.sh` all consume the shard-backed source correctly.
-- The compatibility artifact stays generated-only. After the rebase conflict on `workstreams.yaml`, the branch resolved it by importing the new `ws-0333-service-uptime-recovery` archive shard and regenerating `workstreams.yaml` from source, rather than hand-merging the generated file.
-- Focused regression coverage passed on the rebased tree: `uv run --with pytest --with pyyaml python -m pytest tests/test_workstream_registry.py tests/test_canonical_truth.py tests/test_workstream_surface_ownership.py tests/test_interface_contracts.py -q` returned `27 passed in 2.97s`.
-- `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-portals` passed on the rebased branch. The broader `generated-docs` lane was also exercised and failed only on the expected protected `changelog.md` canonical-truth delta that this branch is intentionally not allowed to write.
-- `make remote-validate` exercised the live remote entrypoint and truthfully exposed two environmental follow-ups: the build server could not create a workspace in its managed workspace root because the host was out of space, so the run fell back locally; the fallback then surfaced a stale `build/platform-manifest.json`, which this branch refreshed and re-checked locally. The same fallback also hit an `ansible-syntax` timeout under the large concurrent validation load, so the remote replay is preserved as partial evidence rather than a clean pass.
-- After the build-host workspace cleanup, the same `make remote-validate` replay proved that the remote path now starts correctly and that the remaining schema failure was repo-local: `status: blocked` in the ADR 0326 active shard is not a valid release-candidate value for the generated registry contract. The workstream now keeps `status: ready_for_merge` and records the publication constraints explicitly under `blockers:`.
-- Final verification evidence is recorded in:
-  `receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-focused-tests-r1-0.178.1.txt`,
-  `receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-validate-repo-r1-0.178.1.txt`,
-  `receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-remote-validate-r1-0.178.1.txt`,
-  `receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-generate-adr-index-r1-0.178.1.txt`,
-  `receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-platform-manifest-write-r1-0.178.1.txt`,
-  `receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-platform-manifest-check-r1-0.178.1.txt`,
-  `receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-git-diff-check-r1-0.178.1.txt`,
-  and `receipts/live-applies/evidence/2026-04-03-ws-0326-mainline-live-apply-receipts-validate-r1-0.178.1.txt`.
+- The branch was rebased onto `origin/main@387dadb451507490cf584fe24af5792577bff9d2` while resolving the shard migration conflict by importing the newly merged `ws-0332-homepage-triage` archive shard and regenerating `workstreams.yaml` from shard source instead of hand-merging the generated registry. The branch also retains the earlier `ws-0333-service-uptime-recovery` archive shard from the prior replay.
+- The migration is committed automation, not a one-off transform: `platform/workstream_registry.py` owns load, assemble, write, and migrate behavior; `scripts/workstream_registry.py` exposes the CLI; `scripts/canonical_truth.py`, `scripts/workstream_tool.py`, `scripts/generate_status_docs.py`, `scripts/generate_diagrams.py`, `scripts/drift_lib.py`, `scripts/workstream_surface_ownership.py`, `scripts/validate_repository_data_models.py`, and `scripts/validate_repo.sh` all consume the shard-backed source correctly.
+- Focused regression coverage passed on the repaired tree: `uv run --with pytest --with pyyaml python -m pytest tests/test_workstream_registry.py tests/test_canonical_truth.py tests/test_workstream_surface_ownership.py tests/test_interface_contracts.py -q` returned `27 passed in 2.79s`.
+- `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-portals` passed on the final metadata state and exercised the shard-backed registry, ownership surfaces, schema bundle, and generated portal build without touching the protected release files reserved for exact-main integration.
+- The build-host workspace cleanup recorded in `receipts/live-applies/evidence/2026-04-03-ws-0326-build-host-workspace-cleanup-r1-0.178.1.txt` recovered the remote builder from disk exhaustion by pruning 44 stale session roots and increasing free space from `108G` to `119G`.
+- A first post-rebase `make remote-validate` replay proved the remote path could start again and then exposed two stale generated surfaces on the branch, `build/platform-manifest.json` and `docs/diagrams/agent-coordination-map.excalidraw`. Both were regenerated and re-checked locally before the second replay.
+- A repaired `make remote-validate` replay passed end to end against `origin/main@6b9117310ef45ccc8e08855f33b4ddeeb746e4ee` with all blocking checks green, and a final replay after the receipt/workstream refresh passed again on the commit-ready tree. Those runs preserved the protected `VERSION`, `changelog.md`, top-level `README.md` summary, and `versions/stack.yaml` updates for the later exact-main integration step.
+- Final verification evidence is recorded in `receipts/live-applies/evidence/2026-04-03-ws-0326-build-host-workspace-cleanup-r1-0.178.1.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0326-targeted-tests-post-rebase-r1-0.178.2.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0326-validate-repo-post-rebase-r3-0.178.2.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0326-remote-validate-post-rebase-r1-0.178.2.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0326-remote-validate-post-rebase-r2-0.178.2.txt`, and `receipts/live-applies/evidence/2026-04-03-ws-0326-remote-validate-post-rebase-r3-0.178.2.txt`.
 
 ## Outcome
 
 - ADR 0326 is implemented on this rebased workstream branch, with authored workstream truth split into shard files and `workstreams.yaml` preserved as a generated active-only compatibility surface.
 - The repo automation paths that depend on workstream metadata now validate the shard source directly or assemble the compatibility registry deterministically from it.
-- The latest-main rebase proved that concurrent mainline changes can be absorbed safely by adding the new archived shard and regenerating `workstreams.yaml`, which is the intended operational model for this ADR.
-- The branch now also carries the refreshed `build/platform-manifest.json` and diagram output needed to keep generated truth aligned with the shard-backed registry change set.
+- The latest-main replay proved that concurrent mainline changes can be absorbed safely by adding new archived shards and regenerating `workstreams.yaml`, which is the intended operational model for this ADR.
+- The branch now also carries the refreshed `build/platform-manifest.json` and diagram output needed to keep generated truth aligned with both the shard-backed registry change set and the newer exact-main validation base.
 
 ## Remaining Merge-To-Main
 
 - This branch intentionally does not touch `VERSION`, release sections in `changelog.md`, the top-level `README.md` summary, or `versions/stack.yaml`.
-- If this workstream becomes the exact `main` integration step, update the protected release bookkeeping on `main`: bump `VERSION`, refresh the changelog and any release-generated surfaces that depend on it, regenerate any affected truth artifacts, and then mark ADR 0326 as `Implemented` with its first integrated repo version.
+- `origin/main` advanced again to `6b9117310ef45ccc8e08855f33b4ddeeb746e4ee` during the post-rebase verification pass, so exact-main integration should begin with one fresh fetch/rebase and a replay of `workstreams.yaml`, `build/platform-manifest.json`, and `docs/diagrams/agent-coordination-map.excalidraw`.
+- On the exact-main integration step only, update the protected release bookkeeping on `main`: bump `VERSION`, refresh the changelog and any release-generated surfaces that depend on it, and then promote ADR 0326 from `Implemented on workstream branch` to `Implemented` with its first integrated repo version.
 - Because ADR 0326 changes repository coordination and validation structure rather than live infrastructure state, `versions/stack.yaml` and the platform version should remain unchanged unless a separate exact-main integration explicitly chooses to record this repo-only truth there.
-- If a clean remote-gate proof is required before merging, use the cleaned build host workspace root and rerun `make remote-validate`; the 2026-04-03 replay already recovered the builder from disk exhaustion, and the remaining follow-up was the repo-local status-contract mismatch fixed on this branch.

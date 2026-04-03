@@ -136,13 +136,12 @@ workstreams:
       - receipts/live-applies/evidence/2026-04-03-ws-0326-*
       mode: exclusive
   blockers:
-  - Remote `make remote-validate` on 2026-04-03 could not create a workspace under
-    the build-host workspace root because the host was out of disk space; rerun the
-    remote gate after build-host cleanup if a clean remote pass is required before
-    merging.
-  - git push -u origin codex/ws-0326-live-apply triggered the same pre-push gate fallback
-    path and did not complete, so the committed branch state remains local until the
-    validation environment is healthy enough to publish it.
+  - origin/main advanced to `6b9117310ef45ccc8e08855f33b4ddeeb746e4ee` during the
+    post-rebase verification pass, so exact-main integration should do one fresh fetch/rebase
+    before the final merge and push.
+  - 'Protected release surfaces still belong to the exact-main integration step: `VERSION`,
+    release sections in `changelog.md`, the top-level `README.md` summary, and any
+    generated release surfaces that depend on them.'
   ready_to_merge: true
   live_applied: true
   canonical_truth:
