@@ -1,0 +1,49 @@
+# ============================================================================
+# ADR Concern Shard agent-coordination — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: agent-coordination
+total_adrs: 2
+adrs:
+  - adr: '0153'
+    title: Distributed Resource Lock Registry
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: agent-coordination
+    keywords:
+      - distributed
+      - resource
+      - lock
+      - registry
+    summary: 'We will implement a distributed resource lock registry backed by NATS JetStream Key-Value (KV) store, providing
+      hierarchical, TTL-bounded, typed resource locks '
+    filename: 0153-distributed-resource-lock-registry.md
+    path: docs/adr/0153-distributed-resource-lock-registry.md
+    implemented_in_repo_version: 0.150.0
+    implemented_in_platform_version: 0.130.12
+    implemented_on: '2026-03-26'
+  - adr: '0162'
+    title: Distributed Deadlock Detection and Resolution
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: agent-coordination
+    keywords:
+      - distributed
+      - deadlock
+      - detection
+      - resolution
+    summary: We will implement a distributed deadlock detector as a periodic Windmill workflow that scans the lock registry
+      and intent queue for cycle formation, and a resol
+    filename: 0162-distributed-deadlock-detection-and-resolution.md
+    path: docs/adr/0162-distributed-deadlock-detection-and-resolution.md
+    implemented_in_repo_version: 0.150.0
+    implemented_in_platform_version: 0.130.11
+    implemented_on: '2026-03-25'

@@ -1,0 +1,181 @@
+# ============================================================================
+# ADR Concern Shard monitoring — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: monitoring
+total_adrs: 9
+adrs:
+  - adr: '0041'
+    title: Dockerized Mail Platform For Server Delivery, API Automation, And Grafana Observability
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: monitoring
+    keywords:
+      - dockerized
+      - mail
+      - platform
+      - server
+      - delivery
+      - api
+      - automation
+      - grafana
+      - observability
+    summary: We will standardize on a Dockerized mail platform built around Stalwart as the primary mail server, with a private
+      mail gateway service in front of it for appli
+    filename: 0041-dockerized-mail-platform-for-server-delivery-api-and-observability.md
+    path: docs/adr/0041-dockerized-mail-platform-for-server-delivery-api-and-observability.md
+    implemented_in_repo_version: 0.43.0
+    implemented_in_platform_version: 0.21.0
+    implemented_on: '2026-03-22'
+  - adr: '0052'
+    title: Centralized Log Aggregation With Grafana Loki
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: monitoring
+    keywords:
+      - centralized
+      - log
+      - aggregation
+      - grafana
+      - loki
+    summary: We will add a centralized log plane using Grafana Loki.
+    filename: 0052-centralized-log-aggregation-with-grafana-loki.md
+    path: docs/adr/0052-centralized-log-aggregation-with-grafana-loki.md
+    implemented_in_repo_version: 0.57.0
+    implemented_in_platform_version: 0.31.0
+    implemented_on: '2026-03-22'
+  - adr: '0053'
+    title: OpenTelemetry Traces And Service Maps With Grafana Tempo
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: monitoring
+    keywords:
+      - opentelemetry
+      - traces
+      - service
+      - maps
+      - grafana
+      - tempo
+    summary: We will add distributed tracing and service-map support with OpenTelemetry and Grafana Tempo.
+    filename: 0053-opentelemetry-traces-and-service-maps-with-grafana-tempo.md
+    path: docs/adr/0053-opentelemetry-traces-and-service-maps-with-grafana-tempo.md
+    implemented_in_repo_version: 0.55.0
+    implemented_in_platform_version: 0.31.0
+    implemented_on: '2026-03-22'
+  - adr: '0146'
+    title: Langfuse For Agent Observability
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: monitoring
+    keywords:
+      - langfuse
+      - agent
+      - observability
+    summary: We will deploy self-hosted Langfuse on docker-runtime-lv3 and publish it at https://langfuse.lv3.org.
+    filename: 0146-langfuse-for-agent-observability.md
+    path: docs/adr/0146-langfuse-for-agent-observability.md
+    implemented_in_repo_version: 0.163.0
+    implemented_in_platform_version: 0.130.14
+    implemented_on: '2026-03-26'
+  - adr: 0196
+    title: Netdata Realtime Streaming Metrics
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: monitoring
+    keywords:
+      - netdata
+      - realtime
+      - streaming
+      - metrics
+    summary: We deploy Netdata as a parent-plus-children topology for real-time metrics.
+    filename: 0196-netdata-realtime-streaming-metrics.md
+    path: docs/adr/0196-netdata-realtime-streaming-metrics.md
+    implemented_in_repo_version: 0.177.25
+    implemented_in_platform_version: 0.130.32
+    implemented_on: '2026-03-27'
+  - adr: '0250'
+    title: Log Ingestion And Queryability Canaries Via Loki Canary
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: monitoring
+    keywords:
+      - log
+      - ingestion
+      - queryability
+      - canaries
+      - loki
+      - canary
+    summary: We will use Loki Canary as the default end-to-end log-path assurance signal
+    filename: 0250-log-ingestion-and-queryability-canaries-via-loki-canary.md
+    path: docs/adr/0250-log-ingestion-and-queryability-canaries-via-loki-canary.md
+    implemented_in_repo_version: 0.177.57
+    implemented_in_platform_version: 0.130.44
+    implemented_on: '2026-03-28'
+  - adr: 0258
+    title: Temporal As The Durable ServerClaw Session Orchestrator
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: monitoring
+    keywords:
+      - temporal
+      - as
+      - durable
+      - serverclaw
+      - session
+      - orchestrator
+    summary: We will use Temporal as the durable workflow engine for ServerClaw session
+    filename: 0258-temporal-as-the-durable-serverclaw-session-orchestrator.md
+    path: docs/adr/0258-temporal-as-the-durable-serverclaw-session-orchestrator.md
+  - adr: 0280
+    title: Changedetection.io For External Content And API Change Monitoring
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: monitoring
+    keywords:
+      - changedetection
+      - io
+      - external
+      - content
+      - api
+      - change
+      - monitoring
+    summary: We will deploy Changedetection.io as the external content and API change
+    filename: 0280-changedetection-io-for-external-content-and-api-change-monitoring.md
+    path: docs/adr/0280-changedetection-io-for-external-content-and-api-change-monitoring.md
+    implemented_in_repo_version: 0.177.100
+    implemented_in_platform_version: 0.130.63
+    implemented_on: '2026-03-30'
+  - adr: 0293
+    title: Temporal As The Durable Workflow And Task Queue Engine
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: monitoring
+    keywords:
+      - temporal
+      - as
+      - durable
+      - workflow
+      - task
+      - queue
+      - engine
+    summary: We will deploy Temporal as the durable workflow engine for long-running,
+    filename: 0293-temporal-as-the-durable-workflow-and-task-queue-engine.md
+    path: docs/adr/0293-temporal-as-the-durable-workflow-and-task-queue-engine.md
+    implemented_in_repo_version: 0.177.109
+    implemented_in_platform_version: 0.130.72
+    implemented_on: '2026-03-30'

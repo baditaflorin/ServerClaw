@@ -1,0 +1,198 @@
+# ============================================================================
+# ADR Concern Shard api — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: api
+total_adrs: 10
+adrs:
+  - adr: 0049
+    title: Private-First API Publication Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: api
+    keywords:
+      - private-first
+      - api
+      - publication
+      - model
+    summary: Every API must be classified into one of three publication tiers.
+    filename: 0049-private-first-api-publication-model.md
+    path: docs/adr/0049-private-first-api-publication-model.md
+    implemented_in_repo_version: 0.50.0
+    implemented_on: '2026-03-22'
+  - adr: '0075'
+    title: Service Capability Catalog
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: api
+    keywords:
+      - service
+      - capability
+      - catalog
+    summary: We will define a canonical config/service-capability-catalog.json that is the authoritative index for every service
+      on the platform.
+    filename: 0075-service-capability-catalog.md
+    path: docs/adr/0075-service-capability-catalog.md
+    implemented_in_repo_version: 0.69.0
+    implemented_on: '2026-03-23'
+  - adr: '0145'
+    title: Ollama for Local LLM Inference API
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: api
+    keywords:
+      - ollama
+      - local
+      - llm
+      - inference
+      - api
+    summary: We run Ollama as a private, repo-managed runtime on docker-runtime-lv3.
+    filename: 0145-ollama-for-local-llm-inference.md
+    path: docs/adr/0145-ollama-for-local-llm-inference.md
+    implemented_in_repo_version: 0.142.0
+    implemented_in_platform_version: 0.130.2
+    implemented_on: '2026-03-25'
+  - adr: '0272'
+    title: Restore Readiness Ladders And Stateful Warm-Up Verification Profiles
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: api
+    keywords:
+      - restore
+      - readiness
+      - ladders
+      - stateful
+      - warm-up
+      - verification
+      - profiles
+    summary: We will verify restores through readiness ladders and
+    filename: 0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+    path: docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+    implemented_in_repo_version: 0.177.75
+    implemented_in_platform_version: 0.130.51
+    implemented_on: '2026-03-29'
+  - adr: 0285
+    title: Paperless-ngx As The Document Management And Archive API
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - paperless-ngx
+      - as
+      - document
+      - management
+      - archive
+      - api
+    summary: We will deploy Paperless-ngx as the document management and archive API
+    filename: 0285-paperless-ngx-as-the-document-management-and-archive-api.md
+    path: docs/adr/0285-paperless-ngx-as-the-document-management-and-archive-api.md
+    implemented_in_repo_version: 0.177.121
+    implemented_in_platform_version: 0.130.75
+    implemented_on: '2026-03-31'
+  - adr: 0286
+    title: Vikunja As The Task And Project Management REST API
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - vikunja
+      - as
+      - task
+      - project
+      - management
+      - rest
+      - api
+    summary: We will deploy Vikunja as the task and project management REST API for
+    filename: 0286-vikunja-as-the-task-and-project-management-rest-api.md
+    path: docs/adr/0286-vikunja-as-the-task-and-project-management-rest-api.md
+  - adr: 0287
+    title: LiteLLM As The Unified LLM API Proxy And Router
+    status: Deprecated
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - litellm
+      - as
+      - unified
+      - llm
+      - api
+      - proxy
+      - router
+    summary: We will deploy LiteLLM as the unified LLM API proxy and router.
+    filename: 0287-litellm-as-the-unified-llm-api-proxy-and-router.md
+    path: docs/adr/0287-litellm-as-the-unified-llm-api-proxy-and-router.md
+  - adr: 0289
+    title: Directus As The REST And GraphQL Data API Layer Over Postgres
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - directus
+      - as
+      - rest
+      - graphql
+      - data
+      - api
+      - layer
+      - over
+      - postgres
+    summary: We will deploy Directus as the REST and GraphQL data API layer for
+    filename: 0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md
+    path: docs/adr/0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md
+    implemented_in_repo_version: 0.177.109
+    implemented_in_platform_version: 0.130.72
+    implemented_on: '2026-03-30'
+  - adr: 0292
+    title: Lago As The Usage Metering And Billing API Layer
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - lago
+      - as
+      - usage
+      - metering
+      - billing
+      - api
+      - layer
+    summary: We will deploy Lago as the usage metering and billing API layer for
+    filename: 0292-lago-as-the-usage-metering-and-billing-api-layer.md
+    path: docs/adr/0292-lago-as-the-usage-metering-and-billing-api-layer.md
+    implemented_in_repo_version: 0.177.118
+    implemented_in_platform_version: 0.130.77
+    implemented_on: '2026-03-31'
+  - adr: 0294
+    title: One-API As The Unified LLM API Proxy And Router
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - one-api
+      - as
+      - unified
+      - llm
+      - api
+      - proxy
+      - router
+    summary: We will deploy One-API as the unified LLM API proxy and router, superseding
+    filename: 0294-one-api-as-the-unified-llm-api-proxy-and-router.md
+    path: docs/adr/0294-one-api-as-the-unified-llm-api-proxy-and-router.md
+    implemented_in_repo_version: 0.177.135
+    implemented_in_platform_version: 0.130.85
+    implemented_on: '2026-04-01'

@@ -27,7 +27,7 @@ REPO_QUICK_START = {
     "step_2": "Read AGENTS.md for working rules, conventions, and handoff protocol",
     "step_3": "Read this file (.repo-structure.yaml) for a concise section map",
     "step_4": "Read .config-locations.yaml to find the right config section",
-    "step_5": "Read docs/adr/.index.yaml to search ADRs by keyword or concern",
+    "step_5": "Read docs/adr/.index.yaml to search ADRs by keyword, concern, or reservation context",
     "step_6": "Check workstreams.yaml for active work and ownership contracts",
     "note": (
         "Use the section files under docs/discovery/ and the generated onboarding packs under "
@@ -54,7 +54,7 @@ ENTRYPOINT_PURPOSES = {
     "AGENTS.md": "Working rules, handoff protocol, and collaboration conventions for agents.",
     ".repo-structure.yaml": "Generated root discovery entrypoint for repository layout and section navigation.",
     ".config-locations.yaml": "Generated root discovery entrypoint for canonical configuration locations.",
-    "docs/adr/.index.yaml": "Generated ADR discovery index for keyword and concern queries.",
+    "docs/adr/.index.yaml": "Generated ADR discovery index for keyword, concern, and reservation-aware queries.",
     "workstreams.yaml": "Active workstream registry plus ownership contracts and merge state.",
 }
 

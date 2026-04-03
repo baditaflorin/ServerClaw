@@ -5,7 +5,7 @@
 # Regenerate: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
 # ============================================================================
 schema_version: 1
-generated: '2026-04-03'
+generated: '2026-04-04'
 source_root: docs/discovery/config-locations
 pack_manifest: docs/discovery/onboarding-packs.yaml
 purpose: Generated root configuration discovery entrypoint. Use the section summaries below to choose the right canonical source file under docs/discovery/config-locations/.
@@ -24,7 +24,7 @@ section_index:
     file: docs/discovery/config-locations/agent-discovery.yaml
     summary: The files and generated artifacts that orient agents and collaborators inside the repo.
     when_to_read: Use this section when changing onboarding surfaces, discovery metadata, or generated packs.
-    entry_count: 8
+    entry_count: 10
   - id: project-tracking
     title: Project Tracking
     file: docs/discovery/config-locations/project-tracking.yaml

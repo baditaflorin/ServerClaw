@@ -45,12 +45,26 @@ entries:
     update_by: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
     update_when: After changing docs/discovery/ or onboarding pack definitions
   docs/adr/.index.yaml:
-    purpose: "Searchable metadata index for all 170+ ADRs \u2014 ADR 0164"
+    purpose: "Searchable ADR discovery root manifest with shard pointers and reservation summaries \u2014 ADR 0164 / ADR 0325"
     owner: automation
     format: YAML
-    use_for: Finding relevant ADRs by keyword without reading all files
+    use_for: Finding relevant ADRs by keyword or concern and learning which shard or reservation surface to open next
     update_by: python scripts/generate_adr_index.py --write
     update_when: When new ADRs are added or status changes
+  docs/adr/index/:
+    purpose: ADR discovery shard directory grouped by range, concern, and implementation status
+    owner: automation
+    format: YAML directory
+    use_for: Loading one ADR metadata shard instead of the full root manifest when you need targeted discovery
+    update_by: python scripts/generate_adr_index.py --write
+    update_when: When ADR metadata changes or shard layout changes
+  docs/adr/index/reservations.yaml:
+    purpose: ADR 0325 reservation ledger for ADR number windows claimed by active parallel work
+    owner: human and automation
+    format: YAML
+    use_for: Checking or recording reserved ADR number windows before writing new ADRs in parallel
+    update_by: python scripts/generate_adr_index.py --write
+    update_when: Before allocating ADR numbers and after releasing or consuming reserved windows
   AGENTS.md:
     purpose: "Rules, conventions, and handoff protocol for LLM agents \u2014 ADR 0167"
     owner: human

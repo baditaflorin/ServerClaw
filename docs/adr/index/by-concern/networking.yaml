@@ -1,0 +1,307 @@
+# ============================================================================
+# ADR Concern Shard networking — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: networking
+total_adrs: 16
+adrs:
+  - adr: '0015'
+    title: lv3.org DNS And Subdomain Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: networking
+    keywords:
+      - lv3
+      - org
+      - dns
+      - subdomain
+      - model
+    summary: We will use named subdomains under lv3.org for platform entry points.
+    filename: 0015-lv3-org-dns-and-subdomain-model.md
+    path: docs/adr/0015-lv3-org-dns-and-subdomain-model.md
+    implemented_in_repo_version: 0.5.0
+    implemented_in_platform_version: 0.5.0
+    implemented_on: '2026-03-21'
+  - adr: '0021'
+    title: Public Subdomain Publication At The NGINX Edge
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: networking
+    keywords:
+      - public
+      - subdomain
+      - publication
+      - at
+      - nginx
+      - edge
+    summary: We will publish subdomains deliberately at the NGINX edge.
+    filename: 0021-public-subdomain-publication-at-the-nginx-edge.md
+    path: docs/adr/0021-public-subdomain-publication-at-the-nginx-edge.md
+    implemented_in_repo_version: 0.22.0
+    implemented_in_platform_version: 0.14.0
+    implemented_on: '2026-03-22'
+  - adr: 0058
+    title: NATS JetStream For Internal Event Bus And Agent Coordination
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-22'
+    concern: networking
+    keywords:
+      - nats
+      - jetstream
+      - internal
+      - event
+      - bus
+      - agent
+      - coordination
+    summary: We will use NATS JetStream as the internal event-distribution backbone for control-plane and agent-oriented events.
+    filename: 0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
+    path: docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
+  - adr: 0059
+    title: ntopng For Private Network Flow Visibility
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: networking
+    keywords:
+      - ntopng
+      - private
+      - network
+      - flow
+      - visibility
+    summary: We will add ntopng as the visual network-flow analysis surface for the private platform network.
+    filename: 0059-ntopng-for-private-network-flow-visibility.md
+    path: docs/adr/0059-ntopng-for-private-network-flow-visibility.md
+    implemented_in_repo_version: 0.53.0
+    implemented_in_platform_version: 0.28.0
+    implemented_on: '2026-03-22'
+  - adr: '0076'
+    title: Subdomain Governance And DNS Lifecycle
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: networking
+    keywords:
+      - subdomain
+      - governance
+      - dns
+      - lifecycle
+    summary: We will define a subdomain governance model covering naming, ownership, TLS provisioning, and lifecycle.
+    filename: 0076-subdomain-governance-and-dns-lifecycle.md
+    path: docs/adr/0076-subdomain-governance-and-dns-lifecycle.md
+    implemented_in_repo_version: 0.84.0
+    implemented_on: '2026-03-23'
+  - adr: '0124'
+    title: Platform Event Taxonomy And Canonical NATS Topics
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: networking
+    keywords:
+      - platform
+      - event
+      - taxonomy
+      - canonical
+      - nats
+      - topics
+    summary: We will treat config/event-taxonomy.yaml as the canonical registry for platform NATS topics and the minimum payload
+      contract for each topic. All active platform
+    filename: 0124-platform-event-taxonomy-and-canonical-nats-topics.md
+    path: docs/adr/0124-platform-event-taxonomy-and-canonical-nats-topics.md
+    implemented_in_repo_version: 0.128.0
+    implemented_in_platform_version: 0.130.13
+    implemented_on: '2026-03-26'
+  - adr: 0139
+    title: Subdomain Exposure Audit and Registry
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: networking
+    keywords:
+      - subdomain
+      - exposure
+      - audit
+      - registry
+    summary: 'We will maintain a deterministic subdomain exposure registry generated from:'
+    filename: 0139-subdomain-exposure-audit-and-registry.md
+    path: docs/adr/0139-subdomain-exposure-audit-and-registry.md
+    implemented_in_repo_version: 0.127.0
+    implemented_on: '2026-03-24'
+  - adr: '0161'
+    title: Real-Time Agent Coordination Map
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: networking
+    keywords:
+      - real-time
+      - agent
+      - coordination
+      - map
+    summary: We implement a real-time agent coordination map with JetStream KV as the preferred backing store and a repo-local
+      file-backed fallback for offline tests and loc
+    filename: 0161-real-time-agent-coordination-map.md
+    path: docs/adr/0161-real-time-agent-coordination-map.md
+    implemented_in_repo_version: 0.156.0
+    implemented_in_platform_version: 0.130.10
+    implemented_on: '2026-03-25'
+  - adr: 0183
+    title: Keycloak Uses Shared-Mail-Network Internal Submission
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: networking
+    keywords:
+      - keycloak
+      - uses
+      - shared-mail-network
+      - internal
+      - submission
+    summary: 'Keycloak will:'
+    filename: 0183-keycloak-mail-network-internal-submission.md
+    path: docs/adr/0183-keycloak-mail-network-internal-submission.md
+    implemented_on: '2026-03-27'
+  - adr: 0189
+    title: Network Impairment Test Matrix for Staging and Previews
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: networking
+    keywords:
+      - network
+      - impairment
+      - test
+      - matrix
+      - staging
+      - previews
+    summary: We will define a network impairment test matrix for preview, fixture, standby, and recovery environments.
+    filename: 0189-network-impairment-test-matrix-for-staging-and-previews.md
+    path: docs/adr/0189-network-impairment-test-matrix-for-staging-and-previews.md
+    implemented_in_repo_version: 0.177.22
+    implemented_in_platform_version: 0.130.31
+    implemented_on: '2026-03-27'
+  - adr: '0252'
+    title: Route And DNS Publication Assertion Ledger
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: networking
+    keywords:
+      - route
+      - dns
+      - publication
+      - assertion
+      - ledger
+    summary: We will maintain a route and DNS publication assertion ledger for all
+    filename: 0252-route-and-dns-publication-assertion-ledger.md
+    path: docs/adr/0252-route-and-dns-publication-assertion-ledger.md
+    implemented_in_repo_version: 0.177.68
+    implemented_in_platform_version: 0.130.43
+    implemented_on: '2026-03-29'
+  - adr: '0256'
+    title: Mautrix Bridges For External Chat Channel Adapters
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: networking
+    keywords:
+      - mautrix
+      - bridges
+      - external
+      - chat
+      - channel
+      - adapters
+    summary: We will use mautrix bridges as the default external chat-channel adapters
+    filename: 0256-mautrix-bridges-for-external-chat-channel-adapters.md
+    path: docs/adr/0256-mautrix-bridges-for-external-chat-channel-adapters.md
+    implemented_in_repo_version: 0.177.98
+    implemented_in_platform_version: 0.130.65
+    implemented_on: '2026-03-30'
+  - adr: '0273'
+    title: Public Endpoint Admission Control For DNS Catalog And Certificate Concordance
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: networking
+    keywords:
+      - public
+      - endpoint
+      - admission
+      - control
+      - dns
+      - catalog
+      - certificate
+      - concordance
+    summary: We will require public endpoint admission control that proves concordance
+    filename: 0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+    path: docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+    implemented_in_repo_version: 0.177.77
+    implemented_in_platform_version: 0.130.52
+    implemented_on: '2026-03-29'
+  - adr: '0276'
+    title: NATS JetStream As The Platform Event Bus
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: networking
+    keywords:
+      - nats
+      - jetstream
+      - as
+      - platform
+      - event
+      - bus
+    summary: We will deploy NATS with JetStream enabled as the platform event bus.
+    filename: 0276-nats-jetstream-as-the-platform-event-bus.md
+    path: docs/adr/0276-nats-jetstream-as-the-platform-event-bus.md
+    implemented_in_repo_version: 0.177.97
+    implemented_in_platform_version: 0.130.64
+    implemented_on: '2026-03-30'
+  - adr: '0326'
+    title: Workstream Registry Shards With Active And Archive Assembly
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: networking
+    keywords:
+      - workstreams
+      - registry
+      - archive
+      - sharding
+      - coordination
+      - workstream
+      - shards
+      - active
+      - assembly
+    summary: We will split workstream metadata into per-workstream shards and keep a
+    filename: 0326-workstream-registry-shards-with-active-and-archive-assembly.md
+    path: docs/adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md
+    implemented_on: '2026-04-03'
+  - adr: 0329
+    title: Shared Docker Runtime Bridge-Chain Checks Must Fail Safe Before Daemon Restart
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-01'
+    concern: networking
+    keywords:
+      - docker
+      - runtime
+      - uptime
+      - automation
+      - safety
+      - shared
+      - bridge-chain
+      - checks
+      - must
+      - fail
+    summary: Shared Docker bridge-chain preflight checks on a shared runtime pool must
+    filename: 0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
+    path: docs/adr/0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md

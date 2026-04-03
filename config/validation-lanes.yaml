@@ -63,6 +63,15 @@ surface_classes:
       - mkdocs.yml
     required_lanes:
       - documentation-and-adr
+  - surface_id: adr_discovery_metadata
+    title: Generated ADR discovery metadata and reservation ledger
+    paths:
+      - docs/adr/.index.yaml
+      - docs/adr/index/*.yaml
+      - docs/adr/index/**/*.yaml
+    required_lanes:
+      - documentation-and-adr
+      - repository-structure-and-schema
   - surface_id: generated_truth
     title: Generated documentation and canonical-truth surfaces
     paths:

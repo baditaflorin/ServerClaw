@@ -1,0 +1,734 @@
+# ============================================================================
+# ADR Concern Shard ci-cd — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: ci-cd
+total_adrs: 39
+adrs:
+  - adr: 0009
+    title: DRY And Solid Engineering Principles
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: ci-cd
+    keywords:
+      - dry
+      - solid
+      - engineering
+      - principles
+    summary: 'We will treat the following as core repository rules:'
+    filename: 0009-dry-and-solid-engineering-principles.md
+    path: docs/adr/0009-dry-and-solid-engineering-principles.md
+    implemented_in_repo_version: 0.1.0
+    implemented_on: '2026-03-21'
+  - adr: '0031'
+    title: Repository Validation Pipeline For Automation Changes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - repository
+      - validation
+      - pipeline
+      - automation
+      - changes
+    summary: We will define one repository validation pipeline and make it the standard integration gate.
+    filename: 0031-repository-validation-pipeline-for-automation-changes.md
+    path: docs/adr/0031-repository-validation-pipeline-for-automation-changes.md
+    implemented_in_repo_version: 0.32.0
+    implemented_on: '2026-03-22'
+  - adr: 0048
+    title: Command Catalog And Approval Gates
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - command
+      - catalog
+      - approval
+      - gates
+    summary: All recurring mutating operations must be represented as named command contracts.
+    filename: 0048-command-catalog-and-approval-gates.md
+    path: docs/adr/0048-command-catalog-and-approval-gates.md
+    implemented_in_repo_version: 0.45.0
+    implemented_in_platform_version: 0.26.0
+    implemented_on: '2026-03-22'
+  - adr: '0073'
+    title: Environment Promotion Gate And Deployment Pipeline
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - environment
+      - promotion
+      - gate
+      - deployment
+      - pipeline
+    summary: 'We will define a formal promotion pipeline with three phases: validate → stage → promote.'
+    filename: 0073-environment-promotion-gate-and-deployment-pipeline.md
+    path: docs/adr/0073-environment-promotion-gate-and-deployment-pipeline.md
+    implemented_in_repo_version: 0.82.0
+    implemented_on: '2026-03-23'
+  - adr: 0082
+    title: Remote Build Execution Gateway
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - remote
+      - build
+      - execution
+      - gateway
+    summary: 'We will implement a Remote Build Execution Gateway consisting of:'
+    filename: 0082-remote-build-execution-gateway.md
+    path: docs/adr/0082-remote-build-execution-gateway.md
+    implemented_in_repo_version: 0.80.0
+    implemented_in_platform_version: 0.38.0
+    implemented_on: '2026-03-23'
+  - adr: 0087
+    title: Repository Validation Gate (Pre-Push and CI)
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - repository
+      - validation
+      - gate
+      - pre-push
+      - ci
+    summary: We will implement a two-layer validation gate — local pre-commit hooks and a remote build server check — enforced
+      on every git push to any branch.
+    filename: 0087-repository-validation-gate.md
+    path: docs/adr/0087-repository-validation-gate.md
+    implemented_in_repo_version: 0.93.0
+    implemented_on: '2026-03-23'
+  - adr: 0091
+    title: Continuous Drift Detection and Reconciliation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - continuous
+      - drift
+      - detection
+      - reconciliation
+    summary: 'We will implement continuous drift detection as a scheduled Windmill workflow that:'
+    filename: 0091-continuous-drift-detection.md
+    path: docs/adr/0091-continuous-drift-detection.md
+    implemented_in_repo_version: 0.94.0
+    implemented_on: '2026-03-23'
+  - adr: 0092
+    title: Unified Platform API Gateway
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: ci-cd
+    keywords:
+      - unified
+      - platform
+      - api
+      - gateway
+    summary: We will deploy a platform API gateway on docker-runtime-lv3 as a FastAPI-based aggregation and proxy service,
+      exposed on the host at http://10.10.10.20:8083 and
+    filename: 0092-unified-platform-api-gateway.md
+    path: docs/adr/0092-unified-platform-api-gateway.md
+    implemented_in_repo_version: 0.101.0
+    implemented_in_platform_version: 0.114.2
+    implemented_on: '2026-03-24'
+  - adr: 0093
+    title: Interactive Ops Portal with Live Actions
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: ci-cd
+    keywords:
+      - interactive
+      - ops
+      - portal
+      - live
+      - actions
+    summary: 'We will replace the static generated ops portal with a server-side-rendered interactive portal built with FastHTML
+      (Python) or HTMX-augmented Jinja2 templates, '
+    filename: 0093-interactive-ops-portal.md
+    path: docs/adr/0093-interactive-ops-portal.md
+    implemented_in_repo_version: 0.97.0
+    implemented_in_platform_version: 0.105.0
+    implemented_on: '2026-03-24'
+  - adr: '0105'
+    title: Platform Capacity Model and Resource Quota Enforcement
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: ci-cd
+    keywords:
+      - platform
+      - capacity
+      - model
+      - resource
+      - quota
+      - enforcement
+    summary: We will keep a repository-managed capacity model for the Proxmox host, use it to render operator-facing reports,
+      and expose the same model to repository validat
+    filename: 0105-platform-capacity-model.md
+    path: docs/adr/0105-platform-capacity-model.md
+    implemented_in_repo_version: 0.115.0
+    implemented_in_platform_version: 0.130.24
+    implemented_on: '2026-03-27'
+  - adr: '0114'
+    title: Rule-Based Incident Triage Engine
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - rule-based
+      - incident
+      - triage
+      - engine
+    summary: We will implement a rule-based incident triage engine as a Windmill workflow triggered on every firing alert
+      from the alerting router (ADR 0097).
+    filename: 0114-rule-based-incident-triage-engine.md
+    path: docs/adr/0114-rule-based-incident-triage-engine.md
+    implemented_in_repo_version: 0.111.0
+    implemented_on: '2026-03-24'
+  - adr: '0143'
+    title: Gitea for Self-Hosted Git and Webhook-Driven Automation
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - gitea
+      - self-hosted
+      - git
+      - webhook-driven
+      - automation
+    summary: We will deploy Gitea as a self-hosted git service on the docker-runtime-lv3 VM, replacing the external git provider
+      as the primary remote.
+    filename: 0143-gitea-for-self-hosted-git-and-ci.md
+    path: docs/adr/0143-gitea-for-self-hosted-git-and-ci.md
+    implemented_in_repo_version: 0.165.0
+    implemented_in_platform_version: 0.130.15
+    implemented_on: '2026-03-26'
+  - adr: 0159
+    title: Speculative Parallel Execution with Compensating Transactions
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - speculative
+      - parallel
+      - execution
+      - compensating
+      - transactions
+    summary: The repository now implements speculative execution as an opt-in extension of the existing scheduler and conflict
+      registry.
+    filename: 0159-speculative-parallel-execution-with-compensating-transactions.md
+    path: docs/adr/0159-speculative-parallel-execution-with-compensating-transactions.md
+    implemented_in_repo_version: 0.144.0
+    implemented_on: '2026-03-25'
+  - adr: '0160'
+    title: Parallel Dry-Run Fan-Out for Intent Batch Validation
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - parallel
+      - dry-run
+      - fan-out
+      - intent
+      - batch
+      - validation
+    summary: 'We implement a controller-local parallel dry-run fan-out for multi-intent batches: all semantic dry-runs in
+      a batch execute concurrently, cross-intent conflict '
+    filename: 0160-parallel-dry-run-fan-out-for-intent-batch-validation.md
+    path: docs/adr/0160-parallel-dry-run-fan-out-for-intent-batch-validation.md
+    implemented_in_repo_version: 0.145.0
+    implemented_on: '2026-03-25'
+  - adr: '0164'
+    title: Circuit Breaker Pattern for External Service Calls
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - circuit
+      - breaker
+      - pattern
+      - external
+      - service
+      - calls
+    summary: We implement a shared, repo-managed circuit breaker layer for external and high-impact internal service calls.
+    filename: 0164-circuit-breaker-pattern-for-external-service-calls.md
+    path: docs/adr/0164-circuit-breaker-pattern-for-external-service-calls.md
+    implemented_in_repo_version: 0.152.0
+    implemented_in_platform_version: 0.130.5
+    implemented_on: '2026-03-25'
+  - adr: 0168
+    title: Ansible Role Idempotency CI Enforcement
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - ansible
+      - role
+      - idempotency
+      - ci
+      - enforcement
+    summary: We will enforce Ansible role idempotency through a repo-managed coverage policy and a CI validation gate.
+    filename: 0168-ansible-role-idempotency-ci-enforcement.md
+    path: docs/adr/0168-ansible-role-idempotency-ci-enforcement.md
+    implemented_in_repo_version: 0.146.0
+    implemented_on: '2026-03-25'
+  - adr: '0171'
+    title: Controlled Fault Injection for Resilience Validation
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - controlled
+      - fault
+      - injection
+      - resilience
+      - validation
+    summary: We will implement a controlled fault injection suite as a monthly Windmill workflow run-fault-injection that
+      verifies each declared resilience mechanism against
+    filename: 0171-controlled-fault-injection-for-resilience-validation.md
+    path: docs/adr/0171-controlled-fault-injection-for-resilience-validation.md
+    implemented_in_repo_version: 0.166.0
+    implemented_in_platform_version: 0.130.16
+    implemented_on: '2026-03-26'
+  - adr: 0180
+    title: Standby Capacity Reservation and Placement Rules
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: ci-cd
+    keywords:
+      - standby
+      - capacity
+      - reservation
+      - placement
+      - rules
+    summary: We will reserve standby capacity and define placement rules for any service declared as R2 or higher in ADR 0179.
+    filename: 0180-standby-capacity-reservation-and-placement-rules.md
+    path: docs/adr/0180-standby-capacity-reservation-and-placement-rules.md
+    implemented_in_repo_version: 0.176.4
+    implemented_on: '2026-03-27'
+  - adr: 0183
+    title: Auxiliary Cloud Failure Domain for Witness, Recovery, and Burst Capacity
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-27'
+    concern: ci-cd
+    keywords:
+      - auxiliary
+      - cloud
+      - failure
+      - domain
+      - witness
+      - recovery
+      - burst
+      - capacity
+    summary: We will add a small auxiliary cloud failure domain using Hetzner Cloud for non-primary control-plane resilience
+      and burstable ephemeral workloads.
+    filename: 0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md
+    path: docs/adr/0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md
+  - adr: 0186
+    title: Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: ci-cd
+    keywords:
+      - prewarmed
+      - fixture
+      - pools
+      - lease-based
+      - ephemeral
+      - capacity
+    summary: We will manage ephemeral compute as lease-based capacity pools with a small set of prewarmed fixtures per common
+      template.
+    filename: 0186-prewarmed-fixture-pools-and-lease-based-ephemeral-capacity.md
+    path: docs/adr/0186-prewarmed-fixture-pools-and-lease-based-ephemeral-capacity.md
+    implemented_in_repo_version: 0.177.21
+    implemented_in_platform_version: 0.130.32
+    implemented_on: '2026-03-28'
+  - adr: 0188
+    title: Failover Rehearsal Gate for Redundancy Tiers
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: ci-cd
+    keywords:
+      - failover
+      - rehearsal
+      - gate
+      - redundancy
+      - tiers
+    summary: We will require scheduled failover or recovery rehearsals for services that claim redundancy tiers above rebuild-only
+      recovery.
+    filename: 0188-failover-rehearsal-gate-for-redundancy-tiers.md
+    path: docs/adr/0188-failover-rehearsal-gate-for-redundancy-tiers.md
+    implemented_in_repo_version: 0.177.20
+    implemented_in_platform_version: 0.130.31
+    implemented_on: '2026-03-27'
+  - adr: 0190
+    title: Synthetic Transaction Replay for Capacity and Recovery Validation
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: ci-cd
+    keywords:
+      - synthetic
+      - transaction
+      - replay
+      - capacity
+      - recovery
+      - validation
+    summary: We will maintain a synthetic transaction replay harness for capacity, failover, and recovery validation.
+    filename: 0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md
+    path: docs/adr/0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md
+    implemented_in_repo_version: 0.177.21
+    implemented_on: '2026-03-27'
+  - adr: 0192
+    title: Separate Capacity Classes for Standby, Recovery, and Preview Workloads
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: ci-cd
+    keywords:
+      - separate
+      - capacity
+      - classes
+      - standby
+      - recovery
+      - preview
+      - workloads
+    summary: We will classify spare capacity into separate reservation classes with explicit admission rules.
+    filename: 0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md
+    path: docs/adr/0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md
+    implemented_in_repo_version: 0.177.15
+    implemented_in_platform_version: 0.130.31
+    implemented_on: '2026-03-27'
+  - adr: '0213'
+    title: Architecture Fitness Functions In The Validation Gate
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - architecture
+      - fitness
+      - functions
+      - validation
+      - gate
+    summary: We will add architecture fitness functions to the repository validation gate.
+    filename: 0213-architecture-fitness-functions-in-the-validation-gate.md
+    path: docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md
+    implemented_in_repo_version: 0.177.36
+    implemented_in_platform_version: 0.130.36
+    implemented_on: '2026-03-28'
+  - adr: '0225'
+    title: Server-Resident Reconciliation Via Ansible Pull
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - server-resident
+      - reconciliation
+      - ansible
+      - pull
+    summary: We will use ansible-pull as the default server-resident reconcile
+    filename: 0225-server-resident-reconciliation-via-ansible-pull.md
+    path: docs/adr/0225-server-resident-reconciliation-via-ansible-pull.md
+    implemented_in_repo_version: 0.177.43
+    implemented_in_platform_version: 0.130.40
+    implemented_on: '2026-03-28'
+  - adr: 0229
+    title: Gitea Actions Runners For On-Platform Validation And Release Preparation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - gitea
+      - actions
+      - runners
+      - on-platform
+      - validation
+      - release
+      - preparation
+    summary: We will use Gitea Actions runners (actrunner) as the default on-platform
+    filename: 0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
+    path: docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
+    implemented_in_repo_version: 0.165.0
+    implemented_in_platform_version: 0.130.15
+    implemented_on: '2026-03-26'
+  - adr: '0230'
+    title: Policy Decisions Via Open Policy Agent And Conftest
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - policy
+      - decisions
+      - open
+      - agent
+      - conftest
+    summary: We will use Open Policy Agent (OPA) as the shared decision engine and
+    filename: 0230-policy-decisions-via-open-policy-agent-and-conftest.md
+    path: docs/adr/0230-policy-decisions-via-open-policy-agent-and-conftest.md
+    implemented_in_repo_version: 0.177.49
+    implemented_in_platform_version: 0.130.42
+    implemented_on: '2026-03-28'
+  - adr: '0233'
+    title: Signed Release Bundles Via Gitea Releases And Cosign
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - signed
+      - release
+      - bundles
+      - gitea
+      - releases
+      - cosign
+    summary: We will package server-consumable control inputs as signed release bundles
+    filename: 0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+    path: docs/adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+    implemented_in_repo_version: 0.177.54
+    implemented_in_platform_version: 0.130.43
+    implemented_on: '2026-03-28'
+  - adr: '0251'
+    title: Stage-Scoped Smoke Suites And Promotion Gates
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - stage-scoped
+      - smoke
+      - suites
+      - promotion
+      - gates
+    summary: We will require stage-scoped smoke suites for active services and wire them
+    filename: 0251-stage-scoped-smoke-suites-and-promotion-gates.md
+    path: docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md
+    implemented_in_repo_version: 0.177.86
+    implemented_in_platform_version: 0.130.58
+    implemented_on: '2026-03-29'
+  - adr: '0264'
+    title: Failure-Domain-Isolated Validation Lanes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - failure-domain-isolated
+      - validation
+      - lanes
+    summary: We will split repository and promotion validation into failure-domain-isolated
+    filename: 0264-failure-domain-isolated-validation-lanes.md
+    path: docs/adr/0264-failure-domain-isolated-validation-lanes.md
+    implemented_in_repo_version: 0.177.84
+    implemented_in_platform_version: 0.130.58
+    implemented_on: '2026-03-29'
+  - adr: '0265'
+    title: Immutable Validation Snapshots For Remote Builders And Schema Checks
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - immutable
+      - validation
+      - snapshots
+      - remote
+      - builders
+      - schema
+      - checks
+    summary: We will run remote builder and schema validation against immutable repository
+    filename: 0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+    path: docs/adr/0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+    implemented_in_repo_version: 0.177.78
+    implemented_in_platform_version: 0.130.53
+    implemented_on: '2026-03-29'
+  - adr: '0266'
+    title: Validation Runner Capability Contracts And Environment Attestation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - validation
+      - runner
+      - capability
+      - contracts
+      - environment
+      - attestation
+    summary: We will require every local or remote validation runner to publish a
+    filename: 0266-validation-runner-capability-contracts-and-environment-attestation.md
+    path: docs/adr/0266-validation-runner-capability-contracts-and-environment-attestation.md
+    implemented_in_repo_version: 0.177.88
+    implemented_in_platform_version: 0.130.60
+    implemented_on: '2026-03-30'
+  - adr: '0267'
+    title: Expiring Gate Bypass Waivers With Structured Reason Codes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - expiring
+      - gate
+      - bypass
+      - waivers
+      - structured
+      - reason
+      - codes
+    summary: We will treat every gate bypass as an expiring waiver with a structured
+    filename: 0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md
+    path: docs/adr/0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md
+    implemented_in_repo_version: 0.177.105
+    implemented_in_platform_version: 0.130.70
+    implemented_on: '2026-03-30'
+  - adr: 0269
+    title: Vulnerability Budgets And Image-Host Freshness Promotion Gates
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - vulnerability
+      - budgets
+      - image-host
+      - freshness
+      - promotion
+      - gates
+    summary: We will introduce vulnerability budgets and freshness gates for managed
+    filename: 0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+    path: docs/adr/0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+    implemented_in_repo_version: 0.177.72
+    implemented_in_platform_version: 0.130.50
+    implemented_on: '2026-03-29'
+  - adr: '0275'
+    title: Apache Tika Server For Document Text Extraction In The RAG Pipeline
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: ci-cd
+    keywords:
+      - apache
+      - tika
+      - server
+      - document
+      - text
+      - extraction
+      - rag
+      - pipeline
+    summary: We will deploy Apache Tika Server as the canonical document extraction
+    filename: 0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
+    path: docs/adr/0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
+    implemented_in_repo_version: 0.177.151
+    implemented_in_platform_version: 0.130.94
+    implemented_on: '2026-04-03'
+  - adr: 0287
+    title: Woodpecker CI As The API-Driven Continuous Integration Server
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: ci-cd
+    keywords:
+      - woodpecker
+      - ci
+      - as
+      - api-driven
+      - continuous
+      - integration
+      - server
+    summary: We will deploy Woodpecker CI as the platform's event-driven continuous
+    filename: 0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md
+    path: docs/adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md
+    implemented_in_repo_version: 0.177.110
+    implemented_in_platform_version: 0.130.73
+    implemented_on: '2026-03-30'
+  - adr: 0295
+    title: Shared Artifact Cache Plane For Container And Package Dependencies
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: ci-cd
+    keywords:
+      - shared
+      - artifact
+      - cache
+      - plane
+      - container
+      - package
+      - dependencies
+    summary: We will treat reusable dependency downloads as a shared artifact cache plane
+    filename: 0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
+    path: docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
+    implemented_in_repo_version: 0.177.73
+    implemented_in_platform_version: 0.130.59
+    implemented_on: '2026-03-29'
+  - adr: '0305'
+    title: k6 For Continuous Load Testing And SLO Error Budget Burn Validation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: ci-cd
+    keywords:
+      - k6
+      - continuous
+      - load
+      - testing
+      - slo
+      - error
+      - budget
+      - burn
+      - validation
+    summary: We will integrate k6 as the platform's load testing and SLO budget burn
+    filename: 0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+    path: docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+    implemented_in_repo_version: 0.177.120
+    implemented_in_platform_version: 0.130.75
+    implemented_on: '2026-03-31'
+  - adr: '0336'
+    title: Public Entrypoint Leakage Validation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: ci-cd
+    keywords:
+      - validation
+      - public
+      - guardrails
+      - leakage
+      - ci
+      - entrypoint
+    summary: Public entrypoints must be covered by an automated leakage validator that fails
+    filename: 0336-public-entrypoint-leakage-validation.md
+    path: docs/adr/0336-public-entrypoint-leakage-validation.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'

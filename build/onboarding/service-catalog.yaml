@@ -5,7 +5,7 @@
 # Regenerate: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
 # ============================================================================
 schema_version: 1
-generated: '2026-04-03'
+generated: '2026-04-04'
 generated_from:
   - docs/discovery/onboarding-packs.yaml
   - docs/discovery/repo-structure/automation-and-infrastructure.yaml
@@ -129,10 +129,12 @@ repo_structure_sections:
             - tools
             - validation
             - python
-          for_agents: 'validate_repo.sh runs all local checks. generate_adr_index.py regenerates docs/adr/.index.yaml. platform_manifest.py generates build/platform-manifest.json.
+          for_agents: 'validate_repo.sh runs all local checks. generate_adr_index.py regenerates docs/adr/.index.yaml plus docs/adr/index/. adr_query_tool.py reads the ADR shards and reservation ledger. platform_manifest.py generates build/platform-manifest.json.
 
             '
           key_files:
+            adr_query_tool.py: ADR 0325 discovery query helper and reservation-safe ADR window allocator
+            generate_adr_index.py: ADR 0325 generator for docs/adr/.index.yaml and docs/adr/index/ shards
             network_impairment_matrix.py: ADR 0189 CLI and validation helper for governed network impairment scenarios
             policy_checks.py: ADR 0230 validator for the shared OPA and Conftest policy bundle and toolchain
             stage_smoke_suites.py: ADR 0251 validator and runner for stage-scoped smoke suite catalogs and receipt-ready evidence
@@ -213,7 +215,7 @@ repo_structure_sections:
       directories:
         docs/adr:
           purpose: Architecture Decision Records - every major design decision
-          contains: ADR markdown files plus .index.yaml for machine-readable search
+          contains: ADR markdown files, compact .index.yaml root manifest, and shard metadata under index/
           concern: governance, architecture
           keywords:
             - decisions
@@ -222,11 +224,12 @@ repo_structure_sections:
             - rationale
             - consequences
             - adr
-          for_agents: 'Read .index.yaml to find relevant ADRs by keyword - do not enumerate all 320+ files. Start here for project direction and design rationale.
+          for_agents: 'Read .index.yaml to find relevant ADRs by keyword, concern, or reservation context. Load one shard under docs/adr/index/ when you need focused browsing instead of the full corpus.
 
             '
           key_files:
-            .index.yaml: Machine-readable ADR catalog - search by keyword/concern
+            .index.yaml: Root ADR discovery manifest with shard pointers and reservation summary
+            index/reservations.yaml: ADR number and window reservation ledger for parallel authoring
         docs/runbooks:
           purpose: Operational runbooks and procedures for routine tasks
           contains: Step-by-step guides for deployment, troubleshooting, recovery

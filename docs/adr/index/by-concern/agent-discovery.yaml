@@ -1,0 +1,411 @@
+# ============================================================================
+# ADR Concern Shard agent-discovery — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: agent-discovery
+total_adrs: 22
+adrs:
+  - adr: '0017'
+    title: ADR Lifecycle And Implementation Metadata
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: agent-discovery
+    keywords:
+      - adr
+      - lifecycle
+      - implementation
+      - metadata
+    summary: 'Every ADR in this repository must carry these metadata fields near the top of the document:'
+    filename: 0017-adr-lifecycle-and-implementation-metadata.md
+    path: docs/adr/0017-adr-lifecycle-and-implementation-metadata.md
+    implemented_in_repo_version: 0.7.0
+    implemented_on: '2026-03-21'
+  - adr: '0057'
+    title: Mattermost For ChatOps And Operator-Agent Collaboration
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: agent-discovery
+    keywords:
+      - mattermost
+      - chatops
+      - operator-agent
+      - collaboration
+    summary: We will use Mattermost as the private ChatOps and operator-agent collaboration surface.
+    filename: 0057-mattermost-for-chatops-and-operator-agent-collaboration.md
+    path: docs/adr/0057-mattermost-for-chatops-and-operator-agent-collaboration.md
+    implemented_in_repo_version: 0.59.0
+    implemented_in_platform_version: 0.33.0
+    implemented_on: '2026-03-22'
+  - adr: '0060'
+    title: Open WebUI For Operator And Agent Workbench
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: agent-discovery
+    keywords:
+      - open
+      - webui
+      - operator
+      - agent
+      - workbench
+    summary: We will add an internal operator-and-agent workbench using Open WebUI or an equivalent repo-managed LLM console.
+    filename: 0060-open-webui-for-operator-and-agent-workbench.md
+    path: docs/adr/0060-open-webui-for-operator-and-agent-workbench.md
+    implemented_in_repo_version: 0.54.0
+    implemented_in_platform_version: 0.29.0
+    implemented_on: '2026-03-22'
+  - adr: 0069
+    title: Agent Tool Registry And Governed Tool Calls
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: agent-discovery
+    keywords:
+      - agent
+      - tool
+      - registry
+      - governed
+      - calls
+    summary: We will define an agent tool registry as a machine-readable catalog of named tools available to agents and operators.
+    filename: 0069-agent-tool-registry-and-governed-tool-calls.md
+    path: docs/adr/0069-agent-tool-registry-and-governed-tool-calls.md
+    implemented_in_repo_version: 0.61.0
+    implemented_on: '2026-03-22'
+  - adr: '0070'
+    title: Retrieval-Augmented Context For Platform Queries
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: agent-discovery
+    keywords:
+      - retrieval-augmented
+      - context
+      - platform
+      - queries
+    summary: We will build a retrieval-augmented generation (RAG) index over the platform's authoritative documents and expose
+      it as a governed query tool.
+    filename: 0070-rag-context-for-platform-queries.md
+    path: docs/adr/0070-rag-context-for-platform-queries.md
+    implemented_in_repo_version: 0.71.0
+    implemented_in_platform_version: 0.35.0
+    implemented_on: '2026-03-23'
+  - adr: '0071'
+    title: Agent Observation Loop And Autonomous Drift Detection
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: agent-discovery
+    keywords:
+      - agent
+      - observation
+      - loop
+      - autonomous
+      - drift
+      - detection
+    summary: We will implement a scheduled agent observation loop that detects drift and publishes structured findings.
+    filename: 0071-agent-observation-loop-and-drift-detection.md
+    path: docs/adr/0071-agent-observation-loop-and-drift-detection.md
+    implemented_in_repo_version: 0.59.0
+    implemented_on: '2026-03-23'
+  - adr: '0125'
+    title: Agent Capability Bounds and Autonomous Action Policy
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: agent-discovery
+    keywords:
+      - agent
+      - capability
+      - bounds
+      - autonomous
+      - action
+      - policy
+    summary: We will define an agent capability policy as a per-identity configuration in config/agent-policies.yaml. Every
+      automation identity must have a policy entry befo
+    filename: 0125-agent-capability-bounds-and-autonomous-action-policy.md
+    path: docs/adr/0125-agent-capability-bounds-and-autonomous-action-policy.md
+    implemented_in_repo_version: 0.143.0
+    implemented_on: '2026-03-25'
+  - adr: 0128
+    title: Platform Health Composite Index
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: agent-discovery
+    keywords:
+      - platform
+      - health
+      - composite
+      - index
+    summary: We will maintain a per-service composite health index backed by Postgres and refreshed from a Windmill workflow
+      every minute.
+    filename: 0128-platform-health-composite-index.md
+    path: docs/adr/0128-platform-health-composite-index.md
+    implemented_in_repo_version: 0.125.0
+    implemented_on: '2026-03-24'
+  - adr: '0131'
+    title: Multi-Agent Handoff Protocol
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: agent-discovery
+    keywords:
+      - multi-agent
+      - handoff
+      - protocol
+    summary: 'We will implement a repository-managed handoff protocol with four concrete surfaces:'
+    filename: 0131-multi-agent-handoff-protocol.md
+    path: docs/adr/0131-multi-agent-handoff-protocol.md
+    implemented_in_repo_version: 0.126.0
+    implemented_on: '2026-03-24'
+  - adr: '0156'
+    title: Agent Session Workspace Isolation
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: agent-discovery
+    keywords:
+      - agent
+      - session
+      - workspace
+      - isolation
+    summary: We implement a checkout-aware session workspace contract for controller automation.
+    filename: 0156-agent-session-workspace-isolation.md
+    path: docs/adr/0156-agent-session-workspace-isolation.md
+    implemented_in_repo_version: 0.143.2
+    implemented_in_platform_version: 0.130.9
+    implemented_on: '2026-03-26'
+  - adr: '0163'
+    title: Repository Structure Index for Agent Discovery
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: agent-discovery
+    keywords:
+      - repository
+      - structure
+      - index
+      - agent
+      - discovery
+    summary: 'We will maintain a machine-readable repository structure index at .repo-structure.yaml that documents:'
+    filename: 0163-repository-structure-index.md
+    path: docs/adr/0163-repository-structure-index.md
+    implemented_in_repo_version: 0.173.0
+    implemented_on: '2026-03-26'
+  - adr: '0164'
+    title: ADR Metadata Index and Fast Discovery Protocol
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: agent-discovery
+    keywords:
+      - adr
+      - metadata
+      - index
+      - fast
+      - discovery
+      - protocol
+    summary: 'We will maintain a machine-readable ADR metadata index at docs/adr/.index.yaml that includes:'
+    filename: 0164-adr-metadata-index.md
+    path: docs/adr/0164-adr-metadata-index.md
+    implemented_in_repo_version: 0.173.0
+    implemented_on: '2026-03-26'
+  - adr: 0168
+    title: Automated Enforcement of Agent Discovery and Handoff Standards
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: agent-discovery
+    keywords:
+      - automated
+      - enforcement
+      - agent
+      - discovery
+      - handoff
+      - standards
+    summary: 'Add automated validation to the pre-push-gate (scripts/validaterepo.sh) that enforces:'
+    filename: 0168-automated-enforcement-of-agent-standards.md
+    path: docs/adr/0168-automated-enforcement-of-agent-standards.md
+    implemented_in_repo_version: 0.173.0
+    implemented_on: '2026-03-26'
+  - adr: 0181
+    title: Off-Host Witness and Control Metadata Replication
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: agent-discovery
+    keywords:
+      - off-host
+      - witness
+      - control
+      - metadata
+      - replication
+    summary: We will maintain off-host replicated control metadata in at least two independent locations outside the primary
+      Proxmox host.
+    filename: 0181-off-host-witness-and-control-metadata-replication.md
+    path: docs/adr/0181-off-host-witness-and-control-metadata-replication.md
+    implemented_in_repo_version: 0.176.2
+    implemented_in_platform_version: 0.130.25
+    implemented_on: '2026-03-27'
+  - adr: '0224'
+    title: Self-Service Repo Intake And Agent-Assisted Deployments
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-28'
+    concern: agent-discovery
+    keywords:
+      - self-service
+      - repo
+      - intake
+      - agent-assisted
+      - deployments
+    summary: We will extend the existing ADR 0194 Coolify deploy path instead of introducing
+    filename: 0224-self-service-repo-intake-and-agent-assisted-deployments.md
+    path: docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md
+    implemented_in_repo_version: 0.177.31
+    implemented_in_platform_version: 0.130.35
+    implemented_on: '2026-03-28'
+  - adr: '0254'
+    title: ServerClaw As A Distinct Self-Hosted Agent Product On LV3
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: agent-discovery
+    keywords:
+      - serverclaw
+      - as
+      - distinct
+      - self-hosted
+      - agent
+      - product
+      - lv3
+    summary: We will define ServerClaw as a distinct product surface on top of the LV3
+    filename: 0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md
+    path: docs/adr/0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md
+    implemented_in_repo_version: 0.177.91
+    implemented_in_platform_version: 0.130.60
+    implemented_on: '2026-03-30'
+  - adr: 0293
+    title: Livekit As The Real-Time Audio And Voice Channel For Agents
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: agent-discovery
+    keywords:
+      - livekit
+      - as
+      - real-time
+      - audio
+      - voice
+      - channel
+      - agents
+    summary: We will deploy Livekit as the real-time audio and voice channel for agent
+    filename: 0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
+    path: docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
+    implemented_in_repo_version: 0.177.132
+    implemented_in_platform_version: 0.130.83
+    implemented_on: '2026-04-01'
+  - adr: '0313'
+    title: Contextual Help, Glossary, And Escalation Drawer
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-31'
+    concern: agent-discovery
+    keywords:
+      - contextual
+      - help
+      - glossary
+      - escalation
+      - drawer
+    summary: We will provide a shared contextual help and escalation drawer in
+    filename: 0313-contextual-help-glossary-and-escalation-drawer.md
+    path: docs/adr/0313-contextual-help-glossary-and-escalation-drawer.md
+    implemented_in_repo_version: 0.177.139
+    implemented_in_platform_version: 0.130.87
+    implemented_on: '2026-04-02'
+  - adr: '0320'
+    title: Pool-Scoped Deployment Surfaces And Agent Execution Lanes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: agent-discovery
+    keywords:
+      - pool-scoped
+      - deployment
+      - surfaces
+      - agent
+      - execution
+      - lanes
+    summary: Every runtime pool must have its own deployment surface and its own
+    filename: 0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes.md
+    path: docs/adr/0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes.md
+    implemented_in_repo_version: 0.177.142
+    implemented_in_platform_version: 0.130.89
+    implemented_on: '2026-04-02'
+  - adr: '0331'
+    title: Repository-Relative Paths For Public Metadata And Generated Docs
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: agent-discovery
+    keywords:
+      - paths
+      - portability
+      - metadata
+      - workstreams
+      - docs
+      - repository-relative
+      - public
+      - generated
+    summary: Committed public metadata and generated documentation must use repository-relative
+    filename: 0331-repository-relative-paths-for-public-metadata-and-generated-docs.md
+    path: docs/adr/0331-repository-relative-paths-for-public-metadata-and-generated-docs.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
+  - adr: '0335'
+    title: Public-Safe Agent Onboarding Entrypoints
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: agent-discovery
+    keywords:
+      - onboarding
+      - agents
+      - docs
+      - public
+      - entrypoints
+      - public-safe
+      - agent
+    summary: Root onboarding entrypoints must stay public-safe and generic, focusing on repo
+    filename: 0335-public-safe-agent-onboarding-entrypoints.md
+    path: docs/adr/0335-public-safe-agent-onboarding-entrypoints.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
+  - adr: '0337'
+    title: Fork-First Workstream And Worktree Metadata
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: agent-discovery
+    keywords:
+      - workstreams
+      - worktrees
+      - metadata
+      - portability
+      - forks
+      - fork-first
+      - workstream
+      - worktree
+    summary: Workstream and worktree metadata must be fork-first and repository-relative.
+    filename: 0337-fork-first-workstream-and-worktree-metadata.md
+    path: docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'

@@ -1,0 +1,65 @@
+# ============================================================================
+# ADR Concern Shard testing — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: testing
+total_adrs: 3
+adrs:
+  - adr: '0111'
+    title: End-to-End Integration Test Suite
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: testing
+    keywords:
+      - end-to-end
+      - integration
+      - test
+      - suite
+    summary: We will build an end-to-end integration test suite (tests/integration/) written in Python using pytest with httpx
+      for HTTP interactions, targeting the live plat
+    filename: 0111-end-to-end-integration-test-suite.md
+    path: docs/adr/0111-end-to-end-integration-test-suite.md
+    implemented_in_repo_version: 0.100.0
+    implemented_on: '2026-03-23'
+  - adr: 0187
+    title: Anonymized Seed Data Snapshots for Repeatable Tests
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: testing
+    keywords:
+      - anonymized
+      - seed
+      - data
+      - snapshots
+      - repeatable
+      - tests
+    summary: We will maintain anonymized seed data snapshots for repeatable preview, restore, and failover tests.
+    filename: 0187-anonymized-seed-data-snapshots-for-repeatable-tests.md
+    path: docs/adr/0187-anonymized-seed-data-snapshots-for-repeatable-tests.md
+    implemented_in_repo_version: 0.177.24
+    implemented_in_platform_version: 0.130.33
+    implemented_on: '2026-03-28'
+  - adr: '0245'
+    title: Declared-To-Live Service Attestation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: testing
+    keywords:
+      - declared-to-live
+      - service
+      - attestation
+    summary: We will require declared-to-live service attestation for every active
+    filename: 0245-declared-to-live-service-attestation.md
+    path: docs/adr/0245-declared-to-live-service-attestation.md
+    implemented_in_repo_version: 0.177.72
+    implemented_in_platform_version: 0.130.46
+    implemented_on: '2026-03-29'

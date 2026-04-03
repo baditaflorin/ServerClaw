@@ -1,0 +1,2076 @@
+# ============================================================================
+# ADR Range Shard 0200-0299 — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: range
+label: 0200-0299
+range:
+  start: '0200'
+  end: 0299
+total_adrs: 110
+adrs:
+  - adr: '0201'
+    title: Harbor - Vulnerability-Scanning Container Registry
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - harbor
+      - vulnerability-scanning
+      - container
+      - registry
+    summary: 'Migrate registry.lv3.org from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds: Trivy-powered
+      vulnerability scanning on every push integ'
+    filename: 0201-harbor-container-registry-with-cve-scanning.md
+    path: docs/adr/0201-harbor-container-registry-with-cve-scanning.md
+    implemented_in_repo_version: 0.177.63
+    implemented_in_platform_version: 0.130.43
+    implemented_on: '2026-03-29'
+  - adr: '0202'
+    title: Excalidraw Auto Generated Architecture Diagrams
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - excalidraw
+      - auto
+      - generated
+      - architecture
+      - diagrams
+    summary: We will add a repo-managed Excalidraw publication at draw.lv3.org and commit a
+    filename: 0202-excalidraw-auto-generated-architecture-diagrams.md
+    path: docs/adr/0202-excalidraw-auto-generated-architecture-diagrams.md
+    implemented_in_repo_version: 0.177.16
+    implemented_in_platform_version: 0.130.31
+    implemented_on: '2026-03-27'
+  - adr: '0204'
+    title: Self-Correcting Automation Loops
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: automation
+    keywords:
+      - self-correcting
+      - automation
+      - loops
+    summary: We will treat self-correction as an explicit architecture concern.
+    filename: 0204-self-correcting-automation-loops.md
+    path: docs/adr/0204-self-correcting-automation-loops.md
+    implemented_in_repo_version: 0.177.37
+    implemented_in_platform_version: 0.130.35
+    implemented_on: '2026-03-28'
+  - adr: '0205'
+    title: Capability Contracts Before Product Selection
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - capability
+      - contracts
+      - before
+      - product
+      - selection
+    summary: We will define the capability contract before selecting or changing a product on
+    filename: 0205-capability-contracts-before-product-selection.md
+    path: docs/adr/0205-capability-contracts-before-product-selection.md
+    implemented_in_repo_version: 0.177.41
+    implemented_in_platform_version: 0.130.39
+    implemented_on: '2026-03-28'
+  - adr: '0206'
+    title: Ports And Adapters For External Integrations
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - ports
+      - adapters
+      - external
+      - integrations
+    summary: We will use ports and adapters for all critical external integrations.
+    filename: 0206-ports-and-adapters-for-external-integrations.md
+    path: docs/adr/0206-ports-and-adapters-for-external-integrations.md
+    implemented_in_repo_version: 0.177.34
+    implemented_in_platform_version: 0.130.35
+    implemented_on: '2026-03-28'
+  - adr: '0207'
+    title: Anti-Corruption Layers At Provider Boundaries
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - anti-corruption
+      - layers
+      - at
+      - provider
+      - boundaries
+    summary: Every critical external integration must define an anti-corruption layer at the
+    filename: 0207-anti-corruption-layers-at-provider-boundaries.md
+    path: docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md
+    implemented_in_repo_version: 0.177.42
+    implemented_in_platform_version: 0.130.38
+    implemented_on: '2026-03-28'
+  - adr: 0208
+    title: Dependency Direction And Composition Roots
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - dependency
+      - direction
+      - composition
+      - roots
+    summary: We will enforce a dependency rule with explicit composition roots.
+    filename: 0208-dependency-direction-and-composition-roots.md
+    path: docs/adr/0208-dependency-direction-and-composition-roots.md
+    implemented_in_repo_version: 0.177.40
+    implemented_on: '2026-03-28'
+  - adr: 0209
+    title: Use-Case Services And Thin Delivery Adapters
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - use-case
+      - services
+      - thin
+      - delivery
+      - adapters
+    summary: When a platform capability is exposed through multiple delivery surfaces, the
+    filename: 0209-use-case-services-and-thin-delivery-adapters.md
+    path: docs/adr/0209-use-case-services-and-thin-delivery-adapters.md
+    implemented_in_repo_version: 0.177.38
+    implemented_in_platform_version: 0.130.38
+    implemented_on: '2026-03-28'
+  - adr: '0210'
+    title: Canonical Domain Models Over Vendor Schemas
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - canonical
+      - domain
+      - models
+      - over
+      - vendor
+      - schemas
+    summary: The repository will prefer canonical domain models over vendor-native schemas
+    filename: 0210-canonical-domain-models-over-vendor-schemas.md
+    path: docs/adr/0210-canonical-domain-models-over-vendor-schemas.md
+    implemented_in_repo_version: 0.177.35
+    implemented_in_platform_version: 0.130.37
+    implemented_on: '2026-03-28'
+  - adr: '0211'
+    title: Shared Policy Packs And Rule Registries
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - shared
+      - policy
+      - packs
+      - rule
+      - registries
+    summary: We will centralize shared platform policies into reusable policy packs or rule
+    filename: 0211-shared-policy-packs-and-rule-registries.md
+    path: docs/adr/0211-shared-policy-packs-and-rule-registries.md
+    implemented_in_repo_version: 0.177.39
+    implemented_in_platform_version: 0.130.38
+    implemented_on: '2026-03-28'
+  - adr: '0212'
+    title: Replaceability Scorecards And Vendor Exit Plans
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - replaceability
+      - scorecards
+      - vendor
+      - exit
+      - plans
+    summary: Every critical product ADR must include a replaceability scorecard and a vendor
+    filename: 0212-replaceability-scorecards-and-vendor-exit-plans.md
+    path: docs/adr/0212-replaceability-scorecards-and-vendor-exit-plans.md
+    implemented_in_repo_version: 0.177.36
+    implemented_in_platform_version: 0.130.36
+    implemented_on: '2026-03-28'
+  - adr: '0213'
+    title: Architecture Fitness Functions In The Validation Gate
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - architecture
+      - fitness
+      - functions
+      - validation
+      - gate
+    summary: We will add architecture fitness functions to the repository validation gate.
+    filename: 0213-architecture-fitness-functions-in-the-validation-gate.md
+    path: docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md
+    implemented_in_repo_version: 0.177.36
+    implemented_in_platform_version: 0.130.36
+    implemented_on: '2026-03-28'
+  - adr: '0214'
+    title: Production And Staging Cells As The Unit Of High Availability
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - production
+      - staging
+      - cells
+      - as
+      - unit
+      - high
+      - availability
+    summary: We will treat each environment as a cell. A cell is the smallest complete
+    filename: 0214-production-and-staging-cells-as-the-unit-of-high-availability.md
+    path: docs/adr/0214-production-and-staging-cells-as-the-unit-of-high-availability.md
+  - adr: '0215'
+    title: Node Role Taxonomy For Bootstrap, Control, State, Edge, Workload, Observability, Recovery, And Build
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: bootstrap
+    keywords:
+      - node
+      - role
+      - taxonomy
+      - bootstrap
+      - control
+      - state
+      - edge
+      - workload
+      - observability
+      - recovery
+    summary: We will classify every server, VM, and future node pool by primary node role.
+    filename: 0215-node-role-taxonomy-for-bootstrap-control-state-edge-workload-observability-recovery-and-build.md
+    path: docs/adr/0215-node-role-taxonomy-for-bootstrap-control-state-edge-workload-observability-recovery-and-build.md
+  - adr: '0216'
+    title: Service Criticality Rings For Foundation, Core, Supporting, And Peripheral Functions
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - service
+      - criticality
+      - rings
+      - foundation
+      - core
+      - supporting
+      - peripheral
+      - functions
+    summary: We will classify services into criticality rings. Rings express recovery and
+    filename: 0216-service-criticality-rings-for-foundation-core-supporting-and-peripheral-functions.md
+    path: docs/adr/0216-service-criticality-rings-for-foundation-core-supporting-and-peripheral-functions.md
+  - adr: '0217'
+    title: One-Way Environment Data Flow And Replication Authority
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - one-way
+      - environment
+      - data
+      - flow
+      - replication
+      - authority
+    summary: We will enforce one-way data authority between environments.
+    filename: 0217-one-way-environment-data-flow-and-replication-authority.md
+    path: docs/adr/0217-one-way-environment-data-flow-and-replication-authority.md
+  - adr: 0218
+    title: Relational Database Replication And Single-Writer Policy
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - relational
+      - database
+      - replication
+      - single-writer
+      - policy
+    summary: We will use a single-writer, environment-local HA policy for relational
+    filename: 0218-relational-database-replication-and-single-writer-policy.md
+    path: docs/adr/0218-relational-database-replication-and-single-writer-policy.md
+  - adr: 0219
+    title: Data-Class Replication Policies For Queues, Object Stores, Search, Cache, Secrets, And Time-Series
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - data-class
+      - replication
+      - policies
+      - queues
+      - object
+      - stores
+      - search
+      - cache
+      - secrets
+      - time-series
+    summary: We will govern replication by data class rather than by product name alone.
+    filename: 0219-data-class-replication-policies-for-queues-object-stores-search-cache-secrets-and-time-series.md
+    path: docs/adr/0219-data-class-replication-policies-for-queues-object-stores-search-cache-secrets-and-time-series.md
+  - adr: '0220'
+    title: Bootstrap And Recovery Sequencing For Environment Cells
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: bootstrap
+    keywords:
+      - bootstrap
+      - recovery
+      - sequencing
+      - environment
+      - cells
+    summary: We will define a standard bootstrap and recovery sequence for every
+    filename: 0220-bootstrap-and-recovery-sequencing-for-environment-cells.md
+    path: docs/adr/0220-bootstrap-and-recovery-sequencing-for-environment-cells.md
+  - adr: '0221'
+    title: Role-Based Node Pools And Placement Boundaries
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: automation
+    keywords:
+      - role-based
+      - node
+      - pools
+      - placement
+      - boundaries
+    summary: We will use role-based node pools with explicit placement boundaries.
+    filename: 0221-role-based-node-pools-and-placement-boundaries.md
+    path: docs/adr/0221-role-based-node-pools-and-placement-boundaries.md
+  - adr: '0222'
+    title: Failover Authority And Service Endpoint Separation
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - failover
+      - authority
+      - service
+      - endpoint
+      - separation
+    summary: Every replicated service must declare both failover authority and
+    filename: 0222-failover-authority-and-service-endpoint-separation.md
+    path: docs/adr/0222-failover-authority-and-service-endpoint-separation.md
+  - adr: '0223'
+    title: Canonical HA Topology Catalog And Reusable Automation Profiles
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: vm-topology
+    keywords:
+      - canonical
+      - ha
+      - topology
+      - catalog
+      - reusable
+      - automation
+      - profiles
+    summary: We will centralize HA and replication intent in one canonical topology
+    filename: 0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
+    path: docs/adr/0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
+  - adr: '0224'
+    title: Self-Service Repo Intake And Agent-Assisted Deployments
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-28'
+    concern: agent-discovery
+    keywords:
+      - self-service
+      - repo
+      - intake
+      - agent-assisted
+      - deployments
+    summary: We will extend the existing ADR 0194 Coolify deploy path instead of introducing
+    filename: 0224-self-service-repo-intake-and-agent-assisted-deployments.md
+    path: docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md
+    implemented_in_repo_version: 0.177.31
+    implemented_in_platform_version: 0.130.35
+    implemented_on: '2026-03-28'
+  - adr: '0224'
+    title: Server-Resident Operations As The Default Control Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: resilience
+    keywords:
+      - server-resident
+      - operations
+      - as
+      - default
+      - control
+      - model
+    summary: We will make server-resident operations the default control model.
+    filename: 0224-server-resident-operations-as-the-default-control-model.md
+    path: docs/adr/0224-server-resident-operations-as-the-default-control-model.md
+    implemented_in_repo_version: 0.177.52
+    implemented_in_platform_version: 0.130.42
+    implemented_on: '2026-03-28'
+  - adr: '0225'
+    title: Server-Resident Reconciliation Via Ansible Pull
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - server-resident
+      - reconciliation
+      - ansible
+      - pull
+    summary: We will use ansible-pull as the default server-resident reconcile
+    filename: 0225-server-resident-reconciliation-via-ansible-pull.md
+    path: docs/adr/0225-server-resident-reconciliation-via-ansible-pull.md
+    implemented_in_repo_version: 0.177.43
+    implemented_in_platform_version: 0.130.40
+    implemented_on: '2026-03-28'
+  - adr: '0226'
+    title: Systemd Units, Timers, And Paths For Host-Resident Control Loops
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - systemd
+      - units
+      - timers
+      - paths
+      - host-resident
+      - control
+      - loops
+    summary: We will use systemd as the canonical host-resident supervisor for platform
+    filename: 0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+    path: docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+    implemented_in_repo_version: 0.177.52
+    implemented_in_platform_version: 0.130.38
+    implemented_on: '2026-03-28'
+  - adr: '0227'
+    title: Bounded Command Execution Via Systemd-Run And Approved Wrappers
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - bounded
+      - command
+      - execution
+      - systemd-run
+      - approved
+      - wrappers
+    summary: We will execute routine governed commands through repo-managed wrappers that
+    filename: 0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md
+    path: docs/adr/0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md
+    implemented_in_repo_version: 0.177.46
+    implemented_in_platform_version: 0.130.41
+    implemented_on: '2026-03-28'
+  - adr: 0228
+    title: Windmill As The Default Browser-And-API Operations Surface
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: automation
+    keywords:
+      - windmill
+      - as
+      - default
+      - browser-and-api
+      - operations
+      - surface
+    summary: We will treat Windmill as the default browser-first and API-first operations
+    filename: 0228-windmill-as-the-default-browser-and-api-operations-surface.md
+    path: docs/adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md
+    implemented_in_repo_version: 0.177.70
+    implemented_in_platform_version: 0.130.48
+    implemented_on: '2026-03-29'
+  - adr: 0229
+    title: Gitea Actions Runners For On-Platform Validation And Release Preparation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - gitea
+      - actions
+      - runners
+      - on-platform
+      - validation
+      - release
+      - preparation
+    summary: We will use Gitea Actions runners (actrunner) as the default on-platform
+    filename: 0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
+    path: docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
+    implemented_in_repo_version: 0.165.0
+    implemented_in_platform_version: 0.130.15
+    implemented_on: '2026-03-26'
+  - adr: '0230'
+    title: Policy Decisions Via Open Policy Agent And Conftest
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - policy
+      - decisions
+      - open
+      - agent
+      - conftest
+    summary: We will use Open Policy Agent (OPA) as the shared decision engine and
+    filename: 0230-policy-decisions-via-open-policy-agent-and-conftest.md
+    path: docs/adr/0230-policy-decisions-via-open-policy-agent-and-conftest.md
+    implemented_in_repo_version: 0.177.49
+    implemented_in_platform_version: 0.130.42
+    implemented_on: '2026-03-28'
+  - adr: '0231'
+    title: Local Secret Delivery Via OpenBao Agent And Systemd Credentials
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - local
+      - secret
+      - delivery
+      - openbao
+      - agent
+      - systemd
+      - credentials
+    summary: We will standardize host-local secret delivery on OpenBao Agent plus systemd
+    filename: 0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+    path: docs/adr/0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+    implemented_in_repo_version: 0.177.44
+    implemented_in_platform_version: 0.130.38
+    implemented_on: '2026-03-28'
+  - adr: '0232'
+    title: Nomad For Durable Batch And Long-Running Internal Jobs
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - nomad
+      - durable
+      - batch
+      - long-running
+      - internal
+      - jobs
+    summary: We will adopt Nomad as the future distributed scheduler for internal jobs
+    filename: 0232-nomad-for-durable-batch-and-long-running-internal-jobs.md
+    path: docs/adr/0232-nomad-for-durable-batch-and-long-running-internal-jobs.md
+    implemented_in_repo_version: 0.177.65
+    implemented_in_platform_version: 0.130.44
+    implemented_on: '2026-03-29'
+  - adr: '0233'
+    title: Signed Release Bundles Via Gitea Releases And Cosign
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - signed
+      - release
+      - bundles
+      - gitea
+      - releases
+      - cosign
+    summary: We will package server-consumable control inputs as signed release bundles
+    filename: 0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+    path: docs/adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+    implemented_in_repo_version: 0.177.54
+    implemented_in_platform_version: 0.130.43
+    implemented_on: '2026-03-28'
+  - adr: '0234'
+    title: Shared Human App Shell And Navigation Via PatternFly
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - shared
+      - human
+      - app
+      - shell
+      - navigation
+      - patternfly
+    summary: We will use PatternFly as the default open source app-shell and design
+    filename: 0234-shared-human-app-shell-and-navigation-via-patternfly.md
+    path: docs/adr/0234-shared-human-app-shell-and-navigation-via-patternfly.md
+    implemented_in_repo_version: 0.177.72
+    implemented_in_platform_version: 0.130.50
+    implemented_on: '2026-03-29'
+  - adr: '0235'
+    title: Cross-Application Launcher And Favorites Via PatternFly Application Launcher
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - cross-application
+      - launcher
+      - favorites
+      - patternfly
+      - application
+    summary: We will standardize on the PatternFly Application Launcher as the default
+    filename: 0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md
+    path: docs/adr/0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md
+    implemented_in_repo_version: 0.177.70
+    implemented_in_platform_version: 0.130.48
+    implemented_on: '2026-03-29'
+  - adr: '0236'
+    title: Server-State And Mutation Feedback Via TanStack Query
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - server-state
+      - mutation
+      - feedback
+      - tanstack
+      - query
+    summary: We will use TanStack Query as the default server-state and mutation-feedback
+    filename: 0236-server-state-and-mutation-feedback-via-tanstack-query.md
+    path: docs/adr/0236-server-state-and-mutation-feedback-via-tanstack-query.md
+    implemented_in_repo_version: 0.177.81
+    implemented_in_platform_version: 0.130.43
+    implemented_on: '2026-03-28'
+  - adr: '0237'
+    title: Schema-First Human Forms Via React Hook Form And Zod
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - schema-first
+      - human
+      - forms
+      - react
+      - hook
+      - form
+      - zod
+    summary: We will build first-party structured forms with React Hook Form for form
+    filename: 0237-schema-first-human-forms-via-react-hook-form-and-zod.md
+    path: docs/adr/0237-schema-first-human-forms-via-react-hook-form-and-zod.md
+    implemented_in_repo_version: 0.177.74
+    implemented_in_platform_version: 0.130.43
+    implemented_on: '2026-03-28'
+  - adr: 0238
+    title: Data-Dense Operator Grids Via AG Grid Community
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - data-dense
+      - operator
+      - grids
+      - ag
+      - grid
+      - community
+    summary: We will use AG Grid Community as the default open source grid library for
+    filename: 0238-data-dense-operator-grids-via-ag-grid-community.md
+    path: docs/adr/0238-data-dense-operator-grids-via-ag-grid-community.md
+    implemented_in_repo_version: 0.177.66
+    implemented_in_platform_version: 0.130.46
+    implemented_on: '2026-03-29'
+  - adr: 0239
+    title: Browser-Local Search Experience Via Pagefind
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: documentation
+    keywords:
+      - browser-local
+      - search
+      - experience
+      - pagefind
+    summary: We will use Pagefind as the default browser-local search layer for static or
+    filename: 0239-browser-local-search-experience-via-pagefind.md
+    path: docs/adr/0239-browser-local-search-experience-via-pagefind.md
+    implemented_in_repo_version: 0.177.62
+    implemented_in_platform_version: 0.130.43
+    implemented_on: '2026-03-28'
+  - adr: '0240'
+    title: Operator Visualization Panels Via Apache ECharts
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - operator
+      - visualization
+      - panels
+      - apache
+      - echarts
+    summary: We will use Apache ECharts as the default charting and lightweight
+    filename: 0240-operator-visualization-panels-via-apache-echarts.md
+    path: docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
+    implemented_in_repo_version: 0.177.64
+    implemented_in_platform_version: 0.130.44
+    implemented_on: '2026-03-28'
+  - adr: '0241'
+    title: Rich Content And Inline Knowledge Editing Via Tiptap
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - rich
+      - content
+      - inline
+      - knowledge
+      - editing
+      - tiptap
+    summary: We will use Tiptap as the default rich-content editor framework for
+    filename: 0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+    path: docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+    implemented_in_repo_version: 0.177.61
+    implemented_in_platform_version: 0.130.43
+    implemented_on: '2026-03-29'
+  - adr: '0242'
+    title: Guided Human Onboarding Via Shepherd Tours
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - guided
+      - human
+      - onboarding
+      - shepherd
+      - tours
+    summary: We will use Shepherd.js for guided first-run tours, contextual onboarding,
+    filename: 0242-guided-human-onboarding-via-shepherd-tours.md
+    path: docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md
+    implemented_in_repo_version: 0.177.58
+    implemented_in_platform_version: 0.130.43
+    implemented_on: '2026-03-28'
+  - adr: '0243'
+    title: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: identity
+    keywords:
+      - component
+      - stories
+      - accessibility
+      - ui
+      - contracts
+      - storybook
+      - playwright
+      - axe-core
+    summary: We will use Storybook for component stories and docs, Playwright for
+    filename: 0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
+    path: docs/adr/0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
+  - adr: '0244'
+    title: Runtime Assurance Matrix Per Service And Environment
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - runtime
+      - assurance
+      - matrix
+      - per
+      - service
+      - environment
+    summary: We will govern runtime assurance through a service-by-environment assurance
+    filename: 0244-runtime-assurance-matrix-per-service-and-environment.md
+    path: docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
+    implemented_in_repo_version: 0.177.80
+    implemented_in_platform_version: 0.130.54
+    implemented_on: '2026-03-29'
+  - adr: '0245'
+    title: Declared-To-Live Service Attestation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: testing
+    keywords:
+      - declared-to-live
+      - service
+      - attestation
+    summary: We will require declared-to-live service attestation for every active
+    filename: 0245-declared-to-live-service-attestation.md
+    path: docs/adr/0245-declared-to-live-service-attestation.md
+    implemented_in_repo_version: 0.177.72
+    implemented_in_platform_version: 0.130.46
+    implemented_on: '2026-03-29'
+  - adr: '0246'
+    title: Startup, Readiness, Liveness, And Degraded State Semantics
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: release
+    keywords:
+      - startup
+      - readiness
+      - liveness
+      - degraded
+      - state
+      - semantics
+    summary: 'We will standardize four service-health semantics for runtime assurance:'
+    filename: 0246-startup-readiness-liveness-and-degraded-state-semantics.md
+    path: docs/adr/0246-startup-readiness-liveness-and-degraded-state-semantics.md
+    implemented_in_repo_version: 0.177.60
+    implemented_in_platform_version: 0.130.44
+    implemented_on: '2026-03-28'
+  - adr: '0247'
+    title: Authenticated Browser Journey Verification Via Playwright
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - authenticated
+      - browser
+      - journey
+      - verification
+      - playwright
+    summary: We will use Playwright as the default browser-journey verification tool for
+    filename: 0247-authenticated-browser-journey-verification-via-playwright.md
+    path: docs/adr/0247-authenticated-browser-journey-verification-via-playwright.md
+  - adr: 0248
+    title: Session And Logout Authority Across Keycloak, Oauth2-Proxy, And App Surfaces
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - session
+      - logout
+      - authority
+      - across
+      - keycloak
+      - oauth2-proxy
+      - app
+      - surfaces
+    summary: We will make Keycloak the session authority for protected browser surfaces
+    filename: 0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-apps.md
+    path: docs/adr/0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-apps.md
+    implemented_in_repo_version: 0.177.63
+    implemented_in_platform_version: 0.130.45
+    implemented_on: '2026-03-29'
+  - adr: 0249
+    title: HTTPS And TLS Assurance Via Blackbox Exporter And testssl.sh
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - https
+      - tls
+      - assurance
+      - blackbox
+      - exporter
+      - testssl
+      - sh
+    summary: We will use Prometheus Blackbox Exporter for recurring protocol-level probe
+    filename: 0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
+    path: docs/adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
+    implemented_in_repo_version: 0.177.82
+    implemented_in_platform_version: 0.130.56
+    implemented_on: '2026-03-29'
+  - adr: '0250'
+    title: Log Ingestion And Queryability Canaries Via Loki Canary
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: monitoring
+    keywords:
+      - log
+      - ingestion
+      - queryability
+      - canaries
+      - loki
+      - canary
+    summary: We will use Loki Canary as the default end-to-end log-path assurance signal
+    filename: 0250-log-ingestion-and-queryability-canaries-via-loki-canary.md
+    path: docs/adr/0250-log-ingestion-and-queryability-canaries-via-loki-canary.md
+    implemented_in_repo_version: 0.177.57
+    implemented_in_platform_version: 0.130.44
+    implemented_on: '2026-03-28'
+  - adr: '0251'
+    title: Stage-Scoped Smoke Suites And Promotion Gates
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - stage-scoped
+      - smoke
+      - suites
+      - promotion
+      - gates
+    summary: We will require stage-scoped smoke suites for active services and wire them
+    filename: 0251-stage-scoped-smoke-suites-and-promotion-gates.md
+    path: docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md
+    implemented_in_repo_version: 0.177.86
+    implemented_in_platform_version: 0.130.58
+    implemented_on: '2026-03-29'
+  - adr: '0252'
+    title: Route And DNS Publication Assertion Ledger
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: networking
+    keywords:
+      - route
+      - dns
+      - publication
+      - assertion
+      - ledger
+    summary: We will maintain a route and DNS publication assertion ledger for all
+    filename: 0252-route-and-dns-publication-assertion-ledger.md
+    path: docs/adr/0252-route-and-dns-publication-assertion-ledger.md
+    implemented_in_repo_version: 0.177.68
+    implemented_in_platform_version: 0.130.43
+    implemented_on: '2026-03-29'
+  - adr: '0253'
+    title: Unified Runtime Assurance Scoreboard And Rollup
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - unified
+      - runtime
+      - assurance
+      - scoreboard
+      - rollup
+    summary: We will publish a unified runtime assurance scoreboard that rolls the
+    filename: 0253-unified-runtime-assurance-scoreboard-and-rollup.md
+    path: docs/adr/0253-unified-runtime-assurance-scoreboard-and-rollup.md
+    implemented_in_repo_version: 0.177.59
+    implemented_in_platform_version: 0.130.44
+    implemented_on: '2026-03-29'
+  - adr: '0254'
+    title: ServerClaw As A Distinct Self-Hosted Agent Product On LV3
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: agent-discovery
+    keywords:
+      - serverclaw
+      - as
+      - distinct
+      - self-hosted
+      - agent
+      - product
+      - lv3
+    summary: We will define ServerClaw as a distinct product surface on top of the LV3
+    filename: 0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md
+    path: docs/adr/0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md
+    implemented_in_repo_version: 0.177.91
+    implemented_in_platform_version: 0.130.60
+    implemented_on: '2026-03-30'
+  - adr: '0255'
+    title: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - matrix
+      - synapse
+      - as
+      - canonical
+      - serverclaw
+      - conversation
+      - hub
+    summary: We will use Matrix Synapse as the canonical conversation hub for
+    filename: 0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md
+    path: docs/adr/0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md
+    implemented_in_repo_version: 0.177.85
+    implemented_in_platform_version: 0.130.58
+    implemented_on: '2026-03-29'
+  - adr: '0256'
+    title: Mautrix Bridges For External Chat Channel Adapters
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: networking
+    keywords:
+      - mautrix
+      - bridges
+      - external
+      - chat
+      - channel
+      - adapters
+    summary: We will use mautrix bridges as the default external chat-channel adapters
+    filename: 0256-mautrix-bridges-for-external-chat-channel-adapters.md
+    path: docs/adr/0256-mautrix-bridges-for-external-chat-channel-adapters.md
+    implemented_in_repo_version: 0.177.98
+    implemented_in_platform_version: 0.130.65
+    implemented_on: '2026-03-30'
+  - adr: '0257'
+    title: OpenClaw-Compatible SKILL.md Packs And Workspace Precedence For ServerClaw
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - openclaw-compatible
+      - skill
+      - md
+      - packs
+      - workspace
+      - precedence
+      - serverclaw
+    summary: ServerClaw will adopt OpenClaw-compatible SKILL.md skill packs as its
+    filename: 0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md
+    path: docs/adr/0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md
+    implemented_in_repo_version: 0.177.117
+    implemented_in_platform_version: 0.130.76
+    implemented_on: '2026-03-31'
+  - adr: 0258
+    title: Temporal As The Durable ServerClaw Session Orchestrator
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: monitoring
+    keywords:
+      - temporal
+      - as
+      - durable
+      - serverclaw
+      - session
+      - orchestrator
+    summary: We will use Temporal as the durable workflow engine for ServerClaw session
+    filename: 0258-temporal-as-the-durable-serverclaw-session-orchestrator.md
+    path: docs/adr/0258-temporal-as-the-durable-serverclaw-session-orchestrator.md
+  - adr: 0259
+    title: n8n As The External App Connector Fabric For ServerClaw
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - n8n
+      - as
+      - external
+      - app
+      - connector
+      - fabric
+      - serverclaw
+    summary: We will use n8n as the external app connector fabric for ServerClaw.
+    filename: 0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md
+    path: docs/adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md
+    implemented_in_repo_version: 0.177.79
+    implemented_in_platform_version: 0.130.50
+    implemented_on: '2026-03-29'
+  - adr: '0260'
+    title: Nextcloud As The Canonical Personal Data Plane For ServerClaw
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - nextcloud
+      - as
+      - canonical
+      - personal
+      - data
+      - plane
+      - serverclaw
+    summary: We will use Nextcloud as the canonical personal data plane for ServerClaw.
+    filename: 0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md
+    path: docs/adr/0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md
+    implemented_in_repo_version: 0.177.93
+    implemented_in_platform_version: 0.130.62
+    implemented_on: '2026-03-30'
+  - adr: '0261'
+    title: Playwright Browser Runners For ServerClaw Web Action And Extraction
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - playwright
+      - browser
+      - runners
+      - serverclaw
+      - web
+      - action
+      - extraction
+    summary: We will use Playwright browser runners as the default ServerClaw browser
+    filename: 0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md
+    path: docs/adr/0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md
+    implemented_in_repo_version: 0.177.95
+    implemented_in_platform_version: 0.130.61
+    implemented_on: '2026-03-30'
+  - adr: '0262'
+    title: OpenFGA And Keycloak For Delegated ServerClaw Capability Authorization
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - openfga
+      - keycloak
+      - delegated
+      - serverclaw
+      - capability
+      - authorization
+    summary: We will use Keycloak for authentication and OpenFGA for delegated
+    filename: 0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization.md
+    path: docs/adr/0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization.md
+    implemented_in_repo_version: 0.177.95
+    implemented_in_platform_version: 0.130.63
+    implemented_on: '2026-03-30'
+  - adr: '0263'
+    title: Qdrant, PostgreSQL, And Local Search As The ServerClaw Memory Substrate
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: documentation
+    keywords:
+      - qdrant
+      - postgresql
+      - local
+      - search
+      - as
+      - serverclaw
+      - memory
+      - substrate
+    summary: We will use PostgreSQL, Qdrant, and the local search fabric together as the
+    filename: 0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md
+    path: docs/adr/0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md
+    implemented_in_repo_version: 0.177.90
+    implemented_in_platform_version: 0.130.60
+    implemented_on: '2026-03-29'
+  - adr: '0264'
+    title: Failure-Domain-Isolated Validation Lanes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - failure-domain-isolated
+      - validation
+      - lanes
+    summary: We will split repository and promotion validation into failure-domain-isolated
+    filename: 0264-failure-domain-isolated-validation-lanes.md
+    path: docs/adr/0264-failure-domain-isolated-validation-lanes.md
+    implemented_in_repo_version: 0.177.84
+    implemented_in_platform_version: 0.130.58
+    implemented_on: '2026-03-29'
+  - adr: '0265'
+    title: Immutable Validation Snapshots For Remote Builders And Schema Checks
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - immutable
+      - validation
+      - snapshots
+      - remote
+      - builders
+      - schema
+      - checks
+    summary: We will run remote builder and schema validation against immutable repository
+    filename: 0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+    path: docs/adr/0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+    implemented_in_repo_version: 0.177.78
+    implemented_in_platform_version: 0.130.53
+    implemented_on: '2026-03-29'
+  - adr: '0266'
+    title: Validation Runner Capability Contracts And Environment Attestation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - validation
+      - runner
+      - capability
+      - contracts
+      - environment
+      - attestation
+    summary: We will require every local or remote validation runner to publish a
+    filename: 0266-validation-runner-capability-contracts-and-environment-attestation.md
+    path: docs/adr/0266-validation-runner-capability-contracts-and-environment-attestation.md
+    implemented_in_repo_version: 0.177.88
+    implemented_in_platform_version: 0.130.60
+    implemented_on: '2026-03-30'
+  - adr: '0267'
+    title: Expiring Gate Bypass Waivers With Structured Reason Codes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - expiring
+      - gate
+      - bypass
+      - waivers
+      - structured
+      - reason
+      - codes
+    summary: We will treat every gate bypass as an expiring waiver with a structured
+    filename: 0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md
+    path: docs/adr/0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md
+    implemented_in_repo_version: 0.177.105
+    implemented_in_platform_version: 0.130.70
+    implemented_on: '2026-03-30'
+  - adr: 0268
+    title: Fresh-Worktree Bootstrap Manifests For Generated Artifacts And Local Inputs
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: bootstrap
+    keywords:
+      - fresh-worktree
+      - bootstrap
+      - manifests
+      - generated
+      - artifacts
+      - local
+      - inputs
+    summary: We will require a bootstrap manifest for every fresh worktree path that can
+    filename: 0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+    path: docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+    implemented_in_repo_version: 0.177.83
+    implemented_in_platform_version: 0.130.57
+    implemented_on: '2026-03-29'
+  - adr: 0269
+    title: Vulnerability Budgets And Image-Host Freshness Promotion Gates
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - vulnerability
+      - budgets
+      - image-host
+      - freshness
+      - promotion
+      - gates
+    summary: We will introduce vulnerability budgets and freshness gates for managed
+    filename: 0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+    path: docs/adr/0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+    implemented_in_repo_version: 0.177.72
+    implemented_in_platform_version: 0.130.50
+    implemented_on: '2026-03-29'
+  - adr: '0270'
+    title: Docker Publication Self-Healing And Port-Programming Assertions
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - docker
+      - publication
+      - self-healing
+      - port-programming
+      - assertions
+    summary: We will add Docker publication self-healing and port-programming
+    filename: 0270-docker-publication-self-healing-and-port-programming-assertions.md
+    path: docs/adr/0270-docker-publication-self-healing-and-port-programming-assertions.md
+    implemented_in_repo_version: 0.177.94
+    implemented_in_platform_version: 0.130.62
+    implemented_on: '2026-03-30'
+  - adr: '0271'
+    title: Backup Coverage Assertion Ledger And Backup-Of-Backup Policy
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: storage
+    keywords:
+      - backup
+      - coverage
+      - assertion
+      - ledger
+      - backup-of-backup
+      - policy
+    summary: We will maintain a backup coverage assertion ledger and a declared
+    filename: 0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md
+    path: docs/adr/0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md
+    implemented_in_repo_version: 0.177.75
+    implemented_in_platform_version: 0.130.51
+    implemented_on: '2026-03-29'
+  - adr: '0272'
+    title: Restore Readiness Ladders And Stateful Warm-Up Verification Profiles
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: api
+    keywords:
+      - restore
+      - readiness
+      - ladders
+      - stateful
+      - warm-up
+      - verification
+      - profiles
+    summary: We will verify restores through readiness ladders and
+    filename: 0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+    path: docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+    implemented_in_repo_version: 0.177.75
+    implemented_in_platform_version: 0.130.51
+    implemented_on: '2026-03-29'
+  - adr: '0273'
+    title: Public Endpoint Admission Control For DNS Catalog And Certificate Concordance
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: networking
+    keywords:
+      - public
+      - endpoint
+      - admission
+      - control
+      - dns
+      - catalog
+      - certificate
+      - concordance
+    summary: We will require public endpoint admission control that proves concordance
+    filename: 0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+    path: docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+    implemented_in_repo_version: 0.177.77
+    implemented_in_platform_version: 0.130.52
+    implemented_on: '2026-03-29'
+  - adr: '0274'
+    title: Governed Base Image Mirrors And Warm Caches For Repo Deployments
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - governed
+      - base
+      - image
+      - mirrors
+      - warm
+      - caches
+      - repo
+      - deployments
+    summary: We will add a cache-first base-image policy for governed repo deployments.
+    filename: 0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md
+    path: docs/adr/0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md
+    implemented_in_repo_version: 0.177.104
+    implemented_in_platform_version: 0.130.69
+    implemented_on: '2026-03-30'
+  - adr: '0274'
+    title: MinIO As The S3-Compatible Object Storage Layer
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: storage
+    keywords:
+      - minio
+      - as
+      - s3-compatible
+      - object
+      - storage
+      - layer
+    summary: We will deploy MinIO in standalone mode on the docker-runtime VM as the
+    filename: 0274-minio-as-the-s3-compatible-object-storage-layer.md
+    path: docs/adr/0274-minio-as-the-s3-compatible-object-storage-layer.md
+    implemented_in_repo_version: 0.177.124
+    implemented_in_platform_version: 0.130.79
+    implemented_on: '2026-03-31'
+  - adr: '0275'
+    title: Apache Tika Server For Document Text Extraction In The RAG Pipeline
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: ci-cd
+    keywords:
+      - apache
+      - tika
+      - server
+      - document
+      - text
+      - extraction
+      - rag
+      - pipeline
+    summary: We will deploy Apache Tika Server as the canonical document extraction
+    filename: 0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
+    path: docs/adr/0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
+    implemented_in_repo_version: 0.177.151
+    implemented_in_platform_version: 0.130.94
+    implemented_on: '2026-04-03'
+  - adr: '0276'
+    title: NATS JetStream As The Platform Event Bus
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: networking
+    keywords:
+      - nats
+      - jetstream
+      - as
+      - platform
+      - event
+      - bus
+    summary: We will deploy NATS with JetStream enabled as the platform event bus.
+    filename: 0276-nats-jetstream-as-the-platform-event-bus.md
+    path: docs/adr/0276-nats-jetstream-as-the-platform-event-bus.md
+    implemented_in_repo_version: 0.177.97
+    implemented_in_platform_version: 0.130.64
+    implemented_on: '2026-03-30'
+  - adr: '0277'
+    title: Typesense As The Full-Text Search Engine For Internal Structured Data
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: documentation
+    keywords:
+      - typesense
+      - as
+      - full-text
+      - search
+      - engine
+      - internal
+      - structured
+      - data
+    summary: We will deploy Typesense as the full-text search engine for internal
+    filename: 0277-typesense-as-the-full-text-search-engine-for-internal-structured-data.md
+    path: docs/adr/0277-typesense-as-the-full-text-search-engine-for-internal-structured-data.md
+    implemented_in_repo_version: 0.177.125
+    implemented_in_platform_version: 0.130.80
+    implemented_on: '2026-03-31'
+  - adr: 0278
+    title: Gotenberg As The Document-To-PDF Rendering Service
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - gotenberg
+      - as
+      - document-to-pdf
+      - rendering
+      - service
+    summary: We will deploy Gotenberg as the shared document-to-PDF rendering service.
+    filename: 0278-gotenberg-as-the-document-to-pdf-rendering-service.md
+    path: docs/adr/0278-gotenberg-as-the-document-to-pdf-rendering-service.md
+    implemented_in_repo_version: 0.177.92
+    implemented_in_platform_version: 0.130.61
+    implemented_on: '2026-03-30'
+  - adr: 0279
+    title: Grist As The No-Code Operational Spreadsheet Database
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - grist
+      - as
+      - no-code
+      - operational
+      - spreadsheet
+      - database
+    summary: We will deploy Grist as the shared no-code operational spreadsheet
+    filename: 0279-grist-as-the-no-code-operational-spreadsheet-database.md
+    path: docs/adr/0279-grist-as-the-no-code-operational-spreadsheet-database.md
+    implemented_in_repo_version: 0.177.105
+    implemented_in_platform_version: 0.130.60
+    implemented_on: '2026-03-30'
+  - adr: 0280
+    title: Changedetection.io For External Content And API Change Monitoring
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: monitoring
+    keywords:
+      - changedetection
+      - io
+      - external
+      - content
+      - api
+      - change
+      - monitoring
+    summary: We will deploy Changedetection.io as the external content and API change
+    filename: 0280-changedetection-io-for-external-content-and-api-change-monitoring.md
+    path: docs/adr/0280-changedetection-io-for-external-content-and-api-change-monitoring.md
+    implemented_in_repo_version: 0.177.100
+    implemented_in_platform_version: 0.130.63
+    implemented_on: '2026-03-30'
+  - adr: 0281
+    title: GlitchTip As The Sentry-Compatible Application Error Tracker
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - glitchtip
+      - as
+      - sentry-compatible
+      - application
+      - error
+      - tracker
+    summary: We will deploy GlitchTip as the platform's application error tracking
+    filename: 0281-glitchtip-as-the-sentry-compatible-application-error-tracker.md
+    path: docs/adr/0281-glitchtip-as-the-sentry-compatible-application-error-tracker.md
+    implemented_in_repo_version: 0.177.149
+    implemented_in_platform_version: 0.130.93
+    implemented_on: '2026-04-03'
+  - adr: 0282
+    title: Mailpit As The SMTP Development Mail Interceptor
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - mailpit
+      - as
+      - smtp
+      - development
+      - mail
+      - interceptor
+    summary: We will deploy Mailpit as the SMTP development mail interceptor, available
+    filename: 0282-mailpit-as-the-smtp-development-mail-interceptor.md
+    path: docs/adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md
+    implemented_in_repo_version: 0.177.96
+    implemented_in_platform_version: 0.130.60
+    implemented_on: '2026-03-30'
+  - adr: 0283
+    title: Plausible Analytics As The Privacy-First Web Traffic Analytics Layer
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - plausible
+      - analytics
+      - as
+      - privacy-first
+      - web
+      - traffic
+      - layer
+    summary: We will deploy Plausible Analytics as the privacy-first web traffic
+    filename: 0283-plausible-analytics-as-the-privacy-first-web-traffic-analytics-layer.md
+    path: docs/adr/0283-plausible-analytics-as-the-privacy-first-web-traffic-analytics-layer.md
+    implemented_in_repo_version: 0.177.99
+    implemented_in_platform_version: 0.130.66
+    implemented_on: '2026-03-30'
+  - adr: 0284
+    title: Netbox As The Network IPAM And Topology Source Of Truth
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: vm-topology
+    keywords:
+      - netbox
+      - as
+      - network
+      - ipam
+      - topology
+      - source
+      - truth
+    summary: We will deploy Netbox as the single authoritative source of truth for
+    filename: 0284-netbox-as-the-network-ipam-and-topology-source-of-truth.md
+    path: docs/adr/0284-netbox-as-the-network-ipam-and-topology-source-of-truth.md
+  - adr: 0284
+    title: Piper TTS As The CPU Neural Text-To-Speech Service
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - piper
+      - tts
+      - as
+      - cpu
+      - neural
+      - text-to-speech
+      - service
+    summary: We will deploy Piper TTS as the canonical CPU neural text-to-speech service.
+    filename: 0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md
+    path: docs/adr/0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md
+    implemented_in_repo_version: 0.177.113
+    implemented_in_platform_version: 0.130.74
+    implemented_on: '2026-03-31'
+  - adr: 0285
+    title: Paperless-ngx As The Document Management And Archive API
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - paperless-ngx
+      - as
+      - document
+      - management
+      - archive
+      - api
+    summary: We will deploy Paperless-ngx as the document management and archive API
+    filename: 0285-paperless-ngx-as-the-document-management-and-archive-api.md
+    path: docs/adr/0285-paperless-ngx-as-the-document-management-and-archive-api.md
+    implemented_in_repo_version: 0.177.121
+    implemented_in_platform_version: 0.130.75
+    implemented_on: '2026-03-31'
+  - adr: 0285
+    title: Whisper ASR As The CPU Speech-To-Text Service
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - whisper
+      - asr
+      - as
+      - cpu
+      - speech-to-text
+      - service
+    summary: We will deploy whisper-asr-webservice (faster-whisper backend) as the
+    filename: 0285-whisper-asr-as-the-cpu-speech-to-text-service.md
+    path: docs/adr/0285-whisper-asr-as-the-cpu-speech-to-text-service.md
+  - adr: 0286
+    title: Tesseract OCR Service For Scanned Image Text Extraction
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - tesseract
+      - ocr
+      - service
+      - scanned
+      - image
+      - text
+      - extraction
+    summary: We will deploy Tesseract OCR as a REST service to fill the image-OCR gap
+    filename: 0286-tesseract-ocr-service-for-scanned-image-text-extraction.md
+    path: docs/adr/0286-tesseract-ocr-service-for-scanned-image-text-extraction.md
+    implemented_in_repo_version: 0.177.107
+    implemented_in_platform_version: 0.130.71
+    implemented_on: '2026-03-30'
+  - adr: 0286
+    title: Vikunja As The Task And Project Management REST API
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - vikunja
+      - as
+      - task
+      - project
+      - management
+      - rest
+      - api
+    summary: We will deploy Vikunja as the task and project management REST API for
+    filename: 0286-vikunja-as-the-task-and-project-management-rest-api.md
+    path: docs/adr/0286-vikunja-as-the-task-and-project-management-rest-api.md
+  - adr: 0287
+    title: LiteLLM As The Unified LLM API Proxy And Router
+    status: Deprecated
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - litellm
+      - as
+      - unified
+      - llm
+      - api
+      - proxy
+      - router
+    summary: We will deploy LiteLLM as the unified LLM API proxy and router.
+    filename: 0287-litellm-as-the-unified-llm-api-proxy-and-router.md
+    path: docs/adr/0287-litellm-as-the-unified-llm-api-proxy-and-router.md
+  - adr: 0287
+    title: Woodpecker CI As The API-Driven Continuous Integration Server
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: ci-cd
+    keywords:
+      - woodpecker
+      - ci
+      - as
+      - api-driven
+      - continuous
+      - integration
+      - server
+    summary: We will deploy Woodpecker CI as the platform's event-driven continuous
+    filename: 0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md
+    path: docs/adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md
+    implemented_in_repo_version: 0.177.110
+    implemented_in_platform_version: 0.130.73
+    implemented_on: '2026-03-30'
+  - adr: 0288
+    title: Crawl4AI As The LLM-Optimised Web Content Crawler
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - crawl4ai
+      - as
+      - llm-optimised
+      - web
+      - content
+      - crawler
+    summary: We will deploy Crawl4AI as the LLM-optimised web content crawler.
+    filename: 0288-crawl4ai-as-the-llm-optimised-web-content-crawler.md
+    path: docs/adr/0288-crawl4ai-as-the-llm-optimised-web-content-crawler.md
+    implemented_in_repo_version: 0.177.115
+    implemented_in_platform_version: 0.130.75
+    implemented_on: '2026-03-31'
+  - adr: 0288
+    title: Flagsmith As The Feature Flag And Remote Configuration Service
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - flagsmith
+      - as
+      - feature
+      - flag
+      - remote
+      - configuration
+      - service
+    summary: We will deploy Flagsmith as the feature flag and remote configuration
+    filename: 0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md
+    path: docs/adr/0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md
+    implemented_in_repo_version: 0.177.109
+    implemented_in_platform_version: 0.130.71
+    implemented_on: '2026-03-30'
+  - adr: 0289
+    title: Directus As The REST And GraphQL Data API Layer Over Postgres
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - directus
+      - as
+      - rest
+      - graphql
+      - data
+      - api
+      - layer
+      - over
+      - postgres
+    summary: We will deploy Directus as the REST and GraphQL data API layer for
+    filename: 0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md
+    path: docs/adr/0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md
+    implemented_in_repo_version: 0.177.109
+    implemented_in_platform_version: 0.130.72
+    implemented_on: '2026-03-30'
+  - adr: 0289
+    title: Label Studio As The Human-In-The-Loop Data Annotation Platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - label
+      - studio
+      - as
+      - human-in-the-loop
+      - data
+      - annotation
+      - platform
+    summary: We will deploy Label Studio as the human-in-the-loop data annotation
+    filename: 0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md
+    path: docs/adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md
+    implemented_in_repo_version: 0.177.153
+    implemented_in_platform_version: 0.130.97
+    implemented_on: '2026-04-03'
+  - adr: 0290
+    title: MLflow As The Machine Learning Experiment Tracker And Model Registry
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - mlflow
+      - as
+      - machine
+      - learning
+      - experiment
+      - tracker
+      - model
+      - registry
+    summary: We will deploy MLflow as the machine learning experiment tracker and model
+    filename: 0290-mlflow-as-the-machine-learning-experiment-tracker-and-model-registry.md
+    path: docs/adr/0290-mlflow-as-the-machine-learning-experiment-tracker-and-model-registry.md
+  - adr: 0290
+    title: Redpanda As The Kafka-Compatible Streaming Platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - redpanda
+      - as
+      - kafka-compatible
+      - streaming
+      - platform
+    summary: We will deploy Redpanda as the Kafka-compatible streaming platform for
+    filename: 0290-redpanda-as-the-kafka-compatible-streaming-platform.md
+    path: docs/adr/0290-redpanda-as-the-kafka-compatible-streaming-platform.md
+    implemented_in_repo_version: 0.177.114
+    implemented_in_platform_version: 0.130.75
+    implemented_on: '2026-03-31'
+  - adr: 0291
+    title: JupyterHub As The Interactive Notebook Environment
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - jupyterhub
+      - as
+      - interactive
+      - notebook
+      - environment
+    summary: We will deploy JupyterHub as the shared interactive notebook environment.
+    filename: 0291-jupyterhub-as-the-interactive-notebook-environment.md
+    path: docs/adr/0291-jupyterhub-as-the-interactive-notebook-environment.md
+    implemented_in_repo_version: 0.177.111
+    implemented_in_platform_version: 0.130.71
+    implemented_on: '2026-03-30'
+  - adr: 0291
+    title: SFTPGo As The Managed File Transfer Service With REST Provisioning
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: vm-topology
+    keywords:
+      - sftpgo
+      - as
+      - managed
+      - file
+      - transfer
+      - service
+      - rest
+      - provisioning
+    summary: We will deploy SFTPGo as the managed file transfer service for all SFTP,
+    filename: 0291-sftpgo-as-the-managed-file-transfer-service-with-rest-provisioning.md
+    path: docs/adr/0291-sftpgo-as-the-managed-file-transfer-service-with-rest-provisioning.md
+  - adr: 0292
+    title: Apache Superset As The SQL-First Business Intelligence Layer
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - apache
+      - superset
+      - as
+      - sql-first
+      - business
+      - intelligence
+      - layer
+    summary: We will deploy Apache Superset as the shared SQL-first business intelligence
+    filename: 0292-apache-superset-as-the-sql-first-business-intelligence-layer.md
+    path: docs/adr/0292-apache-superset-as-the-sql-first-business-intelligence-layer.md
+    implemented_in_repo_version: 0.177.129
+    implemented_in_platform_version: 0.130.82
+    implemented_on: '2026-04-01'
+  - adr: 0292
+    title: Lago As The Usage Metering And Billing API Layer
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - lago
+      - as
+      - usage
+      - metering
+      - billing
+      - api
+      - layer
+    summary: We will deploy Lago as the usage metering and billing API layer for
+    filename: 0292-lago-as-the-usage-metering-and-billing-api-layer.md
+    path: docs/adr/0292-lago-as-the-usage-metering-and-billing-api-layer.md
+    implemented_in_repo_version: 0.177.118
+    implemented_in_platform_version: 0.130.77
+    implemented_on: '2026-03-31'
+  - adr: 0293
+    title: Livekit As The Real-Time Audio And Voice Channel For Agents
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: agent-discovery
+    keywords:
+      - livekit
+      - as
+      - real-time
+      - audio
+      - voice
+      - channel
+      - agents
+    summary: We will deploy Livekit as the real-time audio and voice channel for agent
+    filename: 0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
+    path: docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
+    implemented_in_repo_version: 0.177.132
+    implemented_in_platform_version: 0.130.83
+    implemented_on: '2026-04-01'
+  - adr: 0293
+    title: Temporal As The Durable Workflow And Task Queue Engine
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: monitoring
+    keywords:
+      - temporal
+      - as
+      - durable
+      - workflow
+      - task
+      - queue
+      - engine
+    summary: We will deploy Temporal as the durable workflow engine for long-running,
+    filename: 0293-temporal-as-the-durable-workflow-and-task-queue-engine.md
+    path: docs/adr/0293-temporal-as-the-durable-workflow-and-task-queue-engine.md
+    implemented_in_repo_version: 0.177.109
+    implemented_in_platform_version: 0.130.72
+    implemented_on: '2026-03-30'
+  - adr: 0294
+    title: One-API As The Unified LLM API Proxy And Router
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - one-api
+      - as
+      - unified
+      - llm
+      - api
+      - proxy
+      - router
+    summary: We will deploy One-API as the unified LLM API proxy and router, superseding
+    filename: 0294-one-api-as-the-unified-llm-api-proxy-and-router.md
+    path: docs/adr/0294-one-api-as-the-unified-llm-api-proxy-and-router.md
+    implemented_in_repo_version: 0.177.135
+    implemented_in_platform_version: 0.130.85
+    implemented_on: '2026-04-01'
+  - adr: 0295
+    title: Shared Artifact Cache Plane For Container And Package Dependencies
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: ci-cd
+    keywords:
+      - shared
+      - artifact
+      - cache
+      - plane
+      - container
+      - package
+      - dependencies
+    summary: We will treat reusable dependency downloads as a shared artifact cache plane
+    filename: 0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
+    path: docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
+    implemented_in_repo_version: 0.177.73
+    implemented_in_platform_version: 0.130.59
+    implemented_on: '2026-03-29'
+  - adr: 0296
+    title: Dedicated Artifact-Cache VM With Phased Consumer Adoption
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: vm-topology
+    keywords:
+      - dedicated
+      - artifact-cache
+      - vm
+      - phased
+      - consumer
+      - adoption
+    summary: We will adopt artifact caching in two phases.
+    filename: 0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
+    path: docs/adr/0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
+    implemented_in_repo_version: 0.177.103
+    implemented_in_platform_version: 0.130.69
+    implemented_on: '2026-03-30'
+  - adr: 0297
+    title: Renovate Bot As The Automated Stack Version Upgrade Proposer
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: release
+    keywords:
+      - renovate
+      - bot
+      - as
+      - automated
+      - stack
+      - version
+      - upgrade
+      - proposer
+    summary: We will deploy Renovate Bot as a scheduled Gitea Actions job on
+    filename: 0297-renovate-bot-as-the-automated-stack-version-upgrade-proposer.md
+    path: docs/adr/0297-renovate-bot-as-the-automated-stack-version-upgrade-proposer.md
+    implemented_in_repo_version: 0.177.112
+    implemented_in_platform_version: 0.130.74
+    implemented_on: '2026-03-31'
+  - adr: 0298
+    title: Syft And Grype For Platform-Wide SBOM Generation And Continuous CVE Scanning
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - syft
+      - grype
+      - platform-wide
+      - sbom
+      - generation
+      - continuous
+      - cve
+      - scanning
+    summary: We will deploy Syft and Grype as Gitea Actions CI steps and as a
+    filename: 0298-syft-and-grype-for-platform-wide-sbom-generation-and-continuous-cve-scanning.md
+    path: docs/adr/0298-syft-and-grype-for-platform-wide-sbom-generation-and-continuous-cve-scanning.md
+    implemented_in_repo_version: 0.177.118
+    implemented_in_platform_version: 0.130.77
+    implemented_on: '2026-03-31'
+  - adr: 0299
+    title: Ntfy As The Self-Hosted Push Notification Channel For Programmatic Alert Delivery
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - ntfy
+      - as
+      - self-hosted
+      - push
+      - notification
+      - channel
+      - programmatic
+      - alert
+      - delivery
+    summary: We will formalise ntfy as the platform's self-hosted push notification channel
+    filename: 0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
+    path: docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
+    implemented_in_repo_version: 0.177.152
+    implemented_in_platform_version: 0.130.95
+    implemented_on: '2026-04-03'

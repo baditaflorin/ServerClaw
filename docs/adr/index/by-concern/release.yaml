@@ -1,0 +1,144 @@
+# ============================================================================
+# ADR Concern Shard release — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: release
+total_adrs: 7
+adrs:
+  - adr: 0008
+    title: Versioning Model For Repo And Host
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: release
+    keywords:
+      - versioning
+      - model
+      - repo
+      - host
+    summary: We will use two semantic version streams plus one observed-state registry.
+    filename: 0008-versioning-model-for-repo-and-host.md
+    path: docs/adr/0008-versioning-model-for-repo-and-host.md
+    implemented_in_repo_version: 0.1.0
+    implemented_on: '2026-03-21'
+  - adr: '0110'
+    title: Platform Versioning, Release Notes, and Upgrade Path
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: release
+    keywords:
+      - platform
+      - versioning
+      - release
+      - notes
+      - upgrade
+      - path
+    summary: We will define platform-level semantic versioning semantics, a structured release process, machine-readable release
+      notes, and an upgrade path document that spe
+    filename: 0110-platform-versioning-and-upgrade-path.md
+    path: docs/adr/0110-platform-versioning-and-upgrade-path.md
+    implemented_in_repo_version: 0.104.0
+    implemented_on: '2026-03-23'
+  - adr: '0120'
+    title: Dry-Run Semantic Diff Engine
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: release
+    keywords:
+      - dry-run
+      - semantic
+      - diff
+      - engine
+    summary: We will implement a dry-run semantic diff engine as a Python module platform/diffengine/ that computes a SemanticDiff
+      — a structured description of predicted ch
+    filename: 0120-dry-run-semantic-diff-engine.md
+    path: docs/adr/0120-dry-run-semantic-diff-engine.md
+    implemented_in_repo_version: 0.116.0
+    implemented_on: '2026-03-24'
+  - adr: '0155'
+    title: Intent Queue with Release-Triggered Scheduling
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: release
+    keywords:
+      - intent
+      - queue
+      - release-triggered
+      - scheduling
+    summary: We will implement a durable intent queue with priority scheduling and release-triggered dispatch as a platform
+      service.
+    filename: 0155-intent-queue-with-release-triggered-scheduling.md
+    path: docs/adr/0155-intent-queue-with-release-triggered-scheduling.md
+    implemented_in_repo_version: 0.158.0
+    implemented_in_platform_version: 0.130.7
+    implemented_on: '2026-03-25'
+  - adr: '0246'
+    title: Startup, Readiness, Liveness, And Degraded State Semantics
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: release
+    keywords:
+      - startup
+      - readiness
+      - liveness
+      - degraded
+      - state
+      - semantics
+    summary: 'We will standardize four service-health semantics for runtime assurance:'
+    filename: 0246-startup-readiness-liveness-and-degraded-state-semantics.md
+    path: docs/adr/0246-startup-readiness-liveness-and-degraded-state-semantics.md
+    implemented_in_repo_version: 0.177.60
+    implemented_in_platform_version: 0.130.44
+    implemented_on: '2026-03-28'
+  - adr: 0297
+    title: Renovate Bot As The Automated Stack Version Upgrade Proposer
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: release
+    keywords:
+      - renovate
+      - bot
+      - as
+      - automated
+      - stack
+      - version
+      - upgrade
+      - proposer
+    summary: We will deploy Renovate Bot as a scheduled Gitea Actions job on
+    filename: 0297-renovate-bot-as-the-automated-stack-version-upgrade-proposer.md
+    path: docs/adr/0297-renovate-bot-as-the-automated-stack-version-upgrade-proposer.md
+    implemented_in_repo_version: 0.177.112
+    implemented_in_platform_version: 0.130.74
+    implemented_on: '2026-03-31'
+  - adr: '0304'
+    title: Atlas For Declarative Database Schema Migration Versioning And Pre-Migration Linting
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: release
+    keywords:
+      - atlas
+      - declarative
+      - database
+      - schema
+      - migration
+      - versioning
+      - pre-migration
+      - linting
+    summary: We will integrate Atlas as the migration linting and drift detection layer
+    filename: 0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
+    path: docs/adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
+    implemented_in_repo_version: 0.177.150
+    implemented_in_platform_version: 0.130.90
+    implemented_on: '2026-04-02'

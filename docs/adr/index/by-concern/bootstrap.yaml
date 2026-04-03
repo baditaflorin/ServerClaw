@@ -1,0 +1,105 @@
+# ============================================================================
+# ADR Concern Shard bootstrap — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: bootstrap
+total_adrs: 5
+adrs:
+  - adr: '0001'
+    title: Bootstrap Dedicated Host With Ansible
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: bootstrap
+    keywords:
+      - bootstrap
+      - dedicated
+      - host
+      - ansible
+    summary: 'We will treat the build as two stages:'
+    filename: 0001-bootstrap-dedicated-host-with-ansible.md
+    path: docs/adr/0001-bootstrap-dedicated-host-with-ansible.md
+    implemented_in_repo_version: 0.2.0
+    implemented_in_platform_version: 0.1.0
+    implemented_on: '2026-03-21'
+  - adr: '0003'
+    title: Prefer Hetzner Rescue Plus Installimage For Bootstrap
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: bootstrap
+    keywords:
+      - prefer
+      - hetzner
+      - rescue
+      - plus
+      - installimage
+      - bootstrap
+    summary: We will prefer Hetzner Rescue System plus installimage for first bootstrap instead of relying on the automatic
+      installer or the VNC installer.
+    filename: 0003-prefer-hetzner-rescue-plus-installimage-for-bootstrap.md
+    path: docs/adr/0003-prefer-hetzner-rescue-plus-installimage-for-bootstrap.md
+    implemented_in_repo_version: 0.1.0
+    implemented_in_platform_version: 0.1.0
+    implemented_on: '2026-03-21'
+  - adr: '0215'
+    title: Node Role Taxonomy For Bootstrap, Control, State, Edge, Workload, Observability, Recovery, And Build
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: bootstrap
+    keywords:
+      - node
+      - role
+      - taxonomy
+      - bootstrap
+      - control
+      - state
+      - edge
+      - workload
+      - observability
+      - recovery
+    summary: We will classify every server, VM, and future node pool by primary node role.
+    filename: 0215-node-role-taxonomy-for-bootstrap-control-state-edge-workload-observability-recovery-and-build.md
+    path: docs/adr/0215-node-role-taxonomy-for-bootstrap-control-state-edge-workload-observability-recovery-and-build.md
+  - adr: '0220'
+    title: Bootstrap And Recovery Sequencing For Environment Cells
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: bootstrap
+    keywords:
+      - bootstrap
+      - recovery
+      - sequencing
+      - environment
+      - cells
+    summary: We will define a standard bootstrap and recovery sequence for every
+    filename: 0220-bootstrap-and-recovery-sequencing-for-environment-cells.md
+    path: docs/adr/0220-bootstrap-and-recovery-sequencing-for-environment-cells.md
+  - adr: 0268
+    title: Fresh-Worktree Bootstrap Manifests For Generated Artifacts And Local Inputs
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: bootstrap
+    keywords:
+      - fresh-worktree
+      - bootstrap
+      - manifests
+      - generated
+      - artifacts
+      - local
+      - inputs
+    summary: We will require a bootstrap manifest for every fresh worktree path that can
+    filename: 0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+    path: docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+    implemented_in_repo_version: 0.177.83
+    implemented_in_platform_version: 0.130.57
+    implemented_on: '2026-03-29'

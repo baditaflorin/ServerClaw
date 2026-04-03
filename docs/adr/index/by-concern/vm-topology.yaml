@@ -1,0 +1,619 @@
+# ============================================================================
+# ADR Concern Shard vm-topology — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: vm-topology
+total_adrs: 33
+adrs:
+  - adr: '0005'
+    title: Single-Node First Topology
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - single-node
+      - first
+      - topology
+    summary: We will design the first delivery as a single Proxmox node with local storage and external backups, not as a
+      cluster and not as a hyper-converged Ceph deploymen
+    filename: 0005-single-node-first-topology.md
+    path: docs/adr/0005-single-node-first-topology.md
+    implemented_in_repo_version: 0.2.0
+    implemented_in_platform_version: 0.2.0
+    implemented_on: '2026-03-21'
+  - adr: '0013'
+    title: Public Ingress And Guest Egress Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - public
+      - ingress
+      - guest
+      - egress
+      - model
+    summary: We will use a single-edge ingress model in phase one.
+    filename: 0013-public-ingress-and-guest-egress-model.md
+    path: docs/adr/0013-public-ingress-and-guest-egress-model.md
+    implemented_in_repo_version: 0.12.0
+    implemented_in_platform_version: 0.9.0
+    implemented_on: '2026-03-21'
+  - adr: '0014'
+    title: Operator Access To Private Guest Network
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - operator
+      - access
+      - private
+      - guest
+      - network
+    summary: We will use a two-stage operator access model.
+    filename: 0014-operator-access-to-private-guest-network.md
+    path: docs/adr/0014-operator-access-to-private-guest-network.md
+    implemented_in_repo_version: 0.8.0
+    implemented_in_platform_version: 0.6.0
+    implemented_on: '2026-03-21'
+  - adr: 0018
+    title: Non-Root Operations For Host And Guests
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - non-root
+      - operations
+      - host
+      - guests
+    summary: We will make ops the default interactive and automation identity for both the Proxmox host and Debian guests.
+    filename: 0018-non-root-operations-for-host-and-guests.md
+    path: docs/adr/0018-non-root-operations-for-host-and-guests.md
+    implemented_in_repo_version: 0.10.0
+    implemented_in_platform_version: 0.8.0
+    implemented_on: '2026-03-21'
+  - adr: '0022'
+    title: NGINX Guest Observability Via Telegraf And Stub Status
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - nginx
+      - guest
+      - observability
+      - telegraf
+      - stub
+      - status
+    summary: 'We will monitor the NGINX guest with a guest-local telemetry path built from:'
+    filename: 0022-nginx-guest-observability-via-telegraf-and-stub-status.md
+    path: docs/adr/0022-nginx-guest-observability-via-telegraf-and-stub-status.md
+    implemented_in_repo_version: 0.25.0
+    implemented_in_platform_version: 0.16.0
+    implemented_on: '2026-03-22'
+  - adr: '0023'
+    title: Docker Runtime VM Baseline
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - docker
+      - runtime
+      - vm
+      - baseline
+    summary: We will manage the Docker runtime VM with a dedicated runtime baseline role and playbook.
+    filename: 0023-docker-runtime-vm-baseline.md
+    path: docs/adr/0023-docker-runtime-vm-baseline.md
+    implemented_in_repo_version: 0.25.0
+    implemented_in_platform_version: 0.17.0
+    implemented_on: '2026-03-22'
+  - adr: '0024'
+    title: Docker Guest Security Baseline
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - docker
+      - guest
+      - security
+      - baseline
+    summary: We will handle Docker guest hardening as its own workstream, separate from package installation and separate
+      from workload deployment.
+    filename: 0024-docker-guest-security-baseline.md
+    path: docs/adr/0024-docker-guest-security-baseline.md
+  - adr: '0026'
+    title: Dedicated PostgreSQL VM Baseline
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - dedicated
+      - postgresql
+      - vm
+      - baseline
+    summary: 'We will manage PostgreSQL through a dedicated Debian 13 VM with these rules:'
+    filename: 0026-dedicated-postgresql-vm-baseline.md
+    path: docs/adr/0026-dedicated-postgresql-vm-baseline.md
+    implemented_in_repo_version: 0.27.0
+    implemented_in_platform_version: 0.18.0
+    implemented_on: '2026-03-22'
+  - adr: '0027'
+    title: Uptime Kuma On The Docker Runtime VM
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - uptime
+      - kuma
+      - docker
+      - runtime
+      - vm
+    summary: We run Uptime Kuma on the Docker runtime VM under /opt/uptime-kuma.
+    filename: 0027-uptime-kuma-on-the-docker-runtime-vm.md
+    path: docs/adr/0027-uptime-kuma-on-the-docker-runtime-vm.md
+    implemented_in_repo_version: 0.28.0
+    implemented_in_platform_version: 0.19.0
+    implemented_on: '2026-03-22'
+  - adr: 0028
+    title: Docker Build VM Build Count And Duration Telemetry Via CLI Wrapper Events
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - docker
+      - build
+      - vm
+      - count
+      - duration
+      - telemetry
+      - cli
+      - wrapper
+      - events
+    summary: We will count Docker builds on docker-build-lv3 by using a repo-managed Docker CLI wrapper and the existing guest-to-monitoring
+      telemetry path.
+    filename: 0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md
+    path: docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md
+    implemented_on: '2026-03-22'
+  - adr: 0029
+    title: Dedicated Backup VM With Local PBS
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - dedicated
+      - backup
+      - vm
+      - local
+      - pbs
+    summary: We will create a dedicated internal backup VM and run Proxmox Backup Server inside it.
+    filename: 0029-dedicated-backup-vm-with-local-pbs.md
+    path: docs/adr/0029-dedicated-backup-vm-with-local-pbs.md
+    implemented_in_repo_version: 0.30.0
+    implemented_in_platform_version: 0.19.0
+    implemented_on: '2026-03-22'
+  - adr: '0032'
+    title: Shared Guest Observability Framework
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - shared
+      - guest
+      - observability
+      - framework
+    summary: We will introduce a shared guest-observability framework and keep service-specific details as thin extensions.
+    filename: 0032-shared-guest-observability-framework.md
+    path: docs/adr/0032-shared-guest-observability-framework.md
+    implemented_in_repo_version: 0.33.0
+    implemented_on: '2026-03-22'
+  - adr: '0033'
+    title: Declarative Service Topology Catalog
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - declarative
+      - service
+      - topology
+      - catalog
+    summary: We will introduce one declarative service-topology catalog as the canonical source for workload metadata.
+    filename: 0033-declarative-service-topology-catalog.md
+    path: docs/adr/0033-declarative-service-topology-catalog.md
+    implemented_in_repo_version: 0.34.0
+    implemented_on: '2026-03-22'
+  - adr: '0054'
+    title: NetBox For Topology, IPAM, And Inventory
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - netbox
+      - topology
+      - ipam
+      - inventory
+    summary: We will use NetBox as the visual infrastructure inventory and IPAM plane.
+    filename: 0054-netbox-for-topology-ipam-and-inventory.md
+    path: docs/adr/0054-netbox-for-topology-ipam-and-inventory.md
+    implemented_in_repo_version: 0.58.0
+    implemented_in_platform_version: 0.32.0
+    implemented_on: '2026-03-22'
+  - adr: '0067'
+    title: Guest Network Policy Enforcement
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - guest
+      - network
+      - policy
+      - enforcement
+    summary: We will define and enforce an explicit network policy for all inter-guest and host-to-guest traffic.
+    filename: 0067-guest-network-policy-enforcement.md
+    path: docs/adr/0067-guest-network-policy-enforcement.md
+    implemented_in_repo_version: 0.64.0
+    implemented_in_platform_version: 0.34.0
+    implemented_on: '2026-03-22'
+  - adr: '0072'
+    title: Staging And Production Environment Topology
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: vm-topology
+    keywords:
+      - staging
+      - production
+      - environment
+      - topology
+    summary: 'We will model two named environments for this platform: production and staging.'
+    filename: 0072-staging-and-production-environment-topology.md
+    path: docs/adr/0072-staging-and-production-environment-topology.md
+    implemented_in_repo_version: 0.75.0
+    implemented_on: '2026-03-23'
+  - adr: 0084
+    title: Packer VM Template Pipeline
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - packer
+      - vm
+      - template
+      - pipeline
+    summary: We will maintain a Packer VM Template Pipeline defined under packer/ and executed on the build server.
+    filename: 0084-packer-vm-template-pipeline.md
+    path: docs/adr/0084-packer-vm-template-pipeline.md
+    implemented_in_repo_version: 0.91.0
+    implemented_on: '2026-03-23'
+  - adr: 0085
+    title: OpenTofu IaC for VM Lifecycle Management
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - opentofu
+      - iac
+      - vm
+      - lifecycle
+      - management
+    summary: We will introduce OpenTofu (tofu) for all Proxmox resource management and move VM lifecycle out of Ansible.
+    filename: 0085-opentofu-vm-lifecycle.md
+    path: docs/adr/0085-opentofu-vm-lifecycle.md
+    implemented_in_repo_version: 0.92.0
+    implemented_in_platform_version: 0.39.0
+    implemented_on: '2026-03-23'
+  - adr: '0154'
+    title: VM-Scoped Parallel Execution Lanes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: vm-topology
+    keywords:
+      - vm-scoped
+      - parallel
+      - execution
+      - lanes
+    summary: We will treat the Proxmox host plus each managed VM as an execution lane with explicit capacity, and the scheduler
+      will use that lane model before it submits mu
+    filename: 0154-vm-scoped-parallel-execution-lanes.md
+    path: docs/adr/0154-vm-scoped-parallel-execution-lanes.md
+    implemented_in_repo_version: 0.155.0
+    implemented_in_platform_version: 0.130.5
+    implemented_on: '2026-03-25'
+  - adr: '0157'
+    title: Per-VM Concurrency Budget and Resource Reservation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: vm-topology
+    keywords:
+      - per-vm
+      - concurrency
+      - budget
+      - resource
+      - reservation
+    summary: We will implement a per-VM concurrency budget with a reservation-based admission control model. Every ExecutionIntent
+      must declare a resource reservation; the a
+    filename: 0157-per-vm-concurrency-budget-and-resource-reservation.md
+    path: docs/adr/0157-per-vm-concurrency-budget-and-resource-reservation.md
+    implemented_in_repo_version: 0.151.0
+    implemented_in_platform_version: 0.130.7
+    implemented_on: '2026-03-25'
+  - adr: 0191
+    title: Immutable Guest Replacement for Stateful and Edge Services
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: vm-topology
+    keywords:
+      - immutable
+      - guest
+      - replacement
+      - stateful
+      - edge
+      - services
+    summary: For stateful and edge services at redundancy tier R1 or higher, the default change path will be immutable guest
+      replacement rather than in-place mutation.
+    filename: 0191-immutable-guest-replacement-for-stateful-and-edge-services.md
+    path: docs/adr/0191-immutable-guest-replacement-for-stateful-and-edge-services.md
+    implemented_in_repo_version: 0.177.13
+    implemented_in_platform_version: 0.130.31
+    implemented_on: '2026-03-27'
+  - adr: '0223'
+    title: Canonical HA Topology Catalog And Reusable Automation Profiles
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: vm-topology
+    keywords:
+      - canonical
+      - ha
+      - topology
+      - catalog
+      - reusable
+      - automation
+      - profiles
+    summary: We will centralize HA and replication intent in one canonical topology
+    filename: 0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
+    path: docs/adr/0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
+  - adr: 0284
+    title: Netbox As The Network IPAM And Topology Source Of Truth
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: vm-topology
+    keywords:
+      - netbox
+      - as
+      - network
+      - ipam
+      - topology
+      - source
+      - truth
+    summary: We will deploy Netbox as the single authoritative source of truth for
+    filename: 0284-netbox-as-the-network-ipam-and-topology-source-of-truth.md
+    path: docs/adr/0284-netbox-as-the-network-ipam-and-topology-source-of-truth.md
+  - adr: 0291
+    title: SFTPGo As The Managed File Transfer Service With REST Provisioning
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: vm-topology
+    keywords:
+      - sftpgo
+      - as
+      - managed
+      - file
+      - transfer
+      - service
+      - rest
+      - provisioning
+    summary: We will deploy SFTPGo as the managed file transfer service for all SFTP,
+    filename: 0291-sftpgo-as-the-managed-file-transfer-service-with-rest-provisioning.md
+    path: docs/adr/0291-sftpgo-as-the-managed-file-transfer-service-with-rest-provisioning.md
+  - adr: 0296
+    title: Dedicated Artifact-Cache VM With Phased Consumer Adoption
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: vm-topology
+    keywords:
+      - dedicated
+      - artifact-cache
+      - vm
+      - phased
+      - consumer
+      - adoption
+    summary: We will adopt artifact caching in two phases.
+    filename: 0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
+    path: docs/adr/0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
+    implemented_in_repo_version: 0.177.103
+    implemented_in_platform_version: 0.130.69
+    implemented_on: '2026-03-30'
+  - adr: '0307'
+    title: Temporary Guest Operator Accounts With 72-Hour Expiry
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-31'
+    concern: vm-topology
+    keywords:
+      - temporary
+      - guest
+      - operator
+      - accounts
+      - hour
+      - expiry
+    summary: 'Temporary operators are full participants in the ADR 0108 onboarding model — same Keycloak SSO, step-ca SSH
+      certificates, OpenBao secrets access, and Tailscale '
+    filename: 0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
+    path: docs/adr/0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
+    implemented_in_repo_version: 0.0.0
+    implemented_in_platform_version: 0.0.0
+    implemented_on: '2026-03-31'
+  - adr: 0308
+    title: LLM Agent Execution Surface and Connectivity Contracts for Operator Provisioning
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-31'
+    concern: vm-topology
+    keywords:
+      - llm
+      - agent
+      - execution
+      - surface
+      - connectivity
+      - contracts
+      - operator
+      - provisioning
+    summary: The operatormanager.py onboard command must run where OpenBao is reachable over plain HTTP.
+    filename: 0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
+    path: docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
+    implemented_in_repo_version: 0.177.138
+    implemented_in_platform_version: 0.130.85
+    implemented_on: '2026-04-02'
+  - adr: '0317'
+    title: Keycloak Direct-API Operator Provisioning via SSH Proxy
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: vm-topology
+    keywords:
+      - operator-provisioning
+      - keycloak
+      - llm-agent
+      - identity
+      - direct-api
+      - operator
+      - provisioning
+      - ssh
+      - proxy
+    summary: LLM agents MUST use the Keycloak admin REST API directly for operator provisioning when
+    filename: 0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md
+    path: docs/adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md
+    implemented_in_repo_version: 0.177.137
+    implemented_in_platform_version: 0.130.86
+    implemented_on: '2026-04-02'
+  - adr: 0318
+    title: Repeatable Operator Onboarding with CC Audit Trail
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: vm-topology
+    keywords:
+      - operator-provisioning
+      - iac
+      - email
+      - audit-trail
+      - llm-agent
+      - repeatable
+      - operator
+      - onboarding
+      - cc
+      - audit
+    summary: scripts/provisionoperator.py is the authoritative IaC entry point for operator
+    filename: 0318-repeatable-operator-onboarding-with-cc-audit-trail.md
+    path: docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md
+    implemented_in_platform_version: 0.130.97
+    implemented_on: '2026-04-03'
+  - adr: '0330'
+    title: Public GitHub Readiness As A First-Class Repository Lifecycle
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-02'
+    concern: vm-topology
+    keywords:
+      - github
+      - publication
+      - template
+      - governance
+      - public
+      - readiness
+      - as
+      - first-class
+      - repository
+      - lifecycle
+    summary: We will treat public GitHub readiness as a first-class repository lifecycle,
+    filename: 0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+    path: docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
+  - adr: '0334'
+    title: Example-First Inventory And Service Identity Catalogs
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-02'
+    concern: vm-topology
+    keywords:
+      - inventory
+      - examples
+      - templates
+      - identities
+      - forkability
+      - example-first
+      - service
+      - identity
+      - catalogs
+    summary: Primary onboarding catalogs should move toward example-first inventories and
+    filename: 0334-example-first-inventory-and-service-identity-catalogs.md
+    path: docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md
+  - adr: 0339
+    title: Reference Deployment Samples And Replaceable Provider Profiles
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-02'
+    concern: vm-topology
+    keywords:
+      - samples
+      - templates
+      - provider
+      - onboarding
+      - replication
+      - reference
+      - deployment
+      - replaceable
+      - profiles
+    summary: We will provide reference deployment samples and replaceable provider profiles
+    filename: 0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+    path: docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+  - adr: '0340'
+    title: Dedicated Coolify Apps VM Separation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-03'
+    concern: vm-topology
+    keywords:
+      - coolify
+      - vm-topology
+      - paas
+      - apps
+      - separation-of-concerns
+      - dry
+      - dedicated
+      - vm
+      - separation
+    summary: We introduce a second dedicated guest, coolify-apps-lv3 (proposed VMID 171,
+    filename: 0340-dedicated-coolify-apps-vm-separation.md
+    path: docs/adr/0340-dedicated-coolify-apps-vm-separation.md
+    implemented_in_repo_version: 0.177.153
+    implemented_in_platform_version: 0.130.96
+    implemented_on: '2026-04-03'

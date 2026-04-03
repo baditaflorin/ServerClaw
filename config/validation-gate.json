@@ -16,7 +16,7 @@
     "timeout_seconds": 120
   },
   "documentation-index": {
-    "description": "Verify that the generated ADR index is current for documentation and workstream changes.",
+    "description": "Verify that the generated ADR root manifest, facet shards, and reservation summary are current for documentation and workstream changes.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/python:3.12.10",
     "command": "./scripts/run_python_with_packages.sh pyyaml -- scripts/generate_adr_index.py --check >/dev/null",

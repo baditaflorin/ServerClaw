@@ -1,0 +1,392 @@
+# ============================================================================
+# ADR Concern Shard documentation — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: documentation
+total_adrs: 20
+adrs:
+  - adr: '0074'
+    title: Platform Operations Portal
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: documentation
+    keywords:
+      - platform
+      - operations
+      - portal
+    summary: We will deploy a Platform Operations Portal (ops.lv3.org) as a lightweight static web application served from
+      the NGINX edge.
+    filename: 0074-platform-operations-portal.md
+    path: docs/adr/0074-platform-operations-portal.md
+    implemented_in_repo_version: 0.69.0
+    implemented_in_platform_version: 0.40.0
+    implemented_on: '2026-03-23'
+  - adr: 0081
+    title: Platform Changelog And Deployment History Portal
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: documentation
+    keywords:
+      - platform
+      - changelog
+      - deployment
+      - history
+      - portal
+    summary: We will generate a Deployment History Portal (changelog.lv3.org) as part of the operations portal suite (ADR
+      0074).
+    filename: 0081-platform-changelog-and-deployment-history.md
+    path: docs/adr/0081-platform-changelog-and-deployment-history.md
+    implemented_in_repo_version: 0.81.0
+    implemented_in_platform_version: 0.40.0
+    implemented_on: '2026-03-23'
+  - adr: 0094
+    title: Developer Portal and Service Documentation Site
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: documentation
+    keywords:
+      - developer
+      - portal
+      - service
+      - documentation
+      - site
+    summary: We will generate a static documentation site using MkDocs with the Material theme, auto-populated from the canonical
+      platform data sources, and published at doc
+    filename: 0094-developer-portal-and-documentation-site.md
+    path: docs/adr/0094-developer-portal-and-documentation-site.md
+    implemented_in_repo_version: 0.97.0
+    implemented_in_platform_version: 0.105.0
+    implemented_on: '2026-03-23'
+  - adr: 0095
+    title: Unified Search Across Platform Services
+    status: Deprecated
+    implementation_status: Deprecated
+    date: '2026-03-23'
+    concern: documentation
+    keywords:
+      - unified
+      - search
+      - across
+      - platform
+      - services
+    summary: 'We will deploy Zinc Search (a lightweight Elasticsearch-compatible search engine) on docker-runtime-lv3 and
+      build a search indexer that ingests the six primary '
+    filename: 0095-unified-platform-search.md
+    path: docs/adr/0095-unified-platform-search.md
+    implemented_in_repo_version: 0.119.0
+    implemented_on: '2026-03-24'
+  - adr: 0097
+    title: Alerting Routing and On-Call Runbook Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: documentation
+    keywords:
+      - alerting
+      - routing
+      - on-call
+      - runbook
+      - model
+    summary: We will implement a two-tier alert routing model with Alertmanager as the routing engine, severity-based destination
+      mapping, mandatory runbook links on every a
+    filename: 0097-alerting-routing-and-oncall-runbook-model.md
+    path: docs/adr/0097-alerting-routing-and-oncall-runbook-model.md
+    implemented_in_repo_version: 0.114.0
+    implemented_on: '2026-03-24'
+  - adr: '0121'
+    title: Local Search and Indexing Fabric
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: documentation
+    keywords:
+      - local
+      - search
+      - indexing
+      - fabric
+    summary: We will build a local search and indexing fabric entirely within Postgres, using pgtrgm (trigram matching) and
+      the built-in tsvector/tsquery (BM25 full-text sea
+    filename: 0121-local-search-and-indexing-fabric.md
+    path: docs/adr/0121-local-search-and-indexing-fabric.md
+    implemented_in_repo_version: 0.119.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-26'
+  - adr: '0134'
+    title: Changelog Portal Content Redaction
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: documentation
+    keywords:
+      - changelog
+      - portal
+      - content
+      - redaction
+    summary: We implement a config-backed changelog redaction pipeline between raw history collection and portal rendering.
+    filename: 0134-changelog-portal-content-redaction.md
+    path: docs/adr/0134-changelog-portal-content-redaction.md
+    implemented_in_repo_version: 0.133.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-25'
+  - adr: '0135'
+    title: Developer Portal Sensitivity Classification
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: documentation
+    keywords:
+      - developer
+      - portal
+      - sensitivity
+      - classification
+    summary: We will classify developer-portal content by sensitivity and enforce that classification in the generated MkDocs
+      source.
+    filename: 0135-developer-portal-sensitivity-classification.md
+    path: docs/adr/0135-developer-portal-sensitivity-classification.md
+    implemented_in_repo_version: 0.124.0
+    implemented_on: '2026-03-24'
+  - adr: 0148
+    title: SearXNG for Agent Web Search
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: documentation
+    keywords:
+      - searxng
+      - agent
+      - web
+      - search
+    summary: We will deploy SearXNG on docker-runtime-lv3 as a self-hosted search aggregation API for agent and operator use.
+    filename: 0148-searxng-for-agent-web-search.md
+    path: docs/adr/0148-searxng-for-agent-web-search.md
+    implemented_in_repo_version: 0.175.0
+    implemented_in_platform_version: 0.130.21
+    implemented_on: '2026-03-26'
+  - adr: '0167'
+    title: Agent Handoff and Context Preservation Protocol
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: documentation
+    keywords:
+      - agent
+      - handoff
+      - context
+      - preservation
+      - protocol
+    summary: 'All agents working on this repository must follow this handoff protocol:'
+    filename: 0167-agent-handoff-and-context-preservation.md
+    path: docs/adr/0167-agent-handoff-and-context-preservation.md
+    implemented_in_repo_version: 0.173.0
+    implemented_on: '2026-03-26'
+  - adr: 0198
+    title: Qdrant Vector Search for Semantic Platform RAG
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: documentation
+    keywords:
+      - qdrant
+      - vector
+      - search
+      - semantic
+      - platform
+      - rag
+    summary: We will make the platform-context retrieval path semantic by default while preserving the existing private-first
+      operating model.
+    filename: 0198-qdrant-vector-search-semantic-rag.md
+    path: docs/adr/0198-qdrant-vector-search-semantic-rag.md
+    implemented_in_repo_version: 0.177.26
+    implemented_in_platform_version: 0.130.34
+    implemented_on: '2026-03-28'
+  - adr: 0239
+    title: Browser-Local Search Experience Via Pagefind
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: documentation
+    keywords:
+      - browser-local
+      - search
+      - experience
+      - pagefind
+    summary: We will use Pagefind as the default browser-local search layer for static or
+    filename: 0239-browser-local-search-experience-via-pagefind.md
+    path: docs/adr/0239-browser-local-search-experience-via-pagefind.md
+    implemented_in_repo_version: 0.177.62
+    implemented_in_platform_version: 0.130.43
+    implemented_on: '2026-03-28'
+  - adr: '0263'
+    title: Qdrant, PostgreSQL, And Local Search As The ServerClaw Memory Substrate
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: documentation
+    keywords:
+      - qdrant
+      - postgresql
+      - local
+      - search
+      - as
+      - serverclaw
+      - memory
+      - substrate
+    summary: We will use PostgreSQL, Qdrant, and the local search fabric together as the
+    filename: 0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md
+    path: docs/adr/0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md
+    implemented_in_repo_version: 0.177.90
+    implemented_in_platform_version: 0.130.60
+    implemented_on: '2026-03-29'
+  - adr: '0277'
+    title: Typesense As The Full-Text Search Engine For Internal Structured Data
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: documentation
+    keywords:
+      - typesense
+      - as
+      - full-text
+      - search
+      - engine
+      - internal
+      - structured
+      - data
+    summary: We will deploy Typesense as the full-text search engine for internal
+    filename: 0277-typesense-as-the-full-text-search-engine-for-internal-structured-data.md
+    path: docs/adr/0277-typesense-as-the-full-text-search-engine-for-internal-structured-data.md
+    implemented_in_repo_version: 0.177.125
+    implemented_in_platform_version: 0.130.80
+    implemented_on: '2026-03-31'
+  - adr: '0324'
+    title: Service Definition Shards And Generated Service Catalog Assembly
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: documentation
+    keywords:
+      - services
+      - catalogs
+      - generation
+      - sharding
+      - repo-structure
+      - service
+      - definition
+      - shards
+      - generated
+      - catalog
+    summary: We will move service-shaped repository truth toward per-service source
+    filename: 0324-service-definition-shards-and-generated-service-catalog-assembly.md
+    path: docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md
+  - adr: '0325'
+    title: Faceted ADR Index Shards And Reservation Windows
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: documentation
+    keywords:
+      - adr
+      - indexing
+      - discovery
+      - reservations
+      - sharding
+      - faceted
+      - index
+      - shards
+      - reservation
+      - windows
+    summary: We will evolve ADR discovery into faceted generated shards and introduce a
+    filename: 0325-faceted-adr-index-shards-and-reservation-windows.md
+    path: docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md
+  - adr: '0327'
+    title: Sectional Agent Discovery Registries And Generated Onboarding Packs
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: documentation
+    keywords:
+      - agent-discovery
+      - onboarding
+      - registries
+      - config
+      - sharding
+      - sectional
+      - agent
+      - discovery
+      - generated
+      - packs
+    summary: We will reorganize discovery metadata into sectional registries with
+    filename: 0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md
+    path: docs/adr/0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md
+    implemented_on: '2026-04-03'
+  - adr: 0328
+    title: Size-Budgeted Root Summaries And Automatic Rollover Ledgers
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: documentation
+    keywords:
+      - summaries
+      - generation
+      - rollover
+      - readme
+      - changelog
+      - size-budgeted
+      - root
+      - automatic
+      - ledgers
+    summary: We will manage root summary surfaces with explicit size budgets and
+    filename: 0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md
+    path: docs/adr/0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md
+    implemented_on: '2026-04-03'
+  - adr: '0332'
+    title: Relative Release And Status Links In Generated Root Surfaces
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: documentation
+    keywords:
+      - release
+      - readme
+      - changelog
+      - generation
+      - links
+      - relative
+      - status
+      - generated
+      - root
+      - surfaces
+    summary: Root summary generation must emit repository-relative links and avoid absolute
+    filename: 0332-relative-release-and-status-links-in-generated-root-surfaces.md
+    path: docs/adr/0332-relative-release-and-status-links-in-generated-root-surfaces.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
+  - adr: 0338
+    title: Public Documentation Tiers And Private History Boundaries
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-02'
+    concern: documentation
+    keywords:
+      - documentation
+      - publication
+      - history
+      - boundaries
+      - governance
+      - public
+      - tiers
+      - private
+    summary: We will manage documentation with explicit public tiers and private-history
+    filename: 0338-public-documentation-tiers-and-private-history-boundaries.md
+    path: docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'

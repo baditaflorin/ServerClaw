@@ -8,7 +8,7 @@ entries:
   directories:
     docs/adr:
       purpose: Architecture Decision Records - every major design decision
-      contains: ADR markdown files plus .index.yaml for machine-readable search
+      contains: ADR markdown files, compact .index.yaml root manifest, and shard metadata under index/
       concern: governance, architecture
       keywords:
       - decisions
@@ -17,11 +17,12 @@ entries:
       - rationale
       - consequences
       - adr
-      for_agents: 'Read .index.yaml to find relevant ADRs by keyword - do not enumerate all 320+ files. Start here for project direction and design rationale.
+      for_agents: 'Read .index.yaml to find relevant ADRs by keyword, concern, or reservation context. Load one shard under docs/adr/index/ when you need focused browsing instead of the full corpus.
 
         '
       key_files:
-        .index.yaml: Machine-readable ADR catalog - search by keyword/concern
+        .index.yaml: Root ADR discovery manifest with shard pointers and reservation summary
+        index/reservations.yaml: ADR number and window reservation ledger for parallel authoring
     docs/runbooks:
       purpose: Operational runbooks and procedures for routine tasks
       contains: Step-by-step guides for deployment, troubleshooting, recovery

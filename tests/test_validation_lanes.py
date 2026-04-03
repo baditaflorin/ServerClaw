@@ -62,6 +62,39 @@ def test_docs_change_selects_docs_lane_without_remote_builder() -> None:
     assert "semgrep-sast" not in selection.blocking_checks
 
 
+def test_adr_discovery_metadata_change_selects_docs_and_repo_lanes() -> None:
+    module = load_module("validation_lanes_adr_discovery", "scripts/validation_lanes.py")
+    manifest_checks = module.load_manifest_checks(REPO_ROOT / "config" / "validation-gate.json")
+    catalog = module.load_catalog(
+        catalog_path=REPO_ROOT / "config" / "validation-lanes.yaml",
+        manifest_checks=manifest_checks,
+    )
+
+    selection = module.resolve_selection_from_changed_files(
+        catalog,
+        manifest_checks,
+        changed_files=("docs/adr/index/reservations.yaml",),
+        branch="codex/adr-discovery-metadata",
+        base_ref="origin/main",
+    )
+
+    assert selection.selected_lanes == (
+        "documentation-and-adr",
+        "repository-structure-and-schema",
+    )
+    assert selection.blocking_checks == (
+        "workstream-surfaces",
+        "agent-standards",
+        "documentation-index",
+        "yaml-lint",
+        "schema-validation",
+        "atlas-lint",
+        "policy-validation",
+        "alert-rule-validation",
+        "dependency-direction",
+    )
+
+
 def test_ansible_role_change_selects_iac_policy_scan() -> None:
     module = load_module("validation_lanes_ansible_iac", "scripts/validation_lanes.py")
     manifest_checks = module.load_manifest_checks(REPO_ROOT / "config" / "validation-gate.json")

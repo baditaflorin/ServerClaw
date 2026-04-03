@@ -1,0 +1,103 @@
+# ============================================================================
+# ADR Concern Shard resilience — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: resilience
+total_adrs: 5
+adrs:
+  - adr: '0163'
+    title: Platform-Wide Retry Taxonomy and Exponential Backoff
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: resilience
+    keywords:
+      - platform-wide
+      - retry
+      - taxonomy
+      - exponential
+      - backoff
+    summary: We will define a platform-wide error taxonomy and a standard retry policy implementation in platform/retry/policy.py
+      that is used by all platform code.
+    filename: 0163-platform-wide-retry-taxonomy-and-exponential-backoff.md
+    path: docs/adr/0163-platform-wide-retry-taxonomy-and-exponential-backoff.md
+    implemented_in_repo_version: 0.149.0
+    implemented_in_platform_version: 0.130.15
+    implemented_on: '2026-03-26'
+  - adr: '0167'
+    title: Graceful Degradation Mode Declarations
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: resilience
+    keywords:
+      - graceful
+      - degradation
+      - mode
+      - declarations
+    summary: We will make graceful degradation a declared and testable part of the platform contract.
+    filename: 0167-graceful-degradation-mode-declarations.md
+    path: docs/adr/0167-graceful-degradation-mode-declarations.md
+    implemented_in_repo_version: 0.146.1
+    implemented_in_platform_version: 0.130.15
+    implemented_on: '2026-03-26'
+  - adr: '0170'
+    title: Platform-Wide Timeout Hierarchy
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: resilience
+    keywords:
+      - platform-wide
+      - timeout
+      - hierarchy
+    summary: 'We will define a repository-managed timeout hierarchy in config/timeout-hierarchy.yaml and use it as the canonical
+      source for:'
+    filename: 0170-platform-wide-timeout-hierarchy.md
+    path: docs/adr/0170-platform-wide-timeout-hierarchy.md
+    implemented_in_repo_version: 0.157.0
+    implemented_in_platform_version: 0.130.8
+    implemented_on: '2026-03-25'
+  - adr: '0172'
+    title: Watchdog Escalation and Stale Job Self-Healing
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: resilience
+    keywords:
+      - watchdog
+      - escalation
+      - stale
+      - job
+      - self-healing
+    summary: We extend the scheduler watchdog into a stale-job backstop that can operate from repo-managed Windmill schedules
+      as well as local controller runs.
+    filename: 0172-watchdog-escalation-and-stale-job-self-healing.md
+    path: docs/adr/0172-watchdog-escalation-and-stale-job-self-healing.md
+    implemented_in_repo_version: 0.146.2
+    implemented_on: '2026-03-25'
+  - adr: '0224'
+    title: Server-Resident Operations As The Default Control Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: resilience
+    keywords:
+      - server-resident
+      - operations
+      - as
+      - default
+      - control
+      - model
+    summary: We will make server-resident operations the default control model.
+    filename: 0224-server-resident-operations-as-the-default-control-model.md
+    path: docs/adr/0224-server-resident-operations-as-the-default-control-model.md
+    implemented_in_repo_version: 0.177.52
+    implemented_in_platform_version: 0.130.42
+    implemented_on: '2026-03-28'

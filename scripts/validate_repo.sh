@@ -718,26 +718,24 @@ _validate_workstream_entry() {
 }
 
 _validate_adr_index_current() {
-  local adr_changes index_updated
+  local adr_related_changes index_updated
 
-  adr_changes=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -c '^docs/adr/0[0-9]' || true)
-  adr_changes="${adr_changes:-0}"
+  adr_related_changes=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
+    grep -Ec '^(docs/adr/0[0-9]{3}.*\.md|docs/adr/index/reservations\.yaml|scripts/generate_adr_index\.py)$' || true)
+  adr_related_changes="${adr_related_changes:-0}"
   index_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -c '^docs/adr/\.index\.yaml' || true)
+    grep -Ec '^docs/adr/\.index\.yaml$|^docs/adr/index/(by-range|by-concern|by-status)/.+\.yaml$' || true)
   index_updated="${index_updated:-0}"
 
-  if [[ "$adr_changes" -gt 0 ]] && [[ "$index_updated" -eq 0 ]]; then
-    # Check if index exists at all
+  if [[ "$adr_related_changes" -gt 0 ]] && [[ "$index_updated" -eq 0 ]]; then
     if [[ ! -f "$REPO_ROOT/docs/adr/.index.yaml" ]]; then
-      echo "ERROR: docs/adr/.index.yaml missing (ADR 0164). Generate with:" >&2
+      echo "ERROR: docs/adr/.index.yaml missing (ADR 0164 / ADR 0325). Generate with:" >&2
       echo "  uv run --with pyyaml python3 scripts/generate_adr_index.py --write" >&2
       return 1
     fi
-    echo "WARNING: ADR files changed but docs/adr/.index.yaml not updated (ADR 0164)" >&2
+    echo "WARNING: ADR metadata changed but the generated ADR discovery outputs were not refreshed (ADR 0164 / ADR 0325)" >&2
     echo "  Run: uv run --with pyyaml python3 scripts/generate_adr_index.py --write" >&2
-    echo "  Then: git add docs/adr/.index.yaml" >&2
-    # Warning only — do not block push for this
+    echo "  Then: git add docs/adr/.index.yaml docs/adr/index/" >&2
   fi
   return 0
 }

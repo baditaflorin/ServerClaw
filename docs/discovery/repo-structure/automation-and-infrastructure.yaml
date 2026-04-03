@@ -103,10 +103,12 @@ entries:
       - tools
       - validation
       - python
-      for_agents: 'validate_repo.sh runs all local checks. generate_adr_index.py regenerates docs/adr/.index.yaml. platform_manifest.py generates build/platform-manifest.json.
+      for_agents: 'validate_repo.sh runs all local checks. generate_adr_index.py regenerates docs/adr/.index.yaml plus docs/adr/index/. adr_query_tool.py reads the ADR shards and reservation ledger. platform_manifest.py generates build/platform-manifest.json.
 
         '
       key_files:
+        adr_query_tool.py: ADR 0325 discovery query helper and reservation-safe ADR window allocator
+        generate_adr_index.py: ADR 0325 generator for docs/adr/.index.yaml and docs/adr/index/ shards
         network_impairment_matrix.py: ADR 0189 CLI and validation helper for governed network impairment scenarios
         policy_checks.py: ADR 0230 validator for the shared OPA and Conftest policy bundle and toolchain
         stage_smoke_suites.py: ADR 0251 validator and runner for stage-scoped smoke suite catalogs and receipt-ready evidence

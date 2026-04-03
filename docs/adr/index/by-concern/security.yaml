@@ -1,0 +1,480 @@
+# ============================================================================
+# ADR Concern Shard security — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: security
+total_adrs: 25
+adrs:
+  - adr: '0034'
+    title: Controller-Local Secret Manifest And Preflight
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - controller-local
+      - secret
+      - manifest
+      - preflight
+    summary: We will define a controller-local secret manifest and a standard preflight check.
+    filename: 0034-controller-local-secret-manifest-and-preflight.md
+    path: docs/adr/0034-controller-local-secret-manifest-and-preflight.md
+    implemented_in_repo_version: 0.35.0
+    implemented_on: '2026-03-22'
+  - adr: '0042'
+    title: step-ca For SSH And Internal TLS
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - step-ca
+      - ssh
+      - internal
+      - tls
+    summary: We will standardize on step-ca as the internal certificate authority for LV3.
+    filename: 0042-step-ca-for-ssh-and-internal-tls.md
+    path: docs/adr/0042-step-ca-for-ssh-and-internal-tls.md
+    implemented_in_repo_version: 0.45.0
+    implemented_in_platform_version: 0.22.0
+    implemented_on: '2026-03-22'
+  - adr: '0043'
+    title: OpenBao For Secrets, Transit, And Dynamic Credentials
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - openbao
+      - secrets
+      - transit
+      - dynamic
+      - credentials
+    summary: We will use OpenBao as the platform secret authority.
+    filename: 0043-openbao-for-secrets-transit-and-dynamic-credentials.md
+    path: docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md
+    implemented_in_repo_version: 0.48.0
+    implemented_in_platform_version: 0.24.0
+    implemented_on: '2026-03-22'
+  - adr: '0047'
+    title: Short-Lived Credentials And Internal mTLS
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - short-lived
+      - credentials
+      - internal
+      - mtls
+    summary: We will prefer short-lived credentials and mutual TLS for new internal access paths.
+    filename: 0047-short-lived-credentials-and-internal-mtls.md
+    path: docs/adr/0047-short-lived-credentials-and-internal-mtls.md
+    implemented_in_repo_version: 0.49.0
+    implemented_in_platform_version: 0.25.0
+    implemented_on: '2026-03-22'
+  - adr: '0056'
+    title: Keycloak For Operator And Agent SSO
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - keycloak
+      - operator
+      - agent
+      - sso
+    summary: We will use Keycloak as the shared SSO and identity-broker layer for internal operator-facing and approved agent-facing
+      applications.
+    filename: 0056-keycloak-for-operator-and-agent-sso.md
+    path: docs/adr/0056-keycloak-for-operator-and-agent-sso.md
+    implemented_in_repo_version: 0.66.0
+    implemented_in_platform_version: 0.34.0
+    implemented_on: '2026-03-22'
+  - adr: '0065'
+    title: Secret Rotation Automation With OpenBao
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - secret
+      - rotation
+      - automation
+      - openbao
+    summary: We will implement automated secret rotation for all non-ephemeral credentials using OpenBao as the rotation authority.
+    filename: 0065-secret-rotation-automation-with-openbao.md
+    path: docs/adr/0065-secret-rotation-automation-with-openbao.md
+    implemented_in_repo_version: 0.62.0
+    implemented_in_platform_version: 0.36.0
+    implemented_on: '2026-03-23'
+  - adr: '0077'
+    title: Compose Runtime Secrets Injection Via OpenBao Agent
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - compose
+      - runtime
+      - secrets
+      - injection
+      - openbao
+      - agent
+    summary: We will replace .env file secret injection with OpenBao Agent sidecar injection for all Docker Compose stacks.
+    filename: 0077-compose-runtime-secrets-injection.md
+    path: docs/adr/0077-compose-runtime-secrets-injection.md
+    implemented_in_repo_version: 0.83.0
+    implemented_in_platform_version: 0.39.0
+    implemented_on: '2026-03-23'
+  - adr: '0101'
+    title: Automated Certificate Lifecycle Management
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: security
+    keywords:
+      - automated
+      - certificate
+      - lifecycle
+      - management
+    summary: We will implement a three-layer certificate lifecycle covering inventory, automated renewal where this repository
+      actually owns the renewal path, and expiry det
+    filename: 0101-automated-certificate-lifecycle-management.md
+    path: docs/adr/0101-automated-certificate-lifecycle-management.md
+    implemented_in_repo_version: 0.177.6
+    implemented_in_platform_version: 0.130.27
+    implemented_on: '2026-03-27'
+  - adr: '0102'
+    title: Security Posture Reporting and Benchmark Drift
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: security
+    keywords:
+      - security
+      - posture
+      - reporting
+      - benchmark
+      - drift
+    summary: We will implement a weekly automated security posture report using two complementary tools — Lynis for host or
+      guest OS-level hardening checks and Trivy for con
+    filename: 0102-security-posture-reporting.md
+    path: docs/adr/0102-security-posture-reporting.md
+    implemented_in_repo_version: 0.109.0
+    implemented_in_platform_version: 0.130.21
+    implemented_on: '2026-03-26'
+  - adr: '0136'
+    title: HTTP Security Headers Hardening
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: security
+    keywords:
+      - http
+      - security
+      - headers
+      - hardening
+    summary: We standardise HTTP security headers in the nginxedgepublication role and make the edge authoritative for those
+      headers on every published hostname.
+    filename: 0136-http-security-headers-hardening.md
+    path: docs/adr/0136-http-security-headers-hardening.md
+    implemented_in_repo_version: 0.141.0
+    implemented_in_platform_version: 0.130.1
+    implemented_on: '2026-03-25'
+  - adr: 0138
+    title: Published Artifact Secret Scanning
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: security
+    keywords:
+      - published
+      - artifact
+      - secret
+      - scanning
+    summary: We will add a published artifact secret-scanning stage that runs before merge and before artifact publication.
+    filename: 0138-published-artifact-secret-scanning.md
+    path: docs/adr/0138-published-artifact-secret-scanning.md
+    implemented_in_repo_version: 0.123.0
+    implemented_on: '2026-03-24'
+  - adr: '0140'
+    title: Grafana Public Access Hardening
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: security
+    keywords:
+      - grafana
+      - public
+      - access
+      - hardening
+    summary: We will harden Grafana's public publication with repository-managed controls at both the Grafana runtime and
+      the NGINX edge.
+    filename: 0140-grafana-public-access-hardening.md
+    path: docs/adr/0140-grafana-public-access-hardening.md
+    implemented_in_repo_version: 0.124.1
+    implemented_in_platform_version: 0.130.1
+    implemented_on: '2026-03-24'
+  - adr: '0141'
+    title: API Token Lifecycle and Exposure Response
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: security
+    keywords:
+      - api
+      - token
+      - lifecycle
+      - exposure
+      - response
+    summary: We will define a token lifecycle policy in config/token-policy.yaml and implement automated enforcement and a
+      runbook for exposure response.
+    filename: 0141-api-token-lifecycle-and-exposure-response.md
+    path: docs/adr/0141-api-token-lifecycle-and-exposure-response.md
+    implemented_in_repo_version: 0.135.0
+    implemented_on: '2026-03-25'
+  - adr: '0142'
+    title: Public Surface Automated Security Scan
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: security
+    keywords:
+      - public
+      - surface
+      - automated
+      - security
+      - scan
+    summary: 'We will run a repo-managed weekly public-surface security scan that writes structured receipts under receipts/security-scan/
+      and publishes summary plus high or '
+    filename: 0142-public-surface-automated-security-scan.md
+    path: docs/adr/0142-public-surface-automated-security-scan.md
+    implemented_in_repo_version: 0.129.0
+    implemented_on: '2026-03-24'
+  - adr: '0147'
+    title: Vaultwarden for Operator Credential Management
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: security
+    keywords:
+      - vaultwarden
+      - operator
+      - credential
+      - management
+    summary: We will deploy Vaultwarden on docker-runtime-lv3 as a Bitwarden-compatible self-hosted credential vault for operator
+      use.
+    filename: 0147-vaultwarden-for-operator-credential-management.md
+    path: docs/adr/0147-vaultwarden-for-operator-credential-management.md
+    implemented_in_repo_version: 0.147.0
+    implemented_in_platform_version: 0.130.12
+    implemented_on: '2026-03-26'
+  - adr: '0165'
+    title: Workflow Idempotency Keys and Double-Execution Prevention
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: security
+    keywords:
+      - workflow
+      - idempotency
+      - keys
+      - double-execution
+      - prevention
+    summary: We will add a repository-managed idempotency layer on the workflow submission path.
+    filename: 0165-workflow-idempotency-keys-and-double-execution-prevention.md
+    path: docs/adr/0165-workflow-idempotency-keys-and-double-execution-prevention.md
+    implemented_in_repo_version: 0.153.0
+    implemented_in_platform_version: 0.130.6
+    implemented_on: '2026-03-25'
+  - adr: 0219
+    title: Data-Class Replication Policies For Queues, Object Stores, Search, Cache, Secrets, And Time-Series
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - data-class
+      - replication
+      - policies
+      - queues
+      - object
+      - stores
+      - search
+      - cache
+      - secrets
+      - time-series
+    summary: We will govern replication by data class rather than by product name alone.
+    filename: 0219-data-class-replication-policies-for-queues-object-stores-search-cache-secrets-and-time-series.md
+    path: docs/adr/0219-data-class-replication-policies-for-queues-object-stores-search-cache-secrets-and-time-series.md
+  - adr: '0231'
+    title: Local Secret Delivery Via OpenBao Agent And Systemd Credentials
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - local
+      - secret
+      - delivery
+      - openbao
+      - agent
+      - systemd
+      - credentials
+    summary: We will standardize host-local secret delivery on OpenBao Agent plus systemd
+    filename: 0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+    path: docs/adr/0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+    implemented_in_repo_version: 0.177.44
+    implemented_in_platform_version: 0.130.38
+    implemented_on: '2026-03-28'
+  - adr: 0248
+    title: Session And Logout Authority Across Keycloak, Oauth2-Proxy, And App Surfaces
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - session
+      - logout
+      - authority
+      - across
+      - keycloak
+      - oauth2-proxy
+      - app
+      - surfaces
+    summary: We will make Keycloak the session authority for protected browser surfaces
+    filename: 0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-apps.md
+    path: docs/adr/0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-apps.md
+    implemented_in_repo_version: 0.177.63
+    implemented_in_platform_version: 0.130.45
+    implemented_on: '2026-03-29'
+  - adr: 0249
+    title: HTTPS And TLS Assurance Via Blackbox Exporter And testssl.sh
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - https
+      - tls
+      - assurance
+      - blackbox
+      - exporter
+      - testssl
+      - sh
+    summary: We will use Prometheus Blackbox Exporter for recurring protocol-level probe
+    filename: 0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
+    path: docs/adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
+    implemented_in_repo_version: 0.177.82
+    implemented_in_platform_version: 0.130.56
+    implemented_on: '2026-03-29'
+  - adr: '0262'
+    title: OpenFGA And Keycloak For Delegated ServerClaw Capability Authorization
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - openfga
+      - keycloak
+      - delegated
+      - serverclaw
+      - capability
+      - authorization
+    summary: We will use Keycloak for authentication and OpenFGA for delegated
+    filename: 0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization.md
+    path: docs/adr/0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization.md
+    implemented_in_repo_version: 0.177.95
+    implemented_in_platform_version: 0.130.63
+    implemented_on: '2026-03-30'
+  - adr: '0300'
+    title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: security
+    keywords:
+      - falco
+      - container
+      - runtime
+      - syscall
+      - security
+      - monitoring
+      - autonomous
+      - anomaly
+      - detection
+    summary: We will deploy Falco as a systemd service on each selected production VM,
+    filename: 0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md
+    path: docs/adr/0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md
+    implemented_in_repo_version: 0.178.0
+    implemented_in_platform_version: 0.130.96
+    implemented_on: '2026-04-03'
+  - adr: '0301'
+    title: Semgrep For SAST And Application Code Security Scanning In The CI Gate
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: security
+    keywords:
+      - semgrep
+      - sast
+      - application
+      - code
+      - security
+      - scanning
+      - ci
+      - gate
+    summary: We will integrate Semgrep as a required step in the repo-managed
+    filename: 0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md
+    path: docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md
+    implemented_in_repo_version: 0.177.108
+    implemented_on: '2026-03-30'
+  - adr: '0333'
+    title: Private Overlay Files For Deployment-Specific Secrets And Identities
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-02'
+    concern: security
+    keywords:
+      - overlays
+      - secrets
+      - identities
+      - local-state
+      - forkability
+      - private
+      - overlay
+      - files
+      - deployment-specific
+    summary: Deployment-specific secrets, identities, and one-off bootstrap artefacts must
+    filename: 0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+    path: docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
+  - adr: '0341'
+    title: Open WebUI Keycloak OIDC With Break-Glass Fallback
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-03'
+    concern: security
+    keywords:
+      - open-webui
+      - keycloak
+      - oidc
+      - operator-auth
+      - break-glass
+      - open
+      - webui
+      - fallback
+    summary: Open WebUI will use a dedicated repo-managed Keycloak OIDC client for routine
+    filename: 0341-open-webui-keycloak-oidc-with-break-glass-fallback.md
+    path: docs/adr/0341-open-webui-keycloak-oidc-with-break-glass-fallback.md
+    implemented_in_repo_version: 0.178.3
+    implemented_in_platform_version: 0.130.98
+    implemented_on: '2026-04-03'

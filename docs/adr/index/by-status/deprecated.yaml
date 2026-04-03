@@ -1,0 +1,32 @@
+# ============================================================================
+# ADR Status Shard Deprecated — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: status
+implementation_status: Deprecated
+slug: deprecated
+total_adrs: 1
+adrs:
+  - adr: 0095
+    title: Unified Search Across Platform Services
+    status: Deprecated
+    implementation_status: Deprecated
+    date: '2026-03-23'
+    concern: documentation
+    keywords:
+      - unified
+      - search
+      - across
+      - platform
+      - services
+    summary: 'We will deploy Zinc Search (a lightweight Elasticsearch-compatible search engine) on docker-runtime-lv3 and
+      build a search indexer that ingests the six primary '
+    filename: 0095-unified-platform-search.md
+    path: docs/adr/0095-unified-platform-search.md
+    implemented_in_repo_version: 0.119.0
+    implemented_on: '2026-03-24'

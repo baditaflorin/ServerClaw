@@ -1,0 +1,891 @@
+# ============================================================================
+# ADR Range Shard 0300-0399 — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: range
+label: 0300-0399
+range:
+  start: '0300'
+  end: 0399
+total_adrs: 44
+adrs:
+  - adr: '0300'
+    title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: security
+    keywords:
+      - falco
+      - container
+      - runtime
+      - syscall
+      - security
+      - monitoring
+      - autonomous
+      - anomaly
+      - detection
+    summary: We will deploy Falco as a systemd service on each selected production VM,
+    filename: 0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md
+    path: docs/adr/0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md
+    implemented_in_repo_version: 0.178.0
+    implemented_in_platform_version: 0.130.96
+    implemented_on: '2026-04-03'
+  - adr: '0301'
+    title: Semgrep For SAST And Application Code Security Scanning In The CI Gate
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: security
+    keywords:
+      - semgrep
+      - sast
+      - application
+      - code
+      - security
+      - scanning
+      - ci
+      - gate
+    summary: We will integrate Semgrep as a required step in the repo-managed
+    filename: 0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md
+    path: docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md
+    implemented_in_repo_version: 0.177.108
+    implemented_on: '2026-03-30'
+  - adr: '0302'
+    title: Restic For Encrypted File-Level Backup Of Platform Configuration And State Artifacts
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: storage
+    keywords:
+      - restic
+      - encrypted
+      - file-level
+      - backup
+      - platform
+      - configuration
+      - state
+      - artifacts
+    summary: We will deploy Restic as a scheduled backup agent for platform configuration
+    filename: 0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts.md
+    path: docs/adr/0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts.md
+    implemented_in_repo_version: 0.177.115
+    implemented_in_platform_version: 0.130.75
+    implemented_on: '2026-03-31'
+  - adr: '0303'
+    title: pgaudit For PostgreSQL Query And Privilege Change Audit Logging
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - pgaudit
+      - postgresql
+      - query
+      - privilege
+      - change
+      - audit
+      - logging
+    summary: We will enable pgaudit on the production PostgreSQL instance and configure it
+    filename: 0303-pgaudit-for-postgresql-query-and-privilege-change-audit-logging.md
+    path: docs/adr/0303-pgaudit-for-postgresql-query-and-privilege-change-audit-logging.md
+    implemented_in_repo_version: 0.177.122
+    implemented_in_platform_version: 0.130.77
+    implemented_on: '2026-03-31'
+  - adr: '0304'
+    title: Atlas For Declarative Database Schema Migration Versioning And Pre-Migration Linting
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: release
+    keywords:
+      - atlas
+      - declarative
+      - database
+      - schema
+      - migration
+      - versioning
+      - pre-migration
+      - linting
+    summary: We will integrate Atlas as the migration linting and drift detection layer
+    filename: 0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
+    path: docs/adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
+    implemented_in_repo_version: 0.177.150
+    implemented_in_platform_version: 0.130.90
+    implemented_on: '2026-04-02'
+  - adr: '0305'
+    title: k6 For Continuous Load Testing And SLO Error Budget Burn Validation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: ci-cd
+    keywords:
+      - k6
+      - continuous
+      - load
+      - testing
+      - slo
+      - error
+      - budget
+      - burn
+      - validation
+    summary: We will integrate k6 as the platform's load testing and SLO budget burn
+    filename: 0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+    path: docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+    implemented_in_repo_version: 0.177.120
+    implemented_in_platform_version: 0.130.75
+    implemented_on: '2026-03-31'
+  - adr: '0306'
+    title: Checkov For IaC Policy Compliance Scanning Of OpenTofu, Compose, And Ansible
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: automation
+    keywords:
+      - checkov
+      - iac
+      - policy
+      - compliance
+      - scanning
+      - opentofu
+      - compose
+      - ansible
+    summary: We will integrate Checkov as a required CI gate step for all IaC surfaces in
+    filename: 0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md
+    path: docs/adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md
+    implemented_in_repo_version: 0.177.119
+    implemented_in_platform_version: 0.130.75
+    implemented_on: '2026-03-31'
+  - adr: '0307'
+    title: Platform Workbench As The Cohesive First-Party App Frame
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-31'
+    concern: platform
+    keywords:
+      - platform
+      - workbench
+      - as
+      - cohesive
+      - first-party
+      - app
+      - frame
+    summary: We will treat the platform's human-facing experience as one cohesive
+    filename: 0307-platform-workbench-as-the-cohesive-first-party-app-frame.md
+    path: docs/adr/0307-platform-workbench-as-the-cohesive-first-party-app-frame.md
+  - adr: '0307'
+    title: Temporary Guest Operator Accounts With 72-Hour Expiry
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-31'
+    concern: vm-topology
+    keywords:
+      - temporary
+      - guest
+      - operator
+      - accounts
+      - hour
+      - expiry
+    summary: 'Temporary operators are full participants in the ADR 0108 onboarding model — same Keycloak SSO, step-ca SSH
+      certificates, OpenBao secrets access, and Tailscale '
+    filename: 0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
+    path: docs/adr/0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
+    implemented_in_repo_version: 0.0.0
+    implemented_in_platform_version: 0.0.0
+    implemented_on: '2026-03-31'
+  - adr: 0308
+    title: Journey-Aware Entry Routing And Saved Home Selection
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-31'
+    concern: platform
+    keywords:
+      - journey-aware
+      - entry
+      - routing
+      - saved
+      - home
+      - selection
+    summary: We will use a journey-aware entry router and a saved home model for
+    filename: 0308-journey-aware-entry-routing-and-saved-home-selection.md
+    path: docs/adr/0308-journey-aware-entry-routing-and-saved-home-selection.md
+    implemented_in_repo_version: 0.177.146
+    implemented_in_platform_version: 0.130.92
+    implemented_on: '2026-04-02'
+  - adr: 0308
+    title: LLM Agent Execution Surface and Connectivity Contracts for Operator Provisioning
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-31'
+    concern: vm-topology
+    keywords:
+      - llm
+      - agent
+      - execution
+      - surface
+      - connectivity
+      - contracts
+      - operator
+      - provisioning
+    summary: The operatormanager.py onboard command must run where OpenBao is reachable over plain HTTP.
+    filename: 0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
+    path: docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
+    implemented_in_repo_version: 0.177.138
+    implemented_in_platform_version: 0.130.85
+    implemented_on: '2026-04-02'
+  - adr: 0309
+    title: Task-Oriented Information Architecture Across The Platform Workbench
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-31'
+    concern: platform
+    keywords:
+      - task-oriented
+      - information
+      - architecture
+      - across
+      - platform
+      - workbench
+    summary: We will organize first-party navigation and routing around five task-oriented
+    filename: 0309-task-oriented-information-architecture-across-the-platform-workbench.md
+    path: docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md
+    implemented_in_repo_version: 0.177.148
+    implemented_in_platform_version: 0.130.93
+    implemented_on: '2026-04-03'
+  - adr: '0310'
+    title: First-Run Activation Checklists And Progressive Capability Reveal
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-31'
+    concern: platform
+    keywords:
+      - first-run
+      - activation
+      - checklists
+      - progressive
+      - capability
+      - reveal
+    summary: We will add a cross-surface activation checklist and use progressive
+    filename: 0310-first-run-activation-checklists-and-progressive-capability-reveal.md
+    path: docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md
+    implemented_in_repo_version: 0.177.144
+    implemented_in_platform_version: 0.130.91
+    implemented_on: '2026-04-02'
+  - adr: '0311'
+    title: Global Command Palette And Universal Open Dialog Via cmdk
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-31'
+    concern: platform
+    keywords:
+      - global
+      - command
+      - palette
+      - universal
+      - open
+      - dialog
+      - cmdk
+    summary: We will use cmdk as the default global command palette and universal open
+    filename: 0311-global-command-palette-and-universal-open-dialog-via-cmdk.md
+    path: docs/adr/0311-global-command-palette-and-universal-open-dialog-via-cmdk.md
+    implemented_in_repo_version: 0.177.142
+    implemented_in_platform_version: 0.130.90
+    implemented_on: '2026-04-02'
+  - adr: '0312'
+    title: Shared Notification Center And Activity Timeline Across Human Surfaces
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-31'
+    concern: platform
+    keywords:
+      - shared
+      - notification
+      - center
+      - activity
+      - timeline
+      - across
+      - human
+      - surfaces
+    summary: We will provide a shared notification center for actionable items and a
+    filename: 0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md
+    path: docs/adr/0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md
+    implemented_in_repo_version: 0.177.146
+    implemented_in_platform_version: 0.130.92
+    implemented_on: '2026-04-02'
+  - adr: '0313'
+    title: Contextual Help, Glossary, And Escalation Drawer
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-31'
+    concern: agent-discovery
+    keywords:
+      - contextual
+      - help
+      - glossary
+      - escalation
+      - drawer
+    summary: We will provide a shared contextual help and escalation drawer in
+    filename: 0313-contextual-help-glossary-and-escalation-drawer.md
+    path: docs/adr/0313-contextual-help-glossary-and-escalation-drawer.md
+    implemented_in_repo_version: 0.177.139
+    implemented_in_platform_version: 0.130.87
+    implemented_on: '2026-04-02'
+  - adr: '0314'
+    title: Resumable Multi-Step Flows And Return-To-Task Reentry
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-31'
+    concern: platform
+    keywords:
+      - resumable
+      - multi-step
+      - flows
+      - return-to-task
+      - reentry
+    summary: We will treat important multi-step human flows as resumable tasks with
+    filename: 0314-resumable-multi-step-flows-and-return-to-task-reentry.md
+    path: docs/adr/0314-resumable-multi-step-flows-and-return-to-task-reentry.md
+  - adr: '0315'
+    title: Canonical Page States And Next-Best-Action Guidance For Human Surfaces
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-31'
+    concern: platform
+    keywords:
+      - canonical
+      - page
+      - states
+      - next-best-action
+      - guidance
+      - human
+      - surfaces
+    summary: We will standardize first-party human-facing pages on a canonical state model
+    filename: 0315-canonical-page-states-and-next-best-action-guidance-for-human-surfaces.md
+    path: docs/adr/0315-canonical-page-states-and-next-best-action-guidance-for-human-surfaces.md
+    implemented_in_repo_version: 0.177.140
+    implemented_in_platform_version: 0.130.87
+    implemented_on: '2026-04-02'
+  - adr: '0316'
+    title: Journey Analytics And Onboarding Success Scorecards
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-31'
+    concern: platform
+    keywords:
+      - journey
+      - analytics
+      - onboarding
+      - success
+      - scorecards
+    summary: We will define privacy-preserving journey analytics and onboarding
+    filename: 0316-journey-analytics-and-onboarding-success-scorecards.md
+    path: docs/adr/0316-journey-analytics-and-onboarding-success-scorecards.md
+    implemented_in_repo_version: 0.177.141
+    implemented_in_platform_version: 0.130.89
+    implemented_on: '2026-04-02'
+  - adr: '0317'
+    title: Keycloak Direct-API Operator Provisioning via SSH Proxy
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: vm-topology
+    keywords:
+      - operator-provisioning
+      - keycloak
+      - llm-agent
+      - identity
+      - direct-api
+      - operator
+      - provisioning
+      - ssh
+      - proxy
+    summary: LLM agents MUST use the Keycloak admin REST API directly for operator provisioning when
+    filename: 0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md
+    path: docs/adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md
+    implemented_in_repo_version: 0.177.137
+    implemented_in_platform_version: 0.130.86
+    implemented_on: '2026-04-02'
+  - adr: 0318
+    title: Repeatable Operator Onboarding with CC Audit Trail
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: vm-topology
+    keywords:
+      - operator-provisioning
+      - iac
+      - email
+      - audit-trail
+      - llm-agent
+      - repeatable
+      - operator
+      - onboarding
+      - cc
+      - audit
+    summary: scripts/provisionoperator.py is the authoritative IaC entry point for operator
+    filename: 0318-repeatable-operator-onboarding-with-cc-audit-trail.md
+    path: docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md
+    implemented_in_platform_version: 0.130.97
+    implemented_on: '2026-04-03'
+  - adr: 0319
+    title: Runtime Pools As The Service Partition Boundary
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: platform
+    keywords:
+      - runtime
+      - pools
+      - as
+      - service
+      - partition
+      - boundary
+    summary: We will treat the runtime pool as the primary partition boundary for
+    filename: 0319-runtime-pools-as-the-service-partition-boundary.md
+    path: docs/adr/0319-runtime-pools-as-the-service-partition-boundary.md
+    implemented_in_repo_version: 0.177.142
+    implemented_in_platform_version: 0.130.89
+    implemented_on: '2026-04-02'
+  - adr: '0320'
+    title: Pool-Scoped Deployment Surfaces And Agent Execution Lanes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: agent-discovery
+    keywords:
+      - pool-scoped
+      - deployment
+      - surfaces
+      - agent
+      - execution
+      - lanes
+    summary: Every runtime pool must have its own deployment surface and its own
+    filename: 0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes.md
+    path: docs/adr/0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes.md
+    implemented_in_repo_version: 0.177.142
+    implemented_in_platform_version: 0.130.89
+    implemented_on: '2026-04-02'
+  - adr: '0321'
+    title: Runtime Pool Memory Envelopes And Reserved Host Headroom
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: platform
+    keywords:
+      - runtime
+      - pool
+      - memory
+      - envelopes
+      - reserved
+      - host
+      - headroom
+    summary: We will replace the single shared runtime memory budget with runtime-pool
+    filename: 0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md
+    path: docs/adr/0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md
+    implemented_in_repo_version: 0.177.145
+    implemented_on: '2026-04-02'
+  - adr: '0322'
+    title: Memory-Pressure Autoscaling For Elastic Runtime Pools
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: platform
+    keywords:
+      - memory-pressure
+      - autoscaling
+      - elastic
+      - runtime
+      - pools
+    summary: We will add a memory-pressure autoscaling control loop for elastic runtime
+    filename: 0322-memory-pressure-autoscaling-for-elastic-runtime-pools.md
+    path: docs/adr/0322-memory-pressure-autoscaling-for-elastic-runtime-pools.md
+    implemented_in_repo_version: 0.177.145
+    implemented_on: '2026-04-02'
+  - adr: '0323'
+    title: Service Mobility Tiers And Migration Waves For Runtime Pools
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: platform
+    keywords:
+      - service
+      - mobility
+      - tiers
+      - migration
+      - waves
+      - runtime
+      - pools
+    summary: We will classify services into mobility tiers and move them through
+    filename: 0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md
+    path: docs/adr/0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md
+    implemented_in_repo_version: 0.177.145
+    implemented_on: '2026-04-02'
+  - adr: '0324'
+    title: Service Definition Shards And Generated Service Catalog Assembly
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: documentation
+    keywords:
+      - services
+      - catalogs
+      - generation
+      - sharding
+      - repo-structure
+      - service
+      - definition
+      - shards
+      - generated
+      - catalog
+    summary: We will move service-shaped repository truth toward per-service source
+    filename: 0324-service-definition-shards-and-generated-service-catalog-assembly.md
+    path: docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md
+  - adr: '0325'
+    title: Faceted ADR Index Shards And Reservation Windows
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: documentation
+    keywords:
+      - adr
+      - indexing
+      - discovery
+      - reservations
+      - sharding
+      - faceted
+      - index
+      - shards
+      - reservation
+      - windows
+    summary: We will evolve ADR discovery into faceted generated shards and introduce a
+    filename: 0325-faceted-adr-index-shards-and-reservation-windows.md
+    path: docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md
+  - adr: '0326'
+    title: Workstream Registry Shards With Active And Archive Assembly
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: networking
+    keywords:
+      - workstreams
+      - registry
+      - archive
+      - sharding
+      - coordination
+      - workstream
+      - shards
+      - active
+      - assembly
+    summary: We will split workstream metadata into per-workstream shards and keep a
+    filename: 0326-workstream-registry-shards-with-active-and-archive-assembly.md
+    path: docs/adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md
+    implemented_on: '2026-04-03'
+  - adr: '0327'
+    title: Sectional Agent Discovery Registries And Generated Onboarding Packs
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: documentation
+    keywords:
+      - agent-discovery
+      - onboarding
+      - registries
+      - config
+      - sharding
+      - sectional
+      - agent
+      - discovery
+      - generated
+      - packs
+    summary: We will reorganize discovery metadata into sectional registries with
+    filename: 0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md
+    path: docs/adr/0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md
+    implemented_on: '2026-04-03'
+  - adr: 0328
+    title: Size-Budgeted Root Summaries And Automatic Rollover Ledgers
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: documentation
+    keywords:
+      - summaries
+      - generation
+      - rollover
+      - readme
+      - changelog
+      - size-budgeted
+      - root
+      - automatic
+      - ledgers
+    summary: We will manage root summary surfaces with explicit size budgets and
+    filename: 0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md
+    path: docs/adr/0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md
+    implemented_on: '2026-04-03'
+  - adr: 0329
+    title: Shared Docker Runtime Bridge-Chain Checks Must Fail Safe Before Daemon Restart
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-01'
+    concern: networking
+    keywords:
+      - docker
+      - runtime
+      - uptime
+      - automation
+      - safety
+      - shared
+      - bridge-chain
+      - checks
+      - must
+      - fail
+    summary: Shared Docker bridge-chain preflight checks on a shared runtime pool must
+    filename: 0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
+    path: docs/adr/0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
+  - adr: '0330'
+    title: Public GitHub Readiness As A First-Class Repository Lifecycle
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-02'
+    concern: vm-topology
+    keywords:
+      - github
+      - publication
+      - template
+      - governance
+      - public
+      - readiness
+      - as
+      - first-class
+      - repository
+      - lifecycle
+    summary: We will treat public GitHub readiness as a first-class repository lifecycle,
+    filename: 0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+    path: docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
+  - adr: '0331'
+    title: Repository-Relative Paths For Public Metadata And Generated Docs
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: agent-discovery
+    keywords:
+      - paths
+      - portability
+      - metadata
+      - workstreams
+      - docs
+      - repository-relative
+      - public
+      - generated
+    summary: Committed public metadata and generated documentation must use repository-relative
+    filename: 0331-repository-relative-paths-for-public-metadata-and-generated-docs.md
+    path: docs/adr/0331-repository-relative-paths-for-public-metadata-and-generated-docs.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
+  - adr: '0332'
+    title: Relative Release And Status Links In Generated Root Surfaces
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: documentation
+    keywords:
+      - release
+      - readme
+      - changelog
+      - generation
+      - links
+      - relative
+      - status
+      - generated
+      - root
+      - surfaces
+    summary: Root summary generation must emit repository-relative links and avoid absolute
+    filename: 0332-relative-release-and-status-links-in-generated-root-surfaces.md
+    path: docs/adr/0332-relative-release-and-status-links-in-generated-root-surfaces.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
+  - adr: '0333'
+    title: Private Overlay Files For Deployment-Specific Secrets And Identities
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-02'
+    concern: security
+    keywords:
+      - overlays
+      - secrets
+      - identities
+      - local-state
+      - forkability
+      - private
+      - overlay
+      - files
+      - deployment-specific
+    summary: Deployment-specific secrets, identities, and one-off bootstrap artefacts must
+    filename: 0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+    path: docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
+  - adr: '0334'
+    title: Example-First Inventory And Service Identity Catalogs
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-02'
+    concern: vm-topology
+    keywords:
+      - inventory
+      - examples
+      - templates
+      - identities
+      - forkability
+      - example-first
+      - service
+      - identity
+      - catalogs
+    summary: Primary onboarding catalogs should move toward example-first inventories and
+    filename: 0334-example-first-inventory-and-service-identity-catalogs.md
+    path: docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md
+  - adr: '0335'
+    title: Public-Safe Agent Onboarding Entrypoints
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: agent-discovery
+    keywords:
+      - onboarding
+      - agents
+      - docs
+      - public
+      - entrypoints
+      - public-safe
+      - agent
+    summary: Root onboarding entrypoints must stay public-safe and generic, focusing on repo
+    filename: 0335-public-safe-agent-onboarding-entrypoints.md
+    path: docs/adr/0335-public-safe-agent-onboarding-entrypoints.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
+  - adr: '0336'
+    title: Public Entrypoint Leakage Validation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: ci-cd
+    keywords:
+      - validation
+      - public
+      - guardrails
+      - leakage
+      - ci
+      - entrypoint
+    summary: Public entrypoints must be covered by an automated leakage validator that fails
+    filename: 0336-public-entrypoint-leakage-validation.md
+    path: docs/adr/0336-public-entrypoint-leakage-validation.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
+  - adr: '0337'
+    title: Fork-First Workstream And Worktree Metadata
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: agent-discovery
+    keywords:
+      - workstreams
+      - worktrees
+      - metadata
+      - portability
+      - forks
+      - fork-first
+      - workstream
+      - worktree
+    summary: Workstream and worktree metadata must be fork-first and repository-relative.
+    filename: 0337-fork-first-workstream-and-worktree-metadata.md
+    path: docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
+  - adr: 0338
+    title: Public Documentation Tiers And Private History Boundaries
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-02'
+    concern: documentation
+    keywords:
+      - documentation
+      - publication
+      - history
+      - boundaries
+      - governance
+      - public
+      - tiers
+      - private
+    summary: We will manage documentation with explicit public tiers and private-history
+    filename: 0338-public-documentation-tiers-and-private-history-boundaries.md
+    path: docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
+  - adr: 0339
+    title: Reference Deployment Samples And Replaceable Provider Profiles
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-02'
+    concern: vm-topology
+    keywords:
+      - samples
+      - templates
+      - provider
+      - onboarding
+      - replication
+      - reference
+      - deployment
+      - replaceable
+      - profiles
+    summary: We will provide reference deployment samples and replaceable provider profiles
+    filename: 0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+    path: docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+  - adr: '0340'
+    title: Dedicated Coolify Apps VM Separation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-03'
+    concern: vm-topology
+    keywords:
+      - coolify
+      - vm-topology
+      - paas
+      - apps
+      - separation-of-concerns
+      - dry
+      - dedicated
+      - vm
+      - separation
+    summary: We introduce a second dedicated guest, coolify-apps-lv3 (proposed VMID 171,
+    filename: 0340-dedicated-coolify-apps-vm-separation.md
+    path: docs/adr/0340-dedicated-coolify-apps-vm-separation.md
+    implemented_in_repo_version: 0.177.153
+    implemented_in_platform_version: 0.130.96
+    implemented_on: '2026-04-03'
+  - adr: '0341'
+    title: Open WebUI Keycloak OIDC With Break-Glass Fallback
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-03'
+    concern: security
+    keywords:
+      - open-webui
+      - keycloak
+      - oidc
+      - operator-auth
+      - break-glass
+      - open
+      - webui
+      - fallback
+    summary: Open WebUI will use a dedicated repo-managed Keycloak OIDC client for routine
+    filename: 0341-open-webui-keycloak-oidc-with-break-glass-fallback.md
+    path: docs/adr/0341-open-webui-keycloak-oidc-with-break-glass-fallback.md
+    implemented_in_repo_version: 0.178.3
+    implemented_in_platform_version: 0.130.98
+    implemented_on: '2026-04-03'

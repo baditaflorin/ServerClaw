@@ -1,0 +1,539 @@
+# ============================================================================
+# ADR Status Shard Not Implemented — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: status
+implementation_status: Not Implemented
+slug: not-implemented
+total_adrs: 31
+adrs:
+  - adr: '0024'
+    title: Docker Guest Security Baseline
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - docker
+      - guest
+      - security
+      - baseline
+    summary: We will handle Docker guest hardening as its own workstream, separate from package installation and separate
+      from workload deployment.
+    filename: 0024-docker-guest-security-baseline.md
+    path: docs/adr/0024-docker-guest-security-baseline.md
+  - adr: '0025'
+    title: Compose-Managed Runtime Stacks
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - compose-managed
+      - runtime
+      - stacks
+    summary: Long-running workloads on docker-runtime-lv3 will use a compose-managed deployment model.
+    filename: 0025-compose-managed-runtime-stacks.md
+    path: docs/adr/0025-compose-managed-runtime-stacks.md
+  - adr: 0058
+    title: NATS JetStream For Internal Event Bus And Agent Coordination
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-22'
+    concern: networking
+    keywords:
+      - nats
+      - jetstream
+      - internal
+      - event
+      - bus
+      - agent
+      - coordination
+    summary: We will use NATS JetStream as the internal event-distribution backbone for control-plane and agent-oriented events.
+    filename: 0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
+    path: docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
+  - adr: '0061'
+    title: GlitchTip For Application Exceptions And Task Failures
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - glitchtip
+      - application
+      - exceptions
+      - task
+      - failures
+    summary: We will use GlitchTip or an equivalent self-hosted Sentry-compatible platform for application exception and task-failure
+      visibility.
+    filename: 0061-glitchtip-for-application-exceptions-and-task-failures.md
+    path: docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
+  - adr: 0118
+    title: Replayable Failure Case Library
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - replayable
+      - failure
+      - case
+      - library
+    summary: We will build a replayable failure case library stored in Postgres with a full-text search index, queryable via
+      the platform API gateway and surfaced in Matterm
+    filename: 0118-replayable-failure-case-library.md
+    path: docs/adr/0118-replayable-failure-case-library.md
+  - adr: 0183
+    title: Auxiliary Cloud Failure Domain for Witness, Recovery, and Burst Capacity
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-27'
+    concern: ci-cd
+    keywords:
+      - auxiliary
+      - cloud
+      - failure
+      - domain
+      - witness
+      - recovery
+      - burst
+      - capacity
+    summary: We will add a small auxiliary cloud failure domain using Hetzner Cloud for non-primary control-plane resilience
+      and burstable ephemeral workloads.
+    filename: 0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md
+    path: docs/adr/0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md
+  - adr: '0214'
+    title: Production And Staging Cells As The Unit Of High Availability
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - production
+      - staging
+      - cells
+      - as
+      - unit
+      - high
+      - availability
+    summary: We will treat each environment as a cell. A cell is the smallest complete
+    filename: 0214-production-and-staging-cells-as-the-unit-of-high-availability.md
+    path: docs/adr/0214-production-and-staging-cells-as-the-unit-of-high-availability.md
+  - adr: '0215'
+    title: Node Role Taxonomy For Bootstrap, Control, State, Edge, Workload, Observability, Recovery, And Build
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: bootstrap
+    keywords:
+      - node
+      - role
+      - taxonomy
+      - bootstrap
+      - control
+      - state
+      - edge
+      - workload
+      - observability
+      - recovery
+    summary: We will classify every server, VM, and future node pool by primary node role.
+    filename: 0215-node-role-taxonomy-for-bootstrap-control-state-edge-workload-observability-recovery-and-build.md
+    path: docs/adr/0215-node-role-taxonomy-for-bootstrap-control-state-edge-workload-observability-recovery-and-build.md
+  - adr: '0216'
+    title: Service Criticality Rings For Foundation, Core, Supporting, And Peripheral Functions
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - service
+      - criticality
+      - rings
+      - foundation
+      - core
+      - supporting
+      - peripheral
+      - functions
+    summary: We will classify services into criticality rings. Rings express recovery and
+    filename: 0216-service-criticality-rings-for-foundation-core-supporting-and-peripheral-functions.md
+    path: docs/adr/0216-service-criticality-rings-for-foundation-core-supporting-and-peripheral-functions.md
+  - adr: '0217'
+    title: One-Way Environment Data Flow And Replication Authority
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - one-way
+      - environment
+      - data
+      - flow
+      - replication
+      - authority
+    summary: We will enforce one-way data authority between environments.
+    filename: 0217-one-way-environment-data-flow-and-replication-authority.md
+    path: docs/adr/0217-one-way-environment-data-flow-and-replication-authority.md
+  - adr: 0218
+    title: Relational Database Replication And Single-Writer Policy
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - relational
+      - database
+      - replication
+      - single-writer
+      - policy
+    summary: We will use a single-writer, environment-local HA policy for relational
+    filename: 0218-relational-database-replication-and-single-writer-policy.md
+    path: docs/adr/0218-relational-database-replication-and-single-writer-policy.md
+  - adr: 0219
+    title: Data-Class Replication Policies For Queues, Object Stores, Search, Cache, Secrets, And Time-Series
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - data-class
+      - replication
+      - policies
+      - queues
+      - object
+      - stores
+      - search
+      - cache
+      - secrets
+      - time-series
+    summary: We will govern replication by data class rather than by product name alone.
+    filename: 0219-data-class-replication-policies-for-queues-object-stores-search-cache-secrets-and-time-series.md
+    path: docs/adr/0219-data-class-replication-policies-for-queues-object-stores-search-cache-secrets-and-time-series.md
+  - adr: '0220'
+    title: Bootstrap And Recovery Sequencing For Environment Cells
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: bootstrap
+    keywords:
+      - bootstrap
+      - recovery
+      - sequencing
+      - environment
+      - cells
+    summary: We will define a standard bootstrap and recovery sequence for every
+    filename: 0220-bootstrap-and-recovery-sequencing-for-environment-cells.md
+    path: docs/adr/0220-bootstrap-and-recovery-sequencing-for-environment-cells.md
+  - adr: '0221'
+    title: Role-Based Node Pools And Placement Boundaries
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: automation
+    keywords:
+      - role-based
+      - node
+      - pools
+      - placement
+      - boundaries
+    summary: We will use role-based node pools with explicit placement boundaries.
+    filename: 0221-role-based-node-pools-and-placement-boundaries.md
+    path: docs/adr/0221-role-based-node-pools-and-placement-boundaries.md
+  - adr: '0222'
+    title: Failover Authority And Service Endpoint Separation
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - failover
+      - authority
+      - service
+      - endpoint
+      - separation
+    summary: Every replicated service must declare both failover authority and
+    filename: 0222-failover-authority-and-service-endpoint-separation.md
+    path: docs/adr/0222-failover-authority-and-service-endpoint-separation.md
+  - adr: '0223'
+    title: Canonical HA Topology Catalog And Reusable Automation Profiles
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: vm-topology
+    keywords:
+      - canonical
+      - ha
+      - topology
+      - catalog
+      - reusable
+      - automation
+      - profiles
+    summary: We will centralize HA and replication intent in one canonical topology
+    filename: 0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
+    path: docs/adr/0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
+  - adr: '0243'
+    title: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: identity
+    keywords:
+      - component
+      - stories
+      - accessibility
+      - ui
+      - contracts
+      - storybook
+      - playwright
+      - axe-core
+    summary: We will use Storybook for component stories and docs, Playwright for
+    filename: 0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
+    path: docs/adr/0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
+  - adr: '0247'
+    title: Authenticated Browser Journey Verification Via Playwright
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - authenticated
+      - browser
+      - journey
+      - verification
+      - playwright
+    summary: We will use Playwright as the default browser-journey verification tool for
+    filename: 0247-authenticated-browser-journey-verification-via-playwright.md
+    path: docs/adr/0247-authenticated-browser-journey-verification-via-playwright.md
+  - adr: 0258
+    title: Temporal As The Durable ServerClaw Session Orchestrator
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: monitoring
+    keywords:
+      - temporal
+      - as
+      - durable
+      - serverclaw
+      - session
+      - orchestrator
+    summary: We will use Temporal as the durable workflow engine for ServerClaw session
+    filename: 0258-temporal-as-the-durable-serverclaw-session-orchestrator.md
+    path: docs/adr/0258-temporal-as-the-durable-serverclaw-session-orchestrator.md
+  - adr: 0284
+    title: Netbox As The Network IPAM And Topology Source Of Truth
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: vm-topology
+    keywords:
+      - netbox
+      - as
+      - network
+      - ipam
+      - topology
+      - source
+      - truth
+    summary: We will deploy Netbox as the single authoritative source of truth for
+    filename: 0284-netbox-as-the-network-ipam-and-topology-source-of-truth.md
+    path: docs/adr/0284-netbox-as-the-network-ipam-and-topology-source-of-truth.md
+  - adr: 0285
+    title: Whisper ASR As The CPU Speech-To-Text Service
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - whisper
+      - asr
+      - as
+      - cpu
+      - speech-to-text
+      - service
+    summary: We will deploy whisper-asr-webservice (faster-whisper backend) as the
+    filename: 0285-whisper-asr-as-the-cpu-speech-to-text-service.md
+    path: docs/adr/0285-whisper-asr-as-the-cpu-speech-to-text-service.md
+  - adr: 0286
+    title: Vikunja As The Task And Project Management REST API
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - vikunja
+      - as
+      - task
+      - project
+      - management
+      - rest
+      - api
+    summary: We will deploy Vikunja as the task and project management REST API for
+    filename: 0286-vikunja-as-the-task-and-project-management-rest-api.md
+    path: docs/adr/0286-vikunja-as-the-task-and-project-management-rest-api.md
+  - adr: 0287
+    title: LiteLLM As The Unified LLM API Proxy And Router
+    status: Deprecated
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - litellm
+      - as
+      - unified
+      - llm
+      - api
+      - proxy
+      - router
+    summary: We will deploy LiteLLM as the unified LLM API proxy and router.
+    filename: 0287-litellm-as-the-unified-llm-api-proxy-and-router.md
+    path: docs/adr/0287-litellm-as-the-unified-llm-api-proxy-and-router.md
+  - adr: 0290
+    title: MLflow As The Machine Learning Experiment Tracker And Model Registry
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - mlflow
+      - as
+      - machine
+      - learning
+      - experiment
+      - tracker
+      - model
+      - registry
+    summary: We will deploy MLflow as the machine learning experiment tracker and model
+    filename: 0290-mlflow-as-the-machine-learning-experiment-tracker-and-model-registry.md
+    path: docs/adr/0290-mlflow-as-the-machine-learning-experiment-tracker-and-model-registry.md
+  - adr: 0291
+    title: SFTPGo As The Managed File Transfer Service With REST Provisioning
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: vm-topology
+    keywords:
+      - sftpgo
+      - as
+      - managed
+      - file
+      - transfer
+      - service
+      - rest
+      - provisioning
+    summary: We will deploy SFTPGo as the managed file transfer service for all SFTP,
+    filename: 0291-sftpgo-as-the-managed-file-transfer-service-with-rest-provisioning.md
+    path: docs/adr/0291-sftpgo-as-the-managed-file-transfer-service-with-rest-provisioning.md
+  - adr: '0307'
+    title: Platform Workbench As The Cohesive First-Party App Frame
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-31'
+    concern: platform
+    keywords:
+      - platform
+      - workbench
+      - as
+      - cohesive
+      - first-party
+      - app
+      - frame
+    summary: We will treat the platform's human-facing experience as one cohesive
+    filename: 0307-platform-workbench-as-the-cohesive-first-party-app-frame.md
+    path: docs/adr/0307-platform-workbench-as-the-cohesive-first-party-app-frame.md
+  - adr: '0314'
+    title: Resumable Multi-Step Flows And Return-To-Task Reentry
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-31'
+    concern: platform
+    keywords:
+      - resumable
+      - multi-step
+      - flows
+      - return-to-task
+      - reentry
+    summary: We will treat important multi-step human flows as resumable tasks with
+    filename: 0314-resumable-multi-step-flows-and-return-to-task-reentry.md
+    path: docs/adr/0314-resumable-multi-step-flows-and-return-to-task-reentry.md
+  - adr: '0324'
+    title: Service Definition Shards And Generated Service Catalog Assembly
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: documentation
+    keywords:
+      - services
+      - catalogs
+      - generation
+      - sharding
+      - repo-structure
+      - service
+      - definition
+      - shards
+      - generated
+      - catalog
+    summary: We will move service-shaped repository truth toward per-service source
+    filename: 0324-service-definition-shards-and-generated-service-catalog-assembly.md
+    path: docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md
+  - adr: '0325'
+    title: Faceted ADR Index Shards And Reservation Windows
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-01'
+    concern: documentation
+    keywords:
+      - adr
+      - indexing
+      - discovery
+      - reservations
+      - sharding
+      - faceted
+      - index
+      - shards
+      - reservation
+      - windows
+    summary: We will evolve ADR discovery into faceted generated shards and introduce a
+    filename: 0325-faceted-adr-index-shards-and-reservation-windows.md
+    path: docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md
+  - adr: '0334'
+    title: Example-First Inventory And Service Identity Catalogs
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-02'
+    concern: vm-topology
+    keywords:
+      - inventory
+      - examples
+      - templates
+      - identities
+      - forkability
+      - example-first
+      - service
+      - identity
+      - catalogs
+    summary: Primary onboarding catalogs should move toward example-first inventories and
+    filename: 0334-example-first-inventory-and-service-identity-catalogs.md
+    path: docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md
+  - adr: 0339
+    title: Reference Deployment Samples And Replaceable Provider Profiles
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-02'
+    concern: vm-topology
+    keywords:
+      - samples
+      - templates
+      - provider
+      - onboarding
+      - replication
+      - reference
+      - deployment
+      - replaceable
+      - profiles
+    summary: We will provide reference deployment samples and replaceable provider profiles
+    filename: 0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+    path: docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md

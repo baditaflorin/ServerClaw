@@ -1,0 +1,156 @@
+# ============================================================================
+# ADR Concern Shard host-os — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: host-os
+total_adrs: 8
+adrs:
+  - adr: '0002'
+    title: Target Proxmox VE 9 on Debian 13
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: host-os
+    keywords:
+      - target
+      - proxmox
+      - ve
+      - debian
+    summary: 'We will target:'
+    filename: 0002-target-proxmox-ve-9-on-debian-13.md
+    path: docs/adr/0002-target-proxmox-ve-9-on-debian-13.md
+    implemented_in_repo_version: 0.2.0
+    implemented_in_platform_version: 0.2.0
+    implemented_on: '2026-03-21'
+  - adr: '0004'
+    title: Install Proxmox VE From Debian Packages
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: host-os
+    keywords:
+      - install
+      - proxmox
+      - ve
+      - from
+      - debian
+      - packages
+    summary: We will install Proxmox VE 9 on top of the existing Debian 13 system using official Proxmox package repositories
+      and Ansible-managed configuration.
+    filename: 0004-install-proxmox-ve-from-debian-packages.md
+    path: docs/adr/0004-install-proxmox-ve-from-debian-packages.md
+    implemented_in_repo_version: 0.2.0
+    implemented_in_platform_version: 0.2.0
+    implemented_on: '2026-03-21'
+  - adr: '0006'
+    title: Security Baseline For Proxmox Host
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: host-os
+    keywords:
+      - security
+      - baseline
+      - proxmox
+      - host
+    summary: 'We will apply the following baseline before declaring the node ready for workloads:'
+    filename: 0006-security-baseline-for-proxmox-host.md
+    path: docs/adr/0006-security-baseline-for-proxmox-host.md
+    implemented_in_repo_version: 0.13.0
+    implemented_in_platform_version: 0.10.0
+    implemented_on: '2026-03-21'
+  - adr: '0010'
+    title: Initial Proxmox VM Topology
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: host-os
+    keywords:
+      - initial
+      - proxmox
+      - vm
+      - topology
+    summary: We will start with a simple four-VM topology on a private Proxmox-managed network in the 10.10.10.0/24 range.
+    filename: 0010-initial-proxmox-vm-topology.md
+    path: docs/adr/0010-initial-proxmox-vm-topology.md
+    implemented_in_repo_version: 0.6.0
+    implemented_in_platform_version: 0.6.0
+    implemented_on: '2026-03-21'
+  - adr: '0011'
+    title: Monitoring VM With Grafana And Proxmox Metrics
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: host-os
+    keywords:
+      - monitoring
+      - vm
+      - grafana
+      - proxmox
+      - metrics
+    summary: We will create a dedicated monitoring VM on the internal Proxmox network.
+    filename: 0011-monitoring-vm-with-grafana-and-proxmox-metrics.md
+    path: docs/adr/0011-monitoring-vm-with-grafana-and-proxmox-metrics.md
+    implemented_in_repo_version: 0.23.0
+    implemented_in_platform_version: 0.15.0
+    implemented_on: '2026-03-22'
+  - adr: '0012'
+    title: Proxmox Host Bridge And NAT Network
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: host-os
+    keywords:
+      - proxmox
+      - host
+      - bridge
+      - nat
+      - network
+    summary: 'We will configure the Proxmox host with two bridges:'
+    filename: 0012-proxmox-host-bridge-and-nat-network.md
+    path: docs/adr/0012-proxmox-host-bridge-and-nat-network.md
+    implemented_in_repo_version: 0.3.0
+    implemented_in_platform_version: 0.3.0
+    implemented_on: '2026-03-21'
+  - adr: '0016'
+    title: Provision Guests From Debian 13 Cloud Template
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: host-os
+    keywords:
+      - provision
+      - guests
+      - from
+      - debian
+      - cloud
+      - template
+    summary: We will provision the first guests from a reusable Debian 13 cloud-image template using Proxmox qm plus cloud-init.
+    filename: 0016-provision-guests-from-debian-13-cloud-template.md
+    path: docs/adr/0016-provision-guests-from-debian-13-cloud-template.md
+    implemented_in_repo_version: 0.6.0
+    implemented_in_platform_version: 0.6.0
+    implemented_on: '2026-03-21'
+  - adr: '0163'
+    title: Proxmox Break-Glass SSH Port
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: host-os
+    keywords:
+      - proxmox
+      - break-glass
+      - ssh
+      - port
+    summary: Add a dedicated break-glass SSH port (proxmoxbreakglasssshport, default 2222)
+    filename: 0163-proxmox-break-glass-ssh-port.md
+    path: docs/adr/0163-proxmox-break-glass-ssh-port.md
+    implemented_in_repo_version: 0.123.0
+    implemented_in_platform_version: 0.130.18
+    implemented_on: '2026-03-26'

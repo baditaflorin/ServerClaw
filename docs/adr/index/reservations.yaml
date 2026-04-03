@@ -1,0 +1,11 @@
+# ============================================================================
+# ADR Reservation Ledger - ADR 0325
+# ============================================================================
+# Reserve future ADR numbers or windows here before parallel ADR authoring.
+# Active reservations participate in overlap checks and ADR allocation.
+# After editing this file, regenerate the ADR discovery metadata:
+#   python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 1
+reservations: []

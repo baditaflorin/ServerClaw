@@ -1,0 +1,205 @@
+# ============================================================================
+# ADR Status Shard Partial — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: status
+implementation_status: Partial
+slug: partial
+total_adrs: 10
+adrs:
+  - adr: '0014'
+    title: Operator Access To Private Guest Network
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - operator
+      - access
+      - private
+      - guest
+      - network
+    summary: We will use a two-stage operator access model.
+    filename: 0014-operator-access-to-private-guest-network.md
+    path: docs/adr/0014-operator-access-to-private-guest-network.md
+    implemented_in_repo_version: 0.8.0
+    implemented_in_platform_version: 0.6.0
+    implemented_on: '2026-03-21'
+  - adr: '0020'
+    title: Initial Storage And Backup Model
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: storage
+    keywords:
+      - initial
+      - storage
+      - backup
+      - model
+    summary: 'We will use this initial model:'
+    filename: 0020-initial-storage-and-backup-model.md
+    path: docs/adr/0020-initial-storage-and-backup-model.md
+  - adr: '0166'
+    title: Canonical Error Response Format and Error Code Registry
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - canonical
+      - error
+      - response
+      - format
+      - code
+      - registry
+    summary: We will define a canonical error envelope and an error code registry as the single source of truth for all platform
+      errors. Every platform surface that currentl
+    filename: 0166-canonical-error-response-format-and-error-code-registry.md
+    path: docs/adr/0166-canonical-error-response-format-and-error-code-registry.md
+    implemented_in_repo_version: 0.162.0
+    implemented_in_platform_version: 0.130.13
+    implemented_on: '2026-03-26'
+  - adr: '0213'
+    title: Architecture Fitness Functions In The Validation Gate
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - architecture
+      - fitness
+      - functions
+      - validation
+      - gate
+    summary: We will add architecture fitness functions to the repository validation gate.
+    filename: 0213-architecture-fitness-functions-in-the-validation-gate.md
+    path: docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md
+    implemented_in_repo_version: 0.177.36
+    implemented_in_platform_version: 0.130.36
+    implemented_on: '2026-03-28'
+  - adr: '0224'
+    title: Self-Service Repo Intake And Agent-Assisted Deployments
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-28'
+    concern: agent-discovery
+    keywords:
+      - self-service
+      - repo
+      - intake
+      - agent-assisted
+      - deployments
+    summary: We will extend the existing ADR 0194 Coolify deploy path instead of introducing
+    filename: 0224-self-service-repo-intake-and-agent-assisted-deployments.md
+    path: docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md
+    implemented_in_repo_version: 0.177.31
+    implemented_in_platform_version: 0.130.35
+    implemented_on: '2026-03-28'
+  - adr: '0307'
+    title: Temporary Guest Operator Accounts With 72-Hour Expiry
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-31'
+    concern: vm-topology
+    keywords:
+      - temporary
+      - guest
+      - operator
+      - accounts
+      - hour
+      - expiry
+    summary: 'Temporary operators are full participants in the ADR 0108 onboarding model — same Keycloak SSO, step-ca SSH
+      certificates, OpenBao secrets access, and Tailscale '
+    filename: 0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
+    path: docs/adr/0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
+    implemented_in_repo_version: 0.0.0
+    implemented_in_platform_version: 0.0.0
+    implemented_on: '2026-03-31'
+  - adr: 0329
+    title: Shared Docker Runtime Bridge-Chain Checks Must Fail Safe Before Daemon Restart
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-01'
+    concern: networking
+    keywords:
+      - docker
+      - runtime
+      - uptime
+      - automation
+      - safety
+      - shared
+      - bridge-chain
+      - checks
+      - must
+      - fail
+    summary: Shared Docker bridge-chain preflight checks on a shared runtime pool must
+    filename: 0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
+    path: docs/adr/0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
+  - adr: '0330'
+    title: Public GitHub Readiness As A First-Class Repository Lifecycle
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-02'
+    concern: vm-topology
+    keywords:
+      - github
+      - publication
+      - template
+      - governance
+      - public
+      - readiness
+      - as
+      - first-class
+      - repository
+      - lifecycle
+    summary: We will treat public GitHub readiness as a first-class repository lifecycle,
+    filename: 0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+    path: docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
+  - adr: '0333'
+    title: Private Overlay Files For Deployment-Specific Secrets And Identities
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-02'
+    concern: security
+    keywords:
+      - overlays
+      - secrets
+      - identities
+      - local-state
+      - forkability
+      - private
+      - overlay
+      - files
+      - deployment-specific
+    summary: Deployment-specific secrets, identities, and one-off bootstrap artefacts must
+    filename: 0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+    path: docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
+  - adr: 0338
+    title: Public Documentation Tiers And Private History Boundaries
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-02'
+    concern: documentation
+    keywords:
+      - documentation
+      - publication
+      - history
+      - boundaries
+      - governance
+      - public
+      - tiers
+      - private
+    summary: We will manage documentation with explicit public tiers and private-history
+    filename: 0338-public-documentation-tiers-and-private-history-boundaries.md
+    path: docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'

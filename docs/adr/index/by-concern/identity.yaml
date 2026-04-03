@@ -1,0 +1,100 @@
+# ============================================================================
+# ADR Concern Shard identity — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: identity
+total_adrs: 5
+adrs:
+  - adr: '0007'
+    title: Agent-Oriented Access Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: identity
+    keywords:
+      - agent-oriented
+      - access
+      - model
+    summary: 'We will use a layered access model:'
+    filename: 0007-agent-oriented-access-model.md
+    path: docs/adr/0007-agent-oriented-access-model.md
+    implemented_in_repo_version: 0.14.0
+    implemented_in_platform_version: 0.11.0
+    implemented_on: '2026-03-21'
+  - adr: '0046'
+    title: Identity Classes For Humans, Services, And Agents
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: identity
+    keywords:
+      - identity
+      - classes
+      - humans
+      - services
+      - agents
+    summary: All platform identities must belong to one of four classes.
+    filename: 0046-identity-classes-for-humans-services-and-agents.md
+    path: docs/adr/0046-identity-classes-for-humans-services-and-agents.md
+    implemented_in_repo_version: 0.45.0
+    implemented_in_platform_version: 0.26.0
+    implemented_on: '2026-03-22'
+  - adr: '0133'
+    title: Portal Authentication by Default
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: identity
+    keywords:
+      - portal
+      - authentication
+      - by
+      - default
+    summary: We will enforce authentication by default for portal services.
+    filename: 0133-portal-authentication-by-default.md
+    path: docs/adr/0133-portal-authentication-by-default.md
+    implemented_in_repo_version: 0.130.0
+    implemented_in_platform_version: 0.114.7
+    implemented_on: '2026-03-24'
+  - adr: '0150'
+    title: Dozzle for Real-Time Container Log Access
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: identity
+    keywords:
+      - dozzle
+      - real-time
+      - container
+      - log
+      - access
+    summary: We run Dozzle as a repo-managed hub-and-agent deployment.
+    filename: 0150-dozzle-for-real-time-container-log-access.md
+    path: docs/adr/0150-dozzle-for-real-time-container-log-access.md
+    implemented_in_repo_version: 0.168.0
+    implemented_in_platform_version: 0.130.18
+    implemented_on: '2026-03-26'
+  - adr: '0243'
+    title: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: identity
+    keywords:
+      - component
+      - stories
+      - accessibility
+      - ui
+      - contracts
+      - storybook
+      - playwright
+      - axe-core
+    summary: We will use Storybook for component stories and docs, Playwright for
+    filename: 0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
+    path: docs/adr/0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md

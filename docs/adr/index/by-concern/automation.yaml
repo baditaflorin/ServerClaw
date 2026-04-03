@@ -1,0 +1,406 @@
+# ============================================================================
+# ADR Concern Shard automation — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: automation
+total_adrs: 22
+adrs:
+  - adr: '0030'
+    title: Role Interface Contracts And Defaults Boundaries
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - role
+      - interface
+      - contracts
+      - defaults
+      - boundaries
+    summary: We will make each role own an explicit interface contract.
+    filename: 0030-role-interface-contracts-and-defaults-boundaries.md
+    path: docs/adr/0030-role-interface-contracts-and-defaults-boundaries.md
+    implemented_in_repo_version: 0.31.0
+    implemented_on: '2026-03-22'
+  - adr: '0035'
+    title: Workflow Catalog And Machine-Readable Execution Contracts
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - workflow
+      - catalog
+      - machine-readable
+      - execution
+      - contracts
+    summary: We will define one workflow catalog as the canonical machine-readable contract for repository execution paths.
+    filename: 0035-workflow-catalog-and-machine-readable-execution-contracts.md
+    path: docs/adr/0035-workflow-catalog-and-machine-readable-execution-contracts.md
+    implemented_in_repo_version: 0.36.0
+    implemented_on: '2026-03-22'
+  - adr: 0039
+    title: Shared Controller Automation Toolkit
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - shared
+      - controller
+      - automation
+      - toolkit
+    summary: We will define one shared controller automation toolkit for repo-local scripts.
+    filename: 0039-shared-controller-automation-toolkit.md
+    path: docs/adr/0039-shared-controller-automation-toolkit.md
+    implemented_in_repo_version: 0.42.0
+    implemented_on: '2026-03-22'
+  - adr: '0044'
+    title: Windmill For Agent And Operator Workflows
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - windmill
+      - agent
+      - operator
+      - workflows
+    summary: We will use Windmill as the first on-platform workflow runtime for agents and operators.
+    filename: 0044-windmill-for-agent-and-operator-workflows.md
+    path: docs/adr/0044-windmill-for-agent-and-operator-workflows.md
+    implemented_in_repo_version: 0.47.0
+    implemented_in_platform_version: 0.23.0
+    implemented_on: '2026-03-22'
+  - adr: '0062'
+    title: Ansible Role Composability And DRY Defaults
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - ansible
+      - role
+      - composability
+      - dry
+      - defaults
+    summary: We will refactor the role layer to enforce composability and eliminate duplication.
+    filename: 0062-ansible-role-composability-and-dry-defaults.md
+    path: docs/adr/0062-ansible-role-composability-and-dry-defaults.md
+    implemented_in_repo_version: 0.60.0
+    implemented_on: '2026-03-22'
+  - adr: 0079
+    title: Playbook Decomposition And Shared Execution Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - playbook
+      - decomposition
+      - shared
+      - execution
+      - model
+    summary: We will restructure the playbook layer into a declared, composable, environment-aware execution model.
+    filename: 0079-playbook-decomposition-and-shared-execution-model.md
+    path: docs/adr/0079-playbook-decomposition-and-shared-execution-model.md
+    implemented_in_repo_version: 0.77.0
+    implemented_on: '2026-03-23'
+  - adr: 0086
+    title: Ansible Collection Packaging and Versioned Role Distribution
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - ansible
+      - collection
+      - packaging
+      - versioned
+      - role
+      - distribution
+    summary: We will restructure the roles/ directory into a proper Ansible Collection lv3.platform and publish it to the
+      internal Ansible Galaxy server (galaxy.lv3.org).
+    filename: 0086-ansible-collection-packaging.md
+    path: docs/adr/0086-ansible-collection-packaging.md
+    implemented_in_repo_version: 0.88.0
+    implemented_on: '2026-03-23'
+  - adr: '0100'
+    title: Formal RTO/RPO Targets and Disaster Recovery Playbook
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: automation
+    keywords:
+      - formal
+      - rto
+      - rpo
+      - targets
+      - disaster
+      - recovery
+      - playbook
+    summary: We will define formal platform RTO/RPO targets, store them in machine-readable repo data, publish the ordered
+      disaster recovery playbook, and expose a repo-mana
+    filename: 0100-rto-rpo-targets-and-disaster-recovery-playbook.md
+    path: docs/adr/0100-rto-rpo-targets-and-disaster-recovery-playbook.md
+    implemented_in_repo_version: 0.97.0
+    implemented_on: '2026-03-23'
+  - adr: 0108
+    title: Operator Onboarding and Off-boarding Workflow
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: automation
+    keywords:
+      - operator
+      - onboarding
+      - off-boarding
+      - workflow
+    summary: We will implement a Windmill-backed operator onboarding and off-boarding workflow that provisions and revokes
+      access across all platform services atomically, re
+    filename: 0108-operator-onboarding-and-offboarding.md
+    path: docs/adr/0108-operator-onboarding-and-offboarding.md
+    implemented_in_repo_version: 0.177.8
+    implemented_in_platform_version: 0.130.29
+    implemented_on: '2026-03-27'
+  - adr: 0119
+    title: Budgeted Workflow Scheduler
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: automation
+    keywords:
+      - budgeted
+      - workflow
+      - scheduler
+    summary: We will implement a budgeted workflow scheduler as a thin orchestration layer between the goal compiler (ADR
+      0112) and Windmill (ADR 0044). The scheduler receiv
+    filename: 0119-budgeted-workflow-scheduler.md
+    path: docs/adr/0119-budgeted-workflow-scheduler.md
+    implemented_in_repo_version: 0.118.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-26'
+  - adr: '0122'
+    title: Windmill Operator Access Admin Surface
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: automation
+    keywords:
+      - windmill
+      - operator
+      - access
+      - admin
+      - surface
+    summary: We will add a repo-managed Windmill raw app that acts as the operator access admin console for ADR 0108.
+    filename: 0122-windmill-operator-access-admin.md
+    path: docs/adr/0122-windmill-operator-access-admin.md
+    implemented_in_repo_version: 0.120.0
+    implemented_in_platform_version: 0.114.4
+    implemented_on: '2026-03-24'
+  - adr: 0129
+    title: Runbook Automation Executor
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: automation
+    keywords:
+      - runbook
+      - automation
+      - executor
+    summary: 'We will implement a runbook automation executor in repository-managed Python with:'
+    filename: 0129-runbook-automation-executor.md
+    path: docs/adr/0129-runbook-automation-executor.md
+    implemented_in_repo_version: 0.132.0
+    implemented_on: '2026-03-25'
+  - adr: '0130'
+    title: Agent State Persistence Across Workflow Boundaries
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: automation
+    keywords:
+      - agent
+      - state
+      - persistence
+      - across
+      - workflow
+      - boundaries
+    summary: We will implement an agent state store in Postgres, accessible via a thin AgentStateClient API. The store is
+      a scratchpad for in-progress agentic work, not a pe
+    filename: 0130-agent-state-persistence-across-workflow-boundaries.md
+    path: docs/adr/0130-agent-state-persistence-across-workflow-boundaries.md
+    implemented_in_repo_version: 0.122.0
+    implemented_on: '2026-03-24'
+  - adr: 0149
+    title: Semaphore For Ansible Job Management UI And API
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: automation
+    keywords:
+      - semaphore
+      - ansible
+      - job
+      - management
+      - ui
+      - api
+    summary: We will deploy Semaphore privately on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3 and a Tailscale-only
+      host proxy on the Proxmox node.
+    filename: 0149-semaphore-for-ansible-job-management-ui-and-api.md
+    path: docs/adr/0149-semaphore-for-ansible-job-management-ui-and-api.md
+    implemented_in_repo_version: 0.158.0
+    implemented_in_platform_version: 0.130.7
+    implemented_on: '2026-03-25'
+  - adr: '0151'
+    title: n8n for Webhook and API Integration Automation
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: automation
+    keywords:
+      - n8n
+      - webhook
+      - api
+      - integration
+      - automation
+    summary: We run n8n as a repo-managed compose service on docker-runtime-lv3, backed by PostgreSQL on postgres-lv3, and
+      published at https://n8n.lv3.org.
+    filename: 0151-n8n-for-webhook-and-api-integration-automation.md
+    path: docs/adr/0151-n8n-for-webhook-and-api-integration-automation.md
+    implemented_in_repo_version: 0.148.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-26'
+  - adr: '0165'
+    title: Playbook and Role Metadata Standard for Agent Discovery
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: automation
+    keywords:
+      - playbook
+      - role
+      - metadata
+      - standard
+      - agent
+      - discovery
+    summary: 'All Ansible playbooks and roles in this repository must include a metadata block at the start documenting:'
+    filename: 0165-playbook-role-metadata-standard.md
+    path: docs/adr/0165-playbook-role-metadata-standard.md
+    implemented_in_repo_version: 0.173.0
+    implemented_on: '2026-03-26'
+  - adr: '0176'
+    title: Inventory Sharding and Host-Scoped Ansible Execution
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: automation
+    keywords:
+      - inventory
+      - sharding
+      - host-scoped
+      - ansible
+      - execution
+    summary: We will structure mutable Ansible execution around inventory shards and host-scoped play metadata.
+    filename: 0176-inventory-sharding-and-host-scoped-ansible-execution.md
+    path: docs/adr/0176-inventory-sharding-and-host-scoped-ansible-execution.md
+    implemented_in_repo_version: 0.177.0
+    implemented_in_platform_version: 0.130.25
+    implemented_on: '2026-03-27'
+  - adr: 0197
+    title: Dify - Visual LLM Workflow and Agent Canvas
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: automation
+    keywords:
+      - dify
+      - visual
+      - llm
+      - workflow
+      - agent
+      - canvas
+    summary: 'Deploy Dify on docker-runtime-lv3 at agents.lv3.org behind the shared Keycloak-backed edge authentication flow.
+      Connect Dify to:'
+    filename: 0197-dify-visual-llm-workflow-canvas.md
+    path: docs/adr/0197-dify-visual-llm-workflow-canvas.md
+    implemented_in_repo_version: 0.177.48
+    implemented_in_platform_version: 0.130.42
+    implemented_on: '2026-03-28'
+  - adr: '0204'
+    title: Self-Correcting Automation Loops
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: automation
+    keywords:
+      - self-correcting
+      - automation
+      - loops
+    summary: We will treat self-correction as an explicit architecture concern.
+    filename: 0204-self-correcting-automation-loops.md
+    path: docs/adr/0204-self-correcting-automation-loops.md
+    implemented_in_repo_version: 0.177.37
+    implemented_in_platform_version: 0.130.35
+    implemented_on: '2026-03-28'
+  - adr: '0221'
+    title: Role-Based Node Pools And Placement Boundaries
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: automation
+    keywords:
+      - role-based
+      - node
+      - pools
+      - placement
+      - boundaries
+    summary: We will use role-based node pools with explicit placement boundaries.
+    filename: 0221-role-based-node-pools-and-placement-boundaries.md
+    path: docs/adr/0221-role-based-node-pools-and-placement-boundaries.md
+  - adr: 0228
+    title: Windmill As The Default Browser-And-API Operations Surface
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: automation
+    keywords:
+      - windmill
+      - as
+      - default
+      - browser-and-api
+      - operations
+      - surface
+    summary: We will treat Windmill as the default browser-first and API-first operations
+    filename: 0228-windmill-as-the-default-browser-and-api-operations-surface.md
+    path: docs/adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md
+    implemented_in_repo_version: 0.177.70
+    implemented_in_platform_version: 0.130.48
+    implemented_on: '2026-03-29'
+  - adr: '0306'
+    title: Checkov For IaC Policy Compliance Scanning Of OpenTofu, Compose, And Ansible
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: automation
+    keywords:
+      - checkov
+      - iac
+      - policy
+      - compliance
+      - scanning
+      - opentofu
+      - compose
+      - ansible
+    summary: We will integrate Checkov as a required CI gate step for all IaC surfaces in
+    filename: 0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md
+    path: docs/adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md
+    implemented_in_repo_version: 0.177.119
+    implemented_in_platform_version: 0.130.75
+    implemented_on: '2026-03-31'

@@ -1,0 +1,120 @@
+# ============================================================================
+# ADR Concern Shard storage — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-04'
+facet: concern
+concern: storage
+total_adrs: 6
+adrs:
+  - adr: '0020'
+    title: Initial Storage And Backup Model
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: storage
+    keywords:
+      - initial
+      - storage
+      - backup
+      - model
+    summary: 'We will use this initial model:'
+    filename: 0020-initial-storage-and-backup-model.md
+    path: docs/adr/0020-initial-storage-and-backup-model.md
+  - adr: '0051'
+    title: Control-Plane Backup, Recovery, And Break-Glass
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: storage
+    keywords:
+      - control-plane
+      - backup
+      - recovery
+      - break-glass
+    summary: We will treat control-plane state as a distinct backup and recovery concern.
+    filename: 0051-control-plane-backup-recovery-and-break-glass.md
+    path: docs/adr/0051-control-plane-backup-recovery-and-break-glass.md
+    implemented_in_repo_version: 0.63.0
+    implemented_in_platform_version: 0.33.0
+    implemented_on: '2026-03-22'
+  - adr: 0099
+    title: Automated Backup Restore Verification
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: storage
+    keywords:
+      - automated
+      - backup
+      - restore
+      - verification
+    summary: 'We will implement a weekly automated restore verification workflow that restores the three most critical VM
+      backups into ephemeral infrastructure fixtures (ADR '
+    filename: 0099-automated-backup-restore-verification.md
+    path: docs/adr/0099-automated-backup-restore-verification.md
+    implemented_in_repo_version: 0.99.0
+    implemented_on: '2026-03-23'
+  - adr: '0271'
+    title: Backup Coverage Assertion Ledger And Backup-Of-Backup Policy
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: storage
+    keywords:
+      - backup
+      - coverage
+      - assertion
+      - ledger
+      - backup-of-backup
+      - policy
+    summary: We will maintain a backup coverage assertion ledger and a declared
+    filename: 0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md
+    path: docs/adr/0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md
+    implemented_in_repo_version: 0.177.75
+    implemented_in_platform_version: 0.130.51
+    implemented_on: '2026-03-29'
+  - adr: '0274'
+    title: MinIO As The S3-Compatible Object Storage Layer
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: storage
+    keywords:
+      - minio
+      - as
+      - s3-compatible
+      - object
+      - storage
+      - layer
+    summary: We will deploy MinIO in standalone mode on the docker-runtime VM as the
+    filename: 0274-minio-as-the-s3-compatible-object-storage-layer.md
+    path: docs/adr/0274-minio-as-the-s3-compatible-object-storage-layer.md
+    implemented_in_repo_version: 0.177.124
+    implemented_in_platform_version: 0.130.79
+    implemented_on: '2026-03-31'
+  - adr: '0302'
+    title: Restic For Encrypted File-Level Backup Of Platform Configuration And State Artifacts
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-29'
+    concern: storage
+    keywords:
+      - restic
+      - encrypted
+      - file-level
+      - backup
+      - platform
+      - configuration
+      - state
+      - artifacts
+    summary: We will deploy Restic as a scheduled backup agent for platform configuration
+    filename: 0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts.md
+    path: docs/adr/0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts.md
+    implemented_in_repo_version: 0.177.115
+    implemented_in_platform_version: 0.130.75
+    implemented_on: '2026-03-31'
