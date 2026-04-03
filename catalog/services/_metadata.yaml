@@ -1,0 +1,74 @@
+schema_version: 1.0.0
+outputs:
+  service_capability_catalog:
+    path: config/service-capability-catalog.json
+    top_level:
+      $schema: docs/schema/service-capability-catalog.schema.json
+      schema_version: 1.0.0
+  health_probe_catalog:
+    path: config/health-probe-catalog.json
+    top_level:
+      schema_version: 1.1.0
+  service_completeness:
+    path: config/service-completeness.json
+    top_level:
+      $schema: docs/schema/service-completeness.schema.json
+      schema_version: 1.0.0
+      suppression_presets:
+        legacy-service:
+          adr: '2026-09-23'
+          ansible_role: '2026-09-23'
+          service_catalog: '2026-09-23'
+          health_probe: '2026-09-23'
+          subdomain: '2026-09-23'
+          api_gateway: '2026-09-23'
+          dependency_graph: '2026-09-23'
+          keycloak_client: '2026-09-23'
+          secret_definition: '2026-09-23'
+          grafana_dashboard: '2026-09-23'
+          slo_definition: '2026-09-23'
+          compose_secrets: '2026-09-23'
+          data_catalog: '2026-09-23'
+          alert_rules: '2026-09-23'
+          runbook: '2026-09-23'
+  service_redundancy:
+    path: config/service-redundancy-catalog.json
+    top_level:
+      $schema: docs/schema/service-redundancy-catalog.schema.json
+      schema_version: 1.0.0
+      platform:
+        failure_domain_count: 1
+        max_supported_tier: R2
+        notes:
+        - The current platform has one physical Hetzner host, so guest- or software-level
+          warm standbys can be implemented but cross-host active redundancy cannot.
+        - Any future R3 declaration remains a design target until a second failure
+          domain exists and live apply is allowed to converge both domains.
+        rehearsal_gate:
+          tiers:
+            R1:
+              exercise: restore_to_preview
+              freshness_window_days: 90
+            R2:
+              exercise: standby_switchover_or_promotion
+              freshness_window_days: 30
+            R3:
+              exercise: cross_domain_failover
+              freshness_window_days: 30
+  dependency_graph:
+    path: config/dependency-graph.json
+    top_level:
+      $schema: docs/schema/service-dependency-graph.schema.json
+      schema_version: 1.0.0
+  data_catalog:
+    path: config/data-catalog.json
+    top_level:
+      $schema: docs/schema/data-catalog.schema.json
+      schema_version: 1.0.0
+  slo_catalog:
+    path: config/slo-catalog.json
+    top_level:
+      $schema: docs/schema/slo-catalog.schema.json
+      schema_version: 1.0.0
+      review_note: Initial objectives should be recalibrated after 30 days of production
+        telemetry.

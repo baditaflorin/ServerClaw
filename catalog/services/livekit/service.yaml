@@ -1,0 +1,144 @@
+schema_version: 1.0.0
+service:
+  id: livekit
+  name: LiveKit
+  description: Real-time audio signalling and media relay surface for voice-enabled
+    operator and agent sessions.
+  category: communication
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:7880
+  public_url: https://livekit.lv3.org
+  subdomain: livekit.lv3.org
+  exposure: edge-published
+  health_probe_id: livekit
+  image_catalog_ids:
+  - livekit_runtime
+  secret_catalog_ids:
+  - livekit_api_key
+  - livekit_api_secret
+  adr: 0293
+  adr_file: docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
+  runbook: docs/runbooks/configure-livekit.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/livekit.yml
+  restart_domain: runtime-general-collaboration
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  tags:
+  - agents
+  - voice
+  - webrtc
+  - realtime
+  notes: Signal traffic is published through the shared NGINX edge at livekit.lv3.org
+    while media TCP and UDP listeners are forwarded directly by the Proxmox host to
+    docker-runtime-lv3.
+  environments:
+    production:
+      status: active
+      url: https://livekit.lv3.org
+      subdomain: livekit.lv3.org
+      notes: Room creation and participant access are governed by repo-managed API
+        credentials and short-lived LiveKit tokens instead of an edge OIDC boundary.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  suppressed_checks:
+    api_gateway: '2026-09-23'
+    grafana_dashboard: '2026-09-23'
+    slo_definition: '2026-09-23'
+    data_catalog: '2026-09-23'
+    alert_rules: '2026-09-23'
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when LiveKit, its public signalling
+      path, or its media listener contract cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the LiveKit
+      converge from git.
+dependency:
+  node:
+    id: livekit
+    service: livekit
+    name: LiveKit
+    vm: docker-runtime-lv3
+    tier: 2
+    category: communication
+    adr: 0293
+  outbound_edges:
+  - from: livekit
+    to: docker_runtime
+    type: hard
+    description: LiveKit runs as a repo-managed Docker Compose workload on docker-runtime-lv3.
+  - from: livekit
+    to: nginx_edge
+    type: soft
+    description: Public signalling at livekit.lv3.org depends on the shared NGINX
+      edge publication path.
+  - from: livekit
+    to: openbao
+    type: startup_only
+    description: LiveKit reads its API key pair from the OpenBao-backed runtime env
+      contract before the service is verified.
+health:
+  service_name: livekit
+  owning_vm: docker-runtime-lv3
+  role: livekit_runtime
+  verify_file: roles/livekit_runtime/tasks/verify.yml
+  startup:
+    kind: tcp
+    description: LiveKit startup completes once the local signalling listener is reachable
+      on docker-runtime-lv3.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    host: 127.0.0.1
+    port: 7880
+  liveness:
+    kind: tcp
+    description: The LiveKit TCP media listener remains bound on docker-runtime-lv3.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    host: 127.0.0.1
+    port: 7881
+  readiness:
+    kind: command
+    description: The guest-local LiveKit helper can create, list, and delete a synthetic
+      room using the OpenBao-rendered runtime env contract.
+    timeout_seconds: 120
+    retries: 12
+    delay_seconds: 5
+    argv:
+    - python3
+    - /opt/livekit/livekit_tool.py
+    - verify-room-lifecycle
+    - --url
+    - http://127.0.0.1:7880
+    - --runtime-env-file
+    - /run/lv3-secrets/livekit/runtime.env
+    - --room-prefix
+    - lv3-livekit-readiness
+    - --identity
+    - livekit-readiness-probe
+    - --timeout-seconds
+    - '120'
+    success_rc: 0
+  tls_certificate_ids:
+  - livekit-edge
+  uptime_kuma:
+    enabled: false
+    reason: LiveKit room access is token-gated and the repo-managed local plus public
+      room-lifecycle probes are the authoritative health contract.

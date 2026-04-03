@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/service-definition-dependency-fragment.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "dependency"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "dependency": {
+      "type": "object",
+      "required": [
+        "node"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "node": {
+          "type": "object"
+        },
+        "outbound_edges": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

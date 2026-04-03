@@ -1,0 +1,194 @@
+schema_version: 1.0.0
+service:
+  id: superset
+  name: Apache Superset
+  description: SQL-first business intelligence surface for governed read-only exploration
+    of operational PostgreSQL data.
+  category: access
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:8105
+  public_url: https://bi.lv3.org
+  subdomain: bi.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: Superset Public Health
+  health_probe_id: superset
+  secret_catalog_ids:
+  - superset_database_password
+  - superset_reader_password
+  - superset_secret_key
+  - superset_admin_password
+  - keycloak_superset_client_secret
+  adr: 0292
+  adr_file: docs/adr/0292-apache-superset-as-the-sql-first-business-intelligence-layer.md
+  runbook: docs/runbooks/configure-superset.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/superset.yml
+  restart_domain: runtime-general-data-apps
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  tags:
+  - analytics
+  - bi
+  - postgres
+  - sql
+  - oidc
+  notes: Superset runs on docker-runtime-lv3, stores metadata in the managed superset
+    schema of the shared postgres database on postgres-lv3, delegates browser sign-in
+    to Keycloak, and seeds a repo-managed PostgreSQL inventory dashboard plus the
+    optional Plausible ClickHouse datasource.
+  environments:
+    production:
+      status: active
+      url: https://bi.lv3.org
+      subdomain: bi.lv3.org
+      notes: Public publication terminates on the shared NGINX edge while browser
+        authentication remains upstream in the service-native Keycloak OIDC flow.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: true
+  requires_secrets: true
+  requires_compose_secrets: true
+  keycloak_client_generated: true
+  suppressed_checks:
+    api_gateway: '2026-09-30'
+    alert_rules: '2026-09-30'
+    grafana_dashboard: '2026-09-30'
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  - pbs_vm_150
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 or postgres-lv3 when Superset, its
+      managed metadata schema, or the published bi.lv3.org surface cannot be recovered
+      in place.
+    failback_method: Restore or rebuild docker-runtime-lv3 and postgres-lv3 as needed,
+      then rerun the Superset converge plus public datasource inventory verification
+      from git.
+dependency:
+  node:
+    id: superset
+    service: superset
+    name: Apache Superset
+    vm: docker-runtime-lv3
+    tier: 2
+    category: access
+    adr: 0292
+  outbound_edges:
+  - from: superset
+    to: docker_runtime
+    type: hard
+    description: The Superset runtime and its OpenBao-backed compose stack run on
+      docker-runtime-lv3.
+  - from: superset
+    to: keycloak
+    type: soft
+    description: Routine browser sign-in to bi.lv3.org depends on the repo-managed
+      Keycloak OIDC client and realm configuration.
+  - from: superset
+    to: nginx_edge
+    type: soft
+    description: Public publication at bi.lv3.org depends on the shared NGINX edge
+      publication path.
+  - from: superset
+    to: openbao
+    type: startup_only
+    description: Superset starts from OpenBao-rendered runtime secrets mirrored into
+      its compose environment before the main container launches.
+  - from: superset
+    to: postgres
+    type: hard
+    description: Superset persists metadata in the managed superset schema of the
+      shared postgres database and registers read-only PostgreSQL datasources from
+      postgres-lv3.
+health:
+  service_name: superset
+  owning_vm: docker-runtime-lv3
+  role: superset_runtime
+  verify_file: roles/superset_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: Superset startup completes once the local /health endpoint returns
+      OK on docker-runtime-lv3.
+    timeout_seconds: 300
+    retries: 36
+    delay_seconds: 5
+    url: http://127.0.0.1:8105/health
+    method: GET
+    expected_status:
+    - 200
+  liveness:
+    kind: http
+    description: The local Superset health endpoint continues to answer on docker-runtime-lv3.
+    timeout_seconds: 300
+    retries: 36
+    delay_seconds: 5
+    url: http://127.0.0.1:8105/health
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The public Superset health endpoint answers through the shared NGINX
+      edge with the managed published port bound on docker-runtime-lv3.
+    timeout_seconds: 300
+    retries: 36
+    delay_seconds: 5
+    url: https://bi.lv3.org/health
+    method: GET
+    expected_status:
+    - 200
+    docker_publication:
+      container_name: superset
+      bindings:
+      - host: 10.10.10.20
+        port: 8105
+      required_networks:
+      - superset_default
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Superset Public Health
+      type: http
+      url: https://bi.lv3.org/health
+      description: Public Superset health endpoint published through the shared NGINX
+        edge VM.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 5
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: superset-metadata-and-managed-assets
+  service: superset
+  name: Superset metadata and managed BI assets
+  class: confidential
+  retention_days: 365
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: medium
+  locations:
+  - PostgreSQL database postgres on postgres-lv3, schema superset
+  notes: Superset persists datasource definitions, saved queries, charts, dashboards,
+    and user-generated BI metadata in the managed superset schema, so the schema should
+    remain recoverable with the shared PostgreSQL backup policy.
+slos:
+- id: superset-availability
+  service_id: superset
+  indicator: availability
+  objective_percent: 99.5
+  window_days: 30
+  target_url: https://bi.lv3.org/health
+  probe_module: http_2xx_follow_redirects
+  description: Superset remains reachable through the public LV3 edge for SQL-first
+    BI exploration, dashboard viewing, and governed datasource verification.

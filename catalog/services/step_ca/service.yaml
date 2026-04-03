@@ -1,0 +1,139 @@
+schema_version: 1.0.0
+service:
+  id: step_ca
+  name: step-ca
+  description: Private certificate authority for internal TLS and SSH certificates.
+  category: security
+  lifecycle_status: active
+  vm: runtime-control-lv3
+  vmid: 192
+  internal_url: https://100.64.0.1:9443
+  exposure: private-only
+  uptime_monitor_name: Step CA Private
+  health_probe_id: step_ca
+  image_catalog_ids:
+  - step_ca_runtime
+  adr: '0042'
+  runbook: docs/runbooks/configure-step-ca.md
+  runtime_pool: runtime-control
+  deployment_surface: playbooks/services/step-ca.yml
+  restart_domain: runtime-control-secrets
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+  mobility_tier: anchor
+  tags:
+  - ca
+  - certificates
+  - ssh
+  - tls
+  environments:
+    production:
+      status: active
+      url: https://100.64.0.1:9443
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: false
+  requires_compose_secrets: true
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_192
+  standby:
+    kind: cold
+    location: runtime-control-lv3
+    failover_trigger: Restore runtime-control-lv3 when step-ca or its runtime state
+      cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-control-lv3, then rerun the step-ca
+      converge from git.
+dependency:
+  node:
+    id: step_ca
+    service: step_ca
+    name: step-ca
+    vm: docker-runtime-lv3
+    tier: 1
+    category: security
+    adr: '0042'
+  outbound_edges: []
+health:
+  service_name: step-ca
+  owning_vm: runtime-control-lv3
+  role: step_ca_runtime
+  verify_file: roles/step_ca_runtime/tasks/verify.yml
+  liveness:
+    kind: tcp
+    description: The private step-ca API listens on runtime-control-lv3.
+    timeout_seconds: 120
+    retries: 1
+    delay_seconds: 0
+    host: 10.10.10.92
+    port: 9000
+  readiness:
+    kind: command
+    description: The services provisioner can issue a short-lived X.509 certificate.
+    timeout_seconds: 120
+    retries: 1
+    delay_seconds: 0
+    argv:
+    - step
+    - ca
+    - certificate
+    - step-ca-service-test.lv3.internal
+    - /opt/step-ca/service-test.crt
+    - /opt/step-ca/service-test.key
+    - --force
+    - --ca-url
+    - https://10.10.10.92:9000
+    - --root
+    - /opt/step-ca/home/certs/root_ca.crt
+    - --provisioner
+    - services
+    - --provisioner-password-file
+    - /opt/step-ca/secrets/services-password.txt
+    - --password-file
+    - /opt/step-ca/secrets/services-password.txt
+    - --san
+    - step-ca-service-test.lv3.internal
+    - --not-after
+    - 1h
+    success_rc: 0
+    docker_publication:
+      container_name: step-ca
+      required_networks:
+      - step-ca_default
+  tls_certificate_ids:
+  - step-ca-proxy
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Step CA Private
+      type: http
+      url: https://10.10.10.92:9000/health
+      description: Private step-ca health endpoint on runtime-control-lv3.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 10
+      accepted_statuscodes:
+      - 200-299
+      ignoreTls: true
+data:
+- id: tls-private-keys
+  service: step_ca
+  name: TLS private keys
+  class: secret
+  retention_days: 7
+  backup_included: false
+  access_role: service_account
+  pii_risk: low
+  locations:
+  - step-ca runtime volumes
+  - /etc/pve/local/pve-ssl.*
+  notes: Runtime keys are rotated with certificate renewal and old material should
+    not persist beyond the overlap window.

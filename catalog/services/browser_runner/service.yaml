@@ -1,0 +1,141 @@
+schema_version: 1.0.0
+service:
+  id: browser_runner
+  name: Browser Runner
+  description: Private Playwright session runtime for governed web action, extraction,
+    screenshots, and PDF capture.
+  category: automation
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:8096
+  exposure: private-only
+  uptime_monitor_name: Browser Runner Private
+  health_probe_id: browser_runner
+  adr: '0261'
+  runbook: docs/runbooks/configure-browser-runner.md
+  runtime_pool: runtime-ai
+  deployment_surface: playbooks/services/browser-runner.yml
+  restart_domain: runtime-ai-execution
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+  mobility_tier: burst_batch
+  dashboard_url: https://grafana.lv3.org/d/lv3-browser-runner/lv3-browser-runner
+  tags:
+  - browser
+  - playwright
+  - automation
+  - private
+  environments:
+    production:
+      status: active
+      url: http://10.10.10.20:8096
+      notes: The runtime stays private-only and is exposed to operators through the
+        governed API gateway route plus the Dify tool bridge.
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: false
+  requires_compose_secrets: false
+  dashboard_file: config/grafana/dashboards/browser-runner.json
+  alert_rule_file: config/alertmanager/rules/browser-runner.yml
+  suppressed_checks: {}
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when the browser-runner runtime,
+      its Playwright image build, or its artifact path cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the browser-runner
+      converge and smoke verification from git.
+dependency:
+  node:
+    id: browser_runner
+    service: browser_runner
+    name: Browser Runner
+    vm: docker-runtime-lv3
+    tier: 2
+    category: automation
+    adr: '0261'
+  outbound_edges:
+  - from: browser_runner
+    to: api_gateway
+    type: soft
+    description: Authenticated operator access to the browser runner uses the governed
+      API gateway route, while the private runtime can still be verified locally.
+  - from: browser_runner
+    to: docker_runtime
+    type: hard
+    description: The private Playwright browser runner is hosted on docker-runtime-lv3.
+health:
+  service_name: browser-runner
+  owning_vm: docker-runtime-lv3
+  role: browser_runner_runtime
+  verify_file: roles/browser_runner_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: The browser runner health endpoint responds on the private runtime
+      listener.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:8096/healthz
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The browser runner sessions endpoint accepts the bounded local smoke
+      payload through the role verification path.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:8096/healthz
+    method: GET
+    expected_status:
+    - 200
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Browser Runner Private
+      type: http
+      url: http://10.10.10.20:8096/healthz
+      description: Private browser-runner health endpoint on docker-runtime-lv3.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 10
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: browser-runner-artifacts
+  service: browser_runner
+  name: Browser runner bounded session artifacts
+  class: confidential
+  retention_days: 30
+  backup_included: false
+  access_role: platform-operator
+  pii_risk: high
+  locations:
+  - /opt/browser-runner/data/artifacts
+  - browser-run-session structured outputs
+  notes: Captured screenshots, PDFs, selector text, and downloaded files may contain
+    third-party page content or delegated-session data, so retention stays intentionally
+    short and private.
+slos:
+- id: browser-runner-availability
+  service_id: browser_runner
+  indicator: availability
+  objective_percent: 99.0
+  window_days: 30
+  target_url: http://10.10.10.20:8096/healthz
+  probe_module: http_2xx_follow_redirects
+  description: The private browser runner remains reachable on docker-runtime-lv3
+    for governed Playwright session execution.

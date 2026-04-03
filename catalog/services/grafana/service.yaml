@@ -1,0 +1,177 @@
+schema_version: 1.0.0
+service:
+  id: grafana
+  name: Grafana
+  description: Metrics dashboards, platform overview, and service detail dashboards.
+  category: observability
+  lifecycle_status: active
+  vm: monitoring-lv3
+  vmid: 140
+  internal_url: http://10.10.10.40:3000
+  public_url: https://grafana.lv3.org
+  subdomain: grafana.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: Grafana Public
+  health_probe_id: grafana
+  secret_catalog_ids:
+  - loki_minio_secret_key
+  - monitoring_guest_writer_token
+  - monitoring_proxmox_writer_token
+  adr: '0011'
+  runbook: docs/runbooks/monitoring-stack.md
+  runtime_pool: dedicated-monitoring
+  deployment_surface: playbooks/services/grafana.yml
+  restart_domain: dedicated-monitoring-core
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
+  mobility_tier: anchor
+  dashboard_url: https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview
+  tags:
+  - metrics
+  - dashboards
+  - observability
+  environments:
+    production:
+      status: active
+      url: https://grafana.lv3.org
+      subdomain: grafana.lv3.org
+    staging:
+      status: planned
+      url: https://grafana.staging.lv3.org
+      subdomain: grafana.staging.lv3.org
+      notes: Planned shared-edge staging hostname; live publication remains pending.
+completeness:
+  service_type: vm-service
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: false
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 30
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_140
+  standby:
+    kind: cold
+    location: monitoring-lv3
+    failover_trigger: Restore or rebuild monitoring-lv3 when Grafana or the monitoring
+      guest cannot be recovered in place.
+    failback_method: Replay the monitoring stack converge on monitoring-lv3 after
+      the restored guest is healthy.
+dependency:
+  node:
+    id: grafana
+    service: grafana
+    name: Grafana
+    vm: monitoring-lv3
+    tier: 1
+    category: observability
+    adr: '0011'
+  outbound_edges:
+  - from: grafana
+    to: keycloak
+    type: soft
+    description: Grafana uses Keycloak for the preferred SSO path, but local admin
+      remains the break-glass fallback.
+  - from: grafana
+    to: minio
+    type: soft
+    description: Loki chunk persistence now depends on the shared MinIO bucket, while
+      metrics and trace dashboards can still serve partial observability if object
+      storage is degraded.
+  - from: grafana
+    to: nginx_edge
+    type: soft
+    description: Public access to grafana.lv3.org depends on the shared NGINX edge;
+      private reachability remains available if the edge is degraded.
+health:
+  service_name: grafana
+  owning_vm: monitoring-lv3
+  role: monitoring_vm
+  verify_file: roles/monitoring_vm/tasks/verify.yml
+  liveness:
+    kind: http
+    description: Grafana responds on its local health endpoint.
+    timeout_seconds: 60
+    retries: 20
+    delay_seconds: 3
+    url: http://127.0.0.1:3000/api/health
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: Grafana serves its local health endpoint after provisioning completes.
+    timeout_seconds: 60
+    retries: 1
+    delay_seconds: 0
+    url: http://127.0.0.1:3000/api/health
+    method: GET
+    expected_status:
+    - 200
+  tls_certificate_ids:
+  - grafana-edge
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Grafana Public
+      type: http
+      url: https://grafana.lv3.org
+      description: Grafana publication through the NGINX edge VM.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 10
+      accepted_statuscodes:
+      - 200-399
+data:
+- id: grafana-annotations
+  service: grafana
+  name: Grafana annotations
+  class: internal
+  retention_days: 90
+  backup_included: true
+  access_role: platform-read
+  pii_risk: low
+  locations:
+  - Grafana SQLite/PostgreSQL annotation store
+  notes: Annotations capture deployment and incident context that remains useful longer
+    than raw logs.
+- id: loki-logs
+  service: grafana
+  name: Loki log store
+  class: internal
+  retention_days: 30
+  backup_included: false
+  access_role: platform-read
+  pii_risk: low
+  locations:
+  - /var/lib/loki
+  - Grafana Loki datasource
+  notes: Operational logs may contain internal IP addresses, usernames, and error
+    details.
+- id: tempo-traces
+  service: grafana
+  name: Tempo trace blocks
+  class: internal
+  retention_days: 14
+  backup_included: false
+  access_role: platform-read
+  pii_risk: low
+  locations:
+  - /var/lib/tempo/blocks
+  - Grafana Tempo datasource
+  notes: Trace payloads support short-lived troubleshooting and should remain bounded
+    to protect monitoring disk capacity.
+slos:
+- id: grafana-availability
+  service_id: grafana
+  indicator: availability
+  objective_percent: 99.5
+  window_days: 30
+  target_url: https://grafana.lv3.org
+  probe_module: http_2xx_follow_redirects
+  description: Grafana remains reachable through the public LV3 edge.

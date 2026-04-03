@@ -1,0 +1,125 @@
+schema_version: 1.0.0
+service:
+  id: coolify
+  name: Coolify
+  description: Repo-managed PaaS control plane for deploying public applications directly
+    from Git repositories.
+  category: infrastructure
+  lifecycle_status: active
+  vm: coolify-lv3
+  vmid: 170
+  internal_url: http://100.64.0.1:8012
+  public_url: https://coolify.lv3.org
+  subdomain: coolify.lv3.org
+  exposure: edge-published
+  health_probe_id: coolify
+  secret_catalog_ids:
+  - coolify_root_password
+  - coolify_api_token
+  - coolify_server_ssh_private_key
+  adr: 0194
+  runbook: docs/runbooks/configure-coolify.md
+  runtime_pool: dedicated-coolify
+  deployment_surface: playbooks/services/coolify.yml
+  restart_domain: dedicated-coolify-core
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify
+  mobility_tier: anchor
+  tags:
+  - paas
+  - git
+  - deployments
+  - applications
+  environments:
+    production:
+      status: active
+      url: https://coolify.lv3.org
+      subdomain: coolify.lv3.org
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: true
+  requires_secrets: true
+  requires_compose_secrets: false
+  suppressed_checks:
+    api_gateway: '2026-09-23'
+    keycloak_client: '2026-09-23'
+    grafana_dashboard: '2026-09-23'
+    slo_definition: '2026-09-23'
+    data_catalog: '2026-09-23'
+    alert_rules: '2026-09-23'
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_170
+  standby:
+    kind: cold
+    location: coolify-lv3
+    failover_trigger: Restore coolify-lv3 when the Coolify control plane or its managed
+      runtime state cannot be recovered in place.
+    failback_method: Restore or rebuild coolify-lv3, then rerun the Coolify converge
+      and smoke deployment verification from git.
+dependency:
+  node:
+    id: coolify
+    service: coolify
+    name: Coolify
+    vm: coolify-lv3
+    tier: 1
+    category: infrastructure
+    adr: 0194
+  outbound_edges:
+  - from: coolify
+    to: keycloak
+    type: soft
+    description: Authenticated browser access to coolify.lv3.org depends on the shared
+      Keycloak-backed edge auth path, while the private controller remains reachable
+      over the management network.
+  - from: coolify
+    to: nginx_edge
+    type: soft
+    description: Public dashboard access to coolify.lv3.org depends on the shared
+      NGINX edge publication, while the private controller proxy remains reachable
+      directly.
+health:
+  service_name: coolify
+  owning_vm: coolify-lv3
+  role: coolify_runtime
+  verify_file: roles/coolify_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: The Coolify API health endpoint responds on the guest-local controller
+      listener.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:8000/api/health
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The guest-local Coolify health endpoint remains reachable after repo-managed
+      bootstrap completes; authenticated controller API checks are covered by the
+      role verify contract.
+    timeout_seconds: 120
+    retries: 1
+    delay_seconds: 0
+    url: http://127.0.0.1:8000/api/health
+    method: GET
+    expected_status:
+    - 200
+    docker_publication:
+      container_name: coolify
+      bindings:
+      - host: 10.10.10.70
+        port: 8000
+      required_networks:
+      - coolify
+  uptime_kuma:
+    enabled: false
+    reason: The dashboard is OIDC-gated and the repo-managed role plus live-apply
+      verification are the current health contract.

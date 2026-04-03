@@ -1,0 +1,102 @@
+schema_version: 1.0.0
+service:
+  id: docker_build
+  name: Docker Build VM
+  description: Private build worker for image builds, heavy validation, and repository
+    offload tasks.
+  category: infrastructure
+  lifecycle_status: active
+  vm: docker-build-lv3
+  vmid: 130
+  internal_url: ssh://ops@10.10.10.30
+  public_url: https://build.lv3.org
+  subdomain: build.lv3.org
+  exposure: informational-only
+  uptime_monitor_name: Docker Build SSH
+  health_probe_id: docker_build
+  adr: 0028
+  runbook: docs/runbooks/configure-docker-build-vm.md
+  runtime_pool: dedicated-build
+  deployment_surface: playbooks/services/build-artifact-cache.yml
+  restart_domain: dedicated-build-core
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-build
+  mobility_tier: anchor
+  dashboard_url: https://grafana.lv3.org/d/lv3-vm-docker-build-lv3/lv3-vm-docker-build-lv3
+  tags:
+  - build
+  - docker
+  - worker
+  environments:
+    production:
+      status: active
+      url: https://build.lv3.org
+      subdomain: build.lv3.org
+completeness:
+  service_type: vm-service
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: false
+  requires_compose_secrets: false
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_130
+  standby:
+    kind: cold
+    location: docker-build-lv3
+    failover_trigger: Restore docker-build-lv3 when the build worker guest or its
+      persistent workspace cannot be recovered in place.
+    failback_method: Restore or rebuild docker-build-lv3, then rerun the documented
+      build-host converge and cache warm-up.
+dependency:
+  node:
+    id: docker_build
+    service: docker_build
+    name: Docker Build VM
+    vm: docker-build-lv3
+    tier: 1
+    category: infrastructure
+    adr: 0028
+  outbound_edges: []
+health:
+  service_name: docker-build
+  owning_vm: docker-build-lv3
+  role: null
+  verify_file: null
+  liveness:
+    kind: tcp
+    description: SSH is reachable on the Docker build VM.
+    timeout_seconds: 30
+    retries: 1
+    delay_seconds: 0
+    host: 10.10.10.30
+    port: 22
+  readiness:
+    kind: tcp
+    description: The Docker build VM is ready enough to accept routine operator SSH
+      sessions.
+    timeout_seconds: 30
+    retries: 1
+    delay_seconds: 0
+    host: 10.10.10.30
+    port: 22
+  tls_certificate_ids:
+  - build-edge
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Docker Build SSH
+      type: port
+      hostname: 10.10.10.30
+      port: 22
+      description: SSH reachability for the Docker build VM.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      accepted_statuscodes:
+      - 200-299

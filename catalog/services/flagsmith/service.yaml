@@ -1,0 +1,184 @@
+schema_version: 1.0.0
+service:
+  id: flagsmith
+  name: Flagsmith
+  description: Feature flag and remote configuration control plane with repo-managed
+    environment and baseline feature seeding.
+  category: automation
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:8017
+  public_url: https://flags.lv3.org
+  subdomain: flags.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: Flagsmith Public Health
+  health_probe_id: flagsmith
+  secret_catalog_ids:
+  - flagsmith_database_password
+  - flagsmith_django_secret_key
+  - flagsmith_admin_password
+  - flagsmith_environment_keys
+  image_catalog_ids:
+  - flagsmith_runtime
+  adr: 0288
+  adr_file: docs/adr/0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md
+  runbook: docs/runbooks/configure-flagsmith.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/flagsmith.yml
+  restart_domain: runtime-general-product-apps
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  tags:
+  - feature-flags
+  - remote-config
+  - control-plane
+  - edge-authenticated
+  notes: The public UI and browser management API are protected by the shared edge
+    oauth2-proxy and Keycloak flow while server-side environment keys remain private
+    and repo-managed through OpenBao.
+  environments:
+    production:
+      status: active
+      url: https://flags.lv3.org
+      subdomain: flags.lv3.org
+      notes: The bootstrap org, project, environments, feature definitions, and environment
+        API keys are seeded from the repo-managed Flagsmith runtime role.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  suppressed_checks:
+    api_gateway: '2026-09-23'
+    grafana_dashboard: '2026-09-23'
+    alert_rules: '2026-09-23'
+    slo_definition: '2026-09-23'
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  - pbs_vm_150
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 or the shared postgres leader when
+      Flagsmith, its seeded control-plane metadata, or the authenticated edge publication
+      path cannot be recovered in place.
+    failback_method: Restore the affected guest, confirm postgres leadership and OpenBao
+      state, then rerun the Flagsmith converge and seeded-state verification from
+      git.
+dependency:
+  node:
+    id: flagsmith
+    service: flagsmith
+    name: Flagsmith
+    vm: docker-runtime-lv3
+    tier: 2
+    category: automation
+    adr: 0288
+  outbound_edges:
+  - from: flagsmith
+    to: docker_runtime
+    type: hard
+    description: The Flagsmith Community Edition runtime and task processor are hosted
+      on docker-runtime-lv3.
+  - from: flagsmith
+    to: keycloak
+    type: soft
+    description: Browser access to flags.lv3.org is gated by the shared oauth2-proxy
+      and Keycloak edge-auth path, while private environment-key consumers continue
+      to use the internal runtime directly.
+  - from: flagsmith
+    to: nginx_edge
+    type: soft
+    description: Public reachability for flags.lv3.org depends on the shared NGINX
+      edge publication path.
+  - from: flagsmith
+    to: openbao
+    type: startup_only
+    description: Flagsmith consumes mirrored runtime secrets and publishes seeded
+      environment API keys through the OpenBao-backed compose environment path.
+  - from: flagsmith
+    to: postgres
+    type: hard
+    description: Flagsmith stores organisations, projects, environments, feature state,
+      and audit metadata in the shared PostgreSQL cluster.
+health:
+  service_name: flagsmith
+  owning_vm: docker-runtime-lv3
+  role: flagsmith_runtime
+  verify_file: roles/flagsmith_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: Flagsmith startup completes once the local health endpoint responds
+      on the private runtime listener.
+    timeout_seconds: 300
+    retries: 36
+    delay_seconds: 5
+    url: http://127.0.0.1:8017/health
+    method: GET
+    expected_status:
+    - 200
+  liveness:
+    kind: http
+    description: The local Flagsmith health endpoint continues to answer on docker-runtime-lv3.
+    timeout_seconds: 300
+    retries: 36
+    delay_seconds: 5
+    url: http://127.0.0.1:8017/health
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The public Flagsmith health endpoint answers through the shared NGINX
+      edge while the browser UI and management API remain protected by the shared
+      auth boundary.
+    timeout_seconds: 300
+    retries: 36
+    delay_seconds: 5
+    url: https://flags.lv3.org/health
+    method: GET
+    expected_status:
+    - 200
+    docker_publication:
+      container_name: flagsmith
+      bindings:
+      - host: 10.10.10.20
+        port: 8017
+      required_networks:
+      - flagsmith_default
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Flagsmith Public Health
+      type: http
+      url: https://flags.lv3.org/health
+      description: Public Flagsmith health endpoint published through the shared NGINX
+        edge VM.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 5
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: flagsmith-control-plane-state
+  service: flagsmith
+  name: Flagsmith project, environment, and feature state
+  class: confidential
+  retention_days: 365
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: medium
+  locations:
+  - Flagsmith PostgreSQL database on postgres-lv3
+  notes: Flagsmith persists organisations, projects, environments, feature definitions,
+    segment metadata, and environment-specific flag state in the shared PostgreSQL
+    cluster.

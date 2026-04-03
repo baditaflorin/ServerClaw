@@ -1,0 +1,169 @@
+schema_version: 1.0.0
+service:
+  id: grist
+  name: Grist
+  description: Self-hosted no-code spreadsheet database for operator-managed structured
+    data, formulas, and governed workflow tables.
+  category: automation
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:8484
+  public_url: https://grist.lv3.org
+  subdomain: grist.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: Grist Public Status
+  health_probe_id: grist
+  image_catalog_ids:
+  - grist_runtime
+  secret_catalog_ids:
+  - grist_session_secret
+  - keycloak_grist_client_secret
+  adr: 0279
+  runbook: docs/runbooks/configure-grist.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/grist.yml
+  restart_domain: runtime-general-product-apps
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  tags:
+  - grist
+  - spreadsheet
+  - database
+  - operations
+  - oidc
+  notes: Live-apply evidence is tracked on the workstream branch; merge-to-main still
+    must update the integrated README, VERSION, changelog, and versions/stack.yaml
+    surfaces.
+  environments:
+    production:
+      status: active
+      url: https://grist.lv3.org
+      subdomain: grist.lv3.org
+      notes: The public spreadsheet surface is published through the shared edge while
+        the document UI remains gated by the repo-managed Keycloak OIDC client.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: true
+  requires_secrets: true
+  requires_compose_secrets: true
+  dashboard_file: config/grafana/dashboards/grist.json
+  alert_rule_file: config/alertmanager/rules/grist.yml
+  keycloak_client_generated: true
+  suppressed_checks: {}
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when Grist or its runtime state cannot
+      be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Grist converge
+      from git.
+dependency:
+  node:
+    id: grist
+    service: grist
+    name: Grist
+    vm: docker-runtime-lv3
+    tier: 1
+    category: automation
+    adr: 0279
+  outbound_edges:
+  - from: grist
+    to: keycloak
+    type: soft
+    description: Grist delegates routine browser sign-in to the shared Keycloak OIDC
+      broker.
+  - from: grist
+    to: nginx_edge
+    type: soft
+    description: Public access to grist.lv3.org depends on the shared NGINX edge publication
+      path.
+  - from: grist
+    to: openbao
+    type: startup_only
+    description: Grist starts from OpenBao-rendered runtime secrets mirrored into
+      its compose environment.
+health:
+  service_name: grist
+  owning_vm: docker-runtime-lv3
+  role: grist_runtime
+  verify_file: roles/grist_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: Grist startup completes once the public status endpoint answers through
+      the shared edge publication path.
+    timeout_seconds: 300
+    retries: 60
+    delay_seconds: 5
+    url: https://grist.lv3.org/status
+    method: GET
+    expected_status:
+    - 200
+  liveness:
+    kind: http
+    description: The local Grist status endpoint responds on the runtime listener.
+    timeout_seconds: 300
+    retries: 60
+    delay_seconds: 5
+    url: http://127.0.0.1:8484/status
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The public Grist status endpoint renders through the shared edge
+      while authenticated document routes remain OIDC-gated.
+    timeout_seconds: 300
+    retries: 60
+    delay_seconds: 5
+    url: https://grist.lv3.org/status
+    method: GET
+    expected_status:
+    - 200
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Grist Public Status
+      type: http
+      url: https://grist.lv3.org/status
+      description: Public Grist status endpoint published through the shared NGINX
+        edge VM.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 5
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: grist-document-store
+  service: grist
+  name: Grist document and instance store
+  class: confidential
+  retention_days: 365
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: medium
+  locations:
+  - /opt/grist/persist/docs
+  - /opt/grist/persist/home.sqlite3
+  notes: Grist persists operator-managed spreadsheet documents and instance metadata
+    as SQLite files under /persist on docker-runtime-lv3.
+slos:
+- id: grist-availability
+  service_id: grist
+  indicator: availability
+  objective_percent: 99.5
+  window_days: 30
+  target_url: https://grist.lv3.org/status
+  probe_module: http_2xx_follow_redirects
+  description: Grist remains reachable through the public LV3 edge for operator-managed
+    spreadsheet databases and workflow tables.

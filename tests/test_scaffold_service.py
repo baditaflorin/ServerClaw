@@ -11,6 +11,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 import scaffold_service
+import service_definition_catalog
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -28,6 +29,7 @@ class ScaffoldServiceTests(unittest.TestCase):
         (root / "docs" / "templates").mkdir(parents=True)
         (root / "playbooks" / "services").mkdir(parents=True)
         (root / "config").mkdir(parents=True)
+        (root / "catalog" / "services").mkdir(parents=True)
         (root / "inventory" / "host_vars").mkdir(parents=True)
         (root / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "_template").mkdir(parents=True)
         shutil.copytree(
@@ -217,7 +219,14 @@ class ScaffoldServiceTests(unittest.TestCase):
                 {
                     "$schema": "docs/schema/dependency-graph.schema.json",
                     "schema_version": "1.0.0",
-                    "nodes": [],
+                    "nodes": [
+                        {
+                            "id": "docker_runtime",
+                            "service": "docker_runtime",
+                            "vm": "docker-runtime-lv3",
+                            "tier": 1,
+                        }
+                    ],
                     "edges": [],
                 },
                 indent=2,
@@ -260,6 +269,56 @@ class ScaffoldServiceTests(unittest.TestCase):
                             "requires_oidc": False,
                             "requires_secrets": False,
                             "requires_compose_secrets": False,
+                        }
+                    },
+                },
+                indent=2,
+            )
+            + "\n"
+        )
+        (root / "config" / "service-redundancy-catalog.json").write_text(
+            json.dumps(
+                {
+                    "$schema": "docs/schema/service-redundancy-catalog.schema.json",
+                    "schema_version": "1.0.0",
+                    "platform": {
+                        "failure_domain_count": 1,
+                        "max_supported_tier": "R2",
+                        "notes": ["Single-node test fixture."],
+                        "rehearsal_gate": {
+                            "tiers": {
+                                "R1": {
+                                    "exercise": "restore_to_preview",
+                                    "freshness_window_days": 90,
+                                },
+                                "R2": {
+                                    "exercise": "standby_switchover_or_promotion",
+                                    "freshness_window_days": 30,
+                                },
+                                "R3": {
+                                    "exercise": "cross_domain_failover",
+                                    "freshness_window_days": 30,
+                                },
+                            }
+                        },
+                    },
+                    "services": {
+                        "docker_runtime": {
+                            "tier": "R0",
+                            "recovery_objective": {
+                                "rto_minutes": 240,
+                                "rpo_minutes": 1440,
+                            },
+                            "backup_sources": [
+                                "git_repository",
+                                "host_reinstall_runbooks",
+                            ],
+                            "standby": {
+                                "kind": "none",
+                                "location": "none",
+                                "failover_trigger": "No standby in the test fixture.",
+                                "failback_method": "Reapply the runtime role after rebuilding the fixture.",
+                            },
                         }
                     },
                 },
@@ -357,7 +416,7 @@ class ScaffoldServiceTests(unittest.TestCase):
             self.assertEqual(api_gateway_catalog["services"][0]["name"], "Test Echo")
 
             dependency_graph = json.loads((root / "config" / "dependency-graph.json").read_text())
-            self.assertEqual(dependency_graph["nodes"][0]["id"], "test_echo")
+            self.assertTrue(any(node["id"] == "test_echo" for node in dependency_graph["nodes"]))
 
             slo_catalog = json.loads((root / "config" / "slo-catalog.json").read_text())
             self.assertEqual(slo_catalog["slos"][0]["service_id"], "test_echo")
@@ -391,6 +450,57 @@ class ScaffoldServiceTests(unittest.TestCase):
                 ]
             )
             self.assertEqual(exit_code, 1)
+
+    def test_scaffold_writes_service_bundle_when_metadata_exists(self) -> None:
+        from tempfile import TemporaryDirectory
+
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.build_repo(root)
+            service_definition_catalog.migrate_from_aggregate_catalogs(
+                bundle_root=root / "catalog" / "services",
+                overwrite=True,
+            )
+
+            exit_code = scaffold_service.main(
+                [
+                    "--repo-root",
+                    str(root),
+                    "--name",
+                    "test-echo",
+                    "--description",
+                    "Echo test service.",
+                    "--category",
+                    "automation",
+                    "--vm",
+                    "docker-runtime-lv3",
+                    "--port",
+                    "8181",
+                    "--subdomain",
+                    "test-echo.lv3.org",
+                    "--exposure",
+                    "private-only",
+                    "--image",
+                    "docker.io/hashicorp/http-echo:latest",
+                    "--today",
+                    "2026-03-23",
+                ]
+            )
+
+            self.assertEqual(exit_code, 0)
+            bundle_path = root / "catalog" / "services" / "test_echo" / "service.yaml"
+            self.assertTrue(bundle_path.is_file())
+            bundle = yaml.safe_load(bundle_path.read_text())
+            self.assertEqual(bundle["service"]["id"], "test_echo")
+            self.assertEqual(bundle["dependency"]["node"]["id"], "test_echo")
+            self.assertEqual(bundle["redundancy"]["tier"], "R0")
+            self.assertEqual(bundle["health"]["role"], "test_echo_runtime")
+
+            service_catalog = json.loads((root / "config" / "service-capability-catalog.json").read_text())
+            self.assertTrue(any(item["id"] == "test_echo" for item in service_catalog["services"]))
+
+            completeness_catalog = json.loads((root / "config" / "service-completeness.json").read_text())
+            self.assertIn("test_echo", completeness_catalog["services"])
 
 
 if __name__ == "__main__":

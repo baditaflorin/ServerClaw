@@ -1,0 +1,202 @@
+schema_version: 1.0.0
+service:
+  id: label_studio
+  name: Label Studio
+  description: Repo-managed human-in-the-loop data annotation platform with deterministic
+    project catalog reconciliation.
+  category: data
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:8110
+  public_url: https://annotate.lv3.org
+  subdomain: annotate.lv3.org
+  exposure: edge-published
+  health_probe_id: label_studio
+  image_catalog_ids:
+  - label_studio_runtime
+  secret_catalog_ids:
+  - label_studio_database_password
+  - label_studio_admin_password
+  - label_studio_admin_token
+  adr: 0289
+  adr_file: docs/adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md
+  runbook: docs/runbooks/configure-label-studio.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/label-studio.yml
+  restart_domain: runtime-general-data-apps
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  dashboard_url: https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=label-studio-availability
+  tags:
+  - annotation
+  - human-in-the-loop
+  - postgres
+  - edge-authenticated
+  - ml-data
+  notes: Label Studio runs on docker-runtime-lv3 with a dedicated PostgreSQL database
+    and repo-managed project catalog sync. Browser access is enforced by the shared
+    edge oauth2-proxy and Keycloak flow, while app-local admin and token auth remain
+    the current Community Edition-compatible recovery and automation path.
+  environments:
+    production:
+      status: active
+      url: https://annotate.lv3.org
+      subdomain: annotate.lv3.org
+      notes: Repo automation verifies the local /api/version contract, the shared-edge
+        auth redirects, and the repo-managed project catalog through the private runtime
+        token.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  suppressed_checks:
+    grafana_dashboard: '2026-09-30'
+    alert_rules: '2026-09-30'
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  - pbs_vm_150
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 or the shared postgres leader when
+      Label Studio, its project catalog state, or its local annotation metadata cannot
+      be recovered in place.
+    failback_method: Restore the affected guest, confirm postgres leadership and OpenBao
+      state, then rerun the Label Studio converge and project verification workflow
+      from git.
+dependency:
+  node:
+    id: label_studio
+    service: label_studio
+    name: Label Studio
+    vm: docker-runtime-lv3
+    tier: 2
+    category: data
+    adr: 0289
+  outbound_edges:
+  - from: label_studio
+    to: api_gateway
+    type: soft
+    description: The private operator JWT route at /v1/label-studio is published through
+      the shared API gateway on docker-runtime-lv3.
+  - from: label_studio
+    to: docker_runtime
+    type: hard
+    description: The Label Studio runtime container and guest-local listener are hosted
+      on docker-runtime-lv3.
+  - from: label_studio
+    to: keycloak
+    type: soft
+    description: Browser access to annotate.lv3.org is gated by the shared oauth2-proxy
+      and Keycloak edge-auth flow, while app-local Label Studio tokens remain the
+      current automation path.
+  - from: label_studio
+    to: nginx_edge
+    type: soft
+    description: The shared NGINX edge publishes annotate.lv3.org and enforces the
+      browser auth boundary ahead of Label Studio.
+  - from: label_studio
+    to: openbao
+    type: startup_only
+    description: Label Studio consumes OpenBao-delivered runtime secrets during converge
+      and container startup.
+  - from: label_studio
+    to: postgres
+    type: hard
+    description: Label Studio persists project metadata, task state, and annotations
+      in the dedicated PostgreSQL database label_studio on postgres-lv3.
+health:
+  service_name: label_studio
+  owning_vm: docker-runtime-lv3
+  role: label_studio_runtime
+  verify_file: roles/label_studio_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: Label Studio startup completes once the local /api/version endpoint
+      returns 200 on the runtime listener.
+    timeout_seconds: 300
+    retries: 60
+    delay_seconds: 5
+    url: http://127.0.0.1:8110/api/version
+    method: GET
+    expected_status:
+    - 200
+  liveness:
+    kind: http
+    description: The local Label Studio /api/version endpoint responds on docker-runtime-lv3.
+    timeout_seconds: 300
+    retries: 60
+    delay_seconds: 5
+    url: http://127.0.0.1:8110/api/version
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The public Label Studio root redirects through the shared edge auth
+      boundary while the private runtime listener remains bound for automation and
+      the operator gateway route.
+    timeout_seconds: 300
+    retries: 60
+    delay_seconds: 5
+    url: https://annotate.lv3.org/
+    method: GET
+    expected_status:
+    - 302
+    - 303
+    docker_publication:
+      container_name: label-studio
+      bindings:
+      - host: 10.10.10.20
+        port: 8110
+      required_networks:
+      - label_studio_default
+  uptime_kuma:
+    enabled: false
+    reason: The public anonymous contract is intentionally a shared-edge auth redirect
+      rather than a stable unauthenticated health endpoint; the role-level verify_public
+      tasks and live-apply evidence cover that boundary.
+data:
+- id: label-studio-annotation-database
+  service: label_studio
+  name: Label Studio annotation metadata database
+  class: confidential
+  retention_days: 365
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: medium
+  locations:
+  - PostgreSQL database label_studio on postgres-lv3
+  notes: Label Studio stores project metadata, task assignments, task payload references,
+    and completed annotations in the dedicated PostgreSQL database.
+- id: label-studio-runtime-state
+  service: label_studio
+  name: Label Studio local runtime state
+  class: confidential
+  retention_days: 365
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: medium
+  locations:
+  - /opt/label-studio/data on docker-runtime-lv3
+  notes: The Label Studio data directory stores local imports, exports, and attachment
+    cache material that accompanies the repo-managed project catalog.
+slos:
+- id: label-studio-availability
+  service_id: label_studio
+  indicator: availability
+  objective_percent: 99.0
+  window_days: 30
+  target_url: http://10.10.10.20:8110/api/version
+  probe_module: http_2xx_follow_redirects
+  description: The private Label Studio runtime remains reachable on docker-runtime-lv3
+    for governed annotation queues and API automation.

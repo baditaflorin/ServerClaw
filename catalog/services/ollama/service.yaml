@@ -1,0 +1,96 @@
+schema_version: 1.0.0
+service:
+  id: ollama
+  name: Ollama
+  description: Private local LLM inference runtime for platform agents and operator
+    workbenches.
+  category: automation
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:11434
+  exposure: private-only
+  health_probe_id: ollama
+  image_catalog_ids:
+  - ollama_runtime
+  adr: '0145'
+  runbook: docs/runbooks/configure-ollama.md
+  runtime_pool: runtime-ai
+  deployment_surface: playbooks/services/ollama.yml
+  restart_domain: runtime-ai-inference
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+  mobility_tier: burst_batch
+  tags:
+  - llm
+  - inference
+  - private
+  environments:
+    production:
+      status: active
+      url: http://10.10.10.20:11434
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: false
+  requires_compose_secrets: false
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when Ollama or its model-serving
+      state cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Ollama
+      converge from git.
+dependency:
+  node:
+    id: ollama
+    service: ollama
+    name: Ollama
+    vm: docker-runtime-lv3
+    tier: 1
+    category: automation
+    adr: '0145'
+  outbound_edges: []
+health:
+  service_name: ollama
+  owning_vm: docker-runtime-lv3
+  role: ollama_runtime
+  verify_file: roles/ollama_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: The Ollama version endpoint responds on the local listener.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:11434/api/version
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: command
+    description: The repo-managed default Ollama model is available inside the runtime
+      container.
+    timeout_seconds: 60
+    retries: 1
+    delay_seconds: 0
+    argv:
+    - docker
+    - exec
+    - ollama
+    - ollama
+    - show
+    - llama3.2:3b
+    success_rc: 0
+  uptime_kuma:
+    enabled: false
+    reason: The Ollama inference API remains private to the docker-runtime VM and
+      internal guest network.

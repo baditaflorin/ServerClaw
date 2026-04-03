@@ -2,7 +2,12 @@
 
 ## Purpose
 
-`config/service-capability-catalog.json` is the operator-facing registry of platform services.
+`catalog/services/<service-id>/service.yaml` is the ADR 0324 source of truth for
+service-local metadata.
+
+`config/service-capability-catalog.json` remains the operator-facing registry of
+platform services, but it is now a generated aggregate view assembled from the
+service bundles.
 
 It answers:
 
@@ -18,7 +23,7 @@ It answers:
 
 ## Update Rules
 
-Update the catalog when:
+Update the service bundle and regenerate the aggregate catalogs when:
 
 1. a service is added or retired
 2. its primary URL changes
@@ -43,18 +48,21 @@ The catalog is the input for:
 Run:
 
 ```bash
+uv run --with pyyaml --with jsonschema python scripts/service_definition_catalog.py --check
 uv run --with pyyaml --with jsonschema python scripts/service_catalog.py --validate
 ```
 
 Or use:
 
 ```bash
+make validate-service-definitions
 make validate
 ```
 
 Validation checks:
 
 - JSON Schema validity and required fields
+- generated aggregate outputs match the committed `catalog/services/` bundles
 - unique service ids and names
 - coverage for every service in `config/health-probe-catalog.json`
 - runbook paths exist
@@ -80,6 +88,12 @@ make show-service SERVICE=grafana
 ```
 
 This prints the lifecycle state, VM, URLs, health probe, image or secret references, degradation modes, runbook, dashboard, and tags for the selected service.
+
+To refresh the generated aggregate catalogs after editing the bundles:
+
+```bash
+make generate-service-definitions
+```
 
 For active environments, `show-service` also prints the effective smoke-suite
 contract and whether it is explicitly declared or inherited from the default

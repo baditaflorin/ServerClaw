@@ -1,0 +1,153 @@
+schema_version: 1.0.0
+service:
+  id: api_gateway
+  name: Platform API Gateway
+  description: Unified authenticated gateway for operator and automation access to
+    platform HTTP APIs.
+  category: automation
+  lifecycle_status: active
+  vm: runtime-control-lv3
+  vmid: 192
+  internal_url: http://10.10.10.92:8083
+  public_url: https://api.lv3.org
+  subdomain: api.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: Platform API Gateway Public
+  health_probe_id: api_gateway
+  adr: 0092
+  runbook: docs/runbooks/configure-api-gateway.md
+  runtime_pool: runtime-control
+  deployment_surface: playbooks/services/api-gateway.yml
+  restart_domain: runtime-control-ingress
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+  mobility_tier: anchor
+  dashboard_url: https://grafana.lv3.org/d/lv3-platform-api-gateway/lv3-platform-api-gateway
+  degradation_modes:
+  - dependency: keycloak
+    dependency_type: soft
+    degraded_behaviour: Use cached JWKS for bearer-token validation until the cache
+      expires. After cache expiry, return GATE_CIRCUIT_OPEN with Retry-After 30 for
+      auth-gated requests.
+    degraded_for_seconds_max: 300
+    recovery_signal: successful JWKS refresh from Keycloak
+    tested_by: fault:keycloak-unavailable
+  - dependency: nats
+    dependency_type: soft
+    degraded_behaviour: Buffer platform.api.request events in the gateway-local outbox
+      under /data/nats-outbox.jsonl and flush them when NATS publication succeeds
+      again.
+    degraded_for_seconds_max: -1
+    recovery_signal: successful outbox flush to NATS
+    tested_by: fault:nats-unavailable
+  tags:
+  - api
+  - gateway
+  - platform
+  - oidc
+  environments:
+    production:
+      status: active
+      url: https://api.lv3.org
+      subdomain: api.lv3.org
+      stage_ready: true
+      smoke_suite_ids:
+      - production-api-gateway-operator-path
+      notes: Repository automation is ready; live publication still requires apply
+        from main.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: true
+  requires_secrets: false
+  requires_compose_secrets: true
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_192
+  standby:
+    kind: cold
+    location: runtime-control-lv3
+    failover_trigger: Restore runtime-control-lv3 when the API gateway container,
+      config, or shared runtime data cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-control-lv3, then rerun the API gateway
+      converge from git.
+dependency:
+  node:
+    id: api_gateway
+    service: api_gateway
+    name: Platform API Gateway
+    vm: docker-runtime-lv3
+    tier: 3
+    category: automation
+    adr: 0092
+  outbound_edges:
+  - from: api_gateway
+    to: keycloak
+    type: hard
+    description: The unified API gateway validates caller JWTs against Keycloak before
+      serving authenticated platform routes.
+  - from: api_gateway
+    to: nginx_edge
+    type: soft
+    description: Public access to api.lv3.org depends on the shared edge publication
+      path, but the internal gateway remains reachable directly.
+  - from: api_gateway
+    to: typesense
+    type: soft
+    description: The structured-search endpoints delegate keyword and facet queries
+      to the private Typesense runtime when it is available.
+health:
+  service_name: api-gateway
+  owning_vm: runtime-control-lv3
+  role: api_gateway_runtime
+  verify_file: roles/api_gateway_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: Gateway startup completes once the authenticated aggregate health
+      endpoint is routing requests.
+    timeout_seconds: 90
+    retries: 18
+    delay_seconds: 5
+    url: http://127.0.0.1:8083/v1/health
+    method: GET
+    expected_status:
+    - 401
+  liveness:
+    kind: http
+    description: The local API gateway health endpoint responds on runtime-control-lv3.
+    timeout_seconds: 90
+    retries: 18
+    delay_seconds: 5
+    url: http://127.0.0.1:8083/healthz
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The authenticated aggregate health endpoint rejects anonymous requests
+      while the gateway is serving traffic.
+    timeout_seconds: 90
+    retries: 1
+    delay_seconds: 0
+    url: http://127.0.0.1:8083/v1/health
+    method: GET
+    expected_status:
+    - 401
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Platform API Gateway Public
+      type: http
+      url: https://api.lv3.org/healthz
+      description: Public edge entrypoint for the unified LV3 API gateway.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 5
+      accepted_statuscodes:
+      - 200-299

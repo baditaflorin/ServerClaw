@@ -1,0 +1,149 @@
+schema_version: 1.0.0
+service:
+  id: excalidraw
+  name: Excalidraw
+  description: Private collaborative whiteboard and architecture diagram surface backed
+    by repo-generated `.excalidraw` scenes.
+  category: access
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:3095
+  public_url: https://draw.lv3.org
+  subdomain: draw.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: Excalidraw Public
+  health_probe_id: excalidraw
+  adr: '0202'
+  runbook: docs/runbooks/configure-excalidraw.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/excalidraw.yml
+  restart_domain: runtime-general-collaboration
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  dashboard_url: https://grafana.lv3.org/d/lv3-excalidraw/lv3-excalidraw
+  tags:
+  - architecture
+  - diagramming
+  - excalidraw
+  - operator
+  environments:
+    production:
+      status: active
+      url: https://draw.lv3.org
+      subdomain: draw.lv3.org
+      notes: Live applied on the ADR 0202 workstream branch and protected by the shared
+        Keycloak-backed oauth2-proxy edge flow.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: false
+  requires_compose_secrets: false
+  dashboard_file: config/grafana/dashboards/excalidraw.json
+  alert_rule_file: config/alertmanager/rules/excalidraw.yml
+  suppressed_checks:
+    api_gateway: '2026-09-23'
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when Excalidraw, the room backend,
+      or the shared runtime state cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Excalidraw
+      converge from git.
+dependency:
+  node:
+    id: excalidraw
+    service: excalidraw
+    name: Excalidraw
+    vm: docker-runtime-lv3
+    tier: 2
+    category: access
+    adr: '0202'
+  outbound_edges:
+  - from: excalidraw
+    to: docker_runtime
+    type: hard
+    description: The Excalidraw frontend and collaboration room are hosted on docker-runtime-lv3.
+  - from: excalidraw
+    to: keycloak
+    type: soft
+    description: Operator access to draw.lv3.org depends on the shared Keycloak-backed
+      oauth2-proxy edge flow, while the private runtime can still be verified locally.
+  - from: excalidraw
+    to: nginx_edge
+    type: hard
+    description: The private diagram surface is published at draw.lv3.org through
+      the shared NGINX edge, including the routed /socket.io/ collaboration path.
+health:
+  service_name: excalidraw
+  owning_vm: docker-runtime-lv3
+  role: excalidraw_runtime
+  verify_file: roles/excalidraw_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: The Excalidraw frontend responds on the private runtime listener.
+    timeout_seconds: 90
+    retries: 18
+    delay_seconds: 5
+    url: http://10.10.10.20:3095/
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The Excalidraw collaboration room responds on its local socket service
+      port.
+    timeout_seconds: 90
+    retries: 18
+    delay_seconds: 5
+    url: http://10.10.10.20:3096/
+    method: GET
+    expected_status:
+    - 200
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Excalidraw Public
+      type: http
+      url: https://draw.lv3.org
+      description: Private Excalidraw publication through the authenticated shared
+        NGINX edge.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 5
+      accepted_statuscodes:
+      - 200-399
+data:
+- id: excalidraw-generated-scenes
+  service: excalidraw
+  name: Generated Excalidraw scene set
+  class: internal
+  retention_days: 365
+  backup_included: true
+  access_role: platform-read
+  pii_risk: low
+  locations:
+  - docs/diagrams/*.excalidraw
+  - /opt/excalidraw/bootstrap-app.sh
+  notes: The committed architecture scene sources are regenerated from repo truth
+    and remain part of normal repository backup scope.
+slos:
+- id: excalidraw-availability
+  service_id: excalidraw
+  indicator: availability
+  objective_percent: 99.5
+  window_days: 30
+  target_url: https://draw.lv3.org
+  probe_module: http_2xx_follow_redirects
+  description: The private Excalidraw publication remains reachable through the authenticated
+    LV3 edge.

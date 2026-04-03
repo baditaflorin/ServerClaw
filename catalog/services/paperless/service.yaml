@@ -1,0 +1,211 @@
+schema_version: 1.0.0
+service:
+  id: paperless
+  name: Paperless-ngx
+  description: Self-hosted document archive and metadata API with OCR, taxonomy reconciliation,
+    and Keycloak-backed operator sign-in.
+  category: data
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:8018
+  public_url: https://paperless.lv3.org
+  subdomain: paperless.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: Paperless Public Health
+  health_probe_id: paperless
+  image_catalog_ids:
+  - paperless_runtime
+  - langfuse_redis_runtime
+  secret_catalog_ids:
+  - paperless_database_password
+  - paperless_secret_key
+  - paperless_redis_password
+  - paperless_admin_password
+  - paperless_api_token
+  - keycloak_paperless_client_secret
+  adr: 0285
+  adr_file: docs/adr/0285-paperless-ngx-as-the-document-management-and-archive-api.md
+  runbook: docs/runbooks/configure-paperless.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/paperless.yml
+  restart_domain: runtime-general-data-apps
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  dashboard_url: https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=paperless-availability
+  tags:
+  - documents
+  - archive
+  - paperless
+  - oidc
+  notes: Live-apply evidence is tracked on the workstream branch; merge-to-main still
+    must update the integrated README, VERSION, changelog, and versions/stack.yaml
+    surfaces once the final mainline apply is complete.
+  environments:
+    production:
+      status: active
+      url: https://paperless.lv3.org
+      subdomain: paperless.lv3.org
+      notes: docs.lv3.org remains reserved for the developer portal, so Paperless
+        publishes at paperless.lv3.org.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: true
+  requires_secrets: true
+  requires_compose_secrets: true
+  dashboard_file: config/grafana/dashboards/slo-overview.json
+  alert_rule_file: config/prometheus/rules/slo_alerts.yml
+  keycloak_client_generated: true
+  suppressed_checks: {}
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 240
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  - pbs_vm_150
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 or postgres-lv3 when the Paperless
+      archive runtime or metadata store cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3 and postgres-lv3, rerun
+      the Paperless converge workflow from git, and replay the repo-managed taxonomy
+      plus smoke verification.
+dependency:
+  node:
+    id: paperless
+    service: paperless
+    name: Paperless-ngx
+    vm: docker-runtime-lv3
+    tier: 2
+    category: data
+    adr: 0285
+  outbound_edges:
+  - from: paperless
+    to: api_gateway
+    type: soft
+    description: Governed operator API access to Paperless flows through the shared
+      platform API gateway.
+  - from: paperless
+    to: docker_runtime
+    type: hard
+    description: Paperless runs as a compose-managed workload on docker-runtime-lv3.
+  - from: paperless
+    to: keycloak
+    type: soft
+    description: Paperless delegates routine browser sign-in to the shared Keycloak
+      OIDC broker.
+  - from: paperless
+    to: nginx_edge
+    type: soft
+    description: Public access to paperless.lv3.org depends on the shared NGINX edge
+      publication path.
+  - from: paperless
+    to: openbao
+    type: startup_only
+    description: Paperless starts from OpenBao-rendered runtime secrets mirrored into
+      its compose environment.
+  - from: paperless
+    to: postgres
+    type: hard
+    description: Paperless stores document metadata, workflow state, and taxonomy
+      in Postgres.
+health:
+  service_name: paperless
+  owning_vm: docker-runtime-lv3
+  role: paperless_runtime
+  verify_file: roles/paperless_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: Paperless startup completes once the shared-edge root renders through
+      the public publication path.
+    timeout_seconds: 300
+    retries: 60
+    delay_seconds: 5
+    url: https://paperless.lv3.org/
+    method: GET
+    expected_status:
+    - 200
+    - 302
+  liveness:
+    kind: http
+    description: The local Paperless root responds on the runtime listener.
+    timeout_seconds: 300
+    retries: 60
+    delay_seconds: 5
+    url: http://127.0.0.1:8018/
+    method: GET
+    expected_status:
+    - 200
+    - 302
+  readiness:
+    kind: command
+    description: Paperless accepts the durable token and returns authenticated document
+      plus taxonomy data from the live runtime.
+    timeout_seconds: 120
+    retries: 3
+    delay_seconds: 5
+    argv:
+    - /bin/bash
+    - -lc
+    - 'set -euo pipefail; token=$(cat /etc/lv3/paperless/api-token); documents=$(mktemp);
+      tags=$(mktemp); trap ''rm -f "${documents}" "${tags}"'' EXIT; curl -fsS http://127.0.0.1:8018/api/documents/?page_size=1
+      -H "Authorization: Token ${token}" > "${documents}"; curl -fsS http://127.0.0.1:8018/api/tags/?page_size=200
+      -H "Authorization: Token ${token}" > "${tags}"; python3 -c ''import json, pathlib,
+      sys; documents=json.loads(pathlib.Path(sys.argv[1]).read_text()); tags=json.loads(pathlib.Path(sys.argv[2]).read_text());
+      assert "results" in documents; assert len(tags.get("results", [])) >= 1'' "${documents}"
+      "${tags}"'
+    success_rc: 0
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Paperless Public Health
+      type: http
+      url: https://paperless.lv3.org/
+      description: Public Paperless root published through the shared NGINX edge VM.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 5
+      accepted_statuscodes:
+      - 200-399
+data:
+- id: paperless-document-archive
+  service: paperless
+  name: Paperless document archive
+  class: confidential
+  retention_days: null
+  backup_included: true
+  access_role: break_glass
+  pii_risk: high
+  locations:
+  - Docker volumes paperless-media, paperless-data, paperless-export, and paperless-consume
+    on docker-runtime-lv3
+  notes: Paperless stores uploaded source files, OCR output, and exportable archive
+    artifacts that must remain recoverable.
+- id: paperless-document-metadata
+  service: paperless
+  name: Paperless document metadata
+  class: confidential
+  retention_days: null
+  backup_included: true
+  access_role: break_glass
+  pii_risk: high
+  locations:
+  - Paperless PostgreSQL database on postgres-lv3
+  notes: Paperless stores document metadata, taxonomy, correspondents, and operator
+    actions alongside the archive state.
+slos:
+- id: paperless-availability
+  service_id: paperless
+  indicator: availability
+  objective_percent: 99.0
+  window_days: 30
+  target_url: https://paperless.lv3.org/
+  probe_module: http_2xx_follow_redirects
+  description: Paperless remains reachable through the public LV3 edge for document
+    archive access and governed API reconciliation.

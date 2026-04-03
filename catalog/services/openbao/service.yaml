@@ -1,0 +1,136 @@
+schema_version: 1.0.0
+service:
+  id: openbao
+  name: OpenBao
+  description: Private secrets authority for controller automation and runtime credentials.
+  category: security
+  lifecycle_status: active
+  vm: runtime-control-lv3
+  vmid: 192
+  internal_url: https://100.64.0.1:8200
+  exposure: private-only
+  health_probe_id: openbao
+  image_catalog_ids:
+  - openbao_runtime
+  secret_catalog_ids:
+  - openbao_controller_approle
+  - openbao_atlas_approle
+  - openbao_mail_platform_approle
+  adr: '0043'
+  runbook: docs/runbooks/configure-openbao.md
+  runtime_pool: runtime-control
+  deployment_surface: playbooks/services/openbao.yml
+  restart_domain: runtime-control-secrets
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+  mobility_tier: anchor
+  degradation_modes:
+  - dependency: postgres
+    dependency_type: hard
+    degraded_behaviour: OpenBao cannot persist state without PostgreSQL. Secret reads
+      and writes fail until the storage backend reconnects.
+    degraded_for_seconds_max: 0
+    recovery_signal: OpenBao storage reconnect succeeds
+    tested_by: fault:postgres-unavailable
+  tags:
+  - secrets
+  - vault
+  - pki
+  environments:
+    production:
+      status: active
+      url: https://100.64.0.1:8200
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_192
+  standby:
+    kind: cold
+    location: runtime-control-lv3
+    failover_trigger: Restore runtime-control-lv3 when OpenBao or its sealed runtime
+      state cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-control-lv3, then rerun the OpenBao
+      converge and unseal workflow from git.
+dependency:
+  node:
+    id: openbao
+    service: openbao
+    name: OpenBao
+    vm: docker-runtime-lv3
+    tier: 1
+    category: security
+    adr: '0043'
+  outbound_edges: []
+health:
+  service_name: openbao
+  owning_vm: runtime-control-lv3
+  role: openbao_runtime
+  verify_file: roles/openbao_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: OpenBao startup completes once the local health endpoint reports
+      the active node as ready.
+    timeout_seconds: 60
+    retries: 30
+    delay_seconds: 2
+    url: http://127.0.0.1:8201/v1/sys/health
+    method: GET
+    expected_status:
+    - 200
+  liveness:
+    kind: http
+    description: OpenBao exposes the local seal-status endpoint.
+    timeout_seconds: 60
+    retries: 1
+    delay_seconds: 0
+    url: http://127.0.0.1:8201/v1/sys/seal-status
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: OpenBao reports the active node as ready on the local health endpoint.
+    timeout_seconds: 60
+    retries: 30
+    delay_seconds: 2
+    url: http://127.0.0.1:8201/v1/sys/health
+    method: GET
+    expected_status:
+    - 200
+    docker_publication:
+      container_name: lv3-openbao
+      bindings:
+      - host: 10.10.10.92
+        port: 8200
+      required_networks:
+      - openbao_default
+  tls_certificate_ids:
+  - openbao-proxy
+  uptime_kuma:
+    enabled: false
+    reason: The operator-facing TLS surface requires client-certificate authentication,
+      so Uptime Kuma only tracks this contract indirectly through role verification.
+data:
+- id: openbao-secrets
+  service: openbao
+  name: OpenBao KV secrets
+  class: secret
+  retention_days: null
+  backup_included: true
+  access_role: break_glass
+  pii_risk: medium
+  locations:
+  - kv/services/*
+  - kv/controller/*
+  notes: Secret material is retained until explicit deletion or rotation removes the
+    prior value.

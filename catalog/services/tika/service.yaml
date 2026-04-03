@@ -1,0 +1,155 @@
+schema_version: 1.0.0
+service:
+  id: tika
+  name: Apache Tika
+  description: Private stateless document text and metadata extraction service for
+    the RAG and ServerClaw memory ingestion pipelines.
+  category: automation
+  lifecycle_status: active
+  vm: runtime-ai-lv3
+  vmid: 190
+  internal_url: http://10.10.10.90:9998
+  exposure: private-only
+  uptime_monitor_name: Tika Private
+  health_probe_id: tika
+  image_catalog_ids:
+  - tika_runtime
+  adr: '0275'
+  runbook: docs/runbooks/configure-tika.md
+  runtime_pool: runtime-ai
+  deployment_surface: playbooks/services/tika.yml
+  restart_domain: runtime-ai-document-extraction
+  api_contract_ref: config/contracts/runtime-pools/runtime-ai/tika.openapi.yaml
+  mobility_tier: burst_batch
+  dashboard_url: https://grafana.lv3.org/d/lv3-tika/lv3-tika
+  tags:
+  - documents
+  - extraction
+  - rag
+  - private
+  environments:
+    production:
+      status: active
+      url: http://10.10.10.90:9998
+      notes: The runtime stays private on runtime-ai-lv3 and is consumed directly
+        by repo-managed ingestion workflows; no shared API gateway publication is
+        issued.
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: false
+  requires_compose_secrets: false
+  dashboard_file: config/grafana/dashboards/tika.json
+  alert_rule_file: config/alertmanager/rules/tika.yml
+  suppressed_checks:
+    api_gateway: '2026-09-23'
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_190
+  standby:
+    kind: cold
+    location: runtime-ai-lv3
+    failover_trigger: Restore runtime-ai-lv3 when Apache Tika or the runtime-ai document-extraction
+      pool state cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-ai-lv3, then rerun the Tika converge
+      and extraction verification workflow.
+dependency:
+  node:
+    id: tika
+    service: tika
+    name: Apache Tika
+    vm: runtime-ai-lv3
+    tier: 2
+    category: automation
+    adr: '0275'
+  outbound_edges:
+  - from: tika
+    to: docker_runtime
+    type: hard
+    description: The Apache Tika extraction runtime is hosted on runtime-ai-lv3.
+health:
+  service_name: tika
+  owning_vm: runtime-ai-lv3
+  role: tika_runtime
+  verify_file: roles/tika_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: Apache Tika startup completes once the local version endpoint returns
+      200 on the runtime listener.
+    timeout_seconds: 180
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:9998/version
+    method: GET
+    expected_status:
+    - 200
+  liveness:
+    kind: http
+    description: Apache Tika keeps serving the local version endpoint on runtime-ai-lv3.
+    timeout_seconds: 180
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:9998/version
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: command
+    description: A minimal HTML document is accepted on the local `/tika` endpoint
+      and returns clean plaintext.
+    timeout_seconds: 120
+    retries: 3
+    delay_seconds: 5
+    argv:
+    - /bin/bash
+    - -lc
+    - 'set -euo pipefail; body=$(mktemp); trap ''rm -f "$body"'' EXIT; printf ''<html><body><h1>LV3
+      Tika readiness</h1><p>Readiness probe.</p></body></html>'' | curl -fsS -X PUT
+      -H ''Content-Type: text/html'' -H ''Accept: text/plain'' --data-binary @- http://127.0.0.1:9998/tika
+      >"$body"; grep -q ''LV3 Tika readiness'' "$body"'
+    success_rc: 0
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Tika Private
+      type: http
+      url: http://10.10.10.90:9998/version
+      description: Private Apache Tika version endpoint on runtime-ai-lv3.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 10
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: tika-transient-document-extraction
+  service: tika
+  name: Apache Tika transient document extraction payloads
+  class: confidential
+  retention_days: null
+  backup_included: false
+  access_role: platform-operator
+  pii_risk: high
+  locations:
+  - Transient request and response buffers inside the tika container on docker-runtime-lv3
+  - Ephemeral extracted plaintext and metadata returned synchronously to callers on
+    docker-runtime-lv3
+  notes: Apache Tika is stateless and does not persist source documents, extracted
+    text, or metadata after each synchronous request completes, but uploaded documents
+    may contain sensitive content in transit.
+slos:
+- id: tika-availability
+  service_id: tika
+  indicator: availability
+  objective_percent: 99.0
+  window_days: 30
+  target_url: http://10.10.10.90:9998/version
+  probe_module: http_2xx_follow_redirects
+  description: The private Apache Tika extraction API remains reachable on runtime-ai-lv3
+    for synchronous document text and metadata extraction workflows.

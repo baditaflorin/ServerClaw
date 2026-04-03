@@ -1,0 +1,146 @@
+schema_version: 1.0.0
+service:
+  id: n8n
+  name: n8n
+  description: Repo-managed external app connector fabric and webhook automation runtime
+    for ServerClaw, with a public edge hostname and PostgreSQL-backed persistence.
+  category: automation
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:5678
+  public_url: https://n8n.lv3.org
+  subdomain: n8n.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: n8n Public Health
+  health_probe_id: n8n
+  image_catalog_ids:
+  - n8n_runtime
+  secret_catalog_ids:
+  - n8n_database_password
+  - n8n_owner_password
+  - n8n_encryption_key
+  adr: '0151'
+  runbook: docs/runbooks/configure-n8n.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/n8n.yml
+  restart_domain: runtime-general-automation
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  tags:
+  - automation
+  - webhooks
+  - integrations
+  - workflows
+  - serverclaw
+  - connector-fabric
+  environments:
+    production:
+      status: active
+      url: https://n8n.lv3.org
+      subdomain: n8n.lv3.org
+      notes: The editor is protected by the shared oauth2-proxy and Keycloak edge
+        flow while selected webhook paths remain intentionally public for governed
+        ServerClaw connector calls.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when n8n or its runtime state cannot
+      be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the n8n converge
+      from git.
+dependency:
+  node:
+    id: n8n
+    service: n8n
+    name: n8n
+    vm: docker-runtime-lv3
+    tier: 2
+    category: automation
+    adr: '0151'
+  outbound_edges:
+  - from: n8n
+    to: keycloak
+    type: soft
+    description: The public n8n editor path is gated behind oauth2-proxy and Keycloak-backed
+      browser authentication.
+  - from: n8n
+    to: nginx_edge
+    type: soft
+    description: Public reachability for n8n.lv3.org depends on the shared edge publication
+      path.
+  - from: n8n
+    to: openbao
+    type: startup_only
+    description: n8n reads its mirrored database password and encryption key through
+      the OpenBao agent before startup.
+  - from: n8n
+    to: postgres
+    type: hard
+    description: n8n stores workflow, credential, and execution state in Postgres.
+health:
+  service_name: n8n
+  owning_vm: docker-runtime-lv3
+  role: n8n_runtime
+  verify_file: roles/n8n_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: n8n startup completes once the local readiness endpoint reports a
+      ready runtime after bootstrap.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:5678/healthz/readiness
+    method: GET
+    expected_status:
+    - 200
+  liveness:
+    kind: http
+    description: The n8n health endpoint responds on the local listener.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:5678/healthz
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The n8n readiness endpoint reports a ready runtime after startup
+      and database bootstrap.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:5678/healthz/readiness
+    method: GET
+    expected_status:
+    - 200
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: n8n Public Health
+      type: http
+      url: https://n8n.lv3.org/healthz
+      description: n8n edge-published health endpoint behind the shared NGINX edge
+        VM.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 5
+      accepted_statuscodes:
+      - 200-299

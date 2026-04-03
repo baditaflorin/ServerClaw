@@ -1,0 +1,122 @@
+schema_version: 1.0.0
+service:
+  id: nomad
+  name: Nomad
+  description: Private distributed scheduler for durable batch jobs and long-running
+    internal workloads.
+  category: automation
+  lifecycle_status: active
+  vm: monitoring-lv3
+  vmid: 140
+  internal_url: https://100.64.0.1:8013
+  exposure: private-only
+  health_probe_id: nomad
+  secret_catalog_ids:
+  - nomad_acl_management_token
+  - nomad_tls_ca_key
+  - nomad_tls_server_key
+  - nomad_tls_client_key
+  adr: '0232'
+  runbook: docs/runbooks/configure-nomad.md
+  runtime_pool: dedicated-monitoring
+  deployment_surface: playbooks/services/nomad.yml
+  restart_domain: dedicated-monitoring-core
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
+  mobility_tier: anchor
+  degradation_modes:
+  - dependency: docker_runtime
+    dependency_type: soft
+    degraded_behaviour: Runtime-targeted jobs cannot place while the docker-runtime
+      Nomad client is unavailable. The Nomad server and build-targeted jobs continue
+      to operate.
+    degraded_for_seconds_max: -1
+    recovery_signal: docker-runtime-lv3 rejoins the Nomad client set
+    tested_by: fault:docker-runtime-unavailable
+  - dependency: docker_build
+    dependency_type: soft
+    degraded_behaviour: Build-targeted or long-running helper jobs pinned to the build
+      pool cannot place while the docker-build Nomad client is unavailable. The Nomad
+      server and runtime-targeted jobs continue to operate.
+    degraded_for_seconds_max: -1
+    recovery_signal: docker-build-lv3 rejoins the Nomad client set
+    tested_by: fault:docker-build-unavailable
+  tags:
+  - scheduler
+  - batch
+  - jobs
+  environments:
+    production:
+      status: active
+      url: https://100.64.0.1:8013
+completeness:
+  service_type: vm-service
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: false
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 60
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_140
+  standby:
+    kind: cold
+    location: monitoring-lv3
+    failover_trigger: Restore monitoring-lv3 when the Nomad server or its local Raft
+      state cannot be recovered in place.
+    failback_method: Restore or rebuild monitoring-lv3, then replay the Nomad converge
+      and smoke-job verification from git.
+dependency:
+  node:
+    id: nomad
+    service: nomad
+    name: Nomad
+    vm: monitoring-lv3
+    tier: 1
+    category: automation
+    adr: '0232'
+  outbound_edges:
+  - from: nomad
+    to: docker_build
+    type: soft
+    description: Long-running internal helper services pinned to the build pool depend
+      on the docker-build Nomad client remaining available for placement.
+  - from: nomad
+    to: docker_runtime
+    type: soft
+    description: Runtime-targeted batch jobs and internal helper workloads depend
+      on the docker-runtime Nomad client remaining available for placement.
+health:
+  service_name: nomad
+  owning_vm: monitoring-lv3
+  role: nomad_cluster_bootstrap
+  verify_file: roles/nomad_cluster_bootstrap/tasks/verify.yml
+  liveness:
+    kind: systemd
+    description: The lv3-nomad systemd unit is active on monitoring-lv3.
+    timeout_seconds: 30
+    retries: 1
+    delay_seconds: 0
+    unit: lv3-nomad
+    expected_state: active
+  readiness:
+    kind: command
+    description: The local Nomad CLI wrapper can query the joined node set through
+      the mirrored TLS and ACL contract.
+    timeout_seconds: 30
+    retries: 6
+    delay_seconds: 5
+    argv:
+    - /usr/local/bin/lv3-nomad
+    - node
+    - status
+    - -json
+    success_rc: 0
+  uptime_kuma:
+    enabled: false
+    reason: Nomad stays private-only behind the Proxmox Tailscale TCP proxy and is
+      verified directly by the repo-managed cluster bootstrap path.

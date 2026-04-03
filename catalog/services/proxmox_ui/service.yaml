@@ -1,0 +1,104 @@
+schema_version: 1.0.0
+service:
+  id: proxmox_ui
+  name: Proxmox UI
+  description: Private Proxmox management interface for host and guest administration.
+  category: access
+  lifecycle_status: active
+  vm: proxmox_florin
+  internal_url: https://100.64.0.1:8006
+  public_url: https://proxmox.lv3.org
+  subdomain: proxmox.lv3.org
+  exposure: informational-only
+  uptime_monitor_name: Proxmox UI Port
+  health_probe_id: proxmox_ui
+  secret_catalog_ids:
+  - proxmox_api_token_payload
+  adr: '0004'
+  runbook: docs/runbooks/initial-access.md
+  runtime_pool: host-management
+  deployment_surface: playbooks/proxmox-install.yml
+  restart_domain: host-management-access
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/host-management
+  mobility_tier: anchor
+  tags:
+  - proxmox
+  - host
+  - management
+  environments:
+    production:
+      status: active
+      url: https://proxmox.lv3.org
+      subdomain: proxmox.lv3.org
+completeness:
+  service_type: vm-service
+  requires_subdomain: true
+  requires_oidc: true
+  requires_secrets: true
+  requires_compose_secrets: false
+  suppression_preset: legacy-service
+redundancy:
+  tier: R0
+  recovery_objective:
+    rto_minutes: 240
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - host_reinstall_runbooks
+  standby:
+    kind: none
+    location: none
+    failover_trigger: No cold or warm standby exists; restore host access after host
+      recovery and Proxmox reinstall.
+    failback_method: Reapply the host bootstrap and Proxmox access automation on the
+      rebuilt primary host.
+dependency:
+  node:
+    id: proxmox_ui
+    service: proxmox_ui
+    name: Proxmox UI
+    vm: proxmox_florin
+    tier: 1
+    category: infrastructure
+    adr: '0004'
+  outbound_edges: []
+health:
+  service_name: proxmox-ui
+  owning_vm: proxmox_florin
+  role: null
+  verify_file: null
+  liveness:
+    kind: tcp
+    description: The Proxmox UI listener accepts TCP connections on the host bridge.
+    timeout_seconds: 30
+    retries: 1
+    delay_seconds: 0
+    host: 10.10.10.1
+    port: 8006
+  readiness:
+    kind: http
+    description: The Proxmox API version endpoint responds on the management listener.
+    timeout_seconds: 30
+    retries: 1
+    delay_seconds: 0
+    url: https://10.10.10.1:8006/api2/json/version
+    method: GET
+    expected_status:
+    - 200
+    validate_tls: false
+  tls_certificate_ids:
+  - proxmox-ui
+  - proxmox-edge-page
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Proxmox UI Port
+      type: port
+      hostname: 10.10.10.1
+      port: 8006
+      description: Internal Proxmox UI listener on the host bridge address.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      accepted_statuscodes:
+      - 200-299

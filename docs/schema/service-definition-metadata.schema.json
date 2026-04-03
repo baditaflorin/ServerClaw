@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/service-definition-metadata.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "outputs"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "outputs": {
+      "type": "object",
+      "required": [
+        "data_catalog",
+        "dependency_graph",
+        "health_probe_catalog",
+        "service_capability_catalog",
+        "service_completeness",
+        "service_redundancy",
+        "slo_catalog"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "data_catalog": {
+          "$ref": "#/$defs/output"
+        },
+        "dependency_graph": {
+          "$ref": "#/$defs/output"
+        },
+        "health_probe_catalog": {
+          "$ref": "#/$defs/output"
+        },
+        "service_capability_catalog": {
+          "$ref": "#/$defs/output"
+        },
+        "service_completeness": {
+          "$ref": "#/$defs/output"
+        },
+        "service_redundancy": {
+          "$ref": "#/$defs/output"
+        },
+        "slo_catalog": {
+          "$ref": "#/$defs/output"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "output": {
+      "type": "object",
+      "required": [
+        "path",
+        "top_level"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "top_level": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

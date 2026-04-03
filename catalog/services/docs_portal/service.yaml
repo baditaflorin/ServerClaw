@@ -1,0 +1,66 @@
+schema_version: 1.0.0
+service:
+  id: docs_portal
+  name: Developer Portal
+  description: Generated public documentation site for services, ADRs, runbooks, release
+    notes, and platform reference data.
+  category: access
+  lifecycle_status: active
+  vm: nginx-lv3
+  vmid: 110
+  public_url: https://docs.lv3.org
+  subdomain: docs.lv3.org
+  exposure: edge-published
+  adr: 0094
+  runbook: docs/runbooks/developer-portal.md
+  runtime_pool: dedicated-edge
+  deployment_surface: playbooks/services/public-edge.yml
+  restart_domain: dedicated-edge-publication
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-edge
+  mobility_tier: movable_singleton
+  tags:
+  - portal
+  - documentation
+  - developer-experience
+  environments:
+    production:
+      status: active
+      url: https://docs.lv3.org
+      subdomain: docs.lv3.org
+completeness:
+  service_type: nginx-plugin
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: false
+  requires_compose_secrets: false
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 30
+    rpo_minutes: 0
+  backup_sources:
+  - git_repository
+  - pbs_vm_110
+  standby:
+    kind: cold
+    location: nginx-lv3
+    failover_trigger: Restore or rebuild nginx-lv3 when the published docs files or
+      edge publication cannot be recovered in place.
+    failback_method: Restore nginx-lv3, regenerate the docs portal, and replay edge
+      publication from git.
+dependency:
+  node:
+    id: docs_portal
+    service: docs_portal
+    name: Developer Portal
+    vm: nginx-lv3
+    tier: 2
+    category: access
+    adr: 0094
+  outbound_edges:
+  - from: docs_portal
+    to: nginx_edge
+    type: hard
+    description: The generated developer portal is published as static content on
+      nginx-lv3.

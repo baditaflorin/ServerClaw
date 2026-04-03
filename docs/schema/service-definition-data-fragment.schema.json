@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/service-definition-data-fragment.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "data"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}

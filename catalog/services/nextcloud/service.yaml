@@ -1,0 +1,186 @@
+schema_version: 1.0.0
+service:
+  id: nextcloud
+  name: Nextcloud
+  description: Repo-managed personal data plane for durable files, attachments, and
+    DAV-backed calendars, contacts, and tasks.
+  category: data
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:8084
+  public_url: https://cloud.lv3.org
+  subdomain: cloud.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: Nextcloud Public Status
+  health_probe_id: nextcloud
+  image_catalog_ids:
+  - nextcloud_runtime
+  - nextcloud_redis_runtime
+  secret_catalog_ids:
+  - nextcloud_database_password
+  - nextcloud_admin_password
+  - nextcloud_redis_password
+  adr: '0260'
+  runbook: docs/runbooks/configure-nextcloud.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/nextcloud.yml
+  restart_domain: runtime-general-data-apps
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  tags:
+  - files
+  - webdav
+  - caldav
+  - carddav
+  - personal-data
+  environments:
+    production:
+      status: active
+      url: https://cloud.lv3.org
+      subdomain: cloud.lv3.org
+      notes: Published through the shared NGINX edge while Nextcloud itself enforces
+        session, login, and DAV discovery behavior.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  dashboard_file: config/grafana/dashboards/nextcloud.json
+  alert_rule_file: config/alertmanager/rules/nextcloud.yml
+  suppressed_checks:
+    api_gateway: '2026-09-23'
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  - pbs_vm_150
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when Nextcloud or its runtime state
+      cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Nextcloud
+      converge from git.
+dependency:
+  node:
+    id: nextcloud
+    service: nextcloud
+    name: Nextcloud
+    vm: docker-runtime-lv3
+    tier: 2
+    category: data
+    adr: '0260'
+  outbound_edges:
+  - from: nextcloud
+    to: nginx_edge
+    type: soft
+    description: Public reachability for cloud.lv3.org and DAV discovery redirects
+      depends on the shared NGINX edge publication path.
+  - from: nextcloud
+    to: openbao
+    type: startup_only
+    description: Nextcloud receives its mirrored database, Redis, and admin bootstrap
+      secrets through the OpenBao agent before startup.
+  - from: nextcloud
+    to: postgres
+    type: hard
+    description: Nextcloud stores account, sharing, file, and app metadata in Postgres.
+health:
+  service_name: nextcloud
+  owning_vm: docker-runtime-lv3
+  role: nextcloud_runtime
+  verify_file: roles/nextcloud_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: Nextcloud startup completes once the local status endpoint reports
+      an installed runtime on the private listener.
+    timeout_seconds: 300
+    retries: 60
+    delay_seconds: 5
+    url: http://127.0.0.1:8084/status.php
+    method: GET
+    expected_status:
+    - 200
+  liveness:
+    kind: http
+    description: The local Nextcloud status endpoint responds on docker-runtime-lv3.
+    timeout_seconds: 300
+    retries: 60
+    delay_seconds: 5
+    url: http://127.0.0.1:8084/status.php
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The public Nextcloud status endpoint renders through the shared NGINX
+      edge with DAV publication in place.
+    timeout_seconds: 300
+    retries: 60
+    delay_seconds: 5
+    url: https://cloud.lv3.org/status.php
+    method: GET
+    expected_status:
+    - 200
+    docker_publication:
+      container_name: nextcloud-app
+      bindings:
+      - host: 10.10.10.92
+        port: 8084
+      required_networks:
+      - nextcloud_default
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Nextcloud Public Status
+      type: http
+      url: https://cloud.lv3.org/status.php
+      description: Public Nextcloud status endpoint published through the shared NGINX
+        edge VM.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 5
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: nextcloud-account-metadata
+  service: nextcloud
+  name: Nextcloud account and sharing metadata
+  class: confidential
+  retention_days: null
+  backup_included: true
+  access_role: break_glass
+  pii_risk: high
+  locations:
+  - Nextcloud PostgreSQL database
+  notes: Account records, shares, app state, and file metadata define the canonical
+    personal data plane and must remain restorable with the runtime filesystem.
+- id: nextcloud-personal-files
+  service: nextcloud
+  name: Nextcloud personal files and DAV payloads
+  class: confidential
+  retention_days: null
+  backup_included: true
+  access_role: break_glass
+  pii_risk: high
+  locations:
+  - /opt/nextcloud/data/html/data
+  notes: User-owned files, attachments, calendar bodies, contacts, and task payloads
+    remain under user-directed retention and must stay recoverable.
+slos:
+- id: nextcloud-availability
+  service_id: nextcloud
+  indicator: availability
+  objective_percent: 99.5
+  window_days: 30
+  target_url: https://cloud.lv3.org/status.php
+  probe_module: http_2xx_follow_redirects
+  description: The public Nextcloud status endpoint remains reachable for the canonical
+    personal file and DAV data plane.

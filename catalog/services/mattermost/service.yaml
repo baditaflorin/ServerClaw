@@ -1,0 +1,123 @@
+schema_version: 1.0.0
+service:
+  id: mattermost
+  name: Mattermost
+  description: Private operator and agent collaboration surface for ChatOps workflows.
+  category: communication
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://100.64.0.1:8066
+  exposure: private-only
+  uptime_monitor_name: Mattermost Private
+  health_probe_id: mattermost
+  adr: '0057'
+  runbook: docs/runbooks/configure-mattermost.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/mattermost.yml
+  restart_domain: runtime-general-collaboration
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  tags:
+  - chatops
+  - collaboration
+  - private
+  environments:
+    production:
+      status: active
+      url: http://100.64.0.1:8066
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: false
+  requires_compose_secrets: true
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when Mattermost or its runtime state
+      cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Mattermost
+      converge from git.
+dependency:
+  node:
+    id: mattermost
+    service: mattermost
+    name: Mattermost
+    vm: docker-runtime-lv3
+    tier: 2
+    category: communication
+    adr: '0057'
+  outbound_edges:
+  - from: mattermost
+    to: openbao
+    type: startup_only
+    description: Mattermost starts from OpenBao-rendered runtime secrets mirrored
+      into its compose environment.
+  - from: mattermost
+    to: postgres
+    type: hard
+    description: Mattermost stores channels, users, and message history in Postgres.
+health:
+  service_name: mattermost
+  owning_vm: docker-runtime-lv3
+  role: mattermost_runtime
+  verify_file: roles/mattermost_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: The Mattermost system ping endpoint responds on the local runtime
+      listener.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:8065/api/v4/system/ping
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: command
+    description: The repo-managed Mattermost webhook manifest is rendered after bootstrap.
+    timeout_seconds: 30
+    retries: 1
+    delay_seconds: 0
+    argv:
+    - test
+    - -s
+    - /etc/lv3/mattermost/incoming-webhooks.json
+    success_rc: 0
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Mattermost Private
+      type: http
+      url: http://10.10.10.20:8065/api/v4/system/ping
+      description: Private Mattermost system ping endpoint on docker-runtime-lv3.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 10
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: mattermost-messages
+  service: mattermost
+  name: Mattermost messages and attachments
+  class: confidential
+  retention_days: 730
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: medium
+  locations:
+  - mattermost PostgreSQL database
+  - /opt/mattermost/volumes/app/mattermost
+  notes: ChatOps history supports incident reconstruction and should retain two years
+    of operator discussion.

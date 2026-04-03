@@ -1,0 +1,167 @@
+schema_version: 1.0.0
+service:
+  id: gitea
+  name: Gitea
+  description: Private self-hosted Git service with Keycloak SSO, repo bootstrap automation,
+    and a dedicated Actions runner on docker-build-lv3.
+  category: automation
+  lifecycle_status: active
+  vm: runtime-control-lv3
+  vmid: 192
+  internal_url: http://100.64.0.1:3009
+  subdomain: git.lv3.org
+  exposure: private-only
+  uptime_monitor_name: Gitea Private
+  health_probe_id: gitea
+  secret_catalog_ids:
+  - gitea_admin_password
+  - gitea_database_password
+  - gitea_minio_secret_key
+  - gitea_runner_registration_token
+  - gitea_webhook_secret
+  adr: '0143'
+  runbook: docs/runbooks/configure-gitea.md
+  runtime_pool: runtime-control
+  deployment_surface: playbooks/services/gitea.yml
+  restart_domain: runtime-control-supply-chain
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+  mobility_tier: anchor
+  tags:
+  - git
+  - scm
+  - ci
+  - private
+  environments:
+    production:
+      status: active
+      url: http://100.64.0.1:3009
+      subdomain: git.lv3.org
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: true
+  requires_secrets: true
+  requires_compose_secrets: true
+  keycloak_client_generated: true
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_192
+  standby:
+    kind: cold
+    location: runtime-control-lv3
+    failover_trigger: Restore runtime-control-lv3 when the Gitea runtime or its persistent
+      state cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-control-lv3, then rerun the Gitea
+      converge and runner reconnect workflow.
+dependency:
+  node:
+    id: gitea
+    service: gitea
+    name: Gitea
+    vm: docker-runtime-lv3
+    tier: 2
+    category: automation
+    adr: '0143'
+  outbound_edges:
+  - from: gitea
+    to: docker_build
+    type: soft
+    description: Gitea Actions jobs are delegated to the dedicated runner on docker-build-lv3,
+      but repository hosting remains available without the runner.
+  - from: gitea
+    to: keycloak
+    type: soft
+    description: Operator SSO into Gitea prefers Keycloak, while the repo-managed
+      bootstrap admin remains the break-glass fallback.
+  - from: gitea
+    to: minio
+    type: soft
+    description: Git LFS object reads and writes depend on the shared MinIO bucket,
+      while repository hosting and metadata remain available without new LFS traffic.
+  - from: gitea
+    to: ntfy
+    type: soft
+    description: Validation-gate failures publish critical operator push notifications
+      to ntfy without requiring UI polling.
+  - from: gitea
+    to: openbao
+    type: startup_only
+    description: Gitea loads its mirrored database, webhook, and OIDC client secrets
+      from the OpenBao sidecar before startup.
+  - from: gitea
+    to: postgres
+    type: hard
+    description: Gitea persists repositories, metadata, and issue state in Postgres.
+health:
+  service_name: gitea
+  owning_vm: runtime-control-lv3
+  role: gitea_runtime
+  verify_file: roles/gitea_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: The Gitea health endpoint responds on the local runtime listener.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://10.10.10.92:3003/api/healthz
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: command
+    description: The repo-managed pre-receive hook is installed in the bootstrap repository.
+    timeout_seconds: 30
+    retries: 1
+    delay_seconds: 0
+    argv:
+    - test
+    - -x
+    - /opt/gitea/data/git/repositories/ops/proxmox_florin_server.git/custom_hooks/pre-receive
+    success_rc: 0
+    docker_publication:
+      container_name: gitea
+      required_networks:
+      - gitea_runtime_default
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Gitea Private
+      type: http
+      url: http://10.10.10.92:3003/api/healthz
+      description: Private Gitea health endpoint on runtime-control-lv3.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 10
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: gitea-repositories
+  service: gitea
+  name: Gitea repositories and metadata
+  class: confidential
+  retention_days: 1825
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: medium
+  locations:
+  - Gitea PostgreSQL database
+  - /opt/gitea/data/git/repositories
+  - /opt/gitea/data/gitea
+  notes: Repositories, issues, webhook configuration, and audit metadata are operational
+    records that should remain restorable for multi-year incident and change reconstruction.
+slos:
+- id: gitea-availability
+  service_id: gitea
+  indicator: availability
+  objective_percent: 99.5
+  window_days: 30
+  target_url: http://10.10.10.92:3003/api/healthz
+  probe_module: http_2xx_follow_redirects
+  description: The private Gitea runtime remains reachable for repository hosting,
+    webhooks, and self-hosted CI orchestration.

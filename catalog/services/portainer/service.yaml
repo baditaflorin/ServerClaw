@@ -1,0 +1,104 @@
+schema_version: 1.0.0
+service:
+  id: portainer
+  name: Portainer
+  description: Private read-mostly Docker runtime operations UI and API.
+  category: access
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: https://100.64.0.1:9444
+  exposure: private-only
+  uptime_monitor_name: Portainer Private
+  health_probe_id: portainer
+  image_catalog_ids:
+  - portainer_runtime
+  secret_catalog_ids:
+  - portainer_admin_password
+  adr: '0055'
+  runbook: docs/runbooks/configure-portainer.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/portainer.yml
+  restart_domain: runtime-general-operator-ui
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  tags:
+  - docker
+  - operations
+  - runtime
+  environments:
+    production:
+      status: active
+      url: https://100.64.0.1:9444
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when Portainer or its runtime state
+      cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Portainer
+      converge from git.
+dependency:
+  node:
+    id: portainer
+    service: portainer
+    name: Portainer
+    vm: docker-runtime-lv3
+    tier: 1
+    category: automation
+    adr: '0055'
+  outbound_edges: []
+health:
+  service_name: portainer
+  owning_vm: docker-runtime-lv3
+  role: portainer_runtime
+  verify_file: roles/portainer_runtime/tasks/verify.yml
+  liveness:
+    kind: tcp
+    description: Portainer accepts TLS connections on the private runtime listener.
+    timeout_seconds: 180
+    retries: 1
+    delay_seconds: 0
+    host: 127.0.0.1
+    port: 9443
+  readiness:
+    kind: http
+    description: Portainer returns status from the private API surface.
+    timeout_seconds: 60
+    retries: 1
+    delay_seconds: 0
+    url: https://127.0.0.1:9443/api/status
+    method: GET
+    expected_status:
+    - 200
+    validate_tls: false
+  tls_certificate_ids:
+  - portainer-proxy
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Portainer Private
+      type: http
+      url: https://10.10.10.20:9443/api/status
+      description: Private Portainer status endpoint on docker-runtime-lv3.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 10
+      accepted_statuscodes:
+      - 200-299
+      ignoreTls: true

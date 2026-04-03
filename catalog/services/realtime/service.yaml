@@ -1,0 +1,140 @@
+schema_version: 1.0.0
+service:
+  id: realtime
+  name: Netdata Realtime Metrics
+  description: Authenticated Netdata parent dashboard for live host and guest metrics
+    streamed into monitoring-lv3.
+  category: observability
+  lifecycle_status: active
+  vm: monitoring-lv3
+  vmid: 140
+  internal_url: http://10.10.10.40:19999
+  public_url: https://realtime.lv3.org
+  subdomain: realtime.lv3.org
+  exposure: edge-published
+  health_probe_id: realtime
+  adr: 0196
+  runbook: docs/runbooks/configure-netdata.md
+  runtime_pool: dedicated-monitoring
+  deployment_surface: playbooks/services/realtime.yml
+  restart_domain: dedicated-monitoring-core
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
+  mobility_tier: movable_singleton
+  tags:
+  - metrics
+  - netdata
+  - observability
+  - realtime
+  environments:
+    production:
+      status: active
+      url: https://realtime.lv3.org
+      subdomain: realtime.lv3.org
+completeness:
+  service_type: vm-service
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: false
+  requires_compose_secrets: false
+  dashboard_file: config/grafana/dashboards/slo-overview.json
+  alert_rule_file: config/prometheus/rules/slo_alerts.yml
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 30
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_140
+  standby:
+    kind: cold
+    location: monitoring-lv3
+    failover_trigger: Restore or rebuild monitoring-lv3 when the Netdata parent or
+      its short-retention metric cache cannot be recovered in place.
+    failback_method: Replay the realtime Netdata converge on monitoring-lv3 after
+      the restored guest is healthy.
+dependency:
+  node:
+    id: realtime
+    service: realtime
+    name: Netdata Realtime Metrics
+    vm: monitoring-lv3
+    tier: 1
+    category: observability
+    adr: 0196
+  outbound_edges:
+  - from: realtime
+    to: keycloak
+    type: soft
+    description: Public operator access to realtime.lv3.org depends on the shared
+      Keycloak-backed edge auth path, but the private Netdata parent remains reachable
+      on monitoring-lv3.
+  - from: realtime
+    to: nginx_edge
+    type: soft
+    description: Public operator access to realtime.lv3.org depends on the shared
+      NGINX edge publication while the private Netdata parent remains reachable on
+      the guest network.
+health:
+  service_name: realtime
+  owning_vm: monitoring-lv3
+  role: netdata_runtime
+  verify_file: roles/netdata_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: The Netdata parent info endpoint responds on monitoring-lv3.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:19999/api/v1/info
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The Netdata parent exporter responds with consolidated metrics on
+      monitoring-lv3.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:19999/api/v1/allmetrics?format=prometheus_all_hosts&source=as-collected
+    method: GET
+    expected_status:
+    - 200
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Realtime Metrics Private
+      type: http
+      url: http://10.10.10.40:19999/api/v1/info
+      description: Private Netdata parent healthcheck on monitoring-lv3.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 10
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: netdata-realtime-metrics
+  service: realtime
+  name: Netdata realtime metrics store
+  class: internal
+  retention_days: 1
+  backup_included: false
+  access_role: platform-read
+  pii_risk: low
+  locations:
+  - /var/cache/netdata
+  - https://realtime.lv3.org
+  notes: Netdata stores short-lived host and guest metrics for live operator troubleshooting
+    and anomaly triage; long-term retention remains outside the scope of this service.
+slos:
+- id: realtime-availability
+  service_id: realtime
+  indicator: availability
+  objective_percent: 99.0
+  window_days: 30
+  target_url: http://10.10.10.40:19999/api/v1/info
+  probe_module: http_2xx_follow_redirects
+  description: The Netdata parent remains reachable on monitoring-lv3 for real-time
+    streamed platform metrics.

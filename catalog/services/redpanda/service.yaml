@@ -1,0 +1,181 @@
+schema_version: 1.0.0
+service:
+  id: redpanda
+  name: Redpanda
+  description: Private Kafka-compatible streaming platform for durable, replayable
+    event logs and schema-managed topics.
+  category: data
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: kafka://10.10.10.20:9092
+  exposure: private-only
+  health_probe_id: redpanda
+  image_catalog_ids:
+  - redpanda_runtime
+  secret_catalog_ids:
+  - redpanda_admin_password
+  - redpanda_platform_password
+  adr: 0290
+  adr_file: docs/adr/0290-redpanda-as-the-kafka-compatible-streaming-platform.md
+  runbook: docs/runbooks/configure-redpanda.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/redpanda.yml
+  restart_domain: runtime-general-data-apps
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: anchor
+  tags:
+  - streaming
+  - kafka
+  - redpanda
+  - private
+  notes: The private Kafka listener stays on 9092 while the authenticated Admin API,
+    HTTP Proxy, and Schema Registry listeners use 9644, 8103, and 8104 because docker-runtime-lv3
+    already reserves 8097 for JupyterHub and 8099 for the Temporal UI.
+  environments:
+    production:
+      status: active
+      url: kafka://10.10.10.20:9092
+      notes: Platform callers use the Kafka listener on 9092 while the authenticated
+        Admin API, HTTP Proxy, and Schema Registry listeners remain private on 9644,
+        8103, and 8104.
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  suppressed_checks:
+    api_gateway: '2026-09-23'
+    grafana_dashboard: '2026-09-23'
+    slo_definition: '2026-09-23'
+    alert_rules: '2026-09-23'
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when the Redpanda runtime or its
+      durable log volume cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Redpanda
+      converge from git.
+dependency:
+  node:
+    id: redpanda
+    service: redpanda
+    name: Redpanda
+    vm: docker-runtime-lv3
+    tier: 1
+    category: data
+    adr: 0290
+  outbound_edges:
+  - from: redpanda
+    to: openbao
+    type: startup_only
+    description: Redpanda loads its mirrored admin and platform principal secrets
+      through the OpenBao agent before startup.
+health:
+  service_name: redpanda
+  owning_vm: docker-runtime-lv3
+  role: redpanda_runtime
+  verify_file: roles/redpanda_runtime/tasks/verify.yml
+  startup:
+    kind: command
+    description: Redpanda startup completes once the authenticated Admin API ready
+      endpoint answers with the repo-managed admin principal.
+    timeout_seconds: 180
+    retries: 24
+    delay_seconds: 5
+    argv:
+    - python3
+    - -c
+    - "from pathlib import Path\nimport base64\nimport urllib.request\n\nenv = {}\n\
+      for line in Path('/run/lv3-secrets/redpanda/runtime.env').read_text(encoding='utf-8').splitlines():\n\
+      \    if '=' in line:\n        key, value = line.split('=', 1)\n        env[key]\
+      \ = value\n\ntoken = base64.b64encode(\n    f\"{env['REDPANDA_ADMIN_USER']}:{env['REDPANDA_ADMIN_PASSWORD']}\"\
+      .encode('utf-8')\n).decode('ascii')\nrequest = urllib.request.Request(\n   \
+      \ 'http://127.0.0.1:9644/v1/status/ready',\n    headers={'Authorization': f'Basic\
+      \ {token}'},\n)\nwith urllib.request.urlopen(request, timeout=30) as response:\n\
+      \    raise SystemExit(0 if response.status == 200 else 1)"
+    success_rc: 0
+  liveness:
+    kind: command
+    description: The authenticated Redpanda Admin API ready endpoint answers through
+      the rendered runtime env credentials.
+    timeout_seconds: 120
+    retries: 1
+    delay_seconds: 0
+    argv:
+    - python3
+    - -c
+    - "from pathlib import Path\nimport base64\nimport urllib.request\n\nenv = {}\n\
+      for line in Path('/run/lv3-secrets/redpanda/runtime.env').read_text(encoding='utf-8').splitlines():\n\
+      \    if '=' in line:\n        key, value = line.split('=', 1)\n        env[key]\
+      \ = value\n\ntoken = base64.b64encode(\n    f\"{env['REDPANDA_ADMIN_USER']}:{env['REDPANDA_ADMIN_PASSWORD']}\"\
+      .encode('utf-8')\n).decode('ascii')\nrequest = urllib.request.Request(\n   \
+      \ 'http://127.0.0.1:9644/v1/status/ready',\n    headers={'Authorization': f'Basic\
+      \ {token}'},\n)\nwith urllib.request.urlopen(request, timeout=30) as response:\n\
+      \    raise SystemExit(0 if response.status == 200 else 1)"
+    success_rc: 0
+  readiness:
+    kind: command
+    description: Redpanda accepts a smoke record through the HTTP Proxy and returns
+      the registered smoke schema through the Schema Registry.
+    timeout_seconds: 180
+    retries: 1
+    delay_seconds: 0
+    argv:
+    - python3
+    - -c
+    - "from pathlib import Path\nimport base64\nimport json\nimport time\nimport urllib.request\n\
+      \nenv = {}\nfor line in Path('/run/lv3-secrets/redpanda/runtime.env').read_text(encoding='utf-8').splitlines():\n\
+      \    if '=' in line:\n        key, value = line.split('=', 1)\n        env[key]\
+      \ = value\n\ndef auth(user_key, password_key):\n    return base64.b64encode(\n\
+      \        f\"{env[user_key]}:{env[password_key]}\".encode('utf-8')\n    ).decode('ascii')\n\
+      \nmarker = f\"health-probe-redpanda-{int(time.time())}\"\npayload = json.dumps(\n\
+      \    {\n        'records': [\n            {\n                'value': {\n  \
+      \                  'marker': marker,\n                    'created_at': time.strftime('%Y-%m-%dT%H:%M:%SZ',\
+      \ time.gmtime()),\n                    'producer': 'health-probe',\n       \
+      \         }\n            }\n        ]\n    }\n).encode('utf-8')\nproduce_request\
+      \ = urllib.request.Request(\n    'http://127.0.0.1:8103/topics/platform.redpanda.smoke',\n\
+      \    data=payload,\n    headers={\n        'Authorization': f\"Basic {auth('REDPANDA_PLATFORM_USER',\
+      \ 'REDPANDA_PLATFORM_PASSWORD')}\",\n        'Content-Type': 'application/vnd.kafka.json.v2+json',\n\
+      \        'Accept': 'application/vnd.kafka.v2+json',\n    },\n    method='POST',\n\
+      )\nurllib.request.urlopen(produce_request, timeout=30).read()\n\nrecords_request\
+      \ = urllib.request.Request(\n    'http://127.0.0.1:8103/topics/platform.redpanda.smoke/partitions/0/records?offset=0&timeout=3000&max_bytes=1048576',\n\
+      \    headers={\n        'Authorization': f\"Basic {auth('REDPANDA_PLATFORM_USER',\
+      \ 'REDPANDA_PLATFORM_PASSWORD')}\",\n        'Accept': 'application/vnd.kafka.json.v2+json',\n\
+      \    },\n)\nrecords = json.loads(urllib.request.urlopen(records_request, timeout=30).read().decode('utf-8'))\n\
+      if not any(item.get('value', {}).get('marker') == marker for item in records):\n\
+      \    raise SystemExit(1)\n\nschema_request = urllib.request.Request(\n    'http://127.0.0.1:8104/subjects/platform.redpanda.smoke-value/versions/latest',\n\
+      \    headers={\n        'Authorization': f\"Basic {auth('REDPANDA_PLATFORM_USER',\
+      \ 'REDPANDA_PLATFORM_PASSWORD')}\",\n        'Accept': 'application/vnd.schemaregistry.v1+json',\n\
+      \    },\n)\nschema_payload = json.loads(urllib.request.urlopen(schema_request,\
+      \ timeout=30).read().decode('utf-8'))\nraise SystemExit(0 if schema_payload.get('subject')\
+      \ == 'platform.redpanda.smoke-value' else 1)"
+    success_rc: 0
+  uptime_kuma:
+    enabled: false
+    reason: Redpanda is intentionally private-only and its Admin API, HTTP Proxy,
+      and Schema Registry listeners require credentials, so governed role verification
+      remains the authoritative health signal.
+data:
+- id: redpanda-log-store
+  service: redpanda
+  name: Redpanda durable log store
+  class: confidential
+  retention_days: null
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: high
+  locations:
+  - Docker volume lv3-redpanda-data on docker-runtime-lv3
+  notes: Topic retention remains per-topic and repo-managed; the named Docker volume
+    must be covered by docker-runtime-lv3 backup evidence whenever the Redpanda runtime
+    contract changes.

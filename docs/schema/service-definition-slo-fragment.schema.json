@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/service-definition-slo-fragment.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "slos"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "slos": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}

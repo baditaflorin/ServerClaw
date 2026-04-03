@@ -1,0 +1,162 @@
+schema_version: 1.0.0
+service:
+  id: minio
+  name: MinIO
+  description: Shared S3-compatible object storage runtime for platform buckets, governed
+    bucket policy reconciliation, and browser-based object inspection.
+  category: data
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:9010
+  public_url: https://minio.lv3.org
+  subdomain: minio.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: MinIO Public Health
+  health_probe_id: minio
+  image_catalog_ids:
+  - minio_runtime
+  secret_catalog_ids:
+  - minio_root_password
+  adr: '0274'
+  adr_file: docs/adr/0274-minio-as-the-s3-compatible-object-storage-layer.md
+  runbook: docs/runbooks/minio-object-storage.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/minio.yml
+  restart_domain: runtime-general-data-apps
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: anchor
+  tags:
+  - s3
+  - object-storage
+  - minio
+  - shared
+  environments:
+    production:
+      status: active
+      url: https://minio.lv3.org
+      subdomain: minio.lv3.org
+      notes: The public S3 API remains machine-accessible while the browser console
+        is separately published at minio-console.lv3.org behind the shared edge OIDC
+        gate.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  suppressed_checks:
+    api_gateway: '2026-09-23'
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when the shared MinIO object store
+      or its bucket data cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the MinIO converge
+      from git.
+dependency:
+  node:
+    id: minio
+    service: minio
+    name: MinIO
+    vm: docker-runtime-lv3
+    tier: 1
+    category: data
+    adr: '0274'
+  outbound_edges:
+  - from: minio
+    to: nginx_edge
+    type: soft
+    description: Public API and console reachability depend on the shared NGINX edge
+      publication path, while the private guest-network listeners remain reachable
+      directly.
+  - from: minio
+    to: openbao
+    type: startup_only
+    description: MinIO starts from OpenBao-rendered root credentials mirrored into
+      its compose environment before bucket and policy reconciliation runs.
+health:
+  service_name: minio
+  owning_vm: docker-runtime-lv3
+  role: minio_runtime
+  verify_file: roles/minio_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: MinIO startup completes once the local ready endpoint reports the
+      S3 API is ready to serve requests.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:9010/minio/health/ready
+    method: GET
+    expected_status:
+    - 200
+  liveness:
+    kind: http
+    description: The MinIO live health endpoint responds on the local S3 API listener.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:9010/minio/health/live
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The MinIO ready health endpoint confirms the shared object store
+      is ready for bucket operations.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:9010/minio/health/ready
+    method: GET
+    expected_status:
+    - 200
+  tls_certificate_ids:
+  - minio-edge
+  - minio-console-edge
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: MinIO Public Health
+      type: http
+      url: https://minio.lv3.org/minio/health/live
+      description: Public MinIO S3 API health endpoint published through the shared
+        NGINX edge VM.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 5
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: minio-shared-object-storage
+  service: minio
+  name: Shared object storage buckets and IAM metadata
+  class: confidential
+  retention_days: 365
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: high
+  locations:
+  - /opt/minio/data
+  notes: Repo-managed MinIO stores shared service objects, bucket metadata, and bucket-level
+    lifecycle policy state for Loki, Langfuse exports, Gitea LFS, and RAG staging.
+slos:
+- id: minio-availability
+  service_id: minio
+  indicator: availability
+  objective_percent: 99.5
+  window_days: 30
+  target_url: https://minio.lv3.org/minio/health/live
+  probe_module: http_2xx_follow_redirects
+  description: The shared MinIO S3-compatible object-storage API remains reachable
+    through the public LV3 edge.

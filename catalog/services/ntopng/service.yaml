@@ -1,0 +1,90 @@
+schema_version: 1.0.0
+service:
+  id: ntopng
+  name: ntopng
+  description: Private flow-visibility and traffic-inspection surface for the platform
+    network.
+  category: observability
+  lifecycle_status: active
+  vm: proxmox_florin
+  internal_url: http://100.64.0.1:3001
+  exposure: private-only
+  health_probe_id: ntopng
+  adr: 0059
+  runbook: docs/runbooks/configure-ntopng.md
+  runtime_pool: host-management
+  deployment_surface: playbooks/ntopng.yml
+  restart_domain: host-management-observability
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/host-management
+  mobility_tier: anchor
+  tags:
+  - flows
+  - network
+  - traffic
+  environments:
+    production:
+      status: active
+      url: http://100.64.0.1:3001
+completeness:
+  service_type: vm-service
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: false
+  requires_compose_secrets: false
+  suppression_preset: legacy-service
+redundancy:
+  tier: R0
+  recovery_objective:
+    rto_minutes: 240
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - host_reinstall_runbooks
+  standby:
+    kind: none
+    location: none
+    failover_trigger: No cold or warm standby exists; rebuild the host-local ntopng
+      service after host recovery.
+    failback_method: Reapply the host-local ntopng automation on the rebuilt primary
+      host.
+dependency:
+  node:
+    id: ntopng
+    service: ntopng
+    name: ntopng
+    vm: proxmox_florin
+    tier: 1
+    category: observability
+    adr: 0059
+  outbound_edges: []
+health:
+  service_name: ntopng
+  owning_vm: proxmox_florin
+  role: proxmox_ntopng
+  verify_file: roles/proxmox_ntopng/tasks/verify.yml
+  liveness:
+    kind: http
+    description: The local ntopng HTTP endpoint responds on the Proxmox host.
+    timeout_seconds: 60
+    retries: 20
+    delay_seconds: 3
+    url: http://127.0.0.1:3000/
+    method: GET
+    expected_status:
+    - 200
+    - 302
+  readiness:
+    kind: http
+    description: ntopng exposes the managed interface inventory over its authenticated
+      API.
+    timeout_seconds: 60
+    retries: 20
+    delay_seconds: 3
+    url: http://127.0.0.1:3000/lua/rest/v2/get/ntopng/interfaces.lua
+    method: GET
+    expected_status:
+    - 200
+  uptime_kuma:
+    enabled: false
+    reason: The useful ntopng readiness signal requires authenticated API access and
+      host-local traffic generation.

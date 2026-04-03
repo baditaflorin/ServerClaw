@@ -1,0 +1,116 @@
+schema_version: 1.0.0
+service:
+  id: status_page
+  name: Public Status Page
+  description: Public-facing platform status page backed by Uptime Kuma and independently
+    checked by Uptime Robot.
+  category: observability
+  lifecycle_status: active
+  vm: runtime-general-lv3
+  vmid: 191
+  internal_url: http://10.10.10.91:3001/status/lv3-platform
+  public_url: https://status.lv3.org
+  subdomain: status.lv3.org
+  exposure: edge-published
+  health_probe_id: status_page
+  adr: 0109
+  runbook: docs/runbooks/public-status-page.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/uptime-kuma.yml
+  restart_domain: runtime-general-observability
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: elastic_stateless
+  tags:
+  - status
+  - uptime
+  - public
+  environments:
+    production:
+      status: active
+      url: https://status.lv3.org
+      subdomain: status.lv3.org
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: false
+  requires_compose_secrets: true
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_191
+  standby:
+    kind: cold
+    location: runtime-general-lv3
+    failover_trigger: Restore runtime-general-lv3 when the status page runtime cannot
+      be recovered in place.
+    failback_method: Restore or rebuild runtime-general-lv3, then rerun the status-page
+      converge from git.
+dependency:
+  node:
+    id: status_page
+    service: status_page
+    name: Public Status Page
+    vm: docker-runtime-lv3
+    tier: 2
+    category: observability
+    adr: 0109
+  outbound_edges:
+  - from: status_page
+    to: nginx_edge
+    type: hard
+    description: The public status page is published at status.lv3.org through the
+      shared NGINX edge hostname.
+  - from: status_page
+    to: uptime_kuma
+    type: hard
+    description: The public status page is rendered by the Uptime Kuma runtime and
+      cannot function if that service is unavailable.
+health:
+  service_name: status-page
+  owning_vm: runtime-general-lv3
+  role: null
+  verify_file: null
+  liveness:
+    kind: http
+    description: The Uptime Kuma status page slug responds on the local runtime listener.
+    timeout_seconds: 30
+    retries: 1
+    delay_seconds: 0
+    url: http://127.0.0.1:3001/status/lv3-platform
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The public status page route responds through the shared edge host
+      header.
+    timeout_seconds: 30
+    retries: 1
+    delay_seconds: 0
+    url: https://127.0.0.1/
+    method: GET
+    expected_status:
+    - 200
+    headers:
+      Host: status.lv3.org
+    validate_tls: false
+  uptime_kuma:
+    enabled: false
+    reason: The status page should not recursively monitor itself from the same Uptime
+      Kuma instance; independent coverage is delegated to Uptime Robot.
+slos:
+- id: status-page-availability
+  service_id: status_page
+  indicator: availability
+  objective_percent: 99.9
+  window_days: 30
+  target_url: https://status.lv3.org
+  probe_module: http_2xx_follow_redirects
+  description: The public status page remains externally reachable as the last-resort
+    platform signal.

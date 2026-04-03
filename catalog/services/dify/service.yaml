@@ -1,0 +1,178 @@
+schema_version: 1.0.0
+service:
+  id: dify
+  name: Dify
+  description: Visual LLM workflow and agent canvas with governed LV3 tool sync and
+    trace export support.
+  category: automation
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:8094
+  public_url: https://agents.lv3.org
+  subdomain: agents.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: Dify Public
+  health_probe_id: dify
+  secret_catalog_ids:
+  - dify_database_password
+  - dify_init_password
+  - dify_admin_password
+  - dify_secret_key
+  - dify_redis_password
+  - dify_qdrant_api_key
+  - dify_sandbox_api_key
+  - dify_plugin_daemon_key
+  - dify_plugin_inner_api_key
+  - dify_tools_api_key
+  image_catalog_ids:
+  - dify_api_runtime
+  - dify_web_runtime
+  - dify_redis_runtime
+  - dify_qdrant_runtime
+  - dify_sandbox_runtime
+  - dify_plugin_daemon_runtime
+  - dify_nginx_runtime
+  - dify_ssrf_proxy_runtime
+  adr: 0197
+  runbook: docs/runbooks/configure-dify.md
+  runtime_pool: runtime-ai
+  deployment_surface: playbooks/services/dify.yml
+  restart_domain: runtime-ai-inference
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+  mobility_tier: movable_singleton
+  tags:
+  - agents
+  - llm
+  - workflow
+  - canvas
+  - edge-authenticated
+  environments:
+    production:
+      status: active
+      url: https://agents.lv3.org
+      subdomain: agents.lv3.org
+      notes: Branch-local rollout uses a Dify-local Qdrant sidecar until ADR 0198
+        lands on main.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: true
+  requires_secrets: true
+  requires_compose_secrets: true
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when Dify or its runtime state cannot
+      be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Dify converge
+      from git.
+dependency:
+  node:
+    id: dify
+    service: dify
+    name: Dify
+    vm: docker-runtime-lv3
+    tier: 2
+    category: automation
+    adr: 0197
+  outbound_edges:
+  - from: dify
+    to: api_gateway
+    type: soft
+    description: Dify uses the governed API gateway route to call named LV3 tools,
+      but the canvas remains reachable without tool invocation.
+  - from: dify
+    to: keycloak
+    type: soft
+    description: Operator browser access to Dify is gated behind the shared oauth2-proxy
+      and Keycloak authentication flow at the edge.
+  - from: dify
+    to: langfuse
+    type: soft
+    description: Dify can publish workflow traces into Langfuse, but authoring and
+      bootstrap access remain available without trace export.
+  - from: dify
+    to: nginx_edge
+    type: soft
+    description: Public reachability for agents.lv3.org depends on the shared NGINX
+      edge publication path.
+  - from: dify
+    to: ollama
+    type: soft
+    description: Dify can use the private Ollama runtime for local model inference,
+      but the canvas can still operate with external model providers.
+  - from: dify
+    to: openbao
+    type: startup_only
+    description: Dify loads its mirrored database, admin, and tool-bridge secrets
+      through the OpenBao agent before startup.
+  - from: dify
+    to: postgres
+    type: hard
+    description: Dify stores application state, accounts, knowledge metadata, and
+      workflow definitions in Postgres.
+health:
+  service_name: dify
+  owning_vm: docker-runtime-lv3
+  role: dify_runtime
+  verify_file: roles/dify_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: Dify startup completes once the setup-status endpoint responds on
+      the private listener.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://10.10.10.20:8094/console/api/setup
+    method: GET
+    expected_status:
+    - 200
+  liveness:
+    kind: http
+    description: The Dify edge health endpoint responds on the docker-runtime listener.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://10.10.10.20:8094/healthz
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The Dify setup-status endpoint responds and reports the bootstrap
+      step state.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://10.10.10.20:8094/console/api/setup
+    method: GET
+    expected_status:
+    - 200
+    docker_publication:
+      container_name: dify-nginx
+      required_networks:
+      - dify_default
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Dify Public
+      type: http
+      url: https://agents.lv3.org/healthz
+      description: Dify publication through the shared NGINX edge and oauth2-proxy
+        gate.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 10
+      accepted_statuscodes:
+      - 200-299

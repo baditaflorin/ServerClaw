@@ -1,0 +1,138 @@
+schema_version: 1.0.0
+service:
+  id: semaphore
+  name: Semaphore
+  description: Private Semaphore UI and API for bounded Ansible job execution.
+  category: automation
+  lifecycle_status: active
+  vm: runtime-control-lv3
+  vmid: 192
+  internal_url: http://100.118.189.95:8020
+  exposure: private-only
+  uptime_monitor_name: Semaphore Private
+  health_probe_id: semaphore
+  image_catalog_ids:
+  - semaphore_runtime
+  secret_catalog_ids:
+  - semaphore_database_password
+  - semaphore_admin_password
+  - semaphore_api_token
+  adr: 0149
+  runbook: docs/runbooks/configure-semaphore.md
+  runtime_pool: runtime-control
+  deployment_surface: playbooks/services/semaphore.yml
+  restart_domain: runtime-control-automation
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+  mobility_tier: anchor
+  tags:
+  - ansible
+  - automation
+  - jobs
+  environments:
+    production:
+      status: active
+      url: http://100.118.189.95:8020
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_192
+  standby:
+    kind: cold
+    location: runtime-control-lv3
+    failover_trigger: Restore runtime-control-lv3 when Semaphore or its runtime state
+      cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-control-lv3, then rerun the Semaphore
+      converge from git.
+dependency:
+  node:
+    id: semaphore
+    service: semaphore
+    name: Semaphore
+    vm: docker-runtime-lv3
+    tier: 2
+    category: automation
+    adr: 0149
+  outbound_edges:
+  - from: semaphore
+    to: openbao
+    type: startup_only
+    description: Semaphore loads database and bootstrap secrets from the OpenBao agent
+      before the container starts.
+  - from: semaphore
+    to: postgres
+    type: hard
+    description: Semaphore persists project metadata, inventories, templates, and
+      task history in Postgres.
+health:
+  service_name: semaphore
+  owning_vm: runtime-control-lv3
+  role: semaphore_runtime
+  verify_file: roles/semaphore_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: Semaphore returns the unauthenticated ping response on the local
+      runtime listener.
+    timeout_seconds: 60
+    retries: 18
+    delay_seconds: 5
+    url: http://127.0.0.1:3004/api/ping
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: Semaphore keeps the local ping endpoint reachable after project bootstrap.
+    timeout_seconds: 60
+    retries: 1
+    delay_seconds: 0
+    url: http://127.0.0.1:3004/api/ping
+    method: GET
+    expected_status:
+    - 200
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Semaphore Private
+      type: http
+      url: http://10.10.10.92:3004/api/ping
+      description: Private Semaphore ping endpoint on runtime-control-lv3.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 10
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: semaphore-task-history
+  service: semaphore
+  name: Semaphore task history
+  class: internal
+  retention_days: 90
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: medium
+  locations:
+  - Semaphore PostgreSQL data
+  - /opt/semaphore/data
+  notes: Task output can contain operator context, playbook names, and limited execution
+    logs, so it should stay private and be retained long enough for incident review.
+slos:
+- id: semaphore-availability
+  service_id: semaphore
+  indicator: availability
+  objective_percent: 99.5
+  window_days: 30
+  target_url: http://10.10.10.92:3004/api/ping
+  probe_module: http_2xx_follow_redirects
+  description: Semaphore stays reachable for private Ansible job launches and API-based
+    task inspection.

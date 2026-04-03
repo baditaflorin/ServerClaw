@@ -1,0 +1,102 @@
+schema_version: 1.0.0
+service:
+  id: alertmanager
+  name: Alertmanager
+  description: Severity-based alert routing, grouping, and silencing service for the
+    monitoring stack.
+  category: observability
+  lifecycle_status: active
+  vm: monitoring-lv3
+  vmid: 140
+  internal_url: http://10.10.10.40:9093
+  exposure: private-only
+  health_probe_id: alertmanager
+  adr: 0097
+  runbook: docs/runbooks/monitoring-stack.md
+  runtime_pool: dedicated-monitoring
+  deployment_surface: playbooks/monitoring-stack.yml
+  restart_domain: dedicated-monitoring-core
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
+  mobility_tier: anchor
+  tags:
+  - alerts
+  - routing
+  - monitoring
+  environments:
+    production:
+      status: active
+      url: http://10.10.10.40:9093
+completeness:
+  service_type: vm-service
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: false
+  requires_compose_secrets: false
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 30
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_140
+  standby:
+    kind: cold
+    location: monitoring-lv3
+    failover_trigger: Restore or rebuild monitoring-lv3 when Alertmanager or the guest
+      cannot be recovered in place.
+    failback_method: Replay the monitoring stack converge on monitoring-lv3 after
+      the restored guest is healthy.
+dependency:
+  node:
+    id: alertmanager
+    service: alertmanager
+    name: Alertmanager
+    vm: monitoring-lv3
+    tier: 1
+    category: observability
+    adr: 0097
+  outbound_edges:
+  - from: alertmanager
+    to: mattermost
+    type: soft
+    description: Alertmanager forwards warning, info, and mirrored critical notifications
+      into Mattermost channels, but operators can still inspect active alerts directly
+      if chat delivery is degraded.
+  - from: alertmanager
+    to: ntfy
+    type: soft
+    description: Critical Alertmanager notifications publish into the governed ntfy
+      topic registry for operator push delivery, while Mattermost still provides the
+      team-visible fallback channel.
+health:
+  service_name: alertmanager
+  owning_vm: monitoring-lv3
+  role: alertmanager_runtime
+  verify_file: roles/alertmanager_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: Alertmanager responds on its local health endpoint.
+    timeout_seconds: 60
+    retries: 20
+    delay_seconds: 3
+    url: http://127.0.0.1:9093/-/healthy
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: Alertmanager responds on its local readiness endpoint after routing
+      config loads.
+    timeout_seconds: 60
+    retries: 20
+    delay_seconds: 3
+    url: http://127.0.0.1:9093/-/ready
+    method: GET
+    expected_status:
+    - 200
+  uptime_kuma:
+    enabled: false
+    reason: Alertmanager is private-only and its operator value is already covered
+      by role verification on monitoring-lv3.

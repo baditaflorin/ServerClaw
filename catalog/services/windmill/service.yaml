@@ -1,0 +1,154 @@
+schema_version: 1.0.0
+service:
+  id: windmill
+  name: Windmill
+  description: Operator and agent workflow runtime exposed privately on the management
+    tailnet.
+  category: automation
+  lifecycle_status: active
+  vm: runtime-control-lv3
+  vmid: 192
+  internal_url: http://100.64.0.1:8005
+  exposure: private-only
+  uptime_monitor_name: Windmill Private
+  health_probe_id: windmill
+  image_catalog_ids:
+  - windmill_extra_runtime
+  - windmill_runtime
+  secret_catalog_ids:
+  - windmill_database_password
+  - windmill_superadmin_secret
+  adr: '0044'
+  runbook: docs/runbooks/configure-windmill.md
+  runtime_pool: runtime-control
+  deployment_surface: playbooks/services/windmill.yml
+  restart_domain: runtime-control-automation
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+  mobility_tier: anchor
+  degradation_modes:
+  - dependency: postgres
+    dependency_type: hard
+    degraded_behaviour: Windmill cannot accept or persist workflow state without PostgreSQL.
+      Requests fail until database connectivity returns.
+    degraded_for_seconds_max: 0
+    recovery_signal: Windmill database connection succeeds again
+    tested_by: fault:postgres-unavailable
+  tags:
+  - workflow
+  - automation
+  - jobs
+  environments:
+    production:
+      status: active
+      url: http://100.64.0.1:8005
+      stage_ready: true
+      smoke_suite_ids:
+      - production-windmill-primary-path
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_192
+  standby:
+    kind: cold
+    location: runtime-control-lv3
+    failover_trigger: Restore runtime-control-lv3 when Windmill or its runtime state
+      cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-control-lv3, then rerun the Windmill
+      converge from git.
+dependency:
+  node:
+    id: windmill
+    service: windmill
+    name: Windmill
+    vm: docker-runtime-lv3
+    tier: 2
+    category: automation
+    adr: '0044'
+  outbound_edges:
+  - from: windmill
+    to: ntfy
+    type: soft
+    description: The repo-seeded Windmill resource and NATS bridge publish high-priority
+      operator push notifications through ntfy.
+  - from: windmill
+    to: openbao
+    type: startup_only
+    description: Windmill workers and the server runtime load mirrored secrets from
+      the OpenBao agent before the containers start.
+  - from: windmill
+    to: postgres
+    type: hard
+    description: Windmill persists workflow metadata, run history, and state in Postgres.
+health:
+  service_name: windmill
+  owning_vm: runtime-control-lv3
+  role: windmill_runtime
+  verify_file: roles/windmill_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: The Windmill API version endpoint responds on the local listener.
+    timeout_seconds: 90
+    retries: 18
+    delay_seconds: 5
+    url: http://127.0.0.1:8000/api/version
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The Windmill API version endpoint remains reachable after workspace
+      bootstrap.
+    timeout_seconds: 90
+    retries: 1
+    delay_seconds: 0
+    url: http://127.0.0.1:8000/api/version
+    method: GET
+    expected_status:
+    - 200
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Windmill Private
+      type: http
+      url: http://10.10.10.92:8000/api/version
+      description: Private Windmill API version endpoint on runtime-control-lv3.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 10
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: windmill-run-history
+  service: windmill
+  name: Windmill job history
+  class: internal
+  retention_days: 60
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: medium
+  locations:
+  - Windmill PostgreSQL data
+  - Windmill workspace logs
+  notes: Workflow logs can contain operator context and transient execution metadata
+    but do not need indefinite retention.
+slos:
+- id: windmill-availability
+  service_id: windmill
+  indicator: availability
+  objective_percent: 99.5
+  window_days: 30
+  target_url: http://10.10.10.92:8000/api/version
+  probe_module: http_2xx_follow_redirects
+  description: Windmill API stays reachable for scheduled automation.

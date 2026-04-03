@@ -1,0 +1,103 @@
+schema_version: 1.0.0
+service:
+  id: backup_pbs
+  name: Proxmox Backup Server
+  description: Backup datastore and snapshot retention service for the Proxmox estate.
+  category: data
+  lifecycle_status: active
+  vm: backup-lv3
+  vmid: 160
+  internal_url: https://10.10.10.60:8007
+  exposure: private-only
+  uptime_monitor_name: Backup PBS Port
+  health_probe_id: backup_pbs
+  secret_catalog_ids:
+  - backup_vm_api_token_payload
+  adr: 0029
+  runbook: docs/runbooks/configure-backup-vm.md
+  runtime_pool: dedicated-backup
+  deployment_surface: playbooks/services/backup-vm.yml
+  restart_domain: dedicated-backup-core
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-backup
+  mobility_tier: anchor
+  tags:
+  - backup
+  - pbs
+  - snapshots
+  environments:
+    production:
+      status: active
+      url: https://10.10.10.60:8007
+completeness:
+  service_type: vm-service
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: false
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 240
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - proxmox_offsite_vm_160
+  standby:
+    kind: cold
+    location: backup-lv3
+    failover_trigger: Restore backup-lv3 from the off-site Proxmox copy when the local
+      PBS VM or datastore is lost or corrupted.
+    failback_method: Bring backup-lv3 back from the off-site copy, confirm the datastore,
+      then resume scheduled Proxmox backups.
+dependency:
+  node:
+    id: backup_pbs
+    service: backup_pbs
+    name: Proxmox Backup Server
+    vm: backup-lv3
+    tier: 1
+    category: data
+    adr: 0029
+  outbound_edges: []
+health:
+  service_name: backup-pbs
+  owning_vm: backup-lv3
+  role: backup_vm
+  verify_file: roles/backup_vm/tasks/verify.yml
+  liveness:
+    kind: tcp
+    description: The PBS proxy port is reachable on the backup guest.
+    timeout_seconds: 60
+    retries: 1
+    delay_seconds: 0
+    host: 127.0.0.1
+    port: 8007
+  readiness:
+    kind: command
+    description: The managed PBS datastore is readable through the local CLI.
+    timeout_seconds: 60
+    retries: 1
+    delay_seconds: 0
+    argv:
+    - proxmox-backup-manager
+    - datastore
+    - list
+    - --output-format
+    - json
+    success_rc: 0
+  tls_certificate_ids:
+  - backup-pbs-ui
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Backup PBS Port
+      type: port
+      hostname: 10.10.10.60
+      port: 8007
+      description: Private PBS listener on backup-lv3.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      accepted_statuscodes:
+      - 200-299

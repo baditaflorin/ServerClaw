@@ -1,0 +1,195 @@
+schema_version: 1.0.0
+service:
+  id: matrix_synapse
+  name: Matrix Synapse
+  description: Repo-managed Matrix Synapse runtime with Discord and WhatsApp mautrix
+    bridges that serves as the canonical ServerClaw conversation hub.
+  category: communication
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:8008
+  public_url: https://matrix.lv3.org
+  subdomain: matrix.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: Matrix Synapse Public
+  health_probe_id: matrix_synapse
+  image_catalog_ids:
+  - matrix_synapse_runtime
+  - matrix_mautrix_discord_runtime
+  - matrix_mautrix_whatsapp_runtime
+  secret_catalog_ids:
+  - matrix_synapse_database_password
+  - matrix_synapse_ops_password
+  - matrix_synapse_registration_shared_secret
+  - matrix_synapse_signing_key
+  - matrix_synapse_mautrix_discord_database_password
+  - matrix_synapse_mautrix_discord_as_token
+  - matrix_synapse_mautrix_discord_hs_token
+  - matrix_synapse_mautrix_discord_provisioning_shared_secret
+  - matrix_synapse_mautrix_discord_avatar_proxy_key
+  - matrix_synapse_mautrix_whatsapp_database_password
+  - matrix_synapse_mautrix_whatsapp_as_token
+  - matrix_synapse_mautrix_whatsapp_hs_token
+  - matrix_synapse_mautrix_whatsapp_provisioning_shared_secret
+  - matrix_synapse_mautrix_whatsapp_public_media_signing_key
+  - matrix_synapse_mautrix_whatsapp_encryption_pickle_key
+  adr: '0255'
+  runbook: docs/runbooks/configure-matrix-synapse.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/matrix-synapse.yml
+  restart_domain: runtime-general-collaboration
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  dashboard_url: https://grafana.lv3.org/d/lv3-matrix-synapse/lv3-matrix-synapse
+  tags:
+  - matrix
+  - synapse
+  - serverclaw
+  - conversation
+  - bridge
+  - discord
+  - whatsapp
+  environments:
+    production:
+      status: active
+      url: https://matrix.lv3.org
+      subdomain: matrix.lv3.org
+      notes: The public Matrix client API is edge-published while authentication stays
+        inside Synapse, federation remains disabled for ADR 0255, and ADR 0256 manages
+        Discord plus WhatsApp bridge bots through application-service registrations
+        and bridge-management-room smoke verification.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  dashboard_file: config/grafana/dashboards/matrix-synapse.json
+  alert_rule_file: config/alertmanager/rules/matrix-synapse.yml
+  suppressed_checks: {}
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when Matrix Synapse or its runtime
+      state cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Matrix
+      Synapse converge from git.
+dependency:
+  node:
+    id: matrix_synapse
+    service: matrix_synapse
+    name: Matrix Synapse
+    vm: docker-runtime-lv3
+    tier: 2
+    category: communication
+    adr: '0255'
+  outbound_edges:
+  - from: matrix_synapse
+    to: nginx_edge
+    type: soft
+    description: Public reachability for matrix.lv3.org depends on the shared edge
+      publication path.
+  - from: matrix_synapse
+    to: openbao
+    type: startup_only
+    description: Matrix Synapse starts from mirrored database credentials rendered
+      through the shared OpenBao compose environment helper.
+  - from: matrix_synapse
+    to: postgres
+    type: hard
+    description: Matrix Synapse stores users, room metadata, media references, and
+      event history in Postgres.
+health:
+  service_name: matrix-synapse
+  owning_vm: docker-runtime-lv3
+  role: matrix_synapse_runtime
+  verify_file: roles/matrix_synapse_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: Matrix Synapse startup completes once the local client versions endpoint
+      responds after config rendering and database bootstrap.
+    timeout_seconds: 180
+    retries: 36
+    delay_seconds: 5
+    url: http://127.0.0.1:8008/_matrix/client/versions
+    method: GET
+    expected_status:
+    - 200
+  liveness:
+    kind: http
+    description: The Matrix Synapse local health endpoint responds on the managed
+      runtime listener.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:8008/health
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The Matrix Synapse client versions endpoint answers on the local
+      listener after bootstrap and admin seeding.
+    timeout_seconds: 180
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:8008/_matrix/client/versions
+    method: GET
+    expected_status:
+    - 200
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Matrix Synapse Public
+      type: http
+      url: https://matrix.lv3.org/_matrix/client/versions
+      description: Public Matrix Synapse client versions endpoint on matrix.lv3.org.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 5
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: matrix-synapse-event-store
+  service: matrix_synapse
+  name: Matrix Synapse events and room state
+  class: confidential
+  retention_days: 730
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: high
+  locations:
+  - Matrix Synapse PostgreSQL database
+  notes: Conversation history, room membership, and server-to-user metadata are retained
+    for two years for assistant auditability and recovery.
+- id: matrix-synapse-media-store
+  service: matrix_synapse
+  name: Matrix Synapse media store
+  class: confidential
+  retention_days: 365
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: high
+  locations:
+  - /opt/matrix-synapse/data/media_store
+  notes: Uploaded Matrix media is retained for one year unless a stricter room- or
+    user-level policy is introduced later.
+slos:
+- id: matrix-synapse-availability
+  service_id: matrix_synapse
+  indicator: availability
+  objective_percent: 99.5
+  window_days: 30
+  target_url: https://matrix.lv3.org/_matrix/client/versions
+  probe_module: http_2xx_follow_redirects
+  description: Matrix Synapse remains reachable on the public client versions endpoint.

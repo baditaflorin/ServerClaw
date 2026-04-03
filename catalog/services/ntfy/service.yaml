@@ -1,0 +1,127 @@
+schema_version: 1.0.0
+service:
+  id: ntfy
+  name: ntfy
+  description: Repo-governed self-hosted push notification channel published at ntfy.lv3.org
+    for operator-targeted automation alerts.
+  category: communication
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:2586
+  public_url: https://ntfy.lv3.org
+  subdomain: ntfy.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: ntfy Public
+  health_probe_id: ntfy
+  image_catalog_ids:
+  - ntfy_runtime
+  secret_catalog_ids:
+  - ntfy_alertmanager_password
+  - ntfy_ansible_password
+  - ntfy_ansible_token
+  - ntfy_changedetection_password
+  - ntfy_gitea_actions_password
+  - ntfy_gitea_actions_token
+  - ntfy_ops_password
+  - ntfy_windmill_password
+  - ntfy_windmill_token
+  adr: 0299
+  runbook: docs/runbooks/configure-ntfy.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/ntfy.yml
+  restart_domain: runtime-general-communications
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  tags:
+  - notifications
+  - push
+  - automation
+  - public
+  environments:
+    production:
+      status: active
+      url: https://ntfy.lv3.org
+      subdomain: ntfy.lv3.org
+      notes: The public edge publishes ntfy.lv3.org while the repo-managed topic registry,
+        auth users, and token contracts continue to govern publisher access.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: false
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when the ntfy runtime or its published
+      edge contract cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the repo-managed
+      ntfy converge from git.
+dependency:
+  node:
+    id: ntfy
+    service: ntfy
+    name: ntfy
+    vm: docker-runtime-lv3
+    tier: 2
+    category: communication
+    adr: 0299
+  outbound_edges:
+  - from: ntfy
+    to: docker_runtime
+    type: hard
+    description: The ntfy runtime, topic registry, and auth state are hosted on docker-runtime-lv3.
+  - from: ntfy
+    to: nginx_edge
+    type: soft
+    description: Public operator access to ntfy.lv3.org depends on the shared NGINX
+      edge publication path, while the private runtime remains directly verifiable.
+health:
+  service_name: ntfy
+  owning_vm: docker-runtime-lv3
+  role: ntfy_runtime
+  verify_file: roles/ntfy_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: The ntfy health endpoint responds on docker-runtime-lv3.
+    timeout_seconds: 60
+    retries: 20
+    delay_seconds: 3
+    url: http://127.0.0.1:2586/v1/health
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The ntfy health endpoint remains reachable after governed auth and
+      topic configuration load.
+    timeout_seconds: 60
+    retries: 20
+    delay_seconds: 3
+    url: http://127.0.0.1:2586/v1/health
+    method: GET
+    expected_status:
+    - 200
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: ntfy Public
+      type: http
+      url: https://ntfy.lv3.org/v1/health
+      description: Published ntfy health endpoint through the shared NGINX edge.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 5
+      accepted_statuscodes:
+      - 200-299

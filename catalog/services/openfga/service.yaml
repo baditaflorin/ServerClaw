@@ -1,0 +1,166 @@
+schema_version: 1.0.0
+service:
+  id: openfga
+  name: OpenFGA
+  description: Private delegated authorization graph for ServerClaw workspace, assistant,
+    skill, connector, and data-scope capability checks.
+  category: access
+  lifecycle_status: active
+  vm: runtime-control-lv3
+  vmid: 192
+  internal_url: http://10.10.10.92:8098
+  exposure: private-only
+  health_probe_id: openfga
+  image_catalog_ids:
+  - openfga_runtime
+  secret_catalog_ids:
+  - openfga_database_password
+  - openfga_preshared_key
+  - keycloak_serverclaw_runtime_client_secret
+  adr: '0262'
+  runbook: docs/runbooks/configure-openfga.md
+  runtime_pool: runtime-control
+  deployment_surface: playbooks/services/openfga.yml
+  restart_domain: runtime-control-identity
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+  mobility_tier: anchor
+  dashboard_url: https://grafana.lv3.org/d/lv3-openfga/lv3-openfga
+  tags:
+  - authorization
+  - delegation
+  - private
+  - serverclaw
+  environments:
+    production:
+      status: active
+      url: http://10.10.10.92:8098
+      notes: The guest-reachable runtime now lives on runtime-control-lv3 for SLO
+        probes and delegated-auth validation. Controller-local bootstrap and bearer-key
+        verification continue to use the Proxmox host Tailscale proxy at http://100.64.0.1:8014.
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  dashboard_file: config/grafana/dashboards/openfga.json
+  alert_rule_file: config/alertmanager/rules/openfga.yml
+  suppressed_checks: {}
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_192
+  standby:
+    kind: cold
+    location: runtime-control-lv3
+    failover_trigger: Restore runtime-control-lv3 when OpenFGA, its private host proxy
+      contract, or its delegated authorization runtime state cannot be recovered in
+      place.
+    failback_method: Restore or rebuild runtime-control-lv3, rerun the OpenFGA converge
+      and API gateway converge from git, and replay the repo-managed delegated authorization
+      bootstrap verification.
+dependency:
+  node:
+    id: openfga
+    service: openfga
+    name: OpenFGA
+    vm: docker-runtime-lv3
+    tier: 2
+    category: access
+    adr: '0262'
+  outbound_edges:
+  - from: openfga
+    to: keycloak
+    type: soft
+    description: The repo-managed bootstrap verification path checks Keycloak-issued
+      operator and runtime identities alongside the delegated authorization graph.
+  - from: openfga
+    to: openbao
+    type: startup_only
+    description: OpenFGA reads its mirrored datastore password and preshared API key
+      from the OpenBao-backed runtime secret path before startup.
+  - from: openfga
+    to: postgres
+    type: hard
+    description: OpenFGA stores authorization stores, models, and relationship tuples
+      in PostgreSQL.
+health:
+  service_name: openfga
+  owning_vm: runtime-control-lv3
+  role: openfga_runtime
+  verify_file: roles/openfga_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: OpenFGA startup completes once the local health endpoint returns
+      200 on the runtime listener.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:8098/healthz
+    method: GET
+    expected_status:
+    - 200
+  liveness:
+    kind: http
+    description: OpenFGA keeps serving the local health endpoint on runtime-control-lv3.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:8098/healthz
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: OpenFGA accepts requests on the local runtime health endpoint after
+      the datastore and bootstrap contract are ready.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:8098/healthz
+    method: GET
+    expected_status:
+    - 200
+  uptime_kuma:
+    enabled: false
+    reason: The private authenticated OpenFGA contract is verified directly by the
+      repo-managed bootstrap and bearer-auth checks instead of an unauthenticated
+      Uptime Kuma monitor.
+data:
+- id: openfga-authorization-graph
+  service: openfga
+  name: OpenFGA authorization graph
+  class: confidential
+  retention_days: null
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: medium
+  locations:
+  - PostgreSQL openfga database on postgres-lv3
+  - serverclaw-authz store, authorization models, and tuples
+  notes: The delegated authorization graph persists named operator and service-principal
+    relationships until the repo-managed bootstrap contract removes or replaces them.
+slos:
+- id: openfga-availability
+  service_id: openfga
+  indicator: availability
+  objective_percent: 99.5
+  window_days: 30
+  target_url: http://10.10.10.92:8098/healthz
+  probe_module: http_2xx_follow_redirects
+  description: The private OpenFGA runtime remains reachable on runtime-control-lv3
+    for delegated authorization queries from the platform guest network.
+- id: openfga-latency
+  service_id: openfga
+  indicator: latency
+  objective_percent: 95.0
+  window_days: 30
+  target_url: http://10.10.10.92:8098/healthz
+  probe_module: http_2xx_follow_redirects
+  latency_threshold_ms: 500
+  description: The private OpenFGA runtime responds in under 500ms for 95% of guest-network
+    probes.

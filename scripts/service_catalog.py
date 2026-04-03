@@ -40,6 +40,7 @@ except ModuleNotFoundError as exc:  # pragma: no cover - runtime guard
 SERVICE_CATALOG_PATH: Final = repo_path("config", "service-capability-catalog.json")
 SERVICE_CATALOG_SCHEMA_PATH: Final = repo_path("docs", "schema", "service-capability-catalog.schema.json")
 ADR_DIR: Final = repo_path("docs", "adr")
+SERVICE_BUNDLE_ROOT: Final = repo_path("catalog", "services")
 STACK_PATH: Final = repo_path("versions", "stack.yaml")
 WORKSTREAMS_PATH: Final = repo_path("workstreams.yaml")
 UPTIME_MONITORS_PATH: Final = repo_path("config", "uptime-kuma", "monitors.json")
@@ -523,6 +524,9 @@ def show_service(catalog: dict[str, Any], service_id: str) -> int:
                 print(f"  - {secret_id}")
         if "runbook" in service:
             print(f"Runbook: {service['runbook']}")
+        bundle_path = SERVICE_BUNDLE_ROOT / service["id"] / "service.yaml"
+        if bundle_path.exists():
+            print(f"Source bundle: {bundle_path.relative_to(repo_path())}")
         if "dashboard_url" in service:
             print(f"Dashboard: {service['dashboard_url']}")
         if "adr" in service:

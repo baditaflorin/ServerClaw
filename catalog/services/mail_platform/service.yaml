@@ -1,0 +1,128 @@
+schema_version: 1.0.0
+service:
+  id: mail_platform
+  name: Mail Platform
+  description: Managed SMTP, IMAP, and delivery automation surface for platform notifications.
+  category: communication
+  lifecycle_status: active
+  vm: runtime-control-lv3
+  vmid: 192
+  internal_url: http://10.10.10.92:8081
+  public_url: https://mail.lv3.org
+  subdomain: mail.lv3.org
+  exposure: informational-only
+  uptime_monitor_name: Mail Platform Gateway Private
+  health_probe_id: mail_platform
+  image_catalog_ids:
+  - mail_platform_stalwart_runtime
+  secret_catalog_ids:
+  - mail_platform_agent_reports_gateway_api_key
+  - mail_platform_gateway_admin_api_key
+  - mail_platform_operator_alerts_gateway_api_key
+  - mail_platform_platform_transactional_gateway_api_key
+  - mail_platform_server_mailbox_password
+  adr: '0041'
+  runbook: docs/runbooks/configure-mail-platform.md
+  runtime_pool: runtime-control
+  deployment_surface: playbooks/services/mail-platform.yml
+  restart_domain: runtime-control-communications
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+  mobility_tier: anchor
+  dashboard_url: https://grafana.lv3.org/d/lv3-mail-platform/lv3-mail-platform
+  tags:
+  - mail
+  - smtp
+  - imap
+  - delivery
+  environments:
+    production:
+      status: active
+      url: https://mail.lv3.org
+      subdomain: mail.lv3.org
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_192
+  standby:
+    kind: cold
+    location: runtime-control-lv3
+    failover_trigger: Restore runtime-control-lv3 when the mail platform or its runtime
+      state cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-control-lv3, then rerun the mail-platform
+      converge from git.
+dependency:
+  node:
+    id: mail_platform
+    service: mail_platform
+    name: Mail Platform
+    vm: docker-runtime-lv3
+    tier: 1
+    category: communication
+    adr: '0041'
+  outbound_edges:
+  - from: mail_platform
+    to: nginx_edge
+    type: soft
+    description: The published mail.lv3.org informational surface is exposed through
+      the shared NGINX edge.
+  - from: mail_platform
+    to: openbao
+    type: startup_only
+    description: The mail gateway runtime is rendered from secrets mirrored locally
+      by the OpenBao sidecar.
+health:
+  service_name: mail-platform
+  owning_vm: runtime-control-lv3
+  role: mail_platform_runtime
+  verify_file: roles/mail_platform_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: The private mail gateway health endpoint responds.
+    timeout_seconds: 60
+    retries: 1
+    delay_seconds: 0
+    url: http://127.0.0.1:8081/healthz
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: command
+    description: The mail gateway can list the managed notification profiles over
+      the authenticated API.
+    timeout_seconds: 60
+    retries: 1
+    delay_seconds: 0
+    argv:
+    - python3
+    - -c
+    - 'from pathlib import Path; import sys, urllib.request; api_key = Path(''/etc/lv3/mail-platform/gateway-api-key'').read_text(encoding=''utf-8'').strip();
+      request = urllib.request.Request(''http://127.0.0.1:8081/v1/profiles'', headers={''X-API-Key'':
+      api_key}); response = urllib.request.urlopen(request, timeout=60); sys.exit(0
+      if response.status == 200 else 1)'
+    success_rc: 0
+  tls_certificate_ids:
+  - mail-platform-edge
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Mail Platform Gateway Private
+      type: http
+      url: http://10.10.10.92:8081/healthz
+      description: Private mail gateway health endpoint on runtime-control-lv3.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 10
+      accepted_statuscodes:
+      - 200-299

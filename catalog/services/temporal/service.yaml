@@ -1,0 +1,171 @@
+schema_version: 1.0.0
+service:
+  id: temporal
+  name: Temporal
+  description: Private durable workflow and task queue engine for long-running platform
+    automation that must survive worker crashes and retries.
+  category: automation
+  lifecycle_status: active
+  vm: runtime-control-lv3
+  vmid: 192
+  internal_url: grpc://127.0.0.1:7233
+  exposure: private-only
+  health_probe_id: temporal
+  image_catalog_ids:
+  - temporal_server_runtime
+  - temporal_admin_tools_runtime
+  - temporal_ui_runtime
+  secret_catalog_ids:
+  - temporal_database_password
+  adr: 0293
+  adr_file: docs/adr/0293-temporal-as-the-durable-workflow-and-task-queue-engine.md
+  runbook: docs/runbooks/configure-temporal.md
+  runtime_pool: runtime-control
+  deployment_surface: playbooks/services/temporal.yml
+  restart_domain: runtime-control-automation
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+  mobility_tier: anchor
+  tags:
+  - workflow
+  - durable
+  - temporal
+  - private
+  notes: The frontend gRPC port, HTTP port, and UI are intentionally loopback-only
+    on runtime-control-lv3; operators reach them through SSH tunneling or repo-managed
+    admin-tools commands.
+  environments:
+    production:
+      status: active
+      url: grpc://127.0.0.1:7233
+      notes: The repo-managed `lv3` namespace is bootstrapped automatically, while
+        UI diagnostics are exposed only through a loopback tunnel to preserve the
+        current guest firewall boundary.
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  suppressed_checks:
+    api_gateway: '2026-09-30'
+    grafana_dashboard: '2026-09-30'
+    slo_definition: '2026-09-30'
+    alert_rules: '2026-09-30'
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_192
+  - pbs_vm_150
+  standby:
+    kind: cold
+    location: runtime-control-lv3
+    failover_trigger: Restore runtime-control-lv3 or postgres-lv3 when the Temporal
+      runtime, namespace bootstrap, or workflow history stores cannot be recovered
+      in place.
+    failback_method: Restore or rebuild runtime-control-lv3 and postgres-lv3 as needed,
+      then rerun the Temporal converge from git and replay the smoke verification.
+dependency:
+  node:
+    id: temporal
+    service: temporal
+    name: Temporal
+    vm: docker-runtime-lv3
+    tier: 2
+    category: automation
+    adr: 0293
+  outbound_edges:
+  - from: temporal
+    to: openbao
+    type: startup_only
+    description: Temporal reads its mirrored PostgreSQL password from the OpenBao-backed
+      runtime secret path before startup.
+  - from: temporal
+    to: postgres
+    type: hard
+    description: Temporal stores workflow history, task queues, and visibility records
+      in PostgreSQL.
+health:
+  service_name: temporal
+  owning_vm: runtime-control-lv3
+  role: temporal_runtime
+  verify_file: roles/temporal_runtime/tasks/verify.yml
+  startup:
+    kind: command
+    description: Temporal startup completes once the cluster health command succeeds
+      through the repo-managed admin-tools profile.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    argv:
+    - docker
+    - compose
+    - --profile
+    - tools
+    - --file
+    - /opt/temporal/docker-compose.yml
+    - run
+    - --rm
+    - temporal-admin-tools
+    - temporal
+    - operator
+    - cluster
+    - health
+    success_rc: 0
+  liveness:
+    kind: http
+    description: The Temporal UI renders on the loopback diagnostic endpoint after
+      the runtime settles.
+    timeout_seconds: 60
+    retries: 12
+    delay_seconds: 5
+    url: http://127.0.0.1:8100
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: command
+    description: Temporal is ready once the repo-managed `lv3` namespace can be described
+      through the admin-tools profile.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    argv:
+    - docker
+    - compose
+    - --profile
+    - tools
+    - --file
+    - /opt/temporal/docker-compose.yml
+    - run
+    - --rm
+    - temporal-admin-tools
+    - temporal
+    - operator
+    - namespace
+    - describe
+    - --namespace
+    - lv3
+    success_rc: 0
+  uptime_kuma:
+    enabled: false
+    reason: Temporal is intentionally private-only and loopback-bound; the repo-managed
+      admin-tools and smoke workflow verification path provides the authoritative
+      health signal.
+data:
+- id: temporal-workflow-history
+  service: temporal
+  name: Temporal workflow history and visibility
+  class: confidential
+  retention_days: 7
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: medium
+  locations:
+  - PostgreSQL temporal database on postgres-lv3
+  - PostgreSQL temporal_visibility database on postgres-lv3
+  notes: Temporal persists workflow event history, timers, and visibility records
+    for the repo-managed `lv3` namespace using the declared retention window.

@@ -1,0 +1,143 @@
+schema_version: 1.0.0
+service:
+  id: vaultwarden
+  name: Vaultwarden
+  description: Private Bitwarden-compatible credential vault for operator-managed
+    passwords, recovery codes, and TOTP material.
+  category: security
+  lifecycle_status: active
+  vm: runtime-control-lv3
+  vmid: 192
+  internal_url: https://vault.lv3.org
+  subdomain: vault.lv3.org
+  exposure: private-only
+  health_probe_id: vaultwarden
+  image_catalog_ids:
+  - vaultwarden_runtime
+  secret_catalog_ids:
+  - vaultwarden_admin_token
+  - vaultwarden_database_password
+  adr: '0147'
+  runbook: docs/runbooks/configure-vaultwarden.md
+  runtime_pool: runtime-control
+  deployment_surface: playbooks/services/vaultwarden.yml
+  restart_domain: runtime-control-secrets
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+  mobility_tier: anchor
+  dashboard_url: https://grafana.lv3.org/d/lv3-vaultwarden/lv3-vaultwarden
+  tags:
+  - credentials
+  - totp
+  - vault
+  - private
+  environments:
+    production:
+      status: active
+      url: https://vault.lv3.org
+      subdomain: vault.lv3.org
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: false
+  dashboard_file: config/grafana/dashboards/vaultwarden.json
+  alert_rule_file: config/alertmanager/rules/vaultwarden.yml
+  suppressed_checks: {}
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_192
+  standby:
+    kind: cold
+    location: runtime-control-lv3
+    failover_trigger: Restore runtime-control-lv3 when Vaultwarden or its persistent
+      state cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-control-lv3, then rerun the Vaultwarden
+      converge from git.
+dependency:
+  node:
+    id: vaultwarden
+    service: vaultwarden
+    name: Vaultwarden
+    vm: docker-runtime-lv3
+    tier: 2
+    category: security
+    adr: '0147'
+  outbound_edges:
+  - from: vaultwarden
+    to: postgres
+    type: hard
+    description: Vaultwarden stores encrypted vault metadata and shared credential
+      state in PostgreSQL.
+  - from: vaultwarden
+    to: step_ca
+    type: startup_only
+    description: Vaultwarden uses step-ca issued private TLS certificates for the
+      Tailscale-only HTTPS surface and managed renewal path.
+health:
+  service_name: vaultwarden
+  owning_vm: runtime-control-lv3
+  role: vaultwarden_runtime
+  verify_file: roles/vaultwarden_runtime/tasks/verify.yml
+  liveness:
+    kind: tcp
+    description: Vaultwarden accepts TLS connections on the private runtime listener.
+    timeout_seconds: 180
+    retries: 1
+    delay_seconds: 0
+    host: 127.0.0.1
+    port: 8222
+  readiness:
+    kind: http
+    description: Vaultwarden returns success from the managed liveness endpoint over
+      HTTPS.
+    timeout_seconds: 60
+    retries: 12
+    delay_seconds: 5
+    url: https://10.10.10.92:8222/alive
+    method: GET
+    expected_status:
+    - 200
+    validate_tls: false
+    docker_publication:
+      container_name: vaultwarden
+      bindings:
+      - host: 10.10.10.92
+        port: 8222
+      derive_bindings_from_probes: false
+      required_networks:
+      - vaultwarden_default
+  tls_certificate_ids:
+  - vaultwarden-private
+  uptime_kuma:
+    enabled: false
+    reason: Vaultwarden is private-only and uses an internal CA trust chain, so repo-managed
+      role verification is the current health contract.
+data:
+- id: vaultwarden-shared-vault
+  service: vaultwarden
+  name: Vaultwarden shared credential vault
+  class: secret
+  retention_days: null
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: high
+  locations:
+  - Vaultwarden PostgreSQL database
+  - /opt/vaultwarden/data
+  notes: Shared operator credentials, recovery codes, and TOTP seeds remain until
+    explicit deletion or rotation removes them from the private vault.
+slos:
+- id: vaultwarden-availability
+  service_id: vaultwarden
+  indicator: availability
+  objective_percent: 99.5
+  window_days: 30
+  target_url: https://vault.lv3.org/alive
+  probe_module: http_2xx_insecure_tls
+  description: Vaultwarden remains reachable on the private Tailscale operator path.

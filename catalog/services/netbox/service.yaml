@@ -1,0 +1,146 @@
+schema_version: 1.0.0
+service:
+  id: netbox
+  name: NetBox
+  description: Private topology, IPAM, and inventory system for the platform.
+  category: data
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://100.64.0.1:8004
+  exposure: private-only
+  uptime_monitor_name: NetBox Private
+  health_probe_id: netbox
+  image_catalog_ids:
+  - netbox_redis_runtime
+  - netbox_runtime
+  secret_catalog_ids:
+  - netbox_api_token
+  - netbox_superuser_password
+  adr: '0054'
+  runbook: docs/runbooks/configure-netbox.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/netbox.yml
+  restart_domain: runtime-general-data-apps
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  tags:
+  - inventory
+  - ipam
+  - topology
+  environments:
+    production:
+      status: active
+      url: http://100.64.0.1:8004
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when NetBox or its persistent state
+      cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the NetBox
+      converge from git.
+dependency:
+  node:
+    id: netbox
+    service: netbox
+    name: NetBox
+    vm: docker-runtime-lv3
+    tier: 2
+    category: data
+    adr: '0054'
+  outbound_edges:
+  - from: netbox
+    to: openbao
+    type: startup_only
+    description: NetBox receives its database and Redis credentials from the OpenBao
+      agent before the application containers start.
+  - from: netbox
+    to: postgres
+    type: hard
+    description: NetBox stores all inventory, topology, and IPAM data in Postgres.
+health:
+  service_name: netbox
+  owning_vm: docker-runtime-lv3
+  role: netbox_runtime
+  verify_file: roles/netbox_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: NetBox startup completes once the repo-managed API token can read
+      the users API.
+    timeout_seconds: 300
+    retries: 30
+    delay_seconds: 10
+    url: http://127.0.0.1:8082/api/users/users/?limit=1
+    method: GET
+    expected_status:
+    - 200
+  liveness:
+    kind: http
+    description: The NetBox login page responds on the local runtime listener.
+    timeout_seconds: 300
+    retries: 30
+    delay_seconds: 10
+    url: http://127.0.0.1:8082/login/
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The repo-managed NetBox API token can read the users API.
+    timeout_seconds: 60
+    retries: 12
+    delay_seconds: 5
+    url: http://127.0.0.1:8082/api/users/users/?limit=1
+    method: GET
+    expected_status:
+    - 200
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: NetBox Private
+      type: http
+      url: http://10.10.10.20:8082/login/
+      description: Private NetBox login surface on docker-runtime-lv3.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 10
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: netbox-change-log
+  service: netbox
+  name: NetBox object change log
+  class: internal
+  retention_days: 180
+  backup_included: true
+  access_role: platform-read
+  pii_risk: low
+  locations:
+  - NetBox PostgreSQL extras_objectchange table
+  notes: Object-change history should remain available through at least one quarterly
+    planning cycle without growing unbounded.
+slos:
+- id: netbox-availability
+  service_id: netbox
+  indicator: availability
+  objective_percent: 99.5
+  window_days: 30
+  target_url: http://10.10.10.20:8082/login/
+  probe_module: http_2xx_follow_redirects
+  description: NetBox remains reachable for inventory, IPAM, and topology workflows.

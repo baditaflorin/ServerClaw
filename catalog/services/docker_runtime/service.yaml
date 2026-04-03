@@ -1,0 +1,94 @@
+schema_version: 1.0.0
+service:
+  id: docker_runtime
+  name: Docker Runtime VM
+  description: Primary runtime for containerised control-plane and platform services.
+  category: infrastructure
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: ssh://ops@10.10.10.20
+  public_url: https://docker.lv3.org
+  subdomain: docker.lv3.org
+  exposure: informational-only
+  health_probe_id: docker_runtime
+  adr: '0023'
+  runbook: docs/runbooks/configure-docker-runtime.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/docker-runtime.yml
+  restart_domain: runtime-general-core
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: anchor
+  dashboard_url: https://grafana.lv3.org/d/lv3-vm-docker-runtime-lv3/lv3-vm-docker-runtime-lv3
+  tags:
+  - docker
+  - runtime
+  - control-plane
+  environments:
+    production:
+      status: active
+      url: https://docker.lv3.org
+      subdomain: docker.lv3.org
+completeness:
+  service_type: vm-service
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: false
+  requires_compose_secrets: false
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when the runtime VM or its shared
+      service state cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then replay the required
+      service converges from git.
+dependency:
+  node:
+    id: docker_runtime
+    service: docker_runtime
+    name: Docker Runtime VM
+    vm: docker-runtime-lv3
+    tier: 1
+    category: infrastructure
+    adr: '0023'
+  outbound_edges: []
+health:
+  service_name: docker-runtime
+  owning_vm: docker-runtime-lv3
+  role: docker_runtime
+  verify_file: roles/docker_runtime/tasks/verify.yml
+  liveness:
+    kind: systemd
+    description: The Docker daemon is active on docker-runtime-lv3.
+    timeout_seconds: 30
+    retries: 1
+    delay_seconds: 0
+    unit: docker
+    expected_state: active
+  readiness:
+    kind: command
+    description: The local Docker Engine API returns server metadata.
+    timeout_seconds: 30
+    retries: 1
+    delay_seconds: 0
+    argv:
+    - docker
+    - info
+    - --format
+    - '{{.ServerVersion}}'
+    success_rc: 0
+  tls_certificate_ids:
+  - docker-runtime-edge
+  uptime_kuma:
+    enabled: false
+    reason: Docker daemon health is enforced by the role verify task and does not
+      expose a dedicated external HTTP surface.

@@ -1,0 +1,65 @@
+schema_version: 1.0.0
+service:
+  id: changelog_portal
+  name: Deployment History Portal
+  description: Generated portal for browsing live applies, promotions, and mutation
+    audit history.
+  category: access
+  lifecycle_status: active
+  vm: nginx-lv3
+  vmid: 110
+  public_url: https://changelog.lv3.org
+  subdomain: changelog.lv3.org
+  exposure: edge-published
+  adr: 0081
+  runbook: docs/runbooks/deployment-history-portal.md
+  runtime_pool: dedicated-edge
+  deployment_surface: playbooks/services/public-edge.yml
+  restart_domain: dedicated-edge-publication
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-edge
+  mobility_tier: movable_singleton
+  tags:
+  - portal
+  - history
+  - deployments
+  environments:
+    production:
+      status: active
+      url: https://changelog.lv3.org
+      subdomain: changelog.lv3.org
+completeness:
+  service_type: nginx-plugin
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: false
+  requires_compose_secrets: false
+  suppression_preset: legacy-service
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 30
+    rpo_minutes: 0
+  backup_sources:
+  - git_repository
+  - pbs_vm_110
+  standby:
+    kind: cold
+    location: nginx-lv3
+    failover_trigger: Restore or rebuild nginx-lv3 when the published static portal
+      or its edge files cannot be recovered in place.
+    failback_method: Restore nginx-lv3, regenerate the portal, and replay edge publication
+      from git.
+dependency:
+  node:
+    id: changelog_portal
+    service: changelog_portal
+    name: Changelog Portal
+    vm: nginx-lv3
+    tier: 2
+    category: communication
+    adr: 0081
+  outbound_edges:
+  - from: changelog_portal
+    to: nginx_edge
+    type: hard
+    description: The changelog portal is served as generated static content on nginx-lv3.

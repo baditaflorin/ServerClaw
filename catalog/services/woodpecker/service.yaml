@@ -1,0 +1,171 @@
+schema_version: 1.0.0
+service:
+  id: woodpecker
+  name: Woodpecker CI
+  description: Repo-managed event-driven CI server with Gitea OAuth, a public edge
+    URL, and a private controller path on the Proxmox host.
+  category: automation
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://100.64.0.1:8017
+  public_url: https://ci.lv3.org
+  subdomain: ci.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: Woodpecker Public
+  health_probe_id: woodpecker
+  image_catalog_ids:
+  - woodpecker_server_runtime
+  - woodpecker_agent_runtime
+  secret_catalog_ids:
+  - woodpecker_database_password
+  - woodpecker_gitea_client_secret
+  - woodpecker_agent_secret
+  - woodpecker_api_token
+  - woodpecker_secret_smoke
+  adr: 0287
+  adr_file: docs/adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md
+  runbook: docs/runbooks/configure-woodpecker.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/woodpecker.yml
+  restart_domain: runtime-general-automation
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  degradation_modes:
+  - dependency: postgres
+    dependency_type: hard
+    degraded_behaviour: Woodpecker cannot persist repositories, secrets, pipeline
+      history, or queued state without PostgreSQL.
+    degraded_for_seconds_max: 0
+    recovery_signal: Woodpecker database connectivity succeeds again
+    tested_by: fault:postgres-unavailable
+  tags:
+  - ci
+  - pipelines
+  - git
+  - automation
+  environments:
+    production:
+      status: active
+      url: https://ci.lv3.org
+      subdomain: ci.lv3.org
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: true
+  suppressed_checks:
+    grafana_dashboard: '2026-09-23'
+    alert_rules: '2026-09-23'
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when Woodpecker or its runtime state
+      cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Woodpecker
+      converge from git.
+dependency:
+  node:
+    id: woodpecker
+    service: woodpecker
+    name: Woodpecker CI
+    vm: docker-runtime-lv3
+    tier: 3
+    category: automation
+    adr: 0287
+  outbound_edges:
+  - from: woodpecker
+    to: gitea
+    type: hard
+    description: Woodpecker delegates authentication and repository activation to
+      Gitea through the governed OAuth and API bootstrap path.
+  - from: woodpecker
+    to: nginx_edge
+    type: soft
+    description: Public operator access to ci.lv3.org depends on the shared NGINX
+      edge, while the controller path remains reachable on the Proxmox host tailnet.
+  - from: woodpecker
+    to: openbao
+    type: startup_only
+    description: Woodpecker loads mirrored database, OAuth, and agent secrets from
+      the OpenBao agent before the runtime starts.
+  - from: woodpecker
+    to: postgres
+    type: hard
+    description: Woodpecker persists repository metadata, secrets, and pipeline history
+      in Postgres.
+health:
+  service_name: woodpecker
+  owning_vm: docker-runtime-lv3
+  role: woodpecker_runtime
+  verify_file: roles/woodpecker_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: The Woodpecker health endpoint responds on the local runtime listener.
+    timeout_seconds: 90
+    retries: 18
+    delay_seconds: 5
+    url: http://127.0.0.1:8102/healthz
+    method: GET
+    expected_status:
+    - 200
+    - 204
+  readiness:
+    kind: http
+    description: The public Woodpecker health endpoint remains reachable through the
+      shared NGINX edge publication after bootstrap completes.
+    timeout_seconds: 90
+    retries: 18
+    delay_seconds: 5
+    url: https://ci.lv3.org/healthz
+    method: GET
+    expected_status:
+    - 200
+    - 204
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Woodpecker Public
+      type: http
+      url: https://ci.lv3.org/healthz
+      description: Woodpecker health endpoint published through the shared NGINX edge.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 10
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: woodpecker-pipeline-history
+  service: woodpecker
+  name: Woodpecker pipeline history
+  class: internal
+  retention_days: 90
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: medium
+  locations:
+  - Woodpecker PostgreSQL data
+  - /opt/woodpecker/data/server
+  notes: Pipeline logs and repository activation metadata can contain branch names,
+    repository details, and operator-trigger context, so they remain private and restorable
+    with the Woodpecker control plane.
+slos:
+- id: woodpecker-availability
+  service_id: woodpecker
+  indicator: availability
+  objective_percent: 99.5
+  window_days: 30
+  target_url: https://ci.lv3.org/healthz
+  probe_module: http_2xx_follow_redirects
+  description: Woodpecker stays reachable for repo-managed CI bootstrap, API inspection,
+    and manual validation pipeline triggers.

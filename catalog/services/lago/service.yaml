@@ -1,0 +1,204 @@
+schema_version: 1.0.0
+service:
+  id: lago
+  name: Lago
+  description: Usage metering and billing control plane with a protected operator
+    browser surface and a governed public event-ingest adapter.
+  category: automation
+  lifecycle_status: active
+  vm: docker-runtime-lv3
+  vmid: 120
+  internal_url: http://10.10.10.20:8100
+  public_url: https://billing.lv3.org
+  subdomain: billing.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: Lago Public Health
+  health_probe_id: lago
+  secret_catalog_ids:
+  - lago_database_password
+  - lago_redis_password
+  - lago_secret_key_base
+  - lago_rsa_private_key
+  - lago_encryption_primary_key
+  - lago_encryption_deterministic_key
+  - lago_encryption_key_derivation_salt
+  - lago_bootstrap_user_password
+  - lago_org_api_key
+  - lago_smoke_producer_token
+  - lago_producer_catalog
+  image_catalog_ids:
+  - lago_api_runtime
+  - lago_front_runtime
+  - lago_pdf_runtime
+  - lago_redis_runtime
+  adr: 0292
+  adr_file: docs/adr/0292-lago-as-the-usage-metering-and-billing-api-layer.md
+  runbook: docs/runbooks/configure-lago.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/lago.yml
+  restart_domain: runtime-general-product-apps
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  tags:
+  - billing
+  - metering
+  - usage
+  - edge-authenticated
+  - event-ingest
+  notes: The browser UI and management surfaces at billing.lv3.org stay behind the
+    shared oauth2-proxy and Keycloak edge-auth flow. Public `/api/health` and `/api/v1/events`
+    remain reachable without browser sign-in, with event ingest terminating at the
+    governed API-gateway adapter and rejected payloads published to `billing.events.rejected`.
+  environments:
+    production:
+      status: active
+      url: https://billing.lv3.org
+      subdomain: billing.lv3.org
+      notes: The repo-managed smoke customer, subscription, billable metric, and plan
+        are seeded through the Lago API and validated by direct plus public ingest
+        replays on every governed converge.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: false
+  suppressed_checks:
+    grafana_dashboard: '2026-09-30'
+    alert_rules: '2026-09-30'
+    slo_definition: '2026-09-30'
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime-lv3
+    failover_trigger: Restore docker-runtime-lv3 when Lago, its shared PostgreSQL-backed
+      billing state, or its local runtime companions cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Lago converge
+      and public-ingest verification workflow from git.
+dependency:
+  node:
+    id: lago
+    service: lago
+    name: Lago
+    vm: docker-runtime-lv3
+    tier: 2
+    category: automation
+    adr: 0292
+  outbound_edges:
+  - from: lago
+    to: api_gateway
+    type: soft
+    description: Public producer ingest at billing.lv3.org/api/v1/events is brokered
+      by the platform API gateway adapter and canonical error-handling path.
+  - from: lago
+    to: docker_runtime
+    type: hard
+    description: The Lago API, front end, worker, clock, Redis, and PDF sidecar run
+      on docker-runtime-lv3.
+  - from: lago
+    to: keycloak
+    type: soft
+    description: Operator browser access to billing.lv3.org is gated by the shared
+      oauth2-proxy and Keycloak edge-auth path.
+  - from: lago
+    to: nginx_edge
+    type: soft
+    description: Public reachability for billing.lv3.org depends on the shared NGINX
+      edge publication path.
+  - from: lago
+    to: postgres
+    type: hard
+    description: Lago stores billable metrics, plans, customers, subscriptions, invoices,
+      and aggregated usage state in the shared PostgreSQL cluster.
+health:
+  service_name: lago
+  owning_vm: docker-runtime-lv3
+  role: lago_runtime
+  verify_file: roles/lago_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: Lago startup completes once the local API health endpoint responds
+      on the private runtime listener.
+    timeout_seconds: 300
+    retries: 60
+    delay_seconds: 5
+    url: http://127.0.0.1:8099/health
+    method: GET
+    expected_status:
+    - 200
+  liveness:
+    kind: http
+    description: The local Lago API health endpoint continues to answer on docker-runtime-lv3.
+    timeout_seconds: 300
+    retries: 60
+    delay_seconds: 5
+    url: http://127.0.0.1:8099/health
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The public Lago health endpoint answers through the shared NGINX
+      edge and API-gateway-backed `/api/health` publication while the browser UI remains
+      protected by the shared auth boundary.
+    timeout_seconds: 300
+    retries: 60
+    delay_seconds: 5
+    url: https://billing.lv3.org/api/health
+    method: GET
+    expected_status:
+    - 200
+    docker_publication:
+      container_name: lago-api
+      bindings:
+      - host: 10.10.10.20
+        port: 8099
+      required_networks:
+      - lago_default
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Lago Public Health
+      type: http
+      url: https://billing.lv3.org/api/health
+      description: Public Lago health endpoint published through the shared NGINX
+        edge and billing adapter path.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 5
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: lago-billing-control-plane-state
+  service: lago
+  name: Lago billing catalog and usage state
+  class: confidential
+  retention_days: 1825
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: high
+  locations:
+  - Lago PostgreSQL database on postgres-lv3
+  notes: Lago stores billable metrics, plans, customers, subscriptions, invoices,
+    credit notes, and aggregated usage records that may include tenant identifiers
+    and billing contacts.
+- id: lago-generated-billing-artifacts
+  service: lago
+  name: Lago generated billing artifacts
+  class: confidential
+  retention_days: 365
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: medium
+  locations:
+  - /opt/lago/data/storage on docker-runtime-lv3
+  notes: The Lago storage directory retains generated invoice exports, PDF-ready billing
+    artifacts, and other runtime files needed for billing-history reconstruction.

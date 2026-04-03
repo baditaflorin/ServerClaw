@@ -1,0 +1,169 @@
+schema_version: 1.0.0
+service:
+  id: harbor
+  name: Harbor
+  description: Private container registry with vulnerability scanning, operator SSO,
+    and scoped robot credentials for repository automation.
+  category: security
+  lifecycle_status: active
+  vm: runtime-control-lv3
+  vmid: 192
+  internal_url: http://10.10.10.92:8095
+  public_url: https://registry.lv3.org
+  subdomain: registry.lv3.org
+  exposure: edge-published
+  uptime_monitor_name: Harbor Registry Public
+  health_probe_id: harbor
+  secret_catalog_ids:
+  - harbor_admin_password
+  - harbor_database_password
+  - harbor_check_runner_robot_secret
+  - keycloak_harbor_client_secret
+  adr: '0201'
+  runbook: docs/runbooks/configure-harbor.md
+  runtime_pool: runtime-control
+  deployment_surface: playbooks/services/harbor.yml
+  restart_domain: runtime-control-supply-chain
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+  mobility_tier: anchor
+  dashboard_url: https://grafana.lv3.org/d/lv3-harbor/lv3-harbor
+  tags:
+  - registry
+  - containers
+  - trivy
+  - supply-chain
+  environments:
+    production:
+      status: active
+      url: https://registry.lv3.org
+      subdomain: registry.lv3.org
+      notes: Published through the shared NGINX edge while Harbor handles operator
+        authentication and project policy.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: true
+  requires_secrets: true
+  requires_compose_secrets: false
+  dashboard_file: config/grafana/dashboards/harbor.json
+  alert_rule_file: config/alertmanager/rules/harbor.yml
+  keycloak_client_generated: true
+  suppressed_checks: {}
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+  - git_repository
+  - pbs_vm_192
+  standby:
+    kind: cold
+    location: runtime-control-lv3
+    failover_trigger: Restore runtime-control-lv3 when Harbor or its persisted registry
+      state cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-control-lv3, then rerun the Harbor
+      converge and registry verification workflow.
+dependency:
+  node:
+    id: harbor
+    service: harbor
+    name: Harbor
+    vm: docker-runtime-lv3
+    tier: 1
+    category: security
+    adr: '0201'
+  outbound_edges:
+  - from: harbor
+    to: keycloak
+    type: soft
+    description: Operator browser sign-in to registry.lv3.org depends on the shared
+      Keycloak OIDC path, while robot credentials still support governed automation.
+  - from: harbor
+    to: nginx_edge
+    type: soft
+    description: Public reachability for registry.lv3.org depends on the shared NGINX
+      edge publication path.
+health:
+  service_name: harbor
+  owning_vm: runtime-control-lv3
+  role: harbor_runtime
+  verify_file: roles/harbor_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: Harbor answers the local ping endpoint on the private runtime port.
+    timeout_seconds: 180
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:8095/api/v2.0/ping
+    method: GET
+    expected_status:
+    - 200
+  readiness:
+    kind: http
+    description: The public Harbor registry endpoint answers the authenticated API
+      ping through the shared edge.
+    timeout_seconds: 180
+    retries: 24
+    delay_seconds: 5
+    url: https://registry.lv3.org/api/v2.0/ping
+    method: GET
+    expected_status:
+    - 200
+    docker_publication:
+      container_name: nginx
+      bindings:
+      - host: 10.10.10.92
+        port: 8095
+      required_networks:
+      - harbor_harbor
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Harbor Registry Public
+      type: http
+      url: https://registry.lv3.org/api/v2.0/ping
+      description: Harbor ping endpoint published through the shared NGINX edge.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 5
+      accepted_statuscodes:
+      - 200-299
+data:
+- id: harbor-registry-artifacts
+  service: harbor
+  name: Harbor registry artifacts and chart storage
+  class: confidential
+  retention_days: 90
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: medium
+  locations:
+  - /opt/harbor/data/registry
+  - /opt/harbor/data/chart_storage
+  notes: Private container images, OCI artifacts, and retained charts are durable
+    release assets that must remain recoverable through the managed retention window.
+- id: harbor-registry-metadata
+  service: harbor
+  name: Harbor registry metadata and scan results
+  class: confidential
+  retention_days: 90
+  backup_included: true
+  access_role: platform-operator
+  pii_risk: medium
+  locations:
+  - Harbor PostgreSQL database
+  - /opt/harbor/data/database
+  notes: Harbor stores project metadata, robot-account policy, replication state,
+    and vulnerability scan findings that support supply-chain auditing and recovery.
+slos:
+- id: harbor-availability
+  service_id: harbor
+  indicator: availability
+  objective_percent: 99.5
+  window_days: 30
+  target_url: https://registry.lv3.org/api/v2.0/ping
+  probe_module: http_2xx_follow_redirects
+  description: Harbor remains reachable through the shared LV3 edge for image pulls,
+    pushes, and operator access.
