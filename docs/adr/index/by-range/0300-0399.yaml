@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 44
+total_adrs: 48
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -890,3 +890,87 @@ adrs:
     implemented_in_repo_version: 0.178.3
     implemented_in_platform_version: 0.130.98
     implemented_on: '2026-04-03'
+  - adr: '0342'
+    title: Zero-SSH Guest Operations via Proxmox QAPI
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-04'
+    concern: host-os
+    keywords:
+      - proxmox
+      - automation
+      - tooling
+      - qapi
+      - guest-exec
+      - multi-environment
+      - no-ssh
+      - zero-ssh
+      - guest
+      - operations
+    summary: All controller-initiated imperative operations targeting VM guests will use the
+    filename: 0342-zero-ssh-guest-operations-via-proxmox-qapi.md
+    path: docs/adr/0342-zero-ssh-guest-operations-via-proxmox-qapi.md
+    implemented_in_repo_version: 0.178.4
+    implemented_in_platform_version: 0.130.97
+    implemented_on: '2026-04-04'
+  - adr: '0343'
+    title: Operator Tool Interface Contract
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-04'
+    concern: automation
+    keywords:
+      - tooling
+      - contracts
+      - automation
+      - dry
+      - idempotency
+      - operator-tools
+      - operator
+      - tool
+      - interface
+      - contract
+    summary: All scripts/ operator tools that perform imperative platform operations
+    filename: 0343-operator-tool-interface-contract.md
+    path: docs/adr/0343-operator-tool-interface-contract.md
+    implemented_in_repo_version: 0.178.4
+  - adr: '0344'
+    title: Single-Source Environment Topology
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-04'
+    concern: vm-topology
+    keywords:
+      - multi-environment
+      - topology
+      - dry
+      - tooling
+      - inventory
+      - configuration
+      - single-source
+      - environment
+    summary: Ansible inventory remains the single authoritative source for all
+    filename: 0344-single-source-environment-topology.md
+    path: docs/adr/0344-single-source-environment-topology.md
+    implemented_in_repo_version: 0.178.4
+  - adr: '0345'
+    title: Layered Operator Tool Separation
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-04'
+    concern: platform
+    keywords:
+      - tooling
+      - architecture
+      - dry
+      - separation-of-concerns
+      - contracts
+      - operator-tools
+      - layered
+      - operator
+      - tool
+      - separation
+    summary: The scripts/ operator tools are organised into three layers with strict
+    filename: 0345-layered-operator-tool-separation.md
+    path: docs/adr/0345-layered-operator-tool-separation.md
+    implemented_in_repo_version: 0.178.4

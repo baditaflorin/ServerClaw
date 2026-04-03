@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-03'
 facet: concern
 concern: automation
-total_adrs: 22
+total_adrs: 23
 adrs:
   - adr: '0030'
     title: Role Interface Contracts And Defaults Boundaries
@@ -404,3 +404,24 @@ adrs:
     implemented_in_repo_version: 0.177.119
     implemented_in_platform_version: 0.130.75
     implemented_on: '2026-03-31'
+  - adr: '0343'
+    title: Operator Tool Interface Contract
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-04'
+    concern: automation
+    keywords:
+      - tooling
+      - contracts
+      - automation
+      - dry
+      - idempotency
+      - operator-tools
+      - operator
+      - tool
+      - interface
+      - contract
+    summary: All scripts/ operator tools that perform imperative platform operations
+    filename: 0343-operator-tool-interface-contract.md
+    path: docs/adr/0343-operator-tool-interface-contract.md
+    implemented_in_repo_version: 0.178.4

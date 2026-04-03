@@ -4,113 +4,62 @@
 - Title: Live apply faceted ADR index shards and reservation windows from the latest `origin/main`
 - Status: live_applied
 - Included In Repo Version: `not yet`
-- Branch Live-Apply Receipt: `2026-04-03-adr-0325-adr-discovery-live-apply`
-- Live Applied In Platform Version: `N/A`
+- Branch-Local Receipt: `receipts/live-applies/2026-04-03-adr-0325-adr-discovery-live-apply.json`
+- Mainline Receipt: `receipts/live-applies/2026-04-04-adr-0325-adr-discovery-mainline-live-apply.json`
+- Implemented On: 2026-04-03
+- Live Applied On: 2026-04-04
+- Live Applied In Platform Version: not applicable (repo-only control-plane change)
+- Latest Verified Base: `origin/main@6f0c993723e2706c9f6a5b3913d1c88ef70de52b` (`repo 0.178.3`, `platform 0.130.98`)
 - Branch: `codex/ws-0325-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0325-live-apply`
-- Workstream Source: `workstreams/active/ws-0325-live-apply.yaml`
+- Worktree: `.worktrees/ws-0325-live-apply`
 - Owner: codex
-- Depends On: `adr-0164`, `adr-0167`, `adr-0168`
+- Depends On: `ADR 0164`, `ADR 0167`, `ADR 0168`, `ADR 0326`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0325-live-apply.md`, `docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md`, `docs/adr/.index.yaml`, `docs/adr/index/`, `docs/runbooks/adr-discovery-and-reservations.md`, `.repo-structure.yaml`, `.config-locations.yaml`, `config/validation-gate.json`, `config/validation-lanes.yaml`, `scripts/adr_discovery.py`, `scripts/generate_adr_index.py`, `scripts/adr_query_tool.py`, `scripts/validate_repo.sh`, `tests/test_generate_adr_index.py`, `tests/test_adr_query_tool.py`, `tests/test_validation_lanes.py`, `receipts/live-applies/`, `receipts/live-applies/evidence/`
-
-## Purpose
-
-Implement ADR 0325 from the latest practical `origin/main` baseline by
-switching ADR discovery to compact shard-backed metadata, adding an explicit ADR
-number reservation ledger, and proving the repo-managed query, validation, and
-allocation paths end to end.
+- Shared Surfaces: `workstreams.yaml`, `workstreams/active/ws-0325-live-apply.yaml`, `docs/workstreams/ws-0325-live-apply.md`, `docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md`, `docs/adr/.index.yaml`, `docs/adr/index/`, `docs/runbooks/adr-discovery-and-reservations.md`, `.repo-structure.yaml`, `.config-locations.yaml`, `build/onboarding/*.yaml`, `docs/discovery/config-locations/agent-discovery.yaml`, `docs/discovery/repo-structure/automation-and-infrastructure.yaml`, `docs/discovery/repo-structure/documentation-and-history.yaml`, `config/validation-gate.json`, `config/validation-lanes.yaml`, `scripts/adr_discovery.py`, `scripts/generate_adr_index.py`, `scripts/adr_query_tool.py`, `scripts/generate_discovery_artifacts.py`, `scripts/validate_repo.sh`, `tests/test_generate_adr_index.py`, `tests/test_adr_query_tool.py`, `tests/test_generate_discovery_artifacts.py`, `tests/test_validation_lanes.py`, `README.md`, `changelog.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `receipts/live-applies/2026-04-03-adr-0325-adr-discovery-live-apply.json`, `receipts/live-applies/2026-04-04-adr-0325-adr-discovery-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-04-03-ws-0325-*`, `receipts/live-applies/evidence/2026-04-04-ws-0325-*`
 
 ## Scope
 
-- generate a compact `docs/adr/.index.yaml` root manifest plus range, concern,
-  and implementation-status shards under `docs/adr/index/`
-- add `docs/adr/index/reservations.yaml` and reservation-aware ADR allocation
-  tooling
-- update repo validation so ADR metadata and reservation changes fail cleanly
-  when the generated shard surfaces drift
-- document the operational workflow for querying ADRs, reserving windows, and
-  refreshing the generated discovery metadata
-- preserve live-apply evidence and branch-local verification so another agent
-  can merge or replay safely if `origin/main` moves again
+- replace the monolithic ADR discovery catalog with a compact root manifest plus
+  range, concern, and implementation-status shards under `docs/adr/index/`
+- add a committed reservation ledger and reservation-aware ADR allocation/query
+  workflow
+- extend the repo validation and discovery generation paths so stale ADR and
+  generated discovery surfaces fail cleanly, including UTC-stable generated
+  dates across the Bucharest controller and UTC build hosts
+- replay the exact-main integration onto the latest `origin/main` without
+  cutting a blocked numbered repo release
 
-## Non-Goals
+## Outcome
 
-- rewriting unrelated ADR content outside the 0325 implementation metadata
-- inventing speculative future ADR reservations that are not grounded in an
-  actual workstream
-- updating protected release or canonical-truth surfaces on this workstream
-  branch before the exact-main integration step
-
-## Expected Repo Surfaces
-
-- `workstreams.yaml`
-- `workstreams/active/ws-0325-live-apply.yaml`
-- `docs/workstreams/ws-0325-live-apply.md`
-- `docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md`
-- `docs/adr/.index.yaml`
-- `docs/adr/index/by-range/`
-- `docs/adr/index/by-concern/`
-- `docs/adr/index/by-status/`
-- `docs/adr/index/reservations.yaml`
-- `docs/runbooks/adr-discovery-and-reservations.md`
-- `docs/diagrams/agent-coordination-map.excalidraw`
-- `docs/site-generated/architecture/dependency-graph.md`
-- `.repo-structure.yaml`
-- `.config-locations.yaml`
-- `config/validation-gate.json`
-- `config/validation-lanes.yaml`
-- `scripts/adr_discovery.py`
-- `scripts/generate_adr_index.py`
-- `scripts/adr_query_tool.py`
-- `scripts/validate_repo.sh`
-- `tests/test_generate_adr_index.py`
-- `tests/test_adr_query_tool.py`
-- `tests/test_validation_lanes.py`
-- `receipts/live-applies/`
-- `receipts/live-applies/evidence/`
-
-## Expected Live Surfaces
-
-- `docs/adr/.index.yaml` becomes a compact ADR discovery root manifest instead
-  of embedding the full ADR corpus inline
-- `docs/adr/index/by-range/`, `by-concern/`, and `by-status/` expose focused
-  ADR metadata shards that can be read without loading the entire corpus
-- `python3 scripts/adr_query_tool.py allocate` respects committed ADRs plus
-  active reservations from `docs/adr/index/reservations.yaml`
-- `python3 scripts/workstream_registry.py --write` keeps the compatibility
-  `workstreams.yaml` assembly aligned with the shard-backed workstream source
-- `documentation-index` and `agent-standards` both catch stale ADR discovery
-  outputs after ADR or reservation changes
+- `scripts/adr_discovery.py`, `scripts/generate_adr_index.py`, and
+  `scripts/adr_query_tool.py` now support shard-backed ADR discovery plus
+  reservation-aware allocation without relying on hidden chat coordination.
+- `docs/adr/.index.yaml` now points readers at shard-sized metadata surfaces,
+  and the rebased replay preserves the latest `origin/main` ADR additions
+  (`0342`-`0345`) inside the shard outputs instead of regressing to the old
+  monolithic index.
+- `scripts/generate_discovery_artifacts.py` and `scripts/generate_adr_index.py`
+  now stamp generated dates in UTC, which keeps exact-main validation stable
+  when the controller and build host cross midnight in different time zones.
+- Repo automation now fails closed on stale ADR shards, stale generated
+  discovery entrypoints, and drift in the exact-main workstream ownership
+  contract.
 
 ## Verification
 
-- `python3 scripts/workstream_registry.py --check`
-- `uv run --with pyyaml python3 scripts/generate_adr_index.py --write`
-- `python3 scripts/adr_query_tool.py list --concern documentation`
-- `python3 scripts/adr_query_tool.py allocate --window-size 2`
-- `uv run --with pytest --with pyyaml pytest -q tests/test_generate_adr_index.py tests/test_adr_query_tool.py tests/test_validation_lanes.py`
-- `./scripts/validate_repo.sh workstream-surfaces agent-standards`
+- Focused regression coverage passed on the rebased exact-main tree: `uv run --with pytest --with pyyaml python3 -m pytest -q tests/test_generate_adr_index.py tests/test_adr_query_tool.py tests/test_validation_lanes.py tests/test_workstream_registry.py tests/test_generate_discovery_artifacts.py`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-targeted-tests-r1.txt`.
+- Generated-surface drift checks passed after the rebase onto `origin/main@6f0c993723e2706c9f6a5b3913d1c88ef70de52b`: `uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --check`, `./scripts/run_python_with_packages.sh pyyaml -- scripts/generate_adr_index.py --check`, `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --check`, and `git diff --check`, preserved in the matching `2026-04-04-ws-0325-mainline-*.txt` evidence files.
+- Release bookkeeping remains intentionally unreleased: `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py status --json` still reports repository version `0.178.3`, platform version `0.130.98`, and a blocked release cut because three unrelated `controller_dependency_gap` waiver receipts remain open through `2026-04-06`; the next candidate repo version remains `0.178.4`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-release-status-r1.json` and `receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-release-dry-run-r1.txt`.
+- `python3 scripts/live_apply_receipts.py --validate`, `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs generated-portals`, `make remote-validate`, and `make pre-push-gate` passed on the rebased exact-main tree; the remote build still needed the usual unresolved-only local fallback for `atlas-lint`, and that fallback passed and merged cleanly into the recorded gate status.
 
-## Verified Result
+## Exact-Main Integration Status
 
-- the shard-backed ADR tooling slice passed with `14 passed` across
-  `tests/test_generate_adr_index.py`, `tests/test_adr_query_tool.py`,
-  `tests/test_validation_lanes.py`, and `tests/test_workstream_registry.py`
-- `python3 scripts/workstream_registry.py --check`,
-  `scripts/generate_adr_index.py --check`, `./scripts/validate_repo.sh
-  generated-docs`, and the dependency-graph regeneration checks all passed on
-  the rebased tree after the active workstream shard was added and the
-  generated coordination diagram refreshed
-- `make pre-push-gate` passed end to end after the build-server remote replay
-  failed only on remote `atlas-lint` connectivity, then
-  `scripts/run_gate_fallback.py` reran the single unresolved `atlas-lint`
-  check locally and merged that passing result into
-  `.local/validation-gate/last-run.json`
-
-## Closeout
-
-- ADR 0325 is implemented and live-applied on the branch-local exact-main
-  baseline
-- the first integrated repo version is still `not yet` until the protected
-  `main` release surfaces are updated in the final merge step
+- The exact-main integration is complete on the latest `origin/main`, with the
+  shard-backed ADR discovery rollout, reservation ledger, and generated
+  discovery entrypoints refreshed from source rather than hand-merged.
+- `VERSION` remains `0.178.3` and `Implemented In Repo Version` remains `not yet`
+  because the release manager still blocks a fresh numbered cut on unrelated
+  open waiver receipts outside this workstream.
+- Because ADR 0325 is a repo-only control-plane change, no platform version bump
+  should accompany the merge; the live platform version context remains
+  `0.130.98`.

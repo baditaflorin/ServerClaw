@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-03'
 facet: concern
 concern: host-os
-total_adrs: 8
+total_adrs: 9
 adrs:
   - adr: '0002'
     title: Target Proxmox VE 9 on Debian 13
@@ -154,3 +154,26 @@ adrs:
     implemented_in_repo_version: 0.123.0
     implemented_in_platform_version: 0.130.18
     implemented_on: '2026-03-26'
+  - adr: '0342'
+    title: Zero-SSH Guest Operations via Proxmox QAPI
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-04'
+    concern: host-os
+    keywords:
+      - proxmox
+      - automation
+      - tooling
+      - qapi
+      - guest-exec
+      - multi-environment
+      - no-ssh
+      - zero-ssh
+      - guest
+      - operations
+    summary: All controller-initiated imperative operations targeting VM guests will use the
+    filename: 0342-zero-ssh-guest-operations-via-proxmox-qapi.md
+    path: docs/adr/0342-zero-ssh-guest-operations-via-proxmox-qapi.md
+    implemented_in_repo_version: 0.178.4
+    implemented_in_platform_version: 0.130.97
+    implemented_on: '2026-04-04'

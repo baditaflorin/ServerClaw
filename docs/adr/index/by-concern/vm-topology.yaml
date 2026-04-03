@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-03'
 facet: concern
 concern: vm-topology
-total_adrs: 33
+total_adrs: 34
 adrs:
   - adr: '0005'
     title: Single-Node First Topology
@@ -617,3 +617,22 @@ adrs:
     implemented_in_repo_version: 0.177.153
     implemented_in_platform_version: 0.130.96
     implemented_on: '2026-04-03'
+  - adr: '0344'
+    title: Single-Source Environment Topology
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-04'
+    concern: vm-topology
+    keywords:
+      - multi-environment
+      - topology
+      - dry
+      - tooling
+      - inventory
+      - configuration
+      - single-source
+      - environment
+    summary: Ansible inventory remains the single authoritative source for all
+    filename: 0344-single-source-environment-topology.md
+    path: docs/adr/0344-single-source-environment-topology.md
+    implemented_in_repo_version: 0.178.4

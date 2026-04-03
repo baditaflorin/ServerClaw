@@ -8,18 +8,18 @@
 schema_version: 2
 generated: '2026-04-03'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 361
+total_adrs: 365
 adr_number_range:
   first: '0001'
-  last: '0341'
-  next_available: '0342'
+  last: '0345'
+  next_available: '0346'
 implementation_status_summary:
-  Implemented: 320
-  Partial: 10
+  Implemented: 321
+  Partial: 13
   Not Implemented: 30
   Deprecated: 1
 decision_status_summary:
-  Accepted: 305
+  Accepted: 309
   Proposed: 4
   Deprecated: 2
   Implemented: 50
@@ -42,9 +42,9 @@ facets:
       last_adr: 0299
     - label: 0300-0399
       path: docs/adr/index/by-range/0300-0399.yaml
-      count: 44
+      count: 48
       first_adr: '0300'
-      last_adr: '0341'
+      last_adr: '0345'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -57,7 +57,7 @@ facets:
       count: 10
     - concern: automation
       path: docs/adr/index/by-concern/automation.yaml
-      count: 22
+      count: 23
     - concern: bootstrap
       path: docs/adr/index/by-concern/bootstrap.yaml
       count: 5
@@ -69,7 +69,7 @@ facets:
       count: 20
     - concern: host-os
       path: docs/adr/index/by-concern/host-os.yaml
-      count: 8
+      count: 9
     - concern: identity
       path: docs/adr/index/by-concern/identity.yaml
       count: 5
@@ -81,7 +81,7 @@ facets:
       count: 16
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 124
+      count: 125
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -99,16 +99,16 @@ facets:
       count: 3
     - concern: vm-topology
       path: docs/adr/index/by-concern/vm-topology.yaml
-      count: 33
+      count: 34
   by_status:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 320
+      count: 321
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 10
+      count: 13
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
@@ -122,8 +122,29 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0342'
+  next_available_adr: '0346'
 latest_adrs:
+  - adr: '0345'
+    title: Layered Operator Tool Separation
+    implementation_status: Partial
+    concern: platform
+    path: docs/adr/0345-layered-operator-tool-separation.md
+  - adr: '0344'
+    title: Single-Source Environment Topology
+    implementation_status: Partial
+    concern: vm-topology
+    path: docs/adr/0344-single-source-environment-topology.md
+  - adr: '0343'
+    title: Operator Tool Interface Contract
+    implementation_status: Partial
+    concern: automation
+    path: docs/adr/0343-operator-tool-interface-contract.md
+  - adr: '0342'
+    title: Zero-SSH Guest Operations via Proxmox QAPI
+    implementation_status: Implemented
+    concern: host-os
+    path: docs/adr/0342-zero-ssh-guest-operations-via-proxmox-qapi.md
+    implemented_on: '2026-04-04'
   - adr: '0341'
     title: Open WebUI Keycloak OIDC With Break-Glass Fallback
     implementation_status: Implemented
@@ -158,29 +179,6 @@ latest_adrs:
     implementation_status: Implemented
     concern: ci-cd
     path: docs/adr/0336-public-entrypoint-leakage-validation.md
-    implemented_on: '2026-04-02'
-  - adr: '0335'
-    title: Public-Safe Agent Onboarding Entrypoints
-    implementation_status: Implemented
-    concern: agent-discovery
-    path: docs/adr/0335-public-safe-agent-onboarding-entrypoints.md
-    implemented_on: '2026-04-02'
-  - adr: '0334'
-    title: Example-First Inventory And Service Identity Catalogs
-    implementation_status: Not Implemented
-    concern: vm-topology
-    path: docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md
-  - adr: '0333'
-    title: Private Overlay Files For Deployment-Specific Secrets And Identities
-    implementation_status: Partial
-    concern: security
-    path: docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
-    implemented_on: '2026-04-02'
-  - adr: '0332'
-    title: Relative Release And Status Links In Generated Root Surfaces
-    implementation_status: Implemented
-    concern: documentation
-    path: docs/adr/0332-relative-release-and-status-links-in-generated-root-surfaces.md
     implemented_on: '2026-04-02'
 discovery_queries:
   how do we bootstrap:
