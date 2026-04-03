@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.2",
   "platform_version": "0.130.98",
-  "generated_at": "2026-04-03T16:37:48Z",
-  "next_refresh_at": "2026-04-03T17:37:48Z",
+  "generated_at": "2026-04-03T17:02:54Z",
+  "next_refresh_at": "2026-04-03T18:02:54Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -395,7 +395,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.91:8025",
-        "last_live_apply": "2026-04-02T00:00:00Z",
+        "last_live_apply": "2026-04-03T00:00:00Z",
         "slo_status": "unknown"
       },
       "matrix_synapse": {

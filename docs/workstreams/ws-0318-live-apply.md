@@ -8,7 +8,7 @@
 - Owner: codex
 - Depends On: `adr-0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy`, `adr-0318-repeatable-operator-onboarding-with-cc-audit-trail`
 - Conflicts With: `ws-0318-operator-onboarding-iac`, `ws-0318-provision-operator-v2`
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0318-live-apply.md`, `docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md`, `docs/runbooks/operator-onboarding.md`, `docs/adr/.index.yaml`, `scripts/provision_operator.py`, `tests/test_provision_operator.py`, `receipts/live-applies/`, `receipts/live-applies/evidence/`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0318-live-apply.md`, `docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md`, `docs/runbooks/operator-onboarding.md`, `docs/adr/.index.yaml`, `scripts/provision_operator.py`, `tests/test_provision_operator.py`, `build/platform-manifest.json`, `receipts/live-applies/`, `receipts/live-applies/evidence/`
 
 ## Purpose
 
@@ -64,12 +64,13 @@ instead of silently taking over the separate runtime-control migration work.
 
 - `python3 -m pytest -q tests/test_provision_operator.py`
 - `./scripts/validate_repo.sh agent-standards`
+- `make pre-push-gate`
 - exact-main dry-run and `--skip-email` verification from this dedicated
   worktree
 - full live replay against Keycloak, Headscale, and the SMTP relay using
   shared `.local/` controller artifacts
-- final validation, pre-push gate, and canonical receipt capture after the
-  exact-main replay succeeds
+- final validation and canonical receipt capture after the exact-main replay
+  succeeds
 
 ## Evidence
 
@@ -87,7 +88,12 @@ instead of silently taking over the separate runtime-control migration work.
 
 ## Exact-Main Integration Status
 
-- rebased cleanly onto the latest `origin/main`
+- rebased cleanly onto the latest `origin/main`, then refreshed
+  `build/platform-manifest.json` so `schema-validation` reflects the integrated
+  mainline release state
+- refreshed `docs/diagrams/agent-coordination-map.excalidraw` so the generated
+  architecture surfaces matched the rebased manifest and the final
+  `make pre-push-gate` replay passed
 - exact-main `--skip-email` replay succeeded for `florin.badita-tmp-002`
 - canonical truth now records the `Unreleased` ADR 0318 changelog entry and the
   `operator_onboarding` latest receipt on the integrated tree
