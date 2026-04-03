@@ -44,9 +44,24 @@ module_available() {
   "$PYTHON_BIN" - "$module_name" <<'PY' >/dev/null 2>&1
 import importlib.util
 import sys
+from pathlib import Path
 
 module_name = sys.argv[1]
-raise SystemExit(0 if importlib.util.find_spec(module_name) is not None else 1)
+spec = importlib.util.find_spec(module_name)
+if spec is None:
+    raise SystemExit(1)
+
+workspace = Path.cwd().resolve()
+candidate_paths = []
+if spec.origin not in {None, "built-in", "frozen"}:
+    candidate_paths.append(Path(spec.origin).resolve())
+for location in spec.submodule_search_locations or ():
+    candidate_paths.append(Path(location).resolve())
+
+if candidate_paths and all(path == workspace or workspace in path.parents for path in candidate_paths):
+    raise SystemExit(1)
+
+raise SystemExit(0)
 PY
 }
 

@@ -1,0 +1,100 @@
+make pre-push-gate
+remote_exec.sh pre-push-gate --local-fallback was not relied on for the final branch evidence; the exact configured local_fallback_command was executed from the worktree.
+
+$ mkdir -p .local/validation-gate .local/trivy-cache .local/packer-plugin-cache .ansible/validation/collections .local/policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_PACKER_PLUGIN_CACHE_DIR=.local/packer-plugin-cache LV3_TRIVY_CACHE_DIR=.local/trivy-cache LV3_POLICY_TOOLCHAIN_ROOT=.local/policy-toolchain python3 scripts/run_gate_fallback.py --workspace . --status-file .local/validation-gate/last-run.json --source local-fallback
+run_gate_fallback: ignoring stale non-remote gate status and running the requested local checks.
+Validation lane selection
+  mode: auto
+  branch: codex/ws-0304-mainline
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, atlas-lint, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, iac-policy-scan, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: Makefile, README.md, RELEASE.md, VERSION, build/platform-manifest.json, changelog.md, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 40.57
+alert-rule-validation passed 26.80
+ansible-lint          failed 212.76
+ansible-syntax        passed 669.67
+artifact-secret-scan  passed 82.87
+atlas-lint            passed 103.11
+dependency-direction  passed 39.06
+dependency-graph      passed 37.75
+documentation-index   passed 38.46
+generated-docs        passed 62.28
+generated-portals     passed 321.61
+iac-policy-scan       passed 235.12
+integration-tests     passed 14.42
+packer-validate       passed 144.64
+policy-validation     failed 50.48
+schema-validation     passed 431.79
+security-scan         failed 318.23
+semgrep-sast          passed 396.72
+service-completeness  passed 32.36
+tofu-validate         passed 16.60
+type-check            passed 72.89
+workstream-surfaces   passed 254.67
+yaml-lint             passed 183.95
+
+[ansible-lint] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0304-mainline:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0304-mainline:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -w /workspace registry.lv3.org/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/lint-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/lint-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/lint-requirements.sha ./scripts/validate_repo.sh ansible-lint
+[ansible-lint] stdout
+Ansible lint
+[ansible-lint] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+Timeout waiting for another instance of ansible-lint to release the lock.
+
+[policy-validation] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0304-mainline:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0304-mainline:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/.local/policy-toolchain:/opt/lv3/policy-toolchain -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_POLICY_TOOLCHAIN_ROOT=/opt/lv3/policy-toolchain -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/policy_checks.py --validate
+[policy-validation] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+Traceback (most recent call last):
+  File "/workspace/scripts/policy_checks.py", line 131, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/scripts/policy_checks.py", line 125, in main
+    validate_repository_policies(repo_root)
+  File "/workspace/scripts/policy_checks.py", line 96, in validate_repository_policies
+    run_conftest_checks(repo_root, effective_toolchain)
+  File "/workspace/scripts/policy_checks.py", line 77, in run_conftest_checks
+    _run(
+  File "/workspace/scripts/policy_checks.py", line 58, in _run
+    raise RuntimeError(f"{' '.join(command)} failed:\n{details}")
+RuntimeError: /opt/lv3/policy-toolchain/conftest/0.67.1/linux-amd64/conftest test /tmp/lv3-policy-context-3ietb5iu/repository-context.json --policy /workspace/policy/conftest failed:
+[31mFAIL[0m - /tmp/lv3-policy-context-3ietb5iu/repository-context.json - main - validation gate check "ansible-lint" timeout_seconds must be <= 900
+
+[31m19 tests, 18 passed, 0 warnings, 1 failure, 0 exceptions[0m
+
+[security-scan] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0304-mainline:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0304-mainline:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/.local/trivy-cache:/var/lib/trivy -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e TRIVY_CACHE_DIR=/var/lib/trivy -w /workspace registry.lv3.org/check-runner/security:2026.03.23 sh -c trivy fs --scanners misconfig,secret --skip-db-update --skip-dirs .ansible --skip-dirs .git --skip-dirs .worktrees --skip-files docker/check-runners/ansible/Dockerfile --skip-files docker/check-runners/infra/Dockerfile --skip-files docker/check-runners/python/Dockerfile --skip-files docker/check-runners/security/Dockerfile --skip-files uv.lock --exit-code 1 --severity HIGH,CRITICAL .
+[security-scan] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+2026-04-03T01:49:34Z	INFO	[misconfig] Misconfiguration scanning is enabled
+2026-04-03T01:50:11Z	INFO	[secret] Secret scanning is enabled
+2026-04-03T01:50:11Z	INFO	[secret] If your scanning is slow, please try '--scanners misconfig' to disable secret scanning
+2026-04-03T01:50:11Z	INFO	[secret] Please see https://trivy.dev/docs/v0.68/guide/scanner/secret#recommendation for faster secret detection
+2026-04-03T01:51:26Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="receipts/image-scans/2026-03-28-dify-plugin-daemon-runtime.trivy.json" size (MB)=12
+2026-04-03T01:51:28Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="receipts/image-scans/2026-03-30-crawl4ai-runtime.trivy.json" size (MB)=11
+2026-04-03T01:52:33Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="receipts/sbom/host-docker-runtime-lv3-2026-03-30.cdx.json" size (MB)=21
+2026-04-03T01:52:33Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="receipts/sbom/host-docker-runtime-lv3-2026-03-31.cdx.json" size (MB)=24
+2026-04-03T01:52:33Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json" size (MB)=24
+2026-04-03T01:52:33Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json" size (MB)=24
+2026-04-03T01:52:38Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="receipts/sbom/host-monitoring-lv3-2026-03-31.cdx.json" size (MB)=18
+2026-04-03T01:52:52Z	ERROR	[dockerfile scanner] Failed to parse file	file_path="collections/ansible_collections/lv3/platform/roles/browser_runner_runtime/templates/Dockerfile.j2" err="parse dockerfile instruction: parse instruction \"from\": FROM requires either one or three arguments"
+2026-04-03T01:52:52Z	ERROR	[dockerfile scanner] Failed to parse file	file_path="collections/ansible_collections/lv3/platform/roles/piper_runtime/templates/Dockerfile.j2" err="parse dockerfile instruction: parse instruction \"from\": FROM requires either one or three arguments"
+2026-04-03T01:52:52Z	ERROR	[dockerfile scanner] Failed to parse file	file_path="collections/ansible_collections/lv3/platform/roles/superset_runtime/templates/Dockerfile.j2" err="parse dockerfile instruction: parse instruction \"from\": FROM requires either one or three arguments"
+2026-04-03T01:52:52Z	ERROR	[dockerfile scanner] Failed to parse file	file_path="collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/templates/Dockerfile.j2" err="parse dockerfile instruction: parse instruction \"from\": FROM requires either one or three arguments"
+2026-04-03T01:54:35Z	INFO	[npm] To collect the license information of packages, "npm install" needs to be performed beforehand	dir="config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules"
+2026-04-03T01:54:35Z	INFO	[terraform scanner] Scanning root module	file_path="tofu/environments/production"
+2026-04-03T01:54:35Z	WARN	[terraform parser] Variable values were not found in the environment or variable files. Evaluating may not work correctly.	module="root" variables="bridge, ci_user, cloud_init_datastore_id, datastore_id, nameserver, node_name, proxmox_api_token, proxmox_endpoint, search_domain, template_node_name, template_vmid"
+2026-04-03T01:54:36Z	INFO	[terraform scanner] Scanning root module	file_path="tofu/environments/staging"
+2026-04-03T01:54:36Z	WARN	[terraform parser] Variable values were not found in the environment or variable files. Evaluating may not work correctly.	module="root" variables="bridge, ci_user, cloud_init_datastore_id, datastore_id, nameserver, node_name, proxmox_api_token, proxmox_endpoint, search_domain, template_node_name, template_vmid"
+2026-04-03T01:54:36Z	INFO	[terraform scanner] Scanning root module	file_path="tofu/modules/proxmox-fixture"
+2026-04-03T01:54:36Z	WARN	[terraform parser] Variable values were not found in the environment or variable files. Evaluating may not work correctly.	module="root" variables="bridge, ci_user, cloud_init_datastore_id, cores, datastore_id, description, disk_gb, fixture_id, gateway, ip_address, ip_cidr, lifetime_minutes, mac_address, memory_mb, name, nameserver, node_name, search_domain, ssh_authorized_keys, tags, template_node_name, template_vmid, vm_id, vmid_range"
+
+📣 [34mNotices:[0m
+  - Version 0.69.3 of Trivy is now available, current version is 0.68.2
+
+To suppress version checks, run Trivy scans with the --skip-version-check flag
+
+2026-04-03T01:54:36Z	WARN	Provide a higher timeout value, see https://trivy.dev/docs/v0.68/guide/references/troubleshooting#timeout
+2026-04-03T01:54:36Z	FATAL	Fatal error	run error: fs scan error: scan error: scan failed: failed analysis: post analysis error: post analysis error: terraform scan error: scan config error: context deadline exceeded

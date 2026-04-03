@@ -8,6 +8,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
@@ -46,6 +47,7 @@ class CheckDefinition:
     command: str
     working_dir: str
     timeout_seconds: int
+    local_fallback_command: str | None = None
     cache_mounts: tuple[str, ...] = ()
 
 
@@ -116,6 +118,11 @@ def load_manifest(manifest_path: Path) -> dict[str, CheckDefinition]:
             command=str(config["command"]),
             working_dir=str(config.get("working_dir", "/workspace")),
             timeout_seconds=int(config.get("timeout_seconds", 300)),
+            local_fallback_command=(
+                str(config["local_fallback_command"])
+                if config.get("local_fallback_command")
+                else None
+            ),
             cache_mounts=tuple(str(item) for item in config.get("cache_mounts", [])),
         )
     return checks
@@ -145,6 +152,8 @@ def build_docker_command(
     check: CheckDefinition,
     workspace: Path,
     docker_binary: str,
+    *,
+    cidfile_path: Path | None = None,
 ) -> list[str]:
     workspace_mount_source = os.environ.get("LV3_DOCKER_WORKSPACE_PATH", "").strip()
     if not workspace_mount_source:
@@ -222,6 +231,7 @@ def build_docker_command(
         "run",
         "--rm",
         "--cpus=4",
+        *(["--cidfile", str(cidfile_path)] if cidfile_path is not None else []),
         *mount_args,
         *env_args,
         "-w",
@@ -241,12 +251,57 @@ def normalize_process_output(output: bytes | str | None) -> str:
     return output.strip()
 
 
+def cleanup_timed_out_container(
+    docker_binary: str,
+    workspace: Path,
+    cidfile_path: Path,
+) -> str:
+    if not cidfile_path.exists():
+        return ""
+    container_id = cidfile_path.read_text(encoding="utf-8").strip()
+    cidfile_path.unlink(missing_ok=True)
+    if not container_id:
+        return ""
+    completed = subprocess.run(
+        [docker_binary, "rm", "-f", container_id],
+        cwd=workspace,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=30,
+    )
+    details = "\n".join(part for part in (completed.stdout.strip(), completed.stderr.strip()) if part)
+    if completed.returncode == 0 or "No such container" in details:
+        return ""
+    return details or f"docker rm -f {container_id} exited with {completed.returncode}"
+
+
+def should_use_local_fallback_command(check: CheckDefinition) -> bool:
+    source = os.environ.get("LV3_VALIDATION_SOURCE", "").strip().lower()
+    return bool(check.local_fallback_command and source.startswith("local-"))
+
+
 def execute_check(
     check: CheckDefinition,
     workspace: Path,
     docker_binary: str,
 ) -> CheckResult:
-    docker_command = build_docker_command(check, workspace, docker_binary)
+    cidfile_path: Path | None = None
+    if should_use_local_fallback_command(check):
+        docker_command = ["sh", "-c", check.local_fallback_command or check.command]
+    else:
+        cidfile_dir = workspace / ".local" / "validation-gate" / "docker-cids"
+        cidfile_dir.mkdir(parents=True, exist_ok=True)
+        cidfile_handle = tempfile.NamedTemporaryFile(
+            dir=cidfile_dir,
+            prefix=f"{check.label}-",
+            suffix=".cid",
+            delete=False,
+        )
+        cidfile_path = Path(cidfile_handle.name)
+        cidfile_handle.close()
+        cidfile_path.unlink(missing_ok=True)
+        docker_command = build_docker_command(check, workspace, docker_binary, cidfile_path=cidfile_path)
     started = time.monotonic()
 
     try:
@@ -277,13 +332,21 @@ def execute_check(
             docker_command=docker_command,
         )
     except subprocess.TimeoutExpired as exc:
+        cleanup_details = (
+            cleanup_timed_out_container(docker_binary, workspace, cidfile_path)
+            if cidfile_path is not None
+            else ""
+        )
+        stderr = normalize_process_output(exc.stderr)
+        if cleanup_details:
+            stderr = "\n".join(part for part in (stderr, f"cleanup: {cleanup_details}") if part)
         return CheckResult(
             label=check.label,
             status="timed_out",
             returncode=124,
             duration_seconds=time.monotonic() - started,
             stdout=normalize_process_output(exc.stdout),
-            stderr=normalize_process_output(exc.stderr),
+            stderr=stderr,
             docker_command=docker_command,
         )
     except FileNotFoundError as exc:
@@ -296,6 +359,9 @@ def execute_check(
             stderr=str(exc),
             docker_command=docker_command,
         )
+    finally:
+        if cidfile_path is not None:
+            cidfile_path.unlink(missing_ok=True)
 
 
 def print_progress(

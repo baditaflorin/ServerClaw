@@ -1,0 +1,3 @@
+from pathlib import Path
+
+def ensure_repo_root_on_path(script_file: str) -> Path: ...

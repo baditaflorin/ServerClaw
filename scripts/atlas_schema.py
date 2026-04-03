@@ -332,6 +332,7 @@ def load_docker_sdk():
     repo_root = REPO_ROOT.resolve()
     original = list(sys.path)
     filtered: list[str] = []
+    cached_module = sys.modules.pop("docker", None)
     for entry in original:
         resolved = repo_root if entry == "" else Path(entry).resolve()
         if resolved == repo_root:
@@ -340,6 +341,10 @@ def load_docker_sdk():
     sys.path[:] = filtered
     try:
         import docker as docker_sdk  # type: ignore[import-not-found]
+    except Exception:
+        if cached_module is not None:
+            sys.modules["docker"] = cached_module
+        raise
     finally:
         sys.path[:] = original
     return docker_sdk

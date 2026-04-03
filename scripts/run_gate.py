@@ -375,6 +375,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
     manifest_metadata, manifest = load_gate_manifest(args.manifest)
     workspace = args.workspace.resolve()
+    os.environ["LV3_VALIDATION_SOURCE"] = args.source
     checks, catalog, selection = resolve_gate_selection(args=args, manifest=manifest)
     if selection is not None:
         print(validation_lanes.render_selection_summary(selection))

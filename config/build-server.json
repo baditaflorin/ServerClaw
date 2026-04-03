@@ -29,7 +29,7 @@
       "local_fallback_runner_id": "controller-local-validation",
       "runner_label": "lint-ansible",
       "validation_lanes": ["yaml-lint", "ansible-lint"],
-      "command": "command -v yamllint >/dev/null 2>&1 || python3 -m pip install --break-system-packages --quiet yamllint==1.37.1; command -v ansible-lint >/dev/null 2>&1 || python3 -m pip install --break-system-packages --quiet ansible-lint==24.12.2; export ANSIBLE_CONFIG=/workspace/ansible.cfg; export ANSIBLE_COLLECTIONS_PATH=/workspace/collections${LV3_ANSIBLE_COLLECTIONS_DIR:+:$LV3_ANSIBLE_COLLECTIONS_DIR}; find . -path ./.git -prune -o -type f \\( -name '*.yml' -o -name '*.yaml' \\) -print0 | xargs -0 yamllint -c .yamllint && ANSIBLE_LINT_NODEPS=1 ansible-lint playbooks collections/ansible_collections/lv3/platform",
+      "command": "command -v yamllint >/dev/null 2>&1 || python3 -m pip install --break-system-packages --quiet yamllint==1.37.1; command -v ansible-lint >/dev/null 2>&1 || python3 -m pip install --break-system-packages --quiet ansible-lint==24.12.2; export ANSIBLE_CONFIG=/workspace/ansible.cfg; export ANSIBLE_COLLECTIONS_PATH=/workspace/collections${LV3_ANSIBLE_COLLECTIONS_DIR:+:$LV3_ANSIBLE_COLLECTIONS_DIR}; find . -path ./.git -prune -o -type f \\( -name '*.yml' -o -name '*.yaml' \\) -print0 | xargs -0 yamllint -c .yamllint && ANSIBLE_LINT_NODEPS=1 ansible-lint --offline playbooks collections/ansible_collections/lv3/platform",
       "local_fallback_command": "./scripts/validate_repo.sh yaml ansible-lint"
     },
     "remote-validate": {

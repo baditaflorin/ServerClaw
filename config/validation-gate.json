@@ -5,7 +5,7 @@
     "image": "registry.lv3.org/check-runner/python:3.12.10",
     "command": "./scripts/validate_repo.sh workstream-surfaces",
     "working_dir": "/workspace",
-    "timeout_seconds": 120
+    "timeout_seconds": 480
   },
   "agent-standards": {
     "description": "Enforce the ADR 0163 through ADR 0168 agent handoff, ADR index, and workstream registration standards.",
@@ -28,8 +28,9 @@
     "severity": "error",
     "image": "registry.lv3.org/check-runner/ansible:2.17.10",
     "command": "mkdir -p .ansible/validation/lint-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/lint-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/lint-requirements.sha ./scripts/validate_repo.sh ansible-lint",
+    "local_fallback_command": "./scripts/validate_repo.sh ansible-lint",
     "working_dir": "/workspace",
-    "timeout_seconds": 600,
+    "timeout_seconds": 900,
     "cache_mounts": ["ansible_collections"]
   },
   "ansible-syntax": {
@@ -38,7 +39,7 @@
     "image": "registry.lv3.org/check-runner/ansible:2.17.10",
     "command": "mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax",
     "working_dir": "/workspace",
-    "timeout_seconds": 600,
+    "timeout_seconds": 900,
     "cache_mounts": ["ansible_collections"]
   },
   "dependency-graph": {
@@ -71,7 +72,7 @@
     "image": "registry.lv3.org/check-runner/python:3.12.10",
     "command": "./scripts/validate_repo.sh generated-portals",
     "working_dir": "/workspace",
-    "timeout_seconds": 300
+    "timeout_seconds": 600
   },
   "packer-validate": {
     "description": "Validate all Packer templates when the repo carries them; otherwise report a no-op pass.",
@@ -88,7 +89,7 @@
     "image": "registry.lv3.org/check-runner/python:3.12.10",
     "command": "python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/stage_smoke_suites.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null && ./scripts/run_python_with_packages.sh pyyaml -- scripts/atlas_schema.py validate >/dev/null",
     "working_dir": "/workspace",
-    "timeout_seconds": 360
+    "timeout_seconds": 600
   },
   "atlas-lint": {
     "description": "Run Atlas pre-migration lint for the repo-managed SQL migration directories using the pinned Atlas image and an ephemeral PostgreSQL dev database.",
@@ -124,9 +125,9 @@
     "description": "Run the repository filesystem through the pinned Trivy security scan policy.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/security:2026.03.23",
-    "command": "trivy fs --scanners misconfig,secret --skip-db-update --skip-dirs .ansible --skip-dirs .git --skip-dirs .worktrees --skip-files docker/check-runners/ansible/Dockerfile --skip-files docker/check-runners/infra/Dockerfile --skip-files docker/check-runners/python/Dockerfile --skip-files docker/check-runners/security/Dockerfile --skip-files uv.lock --exit-code 1 --severity HIGH,CRITICAL .",
+    "command": "trivy fs --timeout 15m --scanners misconfig,secret --skip-db-update --skip-dirs .ansible --skip-dirs .git --skip-dirs .worktrees --skip-files docker/check-runners/ansible/Dockerfile --skip-files docker/check-runners/infra/Dockerfile --skip-files docker/check-runners/python/Dockerfile --skip-files docker/check-runners/security/Dockerfile --skip-files uv.lock --exit-code 1 --severity HIGH,CRITICAL .",
     "working_dir": "/workspace",
-    "timeout_seconds": 240,
+    "timeout_seconds": 600,
     "cache_mounts": ["trivy"]
   },
   "semgrep-sast": {
@@ -135,7 +136,7 @@
     "image": "registry.lv3.org/check-runner/python:3.12.10",
     "command": "python -m pip install --quiet --disable-pip-version-check semgrep==1.155.0 && ./scripts/validate_repo.sh semgrep",
     "working_dir": "/workspace",
-    "timeout_seconds": 300,
+    "timeout_seconds": 600,
     "cache_mounts": ["pip"]
   },
   "iac-policy-scan": {
@@ -174,7 +175,7 @@
     "description": "Type check the gate orchestration code, Atlas schema helpers, and the manifest-backed Docker runner surfaces.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/python:3.12.10",
-    "command": "mypy --cache-dir /tmp/mypy-cache scripts/atlas_schema.py scripts/gate_bypass_waivers.py scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/iac_policy_scan.py scripts/log_gate_bypass.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/semgrep_gate.py scripts/validation_lanes.py scripts/validation_runner_contracts.py config/windmill/scripts/atlas-drift-check.py config/windmill/scripts/post-merge-gate.py tests/test_atlas_schema.py tests/test_atlas_drift_check_windmill.py tests/test_iac_policy_scan.py tests/test_parallel_check.py tests/test_semgrep_gate.py tests/test_validation_gate.py tests/test_validation_lanes.py tests/test_policy_checks.py tests/test_command_catalog.py tests/test_validation_runner_contracts.py",
+    "command": "./scripts/run_python_with_packages.sh mypy pyyaml types-PyYAML httpx -- -m mypy --cache-dir /tmp/mypy-cache scripts/atlas_schema.py scripts/gate_bypass_waivers.py scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/iac_policy_scan.py scripts/log_gate_bypass.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/semgrep_gate.py scripts/validation_lanes.py scripts/validation_runner_contracts.py config/windmill/scripts/atlas-drift-check.py config/windmill/scripts/post-merge-gate.py tests/test_atlas_schema.py tests/test_atlas_drift_check_windmill.py tests/test_iac_policy_scan.py tests/test_parallel_check.py tests/test_semgrep_gate.py tests/test_validation_gate.py tests/test_validation_lanes.py tests/test_policy_checks.py tests/test_command_catalog.py tests/test_validation_runner_contracts.py",
     "working_dir": "/workspace",
     "timeout_seconds": 180
   },

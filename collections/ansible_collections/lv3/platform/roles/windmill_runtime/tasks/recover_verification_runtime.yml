@@ -5,7 +5,7 @@
 # Idempotency: Conditionally mutating; only restarts compose services when the local API is unavailable, then waits for recovery.
 # Dependencies: windmill_runtime convergence, Docker Compose on the guest, and tasks/wait_for_workers.yml.
 
-- name: Check whether the Windmill runtime API is reachable before {{ windmill_verify_runtime_reconcile_reason }}
+- name: Check whether the Windmill runtime API is reachable before verification recovery for {{ windmill_verify_runtime_reconcile_reason }}
   ansible.builtin.uri:
     url: "{{ windmill_runtime_api_base_url }}/api/version"
     method: GET
@@ -14,7 +14,7 @@
   failed_when: false
   changed_when: false
 
-- name: Recover the Windmill compose services before {{ windmill_verify_runtime_reconcile_reason }} when the API is unavailable
+- name: Recover the Windmill compose services before verification recovery when the API is unavailable for {{ windmill_verify_runtime_reconcile_reason }}
   ansible.builtin.shell: |
     set -euo pipefail
     stale_ids="$(docker ps -aq \
@@ -34,7 +34,7 @@
     or 'Starting' in windmill_verify_runtime_recover.stdout
   when: windmill_verify_runtime_preflight.status | default(0) != 200
 
-- name: Wait for the Windmill runtime API after verification recovery before {{ windmill_verify_runtime_reconcile_reason }}
+- name: Wait for the Windmill runtime API after verification recovery for {{ windmill_verify_runtime_reconcile_reason }}
   ansible.builtin.uri:
     url: "{{ windmill_runtime_api_base_url }}/api/version"
     method: GET
@@ -46,5 +46,5 @@
   changed_when: false
   when: windmill_verify_runtime_preflight.status | default(0) != 200
 
-- name: Wait for Windmill workers to register before {{ windmill_verify_runtime_reconcile_reason }}
+- name: Wait for Windmill workers to register before verification recovery for {{ windmill_verify_runtime_reconcile_reason }}
   ansible.builtin.import_tasks: wait_for_workers.yml

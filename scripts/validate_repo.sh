@@ -379,7 +379,7 @@ validate_ansible_lint() {
   fi
   (
     cd "$REPO_ROOT"
-    "${ANSIBLE_LINT_CMD[@]}" "${lint_targets[@]}"
+    ANSIBLE_LINT_NODEPS=1 "${ANSIBLE_LINT_CMD[@]}" --offline "${lint_targets[@]}"
   )
 }
 

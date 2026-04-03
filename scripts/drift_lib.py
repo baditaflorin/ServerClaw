@@ -13,7 +13,7 @@ import sys
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 from script_bootstrap import ensure_repo_root_on_path
 
@@ -327,7 +327,7 @@ def wait_for_tunnel(process: subprocess.Popen[str], port: int) -> None:
 
 
 @contextmanager
-def nats_tunnel(context: dict[str, Any]) -> int:
+def nats_tunnel(context: dict[str, Any]) -> Iterator[int]:
     local_port = reserve_local_port()
     command = build_guest_ssh_tunnel_command(
         context,
@@ -400,16 +400,24 @@ async def publish_nats_events_async(
                 context_id=str(record.get("context_id") or "").strip() or None,
                 ts=record.get("ts") or record.get("generated_at") or record.get("occurred_at") or record.get("collected_at"),
             )
-            await async_with_retry(
-                lambda subject=subject, envelope=envelope: nc.publish(
+
+            async def publish_current() -> None:
+                await nc.publish(
                     subject,
                     json.dumps(envelope, separators=(",", ":")).encode(),
-                ),
+                )
+
+            await async_with_retry(
+                publish_current,
                 policy=NATS_PUBLISH_POLICY,
                 error_context=f"nats publish {subject}",
             )
+
+            async def flush_current() -> None:
+                await nc.flush(timeout=NATS_CONNECT_TIMEOUT_SECONDS)
+
             await async_with_retry(
-                lambda: nc.flush(timeout=NATS_CONNECT_TIMEOUT_SECONDS),
+                flush_current,
                 policy=NATS_PUBLISH_POLICY,
                 error_context="nats flush",
             )

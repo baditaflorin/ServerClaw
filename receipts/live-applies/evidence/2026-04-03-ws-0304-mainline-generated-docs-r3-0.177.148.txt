@@ -1,0 +1,17 @@
+$ uv run --with pyyaml python3 scripts/generate_adr_index.py --write
+Written /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/docs/adr/.index.yaml (359 ADRs indexed)
+$ make assemble-canonical-truth
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/scripts/canonical_truth.py --write
+Updated canonical truth:
+- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/versions/stack.yaml
+- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/README.md
+$ make generate-status-docs
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/scripts/generate_status_docs.py --write
+Updated generated status docs: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/README.md
+$ make generate-platform-manifest
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/scripts/platform_manifest.py --write
+$ make generate-diagrams
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/scripts/generate_diagrams.py --write
+Updated diagrams in /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/docs/diagrams
+$ ./scripts/validate_repo.sh generated-docs
+Generated status document validation

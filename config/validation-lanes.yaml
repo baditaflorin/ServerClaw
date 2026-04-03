@@ -87,6 +87,8 @@ surface_classes:
   - surface_id: live_apply_receipts
     title: Live-apply receipts and evidence payloads
     paths:
+      - receipts/atlas-drift/*
+      - receipts/atlas-drift/**/*
       - receipts/live-applies/*.json
       - receipts/live-applies/*.md
       - receipts/live-applies/evidence/*
@@ -103,6 +105,8 @@ surface_classes:
       - docs/schema/*
       - docs/schema/**/*
       - workstreams.yaml
+      - config/atlas/*.hcl
+      - config/atlas/**/*.hcl
       - config/*.json
       - config/*.yaml
       - config/*.yml
@@ -133,6 +137,7 @@ surface_classes:
       - .gitea/workflows/validate.yml
       - .github/workflows/validate.yml
       - .githooks/pre-push
+      - Makefile
       - config/build-server.json
       - config/check-runner-manifest.json
       - config/validation-gate.json
@@ -166,9 +171,13 @@ surface_classes:
   - surface_id: service_automation
     title: Service automation, inventory, and runtime code
     paths:
+      - "*.pyi"
       - collections/ansible_collections/**/*
       - inventory/*.yml
       - inventory/**/*.yml
+      - nats/*.pyi
+      - nats/**/*.pyi
+      - platform/*.py
       - platform/**/*.py
       - playbooks/*.yml
       - playbooks/**/*.yml

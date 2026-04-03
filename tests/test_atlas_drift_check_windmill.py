@@ -4,23 +4,25 @@ import importlib.util
 import json
 import subprocess
 from pathlib import Path
+from types import ModuleType
+from typing import Any, cast
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 WRAPPER_PATH = REPO_ROOT / "config" / "windmill" / "scripts" / "atlas-drift-check.py"
 
 
-def load_module(name: str):
+def load_module(name: str) -> ModuleType:
     spec = importlib.util.spec_from_file_location(name, WRAPPER_PATH)
+    assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
-    assert spec and spec.loader
     spec.loader.exec_module(module)
     return module
 
 
 def test_wrapper_blocks_when_repo_checkout_is_missing(tmp_path: Path) -> None:
     module = load_module("atlas_drift_missing")
-    payload = module.main(repo_path=str(tmp_path / "missing"))
+    payload = cast(dict[str, Any], module.main(repo_path=str(tmp_path / "missing")))
 
     assert payload["status"] == "blocked"
 
@@ -32,7 +34,7 @@ def test_wrapper_executes_repo_script_and_parses_clean_json(monkeypatch, tmp_pat
     (repo_root / "scripts" / "atlas_schema.py").write_text("# placeholder\n", encoding="utf-8")
     (repo_root / "scripts" / "run_python_with_packages.sh").write_text("#!/bin/sh\n", encoding="utf-8")
     (repo_root / "scripts" / "run_python_with_packages.sh").chmod(0o755)
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def fake_run(command, **kwargs):
         captured["command"] = command
@@ -47,7 +49,7 @@ def test_wrapper_executes_repo_script_and_parses_clean_json(monkeypatch, tmp_pat
 
     monkeypatch.setattr(module.subprocess, "run", fake_run)
 
-    payload = module.main(repo_path=str(repo_root))
+    payload = cast(dict[str, Any], module.main(repo_path=str(repo_root)))
 
     assert payload["status"] == "ok"
     assert captured["cwd"] == repo_root
@@ -65,7 +67,7 @@ def test_wrapper_overrides_blank_direct_endpoint_env_values(monkeypatch, tmp_pat
     (repo_root / "scripts" / "atlas_schema.py").write_text("# placeholder\n", encoding="utf-8")
     (repo_root / "scripts" / "run_python_with_packages.sh").write_text("#!/bin/sh\n", encoding="utf-8")
     (repo_root / "scripts" / "run_python_with_packages.sh").chmod(0o755)
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def fake_run(command, **kwargs):
         captured["env"] = kwargs["env"]
@@ -80,7 +82,7 @@ def test_wrapper_overrides_blank_direct_endpoint_env_values(monkeypatch, tmp_pat
     monkeypatch.setenv("LV3_NATS_URL", "   ")
     monkeypatch.setattr(module.subprocess, "run", fake_run)
 
-    payload = module.main(repo_path=str(repo_root))
+    payload = cast(dict[str, Any], module.main(repo_path=str(repo_root)))
 
     assert payload["status"] == "ok"
     assert captured["env"]["LV3_ATLAS_FORCE_DIRECT_ENDPOINTS"] == "1"
@@ -110,7 +112,7 @@ def test_wrapper_loads_worker_secret_files_when_runtime_env_is_missing(
         "ntfy-password\n",
         encoding="utf-8",
     )
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def fake_run(command, **kwargs):
         captured["env"] = kwargs["env"]
@@ -126,7 +128,7 @@ def test_wrapper_loads_worker_secret_files_when_runtime_env_is_missing(
     monkeypatch.delenv("LV3_NTFY_ALERTMANAGER_PASSWORD", raising=False)
     monkeypatch.setattr(module.subprocess, "run", fake_run)
 
-    payload = module.main(repo_path=str(repo_root))
+    payload = cast(dict[str, Any], module.main(repo_path=str(repo_root)))
 
     assert payload["status"] == "ok"
     assert json.loads(captured["env"]["LV3_ATLAS_OPENBAO_APPROLE_JSON"]) == {
@@ -163,7 +165,7 @@ def test_wrapper_prefers_seed_job_secret_files_when_repo_local_worker_secrets_ar
         "ntfy-password\n",
         encoding="utf-8",
     )
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def fake_run(command, **kwargs):
         captured["env"] = kwargs["env"]
@@ -179,7 +181,7 @@ def test_wrapper_prefers_seed_job_secret_files_when_repo_local_worker_secrets_ar
     monkeypatch.delenv("LV3_NTFY_ALERTMANAGER_PASSWORD", raising=False)
     monkeypatch.setattr(module.subprocess, "run", fake_run)
 
-    payload = module.main(repo_path=str(repo_root))
+    payload = cast(dict[str, Any], module.main(repo_path=str(repo_root)))
 
     assert payload["status"] == "ok"
     assert json.loads(captured["env"]["LV3_ATLAS_OPENBAO_APPROLE_JSON"]) == {
@@ -204,7 +206,7 @@ def test_wrapper_loads_worker_secrets_from_proc_env_when_files_are_unreadable(
     (repo_root / "scripts" / "atlas_schema.py").write_text("# placeholder\n", encoding="utf-8")
     (repo_root / "scripts" / "run_python_with_packages.sh").write_text("#!/bin/sh\n", encoding="utf-8")
     (repo_root / "scripts" / "run_python_with_packages.sh").chmod(0o755)
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def fake_run(command, **kwargs):
         captured["env"] = kwargs["env"]
@@ -233,7 +235,7 @@ def test_wrapper_loads_worker_secrets_from_proc_env_when_files_are_unreadable(
     monkeypatch.setattr(module, "read_proc_env_var", fake_read_proc_env_var)
     monkeypatch.setattr(module.subprocess, "run", fake_run)
 
-    payload = module.main(repo_path=str(repo_root))
+    payload = cast(dict[str, Any], module.main(repo_path=str(repo_root)))
 
     assert payload["status"] == "ok"
     assert json.loads(captured["env"]["LV3_ATLAS_OPENBAO_APPROLE_JSON"]) == {
@@ -265,7 +267,7 @@ def test_wrapper_surfaces_drift_without_treating_it_as_runner_error(monkeypatch,
 
     monkeypatch.setattr(module.subprocess, "run", fake_run)
 
-    payload = module.main(repo_path=str(repo_root))
+    payload = cast(dict[str, Any], module.main(repo_path=str(repo_root)))
 
     assert payload["status"] == "drift"
     assert payload["report"]["drift_count"] == 2
@@ -289,7 +291,7 @@ def test_wrapper_treats_exit_code_two_without_structured_drift_report_as_error(m
 
     monkeypatch.setattr(module.subprocess, "run", fake_run)
 
-    payload = module.main(repo_path=str(repo_root))
+    payload = cast(dict[str, Any], module.main(repo_path=str(repo_root)))
 
     assert payload["status"] == "error"
     assert payload["stderr"] == "Atlas schema automation error: permission denied"

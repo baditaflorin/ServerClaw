@@ -25,18 +25,11 @@
     common_local_openbao_runtime_gid: "{{ openbao_runtime_gid | default('1000') }}"
     common_local_openbao_runtime_chain_recheck_retries: "{{ openbao_runtime_chain_recheck_retries | default(30) }}"
     common_local_openbao_runtime_chain_recheck_delay_seconds: "{{ openbao_runtime_chain_recheck_delay_seconds | default(2) }}"
-    common_local_openbao_runtime_log_dir: >-
-      {{
-        openbao_log_dir
-        | default(((openbao_site_dir | default('/opt/openbao')) ~ '/logs'))
-      }}
     common_local_openbao_runtime_audit_log_file: >-
       {{
         openbao_audit_file_path
         | default(((openbao_log_dir | default(((openbao_site_dir | default('/opt/openbao')) ~ '/logs'))) ~ '/audit.log'))
       }}
-    common_local_openbao_runtime_uid: "{{ openbao_runtime_uid | default('100') }}"
-    common_local_openbao_runtime_gid: "{{ openbao_runtime_gid | default('1000') }}"
 
 - name: Ensure the local OpenBao log directory retains managed ownership before helper API calls
   ansible.builtin.file:
@@ -49,24 +42,6 @@
 - name: Ensure the local OpenBao audit log file retains managed ownership before helper API calls
   ansible.builtin.file:
     path: "{{ common_local_openbao_runtime_audit_log_file }}"
-    state: touch
-    owner: "{{ common_local_openbao_runtime_uid }}"
-    group: "{{ common_local_openbao_runtime_gid }}"
-    mode: "0640"
-    access_time: preserve
-    modification_time: preserve
-
-- name: Ensure the local OpenBao log directory exists with managed ownership before helper recovery
-  ansible.builtin.file:
-    path: "{{ common_local_openbao_runtime_log_dir }}"
-    state: directory
-    owner: "{{ common_local_openbao_runtime_uid }}"
-    group: "{{ common_local_openbao_runtime_gid }}"
-    mode: "0700"
-
-- name: Ensure the local OpenBao audit log file exists with managed ownership before helper recovery
-  ansible.builtin.file:
-    path: "{{ common_local_openbao_runtime_log_dir }}/audit.log"
     state: touch
     owner: "{{ common_local_openbao_runtime_uid }}"
     group: "{{ common_local_openbao_runtime_gid }}"

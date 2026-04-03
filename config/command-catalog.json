@@ -731,6 +731,65 @@
         "timeout_seconds": 3600
       }
     },
+    "atlas-drift-check": {
+      "description": "Run the ADR 0304 Atlas drift check against the governed PostgreSQL catalog and record one receipt batch plus any resulting notification evidence.",
+      "workflow_id": "atlas-drift-check",
+      "scope": "guest_runtime",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used when the drift check reaches the private runtime guests through the managed jump path."
+        },
+        {
+          "name": "openbao_atlas_approle",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "OpenBao AppRole payload used to mint ephemeral PostgreSQL credentials for the declared Atlas drift targets."
+        },
+        {
+          "name": "nats_jetstream_admin_password",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local NATS password used when drift findings are published to the active Atlas drift topic."
+        },
+        {
+          "name": "ntfy_alertmanager_password",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local ntfy password used when the drift run emits alert notifications for detected schema drift."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes on the repo state being checked",
+        "make atlas-validate and make atlas-lint pass before operators rely on the live drift result",
+        "Operators understand this workflow is diagnostic and read-only against PostgreSQL, but it does write receipts and may publish notifications when drift is detected"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the drift summary, any written receipt paths under receipts/atlas-drift, and whether NATS or ntfy publication was triggered."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the drift runner cannot reach OpenBao, the PostgreSQL targets, or the declared notification surfaces well enough to produce a trustworthy summary.",
+          "Stop if the drift result indicates an unexpected production schema delta that should be investigated before more live changes are applied."
+        ],
+        "rollback_guidance": [
+          "This workflow is diagnostic only; repair the underlying schema or secret-path issue through the governed Atlas migration path before rerunning the drift check.",
+          "If the failure is caused by runner or notification prerequisites rather than schema drift, restore those prerequisites and rerun instead of compensating with manual database edits."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "subdomain-exposure-audit": {
       "description": "Run the ADR 0139 subdomain exposure audit against the governed public catalog and record one receipt.",
       "workflow_id": "subdomain-exposure-audit",

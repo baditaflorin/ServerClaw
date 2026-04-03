@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import sys
+import textwrap
 from pathlib import Path
 
 
@@ -247,6 +248,69 @@ def test_execute_check_marks_missing_docker_as_runner_unavailable(tmp_path: Path
 
     assert result.status == "runner_unavailable"
     assert result.returncode == 127
+
+
+def test_execute_check_cleans_up_timed_out_container(tmp_path: Path) -> None:
+    parallel_check = load_parallel_check_module()
+    fake_docker = tmp_path / "fake-docker"
+    cleanup_log = tmp_path / "cleanup.log"
+    fake_docker.write_text(
+        textwrap.dedent(
+            f"""\
+            #!/usr/bin/env python3
+            import pathlib
+            import sys
+            import time
+
+            cleanup_log = pathlib.Path({str(cleanup_log)!r})
+            args = sys.argv[1:]
+            if args[:2] == ["rm", "-f"]:
+                cleanup_log.write_text(" ".join(args), encoding="utf-8")
+                raise SystemExit(0)
+
+            cidfile = pathlib.Path(args[args.index("--cidfile") + 1])
+            if cidfile.exists():
+                raise SystemExit(2)
+            cidfile.write_text("fake-container\\n", encoding="utf-8")
+            time.sleep(2)
+            raise SystemExit(0)
+            """
+        ),
+        encoding="utf-8",
+    )
+    fake_docker.chmod(0o755)
+
+    check = parallel_check.CheckDefinition(
+        label="security-scan",
+        image="example/security:latest",
+        command="sleep 2",
+        working_dir="/workspace",
+        timeout_seconds=1,
+    )
+
+    result = parallel_check.execute_check(check, tmp_path, str(fake_docker))
+
+    assert result.status == "timed_out"
+    assert cleanup_log.read_text(encoding="utf-8") == "rm -f fake-container"
+
+
+def test_execute_check_uses_local_fallback_command_for_local_sources(tmp_path: Path, monkeypatch) -> None:
+    parallel_check = load_parallel_check_module()
+    monkeypatch.setenv("LV3_VALIDATION_SOURCE", "local-fallback")
+    check = parallel_check.CheckDefinition(
+        label="ansible-lint",
+        image="example/ansible:latest",
+        command="exit 99",
+        working_dir="/workspace",
+        timeout_seconds=30,
+        local_fallback_command="printf native-ok",
+    )
+
+    result = parallel_check.execute_check(check, tmp_path, str(tmp_path / "missing-docker"))
+
+    assert result.status == "passed"
+    assert result.stdout == "native-ok"
+    assert result.docker_command == ["sh", "-c", "printf native-ok"]
 
 
 def test_main_supports_all_checks(tmp_path: Path, capsys) -> None:

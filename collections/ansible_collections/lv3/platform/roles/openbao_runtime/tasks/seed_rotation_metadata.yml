@@ -1,3 +1,9 @@
+# Purpose: Seed repo-managed OpenBao rotation metadata for one rotatable secret through recovery-aware retries.
+# Use case: Included by the OpenBao runtime role after rotatable secrets are written so KV metadata matches the declared contract.
+# Inputs: openbao_rotation_contract, openbao_seed_rotation_init_payload, openbao_rotation_metadata, and openbao_http_port.
+# Outputs: The target KV metadata record contains the repo-managed rotation contract fields for the secret.
+# Idempotency: Yes; retries the metadata write and only converges the declared custom metadata fields for the current contract item.
+# Dependencies: ensure_unsealed.yml and seeded_secrets_and_verification.yml.
 ---
 - name: Ensure OpenBao remains unsealed before seeding rotation metadata for {{ openbao_rotation_contract.key }}
   ansible.builtin.include_role:
@@ -53,7 +59,7 @@
         openbao_unseal_context: "retrying rotation metadata for {{ openbao_rotation_contract.key }}"
         openbao_unseal_init_payload: "{{ openbao_seed_rotation_init_payload }}"
 
-    - name: Retry the OpenBao rotation metadata update for {{ openbao_rotation_contract.key }} after runtime recovery
+    - name: Retry the OpenBao rotation metadata update after runtime recovery for {{ openbao_rotation_contract.key }}
       ansible.builtin.uri:
         url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/metadata/{{ openbao_rotation_contract.value.openbao_path }}"
         method: POST
