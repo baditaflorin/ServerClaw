@@ -1,8 +1,9 @@
 # ADR 0343: Operator Tool Interface Contract
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: 0.178.4
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.178.5
+- Implemented On: 2026-04-04
 - Date: 2026-04-04
 - Tags: tooling, contracts, automation, dry, idempotency, operator-tools
 
