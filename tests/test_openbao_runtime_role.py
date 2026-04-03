@@ -74,7 +74,15 @@ OPENBAO_POSTGRES_BACKEND_TASKS_PATH = (
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "openbao.yml"
 PLAYBOOK_REFRESH_APPROLE_TASKS_PATH = REPO_ROOT / "playbooks" / "tasks" / "openbao-refresh-approle-artifact.yml"
 PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH = (
-    REPO_ROOT / "playbooks" / "tasks" / "openbao-seed-rotation-metadata.yml"
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "openbao_runtime"
+    / "tasks"
+    / "seed_rotation_metadata.yml"
 )
 GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "all.yml"
 
@@ -373,7 +381,7 @@ def test_openbao_runtime_renders_rotatable_secret_keys_dynamically() -> None:
     assert "register: openbao_seed_rotatable_secret_result" in tasks
     assert "until: openbao_seed_rotatable_secret_result.status == 200" in tasks
     assert "- name: Seed rotation metadata for dedicated rotatable secrets one at a time through recovery-aware retries" in tasks
-    assert 'ansible.builtin.include_tasks: "{{ playbook_dir }}/tasks/openbao-seed-rotation-metadata.yml"' in tasks
+    assert "ansible.builtin.include_tasks: seed_rotation_metadata.yml" in tasks
     assert "loop_var: openbao_rotation_contract" in tasks
     assert "\"{{ item.value.openbao_field }}\":" not in tasks
     assert "(openbao_rotation_metadata.last_rotated_metadata_key):" in PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH.read_text(
@@ -410,7 +418,7 @@ def test_openbao_seed_rotation_metadata_task_recovers_each_secret_through_unseal
     retry_task = seed_task["rescue"][1]
     assert (
         retry_task["name"]
-        == "Retry the OpenBao rotation metadata update for {{ openbao_rotation_contract.key }} after runtime recovery"
+        == "Retry the OpenBao rotation metadata update after runtime recovery for {{ openbao_rotation_contract.key }}"
     )
 
 
@@ -541,18 +549,18 @@ def test_openbao_playbook_refresh_task_recovers_each_approle_through_unseal_chec
     task_names = [task["name"] for task in refresh_tasks]
 
     assert (
-        "Ensure OpenBao remains unsealed before refreshing the {{ openbao_refresh_approle.name }} controller-local AppRole artifact"
+        "Ensure OpenBao remains unsealed before refreshing the controller-local AppRole artifact for {{ openbao_refresh_approle.name }}"
         in task_names
     )
     assert (
-        "Persist the refreshed {{ openbao_refresh_approle.name }} AppRole artifact locally after end-to-end verification"
+        "Persist the refreshed AppRole artifact locally after end-to-end verification for {{ openbao_refresh_approle.name }}"
         in task_names
     )
 
     request_task = next(
         task
         for task in refresh_tasks
-        if task["name"] == "Generate the refreshed {{ openbao_refresh_approle.name }} AppRole secret ID after end-to-end verification"
+        if task["name"] == "Generate the refreshed AppRole secret ID after end-to-end verification for {{ openbao_refresh_approle.name }}"
     )
     request_block = request_task["block"][0]
     request_module = request_block["ansible.builtin.uri"]
@@ -568,7 +576,7 @@ def test_openbao_playbook_refresh_task_recovers_each_approle_through_unseal_chec
     persist_task = next(
         task
         for task in refresh_tasks
-        if task["name"] == "Persist the refreshed {{ openbao_refresh_approle.name }} AppRole artifact locally after end-to-end verification"
+        if task["name"] == "Persist the refreshed AppRole artifact locally after end-to-end verification for {{ openbao_refresh_approle.name }}"
     )
     assert (
         "openbao_refresh_existing_artifacts[openbao_refresh_approle.name].role_id"
