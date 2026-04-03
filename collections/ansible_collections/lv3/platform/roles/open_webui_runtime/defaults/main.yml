@@ -32,17 +32,18 @@ open_webui_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_flo
 open_webui_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt
 open_webui_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/webui-secret-key.txt
 open_webui_provider_env_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/provider.env
-open_webui_oidc_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/oidc-client-secret.txt
+open_webui_oidc_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/open-webui-client-secret.txt
 open_webui_admin_password_remote_file: "{{ open_webui_secret_dir }}/admin-password.txt"
 open_webui_secret_key_remote_file: "{{ open_webui_secret_dir }}/webui-secret-key.txt"
-open_webui_enable_oidc: false
-open_webui_oidc_client_id: ""
-open_webui_oidc_provider_url: ""
+open_webui_enable_oidc: true
+open_webui_oidc_client_id: open-webui
+open_webui_oidc_provider_url: https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
 open_webui_oidc_provider_name: Keycloak
 open_webui_oidc_scopes: openid email profile
 open_webui_oidc_redirect_uri: "{{ open_webui_webui_url }}/oauth/oidc/callback"
-open_webui_enable_login_form: "{{ not (open_webui_enable_oidc | bool) }}"
-open_webui_enable_password_auth: "{{ not (open_webui_enable_oidc | bool) }}"
+open_webui_oidc_login_path: /oauth/oidc/login
+open_webui_enable_login_form: true
+open_webui_enable_password_auth: true
 open_webui_default_user_role: pending
 open_webui_enable_openai_api: false
 open_webui_enable_ollama_api: false

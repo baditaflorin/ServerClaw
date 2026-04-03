@@ -42,6 +42,7 @@ The workflow manages these live surfaces:
 - internal Keycloak mail submission endpoint `lv3-mail-stalwart:1587` on the shared mail Docker network
 - named operator account `florin.badita`
 - confidential OIDC client `grafana-oauth`
+- confidential OIDC client `open-webui`
 - shared logout authority return paths rooted at `https://ops.lv3.org/.well-known/lv3/session/`
 - confidential agent client `lv3-agent-hub`
 - confidential delegated-auth runtime client `serverclaw-runtime`
@@ -55,6 +56,7 @@ After a successful converge, these controller-local files should exist:
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/bootstrap-admin-password.txt`
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-password.txt`
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/grafana-client-secret.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/open-webui-client-secret.txt`
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt`
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-runtime-client-secret.txt`
 

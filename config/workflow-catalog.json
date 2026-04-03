@@ -4768,7 +4768,7 @@
       }
     },
     "converge-open-webui": {
-      "description": "Deploy private Open WebUI on docker-runtime-lv3 with repo-managed bootstrap auth and an operator-only Tailscale proxy on the Proxmox host.",
+      "description": "Deploy private Open WebUI with a repo-managed Keycloak OIDC client, routine SSO sign-in, retained break-glass admin auth, and an operator-only Tailscale proxy on the Proxmox host.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4782,6 +4782,7 @@
         ],
         "generated_secret_ids": [
           "open_webui_admin_password",
+          "open_webui_oidc_client_secret",
           "open_webui_secret_key"
         ]
       },
@@ -4794,6 +4795,7 @@
       "implementation_refs": [
         "Makefile",
         "playbooks/open-webui.yml",
+        "roles/keycloak_runtime/tasks/open_webui_client.yml",
         "roles/open_webui_runtime",
         "roles/proxmox_tailscale_proxy/tasks/main.yml",
         "roles/proxmox_security/tasks/main.yml",
@@ -4801,11 +4803,12 @@
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
-        "A private Open WebUI runtime deployed on docker-runtime-lv3 with repo-managed admin bootstrap and an operator-only Tailscale proxy on the Proxmox host."
+        "A private Open WebUI runtime deployed on docker-runtime-lv3 with a repo-managed Keycloak client, routine OIDC login, retained local admin fallback, and an operator-only Tailscale proxy on the Proxmox host."
       ],
       "verification_commands": [
         "make syntax-check-open-webui",
         "curl -s http://100.64.0.1:8008/",
+        "curl -I http://100.64.0.1:8008/oauth/oidc/login",
         "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"'\"}' http://100.64.0.1:8008/api/v1/auths/signin"
       ],
       "execution_class": "mutation",

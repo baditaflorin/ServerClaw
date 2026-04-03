@@ -1851,7 +1851,7 @@
     {
       "id": "open_webui",
       "name": "Open WebUI",
-      "description": "Private operator and agent workbench for governed platform interactions.",
+      "description": "Private operator and agent workbench with Keycloak-backed routine sign-in and a retained local break-glass admin path.",
       "category": "access",
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
@@ -1865,6 +1865,7 @@
       ],
       "secret_catalog_ids": [
         "open_webui_admin_password",
+        "open_webui_oidc_client_secret",
         "open_webui_secret_key"
       ],
       "adr": "0060",

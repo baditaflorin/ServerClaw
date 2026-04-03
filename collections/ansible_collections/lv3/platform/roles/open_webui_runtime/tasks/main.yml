@@ -25,6 +25,7 @@
       - (not open_webui_enable_web_search | bool) or (open_webui_web_search_engine != 'searxng') or (open_webui_searxng_query_url | length > 0)
       - (not open_webui_enable_oidc | bool) or (open_webui_oidc_client_id | length > 0)
       - (not open_webui_enable_oidc | bool) or (open_webui_oidc_provider_url | length > 0)
+      - (not open_webui_enable_oidc | bool) or (open_webui_oidc_redirect_uri | length > 0)
     fail_msg: >-
       open_webui_runtime requires compose paths, image, admin bootstrap, base URLs,
       web-search settings when enabled, and OIDC settings when SSO is enabled.
@@ -338,6 +339,7 @@
   register: open_webui_admin_signin
   changed_when: false
   no_log: true
+  when: open_webui_enable_password_auth | bool
 
 - name: Assert Open WebUI sign-in returned the expected account
   ansible.builtin.assert:
@@ -346,6 +348,7 @@
       - (open_webui_admin_signin.json.role | default('')) == 'admin'
     fail_msg: "Open WebUI started, but the repo-managed admin bootstrap could not be verified."
   no_log: true
+  when: open_webui_enable_password_auth | bool
 
 - name: Verify Open WebUI health probes
   ansible.builtin.import_tasks: verify.yml

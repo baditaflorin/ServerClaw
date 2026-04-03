@@ -39,3 +39,16 @@
     fail_msg: "Open WebUI started, but the repo-managed admin bootstrap could not be verified."
   no_log: true
   when: open_webui_enable_password_auth | bool
+
+- name: Verify Open WebUI OIDC login redirects through the configured provider
+  ansible.builtin.uri:
+    url: "{{ open_webui_internal_base_url }}{{ open_webui_oidc_login_path }}"
+    method: GET
+    follow_redirects: none
+    status_code:
+      - 302
+      - 303
+      - 307
+  register: open_webui_verify_oidc_redirect
+  changed_when: false
+  when: open_webui_enable_oidc | bool

@@ -29,13 +29,18 @@ def load_health_probes() -> dict:
 def test_defaults_expose_public_oidc_runtime_inputs() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text())
 
+    assert defaults["open_webui_enable_oidc"] is True
+    assert defaults["open_webui_oidc_client_id"] == "open-webui"
+    assert defaults["open_webui_oidc_provider_url"] == "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration"
     assert defaults["open_webui_webui_name"] == "Open WebUI"
     assert defaults["open_webui_oidc_provider_name"] == "Keycloak"
     assert defaults["open_webui_oidc_scopes"] == "openid email profile"
     assert defaults["open_webui_oidc_redirect_uri"] == "{{ open_webui_webui_url }}/oauth/oidc/callback"
+    assert defaults["open_webui_oidc_login_path"] == "/oauth/oidc/login"
+    assert defaults["open_webui_oidc_client_secret_local_file"].endswith("/.local/keycloak/open-webui-client-secret.txt")
     assert defaults["open_webui_enable_openbao_agent"] is True
-    assert defaults["open_webui_enable_login_form"] == "{{ not (open_webui_enable_oidc | bool) }}"
-    assert defaults["open_webui_enable_password_auth"] == "{{ not (open_webui_enable_oidc | bool) }}"
+    assert defaults["open_webui_enable_login_form"] is True
+    assert defaults["open_webui_enable_password_auth"] is True
     assert defaults["open_webui_default_user_role"] == "pending"
     assert defaults["open_webui_session_cookie_secure"] is False
     assert defaults["open_webui_auth_cookie_secure"] is False
@@ -48,6 +53,7 @@ def test_env_template_wires_public_runtime_identity_and_oidc_fields() -> None:
     assert "ENABLE_LOGIN_FORM={{ 'True' if open_webui_enable_login_form | bool else 'False' }}" in template
     assert "ENABLE_PASSWORD_AUTH={{ 'True' if open_webui_enable_password_auth | bool else 'False' }}" in template
     assert "DEFAULT_USER_ROLE={{ open_webui_default_user_role }}" in template
+    assert "OAUTH_CLIENT_ID={{ open_webui_oidc_client_id }}" in template
     assert "WEBUI_SESSION_COOKIE_SAME_SITE={{ open_webui_session_cookie_same_site }}" in template
     assert "WEBUI_AUTH_COOKIE_SAME_SITE={{ open_webui_auth_cookie_same_site }}" in template
     assert "WEBUI_SESSION_COOKIE_SECURE={{ 'True' if open_webui_session_cookie_secure | bool else 'False' }}" in template
@@ -84,9 +90,17 @@ def test_verify_tasks_skip_password_signin_when_password_auth_is_disabled() -> N
 
     signin_task = next(task for task in tasks if task.get("name") == "Verify Open WebUI admin sign-in works")
     assert_task = next(task for task in tasks if task.get("name") == "Assert Open WebUI sign-in returned the expected account")
+    oidc_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Verify Open WebUI OIDC login redirects through the configured provider"
+    )
 
     assert signin_task["when"] == "open_webui_enable_password_auth | bool"
     assert assert_task["when"] == "open_webui_enable_password_auth | bool"
+    assert oidc_task["when"] == "open_webui_enable_oidc | bool"
+    assert oidc_task["ansible.builtin.uri"]["url"] == "{{ open_webui_internal_base_url }}{{ open_webui_oidc_login_path }}"
+    assert oidc_task["ansible.builtin.uri"]["status_code"] == [302, 303, 307]
 
 
 def test_open_webui_and_serverclaw_probes_match_their_runtime_contracts() -> None:

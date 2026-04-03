@@ -142,8 +142,8 @@
       "lane": "api",
       "lane_surface_ref": "open-webui-operator-workbench",
       "publication_tier": "operator-only",
-      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8008.",
-      "approval_notes": "This conversational operator surface stays private and requires approved operator credentials; do not publish it through the public edge."
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8008, with routine browser sign-in brokered by Keycloak and a retained local break-glass admin path.",
+      "approval_notes": "This conversational operator surface stays private, relies on the shared Keycloak identity plane for normal access, and must not be published through the public edge."
     },
     {
       "id": "one-api-unified-llm-api",

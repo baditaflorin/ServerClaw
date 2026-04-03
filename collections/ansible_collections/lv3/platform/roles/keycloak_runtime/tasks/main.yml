@@ -1296,6 +1296,41 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_gitea_client_reconcile is succeeded
 
+    - name: Ensure the Open WebUI OAuth client exists
+      community.general.keycloak_client:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_open_webui_client_id }}"
+        name: Open WebUI
+        description: Repo-managed OIDC client for the private Open WebUI operator and agent workbench.
+        enabled: true
+        protocol: openid-connect
+        public_client: false
+        client_authenticator_type: client-secret
+        standard_flow_enabled: true
+        implicit_flow_enabled: false
+        direct_access_grants_enabled: false
+        service_accounts_enabled: false
+        full_scope_allowed: false
+        root_url: "{{ keycloak_open_webui_root_url }}"
+        base_url: "{{ keycloak_open_webui_root_url }}"
+        admin_url: "{{ keycloak_open_webui_root_url }}"
+        redirect_uris:
+          - "{{ keycloak_open_webui_root_url }}/oauth/oidc/callback"
+        valid_post_logout_redirect_uris: "{{ keycloak_open_webui_post_logout_redirect_uris }}"
+        web_origins:
+          - "{{ keycloak_open_webui_root_url }}"
+        state: present
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      register: keycloak_open_webui_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_open_webui_client_reconcile is succeeded
+
     - name: Ensure the agent service client exists
       community.general.keycloak_client:
         realm: "{{ keycloak_realm_name }}"
@@ -1821,6 +1856,22 @@
       until: keycloak_gitea_client_secret_info is succeeded
       no_log: true
 
+    - name: Read the Open WebUI client secret
+      community.general.keycloak_clientsecret_info:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_open_webui_client_id }}"
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      register: keycloak_open_webui_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_open_webui_client_secret_info is succeeded
+      no_log: true
+
     - name: Read the agent client secret
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
@@ -2018,6 +2069,7 @@
     keycloak_grafana_client_secret: "{{ keycloak_grafana_client_secret_info.clientsecret_info.value }}"
     keycloak_ops_portal_client_secret: "{{ keycloak_ops_portal_client_secret_info.clientsecret_info.value }}"
     keycloak_gitea_client_secret: "{{ keycloak_gitea_client_secret_info.clientsecret_info.value }}"
+    keycloak_open_webui_client_secret: "{{ keycloak_open_webui_client_secret_info.clientsecret_info.value }}"
     keycloak_agent_client_secret: "{{ keycloak_agent_client_secret_info.clientsecret_info.value }}"
     keycloak_langfuse_client_secret: "{{ keycloak_langfuse_client_secret_info.clientsecret_info.value }}"
     keycloak_grist_client_secret: "{{ keycloak_grist_client_secret_info.clientsecret_info.value }}"
@@ -2054,6 +2106,15 @@
   ansible.builtin.copy:
     dest: "{{ keycloak_gitea_client_secret_local_file }}"
     content: "{{ keycloak_gitea_client_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the Open WebUI client secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ keycloak_open_webui_client_secret_local_file }}"
+    content: "{{ keycloak_open_webui_client_secret }}\n"
     mode: "0600"
   delegate_to: localhost
   become: false

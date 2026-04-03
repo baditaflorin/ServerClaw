@@ -3212,7 +3212,7 @@
       }
     },
     "converge-open-webui": {
-      "description": "Converge the private Open WebUI runtime, host-side proxy, and repo-managed bootstrap auth state.",
+      "description": "Converge the private Open WebUI runtime, its dedicated Keycloak OIDC client, the host-side proxy, and the retained break-glass admin state.",
       "workflow_id": "converge-open-webui",
       "scope": "host_and_guest",
       "approval_policy": "sensitive_live_change",
@@ -3228,19 +3228,20 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-open-webui passes",
         "make validate passes before the apply",
-        "Approved model connector policy and private-only access expectations are reviewed before rollout"
+        "Approved model connector policy and private-only access expectations are reviewed before rollout",
+        "The shared Keycloak runtime is already deployed and reachable before replaying the dedicated Open WebUI client step"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record runtime health, host-side proxy reachability, generated bootstrap secrets, and admin sign-in verification."
+        "notes": "Record Keycloak client reconciliation, runtime health, host-side proxy reachability, generated bootstrap secrets, OIDC redirect verification, and break-glass admin sign-in verification."
       },
       "failure_guidance": {
         "stop_conditions": [
-          "Stop if runtime deployment, host-side proxy setup, or admin bootstrap verification fails.",
+          "Stop if Keycloak client reconciliation, runtime deployment, host-side proxy setup, OIDC redirect verification, or admin bootstrap verification fails.",
           "Stop if the service becomes reachable without the intended private-only operator boundary."
         ],
         "rollback_guidance": [
-          "Restore the last known-good Open WebUI runtime and proxy state before retrying.",
+          "Restore the last known-good Open WebUI runtime, Keycloak client contract, and proxy state before retrying.",
           "Do not leave ad hoc provider configuration or manual UI drift behind after a failed rollout."
         ]
       },
