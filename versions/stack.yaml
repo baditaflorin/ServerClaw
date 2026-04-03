@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.152
-platform_version: 0.130.95
+repo_version: 0.177.153
+platform_version: 0.130.96
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -85,7 +85,7 @@ live_apply_evidence:
     flagsmith: 2026-03-30-adr-0288-flagsmith-mainline-live-apply
     crawl4ai: 2026-03-31-adr-0288-crawl4ai-mainline-live-apply
     coolify: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
-    coolify_apps: 2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply
+    coolify_apps: 2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply
     outline: 2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply
     network_impairment_matrix: 2026-03-27-adr-0189-network-impairment-matrix-live-apply
     plane: 2026-03-28-adr-0193-plane-mainline-live-apply
@@ -903,8 +903,11 @@ observed_state:
     apps_public_url: https://apps.lv3.org
     dashboard_version: 4.0.0-beta.470
     deployment_server_name: coolify-apps-lv3
-    deployment_server_reachable: false
-    deployment_server_usable: false
+    deployment_server_uuid: upsaaj0eoynvncqlorp7y2yj
+    deployment_server_registered: true
+    deployment_server_reachable: true
+    deployment_server_usable: true
+    apps_migration_status: pending_ui  # Coolify API v1 does not support programmatic server migration; use Coolify UI
     repo_smoke_app_url: https://repo-smoke.apps.lv3.org
     repo_smoke_public_http_verified: false
     apps_apex_default_unassigned: true

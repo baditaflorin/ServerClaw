@@ -235,6 +235,8 @@
 - name: Register coolify-apps-lv3 as the Coolify deployment server
   hosts: localhost
   gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
   tags:
     - tier-3
     - automation
@@ -244,22 +246,30 @@
   tasks:
     - name: Register coolify-apps-lv3 as the active Coolify deployment server
       ansible.builtin.command: >
-        python3 scripts/coolify_tool.py register-deployment-server
+        python3 scripts/coolify_tool.py
+        --auth-file "{{ coolify_admin_auth_local_file }}"
+        register-deployment-server
         --host coolify-apps-lv3
         --ip "{{ hostvars['coolify-apps-lv3']['ansible_host'] }}"
+      args:
+        chdir: "{{ playbook_dir }}/.."
       delegate_to: localhost
       become: false
       register: coolify_server_registration
-      changed_when: "'registered' in coolify_server_registration.stdout"
+      changed_when: "'\"status\": \"registered\"' in coolify_server_registration.stdout"
       failed_when: coolify_server_registration.rc != 0
       tags:
         - coolify-deploy-server-registration
 
     - name: Migrate existing app deployments to coolify-apps-lv3
       ansible.builtin.command: >
-        python3 scripts/coolify_tool.py migrate-deployment-server
+        python3 scripts/coolify_tool.py
+        --auth-file "{{ coolify_admin_auth_local_file }}"
+        migrate-deployment-server
         --from coolify-lv3
         --to coolify-apps-lv3
+      args:
+        chdir: "{{ playbook_dir }}/.."
       delegate_to: localhost
       become: false
       register: coolify_server_migration
