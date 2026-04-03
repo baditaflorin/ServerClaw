@@ -1,0 +1,21 @@
+id: adr-0134-changelog-redaction
+adr: '0134'
+title: Changelog portal content redaction
+status: merged
+owner: codex
+branch: codex/adr-0134-changelog-redaction
+worktree_path: .worktrees/adr-0134
+doc: docs/workstreams/adr-0134-changelog-redaction.md
+depends_on:
+- adr-0081-changelog-portal
+- adr-0115-mutation-ledger
+conflicts_with: []
+shared_surfaces:
+- scripts/changelog_redaction.py
+- scripts/deployment_history.py
+- scripts/generate_changelog_portal.py
+- config/changelog-redaction.yaml
+- tests/test_changelog_redaction.py
+- docs/runbooks/deployment-history-portal.md
+ready_to_merge: false
+live_applied: false

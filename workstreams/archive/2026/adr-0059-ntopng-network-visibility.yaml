@@ -1,0 +1,20 @@
+id: adr-0059-ntopng-network-visibility
+adr: 0059
+title: ntopng for private network flow visibility
+status: live_applied
+owner: codex
+branch: codex/adr-0059-ntopng
+worktree_path: ../proxmox_florin_server-ntopng
+doc: docs/workstreams/adr-0059-ntopng-network-visibility.md
+depends_on:
+- adr-0011-monitoring
+- adr-0012-proxmox-host-bridge-and-nat-network
+- adr-0049-private-api-publication
+conflicts_with: []
+shared_surfaces:
+- vmbr10
+- ingress traffic
+- guest egress
+- network triage
+ready_to_merge: true
+live_applied: true

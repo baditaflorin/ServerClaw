@@ -1,0 +1,26 @@
+id: adr-0164-circuit-breaker-pattern
+adr: '0164'
+title: Circuit breaker pattern for external service calls
+status: live_applied
+owner: codex
+branch: codex/live-apply-0164
+worktree_path: .worktrees/live-apply-0164
+doc: docs/workstreams/adr-0164-circuit-breaker-pattern.md
+depends_on:
+- adr-0058-nats-event-bus
+- adr-0092-platform-api-gateway
+- adr-0119-budgeted-workflow-scheduler
+- adr-0129-runbook-automation-executor
+- adr-0145-ollama
+conflicts_with: []
+shared_surfaces:
+- config/circuit-policies.yaml
+- platform/circuit
+- scripts/api_gateway/main.py
+- platform/llm/client.py
+- platform/scheduler/scheduler.py
+- scripts/runbook_executor.py
+- collections/ansible_collections/lv3/platform/roles/api_gateway_runtime
+- docs/runbooks/circuit-breaker-operations.md
+ready_to_merge: false
+live_applied: true

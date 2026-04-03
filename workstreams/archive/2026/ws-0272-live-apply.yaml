@@ -1,0 +1,68 @@
+id: ws-0272-live-apply
+adr: '0272'
+title: Restore readiness ladders and stateful warm-up verification profiles
+status: live_applied
+owner: codex
+branch: codex/adr-0272-restore-readiness-live-apply
+worktree_path: .worktrees/adr-0272-restore-readiness
+doc: docs/workstreams/ws-0272-live-apply.md
+depends_on:
+- adr-0099-backup-restore-verification
+- adr-0190-synthetic-transaction-replay
+- adr-0246-startup-readiness-liveness-and-degraded-state-semantics
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- docs/workstreams/ws-0272-live-apply.md
+- docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+- docs/adr/.index.yaml
+- docs/runbooks/backup-restore-verification.md
+- .config-locations.yaml
+- config/restore-readiness-profiles.json
+- docs/schema/restore-readiness-profiles.schema.json
+- scripts/restore_verification.py
+- scripts/validate_repository_data_models.py
+- config/workflow-catalog.json
+- tests/test_restore_verification.py
+- receipts/restore-verifications/
+- receipts/live-applies/
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: adr_index_generation
+    paths:
+    - docs/adr/.index.yaml
+    mode: shared_contract
+    contract: adr-index-generator-v1
+  - id: adr_0272_docs
+    paths:
+    - docs/workstreams/ws-0272-live-apply.md
+    - docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+    - docs/runbooks/backup-restore-verification.md
+    - .config-locations.yaml
+    mode: exclusive
+  - id: adr_0272_restore_automation
+    paths:
+    - config/restore-readiness-profiles.json
+    - docs/schema/restore-readiness-profiles.schema.json
+    - scripts/restore_verification.py
+    - scripts/validate_repository_data_models.py
+    - config/workflow-catalog.json
+    - tests/test_restore_verification.py
+    - receipts/restore-verifications/
+    - receipts/live-applies/
+    mode: exclusive
+ready_to_merge: true
+live_applied: true
+canonical_truth:
+  changelog_entry: implements ADR 0272 by adding governed restore-readiness ladders,
+    per-service warm-up profiles, ladder-aware restore receipts, and verified live
+    restore evidence for the protected guests
+  release_bump: patch
+  included_in_repo_version: 0.177.75
+  latest_receipts:
+    restore_verification: 2026-03-29-adr-0272-restore-readiness-mainline-live-apply

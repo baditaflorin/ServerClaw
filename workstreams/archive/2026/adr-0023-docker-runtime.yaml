@@ -1,0 +1,16 @@
+id: adr-0023-docker-runtime
+adr: '0023'
+title: Docker runtime VM baseline
+status: live_applied
+owner: codex
+branch: codex/adr-0023-docker-runtime
+worktree_path: ../proxmox_florin_server-docker-runtime
+doc: docs/workstreams/adr-0023-docker-runtime.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+- docker-runtime-lv3
+- playbooks/docker-runtime.yml
+- roles/docker_runtime
+ready_to_merge: false
+live_applied: true

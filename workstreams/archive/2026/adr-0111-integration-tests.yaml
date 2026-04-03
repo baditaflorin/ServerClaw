@@ -1,0 +1,32 @@
+id: adr-0111-integration-tests
+adr: '0111'
+title: End-to-end integration test suite
+status: merged
+owner: codex
+branch: codex/adr-0111-integration-tests
+worktree_path: .worktrees/adr-0111
+doc: docs/workstreams/adr-0111-integration-test-suite.md
+depends_on:
+- adr-0044-windmill
+- adr-0056-keycloak
+- adr-0061-glitchtip
+- adr-0064-health-probes
+- adr-0066-mutation-audit-log
+- adr-0088-ephemeral-fixtures
+- adr-0092-platform-api-gateway
+- adr-0098-postgres-ha
+- adr-0106-ephemeral-lifecycle
+- adr-0108-operator-onboarding
+conflicts_with: []
+shared_surfaces:
+- tests/
+- scripts/integration_suite.py
+- requirements/integration-tests.txt
+- Makefile
+- config/validation-gate.json
+- config/workflow-catalog.json
+- Windmill workflows
+- Keycloak realm
+- docs/runbooks/
+ready_to_merge: false
+live_applied: false

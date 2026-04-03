@@ -1,0 +1,24 @@
+id: adr-0152-homepage-dashboard
+adr: '0152'
+title: Homepage for unified service dashboard
+status: live_applied
+owner: codex
+branch: codex/integration-0152-homepage-v3
+worktree_path: ../proxmox_florin_server-homepage-mainline-v2
+doc: docs/workstreams/adr-0152-homepage.md
+depends_on:
+- adr-0075-service-capability-catalog
+- adr-0076-subdomain-governance
+- adr-0093-interactive-ops-portal
+- adr-0133-portal-auth-by-default
+conflicts_with: []
+shared_surfaces:
+- roles/homepage_runtime
+- playbooks/homepage.yml
+- scripts/generate_homepage_config.py
+- config/service-capability-catalog.json
+- config/subdomain-catalog.json
+- inventory/host_vars/proxmox_florin.yml
+- config/workflow-catalog.json
+ready_to_merge: false
+live_applied: true

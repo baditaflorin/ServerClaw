@@ -1,0 +1,21 @@
+id: adr-0135-data-governance
+adr: '0135'
+title: Developer portal sensitivity classification
+status: merged
+owner: codex
+branch: codex/adr-0135-data-governance-mainline
+worktree_path: .worktrees/adr-0135-mainline
+doc: docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md
+depends_on:
+- adr-0094-developer-portal
+- adr-0110-platform-versioning
+- adr-0121-search-indexing-fabric
+conflicts_with: []
+shared_surfaces:
+- docs/adr/
+- docs/runbooks/
+- docs/templates/
+- scripts/generate_docs_site.py
+- tests/test_docs_site.py
+ready_to_merge: false
+live_applied: false

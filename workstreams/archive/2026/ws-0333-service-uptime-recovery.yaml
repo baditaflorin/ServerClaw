@@ -1,0 +1,89 @@
+id: ws-0333-service-uptime-recovery
+adr: 0319
+title: Fail closed before runtime-pool retirement or shared-runtime recovery can take
+  down legacy services
+status: merged
+owner: codex
+branch: codex/ws-0333-service-uptime-recovery
+worktree_path: .worktrees/ws-0333-service-uptime-recovery
+doc: docs/workstreams/ws-0333-service-uptime-recovery.md
+depends_on:
+- ws-0325-service-uptime-investigation
+- ws-0330-runtime-pool-transition-program
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- docs/workstreams/ws-0333-service-uptime-recovery.md
+- playbooks/runtime-general-pool.yml
+- playbooks/runtime-control-pool.yml
+- playbooks/runtime-ai-pool.yml
+- docs/runbooks/configure-runtime-general-pool.md
+- docs/runbooks/configure-runtime-control-pool.md
+- docs/runbooks/configure-runtime-ai-pool.md
+- docs/runbooks/configure-keycloak.md
+- docs/runbooks/configure-openbao.md
+- docs/diagrams/agent-coordination-map.excalidraw
+- roles/common/defaults/main.yml
+- roles/common/meta/argument_specs.yml
+- roles/common/tasks/docker_daemon_restart.yml
+- roles/keycloak_runtime/tasks/main.yml
+- roles/openbao_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+- collections/ansible_collections/lv3/platform/roles/common/tasks/docker_daemon_restart.yml
+- collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+- tests/test_common_docker_daemon_restart_helper.py
+- tests/test_keycloak_runtime_role.py
+- tests/test_openbao_runtime_role.py
+- tests/test_runtime_general_pool_playbook.py
+- tests/test_runtime_control_pool_playbook.py
+- tests/test_runtime_ai_pool_playbook.py
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws0333_uptime_recovery_doc
+    paths:
+    - docs/workstreams/ws-0333-service-uptime-recovery.md
+    mode: exclusive
+  - id: ws0333_runtime_pool_retirement_guards
+    paths:
+    - playbooks/runtime-general-pool.yml
+    - playbooks/runtime-control-pool.yml
+    - playbooks/runtime-ai-pool.yml
+    - docs/runbooks/configure-runtime-general-pool.md
+    - docs/runbooks/configure-runtime-control-pool.md
+    - docs/runbooks/configure-runtime-ai-pool.md
+    - docs/runbooks/configure-keycloak.md
+    - docs/runbooks/configure-openbao.md
+    - docs/diagrams/agent-coordination-map.excalidraw
+    - roles/common/defaults/main.yml
+    - roles/common/meta/argument_specs.yml
+    - roles/common/tasks/docker_daemon_restart.yml
+    - roles/keycloak_runtime/tasks/main.yml
+    - roles/openbao_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_daemon_restart.yml
+    - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+    - tests/test_common_docker_daemon_restart_helper.py
+    - tests/test_keycloak_runtime_role.py
+    - tests/test_openbao_runtime_role.py
+    - tests/test_runtime_general_pool_playbook.py
+    - tests/test_runtime_control_pool_playbook.py
+    - tests/test_runtime_ai_pool_playbook.py
+    mode: exclusive
+canonical_truth:
+  changelog_entry: hardens runtime-pool retirement and shared-runtime recovery so
+    legacy services cannot be retired before destination pools are verified and routine
+    Keycloak or OpenBao converges cannot restart Docker on docker-runtime-lv3
+  release_bump: patch
+  included_in_repo_version: 0.178.1
+blockers: []
+ready_to_merge: true
+live_applied: false

@@ -1,0 +1,19 @@
+id: adr-0045-communication-lanes
+adr: '0045'
+title: Control-plane communication lanes
+status: live_applied
+owner: codex
+branch: codex/adr-0045-communication-lanes
+worktree_path: ../proxmox_florin_server-communication-lanes
+doc: docs/workstreams/adr-0045-communication-lanes.md
+depends_on:
+- adr-0014-tailscale
+- adr-0041-email-platform
+conflicts_with: []
+shared_surfaces:
+- SSH
+- HTTPS APIs
+- SMTP submission
+- webhook flows
+ready_to_merge: false
+live_applied: true

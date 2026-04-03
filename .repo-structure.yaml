@@ -23,7 +23,7 @@ quick_start_for_agents:
   step_3: "Read this file (.repo-structure.yaml) to navigate directories"
   step_4: "Read .config-locations.yaml to find where specific configs live"
   step_5: "Read docs/adr/.index.yaml to search all 320+ decisions by keyword"
-  step_6: "Check workstreams.yaml for parallel work already in flight"
+  step_6: "Check workstreams.yaml for active coordination and workstreams/ when editing registry source shards"
   note: >
     Do NOT glob-explore the tree. All key paths are listed below.
     Token budget: 6 reads to be fully oriented.
@@ -46,8 +46,8 @@ top_level_files:
     purpose: Human-readable changelog index pointing to versioned release notes
     for_agents: "Update when cutting a new version"
   workstreams.yaml:
-    purpose: Active workstream registry - branch, assignee, status, ADR ref
-    for_agents: "Check for in-flight work; update your entry at start/end"
+    purpose: Generated compatibility assembly for active workstream coordination
+    for_agents: "Read this first for current active work; regenerate it after shard edits"
   Makefile:
     purpose: Task runner - validate, test, build, deploy, generate docs
     for_agents: "Run 'make validate-data-models' before pushing"
@@ -94,6 +94,15 @@ directories:
     concern: project-management, branch-work
     keywords: [workstreams, parallel, branch, in-progress, tasks]
     for_agents: Understand what work is in progress and planned; create one here
+
+  workstreams:
+    purpose: Shard-backed workstream registry source files and archive history
+    contains: "policy.yaml plus active/<id>.yaml and archive/<year>/<id>.yaml"
+    concern: project-management, branch-work, coordination
+    keywords: [workstreams, registry, shards, archive, coordination]
+    for_agents: >
+      Edit workstream metadata here, then regenerate workstreams.yaml with
+      scripts/workstream_registry.py --write.
 
   docs/release-notes:
     purpose: Versioned release notes

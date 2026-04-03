@@ -1,0 +1,24 @@
+id: adr-0171-controlled-fault-injection
+adr: '0171'
+title: Controlled fault injection for resilience validation
+status: live_applied
+owner: codex
+branch: codex/adr-0171-fault-injection
+worktree_path: .worktrees/adr-0171-fault-injection
+doc: docs/workstreams/adr-0171-controlled-fault-injection.md
+depends_on:
+- adr-0043-openbao
+- adr-0044-windmill
+- adr-0056-keycloak
+- adr-0087-validation-gate
+conflicts_with: []
+shared_surfaces:
+- config/fault-scenarios.yaml
+- scripts/fault_injection.py
+- config/windmill/scripts/
+- config/workflow-catalog.json
+- collections/ansible_collections/lv3/platform/roles/windmill_runtime
+- docs/runbooks/fault-injection.md
+- versions/stack.yaml
+ready_to_merge: false
+live_applied: true

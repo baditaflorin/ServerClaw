@@ -25,12 +25,12 @@ from controller_automation_toolkit import load_json, load_yaml, repo_path
 from platform.events import build_envelope
 from platform.retry import async_with_retry, policy_for_surface
 from platform.timeouts import default_timeout, resolve_timeout_seconds
+from platform.workstream_registry import load_active_workstreams
 
 
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 GROUP_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
 SECRET_MANIFEST_PATH = repo_path("config", "controller-local-secrets.json")
-WORKSTREAMS_PATH = repo_path("workstreams.yaml")
 NATS_PUBLISH_POLICY = policy_for_surface("nats_publish")
 SSH_CONNECT_TIMEOUT_SECONDS = int(default_timeout("ssh_connection"))
 LOCAL_TUNNEL_STATUS_TIMEOUT_SECONDS = resolve_timeout_seconds("liveness_probe", 1)
@@ -263,11 +263,7 @@ def normalize_image_reference(reference: str) -> str:
 
 
 def load_workstreams() -> list[dict[str, Any]]:
-    payload = load_yaml(WORKSTREAMS_PATH)
-    workstreams = payload.get("workstreams")
-    if not isinstance(workstreams, list):
-        raise ValueError("workstreams.yaml must define a workstreams list")
-    return workstreams
+    return load_active_workstreams(repo_root=REPO_ROOT)
 
 
 def workstream_suppression(shared_surfaces: list[str]) -> tuple[bool, list[str]]:

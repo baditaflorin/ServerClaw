@@ -1,0 +1,18 @@
+id: adr-0044-windmill
+adr: '0044'
+title: Windmill for agent and operator workflows
+status: live_applied
+owner: codex
+branch: codex/adr-0044-windmill
+worktree_path: ../proxmox_florin_server-windmill
+doc: docs/workstreams/adr-0044-windmill.md
+depends_on:
+- adr-0026-postgres-vm
+conflicts_with: []
+shared_surfaces:
+- docker-runtime-lv3
+- postgres-lv3
+- workflow APIs
+- webhook entry points
+ready_to_merge: false
+live_applied: true

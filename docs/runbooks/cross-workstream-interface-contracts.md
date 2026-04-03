@@ -9,12 +9,13 @@ ADR 0175 makes shared producer-consumer boundaries explicit so parallel workstre
 - contract definitions: [config/contracts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/contracts)
 - validator module: [platform/interface_contracts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/interface_contracts.py)
 - CLI wrapper: [scripts/interface_contracts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/interface_contracts.py)
-- workstream registry: [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
+- workstream registry source: [workstreams/policy.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams/policy.yaml), [workstreams/active](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams/active), and [workstreams/archive](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams/archive)
+- workstream registry compatibility artifact: [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
 
 ## Current Contract Set
 
 - `workstream-registry-v1`
-  validates the shared `workstreams.yaml` entry shape, required fields, unique ids, and doc links consumed by release, drift, and status tooling
+  validates the generated `workstreams.yaml` compatibility shape, required fields, unique ids, and doc links consumed by release, drift, and status tooling
 - `converge-workflow-live-apply-v1`
   validates the live-apply handoff between `Makefile`, workflow contracts, command contracts, and owner runbooks for `converge-*` workflows
 
@@ -44,6 +45,12 @@ Show one contract with the resolved metadata:
 
 ```bash
 make interface-contract-info CONTRACT=workstream-registry-v1
+```
+
+For shard-source edits, also verify the compatibility assembly is current:
+
+```bash
+python3 scripts/workstream_registry.py --check
 ```
 
 ## Live Apply Guard

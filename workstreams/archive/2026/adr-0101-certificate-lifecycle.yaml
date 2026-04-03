@@ -1,0 +1,23 @@
+id: adr-0101-certificate-lifecycle
+adr: '0101'
+title: Automated certificate lifecycle management
+status: live_applied
+owner: codex
+branch: codex/adr-0101-certificate-lifecycle
+worktree_path: ../proxmox_florin_server-certificate-lifecycle
+doc: docs/workstreams/adr-0101-certificate-lifecycle.md
+depends_on:
+- adr-0042-step-ca
+- adr-0047-short-lived-creds
+- adr-0064-health-probes
+- adr-0091-drift-detection
+- adr-0096-slo-tracking
+- adr-0097-alerting-routing
+conflicts_with: []
+shared_surfaces:
+- config/health-probe-catalog.json
+- config/certificate-catalog.json
+- TLS-owning service roles
+- systemd unit files on VMs
+ready_to_merge: true
+live_applied: true

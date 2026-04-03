@@ -1,0 +1,19 @@
+id: adr-0052-loki-logs
+adr: '0052'
+title: Centralized log aggregation with Grafana Loki
+status: live_applied
+owner: codex
+branch: codex/adr-0052-loki-logs
+worktree_path: ../proxmox_florin_server-loki-logs
+doc: docs/workstreams/adr-0052-loki-logs.md
+depends_on:
+- adr-0011-monitoring
+conflicts_with: []
+shared_surfaces:
+- monitoring-lv3
+- Grafana
+- host logs
+- guest logs
+- container logs
+ready_to_merge: false
+live_applied: true

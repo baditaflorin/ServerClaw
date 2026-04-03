@@ -1,0 +1,18 @@
+id: adr-0042-step-ca
+adr: '0042'
+title: step-ca for SSH and internal TLS
+status: live_applied
+owner: codex
+branch: codex/adr-0042-step-ca
+worktree_path: ../proxmox_florin_server-step-ca
+doc: docs/workstreams/adr-0042-step-ca.md
+depends_on:
+- adr-0014-tailscale
+conflicts_with: []
+shared_surfaces:
+- docker-runtime-lv3
+- SSH trust
+- internal TLS
+- certificate issuance
+ready_to_merge: false
+live_applied: true

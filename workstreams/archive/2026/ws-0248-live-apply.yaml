@@ -1,0 +1,85 @@
+id: ws-0248-live-apply
+adr: 0248
+title: Live apply session and logout authority across Keycloak, oauth2-proxy, and
+  app surfaces
+status: live_applied
+owner: codex
+branch: codex/ws-0248-live-apply
+worktree_path: .worktrees/ws-0248-live-apply
+doc: docs/workstreams/ws-0248-live-apply.md
+depends_on:
+- adr-0056-keycloak-for-operator-and-agent-sso
+- adr-0133-portal-authentication-by-default
+- adr-0199-outline-living-knowledge-wiki
+- adr-0247-authenticated-browser-journey-verification-via-playwright
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- docs/workstreams/ws-0248-live-apply.md
+- docs/adr/0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-apps.md
+- docs/runbooks/portal-authentication-by-default.md
+- docs/runbooks/configure-keycloak.md
+- docs/runbooks/configure-outline.md
+- scripts/generate_platform_vars.py
+- inventory/group_vars/platform.yml
+- playbooks/keycloak.yml
+- playbooks/public-edge.yml
+- playbooks/outline.yml
+- collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+- collections/ansible_collections/lv3/platform/roles/keycloak_runtime/**
+- collections/ansible_collections/lv3/platform/roles/grafana_sso/**
+- collections/ansible_collections/lv3/platform/roles/outline_runtime/**
+- scripts/session_logout_verify.py
+- tests/test_generate_platform_vars.py
+- tests/test_grafana_sso_role.py
+- tests/test_nginx_edge_publication_role.py
+- tests/test_keycloak_runtime_role.py
+- tests/test_outline_runtime_role.py
+- tests/test_session_logout_verify.py
+- receipts/live-applies/2026-03-28-adr-0248-session-logout-authority-live-apply.json
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: adr_0248_live_apply
+    paths:
+    - docs/workstreams/ws-0248-live-apply.md
+    - docs/adr/0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-apps.md
+    - docs/runbooks/portal-authentication-by-default.md
+    - docs/runbooks/configure-keycloak.md
+    - docs/runbooks/configure-outline.md
+    - scripts/generate_platform_vars.py
+    - inventory/group_vars/platform.yml
+    - playbooks/keycloak.yml
+    - playbooks/public-edge.yml
+    - playbooks/outline.yml
+    - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+    - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/**
+    - collections/ansible_collections/lv3/platform/roles/grafana_sso/**
+    - collections/ansible_collections/lv3/platform/roles/outline_runtime/**
+    - scripts/session_logout_verify.py
+    - tests/test_generate_platform_vars.py
+    - tests/test_grafana_sso_role.py
+    - tests/test_nginx_edge_publication_role.py
+    - tests/test_keycloak_runtime_role.py
+    - tests/test_outline_runtime_role.py
+    - tests/test_session_logout_verify.py
+    mode: exclusive
+  - id: live_apply_evidence
+    paths:
+    - receipts/live-applies/2026-03-28-adr-0248-session-logout-authority-live-apply.json
+    mode: shared_contract
+    contract: live-apply-receipts-v1
+ready_to_merge: true
+live_applied: true
+canonical_truth:
+  changelog_entry: implements ADR 0248 by making Keycloak the governed browser-session
+    authority, routing shared-edge logout through oauth2-proxy with Keycloak id-token
+    logout hints, and aligning app-local logout surfaces with the same contract
+  release_bump: patch
+  included_in_repo_version: 0.177.69
+  latest_receipts:
+    session_logout_authority: 2026-03-29-adr-0248-session-logout-authority-mainline-live-apply

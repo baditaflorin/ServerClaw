@@ -1,0 +1,24 @@
+id: adr-0106-ephemeral-lifecycle
+adr: '0106'
+title: Ephemeral environment lifecycle and teardown policy
+status: merged
+owner: codex
+branch: codex/ws-0106-main-merge
+worktree_path: .worktrees/ws-0106-main-merge
+doc: docs/workstreams/adr-0106-ephemeral-lifecycle.md
+depends_on:
+- adr-0072-staging-production-topology
+- adr-0085-opentofu-vm-lifecycle
+- adr-0088-ephemeral-fixtures
+- adr-0093-interactive-ops-portal
+- adr-0105-capacity-model
+conflicts_with: []
+shared_surfaces:
+- scripts/fixture_manager.py
+- scripts/lv3_cli.py
+- scripts/generate_ops_portal.py
+- config/command-catalog.json
+- config/workflow-catalog.json
+- config/capacity-model.json
+ready_to_merge: true
+live_applied: true

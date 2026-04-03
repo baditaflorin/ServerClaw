@@ -1,0 +1,94 @@
+id: ws-0239-main-merge
+adr: 0239
+title: Integrate ADR 0239 browser-local search into origin/main
+status: merged
+owner: codex
+branch: codex/ws-0239-main-merge-r2
+worktree_path: .worktrees/ws-0239-main-merge-r2
+doc: docs/workstreams/ws-0239-main-merge.md
+depends_on:
+- ws-0239-live-apply
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- docs/workstreams/ws-0239-main-merge.md
+- README.md
+- RELEASE.md
+- VERSION
+- changelog.md
+- docs/release-notes/README.md
+- docs/release-notes/0.177.62.md
+- versions/stack.yaml
+- build/platform-manifest.json
+- docs/diagrams/agent-coordination-map.excalidraw
+- docs/adr/.index.yaml
+- docs/adr/0239-browser-local-search-experience-via-pagefind.md
+- docs/workstreams/ws-0239-live-apply.md
+- docs/runbooks/deployment-history-portal.md
+- docs/runbooks/developer-portal.md
+- docs/site-generated/architecture/dependency-graph.md
+- Makefile
+- mkdocs.yml
+- requirements/docs.txt
+- scripts/generate_docs_site.py
+- scripts/build_docs_portal.py
+- scripts/validate_repo.sh
+- docs/theme-overrides/**
+- tests/test_docs_site.py
+- receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json
+- receipts/live-applies/2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json
+- receipts/live-applies/2026-03-29-adr-0239-browser-local-search-post-merge-replay.json
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws_0239_main_merge_doc
+    paths:
+    - docs/workstreams/ws-0239-main-merge.md
+    mode: exclusive
+  - id: adr_0239_mainline_truth
+    paths:
+    - README.md
+    - RELEASE.md
+    - VERSION
+    - changelog.md
+    - docs/release-notes/README.md
+    - docs/release-notes/0.177.62.md
+    - versions/stack.yaml
+    - build/platform-manifest.json
+    - docs/diagrams/agent-coordination-map.excalidraw
+    mode: exclusive
+  - id: adr_0239_main_merge_surfaces
+    paths:
+    - docs/adr/.index.yaml
+    - docs/adr/0239-browser-local-search-experience-via-pagefind.md
+    - docs/workstreams/ws-0239-live-apply.md
+    - docs/runbooks/deployment-history-portal.md
+    - docs/runbooks/developer-portal.md
+    - docs/site-generated/architecture/dependency-graph.md
+    - Makefile
+    - mkdocs.yml
+    - requirements/docs.txt
+    - scripts/generate_docs_site.py
+    - scripts/build_docs_portal.py
+    - scripts/validate_repo.sh
+    - docs/theme-overrides/**
+    - tests/test_docs_site.py
+    - receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json
+    - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json
+    - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-post-merge-replay.json
+    mode: exclusive
+ready_to_merge: true
+live_applied: false
+canonical_truth:
+  changelog_entry: records ADR 0239 exact-main evidence on the current mainline by
+    preserving the verified Pagefind browser-local docs search rollout, refreshed
+    release surfaces, and the current platform baseline after the exact-main replay
+  release_bump: patch
+  included_in_repo_version: 0.177.62
+  latest_receipts:
+    docs_portal: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
+    local_search_and_indexing_fabric: 2026-03-29-adr-0239-browser-local-search-post-merge-replay

@@ -1,0 +1,31 @@
+id: adr-0126-observation-to-action-closure-loop
+adr: '0126'
+title: Observation-to-action closure loop
+status: live_applied
+owner: codex
+branch: codex/adr-0126-logic-loop-clean
+worktree_path: ../proxmox_florin_server-adr-0126-logic-loop-clean
+doc: docs/workstreams/adr-0126-observation-to-action-closure-loop.md
+depends_on:
+- adr-0048-command-catalog
+- adr-0064-health-probe-contracts
+- adr-0071-agent-observation-loop
+- adr-0090-platform-cli
+- adr-0112-goal-compiler
+- adr-0114-incident-triage
+- adr-0115-mutation-ledger
+- adr-0119-budgeted-workflow-scheduler
+conflicts_with:
+- adr-0112-goal-compiler
+- adr-0114-incident-triage
+- adr-0119-budgeted-workflow-scheduler
+shared_surfaces:
+- platform/closure_loop
+- config/agent-policies.yaml
+- config/ledger-event-types.yaml
+- config/windmill/scripts/platform-observation-loop.py
+- config/workflow-catalog.json
+- scripts/lv3_cli.py
+- docs/runbooks/observation-to-action-closure-loop.md
+ready_to_merge: true
+live_applied: true

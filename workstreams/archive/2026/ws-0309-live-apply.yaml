@@ -1,0 +1,119 @@
+id: ws-0309-live-apply
+adr: 0309
+title: Live apply task-oriented information architecture across the platform workbench
+  from latest origin/main
+status: live_applied
+owner: codex
+branch: codex/ws-0309-live-apply
+worktree_path: .worktrees/ws-0309-live-apply
+doc: docs/workstreams/ws-0309-live-apply.md
+depends_on:
+- adr-0093-interactive-ops-portal
+- adr-0152-homepage-for-unified-service-dashboard
+- adr-0234-shared-human-app-shell-and-navigation-via-patternfly
+- adr-0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher
+- adr-0239-browser-local-search-experience-via-pagefind
+- adr-0313-contextual-help-glossary-and-escalation-drawer
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- docs/workstreams/ws-0309-live-apply.md
+- docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md
+- docs/adr/.index.yaml
+- Makefile
+- docs/runbooks/platform-operations-portal.md
+- playbooks/ops-portal.yml
+- config/persona-catalog.json
+- config/workflow-catalog.json
+- config/workbench-information-architecture.json
+- docs/schema/persona-catalog.schema.json
+- docs/schema/workbench-information-architecture.schema.json
+- scripts/workbench_information_architecture.py
+- scripts/workflow_catalog.py
+- scripts/validate_repository_data_models.py
+- scripts/ops_portal/app.py
+- scripts/ops_portal/static/portal.css
+- scripts/ops_portal/static/portal.js
+- scripts/ops_portal/templates/base.html
+- scripts/ops_portal/templates/index.html
+- scripts/ops_portal/templates/macros/lane_context.html
+- scripts/ops_portal/templates/partials/agents.html
+- scripts/ops_portal/templates/partials/changelog.html
+- scripts/ops_portal/templates/partials/drift.html
+- scripts/ops_portal/templates/partials/launcher.html
+- scripts/ops_portal/templates/partials/overview.html
+- scripts/ops_portal/templates/partials/runbooks.html
+- scripts/ops_portal/templates/partials/runtime_assurance.html
+- scripts/ops_portal/templates/partials/search.html
+- roles/ops_portal_runtime/defaults/main.yml
+- roles/ops_portal_runtime/tasks/main.yml
+- roles/ops_portal_runtime/tasks/sync_service_tree.yml
+- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/sync_service_tree.yml
+- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+- tests/test_interactive_ops_portal.py
+- tests/test_ops_portal.py
+- tests/test_ops_portal_playbook.py
+- tests/test_ops_portal_runtime_role.py
+- receipts/live-applies/*adr-0309*
+- receipts/live-applies/evidence/*ws-0309*
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: adr_index_generation
+    paths:
+    - docs/adr/.index.yaml
+    mode: shared_contract
+    contract: adr-index-generator-v1
+  - id: adr_0309_navigation_contract
+    paths:
+    - docs/workstreams/ws-0309-live-apply.md
+    - docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md
+    - Makefile
+    - docs/runbooks/platform-operations-portal.md
+    - playbooks/ops-portal.yml
+    - config/persona-catalog.json
+    - config/workflow-catalog.json
+    - config/workbench-information-architecture.json
+    - docs/schema/persona-catalog.schema.json
+    - docs/schema/workbench-information-architecture.schema.json
+    - scripts/workbench_information_architecture.py
+    - scripts/workflow_catalog.py
+    - scripts/validate_repository_data_models.py
+    - scripts/ops_portal/app.py
+    - scripts/ops_portal/static/portal.css
+    - scripts/ops_portal/static/portal.js
+    - scripts/ops_portal/templates/base.html
+    - scripts/ops_portal/templates/index.html
+    - scripts/ops_portal/templates/macros/lane_context.html
+    - scripts/ops_portal/templates/partials/agents.html
+    - scripts/ops_portal/templates/partials/changelog.html
+    - scripts/ops_portal/templates/partials/drift.html
+    - scripts/ops_portal/templates/partials/launcher.html
+    - scripts/ops_portal/templates/partials/overview.html
+    - scripts/ops_portal/templates/partials/runbooks.html
+    - scripts/ops_portal/templates/partials/runtime_assurance.html
+    - scripts/ops_portal/templates/partials/search.html
+    - roles/ops_portal_runtime/defaults/main.yml
+    - roles/ops_portal_runtime/tasks/main.yml
+    - roles/ops_portal_runtime/tasks/sync_service_tree.yml
+    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/sync_service_tree.yml
+    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+    - tests/test_interactive_ops_portal.py
+    - tests/test_ops_portal.py
+    - tests/test_ops_portal_playbook.py
+    - tests/test_ops_portal_runtime_role.py
+    - receipts/live-applies/*adr-0309*
+    - receipts/live-applies/evidence/*ws-0309*
+    mode: shared_contract
+    contract: adr-0309-task-navigation-v1
+blockers: []
+ready_to_merge: true
+live_applied: true

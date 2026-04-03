@@ -1,0 +1,23 @@
+id: adr-0098-postgres-ha
+adr: 0098
+title: Postgres high availability and automated failover
+status: merged
+owner: codex
+branch: codex/adr-0098-postgres-ha
+worktree_path: ../proxmox_florin_server-postgres-ha
+doc: docs/workstreams/adr-0098-postgres-ha.md
+depends_on:
+- adr-0026-postgres-vm
+- adr-0064-health-probes
+- adr-0085-opentofu-vm-lifecycle
+- adr-0096-slo-tracking
+- adr-0097-alerting-routing
+conflicts_with: []
+shared_surfaces:
+- tofu/environments/production/
+- inventory/host_vars/proxmox_florin.yml
+- collections/ansible_collections/lv3/platform/roles/postgres_ha/
+- inventory/
+- config/service-capability-catalog.json
+ready_to_merge: false
+live_applied: false

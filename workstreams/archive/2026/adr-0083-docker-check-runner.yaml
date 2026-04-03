@@ -1,0 +1,19 @@
+id: adr-0083-docker-check-runner
+adr: 0083
+title: Docker-based check runner
+status: merged
+owner: codex
+branch: codex/adr-0083-docker-check-runner
+worktree_path: .worktrees/adr-0083
+doc: docs/workstreams/adr-0083-docker-check-runner.md
+depends_on:
+- adr-0082-remote-build-gateway
+conflicts_with: []
+shared_surfaces:
+- docker/check-runners/
+- config/check-runner-manifest.json
+- scripts/parallel_check.py
+- config/windmill/scripts/check-runner-rebuild.py
+- Makefile
+ready_to_merge: false
+live_applied: false

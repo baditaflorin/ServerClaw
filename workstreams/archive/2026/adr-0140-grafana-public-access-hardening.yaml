@@ -1,0 +1,22 @@
+id: adr-0140-grafana-public-access-hardening
+adr: '0140'
+title: Grafana public access hardening
+status: live_applied
+owner: codex
+branch: codex/adr-0140-grafana-hardening
+worktree_path: .worktrees/adr-0140-grafana-hardening
+doc: docs/workstreams/adr-0140-grafana-public-access-hardening.md
+depends_on:
+- adr-0011-monitoring
+- adr-0056-keycloak-sso
+- adr-0109-public-status-page
+conflicts_with: []
+shared_surfaces:
+- inventory/host_vars/proxmox_florin.yml
+- collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py
+- collections/ansible_collections/lv3/platform/roles/monitoring_vm/
+- collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+- docs/runbooks/
+- tests/
+ready_to_merge: false
+live_applied: true

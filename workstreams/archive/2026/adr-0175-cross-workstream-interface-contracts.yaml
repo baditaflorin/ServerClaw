@@ -1,0 +1,29 @@
+id: adr-0175-cross-workstream-interface-contracts
+adr: '0175'
+title: Cross-workstream interface contracts
+status: merged
+owner: codex
+branch: codex/adr-0175-interface-contracts
+worktree_path: ../worktree-adr-0175-interface-contracts
+doc: docs/workstreams/adr-0175-cross-workstream-interface-contracts.md
+depends_on:
+- adr-0079-playbook-decomposition
+- adr-0158-config-merge-protocol
+conflicts_with: []
+shared_surfaces:
+- config/contracts/
+- platform/interface_contracts.py
+- scripts/interface_contracts.py
+- scripts/validate_repository_data_models.py
+- Makefile
+- workstreams.yaml
+- docs/runbooks/cross-workstream-interface-contracts.md
+- docs/workstreams/adr-0175-cross-workstream-interface-contracts.md
+ready_to_merge: false
+live_applied: false
+canonical_truth:
+  changelog_entry: implemented ADR 0175 cross-workstream interface contracts for the
+    shared workstream registry and live-apply handoff
+  release_bump: patch
+  included_in_repo_version: 0.176.7
+  latest_receipts: {}

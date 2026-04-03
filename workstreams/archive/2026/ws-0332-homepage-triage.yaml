@@ -1,0 +1,78 @@
+id: ws-0332-homepage-triage
+adr: "0152"
+title: Triage failing Homepage services and restore safe runtime health
+status: live_applied
+owner: codex
+branch: codex/ws-0332-homepage-triage
+worktree_path: .worktrees/ws-0332-homepage-triage
+doc: docs/workstreams/ws-0332-homepage-triage.md
+depends_on:
+- adr-0152-homepage
+- adr-0167-handoff-protocol
+- ws-0333-service-uptime-recovery
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- docs/workstreams/ws-0332-homepage-triage.md
+- playbooks/runtime-general-pool.yml
+- docs/runbooks/configure-runtime-general-pool.md
+- collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/homepage_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/homepage_runtime/meta/argument_specs.yml
+- collections/ansible_collections/lv3/platform/roles/homepage_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/homepage_runtime/templates/docker-compose.yml.j2
+- collections/ansible_collections/lv3/platform/roles/uptime_kuma_runtime/README.md
+- collections/ansible_collections/lv3/platform/roles/uptime_kuma_runtime/meta/main.yml
+- collections/ansible_collections/lv3/platform/roles/uptime_kuma_runtime/tasks/main.yml
+- tests/test_docker_runtime_role.py
+- tests/test_homepage_runtime_role.py
+- tests/test_runtime_general_pool_playbook.py
+- tests/test_uptime_kuma_runtime_role.py
+- receipts/live-applies/*
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws0332_triage_doc
+    paths:
+    - docs/workstreams/ws-0332-homepage-triage.md
+    mode: exclusive
+  - id: ws0332_runtime_general_recovery
+    paths:
+    - playbooks/runtime-general-pool.yml
+    - docs/runbooks/configure-runtime-general-pool.md
+    - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/homepage_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/homepage_runtime/meta/argument_specs.yml
+    - collections/ansible_collections/lv3/platform/roles/homepage_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/homepage_runtime/templates/docker-compose.yml.j2
+    - collections/ansible_collections/lv3/platform/roles/uptime_kuma_runtime/README.md
+    - collections/ansible_collections/lv3/platform/roles/uptime_kuma_runtime/meta/main.yml
+    - collections/ansible_collections/lv3/platform/roles/uptime_kuma_runtime/tasks/main.yml
+    - tests/test_docker_runtime_role.py
+    - tests/test_homepage_runtime_role.py
+    - tests/test_runtime_general_pool_playbook.py
+    - tests/test_uptime_kuma_runtime_role.py
+    mode: exclusive
+  - id: ws0332_receipts
+    paths:
+    - receipts/live-applies/*
+    mode: shared_contract
+    contract: live-apply-receipts-v1
+canonical_truth:
+  changelog_entry: repairs the runtime-general Homepage and Uptime Kuma recovery path
+    by restoring migrated Uptime Kuma state, aligning Docker guest public-edge host
+    alias pinning, teaching the Uptime Kuma role to use the Compose plugin contract,
+    and binding Homepage on loopback so Traefik and the shared edge can re-verify
+    home.lv3.org safely
+  release_bump: patch
+  included_in_repo_version: 0.178.2
+  latest_receipts:
+    homepage: 2026-04-03-ws-0332-homepage-triage-mainline-live-apply
+    uptime_kuma: 2026-04-03-ws-0332-homepage-triage-mainline-live-apply
+blockers: []
+ready_to_merge: true
+live_applied: true

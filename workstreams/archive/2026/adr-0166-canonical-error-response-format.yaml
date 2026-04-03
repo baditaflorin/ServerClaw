@@ -1,0 +1,24 @@
+id: adr-0166-canonical-error-response-format
+adr: '0166'
+title: Canonical error response format and error code registry
+status: live_applied
+owner: codex
+branch: codex/live-apply-0166
+worktree_path: .worktrees/live-apply-0166
+doc: docs/workstreams/adr-0166-canonical-error-response-format.md
+depends_on:
+- adr-0031-validation-pipeline
+- adr-0070-rag-platform-context
+- adr-0092-platform-api-gateway
+conflicts_with: []
+shared_surfaces:
+- config/error-codes.yaml
+- scripts/canonical_errors.py
+- scripts/api_gateway/main.py
+- scripts/platform_context_service.py
+- scripts/validate_repository_data_models.py
+- docs/runbooks/platform-api-error-codes.md
+- collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/
+- collections/ansible_collections/lv3/platform/roles/rag_context_runtime/
+ready_to_merge: false
+live_applied: true

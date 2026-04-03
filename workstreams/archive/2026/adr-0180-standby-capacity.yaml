@@ -1,0 +1,76 @@
+id: adr-0180-standby-capacity
+adr: 0180
+title: Standby capacity reservation and placement rules
+status: implemented
+owner: codex
+branch: codex/adr-0180-standby-capacity
+worktree_path: ../worktree-adr-0180-standby-capacity
+doc: ../worktree-adr-0180-standby-capacity/docs/workstreams/adr-0180-standby-capacity-reservation-and-placement-rules.md
+depends_on:
+- adr-0105-capacity-model
+- adr-0157-per-vm-concurrency-budget
+- adr-0179-service-redundancy-tier-matrix
+conflicts_with: []
+shared_surfaces:
+- config/service-capability-catalog.json
+- config/capacity-model.json
+- docs/schema/service-capability-catalog.schema.json
+- docs/schema/capacity-model.schema.json
+- scripts/capacity_report.py
+- scripts/service_catalog.py
+- scripts/standby_capacity.py
+- scripts/promotion_pipeline.py
+- Makefile
+- docs/runbooks/capacity-model.md
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: standby_capacity_repo_surface
+    paths:
+    - docs/adr/0180-standby-capacity-reservation-and-placement-rules.md
+    - docs/workstreams/adr-0180-standby-capacity-reservation-and-placement-rules.md
+    - scripts/standby_capacity.py
+    - tests/test_standby_capacity.py
+    - docs/runbooks/capacity-model.md
+    mode: exclusive
+  - id: service_capability_catalog_contract
+    paths:
+    - config/service-capability-catalog.json
+    mode: shared_contract
+    contract: service-capability-catalog-v1
+  - id: capacity_model_contract
+    paths:
+    - config/capacity-model.json
+    mode: shared_contract
+    contract: capacity-model-v1
+  - id: service_capability_schema_contract
+    paths:
+    - docs/schema/service-capability-catalog.schema.json
+    - scripts/service_catalog.py
+    - tests/test_validate_service_catalog.py
+    mode: shared_contract
+    contract: service-capability-catalog-schema-v1
+  - id: capacity_model_schema_contract
+    paths:
+    - docs/schema/capacity-model.schema.json
+    - scripts/capacity_report.py
+    - tests/test_capacity_report.py
+    mode: shared_contract
+    contract: capacity-model-schema-v1
+  - id: promotion_pipeline_contract
+    paths:
+    - scripts/promotion_pipeline.py
+    - tests/test_promotion_pipeline.py
+    mode: shared_contract
+    contract: promotion-pipeline-v1
+  - id: makefile_contract
+    paths:
+    - Makefile
+    mode: shared_contract
+    contract: makefile-validation-targets-v1
+ready_to_merge: false
+live_applied: false

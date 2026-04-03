@@ -1,0 +1,31 @@
+id: adr-0078-service-scaffold
+adr: 0078
+title: Service scaffold generator
+status: merged
+owner: codex
+branch: codex/adr-0078-mainline-rebuild
+worktree_path: .worktrees/adr-0078-mainline-rebuild
+doc: docs/workstreams/adr-0078-service-scaffold.md
+depends_on:
+- adr-0062-role-composability
+- adr-0075-service-capability-catalog
+- adr-0076-subdomain-governance
+- adr-0077-compose-secrets-injection
+conflicts_with: []
+shared_surfaces:
+- scripts/scaffold_service.py
+- scripts/pin_image_ref.py
+- scripts/service_catalog.py
+- scripts/validate_repository_data_models.py
+- Makefile
+- collections/ansible_collections/lv3/platform/roles/_template/
+- docs/runbooks/scaffold-new-service.md
+- config/service-capability-catalog.json
+- config/subdomain-catalog.json
+- config/health-probe-catalog.json
+- config/secret-catalog.json
+- config/image-catalog.json
+- config/controller-local-secrets.json
+- inventory/host_vars/proxmox_florin.yml
+ready_to_merge: false
+live_applied: false

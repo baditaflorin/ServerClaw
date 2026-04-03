@@ -19,7 +19,7 @@ def build_registry(*, include_manifest: bool = True) -> dict:
         "id": "adr-0173-workstream-surface-ownership-manifest",
         "status": "ready",
         "branch": "codex/adr-0173-ownership-manifest",
-        "doc": "/tmp/docs/workstreams/adr-0173.md",
+        "doc": "docs/workstreams/adr-0173.md",
     }
     if include_manifest:
         workstream["ownership_manifest"] = {
@@ -90,7 +90,7 @@ def test_validate_registry_rejects_duplicate_exclusive_surface_across_active_wor
             "id": "adr-9999-another",
             "status": "implemented",
             "branch": "codex/adr-9999-another",
-            "doc": "/tmp/docs/workstreams/adr-9999.md",
+            "doc": "docs/workstreams/adr-9999.md",
             "ownership_manifest": {
                 "owned_surfaces": [
                     {
@@ -114,7 +114,7 @@ def test_validate_registry_rejects_shared_contract_mismatch() -> None:
             "id": "adr-9999-another",
             "status": "ready",
             "branch": "codex/adr-9999-another",
-            "doc": "/tmp/docs/workstreams/adr-9999.md",
+            "doc": "docs/workstreams/adr-9999.md",
             "ownership_manifest": {
                 "owned_surfaces": [
                     {
@@ -187,3 +187,36 @@ def test_validate_branch_allows_terminal_workstream_with_manifest(tmp_path: Path
     changed_files = ownership.validate_branch_ownership(repo_root=repo, base_ref="main")
 
     assert changed_files == ["scripts/workstream_surface_ownership.py", "workstreams.yaml"]
+
+
+def test_validate_branch_allows_editing_its_own_workstream_shard(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = init_repo(tmp_path)
+    registry = build_registry()
+    write(
+        repo / "workstreams" / "policy.yaml",
+        yaml.safe_dump(
+            {
+                "schema_version": "1.0.0",
+                "delivery_model": registry["delivery_model"],
+                "release_policy": {"breaking_change_criteria": "config/version-semantics.json"},
+            },
+            sort_keys=False,
+        ),
+    )
+    (repo / "workstreams" / "archive").mkdir(parents=True, exist_ok=True)
+    shard_path = repo / "workstreams" / "active" / "adr-0173-workstream-surface-ownership-manifest.yaml"
+    write(shard_path, yaml.safe_dump(registry["workstreams"][0], sort_keys=False))
+    git(repo, "add", ".")
+    git(repo, "commit", "-m", "Add shard source")
+
+    write(shard_path, yaml.safe_dump(registry["workstreams"][0], sort_keys=False).replace("ready", "in_progress", 1))
+    monkeypatch.setenv(
+        "LV3_VALIDATION_CHANGED_FILES_JSON",
+        '["workstreams/active/adr-0173-workstream-surface-ownership-manifest.yaml"]',
+    )
+
+    changed_files = ownership.validate_branch_ownership(repo_root=repo, base_ref="main")
+
+    assert changed_files == ["workstreams/active/adr-0173-workstream-surface-ownership-manifest.yaml"]

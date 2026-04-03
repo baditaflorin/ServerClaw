@@ -1,0 +1,19 @@
+id: adr-0048-command-catalog
+adr: 0048
+title: Command catalog and approval gates
+status: live_applied
+owner: codex
+branch: codex/adr-0048-command-catalog
+worktree_path: ../proxmox_florin_server-command-catalog
+doc: docs/workstreams/adr-0048-command-catalog.md
+depends_on:
+- adr-0044-windmill
+- adr-0046-identity-classes
+conflicts_with: []
+shared_surfaces:
+- remote commands
+- live-apply receipts
+- workflow execution
+- runbooks
+ready_to_merge: false
+live_applied: true

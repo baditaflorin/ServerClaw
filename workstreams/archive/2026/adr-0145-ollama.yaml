@@ -1,0 +1,23 @@
+id: adr-0145-ollama
+adr: '0145'
+title: Ollama for local LLM inference
+status: live_applied
+owner: codex
+branch: codex/adr-0145-ollama
+worktree_path: ../proxmox_florin_server-ollama
+doc: docs/workstreams/adr-0145-ollama.md
+depends_on:
+- adr-0060-open-webui-workbench
+- adr-0112-goal-compiler
+- adr-0115-mutation-ledger
+conflicts_with: []
+shared_surfaces:
+- roles/ollama_runtime
+- config/ollama-models.yaml
+- platform/llm
+- platform/goal_compiler/compiler.py
+- inventory/host_vars/proxmox_florin.yml
+- config/workflow-catalog.json
+- config/dependency-graph.json
+ready_to_merge: false
+live_applied: true

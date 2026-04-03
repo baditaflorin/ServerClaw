@@ -1,0 +1,26 @@
+id: adr-0156-agent-session-workspace-isolation
+adr: '0156'
+title: Agent session workspace isolation
+status: live_applied
+owner: codex
+branch: codex/adr-0156-agent-session-workspace-isolation
+worktree_path: .worktrees/adr-0156
+doc: docs/workstreams/adr-0156-agent-session-workspace-isolation.md
+depends_on:
+- adr-0082-remote-build-gateway
+- adr-0087-validation-gate
+- adr-0115-mutation-ledger
+- adr-0119-budgeted-workflow-scheduler
+- adr-0127-intent-conflict-resolution
+conflicts_with: []
+shared_surfaces:
+- scripts/remote_exec.sh
+- scripts/session_workspace.py
+- scripts/run_gate.py
+- platform/scheduler/watchdog.py
+- platform/ledger/writer.py
+- scripts/live_apply_receipts.py
+- scripts/promotion_pipeline.py
+- docs/runbooks/
+ready_to_merge: false
+live_applied: true

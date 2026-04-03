@@ -1,0 +1,59 @@
+id: ws-0226-live-apply
+adr: '0226'
+title: Live apply ADR 0226 systemd host-resident control-loop supervision
+status: live_applied
+owner: codex
+branch: codex/ws-0226-live-apply
+worktree_path: .worktrees/ws-0226-live-apply
+doc: docs/workstreams/ws-0226-live-apply.md
+depends_on:
+- adr-0204-self-correcting-automation-loops
+- adr-0220-bootstrap-and-recovery-sequencing-for-environment-cells
+- adr-0224-server-resident-operations-as-the-default-control-model
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- docs/workstreams/ws-0226-live-apply.md
+- docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+- docs/adr/.index.yaml
+- docs/runbooks/configure-host-control-loops.md
+- Makefile
+- config/workflow-catalog.json
+- config/command-catalog.json
+- config/ansible-role-idempotency.yml
+- playbooks/proxmox-install.yml
+- collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
+- tests/test_proxmox_host_control_loops_role.py
+- receipts/live-applies/2026-03-28-adr-0226-host-control-loops-live-apply.json
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: adr_0226_live_apply
+    paths:
+    - docs/workstreams/ws-0226-live-apply.md
+    - docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+    - docs/adr/.index.yaml
+    - docs/runbooks/configure-host-control-loops.md
+    - Makefile
+    - config/workflow-catalog.json
+    - config/command-catalog.json
+    - config/ansible-role-idempotency.yml
+    - playbooks/proxmox-install.yml
+    - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
+    - tests/test_proxmox_host_control_loops_role.py
+    - receipts/live-applies/2026-03-28-adr-0226-host-control-loops-live-apply.json
+    mode: exclusive
+ready_to_merge: true
+live_applied: true
+canonical_truth:
+  changelog_entry: implemented ADR 0226 by installing the repo-managed systemd service,
+    timer, and path baseline for host-resident control loops on proxmox_florin and
+    verifying both manual and path-triggered reconcile passes
+  release_bump: patch
+  included_in_repo_version: 0.177.52
+  latest_receipts:
+    host_control_loops: 2026-03-28-adr-0226-host-control-loops-mainline-live-apply

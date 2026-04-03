@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 import canonical_truth
+from platform.workstream_registry import write_assembled_registry
 
 
 def write(path: Path, content: str) -> None:
@@ -274,3 +275,57 @@ def test_invalid_release_bump_is_rejected(canonical_repo: Path) -> None:
 
     with pytest.raises(ValueError, match="release_bump must be one of"):
         canonical_truth.load_workstream_canonical_truth()
+
+
+def test_mark_pending_workstreams_released_moves_sharded_workstream_to_archive(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write(
+        tmp_path / "workstreams" / "policy.yaml",
+        """
+schema_version: 1.0.0
+delivery_model:
+  mode: parallel_workstreams
+  branch_prefix: codex/
+  workstream_doc_root: docs/workstreams
+  registry_owner: main
+release_policy:
+  repo_version_bump_on: merge_to_main
+  platform_version_bump_on: live_apply_from_main
+  changelog_working_section: Unreleased
+  versions_stack_branch_policy: main_only
+  breaking_change_criteria: config/version-semantics.json
+""".strip()
+        + "\n",
+    )
+    (tmp_path / "workstreams" / "archive").mkdir(parents=True, exist_ok=True)
+    write(
+        tmp_path / "workstreams" / "active" / "adr-0174-canonical-truth-assembly.yaml",
+        """
+id: adr-0174-canonical-truth-assembly
+adr: "0174"
+title: Integration-only canonical truth assembly
+status: merged
+branch: codex/adr-0174-canonical-truth
+worktree_path: .worktrees/adr-0174-canonical-truth
+doc: docs/workstreams/adr-0174-canonical-truth-assembly.md
+canonical_truth:
+  changelog_entry: implemented ADR 0174 integration-only canonical truth assembly
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+""".strip()
+        + "\n",
+    )
+    write_assembled_registry(repo_root=tmp_path, compatibility_path=tmp_path / "workstreams.yaml")
+
+    monkeypatch.setattr(canonical_truth, "WORKSTREAMS_PATH", tmp_path / "workstreams.yaml")
+
+    changed = canonical_truth.mark_pending_workstreams_released("0.10.1", workstreams_path=tmp_path / "workstreams.yaml")
+
+    assert changed == ["adr-0174-canonical-truth-assembly"]
+    assert not (tmp_path / "workstreams" / "active" / "adr-0174-canonical-truth-assembly.yaml").exists()
+    archived = next((tmp_path / "workstreams" / "archive").rglob("adr-0174-canonical-truth-assembly.yaml"))
+    assert "included_in_repo_version: 0.10.1" in archived.read_text(encoding="utf-8")
+    compatibility = (tmp_path / "workstreams.yaml").read_text(encoding="utf-8")
+    assert "adr-0174-canonical-truth-assembly" not in compatibility

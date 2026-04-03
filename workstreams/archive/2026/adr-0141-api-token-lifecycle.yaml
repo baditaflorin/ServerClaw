@@ -1,0 +1,25 @@
+id: adr-0141-api-token-lifecycle
+adr: '0141'
+title: API token lifecycle and exposure response
+status: merged
+owner: codex
+branch: codex/adr-0141-token-lifecycle
+worktree_path: .worktrees/adr-0141
+doc: docs/workstreams/adr-0141-api-token-lifecycle.md
+depends_on:
+- adr-0043-openbao
+- adr-0044-windmill
+- adr-0056-keycloak
+- adr-0065-secret-rotation
+- adr-0090-platform-cli
+- adr-0115-mutation-ledger
+conflicts_with: []
+shared_surfaces:
+- config/token-policy.yaml
+- config/token-inventory.yaml
+- config/windmill/scripts/
+- scripts/token_lifecycle.py
+- scripts/lv3_cli.py
+- docs/runbooks/
+ready_to_merge: false
+live_applied: false

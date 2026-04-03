@@ -1,0 +1,22 @@
+id: adr-0051-control-plane-recovery
+adr: '0051'
+title: Control-plane backup, recovery, and break-glass
+status: live_applied
+owner: codex
+branch: codex/adr-0051-control-plane-backup-recovery-break-glass
+worktree_path: ../proxmox_florin_server-adr-0051
+doc: docs/workstreams/adr-0051-control-plane-recovery.md
+depends_on:
+- adr-0029-backup-vm
+- adr-0042-step-ca
+- adr-0043-openbao
+- adr-0044-windmill
+- adr-0041-email-platform
+conflicts_with: []
+shared_surfaces:
+- PBS backups
+- recovery metadata
+- break-glass procedures
+- control-plane state
+ready_to_merge: false
+live_applied: true

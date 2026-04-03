@@ -1,0 +1,17 @@
+id: adr-0025-docker-compose-stacks
+adr: '0025'
+title: Compose-managed runtime stacks
+status: merged
+owner: codex
+branch: codex/adr-0025-docker-compose-stacks
+worktree_path: ../proxmox_florin_server-docker-compose-stacks
+doc: docs/workstreams/adr-0025-docker-compose-stacks.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+- docker-runtime-lv3
+- playbooks/docker-compose-stacks.yml
+- roles/docker_compose_stack
+- docs/runbooks/deploy-docker-compose-stack.md
+ready_to_merge: true
+live_applied: true

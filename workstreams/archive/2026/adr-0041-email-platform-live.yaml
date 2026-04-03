@@ -1,0 +1,22 @@
+id: adr-0041-email-platform-live
+adr: '0041'
+title: Dockerized mail platform live rollout
+status: live_applied
+owner: codex
+branch: codex/adr-0041-email-platform-live
+worktree_path: ../proxmox_florin_server-email-platform-live
+doc: docs/workstreams/adr-0041-email-platform-live.md
+depends_on:
+- adr-0041-email-platform
+- adr-0011-monitoring
+- adr-0023-docker-runtime
+conflicts_with: []
+shared_surfaces:
+- docker-runtime-lv3
+- monitoring-lv3
+- playbooks/mail-platform.yml
+- roles/proxmox_network
+- lv3.org DNS
+- mail.lv3.org
+ready_to_merge: false
+live_applied: true

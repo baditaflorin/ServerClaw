@@ -1,0 +1,25 @@
+id: adr-0113-world-state-materializer
+adr: '0113'
+title: World-state materializer
+status: live_applied
+owner: codex
+branch: codex/ws-0113-main-live-apply
+worktree_path: .worktrees/ws-0113-main-live-apply
+doc: docs/workstreams/adr-0113-world-state-materializer.md
+depends_on:
+- adr-0054-netbox-topology
+- adr-0058-nats-event-bus
+- adr-0064-health-probe-contracts
+- adr-0080-maintenance-windows
+- adr-0085-opentofu-vm-lifecycle
+- adr-0091-drift-detection
+- adr-0098-postgres-ha
+conflicts_with:
+- adr-0117-dependency-graph-runtime
+shared_surfaces:
+- platform/world_state/
+- config/windmill/scripts/world-state/
+- collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+- migrations/0010_world_state_schema.sql
+ready_to_merge: true
+live_applied: true

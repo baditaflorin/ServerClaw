@@ -91,6 +91,13 @@ from workflow_catalog import (
 )
 from workstream_surface_ownership import validate_registry as validate_workstream_surface_ownership_registry
 from platform.config_merge import validate_merge_eligible_catalog
+from platform.workstream_registry import (
+    compatibility_matches_source as workstream_registry_matches_source,
+    has_sharded_sources as has_workstream_shards,
+    load_policy as load_workstream_policy,
+    load_shard_workstreams,
+    load_workstreams as load_workstream_registry_entries,
+)
 from preview_environment import load_profile_catalog, validate_profile_catalog
 from repo_deploy_profiles import load_repo_deploy_catalog, validate_repo_deploy_catalog
 from repo_deploy_image_cache import load_profile_catalog as load_repo_deploy_base_image_profile_catalog
@@ -1876,7 +1883,19 @@ def validate_version_semantics() -> None:
 
 
 def validate_workstreams_release_policy() -> None:
-    registry = load_yaml(WORKSTREAMS_PATH)
+    if has_workstream_shards(repo_root=REPO_ROOT):
+        load_shard_workstreams(repo_root=REPO_ROOT, include_active=True, include_archive=True)
+        if not workstream_registry_matches_source(repo_root=REPO_ROOT):
+            raise ValueError("workstreams.yaml must be regenerated from the shard source")
+        policy_source = load_workstream_policy(repo_root=REPO_ROOT)
+        registry = {
+            "delivery_model": policy_source["delivery_model"],
+            "release_policy": policy_source["release_policy"],
+            "workstreams": load_workstream_registry_entries(repo_root=REPO_ROOT, include_archive=False),
+        }
+    else:
+        registry = load_yaml(WORKSTREAMS_PATH)
+
     release_policy = require_mapping(registry.get("release_policy"), "workstreams.yaml.release_policy")
     breaking_change_path = require_repo_relative_path(
         release_policy.get("breaking_change_criteria"),
@@ -1892,8 +1911,7 @@ def validate_workstreams_release_policy() -> None:
     validate_workstream_surface_ownership_registry(registry)
 
 def validate_workstream_canonical_truth_metadata() -> None:
-    registry = load_yaml(WORKSTREAMS_PATH)
-    workstreams = require_list(registry.get("workstreams"), "workstreams.yaml.workstreams")
+    workstreams = load_workstream_registry_entries(repo_root=REPO_ROOT, include_archive=True)
     allowed_release_bumps = {"patch", "minor", "major"}
     semver_pattern = re.compile(r"^\d+\.\d+\.\d+$")
 
@@ -1940,8 +1958,7 @@ def validate_workstream_canonical_truth_metadata() -> None:
             )
 
 def validate_workstream_live_apply_contracts() -> None:
-    registry = load_yaml(WORKSTREAMS_PATH)
-    workstreams = require_list(registry.get("workstreams"), "workstreams.yaml.workstreams")
+    workstreams = load_workstream_registry_entries(repo_root=REPO_ROOT, include_archive=True)
     allowed_surface_modes = {"exclusive", "shared_contract", "generated", "read_only"}
     allowed_rollback_step_kinds = {"shell", "file_restore", "runbook"}
     for index, item in enumerate(workstreams):

@@ -4,7 +4,10 @@ This runbook documents ADR 0174: integration-only assembly of the top-level cano
 
 ## Canonical Inputs
 
-- `workstreams.yaml`
+- `workstreams/policy.yaml`
+- `workstreams/active/*.yaml`
+- `workstreams/archive/**/*.yaml`
+- generated compatibility assembly in `workstreams.yaml`
 - `docs/workstreams/*.md`
 - `receipts/live-applies/*.json`
 - `docs/adr/*.md`
@@ -73,7 +76,7 @@ The release manager now:
 - assembles `changelog.md` before reading `## Unreleased`
 - writes the new `VERSION`
 - keeps `versions/stack.yaml.repo_version` and `release_tracks.repo_versioning.current` in sync
-- marks pending workstreams as released in `workstreams.yaml`
+- marks pending workstreams as released in the shard source, moves completed shards from `workstreams/active/` into `workstreams/archive/<year>/`, and regenerates `workstreams.yaml`
 - reruns canonical-truth assembly so `README.md` and `changelog.md` match the cut release
 
 ## Live Apply

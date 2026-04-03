@@ -1,0 +1,80 @@
+id: adr-0183-multi-environment-live-lanes
+adr: 0183
+title: Multi-environment live lanes
+status: live_applied
+owner: codex
+branch: codex/adr-0183-main-live-apply
+worktree_path: ../worktree-adr-0183-main-live-apply
+doc: docs/workstreams/adr-0183-multi-environment-live-lanes.md
+depends_on:
+- adr-0072-staging-production-topology
+- adr-0073-promotion-pipeline
+- adr-0079-playbook-decomposition
+- adr-0182-live-apply-merge-train
+conflicts_with: []
+shared_surfaces:
+- config/environment-topology.json
+- inventory/host_vars/proxmox_florin.yml
+- roles/proxmox_network/
+- playbooks/proxmox-staging-bridge.yml
+- scripts/environment_catalog.py
+- scripts/environment_topology.py
+- scripts/service_catalog.py
+- scripts/subdomain_catalog.py
+- scripts/integration_suite.py
+- scripts/live_apply_receipts.py
+- scripts/deployment_history.py
+- scripts/lv3_cli.py
+- docs/runbooks/staging-environment.md
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: environment_lane_runtime
+    paths:
+    - config/environment-topology.json
+    - docs/schema/environment-topology.schema.json
+    - scripts/environment_catalog.py
+    - scripts/environment_topology.py
+    - scripts/service_catalog.py
+    - scripts/subdomain_catalog.py
+    - scripts/integration_suite.py
+    - scripts/live_apply_receipts.py
+    - scripts/deployment_history.py
+    - scripts/drift_detector.py
+    - scripts/security_posture_report.py
+    - scripts/tofu_remote_command.py
+    - scripts/generate_changelog_portal.py
+    - config/windmill/scripts/nightly-integration-tests.py
+    mode: exclusive
+  - id: platform_cli_environment_selection
+    paths:
+    - scripts/lv3_cli.py
+    mode: shared_contract
+    contract: platform-cli-environment-selection-v1
+  - id: staging_bridge_repo_surface
+    paths:
+    - inventory/host_vars/proxmox_florin.yml
+    - roles/proxmox_network/**
+    - playbooks/proxmox-staging-bridge.yml
+    - Makefile
+    mode: exclusive
+  - id: environment_lane_docs
+    paths:
+    - docs/adr/0183-multi-environment-live-lanes.md
+    - docs/workstreams/adr-0183-multi-environment-live-lanes.md
+    - docs/runbooks/staging-environment.md
+    mode: exclusive
+ready_to_merge: false
+live_applied: true
+canonical_truth:
+  changelog_entry: implemented ADR 0183 catalog-driven environment lanes and the repo-managed
+    staging bridge activation path so staging can be brought up safely from main without
+    ad hoc Proxmox network edits
+  release_bump: patch
+  included_in_repo_version: 0.177.12
+  latest_receipts:
+    staging_environment: 2026-03-27-adr-0183-staging-live-apply

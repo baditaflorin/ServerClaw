@@ -14,8 +14,11 @@ from typing import Any
 
 import yaml
 
+from controller_automation_toolkit import repo_path
+from platform.workstream_registry import find_workstream
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+
+REPO_ROOT = repo_path()
 WORKSTREAMS_PATH = REPO_ROOT / "workstreams.yaml"
 MUTABLE_SURFACE_MODES = {"exclusive", "shared_contract"}
 ALL_SURFACE_MODES = MUTABLE_SURFACE_MODES | {"generated", "read_only"}
@@ -311,11 +314,18 @@ def validate_branch_ownership(
     if not changed_files:
         return []
 
+    implicit_mutable_paths: set[str] = set()
+    source_record = find_workstream(ownership.workstream_id, repo_root=repo_root, include_archive=True)
+    if source_record is not None and source_record.location != "compatibility":
+        implicit_mutable_paths.add(source_record.path.relative_to(repo_root).as_posix())
+
     mutable_surfaces = [surface for surface in ownership.owned_surfaces if surface.mode in MUTABLE_SURFACE_MODES]
     immutable_surfaces = [surface for surface in ownership.owned_surfaces if surface.mode not in MUTABLE_SURFACE_MODES]
     failures: list[str] = []
 
     for changed_file in changed_files:
+        if changed_file in implicit_mutable_paths:
+            continue
         matched_mutable = [surface for surface in mutable_surfaces if _matches_any_pattern(changed_file, surface.paths)]
         matched_immutable = [surface for surface in immutable_surfaces if _matches_any_pattern(changed_file, surface.paths)]
         if matched_mutable:

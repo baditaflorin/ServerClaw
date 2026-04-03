@@ -1,0 +1,105 @@
+id: ws-0269-live-apply
+adr: 0269
+title: Vulnerability budgets and image-host freshness promotion gates
+status: ready_for_merge
+owner: codex
+branch: codex/adr-0269-live-apply
+worktree_path: ../worktree-adr-0269-live-apply
+doc: ../worktree-adr-0269-live-apply/docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+depends_on:
+- adr-0068-container-image-policy-and-supply-chain-integrity
+- adr-0102-security-posture-reporting
+- adr-0230-policy-decisions-via-open-policy-agent-and-conftest
+conflicts_with: []
+shared_surfaces:
+- docs/adr/0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+- docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+- docs/adr/.index.yaml
+- docs/release-notes/0.177.84.md
+- workstreams.yaml
+- config/vulnerability-budget-policy.json
+- config/image-catalog.json
+- docs/schema/vulnerability-budget-policy.schema.json
+- scripts/vulnerability_budget.py
+- scripts/promotion_pipeline.py
+- scripts/security_posture_report.py
+- scripts/container_image_policy.py
+- scripts/upgrade_container_image.py
+- policy/decisions/release_promotion.rego
+- policy/tests/release_promotion_test.rego
+- Makefile
+- collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+- collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+- docs/runbooks/configure-windmill.md
+- docs/runbooks/vulnerability-budget-gates.md
+- docs/runbooks/container-image-policy.md
+- docs/runbooks/security-posture-reporting.md
+- docs/runbooks/environment-promotion-pipeline.md
+- tests/test_vulnerability_budget.py
+- tests/test_container_image_policy.py
+- tests/test_promotion_pipeline.py
+- tests/test_security_posture_report.py
+- receipts/ops-portal-snapshot.html
+- receipts/security-reports/20260329T*.json
+- receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-live-apply.json
+- receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-mainline-live-apply.json
+- receipts/live-applies/2026-03-29-adr-0269-windmill-isolated-checkout-live-apply.json
+- receipts/live-applies/evidence/2026-03-29-adr-0269-*.txt
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: adr_0269_budget_gate
+    paths:
+    - docs/adr/0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+    - docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+    - config/vulnerability-budget-policy.json
+    - config/image-catalog.json
+    - docs/schema/vulnerability-budget-policy.schema.json
+    - scripts/vulnerability_budget.py
+    - scripts/promotion_pipeline.py
+    - scripts/security_posture_report.py
+    - scripts/container_image_policy.py
+    - scripts/upgrade_container_image.py
+    - policy/decisions/release_promotion.rego
+    - policy/tests/release_promotion_test.rego
+    - Makefile
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+    - docs/runbooks/configure-windmill.md
+    - docs/runbooks/vulnerability-budget-gates.md
+    - docs/runbooks/container-image-policy.md
+    - docs/runbooks/security-posture-reporting.md
+    - docs/runbooks/environment-promotion-pipeline.md
+    - tests/test_vulnerability_budget.py
+    - tests/test_container_image_policy.py
+    - tests/test_promotion_pipeline.py
+    - tests/test_security_posture_report.py
+    mode: exclusive
+  - id: adr_0269_registry_contracts
+    paths:
+    - docs/adr/.index.yaml
+    mode: shared_contract
+    contract: adr-index-generator-v1
+  - id: adr_0269_live_evidence
+    paths:
+    - receipts/security-reports/20260329T*.json
+    - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-live-apply.json
+    - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-mainline-live-apply.json
+    - receipts/live-applies/2026-03-29-adr-0269-windmill-isolated-checkout-live-apply.json
+    - receipts/live-applies/evidence/2026-03-29-adr-0269-*.txt
+    mode: exclusive
+  - id: adr_0269_generated_portal_surfaces
+    paths:
+    - receipts/ops-portal-snapshot.html
+    mode: exclusive
+  - id: adr_0269_mainline_integration
+    paths:
+    - docs/release-notes/0.177.8[45].md
+    - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-mainline-live-apply.json
+    mode: exclusive
+ready_to_merge: true
+live_applied: true

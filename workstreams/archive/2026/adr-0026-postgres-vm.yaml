@@ -1,0 +1,19 @@
+id: adr-0026-postgres-vm
+adr: '0026'
+title: Dedicated PostgreSQL VM baseline
+status: merged
+owner: codex
+branch: codex/adr-0025-postgres-vm
+worktree_path: ../proxmox_florin_server-postgres-vm
+doc: docs/workstreams/adr-0026-postgres-vm.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+- postgres-lv3
+- playbooks/postgres-vm.yml
+- roles/postgres_vm
+- roles/proxmox_tailscale_proxy
+- playbooks/database-dns.yml
+- roles/hetzner_dns_record
+ready_to_merge: false
+live_applied: true

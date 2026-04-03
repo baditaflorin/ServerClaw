@@ -1,0 +1,16 @@
+id: adr-0011-monitoring
+adr: '0011'
+title: Monitoring stack rollout
+status: live_applied
+owner: codex
+branch: codex/adr-0011-monitoring
+worktree_path: ../proxmox_florin_server-monitoring
+doc: docs/workstreams/adr-0011-monitoring.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+- monitoring_vm
+- grafana_dns
+- proxmox_metrics
+ready_to_merge: false
+live_applied: true

@@ -1,0 +1,103 @@
+id: ws-0230-live-apply
+adr: '0230'
+title: Live apply policy decisions via Open Policy Agent and Conftest
+status: live_applied
+owner: codex
+branch: codex/ws-0230-live-apply-r2
+worktree_path: .worktrees/ws-0230-live-apply-r2
+doc: docs/workstreams/ws-0230-live-apply.md
+depends_on:
+- adr-0048-command-catalog
+- adr-0073-promotion-pipeline
+- adr-0087-repository-validation-gate
+- adr-0211-shared-policy-packs-and-rule-registries
+- adr-0224-server-resident-operations-as-the-default-control-model
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- docs/workstreams/ws-0230-live-apply.md
+- docs/adr/0230-policy-decisions-via-open-policy-agent-and-conftest.md
+- docs/adr/.index.yaml
+- docs/runbooks/command-catalog-and-approval-gates.md
+- docs/runbooks/environment-promotion-pipeline.md
+- docs/runbooks/validation-gate.md
+- docs/runbooks/configure-windmill.md
+- .repo-structure.yaml
+- .config-locations.yaml
+- Makefile
+- config/build-server.json
+- config/check-runner-manifest.json
+- config/validation-gate.json
+- policy/**
+- platform/policy/**
+- scripts/policy_checks.py
+- scripts/policy_toolchain.py
+- scripts/command_catalog.py
+- scripts/parallel_check.py
+- scripts/promotion_pipeline.py
+- tests/test_policy_checks.py
+- tests/test_command_catalog.py
+- tests/test_parallel_check.py
+- tests/test_promotion_pipeline.py
+- tests/test_validation_gate.py
+- tests/test_validation_gate_windmill.py
+- tests/test_windmill_operator_admin_app.py
+- collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+- receipts/live-applies/2026-03-28-adr-0230-policy-decisions-live-apply.json
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: adr_0230_live_apply
+    paths:
+    - docs/workstreams/ws-0230-live-apply.md
+    - docs/adr/0230-policy-decisions-via-open-policy-agent-and-conftest.md
+    - docs/adr/.index.yaml
+    - docs/runbooks/command-catalog-and-approval-gates.md
+    - docs/runbooks/environment-promotion-pipeline.md
+    - docs/runbooks/validation-gate.md
+    - docs/runbooks/configure-windmill.md
+    - .repo-structure.yaml
+    - .config-locations.yaml
+    - Makefile
+    - config/build-server.json
+    - config/check-runner-manifest.json
+    - config/validation-gate.json
+    - policy/**
+    - platform/policy/**
+    - scripts/policy_checks.py
+    - scripts/policy_toolchain.py
+    - scripts/command_catalog.py
+    - scripts/parallel_check.py
+    - scripts/promotion_pipeline.py
+    - tests/test_policy_checks.py
+    - tests/test_command_catalog.py
+    - tests/test_parallel_check.py
+    - tests/test_promotion_pipeline.py
+    - tests/test_validation_gate.py
+    - tests/test_validation_gate_windmill.py
+    - tests/test_windmill_operator_admin_app.py
+    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+    mode: exclusive
+  - id: live_apply_evidence
+    paths:
+    - receipts/live-applies/2026-03-28-adr-0230-policy-decisions-live-apply.json
+    mode: shared_contract
+    contract: live-apply-receipts-v1
+ready_to_merge: false
+live_applied: true
+canonical_truth:
+  changelog_entry: implemented ADR 0230 by routing command approval, promotion eligibility,
+    and validation-gate policy decisions through one shared OPA and Conftest bundle
+    on both the controller and Windmill worker runtime
+  release_bump: patch
+  included_in_repo_version: 0.177.49
+  latest_receipts:
+    command_catalog: 2026-03-28-adr-0230-policy-decisions-live-apply
+    policy_validation: 2026-03-28-adr-0230-policy-decisions-live-apply
+    promotion_pipeline: 2026-03-28-adr-0230-policy-decisions-live-apply

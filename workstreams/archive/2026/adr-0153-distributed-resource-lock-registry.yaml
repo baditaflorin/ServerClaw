@@ -1,0 +1,25 @@
+id: adr-0153-distributed-resource-lock-registry
+adr: '0153'
+title: Distributed resource lock registry
+status: merged
+owner: codex
+branch: codex/adr-0153-distributed-resource-lock-registry
+worktree_path: .worktrees/adr-0153
+doc: docs/workstreams/adr-0153-distributed-resource-lock-registry.md
+depends_on:
+- adr-0112-goal-compiler
+- adr-0115-mutation-ledger
+- adr-0119-budgeted-workflow-scheduler
+- adr-0127-intent-conflict-resolution
+conflicts_with:
+- adr-0154-vm-scoped-execution-lanes
+- adr-0155-intent-queue-with-release-triggered-scheduling
+shared_surfaces:
+- platform/locking/
+- platform/scheduler/
+- platform/goal_compiler/
+- scripts/resource_lock_tool.py
+- Makefile
+- docs/runbooks/resource-lock-registry.md
+ready_to_merge: false
+live_applied: false

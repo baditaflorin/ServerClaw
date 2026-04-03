@@ -1,0 +1,76 @@
+id: ws-0240-main-merge
+adr: '0240'
+title: Integrate ADR 0240 operator visualization panels into origin/main
+status: merged
+owner: codex
+branch: codex/ws-0240-main-merge
+worktree_path: .worktrees/ws-0240-main-merge
+doc: docs/workstreams/ws-0240-main-merge.md
+depends_on:
+- ws-0240-live-apply
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- docs/workstreams/ws-0240-main-merge.md
+- README.md
+- RELEASE.md
+- VERSION
+- changelog.md
+- docs/release-notes/README.md
+- docs/release-notes/0.177.64.md
+- versions/stack.yaml
+- build/platform-manifest.json
+- docs/adr/.index.yaml
+- docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
+- docs/workstreams/ws-0240-live-apply.md
+- docs/runbooks/ops-portal-down.md
+- scripts/ops_portal/app.py
+- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+- tests/test_interactive_ops_portal.py
+- receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json
+- receipts/live-applies/2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply.json
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws_0240_main_merge_doc
+    paths:
+    - docs/workstreams/ws-0240-main-merge.md
+    mode: exclusive
+  - id: adr_0240_mainline_truth
+    paths:
+    - README.md
+    - RELEASE.md
+    - VERSION
+    - changelog.md
+    - docs/release-notes/README.md
+    - docs/release-notes/0.177.64.md
+    - versions/stack.yaml
+    - build/platform-manifest.json
+    mode: exclusive
+  - id: adr_0240_main_merge_surfaces
+    paths:
+    - docs/adr/.index.yaml
+    - docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
+    - docs/workstreams/ws-0240-live-apply.md
+    - docs/runbooks/ops-portal-down.md
+    - scripts/ops_portal/app.py
+    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+    - tests/test_interactive_ops_portal.py
+    - receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json
+    - receipts/live-applies/2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply.json
+    mode: exclusive
+ready_to_merge: true
+live_applied: false
+canonical_truth:
+  changelog_entry: records ADR 0240 exact-main evidence on the current mainline by
+    preserving the verified Apache ECharts operator visualization rollout, refreshed
+    release surfaces, and the current ops-portal platform baseline after the mainline
+    replay
+  release_bump: patch
+  included_in_repo_version: 0.177.64
+  latest_receipts:
+    ops_portal_visualizations: 2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply

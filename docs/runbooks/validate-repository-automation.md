@@ -67,6 +67,7 @@ runner `docker-build-lv3`.
 - the workflow catalog, command catalog, control-plane lane catalog, and controller-local secret manifest cross-reference cleanly
 - the API publication catalog classifies every governed API and webhook surface
 - structured live-apply receipts reference valid workflows and files, and record exact source git hashes; clone-local object availability can be audited explicitly with `LV3_REQUIRE_RECEIPT_SOURCE_COMMIT_OBJECTS=1`
+- shard-backed workstream registry sources stay in sync with the generated `workstreams.yaml` compatibility artifact
 
 ## Tooling Model
 
@@ -82,6 +83,7 @@ runner `docker-build-lv3`.
 - `make converge-windmill` now pins `/srv/proxmox_florin_server` to the active repo worktree automatically via `windmill_worker_checkout_repo_root_local_dir=$(REPO_ROOT)`
 - if a Windmill replay starts from an out-of-tree or temporary playbook path instead of the Makefile wrapper, pass `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` explicitly
 - validation resolves tracked JSON files against the repo root, falls back to `python3` when `jq` is unavailable, and skips rsync-excluded generated JSON artifacts that are intentionally absent from mirrored remote workspaces
+- workstream metadata is authored under `workstreams/` and the validation gate now fails if `workstreams.yaml` was not regenerated from that shard source
 - required Ansible collections are installed from [collections/requirements.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/requirements.yml)
 - validation collections are cached under `.ansible/validation/collections`
 - lint-oriented stages operate on tracked repository files so unrelated local work-in-progress does not fail the repo gate
@@ -167,4 +169,5 @@ python3 scripts/correction_loops.py --validate
 - if a local fallback or login shell picks up an older Python and direct validators fail on `int | None` or similar modern type syntax, export `LV3_VALIDATE_PYTHON_BIN=/absolute/path/to/python3.10+` and rerun
 - if the build-server immutable snapshot is missing a generated JSON artifact that is intentionally excluded from `.rsync-exclude`, keep the artifact excluded and extend the validation contract only if the remote gate truly needs that file
 - if the build-server gate fails with `No space left on device`, prune stale session workspaces under `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces` (plus `.lv3-runs` and `.lv3-snapshots`) to restore disk capacity before retrying
+- if validation reports a stale workstream registry, rerun `python3 scripts/workstream_registry.py --write` before retrying the broader gate
 - if a new file type needs validation, extend [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repo.sh) and keep `make validate` as the single top-level entry point

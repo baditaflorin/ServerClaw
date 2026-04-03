@@ -1,0 +1,69 @@
+id: ws-0185-live-apply
+adr: 0185
+title: Branch-scoped ephemeral preview environments
+status: merged
+owner: codex
+branch: codex/ws-0185-live-apply
+worktree_path: .worktrees/ws-0185-live-apply
+doc: .worktrees/ws-0185-live-apply/docs/workstreams/adr-0185-branch-scoped-ephemeral-preview-environments.md
+depends_on:
+- adr-0088-ephemeral-fixtures
+- adr-0106-ephemeral-environment-lifecycle
+- adr-0156-agent-session-workspace-isolation
+- adr-0183-multi-environment-live-lanes
+conflicts_with: []
+shared_surfaces:
+- config/preview-environment-profiles.json
+- config/ansible-execution-scopes.yaml
+- docs/schema/preview-environment-profiles.schema.json
+- scripts/preview_environment.py
+- scripts/live_apply_receipts.py
+- scripts/validate_repository_data_models.py
+- scripts/validate_repo.sh
+- docs/runbooks/preview-environments.md
+- Makefile
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: preview_environment_repo_surface
+    paths:
+    - docs/adr/0185-branch-scoped-ephemeral-preview-environments.md
+    - docs/workstreams/adr-0185-branch-scoped-ephemeral-preview-environments.md
+    - docs/runbooks/preview-environments.md
+    - docs/schema/preview-environment-profiles.schema.json
+    - config/preview-environment-profiles.json
+    - scripts/preview_environment.py
+    - tests/test_preview_environment.py
+    - receipts/preview-environments/
+    - receipts/live-applies/preview/
+    mode: exclusive
+  - id: preview_validation_contract
+    paths:
+    - config/ansible-execution-scopes.yaml
+    - scripts/live_apply_receipts.py
+    - scripts/validate_repository_data_models.py
+    - scripts/validate_repo.sh
+    - tests/test_environment_catalog.py
+    - tests/test_live_apply_receipts.py
+    mode: shared_contract
+    contract: preview-environment-validation-v1
+  - id: makefile_preview_entrypoints
+    paths:
+    - Makefile
+    mode: shared_contract
+    contract: preview-environment-entrypoints-v1
+ready_to_merge: false
+live_applied: true
+canonical_truth:
+  changelog_entry: merged ADR 0185 branch-scoped ephemeral preview environments after
+    the committed-head live apply proved the preview lifecycle can create, converge,
+    validate, and destroy isolated preview VMs from a separate worktree without interfering
+    with concurrent agent branches
+  release_bump: patch
+  included_in_repo_version: 0.177.17
+  latest_receipts:
+    preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z

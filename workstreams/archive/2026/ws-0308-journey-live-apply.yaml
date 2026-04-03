@@ -1,0 +1,183 @@
+id: ws-0308-journey-live-apply
+adr: 0308
+title: Live apply ADR 0308 journey-aware entry routing and saved home selection from
+  latest origin/main
+status: live_applied
+owner: codex
+branch: codex/ws-0308-live-apply-r3
+worktree_path: .worktrees/ws-0308-live-apply-r2
+doc: docs/workstreams/ws-0308-journey-live-apply.md
+depends_on:
+- adr-0093-interactive-ops-portal
+- adr-0152-homepage
+- adr-0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher
+- adr-0242-guided-human-onboarding-via-shepherd-tours
+- adr-0313-contextual-help-glossary-and-escalation-drawer
+conflicts_with:
+- ws-0308-live-apply
+shared_surfaces:
+- workstreams.yaml
+- docs/workstreams/ws-0308-journey-live-apply.md
+- docs/workstreams/ws-0310-live-apply.md
+- docs/workstreams/ws-0312-live-apply.md
+- docs/workstreams/adr-0307-platform-app-cohesion-bundle.md
+- docs/adr/0308-journey-aware-entry-routing-and-saved-home-selection.md
+- docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md
+- docs/adr/0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md
+- docs/adr/.index.yaml
+- .config-locations.yaml
+- config/activation-checklist.json
+- docs/schema/activation-checklist.schema.json
+- docs/runbooks/platform-operations-portal.md
+- docs/runbooks/operator-onboarding.md
+- docs/runbooks/windmill-operator-access-admin.md
+- docs/runbooks/ops-portal-down.md
+- Makefile
+- inventory/group_vars/platform.yml
+- playbooks/ops-portal.yml
+- receipts/ops-portal-snapshot.html
+- scripts/ops_portal/app.py
+- scripts/ops_portal/templates/base.html
+- scripts/ops_portal/templates/entry.html
+- scripts/ops_portal/templates/index.html
+- scripts/ops_portal/templates/partials/activation.html
+- scripts/ops_portal/templates/partials/attention.html
+- scripts/ops_portal/templates/partials/changelog.html
+- scripts/ops_portal/templates/partials/launcher.html
+- scripts/ops_portal/templates/partials/overview.html
+- scripts/ops_portal/templates/partials/runbooks.html
+- scripts/ops_portal/static/portal.css
+- scripts/validate_repository_data_models.py
+- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/docker-compose.yml.j2
+- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
+- tests/test_interactive_ops_portal.py
+- tests/test_ops_portal_playbook.py
+- tests/test_ops_portal_runtime_role.py
+- README.md
+- RELEASE.md
+- VERSION
+- changelog.md
+- docs/release-notes/README.md
+- docs/release-notes/*.md
+- versions/stack.yaml
+- build/platform-manifest.json
+- docs/diagrams/agent-coordination-map.excalidraw
+- docs/site-generated/architecture/dependency-graph.md
+- receipts/live-applies/*journey-entry-routing*
+- receipts/live-applies/evidence/*journey-entry-routing*
+- receipts/live-applies/evidence/*ws-0308-journey*
+- platform/ansible/execution_scopes.py
+- scripts/ansible_scope_runner.py
+- tests/test_ansible_execution_scopes.py
+- receipts/restic-backups/20260402T131708Z.json
+- receipts/restic-backups/20260402T154404Z.json
+- receipts/restic-snapshots-latest.json
+- receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws0308_journey_docs
+    paths:
+    - docs/workstreams/ws-0308-journey-live-apply.md
+    - docs/workstreams/ws-0310-live-apply.md
+    - docs/workstreams/ws-0312-live-apply.md
+    - docs/workstreams/adr-0307-platform-app-cohesion-bundle.md
+    - docs/adr/0308-journey-aware-entry-routing-and-saved-home-selection.md
+    - docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md
+    - docs/adr/0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md
+    - docs/runbooks/platform-operations-portal.md
+    - docs/runbooks/operator-onboarding.md
+    - docs/runbooks/windmill-operator-access-admin.md
+    - docs/runbooks/ops-portal-down.md
+    mode: exclusive
+  - id: ws0308_journey_runtime
+    paths:
+    - scripts/ops_portal/app.py
+    - scripts/ops_portal/templates/base.html
+    - scripts/ops_portal/templates/entry.html
+    - scripts/ops_portal/templates/index.html
+    - scripts/ops_portal/templates/partials/activation.html
+    - scripts/ops_portal/templates/partials/attention.html
+    - scripts/ops_portal/templates/partials/changelog.html
+    - scripts/ops_portal/templates/partials/launcher.html
+    - scripts/ops_portal/templates/partials/overview.html
+    - scripts/ops_portal/templates/partials/runbooks.html
+    - scripts/ops_portal/static/portal.css
+    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/docker-compose.yml.j2
+    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
+    - tests/test_interactive_ops_portal.py
+    - tests/test_ops_portal_playbook.py
+    - tests/test_ops_portal_runtime_role.py
+    mode: exclusive
+  - id: ws0308_journey_activation_and_validation_contract
+    paths:
+    - .config-locations.yaml
+    - config/activation-checklist.json
+    - docs/schema/activation-checklist.schema.json
+    - scripts/validate_repository_data_models.py
+    mode: shared_contract
+    contract: ws0308-portal-validation-v1
+  - id: ws0308_journey_deploy_contract
+    paths:
+    - Makefile
+    - inventory/group_vars/platform.yml
+    - playbooks/ops-portal.yml
+    mode: shared_contract
+    contract: ws0308-portal-deploy-v1
+  - id: ws0308_journey_release_surfaces
+    paths:
+    - README.md
+    - RELEASE.md
+    - VERSION
+    - changelog.md
+    - docs/release-notes/README.md
+    - docs/release-notes/*.md
+    - versions/stack.yaml
+    - build/platform-manifest.json
+    - docs/adr/.index.yaml
+    - docs/diagrams/agent-coordination-map.excalidraw
+    - docs/site-generated/architecture/dependency-graph.md
+    mode: shared_contract
+    contract: release-management-v1
+  - id: ws0308_journey_execution_scope_guard
+    paths:
+    - platform/ansible/execution_scopes.py
+    - scripts/ansible_scope_runner.py
+    - tests/test_ansible_execution_scopes.py
+    mode: shared_contract
+    contract: ws0308-execution-scope-guard-v1
+  - id: ws0308_journey_live_apply_receipts
+    paths:
+    - receipts/live-applies/*journey-entry-routing*
+    - receipts/live-applies/evidence/*journey-entry-routing*
+    - receipts/live-applies/evidence/*ws-0308-journey*
+    - receipts/ops-portal-snapshot.html
+    - receipts/restic-backups/20260402T131708Z.json
+    - receipts/restic-backups/20260402T154404Z.json
+    - receipts/restic-snapshots-latest.json
+    - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+    mode: shared_contract
+    contract: live-apply-receipts-v1
+blockers: []
+ready_to_merge: true
+live_applied: true
+canonical_truth:
+  changelog_entry: implements ADRs 0308 and 0312 on top of the ADR 0310 exact-main
+    portal baseline by adding the journey-aware `/entry` router, saved-home selection,
+    shared notification center and activity timeline, and hardening scoped live-apply
+    host discovery plus resilient search-fabric sync for the interactive ops portal
+    runtime
+  release_bump: patch
+  included_in_repo_version: 0.177.146
+  latest_receipts:
+    ops_portal: 2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply

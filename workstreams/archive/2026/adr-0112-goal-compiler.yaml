@@ -1,0 +1,24 @@
+id: adr-0112-goal-compiler
+adr: '0112'
+title: Deterministic goal compiler
+status: merged
+owner: codex
+branch: codex/adr-0112-goal-compiler
+worktree_path: .worktrees/adr-0112
+doc: docs/workstreams/adr-0112-goal-compiler.md
+depends_on:
+- adr-0048-command-catalog
+- adr-0069-agent-tool-registry
+- adr-0090-platform-cli
+conflicts_with:
+- adr-0113-world-state-materializer
+- adr-0115-mutation-ledger
+shared_surfaces:
+- platform/goal_compiler/
+- platform/ledger/
+- platform/world_state/
+- config/goal-compiler-rules.yaml
+- config/goal-compiler-aliases.yaml
+- scripts/lv3_cli.py
+ready_to_merge: false
+live_applied: false

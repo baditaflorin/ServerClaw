@@ -1,0 +1,18 @@
+id: adr-0040-runtime-container-telemetry
+adr: '0040'
+title: Docker runtime container telemetry
+status: live_applied
+owner: codex
+branch: codex/adr-0040-runtime-container-telemetry
+worktree_path: ../proxmox_florin_server-runtime-container-telemetry
+doc: docs/workstreams/adr-0040-runtime-container-telemetry.md
+depends_on:
+- adr-0011-monitoring
+conflicts_with: []
+shared_surfaces:
+- docker-runtime-lv3
+- playbooks/monitoring-stack.yml
+- roles/docker_runtime_observability
+- roles/monitoring_vm
+ready_to_merge: false
+live_applied: true

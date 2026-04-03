@@ -1,0 +1,18 @@
+id: adr-0082-remote-build-gateway
+adr: 0082
+title: Remote build execution gateway
+status: live_applied
+owner: codex
+branch: codex/adr-0082-remote-build-gateway
+worktree_path: ../proxmox_florin_server-remote-build-gateway
+doc: docs/workstreams/adr-0082-remote-build-gateway.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+- scripts/remote_exec.sh
+- config/build-server.json
+- inventory/build_server.yml
+- .rsync-exclude
+- Makefile
+ready_to_merge: false
+live_applied: true

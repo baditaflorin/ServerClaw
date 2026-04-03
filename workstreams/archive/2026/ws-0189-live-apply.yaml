@@ -1,0 +1,73 @@
+id: ws-0189-live-apply
+adr: 0189
+title: ADR 0189 live apply from latest origin/main
+status: live_applied
+owner: codex
+branch: codex/ws-0189-live-apply
+worktree_path: .worktrees/ws-0189-live-apply
+doc: docs/workstreams/ws-0189-live-apply.md
+depends_on:
+- adr-0088-ephemeral-fixtures
+- adr-0167-graceful-degradation-mode-declarations
+- adr-0171-controlled-fault-injection
+- adr-0185-branch-scoped-ephemeral-preview-environments
+conflicts_with: []
+shared_surfaces:
+- config/network-impairment-matrix.yaml
+- platform/faults/network_impairment_matrix.py
+- scripts/network_impairment_matrix.py
+- config/windmill/scripts/network-impairment-matrix.py
+- config/workflow-catalog.json
+- config/command-catalog.json
+- collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+- docs/runbooks/network-impairment-matrix.md
+- receipts/live-applies/
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: adr_0189_live_apply_repo_surface
+    paths:
+    - config/network-impairment-matrix.yaml
+    - platform/faults/network_impairment_matrix.py
+    - scripts/network_impairment_matrix.py
+    - config/windmill/scripts/network-impairment-matrix.py
+    - tests/test_network_impairment_matrix.py
+    - tests/test_network_impairment_matrix_repo_surfaces.py
+    - tests/test_network_impairment_matrix_windmill.py
+    - docs/runbooks/network-impairment-matrix.md
+    - docs/workstreams/ws-0189-live-apply.md
+    mode: exclusive
+  - id: workflow_catalog_contract
+    paths:
+    - config/workflow-catalog.json
+    mode: shared_contract
+    contract: workflow-catalog-v1
+  - id: command_catalog_contract
+    paths:
+    - config/command-catalog.json
+    mode: shared_contract
+    contract: command-catalog-v1
+  - id: windmill_runtime_seed_contract
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+    mode: shared_contract
+    contract: windmill-seed-scripts-v1
+  - id: makefile_contract
+    paths:
+    - Makefile
+    mode: shared_contract
+    contract: makefile-validation-targets-v1
+ready_to_merge: false
+live_applied: true
+canonical_truth:
+  changelog_entry: implemented ADR 0189 governed network-impairment matrix rendering
+    and hardened the mirrored Windmill worker checkout so repo-managed Python jobs
+    no longer trip stale editable-build metadata before startup
+  release_bump: patch
+  included_in_repo_version: 0.177.27
+  latest_receipts:
+    network_impairment_matrix: 2026-03-27-adr-0189-network-impairment-matrix-live-apply

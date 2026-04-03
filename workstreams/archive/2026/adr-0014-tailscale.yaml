@@ -1,0 +1,16 @@
+id: adr-0014-tailscale
+adr: '0014'
+title: Tailscale private access rollout
+status: live_applied
+owner: codex
+branch: codex/adr-0014-tailscale
+worktree_path: ../proxmox_florin_server-tailscale
+doc: docs/workstreams/adr-0014-tailscale.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+- proxmox_host_access
+- guest_access
+- private_network
+ready_to_merge: false
+live_applied: true

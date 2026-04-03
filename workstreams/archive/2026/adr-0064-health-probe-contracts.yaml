@@ -1,0 +1,19 @@
+id: adr-0064-health-probe-contracts
+adr: '0064'
+title: Health probe contracts for all services
+status: merged
+owner: codex
+branch: codex/adr-0064-health-probe-contracts
+worktree_path: ../proxmox_florin_server-health-probe-contracts
+doc: docs/workstreams/adr-0064-health-probe-contracts.md
+depends_on:
+- adr-0027-uptime-kuma
+- adr-0062-role-composability
+conflicts_with: []
+shared_surfaces:
+- service role verify tasks
+- config/health-probe-catalog.json
+- config/uptime-kuma/
+- make validate
+ready_to_merge: false
+live_applied: false

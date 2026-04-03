@@ -1,0 +1,18 @@
+id: adr-0049-private-api-publication
+adr: 0049
+title: Private-first API publication model
+status: merged
+owner: codex
+branch: codex/adr-0049-private-first-api-publication-model
+worktree_path: ../proxmox_florin_server-adr-0049
+doc: docs/workstreams/adr-0049-private-api-publication.md
+depends_on:
+- adr-0045-communication-lanes
+- adr-0047-short-lived-creds
+conflicts_with: []
+shared_surfaces:
+- NGINX edge
+- private API listeners
+- admin surfaces
+ready_to_merge: true
+live_applied: true

@@ -1,0 +1,22 @@
+id: adr-0075-service-capability-catalog
+adr: '0075'
+title: Service capability catalog
+status: merged
+owner: codex
+branch: codex/adr-0075-service-capability-catalog
+worktree_path: ../proxmox_florin_server-service-capability-catalog
+doc: docs/workstreams/adr-0075-service-capability-catalog.md
+depends_on:
+- adr-0064-health-probe-contracts
+- adr-0068-container-image-policy
+- adr-0065-secret-rotation-automation
+conflicts_with: []
+shared_surfaces:
+- config/service-capability-catalog.json
+- docs/schema/service-capability-catalog.schema.json
+- scripts/service_catalog.py
+- scripts/validate_service_catalog.py
+- docs/runbooks/service-capability-catalog.md
+- Makefile
+ready_to_merge: false
+live_applied: false

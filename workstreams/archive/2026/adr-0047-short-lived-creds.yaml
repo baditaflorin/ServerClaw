@@ -1,0 +1,20 @@
+id: adr-0047-short-lived-creds
+adr: '0047'
+title: Short-lived credentials and internal mTLS
+status: live_applied
+owner: codex
+branch: codex/adr-0047-short-lived-creds
+worktree_path: ../proxmox_florin_server-short-lived-creds
+doc: docs/workstreams/adr-0047-short-lived-creds.md
+depends_on:
+- adr-0042-step-ca
+- adr-0043-openbao
+- adr-0046-identity-classes
+conflicts_with: []
+shared_surfaces:
+- SSH certificates
+- API tokens
+- internal HTTPS
+- service authentication
+ready_to_merge: false
+live_applied: true

@@ -1,0 +1,89 @@
+id: ws-0251-main-integration
+adr: '0251'
+title: Integrate ADR 0251 exact-main durable verification onto current origin/main
+status: merged
+owner: codex
+branch: codex/ws-0251-main-integration
+worktree_path: .worktrees/ws-0251-live-apply-r2
+doc: docs/workstreams/ws-0251-main-integration.md
+depends_on:
+- ws-0251-live-apply
+- ws-0251-live-apply-r2
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- README.md
+- RELEASE.md
+- VERSION
+- build/platform-manifest.json
+- changelog.md
+- docs/release-notes/README.md
+- docs/release-notes/0.177.87.md
+- versions/stack.yaml
+- docs/adr/.index.yaml
+- docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md
+- docs/workstreams/ws-0251-live-apply.md
+- docs/workstreams/ws-0251-live-apply-r2.md
+- docs/workstreams/ws-0251-main-integration.md
+- docs/diagrams/agent-coordination-map.excalidraw
+- collections/ansible_collections/lv3/platform/roles/control_plane_recovery/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+- tests/test_ops_portal_runtime_role.py
+- receipts/live-applies/2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply.json
+- receipts/live-applies/evidence/2026-03-29-adr-0251-exact-main-durable-verification.txt
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: adr_index_generation
+    paths:
+    - docs/adr/.index.yaml
+    mode: shared_contract
+    contract: adr-index-generator-v1
+  - id: integration_truth
+    paths:
+    - README.md
+    - RELEASE.md
+    - VERSION
+    - build/platform-manifest.json
+    - changelog.md
+    - docs/release-notes/README.md
+    - docs/release-notes/0.177.87.md
+    - versions/stack.yaml
+    mode: shared_contract
+    contract: main-integration-truth-v1
+  - id: adr_0251_mainline_generated_state
+    paths:
+    - docs/diagrams/agent-coordination-map.excalidraw
+    mode: shared_contract
+    contract: generated-diagrams-v1
+  - id: adr_0251_ansible_lint_cleanup
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/control_plane_recovery/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+    - tests/test_ops_portal_runtime_role.py
+    mode: exclusive
+  - id: adr_0251_mainline_integration
+    paths:
+    - docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md
+    - docs/workstreams/ws-0251-live-apply.md
+    - docs/workstreams/ws-0251-live-apply-r2.md
+    - docs/workstreams/ws-0251-main-integration.md
+    - receipts/live-applies/2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply.json
+    - receipts/live-applies/evidence/2026-03-29-adr-0251-exact-main-durable-verification.txt
+    mode: exclusive
+ready_to_merge: true
+live_applied: true
+canonical_truth:
+  changelog_entry: records ADR 0251 exact-main durable verification on the latest
+    realistic origin/main by marking the stage-scoped smoke suite and promotion-gate
+    workflow fully live, preserving the live worker checkout, gate-status, runtime-assurance,
+    and ops-portal verification on release 0.177.87 while the current verified platform
+    baseline remains 0.130.59
+  release_bump: patch
+  included_in_repo_version: 0.177.87
+  latest_receipts:
+    stage_smoke_promotion_gates: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply

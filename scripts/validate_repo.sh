@@ -638,6 +638,10 @@ validate_agent_standards() {
   local ws_rc=$?
   [[ $ws_rc -ne 0 ]] && rc=$ws_rc
 
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/workstream_registry.py" --check >/dev/null
+  local ws_registry_rc=$?
+  [[ $ws_registry_rc -ne 0 ]] && rc=$ws_registry_rc
+
   _validate_adr_index_current
   local idx_rc=$?
   [[ $idx_rc -ne 0 ]] && rc=$idx_rc

@@ -19,17 +19,27 @@ fi
 
 WORKSTREAM_ID="$1"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-REGISTRY_PATH="$REPO_ROOT/workstreams.yaml"
 
 readarray -t WORKSTREAM_FIELDS < <(
-  ruby -r yaml -e '
-    registry = YAML.load_file(ARGV[0])
-    workstream = registry.fetch("workstreams").find { |item| item.fetch("id") == ARGV[1] }
-    abort("Unknown workstream: #{ARGV[1]}") unless workstream
-    puts workstream.fetch("branch")
-    puts workstream.fetch("worktree_path")
-    puts workstream.fetch("doc")
-  ' "$REGISTRY_PATH" "$WORKSTREAM_ID"
+  python3 - "$REPO_ROOT" "$WORKSTREAM_ID" <<'PY'
+from pathlib import Path
+import sys
+
+repo_root = Path(sys.argv[1])
+workstream_id = sys.argv[2]
+sys.path.insert(0, str(repo_root))
+sys.path.insert(0, str(repo_root / "scripts"))
+
+from platform.workstream_registry import find_workstream
+
+record = find_workstream(workstream_id, repo_root=repo_root, include_archive=True)
+if record is None:
+    raise SystemExit(f"Unknown workstream: {workstream_id}")
+workstream = record.payload
+print(workstream["branch"])
+print(workstream["worktree_path"])
+print(workstream["doc"])
+PY
 )
 
 BRANCH_NAME="${WORKSTREAM_FIELDS[0]}"

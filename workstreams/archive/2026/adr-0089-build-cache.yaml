@@ -1,0 +1,22 @@
+id: adr-0089-build-cache
+adr: 0089
+title: Build artifact cache and layer registry
+status: merged
+owner: codex
+branch: codex/adr-0089-build-cache
+worktree_path: ../proxmox_florin_server-build-cache
+doc: docs/workstreams/adr-0089-build-cache.md
+depends_on:
+- adr-0082-remote-build-gateway
+- adr-0083-docker-check-runner
+conflicts_with: []
+shared_surfaces:
+- roles/build_server/
+- playbooks/build-artifact-cache.yml
+- playbooks/services/build-artifact-cache.yml
+- config/build-cache-manifest.json
+- config/windmill/scripts/warm-build-cache.py
+- scripts/cache_status.py
+- docs/runbooks/configure-build-artifact-cache.md
+ready_to_merge: false
+live_applied: false

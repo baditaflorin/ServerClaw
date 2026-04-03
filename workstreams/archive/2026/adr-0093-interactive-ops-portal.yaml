@@ -1,0 +1,24 @@
+id: adr-0093-interactive-ops-portal
+adr: 0093
+title: Interactive ops portal with live actions
+status: live_applied
+owner: codex
+branch: codex/live-apply-0093
+worktree_path: .worktrees/live-apply-0093
+doc: docs/workstreams/adr-0093-interactive-ops-portal.md
+depends_on:
+- adr-0092-platform-api-gateway
+- adr-0056-keycloak
+- adr-0058-nats-event-bus
+- adr-0066-mutation-audit-log
+- adr-0074-ops-portal
+- adr-0080-maintenance-windows
+- adr-0091-drift-detection
+conflicts_with:
+- adr-0074-ops-portal
+shared_surfaces:
+- scripts/generate_ops_portal.py
+- nginx edge ops.lv3.org vhost
+- config/service-capability-catalog.json
+ready_to_merge: false
+live_applied: true

@@ -1,0 +1,23 @@
+id: adr-0081-changelog-portal
+adr: 0081
+title: Platform changelog and deployment history portal
+status: live_applied
+owner: codex
+branch: codex/adr-0081-changelog-portal
+worktree_path: ../proxmox_florin_server-changelog-portal
+doc: docs/workstreams/adr-0081-changelog-portal.md
+depends_on:
+- adr-0074-ops-portal
+- adr-0066-mutation-audit-log
+- adr-0075-service-capability-catalog
+conflicts_with: []
+shared_surfaces:
+- scripts/generate_changelog_portal.py
+- scripts/deployment_history.py
+- build/changelog-portal/
+- config/agent-tool-registry.json
+- config/subdomain-catalog.json
+- changelog.md
+- docs/release-notes/
+ready_to_merge: false
+live_applied: true

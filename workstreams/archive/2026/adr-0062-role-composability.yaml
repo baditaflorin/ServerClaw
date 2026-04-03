@@ -1,0 +1,17 @@
+id: adr-0062-role-composability
+adr: '0062'
+title: Ansible role composability and DRY defaults
+status: merged
+owner: codex
+branch: codex/adr-0062-role-composability
+worktree_path: ../proxmox_florin_server-role-composability
+doc: docs/workstreams/adr-0062-role-composability.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+- roles/common/
+- filter_plugins/
+- make validate
+- role argument specs
+ready_to_merge: false
+live_applied: false

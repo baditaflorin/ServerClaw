@@ -1,0 +1,25 @@
+id: adr-0163-retry-taxonomy
+adr: '0163'
+title: Platform-wide retry taxonomy and exponential backoff
+status: live_applied
+owner: codex
+branch: codex/adr-0163-retry-taxonomy
+worktree_path: .worktrees/adr-0163
+doc: docs/workstreams/adr-0163-retry-taxonomy.md
+depends_on:
+- adr-0044-windmill
+- adr-0058-nats-event-bus
+- adr-0092-platform-api-gateway
+- adr-0119-budgeted-workflow-scheduler
+conflicts_with: []
+shared_surfaces:
+- platform/retry/
+- config/retry-policies.yaml
+- scripts/api_gateway/main.py
+- platform/scheduler/scheduler.py
+- scripts/netbox_inventory_sync.py
+- scripts/drift_lib.py
+- scripts/check_ad_hoc_retry.py
+- docs/runbooks/retry-taxonomy.md
+ready_to_merge: false
+live_applied: true

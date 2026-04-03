@@ -4,12 +4,23 @@ owner: adr-0175-cross-workstream-interface-contracts
 version: 1.0.0
 compatibility: backward_compatible_minor
 producer_paths:
+  - workstreams/policy.yaml
+  - workstreams/active
+  - workstreams/archive
+  - platform/workstream_registry.py
+  - scripts/workstream_registry.py
   - workstreams.yaml
 consumer_paths:
   - scripts/create-workstream.sh
+  - scripts/canonical_truth.py
   - scripts/drift_lib.py
+  - scripts/generate_diagrams.py
   - scripts/generate_status_docs.py
   - scripts/release_manager.py
+  - scripts/workstream_tool.py
+  - scripts/workstream_surface_ownership.py
+  - scripts/validate_repository_data_models.py
+  - scripts/validate_repo.sh
 input_schema:
   type: registry
   required_fields:

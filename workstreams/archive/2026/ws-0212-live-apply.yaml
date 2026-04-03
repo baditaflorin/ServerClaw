@@ -1,0 +1,108 @@
+id: ws-0212-live-apply
+adr: '0212'
+title: Replaceability scorecards and vendor exit plans live apply
+status: merged
+owner: codex
+branch: codex/ws-0212-live-apply
+worktree_path: .worktrees/ws-0212-live-apply
+doc: docs/workstreams/ws-0212-live-apply.md
+depends_on:
+- adr-0205-capability-contracts-before-product-selection
+- adr-0213-architecture-fitness-functions-in-the-validation-gate
+conflicts_with: []
+shared_surfaces:
+- docs/adr/0029-dedicated-backup-vm-with-local-pbs.md
+- docs/adr/0042-step-ca-for-ssh-and-internal-tls.md
+- docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md
+- docs/adr/0044-windmill-for-agent-and-operator-workflows.md
+- docs/adr/0056-keycloak-for-operator-and-agent-sso.md
+- docs/adr/0143-gitea-for-self-hosted-git-and-ci.md
+- docs/adr/0144-headscale-for-zero-trust-mesh-vpn.md
+- docs/adr/0212-replaceability-scorecards-and-vendor-exit-plans.md
+- docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md
+- config/replaceability-review-catalog.json
+- docs/schema/replaceability-review-catalog.schema.json
+- scripts/replaceability_scorecards.py
+- scripts/validate_repository_data_models.py
+- scripts/validate_repo.sh
+- platform/interface_contracts.py
+- Makefile
+- docs/runbooks/replaceability-scorecards.md
+- docs/runbooks/validate-repository-automation.md
+- collections/ansible_collections/lv3/platform/roles/_template/service_scaffold/adr.md.tpl
+- tests/test_interface_contracts.py
+- tests/test_replaceability_scorecards.py
+- tests/test_scaffold_service.py
+- tests/test_validate_repo_cache.py
+- docs/adr/.index.yaml
+- docs/site-generated/architecture/dependency-graph.md
+- docs/diagrams/agent-coordination-map.excalidraw
+- scripts/generate_dependency_diagram.py
+- tests/test_dependency_graph.py
+- tests/test_docs_site.py
+- docs/workstreams/ws-0212-live-apply.md
+- receipts/live-applies/2026-03-28-adr-0212-replaceability-scorecards-live-apply.json
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: replaceability_governed_adrs
+    paths:
+    - docs/adr/0029-dedicated-backup-vm-with-local-pbs.md
+    - docs/adr/0042-step-ca-for-ssh-and-internal-tls.md
+    - docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md
+    - docs/adr/0044-windmill-for-agent-and-operator-workflows.md
+    - docs/adr/0056-keycloak-for-operator-and-agent-sso.md
+    - docs/adr/0143-gitea-for-self-hosted-git-and-ci.md
+    - docs/adr/0144-headscale-for-zero-trust-mesh-vpn.md
+    - docs/adr/0212-replaceability-scorecards-and-vendor-exit-plans.md
+    - docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md
+    - docs/adr/.index.yaml
+    mode: exclusive
+  - id: replaceability_repo_surface
+    paths:
+    - config/replaceability-review-catalog.json
+    - docs/schema/replaceability-review-catalog.schema.json
+    - scripts/replaceability_scorecards.py
+    - scripts/validate_repository_data_models.py
+    - scripts/validate_repo.sh
+    - platform/interface_contracts.py
+    - Makefile
+    - docs/runbooks/replaceability-scorecards.md
+    - docs/runbooks/validate-repository-automation.md
+    - .config-locations.yaml
+    - collections/ansible_collections/lv3/platform/roles/_template/service_scaffold/adr.md.tpl
+    - scripts/generate_dependency_diagram.py
+    - tests/test_interface_contracts.py
+    - tests/test_replaceability_scorecards.py
+    - tests/test_scaffold_service.py
+    - tests/test_validate_repo_cache.py
+    - tests/test_dependency_graph.py
+    - tests/test_docs_site.py
+    mode: exclusive
+  - id: docs_portal_generated_surface
+    paths:
+    - docs/site-generated/architecture/dependency-graph.md
+    - docs/diagrams/agent-coordination-map.excalidraw
+    mode: exclusive
+  - id: workstream_docs_and_receipt
+    paths:
+    - docs/workstreams/ws-0212-live-apply.md
+    - docs/workstreams/adr-0143-gitea-ci.md
+    - docs/workstreams/adr-0144-headscale.md
+    - docs/workstreams/adr-0204-architecture-governance.md
+    - receipts/live-applies/2026-03-28-adr-0212-replaceability-scorecards-live-apply.json
+    mode: exclusive
+ready_to_merge: true
+live_applied: true
+canonical_truth:
+  changelog_entry: implemented ADR 0212 by governing critical integrated product ADRs
+    with machine-checked replaceability scorecards, vendor exit plans, and live docs
+    publication evidence
+  release_bump: patch
+  included_in_repo_version: 0.177.35
+  latest_receipts:
+    docs_portal: 2026-03-28-adr-0212-replaceability-scorecards-live-apply

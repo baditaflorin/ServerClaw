@@ -1,0 +1,54 @@
+id: ws-0184-live-apply
+adr: 0184
+title: Failure-domain labels and anti-affinity policy live apply
+status: live_applied
+owner: codex
+branch: codex/ws-0184-live-apply
+worktree_path: ../worktree-ws-0184-live-apply
+doc: docs/workstreams/ws-0184-live-apply.md
+depends_on:
+- adr-0179-service-redundancy-tier-matrix
+- adr-0180-standby-capacity
+- adr-0183-auxiliary-cloud-failure-domain
+conflicts_with: []
+shared_surfaces:
+- inventory/host_vars/proxmox_florin.yml
+- config/environment-topology.json
+- roles/proxmox_guests/
+- collections/ansible_collections/lv3/platform/roles/proxmox_guests/
+- scripts/failure_domain_policy.py
+- scripts/validate_repository_data_models.py
+- docs/runbooks/failure-domain-policy.md
+- docs/adr/0184-failure-domain-labels-and-anti-affinity-policy.md
+- docs/workstreams/ws-0184-live-apply.md
+- receipts/live-applies/
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: failure_domain_policy_repo_surface
+    paths:
+    - inventory/host_vars/proxmox_florin.yml
+    - config/environment-topology.json
+    - docs/schema/environment-topology.schema.json
+    - scripts/failure_domain_policy.py
+    - scripts/validate_repository_data_models.py
+    - tests/test_failure_domain_policy.py
+    - docs/runbooks/failure-domain-policy.md
+    - docs/adr/0184-failure-domain-labels-and-anti-affinity-policy.md
+    - docs/workstreams/ws-0184-live-apply.md
+    - receipts/live-applies/**
+    mode: exclusive
+ready_to_merge: false
+live_applied: true
+canonical_truth:
+  changelog_entry: implemented ADR 0184 failure-domain labels and anti-affinity policy,
+    adding repo-validated placement metadata, live Proxmox guest tag convergence,
+    and the verified workstream receipt for the current managed guests
+  release_bump: patch
+  included_in_repo_version: 0.177.18
+  latest_receipts:
+    failure_domain_policy: 2026-03-27-adr-0184-failure-domain-labels-live-apply

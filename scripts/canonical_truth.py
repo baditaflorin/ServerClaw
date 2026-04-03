@@ -10,6 +10,13 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import README_PATH, emit_cli_error, load_yaml, repo_path
+from platform.workstream_registry import (
+    find_workstream,
+    has_sharded_sources,
+    load_workstreams as load_registry_workstreams,
+    write_assembled_registry,
+    write_workstream,
+)
 
 
 REPO_ROOT = repo_path()
@@ -81,10 +88,7 @@ def _require_optional_semver(value: Any, *, path: str) -> str | None:
 
 def load_workstream_canonical_truth(path: Path | None = None) -> list[WorkstreamCanonicalTruth]:
     resolved_path = path or WORKSTREAMS_PATH
-    registry = load_yaml(resolved_path)
-    workstreams = registry.get("workstreams")
-    if not isinstance(workstreams, list):
-        raise ValueError("workstreams.yaml.workstreams must be a list")
+    workstreams = load_registry_workstreams(compatibility_path=resolved_path, include_archive=True)
 
     result: list[WorkstreamCanonicalTruth] = []
     for index, workstream in enumerate(workstreams):
@@ -345,6 +349,28 @@ def mark_pending_workstreams_released(version: str, *, workstreams_path: Path | 
     items = pending_release_workstreams(load_workstream_canonical_truth(resolved_workstreams_path))
     if not items:
         return []
+
+    if has_sharded_sources(compatibility_path=resolved_workstreams_path):
+        changed_ids: list[str] = []
+        for item in items:
+            record = find_workstream(item.workstream_id, compatibility_path=resolved_workstreams_path, include_archive=True)
+            if record is None or record.location == "compatibility":
+                raise ValueError(
+                    f"failed to locate shard for workstream '{item.workstream_id}' in {resolved_workstreams_path.name}"
+                )
+            updated_payload = dict(record.payload)
+            canonical_truth = dict(updated_payload.get("canonical_truth") or {})
+            canonical_truth["included_in_repo_version"] = version
+            updated_payload["canonical_truth"] = canonical_truth
+            write_workstream(
+                updated_payload,
+                compatibility_path=resolved_workstreams_path,
+                current_path=record.path,
+                archive_year=record.archive_year,
+            )
+            changed_ids.append(item.workstream_id)
+        write_assembled_registry(compatibility_path=resolved_workstreams_path)
+        return changed_ids
 
     updated = resolved_workstreams_path.read_text(encoding="utf-8")
     changed_ids: list[str] = []

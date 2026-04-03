@@ -15,7 +15,7 @@ last_updated: "2026-03-30"
 agent_quick_reference:
   find_config: "Check this file → find your concern section → read 'use_for'"
   where_to_document:
-    infrastructure_changes: "workstreams.yaml + docs/workstreams/"
+    infrastructure_changes: "workstreams/ + workstreams.yaml + docs/workstreams/"
     service_deployments: "versions/stack.yaml"
     version_bumps: "VERSION + changelog.md + docs/release-notes/"
     operational_changes: "receipts/live-applies/"
@@ -783,20 +783,48 @@ agent_discovery:
 
 project_tracking:
 
-  workstreams.yaml:
-    purpose: Active workstream registry — branch, assignee, status, ADR ref
+  workstreams/policy.yaml:
+    purpose: Canonical shared policy and release metadata for the shard-backed workstream registry
     owner: human and automation
-    format: YAML — workstream definitions
-    use_for: Tracking parallel work and current projects
-    update_when: Starting or completing a workstream
-    update_by: Agent at start/end of branch work
+    format: YAML
+    use_for: Defining delivery_model and release_policy values shared by every workstream shard
+    update_when: Delivery or release policy changes
+    update_by: Agent or human changing the registry model
+
+  workstreams/active/:
+    purpose: Canonical active workstream shard directory
+    owner: human and automation
+    format: YAML - one file per active workstream
+    use_for: Tracking in-flight or not-yet-archived workstreams
+    update_when: Starting, updating, or finishing a workstream before archive handoff
+    update_by: Agent or human owning the workstream
+    naming_convention: "<workstream-id>.yaml"
+
+  workstreams/archive/:
+    purpose: Canonical archived workstream shard directory
+    owner: human and automation
+    format: YAML - one file per archived workstream under year folders
+    use_for: Keeping completed workstream history out of the active coordination surface
+    update_when: A completed workstream finishes repo-version bookkeeping and is archived
+    update_by: Release automation or the integrating agent
+    naming_convention: "<year>/<workstream-id>.yaml"
+
+  workstreams.yaml:
+    purpose: Generated compatibility assembly for active workstream coordination
+    owner: human and automation
+    format: YAML — generated active workstream list plus archive summary
+    use_for: Current readers that still consume a single workstream registry file
+    update_when: Any workstream shard changes
+    update_by: "python3 scripts/workstream_registry.py --write"
     structure: |
+      archive_summary:
+        by_year:
+          "2026": 42
       workstreams:
-        - name: workstream-name
-          branch: codex/adr-XXXX-description
-          assignee: claude | codex | human
-          status: in-progress | blocked | review-ready | complete
-          adr_reference: docs/workstreams/adr-XXXX-workstream-name.md
+        - id: ws-XXXX-live-apply
+          branch: codex/ws-XXXX-live-apply
+          owner: codex | claude | human
+          status: in_progress | ready_for_merge | ...
 
   docs/workstreams/:
     purpose: ADR-style planning documents for active workstreams

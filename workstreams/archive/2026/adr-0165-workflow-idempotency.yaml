@@ -1,0 +1,30 @@
+id: adr-0165-workflow-idempotency
+adr: '0165'
+title: Workflow idempotency keys and double-execution prevention
+status: live_applied
+owner: codex
+branch: codex/live-apply-0165
+worktree_path: .worktrees/live-apply-0165
+doc: docs/workstreams/adr-0165-workflow-idempotency.md
+depends_on:
+- adr-0044-windmill
+- adr-0058-nats-event-bus
+- adr-0112-goal-compiler
+- adr-0115-mutation-ledger
+- adr-0119-budgeted-workflow-scheduler
+- adr-0126-observation-to-action-closure-loop
+- adr-0127-intent-conflict-resolution
+conflicts_with:
+- adr-0119-budgeted-workflow-scheduler
+- adr-0126-observation-to-action-closure-loop
+- adr-0127-intent-conflict-resolution
+shared_surfaces:
+- platform/idempotency
+- platform/scheduler
+- platform/closure_loop
+- scripts/lv3_cli.py
+- migrations/0016_idempotency_store.sql
+- docs/runbooks/workflow-idempotency.md
+- config/ledger-event-types.yaml
+ready_to_merge: false
+live_applied: true

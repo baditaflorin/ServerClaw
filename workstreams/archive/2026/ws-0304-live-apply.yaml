@@ -1,0 +1,140 @@
+id: ws-0304-live-apply
+adr: '0304'
+title: Live apply ADR 0304 from latest origin/main
+status: merged
+owner: codex
+branch: codex/ws-0304-mainline
+worktree_path: .worktrees/ws-0304-mainline
+doc: docs/workstreams/ws-0304-live-apply.md
+depends_on:
+- adr-0043-compose-based-service-layout
+- adr-0044-openbao-as-secrets-manager
+- adr-0077-compose-runtime-secrets-injection
+- adr-0087-repository-validation-gate-and-release-readiness
+- adr-0197-openbao-host-runtime-and-unseal-recovery-contracts
+- adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- docs/workstreams/ws-0304-live-apply.md
+- docs/adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
+- docs/runbooks/configure-atlas.md
+- docs/adr/.index.yaml
+- README.md
+- RELEASE.md
+- VERSION
+- changelog.md
+- versions/stack.yaml
+- build/platform-manifest.json
+- docs/release-notes/*.md
+- docs/diagrams/*.excalidraw
+- Makefile
+- inventory/group_vars/all.yml
+- controller_automation_toolkit.pyi
+- script_bootstrap.pyi
+- nats/*.pyi
+- nats/**/*.pyi
+- config/api-publication.json
+- config/atlas/**
+- config/build-server.json
+- config/check-runner-manifest.json
+- config/command-catalog.json
+- config/control-plane-lanes.json
+- config/controller-local-secrets.json
+- config/event-taxonomy.yaml
+- config/secret-catalog.json
+- config/service-capability-catalog.json
+- config/validation-gate.json
+- config/validation-lanes.yaml
+- config/validation-runner-contracts.json
+- config/windmill/scripts/**
+- config/workflow-catalog.json
+- collections/ansible_collections/lv3/platform/roles/common/**
+- collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/**
+- collections/ansible_collections/lv3/platform/roles/openbao_postgres_backend/**
+- collections/ansible_collections/lv3/platform/roles/openbao_runtime/**
+- collections/ansible_collections/lv3/platform/roles/postgres_vm/**
+- collections/ansible_collections/lv3/platform/roles/windmill_runtime/**
+- platform/*.py
+- platform/**/*.py
+- playbooks/openbao.yml
+- playbooks/tasks/openbao-*.yml
+- receipts/atlas-drift/**
+- receipts/live-applies/**
+- scripts/run_python_with_packages.sh
+- scripts/validate_repo.sh
+- scripts/*.py
+- tests/*.py
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws0304_adr_index
+    paths:
+    - docs/adr/.index.yaml
+    mode: shared_contract
+    contract: ws0304-adr-index-v1
+  - id: ws0304_live_apply_surfaces
+    paths:
+    - docs/workstreams/ws-0304-live-apply.md
+    - docs/adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
+    - docs/runbooks/configure-atlas.md
+    - README.md
+    - RELEASE.md
+    - VERSION
+    - changelog.md
+    - versions/stack.yaml
+    - build/platform-manifest.json
+    - docs/release-notes/*.md
+    - docs/diagrams/*.excalidraw
+    - Makefile
+    - inventory/group_vars/all.yml
+    - controller_automation_toolkit.pyi
+    - script_bootstrap.pyi
+    - nats/*.pyi
+    - nats/**/*.pyi
+    - config/api-publication.json
+    - config/atlas/**
+    - config/build-server.json
+    - config/check-runner-manifest.json
+    - config/command-catalog.json
+    - config/control-plane-lanes.json
+    - config/controller-local-secrets.json
+    - config/event-taxonomy.yaml
+    - config/secret-catalog.json
+    - config/service-capability-catalog.json
+    - config/validation-gate.json
+    - config/validation-lanes.yaml
+    - config/validation-runner-contracts.json
+    - config/windmill/scripts/**
+    - config/workflow-catalog.json
+    - collections/ansible_collections/lv3/platform/roles/common/**
+    - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/**
+    - collections/ansible_collections/lv3/platform/roles/openbao_postgres_backend/**
+    - collections/ansible_collections/lv3/platform/roles/openbao_runtime/**
+    - collections/ansible_collections/lv3/platform/roles/postgres_vm/**
+    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/**
+    - platform/*.py
+    - platform/**/*.py
+    - playbooks/openbao.yml
+    - playbooks/tasks/openbao-*.yml
+    - receipts/atlas-drift/**
+    - receipts/live-applies/**
+    - scripts/run_python_with_packages.sh
+    - scripts/validate_repo.sh
+    - scripts/*.py
+    - tests/*.py
+    mode: exclusive
+ready_to_merge: true
+live_applied: true
+canonical_truth:
+  changelog_entry: implemented ADR 0304 by adding Atlas-backed schema validation,
+    pre-migration linting, snapshot refresh, and verified Windmill drift detection
+    with OpenBao-delivered runtime credentials on the latest mainline replay
+  release_bump: patch
+  included_in_repo_version: 0.177.149
+  latest_receipts:
+    database_schema: 2026-04-02-adr-0304-atlas-mainline-live-apply

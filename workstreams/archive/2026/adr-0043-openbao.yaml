@@ -1,0 +1,18 @@
+id: adr-0043-openbao
+adr: '0043'
+title: OpenBao for secrets, transit, and dynamic credentials
+status: live_applied
+owner: codex
+branch: codex/adr-0043-openbao
+worktree_path: ../proxmox_florin_server-openbao
+doc: docs/workstreams/adr-0043-openbao.md
+depends_on:
+- adr-0023-docker-runtime
+conflicts_with: []
+shared_surfaces:
+- docker-runtime-lv3
+- secret distribution
+- transit operations
+- automation credentials
+ready_to_merge: false
+live_applied: true

@@ -10,6 +10,7 @@ from typing import Any
 from api_publication import ALLOWED_PUBLICATION_TIERS, load_api_publication_catalog
 from control_plane_lanes import ALLOWED_LANE_IDS, load_lane_catalog
 from controller_automation_toolkit import README_PATH, emit_cli_error, load_yaml, repo_path
+from platform.workstream_registry import load_workstreams
 
 
 REPO_ROOT = repo_path()
@@ -198,7 +199,7 @@ def render_version_summary() -> str:
 
 
 def render_merged_workstreams() -> str:
-    workstreams = load_yaml(WORKSTREAMS_PATH)["workstreams"]
+    workstreams = load_workstreams(repo_root=REPO_ROOT, include_archive=True)
     merged_rows = []
     for workstream in sorted(workstreams, key=lambda item: (int(item["adr"]), item["id"])):
         if workstream["status"] not in {"merged", "live_applied"}:

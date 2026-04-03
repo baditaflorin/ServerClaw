@@ -1,0 +1,25 @@
+id: adr-0123-service-uptime-contracts
+adr: '0123'
+title: Service uptime contracts and monitor-backed health
+status: merged
+owner: codex
+branch: codex/adr-0123-service-uptime-contract
+worktree_path: .worktrees/adr-0123
+doc: docs/workstreams/adr-0123-service-uptime-contracts.md
+depends_on:
+- adr-0027-uptime-kuma
+- adr-0064-health-probe-contracts
+- adr-0075-service-capability-catalog
+- adr-0092-platform-api-gateway
+- adr-0093-interactive-ops-portal
+- adr-0113-world-state-materializer
+conflicts_with: []
+shared_surfaces:
+- config/health-probe-catalog.json
+- config/uptime-kuma/monitors.json
+- platform/world_state/
+- scripts/api_gateway/
+- scripts/ops_portal/
+- docs/runbooks/
+ready_to_merge: false
+live_applied: false

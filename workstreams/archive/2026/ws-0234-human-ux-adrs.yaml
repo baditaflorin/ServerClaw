@@ -1,0 +1,79 @@
+id: ws-0234-human-ux-adrs
+adr: '0234'
+title: Human user experience architecture bundle
+status: merged
+owner: codex
+branch: codex/ws-0234-human-ux-adrs
+worktree_path: .worktrees/ws-0234-human-ux-adrs
+doc: docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md
+depends_on:
+- adr-0093-interactive-ops-portal
+- adr-0094-developer-portal
+- adr-0133-portal-authentication-by-default
+- adr-0152-homepage
+- adr-0193-plane
+- adr-0199-outline
+- adr-0209-use-case-services
+conflicts_with: []
+shared_surfaces:
+- docs/adr/0234-shared-human-app-shell-and-navigation-via-patternfly.md
+- docs/adr/0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md
+- docs/adr/0236-server-state-and-mutation-feedback-via-tanstack-query.md
+- docs/adr/0237-schema-first-human-forms-via-react-hook-form-and-zod.md
+- docs/adr/0238-data-dense-operator-grids-via-ag-grid-community.md
+- docs/adr/0239-browser-local-search-experience-via-pagefind.md
+- docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
+- docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+- docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md
+- docs/adr/0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
+- docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md
+- docs/adr/.index.yaml
+- workstreams.yaml
+- VERSION
+- changelog.md
+- RELEASE.md
+- docs/release-notes/README.md
+- docs/release-notes/0.177.47.md
+- docs/diagrams/agent-coordination-map.excalidraw
+- build/platform-manifest.json
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: human_ux_bundle
+    paths:
+    - docs/adr/0234-shared-human-app-shell-and-navigation-via-patternfly.md
+    - docs/adr/0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md
+    - docs/adr/0236-server-state-and-mutation-feedback-via-tanstack-query.md
+    - docs/adr/0237-schema-first-human-forms-via-react-hook-form-and-zod.md
+    - docs/adr/0238-data-dense-operator-grids-via-ag-grid-community.md
+    - docs/adr/0239-browser-local-search-experience-via-pagefind.md
+    - docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
+    - docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+    - docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md
+    - docs/adr/0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
+    - docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md
+    - docs/adr/.index.yaml
+    mode: exclusive
+  - id: integration_release_surfaces
+    paths:
+    - VERSION
+    - changelog.md
+    - RELEASE.md
+    - docs/release-notes/README.md
+    - docs/release-notes/0.177.47.md
+    - docs/diagrams/agent-coordination-map.excalidraw
+    - build/platform-manifest.json
+    mode: exclusive
+ready_to_merge: true
+live_applied: false
+canonical_truth:
+  changelog_entry: accepted ADRs 0234 through 0243 to define a coherent human-first
+    UX layer for the monolithic platform using mature open source tools including
+    PatternFly, TanStack Query, React Hook Form, Zod, AG Grid Community, Pagefind,
+    Apache ECharts, Tiptap, Shepherd.js, Storybook, Playwright, and axe-core
+  release_bump: patch
+  included_in_repo_version: 0.177.47

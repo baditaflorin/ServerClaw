@@ -1,0 +1,37 @@
+id: adr-0119-budgeted-workflow-scheduler
+adr: 0119
+title: Budgeted workflow scheduler
+status: live_applied
+owner: codex
+branch: codex/ws-0119-main-final
+worktree_path: .worktrees/ws-0119-main-final
+doc: docs/workstreams/adr-0119-budgeted-workflow-scheduler.md
+depends_on:
+- adr-0044-windmill
+- adr-0048-command-catalog
+- adr-0058-nats-event-bus
+- adr-0071-agent-observation-loop
+- adr-0098-postgres-ha
+- adr-0112-goal-compiler
+- adr-0115-mutation-ledger
+- adr-0116-change-risk-scoring
+conflicts_with:
+- adr-0112-goal-compiler
+shared_surfaces:
+- platform/scheduler
+- scripts/lv3_cli.py
+- config/workflow-catalog.json
+- config/workflow-defaults.yaml
+- windmill/scheduler/watchdog-loop.py
+- docs/runbooks/budgeted-workflow-scheduler.md
+ready_to_merge: false
+live_applied: true
+canonical_truth:
+  changelog_entry: completed ADR 0119 latest-main live apply by hardening Windmill
+    seed sync and replaying the scheduler dispatcher, lane, watchdog, and watchdog-loop
+    paths from the current mainline
+  release_bump: patch
+  included_in_repo_version: 0.177.10
+  latest_receipts:
+    budgeted_workflow_scheduler: 2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply
+    windmill: 2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply

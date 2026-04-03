@@ -29,14 +29,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
-try:
-    import yaml  # type: ignore
-except ImportError:
-    print("pyyaml is required: pip install pyyaml", file=sys.stderr)
-    sys.exit(1)
+from controller_automation_toolkit import emit_cli_error
+from platform.workstream_registry import load_workstreams
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-WORKSTREAMS_PATH = REPO_ROOT / "workstreams.yaml"
 
 # Statuses considered "terminal" — dependencies on these are satisfied
 SATISFIED_STATUSES = {"merged", "live_applied"}
@@ -48,12 +44,7 @@ IN_PROGRESS_STATUS = "in_progress"
 # ---------------------------------------------------------------------------
 
 def _load_workstreams() -> list[dict[str, Any]]:
-    if not WORKSTREAMS_PATH.exists():
-        print(f"workstreams.yaml not found at {WORKSTREAMS_PATH}", file=sys.stderr)
-        sys.exit(1)
-    with WORKSTREAMS_PATH.open() as fh:
-        data = yaml.safe_load(fh)
-    return data.get("workstreams") or []
+    return load_workstreams(repo_root=REPO_ROOT, include_archive=True)
 
 
 def _ws_key(ws: dict[str, Any]) -> str:
@@ -311,9 +302,9 @@ def cmd_summary(args: argparse.Namespace) -> None:
 # CLI
 # ---------------------------------------------------------------------------
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Query workstreams.yaml — use this before manual YAML reads.",
+        description="Query the shard-backed workstream registry before manual YAML reads.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     sub = parser.add_subparsers(dest="command", required=True)
@@ -343,7 +334,7 @@ def main() -> None:
     # summary
     sub.add_parser("summary", help="Aggregate stats across all workstreams")
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     dispatch = {
         "list": cmd_list,
         "show": cmd_show,
@@ -352,8 +343,12 @@ def main() -> None:
         "next": cmd_next,
         "summary": cmd_summary,
     }
-    dispatch[args.command](args)
+    try:
+        dispatch[args.command](args)
+        return 0
+    except (FileNotFoundError, OSError, RuntimeError, ValueError) as exc:
+        return emit_cli_error("workstream tool", exc)
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

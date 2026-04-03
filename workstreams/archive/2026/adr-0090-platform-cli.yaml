@@ -1,0 +1,22 @@
+id: adr-0090-platform-cli
+adr: 0090
+title: Unified platform CLI
+status: merged
+owner: codex
+branch: codex/adr-0090-platform-cli
+worktree_path: ../proxmox_florin_server-platform-cli
+doc: docs/workstreams/adr-0090-platform-cli.md
+depends_on:
+- adr-0075-service-capability-catalog
+- adr-0082-remote-build-gateway
+conflicts_with: []
+shared_surfaces:
+- scripts/lv3_cli.py
+- pyproject.toml
+- Makefile
+- config/service-capability-catalog.json
+- config/workflow-catalog.json
+- config/controller-local-secrets.json
+- docs/runbooks/platform-cli.md
+ready_to_merge: false
+live_applied: false

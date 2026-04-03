@@ -1,0 +1,24 @@
+id: adr-0157-per-vm-concurrency-budget
+adr: '0157'
+title: Per-VM concurrency budget and resource reservation
+status: live_applied
+owner: codex
+branch: codex/live-apply-0157
+worktree_path: .worktrees/live-apply-0157
+doc: docs/workstreams/adr-0157-per-vm-concurrency-budget.md
+depends_on:
+- adr-0119-budgeted-workflow-scheduler
+conflicts_with:
+- adr-0153-distributed-resource-lock-registry
+- adr-0154-vm-scoped-execution-lanes
+shared_surfaces:
+- config/execution-lanes.yaml
+- config/workflow-catalog.json
+- config/workflow-defaults.yaml
+- platform/scheduler
+- docs/runbooks/budgeted-workflow-scheduler.md
+- docs/runbooks/per-vm-concurrency-budgets.md
+- playbooks/windmill.yml
+- roles/windmill_runtime
+ready_to_merge: false
+live_applied: true

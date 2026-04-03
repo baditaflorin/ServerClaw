@@ -1,0 +1,23 @@
+id: adr-0107-extension-model
+adr: '0107'
+title: Platform extension model for adding new services
+status: merged
+owner: codex
+branch: codex/adr-0107-extension-model
+worktree_path: ../proxmox_florin_server-extension-model
+doc: docs/workstreams/adr-0107-extension-model.md
+depends_on:
+- adr-0033-service-catalog
+- adr-0064-health-probes
+- adr-0078-service-scaffold
+- adr-0087-validation-gate
+- adr-0092-platform-api-gateway
+- adr-0096-slo-tracking
+- adr-0104-dependency-graph
+conflicts_with: []
+shared_surfaces:
+- scripts/generate_service_scaffold.py
+- config/validation-gate.json
+- all catalog JSON files
+ready_to_merge: false
+live_applied: false
