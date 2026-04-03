@@ -30,6 +30,10 @@ HETZNER_DNS_API_TOKEN=... make converge-glitchtip
 
 The target validates the public subdomain contract, refreshes the shared edge generated sites, and then converges PostgreSQL, Keycloak client wiring, the GlitchTip runtime, and the NGINX edge publication from one repo-managed entrypoint.
 
+`make converge-glitchtip` also forwards `ANSIBLE_TRACE_ARGS` and `EXTRA_ARGS`
+through the canonical entrypoint, so trace-enabled runs and bounded reruns use
+the same governed workflow instead of ad hoc playbook invocations.
+
 ## Generated local artifacts
 
 The workflow maintains controller-local artifacts under `.local/glitchtip/`:
@@ -96,6 +100,10 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 ```
 
 The repo-managed publication verification now waits for a quiet controller window across `docker-runtime-lv3` and `nginx-lv3` before probing `errors.lv3.org`, and it retries once after that quiet window if another live apply had just been mutating the shared runtime or edge.
+- The exact-main recovery path now repairs Docker bridge-chain publication on
+  `docker-runtime-lv3` before the GlitchTip public verifier runs, so reruns
+  can recover from shared-runtime nftables drift without a manual guest-side
+  bridge-chain repair.
 
 ## Notes
 

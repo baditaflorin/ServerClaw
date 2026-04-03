@@ -43,7 +43,7 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.148` |
+| Repository version | `0.177.149` |
 | Platform version | `0.130.93` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -56,13 +56,13 @@ rewriting one operator's workstation paths.
 | Managed guest count | 9 |
 | Running guest count | 8 |
 | Template VM present | `true` |
-| Declared services | 70 |
-| Publicly published services | 42 |
+| Declared services | 71 |
+| Publicly published services | 43 |
 
 ### Service Exposure Summary
 | Exposure Model | Services |
 | --- | --- |
-| `edge-published` | 33 |
+| `edge-published` | 34 |
 | `edge-static` | 1 |
 | `informational-only` | 4 |
 | `private-only` | 32 |
@@ -108,6 +108,7 @@ rewriting one operator's workstation paths.
 | `flagsmith` | `2026-03-30-adr-0288-flagsmith-mainline-live-apply` |
 | `gitea` | `2026-03-26-adr-0143-gitea-live-apply` |
 | `gitea_actions_runners` | `2026-03-28-adr-0229-gitea-actions-runners-live-apply` |
+| `glitchtip` | `2026-04-03-adr-0281-glitchtip-mainline-live-apply` |
 | `gotenberg` | `2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply` |
 | `grist` | `2026-04-01-adr-0279-grist-mainline-live-apply` |
 | `guest_network_policy` | `2026-03-22-adr-0067-guest-network-policy-live-apply` |
@@ -303,12 +304,12 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.148` |
+| Repository version | `0.177.149` |
 | Platform version | `0.130.93` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
-| Declared services | 70 |
+| Declared services | 71 |
 <!-- END GENERATED: version-summary -->
 
 ## Delivery Model
@@ -571,6 +572,7 @@ Current values on `main`:
 | `0273` | Live apply ADR 0273 public endpoint admission control | `live_applied` | [adr-0273-public-endpoint-admission-control.md](docs/workstreams/adr-0273-public-endpoint-admission-control.md) |
 | `0274` | Live apply ADR 0274 shared MinIO object storage from latest origin/main | `live_applied` | [ws-0274-minio-live-apply.md](docs/workstreams/ws-0274-minio-live-apply.md) |
 | `0277` | Live apply the private Typesense structured-search plane from latest origin/main | `live_applied` | [ws-0277-live-apply.md](docs/workstreams/ws-0277-live-apply.md) |
+| `0281` | Live apply the GlitchTip application error tracking stack from latest origin/main | `live_applied` | [ws-0281-live-apply.md](docs/workstreams/ws-0281-live-apply.md) |
 | `0292` | Live apply Lago as the usage metering and billing API layer from latest origin/main | `merged` | [ws-0292-live-apply.md](docs/workstreams/ws-0292-live-apply.md) |
 | `0292` | Live apply ADR 0292 Apache Superset from latest origin/main | `live_applied` | [ws-0292-superset-live-apply.md](docs/workstreams/ws-0292-superset-live-apply.md) |
 | `0293` | Live apply LiveKit as the real-time audio and voice channel for agents from latest origin/main | `live_applied` | [ws-0293-livekit-live-apply.md](docs/workstreams/ws-0293-livekit-live-apply.md) |

@@ -1692,7 +1692,7 @@ workstreams:
   - id: ws-0281-live-apply
     adr: "0281"
     title: Live apply the GlitchTip application error tracking stack from latest origin/main
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0281-mainline-v2
     worktree_path: .worktrees/ws-0281-mainline-v2
@@ -1879,17 +1879,14 @@ workstreams:
           mode: shared_contract
           contract: live-apply-receipts-v1
     canonical_truth:
-      changelog_entry: integrates ADR 0281 into main by re-verifying the latest realistic origin/main GlitchTip replay, preserving the repo-managed `errors.lv3.org` error-tracking publication and Keycloak OIDC handoff, and recording truthful public health plus end-to-end event-ingest evidence from the merged tree
+      changelog_entry: integrates ADR 0281 into main by promoting the April 3 exact-main GlitchTip replay, preserving the already-current platform version `0.130.93`, and recording truthful public health, Keycloak OIDC, and end-to-end event-ingest evidence for `errors.lv3.org`
       release_bump: patch
-      included_in_repo_version: 0.177.142
+      included_in_repo_version: 0.177.149
       latest_receipts:
-        glitchtip: 2026-04-01-adr-0281-glitchtip-mainline-live-apply
-    ready_to_merge: false
+        glitchtip: 2026-04-03-adr-0281-glitchtip-mainline-live-apply
+    ready_to_merge: true
     live_applied: true
-    blockers:
-      - 'The branch is now rebased onto latest realistic `origin/main` `67bc9f13f973f5386b1ec5b4dd4304e400c214a8` / `0.177.142`, but the exact-main public verification still cannot start honestly because `receipts/live-applies/evidence/2026-04-02-adr-0281-mainline-quiet-window-waiter-r2-0.177.142.txt` timed out while ws-0247, ws-0289, ws-0299, ws-0303, ws-0304, ws-0308, ws-0309, ws-0312, and ws-0314 playbooks were all mutating `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`.'
-      - 'Fresh read-only public checks on 2026-04-02 still show `errors.lv3.org` drifted away from the repo-managed GlitchTip publication: at 11:11:11 GMT it returned `HTTP/2 308` to `https://nginx.lv3.org/health/` and served certificate `CN=nginx.lv3.org`; see `receipts/live-applies/evidence/2026-04-02-adr-0281-current-public-surface-r2-0.177.142.txt` and `receipts/live-applies/evidence/2026-04-02-adr-0281-current-public-cert-r2-0.177.142.txt`.'
-      - 'Repo automation is current on `0.177.142`: focused latest-main tests passed (`42 passed`), `make check-build-server` passed, and `make remote-validate` passed, while both `make validate` and `make pre-push-gate` now narrow only to protected canonical-truth regeneration for the top-level `README.md`; see `receipts/live-applies/evidence/2026-04-02-adr-0281-mainline-canonical-truth-r1-0.177.142.txt` and `receipts/live-applies/evidence/2026-04-02-adr-0281-mainline-pre-push-gate-r1-0.177.142.txt`.'
+    blockers: []
   - id: ws-0292-live-apply
     adr: "0292"
     title: Live apply Lago as the usage metering and billing API layer from latest origin/main
