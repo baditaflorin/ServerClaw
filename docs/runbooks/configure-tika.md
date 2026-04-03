@@ -33,10 +33,10 @@ Replay the guarded production live-apply path:
 
 ```bash
 cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
-ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=tika env=production EXTRA_ARGS='-e bypass_promotion=true'
+make live-apply-service service=tika env=production
 ```
 
-Apply the first full runtime-ai pool rollout that also provisions the guest, Traefik, Dapr, and Nomad namespace:
+Historical first runtime-ai pool rollout reference. This is not the routine Apache Tika replay path, but it remains useful if the entire runtime-ai pool ever needs to be rebuilt from the earlier migration baseline:
 
 ```bash
 cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
@@ -113,5 +113,8 @@ PY'
   guest network; do not publish it through the public edge or the API gateway.
 - The repo-managed runtime intentionally uses the standard Apache Tika image,
   not the `-full` image, so OCR remains outside the live contract from ADR 0275.
+- Routine Tika replays on `runtime-ai-lv3` no longer require the ADR 0191
+  in-place mutation override that was previously needed when the service lived
+  on `docker-runtime-lv3`.
 - Future callers must request `Accept: text/plain` on `/tika` if they want clean
   extracted text rather than the XHTML serialization.

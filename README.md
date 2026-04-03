@@ -43,8 +43,8 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.150` |
-| Platform version | `0.130.93` |
+| Repository version | `0.177.151` |
+| Platform version | `0.130.94` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -306,8 +306,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.150` |
-| Platform version | `0.130.93` |
+| Repository version | `0.177.151` |
+| Platform version | `0.130.94` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -574,6 +574,7 @@ Current values on `main`:
 | `0273` | Live apply ADR 0273 public endpoint admission control | `live_applied` | [adr-0273-public-endpoint-admission-control.md](docs/workstreams/adr-0273-public-endpoint-admission-control.md) |
 | `0274` | Live apply ADR 0274 shared MinIO object storage from latest origin/main | `live_applied` | [ws-0274-minio-live-apply.md](docs/workstreams/ws-0274-minio-live-apply.md) |
 | `0277` | Live apply the private Typesense structured-search plane from latest origin/main | `live_applied` | [ws-0277-live-apply.md](docs/workstreams/ws-0277-live-apply.md) |
+| `0279` | Integrate ADR 0279 exact-main replay onto current origin/main | `live_applied` | [ws-0279-main-merge.md](docs/workstreams/ws-0279-main-merge.md) |
 | `0281` | Live apply the GlitchTip application error tracking stack from latest origin/main | `live_applied` | [ws-0281-live-apply.md](docs/workstreams/ws-0281-live-apply.md) |
 | `0292` | Live apply Lago as the usage metering and billing API layer from latest origin/main | `merged` | [ws-0292-live-apply.md](docs/workstreams/ws-0292-live-apply.md) |
 | `0292` | Live apply ADR 0292 Apache Superset from latest origin/main | `live_applied` | [ws-0292-superset-live-apply.md](docs/workstreams/ws-0292-superset-live-apply.md) |

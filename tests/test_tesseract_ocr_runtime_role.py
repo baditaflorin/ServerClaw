@@ -21,6 +21,7 @@ HEALTH_PROBE_CATALOG_PATH = REPO_ROOT / "config" / "health-probe-catalog.json"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
+RUNTIME_AI_HOSTS = "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-ai-lv3' }}"
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -132,7 +133,7 @@ def test_playbook_and_service_wrapper_import_the_tesseract_ocr_runtime() -> None
     root_wrapper = load_yaml(PLAYBOOK_PATH)
     wrapper = load_yaml(SERVICE_WRAPPER_PATH)
 
-    assert playbook[0]["hosts"] == "{{ playbook_execution_host_patterns.runtime_ai[playbook_execution_env] }}"
+    assert playbook[0]["hosts"] == RUNTIME_AI_HOSTS
     roles = [role["role"] for role in playbook[0]["roles"]]
     assert roles == [
         "lv3.platform.linux_guest_firewall",

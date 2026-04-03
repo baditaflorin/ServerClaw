@@ -11,13 +11,14 @@ SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "tika.yml"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
+RUNTIME_AI_HOSTS = "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-ai-lv3' }}"
 
 
 def test_tika_playbook_converges_firewall_before_runtime_verification() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
     play = plays[0]
 
-    assert play["hosts"] == "{{ playbook_execution_host_patterns.runtime_ai[playbook_execution_env] }}"
+    assert play["hosts"] == RUNTIME_AI_HOSTS
     assert play["roles"] == [
         {"role": "lv3.platform.linux_guest_firewall"},
         {"role": "lv3.platform.docker_runtime"},

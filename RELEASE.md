@@ -1,13 +1,12 @@
-# Release 0.177.150
+# Release 0.177.151
 
 - Date: 2026-04-03
 
 ## Summary
-- integrates ADR 0304 into `main` by carrying the already-live Atlas-backed schema validation, pre-migration linting, committed schema snapshots, and Windmill drift-detection path forward onto the latest `origin/main` baseline after replaying the latest realistic live path and refreshing Atlas snapshots
-- preserves the already-current platform version `0.130.93` while promoting the first verified ADR 0304 live-apply baseline from platform version `0.130.90` into repository release `0.177.150`
+- refreshes ADR 0275 on the latest exact mainline by replacing the shared runtime-ai pool receipt with a dedicated Apache Tika receipt, re-verifying the private extraction path on runtime-ai-lv3, and aligning the document-runtime validation tests with the syntax-check-safe host selection contract
 
 ## Platform Impact
-- no new platform version bump; this release promotes the already-live ADR 0304 database-schema baseline, first verified in platform version 0.130.90, into the current mainline repository truth while preserving the live platform state at 0.130.93
+- advances the verified live platform truth to `0.130.94` after the exact-main Apache Tika replay on `runtime-ai-lv3` and replaces the shared runtime-ai pool receipt with a dedicated Tika receipt
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

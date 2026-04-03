@@ -2,9 +2,9 @@
 
 - Status: Accepted
 - Implementation Status: Live applied
-- Implemented In Repo Version: 0.177.102
-- Implemented In Platform Version: 0.130.63
-- Implemented On: 2026-03-30
+- Implemented In Repo Version: 0.177.151
+- Implemented In Platform Version: 0.130.94
+- Implemented On: 2026-04-03
 - Date: 2026-03-29
 
 ## Context
@@ -35,7 +35,7 @@ service for the RAG and memory pipelines.
 
 ### Deployment rules
 
-- Tika runs as a Docker Compose service on the docker-runtime VM
+- Tika runs as a Docker Compose service on the `runtime-ai-lv3` guest
 - It is internal-only; no NGINX route or public subdomain is issued for it
 - The service exposes the standard `/tika` and `/meta` REST endpoints on the
   guest network

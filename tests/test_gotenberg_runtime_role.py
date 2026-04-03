@@ -17,6 +17,7 @@ WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 API_GATEWAY_CATALOG_PATH = REPO_ROOT / "config" / "api-gateway-catalog.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
+RUNTIME_AI_HOSTS = "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-ai-lv3' }}"
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -98,7 +99,7 @@ def test_playbook_converges_runtime_and_api_gateway_route() -> None:
 
     assert len(playbook) == 1
     play = playbook[0]
-    assert play["hosts"] == "{{ playbook_execution_host_patterns.runtime_ai[playbook_execution_env] }}"
+    assert play["hosts"] == RUNTIME_AI_HOSTS
     roles = [role["role"] for role in play["roles"]]
     assert roles == [
         "lv3.platform.linux_guest_firewall",

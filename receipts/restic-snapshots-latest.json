@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "recorded_at": "2026-04-03T00:18:54Z",
+  "recorded_at": "2026-04-03T06:35:47Z",
   "recorded_on": "2026-04-03",
   "recorded_by": "codex",
   "repository": {
@@ -33,13 +33,13 @@
         "keep_monthly": 12
       },
       "latest_snapshot": {
-        "snapshot_id": "0cac16a4536276b6e069a07e710d2889c12b500a1fd4e7c01eb64c9c3f906412",
-        "recorded_at": "2026-04-03T00:11:06Z",
+        "snapshot_id": "08ecf92dc9bcedeed02c6d50d4651d9c5e67cb87850cddecf6fb05e72ca95081",
+        "recorded_at": "2026-04-03T06:35:38Z",
         "host": "docker-runtime-lv3",
         "paths": [
           "receipts"
         ],
-        "files": 4590
+        "files": 4595
       },
       "last_restore_verification": {
         "recorded_at": "2026-03-31T22:43:48Z",
@@ -65,8 +65,8 @@
         "keep_monthly": 6
       },
       "latest_snapshot": {
-        "snapshot_id": "e8db235466c3214dcae645e3dbfe0be6c01aba3c91eb9e88d889e875d9295199",
-        "recorded_at": "2026-04-03T00:18:54Z",
+        "snapshot_id": "b10e113f8e49f8f6e4abd195024b5dbd2c407ea7eae446d0b6b9f2af780471f6",
+        "recorded_at": "2026-04-03T06:35:47Z",
         "host": "docker-runtime-lv3",
         "paths": [
           "config"
@@ -92,8 +92,8 @@
         "keep_daily": 30
       },
       "latest_snapshot": {
-        "snapshot_id": "73d192e5ed19e5a6be239a2fd97e1da8b4e8ae2de123ec4f657df10f722bd961",
-        "recorded_at": "2026-04-03T00:18:54Z",
+        "snapshot_id": "c69e2a2a4f1b89ed5d79d6382e224a16b2f84bbd0b0477eb893c91bc257bcb47",
+        "recorded_at": "2026-04-03T06:35:47Z",
         "host": "docker-runtime-lv3",
         "paths": [
           "versions/stack.yaml"
@@ -119,8 +119,8 @@
         "keep_daily": 90
       },
       "latest_snapshot": {
-        "snapshot_id": "45c76846885bff0665754d4010322b819acf52a9ed3f9caa11459e29d15e3462",
-        "recorded_at": "2026-04-03T00:11:07Z",
+        "snapshot_id": "aac71f5cd03dc48e628bcf64efffed043601c8d87823eab2aa7daf8fdc8ad245",
+        "recorded_at": "2026-04-03T06:35:40Z",
         "host": "docker-runtime-lv3",
         "paths": [
           "config/controller-local-secrets.json"

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.150",
-  "platform_version": "0.130.93",
-  "generated_at": "2026-04-03T03:53:22Z",
-  "next_refresh_at": "2026-04-03T04:53:22Z",
+  "repo_version": "0.177.151",
+  "platform_version": "0.130.94",
+  "generated_at": "2026-04-03T06:49:19Z",
+  "next_refresh_at": "2026-04-03T07:49:19Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -243,7 +243,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.90:3007",
-        "last_live_apply": "2026-04-02T00:00:00Z",
+        "last_live_apply": "2026-04-03T00:00:00Z",
         "slo_status": "unknown"
       },
       "grafana": {
@@ -279,7 +279,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://registry.lv3.org",
-        "last_live_apply": "2026-04-02T00:00:00Z",
+        "last_live_apply": "2026-04-03T00:00:00Z",
         "slo_status": "unknown"
       },
       "headscale": {
@@ -567,7 +567,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.92:8098",
-        "last_live_apply": "2026-04-02T00:00:00Z",
+        "last_live_apply": "2026-04-03T00:00:00Z",
         "slo_status": "unknown"
       },
       "ops_portal": {
@@ -788,7 +788,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "grpc://127.0.0.1:7233",
-        "last_live_apply": "2026-04-02T00:00:00Z"
+        "last_live_apply": "2026-04-03T00:00:00Z"
       },
       "tesseract_ocr": {
         "service_name": "Tesseract OCR",
@@ -799,7 +799,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.90:3008",
-        "last_live_apply": "2026-04-02T00:00:00Z",
+        "last_live_apply": "2026-04-03T00:00:00Z",
         "slo_status": "unknown"
       },
       "tika": {
@@ -811,7 +811,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.90:9998",
-        "last_live_apply": "2026-04-02T00:00:00Z",
+        "last_live_apply": "2026-04-03T00:00:00Z",
         "slo_status": "unknown"
       },
       "typesense": {
@@ -6071,10 +6071,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.149",
+    "last_version": "0.177.150",
     "deployed_at": "2026-04-03",
-    "summary": "integrates ADR 0304 into `main` by carrying the already-live Atlas-backed schema validation, pre-migration linting, committed schema snapshots, and Windmill drift-detection path forward onto the latest `origin/main` baseline after replaying the latest realistic live path and refreshing Atlas snapshots preserves the already-current platform version `0.130.93` while promoting the first verified ADR 0304 live-apply baseline from platform version `0.130.90` into repository release `0.177.150`",
-    "release_notes_url": "docs/release-notes/0.177.150.md"
+    "summary": "refreshes ADR 0275 on the latest exact mainline by replacing the shared runtime-ai pool receipt with a dedicated Apache Tika receipt, re-verifying the private extraction path on runtime-ai-lv3, and aligning the document-runtime validation tests with the syntax-check-safe host selection contract",
+    "release_notes_url": "docs/release-notes/0.177.151.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
