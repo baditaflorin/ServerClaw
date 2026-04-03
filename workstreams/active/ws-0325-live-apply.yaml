@@ -24,21 +24,33 @@ shared_surfaces:
 - docs/adr/index/reservations.yaml
 - docs/runbooks/adr-discovery-and-reservations.md
 - docs/diagrams/agent-coordination-map.excalidraw
-- docs/site-generated/architecture/dependency-graph.md
 - .repo-structure.yaml
 - .config-locations.yaml
+- build/onboarding/*.yaml
+- docs/discovery/config-locations/agent-discovery.yaml
+- docs/discovery/repo-structure/automation-and-infrastructure.yaml
+- docs/discovery/repo-structure/documentation-and-history.yaml
 - config/validation-gate.json
 - config/validation-lanes.yaml
 - scripts/adr_discovery.py
 - scripts/generate_adr_index.py
 - scripts/adr_query_tool.py
+- scripts/generate_discovery_artifacts.py
 - scripts/validate_repo.sh
 - tests/test_generate_adr_index.py
 - tests/test_adr_query_tool.py
 - tests/test_validation_lanes.py
+- README.md
+- changelog.md
+- docs/release-notes/README.md
+- docs/release-notes/index/*.md
+- docs/status/history/*.md
+- versions/stack.yaml
+- build/platform-manifest.json
 - receipts/live-applies/2026-04-03-adr-0325-adr-discovery-live-apply.json
-- receipts/live-applies/2026-04-03-adr-0325-adr-discovery-mainline-live-apply.json
+- receipts/live-applies/2026-04-04-adr-0325-adr-discovery-mainline-live-apply.json
 - receipts/live-applies/evidence/2026-04-03-ws-0325-*
+- receipts/live-applies/evidence/2026-04-04-ws-0325-*
 ownership_manifest:
   owned_surfaces:
   - id: workstream_registry
@@ -71,13 +83,23 @@ ownership_manifest:
   - id: ws0325_generated_truth
     paths:
     - docs/diagrams/agent-coordination-map.excalidraw
-    - docs/site-generated/architecture/dependency-graph.md
+    - README.md
+    - docs/status/history/*.md
+    - build/platform-manifest.json
     mode: shared_contract
     contract: latest-main-generated-truth-v1
   - id: ws0325_repo_indexes
     paths:
     - .repo-structure.yaml
     - .config-locations.yaml
+    - build/onboarding/*.yaml
+    mode: shared_contract
+    contract: agent-discovery-index-v1
+  - id: ws0325_discovery_sources
+    paths:
+    - docs/discovery/config-locations/agent-discovery.yaml
+    - docs/discovery/repo-structure/automation-and-infrastructure.yaml
+    - docs/discovery/repo-structure/documentation-and-history.yaml
     mode: shared_contract
     contract: agent-discovery-index-v1
   - id: ws0325_validation_contract
@@ -93,14 +115,28 @@ ownership_manifest:
     - scripts/adr_discovery.py
     - scripts/generate_adr_index.py
     - scripts/adr_query_tool.py
+    - scripts/generate_discovery_artifacts.py
     - tests/test_generate_adr_index.py
     - tests/test_adr_query_tool.py
     mode: exclusive
+  - id: ws0325_release_management_surfaces
+    paths:
+    - changelog.md
+    - docs/release-notes/README.md
+    - docs/release-notes/index/*.md
+    mode: shared_contract
+    contract: release-management-v1
+  - id: ws0325_canonical_truth
+    paths:
+    - versions/stack.yaml
+    mode: shared_contract
+    contract: canonical-truth-v1
   - id: ws0325_live_apply_receipts
     paths:
     - receipts/live-applies/2026-04-03-adr-0325-adr-discovery-live-apply.json
-    - receipts/live-applies/2026-04-03-adr-0325-adr-discovery-mainline-live-apply.json
+    - receipts/live-applies/2026-04-04-adr-0325-adr-discovery-mainline-live-apply.json
     - receipts/live-applies/evidence/2026-04-03-ws-0325-*
+    - receipts/live-applies/evidence/2026-04-04-ws-0325-*
     mode: exclusive
 blockers: []
 ready_to_merge: true
@@ -110,4 +146,4 @@ canonical_truth:
   release_bump: patch
   included_in_repo_version: null
   latest_receipts:
-    adr_discovery: 2026-04-03-adr-0325-adr-discovery-live-apply
+    adr_discovery: 2026-04-04-adr-0325-adr-discovery-mainline-live-apply

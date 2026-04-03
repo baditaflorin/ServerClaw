@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-04-adr-0325-adr-discovery-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-04",
+  "recorded_on": "2026-04-04",
+  "recorded_at": "2026-04-03T21:18:33Z",
+  "recorded_by": "codex",
+  "source_commit": "96842af277511af8ae909f99015b35792474c71a",
+  "repo_version_context": "0.178.3",
+  "platform_version_context": "0.130.98",
+  "workflow_id": "adr-0325-adr-discovery-mainline-live-apply",
+  "adr": "0325",
+  "summary": "Integrated ADR 0325 onto the exact-main tree by keeping `ws-0325-live-apply` active as a terminal `live_applied` workstream, regenerating the ADR 0327-compatible discovery entrypoints, onboarding packs, shard-backed ADR index surfaces, workstream registry, canonical-truth summaries, release-note and status ledgers, platform manifest, and coordination diagram from the latest `origin/main`, and carrying the ADR discovery evidence forward while the current realistic repo version remains `0.178.3` because unrelated waiver blockers still prevent a fresh numbered release cut.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    },
+    {
+      "kind": "artifact",
+      "name": "docs/adr/.index.yaml"
+    },
+    {
+      "kind": "artifact",
+      "name": "docs/adr/index/reservations.yaml"
+    },
+    {
+      "kind": "artifact",
+      "name": "workstreams.yaml"
+    },
+    {
+      "kind": "artifact",
+      "name": "README.md"
+    },
+    {
+      "kind": "artifact",
+      "name": "changelog.md"
+    },
+    {
+      "kind": "artifact",
+      "name": "versions/stack.yaml"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Branch-local exact-main proof",
+      "result": "pass",
+      "observed": "The branch-local ADR 0325 receipt already proved the shard-backed ADR discovery rollout end to end through focused ADR tooling tests, registry and generator drift checks, reservation-aware query proofs, ownership validation, and a passing `make pre-push-gate` replay with unresolved-only local fallback, preserved in `receipts/live-applies/2026-04-03-adr-0325-adr-discovery-live-apply.json`."
+    },
+    {
+      "check": "Exact-main generated discovery and canonical truth surfaces",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write`, `./scripts/run_python_with_packages.sh pyyaml -- scripts/generate_adr_index.py --write`, `python3 scripts/workstream_registry.py --write`, `uv run --with pyyaml python3 scripts/canonical_truth.py --write`, `uv run --with pyyaml python3 scripts/canonical_truth.py --check`, `uv run --with pyyaml python3 scripts/generate_release_notes.py --write-root-summaries`, `uv run --with pyyaml python3 scripts/generate_status_docs.py --write`, `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --write`, and `python3 scripts/generate_diagrams.py --write` refreshed the exact-main discovery, ADR, workstream, release-note, status, manifest, and diagram surfaces, preserved in the `2026-04-04-ws-0325-mainline-*.txt` evidence files."
+    },
+    {
+      "check": "Exact-main focused regression suite",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python3 -m pytest -q tests/test_generate_adr_index.py tests/test_adr_query_tool.py tests/test_validation_lanes.py tests/test_workstream_registry.py tests/test_generate_discovery_artifacts.py` returned `17 passed in 1.05s`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-targeted-tests-r1.txt`."
+    },
+    {
+      "check": "Exact-main release readiness snapshot",
+      "result": "partial",
+      "observed": "`LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py status --json` reports repository version `0.178.3`, platform version `0.130.98`, and a blocked release cut because three earlier `controller_dependency_gap` waiver receipts remain open through `2026-04-06`; `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py --bump patch --dry-run` shows the next candidate release would be `0.178.4`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-release-status-r1.json` and `receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-release-dry-run-r1.txt`."
+    },
+    {
+      "check": "Exact-main receipt, repository, remote, and gate validation",
+      "result": "pass",
+      "observed": "`python3 scripts/live_apply_receipts.py --validate`, `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs generated-portals`, `make remote-validate`, and `make pre-push-gate` passed on the integrated exact-main tree, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-live-apply-receipts-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-validate-repo-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-remote-validate-r1.txt`, and `receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-pre-push-gate-r1.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "changelog.md",
+    ".repo-structure.yaml",
+    ".config-locations.yaml",
+    "versions/stack.yaml",
+    "build/platform-manifest.json",
+    "build/onboarding/agent-core.yaml",
+    "build/onboarding/automation.yaml",
+    "build/onboarding/service-catalog.yaml",
+    "docs/diagrams/agent-coordination-map.excalidraw",
+    "docs/adr/.index.yaml",
+    "docs/adr/index/reservations.yaml",
+    "docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md",
+    "docs/runbooks/adr-discovery-and-reservations.md",
+    "docs/workstreams/ws-0325-live-apply.md",
+    "docs/release-notes/README.md",
+    "docs/release-notes/index/README.md",
+    "docs/release-notes/index/2026.md",
+    "docs/status/history/live-apply-evidence.md",
+    "docs/status/history/merged-workstreams.md",
+    "workstreams.yaml",
+    "workstreams/active/ws-0325-live-apply.yaml",
+    "receipts/live-applies/2026-04-03-adr-0325-adr-discovery-live-apply.json",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-discovery-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-adr-index-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-registry-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-canonical-truth-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-canonical-truth-check-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-release-notes-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-status-docs-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-platform-manifest-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-diagrams-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-targeted-tests-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-release-status-r1.json",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-release-dry-run-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-live-apply-receipts-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-validate-repo-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-remote-validate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0325-mainline-pre-push-gate-r1.txt"
+  ],
+  "notes": [
+    "This mainline receipt captures the exact-main integration separately from the earlier branch-local live-apply mutation so the rebased repository-proof and the protected-surface refresh remain independently auditable.",
+    "ADR 0325 is implemented on `main`, but `Implemented In Repo Version` remains `not yet` because the global release manager still refuses a fresh version cut while unrelated open `controller_dependency_gap` waivers remain active.",
+    "The current realistic repo version remains `0.178.3`; the next candidate version would be `0.178.4` once the unrelated waiver blockers clear and a fresh release cut is allowed."
+  ]
+}
