@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-04'
+generated: '2026-04-03'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
 total_adrs: 361
 adr_number_range:

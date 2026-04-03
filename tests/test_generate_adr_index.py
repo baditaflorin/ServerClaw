@@ -175,3 +175,22 @@ def test_check_generated_index_documents_detects_stale_shard(tmp_path: Path) -> 
     issues = module.check_generated_index_documents(documents, adr_dir=adr_dir)
 
     assert any("0300-0399.yaml" in issue for issue in issues)
+
+
+def test_main_uses_utc_generated_date_for_written_index(monkeypatch) -> None:
+    module = load_module("generate_adr_index_main_generated_date", "scripts/generate_adr_index.py")
+    captured: dict[str, dt.date] = {}
+
+    monkeypatch.setattr(module, "generated_date", lambda: dt.date(2026, 4, 3))
+    monkeypatch.setattr(module, "ensure_reservations_file", lambda path: False)
+    monkeypatch.setattr(module, "_load_inputs", lambda today: ([], object(), []))
+
+    def fake_build_generated_index_documents(adrs, ledger, *, adr_dir, generated_on):
+        captured["generated_on"] = generated_on
+        return {module.INDEX_PATH: "schema_version: 2\n"}
+
+    monkeypatch.setattr(module, "build_generated_index_documents", fake_build_generated_index_documents)
+    monkeypatch.setattr(module, "write_generated_index_documents", lambda documents, adr_dir: None)
+
+    assert module.main(["--write"]) == 0
+    assert captured["generated_on"] == dt.date(2026, 4, 3)

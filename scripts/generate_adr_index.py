@@ -30,10 +30,14 @@ from adr_discovery import (
 )
 
 
-def _load_inputs() -> tuple[list, object, list[str]]:
+def generated_date() -> dt.date:
+    return dt.datetime.now(dt.timezone.utc).date()
+
+
+def _load_inputs(today: dt.date) -> tuple[list, object, list[str]]:
     adrs = load_adrs(ADR_DIR)
     ledger = load_reservation_ledger(RESERVATIONS_PATH)
-    issues = validate_reservation_ledger(ledger, adrs, today=dt.date.today())
+    issues = validate_reservation_ledger(ledger, adrs, today=today)
     return adrs, ledger, issues
 
 
@@ -48,7 +52,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.write:
         created_reservations_file = ensure_reservations_file(RESERVATIONS_PATH)
 
-    adrs, ledger, issues = _load_inputs()
+    today = generated_date()
+    adrs, ledger, issues = _load_inputs(today)
     if issues:
         for issue in issues:
             print(f"ERROR: {issue}", file=sys.stderr)
@@ -58,7 +63,7 @@ def main(argv: list[str] | None = None) -> int:
         adrs,
         ledger,
         adr_dir=ADR_DIR,
-        generated_on=dt.date.today(),
+        generated_on=today,
     )
 
     if args.check:
