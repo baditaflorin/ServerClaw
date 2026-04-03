@@ -1,0 +1,59 @@
+schema_version: 1
+section:
+  id: agent-discovery
+  title: Agent Discovery And Onboarding
+  summary: The files and generated artifacts that orient agents and collaborators inside the repo.
+  when_to_read: Use this section when changing onboarding surfaces, discovery metadata, or generated packs.
+entries:
+  .repo-structure.yaml:
+    purpose: "Generated root repository discovery entrypoint assembled from docs/discovery/repo-structure/ \u2014 ADR 0163 / ADR 0327"
+    owner: automation
+    format: YAML
+    use_for: Fast onboarding and section-level navigation of the repository
+    update_by: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
+    update_when: After changing docs/discovery/repo-structure/ or docs/discovery/onboarding-packs.yaml
+  .config-locations.yaml:
+    purpose: "Generated root configuration discovery entrypoint assembled from docs/discovery/config-locations/ \u2014 ADR 0166 / ADR 0327"
+    owner: automation
+    format: YAML
+    use_for: Fast onboarding and section-level navigation of canonical configuration locations
+    update_by: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
+    update_when: After changing docs/discovery/config-locations/ or docs/discovery/onboarding-packs.yaml
+  docs/discovery/repo-structure/:
+    purpose: Canonical sectional source registry for repository-structure discovery metadata
+    owner: human and automation
+    format: "YAML directory \u2014 one section file per concern"
+    use_for: Editing the source data that generates .repo-structure.yaml and onboarding packs
+    update_when: Adding new repo sections, directories, or top-level entrypoint guidance
+  docs/discovery/config-locations/:
+    purpose: Canonical sectional source registry for configuration-location discovery metadata
+    owner: human and automation
+    format: "YAML directory \u2014 one section file per concern"
+    use_for: Editing the source data that generates .config-locations.yaml and onboarding packs
+    update_when: Adding new canonical config paths or changing section-level navigation metadata
+  docs/discovery/onboarding-packs.yaml:
+    purpose: Canonical pack-selection manifest for generated onboarding bundles
+    owner: human and automation
+    format: YAML
+    use_for: Declaring which discovery sections belong in each generated onboarding pack
+    update_when: Adding a new onboarding pack or changing pack membership
+  build/onboarding/:
+    purpose: Generated concern-specific onboarding packs assembled from docs/discovery/ sources
+    owner: automation
+    format: YAML directory
+    use_for: Consuming small task-shaped onboarding bundles instead of loading every discovery source by default
+    update_by: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
+    update_when: After changing docs/discovery/ or onboarding pack definitions
+  docs/adr/.index.yaml:
+    purpose: "Searchable metadata index for all 170+ ADRs \u2014 ADR 0164"
+    owner: automation
+    format: YAML
+    use_for: Finding relevant ADRs by keyword without reading all files
+    update_by: python scripts/generate_adr_index.py --write
+    update_when: When new ADRs are added or status changes
+  AGENTS.md:
+    purpose: "Rules, conventions, and handoff protocol for LLM agents \u2014 ADR 0167"
+    owner: human
+    format: Markdown
+    use_for: Understanding how to work in this repository
+    update_when: Learning new lessons or conventions

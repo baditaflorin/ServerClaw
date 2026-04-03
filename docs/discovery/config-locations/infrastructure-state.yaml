@@ -1,0 +1,217 @@
+schema_version: 1
+section:
+  id: infrastructure-state
+  title: Infrastructure State And Receipts
+  summary: Canonical deployed-state files, backup evidence, and other durable operational receipts.
+  when_to_read: Use this section when you need runtime truth, deployment evidence, or backup-related state.
+entries:
+  versions/stack.yaml:
+    purpose: Canonical description of all deployed services and versions
+    owner: human
+    format: "YAML \u2014 service definitions with names, VMs, images, ports"
+    use_for: Querying what is deployed and at which version
+    update_when: After a successful deployment to production
+    update_by: Agent or human completing a deployment workstream
+    validation: make validate-data-models
+    related_files:
+    - 'config/*/: Per-service configuration files'
+    - 'build/platform-manifest.json: Generated manifest from this file'
+    - 'inventory/group_vars/all.yml: Common variables'
+    schema_hint: "services:\n  - service: service_name\n    vm: vm_name\n    image: image:version\n    port: port_number\n"
+  receipts/live-applies/:
+    purpose: Operational audit trail of successful live deployments
+    owner: automation
+    format: "JSON \u2014 timestamp, agent, ADR reference, changes, verification"
+    use_for: Understanding what changed when and confirming deploys succeeded
+    update_when: After every live-apply run
+    update_by: Deployment automation (Ansible/Windmill) or agent
+    validation: Manual review
+    naming_convention: YYYY-MM-DD-adr-XXXX-description-live-apply.json
+  receipts/sast/:
+    purpose: Semgrep SARIF receipts emitted by repo validation runs
+    owner: automation
+    format: SARIF JSON
+    use_for: Preserving the latest branch-local or CI Semgrep findings in a tool-consumable format
+    update_when: After `scripts/semgrep_gate.py` runs through `make validate` or the remote validation gate
+    update_by: scripts/semgrep_gate.py
+    validation: python3 scripts/semgrep_gate.py --print-summary-json
+    naming_convention: <git-sha>.sarif.json
+  receipts/sbom/:
+    purpose: Immutable ADR 0298 CycloneDX SBOM receipts for managed image digests and host package inventories
+    owner: automation
+    format: JSON
+    use_for: Tracking package inventory snapshots for the managed image catalog and for host-level post-verify evidence
+    update_when: After ADR 0298 image refreshes, managed image upgrades, security scans, or post-verify converges
+    update_by: scripts/sbom_refresh.py, scripts/upgrade_container_image.py, playbooks/tasks/generate-host-sbom.yml
+    validation: Manual review
+    naming_convention: <digest-short>.cdx.json or host-<hostname>-<date>.cdx.json
+  receipts/cve/:
+    purpose: Immutable ADR 0298 Grype CVE receipts for managed image refreshes
+    owner: automation
+    format: JSON
+    use_for: Auditing vulnerability findings over time and detecting net-new HIGH or CRITICAL findings per image id
+    update_when: After ADR 0298 daily refreshes or managed image gate scans
+    update_by: scripts/sbom_refresh.py, scripts/managed_image_gate.py, scripts/upgrade_container_image.py
+    validation: Manual review
+    naming_convention: <digest-short>-<timestamp>.grype.json
+  receipts/backup-coverage/:
+    purpose: Durable ADR 0271 backup coverage ledger receipts derived from live Proxmox backup jobs, storage listings, and restore-verification evidence
+    owner: automation
+    format: JSON
+    use_for: Proving which governed assets are protected, degraded, or uncovered at a specific point in time
+    update_when: After every `make backup-coverage-ledger` run or equivalent worker execution
+    update_by: scripts/backup_coverage_ledger.py --write-receipt
+    validation: Manual review
+    naming_convention: YYYYMMDDTHHMMSSZ.json
+  config/restic-file-backup-catalog.json:
+    purpose: Canonical ADR 0302 catalog of file-level sources, schedules, and retention policy for Restic-backed configuration backups
+    owner: human
+    format: JSON
+    use_for: Declaring which repository-backed configuration and receipt paths must be protected by the Restic backup workflow
+    update_when: Adding or changing ADR 0302 governed file-level sources, retention, or notification metadata
+    update_by: Agent or human implementing ADR 0302
+    validation: python3 -m json.tool config/restic-file-backup-catalog.json
+  receipts/restic-backups/:
+    purpose: Durable ADR 0302 backup receipts emitted after each successful Restic snapshot workflow
+    owner: automation
+    format: JSON
+    use_for: Proving which file-level sources were backed up, from which source commit, and whether stale notifications fired
+    update_when: After every `make restic-config-backup env=production` run or equivalent systemd/Windmill execution
+    update_by: scripts/restic_config_backup.py --mode backup
+    validation: Manual review
+    naming_convention: YYYYMMDDTHHMMSSZ.json
+  receipts/restic-restore-verifications/:
+    purpose: Durable ADR 0302 restore-verification receipts for the latest receipts snapshot rehearsal
+    owner: automation
+    format: JSON
+    use_for: Proving the monthly restore path still restores the receipts tree to a temporary directory and meets the file-count expectation
+    update_when: After every `make restic-config-restore-verify env=production` run or equivalent worker execution
+    update_by: scripts/restic_config_backup.py --mode restore-verify
+    validation: Manual review
+    naming_convention: YYYYMMDDTHHMMSSZ.json
+  receipts/restic-snapshots-latest.json:
+    purpose: Canonical ADR 0302 latest-snapshot summary consumed by the backup-coverage ledger and stale-notification path
+    owner: automation
+    format: JSON
+    use_for: Determining the freshest observed Restic snapshot per governed file-level source
+    update_when: After every successful ADR 0302 backup run
+    update_by: scripts/restic_config_backup.py --mode backup
+    validation: Manual review
+  receipts/gate-bypasses/:
+    purpose: Records of --no-verify gate overrides with justification
+    owner: automation
+    format: JSON
+    use_for: Audit trail for why validation was bypassed
+    update_when: When pre-push gate is bypassed
+    validation: Reviewed by human on merge
+  build/platform-manifest.json:
+    purpose: Generated machine-readable platform state manifest
+    owner: automation
+    format: JSON
+    use_for: Machine-readable current platform state for tooling
+    update_when: Generated on push; do NOT edit manually
+    update_by: scripts/platform_manifest.py --write
+  config/ephemeral-capacity-pools.json:
+    purpose: Canonical lease-based warm-pool catalog for ADR 0186 ephemeral fixtures
+    owner: human
+    format: JSON
+    use_for: Declaring per-fixture warm counts, refill targets, lease ceilings, spillover domains, and pool-local address allocations
+    update_when: Changing governed ephemeral lease and prewarm policy
+    update_by: Agent or human completing ADR 0186 follow-up work
+    validation: uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate
+    related_files:
+    - 'docs/schema/ephemeral-capacity-pools.schema.json: JSON schema for the pool catalog'
+    - 'scripts/fixture_manager.py: pool reconciliation and lease handoff logic'
+    - 'docs/runbooks/ephemeral-fixtures.md: operator procedure'
+  config/preview-environment-profiles.json:
+    purpose: Canonical catalog of ADR 0185 branch-scoped preview profiles, network pool, and TTL defaults
+    owner: human
+    format: JSON
+    use_for: Creating and validating ephemeral branch previews on the governed Proxmox pool
+    update_when: Adding or changing preview profiles, network pool limits, or branch-preview defaults
+    update_by: Agent or human implementing ADR 0185 preview automation
+    validation: python3 scripts/preview_environment.py validate-catalog
+    related_files:
+    - 'docs/schema/preview-environment-profiles.schema.json: Schema for the profile catalog'
+    - 'scripts/preview_environment.py: Lifecycle automation for create/validate/destroy'
+  config/repo-deploy-base-image-profiles.json:
+    purpose: Canonical ADR 0274 catalog of approved repo-deploy base-image bundles, freshness windows, and deployment-lane profile bindings
+    owner: human
+    format: JSON
+    use_for: Declaring which base images must be prewarmed before governed Coolify repo deployments run
+    update_when: Adding or changing an approved repo-deploy profile, its image bundles, or its freshness budget
+    update_by: Agent or human implementing ADR 0274 repo-deploy cache policy
+    validation: uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate
+    related_files:
+    - 'docs/schema/repo-deploy-base-image-profiles.schema.json: Schema for the approved profile catalog'
+    - 'scripts/repo_deploy_image_cache.py: Catalog planner, warm helper, and receipt verifier'
+    - 'docs/runbooks/repo-deploy-base-image-cache.md: Operator procedure'
+  config/correction-loops.json:
+    purpose: Canonical ADR 0204 registry of governed self-correcting automation loops and their workflow selectors
+    owner: human
+    format: JSON
+    use_for: Declaring the invariant, observation sources, diagnosis taxonomy, repair actions, verification probe, and escalation boundary for mutable automation surfaces
+    update_when: Adding a new mutating workflow, changing repair policy, or adjusting a loop's retry budget
+    update_by: Agent or human implementing ADR 0204 self-correction changes
+    validation: python3 scripts/correction_loops.py --validate
+    related_files:
+    - 'docs/schema/correction-loop-catalog.schema.json: Schema for the correction-loop catalog'
+    - 'scripts/correction_loops.py: Selector resolution and validation helper'
+    - 'config/workflow-catalog.json: Workflows that must be covered by the correction-loop selectors'
+  config/activation-checklist.json:
+    purpose: Canonical ADR 0310 first-run activation checklist and progressive capability-reveal contract for browser-first human surfaces
+    owner: human
+    format: JSON
+    use_for: Declaring the staged onboarding checklist links plus which launcher, service-action, and runbook paths stay hidden or disabled until orientation is complete
+    update_when: Adding or changing first-run activation stages, checklist links, or progressive-reveal rules for human-facing portal surfaces
+    update_by: Agent or human implementing ADR 0310 follow-up work
+    validation: uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate
+    related_files:
+    - 'docs/schema/activation-checklist.schema.json: Schema for the checklist catalog'
+    - 'scripts/ops_portal/app.py: Interactive portal session state and reveal logic'
+    - 'docs/runbooks/platform-operations-portal.md: Operator procedure'
+  config/restore-readiness-profiles.json:
+    purpose: Canonical ADR 0272 catalog of restore-readiness ladders and stateful warm-up profiles for protected restore targets
+    owner: human
+    format: JSON
+    use_for: Declaring per-service-class warm-up timing, dependency-stage checks, and optional synthetic replay requirements for restore verification
+    update_when: Adding a new restore target, changing the warm-up budget for a protected class, or changing which checks advance each ladder stage
+    update_by: Agent or human implementing ADR 0272 restore semantics
+    validation: uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate
+    related_files:
+    - 'docs/schema/restore-readiness-profiles.schema.json: JSON schema for restore-readiness profiles'
+    - 'scripts/restore_verification.py: restore ladder execution and receipt generation'
+    - 'docs/runbooks/backup-restore-verification.md: operator procedure'
+  config/vulnerability-budget-policy.json:
+    purpose: Canonical ADR 0269 vulnerability budgets, freshness windows, service-profile overrides, and host exception metadata
+    owner: human
+    format: JSON
+    use_for: Governing production promotion and live-apply admission against fresh host and image security evidence
+    update_when: Changing vulnerability thresholds, freshness windows, identity overrides, or structured host exceptions
+    update_by: Agent or human implementing ADR 0269 follow-up work
+    validation: python3 scripts/vulnerability_budget.py --validate
+    related_files:
+    - 'config/image-catalog.json: Structured image exception metadata and scan receipt references'
+    - 'receipts/security-reports/: Latest host scan evidence'
+    - 'receipts/image-scans/: Latest image scan evidence'
+    - 'docs/schema/vulnerability-budget-policy.schema.json: Schema for the ADR 0269 policy document'
+    - 'docs/runbooks/vulnerability-budget-gates.md: Operator procedure'
+  config/sbom-scanner.json:
+    purpose: Canonical ADR 0298 scanner pinset and transport defaults for Syft, Grype, artifact-cache mirrors, and ntfy publication
+    owner: human
+    format: JSON
+    use_for: Declaring the pinned scanner images, digest-verified tarballs, and shared runtime defaults used by controller and worker scan paths
+    update_when: Upgrading Syft or Grype, changing shared cache defaults, or rotating scan publication endpoints
+    update_by: Agent or human implementing ADR 0298 follow-up work
+    validation: python3 -m json.tool config/sbom-scanner.json >/dev/null
+    related_files:
+    - 'scripts/sbom_scanner.py: Shared Syft and Grype execution helpers'
+    - 'scripts/sbom_refresh.py: Daily catalog-wide refresh entry point'
+    - 'config/windmill/scripts/sbom-refresh.py: Worker-side wrapper'
+  receipts/preview-environments/:
+    purpose: Durable branch-local evidence for completed preview create/validate/destroy cycles
+    owner: automation
+    format: JSON
+    use_for: Proving which branch preview ran, what it provisioned, how it validated, and when it was torn down
+    update_when: After a preview environment is destroyed and its evidence is finalized
+    update_by: scripts/preview_environment.py destroy

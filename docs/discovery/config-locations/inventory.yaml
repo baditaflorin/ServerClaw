@@ -1,0 +1,44 @@
+schema_version: 1
+section:
+  id: inventory
+  title: Inventory And Topology
+  summary: Host, group, and topology inputs for the platform inventory model.
+  when_to_read: Use this section when changing hosts, groups, host vars, or topology declarations.
+entries:
+  inventory/hosts.yml:
+    purpose: "Ansible inventory \u2014 defines all hosts and group memberships"
+    owner: human
+    format: "YAML \u2014 Ansible hosts and groups"
+    use_for: Defining which hosts exist and their relationships
+    update_when: Adding/removing hosts or changing group memberships
+    validation: ansible-inventory --list
+  inventory/group_vars/all.yml:
+    purpose: Variables applied to ALL hosts
+    owner: human and automation
+    format: "YAML \u2014 variable definitions"
+    use_for: Shared infrastructure settings across all hosts
+    update_when: Changing default behaviour across all hosts
+    coverage: All hosts inherit these variables
+  inventory/group_vars/platform.yml:
+    purpose: Variables for the full platform group
+    owner: human
+    format: YAML
+    use_for: Platform-wide configuration (service endpoints, domains)
+  inventory/group_vars/proxmox_host.yml:
+    purpose: Variables specific to the Proxmox hypervisor
+    owner: human
+    format: YAML
+    use_for: Proxmox-specific config (networking, storage, firewall rules)
+    examples: pve_node_name, bridge configs (vmbr0/vmbr10), firewall rules
+  inventory/group_vars/guests.yml:
+    purpose: Default variables for all guest VMs
+    owner: human
+    format: YAML
+    use_for: Default VM configuration (OS, network, packages)
+    examples: guest_os, network_bridge, cloud_init_template
+  inventory/host_vars/:
+    purpose: Per-host overrides to group_vars
+    owner: human
+    format: "YAML \u2014 one file per host named after hostname"
+    use_for: Per-host customisation that differs from group defaults
+    structure: 'One file per host: inventory/host_vars/<hostname>.yml'

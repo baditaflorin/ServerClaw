@@ -1,0 +1,44 @@
+schema_version: 1
+section:
+  id: root-entrypoints
+  title: Root Entrypoints And Governance
+  summary: The top-level files every agent reads first, plus release and workflow control surfaces.
+  when_to_read: Start here when orienting a worktree, checking repo-wide rules, or finding the primary human entrypoints.
+entries:
+  top_level_files:
+    README.md:
+      purpose: Project overview, deployment status, current topology, next steps
+      for_agents: START HERE - current state of the platform
+    AGENTS.md:
+      purpose: Rules and conventions for LLM agents; handoff protocol (ADR 0167)
+      for_agents: MUST READ before making any changes
+    RELEASE.md:
+      purpose: Current release notes and upgrade instructions
+      for_agents: Check before bumping VERSION or writing release notes
+    VERSION:
+      purpose: Current repository semantic version (X.Y.Z)
+      for_agents: Bump when merging to main; read to identify release boundaries
+    changelog.md:
+      purpose: Human-readable changelog index pointing to versioned release notes
+      for_agents: Update when cutting a new version
+    workstreams.yaml:
+      purpose: Active workstream registry - branch, assignee, status, ADR ref
+      for_agents: Check for in-flight work; update your entry at start/end
+    Makefile:
+      purpose: Task runner - validate, test, build, deploy, generate docs
+      for_agents: Run 'make validate-data-models' before pushing
+    ansible.cfg:
+      purpose: Ansible configuration and collection paths
+      for_agents: Understand Ansible runtime behaviour
+    mkdocs.yml:
+      purpose: MkDocs documentation-site configuration
+      for_agents: Understand how docs are published for your fork or docs site
+    pyproject.toml:
+      purpose: Python project metadata, tool config (black, ruff, mypy)
+      for_agents: Check Python dependencies and linting settings
+    .repo-structure.yaml:
+      purpose: THIS FILE - machine-readable directory index
+      for_agents: Use to navigate; keep updated when adding new directories
+    .config-locations.yaml:
+      purpose: Registry of every canonical configuration file and its purpose
+      for_agents: Find where specific config lives; where to write changes

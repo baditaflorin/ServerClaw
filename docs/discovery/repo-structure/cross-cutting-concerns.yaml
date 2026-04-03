@@ -1,0 +1,46 @@
+schema_version: 1
+section:
+  id: cross-cutting-concerns
+  title: Cross-Cutting Concern Index
+  summary: Concern-oriented shortcuts that map common task areas to the most relevant repo surfaces.
+  when_to_read: Use this section when you know the concern area but not the exact path yet.
+entries:
+  concerns:
+    bootstrap:
+    - playbooks/site.yml
+    - playbooks/bootstrap.yml
+    - roles/proxmox_bootstrap
+    networking:
+    - inventory/group_vars/
+    - config/nginx/
+    security:
+    - roles/security_baseline
+    - config/keycloak/
+    - scripts/validate_repo.sh
+    monitoring:
+    - config/grafana/
+    - config/prometheus/
+    - config/alertmanager/
+    backup:
+    - playbooks/backup-vm.yml
+    - config/pbs/
+    ci_cd:
+    - .gitea/
+    - scripts/validate_repo.sh
+    - Makefile
+    automation:
+    - playbooks/
+    - collections/ansible_collections/lv3/platform/
+    state_tracking:
+    - versions/stack.yaml
+    - receipts/
+    - VERSION
+    documentation:
+    - docs/adr/
+    - docs/runbooks/
+    - docs/workstreams/
+    agent_discovery:
+    - .repo-structure.yaml
+    - .config-locations.yaml
+    - docs/adr/.index.yaml
+    - AGENTS.md

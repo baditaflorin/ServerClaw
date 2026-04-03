@@ -1,0 +1,781 @@
+# ============================================================================
+# Onboarding Pack - Automation Onboarding
+# ============================================================================
+# GENERATED FILE - do not edit by hand
+# Regenerate: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
+# ============================================================================
+schema_version: 1
+generated: '2026-04-03'
+generated_from:
+  - docs/discovery/onboarding-packs.yaml
+  - docs/discovery/repo-structure/automation-and-infrastructure.yaml
+  - docs/discovery/repo-structure/runtime-and-delivery.yaml
+  - docs/discovery/repo-structure/cross-cutting-concerns.yaml
+  - docs/discovery/config-locations/inventory.yaml
+  - docs/discovery/config-locations/automation.yaml
+  - docs/discovery/config-locations/validation-and-ci.yaml
+  - docs/discovery/config-locations/service-configuration.yaml
+pack:
+  id: automation
+  title: Automation Onboarding
+  summary: Discovery surfaces for infrastructure automation, validation, and runtime tooling work.
+root_entrypoints:
+  AGENTS.md: Working rules, handoff protocol, and collaboration conventions for agents.
+  .repo-structure.yaml: Generated root discovery entrypoint for repository layout and section navigation.
+  .config-locations.yaml: Generated root discovery entrypoint for canonical configuration locations.
+  workstreams.yaml: Active workstream registry plus ownership contracts and merge state.
+repo_structure_sections:
+  - id: automation-and-infrastructure
+    title: Automation And Infrastructure Surfaces
+    summary: Ansible, IaC, policy, inventory, scripts, and tests that define and validate the platform.
+    when_to_read: Use this section when changing provisioning, topology, repo automation, or validation logic.
+    file: docs/discovery/repo-structure/automation-and-infrastructure.yaml
+    entries:
+      directories:
+        playbooks:
+          purpose: Ansible playbooks for host and VM provisioning
+          contains: site.yml, bootstrap.yml, per-service playbooks, groups/
+          concern: automation, infrastructure-deployment
+          keywords:
+            - ansible
+            - playbooks
+            - deployment
+            - automation
+            - idempotent
+            - provision
+          for_agents: 'Check metadata header (first 30 lines) of each playbook for Purpose, Inputs, Outputs, Dependencies. Template at playbooks/.metadata-template.yml
+
+            '
+          key_files:
+            site.yml: Full host bootstrap from bare Debian 13
+            bootstrap.yml: First-run SSH and base packages
+            .metadata-template.yml: Standard metadata header for new playbooks
+        roles:
+          purpose: Ansible roles referenced by playbooks (legacy location)
+          contains: Reusable role implementations
+          concern: automation, shared-logic
+          keywords:
+            - roles
+            - reusable
+            - task-groups
+            - handlers
+          for_agents: 'Most roles live in collections/ansible_collections/lv3/platform/roles/. Check meta/main.yml for each role''s documented contract.
+
+            '
+        collections/ansible_collections/lv3/platform:
+          purpose: Custom Ansible collection - all modern platform roles/plugins
+          contains: roles/, plugins/, modules/ specific to this infrastructure
+          concern: shared-automation, extensibility
+          keywords:
+            - collection
+            - custom
+            - modules
+            - plugins
+            - reusable
+            - lv3
+          for_agents: PRIMARY location for roles; check roles/ subdirectory
+        inventory:
+          purpose: Ansible inventory, host groups, and variable definitions
+          contains: hosts.yml, group_vars/, host_vars/
+          concern: infrastructure-topology, declarative-state
+          keywords:
+            - inventory
+            - hosts
+            - groups
+            - variables
+            - topology
+            - ansible
+          for_agents: 'hosts.yml defines all VMs; group_vars/all.yml has shared vars; host_vars/<name>.yml has per-host overrides.
+
+            '
+        config:
+          purpose: Service and application configuration (YAML/JSON/CONF)
+          contains: Per-service config directories for all deployed services
+          concern: service-configuration, applications
+          keywords:
+            - config
+            - templates
+            - services
+            - settings
+            - configuration
+          for_agents: 'One subdirectory per service (e.g., config/gitea/, config/keycloak/). Read .config-locations.yaml for which file controls which behaviour.
+
+            '
+          key_files:
+            network-impairment-matrix.yaml: ADR 0189 governed preview/staging network impairment catalog
+            stage-smoke-suites.json: ADR 0251 catalog of stage-scoped smoke suites mapped to service/environment bindings
+        policy:
+          purpose: Shared Rego policy bundles and tests for OPA and Conftest
+          contains: decisions/, conftest/, tests/
+          concern: policy, validation, shared-decision-logic
+          keywords:
+            - policy
+            - opa
+            - conftest
+            - rego
+            - approvals
+            - promotion
+          for_agents: 'Shared decision logic lives here for command approval, promotion eligibility, and repository invariants. Validate changes with scripts/policy_checks.py before updating callers.
+
+            '
+        scripts:
+          purpose: Utility and helper scripts (Python, Bash)
+          contains: Validation, data generation, CI helpers, operational utilities
+          concern: automation, tooling, ci
+          keywords:
+            - scripts
+            - utilities
+            - helpers
+            - tools
+            - validation
+            - python
+          for_agents: 'validate_repo.sh runs all local checks. generate_adr_index.py regenerates docs/adr/.index.yaml. platform_manifest.py generates build/platform-manifest.json.
+
+            '
+          key_files:
+            network_impairment_matrix.py: ADR 0189 CLI and validation helper for governed network impairment scenarios
+            policy_checks.py: ADR 0230 validator for the shared OPA and Conftest policy bundle and toolchain
+            stage_smoke_suites.py: ADR 0251 validator and runner for stage-scoped smoke suite catalogs and receipt-ready evidence
+        tests:
+          purpose: Test suites for automated validation
+          contains: pytest unit + integration tests, molecule scenarios
+          concern: validation, quality-assurance
+          keywords:
+            - tests
+            - validation
+            - pytest
+            - molecule
+            - integration
+          for_agents: Run 'pytest tests/' before pushing; check tests/ for test patterns
+        tofu:
+          purpose: OpenTofu/Terraform infrastructure code
+          contains: Infrastructure-as-code for cloud resources
+          concern: infrastructure-provisioning, iac
+          keywords:
+            - tofu
+            - terraform
+            - provisioning
+            - iac
+            - cloud
+          for_agents: Find infrastructure code for cloud provisioning
+        packer:
+          purpose: Packer templates for VM image building
+          contains: Debian cloud-init templates, image build configurations
+          concern: image-building, templates
+          keywords:
+            - packer
+            - image
+            - template
+            - vm
+            - cloud-init
+          for_agents: Understand how VM images are built from templates
+        molecule:
+          purpose: Molecule test scenarios for Ansible role testing
+          contains: Test scenarios for validating Ansible roles in containers
+          concern: testing, role-validation
+          keywords:
+            - molecule
+            - testing
+            - scenarios
+            - validation
+            - ansible-role
+          for_agents: Find role-testing configurations and scenarios
+        migrations:
+          purpose: Database and schema migration scripts
+          contains: Timestamped migration files for data changes
+          concern: data-management, backward-compatibility
+          keywords:
+            - migrations
+            - database
+            - schema
+            - evolution
+          for_agents: Find data schema changes and migration history
+        platform:
+          purpose: Platform management tooling (CLI, utilities)
+          contains: Platform CLI and helper utilities
+          concern: tooling, platform-management
+          keywords:
+            - platform
+            - cli
+            - tooling
+            - management
+          for_agents: Platform-level management utilities
+          key_files:
+            faults/network_impairment_matrix.py: ADR 0189 typed loader and execution helpers for governed network impairment profiles
+            policy/engine.py: ADR 0230 shared OPA evaluation helpers for command approval and promotion gating
+            runtime_assurance/declared_live_attestation.py: ADR 0245 declared-to-live witness collection shared by the CLI and API gateway
+  - id: runtime-and-delivery
+    title: Runtime Packaging And Delivery
+    summary: Container, workflow, credential, dependency, and CI surfaces used to package and deliver the platform.
+    when_to_read: Use this section when tracing runtime composition, workflow automation, or CI execution paths.
+    file: docs/discovery/repo-structure/runtime-and-delivery.yaml
+    entries:
+      directories:
+        docker:
+          purpose: Docker Compose definitions for service stacks
+          contains: docker-compose.yml variants per VM
+          concern: containerisation, service-deployment
+          keywords:
+            - docker
+            - container
+            - compose
+            - image
+            - stack
+          for_agents: Find container and compose definitions for deployed services
+        windmill:
+          purpose: Windmill workflow definitions and scheduled automations
+          contains: YAML workflow definitions for scheduled and triggered tasks
+          concern: workflow-automation, scheduling
+          keywords:
+            - windmill
+            - workflow
+            - automation
+            - scheduled
+            - trigger
+          for_agents: Find scheduled automation and workflow configuration
+        keys:
+          purpose: SSH keys and cryptographic material (bootstrap and automation)
+          contains: bootstrap keys, operator keys, automation keys
+          concern: security, credentials
+          keywords:
+            - keys
+            - ssh
+            - credentials
+            - security
+            - cryptographic
+          for_agents: Understand key structure - NEVER expose or log key content
+        requirements:
+          purpose: Python, system, and dependency specifications
+          contains: requirements.txt, requirements-dev.txt, system package lists
+          concern: dependencies, versions
+          keywords:
+            - requirements
+            - dependencies
+            - packages
+            - versions
+            - python
+          for_agents: Check Python dependencies and their versions
+        .github:
+          purpose: GitHub Actions workflows (legacy/external mirror)
+          contains: GitHub Actions YAML workflows
+          concern: ci, external-automation
+          keywords:
+            - github
+            - ci
+            - actions
+            - workflows
+            - external
+          for_agents: Legacy CI - primary CI runs on Gitea (.gitea/)
+        .gitea:
+          purpose: Gitea Actions workflows (PRIMARY local CI)
+          contains: Gitea Actions YAML workflows running on self-hosted runner
+          concern: ci, local-automation
+          keywords:
+            - gitea
+            - ci
+            - actions
+            - workflows
+            - local
+            - primary
+          for_agents: PRIMARY CI - runs on docker-build-lv3 self-hosted runner
+  - id: cross-cutting-concerns
+    title: Cross-Cutting Concern Index
+    summary: Concern-oriented shortcuts that map common task areas to the most relevant repo surfaces.
+    when_to_read: Use this section when you know the concern area but not the exact path yet.
+    file: docs/discovery/repo-structure/cross-cutting-concerns.yaml
+    entries:
+      concerns:
+        bootstrap:
+          - playbooks/site.yml
+          - playbooks/bootstrap.yml
+          - roles/proxmox_bootstrap
+        networking:
+          - inventory/group_vars/
+          - config/nginx/
+        security:
+          - roles/security_baseline
+          - config/keycloak/
+          - scripts/validate_repo.sh
+        monitoring:
+          - config/grafana/
+          - config/prometheus/
+          - config/alertmanager/
+        backup:
+          - playbooks/backup-vm.yml
+          - config/pbs/
+        ci_cd:
+          - .gitea/
+          - scripts/validate_repo.sh
+          - Makefile
+        automation:
+          - playbooks/
+          - collections/ansible_collections/lv3/platform/
+        state_tracking:
+          - versions/stack.yaml
+          - receipts/
+          - VERSION
+        documentation:
+          - docs/adr/
+          - docs/runbooks/
+          - docs/workstreams/
+        agent_discovery:
+          - .repo-structure.yaml
+          - .config-locations.yaml
+          - docs/adr/.index.yaml
+          - AGENTS.md
+config_location_sections:
+  - id: inventory
+    title: Inventory And Topology
+    summary: Host, group, and topology inputs for the platform inventory model.
+    when_to_read: Use this section when changing hosts, groups, host vars, or topology declarations.
+    file: docs/discovery/config-locations/inventory.yaml
+    entries:
+      inventory/hosts.yml:
+        purpose: "Ansible inventory \u2014 defines all hosts and group memberships"
+        owner: human
+        format: "YAML \u2014 Ansible hosts and groups"
+        use_for: Defining which hosts exist and their relationships
+        update_when: Adding/removing hosts or changing group memberships
+        validation: ansible-inventory --list
+      inventory/group_vars/all.yml:
+        purpose: Variables applied to ALL hosts
+        owner: human and automation
+        format: "YAML \u2014 variable definitions"
+        use_for: Shared infrastructure settings across all hosts
+        update_when: Changing default behaviour across all hosts
+        coverage: All hosts inherit these variables
+      inventory/group_vars/platform.yml:
+        purpose: Variables for the full platform group
+        owner: human
+        format: YAML
+        use_for: Platform-wide configuration (service endpoints, domains)
+      inventory/group_vars/proxmox_host.yml:
+        purpose: Variables specific to the Proxmox hypervisor
+        owner: human
+        format: YAML
+        use_for: Proxmox-specific config (networking, storage, firewall rules)
+        examples: pve_node_name, bridge configs (vmbr0/vmbr10), firewall rules
+      inventory/group_vars/guests.yml:
+        purpose: Default variables for all guest VMs
+        owner: human
+        format: YAML
+        use_for: Default VM configuration (OS, network, packages)
+        examples: guest_os, network_bridge, cloud_init_template
+      inventory/host_vars/:
+        purpose: Per-host overrides to group_vars
+        owner: human
+        format: "YAML \u2014 one file per host named after hostname"
+        use_for: Per-host customisation that differs from group defaults
+        structure: 'One file per host: inventory/host_vars/<hostname>.yml'
+  - id: automation
+    title: Automation And Tooling Config
+    summary: Canonical tool registries, collections, build-server settings, and automation manifests.
+    when_to_read: Use this section when changing workflows, automation catalogs, or supporting build/runtime tooling.
+    file: docs/discovery/config-locations/automation.yaml
+    entries:
+      config/semgrep/rules/:
+        purpose: Canonical local Semgrep rule packs for repo-managed SAST, secret-pattern detection, and Dockerfile policy checks
+        owner: human
+        format: YAML
+        use_for: Declaring the reviewed Semgrep rules enforced by `make validate`, the remote validation gate, and CI workflows
+        update_when: Adding or tuning a Semgrep rule after review of false-positive and false-negative impact
+        update_by: Agent or human implementing ADR 0301
+        validation: ./scripts/validate_repo.sh semgrep
+        related_files:
+          - 'config/semgrep/rule-pins.yaml: Governance record for any upstream rule references'
+          - 'scripts/semgrep_gate.py: Shared Semgrep wrapper that emits SARIF and mutation-audit summaries'
+          - 'docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md: Decision record'
+          - 'docs/runbooks/validation-gate.md: Operator procedure'
+      config/semgrep/rule-pins.yaml:
+        purpose: Canonical governance file for pinned upstream Semgrep rule revisions
+        owner: human
+        format: YAML
+        use_for: Recording the exact upstream Semgrep rule revision hashes referenced by the local rule packs
+        update_when: Adding or changing an upstream Semgrep registry rule reference
+        update_by: Agent or human implementing ADR 0301 follow-up rule governance
+        validation: python3 -c "import yaml,sys; yaml.safe_load(open(sys.argv[1]))" config/semgrep/rule-pins.yaml
+        related_files:
+          - 'config/semgrep/rules/: Local Semgrep rule packs'
+          - 'docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md: Decision record'
+      config/validation-runner-contracts.json:
+        purpose: Canonical ADR 0266 catalog of validation runner capability contracts, supported lanes, and runtime attestation expectations
+        owner: human
+        format: JSON
+        use_for: Declaring which runners may execute each validation lane across controller-local fallback, the remote build server, and the worker post-merge gate
+        update_when: Adding a new validation runner, changing lane eligibility, or tightening runner capability requirements
+        update_by: Agent or human implementing ADR 0266 validation-runner changes
+        validation: uv run --with pyyaml --with jsonschema python3 scripts/validation_runner_contracts.py --validate
+        related_files:
+          - 'docs/schema/validation-runner-contracts.schema.json: Schema for the validation runner contract catalog'
+          - 'scripts/validation_runner_contracts.py: Contract validation, attestation, and lane eligibility helper'
+          - 'config/build-server.json: Remote build-server command routing and runner identities'
+          - 'docs/runbooks/remote-build-gateway.md: Operator procedure for remote validation'
+      config/gate-bypass-waiver-catalog.json:
+        purpose: Canonical ADR 0267 taxonomy and escalation policy for governed validation-gate bypass waivers
+        owner: human
+        format: JSON
+        use_for: Validating structured reason codes, expiry windows, and repeated-reason escalation before a gate bypass receipt is recorded or summarized
+        update_when: Adding or changing allowed waiver reason codes, expiry windows, or repeat-after-expiry escalation thresholds
+        update_by: Agent or human implementing ADR 0267 governance work
+        validation: python3 scripts/gate_bypass_waivers.py --validate
+        related_files:
+          - 'docs/schema/gate-bypass-waiver-catalog.schema.json: JSON schema for the waiver catalog'
+          - 'docs/schema/gate-bypass-waiver-receipt.schema.json: JSON schema for governed waiver receipts'
+          - 'scripts/gate_bypass_waivers.py: Loader, validator, and summary helper'
+          - 'docs/runbooks/validation-gate.md: operator procedure'
+      config/checkov/policy-gate.yaml:
+        purpose: Canonical ADR 0306 policy-level contract for the repo-managed IaC policy scan
+        owner: human
+        format: YAML
+        use_for: Declaring which IaC surfaces the Checkov wrapper scans, which rule ids are blocking, and how the current Compose-template gap is recorded
+        update_when: Adjusting Checkov gating levels, adding or removing governed scan groups, or changing the documented Compose handling boundary
+        validation: python3 scripts/iac_policy_scan.py
+        related_files:
+          - 'config/checkov/skip-checks.yaml: repo-managed suppression catalog'
+          - 'scripts/iac_policy_scan.py: Checkov wrapper, summary writer, and SARIF emitter'
+          - 'docs/runbooks/iac-policy-scanning.md: operator procedure'
+      config/checkov/skip-checks.yaml:
+        purpose: Canonical ADR 0306 suppression catalog for path-scoped Checkov findings
+        owner: human
+        format: YAML
+        use_for: Recording governed Checkov suppressions with explicit path scope, reason, and decision reference instead of inline source comments
+        update_when: Adding or removing a justified IaC policy suppression
+        validation: python3 scripts/iac_policy_scan.py
+        related_files:
+          - 'config/checkov/policy-gate.yaml: gate levels and scan groups'
+          - 'docs/runbooks/iac-policy-scanning.md: suppression governance procedure'
+      keys/gitea-release-bundle-cosign.pub:
+        purpose: Committed ADR 0233 Cosign public verifier for signed private Gitea release bundles
+        owner: human
+        format: PEM public key
+        use_for: Verifying the detached Cosign signatures published alongside ADR 0233 release bundles
+        update_when: Rotating the release-bundle signing material
+        update_by: python3 scripts/release_bundle.py init-signing --force
+        related_files:
+          - 'scripts/release_bundle.py: bundle build, publish, and verification helper'
+          - 'docs/runbooks/signed-release-bundles.md: operator procedure'
+          - 'config/controller-local-secrets.json: controller-local private-key and password contract'
+      config/replaceability-review-catalog.json:
+        purpose: Canonical ADR 0212 catalog of critical integrated product ADRs that must carry replaceability scorecards and vendor exit plans
+        owner: human
+        format: JSON
+        use_for: Declaring which ADRs are governed by the replaceability fitness function and which capability-definition references anchor each review
+        update_when: Adding or removing a governed critical product ADR, or changing its capability identifier or definition references
+        update_by: Agent or human implementing ADR 0212 governance work
+        validation: python3 scripts/replaceability_scorecards.py --validate
+        related_files:
+          - 'docs/schema/replaceability-review-catalog.schema.json: Schema for the governed replaceability catalog'
+          - 'scripts/replaceability_scorecards.py: ADR section validator and summary report'
+          - 'docs/runbooks/replaceability-scorecards.md: authoring and review procedure'
+      config/seed-data-catalog.json:
+        purpose: Canonical contract for anonymized seed-data snapshot classes and storage paths
+        owner: human
+        format: JSON
+        use_for: Building deterministic tiny/standard/recovery seed snapshots and resolving the managed backup-lv3 store
+        update_when: Adjusting seed classes, dataset volumes, or storage locations
+        validation: uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate
+      config/network-impairment-matrix.yaml:
+        purpose: Canonical ADR 0189 matrix of governed latency, loss, and outage profiles for preview and staging fault drills
+        owner: human
+        format: YAML
+        use_for: Declaring named network impairment scenarios, scope, and allowed execution surfaces
+        update_when: Adding or changing governed impairment profiles, preview/staging eligibility, or scenario metadata
+        validation: uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate
+        related_files:
+          - 'platform/faults/network_impairment_matrix.py: typed loader and execution helpers'
+          - 'scripts/network_impairment_matrix.py: CLI and repo-surface validation'
+          - 'config/windmill/scripts/network-impairment-matrix.py: mirrored worker entrypoint'
+          - 'docs/runbooks/network-impairment-matrix.md: operator procedure'
+      config/provider-boundary-catalog.yaml:
+        purpose: Canonical ADR 0207 catalog of provider boundaries that must translate raw provider payloads into canonical internal facts
+        owner: human
+        format: YAML
+        use_for: Declaring which provider integrations are governed by anti-corruption validation and how their implementation guardrails are enforced
+        update_when: Adding a new critical provider boundary or tightening the validation contract for an existing one
+        validation: uv run --with pyyaml python scripts/provider_boundary_catalog.py --validate
+        related_files:
+          - 'scripts/provider_boundary_catalog.py: validator and catalog reader'
+          - 'docs/runbooks/subdomain-governance.md: operator workflow for DNS-boundary usage'
+          - 'docs/runbooks/validation-gate.md: remote and post-merge validation path'
+      policy/:
+        purpose: Canonical ADR 0230 shared Rego bundle for Open Policy Agent and Conftest decisions
+        owner: human
+        format: Rego modules and tests
+        use_for: Command approval, promotion eligibility, runner admission, and repository invariant checks through one shared policy engine
+        update_when: Adding or changing governed decision logic that must stay consistent across controller and worker callers
+        validation: python3 scripts/policy_checks.py --validate
+        related_files:
+          - 'platform/policy/engine.py: shared Python adapters around OPA evaluation'
+          - 'scripts/policy_toolchain.py: local and remote OPA or Conftest bootstrap helper'
+          - 'policy/tests/: Rego policy test coverage'
+      config/command-catalog.json:
+        purpose: Canonical catalog of governed mutating commands, approval policies, and execution profiles
+        owner: human
+        format: JSON
+        use_for: Declaring which command ids exist, which approval policy each uses, and which runtime envelope executes them
+        update_when: Adding or changing recurring mutating command surfaces, approval classes, or execution profiles
+        validation: python3 scripts/command_catalog.py --validate
+        related_files:
+          - 'policy/decisions/command_approval.rego: ADR 0230 shared approval decision logic'
+          - 'scripts/command_catalog.py: catalog validator and approval evaluator'
+          - 'docs/runbooks/command-catalog-and-approval-gates.md: operator procedure'
+      config/workflow-catalog.json:
+        purpose: Canonical workflow registry for operator and automation entrypoints
+        owner: human
+        format: JSON
+        use_for: Resolving preferred entrypoints, runbooks, verification commands, and worker-mirrored workflow wrappers including ADR 0251 smoke-suite entrypoints
+        update_when: Adding or changing reusable workflows or their implementation references
+        validation: python3 scripts/workflow_catalog.py --validate
+        related_files:
+          - 'config/command-catalog.json: command layer that references these workflow ids'
+          - 'config/worktree-bootstrap-manifests.json: generated-artifact and local-helper bootstrap inputs referenced by workflow preflight'
+          - 'config/windmill/scripts/: worker-side wrappers for selected workflows'
+          - 'docs/runbooks/command-catalog-and-approval-gates.md: operator procedure'
+      config/worktree-bootstrap-manifests.json:
+        purpose: Canonical fresh-worktree bootstrap manifest catalog for generated artifacts and controller-local helper inputs
+        owner: human
+        format: JSON
+        use_for: Declaring which governed workflows may auto-materialize generated artifacts and which local helper paths must fail early
+        update_when: Adding or changing worktree bootstrap requirements for a governed workflow
+        validation: uv run --with pyyaml python scripts/workflow_catalog.py --validate
+        related_files:
+          - 'config/workflow-catalog.json: workflows that reference bootstrap manifest ids'
+          - 'scripts/preflight_controller_local.py: controller-side preflight executor'
+          - 'docs/runbooks/controller-local-secrets-and-preflight.md: operator procedure'
+      config/persona-catalog.json:
+        purpose: Canonical persona catalog for shared human launcher defaults and purpose-focused navigation
+        owner: human
+        format: JSON
+        use_for: Declaring the operator personas, their preferred launcher purposes, and their default favorites
+        update_when: Adding or changing shared persona defaults for first-party browser navigation
+        validation: uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate
+        related_files:
+          - 'docs/schema/persona-catalog.schema.json: JSON Schema for launcher persona metadata'
+          - 'scripts/ops_portal/app.py: interactive launcher rendering and session-backed preferences'
+          - 'docs/runbooks/platform-operations-portal.md: operator usage of the shared launcher'
+      playbooks/site.yml:
+        purpose: "Main site playbook \u2014 full host bootstrap from bare Debian 13"
+        owner: human
+        format: Ansible playbook YAML
+        use_for: Complete host setup from Debian 13
+        metadata_header: "Check lines 1\u201330 for Purpose/Inputs/Outputs/Dependencies"
+        runs_when: Fresh Debian 13 installed or full site refresh
+        validation: ansible-playbook --syntax-check
+      playbooks/bootstrap.yml:
+        purpose: "Bootstrap \u2014 initial SSH access and base packages"
+        owner: human
+        format: Ansible playbook YAML
+        use_for: First-run access and initial security setup
+        runs_when: Immediately after OS installation
+      playbooks/.metadata-template.yml:
+        purpose: Template for new playbook metadata headers (ADR 0165)
+        owner: human
+        format: YAML comments
+        use_for: Copy this header into every new playbook
+        validation: grep '# Purpose:' <playbook>
+      collections/ansible_collections/lv3/platform/roles/:
+        purpose: Custom Ansible roles for this platform (PRIMARY roles location)
+        owner: human
+        format: Standard Ansible role structure
+        metadata: Check meta/main.yml for each role's documented contract
+        use_for: All infrastructure automation roles
+      roles/:
+        purpose: Legacy roles (prefer collections/ for new work)
+        owner: human
+        format: Standard Ansible role structure
+        use_for: Older roles not yet migrated to collections
+  - id: validation-and-ci
+    title: Validation And CI
+    summary: Validation entrypoints, CI workflows, and the scripts that enforce repo-wide standards.
+    when_to_read: Use this section when changing validation, CI, or generated-repo contract enforcement.
+    file: docs/discovery/config-locations/validation-and-ci.yaml
+    entries:
+      Makefile:
+        purpose: Development and operational task runners
+        owner: human
+        format: GNU Make
+        use_for: Common tasks (validate, test, build, deploy, generate)
+        key_targets:
+          - make validate-data-models
+          - make test
+          - make generate-docs
+          - make pre-push-gate
+      scripts/validate_repo.sh:
+        purpose: Local validation runner (called by pre-push hook)
+        owner: human
+        format: Bash
+        use_for: Running all validation checks locally before push
+        validation_stages: 'generated-vars, ansible-syntax, yaml, role-argument-specs,
+
+          ansible-lint, data-models, generated-docs, health-probes,
+
+          alert-rules, tofu, agent-standards
+
+          '
+      .gitea/workflows/:
+        purpose: Gitea Actions CI workflows (PRIMARY CI)
+        owner: human
+        format: GitHub Actions-compatible YAML
+        use_for: Local CI on self-hosted Gitea runner
+        runs_on: docker-build-lv3 self-hosted runner
+      .github/workflows/:
+        purpose: "GitHub Actions workflows (LEGACY \u2014 mirrors Gitea)"
+        owner: human
+        format: GitHub Actions YAML
+        use_for: "External CI (not primary \u2014 Gitea is primary)"
+      scripts/generate_discovery_artifacts.py:
+        purpose: Assembler for ADR 0327 discovery entrypoints and generated onboarding packs
+        owner: human and automation
+        format: Python
+        use_for: Rendering .repo-structure.yaml, .config-locations.yaml, and build/onboarding/* from docs/discovery/
+        update_when: Changing discovery source schemas, root output shape, or onboarding-pack generation logic
+      scripts/validate_public_entrypoints.py:
+        purpose: Public-entrypoint and onboarding-surface leakage validator
+        owner: human and automation
+        format: Python
+        use_for: Rejecting absolute paths and deployment-specific identifiers in public-safe discovery entrypoints and packs
+        update_when: Changing which discovery surfaces are protected or which leakage patterns must fail the gate
+  - id: service-configuration
+    title: Service Configuration
+    summary: Per-service configuration roots and the files that drive service runtime behavior.
+    when_to_read: Use this section when changing a service-specific config file or template.
+    file: docs/discovery/config-locations/service-configuration.yaml
+    entries:
+      config/:
+        purpose: Service configuration files for all deployed services
+        owner: human
+        format: "YAML/JSON/CONF \u2014 service-specific formats"
+        use_for: Service-level customisation beyond environment defaults
+        update_when: Changing service behaviour
+        structure: 'One subdirectory per service: config/<service>/'
+        deployment: Copied to service at deploy time via Ansible
+      config/falco/:
+        purpose: Repo-managed Falco runtime rules, suppressions, and smoke-test inputs for ADR 0300
+        owner: human
+        format: YAML
+        use_for: Declaring the governed Falco ruleset, suppressions, and bridge-forwarded runtime-anomaly policy
+        update_when: Adding Falco rules, tuning suppressions, or changing the smoke-test contract
+        validation: make validate-data-models
+        related_files:
+          - 'playbooks/falco.yml: convergence entrypoint for the Falco runtime and private bridge'
+          - 'collections/ansible_collections/lv3/platform/roles/falco_runtime/: package, config, and service automation'
+          - 'collections/ansible_collections/lv3/platform/roles/falco_event_bridge_runtime/: private bridge automation'
+          - 'docs/runbooks/configure-falco-runtime.md: operator procedure'
+      config/service-capability-catalog.json:
+        purpose: Machine-readable catalog of all service capabilities
+        owner: automation
+        format: JSON
+        use_for: Declaring service metadata, environment bindings, and ADR 0251 stage-ready smoke suite ids per environment
+        update_by: scripts/service_catalog.py --write
+      config/stage-smoke-suites.json:
+        purpose: Canonical ADR 0251 catalog of stage-scoped smoke suites mapped to service ids and environments
+        owner: human
+        format: JSON
+        use_for: Declaring which smoke suites exist, which integration targets they run, and which services can claim stage-ready evidence
+        update_when: Adding a new smoke suite, changing test selection, or promoting a service/environment into ADR 0251 enforcement
+        validation: python3 scripts/stage_smoke_suites.py --validate
+        related_files:
+          - 'docs/schema/stage-smoke-suites.schema.json: JSON schema for the smoke-suite catalog'
+          - 'config/service-capability-catalog.json: environment bindings that reference smoke_suite_ids'
+          - 'scripts/stage_smoke_suites.py: catalog validation and execution runner'
+          - 'docs/runbooks/integration-test-suite.md: operator workflow'
+      config/capability-contract-catalog.json:
+        purpose: Contract-first catalog for critical shared platform capabilities and their current product selections
+        owner: human
+        format: JSON
+        use_for: Defining capability requirements before selecting or replacing a critical product surface
+        update_when: Adding or changing a critical product selection, or tightening the shared capability contract
+        validation: uv run --with pyyaml --with jsonschema python scripts/capability_contracts.py --validate
+        related_files:
+          - 'docs/schema/capability-contract-catalog.schema.json: JSON Schema for the contract catalog'
+          - 'scripts/capability_contracts.py: Validation, CLI inspection, and manifest summaries'
+          - 'docs/runbooks/capability-contract-catalog.md: Operator workflow for contract-first product choices'
+      config/immutable-guest-replacement-catalog.json:
+        purpose: Guest-level ADR 0191 policy for immutable replacement, validation mode, and documented in-place exceptions
+        owner: human
+        format: JSON
+        use_for: Determining which production guests default to immutable replacement instead of in-place mutation
+        update_when: Changing the replacement policy, preview method, or rollback window for a governed guest
+        validation: uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --validate
+        related_files:
+          - 'docs/schema/immutable-guest-replacement-catalog.schema.json: JSON Schema for the catalog'
+          - 'scripts/immutable_guest_replacement.py: Validation, planning, and live-apply guard'
+          - 'docs/runbooks/immutable-guest-replacement.md: Operator workflow and exception path'
+      config/dependency-graph.json:
+        purpose: Service dependency graph
+        owner: automation
+        format: JSON
+        update_by: python scripts/generate_dependency_diagram.py --write
+      config/validation-gate.json:
+        purpose: Validation gate configuration for local, remote, and worker post-merge checks
+        owner: human
+        format: JSON
+        use_for: Controlling which validation checks are active, including ADR 0230 policy-validation, ADR 0251 smoke-catalog validation, ADR 0301 Semgrep SAST, and ADR 0306 IaC policy scanning on controller, build-server, and Windmill worker paths
+        validation: python3 scripts/gate_status.py --repo-path .
+        related_files:
+          - 'config/build-server.json: remote-validate and remote-pre-push command wiring'
+          - 'config/validation-lanes.yaml: ADR 0264 lane-to-surface catalog that selects blocking checks'
+          - 'config/check-runner-manifest.json: runner-image check definitions'
+          - 'config/semgrep/rules/: local Semgrep rule packs for the semgrep-sast gate'
+          - 'config/checkov/policy-gate.yaml: ADR 0306 blocking levels and scan surfaces'
+          - 'config/checkov/skip-checks.yaml: ADR 0306 suppression governance catalog'
+          - 'scripts/run_gate.py: gate orchestrator'
+          - 'scripts/iac_policy_scan.py: ADR 0306 Checkov wrapper and SARIF emitter'
+          - 'scripts/semgrep_gate.py: shared Semgrep wrapper'
+          - 'scripts/validation_lanes.py: lane catalog loader and selector'
+          - 'scripts/policy_checks.py: ADR 0230 policy-validation stage'
+          - 'scripts/stage_smoke_suites.py: ADR 0251 catalog validation stage'
+          - 'docs/runbooks/validation-gate.md: operator procedure'
+      config/validation-lanes.yaml:
+        purpose: ADR 0264 failure-domain-isolated validation-lane catalog
+        owner: human
+        format: YAML
+        use_for: Mapping mutable repository surface classes to blocking validation lanes and fast global invariants
+        update_when: Adjusting lane coverage, fast-global invariants, or the changed-surface routing policy
+        validation: python3 scripts/validation_lanes.py --validate
+        related_files:
+          - 'config/validation-gate.json: runnable check manifest consumed by the lanes'
+          - 'scripts/validation_lanes.py: catalog loader, validator, and lane resolver'
+          - 'scripts/run_gate.py: lane-aware gate orchestrator'
+          - 'docs/runbooks/validation-gate.md: operator procedure'
+      config/build-server.json:
+        purpose: Canonical build-server remote automation command catalog
+        owner: human
+        format: JSON
+        use_for: Declaring remote lint, validate, pre-push, and image-build entrypoints plus their local fallback commands
+        update_when: Adjusting build-server automation or local fallback command contracts
+        validation: python3 scripts/policy_checks.py --validate
+        related_files:
+          - 'config/check-runner-manifest.json: runner image check definitions consumed by remote validate'
+          - 'config/validation-gate.json: authoritative enabled gate checks'
+          - 'config/validation-lanes.yaml: ADR 0264 lane-selection contract'
+          - 'scripts/remote_exec.sh: dispatch wrapper'
+      config/check-runner-manifest.json:
+        purpose: Canonical manifest of runner-backed validation checks for remote gate execution
+        owner: human
+        format: JSON
+        use_for: Declaring the exact commands and container images used by the build-server check runners, including the Python-runner Semgrep SAST contract and the shared security runner for Trivy, Gitleaks, and Checkov
+        update_when: Adding or changing remote validation checks or their toolchain images
+        validation: python3 scripts/policy_checks.py --validate
+        related_files:
+          - 'config/build-server.json: remote-validate entrypoint that invokes the manifest'
+          - 'config/semgrep/rules/: local rule packs mounted into the semgrep-sast check'
+          - 'config/checkov/policy-gate.yaml: ADR 0306 scan-group and severity mapping contract'
+          - 'scripts/policy_checks.py: ADR 0230 policy-validation check command'
+          - 'scripts/iac_policy_scan.py: ADR 0306 runner-backed Checkov wrapper'
+          - 'docs/runbooks/validation-gate.md: remote gate procedure'
+      receipts/checkov/:
+        purpose: Repo-managed Checkov JSON and SARIF outputs from ADR 0306 IaC policy scans
+        owner: automation
+        format: JSON and SARIF
+        use_for: Inspecting the latest repo-local IaC policy findings and the emitted SARIF artifact from a governed scan
+        update_when: After every `iac-policy-scan` runner execution or direct `scripts/iac_policy_scan.py` replay
+        update_by: scripts/iac_policy_scan.py
+        validation: Manual review
+        naming_convention: <git-sha>.json and <git-sha>.sarif.json
+      docker/docker-compose.yml:
+        purpose: Docker Compose reference for services on docker-runtime-lv3
+        owner: human
+        format: Docker Compose YAML
+        use_for: Understanding service dependencies and networking
+        validation: docker-compose config

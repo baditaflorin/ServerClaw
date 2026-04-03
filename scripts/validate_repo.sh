@@ -537,6 +537,7 @@ validate_workstream_surfaces() {
 
 validate_generated_docs() {
   echo "Generated status document validation"
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_discovery_artifacts.py" --check >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/canonical_truth.py" --check >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
   run_uv_python jsonschema -- "$REPO_ROOT/scripts/generate_dependency_diagram.py" --check >/dev/null
@@ -649,6 +650,10 @@ validate_agent_standards() {
   _validate_windmill_raw_app_lockfiles
   local raw_app_lock_rc=$?
   [[ $raw_app_lock_rc -ne 0 ]] && rc=$raw_app_lock_rc
+
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_discovery_artifacts.py" --check >/dev/null
+  local discovery_rc=$?
+  [[ $discovery_rc -ne 0 ]] && rc=$discovery_rc
 
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_public_entrypoints.py" --check >/dev/null
   local public_repo_rc=$?

@@ -1,0 +1,54 @@
+schema_version: 1
+packs:
+- id: agent-core
+  title: Agent Core Onboarding
+  summary: The minimum repo-orientation pack for any new agent or contributor.
+  root_entrypoints:
+  - README.md
+  - AGENTS.md
+  - .repo-structure.yaml
+  - .config-locations.yaml
+  - docs/adr/.index.yaml
+  - workstreams.yaml
+  repo_structure_sections:
+  - root-entrypoints
+  - documentation-and-history
+  - cross-cutting-concerns
+  config_location_sections:
+  - agent-discovery
+  - project-tracking
+  - validation-and-ci
+- id: automation
+  title: Automation Onboarding
+  summary: Discovery surfaces for infrastructure automation, validation, and runtime tooling work.
+  root_entrypoints:
+  - AGENTS.md
+  - .repo-structure.yaml
+  - .config-locations.yaml
+  - workstreams.yaml
+  repo_structure_sections:
+  - automation-and-infrastructure
+  - runtime-and-delivery
+  - cross-cutting-concerns
+  config_location_sections:
+  - inventory
+  - automation
+  - validation-and-ci
+  - service-configuration
+- id: service-catalog
+  title: Service Catalog Onboarding
+  summary: Discovery surfaces for locating service topology, runtime config, and generated service-related truth.
+  root_entrypoints:
+  - README.md
+  - .repo-structure.yaml
+  - .config-locations.yaml
+  - workstreams.yaml
+  repo_structure_sections:
+  - automation-and-infrastructure
+  - documentation-and-history
+  - runtime-and-delivery
+  config_location_sections:
+  - infrastructure-state
+  - inventory
+  - service-configuration
+  - automation

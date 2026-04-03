@@ -25,6 +25,11 @@ PUBLIC_GENERIC_ENTRYPOINTS = [
     Path("README.md"),
     Path("AGENTS.md"),
     Path(".repo-structure.yaml"),
+    Path(".config-locations.yaml"),
+]
+PUBLIC_GENERIC_GLOBS = [
+    "docs/discovery/**/*.yaml",
+    "build/onboarding/**/*.yaml",
 ]
 PERSONAL_PATH_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"/Users/[^/\s]+/"), "macOS home path"),
@@ -63,11 +68,33 @@ def _is_absolute_path(value: str) -> bool:
 
 def _validate_text_surfaces() -> list[str]:
     findings: list[str] = []
+    generic_paths = set(PUBLIC_GENERIC_ENTRYPOINTS)
+    for pattern in PUBLIC_GENERIC_GLOBS:
+        generic_paths.update(
+            path.relative_to(REPO_ROOT)
+            for path in REPO_ROOT.glob(pattern)
+            if path.is_file()
+        )
+
+    all_paths: list[Path] = []
+    seen_paths: set[Path] = set()
     for relative_path in PUBLIC_ENTRYPOINTS:
+        if relative_path not in seen_paths:
+            all_paths.append(relative_path)
+            seen_paths.add(relative_path)
+    for path in sorted(generic_paths):
+        if path not in seen_paths:
+            all_paths.append(path)
+            seen_paths.add(path)
+
+    for relative_path in all_paths:
+        resolved_path = REPO_ROOT / relative_path
+        if not resolved_path.exists() or not resolved_path.is_file():
+            continue
         text = (REPO_ROOT / relative_path).read_text(encoding="utf-8")
         for hit in _iter_pattern_hits(text, PERSONAL_PATH_PATTERNS):
             findings.append(f"{relative_path}: {hit}")
-        if relative_path in PUBLIC_GENERIC_ENTRYPOINTS:
+        if relative_path in generic_paths:
             for hit in _iter_pattern_hits(text, DEPLOYMENT_SPECIFIC_PATTERNS):
                 findings.append(f"{relative_path}: {hit}")
     return findings

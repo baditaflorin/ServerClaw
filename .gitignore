@@ -44,6 +44,9 @@ build/
 !build/
 build/*
 !build/platform-manifest.json
+!build/onboarding/
+build/onboarding/*
+!build/onboarding/*.yaml
 .terraform/
 *.tfplan
 *.plan.json

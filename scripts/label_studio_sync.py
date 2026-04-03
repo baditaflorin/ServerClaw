@@ -10,6 +10,14 @@ from pathlib import Path
 from typing import Any
 from urllib import error, parse, request
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
+from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
+
 
 def load_catalog(path: Path) -> list[dict[str, str]]:
     payload = json.loads(path.read_text())
@@ -150,16 +158,39 @@ def verify_version(base_url: str) -> dict[str, Any]:
 
 
 def wait_for_version(base_url: str, attempts: int = 12, delay: float = 5.0) -> dict[str, Any]:
-    last_error: Exception | None = None
-    for attempt in range(attempts):
+    retry_policy = RetryPolicy(
+        max_attempts=max(1, attempts),
+        base_delay_s=max(delay, 0.0),
+        max_delay_s=max(delay, 0.0),
+        multiplier=1.0,
+        jitter=False,
+        transient_max=0,
+    )
+
+    def execute() -> dict[str, Any]:
         try:
             return verify_version(base_url)
         except (RuntimeError, error.URLError, json.JSONDecodeError) as exc:
-            last_error = exc
-            if attempt == attempts - 1:
-                raise
-            time.sleep(delay)
-    raise RuntimeError(f"Unable to verify {base_url}/api/version") from last_error
+            raise PlatformRetryError(
+                f"Label Studio version endpoint not ready: {exc}",
+                code="platform:health_gate_fail",
+                retry_class=RetryClass.BACKOFF,
+            ) from exc
+
+    try:
+        return with_retry(
+            execute,
+            policy=retry_policy,
+            error_context=f"label studio version check for {base_url}",
+            sleep_fn=time.sleep,
+        )
+    except MaxRetriesExceeded as exc:
+        last_error = exc.last_error
+        if isinstance(last_error, PlatformRetryError) and last_error.__cause__ is not None:
+            raise last_error.__cause__
+        if last_error is not None:
+            raise last_error
+        raise RuntimeError(f"Unable to verify {base_url}/api/version") from exc
 
 
 def apply_sync_plan(base_url: str, token: str, plan: dict[str, Any]) -> dict[str, list[Any]]:

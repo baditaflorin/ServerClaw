@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-04-03'
 total_adrs: 361
 implementation_status_summary:
-  Implemented: 317
+  Implemented: 318
   Partial: 10
-  Not Implemented: 33
+  Not Implemented: 32
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5827,7 +5827,7 @@ adr_index:
   - adr: '0327'
     title: Sectional Agent Discovery Registries And Generated Onboarding Packs
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-04-01'
     concern: agent-discovery
     keywords:

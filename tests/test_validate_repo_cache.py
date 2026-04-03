@@ -50,6 +50,13 @@ def test_validate_repo_supports_workstream_surface_stage() -> None:
     assert "scripts/workstream_surface_ownership.py" in script
 
 
+def test_validate_repo_checks_generated_discovery_artifacts() -> None:
+    script = VALIDATE_REPO_SCRIPT.read_text()
+
+    assert "scripts/generate_discovery_artifacts.py" in script
+    assert 'generate_discovery_artifacts.py" --check' in script
+
+
 def test_validate_repo_uses_python_package_runner_for_yaml_validators() -> None:
     script = VALIDATE_REPO_SCRIPT.read_text()
 

@@ -1,9 +1,10 @@
 # ADR 0327: Sectional Agent Discovery Registries And Generated Onboarding Packs
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: not yet
 - Implemented In Platform Version: N/A
+- Implemented On: 2026-04-03
 - Date: 2026-04-01
 - Tags: agent-discovery, onboarding, registries, config, sharding
 
