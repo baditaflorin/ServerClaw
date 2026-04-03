@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-03",
+  "recorded_on": "2026-04-03",
+  "recorded_at": "2026-04-03T10:45:17Z",
+  "recorded_by": "codex",
+  "source_commit": "591eb347cfda43a4e2ae8d26499211df9536d7b5",
+  "repo_version_context": "0.177.153",
+  "platform_version_context": "0.130.96",
+  "workflow_id": "adr-0340-coolify-apps-vm-separation-live-apply",
+  "adr": "0340",
+  "summary": "Backfilled the canonical ADR 0340 live-apply receipt referenced by `versions/stack.yaml` after the latest `origin/main` integration exposed that the completion commit `591eb347cfda43a4e2ae8d26499211df9536d7b5` had marked the Coolify apps VM separation live on repository version `0.177.153` and platform version `0.130.96` without committing the matching receipt file.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "coolify-lv3",
+      "vmid": 170,
+      "address": "10.10.10.70"
+    },
+    {
+      "kind": "guest",
+      "name": "coolify-apps-lv3",
+      "vmid": 171,
+      "address": "10.10.10.71"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Coolify apps wildcard edge",
+      "address": "*.apps.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Canonical platform truth records the apps VM cutover",
+      "result": "pass",
+      "observed": "`versions/stack.yaml` records `coolify-apps-lv3` as the apps runtime, `apps_migration_status: migrated_via_db`, `nginx_edge_updated: true`, and `repo_smoke_public_http_verified: true`, matching the final ADR 0340 completion state."
+    },
+    {
+      "check": "NGINX and service inventory now point apps traffic at 10.10.10.71",
+      "result": "pass",
+      "observed": "`inventory/group_vars/platform.yml` updates the production and staging `coolify_apps` publication contract to `http://10.10.10.71:80`, so the edge now terminates TLS and forwards `*.apps.lv3.org` traffic to the dedicated apps VM."
+    },
+    {
+      "check": "Coolify migration automation preserves direct-DB migrated apps",
+      "result": "pass",
+      "observed": "`scripts/coolify_tool.py` accepts either `to_dest` or `to_uuid` in the migration fallback path, preserving already-migrated application records instead of failing when the API omits one form."
+    },
+    {
+      "check": "ADR and workstream metadata agree on live completion",
+      "result": "pass",
+      "observed": "`docs/adr/0340-dedicated-coolify-apps-vm-separation.md` marks ADR 0340 implemented in repo `0.177.153` and platform `0.130.96`, `workstreams.yaml` keeps `ws-0340-implementation` live-applied on main, and the reconstructed evidence bundle is preserved in `receipts/live-applies/evidence/2026-04-03-ws-0340-mainline-receipt-backfill-r1-0.177.153.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0340-dedicated-coolify-apps-vm-separation.md",
+    "inventory/group_vars/platform.yml",
+    "receipts/live-applies/evidence/2026-04-03-ws-0340-mainline-receipt-backfill-r1-0.177.153.txt",
+    "scripts/coolify_tool.py",
+    "versions/stack.yaml",
+    "workstreams.yaml",
+    "receipts/live-applies/2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply.json"
+  ],
+  "notes": [
+    "This receipt closes the evidence gap discovered while integrating ADR 0289 from the latest `origin/main`: the repo already claimed ADR 0340 had been live applied, but the canonical receipt file referenced by `versions/stack.yaml` was missing.",
+    "The receipt preserves the mainline truth introduced by commit `591eb347cfda43a4e2ae8d26499211df9536d7b5` instead of downgrading `coolify_apps` back to an older unrelated receipt."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-04-03-ws-0340-missing-receipt-backfill",
+    "surface": "Canonical live-apply receipt registration for ADR 0340",
+    "diagnosis": "contract_drift",
+    "repair_action": "Added the missing `2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply` receipt file during the latest-main integration so `versions/stack.yaml` can reference the actual ws-0340 completion without breaking repository data-model validation.",
+    "verification": "versions/stack.yaml"
+  }
+}

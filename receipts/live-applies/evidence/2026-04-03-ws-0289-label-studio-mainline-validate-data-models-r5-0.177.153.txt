@@ -1,0 +1,2 @@
+usage: validate_repository_data_models.py [-h] [--validate]
+validate_repository_data_models.py: error: unrecognized arguments: --repo-root .

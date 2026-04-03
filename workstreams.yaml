@@ -18312,7 +18312,7 @@ workstreams:
   - id: ws-0340-implementation
     adr: "0340"
     title: Dedicated Coolify Apps VM Separation — introduce coolify-apps-lv3 as the Coolify deployment server
-    status: in_progress
+    status: merged
     owner: claude
     branch: claude/affectionate-galileo
     worktree_path: .claude/worktrees/affectionate-galileo
@@ -18393,8 +18393,8 @@ workstreams:
           mode: shared_contract
           contract: coolify-runtime-test-contract-v1
     blockers: []
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
   - id: ws-0289-label-studio-live-apply
     adr: "0289"
     title: Live apply ADR 0289 Label Studio from latest origin/main

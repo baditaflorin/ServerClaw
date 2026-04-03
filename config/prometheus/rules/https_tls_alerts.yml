@@ -231,6 +231,52 @@ groups:
           description: https://apps.lv3.org:443/ has less than 14 days remaining before
             certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_coolify_apps_internal
+        expr: probe_success{job="https-tls-blackbox",assurance_id="coolify-apps-internal"}
+          == 0
+        for: 5m
+        labels:
+          service_id: coolify_apps
+          assurance_id: coolify-apps-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: coolify-apps-internal HTTPS probe is failing.
+          description: https://10.10.10.71:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_coolify_apps_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="coolify-apps-internal"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: coolify_apps
+          assurance_id: coolify-apps-internal
+          environment: production
+          scope: internal
+          severity: warning
+        annotations:
+          summary: coolify-apps-internal TLS certificate is approaching expiry.
+          description: https://10.10.10.71:443/ has less than 21 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_coolify_apps_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="coolify-apps-internal"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: coolify_apps
+          assurance_id: coolify-apps-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: coolify-apps-internal TLS certificate is within the critical expiry
+            window.
+          description: https://10.10.10.71:443/ has less than 14 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_dify_public
         expr: probe_success{job="https-tls-blackbox",assurance_id="dify-public"} ==
           0

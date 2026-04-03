@@ -45,6 +45,10 @@ keeps the annotation-platform delivery merge-safe by using an explicit
 - The latest exact-main replay was performed from merged head `cb7a375c7`
   after `origin/main` advanced to `26e6849be`
   (`[ws-0340] Live apply fixes: chdir, auth-file, API 201/422, migration fallback`).
+- During final integration, `origin/main` advanced again to `591eb347c`
+  (`[ws-0340] Finalize live apply: HTTP upstream, DB migration, full completion`);
+  this closeout preserved that newer ws-0340 state and backfilled its missing
+  canonical receipt so the latest-tip repository truth validates cleanly.
 - That newer `origin/main` head carried inconsistent repo-version surfaces:
   `VERSION` still read `0.177.152`, while `versions/stack.yaml` already read
   `0.177.153` / `0.130.96`. This workstream treated `0.177.153` as the latest
