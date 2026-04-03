@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.152",
   "platform_version": "0.130.95",
-  "generated_at": "2026-04-03T08:25:20Z",
-  "next_refresh_at": "2026-04-03T09:25:20Z",
+  "generated_at": "2026-04-03T08:45:55Z",
+  "next_refresh_at": "2026-04-03T09:45:55Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -94,7 +94,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://coolify.lv3.org",
-        "last_live_apply": "2026-04-02T00:00:00Z"
+        "last_live_apply": "2026-04-03T00:00:00Z"
       },
       "coolify_apps": {
         "service_name": "Coolify Apps Ingress",
