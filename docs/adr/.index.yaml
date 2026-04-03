@@ -6,12 +6,12 @@
 # ============================================================================
 
 schema_version: 1
-generated: '2026-04-03'
-total_adrs: 361
+generated: '2026-04-04'
+total_adrs: 365
 implementation_status_summary:
-  Implemented: 318
-  Partial: 10
-  Not Implemented: 32
+  Implemented: 320
+  Partial: 13
+  Not Implemented: 31
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -149,6 +149,7 @@ concerns:
     - '0012'
     - '0016'
     - '0163'
+    - '0342'
   identity:
     - '0007'
     - '0046'
@@ -311,6 +312,8 @@ concerns:
     - '0326'
     - 0328
     - 0339
+    - '0343'
+    - '0345'
   release:
     - 0008
     - '0110'
@@ -393,6 +396,7 @@ concerns:
     - 0308
     - '0317'
     - '0340'
+    - '0344'
 discovery_queries:
   how do we bootstrap:
     - '0001'
@@ -6056,3 +6060,59 @@ adr_index:
     summary: Open WebUI will use a dedicated repo-managed Keycloak OIDC client for routine
     filename: 0341-open-webui-keycloak-oidc-with-break-glass-fallback.md
     implemented_version: 0.178.3
+  - adr: '0342'
+    title: Zero-SSH Guest Operations via Proxmox QAPI
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-04'
+    concern: host-os
+    keywords:
+      - zero-ssh
+      - guest
+      - operations
+      - proxmox
+      - qapi
+    summary: All controller-initiated imperative operations targeting VM guests will use the
+    filename: 0342-zero-ssh-guest-operations-via-proxmox-qapi.md
+    implemented_version: 0.178.4
+  - adr: '0343'
+    title: Operator Tool Interface Contract
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-04'
+    concern: platform
+    keywords:
+      - operator
+      - tool
+      - interface
+      - contract
+    summary: All scripts/ operator tools that perform imperative platform operations
+    filename: 0343-operator-tool-interface-contract.md
+    implemented_version: 0.178.4
+  - adr: '0344'
+    title: Single-Source Environment Topology
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-04'
+    concern: vm-topology
+    keywords:
+      - single-source
+      - environment
+      - topology
+    summary: Ansible inventory remains the single authoritative source for all
+    filename: 0344-single-source-environment-topology.md
+    implemented_version: 0.178.4
+  - adr: '0345'
+    title: Layered Operator Tool Separation
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-04'
+    concern: platform
+    keywords:
+      - layered
+      - operator
+      - tool
+      - separation
+    summary: The scripts/ operator tools are organised into three layers with strict
+    filename: 0345-layered-operator-tool-separation.md
+    implemented_version: 0.178.4
