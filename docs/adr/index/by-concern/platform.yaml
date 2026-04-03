@@ -2242,7 +2242,7 @@ adrs:
   - adr: '0345'
     title: Layered Operator Tool Separation
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-04-04'
     concern: platform
     keywords:
@@ -2259,4 +2259,5 @@ adrs:
     summary: The scripts/ operator tools are organised into three layers with strict
     filename: 0345-layered-operator-tool-separation.md
     path: docs/adr/0345-layered-operator-tool-separation.md
-    implemented_in_repo_version: 0.178.4
+    implemented_in_repo_version: 0.178.5
+    implemented_on: '2026-04-04'

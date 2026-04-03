@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 import coolify_tool as tool
 
 
@@ -805,3 +807,269 @@ def test_default_deployment_server_reads_from_stack_yaml(tmp_path: Path, monkeyp
     )
     monkeypatch.setattr(tool, "_STACK_YAML", stack_yaml)
     assert tool._default_deployment_server() == "coolify-apps-lv3"
+
+
+# ---------------------------------------------------------------------------
+# ADR 0345: Proxmox guest-exec backed Coolify commands
+# ---------------------------------------------------------------------------
+
+_PROXMOX_AUTH = {
+    "api_url": "https://proxmox.lv3.org:8006/api2/json",
+    "full_token_id": "lv3-automation@pve!primary",
+    "value": "test-secret",
+    "authorization_header": "PVEAPIToken=lv3-automation@pve!primary=test-secret",
+}
+
+_COOLIFY_AUTH = {
+    "controller_url": "http://127.0.0.1:8000",
+    "api_token": "token",
+}
+
+
+def _proxmox_auth_file(tmp_path: Path) -> Path:
+    """Write a valid Proxmox auth file and return its path."""
+    p = tmp_path / "proxmox-auth.json"
+    p.write_text(json.dumps(_PROXMOX_AUTH), encoding="utf-8")
+    return p
+
+
+def _coolify_auth_file(tmp_path: Path) -> Path:
+    """Write a valid Coolify auth file and return its path."""
+    p = tmp_path / "coolify-auth.json"
+    p.write_text(json.dumps(_COOLIFY_AUTH), encoding="utf-8")
+    return p
+
+
+class FakeGuestExec:
+    """
+    Replaces ProxmoxClient.guest_exec with a call-queue.
+
+    Pre-load responses as a list of (exit_code, stdout, stderr) tuples.
+    Each call to guest_exec pops the first response.  Calls are recorded in
+    self.calls as {"vmid": int, "command": list[str]}.
+    """
+
+    def __init__(self, responses: list[tuple[int, str, str]]) -> None:
+        self._responses: list[tuple[int, str, str]] = list(responses)
+        self.calls: list[dict[str, Any]] = []
+
+    def __call__(
+        self,
+        vmid: int,
+        command: list[str],
+        timeout: int = 60,
+    ) -> tuple[int, str, str]:
+        self.calls.append({"vmid": vmid, "command": list(command)})
+        if not self._responses:
+            return (0, "", "")
+        return self._responses.pop(0)
+
+
+def _make_fake_proxmox_client(fake_guest_exec: FakeGuestExec, tmp_path: Path) -> Any:
+    """Return a fake ProxmoxClient-like object for patching _make_proxmox_client."""
+    # Import ProxmoxClient here since it may be available from proxmox_tool
+    try:
+        import proxmox_tool as ptool
+        client = ptool.ProxmoxClient(
+            api_url=_PROXMOX_AUTH["api_url"],
+            authorization_header=_PROXMOX_AUTH["authorization_header"],
+            node="pve",
+        )
+        client.guest_exec = fake_guest_exec  # type: ignore[method-assign]
+        return client
+    except ImportError:
+        return None
+
+
+def test_command_db_exec_success(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+    """db-exec runs psql inside the VM and returns result JSON."""
+    fake = FakeGuestExec([(0, "UPDATE 2\n", "")])
+
+    def fake_make_proxmox_client(proxmox_auth_file: str, node: str = "pve") -> Any:
+        client = _make_fake_proxmox_client(fake, tmp_path)
+        if client is not None:
+            return client
+        # Minimal stub if proxmox_tool unavailable
+        class Stub:
+            def guest_exec(self, vmid, command, timeout=60):
+                return fake(vmid, command, timeout)
+        return Stub()
+
+    monkeypatch.setattr(tool, "_make_proxmox_client", fake_make_proxmox_client)
+
+    rc = tool.main([
+        "--auth-file", str(_coolify_auth_file(tmp_path)),
+        "db-exec",
+        "--proxmox-auth-file", str(_proxmox_auth_file(tmp_path)),
+        "--vmid", "170",
+        "--sql", "UPDATE applications SET destination_id=34 WHERE destination_id=1",
+    ])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert out["exit_code"] == 0
+    assert "UPDATE 2" in out["stdout"]
+    assert out["container"] == "coolify-db"
+    assert out["vmid"] == 170
+    # Verify psql command structure
+    assert fake.calls[0]["command"][0:3] == ["docker", "exec", "coolify-db"]
+    assert "psql" in fake.calls[0]["command"]
+
+
+def test_command_db_exec_failure(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+    """db-exec exits 1 when psql returns non-zero."""
+    fake = FakeGuestExec([(1, "", "ERROR: relation does not exist\n")])
+
+    def fake_make_proxmox_client(proxmox_auth_file: str, node: str = "pve") -> Any:
+        class Stub:
+            def guest_exec(self, vmid, command, timeout=60):
+                return fake(vmid, command, timeout)
+        return Stub()
+
+    monkeypatch.setattr(tool, "_make_proxmox_client", fake_make_proxmox_client)
+
+    rc = tool.main([
+        "--auth-file", str(_coolify_auth_file(tmp_path)),
+        "db-exec",
+        "--proxmox-auth-file", str(_proxmox_auth_file(tmp_path)),
+        "--vmid", "170",
+        "--sql", "SELECT * FROM nonexistent_table",
+    ])
+    assert rc == 1
+
+
+def test_command_clear_cache_success(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+    """clear-cache runs artisan cache:clear and config:clear and exits 0."""
+    fake = FakeGuestExec([(0, "Application cache cleared!\nConfiguration cache cleared!\n", "")])
+
+    def fake_make_proxmox_client(proxmox_auth_file: str, node: str = "pve") -> Any:
+        class Stub:
+            def guest_exec(self, vmid, command, timeout=60):
+                return fake(vmid, command, timeout)
+        return Stub()
+
+    monkeypatch.setattr(tool, "_make_proxmox_client", fake_make_proxmox_client)
+
+    rc = tool.main([
+        "--auth-file", str(_coolify_auth_file(tmp_path)),
+        "clear-cache",
+        "--proxmox-auth-file", str(_proxmox_auth_file(tmp_path)),
+        "--vmid", "170",
+    ])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert out["container"] == "coolify"
+    # Verify artisan commands are in the shell script
+    assert "cache:clear" in fake.calls[0]["command"][-1]
+
+
+def test_command_migrate_apps_success(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+    """migrate-apps finds destination IDs, updates the DB, and clears cache."""
+    fake = FakeGuestExec([
+        (0, "1", ""),                                  # from_id lookup
+        (0, "34", ""),                                 # to_id lookup
+        (0, "2", ""),                                  # count
+        (0, "repo-smoke\neducation-wemeshup", ""),     # app names
+        (0, "UPDATE 2", ""),                           # migration UPDATE
+        (0, "Application cache cleared!", ""),         # cache clear
+    ])
+
+    def fake_make_proxmox_client(proxmox_auth_file: str, node: str = "pve") -> Any:
+        class Stub:
+            def guest_exec(self, vmid, command, timeout=60):
+                return fake(vmid, command, timeout)
+        return Stub()
+
+    monkeypatch.setattr(tool, "_make_proxmox_client", fake_make_proxmox_client)
+
+    rc = tool.main([
+        "--auth-file", str(_coolify_auth_file(tmp_path)),
+        "migrate-apps",
+        "--proxmox-auth-file", str(_proxmox_auth_file(tmp_path)),
+        "--vmid", "170",
+        "--from", "coolify-lv3",
+        "--to", "coolify-apps-lv3",
+    ])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert out["status"] == "migrated"
+    assert out["from_destination_id"] == 1
+    assert out["to_destination_id"] == 34
+    assert out["migrated_count"] == 2
+    assert "repo-smoke" in out["migrated_apps"]
+    assert "education-wemeshup" in out["migrated_apps"]
+    assert len(fake.calls) == 6
+
+
+def test_command_migrate_apps_noop(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+    """migrate-apps exits 2 (no-op) when count == 0."""
+    fake = FakeGuestExec([
+        (0, "1", ""),    # from_id
+        (0, "34", ""),   # to_id
+        (0, "0", ""),    # count == 0
+    ])
+
+    def fake_make_proxmox_client(proxmox_auth_file: str, node: str = "pve") -> Any:
+        class Stub:
+            def guest_exec(self, vmid, command, timeout=60):
+                return fake(vmid, command, timeout)
+        return Stub()
+
+    monkeypatch.setattr(tool, "_make_proxmox_client", fake_make_proxmox_client)
+
+    rc = tool.main([
+        "--auth-file", str(_coolify_auth_file(tmp_path)),
+        "migrate-apps",
+        "--proxmox-auth-file", str(_proxmox_auth_file(tmp_path)),
+        "--vmid", "170",
+        "--from", "coolify-lv3",
+        "--to", "coolify-apps-lv3",
+    ])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 2
+    assert out["status"] == "nothing_to_migrate"
+    assert out["migrated_count"] == 0
+    assert len(fake.calls) == 3  # no UPDATE or cache clear
+
+
+def test_command_install_deploy_key_success(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+    """install-deploy-key installs the key into authorized_keys on the target VM."""
+    pubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC0gB481 coolify-deploy"
+    fake = FakeGuestExec([
+        (0, "", ""),    # no existing keys
+        (0, "", ""),    # append script
+    ])
+
+    def fake_make_proxmox_client(proxmox_auth_file: str, node: str = "pve") -> Any:
+        class Stub:
+            def guest_exec(self, vmid, command, timeout=60):
+                return fake(vmid, command, timeout)
+        return Stub()
+
+    monkeypatch.setattr(tool, "_make_proxmox_client", fake_make_proxmox_client)
+
+    rc = tool.main([
+        "--auth-file", str(_coolify_auth_file(tmp_path)),
+        "install-deploy-key",
+        "--proxmox-auth-file", str(_proxmox_auth_file(tmp_path)),
+        "--vmid", "171",
+        "--pubkey", pubkey,
+    ])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert out["status"] == "installed"
+    assert out["key_fingerprint"] == "coolify-deploy"
+    assert out["vmid"] == 171
+    # Second call should be the bash append script
+    assert fake.calls[1]["command"][0] == "bash"

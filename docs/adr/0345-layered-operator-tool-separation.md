@@ -1,8 +1,9 @@
 # ADR 0345: Layered Operator Tool Separation
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: 0.178.4
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.178.5
+- Implemented On: 2026-04-04
 - Date: 2026-04-04
 - Tags: tooling, architecture, dry, separation-of-concerns, contracts, operator-tools
 

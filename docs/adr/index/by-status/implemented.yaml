@@ -10,7 +10,7 @@ generated: '2026-04-03'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 323
+total_adrs: 324
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -5939,5 +5939,27 @@ adrs:
     summary: Ansible inventory remains the single authoritative source for all
     filename: 0344-single-source-environment-topology.md
     path: docs/adr/0344-single-source-environment-topology.md
+    implemented_in_repo_version: 0.178.5
+    implemented_on: '2026-04-04'
+  - adr: '0345'
+    title: Layered Operator Tool Separation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-04'
+    concern: platform
+    keywords:
+      - tooling
+      - architecture
+      - dry
+      - separation-of-concerns
+      - contracts
+      - operator-tools
+      - layered
+      - operator
+      - tool
+      - separation
+    summary: The scripts/ operator tools are organised into three layers with strict
+    filename: 0345-layered-operator-tool-separation.md
+    path: docs/adr/0345-layered-operator-tool-separation.md
     implemented_in_repo_version: 0.178.5
     implemented_on: '2026-04-04'

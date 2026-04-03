@@ -44,23 +44,21 @@ Commands
   guest-exec             Run an arbitrary shell command inside a VM (no SSH needed).
   docker-ps              List running Docker containers on a VM.
   install-key            Append a public SSH key to /root/.ssh/authorized_keys on a VM.
-  coolify-db-exec        Execute a SQL statement in the Coolify Postgres container.
-  coolify-clear-cache    Clear Coolify application + config cache.
-  coolify-migrate-apps   Migrate Coolify app destination_id in the DB (bypasses API limit).
-  coolify-install-deploy-key  Install the Coolify SSH deploy key on a target VM.
 
 Exit codes
 ----------
   0   Success / change made
   1   Fatal error
   2   No-op / idempotent (nothing to migrate, key already present, etc.)
+
+Note: Coolify-specific commands (db-exec, clear-cache, migrate-apps, install-deploy-key)
+have moved to coolify_tool.py (ADR 0345).
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import re
 import shlex
 import ssl
 import sys
@@ -75,33 +73,45 @@ try:
 except ImportError:  # pragma: no cover
     _yaml = None  # type: ignore[assignment]
 
+try:
+    from controller_automation_toolkit import load_proxmox_auth as load_auth  # type: ignore[import]
+except ImportError:
+    # Toolkit additions from ADR 0343 not yet present; fall back to local implementation.
+    load_auth = None  # type: ignore[assignment]
+
+try:
+    from controller_automation_toolkit import load_topology_snapshot  # type: ignore[import]
+except ImportError:
+    load_topology_snapshot = None  # type: ignore[assignment]
+
 
 # ---------------------------------------------------------------------------
-# Auth + topology
+# Auth
 # ---------------------------------------------------------------------------
 
 _REQUIRED_AUTH_KEYS = {"api_url", "authorization_header"}
 
 
-def load_auth(auth_file: str) -> dict:
-    """
-    Load a Proxmox API token file.  Accepts the schema written by the
-    proxmox_security role: must contain api_url and authorization_header.
+if load_auth is None:
+    def load_auth(auth_file: str) -> dict:  # type: ignore[misc]
+        """
+        Load a Proxmox API token file.  Accepts the schema written by the
+        proxmox_security role: must contain api_url and authorization_header.
 
-    Raises FileNotFoundError if the file does not exist.
-    Raises ValueError if required keys are missing.
-    """
-    path = Path(auth_file).expanduser()
-    if not path.exists():
-        raise FileNotFoundError(f"Proxmox auth file not found: {auth_file}")
-    data = json.loads(path.read_text(encoding="utf-8"))
-    missing = _REQUIRED_AUTH_KEYS - set(data)
-    if missing:
-        raise ValueError(
-            f"Proxmox auth file '{auth_file}' is missing required keys: "
-            + ", ".join(sorted(missing))
-        )
-    return data
+        Raises FileNotFoundError if the file does not exist.
+        Raises ValueError if required keys are missing.
+        """
+        path = Path(auth_file).expanduser()
+        if not path.exists():
+            raise FileNotFoundError(f"Proxmox auth file not found: {auth_file}")
+        data = json.loads(path.read_text(encoding="utf-8"))
+        missing = _REQUIRED_AUTH_KEYS - set(data)
+        if missing:
+            raise ValueError(
+                f"Proxmox auth file '{auth_file}' is missing required keys: "
+                + ", ".join(sorted(missing))
+            )
+        return data
 
 
 def load_topology(topology_file: str, env: str) -> dict:
@@ -245,46 +255,6 @@ def _client_from_args(
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
-_SAFE_IDENT_RE = re.compile(r"^[a-zA-Z0-9_\-]+$")
-
-
-def _safe_identifier(value: str, field: str) -> str:
-    """Validate *value* as a safe SQL identifier (alphanumeric, dash, underscore).
-
-    Prevents SQL injection in the coolify-migrate-apps server name queries.
-    """
-    if not _SAFE_IDENT_RE.match(value):
-        raise ValueError(
-            f"Unsafe value for {field}: {value!r} "
-            "(only alphanumeric, dash, and underscore are allowed)"
-        )
-    return value
-
-
-def _psql_query(
-    client: ProxmoxClient,
-    vmid: int,
-    container: str,
-    db_user: str,
-    sql: str,
-    timeout: int = 30,
-) -> str:
-    """Run a SQL query in a Postgres container and return stripped stdout.
-
-    Uses psql -t -A (tuple-only, unaligned) for clean programmatic output.
-    Raises RuntimeError if the command exits non-zero.
-    """
-    exit_code, stdout, stderr = client.guest_exec(
-        vmid,
-        ["docker", "exec", container, "psql", "-U", db_user, "-t", "-A", "-c", sql],
-        timeout=timeout,
-    )
-    if exit_code != 0:
-        raise RuntimeError(
-            f"psql query failed (exit {exit_code}): {stderr.strip() or stdout.strip()}"
-        )
-    return stdout.strip()
 
 
 def _resolve_topology(
@@ -468,237 +438,6 @@ def command_install_key(args: argparse.Namespace) -> int:
     return 0
 
 
-def command_coolify_db_exec(args: argparse.Namespace) -> int:
-    """
-    Execute a SQL statement in the Coolify Postgres container on a given VM.
-
-    Runs: docker exec <container> psql -U <user> -c '<sql>'
-
-    Output: JSON with vmid, container, sql, exit_code, stdout, stderr.
-    """
-    auth = load_auth(args.auth_file)
-    topo = _resolve_topology(args, auth)
-    client = _client_from_args(args, auth, topo)
-
-    vmid = int(topo.get("coolify_vmid") or 0)
-    if not vmid:
-        print(
-            json.dumps({"error": "--coolify-vmid (or topology.coolify_vmid) is required"}),
-            file=sys.stderr,
-        )
-        return 1
-
-    container = str(topo["coolify_db_container"])
-    db_user = str(topo["coolify_db_user"])
-
-    exit_code, stdout, stderr = client.guest_exec(
-        vmid,
-        ["docker", "exec", container, "psql", "-U", db_user, "-c", args.sql],
-        timeout=args.timeout,
-    )
-    result = {
-        "vmid": vmid,
-        "container": container,
-        "sql": args.sql,
-        "exit_code": exit_code,
-        "stdout": stdout.strip(),
-        "stderr": stderr.strip(),
-    }
-    print(json.dumps(result, indent=2))
-    return 0 if exit_code == 0 else 1
-
-
-def command_coolify_clear_cache(args: argparse.Namespace) -> int:
-    """
-    Clear the Coolify application and config cache on the control-plane VM.
-
-    Equivalent to: docker exec coolify bash -c
-      'cd /var/www/html && php artisan cache:clear && php artisan config:clear'
-
-    Run this after any direct database change to ensure Coolify picks up the
-    new state without requiring a container restart.
-    """
-    auth = load_auth(args.auth_file)
-    topo = _resolve_topology(args, auth)
-    client = _client_from_args(args, auth, topo)
-
-    vmid = int(topo.get("coolify_vmid") or 0)
-    if not vmid:
-        print(
-            json.dumps({"error": "--coolify-vmid (or topology.coolify_vmid) is required"}),
-            file=sys.stderr,
-        )
-        return 1
-
-    container = str(topo["coolify_container"])
-    script = "cd /var/www/html && php artisan cache:clear && php artisan config:clear"
-    exit_code, stdout, stderr = client.guest_exec(
-        vmid,
-        ["docker", "exec", container, "bash", "-c", script],
-        timeout=60,
-    )
-    result = {
-        "vmid": vmid,
-        "container": container,
-        "exit_code": exit_code,
-        "stdout": stdout.strip(),
-        "stderr": stderr.strip(),
-    }
-    print(json.dumps(result, indent=2))
-    return 0 if exit_code == 0 else 1
-
-
-def command_coolify_migrate_apps(args: argparse.Namespace) -> int:
-    """
-    Migrate Coolify application destination_id from one server to another via direct
-    DB update — bypassing the Coolify API v1 limitation (PATCH /applications rejects
-    server_uuid and destination_uuid with HTTP 422).
-
-    Workflow
-    --------
-    1. Resolve standalone_docker destination IDs from server names (JOIN query).
-    2. Count apps on the source destination.  Exit 2 (no-op) if count == 0.
-    3. List app names for result reporting.
-    4. UPDATE applications SET destination_id = <to_id> WHERE destination_id = <from_id>
-    5. Clear Coolify application + config cache.
-
-    Idempotent: calling this when apps are already on the target server exits 2.
-    Use --dry-run to preview what would be migrated without making changes.
-
-    Multi-env: pass --topology-file + --env to select the right Coolify VMID.
-    """
-    auth = load_auth(args.auth_file)
-    topo = _resolve_topology(args, auth)
-    client = _client_from_args(args, auth, topo)
-
-    vmid = int(topo.get("coolify_vmid") or 0)
-    if not vmid:
-        print(
-            json.dumps({"error": "--coolify-vmid (or topology.coolify_vmid) is required"}),
-            file=sys.stderr,
-        )
-        return 1
-
-    db_container = str(topo["coolify_db_container"])
-    app_container = str(topo["coolify_container"])
-    db_user = str(topo["coolify_db_user"])
-
-    from_name = _safe_identifier(args.from_server, "--from")
-    to_name = _safe_identifier(args.to_server, "--to")
-
-    # Step 1: Resolve destination IDs from server names
-    from_sql = (
-        f"SELECT sd.id FROM standalone_dockers sd "
-        f"JOIN servers s ON s.id = sd.server_id "
-        f"WHERE s.name = '{from_name}' LIMIT 1"
-    )
-    to_sql = (
-        f"SELECT sd.id FROM standalone_dockers sd "
-        f"JOIN servers s ON s.id = sd.server_id "
-        f"WHERE s.name = '{to_name}' LIMIT 1"
-    )
-
-    from_id_str = _psql_query(client, vmid, db_container, db_user, from_sql)
-    to_id_str = _psql_query(client, vmid, db_container, db_user, to_sql)
-
-    missing: list[str] = []
-    if not from_id_str:
-        missing.append(f"source server '{from_name}'")
-    if not to_id_str:
-        missing.append(f"target server '{to_name}'")
-    if missing:
-        print(
-            json.dumps(
-                {"error": f"Could not find standalone_docker destination for: {', '.join(missing)}"}
-            ),
-            file=sys.stderr,
-        )
-        return 1
-
-    from_id = int(from_id_str)
-    to_id = int(to_id_str)
-
-    # Step 2: Count apps on source
-    count_str = _psql_query(
-        client, vmid, db_container, db_user,
-        f"SELECT count(*) FROM applications WHERE destination_id = {from_id}",
-    )
-    count = int(count_str) if count_str.isdigit() else 0
-
-    if count == 0:
-        result = {
-            "status": "nothing_to_migrate",
-            "from_server": from_name,
-            "to_server": to_name,
-            "from_destination_id": from_id,
-            "to_destination_id": to_id,
-            "migrated_count": 0,
-            "migrated_apps": [],
-        }
-        print(json.dumps(result, indent=2))
-        return 2
-
-    # Step 3: List app names
-    names_raw = _psql_query(
-        client, vmid, db_container, db_user,
-        f"SELECT name FROM applications WHERE destination_id = {from_id}",
-    )
-    app_names = [n.strip() for n in names_raw.splitlines() if n.strip()]
-
-    # Step 4: Run the migration (skipped in dry-run mode)
-    if not args.dry_run:
-        _psql_query(
-            client, vmid, db_container, db_user,
-            f"UPDATE applications SET destination_id = {to_id} WHERE destination_id = {from_id}",
-        )
-
-        # Step 5: Clear Coolify cache so changes take effect immediately
-        cache_script = (
-            "cd /var/www/html && php artisan cache:clear && php artisan config:clear"
-        )
-        cache_rc, _, cache_err = client.guest_exec(
-            vmid,
-            ["docker", "exec", app_container, "bash", "-c", cache_script],
-            timeout=60,
-        )
-        if cache_rc != 0:
-            # Non-fatal: migration is done, cache miss is recoverable
-            print(
-                json.dumps(
-                    {"warning": f"Migration succeeded but cache clear failed: {cache_err.strip()}"}
-                ),
-                file=sys.stderr,
-            )
-
-    result = {
-        "status": "dry_run" if args.dry_run else "migrated",
-        "from_server": from_name,
-        "to_server": to_name,
-        "from_destination_id": from_id,
-        "to_destination_id": to_id,
-        "migrated_count": count,
-        "migrated_apps": app_names,
-    }
-    print(json.dumps(result, indent=2))
-    return 0
-
-
-def command_coolify_install_deploy_key(args: argparse.Namespace) -> int:
-    """
-    Install the Coolify SSH deploy public key on a target VM.
-
-    Coolify needs to SSH into deployment servers using its own deploy key.
-    This command installs that key into /root/.ssh/authorized_keys on the
-    target VM so that server validation and deployment succeed.
-
-    The deploy key can be found in the Coolify UI under Settings > SSH Keys,
-    or from the Coolify bootstrap artifacts at .local/coolify/deploy-key.pub.
-
-    Delegates to install-key internally.  Exits 2 if already present.
-    """
-    return command_install_key(args)
-
-
 # ---------------------------------------------------------------------------
 # Argument parsing
 # ---------------------------------------------------------------------------
@@ -813,101 +552,6 @@ def _build_parser() -> argparse.ArgumentParser:
         "--pubkey", required=True, help="Public key string (e.g. 'ssh-ed25519 AAAA... comment')."
     )
 
-    # --- coolify-db-exec ---
-    p_db = sub.add_parser(
-        "coolify-db-exec",
-        help="Execute a SQL statement in the Coolify Postgres container.",
-    )
-    p_db.add_argument(
-        "--coolify-vmid",
-        dest="coolify_vmid",
-        type=int,
-        help="VMID of the Coolify control-plane VM (overrides topology).",
-    )
-    p_db.add_argument(
-        "--container", help="Postgres container name (default: coolify-db)."
-    )
-    p_db.add_argument("--db-user", help="Postgres user (default: coolify).")
-    p_db.add_argument("--sql", required=True, help="SQL statement to execute.")
-    p_db.add_argument(
-        "--timeout", type=int, default=30, help="Exec timeout in seconds (default: 30)."
-    )
-
-    # --- coolify-clear-cache ---
-    p_cc = sub.add_parser(
-        "coolify-clear-cache",
-        help="Clear Coolify application and config cache (run after direct DB changes).",
-    )
-    p_cc.add_argument(
-        "--coolify-vmid",
-        dest="coolify_vmid",
-        type=int,
-        help="VMID of the Coolify control-plane VM (overrides topology).",
-    )
-    p_cc.add_argument(
-        "--coolify-container",
-        dest="coolify_container",
-        help="Coolify app container name (default: coolify).",
-    )
-
-    # --- coolify-migrate-apps ---
-    p_migrate = sub.add_parser(
-        "coolify-migrate-apps",
-        help="Migrate Coolify app destination_id in the DB (bypasses API v1 limitation).",
-        description=(
-            "Resolves standalone_docker destination IDs from server names, "
-            "runs the UPDATE, and clears the Coolify cache.  Idempotent."
-        ),
-    )
-    p_migrate.add_argument(
-        "--from",
-        dest="from_server",
-        required=True,
-        metavar="SERVER_NAME",
-        help="Source Coolify server name (e.g. coolify-lv3).",
-    )
-    p_migrate.add_argument(
-        "--to",
-        dest="to_server",
-        required=True,
-        metavar="SERVER_NAME",
-        help="Target Coolify server name (e.g. coolify-apps-lv3).",
-    )
-    p_migrate.add_argument(
-        "--coolify-vmid",
-        dest="coolify_vmid",
-        type=int,
-        help="VMID of the Coolify control-plane VM (overrides topology).",
-    )
-    p_migrate.add_argument(
-        "--container", help="Postgres container name (default: coolify-db)."
-    )
-    p_migrate.add_argument(
-        "--coolify-container",
-        dest="coolify_container",
-        help="Coolify app container name for cache clear (default: coolify).",
-    )
-    p_migrate.add_argument("--db-user", help="Postgres user (default: coolify).")
-    p_migrate.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Preview what would be migrated without making any changes.",
-    )
-
-    # --- coolify-install-deploy-key ---
-    p_deploy_key = sub.add_parser(
-        "coolify-install-deploy-key",
-        help="Install the Coolify SSH deploy public key on a target VM.",
-    )
-    p_deploy_key.add_argument(
-        "--vmid", required=True, type=int, help="Target VMID (e.g. coolify-apps-lv3 VMID)."
-    )
-    p_deploy_key.add_argument(
-        "--pubkey",
-        required=True,
-        help="Coolify deploy public key string (from Coolify UI > Settings > SSH Keys).",
-    )
-
     return parser
 
 
@@ -915,10 +559,6 @@ _COMMAND_HANDLERS = {
     "guest-exec": command_guest_exec,
     "docker-ps": command_docker_ps,
     "install-key": command_install_key,
-    "coolify-db-exec": command_coolify_db_exec,
-    "coolify-clear-cache": command_coolify_clear_cache,
-    "coolify-migrate-apps": command_coolify_migrate_apps,
-    "coolify-install-deploy-key": command_coolify_install_deploy_key,
 }
 
 
