@@ -53,8 +53,8 @@ rewriting one operator's workstation paths.
 ### Topology Summary
 | Field | Value |
 | --- | --- |
-| Managed guest count | 9 |
-| Running guest count | 8 |
+| Managed guest count | 12 |
+| Running guest count | 9 |
 | Template VM present | `true` |
 | Declared services | 71 |
 | Publicly published services | 43 |

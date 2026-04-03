@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.149",
   "platform_version": "0.130.93",
-  "generated_at": "2026-04-03T02:01:48Z",
-  "next_refresh_at": "2026-04-03T03:01:48Z",
+  "generated_at": "2026-04-03T02:45:06Z",
+  "next_refresh_at": "2026-04-03T03:45:06Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -729,7 +729,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8020",
-        "last_live_apply": "2026-04-02T00:00:00Z",
+        "last_live_apply": "2026-04-03T00:00:00Z",
         "slo_status": "unknown"
       },
       "serverclaw": {
@@ -859,7 +859,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8005",
-        "last_live_apply": "2026-04-02T00:00:00Z",
+        "last_live_apply": "2026-04-03T00:00:00Z",
         "slo_status": "unknown"
       },
       "woodpecker": {
