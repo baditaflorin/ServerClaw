@@ -95,7 +95,6 @@ canonical_truth:
     with ephemeral runtime secret overrides while live-provisioning and auditing the
     temporary admin operator florin-tmp-002
   release_bump: patch
-  included_in_repo_version: 0.178.2
   latest_receipts:
     operator_onboarding: 2026-04-03-adr-0318-repeatable-operator-onboarding-mainline-live-apply
 ready_to_merge: true

@@ -1,7 +1,7 @@
 # ADR 0326: Workstream Registry Shards With Active And Archive Assembly
 
 - Status: Accepted
-- Implementation Status: Implemented on workstream branch
+- Implementation Status: Implemented
 - Implemented In Repo Version: not yet
 - Implemented In Platform Version: N/A
 - Implemented On: 2026-04-03

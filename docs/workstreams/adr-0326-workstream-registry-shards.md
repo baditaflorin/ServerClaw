@@ -2,9 +2,10 @@
 
 - ADR: [ADR 0326](../adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md)
 - Title: implement shard-backed workstream registry source files with generated active-only compatibility assembly
-- Status: ready_for_merge
+- Status: live_applied
 - Included In Repo Version: not yet
 - Branch-Local Receipt: `receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-live-apply.json`
+- Mainline Receipt: `receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply.json`
 - Implemented On: 2026-04-03
 - Live Applied On: 2026-04-03
 - Live Applied In Platform Version: N/A (repo-only control-plane change)
@@ -14,7 +15,7 @@
 - Owner: codex
 - Depends On: `ADR 0167`, `ADR 0174`, `ADR 0175`, `ADR 0326`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `workstreams/policy.yaml`, `workstreams/active/*.yaml`, `workstreams/archive/*.yaml`, `platform/workstream_registry.py`, `scripts/workstream_registry.py`, `scripts/workstream_tool.py`, `scripts/create-workstream.sh`, `scripts/canonical_truth.py`, `scripts/generate_status_docs.py`, `scripts/generate_diagrams.py`, `scripts/drift_lib.py`, `scripts/workstream_surface_ownership.py`, `scripts/validate_repository_data_models.py`, `scripts/validate_repo.sh`, `docs/adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md`, `docs/runbooks/workstream-registry-shards.md`, `docs/runbooks/cross-workstream-interface-contracts.md`, `docs/runbooks/canonical-truth-assembly.md`, `docs/runbooks/validate-repository-automation.md`, `.repo-structure.yaml`, `.config-locations.yaml`, `config/contracts/workstream-registry-v1.yaml`, `tests/test_workstream_registry.py`, `tests/test_canonical_truth.py`, `tests/test_workstream_surface_ownership.py`, `tests/test_interface_contracts.py`, `docs/diagrams/agent-coordination-map.excalidraw`, `build/platform-manifest.json`, `receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-live-apply.json`, `receipts/live-applies/evidence/2026-04-03-ws-0326-*`
+- Shared Surfaces: `workstreams.yaml`, `workstreams/policy.yaml`, `workstreams/active/*.yaml`, `workstreams/archive/*.yaml`, `platform/workstream_registry.py`, `scripts/workstream_registry.py`, `scripts/workstream_tool.py`, `scripts/create-workstream.sh`, `scripts/canonical_truth.py`, `scripts/generate_status_docs.py`, `scripts/generate_diagrams.py`, `scripts/drift_lib.py`, `scripts/workstream_surface_ownership.py`, `scripts/validate_repository_data_models.py`, `scripts/validate_repo.sh`, `docs/adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md`, `docs/runbooks/workstream-registry-shards.md`, `docs/runbooks/cross-workstream-interface-contracts.md`, `docs/runbooks/canonical-truth-assembly.md`, `docs/runbooks/validate-repository-automation.md`, `.repo-structure.yaml`, `.config-locations.yaml`, `config/contracts/workstream-registry-v1.yaml`, `tests/test_workstream_registry.py`, `tests/test_canonical_truth.py`, `tests/test_workstream_surface_ownership.py`, `tests/test_interface_contracts.py`, `README.md`, `changelog.md`, `versions/stack.yaml`, `docs/diagrams/agent-coordination-map.excalidraw`, `build/platform-manifest.json`, `receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-live-apply.json`, `receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-04-03-ws-0326-*`
 
 ## Scope
 
@@ -36,14 +37,14 @@
 
 ## Outcome
 
-- ADR 0326 is implemented on this rebased workstream branch, with authored workstream truth split into shard files and `workstreams.yaml` preserved as a generated active-only compatibility surface.
+- ADR 0326 is implemented on the rebased exact-main tree, with authored workstream truth split into shard files and `workstreams.yaml` preserved as a generated active-only compatibility surface.
 - The repo automation paths that depend on workstream metadata now validate the shard source directly or assemble the compatibility registry deterministically from it.
 - The latest-main replay proved that concurrent mainline changes can be absorbed safely by adding new archived shards and regenerating `workstreams.yaml`, which is the intended operational model for this ADR.
-- The branch now also carries the refreshed `build/platform-manifest.json` and diagram output needed to keep generated truth aligned with both the shard-backed registry change set and the newer exact-main validation base.
+- The exact-main tree now also carries the refreshed `build/platform-manifest.json` and diagram output needed to keep generated truth aligned with both the shard-backed registry change set and the still-unreleased ADR 0318 onboarding state.
 
-## Remaining Merge-To-Main
+## Exact-Main Integration Status
 
-- This branch intentionally does not touch `VERSION`, release sections in `changelog.md`, the top-level `README.md` summary, or `versions/stack.yaml`.
-- `origin/main` advanced again to `6b9117310ef45ccc8e08855f33b4ddeeb746e4ee` during the post-rebase verification pass, so exact-main integration should begin with one fresh fetch/rebase and a replay of `workstreams.yaml`, `build/platform-manifest.json`, and `docs/diagrams/agent-coordination-map.excalidraw`.
-- On the exact-main integration step only, update the protected release bookkeeping on `main`: bump `VERSION`, refresh the changelog and any release-generated surfaces that depend on it, and then promote ADR 0326 from `Implemented on workstream branch` to `Implemented` with its first integrated repo version.
-- Because ADR 0326 changes repository coordination and validation structure rather than live infrastructure state, `versions/stack.yaml` and the platform version should remain unchanged unless a separate exact-main integration explicitly chooses to record this repo-only truth there.
+- Exact-main canonical truth now records ADR 0326 in `changelog.md`, `README.md`, and `versions/stack.yaml` while keeping ADR 0318 in `Unreleased`; the sharded registry model now matches current mainline semantics instead of prematurely archiving still-unreleased live-apply workstreams.
+- `workstreams/active/ws-0318-live-apply.yaml` now carries the still-unreleased ADR 0318 onboarding proof as an active shard so the compatibility assembly stays faithful to current `main` release bookkeeping.
+- `uv run --with pyyaml python3 scripts/release_manager.py status --json` still reports repository version `0.178.2`, platform version `0.130.98`, and a blocked release cut only because three pre-existing `controller_dependency_gap` waiver receipts remain open through 2026-04-06.
+- Because the global release manager is blocked by unrelated waivers, ADR 0326 is implemented on the exact-main tree but `Included In Repo Version` remains `not yet` until a later numbered release is cut.

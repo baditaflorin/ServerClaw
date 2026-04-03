@@ -12,7 +12,8 @@ rewriting one operator's workstation paths.
 
 - architecture decisions in `docs/adr/`
 - operational runbooks in `docs/runbooks/`
-- parallel-workstream tracking in `workstreams.yaml`
+- parallel-workstream tracking from shard-backed sources under `workstreams/`,
+  with `workstreams.yaml` preserved as a generated compatibility view
 - automation and validation under `collections/`, `playbooks/`, `scripts/`,
   and `tests/`
 - generated status and release surfaces that summarize current integrated
@@ -21,7 +22,9 @@ rewriting one operator's workstation paths.
 ## Forking Guidance
 
 1. Read `README.md`, `AGENTS.md`, `.repo-structure.yaml`,
-   `.config-locations.yaml`, `docs/adr/.index.yaml`, and `workstreams.yaml`.
+   `.config-locations.yaml`, `docs/adr/.index.yaml`, and the shard-backed
+   workstream registry surfaces under `workstreams/` (with `workstreams.yaml`
+   as the generated compatibility view).
 2. Replace deployment-specific inventory, hostnames, provider choices, and
    secrets with your own values before any live apply.
 3. Keep personal machine paths, operator-specific credentials, and local
@@ -231,6 +234,7 @@ rewriting one operator's workstation paths.
 | `vulnerability_budget_gate` | `2026-03-30-adr-0269-vulnerability-budget-gates-mainline-live-apply` |
 | `windmill` | `2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply` |
 | `woodpecker` | `2026-03-30-adr-0287-woodpecker-mainline-live-apply` |
+| `workstream_registry_shards` | `2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply` |
 | `world_state_materializer` | `2026-03-27-adr-0113-world-state-materializer-mainline-live-apply` |
 <!-- END GENERATED: platform-status -->
 
@@ -614,6 +618,7 @@ Current values on `main`:
 | `0319` | Complete the phased runtime-pool transition after the first runtime-ai split | `merged` | [ws-0330-runtime-pool-transition-program.md](docs/workstreams/ws-0330-runtime-pool-transition-program.md) |
 | `0319` | Fail closed before runtime-pool retirement or shared-runtime recovery can take down legacy services | `merged` | [ws-0333-service-uptime-recovery.md](docs/workstreams/ws-0333-service-uptime-recovery.md) |
 | `0324` | Programmatic sharding roadmap for oversized service, ADR, discovery, and workstream surfaces | `merged` | [ws-0324-programmatic-doc-shards.md](docs/workstreams/ws-0324-programmatic-doc-shards.md) |
+| `0326` | Implement shard-backed workstream registry source files with generated compatibility assembly | `live_applied` | [adr-0326-workstream-registry-shards.md](docs/workstreams/adr-0326-workstream-registry-shards.md) |
 | `0330` | Prepare the repository for public GitHub publication as a generic and forkable reference platform | `merged` | [adr-0330-public-github-readiness-bundle.md](docs/workstreams/adr-0330-public-github-readiness-bundle.md) |
 | `0340` | Dedicated Coolify Apps VM Separation — introduce coolify-apps-lv3 as the Coolify deployment server | `merged` | [0340-dedicated-coolify-apps-vm-separation.md](docs/adr/0340-dedicated-coolify-apps-vm-separation.md) |
 <!-- END GENERATED: merged-workstreams -->
