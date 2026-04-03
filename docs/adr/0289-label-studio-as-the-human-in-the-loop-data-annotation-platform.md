@@ -1,10 +1,10 @@
 # ADR 0289: Label Studio As The Human-In-The-Loop Data Annotation Platform
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
-- Implemented On: not yet
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.153
+- Implemented In Platform Version: 0.130.97
+- Implemented On: 2026-04-03
 - Date: 2026-03-29
 
 ## Context

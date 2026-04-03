@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.152",
-  "platform_version": "0.130.95",
-  "generated_at": "2026-04-03T08:45:55Z",
-  "next_refresh_at": "2026-04-03T09:45:55Z",
+  "repo_version": "0.177.153",
+  "platform_version": "0.130.97",
+  "generated_at": "2026-04-03T10:28:20Z",
+  "next_refresh_at": "2026-04-03T11:28:20Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -105,7 +105,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://apps.lv3.org",
-        "last_live_apply": "2026-04-01T00:00:00Z"
+        "last_live_apply": "2026-04-03T00:00:00Z"
       },
       "crawl4ai": {
         "service_name": "Crawl4AI",
@@ -5095,7 +5095,7 @@
         "id": "configure-label-studio",
         "title": "Configure Label Studio",
         "agent_trust_required": "T3",
-        "steps": 5,
+        "steps": 6,
         "path": "docs/runbooks/configure-label-studio.md",
         "workflow_ids": [
           "converge-label-studio"
@@ -6119,10 +6119,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.151",
+    "last_version": "0.177.152",
     "deployed_at": "2026-04-03",
-    "summary": "implements ADR 0299 by promoting ntfy to the governed self-hosted push notification channel, wiring the governed topic and credential contracts across Ansible, Gitea, Windmill, SBOM, and k6 publishers, and verifying the public publish path plus the mainline service replay",
-    "release_notes_url": "docs/release-notes/0.177.152.md"
+    "summary": "implements ADR 0289 by deploying Label Studio as the shared-edge-protected human-in-the-loop annotation platform on docker-runtime-lv3 with PostgreSQL-backed state, repo-managed project catalog reconciliation, and verified latest-main public and private apply evidence",
+    "release_notes_url": "docs/release-notes/0.177.153.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -18358,8 +18358,12 @@ workstreams:
           paths:
             - inventory/hosts.yml
             - inventory/host_vars/proxmox_florin.yml
-            - inventory/group_vars/platform.yml
           mode: exclusive
+        - id: ws0340_platform_inventory_contract
+          paths:
+            - inventory/group_vars/platform.yml
+          mode: shared_contract
+          contract: platform-topology-v1
         - id: ws0340_platform_truth
           paths:
             - versions/stack.yaml
@@ -18375,23 +18379,26 @@ workstreams:
         - id: ws0340_playbook
           paths:
             - playbooks/coolify.yml
-          mode: exclusive
+          mode: shared_contract
+          contract: coolify-deployment-playbook-v1
         - id: ws0340_tool
           paths:
             - scripts/coolify_tool.py
-          mode: exclusive
+          mode: shared_contract
+          contract: coolify-api-tool-v1
         - id: ws0340_tests
           paths:
             - tests/test_coolify_playbook.py
             - tests/test_coolify_tool.py
-          mode: exclusive
+          mode: shared_contract
+          contract: coolify-runtime-test-contract-v1
     blockers: []
     ready_to_merge: false
     live_applied: false
   - id: ws-0289-label-studio-live-apply
     adr: "0289"
     title: Live apply ADR 0289 Label Studio from latest origin/main
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/ws-0289-label-studio-live-apply-r2
     worktree_path: .worktrees/ws-0289-label-studio-live-apply-r1
@@ -18415,6 +18422,7 @@ workstreams:
       - config/health-probe-catalog.json
       - config/service-capability-catalog.json
       - config/certificate-catalog.json
+      - config/capacity-model.json
       - config/dependency-graph.json
       - config/data-catalog.json
       - config/secret-catalog.json
@@ -18442,6 +18450,7 @@ workstreams:
       - collections/ansible_collections/lv3/platform/playbooks/services/label-studio.yml
       - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent.hcl.j2
       - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml
       - collections/ansible_collections/lv3/platform/roles/label_studio_postgres/**
       - collections/ansible_collections/lv3/platform/roles/label_studio_runtime/**
       - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
@@ -18509,12 +18518,14 @@ workstreams:
             - Makefile
             - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent.hcl.j2
             - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml
             - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
             - config/api-gateway-catalog.json
             - config/contracts/service-partitions/catalog.json
             - config/health-probe-catalog.json
             - config/service-capability-catalog.json
             - config/certificate-catalog.json
+            - config/capacity-model.json
             - config/dependency-graph.json
             - config/data-catalog.json
             - config/secret-catalog.json
@@ -18575,5 +18586,6 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0289 by deploying Label Studio as the shared-edge-protected human-in-the-loop annotation platform on docker-runtime-lv3 with PostgreSQL-backed state, repo-managed project catalog reconciliation, and verified exact-main public and private apply evidence
       release_bump: patch
+      included_in_repo_version: 0.177.153
       latest_receipts:
         label_studio: 2026-04-03-adr-0289-label-studio-mainline-live-apply

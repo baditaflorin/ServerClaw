@@ -2,10 +2,10 @@
 
 - ADR: [ADR 0289](../adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md)
 - Title: deploy Label Studio from the latest realistic `origin/main` baseline without colliding with the existing Directus `ws-0289-*` records
-- Status: in_progress
-- Included In Repo Version: not yet
-- Canonical Mainline Receipt: not yet
-- Live Applied In Platform Version: not yet
+- Status: live_applied
+- Included In Repo Version: 0.177.153
+- Canonical Mainline Receipt: `2026-04-03-adr-0289-label-studio-mainline-live-apply`
+- Live Applied In Platform Version: 0.130.97
 - Branch: `codex/ws-0289-label-studio-live-apply-r2`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-label-studio-live-apply-r1`
 - Owner: codex
@@ -32,47 +32,61 @@ keeps the annotation-platform delivery merge-safe by using an explicit
   protected release and canonical truth surfaces can be updated only after the
   mainline replay is verified
 
-## Current Branch State
+## Final Mainline State
 
-- latest fetched `origin/main` is commit `cbf9b1ec3` (`[live-apply] Finalize ADR 0275 exact-main Tika replay`)
-  with integrated repo version `0.177.151` and platform version `0.130.94`
-- exact-main integration kept the current Superset runtime on `8105`, so
-  Label Studio now uses `8110` throughout the private runtime, firewall,
-  health, SLO, and workflow contracts on the latest realistic `origin/main`
-- browser access is enforced at the shared edge through oauth2-proxy and
-  Keycloak, while Label Studio's admin password and token remain the
-  Community Edition-compatible automation and recovery path
-- the reviewed runtime image is
+- Label Studio is live on `docker-runtime-lv3` at private port `8110` with the
+  dedicated `label_studio` PostgreSQL database on `postgres-lv3`.
+- Browser access is enforced at the shared edge through oauth2-proxy and
+  Keycloak, while the app-local admin password and token remain the deterministic
+  automation and break-glass path.
+- The reviewed runtime image remains
   `docker.io/heartexlabs/label-studio:1.23.0@sha256:aa461572e8f9d86a1bf9520c1db620204e86160fd2f80dd7e9d40ac84a8828ea`
-  with Trivy summary `0 critical / 11 high`
+  with Trivy summary `0 critical / 11 high`.
+- The latest exact-main replay was performed from merged head `cb7a375c7`
+  after `origin/main` advanced to `26e6849be`
+  (`[ws-0340] Live apply fixes: chdir, auth-file, API 201/422, migration fallback`).
+- That newer `origin/main` head carried inconsistent repo-version surfaces:
+  `VERSION` still read `0.177.152`, while `versions/stack.yaml` already read
+  `0.177.153` / `0.130.96`. This workstream treated `0.177.153` as the latest
+  realistic baseline, replayed Label Studio there, and then repaired the
+  release surfaces during final integration.
 
-## Validation Status
+## Evidence
 
-- the pre-rebase exact-main replay remained based on fetched `origin/main`
-  commit `cbf9b1ec38d4cfdb43eef6beb7b71b44f0a7b7cc` with integrated repo version
-  `0.177.151` and platform version `0.130.94`
-- `uv run --with pytest --with pyyaml --with jsonschema python -m pytest -q tests/test_label_studio_playbook.py tests/test_label_studio_runtime_role.py tests/test_label_studio_sync.py tests/test_generate_platform_vars.py tests/test_dependency_graph.py tests/test_edge_publication_playbooks.py tests/test_nginx_edge_publication_role.py tests/test_subdomain_catalog.py tests/test_docker_runtime_role.py tests/test_openbao_compose_env_helper.py tests/test_compose_runtime_secret_injection.py` passed with `128 passed`
-- `make syntax-check-label-studio`, `make preflight WORKFLOW=converge-label-studio`, `./scripts/validate_repo.sh agent-standards workstream-surfaces health-probes`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, and `git diff --check` all passed before that pre-rebase exact-main live apply
+- Focused repo validation on the rebased exact-main tree is preserved in
+  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-syntax-r1-0.177.152.txt`,
+  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-preflight-r1-0.177.152.txt`,
+  and
+  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-pytest-r1-0.177.152.txt`.
+- The first exact-main regenerate failure that exposed the stale shared
+  `coolify_apps` truth is preserved in
+  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-generate-edge-static-sites-r1-0.177.152.txt`;
+  the repaired generator pass is preserved in
+  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-generate-edge-static-sites-r2-0.177.152.txt`.
+- The first post-rebase converge failure that still carried the stale
+  generator contract is preserved in
+  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r6-0.177.152.txt`.
+- The rebased exact-main replay on the `0.177.152` / `0.130.95` baseline
+  succeeded in
+  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r7-0.177.152.txt`
+  with recap `docker-runtime-lv3 ok=518 changed=148 failed=0`, `postgres-lv3
+  ok=73 changed=0 failed=0`, `nginx-lv3 ok=100 changed=5 failed=0`, and
+  `localhost ok=22 changed=0 failed=0`.
+- After merging the newer `origin/main` head, the latest realistic mainline
+  replay succeeded in
+  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r8-0.177.153.txt`
+  with recap `docker-runtime-lv3 ok=492 changed=144 failed=0`,
+  `postgres-lv3 ok=73 changed=0 failed=0`, `nginx-lv3 ok=100 changed=5
+  failed=0`, and `localhost ok=22 changed=0 failed=0`.
+- Standalone public shared-edge redirect proofs are preserved in
+  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-public-head-r3-0.177.152.txt`
+  and
+  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-public-head-r4-0.177.153.txt`.
 
-## Current Branch State
+## Release Note
 
-- the first exact-main converge attempt failed only because
-  `config/subdomain-exposure-registry.json` was stale versus the branch
-  contract; that failure is preserved in
-  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r1.txt`
-- after refreshing the exposure registry from the repo contract, `make
-  converge-label-studio env=production` succeeded on `2026-04-03` across
-  `postgres-lv3`, `docker-runtime-lv3`, `nginx-lv3`, and controller-local
-  shared-edge verification; the successful replay is preserved in
-  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r2.txt`
-- the successful pre-rebase replay verified the private runtime container
-  health, the private version endpoint, the repo-managed project catalog
-  reconciliation, the shared Typesense/API gateway dependency path, and the
-  public `annotate.lv3.org` browser/API redirects through the shared auth
-  boundary
-- standalone public curl verification is preserved in
-  `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-public-head-r1.txt`
-- `origin/main` then advanced to ADR 0299 ntfy release `0.177.152` at platform
-  version `0.130.95`, so this workstream must replay the exact-main branch on
-  that newer baseline before the Label Studio receipt, protected release
-  surfaces, and canonical truth can be promoted safely
+- `scripts/release_manager.py` remained blocked on unrelated in-progress
+  workstreams `ws-0330-public-github-readiness` and `ws-0340-implementation`,
+  so the final `0.177.153` release surfaces were reconciled manually while
+  preserving the latest realistic mainline truth and the canonical live-apply
+  evidence.

@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.177.153
-platform_version: 0.130.96
+platform_version: 0.130.97
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -85,7 +85,7 @@ live_apply_evidence:
     flagsmith: 2026-03-30-adr-0288-flagsmith-mainline-live-apply
     crawl4ai: 2026-03-31-adr-0288-crawl4ai-mainline-live-apply
     coolify: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
-    coolify_apps: 2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply
+    coolify_apps: 2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply
     outline: 2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply
     network_impairment_matrix: 2026-03-27-adr-0189-network-impairment-matrix-live-apply
     plane: 2026-03-28-adr-0193-plane-mainline-live-apply
@@ -164,6 +164,7 @@ live_apply_evidence:
     command_palette: 2026-04-02-adr-0311-global-command-palette-mainline-live-apply
     database_schema: 2026-04-02-adr-0304-atlas-mainline-live-apply
     ntfy: 2026-04-03-adr-0299-ntfy-mainline-live-apply
+    label_studio: 2026-04-03-adr-0289-label-studio-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -1147,8 +1148,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.152
+    current: 0.177.153
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.95
+    current: 0.130.97
     meaning: intended platform release for the actual server configuration
