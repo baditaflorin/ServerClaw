@@ -27,6 +27,7 @@ NTFY_CONFIG_PATH = REPO_ROOT / "config" / "ntfy" / "server.yml"
 FALCO_SUPPRESSIONS_PATH = REPO_ROOT / "config" / "falco" / "suppressions.yaml"
 NTFY_ROLE_DEFAULTS = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "ntfy_runtime" / "defaults" / "main.yml"
 NTFY_ROLE_TASKS = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "ntfy_runtime" / "tasks" / "main.yml"
+NTFY_ROLE_FORCE_RECREATE = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "ntfy_runtime" / "tasks" / "force_recreate.yml"
 NTFY_ROLE_HANDLERS = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "ntfy_runtime" / "handlers" / "main.yml"
 NTFY_ROLE_VERIFY = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "ntfy_runtime" / "tasks" / "verify.yml"
 
@@ -195,6 +196,7 @@ def test_ansible_scopes_taxonomy_ntfy_and_mutation_audit_cover_falco() -> None:
 def test_ntfy_runtime_restarts_container_when_auth_config_changes() -> None:
     defaults = load_yaml(NTFY_ROLE_DEFAULTS)
     tasks = load_yaml(NTFY_ROLE_TASKS)
+    force_recreate_tasks = load_yaml(NTFY_ROLE_FORCE_RECREATE)
     handlers = load_yaml(NTFY_ROLE_HANDLERS)
     verify_tasks = load_yaml(NTFY_ROLE_VERIFY)
 
@@ -209,6 +211,7 @@ def test_ntfy_runtime_restarts_container_when_auth_config_changes() -> None:
     snapshot_acl = next(task for task in tasks if task["name"] == "Snapshot provisioned ntfy ACL state")
     repair_acl = next(task for task in tasks if task["name"] == "Force-recreate the ntfy stack when provisioned ACL entries are stale")
     restart_handler = next(task for task in handlers if task["name"] == "Restart ntfy stack")
+    force_recreate_helper = next(task for task in force_recreate_tasks if task["name"] == "Force-recreate the ntfy stack")
     verify_acl = next(
         task
         for task in verify_tasks
@@ -231,9 +234,16 @@ def test_ntfy_runtime_restarts_container_when_auth_config_changes() -> None:
     assert "Reset stale ntfy compose resources after startup failure" in startup_rescue_names
     assert "Ensure Docker bridge networking chains are present before retrying ntfy startup" in startup_rescue_names
     assert "Retry ntfy startup after Docker bridge-chain recovery" in startup_rescue_names
+    assert repair_acl["ansible.builtin.include_tasks"] == "force_recreate.yml"
     assert render_config["notify"] == "Restart ntfy stack"
     assert render_compose["notify"] == "Restart ntfy stack"
     assert snapshot_acl["environment"]["NTFY_RUNTIME_EXPECTED_TOPICS"] == "{{ ntfy_runtime_expected_write_topics | to_json }}"
     assert repair_acl["when"] == "ntfy_runtime_acl_state.rc != 0"
-    assert "--force-recreate" in restart_handler["ansible.builtin.command"]["argv"]
+    assert force_recreate_helper["args"]["executable"] == "/bin/bash"
+    assert "--force-recreate" in force_recreate_helper["ansible.builtin.shell"]
+    assert "Conflict. The container name" in force_recreate_helper["ansible.builtin.shell"]
+    assert "com.docker.compose.project.working_dir={{ ntfy_runtime_site_dir }}" in force_recreate_helper["ansible.builtin.shell"]
+    assert restart_handler["args"]["executable"] == "/bin/bash"
+    assert "--force-recreate" in restart_handler["ansible.builtin.shell"]
+    assert "Conflict. The container name" in restart_handler["ansible.builtin.shell"]
     assert verify_acl["environment"]["NTFY_RUNTIME_EXPECTED_TOPICS"] == "{{ ntfy_runtime_expected_write_topics | to_json }}"

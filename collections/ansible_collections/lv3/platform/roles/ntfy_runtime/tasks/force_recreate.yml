@@ -1,11 +1,11 @@
-# Purpose: Restart the ntfy compose stack after a managed runtime change.
-# Use case: Triggered by the ntfy runtime role when image, compose, or config inputs change.
-# Inputs: ntfy_runtime_compose_file and ntfy_runtime_site_dir.
-# Outputs: Recreates the ntfy service from the declared compose file on the target host.
-# Idempotency: Partially idempotent because the handler intentionally forces container recreation when notified.
-# Dependencies: ADR 0165 and lv3.platform.ntfy_runtime.
+# Purpose: Force-recreate the ntfy compose stack while recovering stale container-name conflicts.
+# Use case: Included by ntfy drift repair paths that must replay docker compose with --force-recreate.
+# Inputs: ntfy_runtime_compose_file, ntfy_runtime_site_dir, and ntfy_runtime_container_name.
+# Outputs: Recreates the ntfy service and clears stale compose containers when Docker reports a name conflict.
+# Idempotency: Partially idempotent because the task intentionally forces a container recreate when it runs.
+# Dependencies: Docker Compose on the guest and the ntfy_runtime role defaults.
 ---
-- name: Restart ntfy stack
+- name: Force-recreate the ntfy stack
   ansible.builtin.shell: |
     set -euo pipefail
 
@@ -46,4 +46,5 @@
   args:
     chdir: "{{ ntfy_runtime_site_dir }}"
     executable: /bin/bash
+  register: ntfy_runtime_force_recreate
   changed_when: true

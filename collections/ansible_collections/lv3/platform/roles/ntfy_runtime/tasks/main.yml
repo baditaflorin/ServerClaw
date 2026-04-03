@@ -614,23 +614,7 @@
   failed_when: false
 
 - name: Recreate ntfy stack when mounted config drifts
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ ntfy_runtime_compose_file }}"
-      - up
-      - -d
-      - --force-recreate
-      - --remove-orphans
-  args:
-    chdir: "{{ ntfy_runtime_site_dir }}"
-  register: ntfy_runtime_drift_recreate
-  changed_when: >-
-    'Creating' in ntfy_runtime_drift_recreate.stdout
-    or 'Recreating' in ntfy_runtime_drift_recreate.stdout
-    or 'Starting' in ntfy_runtime_drift_recreate.stdout
+  ansible.builtin.include_tasks: force_recreate.yml
   when: >-
     ntfy_runtime_container_config_raw.rc != 0
     or (
@@ -639,20 +623,7 @@
     )
 
 - name: Force-recreate the ntfy stack when provisioned ACL entries are stale
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ ntfy_runtime_compose_file }}"
-      - up
-      - -d
-      - --force-recreate
-      - --remove-orphans
-  args:
-    chdir: "{{ ntfy_runtime_site_dir }}"
-  register: ntfy_runtime_repair
-  changed_when: true
+  ansible.builtin.include_tasks: force_recreate.yml
   when: ntfy_runtime_acl_state.rc != 0
 
 - name: Flush ntfy restart handlers before verification

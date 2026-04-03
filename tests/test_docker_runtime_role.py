@@ -508,24 +508,35 @@ def test_common_docker_bridge_chains_warms_control_socket_before_failing_safe() 
     )
     assert "iptables -t nat -S DOCKER" in chain_wait["ansible.builtin.shell"]
     assert "iptables -t filter -S DOCKER-FORWARD" in chain_wait["ansible.builtin.shell"]
+    assert "iptables -t filter -S DOCKER >/dev/null 2>&1" in chain_wait["ansible.builtin.shell"]
     assert "sleep {{ common_docker_bridge_chains_delay }}" in chain_wait["ansible.builtin.shell"]
     assert chain_wait["failed_when"] is False
     assert nat_recheck["retries"] == "{{ common_docker_bridge_chains_retries }}"
     assert nat_recheck["delay"] == "{{ common_docker_bridge_chains_delay }}"
     assert nat_recheck["until"] == "common_docker_bridge_chains_nat_recheck.rc == 0"
+    assert "iptables -t filter -S DOCKER-FORWARD" in forward_recheck["ansible.builtin.shell"]
+    assert "iptables -t filter -S DOCKER >/dev/null 2>&1" in forward_recheck["ansible.builtin.shell"]
     assert forward_recheck["retries"] == "{{ common_docker_bridge_chains_retries }}"
     assert forward_recheck["delay"] == "{{ common_docker_bridge_chains_delay }}"
     assert forward_recheck["until"] == "common_docker_bridge_chains_forward_recheck.rc == 0"
     assert nat_verify["retries"] == "{{ common_docker_bridge_chains_retries }}"
     assert nat_verify["delay"] == "{{ common_docker_bridge_chains_delay }}"
     assert nat_verify["until"] == "common_docker_bridge_chains_nat_verify.rc == 0"
+    assert "iptables -t filter -S DOCKER-FORWARD" in forward_verify["ansible.builtin.shell"]
+    assert "iptables -t filter -S DOCKER >/dev/null 2>&1" in forward_verify["ansible.builtin.shell"]
     assert forward_verify["retries"] == "{{ common_docker_bridge_chains_retries }}"
     assert forward_verify["delay"] == "{{ common_docker_bridge_chains_delay }}"
     assert forward_verify["until"] == "common_docker_bridge_chains_forward_verify.rc == 0"
     assert nat_final["register"] == "common_docker_bridge_chains_nat_final"
     assert forward_final["register"] == "common_docker_bridge_chains_forward_final"
+    assert "iptables -t filter -S DOCKER-FORWARD" in forward_final["ansible.builtin.shell"]
+    assert "iptables -t filter -S DOCKER >/dev/null 2>&1" in forward_final["ansible.builtin.shell"]
     assert nat_assert["ansible.builtin.assert"]["that"] == ["common_docker_bridge_chains_nat_final.rc == 0"]
     assert forward_assert["ansible.builtin.assert"]["that"] == ["common_docker_bridge_chains_forward_final.rc == 0"]
+    assert (
+        forward_assert["ansible.builtin.assert"]["fail_msg"]
+        == "Docker is running but neither the filter DOCKER-FORWARD chain nor the legacy filter DOCKER chain is present; bridge networking will fail."
+    )
 
 
 def test_docker_runtime_patches_nftables_rule_block_once() -> None:

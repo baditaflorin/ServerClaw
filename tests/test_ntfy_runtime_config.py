@@ -53,9 +53,25 @@ def test_ntfy_runtime_restarts_when_config_changes() -> None:
     assert "Recreate ntfy stack when host port binding drifts" in tasks
     assert "HostConfig.PortBindings" in tasks
     assert "Recreate ntfy stack when mounted config drifts" in tasks
+    assert "include_tasks: force_recreate.yml" in tasks
     assert "Flush ntfy restart handlers before verification" in tasks
     assert "^tk_[a-z0-9]{29}$" in tasks
     assert "openssl rand -hex 24" not in tasks
+
+    force_recreate = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "ntfy_runtime"
+        / "tasks"
+        / "force_recreate.yml"
+    ).read_text(encoding="utf-8")
+
+    assert "Conflict. The container name" in force_recreate
+    assert "com.docker.compose.project.working_dir={{ ntfy_runtime_site_dir }}" in force_recreate
 
     handlers = (
         REPO_ROOT
@@ -70,3 +86,4 @@ def test_ntfy_runtime_restarts_when_config_changes() -> None:
     ).read_text(encoding="utf-8")
 
     assert "--force-recreate" in handlers
+    assert "Conflict. The container name" in handlers
