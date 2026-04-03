@@ -18630,6 +18630,7 @@ workstreams:
       - README.md
       - changelog.md
       - versions/stack.yaml
+      - docs/diagrams/agent-coordination-map.excalidraw
       - receipts/live-applies/
       - receipts/live-applies/evidence/
     ownership_manifest:
@@ -18680,6 +18681,11 @@ workstreams:
             - versions/stack.yaml
           mode: shared_contract
           contract: canonical-truth-v1
+        - id: ws0318_live_apply_generated_diagrams
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: generated-diagrams-v1
         - id: ws0318_live_apply_receipts
           paths:
             - receipts/live-applies/2026-04-03-adr-0318-repeatable-operator-onboarding-live-apply.json
