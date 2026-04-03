@@ -169,6 +169,7 @@ rewriting one operator's workstation paths.
 | `operator_access_runbooks` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_validation` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_workflows` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
+| `operator_onboarding` | `2026-04-03-adr-0318-repeatable-operator-onboarding-mainline-live-apply` |
 | `ops_portal` | `2026-04-03-adr-0309-task-oriented-information-architecture-mainline-live-apply` |
 | `ops_portal_visualizations` | `2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply` |
 | `outline` | `2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply` |
@@ -605,6 +606,7 @@ Current values on `main`:
 | `0315` | Live apply canonical page states and next-best-action guidance on the Windmill operator admin surface | `live_applied` | [ws-0315-live-apply.md](docs/workstreams/ws-0315-live-apply.md) |
 | `0316` | Live apply journey analytics and onboarding success scorecards from latest origin/main | `merged` | [ws-0316-live-apply.md](docs/workstreams/ws-0316-live-apply.md) |
 | `0317` | Live apply ADR 0317 Keycloak direct-API operator provisioning via SSH proxy | `live_applied` | [ws-0317-live-apply.md](docs/workstreams/ws-0317-live-apply.md) |
+| `0318` | Live apply ADR 0318 repeatable operator onboarding from latest origin/main | `live_applied` | [ws-0318-live-apply.md](docs/workstreams/ws-0318-live-apply.md) |
 | `0319` | Live apply the first runtime-ai pool split with Nomad, Traefik, and Dapr on the latest mainline | `live_applied` | [ws-0319-live-apply.md](docs/workstreams/ws-0319-live-apply.md) |
 | `0319` | Split the overloaded shared runtime into pool-scoped lanes with higher memory headroom and bounded autoscaling | `merged` | [adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md](docs/workstreams/adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md) |
 | `0319` | Investigate recurring service restarts and uptime failures across the runtime pools | `merged` | [ws-0325-service-uptime-investigation.md](docs/workstreams/ws-0325-service-uptime-investigation.md) |

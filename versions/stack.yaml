@@ -166,6 +166,7 @@ live_apply_evidence:
     database_schema: 2026-04-02-adr-0304-atlas-mainline-live-apply
     ntfy: 2026-04-03-adr-0299-ntfy-mainline-live-apply
     label_studio: 2026-04-03-adr-0289-label-studio-mainline-live-apply
+    operator_onboarding: 2026-04-03-adr-0318-repeatable-operator-onboarding-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated

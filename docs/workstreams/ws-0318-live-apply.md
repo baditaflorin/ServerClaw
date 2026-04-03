@@ -85,11 +85,13 @@ instead of silently taking over the separate runtime-control migration work.
 - `receipts/live-applies/evidence/2026-04-03-ws-0318-provision-operator-r6.txt`
 - `receipts/live-applies/evidence/2026-04-03-ws-0318-provision-operator-r7.txt`
 
-## Remaining Mainline Integration
+## Exact-Main Integration Status
 
-- rebase this worktree onto the latest `origin/main` before cutting protected
-  release surfaces
-- stamp the canonical live-apply receipt, ADR repo/platform metadata, and any
-  exact-main release truth only after the integrated branch is clean
-- rerun the broader validation and pre-push automation gates from the
-  integrated tree before pushing to `origin/main`
+- rebased cleanly onto the latest `origin/main`
+- exact-main `--skip-email` replay succeeded for `florin.badita-tmp-002`
+- canonical truth now records the `Unreleased` ADR 0318 changelog entry and the
+  `operator_onboarding` latest receipt on the integrated tree
+- a fresh release cut is still blocked by three pre-existing
+  `controller_dependency_gap` gate-bypass waivers that expire on 2026-04-06, so
+  ADR 0318 remains `Implemented In Repo Version: not yet` even though the live
+  apply and exact-main verification are complete

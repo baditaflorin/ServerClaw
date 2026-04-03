@@ -18627,6 +18627,9 @@ workstreams:
       - scripts/provision_operator.py
       - tests/test_provision_operator.py
       - config/operators.yaml
+      - README.md
+      - changelog.md
+      - versions/stack.yaml
       - receipts/live-applies/
       - receipts/live-applies/evidence/
     ownership_manifest:
@@ -18670,6 +18673,13 @@ workstreams:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: adr-index-generator-v1
+        - id: ws0318_live_apply_canonical_truth
+          paths:
+            - README.md
+            - changelog.md
+            - versions/stack.yaml
+          mode: shared_contract
+          contract: canonical-truth-v1
         - id: ws0318_live_apply_receipts
           paths:
             - receipts/live-applies/2026-04-03-adr-0318-repeatable-operator-onboarding-live-apply.json
@@ -18680,6 +18690,8 @@ workstreams:
     canonical_truth:
       changelog_entry: proves ADR 0318 end to end from a dedicated worktree by making the fallback onboarding script worktree-safe, role-contract aligned, and recoverable with ephemeral runtime secret overrides while live-provisioning and auditing the temporary admin operator florin-tmp-002
       release_bump: patch
+      latest_receipts:
+        operator_onboarding: 2026-04-03-adr-0318-repeatable-operator-onboarding-mainline-live-apply
     ready_to_merge: true
     live_applied: true
   - id: ws-0311-live-apply
