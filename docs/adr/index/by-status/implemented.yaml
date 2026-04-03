@@ -10,7 +10,7 @@ generated: '2026-04-03'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 322
+total_adrs: 323
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -5919,5 +5919,25 @@ adrs:
     summary: All scripts/ operator tools that perform imperative platform operations
     filename: 0343-operator-tool-interface-contract.md
     path: docs/adr/0343-operator-tool-interface-contract.md
+    implemented_in_repo_version: 0.178.5
+    implemented_on: '2026-04-04'
+  - adr: '0344'
+    title: Single-Source Environment Topology
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-04'
+    concern: vm-topology
+    keywords:
+      - multi-environment
+      - topology
+      - dry
+      - tooling
+      - inventory
+      - configuration
+      - single-source
+      - environment
+    summary: Ansible inventory remains the single authoritative source for all
+    filename: 0344-single-source-environment-topology.md
+    path: docs/adr/0344-single-source-environment-topology.md
     implemented_in_repo_version: 0.178.5
     implemented_on: '2026-04-04'

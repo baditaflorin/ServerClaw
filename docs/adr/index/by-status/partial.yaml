@@ -10,7 +10,7 @@ generated: '2026-04-03'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 12
+total_adrs: 11
 adrs:
   - adr: '0014'
     title: Operator Access To Private Guest Network
@@ -203,25 +203,6 @@ adrs:
     path: docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
     implemented_in_repo_version: 0.177.143
     implemented_on: '2026-04-02'
-  - adr: '0344'
-    title: Single-Source Environment Topology
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-04-04'
-    concern: vm-topology
-    keywords:
-      - multi-environment
-      - topology
-      - dry
-      - tooling
-      - inventory
-      - configuration
-      - single-source
-      - environment
-    summary: Ansible inventory remains the single authoritative source for all
-    filename: 0344-single-source-environment-topology.md
-    path: docs/adr/0344-single-source-environment-topology.md
-    implemented_in_repo_version: 0.178.4
   - adr: '0345'
     title: Layered Operator Tool Separation
     status: Accepted

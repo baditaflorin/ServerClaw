@@ -620,7 +620,7 @@ adrs:
   - adr: '0344'
     title: Single-Source Environment Topology
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-04-04'
     concern: vm-topology
     keywords:
@@ -635,4 +635,5 @@ adrs:
     summary: Ansible inventory remains the single authoritative source for all
     filename: 0344-single-source-environment-topology.md
     path: docs/adr/0344-single-source-environment-topology.md
-    implemented_in_repo_version: 0.178.4
+    implemented_in_repo_version: 0.178.5
+    implemented_on: '2026-04-04'

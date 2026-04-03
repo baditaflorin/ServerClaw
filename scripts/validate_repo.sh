@@ -648,6 +648,9 @@ validate_agent_standards() {
   local idx_rc=$?
   [[ $idx_rc -ne 0 ]] && rc=$idx_rc
 
+  # Warnings only — do not fail
+  _validate_topology_snapshot_fresh || true
+
   _validate_windmill_raw_app_lockfiles
   local raw_app_lock_rc=$?
   [[ $raw_app_lock_rc -ne 0 ]] && rc=$raw_app_lock_rc
@@ -738,6 +741,25 @@ _validate_adr_index_current() {
     echo "  Then: git add docs/adr/.index.yaml docs/adr/index/" >&2
   fi
   return 0
+}
+
+_validate_topology_snapshot_fresh() {
+  local snapshot="$REPO_ROOT/scripts/topology-snapshot.json"
+  local inv_dir="$REPO_ROOT/inventory"
+  if [[ ! -f "$snapshot" ]]; then
+    echo "WARNING: scripts/topology-snapshot.json missing (ADR 0344). Generate with:" >&2
+    echo "  python3 scripts/generate_topology_snapshot.py --write" >&2
+    return 0
+  fi
+  # Check if any inventory file is newer than the snapshot
+  local newer
+  newer=$(find "$inv_dir" -name "*.yml" -newer "$snapshot" 2>/dev/null | head -1)
+  if [[ -n "$newer" ]]; then
+    echo "WARNING: Inventory changed since topology snapshot was generated (ADR 0344)." >&2
+    echo "  Newer file: $newer" >&2
+    echo "  Run: python3 scripts/generate_topology_snapshot.py" >&2
+    echo "  Then: git add scripts/topology-snapshot.json" >&2
+  fi
 }
 
 _validate_windmill_raw_app_lockfiles() {

@@ -1,20 +1,59 @@
 # proxmox-tool-topology.yaml.example
 #
-# Copy to .local/proxmox-api/topology.yaml and adjust VMIDs for your environment.
-# This file is read by scripts/proxmox_tool.py via --topology-file .
+# DEPRECATED — ADR 0344 (Single-Source Environment Topology)
 #
-# Usage:
-#   python3 scripts/proxmox_tool.py \
-#     --auth-file .local/proxmox-api/lv3-automation-primary.json \
-#     --topology-file .local/proxmox-api/topology.yaml \
-#     --env prod \
-#     coolify-migrate-apps --from coolify-lv3 --to coolify-apps-lv3
+# The hand-maintained topology.yaml file is superseded by the generated
+# snapshot at scripts/topology-snapshot.json. Do not create new copies of
+# this file for routine use.
 #
-# Environments map 1:1 to Proxmox node + VM topology.
-# Add a new env block for each deployment ring (dev / staging / prod).
+# Migration guide
+# ===============
+#
+# Old approach (deprecated):
+#   Copy this file to .local/proxmox-api/topology.yaml, adjust VMIDs by hand,
+#   and pass it to proxmox_tool.py via --topology-file.
+#
+# New approach (ADR 0344):
+#   1. The generated snapshot scripts/topology-snapshot.json is committed to
+#      the repository and derived automatically from the Ansible inventory.
+#      proxmox_tool.py reads it by default — no flag required.
+#
+#   2. Tailscale API URLs (not committed) go in a local overlay file:
+#      .local/proxmox-api/topology-overlay.json
+#
+#      Overlay file format:
+#
+#        {
+#          "prod": {
+#            "api_url": "https://100.64.0.1:8006/api2/json"
+#          },
+#          "staging": {
+#            "api_url": "https://100.64.0.2:8006/api2/json"
+#          }
+#        }
+#
+#      The overlay is merged over the snapshot at tool runtime (highest
+#      priority). All other fields (VMIDs, IPs, ports, container names)
+#      are read directly from the generated snapshot.
+#
+#   3. To regenerate the snapshot after an inventory change:
+#
+#        python3 scripts/generate_topology_snapshot.py
+#        git add scripts/topology-snapshot.json
+#
+# Backward compatibility
+# ======================
+# The --topology-file flag is retained in proxmox_tool.py for local
+# bootstrapping or one-off overrides. If you still need to use the old
+# hand-maintained YAML format, the legacy content is preserved below.
+# Remove this file when the migration is complete.
+
+# ---------------------------------------------------------------------------
+# Legacy topology.yaml format (hand-maintained, deprecated)
+# ---------------------------------------------------------------------------
 
 prod:
-  node: pve                       # Proxmox node name (qm list shows the node)
+  node: Debian-trixie-latest-amd64-base  # Proxmox node name (qm list shows the node)
   coolify_vmid: 170               # VMID of coolify-lv3 (Coolify control plane)
   coolify_apps_vmid: 171          # VMID of coolify-apps-lv3 (apps runtime)
   coolify_db_container: coolify-db
@@ -22,7 +61,7 @@ prod:
   coolify_container: coolify      # Coolify app container (for cache clear)
 
 staging:
-  node: pve
+  node: Debian-trixie-latest-amd64-base
   coolify_vmid: 180               # Adjust to actual staging VMIDs
   coolify_apps_vmid: 181
   coolify_db_container: coolify-db
@@ -30,7 +69,7 @@ staging:
   coolify_container: coolify
 
 dev:
-  node: pve
+  node: Debian-trixie-latest-amd64-base
   coolify_vmid: 190               # Adjust to actual dev VMIDs
   coolify_apps_vmid: 191
   coolify_db_container: coolify-db

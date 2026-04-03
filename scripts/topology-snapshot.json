@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-04-03T22:19:30Z",
+  "generated_from": [
+    "inventory/hosts.yml",
+    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/group_vars/platform.yml"
+  ],
+  "environments": {
+    "prod": {
+      "node": "Debian-trixie-latest-amd64-base",
+      "api_url": "https://proxmox.lv3.org:8006/api2/json",
+      "vms": {
+        "nginx-lv3": {
+          "vmid": 110,
+          "ip": "10.10.10.10"
+        },
+        "docker-runtime-lv3": {
+          "vmid": 120,
+          "ip": "10.10.10.20"
+        },
+        "docker-build-lv3": {
+          "vmid": 130,
+          "ip": "10.10.10.30"
+        },
+        "monitoring-lv3": {
+          "vmid": 140,
+          "ip": "10.10.10.40"
+        },
+        "postgres-lv3": {
+          "vmid": 150,
+          "ip": "10.10.10.50"
+        },
+        "postgres-replica-lv3": {
+          "vmid": 151,
+          "ip": "10.10.10.51"
+        },
+        "backup-lv3": {
+          "vmid": 160,
+          "ip": "10.10.10.60"
+        },
+        "coolify-lv3": {
+          "vmid": 170,
+          "ip": "10.10.10.70"
+        },
+        "coolify-apps-lv3": {
+          "vmid": 171,
+          "ip": "10.10.10.71"
+        },
+        "artifact-cache-lv3": {
+          "vmid": 180,
+          "ip": "10.10.10.80"
+        },
+        "runtime-ai-lv3": {
+          "vmid": 190,
+          "ip": "10.10.10.90"
+        },
+        "runtime-general-lv3": {
+          "vmid": 191,
+          "ip": "10.10.10.91"
+        },
+        "runtime-control-lv3": {
+          "vmid": 192,
+          "ip": "10.10.10.92"
+        }
+      },
+      "services": {
+        "coolify": {
+          "dashboard_port": 8000,
+          "db_container": "coolify-db",
+          "db_user": "coolify",
+          "app_container": "coolify",
+          "vmid": 170
+        },
+        "coolify_apps": {
+          "proxy_port": 80,
+          "vmid": 171
+        }
+      }
+    }
+  }
+}

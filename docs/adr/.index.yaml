@@ -14,8 +14,8 @@ adr_number_range:
   last: '0345'
   next_available: '0346'
 implementation_status_summary:
-  Implemented: 322
-  Partial: 12
+  Implemented: 323
+  Partial: 11
   Not Implemented: 30
   Deprecated: 1
 decision_status_summary:
@@ -104,11 +104,11 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 322
+      count: 323
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 12
+      count: 11
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
@@ -131,9 +131,10 @@ latest_adrs:
     path: docs/adr/0345-layered-operator-tool-separation.md
   - adr: '0344'
     title: Single-Source Environment Topology
-    implementation_status: Partial
+    implementation_status: Implemented
     concern: vm-topology
     path: docs/adr/0344-single-source-environment-topology.md
+    implemented_on: '2026-04-04'
   - adr: '0343'
     title: Operator Tool Interface Contract
     implementation_status: Implemented
