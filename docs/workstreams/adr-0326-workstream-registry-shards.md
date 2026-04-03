@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0326](../adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md)
 - Title: implement shard-backed workstream registry source files with generated active-only compatibility assembly
-- Status: ready_for_merge
+- Status: blocked
 - Included In Repo Version: not yet
 - Branch-Local Receipt: `receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-live-apply.json`
 - Implemented On: 2026-04-03

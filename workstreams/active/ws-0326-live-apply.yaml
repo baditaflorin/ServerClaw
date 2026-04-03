@@ -1,7 +1,7 @@
 id: ws-0326-live-apply
 adr: '0326'
 title: Implement shard-backed workstream registry source files with generated compatibility assembly
-status: ready_for_merge
+status: blocked
 owner: codex
 branch: codex/ws-0326-live-apply
 worktree_path: .worktrees/ws-0326-live-apply
@@ -116,6 +116,9 @@ blockers:
   the build-host workspace root because the host was out of disk space; rerun
   the remote gate after build-host cleanup if a clean remote pass is required
   before merging.
+- git push -u origin codex/ws-0326-live-apply triggered the same pre-push gate
+  fallback path and did not complete, so the committed branch state remains local
+  until the validation environment is healthy enough to publish it.
 ready_to_merge: true
 live_applied: true
 canonical_truth:
