@@ -663,7 +663,7 @@ def test_register_deployment_server_creates_new_server(monkeypatch, tmp_path: Pa
 
     call_log: list[tuple[str, str]] = []
 
-    def fake_request(self, method: str, path: str, payload=None):  # type: ignore
+    def fake_request(self, method: str, path: str, payload=None, **kwargs):  # type: ignore
         call_log.append((method, path))
         if path == "/api/v1/servers" and method == "GET":
             return []  # no existing servers
@@ -699,7 +699,7 @@ def test_register_deployment_server_is_idempotent(monkeypatch, tmp_path: Path, c
     )
     post_called = {"count": 0}
 
-    def fake_request(self, method: str, path: str, payload=None):  # type: ignore
+    def fake_request(self, method: str, path: str, payload=None, **kwargs):  # type: ignore
         if path == "/api/v1/servers" and method == "GET":
             return [{"uuid": "srv-existing", "name": "coolify-apps-lv3", "ip": "10.10.10.71"}]
         if method == "POST":
@@ -730,7 +730,7 @@ def test_migrate_deployment_server_moves_apps(monkeypatch, tmp_path: Path, capsy
     )
     patched: list[dict] = []
 
-    def fake_request(self, method: str, path: str, payload=None):  # type: ignore
+    def fake_request(self, method: str, path: str, payload=None, **kwargs):  # type: ignore
         if path == "/api/v1/servers" and method == "GET":
             return [
                 {"uuid": "src-uuid", "name": "coolify-lv3"},
@@ -762,7 +762,7 @@ def test_migrate_deployment_server_moves_apps(monkeypatch, tmp_path: Path, capsy
     assert "already-moved" in out["skipped"]
     assert out["migration_count"] == 1
     assert len(patched) == 1
-    assert patched[0]["payload"] == {"server_uuid": "dst-uuid"}
+    assert patched[0]["payload"] == {"destination_uuid": "dst-uuid"}
 
 
 def test_migrate_deployment_server_returns_2_when_nothing_to_migrate(monkeypatch, tmp_path: Path) -> None:
@@ -772,7 +772,7 @@ def test_migrate_deployment_server_returns_2_when_nothing_to_migrate(monkeypatch
         '{"controller_url": "http://127.0.0.1:8000", "api_token": "tok"}', encoding="utf-8"
     )
 
-    def fake_request(self, method: str, path: str, payload=None):  # type: ignore
+    def fake_request(self, method: str, path: str, payload=None, **kwargs):  # type: ignore
         if path == "/api/v1/servers" and method == "GET":
             return [
                 {"uuid": "src-uuid", "name": "coolify-lv3"},

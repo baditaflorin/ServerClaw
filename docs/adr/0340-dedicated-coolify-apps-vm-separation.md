@@ -1,9 +1,9 @@
 # ADR 0340: Dedicated Coolify Apps VM Separation
 
 - Status: Accepted
-- Implementation Status: Implemented
-- Implemented In Repo Version: ws-0340-implementation (branch claude/affectionate-galileo)
-- Implemented In Platform Version: N/A (pending live apply)
+- Implementation Status: Partial
+- Implemented In Repo Version: 0.177.153
+- Implemented In Platform Version: 0.130.96 (partial — app migration via UI pending)
 - Implemented On: 2026-04-03
 - Date: 2026-04-03
 - Tags: coolify, vm-topology, paas, apps, separation-of-concerns, dry
@@ -554,6 +554,36 @@ The ADR design listed creating a new `tests/test_coolify_apps_playbook.py`.
 In practice, the apps VM assertions were added directly to
 `tests/test_coolify_playbook.py` which already owned playbook structure
 validation. This avoids creating a split test ownership for a single file.
+
+### Finding 7: Coolify API v1 does not support programmatic app-to-server migration
+
+During live apply, `migrate-deployment-server` tried `PATCH /api/v1/applications/{uuid}`
+with `{"server_uuid": <target>}` and `{"destination_uuid": <target>}`. Both return
+HTTP 422 "This field is not allowed." The Coolify v1 API does not expose an endpoint
+for moving applications between servers programmatically.
+
+Existing apps (`repo-smoke`, `education-wemeshup`) remain on `coolify-lv3` and must be
+migrated via the Coolify UI: **Settings → Application → Move to server**.
+This is tracked in `versions/stack.yaml` as `apps_migration_status: pending_ui`.
+`migrate-deployment-server` was updated to handle the 422 gracefully with
+`app_name:api_limitation` in the skipped list rather than crashing.
+
+### Finding 8: Controller SSH tunnel fails; direct `controller_url` access works
+
+The `admin-auth.json` sets `ssh_tunnel_host`, causing `CoolifyClient` to attempt an
+SSH tunnel through the Proxmox host to `10.10.10.70` as `ops` user. The bootstrap key
+is not authorized there. The direct Tailscale proxy URL `http://100.64.0.1:8012`
+is reachable from the controller without tunneling. Playbook tasks now reference
+`coolify_admin_auth_local_file` via `vars_files` from `platform.yml`.
+
+### Finding 9: Coolify SSH deploy key must be installed on `coolify-apps-lv3`
+
+After server registration, Coolify must SSH to `coolify-apps-lv3` to validate the server.
+The Coolify deploy key public key (`ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC0gB481BWDLL...`)
+must be in `/root/.ssh/authorized_keys` on the new VM. During live apply this was done
+via `qm guest exec`. Follow-up: add this key to the cloud-init user-data or the
+`coolify_runtime` role's guest bootstrapping tasks so it is installed automatically
+on VM first boot.
 
 ## Related ADRs
 
