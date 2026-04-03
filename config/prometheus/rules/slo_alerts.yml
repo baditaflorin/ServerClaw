@@ -1113,6 +1113,46 @@ groups:
           description: JupyterHub remains reachable through the public LV3 edge for
             interactive exploratory notebook sessions.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_label_studio_availability
+        expr: (slo:label_studio_availability:error_rate_5m > (14 * 0.010000)) and
+          (slo:label_studio_availability:error_rate_1h > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: label_studio
+          slo_id: label-studio-availability
+          indicator: availability
+        annotations:
+          summary: label-studio-availability is burning its error budget at 14x
+          description: The private Label Studio runtime remains reachable on docker-runtime-lv3
+            for governed annotation queues and API automation.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_label_studio_availability
+        expr: slo:label_studio_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: label_studio
+          slo_id: label-studio-availability
+          indicator: availability
+        annotations:
+          summary: label-studio-availability is burning its error budget at 3x
+          description: The private Label Studio runtime remains reachable on docker-runtime-lv3
+            for governed annotation queues and API automation.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_label_studio_availability
+        expr: slo:label_studio_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: label_studio
+          slo_id: label-studio-availability
+          indicator: availability
+        annotations:
+          summary: label-studio-availability has less than 10% error budget remaining
+          description: The private Label Studio runtime remains reachable on docker-runtime-lv3
+            for governed annotation queues and API automation.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_piper_availability
         expr: (slo:piper_availability:error_rate_5m > (14 * 0.010000)) and (slo:piper_availability:error_rate_1h
           > (14 * 0.010000))

@@ -2300,6 +2300,51 @@
         "timeout_seconds": 1800
       }
     },
+    "converge-label-studio": {
+      "description": "Converge the Label Studio runtime, shared PostgreSQL backing store, repo-managed project catalog, and the authenticated annotate.lv3.org publication.",
+      "workflow_id": "converge-label-studio",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish annotate.lv3.org and expand the shared edge certificate."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-label-studio passes",
+        "make validate passes before the apply",
+        "The annotation runtime, shared-edge auth boundary, and repo-managed project catalog are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, local /api/version response, shared-edge auth redirects, project catalog verification, and one authenticated private API project listing."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the PostgreSQL setup, Label Studio runtime startup, repo-managed project synchronization, or public edge verification fails.",
+          "Stop if the rollout would leave the annotation UI or API reachable without the documented shared-edge auth boundary or without the managed admin-token recovery path."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Label Studio runtime, shared PostgreSQL state, and edge publication from version control before retrying.",
+          "Do not compensate for a failed rollout by manually editing projects, schemas, or admin tokens outside the repo-managed converge path."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "converge-lago": {
       "description": "Converge Lago with the shared PostgreSQL backend, protected billing.lv3.org publication, and governed public producer-ingest adapter.",
       "workflow_id": "converge-lago",

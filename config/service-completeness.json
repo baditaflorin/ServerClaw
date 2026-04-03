@@ -706,6 +706,17 @@
       "alert_rule_file": "config/alertmanager/rules/typesense.yml",
       "suppressed_checks": {}
     },
+    "label_studio": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "suppressed_checks": {
+        "grafana_dashboard": "2026-09-30",
+        "alert_rules": "2026-09-30"
+      }
+    },
     "uptime_kuma": {
       "service_type": "compose",
       "requires_subdomain": true,

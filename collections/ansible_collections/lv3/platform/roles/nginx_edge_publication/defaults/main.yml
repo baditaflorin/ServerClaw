@@ -126,6 +126,14 @@ public_edge_security_headers_overrides:
       'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:;
       connect-src 'self' https://coolify.lv3.org wss://coolify.lv3.org;
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+  annotate.lv3.org:
+    content_security_policy: >-
+      default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:;
+      style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:;
+      font-src 'self' data:; connect-src 'self' https://annotate.lv3.org
+      https://sso.lv3.org wss://annotate.lv3.org; worker-src 'self' blob:;
+      child-src 'self' blob:; manifest-src 'self'
   chat.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
@@ -255,6 +263,8 @@ public_edge_extra_sites:
     kind: static_dir
     source_dir: docs-portal
 public_edge_authenticated_sites:
+  annotate.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
   analytics.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
     unauthenticated_paths:

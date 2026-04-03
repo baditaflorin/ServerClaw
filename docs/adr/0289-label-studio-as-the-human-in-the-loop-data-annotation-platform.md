@@ -4,6 +4,7 @@
 - Implementation Status: Not Implemented
 - Implemented In Repo Version: N/A
 - Implemented In Platform Version: N/A
+- Implemented On: not yet
 - Date: 2026-03-29
 
 ## Context
@@ -44,7 +45,9 @@ platform.
 
 - Label Studio runs as a Docker Compose service on the docker-runtime VM
 - it uses PostgreSQL as its backend database (ADR 0042)
-- authentication is delegated to Keycloak via OIDC (ADR 0063)
+- browser access is enforced at the shared NGINX edge through oauth2-proxy and
+  Keycloak (ADR 0063), while app-local admin and API token auth remain the
+  Community Edition-compatible automation and break-glass control plane
 - the service is published under the platform subdomain model (ADR 0021) at
   `annotate.<domain>`
 - secrets are injected from OpenBao following ADR 0077
@@ -66,6 +69,13 @@ platform.
 - schema changes must be version-bumped; existing annotations against an old
   schema are not retroactively re-labelled
 
+### Implementation note
+
+- the first live apply uses the shared edge auth boundary rather than a
+  first-class in-app OIDC client because the current Label Studio Community
+  Edition path is more stable for repo-managed automation when the browser
+  gate and API automation surfaces are separated explicitly
+
 ## Consequences
 
 **Positive**
@@ -83,9 +93,9 @@ platform.
 
 - Label Studio requires operator discipline to maintain annotation queues;
   without regular triage the queue grows stale and annotation coverage drops.
-- The OIDC integration requires a Keycloak client registration for each
-  Label Studio deployment, which must be tracked in the platform's client
-  registry.
+- The current deployment uses two auth surfaces on purpose: shared edge auth
+  for browser access and app-local admin or token auth for automation,
+  recovery, and deterministic project reconciliation.
 
 ## Boundaries
 

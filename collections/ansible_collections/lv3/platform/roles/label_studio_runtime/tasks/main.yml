@@ -1,0 +1,391 @@
+# Purpose: Deploy the Label Studio runtime, seed the repo-managed annotation projects, and verify the local service contract.
+# Use case: Run during Label Studio deployment, recovery, and exact-main replay on docker-runtime-lv3.
+# Inputs: Runtime paths, image refs, PostgreSQL credentials, and repo-managed project catalog defaults.
+# Outputs: The live Label Studio container, OpenBao-backed runtime env, and repo-managed annotation projects match repo truth.
+# Idempotency: Partially idempotent because compose restarts and project syncs are performed when the declared runtime or project catalog changes.
+# Dependencies: ADR 0165, ADR 0021, ADR 0042, ADR 0077, and ADR 0289.
+---
+- name: Validate Label Studio runtime inputs
+  ansible.builtin.assert:
+    that:
+      - label_studio_site_dir | length > 0
+      - label_studio_data_dir | length > 0
+      - label_studio_secret_dir | length > 0
+      - label_studio_compose_file | length > 0
+      - label_studio_env_file | length > 0
+      - label_studio_image | length > 0
+      - label_studio_internal_port | int > 0
+      - label_studio_internal_base_url | length > 0
+      - label_studio_public_base_url | length > 0
+      - label_studio_database_name | length > 0
+      - label_studio_database_user | length > 0
+      - label_studio_database_host | length > 0
+      - label_studio_database_password_local_file | length > 0
+      - label_studio_admin_password_local_file | length > 0
+      - label_studio_admin_token_local_file | length > 0
+      - label_studio_admin_password_remote_file | length > 0
+      - label_studio_admin_token_remote_file | length > 0
+      - label_studio_sync_script | length > 0
+      - label_studio_project_catalog_file | length > 0
+    fail_msg: >-
+      label_studio_runtime requires runtime paths, PostgreSQL auth, local admin
+      credentials, and the repo-managed sync inputs.
+
+- name: Check whether the Label Studio database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ label_studio_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: label_studio_database_password_local
+
+- name: Fail if the Label Studio database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ label_studio_database_password_local_file }} is missing on the control machine.
+      Converge label_studio_postgres before deploying Label Studio.
+  when: not label_studio_database_password_local.stat.exists
+
+- name: Ensure the Label Studio runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+      - python3
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Label Studio runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ label_studio_site_dir }}"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ label_studio_data_dir }}"
+      owner: "{{ label_studio_runtime_uid }}"
+      group: "{{ label_studio_runtime_gid }}"
+      mode: "0755"
+    - path: "{{ label_studio_secret_dir }}"
+      owner: root
+      group: root
+      mode: "0700"
+
+- name: Ensure the local Label Studio artifact directory exists
+  ansible.builtin.file:
+    path: "{{ label_studio_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the local Label Studio admin password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ label_studio_admin_password_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ label_studio_admin_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: label_studio_admin_password_generation
+  changed_when: "'changed' in label_studio_admin_password_generation.stdout"
+  no_log: true
+
+- name: Generate the local Label Studio admin token
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ label_studio_admin_token_local_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ label_studio_admin_token_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: label_studio_admin_token_generation
+  changed_when: "'changed' in label_studio_admin_token_generation.stdout"
+  no_log: true
+
+- name: Read the Label Studio admin credentials
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  delegate_to: localhost
+  become: false
+  register: label_studio_admin_credentials
+  loop:
+    - "{{ label_studio_admin_password_local_file }}"
+    - "{{ label_studio_admin_token_local_file }}"
+  no_log: true
+
+- name: Record the Label Studio runtime credentials
+  ansible.builtin.set_fact:
+    label_studio_database_password: "{{ lookup('ansible.builtin.file', label_studio_database_password_local_file) | trim }}"
+    label_studio_admin_password: "{{ label_studio_admin_credentials.results[0].content | b64decode | trim }}"
+    label_studio_admin_token: "{{ label_studio_admin_credentials.results[1].content | b64decode | trim }}"
+    label_studio_runtime_secret_payload:
+      POSTGRE_PASSWORD: "{{ lookup('ansible.builtin.file', label_studio_database_password_local_file) | trim }}"
+      PASSWORD: "{{ label_studio_admin_credentials.results[0].content | b64decode | trim }}"
+      USER_TOKEN: "{{ label_studio_admin_credentials.results[1].content | b64decode | trim }}"
+  no_log: true
+
+- name: Mirror the Label Studio admin credentials to the guest
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  loop:
+    - dest: "{{ label_studio_admin_password_remote_file }}"
+      content: "{{ label_studio_admin_password }}"
+    - dest: "{{ label_studio_admin_token_remote_file }}"
+      content: "{{ label_studio_admin_token }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Label Studio
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: label-studio
+    common_openbao_compose_env_agent_dir: "{{ label_studio_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ label_studio_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ label_studio_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ label_studio_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ label_studio_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ label_studio_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ label_studio_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ label_studio_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ label_studio_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ label_studio_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ label_studio_openbao_agent_dir }}/label-studio.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: label-studio.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ label_studio_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ label_studio_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ label_studio_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ label_studio_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Label Studio environment file
+  ansible.builtin.template:
+    src: label-studio.env.j2
+    dest: "{{ label_studio_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: label_studio_env_template
+  no_log: true
+
+- name: Render the Label Studio project catalog
+  ansible.builtin.template:
+    src: project-catalog.json.j2
+    dest: "{{ label_studio_project_catalog_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: label_studio_project_catalog_template
+
+- name: Render the Label Studio compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ label_studio_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: label_studio_compose_template
+
+- name: Pull the Label Studio image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ label_studio_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ label_studio_site_dir }}"
+  register: label_studio_pull
+  retries: 5
+  delay: 5
+  until: label_studio_pull.rc == 0
+  changed_when: >-
+    'Pulling' in label_studio_pull.stdout
+    or 'Downloaded newer image' in label_studio_pull.stdout
+    or 'Pull complete' in label_studio_pull.stdout
+
+- name: Check whether the Docker nat chain exists before Label Studio startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: label_studio_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing before Label Studio startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: label_studio_docker_nat_chain.rc != 0
+
+- name: Recheck the Docker nat chain before Label Studio startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: label_studio_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: label_studio_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: 10
+  delay: 2
+  until: label_studio_docker_nat_chain_recheck.rc == 0
+  when: label_studio_docker_nat_chain.rc != 0
+
+- name: Wait for the Docker daemon to answer after networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: label_studio_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: label_studio_docker_info.rc == 0
+  when: label_studio_docker_nat_chain.rc != 0
+
+- name: Verify the Docker nat chain after networking recovery before Label Studio startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: label_studio_docker_nat_chain_verify
+  changed_when: false
+  failed_when: label_studio_docker_nat_chain_verify.rc not in [0, 1]
+  when: label_studio_docker_nat_chain.rc != 0
+
+- name: Assert Docker nat chain is present before Label Studio startup
+  ansible.builtin.assert:
+    that:
+      - label_studio_docker_nat_chain.rc == 0 or (label_studio_docker_nat_chain_verify.rc | default(1)) == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; Label Studio published ports will fail."
+
+- name: Check whether the Label Studio local port is already published
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ label_studio_internal_port }}"
+    delay: 0
+    timeout: 1
+  register: label_studio_local_port_probe
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the current Label Studio version endpoint is healthy before startup
+  ansible.builtin.uri:
+    url: "{{ label_studio_internal_base_url }}{{ label_studio_health_path }}"
+    method: GET
+    status_code: 200
+  register: label_studio_health_probe
+  changed_when: false
+  failed_when: false
+
+- name: Record whether the Label Studio startup needs a force recreate
+  ansible.builtin.set_fact:
+    label_studio_force_recreate: >-
+      {{
+        label_studio_docker_nat_chain.rc != 0
+        or (label_studio_env_template.changed | default(false))
+        or (label_studio_project_catalog_template.changed | default(false))
+        or (label_studio_compose_template.changed | default(false))
+        or (label_studio_pull.changed | default(false))
+        or (label_studio_local_port_probe.failed | default(false))
+        or (label_studio_health_probe.status | default(0)) != 200
+      }}
+
+- name: Start the Label Studio stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ label_studio_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ label_studio_site_dir }}"
+  register: label_studio_up
+  changed_when: >-
+    'Creating' in label_studio_up.stdout
+    or 'Recreating' in label_studio_up.stdout
+    or 'Starting' in label_studio_up.stdout
+  when: not label_studio_force_recreate
+
+- name: Force-recreate the Label Studio stack after runtime drift or Docker recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ label_studio_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ label_studio_site_dir }}"
+  register: label_studio_force_recreate_up
+  changed_when: >-
+    'Creating' in label_studio_force_recreate_up.stdout
+    or 'Recreating' in label_studio_force_recreate_up.stdout
+    or 'Starting' in label_studio_force_recreate_up.stdout
+  when: label_studio_force_recreate
+
+- name: Verify the Label Studio runtime before project synchronization
+  ansible.builtin.import_tasks: verify.yml
+
+- name: Synchronize the repo-managed Label Studio project catalog
+  ansible.builtin.script: >-
+    {{ label_studio_sync_script }} sync
+    --base-url {{ label_studio_internal_base_url }}
+    --token-file {{ label_studio_admin_token_remote_file }}
+    --project-catalog {{ label_studio_project_catalog_file }}
+    --report-file {{ label_studio_sync_report_file }}
+  register: label_studio_project_sync
+  retries: 6
+  delay: 5
+  until: label_studio_project_sync.rc == 0
+  changed_when: "'\"changed\": true' in (label_studio_project_sync.stdout | default(''))"
+
+- name: Verify the Label Studio runtime after project synchronization
+  ansible.builtin.import_tasks: verify.yml

@@ -18309,82 +18309,168 @@ workstreams:
       included_in_repo_version: 0.177.151
       latest_receipts:
         tika: 2026-04-03-adr-0275-apache-tika-mainline-live-apply
-  - id: ws-0340-implementation
-    adr: "0340"
-    title: Dedicated Coolify Apps VM Separation — introduce coolify-apps-lv3 as the Coolify deployment server
+  - id: ws-0289-label-studio-live-apply
+    adr: "0289"
+    title: Live apply ADR 0289 Label Studio from latest origin/main
     status: in_progress
-    owner: claude
-    branch: claude/affectionate-galileo
-    worktree_path: .claude/worktrees/affectionate-galileo
-    doc: docs/adr/0340-dedicated-coolify-apps-vm-separation.md
-    depends_on:
-      - adr-0194-coolify-paas-deploy-from-repo
-      - adr-0224-coolify-dns-mirror-edge-and-education
-      - adr-0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes
+    owner: codex
+    branch: codex/ws-0289-label-studio-live-apply-r2
+    worktree_path: .worktrees/ws-0289-label-studio-live-apply-r1
+    doc: docs/workstreams/ws-0289-label-studio-live-apply.md
+    depends_on: []
     conflicts_with: []
     shared_surfaces:
       - workstreams.yaml
-      - inventory/hosts.yml
-      - inventory/host_vars/proxmox_florin.yml
-      - inventory/group_vars/platform.yml
-      - versions/stack.yaml
-      - config/subdomain-catalog.json
-      - config/contracts/service-partitions/catalog.json
-      - config/health-probe-catalog.json
-      - config/service-redundancy-catalog.json
-      - playbooks/coolify.yml
-      - scripts/coolify_tool.py
-      - docs/adr/0340-dedicated-coolify-apps-vm-separation.md
+      - docs/workstreams/ws-0289-label-studio-live-apply.md
+      - docs/adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md
+      - docs/runbooks/configure-label-studio.md
       - docs/adr/.index.yaml
-      - tests/test_coolify_playbook.py
-      - tests/test_coolify_tool.py
+      - inventory/group_vars/platform.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - scripts/generate_platform_vars.py
+      - Makefile
+      - config/api-gateway-catalog.json
+      - config/health-probe-catalog.json
+      - config/service-capability-catalog.json
+      - config/certificate-catalog.json
+      - config/dependency-graph.json
+      - config/data-catalog.json
+      - config/secret-catalog.json
+      - config/controller-local-secrets.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
+      - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
+      - config/uptime-kuma/monitors.json
+      - config/image-catalog.json
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/ansible-execution-scopes.yaml
+      - config/ansible-role-idempotency.yml
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/file_sd/https_tls_targets.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/https_tls_alerts.yml
+      - config/grafana/dashboards/slo-overview.json
+      - playbooks/label-studio.yml
+      - playbooks/services/label-studio.yml
+      - collections/ansible_collections/lv3/platform/playbooks/label-studio.yml
+      - collections/ansible_collections/lv3/platform/playbooks/services/label-studio.yml
+      - collections/ansible_collections/lv3/platform/roles/label_studio_postgres/**
+      - collections/ansible_collections/lv3/platform/roles/label_studio_runtime/**
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
+      - scripts/label_studio_sync.py
+      - tests/test_generate_platform_vars.py
+      - tests/test_label_studio_playbook.py
+      - tests/test_label_studio_runtime_role.py
+      - tests/test_label_studio_sync.py
+      - tests/test_dependency_graph.py
+      - tests/test_subdomain_catalog.py
+      - tests/test_nginx_edge_publication_role.py
+      - tests/test_edge_publication_playbooks.py
+      - receipts/image-scans/2026-03-31-label-studio-runtime.json
+      - receipts/image-scans/2026-03-31-label-studio-runtime.trivy.json
+      - receipts/live-applies/*label-studio*
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
+      - receipts/ops-portal-snapshot.html
     ownership_manifest:
       owned_surfaces:
-        - id: ws0340_workstream_registry
+        - id: workstream_registry
           paths:
             - workstreams.yaml
           mode: shared_contract
           contract: workstream-registry-v1
-        - id: ws0340_adr
-          paths:
-            - docs/adr/0340-dedicated-coolify-apps-vm-separation.md
-          mode: exclusive
-        - id: ws0340_adr_index
+        - id: adr_index_generation
           paths:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: adr-index-generator-v1
-        - id: ws0340_inventory
+        - id: label_studio_live_apply
           paths:
-            - inventory/hosts.yml
-            - inventory/host_vars/proxmox_florin.yml
-            - inventory/group_vars/platform.yml
+            - docs/workstreams/ws-0289-label-studio-live-apply.md
+            - docs/adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md
+            - docs/runbooks/configure-label-studio.md
+            - playbooks/label-studio.yml
+            - playbooks/services/label-studio.yml
+            - collections/ansible_collections/lv3/platform/playbooks/label-studio.yml
+            - collections/ansible_collections/lv3/platform/playbooks/services/label-studio.yml
+            - collections/ansible_collections/lv3/platform/roles/label_studio_postgres/**
+            - collections/ansible_collections/lv3/platform/roles/label_studio_runtime/**
+            - scripts/label_studio_sync.py
+            - tests/test_label_studio_playbook.py
+            - tests/test_label_studio_runtime_role.py
+            - tests/test_label_studio_sync.py
           mode: exclusive
-        - id: ws0340_platform_truth
+        - id: label_studio_shared_platform_contract
+          paths:
+            - inventory/group_vars/platform.yml
+            - inventory/host_vars/proxmox_florin.yml
+            - scripts/generate_platform_vars.py
+            - Makefile
+            - config/api-gateway-catalog.json
+            - config/health-probe-catalog.json
+            - config/service-capability-catalog.json
+            - config/certificate-catalog.json
+            - config/dependency-graph.json
+            - config/data-catalog.json
+            - config/secret-catalog.json
+            - config/controller-local-secrets.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/slo-catalog.json
+            - config/subdomain-catalog.json
+            - config/subdomain-exposure-registry.json
+            - config/uptime-kuma/monitors.json
+            - config/image-catalog.json
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - config/ansible-execution-scopes.yaml
+            - config/ansible-role-idempotency.yml
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/file_sd/https_tls_targets.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/https_tls_alerts.yml
+            - config/grafana/dashboards/slo-overview.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - docs/site-generated/architecture/dependency-graph.md
+            - receipts/ops-portal-snapshot.html
+            - tests/test_generate_platform_vars.py
+            - tests/test_dependency_graph.py
+            - tests/test_subdomain_catalog.py
+            - tests/test_nginx_edge_publication_role.py
+            - tests/test_edge_publication_playbooks.py
+          mode: shared_contract
+          contract: adr-0289-label-studio-live-apply-v1
+        - id: release_management_surfaces
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: platform_truth_generation
           paths:
             - versions/stack.yaml
+            - build/platform-manifest.json
           mode: shared_contract
           contract: canonical-truth-v1
-        - id: ws0340_config_catalogs
-          paths:
-            - config/subdomain-catalog.json
-            - config/contracts/service-partitions/catalog.json
-            - config/health-probe-catalog.json
-            - config/service-redundancy-catalog.json
-          mode: exclusive
-        - id: ws0340_playbook
-          paths:
-            - playbooks/coolify.yml
-          mode: exclusive
-        - id: ws0340_tool
-          paths:
-            - scripts/coolify_tool.py
-          mode: exclusive
-        - id: ws0340_tests
-          paths:
-            - tests/test_coolify_playbook.py
-            - tests/test_coolify_tool.py
-          mode: exclusive
     blockers: []
     ready_to_merge: false
     live_applied: false

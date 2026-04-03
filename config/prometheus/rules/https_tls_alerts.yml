@@ -959,6 +959,52 @@ groups:
           description: https://sso.lv3.org:443/realms/lv3/.well-known/openid-configuration
             has less than 14 days remaining before certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_label_studio_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="label-studio-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: label_studio
+          assurance_id: label-studio-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: label-studio-public HTTPS probe is failing.
+          description: https://annotate.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_label_studio_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="label-studio-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: label_studio
+          assurance_id: label-studio-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: label-studio-public TLS certificate is approaching expiry.
+          description: https://annotate.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_label_studio_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="label-studio-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: label_studio
+          assurance_id: label-studio-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: label-studio-public TLS certificate is within the critical expiry
+            window.
+          description: https://annotate.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_lago_public
         expr: probe_success{job="https-tls-blackbox",assurance_id="lago-public"} ==
           0

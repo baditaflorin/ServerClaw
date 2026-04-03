@@ -336,6 +336,19 @@ def test_build_platform_vars_includes_redpanda_private_topology() -> None:
     assert platform_vars["redpanda_http_proxy_port"] == 8103
     assert platform_vars["redpanda_schema_registry_port"] == 8104
 
+
+def test_build_platform_vars_includes_label_studio_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    label_studio = platform_vars["platform_service_topology"]["label_studio"]
+
+    assert label_studio["public_hostname"] == "annotate.lv3.org"
+    assert label_studio["dns"]["name"] == "annotate"
+    assert label_studio["ports"]["internal"] == 8110
+    assert label_studio["urls"]["public"] == "https://annotate.lv3.org"
+    assert label_studio["urls"]["internal"] == "http://10.10.10.20:8110"
+    assert platform_vars["label_studio_port"] == 8110
+
+
 def test_build_platform_vars_includes_typesense_private_controller_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     typesense = platform_vars["platform_service_topology"]["typesense"]

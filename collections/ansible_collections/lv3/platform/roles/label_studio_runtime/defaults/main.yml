@@ -1,0 +1,104 @@
+# Purpose: Define the default Label Studio runtime paths, image pin, repo-managed project catalog, and publication settings.
+# Use case: Loaded whenever the Label Studio runtime role converges or verifies the repo-managed annotation platform.
+# Inputs: Platform topology, image catalog, PostgreSQL location, and controller-local secret paths.
+# Outputs: Supplies stable runtime defaults consumed by the label_studio_runtime tasks and templates.
+# Idempotency: Fully idempotent because this file only declares desired defaults.
+# Dependencies: ADR 0165, ADR 0021, ADR 0042, ADR 0077, and ADR 0289.
+---
+label_studio_repo_root: "{{ inventory_dir | dirname }}"
+label_studio_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('label_studio') }}"
+label_studio_site_dir: /opt/label-studio
+label_studio_data_dir: "{{ label_studio_site_dir }}/data"
+label_studio_secret_dir: /etc/lv3/label-studio
+label_studio_compose_file: "{{ label_studio_site_dir }}/docker-compose.yml"
+label_studio_env_file: "{{ compose_runtime_secret_root }}/label-studio/runtime.env"
+label_studio_legacy_env_file: "{{ label_studio_site_dir }}/label-studio.env"
+label_studio_openbao_agent_dir: "{{ label_studio_site_dir }}/openbao"
+label_studio_openbao_agent_image: "{{ openbao_agent_image }}"
+label_studio_openbao_agent_container_name: label-studio-openbao-agent
+label_studio_openbao_secret_path: services/label-studio/runtime-env
+label_studio_openbao_policy_name: lv3-service-label-studio-runtime
+label_studio_openbao_approle_name: label-studio-runtime
+label_studio_internal_port: "{{ platform_service_topology | platform_service_port('label_studio', 'internal') }}"
+label_studio_internal_base_url: "{{ platform_service_topology | platform_service_url('label_studio', 'internal') }}"
+label_studio_public_base_url: "https://{{ label_studio_service_topology.public_hostname }}"
+label_studio_compose_project_name: label_studio
+label_studio_compose_network_name: "{{ label_studio_compose_project_name }}_default"
+label_studio_container_name: label-studio
+label_studio_container_port: 8080
+label_studio_image: "{{ container_image_catalog.images.label_studio_runtime.ref }}"
+label_studio_database_name: label_studio
+label_studio_database_user: label_studio
+label_studio_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+label_studio_database_port: 5432
+label_studio_local_artifact_dir: "{{ label_studio_repo_root }}/.local/label-studio"
+label_studio_database_password_local_file: "{{ label_studio_repo_root }}/.local/label-studio/database-password.txt"
+label_studio_admin_password_local_file: "{{ label_studio_repo_root }}/.local/label-studio/admin-password.txt"
+label_studio_admin_token_local_file: "{{ label_studio_repo_root }}/.local/label-studio/admin-token.txt"
+label_studio_admin_password_remote_file: "{{ label_studio_secret_dir }}/admin-password.txt"
+label_studio_admin_token_remote_file: "{{ label_studio_secret_dir }}/admin-token.txt"
+label_studio_admin_email: label-studio.admin@lv3.org
+label_studio_runtime_uid: 1001
+label_studio_runtime_gid: 1001
+label_studio_health_path: /api/version
+label_studio_sync_script: "{{ label_studio_repo_root }}/scripts/label_studio_sync.py"
+label_studio_project_catalog_file: "{{ label_studio_site_dir }}/project-catalog.json"
+label_studio_sync_report_file: "{{ label_studio_site_dir }}/sync-report.json"
+label_studio_verify_report_file: "{{ label_studio_site_dir }}/verify-report.json"
+label_studio_projects:
+  - id: langfuse_trace_review
+    title: Langfuse Trace Review
+    description: Review Langfuse traces for answer quality, safety, and follow-up readiness.
+    label_config: |-
+      <View>
+        <Header value="Langfuse Trace Review"/>
+        <Text name="prompt" value="$prompt"/>
+        <Text name="response" value="$response"/>
+        <Choices name="quality" toName="response" choice="single-radio" showInline="true">
+          <Choice value="accept"/>
+          <Choice value="needs_follow_up"/>
+          <Choice value="reject"/>
+        </Choices>
+        <Choices name="safety" toName="response" choice="single-radio" showInline="true">
+          <Choice value="safe"/>
+          <Choice value="unsafe"/>
+          <Choice value="uncertain"/>
+        </Choices>
+        <TextArea name="notes" toName="response" editable="true" maxSubmissions="1" placeholder="Annotation notes"/>
+      </View>
+  - id: rag_relevance_review
+    title: RAG Relevance Review
+    description: Review retrieved passages and answer quality for RAG evaluation loops.
+    label_config: |-
+      <View>
+        <Header value="RAG Relevance Review"/>
+        <Text name="query" value="$query"/>
+        <Text name="retrieved_context" value="$retrieved_context"/>
+        <Text name="answer" value="$answer"/>
+        <Choices name="relevance" toName="retrieved_context" choice="single-radio" showInline="true">
+          <Choice value="relevant"/>
+          <Choice value="partially_relevant"/>
+          <Choice value="not_relevant"/>
+        </Choices>
+        <Choices name="grounded" toName="answer" choice="single-radio" showInline="true">
+          <Choice value="grounded"/>
+          <Choice value="not_grounded"/>
+          <Choice value="uncertain"/>
+        </Choices>
+        <TextArea name="notes" toName="answer" editable="true" maxSubmissions="1" placeholder="Reviewer notes"/>
+      </View>
+  - id: ocr_correction_review
+    title: OCR Correction Review
+    description: Review OCR output and capture corrected text when the extracted text drifts from the source.
+    label_config: |-
+      <View>
+        <Header value="OCR Correction Review"/>
+        <Text name="source_document" value="$source_document"/>
+        <Text name="ocr_text" value="$ocr_text"/>
+        <Choices name="quality" toName="ocr_text" choice="single-radio" showInline="true">
+          <Choice value="accurate"/>
+          <Choice value="minor_fixes_needed"/>
+          <Choice value="major_fixes_needed"/>
+        </Choices>
+        <TextArea name="corrected_text" toName="ocr_text" editable="true" maxSubmissions="1" placeholder="Corrected OCR text"/>
+      </View>

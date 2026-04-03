@@ -1,0 +1,58 @@
+services:
+  openbao-agent:
+    image: {{ label_studio_openbao_agent_image }}
+    container_name: {{ label_studio_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    restart: unless-stopped
+    network_mode: host
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ label_studio_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    cap_add:
+      - IPC_LOCK
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - {{ label_studio_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ label_studio_env_file | dirname }}:{{ label_studio_env_file | dirname }}
+
+  label-studio:
+    image: {{ label_studio_image }}
+    container_name: {{ label_studio_container_name }}
+    user: "{{ label_studio_runtime_uid }}:{{ label_studio_runtime_gid }}"
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+    env_file:
+      - {{ label_studio_env_file }}
+    command:
+      - label-studio
+      - start
+      - --host
+      - 0.0.0.0
+      - --port
+      - "{{ label_studio_container_port }}"
+      - --init
+    ports:
+      - "{{ ansible_host }}:{{ label_studio_internal_port }}:{{ label_studio_container_port }}"
+      - "127.0.0.1:{{ label_studio_internal_port }}:{{ label_studio_container_port }}"
+    volumes:
+      - {{ label_studio_data_dir }}:/label-studio/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:{{ label_studio_container_port }}{{ label_studio_health_path }}', timeout=5)"
+      interval: 15s
+      timeout: 5s
+      retries: 12

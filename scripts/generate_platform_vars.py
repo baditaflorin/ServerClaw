@@ -86,6 +86,7 @@ PORT_KEYS = (
     "outline_port",
     "directus_port",
     "jupyterhub_port",
+    "label_studio_port",
     "superset_port",
     "piper_port",
     "paperless_port",
@@ -644,6 +645,9 @@ def build_service_urls(
     elif service_id == "jupyterhub":
         urls["internal"] = service_url("http", private_ip, ports["jupyterhub_port"])
         port_map["internal"] = ports["jupyterhub_port"]
+    elif service_id == "label_studio":
+        urls["internal"] = service_url("http", private_ip, ports["label_studio_port"])
+        port_map["internal"] = ports["label_studio_port"]
     elif service_id == "superset":
         urls["internal"] = service_url("http", private_ip, ports["superset_port"])
         port_map["internal"] = ports["superset_port"]

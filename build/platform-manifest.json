@@ -329,6 +329,18 @@
         "last_live_apply": "2026-04-03T00:00:00Z",
         "slo_status": "unknown"
       },
+      "label_studio": {
+        "service_name": "Label Studio",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://annotate.lv3.org",
+        "last_live_apply": "2026-04-03T00:00:00Z",
+        "slo_status": "unknown"
+      },
       "lago": {
         "service_name": "Lago",
         "status": "healthy",
@@ -1871,6 +1883,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-keycloak.md"
+      },
+      {
+        "id": "converge-label-studio",
+        "description": "Converge Label Studio on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish annotate.lv3.org through the shared edge, and verify the repo-managed project catalog plus auth redirects.",
+        "tags": [
+          "converge-label-studio",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-label-studio.md"
       },
       {
         "id": "converge-lago",
@@ -5051,6 +5089,16 @@
         "path": "docs/runbooks/configure-keycloak.md",
         "workflow_ids": [
           "converge-keycloak"
+        ]
+      },
+      {
+        "id": "configure-label-studio",
+        "title": "Configure Label Studio",
+        "agent_trust_required": "T3",
+        "steps": 5,
+        "path": "docs/runbooks/configure-label-studio.md",
+        "workflow_ids": [
+          "converge-label-studio"
         ]
       },
       {

@@ -1,0 +1,10 @@
+---
+# Purpose: Default PostgreSQL inputs for the Label Studio application database.
+
+label_studio_database_name: label_studio
+label_studio_database_user: label_studio
+label_studio_postgres_secret_dir: /etc/lv3/label-studio
+label_studio_postgres_password_file: "{{ label_studio_postgres_secret_dir }}/database-password"
+label_studio_repo_root: "{{ inventory_dir | dirname }}"
+label_studio_local_artifact_dir: "{{ label_studio_repo_root }}/.local/label-studio"
+label_studio_database_password_local_file: "{{ label_studio_repo_root }}/.local/label-studio/database-password.txt"

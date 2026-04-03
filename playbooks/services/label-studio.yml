@@ -1,0 +1,28 @@
+# depends_on:
+#   - playbooks/services/public-edge.yml
+---
+# Playbook: services/label-studio.yml
+# Purpose: Provide the canonical service-scoped live-apply entrypoint for Label Studio.
+# Use case: Run through `make live-apply-service service=label_studio env=production` and related guarded wrappers.
+#
+# Inputs (required):
+#   - env (string, required): Target environment selector passed through the shared execution wrapper.
+#
+# Inputs (optional):
+#   - EXTRA_ARGS (string, optional, default=""): Additional ansible arguments passed by the caller.
+#
+# Outputs:
+#   - Imports the root Label Studio converge playbook used by the service-scoped wrappers.
+#
+# Idempotency: Matches playbooks/label-studio.yml.
+#
+# Dependencies:
+#   - ADR 0079: shared playbook execution model
+#   - ADR 0289: Label Studio annotation platform decision
+#   - Requires: playbooks/label-studio.yml
+#
+# Related ADRs: 0079, 0289
+# Related Runbooks: docs/runbooks/configure-label-studio.md
+# Author: LV3 Platform
+# Last Updated: 2026-03-31
+- import_playbook: ../label-studio.yml

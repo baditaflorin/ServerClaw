@@ -355,6 +355,12 @@ playbooks:
     shared_surfaces:
       - service:jupyterhub
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/label-studio.yml:
+    playbook_id: label_studio
+    mutation_scope: platform
+    shared_surfaces:
+      - service:label_studio
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/openbao.yml:
     playbook_id: openbao
     mutation_scope: platform
@@ -615,6 +621,12 @@ playbooks:
     mutation_scope: platform
     shared_surfaces:
       - service:jupyterhub
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/label-studio.yml:
+    playbook_id: label_studio
+    mutation_scope: platform
+    shared_surfaces:
+      - service:label_studio
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/lago.yml:
     playbook_id: lago
