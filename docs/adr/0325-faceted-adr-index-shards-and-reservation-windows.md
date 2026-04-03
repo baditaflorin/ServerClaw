@@ -1,9 +1,10 @@
 # ADR 0325: Faceted ADR Index Shards And Reservation Windows
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: not yet
 - Implemented In Platform Version: N/A
+- Implemented On: 2026-04-03
 - Date: 2026-04-01
 - Tags: adr, indexing, discovery, reservations, sharding
 

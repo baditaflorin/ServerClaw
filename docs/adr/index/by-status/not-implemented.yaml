@@ -10,7 +10,7 @@ generated: '2026-04-04'
 facet: status
 implementation_status: Not Implemented
 slug: not-implemented
-total_adrs: 31
+total_adrs: 30
 adrs:
   - adr: '0024'
     title: Docker Guest Security Baseline
@@ -479,26 +479,6 @@ adrs:
     summary: We will move service-shaped repository truth toward per-service source
     filename: 0324-service-definition-shards-and-generated-service-catalog-assembly.md
     path: docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md
-  - adr: '0325'
-    title: Faceted ADR Index Shards And Reservation Windows
-    status: Accepted
-    implementation_status: Not Implemented
-    date: '2026-04-01'
-    concern: documentation
-    keywords:
-      - adr
-      - indexing
-      - discovery
-      - reservations
-      - sharding
-      - faceted
-      - index
-      - shards
-      - reservation
-      - windows
-    summary: We will evolve ADR discovery into faceted generated shards and introduce a
-    filename: 0325-faceted-adr-index-shards-and-reservation-windows.md
-    path: docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md
   - adr: '0334'
     title: Example-First Inventory And Service Identity Catalogs
     status: Accepted

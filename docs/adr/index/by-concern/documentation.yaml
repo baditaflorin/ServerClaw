@@ -290,7 +290,7 @@ adrs:
   - adr: '0325'
     title: Faceted ADR Index Shards And Reservation Windows
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-04-01'
     concern: documentation
     keywords:
@@ -307,6 +307,7 @@ adrs:
     summary: We will evolve ADR discovery into faceted generated shards and introduce a
     filename: 0325-faceted-adr-index-shards-and-reservation-windows.md
     path: docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md
+    implemented_on: '2026-04-03'
   - adr: '0327'
     title: Sectional Agent Discovery Registries And Generated Onboarding Packs
     status: Accepted

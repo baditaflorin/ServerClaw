@@ -10,7 +10,7 @@ generated: '2026-04-04'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 319
+total_adrs: 320
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -5652,6 +5652,27 @@ adrs:
     path: docs/adr/0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md
     implemented_in_repo_version: 0.177.145
     implemented_on: '2026-04-02'
+  - adr: '0325'
+    title: Faceted ADR Index Shards And Reservation Windows
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-01'
+    concern: documentation
+    keywords:
+      - adr
+      - indexing
+      - discovery
+      - reservations
+      - sharding
+      - faceted
+      - index
+      - shards
+      - reservation
+      - windows
+    summary: We will evolve ADR discovery into faceted generated shards and introduce a
+    filename: 0325-faceted-adr-index-shards-and-reservation-windows.md
+    path: docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md
+    implemented_on: '2026-04-03'
   - adr: '0326'
     title: Workstream Registry Shards With Active And Archive Assembly
     status: Accepted

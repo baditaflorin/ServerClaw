@@ -280,6 +280,122 @@ workstreams:
     included_in_repo_version: null
     latest_receipts:
       sectional_agent_discovery: 2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply
+- id: ws-0325-live-apply
+  adr: '0325'
+  title: Live apply faceted ADR index shards and reservation windows from latest origin/main
+  status: live_applied
+  owner: codex
+  branch: codex/ws-0325-live-apply
+  worktree_path: .worktrees/ws-0325-live-apply
+  doc: docs/workstreams/ws-0325-live-apply.md
+  depends_on:
+  - adr-0164-adr-metadata-index
+  - adr-0167-agent-handoff-and-context-preservation
+  - adr-0168-automated-enforcement-of-agent-standards
+  - adr-0326-workstream-registry-shards-with-active-and-archive-assembly
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0325-live-apply.yaml
+  - docs/workstreams/ws-0325-live-apply.md
+  - docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md
+  - docs/adr/.index.yaml
+  - docs/adr/index/by-range/*.yaml
+  - docs/adr/index/by-concern/*.yaml
+  - docs/adr/index/by-status/*.yaml
+  - docs/adr/index/reservations.yaml
+  - docs/runbooks/adr-discovery-and-reservations.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/site-generated/architecture/dependency-graph.md
+  - .repo-structure.yaml
+  - .config-locations.yaml
+  - config/validation-gate.json
+  - config/validation-lanes.yaml
+  - scripts/adr_discovery.py
+  - scripts/generate_adr_index.py
+  - scripts/adr_query_tool.py
+  - scripts/validate_repo.sh
+  - tests/test_generate_adr_index.py
+  - tests/test_adr_query_tool.py
+  - tests/test_validation_lanes.py
+  - receipts/live-applies/2026-04-03-adr-0325-adr-discovery-live-apply.json
+  - receipts/live-applies/2026-04-03-adr-0325-adr-discovery-mainline-live-apply.json
+  - receipts/live-applies/evidence/2026-04-03-ws-0325-*
+  ownership_manifest:
+    owned_surfaces:
+    - id: workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws0325_workstream_source
+      paths:
+      - workstreams/active/ws-0325-live-apply.yaml
+      mode: exclusive
+    - id: ws0325_adr_index_generation
+      paths:
+      - docs/adr/.index.yaml
+      - docs/adr/index/by-range/*.yaml
+      - docs/adr/index/by-concern/*.yaml
+      - docs/adr/index/by-status/*.yaml
+      mode: shared_contract
+      contract: adr-index-generator-v2
+    - id: ws0325_adr_reservations
+      paths:
+      - docs/adr/index/reservations.yaml
+      mode: exclusive
+    - id: ws0325_docs
+      paths:
+      - docs/workstreams/ws-0325-live-apply.md
+      - docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md
+      - docs/runbooks/adr-discovery-and-reservations.md
+      mode: exclusive
+    - id: ws0325_generated_truth
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
+      mode: shared_contract
+      contract: latest-main-generated-truth-v1
+    - id: ws0325_repo_indexes
+      paths:
+      - .repo-structure.yaml
+      - .config-locations.yaml
+      mode: shared_contract
+      contract: agent-discovery-index-v1
+    - id: ws0325_validation_contract
+      paths:
+      - config/validation-gate.json
+      - config/validation-lanes.yaml
+      - scripts/validate_repo.sh
+      - tests/test_validation_lanes.py
+      mode: shared_contract
+      contract: validation-gate-contract-v1
+    - id: ws0325_tooling
+      paths:
+      - scripts/adr_discovery.py
+      - scripts/generate_adr_index.py
+      - scripts/adr_query_tool.py
+      - tests/test_generate_adr_index.py
+      - tests/test_adr_query_tool.py
+      mode: exclusive
+    - id: ws0325_live_apply_receipts
+      paths:
+      - receipts/live-applies/2026-04-03-adr-0325-adr-discovery-live-apply.json
+      - receipts/live-applies/2026-04-03-adr-0325-adr-discovery-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-04-03-ws-0325-*
+      mode: exclusive
+  blockers: []
+  ready_to_merge: true
+  live_applied: true
+  canonical_truth:
+    changelog_entry: implements ADR 0325 by replacing the monolithic ADR metadata
+      catalog with shard-backed discovery manifests, adding a committed ADR reservation
+      ledger, and validating reservation-aware query and generator workflows from
+      exact main
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts:
+      adr_discovery: 2026-04-03-adr-0325-adr-discovery-live-apply
 - id: ws-0318-provision-operator-v2
   adr: 0318
   title: 'provision_operator.py v2: Headscale + step-ca fingerprint in single onboarding
