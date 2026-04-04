@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-04'
+generated: '2026-04-05'
 facet: status
 implementation_status: Implemented
 slug: implemented
@@ -5775,6 +5775,7 @@ adrs:
     summary: We will treat public GitHub readiness as a first-class repository lifecycle,
     filename: 0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
     path: docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+    implemented_in_repo_version: 0.178.5
     implemented_on: '2026-04-04'
   - adr: '0331'
     title: Repository-Relative Paths For Public Metadata And Generated Docs
