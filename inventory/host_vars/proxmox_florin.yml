@@ -89,7 +89,7 @@ platform_port_assignments:
   jupyterhub_port: 8097
   label_studio_port: 8110
   superset_port: 8105
-  piper_port: 8100
+  piper_port: 8106
   paperless_port: 8018
   plane_port: 8093
   plane_host_proxy_port: 8011

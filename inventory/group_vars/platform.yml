@@ -222,7 +222,7 @@ platform_ports:
   jupyterhub_port: 8097
   label_studio_port: 8110
   superset_port: 8105
-  piper_port: 8100
+  piper_port: 8106
   paperless_port: 8018
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
@@ -328,7 +328,7 @@ platform_port_assignments:
   jupyterhub_port: 8097
   label_studio_port: 8110
   superset_port: 8105
-  piper_port: 8100
+  piper_port: 8106
   paperless_port: 8018
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
@@ -682,6 +682,110 @@ platform_guest_catalog:
         anti_affinity_group: runtime-control
         co_location_exceptions: []
       packages: []
+    - vmid: 121
+      name: runtime-comms-lv3
+      role: runtime-comms
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.21
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:21
+      cores: 8
+      memory_mb: 24576
+      disk_gb: 256
+      tags:
+        - docker
+        - runtime
+        - comms
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-comms
+        co_location_exceptions: []
+      packages: []
+    - vmid: 122
+      name: runtime-apps-lv3
+      role: runtime-apps
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.22
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:22
+      cores: 8
+      memory_mb: 16384
+      disk_gb: 192
+      tags:
+        - docker
+        - runtime
+        - apps
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-apps
+        co_location_exceptions: []
+      packages: []
+    - vmid: 152
+      name: postgres-apps-lv3
+      role: postgres-apps
+      template_key: lv3-postgres-host
+      ipv4: 10.10.10.52
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:2A:2E:52
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 128
+      tags:
+        - postgres
+        - database
+        - apps
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: postgres-apps
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: The platform still has only one active failure domain, so the
+              apps PostgreSQL primary carries an explicit temporary same-domain waiver
+              until auxiliary capacity is live.
+      packages:
+        - acl
+        - nftables
+        - postgresql
+        - postgresql-contrib
+    - vmid: 154
+      name: postgres-data-lv3
+      role: postgres-data
+      template_key: lv3-postgres-host
+      ipv4: 10.10.10.54
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:2A:2E:54
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 128
+      tags:
+        - postgres
+        - database
+        - data
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: postgres-data
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: The platform still has only one active failure domain, so the
+              data PostgreSQL primary carries an explicit temporary same-domain waiver
+              until auxiliary capacity is live.
+      packages:
+        - acl
+        - nftables
+        - postgresql
+        - postgresql-contrib
   by_name:
     nginx-lv3:
       vmid: 110
@@ -1010,6 +1114,114 @@ platform_guest_catalog:
         anti_affinity_group: runtime-control
         co_location_exceptions: []
       packages: []
+    runtime-comms-lv3:
+      vmid: 121
+      name: runtime-comms-lv3
+      role: runtime-comms
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.21
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:21
+      cores: 8
+      memory_mb: 24576
+      disk_gb: 256
+      tags:
+        - docker
+        - runtime
+        - comms
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-comms
+        co_location_exceptions: []
+      packages: []
+    runtime-apps-lv3:
+      vmid: 122
+      name: runtime-apps-lv3
+      role: runtime-apps
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.22
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:22
+      cores: 8
+      memory_mb: 16384
+      disk_gb: 192
+      tags:
+        - docker
+        - runtime
+        - apps
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-apps
+        co_location_exceptions: []
+      packages: []
+    postgres-apps-lv3:
+      vmid: 152
+      name: postgres-apps-lv3
+      role: postgres-apps
+      template_key: lv3-postgres-host
+      ipv4: 10.10.10.52
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:2A:2E:52
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 128
+      tags:
+        - postgres
+        - database
+        - apps
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: postgres-apps
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: The platform still has only one active failure domain, so the
+              apps PostgreSQL primary carries an explicit temporary same-domain waiver
+              until auxiliary capacity is live.
+      packages:
+        - acl
+        - nftables
+        - postgresql
+        - postgresql-contrib
+    postgres-data-lv3:
+      vmid: 154
+      name: postgres-data-lv3
+      role: postgres-data
+      template_key: lv3-postgres-host
+      ipv4: 10.10.10.54
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:2A:2E:54
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 128
+      tags:
+        - postgres
+        - database
+        - data
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: postgres-data
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: The platform still has only one active failure domain, so the
+              data PostgreSQL primary carries an explicit temporary same-domain waiver
+              until auxiliary capacity is live.
+      packages:
+        - acl
+        - nftables
+        - postgresql
+        - postgresql-contrib
   by_role:
     nginx:
       vmid: 110
@@ -1338,6 +1550,114 @@ platform_guest_catalog:
         anti_affinity_group: runtime-control
         co_location_exceptions: []
       packages: []
+    runtime-comms:
+      vmid: 121
+      name: runtime-comms-lv3
+      role: runtime-comms
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.21
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:21
+      cores: 8
+      memory_mb: 24576
+      disk_gb: 256
+      tags:
+        - docker
+        - runtime
+        - comms
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-comms
+        co_location_exceptions: []
+      packages: []
+    runtime-apps:
+      vmid: 122
+      name: runtime-apps-lv3
+      role: runtime-apps
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.22
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:19:0A:22
+      cores: 8
+      memory_mb: 16384
+      disk_gb: 192
+      tags:
+        - docker
+        - runtime
+        - apps
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-apps
+        co_location_exceptions: []
+      packages: []
+    postgres-apps:
+      vmid: 152
+      name: postgres-apps-lv3
+      role: postgres-apps
+      template_key: lv3-postgres-host
+      ipv4: 10.10.10.52
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:2A:2E:52
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 128
+      tags:
+        - postgres
+        - database
+        - apps
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: postgres-apps
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: The platform still has only one active failure domain, so the
+              apps PostgreSQL primary carries an explicit temporary same-domain waiver
+              until auxiliary capacity is live.
+      packages:
+        - acl
+        - nftables
+        - postgresql
+        - postgresql-contrib
+    postgres-data:
+      vmid: 154
+      name: postgres-data-lv3
+      role: postgres-data
+      template_key: lv3-postgres-host
+      ipv4: 10.10.10.54
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:2A:2E:54
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 128
+      tags:
+        - postgres
+        - database
+        - data
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: postgres-data
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: The platform still has only one active failure domain, so the
+              data PostgreSQL primary carries an explicit temporary same-domain waiver
+              until auxiliary capacity is live.
+      packages:
+        - acl
+        - nftables
+        - postgresql
+        - postgresql-contrib
 platform_service_topology:
   nginx_edge:
     service_name: nginx-edge
@@ -1735,8 +2055,8 @@ platform_service_topology:
       smtp: smtp://10.10.10.91:1025
   livekit:
     service_name: livekit
-    owning_vm: runtime-comms-lv3
-    private_ip: 10.10.10.21
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     public_hostname: livekit.lv3.org
     exposure_model: edge-published
     observability:
@@ -1756,7 +2076,7 @@ platform_service_topology:
       kind: proxy
       proxy_read_timeout_seconds: 3600
       proxy_send_timeout_seconds: 3600
-      upstream: http://10.10.10.21:7880
+      upstream: http://10.10.10.20:7880
     service_id: livekit
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/livekit.yml
@@ -1769,11 +2089,11 @@ platform_service_topology:
       media_udp: 7882
     urls:
       public: https://livekit.lv3.org
-      internal: http://10.10.10.21:7880
+      internal: http://10.10.10.20:7880
   redpanda:
     service_name: redpanda
-    owning_vm: runtime-comms-lv3
-    private_ip: 10.10.10.21
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1790,10 +2110,10 @@ platform_service_topology:
       http_proxy: 8103
       schema_registry: 8104
     urls:
-      internal: kafka://10.10.10.21:9092
-      admin: http://10.10.10.21:9644
-      http_proxy: http://10.10.10.21:8103
-      schema_registry: http://10.10.10.21:8104
+      internal: kafka://10.10.10.20:9092
+      admin: http://10.10.10.20:9644
+      http_proxy: http://10.10.10.20:8103
+      schema_registry: http://10.10.10.20:8104
   step_ca:
     service_name: step-ca
     owning_vm: runtime-control-lv3
@@ -1956,8 +2276,8 @@ platform_service_topology:
       controller: http://100.64.0.1:3009
   mattermost:
     service_name: mattermost
-    owning_vm: runtime-comms-lv3
-    private_ip: 10.10.10.21
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1975,12 +2295,12 @@ platform_service_topology:
       internal: 8065
       controller: 8066
     urls:
-      internal: http://10.10.10.21:8065
+      internal: http://10.10.10.20:8065
       controller: http://100.64.0.1:8066
   matrix_synapse:
     service_name: matrix-synapse
-    owning_vm: runtime-comms-lv3
-    private_ip: 10.10.10.21
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     public_hostname: matrix.lv3.org
     exposure_model: edge-published
     observability:
@@ -1998,7 +2318,7 @@ platform_service_topology:
       tls: true
       noindex: true
       kind: proxy
-      upstream: http://10.10.10.21:8008
+      upstream: http://10.10.10.20:8008
     access:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8015
@@ -2013,7 +2333,7 @@ platform_service_topology:
       controller: 8015
     urls:
       public: https://matrix.lv3.org
-      internal: http://10.10.10.21:8008
+      internal: http://10.10.10.20:8008
       controller: http://100.64.0.1:8015
   netbox:
     service_name: netbox
@@ -2728,9 +3048,9 @@ platform_service_topology:
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
     mobility_tier: burst_batch
     ports:
-      internal: 8100
+      internal: 8106
     urls:
-      internal: http://10.10.10.20:8100
+      internal: http://10.10.10.20:8106
   n8n:
     service_name: n8n
     owning_vm: docker-runtime-lv3
@@ -2765,8 +3085,8 @@ platform_service_topology:
       internal: http://10.10.10.20:5678
   nextcloud:
     service_name: nextcloud
-    owning_vm: runtime-apps-lv3
-    private_ip: 10.10.10.22
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     public_hostname: cloud.lv3.org
     exposure_model: edge-published
     observability:
@@ -2784,7 +3104,7 @@ platform_service_topology:
       tls: true
       noindex: true
       kind: proxy
-      upstream: http://10.10.10.22:8084
+      upstream: http://10.10.10.20:8084
       client_max_body_size: 16g
       proxy_request_buffering: false
       proxy_read_timeout_seconds: 3600
@@ -2808,7 +3128,7 @@ platform_service_topology:
       internal: 8084
     urls:
       public: https://cloud.lv3.org
-      internal: http://10.10.10.22:8084
+      internal: http://10.10.10.20:8084
   coolify:
     service_name: coolify
     owning_vm: coolify-lv3
@@ -4133,8 +4453,8 @@ public_edge_service_topology:
       smtp: smtp://10.10.10.91:1025
   livekit:
     service_name: livekit
-    owning_vm: runtime-comms-lv3
-    private_ip: 10.10.10.21
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     public_hostname: livekit.lv3.org
     exposure_model: edge-published
     observability:
@@ -4154,7 +4474,7 @@ public_edge_service_topology:
       kind: proxy
       proxy_read_timeout_seconds: 3600
       proxy_send_timeout_seconds: 3600
-      upstream: http://10.10.10.21:7880
+      upstream: http://10.10.10.20:7880
     service_id: livekit
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/livekit.yml
@@ -4167,11 +4487,11 @@ public_edge_service_topology:
       media_udp: 7882
     urls:
       public: https://livekit.lv3.org
-      internal: http://10.10.10.21:7880
+      internal: http://10.10.10.20:7880
   redpanda:
     service_name: redpanda
-    owning_vm: runtime-comms-lv3
-    private_ip: 10.10.10.21
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -4188,10 +4508,10 @@ public_edge_service_topology:
       http_proxy: 8103
       schema_registry: 8104
     urls:
-      internal: kafka://10.10.10.21:9092
-      admin: http://10.10.10.21:9644
-      http_proxy: http://10.10.10.21:8103
-      schema_registry: http://10.10.10.21:8104
+      internal: kafka://10.10.10.20:9092
+      admin: http://10.10.10.20:9644
+      http_proxy: http://10.10.10.20:8103
+      schema_registry: http://10.10.10.20:8104
   step_ca:
     service_name: step-ca
     owning_vm: runtime-control-lv3
@@ -4354,8 +4674,8 @@ public_edge_service_topology:
       controller: http://100.64.0.1:3009
   mattermost:
     service_name: mattermost
-    owning_vm: runtime-comms-lv3
-    private_ip: 10.10.10.21
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -4373,12 +4693,12 @@ public_edge_service_topology:
       internal: 8065
       controller: 8066
     urls:
-      internal: http://10.10.10.21:8065
+      internal: http://10.10.10.20:8065
       controller: http://100.64.0.1:8066
   matrix_synapse:
     service_name: matrix-synapse
-    owning_vm: runtime-comms-lv3
-    private_ip: 10.10.10.21
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     public_hostname: matrix.lv3.org
     exposure_model: edge-published
     observability:
@@ -4396,7 +4716,7 @@ public_edge_service_topology:
       tls: true
       noindex: true
       kind: proxy
-      upstream: http://10.10.10.21:8008
+      upstream: http://10.10.10.20:8008
     access:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8015
@@ -4411,7 +4731,7 @@ public_edge_service_topology:
       controller: 8015
     urls:
       public: https://matrix.lv3.org
-      internal: http://10.10.10.21:8008
+      internal: http://10.10.10.20:8008
       controller: http://100.64.0.1:8015
   netbox:
     service_name: netbox
@@ -5126,9 +5446,9 @@ public_edge_service_topology:
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
     mobility_tier: burst_batch
     ports:
-      internal: 8100
+      internal: 8106
     urls:
-      internal: http://10.10.10.20:8100
+      internal: http://10.10.10.20:8106
   n8n:
     service_name: n8n
     owning_vm: docker-runtime-lv3
@@ -5163,8 +5483,8 @@ public_edge_service_topology:
       internal: http://10.10.10.20:5678
   nextcloud:
     service_name: nextcloud
-    owning_vm: runtime-apps-lv3
-    private_ip: 10.10.10.22
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     public_hostname: cloud.lv3.org
     exposure_model: edge-published
     observability:
@@ -5182,7 +5502,7 @@ public_edge_service_topology:
       tls: true
       noindex: true
       kind: proxy
-      upstream: http://10.10.10.22:8084
+      upstream: http://10.10.10.20:8084
       client_max_body_size: 16g
       proxy_request_buffering: false
       proxy_read_timeout_seconds: 3600
@@ -5206,7 +5526,7 @@ public_edge_service_topology:
       internal: 8084
     urls:
       public: https://cloud.lv3.org
-      internal: http://10.10.10.22:8084
+      internal: http://10.10.10.20:8084
   coolify:
     service_name: coolify
     owning_vm: coolify-lv3
@@ -5917,8 +6237,6 @@ uptime_kuma_service_topology:
     internal: http://10.10.10.91:3001
 hetzner_dns_records: *id001
 platform_postgres_host: database.lv3.org
-platform_postgres_apps_host: database-apps.lv3.org
-platform_postgres_data_host: database-data.lv3.org
 openbao_postgres_host: 10.10.10.50
 openbao_http_extra_bind_addresses:
   - 10.10.10.92
@@ -6063,7 +6381,7 @@ directus_port: 8055
 jupyterhub_port: 8097
 label_studio_port: 8110
 superset_port: 8105
-piper_port: 8100
+piper_port: 8106
 paperless_port: 8018
 dozzle_http_port: 8089
 dozzle_agent_port: 7007
