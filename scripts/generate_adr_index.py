@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+from pathlib import Path
+import subprocess
 import sys
 
 from adr_discovery import (
@@ -29,8 +31,29 @@ from adr_discovery import (
     write_generated_index_documents,
 )
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
 
 def generated_date() -> dt.date:
+    source_paths = [
+        ADR_DIR,
+        RESERVATIONS_PATH,
+    ]
+    relative_paths = [path.relative_to(REPO_ROOT).as_posix() for path in source_paths if path.exists()]
+    if relative_paths:
+        try:
+            result = subprocess.run(
+                ["git", "-C", str(REPO_ROOT), "log", "-1", "--format=%cs", "--", *relative_paths],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except (FileNotFoundError, OSError, subprocess.CalledProcessError):
+            pass
+        else:
+            generated_on = result.stdout.strip()
+            if generated_on:
+                return dt.date.fromisoformat(generated_on)
     return dt.datetime.now(dt.timezone.utc).date()
 
 

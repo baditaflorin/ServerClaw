@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -223,6 +224,26 @@ def _serialize_section(section: DiscoverySection) -> dict[str, Any]:
 
 
 def generated_date() -> str:
+    source_paths = [
+        PACK_MANIFEST_PATH,
+        REPO_STRUCTURE_SOURCE_DIR,
+        CONFIG_LOCATIONS_SOURCE_DIR,
+    ]
+    relative_paths = [path.relative_to(REPO_ROOT).as_posix() for path in source_paths if path.exists()]
+    if relative_paths:
+        try:
+            result = subprocess.run(
+                ["git", "-C", str(REPO_ROOT), "log", "-1", "--format=%cs", "--", *relative_paths],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except (FileNotFoundError, OSError, subprocess.CalledProcessError):
+            pass
+        else:
+            generated_on = result.stdout.strip()
+            if generated_on:
+                return generated_on
     return dt.datetime.now(dt.timezone.utc).date().isoformat()
 
 
