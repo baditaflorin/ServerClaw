@@ -78,7 +78,6 @@ rewriting one operator's workstation paths.
 | `plausible_analytics` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `outline` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
-| `minio` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `jupyterhub` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `fork_first_workstream_metadata` | `2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply` |
 | `dozzle` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
@@ -93,6 +92,7 @@ rewriting one operator's workstation paths.
 | `open_webui` | `2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply` |
 | `ntfy` | `2026-04-03-adr-0299-ntfy-mainline-live-apply` |
 | `label_studio` | `2026-04-03-adr-0289-label-studio-mainline-live-apply` |
+| `homepage` | `2026-04-03-ws-0332-homepage-triage-mainline-live-apply` |
 
 Showing 20 of 167 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->

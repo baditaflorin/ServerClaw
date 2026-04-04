@@ -49,6 +49,12 @@ workstreams:
   - docs/adr/index/reservations.yaml
   - docs/diagrams/agent-coordination-map.excalidraw
   - docs/runbooks/compose-runtime-resilience.md
+  - README.md
+  - changelog.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - docs/status/history/live-apply-evidence.md
+  - docs/status/history/merged-workstreams.md
   - receipts/live-applies/2026-04-04-adr-0346-*
   - receipts/live-applies/evidence/2026-04-04-ws-0332-*
   - config/service-completeness.json
@@ -82,11 +88,21 @@ workstreams:
       - receipts/live-applies/2026-04-04-adr-0346-*
       - receipts/live-applies/evidence/2026-04-04-ws-0332-*
       mode: exclusive
-    - id: ws0332_generated_diagrams
+    - id: ws0332_generated_history
       paths:
+      - build/platform-manifest.json
+      - docs/status/history/live-apply-evidence.md
+      - docs/status/history/merged-workstreams.md
       - docs/diagrams/agent-coordination-map.excalidraw
       mode: shared_contract
       contract: latest-main-generated-truth-v1
+    - id: ws0332_canonical_truth
+      paths:
+      - README.md
+      - changelog.md
+      - versions/stack.yaml
+      mode: shared_contract
+      contract: canonical-truth-v1
     - id: ws0332_adr_index
       paths:
       - docs/adr/.index.yaml

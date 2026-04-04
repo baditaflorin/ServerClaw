@@ -13,7 +13,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `plausible_analytics` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `outline` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
-| `minio` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `jupyterhub` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `fork_first_workstream_metadata` | `2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply` |
 | `dozzle` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
@@ -57,6 +56,7 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `redpanda` | `2026-03-31-adr-0290-redpanda-mainline-live-apply` |
 | `postgres_audit` | `2026-03-31-adr-0303-pgaudit-mainline-live-apply` |
 | `piper` | `2026-03-31-adr-0284-piper-mainline-live-apply` |
+| `minio` | `2026-03-31-adr-0274-minio-object-storage-mainline-live-apply` |
 | `k6_load_testing` | `2026-03-31-adr-0305-k6-mainline-live-apply` |
 | `iac_policy_scanning` | `2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply` |
 | `crawl4ai` | `2026-03-31-adr-0288-crawl4ai-mainline-live-apply` |
