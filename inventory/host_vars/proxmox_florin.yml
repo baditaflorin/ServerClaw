@@ -270,7 +270,7 @@ proxmox_tailscale_tcp_proxies:
   - name: vaultwarden
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: 443
-    upstream_host: 10.10.10.20
+    upstream_host: 10.10.10.92
     upstream_port: "{{ platform_port_assignments.vaultwarden_https_port }}"
   - name: coolify
     listen_address: "{{ management_tailscale_ipv4 }}"

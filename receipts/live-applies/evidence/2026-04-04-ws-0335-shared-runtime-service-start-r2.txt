@@ -1,0 +1,49 @@
+docker-runtime-lv3 | FAILED | rc=1 >>
+=== matrix-synapse ===
+started matrix-synapse
+=== jupyterhub === Container matrix-synapse-openbao-agent Running
+ Container matrix-mautrix-whatsapp Stopping
+ Container matrix-mautrix-discord Stopping
+ Container matrix-mautrix-discord Stopped
+ Container matrix-mautrix-discord Removing
+ Container matrix-mautrix-whatsapp Stopped
+ Container matrix-mautrix-whatsapp Removing
+ Container matrix-mautrix-whatsapp Removed
+ Container matrix-mautrix-discord Removed
+ Container matrix-synapse Stopping
+ Container matrix-synapse Stopped
+ Container matrix-synapse Removing
+ Container matrix-synapse Removed
+ Container matrix-synapse-openbao-agent Stopping
+ Container matrix-synapse-openbao-agent Stopped
+ Container matrix-synapse-openbao-agent Removing
+ Container matrix-synapse-openbao-agent Removed
+ Network matrix-synapse_default Removing
+ Network matrix-synapse_default Removed
+ Network matrix-synapse_default Creating
+ Network matrix-synapse_default Created
+ Container matrix-synapse-openbao-agent Creating
+ Container matrix-synapse-openbao-agent Created
+ Container matrix-synapse Creating
+ Container matrix-synapse Created
+ Container matrix-mautrix-discord Creating
+ Container matrix-mautrix-whatsapp Creating
+ Container matrix-mautrix-whatsapp Created
+ Container matrix-mautrix-discord Created
+ Container matrix-synapse-openbao-agent Starting
+ Container matrix-synapse-openbao-agent Started
+ Container matrix-synapse-openbao-agent Waiting
+ Container matrix-synapse-openbao-agent Healthy
+ Container matrix-synapse Starting
+ Container matrix-synapse Started
+ Container matrix-mautrix-discord Starting
+ Container matrix-mautrix-whatsapp Starting
+ Container matrix-mautrix-discord Started
+ Container matrix-mautrix-whatsapp Started
+ Container jupyterhub-openbao-agent Creating
+ Container jupyterhub-openbao-agent Created
+ Container jupyterhub-openbao-agent Starting
+ Container jupyterhub-openbao-agent Started
+ Image lv3/jupyterhub-hub:latest Pulling
+ Image lv3/jupyterhub-hub:latest Error pull access denied for lv3/jupyterhub-hub, repository does not exist or may require 'docker login': denied: requested access to the resource is denied
+Error response from daemon: pull access denied for lv3/jupyterhub-hub, repository does not exist or may require 'docker login': denied: requested access to the resource is deniednon-zero return code

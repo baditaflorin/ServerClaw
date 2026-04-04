@@ -3,6 +3,12 @@
   hosts: all
   gather_facts: false
   tasks:
+    - name: Verify docker.socket is disabled
+      ansible.builtin.command: systemctl is-enabled docker.socket
+      register: docker_socket_enabled_state
+      changed_when: false
+      failed_when: false
+
     - name: Verify docker is active
       ansible.builtin.command: systemctl is-active docker
       register: docker_service_state
@@ -15,4 +21,5 @@
     - name: Assert docker is active
       ansible.builtin.assert:
         that:
+          - docker_socket_enabled_state.stdout == "disabled"
           - docker_service_state.stdout == "active"

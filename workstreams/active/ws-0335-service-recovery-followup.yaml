@@ -14,7 +14,28 @@ shared_surfaces:
 - workstreams.yaml
 - workstreams/active/ws-0335-service-recovery-followup.yaml
 - docs/workstreams/ws-0335-service-recovery-followup.md
-- receipts/live-applies/
+- collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+- collections/ansible_collections/lv3/platform/roles/docker_runtime/molecule/default/verify.yml
+- collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/langfuse_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/nextcloud_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/one_api_runtime/tasks/main.yml
+- config/subdomain-exposure-registry.json
+- docs/site-generated/architecture/dependency-graph.md
+- inventory/group_vars/platform.yml
+- inventory/host_vars/proxmox_florin.yml
+- tests/test_compose_runtime_secret_injection.py
+- tests/test_docker_runtime_role.py
+- tests/test_langfuse_runtime_role.py
+- tests/test_nextcloud_runtime_role.py
+- tests/test_nginx_edge_publication_role.py
+- tests/test_one_api_runtime_role.py
+- tests/test_openbao_compose_env_helper.py
+- receipts/ops-portal-snapshot.html
+- receipts/sbom/host-docker-runtime-lv3-2026-04-03.cdx.json
+- receipts/live-applies/2026-04-04-ws-0335-service-recovery-followup-live-apply.json
+- receipts/live-applies/evidence/2026-04-04-ws-0335-*
 ownership_manifest:
   owned_surfaces:
   - id: workstream_registry
@@ -30,9 +51,38 @@ ownership_manifest:
     paths:
     - docs/workstreams/ws-0335-service-recovery-followup.md
     mode: exclusive
+  - id: ws0335_runtime_recovery_contract
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+    - collections/ansible_collections/lv3/platform/roles/docker_runtime/molecule/default/verify.yml
+    - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/langfuse_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/nextcloud_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/one_api_runtime/tasks/main.yml
+    - config/subdomain-exposure-registry.json
+    - docs/site-generated/architecture/dependency-graph.md
+    - inventory/group_vars/platform.yml
+    - inventory/host_vars/proxmox_florin.yml
+    mode: shared_contract
+    contract: ws0335-service-recovery-v1
+  - id: ws0335_runtime_recovery_tests
+    paths:
+    - tests/test_compose_runtime_secret_injection.py
+    - tests/test_docker_runtime_role.py
+    - tests/test_langfuse_runtime_role.py
+    - tests/test_nextcloud_runtime_role.py
+    - tests/test_nginx_edge_publication_role.py
+    - tests/test_one_api_runtime_role.py
+    - tests/test_openbao_compose_env_helper.py
+    mode: shared_contract
+    contract: ws0335-service-recovery-tests-v1
   - id: ws0335_live_recovery_receipts
     paths:
-    - receipts/live-applies/
+    - receipts/live-applies/2026-04-04-ws-0335-service-recovery-followup-live-apply.json
+    - receipts/live-applies/evidence/2026-04-04-ws-0335-*
+    - receipts/ops-portal-snapshot.html
+    - receipts/sbom/host-docker-runtime-lv3-2026-04-03.cdx.json
     mode: shared_contract
     contract: live-apply-receipts-v1
 canonical_truth:
@@ -41,4 +91,4 @@ canonical_truth:
   included_in_repo_version: null
 blockers: []
 ready_to_merge: false
-live_applied: false
+live_applied: true

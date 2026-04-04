@@ -93,6 +93,10 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert 'retries: "{{ common_openbao_api_operation_retries }}"' in tasks
     assert 'delay: "{{ common_openbao_api_operation_delay }}"' in tasks
     assert "until: common_openbao_compose_env_approle_upsert.status == 204" in tasks
+    assert "- name: Render the bootstrap runtime env file from the managed secret payload" in tasks
+    assert 'dest: "{{ common_openbao_compose_env_env_file }}"' in tasks
+    assert "common_openbao_compose_env_secret_payload | dictsort" in tasks
+    assert "no_log: true" in tasks
     assert "common_openbao_compose_env_agent_template_local_file" in tasks
     assert "common_openbao_compose_env_agent_template_content" in tasks
     assert "ansible.builtin.copy" in tasks

@@ -94,12 +94,27 @@ def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
         "Load required Docker kernel modules before starting Docker"
     )
     assert task_names.index("Load required Docker kernel modules before starting Docker") < task_names.index(
+        "Check whether Docker service is already active before disabling socket activation"
+    )
+    assert task_names.index("Check whether Docker service is already active before disabling socket activation") < task_names.index(
+        "Disable Docker socket activation without stopping a live Docker daemon"
+    )
+    assert task_names.index("Disable Docker socket activation without stopping a live Docker daemon") < task_names.index(
         "Ensure Docker service is enabled and running"
     )
 
     defaults = load_defaults()
     persist_modules = next(task for task in tasks if task["name"] == "Persist required Docker kernel modules across reboot")
     load_modules = next(task for task in tasks if task["name"] == "Load required Docker kernel modules before starting Docker")
+    check_docker_active = next(
+        task for task in tasks if task["name"] == "Check whether Docker service is already active before disabling socket activation"
+    )
+    disable_live_socket = next(
+        task for task in tasks if task["name"] == "Disable Docker socket activation without stopping a live Docker daemon"
+    )
+    disable_inactive_socket = next(
+        task for task in tasks if task["name"] == "Disable Docker socket activation fully when Docker service is not active"
+    )
     assert defaults["docker_runtime_kernel_modules"] == ["iptable_nat"]
     assert defaults["docker_runtime_kernel_modules_file"] == "/etc/modules-load.d/lv3-docker-runtime.conf"
     assert persist_modules["ansible.builtin.copy"]["dest"] == "{{ docker_runtime_kernel_modules_file }}"
@@ -107,6 +122,21 @@ def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
     assert load_modules["ansible.builtin.command"]["argv"] == ["modprobe", "{{ item }}"]
     assert load_modules["loop"] == "{{ docker_runtime_kernel_modules }}"
     assert load_modules["changed_when"] is False
+    assert check_docker_active["ansible.builtin.command"] == "systemctl is-active docker.service"
+    assert check_docker_active["register"] == "docker_runtime_service_active"
+    assert check_docker_active["changed_when"] is False
+    assert check_docker_active["failed_when"] is False
+    assert disable_live_socket["ansible.builtin.systemd_service"] == {
+        "name": "docker.socket",
+        "enabled": False,
+    }
+    assert disable_live_socket["when"] == "docker_runtime_service_active.rc == 0"
+    assert disable_inactive_socket["ansible.builtin.systemd_service"] == {
+        "name": "docker.socket",
+        "enabled": False,
+        "state": "stopped",
+    }
+    assert disable_inactive_socket["when"] == "docker_runtime_service_active.rc != 0"
 
 
 def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:

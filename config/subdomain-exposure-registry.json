@@ -3182,8 +3182,8 @@
         "route_target": {
           "service_id": "harbor",
           "kind": "proxy",
-          "source": "public_edge_extra_sites",
-          "target": "http://10.10.10.20:{{ platform_port_assignments.harbor_port }}",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.harbor_port }}",
           "target_port": 443
         }
       },
@@ -3211,7 +3211,7 @@
         },
         "routing": {
           "mode": "edge",
-          "source": "public_edge_extra_sites",
+          "source": "service_topology",
           "kind": "proxy"
         },
         "edge_auth": {
@@ -3219,9 +3219,11 @@
           "unauthenticated_paths": [],
           "unauthenticated_prefix_paths": []
         },
-        "repo_route_service_id": null,
+        "repo_route_service_id": "harbor",
         "repo_route_metadata": {
-          "upstream": "http://10.10.10.20:{{ platform_port_assignments.harbor_port }}",
+          "enabled": true,
+          "tls": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.harbor_port }}",
           "client_max_body_size": 0,
           "chunked_transfer_encoding": true,
           "proxy_request_buffering": false,

@@ -22,6 +22,8 @@ def test_common_openbao_agent_helper_exists() -> None:
     assert 'static_secret_render_interval = "5m"' in template
     assert '{{ common_openbao_compose_env_agent_template_file | basename }}' in template
     assert 'destination          = "{{ common_openbao_compose_env_env_file }}"' in template
+    assert "Render the bootstrap runtime env file from the managed secret payload" in helper
+    assert "common_openbao_compose_env_secret_payload | dictsort" in helper
     assert "register: common_openbao_compose_env_approle_upsert" in helper
     assert "until: common_openbao_compose_env_approle_upsert.status == 204" in helper
     assert "register: common_openbao_compose_env_unsealed_status" in helper

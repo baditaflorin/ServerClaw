@@ -1,0 +1,27 @@
+Warning: Permanently added '10.10.10.92' (ED25519) to the list of known hosts.
+ Container harbor-log Running
+ Container registry Starting
+ Container harbor-db Starting
+ Container redis Starting
+ Container harbor-portal Starting
+ Container registryctl Starting
+ Container harbor-db Started
+ Container redis Started
+ Container trivy-adapter Starting
+ Container registry Started
+ Container harbor-core Starting
+ Container harbor-portal Started
+ Container registryctl Started
+ Container harbor-core Started
+ Container nginx Starting
+ Container harbor-jobservice Starting
+ Container trivy-adapter Started
+ Container harbor-jobservice Started
+HTTP/1.1 502 Bad Gateway
+Server: nginx
+Date: Sat, 04 Apr 2026 00:14:00 GMT
+Content-Type: text/html
+Content-Length: 150
+Connection: keep-alive
+
+ Container nginx Started

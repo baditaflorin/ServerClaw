@@ -147,7 +147,7 @@ platform_host:
       - name: vaultwarden
         listen_address: 100.64.0.1
         listen_port: 443
-        upstream_host: 10.10.10.20
+        upstream_host: 10.10.10.92
         upstream_port: 8222
       - name: coolify
         listen_address: 100.64.0.1

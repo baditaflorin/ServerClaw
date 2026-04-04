@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-04-ws-0335-service-recovery-followup-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-04",
+  "recorded_on": "2026-04-04",
+  "recorded_at": "2026-04-04T00:31:49Z",
+  "recorded_by": "codex",
+  "source_commit": "9c56058647eadca2b19e532d37c6822457689df7",
+  "repo_version_context": "0.178.3",
+  "platform_version_context": "0.130.98",
+  "workflow_id": "live-apply-service",
+  "adr": "0319",
+  "summary": "Recovered the remaining degraded public services after the runtime-pool stabilization work by restoring missing OpenBao-backed runtime env material on `docker-runtime-lv3`, rebuilding the local JupyterHub images, correcting the stale Vaultwarden Tailscale proxy target on `proxmox_florin`, identifying and fixing a branch-local `docker.socket` change that restarted Docker on `runtime-control-lv3`, and replaying Harbor after that control-plane Docker restart left only `harbor-log` running.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-control-lv3",
+      "vmid": 192,
+      "address": "10.10.10.92"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Harbor edge route",
+      "address": "https://registry.lv3.org/api/v2.0/ping"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Vaultwarden liveness route",
+      "address": "https://vault.lv3.org/alive"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Targeted Docker runtime and OpenBao helper regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest tests/test_docker_runtime_role.py tests/test_openbao_compose_env_helper.py tests/test_compose_runtime_secret_injection.py -q` passed with `31 passed in 25.22s` after the socket-activation guard was updated to avoid stopping a live Docker daemon."
+    },
+    {
+      "check": "Vaultwarden proxy recovery on runtime-control and the Proxmox host",
+      "result": "pass",
+      "observed": "The replay preserved in `receipts/live-applies/evidence/2026-04-04-ws-0335-vaultwarden-proxy-recovery-r1.txt` completed successfully with recap `proxmox_florin ok=42 changed=6 failed=0` and `runtime-control-lv3 ok=150 changed=5 failed=0`, and `https://vault.lv3.org/alive` returned `HTTP 200` afterward."
+    },
+    {
+      "check": "Harbor control-plane recovery after the runtime-control Docker restart",
+      "result": "pass",
+      "observed": "The Docker journal captured a `docker.service` restart on `runtime-control-lv3` at `2026-04-04T00:25:30Z`, and the subsequent Harbor replay in `receipts/live-applies/evidence/2026-04-04-ws-0335-harbor-recovery-r3.txt` restored the full Harbor compose stack; `https://registry.lv3.org/api/v2.0/ping` returned `HTTP 200` afterward."
+    },
+    {
+      "check": "Public lv3.org SLO sweep after the recoveries",
+      "result": "pass",
+      "observed": "The final concurrent sweep of all public `lv3.org` SLO targets returned `200` for every route except the expected Woodpecker `204`, including Directus, Harbor, Matrix Synapse, Outline, JupyterHub, Paperless, Plausible, Vaultwarden, and the remaining public edge contracts."
+    }
+  ],
+  "evidence_refs": [
+    "collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml",
+    "docs/workstreams/ws-0335-service-recovery-followup.md",
+    "inventory/group_vars/platform.yml",
+    "inventory/host_vars/proxmox_florin.yml",
+    "receipts/live-applies/evidence/2026-04-04-ws-0335-directus-runtime-start-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0335-harbor-recovery-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0335-harbor-recovery-r2.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0335-harbor-recovery-r3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0335-jupyterhub-recovery-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0335-shared-runtime-service-start-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0335-shared-runtime-service-start-r2.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0335-vaultwarden-proxy-recovery-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0335-woodpecker-recovery-r1.txt",
+    "tests/test_docker_runtime_role.py",
+    "tests/test_openbao_compose_env_helper.py",
+    "tests/test_compose_runtime_secret_injection.py",
+    "workstreams.yaml",
+    "workstreams/active/ws-0335-service-recovery-followup.yaml"
+  ],
+  "notes": [
+    "The branch-local `Disable Docker socket activation` change caused the runtime-control Docker restart because stopping `docker.socket` on a live host implicitly tore down `docker.service`; the role now avoids that outage path by disabling the socket without stopping it when Docker is already active.",
+    "Harbor remains sensitive to host-wide Docker restarts because its containers can fail to auto-start when `harbor-log` is not yet accepting logging-driver traffic on `localhost:1514`; the bounded Harbor compose replay is the immediate recovery path when that happens.",
+    "The final public SLO sweep is the main green proof for this incident response because it verifies the externally visible contracts instead of only container liveness."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-04-04-ws-0335-service-recovery-followup",
+    "surface": "remaining degraded public services after runtime-pool stabilization",
+    "diagnosis": "contract_drift",
+    "repair_action": "Restored missing OpenBao-backed runtime env files on `docker-runtime-lv3`, rebuilt and replayed JupyterHub locally, corrected the Vaultwarden proxy drift on `proxmox_florin`, patched the Docker runtime role to stop disabling `docker.socket` by stopping a live Docker daemon, and replayed Harbor after the control-plane Docker restart left the stack partially down.",
+    "verification": "The final public `lv3.org` sweep returned healthy responses for every public target, with `registry.lv3.org` at `HTTP 200` and `vault.lv3.org` at `HTTP 200`."
+  }
+}

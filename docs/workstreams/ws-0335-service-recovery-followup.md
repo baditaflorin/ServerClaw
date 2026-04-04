@@ -29,3 +29,24 @@
 - inspect the current live container and publication state on the affected guests
 - replay only the smallest safe repo-managed recovery path for the confirmed failures
 - capture the evidence in `receipts/live-applies/`
+
+## Findings
+
+- The remaining public failures on `2026-04-04` were concentrated in Directus, Harbor, Matrix, Outline, JupyterHub, Paperless, Plausible, Woodpecker, and Vaultwarden.
+- On `docker-runtime-lv3`, the main recovery blocker was missing `/run/lv3-secrets/<service>/runtime.env` material for several OpenBao-backed Compose stacks after earlier churn. Narrow recoveries succeeded by starting the stack-local `openbao-agent`, waiting for the runtime env file, and then replaying `docker compose up -d`.
+- JupyterHub required an additional bounded fix because its local images (`lv3/jupyterhub-hub:latest` and `lv3/jupyterhub-singleuser:latest`) had to be rebuilt from the rendered runtime directories before the service could start again.
+- Vaultwarden on `runtime-control-lv3` was healthy locally, but the Proxmox Tailscale proxy still pointed at the retired upstream `10.10.10.20:8222`; replaying the governed proxy path restored `https://vault.lv3.org/alive`.
+- Harbor exposed a second control-plane failure class: the `vaultwarden.yml` replay on `2026-04-04T00:25:30Z` restarted `docker.service` on `runtime-control-lv3` while applying the branch-local `Disable Docker socket activation` task. After that daemon restart, most Harbor containers failed to auto-start because their logging driver expected `localhost:1514` before `harbor-log` was healthy, leaving `registry.lv3.org` on `502` until the Harbor compose stack was replayed.
+
+## Recovery Summary
+
+- Recovered Directus, Matrix Synapse, Outline, JupyterHub, Paperless, Plausible, and Woodpecker on `docker-runtime-lv3` with bounded stack-local restarts and evidence captured under `receipts/live-applies/evidence/2026-04-04-ws-0335-*.txt`.
+- Replayed the Vaultwarden path on `runtime-control-lv3`, which corrected the Proxmox host proxy drift and restored the `vault.lv3.org` liveness contract.
+- Patched `collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml` so disabling `docker.socket` no longer stops a live Docker daemon; the role now disables the socket without stopping it when `docker.service` is already active, and only stops the socket when Docker is inactive.
+- Recovered Harbor with a bounded `docker compose up -d --remove-orphans` replay after the control-plane Docker restart left only `harbor-log` up.
+
+## Verification
+
+- `uv run --with pytest --with pyyaml python -m pytest tests/test_docker_runtime_role.py tests/test_openbao_compose_env_helper.py tests/test_compose_runtime_secret_injection.py -q` passed with `31 passed`.
+- `git diff --check` passed after the role and test updates.
+- A final concurrent sweep of the public `lv3.org` SLO catalog returned `200` for every public route except the expected Woodpecker `204`, including `registry.lv3.org` and `vault.lv3.org`.

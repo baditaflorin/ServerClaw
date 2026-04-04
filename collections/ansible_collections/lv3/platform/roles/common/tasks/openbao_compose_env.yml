@@ -164,6 +164,18 @@
     - path: "{{ common_openbao_compose_env_runtime_dir }}"
       mode: "0700"
 
+- name: Render the bootstrap runtime env file from the managed secret payload
+  ansible.builtin.copy:
+    dest: "{{ common_openbao_compose_env_env_file }}"
+    content: |-
+      {% for item in common_openbao_compose_env_secret_payload | dictsort %}
+      {{ item.0 }}={{ item.1 }}
+      {% endfor %}
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
 - name: Probe the current runtime secret payload from OpenBao
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
