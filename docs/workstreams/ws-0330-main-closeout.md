@@ -9,7 +9,7 @@
 - Implemented On: 2026-04-04
 - Live Applied On: 2026-04-04
 - Live Applied In Platform Version: `not applicable (repo-only control-plane change)`
-- Latest Verified Base: `origin/main@c48bdae01f6fe4d0df004e247baa8a3d9f6e013b` (`repo 0.178.3`, `platform 0.130.98`)
+- Latest Verified Base: `origin/main@8cdffd437a638083393556cd2618e68ad505aa73` (`repo 0.178.4`, `platform 0.130.98`)
 - Branch: `codex/ws-0330-main-closeout`
 - Worktree: `.worktrees/ws-0330-main-closeout`
 - Owner: codex
@@ -51,5 +51,6 @@
 
 - The branch-local phase intentionally left `README.md`, `changelog.md`, and `versions/stack.yaml` untouched until the protected exact-main integration step; the final exact-main replay then refreshed those surfaces plus the status ledgers, platform manifest, and coordination diagram from workstream canonical truth.
 - The first exact-main `make remote-validate` replay surfaced a duplicate `resolve_repo_local_path` definition in `scripts/controller_automation_toolkit.py`, and the first post-fix `validate_repo` rerun surfaced one missing ownership claim for `tests/test_controller_automation_toolkit.py`; both issues were fixed on this workstream before the final `make remote-validate` and `make pre-push-gate` replays passed.
-- `origin/main` advanced three separate times on 2026-04-04 while this closeout was in flight; the final validated base includes the ADR 0333 latest-main replay, and the last local cleanup refreshed `scripts/topology-snapshot.json` after the merged inventory overlay inputs changed.
-- The current realistic integrated version remains `0.178.3`; the next candidate version would be `0.178.4` once unrelated release blockers clear, and `Implemented In Repo Version` stays `not yet` until a later numbered release includes this exact-main closeout.
+- `origin/main` advanced repeatedly on 2026-04-04 while this closeout was in flight; after the earlier ADR 0333 latest-main replay, a later ADR 0339 exact-main `0.178.4` release closeout landed on `origin/main`, so the final validated base ended at `origin/main@8cdffd437a638083393556cd2618e68ad505aa73`.
+- The committed `0.178.4` merge needed one final `canonical_truth.py --write` refresh to rewrite `README.md` before the last `make pre-push-gate` replay passed on top of the merged tree.
+- The current realistic integrated version is `0.178.4`; the next candidate version would be `0.178.5` once unrelated release blockers clear, and `Included In Repo Version` stays `not yet` because the `0.178.4` release cut had already closed before this exact-main closeout landed.

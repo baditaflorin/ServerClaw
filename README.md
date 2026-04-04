@@ -77,6 +77,7 @@ rewriting one operator's workstation paths.
 | `vaultwarden` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `searxng` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `reference_deployment_samples` | `2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply` |
+| `public_github_readiness` | `2026-04-04-adr-0330-public-github-readiness-mainline-live-apply` |
 | `private_overlay_contract` | `2026-04-04-adr-0333-private-overlay-mainline-live-apply` |
 | `plausible_analytics` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
@@ -92,9 +93,8 @@ rewriting one operator's workstation paths.
 | `adr_discovery` | `2026-04-04-adr-0325-adr-discovery-mainline-live-apply` |
 | `workstream_registry_shards` | `2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply` |
 | `uptime_kuma` | `2026-04-03-ws-0332-homepage-triage-mainline-live-apply` |
-| `sectional_agent_discovery` | `2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply` |
 
-Showing 20 of 169 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
+Showing 20 of 170 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
 
 The current access posture is:
