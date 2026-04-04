@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-04-04",
   "recorded_on": "2026-04-04",
-  "recorded_at": "2026-04-04T15:18:55Z",
+  "recorded_at": "2026-04-04T17:46:12Z",
   "recorded_by": "codex",
-  "source_commit": "7349dc02c0f7fe8215b8c7837c47c594da32c6fb",
+  "source_commit": "3dbb575f3a8e5ce100215621d12ed85e7cbeed10",
   "repo_version_context": "0.178.3",
   "platform_version_context": "0.130.98",
   "workflow_id": "adr-0330-public-github-readiness-mainline-live-apply",
   "adr": "0330",
-  "summary": "Integrated ADR 0330 onto the exact-main tree by carrying the repo-relative controller-secret contract, fork-first example inventory/provider/publication surfaces, and public reference documentation into protected repository truth, regenerating the canonical README, changelog, latest receipt ledger, status ledgers, platform manifest, and coordination diagram, then fixing the one remote type-check regression and the one ownership-manifest miss surfaced during the gate replays before rerunning remote validation and the full pre-push gate successfully, all while the current realistic repo version remains `0.178.3` because unrelated waiver blockers still prevent a fresh numbered release cut.",
+  "summary": "Integrated ADR 0330 onto the latest realistic exact-main tree by replaying the repo-relative controller-secret contract, fork-first example inventory/provider/publication surfaces, and public reference documentation across repeated `origin/main` advances until the final base `c48bdae01f6fe4d0df004e247baa8a3d9f6e013b`, refreshing canonical truth and generated surfaces plus the topology snapshot after the ADR 0333 overlay replay changed merged inventory inputs, and rerunning the focused regression slice, `make validate`, `make remote-validate`, and `make pre-push-gate` successfully while the realistic repository version remains `0.178.3` because unrelated waiver blockers still prevent a fresh numbered release cut.",
   "targets": [
     {
       "kind": "repository",
@@ -43,27 +43,27 @@
     {
       "check": "Exact-main canonical truth and generated surfaces",
       "result": "pass",
-      "observed": "`python3 scripts/workstream_registry.py --write`, `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/canonical_truth.py --write`, `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/canonical_truth.py --check`, `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/generate_release_notes.py --write-root-summaries`, `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/generate_status_docs.py --write`, `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --write`, and `python3 scripts/generate_diagrams.py --write` refreshed the exact-main registry, changelog, latest receipt ledger, root status summaries, manifest, and coordination diagram; after the final test-surface ownership follow-up, `python3 scripts/workstream_registry.py --write` was rerun to keep the assembled registry aligned, preserved in the `receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-*.txt` evidence files."
+      "observed": "`python3 scripts/workstream_registry.py --write`, `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/canonical_truth.py --write`, `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/canonical_truth.py --check`, `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/generate_release_notes.py --write-root-summaries`, `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/generate_status_docs.py --write`, `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --write`, `python3 scripts/generate_diagrams.py --write`, and `uv run --with pyyaml python3 scripts/generate_topology_snapshot.py --output scripts/topology-snapshot.json` refreshed the exact-main registry, changelog, latest receipt ledger, root status summaries, manifest, coordination diagram, and topology snapshot after the final `origin/main` replay brought ADR 0333 overlay inputs into the merged inventory, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge4-registry-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge4-canonical-truth-write-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge4-canonical-truth-check-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge4-release-notes-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge4-status-docs-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge4-platform-manifest-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge4-diagrams-r1.txt`, and `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge5-topology-snapshot-r1.txt`."
     },
     {
       "check": "Exact-main focused regression suite",
       "result": "pass",
-      "observed": "`uv run --with pytest --with pyyaml python -m pytest -q tests/test_controller_automation_toolkit.py tests/test_config_merge_windmill.py tests/test_ntfy_publish.py tests/test_public_reference_samples.py` returned `64 passed` on the final commit after the toolkit and test follow-up fixes, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-targeted-tests-r3-0.178.3.txt`."
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest -q tests/test_controller_automation_toolkit.py tests/test_config_merge_windmill.py tests/test_ntfy_publish.py tests/test_public_reference_samples.py` returned `65 passed in 4.93s` on the final latest-main replay, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-targeted-tests-r1.txt`."
     },
     {
       "check": "Exact-main release readiness snapshot",
       "result": "partial",
-      "observed": "`LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py status --json` still reports repository version `0.178.3`, platform version `0.130.98`, and a blocked release cut because unrelated `controller_dependency_gap` waivers remain open through `2026-04-06`; `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py --bump patch --dry-run` shows the next candidate version would be `0.178.4`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-release-status-r1.json` and `receipts/live-applies/evidence/2026-04-04-ws-0330-release-dry-run-r1.txt`."
+      "observed": "`python3 scripts/release_manager.py status --json` still reports repository version `0.178.3`, platform version `0.130.98`, and a blocked release cut because unrelated `controller_dependency_gap` waivers remain open through `2026-04-06`; `python3 scripts/release_manager.py --bump patch --dry-run` shows the next candidate version would be `0.178.4`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-release-status-r1.json` and `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-release-dry-run-r1.txt`."
     },
     {
       "check": "Exact-main receipt and repository validation",
       "result": "pass",
-      "observed": "`uv run --with pyyaml --with jsonschema python3 scripts/live_apply_receipts.py --validate`, `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs generated-portals`, and `git diff --check` all passed on the final exact-main tree after the last ownership-manifest follow-up, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-live-apply-receipts-r5.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-validate-repo-r5.txt`, and `receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-git-diff-check-r4.txt`."
+      "observed": "`python3 scripts/live_apply_receipts.py --validate`, `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs generated-portals`, and `git diff --check` all passed on the final exact-main tree after the receipt refresh and topology snapshot correction, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-live-apply-receipts-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-validate-repo-r1.txt`, and `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-git-diff-check-r1.txt`."
     },
     {
       "check": "Exact-main broad automation and push-gate replay",
       "result": "pass",
-      "observed": "`make validate`, `make remote-validate`, and `make pre-push-gate` all passed on the exact-main candidate. The first `make remote-validate` replay surfaced a duplicate `resolve_repo_local_path` definition in `scripts/controller_automation_toolkit.py`, and a later `validate_repo` rerun caught the missing ownership claim for `tests/test_controller_automation_toolkit.py`; both issues were fixed on this workstream before the final `make remote-validate` and `make pre-push-gate` replays succeeded, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-make-validate-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-remote-validate-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-remote-validate-r2.txt`, and `receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-pre-push-gate-r1.txt`."
+      "observed": "`make validate`, `make remote-validate`, and `make pre-push-gate` all passed on the final latest-main candidate. `make remote-validate` reached the remote builder first, then exercised the governed local fallback, where all selected blocking checks passed; `make pre-push-gate` then passed the full primary-branch lane set on the same replayed tree, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-make-validate-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-remote-validate-r1.txt`, and `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-pre-push-gate-r1.txt`."
     }
   ],
   "evidence_refs": [
@@ -83,30 +83,29 @@
     "workstreams.yaml",
     "workstreams/active/ws-0330-main-closeout.yaml",
     "receipts/live-applies/2026-04-04-adr-0330-public-github-readiness-live-apply.json",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-registry-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-registry-r2.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-canonical-truth-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-canonical-truth-check-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-release-notes-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-status-docs-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-platform-manifest-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-diagrams-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-targeted-tests-r3-0.178.3.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-release-status-r1.json",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-release-dry-run-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-live-apply-receipts-r5.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-validate-repo-r4.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-validate-repo-r5.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-git-diff-check-r4.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-make-validate-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-remote-validate-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-remote-validate-r2.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0330-mainline-pre-push-gate-r1.txt"
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge4-registry-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge4-canonical-truth-write-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge4-canonical-truth-check-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge4-release-notes-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge4-status-docs-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge4-platform-manifest-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge4-diagrams-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge5-topology-snapshot-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-targeted-tests-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-release-status-r1.json",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-release-dry-run-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-live-apply-receipts-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-validate-repo-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-git-diff-check-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-make-validate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-remote-validate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge6-pre-push-gate-r1.txt"
   ],
   "notes": [
     "This exact-main receipt captures the protected-surface integration separately from the earlier branch-local live-apply proof so the fork-first implementation work and the canonical mainline refresh remain independently auditable.",
-    "ADR 0330 is implemented on `main`, but `Implemented In Repo Version` remains `not yet` because the global release manager still refuses a fresh numbered cut while unrelated `controller_dependency_gap` waivers remain open.",
-    "The final exact-main replay needed two small follow-up commits after the first gate replays: one removed a duplicate `resolve_repo_local_path` definition that only the remote `mypy` lane surfaced, and one updated the workstream ownership manifest to claim the last touched focused test file.",
+    "On 2026-04-04, `origin/main` advanced three separate times while this closeout was in flight; the final validated base ended at `origin/main@c48bdae01f6fe4d0df004e247baa8a3d9f6e013b`, and the last cleanup refreshed `scripts/topology-snapshot.json` after the merged ADR 0333 overlay inputs changed inventory truth.",
+    "ADR 0330 is implemented on `main`, but `Implemented In Repo Version` remains `not yet` because the global release manager still refuses a fresh numbered cut while unrelated `controller_dependency_gap` waivers remain open through `2026-04-06`.",
+    "The final latest-main verification passed with the governed remote-builder fallback: `make remote-validate` failed remotely, reran locally by policy, and every selected blocking check passed before `make pre-push-gate` completed the full primary-branch lane set.",
     "Because ADR 0330 is a repo-only control-plane change, the live platform version remains `0.130.98` and no platform version bump should accompany this integration."
   ]
 }

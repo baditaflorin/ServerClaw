@@ -1,0 +1,16 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0330-main-closeout
+configfile: pytest.ini
+collected 143 items
+
+tests/test_public_reference_samples.py ......                            [  4%]
+tests/test_ntfy_publish.py .....                                         [  7%]
+tests/test_config_merge_windmill.py .................................... [ 32%]
+...........                                                              [ 40%]
+tests/test_controller_automation_toolkit.py ......                       [ 44%]
+tests/test_atlas_schema.py ...........................                   [ 63%]
+tests/test_generate_platform_vars.py ................................... [ 88%]
+.................                                                        [100%]
+
+============================= 143 passed in 21.82s =============================

@@ -9,7 +9,7 @@
 - Implemented On: 2026-04-04
 - Live Applied On: 2026-04-04
 - Live Applied In Platform Version: `not applicable (repo-only control-plane change)`
-- Latest Verified Base: `origin/main@20a66bbf088d1aa456d34f173fd8e2c8664f4c20` (`repo 0.178.3`, `platform 0.130.98`)
+- Latest Verified Base: `origin/main@c48bdae01f6fe4d0df004e247baa8a3d9f6e013b` (`repo 0.178.3`, `platform 0.130.98`)
 - Branch: `codex/ws-0330-main-closeout`
 - Worktree: `.worktrees/ws-0330-main-closeout`
 - Owner: codex
@@ -36,6 +36,8 @@
 - `python3 scripts/workstream_registry.py --write`
 - `uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write`
 - `uv run --with pyyaml python3 scripts/generate_adr_index.py --write`
+- `uv run --with pyyaml python3 scripts/generate_platform_vars.py --write`
+- `uv run --with pyyaml python3 scripts/generate_topology_snapshot.py --output scripts/topology-snapshot.json`
 - `uv run --with pytest --with pyyaml python -m pytest -q tests/test_controller_automation_toolkit.py tests/test_config_merge_windmill.py tests/test_ntfy_publish.py tests/test_public_reference_samples.py`
 - `./scripts/validate_repo.sh agent-standards workstream-surfaces`
 - `./scripts/validate_repo.sh agent-standards workstream-surfaces generated-docs` on the protected exact-main integration tree
@@ -49,4 +51,5 @@
 
 - The branch-local phase intentionally left `README.md`, `changelog.md`, and `versions/stack.yaml` untouched until the protected exact-main integration step; the final exact-main replay then refreshed those surfaces plus the status ledgers, platform manifest, and coordination diagram from workstream canonical truth.
 - The first exact-main `make remote-validate` replay surfaced a duplicate `resolve_repo_local_path` definition in `scripts/controller_automation_toolkit.py`, and the first post-fix `validate_repo` rerun surfaced one missing ownership claim for `tests/test_controller_automation_toolkit.py`; both issues were fixed on this workstream before the final `make remote-validate` and `make pre-push-gate` replays passed.
+- `origin/main` advanced three separate times on 2026-04-04 while this closeout was in flight; the final validated base includes the ADR 0333 latest-main replay, and the last local cleanup refreshed `scripts/topology-snapshot.json` after the merged inventory overlay inputs changed.
 - The current realistic integrated version remains `0.178.3`; the next candidate version would be `0.178.4` once unrelated release blockers clear, and `Implemented In Repo Version` stays `not yet` until a later numbered release includes this exact-main closeout.
