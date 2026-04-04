@@ -1,6 +1,7 @@
 id: ws-0327-live-apply
-adr: "0327"
-title: Live apply sectional agent discovery registries and generated onboarding packs from latest origin/main
+adr: '0327'
+title: Live apply sectional agent discovery registries and generated onboarding packs
+  from latest origin/main
 status: live_applied
 owner: codex
 branch: codex/ws-0327-live-apply
@@ -113,6 +114,6 @@ canonical_truth:
     discovery artifacts plus public entrypoints through the rebased exact-main automation
     gates
   release_bump: patch
-  included_in_repo_version: null
+  included_in_repo_version: 0.178.4
   latest_receipts:
     sectional_agent_discovery: 2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply

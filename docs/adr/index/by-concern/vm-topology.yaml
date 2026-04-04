@@ -595,6 +595,7 @@ adrs:
     summary: We will provide reference deployment samples and replaceable provider profiles
     filename: 0339-reference-deployment-samples-and-replaceable-provider-profiles.md
     path: docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+    implemented_in_repo_version: 0.178.4
     implemented_on: '2026-04-04'
   - adr: '0340'
     title: Dedicated Coolify Apps VM Separation

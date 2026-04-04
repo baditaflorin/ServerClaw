@@ -69,7 +69,7 @@
     "docs/workstreams/ws-0327-live-apply.md",
     "docs/runbooks/discovery-registry-maintenance.md",
     "workstreams.yaml",
-    "workstreams/active/ws-0327-live-apply.yaml",
+    "workstreams/archive/2026/ws-0327-live-apply.yaml",
     "docs/diagrams/agent-coordination-map.excalidraw",
     "receipts/live-applies/2026-04-03-adr-0327-sectional-agent-discovery-live-apply.json",
     "receipts/live-applies/evidence/2026-04-03-ws-0327-mainline-git-diff-check-r2.txt",

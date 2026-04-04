@@ -82,7 +82,7 @@
     "docs/status/history/live-apply-evidence.md",
     "docs/status/history/merged-workstreams.md",
     "workstreams.yaml",
-    "workstreams/active/ws-0328-live-apply.yaml",
+    "workstreams/archive/2026/ws-0328-live-apply.yaml",
     "receipts/live-applies/2026-04-03-adr-0328-root-summary-rollover-live-apply.json",
     "receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-discovery-r1.txt",
     "receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-registry-r3.txt",

@@ -79,7 +79,7 @@
     "tests/test_validate_public_entrypoints.py",
     "tests/test_validate_repo_cache.py",
     "workstreams.yaml",
-    "workstreams/active/ws-0327-live-apply.yaml",
+    "workstreams/archive/2026/ws-0327-live-apply.yaml",
     "receipts/live-applies/evidence/2026-04-03-ws-0327-rebased-git-diff-check-r1.txt",
     "receipts/live-applies/evidence/2026-04-03-ws-0327-generate-discovery-check-r1.txt",
     "receipts/live-applies/evidence/2026-04-03-ws-0327-targeted-tests-r1.txt",

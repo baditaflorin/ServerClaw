@@ -101,10 +101,10 @@ ready_to_merge: true
 live_applied: true
 canonical_truth:
   changelog_entry: hardens ADR 0337 by normalizing the sharded workstream registry
-    to repo-root-relative metadata, preserving canonical in-repo workstream doc
-    links, hardening worktree creation and service scaffolding against out-of-repo
-    paths, and re-verifying the portability gate from the latest realistic mainline
+    to repo-root-relative metadata, preserving canonical in-repo workstream doc links,
+    hardening worktree creation and service scaffolding against out-of-repo paths,
+    and re-verifying the portability gate from the latest realistic mainline
   release_bump: patch
-  included_in_repo_version: null
+  included_in_repo_version: 0.178.4
   latest_receipts:
     fork_first_workstream_metadata: 2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply

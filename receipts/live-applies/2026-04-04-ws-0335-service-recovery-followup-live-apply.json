@@ -82,7 +82,7 @@
     "tests/test_openbao_compose_env_helper.py",
     "tests/test_compose_runtime_secret_injection.py",
     "workstreams.yaml",
-    "workstreams/active/ws-0335-service-recovery-followup.yaml"
+    "workstreams/archive/2026/ws-0335-service-recovery-followup.yaml"
   ],
   "notes": [
     "The branch-local `Disable Docker socket activation` change caused the runtime-control Docker restart because stopping `docker.socket` on a live host implicitly tore down `docker.service`; the role now avoids that outage path by disabling the socket without stopping it when Docker is already active.",

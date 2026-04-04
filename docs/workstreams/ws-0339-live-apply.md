@@ -3,13 +3,13 @@
 - ADR: [ADR 0339](../adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md)
 - Title: reference deployment samples and replaceable provider profiles
 - Status: live_applied
-- Included In Repo Version: not yet
+- Included In Repo Version: 0.178.4
 - Branch-Local Receipt: `receipts/live-applies/2026-04-04-adr-0339-reference-deployment-samples-live-apply.json`
-- Mainline Receipt: pending
+- Mainline Receipt: `receipts/live-applies/2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply.json`
 - Implemented On: 2026-04-04
 - Live Applied On: 2026-04-04
 - Live Applied In Platform Version: N/A (repo-only onboarding and automation change)
-- Latest Verified Base: `origin/main@20a66bbf0` (`repo 0.178.3`, `platform 0.130.98`)
+- Latest Verified Base: `origin/main@c48bdae01f6fe4d0df004e247baa8a3d9f6e013b` (`repo 0.178.3`, `platform 0.130.98`)
 - Branch: `codex/ws-0339-live-apply`
 - Worktree: `.worktrees/ws-0339-live-apply`
 - Owner: codex
@@ -33,16 +33,17 @@
 
 ## Verification
 
-- `uv run --with pyyaml python3 scripts/reference_deployment_samples.py validate` passed and is preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-reference-samples-validate-r1-0.178.3.txt`.
-- `uv run --with pytest --with pyyaml python3 -m pytest -q tests/test_reference_deployment_samples.py tests/test_generate_discovery_artifacts.py` passed and is preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-targeted-tests-r1-0.178.3.txt`.
-- `uv run --with pyyaml python3 scripts/reference_deployment_samples.py render --sample single-node-proxmox-lab --profile dedicated-public-edge --output-dir /tmp/ws-0339-render-check` produced a concrete sample tree, and `uv tool run --from ansible-core ansible-inventory -i /tmp/ws-0339-render-check/inventory/hosts.yml --list` successfully loaded the rendered inventory; both artifacts are preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-render-r1-0.178.3.txt` and `receipts/live-applies/evidence/2026-04-04-ws-0339-rendered-inventory-r1-0.178.3.json`.
-- `./scripts/validate_repo.sh workstream-surfaces`, `python3 scripts/generate_diagrams.py --check`, and `./scripts/validate_repo.sh workstream-surfaces agent-standards data-models` all passed on the corrected branch-local tree after the ADR shard ownership and diagram refresh repair, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-workstream-surfaces-r1-0.178.3.txt` and `receipts/live-applies/evidence/2026-04-04-ws-0339-validate-repo-r3-0.178.3.txt`.
-- The first promotion-facing `make pre-push-gate` replay surfaced two branch-local correction items and one expected integration-only stop: ADR shard ownership needed to declare the generated `docs/adr/index/*` surfaces, `docs/diagrams/agent-coordination-map.excalidraw` needed regeneration after the status promotion, and `generated-docs` correctly refused to proceed while `changelog.md` remained intentionally stale until exact-main canonical-truth assembly. That replay is preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-pre-push-gate-r1-0.178.3.txt`.
-- The release-readiness snapshot on this branch confirms repo version `0.178.3`, platform version `0.130.98`, and that the next candidate release remains `0.178.4` while unrelated waiver blockers stay open through `2026-04-06`.
+- `uv run --with pyyaml python3 scripts/reference_deployment_samples.py validate` passed on the rebased `origin/main@c48bdae01f6fe4d0df004e247baa8a3d9f6e013b` tree and is preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-reference-samples-validate-r2-0.178.3.txt`.
+- `uv run --with pytest --with pyyaml python3 -m pytest -q tests/test_reference_deployment_samples.py tests/test_generate_discovery_artifacts.py` passed and is preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-targeted-tests-r2-0.178.3.txt`.
+- `uv run --with pyyaml python3 scripts/reference_deployment_samples.py render --sample single-node-proxmox-lab --profile dedicated-public-edge --output-dir /tmp/ws-0339-render-check-c48` produced a concrete sample tree, and `uv tool run --from ansible-core ansible-inventory -i /tmp/ws-0339-render-check-c48/inventory/hosts.yml --list` successfully loaded the rendered inventory; both artifacts are preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-render-r2-0.178.3.txt` and `receipts/live-applies/evidence/2026-04-04-ws-0339-rendered-inventory-r2-0.178.3.json`.
+- `./scripts/validate_repo.sh workstream-surfaces` and `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models` both passed after regenerating the rebased `workstreams.yaml` compatibility surface, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-workstream-surfaces-r2-0.178.3.txt` and `receipts/live-applies/evidence/2026-04-04-ws-0339-validate-repo-r4-0.178.3.txt`.
+- The rebased release-readiness snapshot still showed repo version `0.178.3`, platform version `0.130.98`, next candidate version `0.178.4`, and unrelated waiver blockers open through `2026-04-06`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-release-status-r2-0.178.3.json` and `receipts/live-applies/evidence/2026-04-04-ws-0339-release-dry-run-r2-0.178.3.txt`.
 
 ## Exact-Main Integration Status
 
-- Branch-local proof is complete. The remaining integration step is to fast-forward the final validated branch onto the freshest `origin/main`, cut the first repo version that contains ADR 0339, write the canonical mainline receipt, and refresh any protected canonical-truth surfaces that the release cut changes.
+- Exact-main release `0.178.4` now carries ADR 0339 from `origin/main@c48bdae01f6fe4d0df004e247baa8a3d9f6e013b`, with the canonical mainline receipt `receipts/live-applies/2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply.json`.
+- The protected canonical-truth and release-management surfaces were refreshed from the exact-main release tree rather than through branch-local hand edits, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-release-lower-level-r2-0.178.4.txt`.
+- Repository release `0.178.4` now includes ADR 0339 while the platform version context remains `0.130.98` because this is a repo-only onboarding and automation change.
 
 ## Notes
 

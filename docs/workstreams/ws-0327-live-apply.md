@@ -3,7 +3,7 @@
 - ADR: [ADR 0327](../adr/0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md)
 - Title: sectional agent discovery registries and generated onboarding packs
 - Status: live_applied
-- Included In Repo Version: not yet
+- Included In Repo Version: 0.178.4
 - Branch-Local Receipt: `receipts/live-applies/2026-04-03-adr-0327-sectional-agent-discovery-live-apply.json`
 - Mainline Receipt: `receipts/live-applies/2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply.json`
 - Implemented On: 2026-04-03
@@ -44,6 +44,6 @@
 
 ## Exact-Main Integration Status
 
-- The exact-main integration is complete on `main` with active `live_applied` workstream metadata, updated branch-local and mainline receipts, and refreshed `workstreams.yaml` compatibility output.
-- `VERSION` remains `0.178.3` and `Implemented In Repo Version` remains `not yet` because the current release cut is blocked by unrelated open waiver receipts outside this workstream.
-- `README.md`, `changelog.md`, and `versions/stack.yaml` were refreshed from workstream canonical-truth metadata rather than by branch-local hand edits, so another later release cut can promote ADR 0327 into the next numbered repo version without reconstructing the evidence trail.
+- The exact-main integration is now carried by repository release `0.178.4`, including the updated branch-local and mainline receipts plus refreshed `workstreams.yaml` compatibility output.
+- Repository release `0.178.4` records ADR 0327 in `VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, and the generated release-note surfaces.
+- ADR 0327 remains a repo-only control-plane change, so the platform version context stays `0.130.98`.

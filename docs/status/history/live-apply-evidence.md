@@ -9,12 +9,18 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | Capability | Receipt |
 | --- | --- |
 | `woodpecker` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `vaultwarden` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `searxng` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
+| `reference_deployment_samples` | `2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply` |
 | `private_overlay_contract` | `2026-04-04-adr-0333-private-overlay-mainline-live-apply` |
 | `plausible_analytics` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `outline` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `minio` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
+| `matrix_synapse` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `jupyterhub` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `harbor` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `grist` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `fork_first_workstream_metadata` | `2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply` |
 | `dozzle` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `directus` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
@@ -48,7 +54,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `one_api` | `2026-04-01-adr-0294-one-api-mainline-live-apply` |
 | `livekit` | `2026-04-01-adr-0293-livekit-mainline-live-apply` |
 | `lago` | `2026-04-01-adr-0292-lago-mainline-live-apply` |
-| `grist` | `2026-04-01-adr-0279-grist-mainline-live-apply` |
 | `typesense` | `2026-03-31-adr-0277-typesense-mainline-live-apply` |
 | `serverclaw_skills` | `2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply` |
 | `sbom_cve_scanning` | `2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply` |
@@ -57,7 +62,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `redpanda` | `2026-03-31-adr-0290-redpanda-mainline-live-apply` |
 | `postgres_audit` | `2026-03-31-adr-0303-pgaudit-mainline-live-apply` |
 | `piper` | `2026-03-31-adr-0284-piper-mainline-live-apply` |
-| `minio` | `2026-03-31-adr-0274-minio-object-storage-mainline-live-apply` |
 | `k6_load_testing` | `2026-03-31-adr-0305-k6-mainline-live-apply` |
 | `iac_policy_scanning` | `2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply` |
 | `crawl4ai` | `2026-03-31-adr-0288-crawl4ai-mainline-live-apply` |
@@ -77,7 +81,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `browser_runner` | `2026-03-30-adr-0261-playwright-browser-runners-live-apply` |
 | `artifact_cache_vm` | `2026-03-30-adr-0296-dedicated-artifact-cache-vm-mainline-live-apply` |
 | `windmill` | `2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply` |
-| `vaultwarden` | `2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply` |
 | `validation_runner_contracts` | `2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply` |
 | `validation_gate` | `2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply` |
 | `stage_smoke_suites` | `2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
@@ -91,10 +94,8 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `promotion_pipeline` | `2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
 | `ops_portal_visualizations` | `2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply` |
 | `n8n` | `2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply` |
-| `matrix_synapse` | `2026-03-29-adr-0255-matrix-synapse-mainline-live-apply` |
 | `local_search_and_indexing_fabric` | `2026-03-29-adr-0239-browser-local-search-post-merge-replay` |
 | `https_tls_assurance` | `2026-03-29-adr-0255-matrix-synapse-mainline-live-apply` |
-| `harbor` | `2026-03-29-adr-0201-harbor-mainline-live-apply` |
 | `backup_coverage` | `2026-03-29-adr-0271-backup-coverage-ledger-mainline-live-apply` |
 | `artifact_cache_plane` | `2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply` |
 | `api_gateway` | `2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply` |

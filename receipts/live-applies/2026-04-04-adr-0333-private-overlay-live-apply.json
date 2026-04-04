@@ -86,7 +86,7 @@
     "tests/test_provision_operator.py",
     "tests/test_validation_runner_contracts.py",
     "workstreams.yaml",
-    "workstreams/active/adr-0333-private-overlay-live-apply.yaml",
+    "workstreams/archive/2026/adr-0333-private-overlay-live-apply.yaml",
     "receipts/live-applies/evidence/2026-04-04-adr-0333-bootstrap-alias-r1.json",
     "receipts/live-applies/evidence/2026-04-04-adr-0333-preflight-configure-edge-publication-r1.txt",
     "receipts/live-applies/evidence/2026-04-04-adr-0333-check-build-server-r1.txt",

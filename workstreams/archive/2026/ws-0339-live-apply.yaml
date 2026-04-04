@@ -1,6 +1,7 @@
 id: ws-0339-live-apply
-adr: "0339"
-title: Live apply reference deployment samples and replaceable provider profiles from latest origin/main
+adr: 0339
+title: Live apply reference deployment samples and replaceable provider profiles from
+  latest origin/main
 status: live_applied
 owner: codex
 branch: codex/ws-0339-live-apply
@@ -102,8 +103,9 @@ ready_to_merge: true
 live_applied: true
 canonical_truth:
   changelog_entry: implements ADR 0339 by adding governed reference deployment samples,
-    replaceable example provider profiles, a render-and-validate bootstrap tool,
-    and discovery plus runbook guidance for fork-first onboarding
+    replaceable example provider profiles, a render-and-validate bootstrap tool, and
+    discovery plus runbook guidance for fork-first onboarding
   release_bump: patch
-  included_in_repo_version: null
-  latest_receipts: {}
+  included_in_repo_version: 0.178.4
+  latest_receipts:
+    reference_deployment_samples: 2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply

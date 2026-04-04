@@ -3,7 +3,7 @@
 - ADR: [ADR 0333](../adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md)
 - Title: finish the shared private-overlay bootstrap alias contract and verify it from a dedicated worktree
 - Status: live_applied
-- Included In Repo Version: not yet
+- Included In Repo Version: 0.178.4
 - Branch-Local Receipt: `receipts/live-applies/2026-04-04-adr-0333-private-overlay-live-apply.json`
 - Mainline Receipt: `receipts/live-applies/2026-04-04-adr-0333-private-overlay-mainline-live-apply.json`
 - Implemented On: 2026-04-04
@@ -45,7 +45,6 @@
 
 ## Exact-Main Integration Status
 
-- Exact-main canonical truth now records ADR 0333 in `README.md`, `changelog.md`, `versions/stack.yaml`, and `docs/status/history/live-apply-evidence.md` via the mainline receipt `2026-04-04-adr-0333-private-overlay-mainline-live-apply`.
-- `LV3_SKIP_OUTLINE_SYNC=1 python3 scripts/release_manager.py status --json` still reports repository version `0.178.3`, platform version `0.130.98`, `0 workstreams in progress`, and a blocked numbered release cut only because three unrelated `controller_dependency_gap` waiver blockers remain open through `2026-04-06`.
-- `LV3_SKIP_OUTLINE_SYNC=1 python3 scripts/release_manager.py --bump patch --dry-run` shows the next candidate repository release would be `0.178.4` once those unrelated blockers clear.
-- Because the global release manager remains blocked outside this ADR, `Included In Repo Version` remains `not yet` even though the exact-main merge, canonical receipt, and full pre-push replay are complete.
+- Exact-main canonical truth and repository release `0.178.4` now record ADR 0333 via the mainline receipt `2026-04-04-adr-0333-private-overlay-mainline-live-apply`.
+- Repository release `0.178.4` captures ADR 0333 in `VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, and `docs/status/history/live-apply-evidence.md`.
+- The bootstrap overlay capability was already proven live on platform version `0.130.98`, so the numbered repo release does not change the platform version context.

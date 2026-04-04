@@ -1,6 +1,7 @@
 id: ws-0335-service-recovery-followup
 adr: 0319
-title: Investigate and recover the remaining degraded services after the runtime-pool stabilization merges
+title: Investigate and recover the remaining degraded services after the runtime-pool
+  stabilization merges
 status: live_applied
 owner: codex
 branch: codex/ws-0335-service-recovery-followup
@@ -87,12 +88,11 @@ ownership_manifest:
     contract: live-apply-receipts-v1
 canonical_truth:
   changelog_entry: recovers the remaining degraded public services after the runtime-pool
-    stabilization merges by re-materializing OpenBao-backed runtime env files,
-    preventing docker.socket shutdown from restarting a live Docker daemon on
-    runtime-control-lv3, and replaying the Harbor and Vaultwarden recovery paths
-    safely
+    stabilization merges by re-materializing OpenBao-backed runtime env files, preventing
+    docker.socket shutdown from restarting a live Docker daemon on runtime-control-lv3,
+    and replaying the Harbor and Vaultwarden recovery paths safely
   release_bump: patch
-  included_in_repo_version: null
+  included_in_repo_version: 0.178.4
   latest_receipts:
     harbor: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     vaultwarden: 2026-04-04-ws-0335-service-recovery-followup-live-apply

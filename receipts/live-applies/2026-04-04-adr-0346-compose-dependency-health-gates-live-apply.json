@@ -91,7 +91,7 @@
     "docs/runbooks/compose-runtime-resilience.md",
     "docs/workstreams/ws-0332-resilience-predictability.md",
     "workstreams.yaml",
-    "workstreams/active/ws-0332-resilience-predictability.yaml",
+    "workstreams/archive/2026/ws-0332-resilience-predictability.yaml",
     "config/service-completeness.json",
     "scripts/service_completeness.py",
     "collections/ansible_collections/lv3/platform/roles/dozzle_runtime/templates/docker-compose.yml.j2",

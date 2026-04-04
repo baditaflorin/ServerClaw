@@ -3,7 +3,7 @@
 - ADR: [ADR 0328](../adr/0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md)
 - Title: implement size-budgeted root summaries and automatic rollover ledgers
 - Status: live_applied
-- Included In Repo Version: not yet
+- Included In Repo Version: 0.178.4
 - Branch-Local Receipt: `receipts/live-applies/2026-04-03-adr-0328-root-summary-rollover-live-apply.json`
 - Mainline Receipt: `receipts/live-applies/2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply.json`
 - Implemented On: 2026-04-03
@@ -41,6 +41,6 @@
 
 ## Exact-Main Integration Status
 
-- `uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write`, `python3 scripts/workstream_registry.py --write`, `uv run --with pyyaml python3 scripts/canonical_truth.py --write`, `uv run --with pyyaml python3 scripts/canonical_truth.py --check`, `uv run --with pyyaml python3 scripts/generate_release_notes.py --write-root-summaries`, `uv run --with pyyaml python3 scripts/generate_status_docs.py --write`, `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --write`, and `uv run --with pyyaml --with jsonschema python3 scripts/generate_diagrams.py --write` refreshed the ADR 0327-derived discovery entrypoints, onboarding packs, protected integration surfaces, and generated status artifacts from the latest `origin/main`, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-discovery-r1.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-registry-r3.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-canonical-truth-r2.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-canonical-truth-check-r2.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-release-notes-r1.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-status-docs-r1.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-platform-manifest-r1.txt`, and `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-diagrams-r1.txt`.
-- The exact-main release snapshot now reports repository version `0.178.3`, platform version `0.130.98`, and `0 workstreams in progress`; a new numbered repo release is still blocked only by the three pre-existing `controller_dependency_gap` waiver receipts through 2026-04-06, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-release-status-r2.json`.
-- `python3 scripts/live_apply_receipts.py --validate`, `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs generated-portals`, `make remote-validate`, and `make pre-push-gate` all passed on the integrated tree, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-live-apply-receipts-r4.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-validate-repo-r5.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-remote-validate-r2.txt`, and `receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-pre-push-gate-r4.txt`.
+- ADR 0328's bounded-summary and rollover surfaces are now part of repository release `0.178.4`.
+- Repository release `0.178.4` preserves the exact-main generator evidence while recording ADR 0328 in `VERSION`, `RELEASE.md`, `changelog.md`, `README.md`, `versions/stack.yaml`, and the generated release-note plus status-history surfaces.
+- ADR 0328 is a repo-only control-plane change, so the platform version context remains `0.130.98`.

@@ -12,20 +12,13 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- recovers the remaining degraded public services after the runtime-pool stabilization merges by re-materializing OpenBao-backed runtime env files, preventing docker.socket shutdown from restarting a live Docker daemon on runtime-control-lv3, and replaying the Harbor and Vaultwarden recovery paths safely
-- implements ADR 0325 by replacing the monolithic ADR metadata catalog with shard-backed discovery manifests, adding a committed ADR reservation ledger, and validating reservation-aware query and generator workflows from exact main
-- implements ADR 0327 by splitting the root agent-discovery registries into sectional source files, generating concise public-safe root entrypoints, tracking generated onboarding packs under build/onboarding, and validating the discovery artifacts plus public entrypoints through the rebased exact-main automation gates
-- implements ADR 0328 by enforcing explicit line budgets for the root README, changelog, and release-note index, rolling older release and status rows into generated archive ledgers, and teaching the validation plus release automation to keep those bounded summaries current
-- implements ADR 0333 by moving the remaining active controller-local bootstrap-key and private-overlay path contracts onto shared `.local` aliases, teaching fresh worktrees to materialize those aliases automatically, and validating the build-server plus controller automation surfaces from exact main
-- hardens ADR 0337 by normalizing the sharded workstream registry to repo-root-relative metadata, preserving canonical in-repo workstream doc links, hardening worktree creation and service scaffolding against out-of-repo paths, and re-verifying the portability gate from the latest realistic mainline
-- enforces health-gated compose dependency startup as part of service completeness, fixes the low-risk runtime templates that were still using blind startup ordering, and records the remaining bounded exception explicitly
-
 ## Latest Release
 
-- [0.178.3 release notes](docs/release-notes/0.178.3.md)
+- [0.178.4 release notes](docs/release-notes/0.178.4.md)
 
 ## Previous Releases
 
+- [0.178.3 release notes](docs/release-notes/0.178.3.md)
 - [0.178.2 release notes](docs/release-notes/0.178.2.md)
 - [0.178.1 release notes](docs/release-notes/0.178.1.md)
 - [0.178.0 release notes](docs/release-notes/0.178.0.md)
@@ -37,9 +30,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.177.148 release notes](docs/release-notes/0.177.148.md)
 - [0.177.147 release notes](docs/release-notes/0.177.147.md)
 - [0.177.146 release notes](docs/release-notes/0.177.146.md)
-- [0.177.145 release notes](docs/release-notes/0.177.145.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (342 releases)](docs/release-notes/index/2026.md)
+- [2026 (343 releases)](docs/release-notes/index/2026.md)

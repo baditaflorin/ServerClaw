@@ -10,7 +10,7 @@ generated: '2026-04-04'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 326
+total_adrs: 327
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -5672,6 +5672,7 @@ adrs:
     summary: We will evolve ADR discovery into faceted generated shards and introduce a
     filename: 0325-faceted-adr-index-shards-and-reservation-windows.md
     path: docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md
+    implemented_in_repo_version: 0.178.4
     implemented_on: '2026-04-03'
   - adr: '0326'
     title: Workstream Registry Shards With Active And Archive Assembly
@@ -5713,6 +5714,7 @@ adrs:
     summary: We will reorganize discovery metadata into sectional registries with
     filename: 0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md
     path: docs/adr/0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md
+    implemented_in_repo_version: 0.178.4
     implemented_on: '2026-04-03'
   - adr: 0328
     title: Size-Budgeted Root Summaries And Automatic Rollover Ledgers
@@ -5733,6 +5735,7 @@ adrs:
     summary: We will manage root summary surfaces with explicit size budgets and
     filename: 0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md
     path: docs/adr/0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md
+    implemented_in_repo_version: 0.178.4
     implemented_on: '2026-04-03'
   - adr: '0331'
     title: Repository-Relative Paths For Public Metadata And Generated Docs
@@ -5795,6 +5798,7 @@ adrs:
     summary: Deployment-specific secrets, identities, and one-off bootstrap artefacts must
     filename: 0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
     path: docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+    implemented_in_repo_version: 0.178.4
     implemented_in_platform_version: 0.130.98
     implemented_on: '2026-04-04'
   - adr: '0335'
@@ -5852,6 +5856,7 @@ adrs:
     summary: Workstream and worktree metadata must be fork-first and repository-relative.
     filename: 0337-fork-first-workstream-and-worktree-metadata.md
     path: docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
+    implemented_in_repo_version: 0.178.4
     implemented_on: '2026-04-04'
   - adr: 0339
     title: Reference Deployment Samples And Replaceable Provider Profiles
@@ -5872,6 +5877,7 @@ adrs:
     summary: We will provide reference deployment samples and replaceable provider profiles
     filename: 0339-reference-deployment-samples-and-replaceable-provider-profiles.md
     path: docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+    implemented_in_repo_version: 0.178.4
     implemented_on: '2026-04-04'
   - adr: '0340'
     title: Dedicated Coolify Apps VM Separation
@@ -6023,5 +6029,6 @@ adrs:
     summary: We will treat health-gated compose dependencies as a repository resilience
     filename: 0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md
     path: docs/adr/0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md
+    implemented_in_repo_version: 0.178.4
     implemented_in_platform_version: 0.130.98
     implemented_on: '2026-04-04'

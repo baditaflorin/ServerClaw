@@ -46,7 +46,7 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.3` |
+| Repository version | `0.178.4` |
 | Platform version | `0.130.98` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -74,12 +74,18 @@ rewriting one operator's workstation paths.
 | Capability | Receipt |
 | --- | --- |
 | `woodpecker` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `vaultwarden` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `searxng` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
+| `reference_deployment_samples` | `2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply` |
 | `private_overlay_contract` | `2026-04-04-adr-0333-private-overlay-mainline-live-apply` |
 | `plausible_analytics` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `outline` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `minio` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
+| `matrix_synapse` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `jupyterhub` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `harbor` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `grist` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `fork_first_workstream_metadata` | `2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply` |
 | `dozzle` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `directus` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
@@ -87,14 +93,8 @@ rewriting one operator's workstation paths.
 | `workstream_registry_shards` | `2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply` |
 | `uptime_kuma` | `2026-04-03-ws-0332-homepage-triage-mainline-live-apply` |
 | `sectional_agent_discovery` | `2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply` |
-| `root_summary_rollover` | `2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply` |
-| `ops_portal` | `2026-04-03-adr-0309-task-oriented-information-architecture-mainline-live-apply` |
-| `operator_onboarding` | `2026-04-03-adr-0318-repeatable-operator-onboarding-mainline-live-apply` |
-| `open_webui` | `2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply` |
-| `ntfy` | `2026-04-03-adr-0299-ntfy-mainline-live-apply` |
-| `label_studio` | `2026-04-03-adr-0289-label-studio-mainline-live-apply` |
 
-Showing 20 of 168 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
+Showing 20 of 169 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
 
 The current access posture is:
@@ -173,7 +173,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.3` |
+| Repository version | `0.178.4` |
 | Platform version | `0.130.98` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -194,18 +194,11 @@ Current values on `main`:
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 293 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 294 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
-| `0346` | Enforce health-gated compose dependencies for more predictable service recovery | `live_applied` | [ws-0332-resilience-predictability.md](docs/workstreams/ws-0332-resilience-predictability.md) |
-| `0337` | Re-verify fork-first workstream metadata from the latest origin/main | `live_applied` | [ws-0337-live-apply.md](docs/workstreams/ws-0337-live-apply.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
-| `0333` | Finish the shared private-overlay bootstrap alias contract and verify it from a dedicated worktree | `live_applied` | [adr-0333-private-overlay-live-apply.md](docs/workstreams/adr-0333-private-overlay-live-apply.md) |
-| `0328` | Implement size-budgeted root summaries and automatic rollover ledgers | `live_applied` | [ws-0328-live-apply.md](docs/workstreams/ws-0328-live-apply.md) |
-| `0327` | Live apply sectional agent discovery registries and generated onboarding packs from latest origin/main | `live_applied` | [ws-0327-live-apply.md](docs/workstreams/ws-0327-live-apply.md) |
-| `0325` | Live apply faceted ADR index shards and reservation windows from latest origin/main | `live_applied` | [ws-0325-live-apply.md](docs/workstreams/ws-0325-live-apply.md) |
-| `0319` | Investigate and recover the remaining degraded services after the runtime-pool stabilization merges | `live_applied` | [ws-0335-service-recovery-followup.md](docs/workstreams/ws-0335-service-recovery-followup.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
@@ -223,6 +216,13 @@ Showing 25 of 293 merged or live-applied workstreams. Full history: [merged work
 | `0176` | Inventory sharding and host-scoped Ansible execution | `live_applied` | [adr-0176-inventory-sharding.md](docs/workstreams/adr-0176-inventory-sharding.md) |
 | `0173` | Workstream surface ownership manifest | `live_applied` | [adr-0173-workstream-surface-ownership-manifest.md](docs/workstreams/adr-0173-workstream-surface-ownership-manifest.md) |
 | `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
+| `0171` | Controlled fault injection for resilience validation | `live_applied` | [adr-0171-controlled-fault-injection.md](docs/workstreams/adr-0171-controlled-fault-injection.md) |
+| `0170` | Platform-wide timeout hierarchy | `live_applied` | [adr-0170-timeout-hierarchy.md](docs/workstreams/adr-0170-timeout-hierarchy.md) |
+| `0169` | Structured log field contract | `live_applied` | [adr-0169-structured-log-field-contract.md](docs/workstreams/adr-0169-structured-log-field-contract.md) |
+| `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](docs/workstreams/adr-0168-idempotency-ci.md) |
+| `0167` | Graceful degradation mode declarations | `live_applied` | [adr-0167-graceful-degradation-mode-declarations.md](docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md) |
+| `0166` | Canonical error response format and error code registry | `live_applied` | [adr-0166-canonical-error-response-format.md](docs/workstreams/adr-0166-canonical-error-response-format.md) |
+| `0165` | Workflow idempotency keys and double-execution prevention | `live_applied` | [adr-0165-workflow-idempotency.md](docs/workstreams/adr-0165-workflow-idempotency.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Next For Forks

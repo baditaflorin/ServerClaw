@@ -1,6 +1,7 @@
 id: adr-0333-private-overlay-live-apply
 adr: '0333'
-title: Finish the shared private-overlay bootstrap alias contract and verify it from a dedicated worktree
+title: Finish the shared private-overlay bootstrap alias contract and verify it from
+  a dedicated worktree
 status: live_applied
 owner: codex
 branch: codex/ws-0333-private-overlay
@@ -127,8 +128,11 @@ blockers: []
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implements ADR 0333 by moving the remaining active controller-local bootstrap-key and private-overlay path contracts onto shared `.local` aliases, teaching fresh worktrees to materialize those aliases automatically, and validating the build-server plus controller automation surfaces from exact main
+  changelog_entry: implements ADR 0333 by moving the remaining active controller-local
+    bootstrap-key and private-overlay path contracts onto shared `.local` aliases,
+    teaching fresh worktrees to materialize those aliases automatically, and validating
+    the build-server plus controller automation surfaces from exact main
   release_bump: patch
-  included_in_repo_version: null
+  included_in_repo_version: 0.178.4
   latest_receipts:
     private_overlay_contract: 2026-04-04-adr-0333-private-overlay-mainline-live-apply
