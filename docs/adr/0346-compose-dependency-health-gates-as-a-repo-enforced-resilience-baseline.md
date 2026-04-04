@@ -1,9 +1,9 @@
 # ADR 0346: Compose Dependency Health Gates As A Repo-Enforced Resilience Baseline
 
 - Status: Accepted
-- Implementation Status: Implemented
+- Implementation Status: Live applied
 - Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.98
 - Implemented On: 2026-04-04
 - Date: 2026-04-04
 - Tags: compose, docker, readiness, resilience, validation

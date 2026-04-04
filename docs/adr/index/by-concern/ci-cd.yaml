@@ -752,4 +752,5 @@ adrs:
     summary: We will treat health-gated compose dependencies as a repository resilience
     filename: 0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md
     path: docs/adr/0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md
+    implemented_in_platform_version: 0.130.98
     implemented_on: '2026-04-04'
