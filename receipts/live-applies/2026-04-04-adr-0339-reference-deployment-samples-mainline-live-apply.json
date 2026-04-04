@@ -4,7 +4,7 @@
   "environment": "production",
   "applied_on": "2026-04-04",
   "recorded_on": "2026-04-04",
-  "recorded_at": "2026-04-04T17:02:00Z",
+  "recorded_at": "2026-04-04T17:33:01Z",
   "recorded_by": "codex",
   "source_commit": "44616dedf5ca0cf519ec16364af5f88ac0348f38",
   "repo_version_context": "0.178.4",
@@ -49,6 +49,11 @@
       "check": "Exact-main release rewrite",
       "result": "pass",
       "observed": "The lower-level exact-main release replay successfully wrote repository release `0.178.4`, archived the eight pending live-applied workstreams, refreshed canonical truth, and regenerated the protected release surfaces, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-release-lower-level-r2-0.178.4.txt`."
+    },
+    {
+      "check": "Exact-main repository and promotion gates",
+      "result": "pass",
+      "observed": "The finished exact-main `0.178.4` tree passed `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs generated-portals`, `make validate`, `make remote-validate`, and `make pre-push-gate`. The shared remote runner still hit the familiar remote `atlas-lint` connectivity timeout, but both `make remote-validate` and `make pre-push-gate` reran only the unresolved `atlas-lint` check locally and merged that passing fallback into the recorded gate status, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-validate-repo-r2-0.178.4.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-make-validate-r1-0.178.4.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-remote-validate-r1-0.178.4.txt`, and `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-pre-push-gate-r1-0.178.4.txt`."
     }
   ],
   "evidence_refs": [
@@ -78,11 +83,16 @@
     "receipts/live-applies/evidence/2026-04-04-ws-0339-validate-repo-r4-0.178.3.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0339-release-status-r2-0.178.3.json",
     "receipts/live-applies/evidence/2026-04-04-ws-0339-release-dry-run-r2-0.178.3.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-release-lower-level-r2-0.178.4.txt"
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-release-lower-level-r2-0.178.4.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-validate-repo-r2-0.178.4.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-make-validate-r1-0.178.4.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-remote-validate-r1-0.178.4.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-pre-push-gate-r1-0.178.4.txt"
   ],
   "notes": [
     "This receipt becomes the canonical exact-main audit trail for ADR 0339 while preserving the earlier branch-local receipt as the first proof that the reference deployment sample flow worked on the rebased latest-main tree.",
     "Repository release `0.178.4` is the first numbered repo version to include ADR 0339.",
-    "ADR 0339 changes fork bootstrap assets, onboarding packs, and repository validation behavior rather than a running service on the current deployment, so the platform version context remains `0.130.98`."
+    "ADR 0339 changes fork bootstrap assets, onboarding packs, and repository validation behavior rather than a running service on the current deployment, so the platform version context remains `0.130.98`.",
+    "The final exact-main validation bundle succeeded end to end; only the already-known remote-runner `atlas-lint` connectivity issue required the repo's built-in unresolved-check local fallback before the merged gate status could be marked passing."
   ]
 }

@@ -43,6 +43,8 @@
 
 - Exact-main release `0.178.4` now carries ADR 0339 from `origin/main@c48bdae01f6fe4d0df004e247baa8a3d9f6e013b`, with the canonical mainline receipt `receipts/live-applies/2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply.json`.
 - The protected canonical-truth and release-management surfaces were refreshed from the exact-main release tree rather than through branch-local hand edits, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-release-lower-level-r2-0.178.4.txt`.
+- The finished exact-main tree also passed `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs generated-portals`, `make validate`, `make remote-validate`, and `make pre-push-gate`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-validate-repo-r2-0.178.4.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-make-validate-r1-0.178.4.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-remote-validate-r1-0.178.4.txt`, and `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-pre-push-gate-r1-0.178.4.txt`.
+- The remote build host still hit the familiar remote `atlas-lint` connectivity timeout during `make remote-validate` and `make pre-push-gate`, but the built-in unresolved-check fallback reran only `atlas-lint` locally and merged that passing result into the recorded gate status.
 - Repository release `0.178.4` now includes ADR 0339 while the platform version context remains `0.130.98` because this is a repo-only onboarding and automation change.
 
 ## Notes
