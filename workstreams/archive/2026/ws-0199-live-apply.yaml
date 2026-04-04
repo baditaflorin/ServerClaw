@@ -5,7 +5,7 @@ status: merged
 owner: codex
 branch: codex/ws-0199-live-apply
 worktree_path: .worktrees/ws-0199-live-apply
-doc: .worktrees/ws-0199-live-apply/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md
+doc: docs/workstreams/adr-0199-outline-living-knowledge-wiki.md
 depends_on:
 - adr-0043-openbao
 - adr-0056-keycloak

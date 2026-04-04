@@ -4,7 +4,7 @@ title: Short-lived credentials and internal mTLS
 status: live_applied
 owner: codex
 branch: codex/adr-0047-short-lived-creds
-worktree_path: ../proxmox_florin_server-short-lived-creds
+worktree_path: .worktrees/adr-0047-short-lived-creds
 doc: docs/workstreams/adr-0047-short-lived-creds.md
 depends_on:
 - adr-0042-step-ca

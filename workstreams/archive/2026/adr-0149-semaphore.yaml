@@ -4,7 +4,7 @@ title: Semaphore for Ansible job management UI and API
 status: implemented
 owner: codex
 branch: codex/adr-0149-semaphore
-worktree_path: ../proxmox_florin_server-adr-0149
+worktree_path: .worktrees/adr-0149-semaphore
 doc: docs/workstreams/adr-0149-semaphore.md
 depends_on:
 - adr-0023-docker-runtime

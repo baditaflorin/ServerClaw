@@ -11,6 +11,12 @@ Use this runbook when creating, editing, validating, or releasing workstream met
 - archived workstreams: `workstreams/archive/<year>/<workstream-id>.yaml`
 - generated compatibility artifact for existing readers: `workstreams.yaml`
 
+## Path Rules
+
+- committed `worktree_path` and `doc` values must stay repository-relative and must not escape the repo with `..`
+- the default portable worktree convention is `.worktrees/<workstream-id>`
+- local operators may create a worktree elsewhere for their own session, but committed metadata should normalize back to the in-repo portable path
+
 ## Status Guidance
 
 - if a workstream is merge-ready but waiting on an external publication window or shared validation infrastructure, keep `status: ready_for_merge` and record the specific blocker under `blockers:` instead of downgrading the release-candidate status
@@ -42,6 +48,12 @@ python3 scripts/workstream_registry.py --list
 3. regenerate `workstreams.yaml`
 4. run `./scripts/validate_repo.sh agent-standards data-models workstream-surfaces`
 5. create the matching git worktree with `scripts/create-workstream.sh <workstream-id>` if you need a fresh checkout
+
+Keep the committed metadata fork-first and repository-relative:
+
+- `worktree_path` should stay under `.worktrees/` or another repo-local path
+- `doc` should point at the canonical in-repo document under `docs/`
+- do not commit `../...`, `/absolute/...`, or another worktree's nested `.../docs/...` path
 
 Each active workstream may edit its own shard directly. The compatibility artifact remains shared and generated.
 

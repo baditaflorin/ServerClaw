@@ -4,7 +4,7 @@ title: Agent observation loop and autonomous drift detection
 status: merged
 owner: codex
 branch: codex/adr-0071-agent-observation-loop
-worktree_path: ../proxmox_florin_server-agent-observation-loop
+worktree_path: .worktrees/adr-0071-agent-observation-loop
 doc: docs/workstreams/adr-0071-agent-observation-loop.md
 depends_on:
 - adr-0044-windmill

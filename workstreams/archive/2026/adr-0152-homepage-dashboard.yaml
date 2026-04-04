@@ -4,7 +4,7 @@ title: Homepage for unified service dashboard
 status: live_applied
 owner: codex
 branch: codex/integration-0152-homepage-v3
-worktree_path: ../proxmox_florin_server-homepage-mainline-v2
+worktree_path: .worktrees/adr-0152-homepage-dashboard
 doc: docs/workstreams/adr-0152-homepage.md
 depends_on:
 - adr-0075-service-capability-catalog

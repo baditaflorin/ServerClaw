@@ -4,7 +4,7 @@ title: ADR 0105 live apply from latest origin/main
 status: merged
 owner: codex
 branch: codex/ws-0105-live-apply
-worktree_path: ../proxmox_florin_server-ws-0105-live-apply
+worktree_path: .worktrees/ws-0105-live-apply
 doc: docs/workstreams/ws-0105-live-apply.md
 depends_on:
 - adr-0011-monitoring

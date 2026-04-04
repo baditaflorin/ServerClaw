@@ -4,7 +4,7 @@ title: Docker build VM build count and duration telemetry
 status: live_applied
 owner: codex
 branch: codex/adr-0028-build-telemetry
-worktree_path: ../proxmox_florin_server-build-telemetry
+worktree_path: .worktrees/adr-0028-build-telemetry
 doc: docs/workstreams/adr-0028-build-telemetry.md
 depends_on:
 - adr-0011-monitoring

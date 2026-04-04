@@ -4,7 +4,7 @@ title: Service capability catalog
 status: merged
 owner: codex
 branch: codex/adr-0075-service-capability-catalog
-worktree_path: ../proxmox_florin_server-service-capability-catalog
+worktree_path: .worktrees/adr-0075-service-capability-catalog
 doc: docs/workstreams/adr-0075-service-capability-catalog.md
 depends_on:
 - adr-0064-health-probe-contracts

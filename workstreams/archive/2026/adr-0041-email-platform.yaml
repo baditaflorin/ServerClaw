@@ -4,7 +4,7 @@ title: Dockerized mail platform with API, Grafana telemetry, and failover delive
 status: merged
 owner: codex
 branch: codex/adr-0040-email-platform
-worktree_path: ../proxmox_florin_server-email-platform
+worktree_path: .worktrees/adr-0041-email-platform
 doc: docs/workstreams/adr-0041-email-platform.md
 depends_on:
 - adr-0011-monitoring

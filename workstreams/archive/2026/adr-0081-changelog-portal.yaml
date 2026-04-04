@@ -4,7 +4,7 @@ title: Platform changelog and deployment history portal
 status: live_applied
 owner: codex
 branch: codex/adr-0081-changelog-portal
-worktree_path: ../proxmox_florin_server-changelog-portal
+worktree_path: .worktrees/adr-0081-changelog-portal
 doc: docs/workstreams/adr-0081-changelog-portal.md
 depends_on:
 - adr-0074-ops-portal

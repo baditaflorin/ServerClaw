@@ -4,7 +4,7 @@ title: Intent deduplication and conflict resolution
 status: merged
 owner: codex
 branch: codex/adr-0127-conflict-mgmt
-worktree_path: ../proxmox_florin_server-adr-0127
+worktree_path: .worktrees/adr-0127-intent-conflict-resolution
 doc: docs/workstreams/adr-0127-intent-conflict-resolution.md
 depends_on:
 - adr-0112-goal-compiler

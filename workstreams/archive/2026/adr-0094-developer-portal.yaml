@@ -4,7 +4,7 @@ title: Developer portal and service documentation site
 status: live_applied
 owner: codex
 branch: codex/adr-0094-developer-portal
-worktree_path: ../proxmox_florin_server-developer-portal
+worktree_path: .worktrees/adr-0094-developer-portal
 doc: docs/workstreams/adr-0094-developer-portal.md
 depends_on:
 - adr-0021-nginx-edge

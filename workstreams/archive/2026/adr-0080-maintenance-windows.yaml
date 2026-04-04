@@ -4,7 +4,7 @@ title: Maintenance window and change suppression protocol
 status: merged
 owner: codex
 branch: codex/adr-0080-maintenance-windows
-worktree_path: ../proxmox_florin_server-maintenance-windows
+worktree_path: .worktrees/adr-0080-maintenance-windows
 doc: docs/workstreams/adr-0080-maintenance-windows.md
 depends_on:
 - adr-0058-nats-event-bus

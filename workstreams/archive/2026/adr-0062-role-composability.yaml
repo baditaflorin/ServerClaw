@@ -4,7 +4,7 @@ title: Ansible role composability and DRY defaults
 status: merged
 owner: codex
 branch: codex/adr-0062-role-composability
-worktree_path: ../proxmox_florin_server-role-composability
+worktree_path: .worktrees/adr-0062-role-composability
 doc: docs/workstreams/adr-0062-role-composability.md
 depends_on: []
 conflicts_with: []

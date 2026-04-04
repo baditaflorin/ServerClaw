@@ -4,7 +4,7 @@ title: Ollama for local LLM inference
 status: live_applied
 owner: codex
 branch: codex/adr-0145-ollama
-worktree_path: ../proxmox_florin_server-ollama
+worktree_path: .worktrees/adr-0145-ollama
 doc: docs/workstreams/adr-0145-ollama.md
 depends_on:
 - adr-0060-open-webui-workbench

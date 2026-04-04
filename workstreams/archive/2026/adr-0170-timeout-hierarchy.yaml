@@ -4,7 +4,7 @@ title: Platform-wide timeout hierarchy
 status: live_applied
 owner: codex
 branch: codex/adr-0170-timeout-hierarchy
-worktree_path: ../proxmox_florin_server-timeout-hierarchy
+worktree_path: .worktrees/adr-0170-timeout-hierarchy
 doc: docs/workstreams/adr-0170-timeout-hierarchy.md
 depends_on:
 - adr-0092-platform-api-gateway

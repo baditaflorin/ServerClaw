@@ -4,7 +4,7 @@ title: Packer VM template pipeline
 status: merged
 owner: codex
 branch: codex/adr-0084-packer-vm-template-pipeline
-worktree_path: ../proxmox_florin_server-adr-0084
+worktree_path: .worktrees/adr-0084-packer-pipeline
 doc: docs/workstreams/adr-0084-packer-pipeline.md
 depends_on:
 - adr-0082-remote-build-gateway

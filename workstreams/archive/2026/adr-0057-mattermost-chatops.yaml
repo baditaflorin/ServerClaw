@@ -4,7 +4,7 @@ title: Mattermost for ChatOps and operator-agent collaboration
 status: live_applied
 owner: codex
 branch: codex/adr-0057-mattermost-chatops
-worktree_path: ../proxmox_florin_server-mattermost-chatops
+worktree_path: .worktrees/adr-0057-mattermost-chatops
 doc: docs/workstreams/adr-0057-mattermost-chatops.md
 depends_on:
 - adr-0045-communication-lanes

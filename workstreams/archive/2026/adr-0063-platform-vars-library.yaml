@@ -4,7 +4,7 @@ title: Centralised vars and computed facts library
 status: merged
 owner: codex
 branch: codex/adr-0063-platform-vars-library
-worktree_path: ../proxmox_florin_server-platform-vars-library
+worktree_path: .worktrees/adr-0063-platform-vars-library
 doc: docs/workstreams/adr-0063-platform-vars-library.md
 depends_on:
 - adr-0062-role-composability

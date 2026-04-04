@@ -4,7 +4,7 @@ title: Speculative parallel execution with compensating transactions
 status: merged
 owner: codex
 branch: codex/live-apply-0159
-worktree_path: ../proxmox_florin_server-live-apply-0159
+worktree_path: .worktrees/adr-0159-speculative-parallel-execution
 doc: docs/workstreams/adr-0159-speculative-parallel-execution.md
 depends_on:
 - adr-0115-mutation-ledger

@@ -4,7 +4,7 @@ title: Run namespace partitioning for parallel tooling
 status: merged
 owner: codex
 branch: codex/adr-0177-namespace-partitioning
-worktree_path: ../worktree-adr-0177-namespace-partitioning
+worktree_path: .worktrees/adr-0177-run-namespace-partitioning
 doc: docs/workstreams/adr-0177-run-namespace-partitioning.md
 depends_on:
 - adr-0156-agent-session-workspace-isolation

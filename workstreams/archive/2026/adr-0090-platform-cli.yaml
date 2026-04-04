@@ -4,7 +4,7 @@ title: Unified platform CLI
 status: merged
 owner: codex
 branch: codex/adr-0090-platform-cli
-worktree_path: ../proxmox_florin_server-platform-cli
+worktree_path: .worktrees/adr-0090-platform-cli
 doc: docs/workstreams/adr-0090-platform-cli.md
 depends_on:
 - adr-0075-service-capability-catalog

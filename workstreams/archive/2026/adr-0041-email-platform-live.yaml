@@ -4,7 +4,7 @@ title: Dockerized mail platform live rollout
 status: live_applied
 owner: codex
 branch: codex/adr-0041-email-platform-live
-worktree_path: ../proxmox_florin_server-email-platform-live
+worktree_path: .worktrees/adr-0041-email-platform-live
 doc: docs/workstreams/adr-0041-email-platform-live.md
 depends_on:
 - adr-0041-email-platform

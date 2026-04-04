@@ -47,6 +47,15 @@ WORKTREE_PATH_RAW="${WORKSTREAM_FIELDS[1]}"
 WORKSTREAM_DOC="${WORKSTREAM_FIELDS[2]}"
 ABS_WORKTREE_PATH="$(cd "$REPO_ROOT" && ruby -e 'puts File.expand_path(ARGV[0])' "$WORKTREE_PATH_RAW")"
 
+case "$ABS_WORKTREE_PATH" in
+  "$REPO_ROOT" | "$REPO_ROOT"/*)
+    ;;
+  *)
+    echo "Invalid worktree metadata for $WORKSTREAM_ID: $WORKTREE_PATH_RAW resolves outside the repository" >&2
+    exit 1
+    ;;
+esac
+
 if git -C "$REPO_ROOT" worktree list --porcelain | grep -Fxq "worktree $ABS_WORKTREE_PATH"; then
   cat <<EOF
 Worktree already exists:

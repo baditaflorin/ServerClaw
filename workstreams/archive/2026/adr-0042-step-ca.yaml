@@ -4,7 +4,7 @@ title: step-ca for SSH and internal TLS
 status: live_applied
 owner: codex
 branch: codex/adr-0042-step-ca
-worktree_path: ../proxmox_florin_server-step-ca
+worktree_path: .worktrees/adr-0042-step-ca
 doc: docs/workstreams/adr-0042-step-ca.md
 depends_on:
 - adr-0014-tailscale

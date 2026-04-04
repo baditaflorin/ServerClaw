@@ -176,7 +176,7 @@ latest_adrs:
     implementation_status: Implemented
     concern: agent-discovery
     path: docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
-    implemented_on: '2026-04-02'
+    implemented_on: '2026-04-04'
   - adr: '0336'
     title: Public Entrypoint Leakage Validation
     implementation_status: Implemented

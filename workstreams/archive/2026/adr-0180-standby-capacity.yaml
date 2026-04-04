@@ -4,8 +4,8 @@ title: Standby capacity reservation and placement rules
 status: implemented
 owner: codex
 branch: codex/adr-0180-standby-capacity
-worktree_path: ../worktree-adr-0180-standby-capacity
-doc: ../worktree-adr-0180-standby-capacity/docs/workstreams/adr-0180-standby-capacity-reservation-and-placement-rules.md
+worktree_path: .worktrees/adr-0180-standby-capacity
+doc: docs/workstreams/adr-0180-standby-capacity-reservation-and-placement-rules.md
 depends_on:
 - adr-0105-capacity-model
 - adr-0157-per-vm-concurrency-budget

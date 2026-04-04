@@ -4,7 +4,7 @@ title: Event-sourced mutation ledger
 status: merged
 owner: codex
 branch: codex/adr-0115-mutation-ledger
-worktree_path: ../proxmox_florin_server-mutation-ledger
+worktree_path: .worktrees/adr-0115-mutation-ledger
 doc: docs/workstreams/adr-0115-mutation-ledger.md
 depends_on:
 - adr-0058-nats-event-bus

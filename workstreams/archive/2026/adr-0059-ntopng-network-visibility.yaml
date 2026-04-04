@@ -4,7 +4,7 @@ title: ntopng for private network flow visibility
 status: live_applied
 owner: codex
 branch: codex/adr-0059-ntopng
-worktree_path: ../proxmox_florin_server-ntopng
+worktree_path: .worktrees/adr-0059-ntopng-network-visibility
 doc: docs/workstreams/adr-0059-ntopng-network-visibility.md
 depends_on:
 - adr-0011-monitoring

@@ -4,7 +4,7 @@ title: Security posture reporting and benchmark drift
 status: merged
 owner: codex
 branch: codex/adr-0102-security-posture
-worktree_path: ../proxmox_florin_server-security-posture
+worktree_path: .worktrees/adr-0102-security-posture-reporting
 doc: docs/workstreams/adr-0102-security-posture-reporting.md
 depends_on:
 - adr-0006-security-baseline

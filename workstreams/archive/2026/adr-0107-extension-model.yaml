@@ -4,7 +4,7 @@ title: Platform extension model for adding new services
 status: merged
 owner: codex
 branch: codex/adr-0107-extension-model
-worktree_path: ../proxmox_florin_server-extension-model
+worktree_path: .worktrees/adr-0107-extension-model
 doc: docs/workstreams/adr-0107-extension-model.md
 depends_on:
 - adr-0033-service-catalog

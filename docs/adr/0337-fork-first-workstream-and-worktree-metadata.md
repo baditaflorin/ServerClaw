@@ -2,9 +2,9 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.177.143
-- Implemented In Platform Version: N/A
-- Implemented On: 2026-04-02
+- Implemented In Repo Version: not yet
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-04-04
 - Date: 2026-04-02
 - Tags: workstreams, worktrees, metadata, portability, forks
 

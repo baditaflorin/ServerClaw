@@ -4,8 +4,8 @@ title: Failover rehearsal gate live apply
 status: live_applied
 owner: codex
 branch: codex/ws-0188-live-apply
-worktree_path: ../worktree-ws-0188-live-apply
-doc: ../worktree-ws-0188-live-apply/docs/workstreams/ws-0188-live-apply.md
+worktree_path: .worktrees/ws-0188-live-apply
+doc: docs/workstreams/ws-0188-live-apply.md
 depends_on:
 - adr-0098-postgres-ha
 - adr-0099-restore-verification

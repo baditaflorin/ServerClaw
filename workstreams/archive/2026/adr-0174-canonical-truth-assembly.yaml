@@ -4,7 +4,7 @@ title: Integration-only canonical truth assembly
 status: merged
 owner: codex
 branch: codex/adr-0174-canonical-truth
-worktree_path: ../worktree-adr-0174-canonical-truth
+worktree_path: .worktrees/adr-0174-canonical-truth-assembly
 doc: docs/workstreams/adr-0174-canonical-truth-assembly.md
 depends_on:
 - adr-0110-platform-versioning

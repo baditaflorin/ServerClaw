@@ -4,7 +4,7 @@ title: Unified search across platform services
 status: ready
 owner: codex
 branch: codex/adr-0095-unified-search
-worktree_path: ../proxmox_florin_server-unified-search
+worktree_path: .worktrees/adr-0095-unified-search
 doc: docs/workstreams/adr-0095-unified-search.md
 depends_on:
 - adr-0092-platform-api-gateway

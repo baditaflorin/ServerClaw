@@ -4,7 +4,7 @@ title: Workstream surface ownership manifest
 status: live_applied
 owner: codex
 branch: codex/adr-0173-ownership-manifest
-worktree_path: ../worktree-adr-0173-ownership-manifest
+worktree_path: .worktrees/adr-0173-workstream-surface-ownership-manifest
 doc: docs/workstreams/adr-0173-workstream-surface-ownership-manifest.md
 depends_on:
 - adr-0156-agent-session-workspace-isolation

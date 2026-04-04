@@ -4,7 +4,7 @@ title: OpenTelemetry traces and service maps with Grafana Tempo
 status: live_applied
 owner: codex
 branch: codex/adr-0053-tempo-traces
-worktree_path: ../proxmox_florin_server-tempo-traces
+worktree_path: .worktrees/adr-0053-tempo-traces
 doc: docs/workstreams/adr-0053-tempo-traces.md
 depends_on:
 - adr-0011-monitoring

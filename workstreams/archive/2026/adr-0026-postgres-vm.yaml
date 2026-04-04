@@ -4,7 +4,7 @@ title: Dedicated PostgreSQL VM baseline
 status: merged
 owner: codex
 branch: codex/adr-0025-postgres-vm
-worktree_path: ../proxmox_florin_server-postgres-vm
+worktree_path: .worktrees/adr-0026-postgres-vm
 doc: docs/workstreams/adr-0026-postgres-vm.md
 depends_on: []
 conflicts_with: []

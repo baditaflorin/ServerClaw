@@ -1,0 +1,94 @@
+id: ws-0337-live-apply
+adr: '0337'
+title: Re-verify fork-first workstream metadata from the latest origin/main
+status: live_applied
+owner: codex
+branch: codex/ws-0337-live-apply
+worktree_path: .worktrees/ws-0337-live-apply
+doc: docs/workstreams/ws-0337-live-apply.md
+depends_on:
+- adr-0167-agent-handoff-and-context-preservation
+- adr-0326-workstream-registry-shards
+- adr-0331-repository-relative-paths-for-public-metadata-and-generated-docs
+- adr-0337-fork-first-workstream-and-worktree-metadata
+conflicts_with: []
+shared_surfaces:
+- workstreams/policy.yaml
+- workstreams/active/*.yaml
+- workstreams/archive/**/*.yaml
+- workstreams.yaml
+- docs/workstreams/ws-0337-live-apply.md
+- docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
+- docs/adr/.index.yaml
+- docs/adr/index/**/*.yaml
+- docs/runbooks/workstream-registry-shards.md
+- docs/status/history/merged-workstreams.md
+- platform/repo.py
+- scripts/create-workstream.sh
+- scripts/scaffold_service.py
+- scripts/validate_public_entrypoints.py
+- scripts/validate_repository_data_models.py
+- scripts/workstream_surface_ownership.py
+- tests/test_scaffold_service.py
+- tests/test_validate_public_entrypoints.py
+- tests/test_workstream_surface_ownership.py
+- receipts/live-applies/2026-04-04-adr-0337-fork-first-workstream-metadata-live-apply.json
+- receipts/live-applies/2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply.json
+- receipts/live-applies/evidence/2026-04-04-ws-0337-*
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry_source
+    paths:
+    - workstreams/policy.yaml
+    - workstreams/active/*.yaml
+    - workstreams/archive/**/*.yaml
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws0337_docs
+    paths:
+    - docs/workstreams/ws-0337-live-apply.md
+    - docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
+    - docs/runbooks/workstream-registry-shards.md
+    mode: exclusive
+  - id: ws0337_adr_index
+    paths:
+    - docs/adr/.index.yaml
+    - docs/adr/index/**/*.yaml
+    mode: shared_contract
+    contract: adr-index-generator-v1
+  - id: ws0337_generated_history
+    paths:
+    - docs/status/history/merged-workstreams.md
+    mode: shared_contract
+    contract: latest-main-generated-truth-v1
+  - id: ws0337_repo_relative_validation
+    paths:
+    - platform/repo.py
+    - scripts/create-workstream.sh
+    - scripts/scaffold_service.py
+    - scripts/validate_public_entrypoints.py
+    - scripts/validate_repository_data_models.py
+    - scripts/workstream_surface_ownership.py
+    - tests/test_scaffold_service.py
+    - tests/test_validate_public_entrypoints.py
+    - tests/test_workstream_surface_ownership.py
+    mode: exclusive
+  - id: ws0337_live_apply_receipts
+    paths:
+    - receipts/live-applies/2026-04-04-adr-0337-fork-first-workstream-metadata-live-apply.json
+    - receipts/live-applies/2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply.json
+    - receipts/live-applies/evidence/2026-04-04-ws-0337-*
+    mode: exclusive
+blockers: []
+ready_to_merge: true
+live_applied: true
+canonical_truth:
+  changelog_entry: hardens ADR 0337 by normalizing the sharded workstream registry
+    to repo-root-relative metadata, preserving canonical in-repo workstream doc
+    links, hardening worktree creation and service scaffolding against out-of-repo
+    paths, and re-verifying the portability gate from the latest realistic mainline
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts:
+    fork_first_workstream_metadata: 2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply

@@ -4,7 +4,7 @@ title: NetBox for topology, IPAM, and inventory
 status: live_applied
 owner: codex
 branch: codex/adr-0054-netbox-topology
-worktree_path: ../proxmox_florin_server-netbox-topology
+worktree_path: .worktrees/adr-0054-netbox-topology
 doc: docs/workstreams/adr-0054-netbox-topology.md
 depends_on: []
 conflicts_with: []

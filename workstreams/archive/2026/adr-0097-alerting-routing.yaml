@@ -4,7 +4,7 @@ title: Alerting routing and on-call runbook model
 status: merged
 owner: codex
 branch: codex/adr-0097-alerting-routing
-worktree_path: ../.worktrees/adr-0097-alerting-routing
+worktree_path: .worktrees/adr-0097-alerting-routing
 doc: docs/workstreams/adr-0097-alerting-routing.md
 depends_on:
 - adr-0011-monitoring

@@ -4,7 +4,7 @@ title: Receipt-driven resilience architecture bundle
 status: merged
 owner: codex
 branch: codex/ws-0264-receipt-driven-resilience-adrs-r3
-worktree_path: ../proxmox_florin_server
+worktree_path: .worktrees/ws-0264-receipt-driven-resilience-adrs
 doc: docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md
 depends_on:
 - adr-0036-live-apply-receipts

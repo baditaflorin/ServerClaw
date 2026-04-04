@@ -4,7 +4,7 @@ title: Declarative VM provisioning with OpenTofu
 status: merged
 owner: codex
 branch: codex/adr-0085-opentofu-vm-lifecycle
-worktree_path: ../proxmox_florin_server-opentofu-vm-lifecycle
+worktree_path: .worktrees/adr-0085-opentofu-vm-lifecycle
 doc: docs/workstreams/adr-0085-opentofu-vm-lifecycle.md
 depends_on:
 - adr-0082-remote-build-gateway

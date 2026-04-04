@@ -4,7 +4,7 @@ title: Multi-environment live lanes
 status: live_applied
 owner: codex
 branch: codex/adr-0183-main-live-apply
-worktree_path: ../worktree-adr-0183-main-live-apply
+worktree_path: .worktrees/adr-0183-multi-environment-live-lanes
 doc: docs/workstreams/adr-0183-multi-environment-live-lanes.md
 depends_on:
 - adr-0072-staging-production-topology

@@ -4,7 +4,7 @@ title: Cross-workstream interface contracts
 status: merged
 owner: codex
 branch: codex/adr-0175-interface-contracts
-worktree_path: ../worktree-adr-0175-interface-contracts
+worktree_path: .worktrees/adr-0175-cross-workstream-interface-contracts
 doc: docs/workstreams/adr-0175-cross-workstream-interface-contracts.md
 depends_on:
 - adr-0079-playbook-decomposition

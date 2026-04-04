@@ -4,7 +4,7 @@ title: NATS JetStream for internal event bus and agent coordination
 status: ready
 owner: codex
 branch: codex/adr-0058-nats-event-bus
-worktree_path: ../proxmox_florin_server-nats-event-bus
+worktree_path: .worktrees/adr-0058-nats-event-bus
 doc: docs/workstreams/adr-0058-nats-event-bus.md
 depends_on:
 - adr-0045-communication-lanes

@@ -4,7 +4,7 @@ title: Portainer for read-mostly Docker runtime operations
 status: live_applied
 owner: codex
 branch: codex/adr-0055-portainer-operations
-worktree_path: ../proxmox_florin_server-portainer-operations
+worktree_path: .worktrees/adr-0055-portainer-operations
 doc: docs/workstreams/adr-0055-portainer-operations.md
 depends_on:
 - adr-0023-docker-runtime
