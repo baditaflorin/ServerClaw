@@ -4,7 +4,7 @@ title: Centralized log aggregation with Grafana Loki
 status: live_applied
 owner: codex
 branch: codex/adr-0052-loki-logs
-worktree_path: ../proxmox_florin_server-loki-logs
+worktree_path: .worktrees/adr-0052-loki-logs
 doc: docs/workstreams/adr-0052-loki-logs.md
 depends_on:
 - adr-0011-monitoring

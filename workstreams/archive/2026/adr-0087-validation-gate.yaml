@@ -4,7 +4,7 @@ title: Repository validation gate
 status: merged
 owner: codex
 branch: codex/adr-0087-validation-gate
-worktree_path: ../proxmox_florin_server-validation-gate
+worktree_path: .worktrees/adr-0087-validation-gate
 doc: docs/workstreams/adr-0087-validation-gate.md
 depends_on:
 - adr-0082-remote-build-gateway

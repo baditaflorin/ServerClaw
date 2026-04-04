@@ -4,7 +4,7 @@ title: Staging and production environment topology
 status: merged
 owner: codex
 branch: codex/adr-0072-staging-production-topology
-worktree_path: ../proxmox_florin_server-adr-0072-staging-production-topology
+worktree_path: .worktrees/adr-0072-staging-production-topology
 doc: docs/workstreams/adr-0072-staging-production-topology.md
 depends_on:
 - adr-0074-ops-portal

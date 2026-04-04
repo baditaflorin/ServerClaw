@@ -37,6 +37,7 @@ CHECKLIST = [
     ("grafana_dashboard", "Grafana dashboard"),
     ("slo_definition", "SLO definition"),
     ("compose_secrets", "Compose secrets injection"),
+    ("dependency_health_gate", "Dependency health gate"),
     ("data_catalog", "Data catalog entry"),
     ("alert_rules", "Alert rules"),
     ("runbook", "Runbook"),
@@ -348,6 +349,12 @@ def role_dir_for(service_id: str, context: dict[str, Any], profile: dict[str, An
     return None
 
 
+def load_compose_template(role_compose_path: Path | None) -> str | None:
+    if role_compose_path is None or not role_compose_path.exists():
+        return None
+    return role_compose_path.read_text(encoding="utf-8")
+
+
 def item_result(
     item_id: str,
     label: str,
@@ -378,6 +385,7 @@ def evaluate_service(service_id: str, *, today: dt.date | None = None, context: 
     suppressions = merged_suppressions(profile, context["suppression_presets"])
     role_dir = role_dir_for(service_id, context, profile)
     role_compose_path = None if role_dir is None else role_dir / "templates" / "docker-compose.yml.j2"
+    compose_template = load_compose_template(role_compose_path)
     slug = slugify_service_id(service_id)
     dashboard_path = REPO_ROOT / profile.get("dashboard_file", f"config/grafana/dashboards/{slug}.json")
     alert_rule_path = REPO_ROOT / profile.get("alert_rule_file", f"config/alertmanager/rules/{slug}.yml")
@@ -397,10 +405,13 @@ def evaluate_service(service_id: str, *, today: dt.date | None = None, context: 
     slo_entries = [entry for entry in context["slos"] if entry.get("service_id", entry.get("service")) == service_id]
     data_entries = [entry for entry in context["data_stores"] if entry.get("service") == service_id]
 
-    compose_secrets_present = False
-    if role_compose_path is not None and role_compose_path.exists():
-        compose_template = role_compose_path.read_text(encoding="utf-8")
-        compose_secrets_present = "openbao-agent" in compose_template and "env_file:" in compose_template
+    compose_secrets_present = bool(
+        compose_template is not None and "openbao-agent" in compose_template and "env_file:" in compose_template
+    )
+    compose_declares_dependencies = bool(compose_template is not None and "depends_on:" in compose_template)
+    compose_has_dependency_health_gate = bool(
+        compose_template is not None and "condition: service_healthy" in compose_template
+    )
 
     items = [
         item_result(
@@ -508,6 +519,19 @@ def evaluate_service(service_id: str, *, today: dt.date | None = None, context: 
             required=bool(profile["requires_compose_secrets"]),
             present=compose_secrets_present,
             detail=str(role_compose_path.relative_to(REPO_ROOT)) if role_compose_path else "not a compose service",
+            suppressions=suppressions,
+            today=today,
+        ),
+        item_result(
+            "dependency_health_gate",
+            "Dependency health gate",
+            required=bool(profile["service_type"] == "compose" and compose_declares_dependencies),
+            present=compose_has_dependency_health_gate,
+            detail=(
+                str(role_compose_path.relative_to(REPO_ROOT))
+                if role_compose_path is not None
+                else "not a compose service"
+            ),
             suppressions=suppressions,
             today=today,
         ),

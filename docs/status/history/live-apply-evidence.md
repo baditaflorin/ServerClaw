@@ -9,11 +9,14 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | Capability | Receipt |
 | --- | --- |
 | `woodpecker` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `searxng` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `public_github_readiness` | `2026-04-04-adr-0330-public-github-readiness-mainline-live-apply` |
 | `plausible_analytics` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `outline` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `jupyterhub` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `fork_first_workstream_metadata` | `2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply` |
+| `dozzle` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `directus` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `adr_discovery` | `2026-04-04-adr-0325-adr-discovery-mainline-live-apply` |
 | `workstream_registry_shards` | `2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply` |
@@ -146,12 +149,10 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `capacity_classes` | `2026-03-27-adr-0192-capacity-classes-live-apply` |
 | `budgeted_workflow_scheduler` | `2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply` |
 | `security_posture_reporting` | `2026-03-26-adr-0102-security-posture-live-apply` |
-| `searxng` | `2026-03-26-adr-0148-searxng-live-apply` |
 | `platform_event_taxonomy` | `2026-03-26-adr-0124-platform-event-taxonomy-live-apply` |
 | `observation_to_action_closure_loop` | `2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply` |
 | `langfuse` | `2026-03-26-adr-0146-langfuse-live-apply` |
 | `gitea` | `2026-03-26-adr-0143-gitea-live-apply` |
-| `dozzle` | `2026-03-26-adr-0150-dozzle-live-apply` |
 | `dependency_graph_runtime` | `2026-03-26-adr-0117-dependency-graph-live-apply` |
 | `deadlock_detector` | `2026-03-26-adr-0162-deadlock-detector-live-apply` |
 | `config_merge` | `2026-03-26-adr-0158-config-merge-live-apply` |

@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 48
+total_adrs: 49
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -805,8 +805,7 @@ adrs:
     summary: Workstream and worktree metadata must be fork-first and repository-relative.
     filename: 0337-fork-first-workstream-and-worktree-metadata.md
     path: docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
-    implemented_in_repo_version: 0.177.143
-    implemented_on: '2026-04-02'
+    implemented_on: '2026-04-04'
   - adr: 0338
     title: Public Documentation Tiers And Private History Boundaries
     status: Accepted
@@ -975,4 +974,26 @@ adrs:
     filename: 0345-layered-operator-tool-separation.md
     path: docs/adr/0345-layered-operator-tool-separation.md
     implemented_in_repo_version: 0.178.5
+    implemented_on: '2026-04-04'
+  - adr: '0346'
+    title: Compose Dependency Health Gates As A Repo-Enforced Resilience Baseline
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-04'
+    concern: ci-cd
+    keywords:
+      - compose
+      - docker
+      - readiness
+      - resilience
+      - validation
+      - dependency
+      - health
+      - gates
+      - as
+      - repo-enforced
+    summary: We will treat health-gated compose dependencies as a repository resilience
+    filename: 0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md
+    path: docs/adr/0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md
+    implemented_in_platform_version: 0.130.98
     implemented_on: '2026-04-04'

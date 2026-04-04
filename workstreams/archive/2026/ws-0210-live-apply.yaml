@@ -4,7 +4,7 @@ title: Live apply canonical publication models over adapter-shaped vendor fields
 status: merged
 owner: codex
 branch: codex/ws-0210-live-apply
-worktree_path: ../worktree-ws-0210-live-apply
+worktree_path: .worktrees/ws-0210-live-apply
 doc: docs/workstreams/ws-0210-live-apply.md
 depends_on:
 - adr-0074-human-navigation-and-platform-ops-portal

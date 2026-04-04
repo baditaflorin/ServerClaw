@@ -4,7 +4,7 @@ title: Platform capacity model and resource quota enforcement
 status: merged
 owner: codex
 branch: codex/ws-0105-live-apply
-worktree_path: ../proxmox_florin_server-ws-0105-live-apply
+worktree_path: .worktrees/adr-0105-capacity-model
 doc: docs/workstreams/adr-0105-capacity-model.md
 depends_on:
 - adr-0010-vm-topology

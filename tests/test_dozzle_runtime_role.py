@@ -76,4 +76,5 @@ def test_compose_template_defines_hub_remote_agents_and_healthchecks() -> None:
     assert '/dozzle' in template
     assert '":{{ dozzle_runtime_hub_port }}"' in template
     assert '":{{ dozzle_runtime_agent_port }}"' in template
+    assert "condition: service_healthy" in template
     assert "ports:" not in template

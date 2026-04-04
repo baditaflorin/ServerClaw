@@ -4,7 +4,7 @@ title: Postgres high availability and automated failover
 status: merged
 owner: codex
 branch: codex/adr-0098-postgres-ha
-worktree_path: ../proxmox_florin_server-postgres-ha
+worktree_path: .worktrees/adr-0098-postgres-ha
 doc: docs/workstreams/adr-0098-postgres-ha.md
 depends_on:
 - adr-0026-postgres-vm

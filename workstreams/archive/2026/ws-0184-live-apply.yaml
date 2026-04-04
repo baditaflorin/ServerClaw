@@ -4,7 +4,7 @@ title: Failure-domain labels and anti-affinity policy live apply
 status: live_applied
 owner: codex
 branch: codex/ws-0184-live-apply
-worktree_path: ../worktree-ws-0184-live-apply
+worktree_path: .worktrees/ws-0184-live-apply
 doc: docs/workstreams/ws-0184-live-apply.md
 depends_on:
 - adr-0179-service-redundancy-tier-matrix

@@ -4,7 +4,7 @@ title: Uptime Kuma rollout on the Docker runtime VM
 status: merged
 owner: codex
 branch: codex/adr-0022-uptime-kuma
-worktree_path: ../proxmox_florin_server-uptime-kuma
+worktree_path: .worktrees/adr-0027-uptime-kuma
 doc: docs/workstreams/adr-0027-uptime-kuma.md
 depends_on: []
 conflicts_with: []

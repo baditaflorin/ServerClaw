@@ -4,7 +4,7 @@ title: Remote build execution gateway
 status: live_applied
 owner: codex
 branch: codex/adr-0082-remote-build-gateway
-worktree_path: ../proxmox_florin_server-remote-build-gateway
+worktree_path: .worktrees/adr-0082-remote-build-gateway
 doc: docs/workstreams/adr-0082-remote-build-gateway.md
 depends_on: []
 conflicts_with: []

@@ -4,7 +4,7 @@ title: Control-plane communication lanes
 status: live_applied
 owner: codex
 branch: codex/adr-0045-communication-lanes
-worktree_path: ../proxmox_florin_server-communication-lanes
+worktree_path: .worktrees/adr-0045-communication-lanes
 doc: docs/workstreams/adr-0045-communication-lanes.md
 depends_on:
 - adr-0014-tailscale

@@ -4,7 +4,7 @@ title: Off-host witness and control metadata replication
 status: live_applied
 owner: codex
 branch: codex/adr-0181-metadata-replication
-worktree_path: ../worktree-adr-0181-metadata-replication
+worktree_path: .worktrees/adr-0181-off-host-witness
 doc: docs/workstreams/adr-0181-off-host-witness-replication.md
 depends_on:
 - adr-0051-control-plane-recovery

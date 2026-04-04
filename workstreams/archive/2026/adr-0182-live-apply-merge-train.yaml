@@ -4,7 +4,7 @@ title: Live apply merge train and rollback bundle
 status: merged
 owner: codex
 branch: codex/adr-0182-live-apply-landing
-worktree_path: ../worktree-adr-0182-live-apply-landing
+worktree_path: .worktrees/adr-0182-live-apply-merge-train
 doc: docs/workstreams/adr-0182-live-apply-merge-train-and-rollback-bundle.md
 depends_on:
 - adr-0155-intent-queue-with-release-triggered-scheduling

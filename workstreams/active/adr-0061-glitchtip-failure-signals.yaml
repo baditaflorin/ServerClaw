@@ -4,7 +4,7 @@ title: GlitchTip for application exceptions and task failures
 status: ready
 owner: codex
 branch: codex/adr-0061-glitchtip-failure-signals
-worktree_path: ../proxmox_florin_server-glitchtip-failure-signals
+worktree_path: .worktrees/adr-0061-glitchtip-failure-signals
 doc: docs/workstreams/adr-0061-glitchtip-failure-signals.md
 depends_on:
 - adr-0026-postgres-vm

@@ -65,3 +65,59 @@ def test_validate_public_entrypoints_scans_generated_onboarding_packs(tmp_path: 
 
     assert any("build/onboarding/agent-core.yaml" in finding for finding in findings)
     assert any("deployment-specific hostname label" in finding for finding in findings)
+
+
+def test_validate_public_entrypoints_rejects_parent_relative_workstream_metadata(tmp_path: Path) -> None:
+    module = load_module("validate_public_entrypoints_workstreams", "scripts/validate_public_entrypoints.py")
+    _write_required_entrypoints(tmp_path)
+    (tmp_path / "workstreams.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "delivery_model": {"workstream_doc_root": "docs/workstreams"},
+                "release_policy": {"breaking_change_criteria": "config/version-semantics.json"},
+                "workstreams": [
+                    {
+                        "id": "ws-1000-test",
+                        "worktree_path": "../outside",
+                        "doc": "../outside/docs/workstreams/ws-1000-test.md",
+                    }
+                ],
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    module.REPO_ROOT = tmp_path
+    findings = module.validate_public_entrypoints()
+
+    assert any("worktree_path must stay within the repository root" in finding for finding in findings)
+    assert any("doc must stay within the repository root" in finding for finding in findings)
+
+
+def test_validate_public_entrypoints_rejects_workstream_path_escapes(tmp_path: Path) -> None:
+    module = load_module("validate_public_entrypoints_paths", "scripts/validate_public_entrypoints.py")
+    _write_required_entrypoints(tmp_path)
+    (tmp_path / "workstreams.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "delivery_model": {"workstream_doc_root": "docs/workstreams"},
+                "release_policy": {"breaking_change_criteria": "config/version-semantics.json"},
+                "workstreams": [
+                    {
+                        "id": "ws-0337-live-apply",
+                        "worktree_path": "../outside-repo",
+                        "doc": "../outside-repo/docs/workstreams/ws-0337-live-apply.md",
+                    }
+                ],
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    module.REPO_ROOT = tmp_path
+    findings = module.validate_public_entrypoints()
+
+    assert "workstreams.yaml: workstreams[0].worktree_path must stay within the repository root" in findings
+    assert "workstreams.yaml: workstreams[0].doc must stay within the repository root" in findings

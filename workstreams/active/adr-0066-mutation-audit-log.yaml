@@ -4,7 +4,7 @@ title: Structured mutation audit log
 status: ready
 owner: codex
 branch: codex/adr-0066-mutation-audit-log
-worktree_path: ../proxmox_florin_server-mutation-audit-log
+worktree_path: .worktrees/adr-0066-mutation-audit-log
 doc: docs/workstreams/adr-0066-mutation-audit-log.md
 depends_on:
 - adr-0052-loki-logs

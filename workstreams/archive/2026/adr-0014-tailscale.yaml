@@ -4,7 +4,7 @@ title: Tailscale private access rollout
 status: live_applied
 owner: codex
 branch: codex/adr-0014-tailscale
-worktree_path: ../proxmox_florin_server-tailscale
+worktree_path: .worktrees/adr-0014-tailscale
 doc: docs/workstreams/adr-0014-tailscale.md
 depends_on: []
 conflicts_with: []

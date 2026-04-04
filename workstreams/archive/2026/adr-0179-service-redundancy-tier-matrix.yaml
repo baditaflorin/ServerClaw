@@ -4,7 +4,7 @@ title: Service redundancy tier matrix
 status: merged
 owner: codex
 branch: codex/adr-0179-redundancy-tier
-worktree_path: ../worktree-adr-0179-redundancy-tier
+worktree_path: .worktrees/adr-0179-service-redundancy-tier-matrix
 doc: docs/workstreams/adr-0179-service-redundancy-tier-matrix.md
 depends_on:
 - adr-0075-service-capability-catalog

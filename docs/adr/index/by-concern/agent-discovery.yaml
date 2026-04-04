@@ -407,5 +407,4 @@ adrs:
     summary: Workstream and worktree metadata must be fork-first and repository-relative.
     filename: 0337-fork-first-workstream-and-worktree-metadata.md
     path: docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
-    implemented_in_repo_version: 0.177.143
-    implemented_on: '2026-04-02'
+    implemented_on: '2026-04-04'

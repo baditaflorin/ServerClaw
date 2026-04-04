@@ -4,7 +4,7 @@ title: Ansible collection packaging
 status: merged
 owner: codex
 branch: codex/adr-0086-ansible-collections
-worktree_path: ../proxmox_florin_server-ansible-collections
+worktree_path: .worktrees/adr-0086-ansible-collections
 doc: docs/workstreams/adr-0086-ansible-collections.md
 depends_on:
 - adr-0082-remote-build-gateway

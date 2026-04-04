@@ -4,7 +4,7 @@ title: Excalidraw auto generated architecture diagrams
 status: live_applied
 owner: codex
 branch: codex/ws-0202-live-apply
-worktree_path: ../worktree-ws-0202-live-apply
+worktree_path: .worktrees/ws-0202-live-apply
 doc: docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md
 depends_on:
 - adr-0038-generated-status-docs

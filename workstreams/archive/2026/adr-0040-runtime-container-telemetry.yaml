@@ -4,7 +4,7 @@ title: Docker runtime container telemetry
 status: live_applied
 owner: codex
 branch: codex/adr-0040-runtime-container-telemetry
-worktree_path: ../proxmox_florin_server-runtime-container-telemetry
+worktree_path: .worktrees/adr-0040-runtime-container-telemetry
 doc: docs/workstreams/adr-0040-runtime-container-telemetry.md
 depends_on:
 - adr-0011-monitoring

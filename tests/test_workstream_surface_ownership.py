@@ -132,6 +132,23 @@ def test_validate_registry_rejects_shared_contract_mismatch() -> None:
         ownership.validate_registry(registry)
 
 
+def test_validate_registry_rejects_parent_relative_metadata() -> None:
+    registry = build_registry()
+    registry["workstreams"][0]["doc"] = "../docs/workstreams/adr-0173.md"
+    registry["workstreams"][0]["worktree_path"] = "../outside"
+
+    with pytest.raises(ValueError, match="must stay within the repository root"):
+        ownership.validate_registry(registry)
+
+
+def test_validate_registry_rejects_workstream_path_escape() -> None:
+    registry = build_registry()
+    registry["workstreams"][0]["doc"] = "../outside-repo/docs/workstreams/adr-0173.md"
+
+    with pytest.raises(ValueError, match="must stay within the repository root"):
+        ownership.validate_registry(registry)
+
+
 def test_validate_branch_allows_declared_mutable_surfaces(tmp_path: Path) -> None:
     repo = init_repo(tmp_path)
     write(repo / "scripts" / "workstream_surface_ownership.py", "print('changed')\n")

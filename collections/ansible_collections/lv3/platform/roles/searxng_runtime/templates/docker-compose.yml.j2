@@ -12,13 +12,22 @@ services:
     restart: unless-stopped
     volumes:
       - {{ searxng_runtime_valkey_data_dir }}:/data
+    healthcheck:
+      test:
+        - CMD
+        - valkey-cli
+        - ping
+      interval: 30s
+      timeout: 5s
+      retries: 5
 
   searxng:
     image: {{ searxng_runtime_image }}
     container_name: {{ searxng_runtime_container_name }}
     restart: unless-stopped
     depends_on:
-      - valkey
+      valkey:
+        condition: service_healthy
     ports:
       - "{{ searxng_runtime_port }}:8080"
     volumes:

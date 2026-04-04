@@ -4,7 +4,7 @@ title: Private-first API publication model
 status: merged
 owner: codex
 branch: codex/adr-0049-private-first-api-publication-model
-worktree_path: ../proxmox_florin_server-adr-0049
+worktree_path: .worktrees/adr-0049-private-api-publication
 doc: docs/workstreams/adr-0049-private-api-publication.md
 depends_on:
 - adr-0045-communication-lanes

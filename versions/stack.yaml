@@ -19,7 +19,7 @@ live_apply_evidence:
     artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
     docker_publication: 2026-03-30-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
-    dozzle: 2026-03-26-adr-0150-dozzle-live-apply
+    dozzle: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
     falco: 2026-04-03-adr-0300-falco-mainline-live-apply
     gitea: 2026-03-26-adr-0143-gitea-live-apply
     grist: 2026-04-01-adr-0279-grist-mainline-live-apply
@@ -73,7 +73,7 @@ live_apply_evidence:
     security_posture_reporting: 2026-03-26-adr-0102-security-posture-live-apply
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     semaphore: 2026-03-25-adr-0149-semaphore-live-apply
-    searxng: 2026-03-26-adr-0148-searxng-live-apply
+    searxng: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
     ops_portal: 2026-04-03-adr-0309-task-oriented-information-architecture-mainline-live-apply
     ollama: 2026-03-27-adr-0176-inventory-sharding-mainline-live-apply
     operator_access: 2026-04-02-adr-0315-canonical-page-states-mainline-live-apply
@@ -171,6 +171,7 @@ live_apply_evidence:
     sectional_agent_discovery: 2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply
     root_summary_rollover: 2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply
     adr_discovery: 2026-04-04-adr-0325-adr-discovery-mainline-live-apply
+    fork_first_workstream_metadata: 2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply
     public_github_readiness: 2026-04-04-adr-0330-public-github-readiness-mainline-live-apply
 desired_state:
   host_id: proxmox_florin

@@ -4,7 +4,7 @@ title: Dedicated backup VM with local PBS
 status: merged
 owner: codex
 branch: codex/adr-0026-backup-vm
-worktree_path: ../proxmox_florin_server-backup-vm
+worktree_path: .worktrees/adr-0029-backup-vm
 doc: docs/workstreams/adr-0029-backup-vm.md
 depends_on:
 - adr-0020-backups

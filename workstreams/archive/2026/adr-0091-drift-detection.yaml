@@ -4,7 +4,7 @@ title: Continuous drift detection and reconciliation
 status: merged
 owner: codex
 branch: codex/adr-0091-drift-detection
-worktree_path: ../proxmox_florin_server-drift-detection
+worktree_path: .worktrees/adr-0091-drift-detection
 doc: docs/workstreams/adr-0091-drift-detection.md
 depends_on:
 - adr-0058-nats-event-bus

@@ -4,7 +4,7 @@ title: Headscale mesh control plane
 status: merged
 owner: codex
 branch: codex/adr-0144-headscale
-worktree_path: ../proxmox_florin_server-headscale
+worktree_path: .worktrees/adr-0144-headscale
 doc: docs/workstreams/adr-0144-headscale.md
 depends_on:
 - adr-0014-tailscale

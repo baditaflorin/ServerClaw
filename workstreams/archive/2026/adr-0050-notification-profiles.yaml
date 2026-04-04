@@ -4,7 +4,7 @@ title: Transactional email and notification profiles
 status: merged
 owner: codex
 branch: codex/adr-0050-notification-profiles
-worktree_path: ../proxmox_florin_server-notification-profiles
+worktree_path: .worktrees/adr-0050-notification-profiles
 doc: docs/workstreams/adr-0050-notification-profiles.md
 depends_on:
 - adr-0041-email-platform

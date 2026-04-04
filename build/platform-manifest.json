@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.3",
   "platform_version": "0.130.98",
-  "generated_at": "2026-04-04T13:38:32Z",
-  "next_refresh_at": "2026-04-04T14:38:32Z",
+  "generated_at": "2026-04-04T15:26:19Z",
+  "next_refresh_at": "2026-04-04T16:26:19Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -26,7 +26,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.40:9093",
-        "last_live_apply": "2026-04-03T00:00:00Z"
+        "last_live_apply": "2026-04-04T00:00:00Z"
       },
       "api_gateway": {
         "service_name": "Platform API Gateway",
@@ -255,7 +255,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://grafana.lv3.org",
-        "last_live_apply": "2026-04-03T00:00:00Z",
+        "last_live_apply": "2026-04-04T00:00:00Z",
         "slo_status": "unknown"
       },
       "grist": {
@@ -500,7 +500,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:8013",
-        "last_live_apply": "2026-04-03T00:00:00Z"
+        "last_live_apply": "2026-04-04T00:00:00Z"
       },
       "ntfy": {
         "service_name": "ntfy",
@@ -707,7 +707,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://realtime.lv3.org",
-        "last_live_apply": "2026-04-03T00:00:00Z",
+        "last_live_apply": "2026-04-04T00:00:00Z",
         "slo_status": "unknown"
       },
       "redpanda": {
@@ -847,7 +847,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://uptime.lv3.org",
-        "last_live_apply": "2026-04-03T00:00:00Z",
+        "last_live_apply": "2026-04-04T00:00:00Z",
         "slo_status": "unknown"
       },
       "vaultwarden": {

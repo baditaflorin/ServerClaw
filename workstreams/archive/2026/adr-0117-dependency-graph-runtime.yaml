@@ -4,7 +4,7 @@ title: Service dependency graph as first-class runtime
 status: live_applied
 owner: codex
 branch: codex/ws-0117-live-apply
-worktree_path: ../proxmox_florin_server_ws-0117-live-apply
+worktree_path: .worktrees/adr-0117-dependency-graph-runtime
 doc: docs/workstreams/adr-0117-dependency-graph-runtime.md
 depends_on:
 - adr-0048-command-catalog

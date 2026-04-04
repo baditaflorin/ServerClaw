@@ -17,6 +17,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - implements ADR 0327 by splitting the root agent-discovery registries into sectional source files, generating concise public-safe root entrypoints, tracking generated onboarding packs under build/onboarding, and validating the discovery artifacts plus public entrypoints through the rebased exact-main automation gates
 - implements ADR 0328 by enforcing explicit line budgets for the root README, changelog, and release-note index, rolling older release and status rows into generated archive ledgers, and teaching the validation plus release automation to keep those bounded summaries current
 - closes out ADR 0330 public GitHub readiness by making the controller-local secret contract repo-relative, adding fork-first example inventory and provider/publication profiles, and surfacing the public reference tier through discovery-driven onboarding
+- hardens ADR 0337 by normalizing the sharded workstream registry to repo-root-relative metadata, preserving canonical in-repo workstream doc links, hardening worktree creation and service scaffolding against out-of-repo paths, and re-verifying the portability gate from the latest realistic mainline
+- enforces health-gated compose dependency startup as part of service completeness, fixes the low-risk runtime templates that were still using blind startup ordering, and records the remaining bounded exception explicitly
 
 ## Latest Release
 

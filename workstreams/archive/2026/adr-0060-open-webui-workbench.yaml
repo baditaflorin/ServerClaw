@@ -4,7 +4,7 @@ title: Open WebUI for operator and agent workbench
 status: live_applied
 owner: codex
 branch: codex/adr-0060-open-webui-workbench
-worktree_path: ../proxmox_florin_server-open-webui-workbench
+worktree_path: .worktrees/adr-0060-open-webui-workbench
 doc: docs/workstreams/adr-0060-open-webui-workbench.md
 depends_on:
 - adr-0044-windmill

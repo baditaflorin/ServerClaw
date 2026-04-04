@@ -8,6 +8,8 @@ This generated ledger preserves the full merged and live-applied workstream hist
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0346` | Enforce health-gated compose dependencies for more predictable service recovery | `live_applied` | [ws-0332-resilience-predictability.md](../../workstreams/ws-0332-resilience-predictability.md) |
+| `0337` | Re-verify fork-first workstream metadata from the latest origin/main | `live_applied` | [ws-0337-live-apply.md](../../workstreams/ws-0337-live-apply.md) |
 | `0330` | Close out public GitHub readiness on the latest origin/main | `live_applied` | [ws-0330-main-closeout.md](../../workstreams/ws-0330-main-closeout.md) |
 | `0328` | Implement size-budgeted root summaries and automatic rollover ledgers | `live_applied` | [ws-0328-live-apply.md](../../workstreams/ws-0328-live-apply.md) |
 | `0327` | Live apply sectional agent discovery registries and generated onboarding packs from latest origin/main | `live_applied` | [ws-0327-live-apply.md](../../workstreams/ws-0327-live-apply.md) |
@@ -282,12 +284,12 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0196` | ADR 0196 live apply from latest origin/main | `merged` | [ws-0196-live-apply.md](../../workstreams/ws-0196-live-apply.md) |
 | `0187` | ADR 0187 live apply from latest origin/main | `live_applied` | [ws-0187-live-apply.md](../../workstreams/ws-0187-live-apply.md) |
 | `0204` | Architecture governance bundle for self-correction, clean boundaries, and vendor replaceability | `merged` | [adr-0204-architecture-governance.md](../../workstreams/adr-0204-architecture-governance.md) |
-| `0188` | Failover rehearsal gate live apply | `live_applied` | [ws-0188-live-apply.md](../../../../worktree-ws-0188-live-apply/docs/workstreams/ws-0188-live-apply.md) |
+| `0188` | Failover rehearsal gate live apply | `live_applied` | [ws-0188-live-apply.md](../../workstreams/ws-0188-live-apply.md) |
 | `0190` | ADR 0190 live apply from latest origin/main | `merged` | [ws-0190-live-apply.md](../../workstreams/ws-0190-live-apply.md) |
 | `0186` | Live apply ADR 0186 prewarmed fixture pools and lease-based ephemeral capacity | `merged` | [ws-0186-live-apply.md](../../workstreams/ws-0186-live-apply.md) |
-| `0199` | Outline living knowledge wiki | `merged` | [adr-0199-outline-living-knowledge-wiki.md](../../../.worktrees/ws-0199-live-apply/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md) |
+| `0199` | Outline living knowledge wiki | `merged` | [adr-0199-outline-living-knowledge-wiki.md](../../workstreams/adr-0199-outline-living-knowledge-wiki.md) |
 | `0184` | Failure-domain labels and anti-affinity policy live apply | `live_applied` | [ws-0184-live-apply.md](../../workstreams/ws-0184-live-apply.md) |
-| `0185` | Branch-scoped ephemeral preview environments | `merged` | [adr-0185-branch-scoped-ephemeral-preview-environments.md](../../../.worktrees/ws-0185-live-apply/docs/workstreams/adr-0185-branch-scoped-ephemeral-preview-environments.md) |
+| `0185` | Branch-scoped ephemeral preview environments | `merged` | [adr-0185-branch-scoped-ephemeral-preview-environments.md](../../workstreams/adr-0185-branch-scoped-ephemeral-preview-environments.md) |
 | `0202` | Excalidraw auto generated architecture diagrams | `live_applied` | [adr-0202-excalidraw-auto-generated-architecture-diagrams.md](../../workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md) |
 | `0192` | Live apply ADR 0192 capacity classes for standby, recovery, and preview workloads | `merged` | [ws-0192-live-apply.md](../../workstreams/ws-0192-live-apply.md) |
 | `0191` | Immutable guest replacement for stateful and edge services | `live_applied` | [ws-0191-live-apply.md](../../workstreams/ws-0191-live-apply.md) |

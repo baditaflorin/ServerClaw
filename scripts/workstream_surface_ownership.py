@@ -15,6 +15,7 @@ from typing import Any
 import yaml
 
 from controller_automation_toolkit import repo_path
+from platform.repo import validate_repo_relative_path
 from platform.workstream_registry import find_workstream
 
 
@@ -65,17 +66,11 @@ def _require_str(value: Any, path: str) -> str:
 
 
 def _normalized_repo_pattern(pattern: str, path: str) -> str:
-    pattern = _require_str(pattern, path).replace("\\", "/").strip()
-    if pattern.startswith("/"):
-        raise ValueError(f"{path} must be repository-relative, not absolute")
-    return pattern
+    return validate_repo_relative_path(_require_str(pattern, path), label=path)
 
 
 def _normalized_repo_path(value: Any, path: str) -> str:
-    normalized = _require_str(value, path).replace("\\", "/").strip()
-    if normalized.startswith("/"):
-        raise ValueError(f"{path} must be repository-relative, not absolute")
-    return normalized
+    return validate_repo_relative_path(_require_str(value, path), label=path)
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:

@@ -4,7 +4,7 @@ title: Observation-to-action closure loop
 status: live_applied
 owner: codex
 branch: codex/adr-0126-logic-loop-clean
-worktree_path: ../proxmox_florin_server-adr-0126-logic-loop-clean
+worktree_path: .worktrees/adr-0126-observation-to-action-closure-loop
 doc: docs/workstreams/adr-0126-observation-to-action-closure-loop.md
 depends_on:
 - adr-0048-command-catalog

@@ -4,7 +4,7 @@ title: Retrieval-augmented context for platform queries
 status: live_applied
 owner: codex
 branch: codex/adr-0070-rag-platform-context
-worktree_path: ../proxmox_florin_server-rag-platform-context
+worktree_path: .worktrees/adr-0070-rag-platform-context
 doc: docs/workstreams/adr-0070-rag-platform-context.md
 depends_on:
 - adr-0044-windmill

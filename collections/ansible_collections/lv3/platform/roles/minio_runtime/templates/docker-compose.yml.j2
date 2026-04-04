@@ -20,6 +20,13 @@ services:
       - {{ minio_env_file | dirname }}:{{ minio_env_file | dirname }}:rw
     extra_hosts:
       - host.docker.internal:host-gateway
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ minio_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
 
   minio:
     image: {{ minio_image }}
@@ -27,7 +34,7 @@ services:
     restart: unless-stopped
     depends_on:
       openbao-agent:
-        condition: service_started
+        condition: service_healthy
     env_file:
       - {{ minio_env_file }}
     command:

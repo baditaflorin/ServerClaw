@@ -4,7 +4,7 @@ title: Guest network policy enforcement
 status: live_applied
 owner: codex
 branch: codex/adr-0067-guest-network-policy
-worktree_path: ../proxmox_florin_server-guest-network-policy
+worktree_path: .worktrees/adr-0067-guest-network-policy
 doc: docs/workstreams/adr-0067-guest-network-policy.md
 depends_on:
 - adr-0012-proxmox-host-bridge-and-nat-network

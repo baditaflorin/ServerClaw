@@ -4,8 +4,8 @@ title: Vulnerability budgets and image-host freshness promotion gates
 status: ready_for_merge
 owner: codex
 branch: codex/adr-0269-live-apply
-worktree_path: ../worktree-adr-0269-live-apply
-doc: ../worktree-adr-0269-live-apply/docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+worktree_path: .worktrees/ws-0269-live-apply
+doc: docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
 depends_on:
 - adr-0068-container-image-policy-and-supply-chain-integrity
 - adr-0102-security-posture-reporting

@@ -4,7 +4,7 @@ title: Compose-managed runtime stacks
 status: merged
 owner: codex
 branch: codex/adr-0025-docker-compose-stacks
-worktree_path: ../proxmox_florin_server-docker-compose-stacks
+worktree_path: .worktrees/adr-0025-docker-compose-stacks
 doc: docs/workstreams/adr-0025-docker-compose-stacks.md
 depends_on: []
 conflicts_with: []

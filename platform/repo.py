@@ -5,7 +5,7 @@ import re
 import subprocess
 import sys
 from ast import literal_eval
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Final
 
 
@@ -15,6 +15,7 @@ MAKEFILE_PATH: Final[Path] = REPO_ROOT / "Makefile"
 README_PATH: Final[Path] = REPO_ROOT / "README.md"
 RECEIPTS_DIR: Final[Path] = REPO_ROOT / "receipts" / "live-applies"
 MAKE_TARGET_PATTERN: Final[re.Pattern[str]] = re.compile(r"^([A-Za-z0-9_-]+):")
+WINDOWS_ABSOLUTE_PATH_PATTERN: Final[re.Pattern[str]] = re.compile(r"^[A-Za-z]:/")
 PYYAML_INSTALL_HINT: Final[str] = (
     "Missing dependency: PyYAML. Run via 'uvx --from pyyaml python ...' or "
     "'uv run --with pyyaml ...'."
@@ -75,6 +76,17 @@ def resolve_repo_local_path(path_value: str | Path, *, repo_root: Path = REPO_RO
         return path
     marker_index = path.parts.index(marker) + 1
     return _shared_repo_root(Path(repo_root)).joinpath(marker, *path.parts[marker_index:])
+
+
+def validate_repo_relative_path(value: str, *, label: str = "path") -> str:
+    normalized = value.replace("\\", "/").strip()
+    if not normalized:
+        raise ValueError(f"{label} must be a non-empty string")
+    if normalized.startswith("/") or normalized.startswith("~") or WINDOWS_ABSOLUTE_PATH_PATTERN.match(normalized):
+        raise ValueError(f"{label} must be repository-relative, not absolute")
+    if ".." in PurePosixPath(normalized).parts:
+        raise ValueError(f"{label} must stay within the repository root")
+    return normalized
 
 
 WORKFLOW_CATALOG_PATH: Final[Path] = repo_path("config", "workflow-catalog.json")

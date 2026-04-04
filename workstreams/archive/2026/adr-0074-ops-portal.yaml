@@ -4,7 +4,7 @@ title: Platform operations portal
 status: live_applied
 owner: codex
 branch: codex/adr-0074-ops-portal
-worktree_path: ../proxmox_florin_server__adr_0074
+worktree_path: .worktrees/adr-0074-ops-portal
 doc: docs/workstreams/adr-0074-ops-portal.md
 depends_on:
 - adr-0075-service-capability-catalog

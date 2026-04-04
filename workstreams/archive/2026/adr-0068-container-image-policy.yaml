@@ -4,7 +4,7 @@ title: Container image policy and supply chain integrity
 status: merged
 owner: codex
 branch: codex/adr-0068-container-image-policy
-worktree_path: ../proxmox_florin_server-container-image-policy
+worktree_path: .worktrees/adr-0068-container-image-policy
 doc: docs/workstreams/adr-0068-container-image-policy.md
 depends_on:
 - adr-0023-docker-runtime

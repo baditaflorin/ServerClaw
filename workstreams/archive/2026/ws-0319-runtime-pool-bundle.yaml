@@ -5,7 +5,7 @@ title: Split the overloaded shared runtime into pool-scoped lanes with higher me
 status: merged
 owner: codex
 branch: codex/adr-0319-main-integration
-worktree_path: .worktrees/adr-0319-runtime-cells/.worktrees/adr-0319-main-integration
+worktree_path: .worktrees/ws-0319-runtime-pool-bundle
 doc: docs/workstreams/adr-0319-runtime-pool-partitioning-and-memory-autoscaling-bundle.md
 depends_on:
 - adr-0105-platform-capacity-model

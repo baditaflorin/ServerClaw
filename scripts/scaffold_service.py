@@ -365,7 +365,7 @@ def build_service_spec(args: argparse.Namespace, repo_paths: RepoPaths) -> Servi
     role_name = f"{service_id}_runtime"
     depends_on = tuple(sorted({item.strip().replace("-", "_") for item in args.depends_on.split(",") if item.strip()}))
     adr_id = discover_next_adr_id(repo_paths.adr_dir)
-    worktree_path = f"../proxmox_florin_server-{adr_id}-{name_slug}"
+    worktree_path = f".worktrees/adr-{adr_id}-{name_slug}"
     branch_name = f"codex/adr-{adr_id}-{name_slug}"
 
     internal_host = public_hostname if public_hostname and exposure == "private-only" else private_ip
@@ -613,7 +613,7 @@ def update_workstreams_registry(path: Path, spec: ServiceSpec) -> None:
             "owner": "codex",
             "branch": spec.branch_name,
             "worktree_path": spec.worktree_path,
-            "doc": str((path.parent / "docs" / "workstreams" / spec.workstream_filename).resolve()),
+            "doc": (Path("docs") / "workstreams" / spec.workstream_filename).as_posix(),
             "depends_on": ["adr-0062-role-composability", "adr-0075-service-capability-catalog", "adr-0076-subdomain-governance", "adr-0077-compose-secrets-injection"],
             "conflicts_with": [],
             "shared_surfaces": [

@@ -4,7 +4,7 @@ title: Health probe contracts for all services
 status: merged
 owner: codex
 branch: codex/adr-0064-health-probe-contracts
-worktree_path: ../proxmox_florin_server-health-probe-contracts
+worktree_path: .worktrees/adr-0064-health-probe-contracts
 doc: docs/workstreams/adr-0064-health-probe-contracts.md
 depends_on:
 - adr-0027-uptime-kuma

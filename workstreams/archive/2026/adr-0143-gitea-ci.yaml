@@ -4,7 +4,7 @@ title: Private Gitea with self-hosted CI
 status: merged
 owner: codex
 branch: codex/integration-0143-main-refresh-v2
-worktree_path: .worktrees/integration-0134-main/.worktrees/integration-0143-main-refresh-v2
+worktree_path: .worktrees/adr-0143-gitea-ci
 doc: docs/workstreams/adr-0143-gitea-ci.md
 depends_on:
 - adr-0044-windmill

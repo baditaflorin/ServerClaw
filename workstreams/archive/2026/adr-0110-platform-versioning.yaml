@@ -4,7 +4,7 @@ title: Platform versioning, release notes, and upgrade path
 status: merged
 owner: codex
 branch: codex/adr-0110-platform-versioning
-worktree_path: ../proxmox_florin_server-platform-versioning
+worktree_path: .worktrees/adr-0110-platform-versioning
 doc: docs/workstreams/adr-0110-platform-versioning.md
 depends_on:
 - adr-0008-versioning-model

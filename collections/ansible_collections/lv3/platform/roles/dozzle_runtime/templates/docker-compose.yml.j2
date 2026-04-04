@@ -6,7 +6,8 @@ services:
     restart: unless-stopped
     network_mode: host
     depends_on:
-      - dozzle-agent
+      dozzle-agent:
+        condition: service_healthy
     command:
       - "--addr"
       - ":{{ dozzle_runtime_hub_port }}"

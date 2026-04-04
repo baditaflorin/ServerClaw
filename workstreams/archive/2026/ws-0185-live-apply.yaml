@@ -5,7 +5,7 @@ status: merged
 owner: codex
 branch: codex/ws-0185-live-apply
 worktree_path: .worktrees/ws-0185-live-apply
-doc: .worktrees/ws-0185-live-apply/docs/workstreams/adr-0185-branch-scoped-ephemeral-preview-environments.md
+doc: docs/workstreams/adr-0185-branch-scoped-ephemeral-preview-environments.md
 depends_on:
 - adr-0088-ephemeral-fixtures
 - adr-0106-ephemeral-environment-lifecycle

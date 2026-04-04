@@ -10,8 +10,15 @@ from typing import Iterable
 
 import yaml
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
+from platform.repo import validate_repo_relative_path
+
+
 PUBLIC_ENTRYPOINTS = [
     Path("README.md"),
     Path("AGENTS.md"),
@@ -57,13 +64,12 @@ def _iter_pattern_hits(
     return findings
 
 
-def _is_absolute_path(value: str) -> bool:
-    normalized = value.strip().replace("\\", "/")
-    if not normalized:
-        return False
-    if normalized.startswith("/"):
-        return True
-    return bool(re.match(r"^[A-Za-z]:/", normalized))
+def _validate_repo_relative_field(value: str, label: str) -> str | None:
+    try:
+        validate_repo_relative_path(value, label=label)
+    except ValueError as exc:
+        return str(exc)
+    return None
 
 
 def _validate_text_surfaces() -> list[str]:
@@ -106,31 +112,43 @@ def _validate_workstream_registry() -> list[str]:
 
     delivery_model = payload.get("delivery_model", {}) or {}
     workstream_doc_root = str(delivery_model.get("workstream_doc_root", "")).strip()
-    if workstream_doc_root and _is_absolute_path(workstream_doc_root):
-        findings.append(
-            "workstreams.yaml: delivery_model.workstream_doc_root must be repository-relative"
+    if workstream_doc_root:
+        finding = _validate_repo_relative_field(
+            workstream_doc_root,
+            "workstreams.yaml: delivery_model.workstream_doc_root",
         )
+        if finding:
+            findings.append(finding)
 
     release_policy = payload.get("release_policy", {}) or {}
     breaking_change_criteria = str(release_policy.get("breaking_change_criteria", "")).strip()
-    if breaking_change_criteria and _is_absolute_path(breaking_change_criteria):
-        findings.append(
-            "workstreams.yaml: release_policy.breaking_change_criteria must be repository-relative"
+    if breaking_change_criteria:
+        finding = _validate_repo_relative_field(
+            breaking_change_criteria,
+            "workstreams.yaml: release_policy.breaking_change_criteria",
         )
+        if finding:
+            findings.append(finding)
 
     for index, workstream in enumerate(payload.get("workstreams", []) or []):
         if not isinstance(workstream, dict):
             continue
         worktree_path = str(workstream.get("worktree_path", "")).strip()
-        if worktree_path and _is_absolute_path(worktree_path):
-            findings.append(
-                f"workstreams.yaml: workstreams[{index}].worktree_path must be repository-relative"
+        if worktree_path:
+            finding = _validate_repo_relative_field(
+                worktree_path,
+                f"workstreams.yaml: workstreams[{index}].worktree_path",
             )
+            if finding:
+                findings.append(finding)
         doc = str(workstream.get("doc", "")).strip()
-        if doc and _is_absolute_path(doc):
-            findings.append(
-                f"workstreams.yaml: workstreams[{index}].doc must be repository-relative"
+        if doc:
+            finding = _validate_repo_relative_field(
+                doc,
+                f"workstreams.yaml: workstreams[{index}].doc",
             )
+            if finding:
+                findings.append(finding)
 
     return findings
 

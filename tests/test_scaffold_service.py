@@ -338,6 +338,11 @@ class ScaffoldServiceTests(unittest.TestCase):
             self.assertIn("## Replaceability Scorecard", adr_text)
             self.assertIn("## Vendor Exit Plan", adr_text)
 
+            workstreams = yaml.safe_load((root / "workstreams.yaml").read_text())
+            workstream_entry = workstreams["workstreams"][0]
+            self.assertEqual(workstream_entry["worktree_path"], ".worktrees/adr-0002-test-echo")
+            self.assertEqual(workstream_entry["doc"], "docs/workstreams/adr-0002-test-echo.md")
+
             service_catalog = json.loads((root / "config" / "service-capability-catalog.json").read_text())
             service_entry = next(item for item in service_catalog["services"] if item["id"] == "test_echo")
             self.assertEqual(service_entry["lifecycle_status"], "planned")

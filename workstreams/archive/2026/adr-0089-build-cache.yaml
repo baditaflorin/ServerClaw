@@ -4,7 +4,7 @@ title: Build artifact cache and layer registry
 status: merged
 owner: codex
 branch: codex/adr-0089-build-cache
-worktree_path: ../proxmox_florin_server-build-cache
+worktree_path: .worktrees/adr-0089-build-cache
 doc: docs/workstreams/adr-0089-build-cache.md
 depends_on:
 - adr-0082-remote-build-gateway

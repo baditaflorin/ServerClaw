@@ -4,7 +4,7 @@ title: Dry-run semantic diff engine
 status: merged
 owner: codex
 branch: codex/adr-0120-diff-engine
-worktree_path: ../proxmox_florin_server-diff-engine
+worktree_path: .worktrees/adr-0120-dry-run-diff-engine
 doc: docs/workstreams/adr-0120-dry-run-diff-engine.md
 depends_on:
 - adr-0048-command-catalog

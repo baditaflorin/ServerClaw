@@ -4,7 +4,7 @@ title: Inventory sharding and host-scoped Ansible execution
 status: live_applied
 owner: codex
 branch: codex/adr-0176-inventory-sharding
-worktree_path: ../worktree-adr-0176-inventory-sharding
+worktree_path: .worktrees/adr-0176-inventory-sharding
 doc: docs/workstreams/adr-0176-inventory-sharding.md
 depends_on:
 - adr-0048-command-catalog

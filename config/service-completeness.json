@@ -572,7 +572,10 @@
       "requires_oidc": false,
       "requires_secrets": true,
       "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service"
+      "suppression_preset": "legacy-service",
+      "suppressed_checks": {
+        "dependency_health_gate": "2026-05-15"
+      }
     },
     "plausible": {
       "service_type": "compose",

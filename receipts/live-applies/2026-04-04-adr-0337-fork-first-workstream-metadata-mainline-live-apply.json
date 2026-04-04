@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-04",
+  "recorded_on": "2026-04-04",
+  "recorded_at": "2026-04-04T13:41:33Z",
+  "recorded_by": "codex",
+  "source_commit": "09997dece8936de8062ee1790160a5e3059c2351",
+  "repo_version_context": "0.178.3",
+  "platform_version_context": "0.130.98",
+  "workflow_id": "adr-0337-fork-first-workstream-metadata-mainline-live-apply",
+  "adr": "0337",
+  "summary": "Replayed ADR 0337 onto the exact-main tree by carrying the repository-relative workstream metadata hardening from `codex/ws-0337-live-apply` onto `main`, regenerating canonical truth plus the generated coordination and manifest artifacts so the mainline receipt appears in the root status and live-apply ledgers, and re-verifying the workstream registry, public entrypoint, scaffold, receipt, manifest, and repo-validation automation from the latest realistic `origin/main@20a66bbf0` baseline while the current realistic repository version remains `0.178.3` because unrelated `controller_dependency_gap` waiver blockers still prevent a fresh numbered release cut.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    },
+    {
+      "kind": "artifact",
+      "name": "workstreams.yaml"
+    },
+    {
+      "kind": "artifact",
+      "name": "README.md"
+    },
+    {
+      "kind": "artifact",
+      "name": "changelog.md"
+    },
+    {
+      "kind": "artifact",
+      "name": "versions/stack.yaml"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Branch-local exact-main portability proof",
+      "result": "pass",
+      "observed": "The branch-local ADR 0337 receipt already proved the repo-relative metadata hardening end to end through workstream registry checks, public entrypoint validation, ownership validation, targeted tests, repository gate slices, and release-status capture, preserved in `receipts/live-applies/2026-04-04-adr-0337-fork-first-workstream-metadata-live-apply.json`."
+    },
+    {
+      "check": "Exact-main canonical truth and generated status replay",
+      "result": "pass",
+      "observed": "`python3 scripts/workstream_registry.py --write`, `uv run --with pyyaml python3 scripts/canonical_truth.py --write`, and `uv run --with pyyaml python3 scripts/generate_status_docs.py --write` refreshed the integrated `README.md`, `changelog.md`, `versions/stack.yaml`, and status-history surfaces so ADR 0337 is recorded from the finished mainline tree, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-generated-surfaces-r1.txt`."
+    },
+    {
+      "check": "Exact-main focused validation and regression coverage",
+      "result": "pass",
+      "observed": "The finished exact-main tree passed `python3 scripts/workstream_registry.py --check`, `python3 scripts/validate_public_entrypoints.py --check`, `uv run --with pyyaml python3 scripts/canonical_truth.py --check`, `uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate`, `uv run --with pyyaml --with jsonschema python3 scripts/live_apply_receipts.py --validate`, `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --check`, `uv run --with pytest --with pyyaml python -m pytest tests/test_scaffold_service.py tests/test_validate_public_entrypoints.py tests/test_workstream_surface_ownership.py -q`, and `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs`, preserved in the `2026-04-04-ws-0337-mainline-*.txt` evidence files."
+    },
+    {
+      "check": "Exact-main release readiness snapshot",
+      "result": "partial",
+      "observed": "`LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py status --json` still reports repository version `0.178.3`, platform version `0.130.98`, and a blocked release cut because three unrelated `controller_dependency_gap` waiver blockers remain open through `2026-04-06`; `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py --bump patch --dry-run` shows the next candidate release would be `0.178.4`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-release-status-r1.json` and `receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-release-dry-run-r1.txt`."
+    },
+    {
+      "check": "Supplemental pre-push gate replay",
+      "result": "partial",
+      "observed": "An attempted `make pre-push-gate` replay on the shared build host reached the full gate summary and confirmed that every reported lane except `atlas-lint` and the first `schema-validation` pass succeeded. The remote `schema-validation` failure was repaired in this workstream by regenerating `build/platform-manifest.json`, after which `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --check` passed locally; the remaining `atlas-lint` failure is an unrelated build-host networking plus Docker SDK error in the remote runner, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-pre-push-gate-r1.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "build/platform-manifest.json",
+    "changelog.md",
+    "docs/adr/0337-fork-first-workstream-and-worktree-metadata.md",
+    "docs/diagrams/agent-coordination-map.excalidraw",
+    "docs/runbooks/workstream-registry-shards.md",
+    "docs/status/history/live-apply-evidence.md",
+    "docs/status/history/merged-workstreams.md",
+    "docs/workstreams/ws-0337-live-apply.md",
+    "platform/repo.py",
+    "scripts/create-workstream.sh",
+    "scripts/scaffold_service.py",
+    "scripts/validate_public_entrypoints.py",
+    "scripts/validate_repository_data_models.py",
+    "scripts/workstream_surface_ownership.py",
+    "tests/test_scaffold_service.py",
+    "tests/test_validate_public_entrypoints.py",
+    "tests/test_workstream_surface_ownership.py",
+    "versions/stack.yaml",
+    "workstreams.yaml",
+    "workstreams/active/ws-0337-live-apply.yaml",
+    "receipts/live-applies/2026-04-04-adr-0337-fork-first-workstream-metadata-live-apply.json",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-generated-surfaces-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-registry-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-public-entrypoints-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-canonical-truth-check-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-data-models-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-live-apply-receipts-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-platform-manifest-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-platform-manifest-check-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-targeted-tests-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-validate-repo-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-release-status-r1.json",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-release-dry-run-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-git-diff-check-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-pre-push-gate-r1.txt"
+  ],
+  "notes": [
+    "This mainline receipt records the exact-main integration separately from the earlier branch-local live-apply mutation so the canonical-truth replay and the finished-tree validation remain independently auditable.",
+    "ADR 0337 is implemented on `main`, but `Implemented In Repo Version` remains `not yet` because the global release manager still refuses a fresh version cut while unrelated `controller_dependency_gap` waiver blockers remain active.",
+    "The current realistic repository version therefore remains `0.178.3`; the next candidate release would be `0.178.4` once those unrelated blockers clear.",
+    "The supplemental build-host `pre-push-gate` replay was useful for surfacing the stale platform manifest, but its remaining `atlas-lint` failure is unrelated to ADR 0337 and stems from the remote runner environment rather than the repo-relative metadata changes in this workstream."
+  ]
+}
