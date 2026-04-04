@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-04-adr-0339-reference-deployment-samples-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-04",
+  "recorded_on": "2026-04-04",
+  "recorded_at": "2026-04-04T14:22:59Z",
+  "recorded_by": "codex",
+  "source_commit": "5a315c3c2b13d290c211460eaf25251cda0ea0eb",
+  "repo_version_context": "0.178.3",
+  "platform_version_context": "0.130.98",
+  "workflow_id": "adr-0339-reference-deployment-samples-live-apply",
+  "adr": "0339",
+  "summary": "Live-applied ADR 0339 on `codex/ws-0339-live-apply` by adding governed reference deployment samples, replaceable provider profiles, a repo-managed render and validation helper, discovery and onboarding updates, and branch-local evidence proving the sample sources render cleanly and stay under repository governance, while leaving the protected canonical-truth refresh for the exact-main integration step.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    },
+    {
+      "kind": "artifact",
+      "name": "reference-deployments/"
+    },
+    {
+      "kind": "artifact",
+      "name": "config/reference-provider-profiles.yaml"
+    },
+    {
+      "kind": "artifact",
+      "name": "build/onboarding/fork-bootstrap.yaml"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Reference deployment source validation",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python3 scripts/reference_deployment_samples.py validate` passed and is preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-reference-samples-validate-r1-0.178.3.txt`."
+    },
+    {
+      "check": "Focused discovery and sample regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python3 -m pytest -q tests/test_reference_deployment_samples.py tests/test_generate_discovery_artifacts.py` passed and is preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-targeted-tests-r1-0.178.3.txt`."
+    },
+    {
+      "check": "Rendered sample inventory replay",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python3 scripts/reference_deployment_samples.py render --sample single-node-proxmox-lab --profile dedicated-public-edge --output-dir /tmp/ws-0339-render-check` succeeded, and `uv tool run --from ansible-core ansible-inventory -i /tmp/ws-0339-render-check/inventory/hosts.yml --list` loaded the rendered inventory, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-render-r1-0.178.3.txt` and `receipts/live-applies/evidence/2026-04-04-ws-0339-rendered-inventory-r1-0.178.3.json`."
+    },
+    {
+      "check": "Branch-local repository validation bundle",
+      "result": "pass",
+      "observed": "`./scripts/validate_repo.sh workstream-surfaces`, `python3 scripts/generate_diagrams.py --check`, and `./scripts/validate_repo.sh workstream-surfaces agent-standards data-models` passed after the ADR shard ownership and diagram refresh repair, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-workstream-surfaces-r1-0.178.3.txt` and `receipts/live-applies/evidence/2026-04-04-ws-0339-validate-repo-r3-0.178.3.txt`."
+    },
+    {
+      "check": "Release readiness snapshot",
+      "result": "partial",
+      "observed": "`python3 scripts/release_manager.py status --json` reports repo version `0.178.3`, platform version `0.130.98`, `0 workstreams in progress`, and only the pre-existing `controller_dependency_gap` waiver family blocking a fresh release cut through `2026-04-06`; `python3 scripts/release_manager.py --dry-run --bump patch` shows the next candidate release would be `0.178.4`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-release-status-r1-0.178.3.json` and `receipts/live-applies/evidence/2026-04-04-ws-0339-release-dry-run-r1-0.178.3.txt`."
+    },
+    {
+      "check": "Promotion-facing pre-push replay",
+      "result": "partial",
+      "observed": "The first post-promotion `make pre-push-gate` replay surfaced two branch-local correction items and one expected integration-only stop: the generated ADR shard families were not yet declared in the workstream ownership manifest, `docs/diagrams/agent-coordination-map.excalidraw` needed regeneration after the status promotion, and `generated-docs` correctly refused to proceed while `changelog.md` remained intentionally stale until exact-main canonical-truth assembly. That replay is preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-pre-push-gate-r1-0.178.3.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "reference-deployments/README.md",
+    "reference-deployments/catalog.yaml",
+    "config/reference-provider-profiles.yaml",
+    "build/onboarding/fork-bootstrap.yaml",
+    "scripts/reference_deployment_samples.py",
+    "scripts/validate_repository_data_models.py",
+    "docs/adr/.index.yaml",
+    "docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md",
+    "docs/runbooks/reference-deployment-samples.md",
+    "docs/runbooks/validate-repository-automation.md",
+    "docs/workstreams/ws-0339-live-apply.md",
+    "workstreams.yaml",
+    "workstreams/active/ws-0339-live-apply.yaml",
+    "docs/diagrams/agent-coordination-map.excalidraw",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-reference-samples-validate-r1-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-targeted-tests-r1-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-render-r1-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-rendered-inventory-r1-0.178.3.json",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-workstream-surfaces-r1-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-validate-repo-r3-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-release-status-r1-0.178.3.json",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-release-dry-run-r1-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-pre-push-gate-r1-0.178.3.txt"
+  ],
+  "notes": [
+    "This branch-local receipt records the dedicated worktree proof for a repo-only ADR before the final exact-main release integration updates protected canonical-truth surfaces.",
+    "ADR 0339 changes fork bootstrap material, onboarding packs, and repository validation behavior rather than live deployed infrastructure, so `Implemented In Platform Version` remains `N/A` and the platform version stays `0.130.98`.",
+    "The exact-main integration step still needs to refresh `changelog.md`, release artifacts, and the rest of canonical truth from the freshest `origin/main`, then record the canonical mainline receipt and push `origin/main`."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-04-04-ws-0339-branch-local-surface-alignment",
+    "surface": "workstreams/active/ws-0339-live-apply.yaml and docs/diagrams/agent-coordination-map.excalidraw",
+    "diagnosis": "contract_drift",
+    "repair_action": "Declared the generated ADR shard families under the shared ADR-index contract and regenerated the coordination diagram after the first promotion-gate replay surfaced the missing ownership coverage and stale diagram artifact.",
+    "verification": "receipts/live-applies/evidence/2026-04-04-ws-0339-workstream-surfaces-r1-0.178.3.txt"
+  }
+}
