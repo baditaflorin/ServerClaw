@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-04-04",
   "recorded_on": "2026-04-04",
-  "recorded_at": "2026-04-04T14:33:49Z",
+  "recorded_at": "2026-04-04T15:05:36Z",
   "recorded_by": "codex",
-  "source_commit": "0cf8a06fbbfdda11928c8a4df1579877e9a47763",
+  "source_commit": "a79d1487ddd015115476fa32404b1634d2abe4e0",
   "repo_version_context": "0.178.3",
   "platform_version_context": "0.130.98",
   "workflow_id": "adr-0336-public-entrypoint-leakage-mainline-live-apply",
   "adr": "0336",
-  "summary": "Closed out ADR 0336 on the latest exact-main tree after `origin/main` advanced to `b980bb92e62c10c21678317120b07ef0ae98dea9` by archiving ws-0336 as merged history, regenerating the shard-backed compatibility registry plus the coordination diagram, refreshing canonical-truth history surfaces, and preserving the current remote-wrapper fallback behavior plus the terminal archived-branch ownership boundary as explicit evidence instead of hidden operator knowledge.",
+  "summary": "Closed out ADR 0336 on the latest exact-main tree after `origin/main` advanced to `61900f1de988da19bc4db1fde27fa54e0e5aabb1` by archiving ws-0336 as merged history, regenerating the shard-backed compatibility registry plus the coordination diagram, refreshing canonical-truth history surfaces, and preserving the current remote-wrapper fallback behavior plus the terminal archived-branch ownership boundary as explicit evidence instead of hidden operator knowledge.",
   "targets": [
     {
       "kind": "repository",
@@ -38,7 +38,7 @@
     {
       "check": "Branch-local exact-main proof",
       "result": "pass",
-      "observed": "The branch-local receipt `2026-04-04-adr-0336-public-entrypoint-leakage-live-apply` already proves the validator, the focused `29 passed` regression slice, and the rebased exact-main repository validation on top of `origin/main@b980bb92e62c10c21678317120b07ef0ae98dea9`."
+      "observed": "The branch-local receipt `2026-04-04-adr-0336-public-entrypoint-leakage-live-apply` already proves the validator, the focused `29 passed in 2.04s` regression slice, and the rebased exact-main repository validation on top of `origin/main@61900f1de988da19bc4db1fde27fa54e0e5aabb1`."
     },
     {
       "check": "Mainline registry and generated-surface refresh",
@@ -58,7 +58,7 @@
     {
       "check": "Remote validation wrapper path",
       "result": "partial",
-      "observed": "`make remote-validate` reported `remote command failed, falling back locally`; the fallback runner passed `agent-standards`, `alert-rule-validation`, `atlas-lint`, `dependency-graph`, `iac-policy-scan`, `policy-validation`, and `type-check`, while `workstream-surfaces` failed because the branch now maps to terminal history and `ansible-syntax` plus `schema-validation` timed out after `901.21s` and `601.47s`. Those runner-specific outcomes are preserved as explicit evidence instead of being treated as an ADR 0336 validator regression."
+      "observed": "`make remote-validate` reported `remote command failed, falling back locally`; the fallback runner passed `agent-standards`, `alert-rule-validation`, `ansible-syntax`, `atlas-lint`, `dependency-graph`, `iac-policy-scan`, `policy-validation`, `schema-validation`, and `type-check`. The only remaining failure was `workstream-surfaces`, because the branch now maps to terminal archived history. That archived-branch boundary is preserved as explicit evidence instead of being treated as an ADR 0336 validator regression."
     }
   ],
   "evidence_refs": [

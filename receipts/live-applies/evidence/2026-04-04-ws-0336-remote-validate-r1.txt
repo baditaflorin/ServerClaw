@@ -12,185 +12,20 @@ Validation lane selection
   blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, atlas-lint, policy-validation, iac-policy-scan, alert-rule-validation, type-check, dependency-graph
   changed files: README.md, build/platform-manifest.json, docs/adr/0336-public-entrypoint-leakage-validation.md, docs/diagrams/agent-coordination-map.excalidraw, docs/status/history/merged-workstreams.md, docs/workstreams/ws-0336-live-apply.md, ...
 
-CHECK                STATUS    DURATION(s)
-agent-standards       passed    60.44
-alert-rule-validation passed    21.95
-ansible-syntax        timed_out 901.21
-atlas-lint            passed    35.05
-dependency-graph      passed    40.52
-iac-policy-scan       passed    207.72
-policy-validation     passed    46.17
-schema-validation     timed_out 601.47
-type-check            passed    66.63
-workstream-surfaces   failed    20.13
-
-[ansible-syntax] docker command
-docker run --rm --cpus=4 --cidfile /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply/.local/validation-gate/docker-cids/ansible-syntax-nof9uwb5.cid -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0336-live-apply:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0336-live-apply:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=81bf8324020852fcbd45c45b5f769c7b33c2188ae4c8dadeac44d279f6bc8121 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-04T14:39:21.963985+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=f25785a81ac656222a694fad83aef1b598b009a2 -e LV3_SNAPSHOT_BRANCH=codex/ws-0336-live-apply -e LV3_VALIDATION_BASE_REF=origin/main -e LV3_VALIDATION_CHANGED_FILES_JSON=["README.md", "build/platform-manifest.json", "docs/adr/0336-public-entrypoint-leakage-validation.md", "docs/diagrams/agent-coordination-map.excalidraw", "docs/status/history/merged-workstreams.md", "docs/workstreams/ws-0336-live-apply.md", "receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-live-apply.json", "receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-mainline-live-apply.json", "receipts/live-applies/evidence/2026-04-04-ws-0336-data-models-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-generate-diagrams-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-git-diff-check-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-live-apply-receipts-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-canonical-truth-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-generate-diagrams-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-platform-manifest-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-pre-push-gate-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-pre-push-gate-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-status-docs-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-workstream-registry-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-pre-push-gate-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-release-status-r1.json", "receipts/live-applies/evidence/2026-04-04-ws-0336-remote-validate-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-targeted-tests-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-public-entrypoints-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r4.txt", "workstreams.yaml", "workstreams/archive/2026/ws-0336-live-apply.yaml"] -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -w /workspace registry.lv3.org/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax
-[ansible-syntax] stdout
-Syntax check: playbooks/api-gateway.yml
-Syntax check: playbooks/artifact-cache-vm.yml
-Syntax check: playbooks/backup-vm.yml
-Syntax check: playbooks/browser-runner.yml
-Syntax check: playbooks/build-artifact-cache.yml
-Syntax check: playbooks/changedetection.yml
-Syntax check: playbooks/control-plane-recovery.yml
-Syntax check: playbooks/coolify.yml
-Syntax check: playbooks/crawl4ai.yml
-Syntax check: playbooks/data-retention.yml
-Syntax check: playbooks/database-dns.yml
-Syntax check: playbooks/dify.yml
-Syntax check: playbooks/directus.yml
-Syntax check: playbooks/docker-publication-assurance.yml
-Syntax check: playbooks/docker-runtime.yml
-Syntax check: playbooks/dozzle.yml
-Syntax check: playbooks/excalidraw.yml
-Syntax check: playbooks/falco.yml
-Syntax check: playbooks/flagsmith.yml
-Syntax check: playbooks/gitea.yml
-Syntax check: playbooks/glitchtip.yml
-Syntax check: playbooks/gotenberg.yml
-Syntax check: playbooks/grist.yml
-Syntax check: playbooks/groups/access.yml
-Syntax check: playbooks/groups/automation.yml
-Syntax check: playbooks/groups/communication.yml
-Syntax check: playbooks/groups/data.yml
-Syntax check: playbooks/groups/observability.yml
-Syntax check: playbooks/groups/platform-apps.yml
-Syntax check: playbooks/groups/security.yml
-Syntax check: playbooks/guest-access.yml
-Syntax check: playbooks/guest-network-policy.yml
-Syntax check: playbooks/harbor.yml
-Syntax check: playbooks/headscale.yml
-Syntax check: playbooks/homepage.yml
-Syntax check: playbooks/jupyterhub.yml
-Syntax check: playbooks/keycloak.yml
-Syntax check: playbooks/label-studio.yml
-Syntax check: playbooks/lago.yml
-Syntax check: playbooks/langfuse.yml
-Syntax check: playbooks/livekit.yml
-Syntax check: playbooks/mail-platform-diagnostics.yml
-Syntax check: playbooks/mail-platform-notification-profiles-verify.yml
-Syntax check: playbooks/mail-platform-send-gmail.yml
-Syntax check: playbooks/mail-platform-verify.yml
-Syntax check: playbooks/mail-platform.yml
-Syntax check: playbooks/mailpit.yml
-Syntax check: playbooks/matrix-synapse.yml
-Syntax check: playbooks/mattermost.yml
-Syntax check: playbooks/minio.yml
-Syntax check: playbooks/monitoring-stack.yml
-Syntax check: playbooks/n8n.yml
-Syntax check: playbooks/nats-jetstream.yml
-Syntax check: playbooks/netbox.yml
-Syntax check: playbooks/nextcloud.yml
-Syntax check: playbooks/nomad.yml
-Syntax check: playbooks/ntfy.yml
-Syntax check: playbooks/ntopng.yml
-Syntax check: playbooks/ollama.yml
-Syntax check: playbooks/one-api.yml
-Syntax check: playbooks/open-webui.yml
-Syntax check: playbooks/openbao.yml
-Syntax check: playbooks/openfga.yml
-Syntax check: playbooks/ops-portal.yml
-Syntax check: playbooks/outline.yml
-Syntax check: playbooks/paperless.yml
-Syntax check: playbooks/piper.yml
-Syntax check: playbooks/plane.yml
-Syntax check: playbooks/plausible.yml
-Syntax check: playbooks/portainer.yml
-Syntax check: playbooks/postgres-vm.yml
-Syntax check: playbooks/provision-subdomain.yml
-Syntax check: playbooks/proxmox-install.yml
-Syntax check: playbooks/proxmox-staging-bridge.yml
-Syntax check: playbooks/public-edge.yml
-Syntax check: playbooks/rag-context.yml
-Syntax check: playbooks/realtime.yml
-Syntax check: playbooks/redpanda.yml
-Syntax check: playbooks/restic-config-backup.yml
-Syntax check: playbooks/route-dns-assertion-ledger.yml
-Syntax check: playbooks/runtime-ai-pool.yml
-Syntax check: playbooks/runtime-control-pool.yml
-Syntax check: playbooks/runtime-general-pool.yml
-Syntax check: playbooks/searxng.yml
-Syntax check: playbooks/secret-rotation.yml
-Syntax check: playbooks/semaphore-self.yml
-Syntax check: playbooks/semaphore.yml
-Syntax check: playbooks/server-resident-reconciliation.yml
-Syntax check: playbooks/serverclaw.yml
-Syntax check: playbooks/services/api-gateway.yml
-Syntax check: playbooks/services/backup-vm.yml
-Syntax check: playbooks/services/browser-runner.yml
-Syntax check: playbooks/services/build-artifact-cache.yml
-Syntax check: playbooks/services/changedetection.yml
-Syntax check: playbooks/services/coolify.yml
-Syntax check: playbooks/services/crawl4ai.yml
-Syntax check: playbooks/services/dify.yml
-Syntax check: playbooks/services/directus.yml
-Syntax check: playbooks/services/docker-build-observability.yml
-Syntax check: playbooks/services/docker-runtime-observability.yml
-Syntax check: playbooks/services/dozzle.yml
-Syntax check: playbooks/services/excalidraw.yml
-Syntax check: playbooks/services/falco.yml
-Syntax check: playbooks/services/flagsmith.yml
-Syntax check: playbooks/services/gitea.yml
-Syntax check: playbooks/services/glitchtip.yml
-Syntax check: playbooks/services/gotenberg.yml
-Syntax check: playbooks/services/grafana.yml
-Syntax check: playbooks/services/grist.yml
-Syntax check: playbooks/services/guest-access.yml
-Syntax check: playbooks/services/guest-log-shipping.yml
-Syntax check: playbooks/services/harbor.yml
-Syntax check: playbooks/services/headscale.yml
-Syntax check: playbooks/services/homepage.yml
-Syntax check: playbooks/services/jupyterhub.yml
-Syntax check: playbooks/services/label-studio.yml
-Syntax check: playbooks/services/lago.yml
-Syntax check: playbooks/services/langfuse.yml
-Syntax check: playbooks/services/livekit.yml
-Syntax check: playbooks/services/mail-platform.yml
-Syntax check: playbooks/services/mailpit.yml
-Syntax check: playbooks/services/matrix-synapse.yml
-Syntax check: playbooks/services/minio.yml
-Syntax check: playbooks/services/n8n.yml
-Syntax check: playbooks/services/nats-jetstream.yml
-Syntax check: playbooks/services/nextcloud.yml
-Syntax check: playbooks/services/nginx-observability.yml
-Syntax check: playbooks/services/nomad.yml
-Syntax check: playbooks/services/ntfy.yml
-Syntax check: playbooks/services/ollama.yml
-Syntax check: playbooks/services/one-api.yml
-Syntax check: playbooks/services/openbao.yml
-Syntax check: playbooks/services/openfga.yml
-Syntax check: playbooks/services/ops-portal.yml
-Syntax check: playbooks/services/ops_portal.yml
-Syntax check: playbooks/services/outline.yml
-Syntax check: playbooks/services/paperless.yml
-Syntax check: playbooks/services/piper.yml
-Syntax check: playbooks/services/plane.yml
-Syntax check: playbooks/services/plausible.yml
-Syntax check: playbooks/services/postgres-vm.yml
-Syntax check: playbooks/services/proxmox-host-log-shipping.yml
-Syntax check: playbooks/services/proxmox-metrics.yml
-Syntax check: playbooks/services/public-edge.yml
-Syntax check: playbooks/services/rag-context.yml
-Syntax check: playbooks/services/realtime.yml
-Syntax check: playbooks/services/redpanda.yml
-Syntax check: playbooks/services/runtime-ai-pool.yml
-Syntax check: playbooks/services/runtime-control-pool.yml
-Syntax check: playbooks/services/runtime-general-pool.yml
-Syntax check: playbooks/services/semaphore.yml
-Syntax check: playbooks/services/sftpgo.yml
-Syntax check: playbooks/services/step-ca.yml
-Syntax check: playbooks/services/superset.yml
-[ansible-syntax] stderr
-WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
-
-[schema-validation] docker command
-docker run --rm --cpus=4 --cidfile /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply/.local/validation-gate/docker-cids/schema-validation-31s9jw_o.cid -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0336-live-apply:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0336-live-apply:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=81bf8324020852fcbd45c45b5f769c7b33c2188ae4c8dadeac44d279f6bc8121 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-04T14:39:21.963985+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=f25785a81ac656222a694fad83aef1b598b009a2 -e LV3_SNAPSHOT_BRANCH=codex/ws-0336-live-apply -e LV3_VALIDATION_BASE_REF=origin/main -e LV3_VALIDATION_CHANGED_FILES_JSON=["README.md", "build/platform-manifest.json", "docs/adr/0336-public-entrypoint-leakage-validation.md", "docs/diagrams/agent-coordination-map.excalidraw", "docs/status/history/merged-workstreams.md", "docs/workstreams/ws-0336-live-apply.md", "receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-live-apply.json", "receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-mainline-live-apply.json", "receipts/live-applies/evidence/2026-04-04-ws-0336-data-models-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-generate-diagrams-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-git-diff-check-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-live-apply-receipts-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-canonical-truth-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-generate-diagrams-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-platform-manifest-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-pre-push-gate-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-pre-push-gate-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-status-docs-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-workstream-registry-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-pre-push-gate-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-release-status-r1.json", "receipts/live-applies/evidence/2026-04-04-ws-0336-remote-validate-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-targeted-tests-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-public-entrypoints-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r4.txt", "workstreams.yaml", "workstreams/archive/2026/ws-0336-live-apply.yaml"] -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/stage_smoke_suites.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null && ./scripts/run_python_with_packages.sh pyyaml -- scripts/atlas_schema.py validate >/dev/null
-[schema-validation] stderr
-WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+CHECK                STATUS DURATION(s)
+agent-standards       passed 51.66
+alert-rule-validation passed 26.03
+ansible-syntax        passed 840.00
+atlas-lint            passed 37.13
+dependency-graph      passed 37.62
+iac-policy-scan       passed 213.10
+policy-validation     passed 41.21
+schema-validation     passed 477.68
+type-check            passed 58.28
+workstream-surfaces   failed 25.50
 
 [workstream-surfaces] docker command
-docker run --rm --cpus=4 --cidfile /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply/.local/validation-gate/docker-cids/workstream-surfaces-9axa6ref.cid -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0336-live-apply:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0336-live-apply:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=81bf8324020852fcbd45c45b5f769c7b33c2188ae4c8dadeac44d279f6bc8121 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-04T14:39:21.963985+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=f25785a81ac656222a694fad83aef1b598b009a2 -e LV3_SNAPSHOT_BRANCH=codex/ws-0336-live-apply -e LV3_VALIDATION_BASE_REF=origin/main -e LV3_VALIDATION_CHANGED_FILES_JSON=["README.md", "build/platform-manifest.json", "docs/adr/0336-public-entrypoint-leakage-validation.md", "docs/diagrams/agent-coordination-map.excalidraw", "docs/status/history/merged-workstreams.md", "docs/workstreams/ws-0336-live-apply.md", "receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-live-apply.json", "receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-mainline-live-apply.json", "receipts/live-applies/evidence/2026-04-04-ws-0336-data-models-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-generate-diagrams-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-git-diff-check-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-live-apply-receipts-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-canonical-truth-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-generate-diagrams-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-platform-manifest-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-pre-push-gate-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-pre-push-gate-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-status-docs-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-workstream-registry-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-pre-push-gate-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-release-status-r1.json", "receipts/live-applies/evidence/2026-04-04-ws-0336-remote-validate-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-targeted-tests-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-public-entrypoints-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r4.txt", "workstreams.yaml", "workstreams/archive/2026/ws-0336-live-apply.yaml"] -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+docker run --rm --cpus=4 --cidfile /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply/.local/validation-gate/docker-cids/workstream-surfaces-2r2eaelx.cid -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0336-live-apply:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0336-live-apply:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=d0e29fb525d73eccb4929629c78b0a9fb29e9f983d9def97ba6e91be7a653ab8 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-04T15:07:13.459875+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=d13eac7006b6a7d65e89adbbd667a07795820b41 -e LV3_SNAPSHOT_BRANCH=codex/ws-0336-live-apply -e LV3_VALIDATION_BASE_REF=origin/main -e LV3_VALIDATION_CHANGED_FILES_JSON=["README.md", "build/platform-manifest.json", "docs/adr/0336-public-entrypoint-leakage-validation.md", "docs/diagrams/agent-coordination-map.excalidraw", "docs/status/history/merged-workstreams.md", "docs/workstreams/ws-0336-live-apply.md", "receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-live-apply.json", "receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-mainline-live-apply.json", "receipts/live-applies/evidence/2026-04-04-ws-0336-data-models-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-generate-diagrams-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-git-diff-check-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-live-apply-receipts-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-canonical-truth-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-generate-diagrams-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-platform-manifest-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-status-docs-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-workstream-registry-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-pre-push-gate-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-release-status-r1.json", "receipts/live-applies/evidence/2026-04-04-ws-0336-remote-validate-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-targeted-tests-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-public-entrypoints-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r4.txt", "workstreams.yaml", "workstreams/archive/2026/ws-0336-live-apply.yaml"] -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
 [workstream-surfaces] stdout
 Workstream surface ownership validation
 [workstream-surfaces] stderr
