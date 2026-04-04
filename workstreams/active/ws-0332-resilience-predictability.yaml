@@ -1,0 +1,85 @@
+id: ws-0332-resilience-predictability
+adr: '0346'
+title: Enforce health-gated compose dependencies for more predictable service recovery
+status: ready_for_merge
+owner: codex
+branch: codex/ws-0332-resilience-predictability
+worktree_path: .worktrees/ws-0332-resilience-predictability
+doc: docs/workstreams/ws-0332-resilience-predictability.md
+depends_on:
+- adr-0064-health-probe-contracts-for-all-services
+- adr-0107-platform-extension-model
+- adr-0204-self-correcting-automation-loops
+- adr-0246-startup-readiness-liveness-and-degraded-state-semantics
+- adr-0319-runtime-pools-as-the-service-partition-boundary
+- adr-0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- workstreams/active/ws-0332-resilience-predictability.yaml
+- docs/workstreams/ws-0332-resilience-predictability.md
+- docs/adr/0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md
+- docs/adr/.index.yaml
+- docs/adr/index/by-range/*.yaml
+- docs/adr/index/by-concern/*.yaml
+- docs/adr/index/by-status/*.yaml
+- docs/adr/index/reservations.yaml
+- docs/runbooks/compose-runtime-resilience.md
+- config/service-completeness.json
+- scripts/service_completeness.py
+- collections/ansible_collections/lv3/platform/roles/dozzle_runtime/templates/docker-compose.yml.j2
+- collections/ansible_collections/lv3/platform/roles/minio_runtime/templates/docker-compose.yml.j2
+- collections/ansible_collections/lv3/platform/roles/searxng_runtime/templates/docker-compose.yml.j2
+- tests/test_validate_service_completeness.py
+- tests/test_dozzle_runtime_role.py
+- tests/test_minio_runtime_role.py
+- tests/test_searxng_runtime_role.py
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws0332_registry_source
+    paths:
+    - workstreams/active/ws-0332-resilience-predictability.yaml
+    mode: exclusive
+  - id: ws0332_docs
+    paths:
+    - docs/workstreams/ws-0332-resilience-predictability.md
+    - docs/adr/0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md
+    - docs/runbooks/compose-runtime-resilience.md
+    mode: exclusive
+  - id: ws0332_adr_index
+    paths:
+    - docs/adr/.index.yaml
+    - docs/adr/index/by-range/*.yaml
+    - docs/adr/index/by-concern/*.yaml
+    - docs/adr/index/by-status/*.yaml
+    - docs/adr/index/reservations.yaml
+    mode: shared_contract
+    contract: adr-index-generator-v1
+  - id: ws0332_resilience_contract
+    paths:
+    - config/service-completeness.json
+    - scripts/service_completeness.py
+    - collections/ansible_collections/lv3/platform/roles/dozzle_runtime/templates/docker-compose.yml.j2
+    - collections/ansible_collections/lv3/platform/roles/minio_runtime/templates/docker-compose.yml.j2
+    - collections/ansible_collections/lv3/platform/roles/searxng_runtime/templates/docker-compose.yml.j2
+    mode: exclusive
+  - id: ws0332_resilience_tests
+    paths:
+    - tests/test_validate_service_completeness.py
+    - tests/test_dozzle_runtime_role.py
+    - tests/test_minio_runtime_role.py
+    - tests/test_searxng_runtime_role.py
+    mode: exclusive
+canonical_truth:
+  changelog_entry: enforces health-gated compose dependency startup as part of service completeness, fixes the low-risk runtime templates that were still using blind startup ordering, and records the remaining bounded exception explicitly
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+blockers: []
+ready_to_merge: true
+live_applied: false

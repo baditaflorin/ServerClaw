@@ -75,6 +75,35 @@ def test_missing_generated_artifact_blocks_non_grandfathered_service(
     assert any(item.item_id == "grafana_dashboard" for item in result.failing_items)
 
 
+def test_missing_dependency_health_gate_blocks_non_grandfathered_service(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    compose_path = (
+        tmp_path
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "test_echo_runtime"
+        / "templates"
+        / "docker-compose.yml.j2"
+    )
+    compose_text = compose_path.read_text(encoding="utf-8")
+    compose_path.write_text(
+        compose_text.replace("condition: service_healthy", "condition: service_started"),
+        encoding="utf-8",
+    )
+
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    result = service_completeness.evaluate_service("test_echo")
+
+    assert not result.passing
+    assert any(item.item_id == "dependency_health_gate" for item in result.failing_items)
+
+
 def test_legacy_service_uses_grandfathered_suppressions(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

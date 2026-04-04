@@ -45,6 +45,8 @@ def test_compose_template_runs_valkey_sidecar_and_private_http_port() -> None:
     template = COMPOSE_TEMPLATE.read_text()
     assert "image: {{ searxng_runtime_valkey_image }}" in template
     assert 'container_name: {{ searxng_runtime_valkey_container_name }}' in template
+    assert "valkey-cli" in template
+    assert "condition: service_healthy" in template
     assert '"{{ searxng_runtime_port }}:8080"' in template
     assert "{{ searxng_runtime_config_dir }}:/etc/searxng" in template
 

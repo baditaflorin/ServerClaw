@@ -96,6 +96,8 @@ def test_templates_publish_public_server_and_console_urls() -> None:
     assert '"{{ minio_api_port }}:9000"' in compose
     assert '"{{ minio_console_port }}:9001"' in compose
     assert "--console-address" in compose
+    assert "test -s {{ minio_env_file }}" in compose
+    assert "condition: service_healthy" in compose
     assert "MINIO_SERVER_URL={{ minio_public_base_url }}" in env_template
     assert "MINIO_BROWSER_REDIRECT_URL={{ minio_console_public_url }}" in env_template
     assert 'MINIO_ROOT_PASSWORD=[[ with secret ' in env_ctemplate
