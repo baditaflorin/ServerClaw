@@ -9,7 +9,7 @@
 - Implemented On: 2026-04-04
 - Live Applied On: 2026-04-04
 - Live Applied In Platform Version: 0.130.98
-- Latest Verified Base: `origin/main@3103d2f74dae8a08b95c548e46b839b0ac80b667` (`repo 0.178.3`, `platform 0.130.98`)
+- Latest Verified Base: `origin/main@972e3da17e7f9a7c87dc3e7979a38817d113c6f5` (`repo 0.178.3`, `platform 0.130.98`)
 - Branch: `codex/ws-0333-private-overlay`
 - Worktree: `.worktrees/ws-0333-private-overlay`
 - Owner: codex
@@ -40,8 +40,8 @@
 - Repository automation validation passed on the rebased branch after the workstream-registry and diagram refreshes: `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models`, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-validate-repo-r4.txt`.
 - The dependency-graph lane now passes on the branch with the regenerated coordination map, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-dependency-graph-r3.txt` and `receipts/live-applies/evidence/2026-04-04-adr-0333-diagrams-r1.txt`.
 - `make remote-validate` reached the real remote builder first, then fell back locally; the final lane summary passed `agent-standards`, `workstream-surfaces`, `atlas-lint`, `policy-validation`, `iac-policy-scan`, `alert-rule-validation`, `type-check`, and `dependency-graph`, while the heavy fallback `ansible-syntax` and `schema-validation` lanes timed out, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-remote-validate-r3.txt`.
-- The exact-main replay on `origin/main@3103d2f74dae8a08b95c548e46b839b0ac80b667` passed `80` focused pytest cases across the ADR 0333 and Atlas regression slice, `python3 scripts/live_apply_receipts.py --validate`, `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs generated-portals`, and the dependency-graph checks, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-targeted-tests-r3.txt`, `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-live-apply-receipts-r3.txt`, `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-validate-repo-r8.txt`, and `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-dependency-graph-r3.txt`.
-- `make pre-push-gate` passed on the refreshed exact-main tree; the remote build-server run passed every lane except `atlas-lint`, where Atlas still timed out reaching the ephemeral Postgres host-gateway address, and the governed local fallback reran only `atlas-lint` successfully before merging the final gate status, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-pre-push-gate-r2.txt`.
+- The exact-main replay on `origin/main@972e3da17e7f9a7c87dc3e7979a38817d113c6f5` passed `80` focused pytest cases across the ADR 0333 and Atlas regression slice, `python3 scripts/live_apply_receipts.py --validate`, `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs generated-portals`, and the dependency-graph checks, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-targeted-tests-r4.txt`, `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-live-apply-receipts-r4.txt`, `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-validate-repo-r10.txt`, and `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-dependency-graph-r3.txt`.
+- `make pre-push-gate` passed on the refreshed exact-main tree after the latest `origin/main` delta landed; the remote build-server run passed every lane except `atlas-lint`, where Atlas still timed out reaching the ephemeral Postgres host-gateway address, and the governed local fallback reran only `atlas-lint` successfully before merging the final gate status, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-pre-push-gate-r3.txt`.
 
 ## Exact-Main Integration Status
 

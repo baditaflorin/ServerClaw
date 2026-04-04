@@ -10,6 +10,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | --- | --- | --- | --- |
 | `0346` | Enforce health-gated compose dependencies for more predictable service recovery | `live_applied` | [ws-0332-resilience-predictability.md](../../workstreams/ws-0332-resilience-predictability.md) |
 | `0337` | Re-verify fork-first workstream metadata from the latest origin/main | `live_applied` | [ws-0337-live-apply.md](../../workstreams/ws-0337-live-apply.md) |
+| `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](../../workstreams/ws-0336-live-apply.md) |
 | `0333` | Finish the shared private-overlay bootstrap alias contract and verify it from a dedicated worktree | `live_applied` | [adr-0333-private-overlay-live-apply.md](../../workstreams/adr-0333-private-overlay-live-apply.md) |
 | `0328` | Implement size-budgeted root summaries and automatic rollover ledgers | `live_applied` | [ws-0328-live-apply.md](../../workstreams/ws-0328-live-apply.md) |
 | `0327` | Live apply sectional agent discovery registries and generated onboarding packs from latest origin/main | `live_applied` | [ws-0327-live-apply.md](../../workstreams/ws-0327-live-apply.md) |
