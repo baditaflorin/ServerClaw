@@ -20,26 +20,6 @@ from platform.repo import *  # noqa: F401,F403
 from platform.repo import _load_yaml_without_pyyaml as repo_load_yaml_without_pyyaml
 
 
-def _path_exists(path: Path) -> bool:
-    try:
-        return path.exists()
-    except OSError:
-        return False
-
-
-def resolve_repo_local_path(path_value: str | Path, *, repo_root: Path = REPO_ROOT) -> Path:
-    path = Path(path_value).expanduser()
-    if _path_exists(path):
-        return path
-    marker = ".local"
-    if marker not in path.parts:
-        return path
-    marker_index = path.parts.index(marker) + 1
-    root = Path(repo_root)
-    shared_root = root.parent.parent if root.parent.name == ".worktrees" else root
-    return shared_root.joinpath(marker, *path.parts[marker_index:])
-
-
 def _load_yaml_without_pyyaml(path: Path):
     return repo_load_yaml_without_pyyaml(path)
 
