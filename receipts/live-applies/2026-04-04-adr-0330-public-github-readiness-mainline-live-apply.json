@@ -11,7 +11,7 @@
   "platform_version_context": "0.130.98",
   "workflow_id": "adr-0330-public-github-readiness-mainline-live-apply",
   "adr": "0330",
-  "summary": "Integrated ADR 0330 onto the latest realistic exact-main tree by replaying the repo-relative controller-secret contract, fork-first example inventory/provider/publication surfaces, and public reference documentation across repeated `origin/main` advances until the final base `8cdffd437a638083393556cd2618e68ad505aa73`, preserving the newer ADR 0339 exact-main `0.178.4` release closeout, refreshing canonical truth and generated surfaces plus the topology snapshot on the merged tree, and rerunning the focused regression slice plus the full pre-push gate successfully while repository version `0.178.4` remains the current realistic release and `0.178.5` is only the next candidate once unrelated waiver blockers clear.",
+  "summary": "Integrated ADR 0330 onto the then-latest realistic exact-main tree by replaying the repo-relative controller-secret contract, fork-first example inventory/provider/publication surfaces, and public reference documentation across repeated `origin/main` advances until the final base `8cdffd437a638083393556cd2618e68ad505aa73`, preserving the newer ADR 0339 exact-main `0.178.4` release closeout, refreshing canonical truth and generated surfaces plus the topology snapshot on the merged tree, rerunning the focused regression slice plus the full pre-push gate successfully, and carrying that verified repo-only closeout forward into the protected `0.178.5` integration while the live platform version remains `0.130.98`.",
   "targets": [
     {
       "kind": "repository",
@@ -53,7 +53,7 @@
     {
       "check": "Exact-main release readiness snapshot",
       "result": "partial",
-      "observed": "`python3 scripts/release_manager.py status --json` reports repository version `0.178.4`, platform version `0.130.98`, and a blocked next release cut because unrelated `controller_dependency_gap` waivers remain open through `2026-04-06`; `python3 scripts/release_manager.py --bump patch --dry-run` shows the next candidate version would be `0.178.5`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge8-release-status-r1.json` and `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge8-release-dry-run-r1.txt`."
+      "observed": "`python3 scripts/release_manager.py status --json` captured the exact-main replay state at repository version `0.178.4` and platform version `0.130.98`, with unrelated `controller_dependency_gap` waivers still blocking an immediate release cut; `python3 scripts/release_manager.py --bump patch --dry-run` showed `0.178.5` as the next candidate, and this protected integration is the first repo version that now includes ADR 0330, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge8-release-status-r1.json` and `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge8-release-dry-run-r1.txt`."
     },
     {
       "check": "Exact-main receipt and repository validation",
@@ -81,7 +81,7 @@
     "docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md",
     "docs/workstreams/ws-0330-main-closeout.md",
     "workstreams.yaml",
-    "workstreams/active/ws-0330-main-closeout.yaml",
+    "workstreams/archive/2026/ws-0330-main-closeout.yaml",
     "receipts/live-applies/2026-04-04-adr-0330-public-github-readiness-live-apply.json",
     "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-registry-r1.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-discovery-r1.txt",
@@ -105,7 +105,7 @@
   "notes": [
     "This exact-main receipt captures the protected-surface integration separately from the earlier branch-local live-apply proof so the fork-first implementation work and the canonical mainline refresh remain independently auditable.",
     "On 2026-04-04, `origin/main` advanced repeatedly while this closeout was in flight; after the earlier ADR 0333 replay, the final exact-main base advanced again through the ADR 0339 `0.178.4` release closeout and ended at `origin/main@8cdffd437a638083393556cd2618e68ad505aa73`.",
-    "ADR 0330 is implemented on `main`, but `Included In Repo Version` remains `not yet` because the `0.178.4` release cut had already closed before this exact-main closeout landed, and the next candidate version `0.178.5` still remains blocked by unrelated open waiver receipts through `2026-04-06`.",
+    "The exact-main validation base for this closeout was `0.178.4`, and the first repository version that now includes ADR 0330 after the protected integration refresh is `0.178.5`.",
     "The final exact-main verification passed with the governed remote-builder fallback: the first post-merge `make pre-push-gate` rerun exposed one stale `README.md`, `canonical_truth.py --write` refreshed it, and the second full gate replay then passed every blocking lane on the committed merge.",
     "Because ADR 0330 is a repo-only control-plane change, the live platform version remains `0.130.98` and no platform version bump should accompany this integration."
   ]

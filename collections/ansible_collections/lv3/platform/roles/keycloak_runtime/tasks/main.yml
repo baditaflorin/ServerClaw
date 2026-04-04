@@ -1602,6 +1602,7 @@
   block:
     - name: Ensure the LV3 realm exists
       community.general.keycloak_realm:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         display_name: "{{ keycloak_realm_display_name }}"
         enabled: true
@@ -1626,6 +1627,7 @@
 
     - name: Ensure the Keycloak realm groups exist
       community.general.keycloak_group:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         name: "{{ item.name }}"
         attributes: "{{ item.attributes }}"
@@ -1670,6 +1672,7 @@
 
     - name: Ensure the Grafana OAuth client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_grafana_client_id }}"
         name: Grafana
@@ -1709,6 +1712,7 @@
 
     - name: Ensure the operations portal OAuth client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_ops_portal_client_id }}"
         name: Platform Operations Portal
@@ -1748,6 +1752,7 @@
 
     - name: Ensure the Gitea OAuth client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_gitea_client_id }}"
         name: Gitea
@@ -1789,6 +1794,7 @@
 
     - name: Ensure the Open WebUI OAuth client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_open_webui_client_id }}"
         name: Open WebUI
@@ -1818,6 +1824,7 @@
 
     - name: Ensure the agent service client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_agent_client_id }}"
         name: LV3 Agent Hub
@@ -1839,6 +1846,7 @@
 
     - name: Ensure the Langfuse OAuth client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_langfuse_client_id }}"
         name: Langfuse
@@ -1869,6 +1877,7 @@
       until: keycloak_langfuse_client_reconcile is succeeded
     - name: Ensure the Directus OAuth client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_directus_client_id }}"
         name: Directus
@@ -1907,6 +1916,7 @@
 
     - name: Ensure the Outline OAuth client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_outline_client_id }}"
         name: Outline
@@ -1946,6 +1956,7 @@
 
     - name: Ensure the Paperless OAuth client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_paperless_client_id }}"
         name: Paperless-ngx
@@ -1984,6 +1995,7 @@
       until: keycloak_paperless_client_reconcile is succeeded
     - name: Ensure the JupyterHub OAuth client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_jupyterhub_client_id }}"
         name: JupyterHub
@@ -2023,6 +2035,7 @@
 
     - name: Ensure the Superset OAuth client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_superset_client_id }}"
         name: Superset
@@ -2062,6 +2075,7 @@
 
     - name: Ensure the ServerClaw OAuth client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_serverclaw_client_id }}"
         name: ServerClaw
@@ -2101,6 +2115,7 @@
 
     - name: Ensure the Grist OAuth client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_grist_client_id }}"
         name: Grist
@@ -2140,6 +2155,7 @@
 
     - name: Ensure the API gateway client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_api_gateway_client_id }}"
         name: Platform API Gateway
@@ -2161,6 +2177,7 @@
 
     - name: Ensure the obsolete ServerClaw operator CLI direct-grant client is absent
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: serverclaw-operator-cli
         name: ServerClaw Operator CLI
@@ -2182,6 +2199,7 @@
 
     - name: Ensure the ServerClaw runtime client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_serverclaw_runtime_client_id }}"
         name: ServerClaw Runtime
@@ -2217,6 +2235,7 @@
 
     - name: Read the Grafana client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_grafana_client_id }}"
       register: keycloak_grafana_client_secret_info
@@ -2227,6 +2246,7 @@
 
     - name: Read the operations portal client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_ops_portal_client_id }}"
       register: keycloak_ops_portal_client_secret_info
@@ -2237,6 +2257,7 @@
 
     - name: Read the Gitea client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_gitea_client_id }}"
       register: keycloak_gitea_client_secret_info
@@ -2247,6 +2268,7 @@
 
     - name: Read the Open WebUI client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_open_webui_client_id }}"
       register: keycloak_open_webui_client_secret_info
@@ -2257,6 +2279,7 @@
 
     - name: Read the agent client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_agent_client_id }}"
       register: keycloak_agent_client_secret_info
@@ -2267,6 +2290,7 @@
 
     - name: Read the Langfuse client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_langfuse_client_id }}"
       register: keycloak_langfuse_client_secret_info
@@ -2277,6 +2301,7 @@
 
     - name: Read the Directus client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_directus_client_id }}"
       register: keycloak_directus_client_secret_info
@@ -2287,6 +2312,7 @@
 
     - name: Read the Grist client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_grist_client_id }}"
       register: keycloak_grist_client_secret_info
@@ -2297,6 +2323,7 @@
 
     - name: Read the GlitchTip client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_glitchtip_client_id }}"
       register: keycloak_glitchtip_client_secret_info
@@ -2307,6 +2334,7 @@
 
     - name: Read the Outline client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_outline_client_id }}"
       register: keycloak_outline_client_secret_info
@@ -2317,6 +2345,7 @@
 
     - name: Read the JupyterHub client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_jupyterhub_client_id }}"
       register: keycloak_jupyterhub_client_secret_info
@@ -2327,6 +2356,7 @@
 
     - name: Read the Paperless client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_paperless_client_id }}"
       register: keycloak_paperless_client_secret_info
@@ -2337,6 +2367,7 @@
 
     - name: Read the Superset client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_superset_client_id }}"
       register: keycloak_superset_client_secret_info
@@ -2347,6 +2378,7 @@
 
     - name: Read the ServerClaw client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_serverclaw_client_id }}"
       register: keycloak_serverclaw_client_secret_info
@@ -2357,6 +2389,7 @@
 
     - name: Read the API gateway client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_api_gateway_client_id }}"
       register: keycloak_api_gateway_client_secret_info
@@ -2367,6 +2400,7 @@
 
     - name: Read the ServerClaw runtime client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_serverclaw_runtime_client_id }}"
       register: keycloak_serverclaw_runtime_client_secret_info

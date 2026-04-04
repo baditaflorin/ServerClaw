@@ -614,6 +614,7 @@
       args:
         executable: /bin/bash
       delegate_to: "{{ openbao_migration_source_host }}"
+      changed_when: false
       no_log: true
 
     - name: Fetch the source OpenBao raft snapshot to the controller

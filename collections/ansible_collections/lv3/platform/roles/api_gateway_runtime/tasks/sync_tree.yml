@@ -6,6 +6,8 @@
 # Dependencies: ADR 0165, ADR 0092, and ADR 0197.
 ---
 - name: Stage and expand the {{ api_gateway_tree_sync_spec.name }}
+  vars:
+    ansible_become_timeout: "{{ api_gateway_tree_sync_become_timeout }}"
   block:
     - name: Create a local staging archive path for the {{ api_gateway_tree_sync_spec.name }}
       ansible.builtin.tempfile:
@@ -89,8 +91,6 @@
       args:
         executable: /bin/bash
       changed_when: true
-  vars:
-    ansible_become_timeout: "{{ api_gateway_tree_sync_become_timeout }}"
   always:
     - name: Remove the staged archive from the guest for {{ api_gateway_tree_sync_spec.name }}
       ansible.builtin.file:

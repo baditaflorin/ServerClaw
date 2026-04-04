@@ -3,6 +3,7 @@
 - ADR: [ADR 0314](../adr/0314-resumable-multi-step-flows-and-return-to-task-reentry.md)
 - Title: implement resumable multi-step flows and return-to-task reentry on the live operator surfaces
 - Status: live_applied
+- Mainline Receipt: `receipts/live-applies/2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply.json`
 - Branch: `codex/ws-0314-mainline-integration`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply`
 - Owner: codex
@@ -141,16 +142,17 @@
   `receipts/live-applies/evidence/2026-04-04-ws-0314-mainline-task-reentry-portal-r1.txt`
   `receipts/live-applies/evidence/2026-04-04-ws-0314-mainline-task-reentry-resume-r2.txt`
   `receipts/live-applies/evidence/2026-04-04-ws-0314-mainline-task-reentry-portal-after-resume-r2.txt`
+- Canonical structured mainline receipt:
+  `receipts/live-applies/2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply.json`
 - Targeted regression sweep green:
-  `receipts/live-applies/evidence/2026-04-04-ws-0314-mainline-targeted-validation-pytest-r2.txt`
+  `receipts/live-applies/evidence/2026-04-04-ws-0314-mainline-targeted-validation-pytest-r4.txt`
 - Repo automation validation passes from the exact-main worktree:
-  `receipts/live-applies/evidence/2026-04-04-ws-0314-mainline-validate-repo-r2.txt`
+  `receipts/live-applies/evidence/2026-04-04-ws-0314-mainline-validate-repo-r6.txt`
+- Generated and receipt consistency checks green:
+  `receipts/live-applies/evidence/2026-04-04-ws-0314-mainline-generated-checks-r2.txt`
 
 ## Notes
 
 - this thread became the final verified merge-to-`main` step, so protected integration files were updated only after the exact-main replays and validation passed
 - the live apply must prefer repo-managed automation and capture explicit receipts over undocumented ad hoc container restarts
-- `./scripts/validate_repo.sh workstream-surfaces agent-standards` still warns that
-  `scripts/topology-snapshot.json` and `.repo-structure.yaml` may need regeneration
-  relative to broader repo changes; those warnings were not blocking for the
-  ws-0314 live-apply scope itself
+- the exact-main publish closeout added the structured mainline receipt so `versions/stack.yaml` can point at a governed live-apply record rather than raw evidence filenames

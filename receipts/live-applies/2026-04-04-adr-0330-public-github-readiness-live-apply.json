@@ -121,7 +121,7 @@
     "tests/test_ntfy_publish.py",
     "tests/test_public_reference_samples.py",
     "workstreams.yaml",
-    "workstreams/active/ws-0330-main-closeout.yaml",
+    "workstreams/archive/2026/ws-0330-main-closeout.yaml",
     "receipts/live-applies/evidence/2026-04-04-ws-0330-targeted-tests-r1-0.178.3.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0330-workstream-registry-r2.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0330-workstream-registry-r3.txt",

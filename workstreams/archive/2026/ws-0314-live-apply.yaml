@@ -273,7 +273,7 @@ canonical_truth:
   release_bump: patch
   included_in_repo_version: 0.178.5
   latest_receipts:
-    keycloak: 2026-04-04-ws-0314-mainline-keycloak-live-apply-r4
-    api_gateway: 2026-04-04-ws-0314-mainline-api-gateway-live-apply-r11
-    ops_portal: 2026-04-04-ws-0314-mainline-ops-portal-live-apply-r18
-    runbook_task_reentry: 2026-04-04-ws-0314-mainline-task-reentry-resume-r2
+    keycloak: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply
+    api_gateway: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply
+    ops_portal: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply
+    runbook_task_reentry: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply

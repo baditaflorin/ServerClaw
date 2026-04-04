@@ -98,6 +98,7 @@
   block:
     - name: Ensure the ServerClaw OAuth client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_serverclaw_client_id }}"
         name: ServerClaw
@@ -133,6 +134,7 @@
 
     - name: Read the ServerClaw client secret
       community.general.keycloak_clientsecret_info:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_serverclaw_client_id }}"
       register: keycloak_serverclaw_client_secret_info

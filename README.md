@@ -76,17 +76,17 @@ rewriting one operator's workstation paths.
 | `woodpecker` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `vaultwarden` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `searxng` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
-| `runbook_task_reentry` | `2026-04-04-ws-0314-mainline-task-reentry-resume-r2` |
+| `runbook_task_reentry` | `2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply` |
 | `reference_deployment_samples` | `2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply` |
 | `public_github_readiness` | `2026-04-04-adr-0330-public-github-readiness-mainline-live-apply` |
 | `private_overlay_contract` | `2026-04-04-adr-0333-private-overlay-mainline-live-apply` |
 | `plausible_analytics` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `outline` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
-| `ops_portal` | `2026-04-04-ws-0314-mainline-ops-portal-live-apply-r18` |
+| `ops_portal` | `2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply` |
 | `minio` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `matrix_synapse` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
-| `keycloak` | `2026-04-04-ws-0314-mainline-keycloak-live-apply-r4` |
+| `keycloak` | `2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply` |
 | `jupyterhub` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `harbor` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `grist` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
@@ -199,7 +199,6 @@ Showing 25 of 296 merged or live-applied workstreams. Full history: [merged work
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
-| `0330` | Close out public GitHub readiness on the latest origin/main | `live_applied` | [ws-0330-main-closeout.md](docs/workstreams/ws-0330-main-closeout.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
@@ -223,6 +222,7 @@ Showing 25 of 296 merged or live-applied workstreams. Full history: [merged work
 | `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](docs/workstreams/adr-0168-idempotency-ci.md) |
 | `0167` | Graceful degradation mode declarations | `live_applied` | [adr-0167-graceful-degradation-mode-declarations.md](docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md) |
 | `0166` | Canonical error response format and error code registry | `live_applied` | [adr-0166-canonical-error-response-format.md](docs/workstreams/adr-0166-canonical-error-response-format.md) |
+| `0165` | Workflow idempotency keys and double-execution prevention | `live_applied` | [adr-0165-workflow-idempotency.md](docs/workstreams/adr-0165-workflow-idempotency.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Next For Forks
