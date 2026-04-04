@@ -50,8 +50,8 @@
         "make syntax-check-plausible",
         "curl -fsS https://analytics.lv3.org/api/system/health/ready",
         "curl -fsS https://nginx.lv3.org/ | grep -F \"https://analytics.lv3.org/js/script.js\"",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@10.10.10.20 \"curl -fsS http://127.0.0.1:8016/api/health\"",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@10.10.10.20 'sudo docker exec plausible bin/plausible rpc \"import Ecto.Query; site = Plausible.Sites.get_by_domain!(\\\"nginx.lv3.org\\\"); seen = Plausible.ClickhouseRepo.exists?(from e in \\\"events_v2\\\", where: e.site_id == ^site.id and e.pathname == ^\\\"/plausible-smoke\\\" and e.name == \\\"pageview\\\"); IO.puts(Jason.encode!(%{seen: seen}))\"'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@10.10.10.20 \"curl -fsS http://127.0.0.1:8016/api/health\"",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@10.10.10.20 'sudo docker exec plausible bin/plausible rpc \"import Ecto.Query; site = Plausible.Sites.get_by_domain!(\\\"nginx.lv3.org\\\"); seen = Plausible.ClickhouseRepo.exists?(from e in \\\"events_v2\\\", where: e.site_id == ^site.id and e.pathname == ^\\\"/plausible-smoke\\\" and e.name == \\\"pageview\\\"); IO.puts(Jason.encode!(%{seen: seen}))\"'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -118,7 +118,7 @@
         "curl -fsS https://flags.lv3.org/health",
         "curl -I https://flags.lv3.org/",
         "curl -I https://flags.lv3.org/api/v1/projects/",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@10.10.10.20 \"curl -fsS http://127.0.0.1:8017/health\""
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@10.10.10.20 \"curl -fsS http://127.0.0.1:8017/health\""
       ],
       "execution_class": "mutation",
       "budget": {
@@ -171,10 +171,10 @@
       ],
       "verification_commands": [
         "make syntax-check-crawl4ai",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:11235/health'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:11235/monitor/health | python3 -c '\"'\"'import json, sys; payload=json.load(sys.stdin); assert payload[\"pool\"][\"permanent\"][\"active\"] is True; print(\"pool-active\")'\"'\"''",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 -c '\"'\"'import json, urllib.request; payload=json.dumps({\"url\": \"https://example.com/\"}).encode(); request=urllib.request.Request(\"http://127.0.0.1:11235/md\", data=payload, headers={\"Content-Type\": \"application/json\"}); body=json.load(urllib.request.urlopen(request, timeout=180)); assert body[\"success\"] is True and \"Example Domain\" in body[\"markdown\"]; print(body[\"markdown\"].splitlines()[0])'\"'\"''",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.70 'curl -fsS http://10.10.10.20:11235/health'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:11235/health'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:11235/monitor/health | python3 -c '\"'\"'import json, sys; payload=json.load(sys.stdin); assert payload[\"pool\"][\"permanent\"][\"active\"] is True; print(\"pool-active\")'\"'\"''",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 -c '\"'\"'import json, urllib.request; payload=json.dumps({\"url\": \"https://example.com/\"}).encode(); request=urllib.request.Request(\"http://127.0.0.1:11235/md\", data=payload, headers={\"Content-Type\": \"application/json\"}); body=json.load(urllib.request.urlopen(request, timeout=180)); assert body[\"success\"] is True and \"Example Domain\" in body[\"markdown\"]; print(body[\"markdown\"].splitlines()[0])'\"'\"''",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.70 'curl -fsS http://10.10.10.20:11235/health'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -892,7 +892,7 @@
       ],
       "verification_commands": [
         "make syntax-check",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'pveversion'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'pveversion'"
       ],
       "execution_class": "mutation",
       "target_lane": "lane:proxmox-host",
@@ -1004,9 +1004,9 @@
       ],
       "verification_commands": [
         "make syntax-check-guest-network-policy",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo pve-firewall compile >/dev/null && sudo ls /etc/pve/firewall/*.fw'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'nc -z -w 2 10.10.10.50 5432'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.50 'nc -z -w 2 10.10.10.20 8083'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo pve-firewall compile >/dev/null && sudo ls /etc/pve/firewall/*.fw'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'nc -z -w 2 10.10.10.50 5432'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.50 'nc -z -w 2 10.10.10.20 8083'"
       ],
       "required_read_surfaces": [
         "world_state"
@@ -1189,9 +1189,9 @@
       "verification_commands": [
         "make workflow-info WORKFLOW=configure-host-control-loops",
         "make syntax-check",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl status lv3-host-control-loop-reconcile.timer --no-pager'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl status lv3-host-control-loop-reconcile.path --no-pager'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl start lv3-host-control-loop-reconcile.service && sudo cat /var/lib/lv3-host-control-loops/status/latest.json'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl status lv3-host-control-loop-reconcile.timer --no-pager'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl status lv3-host-control-loop-reconcile.path --no-pager'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl start lv3-host-control-loop-reconcile.service && sudo cat /var/lib/lv3-host-control-loops/status/latest.json'"
       ],
       "execution_class": "mutation",
       "target_lane": "lane:proxmox-host",
@@ -1568,8 +1568,8 @@
       ],
       "verification_commands": [
         "make syntax-check-ntopng",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl is-active redis-server ntopng'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'PASS=$(sudo cat /etc/lv3/ntopng/admin-password); curl -fsS -u admin:${PASS} http://100.64.0.1:3001/lua/rest/v2/get/ntopng/interfaces.lua'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl is-active redis-server ntopng'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'PASS=$(sudo cat /etc/lv3/ntopng/admin-password); curl -fsS -u admin:${PASS} http://100.64.0.1:3001/lua/rest/v2/get/ntopng/interfaces.lua'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -1748,9 +1748,9 @@
       ],
       "verification_commands": [
         "make syntax-check-mail-platform",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/mail-platform/docker-compose.yml ps'",
-        "curl -s -H \"X-API-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt)\" http://10.10.10.20:8081/v1/profiles",
-        "ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mail-platform-notification-profiles-verify.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit docker-runtime-lv3",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/mail-platform/docker-compose.yml ps'",
+        "curl -s -H \"X-API-Key: $(cat $(scripts/resolve_local_overlay_root.sh)/mail-platform/gateway-api-key.txt)\" http://10.10.10.20:8081/v1/profiles",
+        "ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mail-platform-notification-profiles-verify.yml --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit docker-runtime-lv3",
         "curl -I https://grafana.lv3.org"
       ],
       "execution_class": "mutation",
@@ -1802,9 +1802,9 @@
       ],
       "verification_commands": [
         "make syntax-check-mailpit",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.91 'curl -fsS http://127.0.0.1:8025/api/v1/info'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.91 'python3 - <<'\"'\"'PY'\"'\"'\nimport json\nimport smtplib\nimport urllib.request\nfrom email.message import EmailMessage\nsubject = \"LV3 workflow Mailpit verification\"\nurllib.request.urlopen(urllib.request.Request(\"http://127.0.0.1:8025/api/v1/messages\", method=\"DELETE\"), timeout=30).read()\nmessage = EmailMessage()\nmessage[\"From\"] = \"workflow-check@lv3.org\"\nmessage[\"To\"] = \"mailpit-workflow@lv3.org\"\nmessage[\"Subject\"] = subject\nmessage.set_content(\"Workflow verification through Mailpit\")\nwith smtplib.SMTP(\"127.0.0.1\", 1025, timeout=15) as client:\n    client.send_message(message)\npayload = json.loads(urllib.request.urlopen(\"http://127.0.0.1:8025/api/v1/messages\", timeout=30).read().decode(\"utf-8\"))\nassert any(item.get(\"Subject\") == subject for item in payload.get(\"messages\", []))\nprint(\"verified\")\nPY'",
-        "ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mail-platform-verify.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e env=staging --syntax-check"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.91 'curl -fsS http://127.0.0.1:8025/api/v1/info'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.91 'python3 - <<'\"'\"'PY'\"'\"'\nimport json\nimport smtplib\nimport urllib.request\nfrom email.message import EmailMessage\nsubject = \"LV3 workflow Mailpit verification\"\nurllib.request.urlopen(urllib.request.Request(\"http://127.0.0.1:8025/api/v1/messages\", method=\"DELETE\"), timeout=30).read()\nmessage = EmailMessage()\nmessage[\"From\"] = \"workflow-check@lv3.org\"\nmessage[\"To\"] = \"mailpit-workflow@lv3.org\"\nmessage[\"Subject\"] = subject\nmessage.set_content(\"Workflow verification through Mailpit\")\nwith smtplib.SMTP(\"127.0.0.1\", 1025, timeout=15) as client:\n    client.send_message(message)\npayload = json.loads(urllib.request.urlopen(\"http://127.0.0.1:8025/api/v1/messages\", timeout=30).read().decode(\"utf-8\"))\nassert any(item.get(\"Subject\") == subject for item in payload.get(\"messages\", []))\nprint(\"verified\")\nPY'",
+        "ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mail-platform-verify.yml --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e env=staging --syntax-check"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -1863,8 +1863,8 @@
       ],
       "verification_commands": [
         "make syntax-check-livekit",
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/livekit_tool.py verify-room-lifecycle --url https://livekit.lv3.org --api-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/livekit/api-key.txt --api-secret-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/livekit/api-secret.txt --room-prefix livekit-workflow-verify --identity livekit-workflow-probe --timeout-seconds 120",
-        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a \"ss -lnt | grep -E ':(7880|7881) ' && ss -lun | grep -E ':(7882) '\" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/livekit_tool.py verify-room-lifecycle --url https://livekit.lv3.org --api-key-file $(scripts/resolve_local_overlay_root.sh)/livekit/api-key.txt --api-secret-file $(scripts/resolve_local_overlay_root.sh)/livekit/api-secret.txt --room-prefix livekit-workflow-verify --identity livekit-workflow-probe --timeout-seconds 120",
+        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a \"ss -lnt | grep -E ':(7880|7881) ' && ss -lun | grep -E ':(7882) '\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -1915,9 +1915,9 @@
       ],
       "verification_commands": [
         "make syntax-check-redpanda",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/redpanda/docker-compose.yml ps'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 - <<'\"'\"'PY'\"'\"'\nfrom pathlib import Path\nimport base64\nimport urllib.request\n\nenv = {}\nfor line in Path('\"'\"'/run/lv3-secrets/redpanda/runtime.env'\"'\"').read_text(encoding='\"'\"'utf-8'\"'\"').splitlines():\n    if '\"'\"'='\"'\"' in line:\n        key, value = line.split('\"'\"'='\"'\"', 1)\n        env[key] = value\n\ntoken = base64.b64encode(\n    f\"{env['\"'\"'REDPANDA_ADMIN_USER'\"'\"']}:{env['\"'\"'REDPANDA_ADMIN_PASSWORD'\"'\"']}\".encode('\"'\"'utf-8'\"'\"')\n).decode('\"'\"'ascii'\"'\"')\nrequest = urllib.request.Request(\n    '\"'\"'http://127.0.0.1:9644/v1/status/ready'\"'\"',\n    headers={'\"'\"'Authorization'\"'\"': f'\"'\"'Basic {token}'\"'\"'},\n)\nwith urllib.request.urlopen(request, timeout=30) as response:\n    assert response.status == 200\nprint('\"'\"'ready'\"'\"')\nPY'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 - <<'\"'\"'PY'\"'\"'\nfrom pathlib import Path\nimport base64\nimport json\nimport time\nimport urllib.request\n\nenv = {}\nfor line in Path('\"'\"'/run/lv3-secrets/redpanda/runtime.env'\"'\"').read_text(encoding='\"'\"'utf-8'\"'\"').splitlines():\n    if '\"'\"'='\"'\"' in line:\n        key, value = line.split('\"'\"'='\"'\"', 1)\n        env[key] = value\n\ndef auth(user_key, password_key):\n    return base64.b64encode(\n        f\"{env[user_key]}:{env[password_key]}\".encode('\"'\"'utf-8'\"'\"')\n    ).decode('\"'\"'ascii'\"'\"')\n\nmarker = f\"workflow-redpanda-{int(time.time())}\"\npayload = json.dumps(\n    {\n        '\"'\"'records'\"'\"': [\n            {\n                '\"'\"'value'\"'\"': {\n                    '\"'\"'marker'\"'\"': marker,\n                    '\"'\"'created_at'\"'\"': time.strftime('\"'\"'%Y-%m-%dT%H:%M:%SZ'\"'\"', time.gmtime()),\n                    '\"'\"'producer'\"'\"': '\"'\"'workflow-check'\"'\"',\n                }\n            }\n        ]\n    }\n).encode('\"'\"'utf-8'\"'\"')\nproduce_request = urllib.request.Request(\n    '\"'\"'http://127.0.0.1:8103/topics/platform.redpanda.smoke'\"'\"',\n    data=payload,\n    headers={\n        '\"'\"'Authorization'\"'\"': f\"Basic {auth('\"'\"'REDPANDA_PLATFORM_USER'\"'\"', '\"'\"'REDPANDA_PLATFORM_PASSWORD'\"'\"')}\",\n        '\"'\"'Content-Type'\"'\"': '\"'\"'application/vnd.kafka.json.v2+json'\"'\"',\n        '\"'\"'Accept'\"'\"': '\"'\"'application/vnd.kafka.v2+json'\"'\"',\n    },\n    method='\"'\"'POST'\"'\"',\n)\nurllib.request.urlopen(produce_request, timeout=30).read()\n\nrecords_request = urllib.request.Request(\n    '\"'\"'http://127.0.0.1:8103/topics/platform.redpanda.smoke/partitions/0/records?offset=0&timeout=3000&max_bytes=1048576'\"'\"',\n    headers={\n        '\"'\"'Authorization'\"'\"': f\"Basic {auth('\"'\"'REDPANDA_PLATFORM_USER'\"'\"', '\"'\"'REDPANDA_PLATFORM_PASSWORD'\"'\"')}\",\n        '\"'\"'Accept'\"'\"': '\"'\"'application/vnd.kafka.json.v2+json'\"'\"',\n    },\n)\nrecords = json.loads(urllib.request.urlopen(records_request, timeout=30).read().decode('\"'\"'utf-8'\"'\"'))\nassert any(item.get('\"'\"'value'\"'\"', {}).get('\"'\"'marker'\"'\"') == marker for item in records)\n\nschema_request = urllib.request.Request(\n    '\"'\"'http://127.0.0.1:8104/subjects/platform.redpanda.smoke-value/versions/latest'\"'\"',\n    headers={\n        '\"'\"'Authorization'\"'\"': f\"Basic {auth('\"'\"'REDPANDA_PLATFORM_USER'\"'\"', '\"'\"'REDPANDA_PLATFORM_PASSWORD'\"'\"')}\",\n        '\"'\"'Accept'\"'\"': '\"'\"'application/vnd.schemaregistry.v1+json'\"'\"',\n    },\n)\nschema_payload = json.loads(urllib.request.urlopen(schema_request, timeout=30).read().decode('\"'\"'utf-8'\"'\"'))\nassert schema_payload['\"'\"'subject'\"'\"'] == '\"'\"'platform.redpanda.smoke-value'\"'\"'\nprint('\"'\"'verified'\"'\"')\nPY'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/redpanda/docker-compose.yml ps'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 - <<'\"'\"'PY'\"'\"'\nfrom pathlib import Path\nimport base64\nimport urllib.request\n\nenv = {}\nfor line in Path('\"'\"'/run/lv3-secrets/redpanda/runtime.env'\"'\"').read_text(encoding='\"'\"'utf-8'\"'\"').splitlines():\n    if '\"'\"'='\"'\"' in line:\n        key, value = line.split('\"'\"'='\"'\"', 1)\n        env[key] = value\n\ntoken = base64.b64encode(\n    f\"{env['\"'\"'REDPANDA_ADMIN_USER'\"'\"']}:{env['\"'\"'REDPANDA_ADMIN_PASSWORD'\"'\"']}\".encode('\"'\"'utf-8'\"'\"')\n).decode('\"'\"'ascii'\"'\"')\nrequest = urllib.request.Request(\n    '\"'\"'http://127.0.0.1:9644/v1/status/ready'\"'\"',\n    headers={'\"'\"'Authorization'\"'\"': f'\"'\"'Basic {token}'\"'\"'},\n)\nwith urllib.request.urlopen(request, timeout=30) as response:\n    assert response.status == 200\nprint('\"'\"'ready'\"'\"')\nPY'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 - <<'\"'\"'PY'\"'\"'\nfrom pathlib import Path\nimport base64\nimport json\nimport time\nimport urllib.request\n\nenv = {}\nfor line in Path('\"'\"'/run/lv3-secrets/redpanda/runtime.env'\"'\"').read_text(encoding='\"'\"'utf-8'\"'\"').splitlines():\n    if '\"'\"'='\"'\"' in line:\n        key, value = line.split('\"'\"'='\"'\"', 1)\n        env[key] = value\n\ndef auth(user_key, password_key):\n    return base64.b64encode(\n        f\"{env[user_key]}:{env[password_key]}\".encode('\"'\"'utf-8'\"'\"')\n    ).decode('\"'\"'ascii'\"'\"')\n\nmarker = f\"workflow-redpanda-{int(time.time())}\"\npayload = json.dumps(\n    {\n        '\"'\"'records'\"'\"': [\n            {\n                '\"'\"'value'\"'\"': {\n                    '\"'\"'marker'\"'\"': marker,\n                    '\"'\"'created_at'\"'\"': time.strftime('\"'\"'%Y-%m-%dT%H:%M:%SZ'\"'\"', time.gmtime()),\n                    '\"'\"'producer'\"'\"': '\"'\"'workflow-check'\"'\"',\n                }\n            }\n        ]\n    }\n).encode('\"'\"'utf-8'\"'\"')\nproduce_request = urllib.request.Request(\n    '\"'\"'http://127.0.0.1:8103/topics/platform.redpanda.smoke'\"'\"',\n    data=payload,\n    headers={\n        '\"'\"'Authorization'\"'\"': f\"Basic {auth('\"'\"'REDPANDA_PLATFORM_USER'\"'\"', '\"'\"'REDPANDA_PLATFORM_PASSWORD'\"'\"')}\",\n        '\"'\"'Content-Type'\"'\"': '\"'\"'application/vnd.kafka.json.v2+json'\"'\"',\n        '\"'\"'Accept'\"'\"': '\"'\"'application/vnd.kafka.v2+json'\"'\"',\n    },\n    method='\"'\"'POST'\"'\"',\n)\nurllib.request.urlopen(produce_request, timeout=30).read()\n\nrecords_request = urllib.request.Request(\n    '\"'\"'http://127.0.0.1:8103/topics/platform.redpanda.smoke/partitions/0/records?offset=0&timeout=3000&max_bytes=1048576'\"'\"',\n    headers={\n        '\"'\"'Authorization'\"'\"': f\"Basic {auth('\"'\"'REDPANDA_PLATFORM_USER'\"'\"', '\"'\"'REDPANDA_PLATFORM_PASSWORD'\"'\"')}\",\n        '\"'\"'Accept'\"'\"': '\"'\"'application/vnd.kafka.json.v2+json'\"'\"',\n    },\n)\nrecords = json.loads(urllib.request.urlopen(records_request, timeout=30).read().decode('\"'\"'utf-8'\"'\"'))\nassert any(item.get('\"'\"'value'\"'\"', {}).get('\"'\"'marker'\"'\"') == marker for item in records)\n\nschema_request = urllib.request.Request(\n    '\"'\"'http://127.0.0.1:8104/subjects/platform.redpanda.smoke-value/versions/latest'\"'\"',\n    headers={\n        '\"'\"'Authorization'\"'\"': f\"Basic {auth('\"'\"'REDPANDA_PLATFORM_USER'\"'\"', '\"'\"'REDPANDA_PLATFORM_PASSWORD'\"'\"')}\",\n        '\"'\"'Accept'\"'\"': '\"'\"'application/vnd.schemaregistry.v1+json'\"'\"',\n    },\n)\nschema_payload = json.loads(urllib.request.urlopen(schema_request, timeout=30).read().decode('\"'\"'utf-8'\"'\"'))\nassert schema_payload['\"'\"'subject'\"'\"'] == '\"'\"'platform.redpanda.smoke-value'\"'\"'\nprint('\"'\"'verified'\"'\"')\nPY'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -1976,8 +1976,8 @@
       ],
       "verification_commands": [
         "make syntax-check-openbao",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 docker compose --file /opt/openbao/docker-compose.yml ps'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 curl -fsS http://127.0.0.1:8200/v1/sys/health'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 docker compose --file /opt/openbao/docker-compose.yml ps'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 curl -fsS http://127.0.0.1:8200/v1/sys/health'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2032,8 +2032,8 @@
       ],
       "verification_commands": [
         "make syntax-check-step-ca",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/step-ca/docker-compose.yml ps'",
-        "curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://100.64.0.1:9443/health"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/step-ca/docker-compose.yml ps'",
+        "curl --cacert $(scripts/resolve_local_overlay_root.sh)/step-ca/certs/root_ca.crt https://100.64.0.1:9443/health"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2106,9 +2106,9 @@
       ],
       "verification_commands": [
         "make syntax-check-superset",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/superset/docker-compose.yml ps && curl -fsS http://127.0.0.1:8105/health'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/superset/docker-compose.yml ps && curl -fsS http://127.0.0.1:8105/health'",
         "curl -fsS https://bi.lv3.org/health",
-        "python3 scripts/superset_bootstrap.py verify-public --base-url https://bi.lv3.org --expected-postgres-databases-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/superset/postgres-databases.json --database-prefix PostgreSQL --expected-dashboard \"LV3 Platform Database Inventory\" --expected-chart \"PostgreSQL Databases\" --expected-sso-host sso.lv3.org --admin-username admin --admin-password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/superset/admin-password.txt --expected-extra-database \"Plausible ClickHouse\" --report-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/superset/verify-public-report.json"
+        "python3 scripts/superset_bootstrap.py verify-public --base-url https://bi.lv3.org --expected-postgres-databases-file $(scripts/resolve_local_overlay_root.sh)/superset/postgres-databases.json --database-prefix PostgreSQL --expected-dashboard \"LV3 Platform Database Inventory\" --expected-chart \"PostgreSQL Databases\" --expected-sso-host sso.lv3.org --admin-username admin --admin-password-file $(scripts/resolve_local_overlay_root.sh)/superset/admin-password.txt --expected-extra-database \"Plausible ClickHouse\" --report-file $(scripts/resolve_local_overlay_root.sh)/superset/verify-public-report.json"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2160,9 +2160,9 @@
       ],
       "verification_commands": [
         "make syntax-check-tika",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p\" ops@10.10.10.90 'curl -fsS http://127.0.0.1:9998/version'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p\" ops@10.10.10.90 'body=$(mktemp); trap '\"'\"'rm -f \"$body\"'\"'\"' EXIT; printf \"<html><body><h1>LV3 Tika workflow verification</h1></body></html>\" | curl -fsS -X PUT -H \"Content-Type: text/html\" -H \"Accept: text/plain\" --data-binary @- http://127.0.0.1:9998/tika >\"$body\"; grep -q \"LV3 Tika workflow verification\" \"$body\"'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p\" ops@10.10.10.90 'printf \"<html><body><h1>LV3 Tika metadata verification</h1></body></html>\" | curl -fsS -X PUT -H \"Content-Type: text/html\" -H \"Accept: application/json\" --data-binary @- http://127.0.0.1:9998/meta | grep -q \"X-TIKA:Parsed-By\"'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ProxyCommand=\"ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p\" ops@10.10.10.90 'curl -fsS http://127.0.0.1:9998/version'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ProxyCommand=\"ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p\" ops@10.10.10.90 'body=$(mktemp); trap '\"'\"'rm -f \"$body\"'\"'\"' EXIT; printf \"<html><body><h1>LV3 Tika workflow verification</h1></body></html>\" | curl -fsS -X PUT -H \"Content-Type: text/html\" -H \"Accept: text/plain\" --data-binary @- http://127.0.0.1:9998/tika >\"$body\"; grep -q \"LV3 Tika workflow verification\" \"$body\"'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ProxyCommand=\"ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p\" ops@10.10.10.90 'printf \"<html><body><h1>LV3 Tika metadata verification</h1></body></html>\" | curl -fsS -X PUT -H \"Content-Type: text/html\" -H \"Accept: application/json\" --data-binary @- http://127.0.0.1:9998/meta | grep -q \"X-TIKA:Parsed-By\"'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2219,7 +2219,7 @@
       "verification_commands": [
         "make syntax-check-nomad",
         "make converge-nomad",
-        "NOMAD_ADDR=https://100.64.0.1:8013 NOMAD_CACERT=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem NOMAD_TOKEN=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tokens/bootstrap-management.token) nomad node status"
+        "NOMAD_ADDR=https://100.64.0.1:8013 NOMAD_CACERT=$(scripts/resolve_local_overlay_root.sh)/nomad/tls/nomad-agent-ca.pem NOMAD_TOKEN=$(cat $(scripts/resolve_local_overlay_root.sh)/nomad/tokens/bootstrap-management.token) nomad node status"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2274,9 +2274,9 @@
       ],
       "verification_commands": [
         "make syntax-check-openfga",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 '\\''curl -fsS http://127.0.0.1:8098/healthz && docker compose --file /opt/openfga/docker-compose.yml ps'\\'''",
-        "curl -fsS -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt)\" http://100.64.0.1:8014/stores",
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/serverclaw_authz.py verify --config /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt --keycloak-url http://10.10.10.20:8091"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 '\\''curl -fsS http://127.0.0.1:8098/healthz && docker compose --file /opt/openfga/docker-compose.yml ps'\\'''",
+        "curl -fsS -H \"Authorization: Bearer $(cat $(scripts/resolve_local_overlay_root.sh)/openfga/preshared-key.txt)\" http://100.64.0.1:8014/stores",
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/serverclaw_authz.py verify --config /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file $(scripts/resolve_local_overlay_root.sh)/openfga/preshared-key.txt --keycloak-url http://10.10.10.20:8091"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2330,7 +2330,7 @@
       ],
       "verification_commands": [
         "make syntax-check-temporal",
-        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a \"docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator cluster health && docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator namespace describe --namespace lv3 && curl -fsS http://127.0.0.1:8099 >/dev/null\" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a \"docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator cluster health && docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator namespace describe --namespace lv3 && curl -fsS http://127.0.0.1:8099 >/dev/null\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2384,7 +2384,7 @@
       "verification_commands": [
         "make syntax-check-windmill",
         "curl -s http://100.64.0.1:8005/api/version",
-        "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\" http://100.64.0.1:8005/api/users/global/whoami"
+        "curl -s -H \"Authorization: Bearer $(cat $(scripts/resolve_local_overlay_root.sh)/windmill/superadmin-secret.txt)\" http://100.64.0.1:8005/api/users/global/whoami"
       ],
       "execution_class": "mutation",
       "target_lane": "lane:docker-runtime",
@@ -3638,7 +3638,7 @@
       "verification_commands": [
         "scripts/validate_repo.sh compose-runtime-envs health-probes",
         "uv run --with pytest pytest -q tests/test_compose_runtime_secret_injection.py",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'sudo ls /run/lv3-secrets'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'sudo ls /run/lv3-secrets'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -3695,8 +3695,8 @@
       ],
       "verification_commands": [
         "make syntax-check-control-plane-recovery",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p\" ops@10.10.10.20 'sudo systemctl status lv3-control-plane-backup.timer --no-pager'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p\" ops@10.10.10.60 'sudo systemctl status lv3-control-plane-restore-drill.timer --no-pager'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p\" ops@10.10.10.20 'sudo systemctl status lv3-control-plane-backup.timer --no-pager'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p\" ops@10.10.10.60 'sudo systemctl status lv3-control-plane-restore-drill.timer --no-pager'",
         "LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT=/path/to/off-host/archive python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/control_metadata_witness.py verify --archive-root \"$LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT\""
       ],
       "execution_class": "mutation",
@@ -3823,8 +3823,8 @@
         "make syntax-check-label-studio",
         "curl -I https://annotate.lv3.org/",
         "curl -I https://annotate.lv3.org/api/projects",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@10.10.10.20 \"curl -fsS http://127.0.0.1:8110/api/version\"",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@10.10.10.20 \"TOKEN=\\$(sudo cat /etc/lv3/label-studio/admin-token.txt); curl -fsS -H 'Authorization: Token '\\\"\\$TOKEN\\\" http://127.0.0.1:8110/api/projects\""
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@10.10.10.20 \"curl -fsS http://127.0.0.1:8110/api/version\"",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@10.10.10.20 \"TOKEN=\\$(sudo cat /etc/lv3/label-studio/admin-token.txt); curl -fsS -H 'Authorization: Token '\\\"\\$TOKEN\\\" http://127.0.0.1:8110/api/projects\""
       ],
       "execution_class": "mutation",
       "budget": {
@@ -4021,7 +4021,7 @@
         "make syntax-check-harbor",
         "curl -fsS https://registry.lv3.org/api/v2.0/ping",
         "curl -fsS -u \"admin:$(cat .local/harbor/admin-password.txt)\" https://registry.lv3.org/api/v2.0/projects/check-runner",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' ops@10.10.10.30 'docker pull registry.lv3.org/check-runner/python:3.12.10'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' ops@10.10.10.30 'docker pull registry.lv3.org/check-runner/python:3.12.10'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -4332,7 +4332,7 @@
         "curl -fsS https://n8n.lv3.org/healthz",
         "curl -sSI https://n8n.lv3.org/",
         "curl -sSI https://n8n.lv3.org/webhook-test/serverclaw-connector-smoke",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'curl -fsS http://127.0.0.1:5678/healthz/readiness'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'curl -fsS http://127.0.0.1:5678/healthz/readiness'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -4389,8 +4389,8 @@
         "make syntax-check-nextcloud",
         "curl -fsS https://cloud.lv3.org/status.php",
         "curl -fsSI https://cloud.lv3.org/.well-known/caldav",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8084/status.php'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker exec --user www-data nextcloud-app php occ background:status'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8084/status.php'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker exec --user www-data nextcloud-app php occ background:status'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -4446,8 +4446,8 @@
       "verification_commands": [
         "make syntax-check-netbox",
         "curl -s -o /dev/null -w '%{http_code}\\n' http://100.64.0.1:8004/login/",
-        "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt)\" http://100.64.0.1:8004/api/virtualization/virtual-machines/?limit=20",
-        "uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/netbox_inventory_sync.py --api-url http://100.64.0.1:8004 --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt --host-vars /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml --stack /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml --lane-catalog /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json"
+        "curl -s -H \"Authorization: Bearer $(cat $(scripts/resolve_local_overlay_root.sh)/netbox/api-token.txt)\" http://100.64.0.1:8004/api/virtualization/virtual-machines/?limit=20",
+        "uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/netbox_inventory_sync.py --api-url http://100.64.0.1:8004 --api-token-file $(scripts/resolve_local_overlay_root.sh)/netbox/api-token.txt --host-vars /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml --stack /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml --lane-catalog /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json"
       ],
       "required_read_surfaces": [
         "netbox",
@@ -4522,7 +4522,7 @@
       "verification_commands": [
         "make syntax-check-homepage",
         "make uptime-kuma-manage ACTION=ensure-monitors",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.91 'curl -fsS http://10.10.10.91:3090/'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.91 'curl -fsS http://10.10.10.91:3090/'",
         "curl -Ik https://home.lv3.org"
       ],
       "execution_class": "mutation",
@@ -4572,7 +4572,7 @@
       "verification_commands": [
         "make syntax-check-excalidraw",
         "uv run --with pyyaml --with jsonschema python scripts/generate_diagrams.py --check",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:3095/ >/dev/null && curl -fsS http://127.0.0.1:3096/'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:3095/ >/dev/null && curl -fsS http://127.0.0.1:3096/'",
         "dig +short draw.lv3.org @8.8.8.8 && curl -Ik --resolve draw.lv3.org:443:65.108.75.123 https://draw.lv3.org"
       ],
       "execution_class": "mutation",
@@ -4693,7 +4693,7 @@
       ],
       "verification_commands": [
         "make syntax-check-minio",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:9010/minio/health/live'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:9010/minio/health/live'",
         "curl -fsSI https://minio.lv3.org/minio/health/live",
         "curl -fsSI https://minio-console.lv3.org/"
       ],
@@ -4754,7 +4754,7 @@
       "verification_commands": [
         "make syntax-check-one-api",
         "curl -fsS http://100.64.0.1:8018/api/status",
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/one_api_bootstrap.py verify --config /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/one-api/bootstrap.json --one-api-url http://100.64.0.1:8018 --root-access-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api/root-access-token.txt"
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/one_api_bootstrap.py verify --config /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/one-api/bootstrap.json --one-api-url http://100.64.0.1:8018 --root-access-token-file $(scripts/resolve_local_overlay_root.sh)/one-api/root-access-token.txt"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -4809,7 +4809,7 @@
         "make syntax-check-open-webui",
         "curl -s http://100.64.0.1:8008/",
         "curl -I http://100.64.0.1:8008/oauth/oidc/login",
-        "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"'\"}' http://100.64.0.1:8008/api/v1/auths/signin"
+        "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat $(scripts/resolve_local_overlay_root.sh)/open-webui/admin-password.txt)\"'\"}' http://100.64.0.1:8008/api/v1/auths/signin"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -4862,7 +4862,7 @@
       "verification_commands": [
         "make syntax-check-serverclaw",
         "curl -I https://chat.lv3.org/",
-        "ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a \"curl -s -X POST http://127.0.0.1:8096/api/v1/auths/signin -H 'Content-Type: application/json' -d '{\\\"email\\\":\\\"ops@lv3.org\\\",\\\"password\\\":\\\"'\\\"$(sudo cat /etc/lv3/serverclaw/admin-password.txt)\\\"'\\\"}'\" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+        "ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a \"curl -s -X POST http://127.0.0.1:8096/api/v1/auths/signin -H 'Content-Type: application/json' -d '{\\\"email\\\":\\\"ops@lv3.org\\\",\\\"password\\\":\\\"'\\\"$(sudo cat /etc/lv3/serverclaw/admin-password.txt)\\\"'\\\"}'\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -4964,8 +4964,8 @@
       ],
       "verification_commands": [
         "make syntax-check-ollama",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:11434/api/version'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/ollama_probe.py --base-url http://127.0.0.1:11434 --runs 3 --json'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:11434/api/version'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/ollama_probe.py --base-url http://127.0.0.1:11434 --runs 3 --json'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -5016,9 +5016,9 @@
       ],
       "verification_commands": [
         "make syntax-check-piper",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8100/healthz'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8100/api/voices'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 -c '\"'\"'import json, urllib.request; request=urllib.request.Request(\"http://127.0.0.1:8100/api/tts?voice=en_US-ryan-medium\", data=b\"LV3 Piper workflow verification\", headers={\"Content-Type\": \"text/plain; charset=utf-8\"}, method=\"POST\"); response=urllib.request.urlopen(request, timeout=180); payload=response.read(); content_type=response.headers.get(\"Content-Type\", \"\"); assert content_type.startswith(\"audio/wav\"); assert payload[:4] == b\"RIFF\"; assert payload[8:12] == b\"WAVE\"; assert len(payload) > 1024; print(json.dumps({\"verified\": True, \"bytes\": len(payload)}))'\"'\"''"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8100/healthz'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8100/api/voices'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 -c '\"'\"'import json, urllib.request; request=urllib.request.Request(\"http://127.0.0.1:8100/api/tts?voice=en_US-ryan-medium\", data=b\"LV3 Piper workflow verification\", headers={\"Content-Type\": \"text/plain; charset=utf-8\"}, method=\"POST\"); response=urllib.request.urlopen(request, timeout=180); payload=response.read(); content_type=response.headers.get(\"Content-Type\", \"\"); assert content_type.startswith(\"audio/wav\"); assert payload[:4] == b\"RIFF\"; assert payload[8:12] == b\"WAVE\"; assert len(payload) > 1024; print(json.dumps({\"verified\": True, \"bytes\": len(payload)}))'\"'\"''"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -5066,8 +5066,8 @@
       ],
       "verification_commands": [
         "make syntax-check-dozzle",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8089/healthcheck'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'sudo docker exec dozzle /dozzle agent-test dozzle-agent:7007 && sudo docker exec dozzle /dozzle agent-test 10.10.10.30:7007 && sudo docker exec dozzle /dozzle agent-test 10.10.10.40:7007'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8089/healthcheck'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'sudo docker exec dozzle /dozzle agent-test dozzle-agent:7007 && sudo docker exec dozzle /dozzle agent-test 10.10.10.30:7007 && sudo docker exec dozzle /dozzle agent-test 10.10.10.40:7007'",
         "curl -skI https://logs.lv3.org/"
       ],
       "execution_class": "mutation",
@@ -5187,7 +5187,7 @@
       ],
       "verification_commands": [
         "make syntax-check-ntfy",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:2586/v1/health'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:2586/v1/health'",
         "curl -fsS https://ntfy.lv3.org/v1/health"
       ],
       "execution_class": "mutation",
@@ -5245,8 +5245,8 @@
       ],
       "verification_commands": [
         "make syntax-check-falco",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'systemctl is-active lv3-falco-event-bridge falco-modern-bpf && curl -fsS http://127.0.0.1:18084/healthz'",
-        "for host in 10.10.10.30 10.10.10.40 10.10.10.50; do ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@$host 'systemctl is-active falco-modern-bpf'; done"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'systemctl is-active lv3-falco-event-bridge falco-modern-bpf && curl -fsS http://127.0.0.1:18084/healthz'",
+        "for host in 10.10.10.30 10.10.10.40 10.10.10.50; do ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@$host 'systemctl is-active falco-modern-bpf'; done"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -5359,10 +5359,10 @@
       ],
       "verification_commands": [
         "make syntax-check-gotenberg",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.90 'curl -fsS http://127.0.0.1:3007/health'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.90 'html=$(mktemp --suffix=.html); pdf=$(mktemp); trap '\"'\"'rm -f \"$html\" \"$pdf\"'\"'\"' EXIT; printf \"<html><body><h1>LV3 Gotenberg workflow verification</h1></body></html>\" >\"$html\"; curl -fsS -o \"$pdf\" -F \"files=@${html};filename=index.html;type=text/html\" http://127.0.0.1:3007/forms/chromium/convert/html; head -c 4 \"$pdf\" | grep -q %PDF'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.90 'txt=$(mktemp --suffix=.txt); pdf=$(mktemp); trap '\"'\"'rm -f \"$txt\" \"$pdf\"'\"'\"' EXIT; printf \"LV3 Gotenberg workflow verification\\n\" >\"$txt\"; curl -fsS -o \"$pdf\" -F \"files=@${txt};filename=verification.txt;type=text/plain\" http://127.0.0.1:3007/forms/libreoffice/convert; head -c 4 \"$pdf\" | grep -q %PDF'",
-        "LV3_TOKEN=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt) && curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" https://api.lv3.org/v1/gotenberg/health"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.90 'curl -fsS http://127.0.0.1:3007/health'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.90 'html=$(mktemp --suffix=.html); pdf=$(mktemp); trap '\"'\"'rm -f \"$html\" \"$pdf\"'\"'\"' EXIT; printf \"<html><body><h1>LV3 Gotenberg workflow verification</h1></body></html>\" >\"$html\"; curl -fsS -o \"$pdf\" -F \"files=@${html};filename=index.html;type=text/html\" http://127.0.0.1:3007/forms/chromium/convert/html; head -c 4 \"$pdf\" | grep -q %PDF'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.90 'txt=$(mktemp --suffix=.txt); pdf=$(mktemp); trap '\"'\"'rm -f \"$txt\" \"$pdf\"'\"'\"' EXIT; printf \"LV3 Gotenberg workflow verification\\n\" >\"$txt\"; curl -fsS -o \"$pdf\" -F \"files=@${txt};filename=verification.txt;type=text/plain\" http://127.0.0.1:3007/forms/libreoffice/convert; head -c 4 \"$pdf\" | grep -q %PDF'",
+        "LV3_TOKEN=$(cat $(scripts/resolve_local_overlay_root.sh)/platform-context/api-token.txt) && curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" https://api.lv3.org/v1/gotenberg/health"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -5415,9 +5415,9 @@
       ],
       "verification_commands": [
         "make syntax-check-typesense",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8108/health'",
-        "TYPESENSE_API_KEY=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/typesense/api-key.txt) && curl -fsS -H \"X-TYPESENSE-API-KEY: $TYPESENSE_API_KEY\" http://100.64.0.1:8016/collections/platform-services",
-        "LV3_TOKEN=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt) && curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" 'https://api.lv3.org/v1/platform/search/structured?q=api&collection=platform-services'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8108/health'",
+        "TYPESENSE_API_KEY=$(cat $(scripts/resolve_local_overlay_root.sh)/typesense/api-key.txt) && curl -fsS -H \"X-TYPESENSE-API-KEY: $TYPESENSE_API_KEY\" http://100.64.0.1:8016/collections/platform-services",
+        "LV3_TOKEN=$(cat $(scripts/resolve_local_overlay_root.sh)/platform-context/api-token.txt) && curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" 'https://api.lv3.org/v1/platform/search/structured?q=api&collection=platform-services'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -5578,8 +5578,8 @@
       ],
       "verification_commands": [
         "make syntax-check-vaultwarden",
-        "curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://vault.lv3.org/alive",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/vaultwarden/docker-compose.yml ps'"
+        "curl --cacert $(scripts/resolve_local_overlay_root.sh)/step-ca/certs/root_ca.crt https://vault.lv3.org/alive",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/vaultwarden/docker-compose.yml ps'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -5634,8 +5634,8 @@
       "verification_commands": [
         "make syntax-check-mattermost",
         "curl -s http://100.64.0.1:8066/api/v4/system/ping",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker exec lv3-mattermost /mattermost/bin/mmctl --local team search lv3 --json'",
-        "python -m json.tool /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/incoming-webhooks.json"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker exec lv3-mattermost /mattermost/bin/mmctl --local team search lv3 --json'",
+        "python -m json.tool $(scripts/resolve_local_overlay_root.sh)/mattermost/incoming-webhooks.json"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -7074,7 +7074,7 @@
           {
             "id": "openbao_private_mtls_listener",
             "description": "The private OpenBao listener on the Proxmox host answers a TLS handshake with the managed step-ca trust root.",
-            "command": "openssl s_client -connect 100.64.0.1:8200 -CAfile /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt < /dev/null 2>/dev/null | grep -q 'Verify return code: 0 (ok)'",
+            "command": "openssl s_client -connect 100.64.0.1:8200 -CAfile $(scripts/resolve_local_overlay_root.sh)/step-ca/certs/root_ca.crt < /dev/null 2>/dev/null | grep -q 'Verify return code: 0 (ok)'",
             "timeout_seconds": 15
           },
           {
@@ -7716,10 +7716,10 @@
       ],
       "verification_commands": [
         "make syntax-check-changedetection",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/changedetection/docker-compose.yml ps && curl -fsS http://127.0.0.1:5000/'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:5000/api/v1/systeminfo -H \"x-api-key: $(sudo cat /etc/lv3/changedetection/api-token)\"'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 -c '\\''import json; payload=json.load(open(\"/opt/changedetection/watch-sync-report.json\", encoding=\"utf-8\")); assert payload[\"check_only\"] is True and payload[\"changed\"] is False; print(json.dumps(payload[\"summary\"], sort_keys=True))'\\'''",
-        "LV3_TOKEN=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt) && curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" https://api.lv3.org/v1/changedetection/"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/changedetection/docker-compose.yml ps && curl -fsS http://127.0.0.1:5000/'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:5000/api/v1/systeminfo -H \"x-api-key: $(sudo cat /etc/lv3/changedetection/api-token)\"'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 -c '\\''import json; payload=json.load(open(\"/opt/changedetection/watch-sync-report.json\", encoding=\"utf-8\")); assert payload[\"check_only\"] is True and payload[\"changed\"] is False; print(json.dumps(payload[\"summary\"], sort_keys=True))'\\'''",
+        "LV3_TOKEN=$(cat $(scripts/resolve_local_overlay_root.sh)/platform-context/api-token.txt) && curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" https://api.lv3.org/v1/changedetection/"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -7843,9 +7843,9 @@
       ],
       "verification_commands": [
         "make syntax-check-directus",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/directus/docker-compose.yml ps && curl -fsS http://127.0.0.1:8055/server/health'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/directus/docker-compose.yml ps && curl -fsS http://127.0.0.1:8055/server/health'",
         "curl -fsS https://data.lv3.org/server/health",
-        "python3 scripts/directus_bootstrap.py verify-public --base-url https://data.lv3.org --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus/service-registry-token.txt --collection service_registry --expected-service-name directus --expected-sso-host sso.lv3.org"
+        "python3 scripts/directus_bootstrap.py verify-public --base-url https://data.lv3.org --api-token-file $(scripts/resolve_local_overlay_root.sh)/directus/service-registry-token.txt --collection service_registry --expected-service-name directus --expected-sso-host sso.lv3.org"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -7901,10 +7901,10 @@
       ],
       "verification_commands": [
         "make syntax-check-paperless",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/paperless/docker-compose.yml ps && curl -I http://127.0.0.1:8018/'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8018/api/documents/?page_size=1 -H \"Authorization: Token $(sudo cat /etc/lv3/paperless/api-token)\"'",
-        "python3 scripts/paperless_sync.py verify --base-url https://paperless.lv3.org --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/api-token.txt --desired-state-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/taxonomy.json --report-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/sync-report.json",
-        "python3 scripts/paperless_sync.py smoke-upload --base-url https://paperless.lv3.org --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/api-token.txt --report-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/smoke-upload-report.json"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/paperless/docker-compose.yml ps && curl -I http://127.0.0.1:8018/'",
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8018/api/documents/?page_size=1 -H \"Authorization: Token $(sudo cat /etc/lv3/paperless/api-token)\"'",
+        "python3 scripts/paperless_sync.py verify --base-url https://paperless.lv3.org --api-token-file $(scripts/resolve_local_overlay_root.sh)/paperless/api-token.txt --desired-state-file $(scripts/resolve_local_overlay_root.sh)/paperless/taxonomy.json --report-file $(scripts/resolve_local_overlay_root.sh)/paperless/sync-report.json",
+        "python3 scripts/paperless_sync.py smoke-upload --base-url https://paperless.lv3.org --api-token-file $(scripts/resolve_local_overlay_root.sh)/paperless/api-token.txt --report-file $(scripts/resolve_local_overlay_root.sh)/paperless/smoke-upload-report.json"
       ],
       "execution_class": "mutation",
       "budget": {

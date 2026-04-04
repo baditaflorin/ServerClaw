@@ -131,6 +131,132 @@ workstreams:
     included_in_repo_version: null
     latest_receipts:
       fork_first_workstream_metadata: 2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply
+- id: adr-0333-private-overlay-live-apply
+  adr: '0333'
+  title: Finish the shared private-overlay bootstrap alias contract and verify it
+    from a dedicated worktree
+  status: in_progress
+  owner: codex
+  branch: codex/ws-0333-private-overlay
+  worktree_path: .worktrees/ws-0333-private-overlay
+  doc: docs/workstreams/adr-0333-private-overlay-live-apply.md
+  depends_on:
+  - adr-0034-controller-local-secret-manifest-and-preflight
+  - adr-0167-agent-handoff-and-context-preservation
+  - adr-0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs
+  - adr-0330-public-github-readiness-as-a-first-class-repository-lifecycle
+  - adr-0333-private-overlay-files-for-deployment-specific-secrets-and-identities
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/adr-0333-private-overlay-live-apply.yaml
+  - docs/workstreams/adr-0333-private-overlay-live-apply.md
+  - docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+  - docs/adr/.index.yaml
+  - docs/runbooks/controller-local-secrets-and-preflight.md
+  - docs/runbooks/initial-access.md
+  - docs/runbooks/operator-onboarding.md
+  - Makefile
+  - config/controller-local-secrets.json
+  - config/workflow-catalog.json
+  - config/worktree-bootstrap-manifests.json
+  - config/build-server.json
+  - inventory/build_server.yml
+  - inventory/group_vars/all.yml
+  - platform/repo.py
+  - scripts/materialize_bootstrap_key_alias.py
+  - scripts/resolve_local_overlay_root.sh
+  - scripts/remote_exec.sh
+  - scripts/validation_runner_contracts.py
+  - scripts/controller_automation_toolkit.py
+  - scripts/drift_lib.py
+  - scripts/coolify_tool.py
+  - scripts/portainer_tool.py
+  - scripts/build_rag_index.py
+  - scripts/provision_operator.py
+  - config/windmill/scripts/ephemeral-pool-reconciler.py
+  - collections/ansible_collections/lv3/platform/roles/proxmox_api_access/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/control_plane_recovery_controller/defaults/main.yml
+  - tests/test_materialize_bootstrap_key_alias.py
+  - tests/test_controller_automation_toolkit.py
+  - tests/test_preflight_controller_local.py
+  - tests/test_remote_exec.py
+  - tests/test_ephemeral_windmill_wrappers.py
+  - tests/test_provision_operator.py
+  - tests/test_validation_runner_contracts.py
+  - receipts/live-applies/2026-04-04-adr-0333-private-overlay-live-apply.json
+  - receipts/live-applies/2026-04-04-adr-0333-private-overlay-mainline-live-apply.json
+  - receipts/live-applies/evidence/2026-04-04-adr-0333-*
+  ownership_manifest:
+    owned_surfaces:
+    - id: workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr0333_workstream_state
+      paths:
+      - workstreams/active/adr-0333-private-overlay-live-apply.yaml
+      - docs/workstreams/adr-0333-private-overlay-live-apply.md
+      - docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+      - docs/adr/.index.yaml
+      mode: exclusive
+    - id: adr0333_controller_overlay_contract
+      paths:
+      - docs/runbooks/controller-local-secrets-and-preflight.md
+      - docs/runbooks/initial-access.md
+      - docs/runbooks/operator-onboarding.md
+      - Makefile
+      - config/controller-local-secrets.json
+      - config/workflow-catalog.json
+      - config/worktree-bootstrap-manifests.json
+      - config/build-server.json
+      - inventory/build_server.yml
+      - inventory/group_vars/all.yml
+      - platform/repo.py
+      - scripts/materialize_bootstrap_key_alias.py
+      - scripts/resolve_local_overlay_root.sh
+      - scripts/remote_exec.sh
+      - scripts/validation_runner_contracts.py
+      - scripts/controller_automation_toolkit.py
+      - scripts/drift_lib.py
+      - scripts/coolify_tool.py
+      - scripts/portainer_tool.py
+      - scripts/build_rag_index.py
+      - scripts/provision_operator.py
+      - config/windmill/scripts/ephemeral-pool-reconciler.py
+      - collections/ansible_collections/lv3/platform/roles/proxmox_api_access/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/control_plane_recovery_controller/defaults/main.yml
+      mode: shared_contract
+      contract: adr0333-private-overlay-v1
+    - id: adr0333_overlay_regression_tests
+      paths:
+      - tests/test_materialize_bootstrap_key_alias.py
+      - tests/test_controller_automation_toolkit.py
+      - tests/test_preflight_controller_local.py
+      - tests/test_remote_exec.py
+      - tests/test_ephemeral_windmill_wrappers.py
+      - tests/test_provision_operator.py
+      - tests/test_validation_runner_contracts.py
+      mode: exclusive
+    - id: adr0333_live_apply_receipts
+      paths:
+      - receipts/live-applies/2026-04-04-adr-0333-private-overlay-live-apply.json
+      - receipts/live-applies/2026-04-04-adr-0333-private-overlay-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-04-04-adr-0333-*
+      mode: exclusive
+  blockers: []
+  ready_to_merge: false
+  live_applied: false
+  canonical_truth:
+    changelog_entry: implements ADR 0333 by moving the remaining active controller-local
+      bootstrap-key and private-overlay path contracts onto shared `.local` aliases,
+      teaching fresh worktrees to materialize those aliases automatically, and validating
+      the build-server plus controller automation surfaces from exact main
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts:
+      private_overlay_contract: 2026-04-04-adr-0333-private-overlay-mainline-live-apply
 - id: ws-0328-live-apply
   adr: 0328
   title: Implement size-budgeted root summaries and automatic rollover ledgers

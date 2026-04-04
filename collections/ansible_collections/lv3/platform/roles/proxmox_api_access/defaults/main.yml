@@ -50,5 +50,5 @@ proxmox_api_token_role_privileges:
   - VM.Snapshot.Rollback
 proxmox_api_token_acl_path: /
 proxmox_api_token_privsep: true
-proxmox_api_token_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api
-proxmox_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json
+proxmox_api_token_local_dir: "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}/proxmox-api"
+proxmox_api_token_local_file: "{{ proxmox_api_token_local_dir }}/lv3-automation-primary.json"

@@ -1,5 +1,5 @@
 ---
-control_plane_recovery_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery
+control_plane_recovery_local_artifact_dir: "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}/control-plane-recovery"
 control_plane_recovery_local_controller_dir: "{{ control_plane_recovery_local_artifact_dir }}/controller"
 control_plane_recovery_local_controller_bundle_file: "{{ control_plane_recovery_local_controller_dir }}/controller-recovery-bundle.tar.zst"
 control_plane_recovery_local_controller_manifest_file: "{{ control_plane_recovery_local_controller_dir }}/control-plane-recovery-manifest.json"
@@ -9,35 +9,35 @@ control_plane_recovery_store_user: lv3-control-plane-backup
 control_plane_recovery_store_group: "{{ control_plane_recovery_store_user }}"
 control_plane_recovery_controller_bundle_sources:
   - id: step_ca
-    path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca
+    path: "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}/step-ca"
     archive_name: step-ca
     required: true
   - id: openbao
-    path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao
+    path: "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}/openbao"
     archive_name: openbao
     required: true
   - id: windmill
-    path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill
+    path: "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}/windmill"
     archive_name: windmill
     required: true
   - id: mail_platform
-    path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform
+    path: "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}/mail-platform"
     archive_name: mail-platform
     required: true
   - id: proxmox_api
-    path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json
+    path: "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}/proxmox-api/lv3-automation-primary.json"
     archive_name: proxmox-api/lv3-automation-primary.json
     required: true
   - id: proxmox_tfa
-    path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/tfa/proxmox-ops-pam-totp.json
+    path: "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}/tfa/proxmox-ops-pam-totp.json"
     archive_name: tfa/proxmox-ops-pam-totp.json
     required: true
   - id: bootstrap_public_key
-    path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/keys/hetzner_llm_agents_ed25519.pub
-    archive_name: ssh/hetzner_llm_agents_ed25519.pub
+    path: "{{ repo_shared_bootstrap_public_key_path | default(((repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true)) ~ '/ssh/bootstrap.id_ed25519.pub'), true) }}"
+    archive_name: ssh/bootstrap.id_ed25519.pub
     required: true
 control_plane_recovery_controller_external_breakglass_dependencies:
   - id: bootstrap_ssh_private_key
-    path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+    path: "{{ repo_shared_bootstrap_private_key_path | default(((repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true)) ~ '/ssh/bootstrap.id_ed25519'), true) }}"
     required: true
     reason: Externalized break-glass SSH private key. Preserve separately from the archived controller bundle.

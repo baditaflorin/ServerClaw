@@ -344,6 +344,76 @@ def test_run_workflow_executes_health_checks(tmp_path: Path, monkeypatch: pytest
     assert exit_code == 0
 
 
+def test_run_workflow_materializes_shared_bootstrap_aliases_for_worktree(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo_root = tmp_path / "repo"
+    worktree_root = repo_root / ".worktrees" / "ws-0333-live-apply"
+    shared_ssh_dir = repo_root / ".local" / "ssh"
+    worktree_root.mkdir(parents=True)
+    shared_ssh_dir.mkdir(parents=True)
+    (shared_ssh_dir / "hetzner_llm_agents_ed25519").write_text("PRIVATE\n", encoding="utf-8")
+    (shared_ssh_dir / "hetzner_llm_agents_ed25519.pub").write_text("PUBLIC\n", encoding="utf-8")
+    secret_manifest = minimal_secret_manifest(
+        Path("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519")
+    )
+    workflow = minimal_workflow(
+        workflow_id="post-merge-gate",
+        preflight_payload={
+            "required": True,
+            "required_secret_ids": ["bootstrap_ssh_private_key"],
+            "bootstrap_manifest_ids": ["controller-local-base"],
+        },
+    )
+    bootstrap_catalog = {
+        "schema_version": "1.0.0",
+        "manifests": {
+            "controller-local-base": {
+                "description": "Base bootstrap",
+                "generated_artifacts": [
+                    {
+                        "id": "bootstrap_private_key_alias",
+                        "kind": "file",
+                        "path": ".local/ssh/bootstrap.id_ed25519",
+                        "resolve_repo_local": True,
+                        "materialize_command": (
+                            f"python3 {REPO_ROOT / 'scripts' / 'materialize_bootstrap_key_alias.py'} "
+                            f"--repo-root {repo_root}"
+                        ),
+                        "description": "Bootstrap private key alias",
+                    },
+                    {
+                        "id": "bootstrap_public_key_alias",
+                        "kind": "file",
+                        "path": ".local/ssh/bootstrap.id_ed25519.pub",
+                        "resolve_repo_local": True,
+                        "materialize_command": (
+                            f"python3 {REPO_ROOT / 'scripts' / 'materialize_bootstrap_key_alias.py'} "
+                            f"--repo-root {repo_root}"
+                        ),
+                        "description": "Bootstrap public key alias",
+                    },
+                ],
+                "optional_read_only_caches": [],
+            }
+        },
+    }
+
+    monkeypatch.setattr(preflight, "REPO_ROOT", worktree_root)
+
+    exit_code = preflight.run_workflow(
+        secret_manifest,
+        workflow,
+        bootstrap_catalog,
+        "post-merge-gate",
+    )
+
+    assert exit_code == 0
+    assert (shared_ssh_dir / "bootstrap.id_ed25519").is_symlink()
+    assert (shared_ssh_dir / "bootstrap.id_ed25519.pub").is_symlink()
+
+
 def test_run_workflow_fails_when_health_check_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     repo_root = tmp_path
     key_path = repo_root / ".local" / "ssh" / "id_ed25519"

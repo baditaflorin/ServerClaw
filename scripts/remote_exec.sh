@@ -200,6 +200,13 @@ PY
   [[ -n "$REMOTE_HOST" ]] || fail "remote host is empty in $BUILD_SERVER_CONFIG"
   [[ -n "$WORKSPACE_ROOT_BASE" ]] || fail "workspace_root is empty in $BUILD_SERVER_CONFIG"
   [[ -n "$TIMEOUT_SECONDS" ]] || TIMEOUT_SECONDS="$DEFAULT_TIMEOUT_SECONDS"
+  if [[ "$SSH_KEY_PATH" == .local/* ]]; then
+    local shared_local_root=""
+    shared_local_root="$("$REPO_ROOT/scripts/resolve_local_overlay_root.sh")"
+    SSH_KEY_PATH="$shared_local_root/${SSH_KEY_PATH#.local/}"
+  elif [[ -n "$SSH_KEY_PATH" && "$SSH_KEY_PATH" != /* ]]; then
+    SSH_KEY_PATH="$REPO_ROOT/$SSH_KEY_PATH"
+  fi
 }
 
 load_session_workspace() {

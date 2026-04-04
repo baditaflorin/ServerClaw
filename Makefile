@@ -1,13 +1,13 @@
 REPO_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-PRIMARY_WORKTREE_ROOT ?= $(shell git -C $(REPO_ROOT) worktree list --porcelain | awk '/^worktree / {sub(/^worktree /, ""); print; exit}')
+LOCAL_OVERLAY_ROOT ?= $(shell $(REPO_ROOT)/scripts/resolve_local_overlay_root.sh)
 ANSIBLE_INVENTORY := $(REPO_ROOT)/inventory/hosts.yml
-BOOTSTRAP_KEY ?= /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+BOOTSTRAP_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519
 ANSIBLE_LOCAL_TEMP ?= /tmp/proxmox_florin_server-ansible-local
 ANSIBLE_REMOTE_TEMP ?= /tmp
 ANSIBLE_ENV := ANSIBLE_LOCAL_TEMP=$(ANSIBLE_LOCAL_TEMP) ANSIBLE_REMOTE_TEMP=$(ANSIBLE_REMOTE_TEMP)
 ANSIBLE_SCOPED_RUN = $(RUN_ID_ENV) ANSIBLE_REMOTE_TEMP=$(ANSIBLE_REMOTE_TEMP) $(REPO_ROOT)/scripts/run_with_namespace.sh uv run --with pyyaml python $(REPO_ROOT)/scripts/ansible_scope_runner.py run --inventory $(ANSIBLE_INVENTORY) $(if $(strip $(PLATFORM_TRACE_ID)),--run-id $(PLATFORM_TRACE_ID),)
-UPTIME_KUMA_PYTHON ?= $(REPO_ROOT)/.local/uptime-kuma/client-venv/bin/python
-UPTIME_KUMA_AUTH_FILE ?= $(PRIMARY_WORKTREE_ROOT)/.local/uptime-kuma/admin-session.json
+UPTIME_KUMA_PYTHON ?= $(LOCAL_OVERLAY_ROOT)/uptime-kuma/client-venv/bin/python
+UPTIME_KUMA_AUTH_FILE ?= $(LOCAL_OVERLAY_ROOT)/uptime-kuma/admin-session.json
 ACTION ?= list-monitors
 UPTIME_KUMA_ARGS ?=
 PLANE_ARGS ?=
@@ -1266,12 +1266,12 @@ semaphore-manage:
 woodpecker-manage:
 	$(MAKE) preflight WORKFLOW=woodpecker-manage
 	@test -n "$(ACTION)" || (echo "set ACTION=<whoami|list-repos|activate-repo|list-secrets|upsert-secret|list-pipelines|trigger-pipeline>"; exit 1)
-	uv run --with pyyaml python $(REPO_ROOT)/scripts/woodpecker_tool.py --auth-file $(HOME)/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/admin-auth.json $(ACTION) $(WOODPECKER_ARGS)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/woodpecker_tool.py --auth-file $(LOCAL_OVERLAY_ROOT)/woodpecker/admin-auth.json $(ACTION) $(WOODPECKER_ARGS)
 
 plane-manage:
 	$(MAKE) preflight WORKFLOW=plane-manage
 	@test -n "$(ACTION)" || (echo "set ACTION=<whoami|list-workspaces|list-projects|list-issues|create-issue|sync-adrs>"; exit 1)
-	uv run --with pyyaml python $(REPO_ROOT)/scripts/plane_tool.py --auth-file $(HOME)/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane/admin-auth.json $(ACTION) $(PLANE_ARGS)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/plane_tool.py --auth-file $(LOCAL_OVERLAY_ROOT)/plane/admin-auth.json $(ACTION) $(PLANE_ARGS)
 
 configure-backups:
 	$(MAKE) preflight WORKFLOW=configure-backups
