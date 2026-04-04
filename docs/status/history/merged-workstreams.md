@@ -8,6 +8,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0330` | Close out public GitHub readiness on the latest origin/main | `live_applied` | [ws-0330-main-closeout.md](../../workstreams/ws-0330-main-closeout.md) |
 | `0328` | Implement size-budgeted root summaries and automatic rollover ledgers | `live_applied` | [ws-0328-live-apply.md](../../workstreams/ws-0328-live-apply.md) |
 | `0327` | Live apply sectional agent discovery registries and generated onboarding packs from latest origin/main | `live_applied` | [ws-0327-live-apply.md](../../workstreams/ws-0327-live-apply.md) |
 | `0325` | Live apply faceted ADR index shards and reservation windows from latest origin/main | `live_applied` | [ws-0325-live-apply.md](../../workstreams/ws-0325-live-apply.md) |

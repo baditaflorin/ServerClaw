@@ -9,6 +9,7 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | Capability | Receipt |
 | --- | --- |
 | `woodpecker` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `public_github_readiness` | `2026-04-04-adr-0330-public-github-readiness-mainline-live-apply` |
 | `plausible_analytics` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `outline` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |

@@ -63,6 +63,14 @@ workstreams:
   - .repo-structure.yaml
   - .config-locations.yaml
   - build/onboarding/**
+  - README.md
+  - changelog.md
+  - docs/release-notes/README.md
+  - docs/release-notes/index/*.md
+  - docs/status/history/*.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
   - config/controller-local-secrets.json
   - config/examples/**
   - inventory/examples/reference-platform/**
@@ -130,6 +138,26 @@ workstreams:
       - .config-locations.yaml
       - build/onboarding/**
       mode: exclusive
+    - id: ws0330_release_and_status_surfaces
+      paths:
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/index/*.md
+      mode: shared_contract
+      contract: release-management-v1
+    - id: ws0330_generated_truth
+      paths:
+      - README.md
+      - docs/status/history/*.md
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: latest-main-generated-truth-v1
+    - id: ws0330_canonical_truth
+      paths:
+      - versions/stack.yaml
+      mode: shared_contract
+      contract: canonical-truth-v1
     - id: ws0330_reference_samples
       paths:
       - config/controller-local-secrets.json
@@ -167,6 +195,8 @@ workstreams:
       profiles, and surfacing the public reference tier through discovery-driven onboarding
     release_bump: patch
     included_in_repo_version: null
+    latest_receipts:
+      public_github_readiness: 2026-04-04-adr-0330-public-github-readiness-mainline-live-apply
 - id: ws-0328-live-apply
   adr: 0328
   title: Implement size-budgeted root summaries and automatic rollover ledgers
