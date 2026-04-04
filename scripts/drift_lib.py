@@ -20,7 +20,7 @@ from script_bootstrap import ensure_repo_root_on_path
 REPO_ROOT = ensure_repo_root_on_path(__file__)
 
 from platform.datetime_compat import UTC, datetime
-from controller_automation_toolkit import load_json, load_yaml, repo_path
+from controller_automation_toolkit import load_json, load_yaml, repo_path, resolve_repo_local_path
 
 from platform.events import build_envelope
 from platform.retry import async_with_retry, policy_for_surface
@@ -77,25 +77,6 @@ def parse_datetime(value: str) -> datetime:
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=UTC)
     return parsed
-
-
-def _path_exists(path: Path) -> bool:
-    try:
-        return path.exists()
-    except OSError:
-        return False
-
-
-def resolve_repo_local_path(path_value: str | Path, *, repo_root: Path = REPO_ROOT) -> Path:
-    path = Path(path_value).expanduser()
-    if _path_exists(path):
-        return path
-    marker = ".local"
-    if marker not in path.parts:
-        return path
-    marker_index = path.parts.index(marker)
-    candidate = repo_root.joinpath(*path.parts[marker_index:])
-    return candidate if _path_exists(candidate) else path
 
 
 def load_controller_context() -> dict[str, Any]:

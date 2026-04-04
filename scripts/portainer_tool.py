@@ -8,12 +8,10 @@ from pathlib import Path
 import requests
 import urllib3
 
-from controller_automation_toolkit import emit_cli_error, load_json
+from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 
 
-DEFAULT_AUTH_FILE = Path(
-    "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/portainer/admin-auth.json"
-)
+DEFAULT_AUTH_FILE = repo_path(".local", "portainer", "admin-auth.json")
 
 
 class PortainerClient:

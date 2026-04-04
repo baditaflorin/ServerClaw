@@ -147,7 +147,7 @@ SMTP_PORT = 587
 SMTP_USER = "platform"
 SMTP_FROM = "LV3 Platform <platform@lv3.org>"
 SMTP_PASS_FILE = repo_path(".local", "mail-platform", "profiles", "platform-transactional-mailbox-password.txt")
-SSH_KEY_FILE = repo_path(".local", "ssh", "hetzner_llm_agents_ed25519")
+SSH_KEY_FILE = repo_path(".local", "ssh", "bootstrap.id_ed25519")
 SSH_PROXY = "ops@100.64.0.1"
 
 # Headscale (self-hosted Tailscale control server)

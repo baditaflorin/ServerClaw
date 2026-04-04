@@ -17,6 +17,7 @@ if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
         sys.modules.pop("platform", None)
 
 from platform.repo import *  # noqa: F401,F403
+from platform.repo import resolve_local_overlay_path
 from platform.repo import _load_yaml_without_pyyaml as repo_load_yaml_without_pyyaml
 
 
@@ -28,15 +29,7 @@ def _path_exists(path: Path) -> bool:
 
 
 def resolve_repo_local_path(path_value: str | Path, *, repo_root: Path = REPO_ROOT) -> Path:
-    path = Path(path_value).expanduser()
-    if _path_exists(path):
-        return path
-    marker = ".local"
-    if marker not in path.parts:
-        return path
-    marker_index = path.parts.index(marker)
-    candidate = repo_root.joinpath(*path.parts[marker_index:])
-    return candidate if _path_exists(candidate) else path
+    return resolve_local_overlay_path(path_value, repo_root=repo_root)
 
 
 def _load_yaml_without_pyyaml(path: Path):

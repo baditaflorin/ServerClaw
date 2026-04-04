@@ -181,6 +181,19 @@ def build_manifest(path: Path) -> None:
     path.write_text(json.dumps(payload, indent=2) + "\n")
 
 
+def seed_snapshot_env(tmp_path: Path) -> dict[str, str]:
+    snapshot_archive = tmp_path / "repository-snapshot-test.tar.gz"
+    snapshot_archive.write_bytes(b"snapshot")
+    return {
+        "LV3_SNAPSHOT_ID": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+        "LV3_SNAPSHOT_ARCHIVE": str(snapshot_archive),
+        "LV3_SNAPSHOT_GENERATED_AT": "2026-04-04T14:30:00+00:00",
+        "LV3_SNAPSHOT_SOURCE_COMMIT": "aa86822664ed78182744f322430410c6a1c3e8f0",
+        "LV3_SNAPSHOT_BRANCH": "codex/ws-0333-private-overlay",
+        "LV3_SNAPSHOT_FILE_COUNT": "1",
+    }
+
+
 def run_remote_exec(
     tmp_path: Path,
     *args: str,
@@ -224,6 +237,7 @@ def run_remote_exec(
             "LV3_SESSION_ID": SESSION_ID,
         }
     )
+    env.update(seed_snapshot_env(tmp_path))
     if extra_env:
         env.update(extra_env)
 
@@ -425,6 +439,7 @@ def test_remote_exec_applies_configured_ssh_options(tmp_path: Path) -> None:
             "LV3_SESSION_ID": SESSION_ID,
         }
     )
+    env.update(seed_snapshot_env(tmp_path))
 
     completed = subprocess.run(
         [str(SCRIPT_PATH), "check-build-server"],

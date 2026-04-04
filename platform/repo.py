@@ -36,6 +36,36 @@ def _shared_worktree_root() -> Path | None:
     return REPO_ROOT.parent.parent
 
 
+def shared_repo_root(repo_root: Path | None = None) -> Path:
+    root = Path(repo_root) if repo_root is not None else REPO_ROOT
+    if root.parent.name == ".worktrees":
+        return root.parent.parent
+    return root
+
+
+def local_overlay_root(repo_root: Path | None = None) -> Path:
+    return shared_repo_root(repo_root) / ".local"
+
+
+def resolve_local_overlay_path(path_value: str | Path, *, repo_root: Path | None = None) -> Path:
+    root = Path(repo_root) if repo_root is not None else REPO_ROOT
+    path = Path(path_value).expanduser()
+    if _path_exists(path):
+        return path
+
+    if not path.is_absolute():
+        if path.parts and path.parts[0] == ".local":
+            return local_overlay_root(root).joinpath(*path.parts[1:])
+        candidate = root / path
+        return candidate if _path_exists(candidate) else candidate
+
+    marker = ".local"
+    if marker not in path.parts:
+        return path
+    marker_index = path.parts.index(marker)
+    return local_overlay_root(root).joinpath(*path.parts[marker_index + 1 :])
+
+
 def repo_path(*parts: str) -> Path:
     if not parts:
         return REPO_ROOT
@@ -51,11 +81,7 @@ def repo_path(*parts: str) -> Path:
             return sibling_root.joinpath(*parts[1:])
 
     if head == ".local":
-        shared_root = _shared_worktree_root()
-        if shared_root is not None:
-            shared_candidate = shared_root.joinpath(*parts)
-            if _path_exists(shared_candidate):
-                return shared_candidate
+        return local_overlay_root(REPO_ROOT).joinpath(*parts[1:])
 
     return candidate
 

@@ -94,6 +94,34 @@ def _load_build_server_config(path: Path = BUILD_SERVER_CONFIG_PATH) -> dict[str
     return require_mapping(load_json(path), str(path))
 
 
+def _validate_build_server_private_overlay_contract(build_server: dict[str, Any]) -> None:
+    ssh_key = require_str(build_server.get("ssh_key"), "config/build-server.json.ssh_key")
+    if "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local" in ssh_key:
+        raise ValueError(
+            "config/build-server.json.ssh_key must not embed an operator workstation path; use a repo-relative .local alias"
+        )
+    if "hetzner_llm_agents_ed25519" in ssh_key:
+        raise ValueError(
+            "config/build-server.json.ssh_key must use the generic bootstrap alias, not the legacy deployment-specific key name"
+        )
+
+    ssh_options = [
+        require_str(option, f"config/build-server.json.ssh_options[{index}]")
+        for index, option in enumerate(require_list(build_server.get("ssh_options", []), "config/build-server.json.ssh_options"))
+    ]
+    for index, option in enumerate(ssh_options):
+        if "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local" in option:
+            raise ValueError(
+                "config/build-server.json.ssh_options "
+                f"[{index}] must not embed an operator workstation path"
+            )
+        if "hetzner_llm_agents_ed25519" in option:
+            raise ValueError(
+                "config/build-server.json.ssh_options "
+                f"[{index}] must not reference the legacy deployment-specific bootstrap key name"
+            )
+
+
 def validate_contract_catalog(
     catalog: dict[str, Any],
     *,
@@ -118,6 +146,7 @@ def validate_contract_catalog(
         )
 
     build_server = build_server_config if build_server_config is not None else _load_build_server_config()
+    _validate_build_server_private_overlay_contract(build_server)
     commands = require_mapping(build_server.get("commands"), "config/build-server.json.commands")
     for command_label, raw_command in commands.items():
         command = require_mapping(raw_command, f"config/build-server.json.commands.{command_label}")

@@ -24,7 +24,7 @@ from script_bootstrap import ensure_repo_root_on_path
 
 ensure_repo_root_on_path(__file__)
 
-from controller_automation_toolkit import emit_cli_error, load_json
+from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 from platform.retry import PlatformRetryError, RetryClass, RetryPolicy, with_retry
 
 try:
@@ -39,12 +39,8 @@ except ImportError:
     load_proxmox_auth = None  # type: ignore[assignment]
 
 
-DEFAULT_AUTH_FILE = Path(
-    "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/coolify/admin-auth.json"
-)
-DEFAULT_BOOTSTRAP_KEY = Path(
-    "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519"
-)
+DEFAULT_AUTH_FILE = repo_path(".local", "coolify", "admin-auth.json")
+DEFAULT_BOOTSTRAP_KEY = repo_path(".local", "ssh", "bootstrap.id_ed25519")
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 _STACK_YAML = _REPO_ROOT / "versions" / "stack.yaml"
@@ -507,9 +503,7 @@ def default_deploy_key_name(normalized_repo: str) -> str:
 
 
 def default_deploy_key_path(normalized_repo: str) -> Path:
-    return Path(
-        "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/coolify/git-keys"
-    ) / f"{slugify(normalized_repo)}.ed25519"
+    return repo_path(".local", "coolify", "git-keys") / f"{slugify(normalized_repo)}.ed25519"
 
 
 def ensure_local_keypair(*, key_path: Path, comment: str) -> tuple[Path, Path]:

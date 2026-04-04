@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.3",
   "platform_version": "0.130.98",
-  "generated_at": "2026-04-04T14:40:39Z",
-  "next_refresh_at": "2026-04-04T15:40:39Z",
+  "generated_at": "2026-04-04T15:49:29Z",
+  "next_refresh_at": "2026-04-04T16:49:29Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -243,7 +243,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.90:3007",
-        "last_live_apply": "2026-04-03T00:00:00Z",
+        "last_live_apply": "2026-04-04T00:00:00Z",
         "slo_status": "unknown"
       },
       "grafana": {
@@ -302,7 +302,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://home.lv3.org",
-        "last_live_apply": "2026-04-03T00:00:00Z",
+        "last_live_apply": "2026-04-04T00:00:00Z",
         "slo_status": "unknown"
       },
       "jupyterhub": {

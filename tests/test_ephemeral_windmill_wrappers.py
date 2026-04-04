@@ -116,7 +116,7 @@ def test_ephemeral_pool_reconciler_uses_worker_local_bootstrap_key(tmp_path: Pat
         '{"api_url": "https://proxmox.example.invalid:8006/api2/json", "full_token_id": "token", "value": "secret"}\n',
         encoding="utf-8",
     )
-    worker_key = repo_root / ".local" / "ssh" / "hetzner_llm_agents_ed25519"
+    worker_key = repo_root / ".local" / "ssh" / "bootstrap.id_ed25519"
     worker_key.write_text("PRIVATE\n", encoding="utf-8")
     (repo_root / "scripts" / "vmid_allocator.py").write_text("MARKER = 'repo-sibling-import'\n", encoding="utf-8")
     (repo_root / "scripts" / "fixture_manager.py").write_text(

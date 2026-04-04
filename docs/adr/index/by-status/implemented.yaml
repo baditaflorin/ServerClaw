@@ -10,7 +10,7 @@ generated: '2026-04-04'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 325
+total_adrs: 326
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -5776,6 +5776,27 @@ adrs:
     path: docs/adr/0332-relative-release-and-status-links-in-generated-root-surfaces.md
     implemented_in_repo_version: 0.177.143
     implemented_on: '2026-04-02'
+  - adr: '0333'
+    title: Private Overlay Files For Deployment-Specific Secrets And Identities
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: security
+    keywords:
+      - overlays
+      - secrets
+      - identities
+      - local-state
+      - forkability
+      - private
+      - overlay
+      - files
+      - deployment-specific
+    summary: Deployment-specific secrets, identities, and one-off bootstrap artefacts must
+    filename: 0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+    path: docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+    implemented_in_platform_version: 0.130.98
+    implemented_on: '2026-04-04'
   - adr: '0335'
     title: Public-Safe Agent Onboarding Entrypoints
     status: Accepted
