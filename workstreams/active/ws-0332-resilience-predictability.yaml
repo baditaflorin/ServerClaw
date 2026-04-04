@@ -24,6 +24,7 @@ shared_surfaces:
 - docs/adr/index/by-concern/*.yaml
 - docs/adr/index/by-status/*.yaml
 - docs/adr/index/reservations.yaml
+- docs/diagrams/agent-coordination-map.excalidraw
 - docs/runbooks/compose-runtime-resilience.md
 - config/service-completeness.json
 - scripts/service_completeness.py
@@ -51,6 +52,11 @@ ownership_manifest:
     - docs/adr/0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md
     - docs/runbooks/compose-runtime-resilience.md
     mode: exclusive
+  - id: ws0332_generated_diagrams
+    paths:
+    - docs/diagrams/agent-coordination-map.excalidraw
+    mode: shared_contract
+    contract: latest-main-generated-truth-v1
   - id: ws0332_adr_index
     paths:
     - docs/adr/.index.yaml
