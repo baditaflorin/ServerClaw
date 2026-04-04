@@ -85,6 +85,7 @@ workstreams:
   - scripts/seed_data_snapshots.py
   - scripts/topology-snapshot.json
   - tests/test_config_merge_windmill.py
+  - tests/test_controller_automation_toolkit.py
   - tests/test_ntfy_publish.py
   - tests/test_public_reference_samples.py
   - receipts/live-applies/2026-04-04-adr-0330-public-github-readiness-live-apply.json
@@ -177,6 +178,7 @@ workstreams:
       - scripts/seed_data_snapshots.py
       - scripts/topology-snapshot.json
       - tests/test_config_merge_windmill.py
+      - tests/test_controller_automation_toolkit.py
       - tests/test_ntfy_publish.py
       - tests/test_public_reference_samples.py
       mode: exclusive
