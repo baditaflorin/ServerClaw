@@ -192,6 +192,10 @@ windmill_worker_repo_mutable_directories:
     mode: "0777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/stage-smoke-suites"
     mode: "0777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/validation-gate"
+    mode: "0777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/validation-gate/docker-cids"
+    mode: "0777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/state/journey-analytics"
     mode: "0777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/logs"
@@ -288,10 +292,13 @@ windmill_worker_checkout_integrity_files:
   - config/windmill/scripts/sbom-refresh.py
   - config/windmill/scripts/stage-smoke-suites.py
 windmill_worker_checkout_sync_paths:
+  - .config-locations.yaml
   - .gitea
+  - .repo-structure.yaml
   - README.md
   - VERSION
   - ansible.cfg
+  - build
   - callback_plugins
   - changelog.md
   - collections

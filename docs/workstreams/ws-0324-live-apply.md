@@ -2,13 +2,20 @@
 
 - ADR: [ADR 0324](../adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md)
 - Title: Implement ADR 0324 by moving service metadata into per-service bundles and verifying the generated-catalog automation end to end
-- Status: in_progress
+- Status: live_applied
+- Included In Repo Version: `not yet`
+- Branch-Local Receipt: `receipts/live-applies/2026-04-04-adr-0324-service-definition-catalog-assembly-live-apply.json`
+- Mainline Receipt: `receipts/live-applies/2026-04-04-adr-0324-service-definition-catalog-assembly-mainline-live-apply.json`
+- Implemented On: 2026-04-04
+- Live Applied On: 2026-04-04
+- Live Applied In Platform Version: 0.130.98
+- Latest Verified Base: `origin/main@20a66bbf088d1aa456d34f173fd8e2c8664f4c20` (`repo 0.178.3`, `platform 0.130.98`)
 - Branch: `codex/ws-0324-live-apply`
 - Worktree: `.worktrees/ws-0324-live-apply`
 - Owner: codex
 - Depends On: `adr-0075-service-capability-catalog`, `adr-0107-platform-extension-model`, `adr-0174-integration-only-canonical-truth-assembly`, `adr-0179-service-redundancy-tier-matrix`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0324-live-apply.md`, `docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md`, `docs/adr/.index.yaml`, `.repo-structure.yaml`, `.config-locations.yaml`, `build/onboarding/agent-core.yaml`, `build/onboarding/automation.yaml`, `build/onboarding/service-catalog.yaml`, `catalog/services/`, `docs/discovery/config-locations/service-configuration.yaml`, `docs/discovery/repo-structure/automation-and-infrastructure.yaml`, `docs/discovery/repo-structure/cross-cutting-concerns.yaml`, `config/service-capability-catalog.json`, `config/health-probe-catalog.json`, `config/service-completeness.json`, `config/service-redundancy-catalog.json`, `config/dependency-graph.json`, `config/data-catalog.json`, `config/slo-catalog.json`, `config/prometheus/rules/slo_rules.yml`, `config/prometheus/rules/slo_alerts.yml`, `config/prometheus/file_sd/slo_targets.yml`, `config/grafana/dashboards/slo-overview.json`, `docs/schema/service-definition-*.json`, `docs/schema/health-probe-catalog.schema.json`, `docs/runbooks/service-capability-catalog.md`, `docs/runbooks/add-a-new-service.md`, `docs/runbooks/scaffold-new-service.md`, `.yamllint`, `Makefile`, `scripts/service_definition_catalog.py`, `scripts/service_catalog.py`, `scripts/scaffold_service.py`, `scripts/validate_repo.sh`, `tests/test_service_definition_catalog.py`, `tests/test_scaffold_service.py`, `tests/test_validate_service_catalog.py`, `docs/diagrams/agent-coordination-map.excalidraw`, `receipts/live-applies/*0324*`, `receipts/live-applies/evidence/2026-04-03-ws-0324-*`, `README.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `versions/stack.yaml`, `build/platform-manifest.json`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0324-live-apply.md`, `docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md`, `docs/adr/.index.yaml`, `docs/adr/index/by-range/*.yaml`, `docs/adr/index/by-concern/*.yaml`, `docs/adr/index/by-status/*.yaml`, `.repo-structure.yaml`, `.config-locations.yaml`, `build/onboarding/agent-core.yaml`, `build/onboarding/automation.yaml`, `build/onboarding/service-catalog.yaml`, `catalog/services/`, `docs/discovery/config-locations/service-configuration.yaml`, `docs/discovery/repo-structure/automation-and-infrastructure.yaml`, `docs/discovery/repo-structure/cross-cutting-concerns.yaml`, `config/service-capability-catalog.json`, `config/health-probe-catalog.json`, `config/service-completeness.json`, `config/service-redundancy-catalog.json`, `config/dependency-graph.json`, `config/data-catalog.json`, `config/slo-catalog.json`, `config/prometheus/rules/slo_rules.yml`, `config/prometheus/rules/slo_alerts.yml`, `config/prometheus/file_sd/slo_targets.yml`, `config/grafana/dashboards/slo-overview.json`, `docs/schema/service-definition-*.json`, `docs/schema/health-probe-catalog.schema.json`, `docs/runbooks/service-capability-catalog.md`, `docs/runbooks/add-a-new-service.md`, `docs/runbooks/scaffold-new-service.md`, `.yamllint`, `Makefile`, `scripts/service_definition_catalog.py`, `scripts/service_catalog.py`, `scripts/scaffold_service.py`, `scripts/validate_repo.sh`, `tests/test_service_definition_catalog.py`, `tests/test_scaffold_service.py`, `tests/test_validate_service_catalog.py`, `docs/diagrams/agent-coordination-map.excalidraw`, `receipts/live-applies/*0324*`, `receipts/live-applies/evidence/2026-04-03-ws-0324-*`, `README.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `versions/stack.yaml`, `build/platform-manifest.json`
 
 ## Scope
 
@@ -72,14 +79,24 @@
 - `make pre-push-gate` replays the same generated-catalog contract through the heavy validation path
 - `python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server` validates the bundle-aware generated-catalog flow from the mirrored worker checkout after the live sync
 
-## Branch-Local Progress
+## Outcome
 
-- the initial implementation seeds `catalog/services/_metadata.yaml` plus one `service.yaml` bundle per governed service from the current aggregates
-- `scripts/service_definition_catalog.py --check` now proves the generated aggregates match the bundle source tree, and `make scaffold-service` switches to writing a service bundle when the metadata exists
-- focused validation is currently green for the new assembler, the scaffold bundle mode, the existing `service_catalog.py` query path, and the downstream SLO generator surfaces assembled from `config/slo-catalog.json`
+- `catalog/services/_metadata.yaml` plus one `service.yaml` bundle per governed service now act as the ADR 0324 source tree for service-local metadata, and the aggregate service catalogs are assembled from those bundles instead of being hand-edited monoliths.
+- `scripts/service_definition_catalog.py --check` proves the generated aggregate surfaces match the bundle source tree, while `scripts/scaffold_service.py` now scaffolds service bundles when the catalog metadata exists.
+- The live-apply follow-through on the latest `origin/main` also hardened the runtime validation path that consumes the generated service metadata from the Windmill worker mirror: the worker checkout now preserves its mutable `.local/validation-gate` paths, includes generated discovery entrypoints needed by the post-merge gate, and uses the externally reachable Windmill base URL for controller-side verification calls.
 
-## Pending Mainline Follow-Through
+## Verification
 
-- finish the wider validation replay and preserve the evidence in `receipts/live-applies/evidence/`
-- update ADR 0324 implementation metadata and record the canonical live-apply receipt once the exact-main replay is verified
-- refresh the protected release surfaces only during the final mainline integration step
+- Focused branch-local regression coverage passed on the rebased exact-main tree: `uv run --with pytest --with pyyaml --with jsonschema python3 -m pytest -q tests/test_service_definition_catalog.py tests/test_scaffold_service.py tests/test_validate_service_catalog.py tests/test_sync_windmill_resources.py tests/test_windmill_operator_admin_app.py tests/test_common_docker_bridge_chains_helper.py tests/test_docker_runtime_role.py tests/test_linux_guest_firewall_role.py tests/test_postgres_vm_access_policy.py tests/test_windmill_default_operations_surface.py`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-rebased-pytest-r3-0.178.3.txt`, with `61 passed in 29.55s`.
+- Windmill-focused follow-up regression slices then passed after the worker-checkout and controller-verification fixes: `25 passed in 1.24s` and `18 passed in 0.68s`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-windmill-verification-tests-r1-0.178.3.txt` and `receipts/live-applies/evidence/2026-04-04-ws-0324-windmill-verification-tests-r2-0.178.3.txt`.
+- `uv run --with pyyaml --with jsonschema python3 scripts/service_definition_catalog.py --check`, `uv run --with pyyaml --with jsonschema python3 scripts/live_apply_receipts.py --validate`, `./scripts/validate_repo.sh agent-standards workstream-surfaces`, and `git diff --check` all passed on the receipt-bearing branch state, preserved in the matching `2026-04-04-ws-0324-rebased-*.txt` evidence files.
+- The initial exact-main `make converge-windmill` replay succeeded and is preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-mainline-converge-windmill-r8-0.178.3.txt`. A later replay exposed two real live issues that this workstream fixed: the worker mirror was missing writable `.local/validation-gate` paths and generated discovery files, and the controller-side verify tasks were trying to reach the private Windmill address instead of the routable base URL.
+- A bounded manual live sync copied `.repo-structure.yaml`, `.config-locations.yaml`, and `build/onboarding/*.yaml` into `/srv/proxmox_florin_server` after the worker fallback exposed that mirror gap, and the repo automation now includes the permanent sync-path fix so later replays do not need that manual copy.
+- The latest worker `post-merge-gate` replay now reaches a healthy Docker attestation and falls back locally for the expected registry-runner outage, but the remaining failure is only stale canonical-truth on `/srv/proxmox_florin_server/changelog.md` and `/srv/proxmox_florin_server/versions/stack.yaml`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-worker-post-merge-gate-r3-0.178.3.txt`. Those protected surfaces are intentionally deferred to the final exact-main integration step.
+- The follow-up exact-main `make converge-windmill` replay no longer hangs in the controller verification block after switching to `windmill_base_url`; the remaining `sudo` timeout at `Create a remote manifest path for repo-managed Windmill scripts` is a later privilege-escalation flake rather than a regression in the ADR 0324 service-catalog path, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-mainline-converge-windmill-r10-0.178.3.txt`.
+
+## Exact-Main Integration Status
+
+- ADR 0324 is live-applied from the latest available `origin/main`, but the protected canonical-truth surfaces still need the final exact-main refresh so `README.md`, `changelog.md`, and `versions/stack.yaml` reflect the now-verified workstream state from `main`.
+- `Implemented In Repo Version` remains `not yet` because the current realistic repo version is still `0.178.3`; unrelated open waiver receipts outside this workstream continue to block a fresh numbered release cut even after the ADR 0324 replay is green.
+- The final exact-main integration must begin with another `git fetch origin --prune`, refresh canonical truth from source, record the mainline receipt, and rerun the promotion-facing validation plus worker post-merge gate from `main` so the remaining canonical-truth-only blocker disappears without hand reconstruction.

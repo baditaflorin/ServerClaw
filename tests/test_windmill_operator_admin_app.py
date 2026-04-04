@@ -113,10 +113,13 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
     )
     assert {
+        ".config-locations.yaml",
         ".gitea",
+        ".repo-structure.yaml",
         "README.md",
         "VERSION",
         "ansible.cfg",
+        "build",
         "callback_plugins",
         "changelog.md",
         "collections",
@@ -213,6 +216,15 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         ),
         frozenset(
             {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/stage-smoke-suites", "mode": "0777"}.items()
+        ),
+        frozenset(
+            {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/validation-gate", "mode": "0777"}.items()
+        ),
+        frozenset(
+            {
+                "path": "{{ windmill_worker_repo_checkout_host_path }}/.local/validation-gate/docker-cids",
+                "mode": "0777",
+            }.items()
         ),
         frozenset(
             {
@@ -1104,11 +1116,13 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     )
     assert "{{ windmill_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/" in verify_tasks
     assert 'Authorization: "Bearer {{ windmill_bootstrap_session_token }}"' in verify_tasks
+    assert "timeout: 10" in verify_tasks
     assert "windmill_verify_critical_seed_script_drift_paths" in verify_tasks
     assert "selectattr('path', 'in', windmill_verify_critical_seed_script_drift_paths)" in verify_tasks
     assert "windmill_verify_critical_seed_script_expectations[item.json.path].content" in verify_tasks
     assert "windmill_verify_critical_seed_script_expectations[item.json.path].local_file" in verify_tasks
     assert "windmill_verify_critical_seed_scripts_final" in verify_tasks
+    assert '- "{{ windmill_base_url }}"' in verify_tasks
     assert "Verify the Windmill default operations scripts are seeded" in verify_tasks
     assert 'WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"' in verify_tasks
     assert 'Authorization: "Bearer {{ windmill_runtime_api_token }}"' in verify_tasks
@@ -1305,7 +1319,7 @@ def test_windmill_runtime_waits_for_full_env_contract_before_starting_or_recreat
     ]
 
 
-def test_windmill_controller_local_sync_and_verify_calls_use_the_host_proxy_url() -> None:
+def test_windmill_runtime_sync_and_controller_verify_calls_use_the_expected_urls() -> None:
     tasks = yaml.safe_load(
         (
             REPO_ROOT
@@ -1357,17 +1371,29 @@ def test_windmill_controller_local_sync_and_verify_calls_use_the_host_proxy_url(
         == "Verify the critical Windmill verification scripts are seeded with current controller content after any repair attempt"
     )
 
-    assert sync_wait_task["delegate_to"] == "localhost"
-    assert sync_wait_task["ansible.builtin.uri"]["url"] == "{{ windmill_base_url }}/api/version"
-    assert sync_script_task["delegate_to"] == "localhost"
-    assert "{{ windmill_base_url }}" in sync_script_task["ansible.builtin.command"]["argv"]
-    assert "{{ windmill_private_base_url }}" not in sync_script_task["ansible.builtin.command"]["argv"]
-    assert sync_resource_task["delegate_to"] == "localhost"
-    assert "{{ windmill_base_url }}" in sync_resource_task["ansible.builtin.command"]["argv"]
-    assert "{{ windmill_private_base_url }}" not in sync_resource_task["ansible.builtin.command"]["argv"]
-    assert sync_schedule_task["delegate_to"] == "localhost"
-    assert "{{ windmill_base_url }}" in sync_schedule_task["ansible.builtin.command"]["argv"]
-    assert "{{ windmill_private_base_url }}" not in sync_schedule_task["ansible.builtin.command"]["argv"]
+    assert "delegate_to" not in sync_wait_task
+    assert sync_wait_task["ansible.builtin.uri"]["url"] == "{{ windmill_runtime_api_base_url }}/api/version"
+    assert "delegate_to" not in sync_script_task
+    assert "{{ windmill_runtime_api_base_url }}" in sync_script_task["ansible.builtin.command"]["argv"]
+    assert "{{ windmill_seed_script_manifest_remote.path }}" in sync_script_task["ansible.builtin.command"]["argv"]
+    assert (
+        "{{ windmill_worker_repo_checkout_host_path }}/scripts/sync_windmill_seed_scripts.py"
+        in (sync_script_task["ansible.builtin.command"]["argv"])
+    )
+    assert "delegate_to" not in sync_resource_task
+    assert "{{ windmill_runtime_api_base_url }}" in sync_resource_task["ansible.builtin.command"]["argv"]
+    assert "{{ windmill_seed_resource_manifest_remote.path }}" in sync_resource_task["ansible.builtin.command"]["argv"]
+    assert (
+        "{{ windmill_worker_repo_checkout_host_path }}/scripts/sync_windmill_resources.py"
+        in (sync_resource_task["ansible.builtin.command"]["argv"])
+    )
+    assert "delegate_to" not in sync_schedule_task
+    assert "{{ windmill_runtime_api_base_url }}" in sync_schedule_task["ansible.builtin.command"]["argv"]
+    assert "{{ windmill_seed_schedule_manifest_remote.path }}" in sync_schedule_task["ansible.builtin.command"]["argv"]
+    assert (
+        "{{ windmill_worker_repo_checkout_host_path }}/scripts/sync_windmill_seed_schedules.py"
+        in (sync_schedule_task["ansible.builtin.command"]["argv"])
+    )
     assert verify_seed_task["delegate_to"] == "localhost"
     assert (
         verify_seed_task["ansible.builtin.uri"]["url"]

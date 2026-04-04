@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-04-adr-0324-service-definition-catalog-assembly-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-04",
+  "recorded_on": "2026-04-04",
+  "recorded_at": "2026-04-04T12:43:22Z",
+  "recorded_by": "codex",
+  "source_commit": "34d276fb70cd6a3f3bdc89cfe2dc4c8ee6ca0ed3",
+  "repo_version_context": "0.178.3",
+  "platform_version_context": "0.130.98",
+  "workflow_id": "adr-0324-service-definition-catalog-assembly-live-apply",
+  "adr": "0324",
+  "summary": "Live-applied ADR 0324 from the rebased `codex/ws-0324-live-apply` worktree by making `catalog/services/` bundles the generated-catalog source of truth, re-verifying the service-definition assembly and scaffold flow on the latest `origin/main`, and then carrying the live replay through the Windmill worker mirror so the post-merge validation path can consume the same generated discovery and catalog artifacts without depending on hand-maintained checkout state.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    },
+    {
+      "kind": "artifact",
+      "name": "catalog/services"
+    },
+    {
+      "kind": "artifact",
+      "name": "config/service-capability-catalog.json"
+    },
+    {
+      "kind": "artifact",
+      "name": "workstreams.yaml"
+    },
+    {
+      "kind": "host",
+      "name": "runtime-control-lv3"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Branch-local service-catalog and runtime regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python3 -m pytest -q tests/test_service_definition_catalog.py tests/test_scaffold_service.py tests/test_validate_service_catalog.py tests/test_sync_windmill_resources.py tests/test_windmill_operator_admin_app.py tests/test_common_docker_bridge_chains_helper.py tests/test_docker_runtime_role.py tests/test_linux_guest_firewall_role.py tests/test_postgres_vm_access_policy.py tests/test_windmill_default_operations_surface.py` returned `61 passed in 29.55s`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-rebased-pytest-r3-0.178.3.txt`."
+    },
+    {
+      "check": "Follow-up Windmill verification regression slices",
+      "result": "pass",
+      "observed": "After adding the worker-checkout mutable paths, generated discovery sync paths, and controller-side `windmill_base_url` verification fix, `uv run --with pytest --with pyyaml --with jsonschema python3 -m pytest -q tests/test_windmill_operator_admin_app.py tests/test_windmill_default_operations_surface.py` and `uv run --with pytest --with pyyaml --with jsonschema python3 -m pytest -q tests/test_sync_windmill_resources.py tests/test_postgres_vm_access_policy.py tests/test_linux_guest_firewall_role.py` passed with `25 passed in 1.24s` and `18 passed in 0.68s`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-windmill-verification-tests-r1-0.178.3.txt` and `receipts/live-applies/evidence/2026-04-04-ws-0324-windmill-verification-tests-r2-0.178.3.txt`."
+    },
+    {
+      "check": "Generated catalog and branch ownership validation",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml --with jsonschema python3 scripts/service_definition_catalog.py --check`, `./scripts/validate_repo.sh agent-standards workstream-surfaces`, `uv run --with pyyaml --with jsonschema python3 scripts/live_apply_receipts.py --validate`, and `git diff --check` all passed on the receipt-bearing branch state, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-rebased-service-definition-catalog-check-r1-0.178.3.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0324-rebased-validate-repo-r9-0.178.3.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0324-rebased-live-apply-receipts-validate-r1-0.178.3.txt`, and `receipts/live-applies/evidence/2026-04-04-ws-0324-rebased-git-diff-check-r3-0.178.3.txt`."
+    },
+    {
+      "check": "Initial exact-main converge replay",
+      "result": "pass",
+      "observed": "The first exact-main `make converge-windmill` replay from the rebased worktree succeeded and is preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-mainline-converge-windmill-r8-0.178.3.txt`."
+    },
+    {
+      "check": "Worker checkout and controller-verification follow-through",
+      "result": "pass",
+      "observed": "Live follow-up uncovered two real issues after the initial converge: the worker mirror lacked writable `.local/validation-gate` paths plus generated discovery files, and controller-side verify tasks were calling the private Windmill address. The repo now fixes both by declaring the mutable worker directories in `windmill_runtime/defaults/main.yml`, syncing `.repo-structure.yaml`, `.config-locations.yaml`, and `build/`, and switching the controller verification path to `windmill_base_url`, with the non-hanging replay preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-mainline-converge-windmill-r10-0.178.3.txt`."
+    },
+    {
+      "check": "Worker post-merge gate readiness",
+      "result": "partial",
+      "observed": "The latest worker `post-merge-gate` replay on `/srv/proxmox_florin_server` now shows healthy Docker attestation, a working `.local/validation-gate` workspace, and the expected local fallback for runner unavailability, but the remaining failure is only stale canonical truth on `changelog.md` and `versions/stack.yaml`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-worker-post-merge-gate-r3-0.178.3.txt`."
+    },
+    {
+      "check": "Release readiness snapshot",
+      "result": "partial",
+      "observed": "`LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py status --json` still reports repository version `0.178.3`, platform version `0.130.98`, and unrelated open waiver blockers outside this workstream, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-rebased-release-status-r1-0.178.3.json`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md",
+    "docs/workstreams/ws-0324-live-apply.md",
+    "workstreams/active/ws-0324-live-apply.yaml",
+    "workstreams.yaml",
+    "docs/adr/.index.yaml",
+    "docs/adr/index/by-range/0300-0399.yaml",
+    "catalog/services/_metadata.yaml",
+    "scripts/service_definition_catalog.py",
+    "scripts/scaffold_service.py",
+    "scripts/sync_windmill_resources.py",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml",
+    "tests/test_service_definition_catalog.py",
+    "tests/test_scaffold_service.py",
+    "tests/test_validate_service_catalog.py",
+    "tests/test_sync_windmill_resources.py",
+    "tests/test_windmill_operator_admin_app.py",
+    "tests/test_windmill_default_operations_surface.py",
+    "scripts/topology-snapshot.json",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-rebased-pytest-r3-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-rebased-service-definition-catalog-check-r1-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-rebased-validate-repo-r8-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-rebased-validate-repo-r9-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-rebased-live-apply-receipts-validate-r1-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-rebased-git-diff-check-r3-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-windmill-verification-tests-r1-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-windmill-verification-tests-r2-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-mainline-converge-windmill-r8-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-mainline-converge-windmill-r9-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-mainline-converge-windmill-r10-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-worker-gate-status-r1-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-worker-gate-status-r2-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-worker-gate-status-r3-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-worker-post-merge-gate-r1-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-worker-post-merge-gate-r2-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-worker-post-merge-gate-r3-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0324-rebased-release-status-r1-0.178.3.json"
+  ],
+  "notes": [
+    "This branch-local receipt intentionally leaves `VERSION`, `README.md`, `changelog.md`, and `versions/stack.yaml` for the protected exact-main integration step.",
+    "One bounded manual live sync copied `.repo-structure.yaml`, `.config-locations.yaml`, and `build/onboarding/*.yaml` into `/srv/proxmox_florin_server` after the worker fallback exposed that the mirror checkout was missing generated discovery artifacts; the repo now carries the permanent sync-path fix for later replays.",
+    "The branch-local worker fallback is now blocked only by canonical-truth refresh on `changelog.md` and `versions/stack.yaml`, which is expected because those protected files were deferred off the workstream branch by design.",
+    "Exact-main integration should begin with another `git fetch origin --prune` so the protected-surface refresh is replayed from the latest available `origin/main`."
+  ]
+}

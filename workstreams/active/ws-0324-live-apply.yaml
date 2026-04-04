@@ -2,7 +2,7 @@ id: ws-0324-live-apply
 adr: '0324'
 title: Implement ADR 0324 service bundles and verify the generated-catalog automation
   end to end
-status: in_progress
+status: live_applied
 owner: codex
 branch: codex/ws-0324-live-apply
 worktree_path: .worktrees/ws-0324-live-apply
@@ -15,9 +15,13 @@ depends_on:
 conflicts_with: []
 shared_surfaces:
 - workstreams.yaml
+- workstreams/active/ws-0324-live-apply.yaml
 - docs/workstreams/ws-0324-live-apply.md
 - docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md
 - docs/adr/.index.yaml
+- docs/adr/index/by-range/*.yaml
+- docs/adr/index/by-concern/*.yaml
+- docs/adr/index/by-status/*.yaml
 - .repo-structure.yaml
 - .config-locations.yaml
 - build/onboarding/agent-core.yaml
@@ -56,11 +60,33 @@ shared_surfaces:
 - scripts/service_catalog.py
 - scripts/scaffold_service.py
 - scripts/validate_repo.sh
+- scripts/sync_windmill_resources.py
+- scripts/topology-snapshot.json
 - tests/test_service_definition_catalog.py
 - tests/test_scaffold_service.py
 - tests/test_validate_service_catalog.py
+- tests/test_sync_windmill_resources.py
+- tests/test_windmill_operator_admin_app.py
+- tests/test_common_docker_bridge_chains_helper.py
+- tests/test_docker_runtime_role.py
+- tests/test_linux_guest_firewall_role.py
+- tests/test_postgres_vm_access_policy.py
+- tests/test_windmill_default_operations_surface.py
+- collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+- collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/meta/argument_specs.yml
+- collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
+- config/ntfy/topics.yaml
+- inventory/group_vars/postgres_guests.yml
+- inventory/host_vars/proxmox_florin.yml
+- docs/runbooks/configure-windmill.md
+- docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
 - receipts/live-applies/
 - receipts/live-applies/evidence/
+- receipts/sbom/host-runtime-control-lv3-2026-04-04.cdx.json
 - README.md
 - VERSION
 - changelog.md
@@ -71,6 +97,7 @@ shared_surfaces:
 - docs/diagrams/agent-coordination-map.excalidraw
 - receipts/live-applies/*0324*
 - receipts/live-applies/evidence/2026-04-03-ws-0324-*
+- receipts/live-applies/evidence/2026-04-04-ws-0324-*
 ownership_manifest:
   owned_surfaces:
   - id: workstream_registry
@@ -81,8 +108,11 @@ ownership_manifest:
   - id: adr_index_generation
     paths:
     - docs/adr/.index.yaml
+    - docs/adr/index/by-range/*.yaml
+    - docs/adr/index/by-concern/*.yaml
+    - docs/adr/index/by-status/*.yaml
     mode: shared_contract
-    contract: adr-index-generator-v1
+    contract: adr-index-generator-v2
   - id: ws0324_service_bundle_source
     paths:
     - docs/workstreams/ws-0324-live-apply.md
@@ -146,10 +176,43 @@ ownership_manifest:
     - build/onboarding/service-catalog.yaml
     mode: shared_contract
     contract: latest-main-generated-truth-v1
+  - id: ws0324_runtime_live_apply_contract
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+    - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/meta/argument_specs.yml
+    - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
+    - config/ntfy/topics.yaml
+    - inventory/group_vars/postgres_guests.yml
+    - inventory/host_vars/proxmox_florin.yml
+    - docs/runbooks/configure-windmill.md
+    - docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
+    - scripts/sync_windmill_resources.py
+    - tests/test_sync_windmill_resources.py
+    - tests/test_windmill_operator_admin_app.py
+    - tests/test_common_docker_bridge_chains_helper.py
+    - tests/test_docker_runtime_role.py
+    - tests/test_linux_guest_firewall_role.py
+    - tests/test_postgres_vm_access_policy.py
+    - tests/test_windmill_default_operations_surface.py
+    mode: shared_contract
+    contract: ws0324-runtime-live-apply-v1
+  - id: ws0324_topology_snapshot_contract
+    paths:
+    - scripts/topology-snapshot.json
+    mode: shared_contract
+    contract: topology-snapshot-v1
   - id: ws0324_live_apply_receipts
     paths:
+    - receipts/live-applies/2026-04-04-adr-0324-service-definition-catalog-assembly-live-apply.json
+    - receipts/live-applies/2026-04-04-adr-0324-service-definition-catalog-assembly-mainline-live-apply.json
     - receipts/live-applies/*0324*
     - receipts/live-applies/evidence/2026-04-03-ws-0324-*
+    - receipts/live-applies/evidence/2026-04-04-ws-0324-*
+    - receipts/sbom/host-runtime-control-lv3-2026-04-04.cdx.json
     mode: shared_contract
     contract: live-apply-receipts-v1
 canonical_truth:
@@ -157,7 +220,8 @@ canonical_truth:
     bundles and generating the aggregate service catalogs from those sources
   release_bump: patch
   included_in_repo_version: null
-  latest_receipts: {}
+  latest_receipts:
+    service_definition_catalog_assembly: 2026-04-04-adr-0324-service-definition-catalog-assembly-live-apply
 blockers: []
-ready_to_merge: false
-live_applied: false
+ready_to_merge: true
+live_applied: true
