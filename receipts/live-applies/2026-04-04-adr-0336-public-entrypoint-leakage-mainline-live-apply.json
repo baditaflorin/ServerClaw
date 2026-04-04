@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-04-04",
   "recorded_on": "2026-04-04",
-  "recorded_at": "2026-04-04T15:05:36Z",
+  "recorded_at": "2026-04-04T15:36:27Z",
   "recorded_by": "codex",
-  "source_commit": "a79d1487ddd015115476fa32404b1634d2abe4e0",
+  "source_commit": "7636d69f05624c9604a71e80c03899dfca478e16",
   "repo_version_context": "0.178.3",
   "platform_version_context": "0.130.98",
   "workflow_id": "adr-0336-public-entrypoint-leakage-mainline-live-apply",
   "adr": "0336",
-  "summary": "Closed out ADR 0336 on the latest exact-main tree after `origin/main` advanced to `61900f1de988da19bc4db1fde27fa54e0e5aabb1` by archiving ws-0336 as merged history, regenerating the shard-backed compatibility registry plus the coordination diagram, refreshing canonical-truth history surfaces, and preserving the current remote-wrapper fallback behavior plus the terminal archived-branch ownership boundary as explicit evidence instead of hidden operator knowledge.",
+  "summary": "Closed out ADR 0336 on the latest exact-main tree after `origin/main` advanced to `3103d2f74dae8a08b95c548e46b839b0ac80b667` by archiving ws-0336 as merged history, regenerating the shard-backed compatibility registry plus the coordination diagram, refreshing canonical-truth history surfaces, and preserving the current remote-wrapper fallback behavior plus the terminal archived-branch ownership boundary as explicit evidence instead of hidden operator knowledge.",
   "targets": [
     {
       "kind": "repository",
@@ -38,7 +38,7 @@
     {
       "check": "Branch-local exact-main proof",
       "result": "pass",
-      "observed": "The branch-local receipt `2026-04-04-adr-0336-public-entrypoint-leakage-live-apply` already proves the validator, the focused `29 passed in 2.04s` regression slice, and the rebased exact-main repository validation on top of `origin/main@61900f1de988da19bc4db1fde27fa54e0e5aabb1`."
+      "observed": "The branch-local receipt `2026-04-04-adr-0336-public-entrypoint-leakage-live-apply` already proves the validator, the focused `29 passed in 2.04s` regression slice, and the rebased exact-main repository validation on top of `origin/main@3103d2f74dae8a08b95c548e46b839b0ac80b667`."
     },
     {
       "check": "Mainline registry and generated-surface refresh",

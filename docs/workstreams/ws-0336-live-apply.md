@@ -9,7 +9,7 @@
 - Implemented On: 2026-04-02
 - Live Applied On: 2026-04-04
 - Live Applied In Platform Version: not applicable (repo-only control-plane validation)
-- Latest Verified Base: `origin/main@61900f1de988da19bc4db1fde27fa54e0e5aabb1` (`repo 0.178.3`, `platform 0.130.98`)
+- Latest Verified Base: `origin/main@3103d2f74dae8a08b95c548e46b839b0ac80b667` (`repo 0.178.3`, `platform 0.130.98`)
 - Branch: `codex/ws-0336-live-apply`
 - Worktree: `.worktrees/ws-0336-live-apply`
 - Owner: codex
@@ -24,7 +24,7 @@
 
 ## Outcome
 
-- The validator implementation was already present on exact `origin/main` at `61900f1de988da19bc4db1fde27fa54e0e5aabb1`; no code change to `scripts/validate_public_entrypoints.py` or the gate wiring was required for ADR 0336 itself.
+- The validator implementation was already present on exact `origin/main` at `3103d2f74dae8a08b95c548e46b839b0ac80b667`; no code change to `scripts/validate_public_entrypoints.py` or the gate wiring was required for ADR 0336 itself.
 - This workstream adds explicit verification evidence, a dedicated workstream record, and a small ADR metadata clarification that the platform-version field is not applicable because the change is repository-only.
 - Protected integration files remain untouched on the workstream branch: no `VERSION` bump, no release-section churn in `changelog.md`, no top-level README status rewrite, and no `versions/stack.yaml` edit.
 
@@ -39,6 +39,6 @@
 
 ## Exact-Main Integration Status
 
-- The validator already ships on `origin/main`; this workstream exists to make that state auditable from a dedicated branch/worktree even after `origin/main` advanced to `61900f1de988da19bc4db1fde27fa54e0e5aabb1`.
+- The validator already ships on `origin/main`; this workstream exists to make that state auditable from a dedicated branch/worktree even after `origin/main` advanced to `3103d2f74dae8a08b95c548e46b839b0ac80b667`.
 - The branch-local closeout completed on `codex/ws-0336-live-apply`, and the mainline closeout archives the workstream as terminal history so the registry no longer carries it as active.
 - Because another local worktree already owns a dirty `main` branch, the exact-main push for this workstream is performed by pushing the verified integration commit directly to `origin/main` instead of mutating that unrelated local `main` checkout.
