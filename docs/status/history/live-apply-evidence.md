@@ -13,6 +13,7 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `outline` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `jupyterhub` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `fork_first_workstream_metadata` | `2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply` |
 | `directus` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `adr_discovery` | `2026-04-04-adr-0325-adr-discovery-mainline-live-apply` |
 | `workstream_registry_shards` | `2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply` |

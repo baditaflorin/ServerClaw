@@ -78,6 +78,7 @@ rewriting one operator's workstation paths.
 | `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `outline` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `jupyterhub` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `fork_first_workstream_metadata` | `2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply` |
 | `directus` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `adr_discovery` | `2026-04-04-adr-0325-adr-discovery-mainline-live-apply` |
 | `workstream_registry_shards` | `2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply` |
@@ -92,9 +93,8 @@ rewriting one operator's workstation paths.
 | `homepage` | `2026-04-03-ws-0332-homepage-triage-mainline-live-apply` |
 | `glitchtip` | `2026-04-03-adr-0281-glitchtip-mainline-live-apply` |
 | `falco` | `2026-04-03-adr-0300-falco-mainline-live-apply` |
-| `coolify_apps` | `2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply` |
 
-Showing 20 of 166 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
+Showing 20 of 167 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
 
 The current access posture is:
@@ -194,10 +194,11 @@ Current values on `main`:
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 289 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 290 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0337` | Re-verify fork-first workstream metadata from the latest origin/main | `live_applied` | [ws-0337-live-apply.md](docs/workstreams/ws-0337-live-apply.md) |
 | `0328` | Implement size-budgeted root summaries and automatic rollover ledgers | `live_applied` | [ws-0328-live-apply.md](docs/workstreams/ws-0328-live-apply.md) |
 | `0327` | Live apply sectional agent discovery registries and generated onboarding packs from latest origin/main | `live_applied` | [ws-0327-live-apply.md](docs/workstreams/ws-0327-live-apply.md) |
 | `0325` | Live apply faceted ADR index shards and reservation windows from latest origin/main | `live_applied` | [ws-0325-live-apply.md](docs/workstreams/ws-0325-live-apply.md) |
@@ -222,7 +223,6 @@ Showing 25 of 289 merged or live-applied workstreams. Full history: [merged work
 | `0171` | Controlled fault injection for resilience validation | `live_applied` | [adr-0171-controlled-fault-injection.md](docs/workstreams/adr-0171-controlled-fault-injection.md) |
 | `0170` | Platform-wide timeout hierarchy | `live_applied` | [adr-0170-timeout-hierarchy.md](docs/workstreams/adr-0170-timeout-hierarchy.md) |
 | `0169` | Structured log field contract | `live_applied` | [adr-0169-structured-log-field-contract.md](docs/workstreams/adr-0169-structured-log-field-contract.md) |
-| `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](docs/workstreams/adr-0168-idempotency-ci.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Next For Forks

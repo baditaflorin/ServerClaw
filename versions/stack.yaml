@@ -171,6 +171,7 @@ live_apply_evidence:
     sectional_agent_discovery: 2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply
     root_summary_rollover: 2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply
     adr_discovery: 2026-04-04-adr-0325-adr-discovery-mainline-live-apply
+    fork_first_workstream_metadata: 2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated

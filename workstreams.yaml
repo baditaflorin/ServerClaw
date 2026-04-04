@@ -45,7 +45,13 @@ workstreams:
   - docs/adr/.index.yaml
   - docs/adr/index/**/*.yaml
   - docs/runbooks/workstream-registry-shards.md
+  - README.md
+  - changelog.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - docs/status/history/live-apply-evidence.md
   - docs/status/history/merged-workstreams.md
+  - docs/diagrams/agent-coordination-map.excalidraw
   - platform/repo.py
   - scripts/create-workstream.sh
   - scripts/scaffold_service.py
@@ -82,9 +88,19 @@ workstreams:
       contract: adr-index-generator-v1
     - id: ws0337_generated_history
       paths:
+      - build/platform-manifest.json
+      - docs/status/history/live-apply-evidence.md
       - docs/status/history/merged-workstreams.md
+      - docs/diagrams/agent-coordination-map.excalidraw
       mode: shared_contract
       contract: latest-main-generated-truth-v1
+    - id: ws0337_canonical_truth
+      paths:
+      - README.md
+      - changelog.md
+      - versions/stack.yaml
+      mode: shared_contract
+      contract: canonical-truth-v1
     - id: ws0337_repo_relative_validation
       paths:
       - platform/repo.py

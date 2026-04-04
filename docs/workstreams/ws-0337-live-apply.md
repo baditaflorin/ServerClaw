@@ -15,7 +15,7 @@
 - Owner: codex
 - Depends On: `ADR 0167`, `ADR 0326`, `ADR 0331`, `ADR 0337`
 - Conflicts With: none
-- Shared Surfaces: `workstreams/policy.yaml`, `workstreams/active/*.yaml`, `workstreams/archive/**/*.yaml`, `workstreams.yaml`, `docs/workstreams/ws-0337-live-apply.md`, `docs/adr/0337-fork-first-workstream-and-worktree-metadata.md`, `docs/adr/.index.yaml`, `docs/adr/index/**/*.yaml`, `docs/runbooks/workstream-registry-shards.md`, `docs/status/history/merged-workstreams.md`, `platform/repo.py`, `scripts/create-workstream.sh`, `scripts/scaffold_service.py`, `scripts/validate_public_entrypoints.py`, `scripts/validate_repository_data_models.py`, `scripts/workstream_surface_ownership.py`, `tests/test_scaffold_service.py`, `tests/test_validate_public_entrypoints.py`, `tests/test_workstream_surface_ownership.py`, `receipts/live-applies/2026-04-04-adr-0337-fork-first-workstream-metadata-live-apply.json`, `receipts/live-applies/2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-04-04-ws-0337-*`
+- Shared Surfaces: `workstreams/policy.yaml`, `workstreams/active/*.yaml`, `workstreams/archive/**/*.yaml`, `workstreams.yaml`, `docs/workstreams/ws-0337-live-apply.md`, `docs/adr/0337-fork-first-workstream-and-worktree-metadata.md`, `docs/adr/.index.yaml`, `docs/adr/index/**/*.yaml`, `docs/runbooks/workstream-registry-shards.md`, `README.md`, `changelog.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `docs/status/history/live-apply-evidence.md`, `docs/status/history/merged-workstreams.md`, `docs/diagrams/agent-coordination-map.excalidraw`, `platform/repo.py`, `scripts/create-workstream.sh`, `scripts/scaffold_service.py`, `scripts/validate_public_entrypoints.py`, `scripts/validate_repository_data_models.py`, `scripts/workstream_surface_ownership.py`, `tests/test_scaffold_service.py`, `tests/test_validate_public_entrypoints.py`, `tests/test_workstream_surface_ownership.py`, `receipts/live-applies/2026-04-04-adr-0337-fork-first-workstream-metadata-live-apply.json`, `receipts/live-applies/2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-04-04-ws-0337-*`
 
 ## Scope
 
@@ -40,6 +40,11 @@
   --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py
   --validate`, focused pytest coverage for the public-entrypoint and workstream
   ownership checks, and `git diff --check`.
+- An attempted `make pre-push-gate` replay on the shared build host caught one
+  real generated-surface gap, `build/platform-manifest.json`, which was then
+  regenerated locally and re-validated with `scripts/platform_manifest.py
+  --check`; the remaining remote `atlas-lint` failure is an unrelated build-host
+  environment issue rather than an ADR 0337 regression.
 - The live-apply evidence is repository-only: no platform mutation was required,
   so the receipt records the exact-main validation pass and the metadata
   normalization instead of a guest or service replay.
@@ -60,8 +65,17 @@
 
 ## Exact-Main Integration Status
 
-- this workstream is intended to merge onto `main` without a release cut, so
-  `Included In Repo Version` remains `not yet`
-- `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml` remain
-  untouched in this workstream because the change is repository-only portability
-  hardening rather than a numbered release or platform-state update
+- exact-main canonical truth now records ADR 0337 in `README.md`,
+  `changelog.md`, `versions/stack.yaml`, and
+  `docs/status/history/live-apply-evidence.md` via the mainline receipt
+  `2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply`
+- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py
+  status --json` still reports repository version `0.178.3`, platform version
+  `0.130.98`, and a blocked release cut only because three unrelated
+  `controller_dependency_gap` waiver receipts remain open through `2026-04-06`
+- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py
+  --bump patch --dry-run` shows the next candidate repository release would be
+  `0.178.4` once those unrelated blockers clear
+- because the global release manager remains blocked outside this ADR,
+  `Included In Repo Version` remains `not yet` even though the exact-main merge
+  and repository-only live-apply replay are complete
