@@ -51,10 +51,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     healthcheck:
       test:
-        - CMD
-        - /dozzle
-        - healthcheck
+        - CMD-SHELL
+        - "nc -z 127.0.0.1 {{ dozzle_runtime_agent_port }} || exit 1"
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 5
       start_period: 10s
