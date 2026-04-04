@@ -1,0 +1,150 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply/scripts/remote_exec.sh remote-validate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+remote_exec: remote command failed, falling back locally for remote-validate
+remote_exec: running local fallback for remote-validate
+Validation lane selection
+  mode: explicit_checks
+  branch: codex/ws-0336-live-apply
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder
+  blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, atlas-lint, policy-validation, iac-policy-scan, alert-rule-validation, type-check, dependency-graph
+  changed files: docs/adr/0336-public-entrypoint-leakage-validation.md, docs/diagrams/agent-coordination-map.excalidraw, docs/workstreams/ws-0336-live-apply.md, receipts/live-applies/evidence/2026-04-04-ws-0336-data-models-r1.txt, receipts/live-applies/evidence/2026-04-04-ws-0336-generate-diagrams-r1.txt, receipts/live-applies/evidence/2026-04-04-ws-0336-git-diff-check-r1.txt, ...
+
+CHECK                STATUS    DURATION(s)
+agent-standards       passed    75.15
+alert-rule-validation passed    36.46
+ansible-syntax        timed_out 902.79
+atlas-lint            passed    47.65
+dependency-graph      passed    54.61
+iac-policy-scan       passed    221.08
+policy-validation     passed    70.36
+schema-validation     passed    503.30
+type-check            passed    79.71
+workstream-surfaces   passed    55.60
+
+[ansible-syntax] docker command
+docker run --rm --cpus=4 --cidfile /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply/.local/validation-gate/docker-cids/ansible-syntax-qp3kxmxb.cid -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0336-live-apply:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0336-live-apply:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=15f3c9e339e34705235bfdd062673db2457129dcd5b3a8ade46b6a8386530972 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-04T13:13:54.385915+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=20a66bbf088d1aa456d34f173fd8e2c8664f4c20 -e LV3_SNAPSHOT_BRANCH=codex/ws-0336-live-apply -e LV3_VALIDATION_BASE_REF=origin/main -e LV3_VALIDATION_CHANGED_FILES_JSON=["docs/adr/0336-public-entrypoint-leakage-validation.md", "docs/diagrams/agent-coordination-map.excalidraw", "docs/workstreams/ws-0336-live-apply.md", "receipts/live-applies/evidence/2026-04-04-ws-0336-data-models-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-generate-diagrams-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-git-diff-check-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-release-status-r1.json", "receipts/live-applies/evidence/2026-04-04-ws-0336-remote-validate-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-targeted-tests-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-public-entrypoints-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r3.txt", "workstreams.yaml", "workstreams/active/ws-0336-live-apply.yaml"] -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -w /workspace registry.lv3.org/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax
+[ansible-syntax] stdout
+Syntax check: playbooks/api-gateway.yml
+Syntax check: playbooks/artifact-cache-vm.yml
+Syntax check: playbooks/backup-vm.yml
+Syntax check: playbooks/browser-runner.yml
+Syntax check: playbooks/build-artifact-cache.yml
+Syntax check: playbooks/changedetection.yml
+Syntax check: playbooks/control-plane-recovery.yml
+Syntax check: playbooks/coolify.yml
+Syntax check: playbooks/crawl4ai.yml
+Syntax check: playbooks/data-retention.yml
+Syntax check: playbooks/database-dns.yml
+Syntax check: playbooks/dify.yml
+Syntax check: playbooks/directus.yml
+Syntax check: playbooks/docker-publication-assurance.yml
+Syntax check: playbooks/docker-runtime.yml
+Syntax check: playbooks/dozzle.yml
+Syntax check: playbooks/excalidraw.yml
+Syntax check: playbooks/falco.yml
+Syntax check: playbooks/flagsmith.yml
+Syntax check: playbooks/gitea.yml
+Syntax check: playbooks/glitchtip.yml
+Syntax check: playbooks/gotenberg.yml
+Syntax check: playbooks/grist.yml
+Syntax check: playbooks/groups/access.yml
+Syntax check: playbooks/groups/automation.yml
+Syntax check: playbooks/groups/communication.yml
+Syntax check: playbooks/groups/data.yml
+Syntax check: playbooks/groups/observability.yml
+Syntax check: playbooks/groups/platform-apps.yml
+Syntax check: playbooks/groups/security.yml
+Syntax check: playbooks/guest-access.yml
+Syntax check: playbooks/guest-network-policy.yml
+Syntax check: playbooks/harbor.yml
+Syntax check: playbooks/headscale.yml
+Syntax check: playbooks/homepage.yml
+Syntax check: playbooks/jupyterhub.yml
+Syntax check: playbooks/keycloak.yml
+Syntax check: playbooks/label-studio.yml
+Syntax check: playbooks/lago.yml
+Syntax check: playbooks/langfuse.yml
+Syntax check: playbooks/livekit.yml
+Syntax check: playbooks/mail-platform-diagnostics.yml
+Syntax check: playbooks/mail-platform-notification-profiles-verify.yml
+Syntax check: playbooks/mail-platform-send-gmail.yml
+Syntax check: playbooks/mail-platform-verify.yml
+Syntax check: playbooks/mail-platform.yml
+Syntax check: playbooks/mailpit.yml
+Syntax check: playbooks/matrix-synapse.yml
+Syntax check: playbooks/mattermost.yml
+Syntax check: playbooks/minio.yml
+Syntax check: playbooks/monitoring-stack.yml
+Syntax check: playbooks/n8n.yml
+Syntax check: playbooks/nats-jetstream.yml
+Syntax check: playbooks/netbox.yml
+Syntax check: playbooks/nextcloud.yml
+Syntax check: playbooks/nomad.yml
+Syntax check: playbooks/ntfy.yml
+Syntax check: playbooks/ntopng.yml
+Syntax check: playbooks/ollama.yml
+Syntax check: playbooks/one-api.yml
+Syntax check: playbooks/open-webui.yml
+Syntax check: playbooks/openbao.yml
+Syntax check: playbooks/openfga.yml
+Syntax check: playbooks/ops-portal.yml
+Syntax check: playbooks/outline.yml
+Syntax check: playbooks/paperless.yml
+Syntax check: playbooks/piper.yml
+Syntax check: playbooks/plane.yml
+Syntax check: playbooks/plausible.yml
+Syntax check: playbooks/portainer.yml
+Syntax check: playbooks/postgres-vm.yml
+Syntax check: playbooks/provision-subdomain.yml
+Syntax check: playbooks/proxmox-install.yml
+Syntax check: playbooks/proxmox-staging-bridge.yml
+Syntax check: playbooks/public-edge.yml
+Syntax check: playbooks/rag-context.yml
+Syntax check: playbooks/realtime.yml
+Syntax check: playbooks/redpanda.yml
+Syntax check: playbooks/restic-config-backup.yml
+Syntax check: playbooks/route-dns-assertion-ledger.yml
+Syntax check: playbooks/runtime-ai-pool.yml
+Syntax check: playbooks/runtime-control-pool.yml
+Syntax check: playbooks/runtime-general-pool.yml
+Syntax check: playbooks/searxng.yml
+Syntax check: playbooks/secret-rotation.yml
+Syntax check: playbooks/semaphore-self.yml
+Syntax check: playbooks/semaphore.yml
+Syntax check: playbooks/server-resident-reconciliation.yml
+Syntax check: playbooks/serverclaw.yml
+Syntax check: playbooks/services/api-gateway.yml
+Syntax check: playbooks/services/backup-vm.yml
+Syntax check: playbooks/services/browser-runner.yml
+Syntax check: playbooks/services/build-artifact-cache.yml
+Syntax check: playbooks/services/changedetection.yml
+Syntax check: playbooks/services/coolify.yml
+Syntax check: playbooks/services/crawl4ai.yml
+Syntax check: playbooks/services/dify.yml
+Syntax check: playbooks/services/directus.yml
+Syntax check: playbooks/services/docker-build-observability.yml
+Syntax check: playbooks/services/docker-runtime-observability.yml
+Syntax check: playbooks/services/dozzle.yml
+Syntax check: playbooks/services/excalidraw.yml
+Syntax check: playbooks/services/falco.yml
+Syntax check: playbooks/services/flagsmith.yml
+Syntax check: playbooks/services/gitea.yml
+Syntax check: playbooks/services/glitchtip.yml
+Syntax check: playbooks/services/gotenberg.yml
+Syntax check: playbooks/services/grafana.yml
+Syntax check: playbooks/services/grist.yml
+Syntax check: playbooks/services/guest-access.yml
+Syntax check: playbooks/services/guest-log-shipping.yml
+Syntax check: playbooks/services/harbor.yml
+Syntax check: playbooks/services/headscale.yml
+Syntax check: playbooks/services/homepage.yml
+Syntax check: playbooks/services/jupyterhub.yml
+Syntax check: playbooks/services/label-studio.yml
+Syntax check: playbooks/services/lago.yml
+Syntax check: playbooks/services/langfuse.yml
+[ansible-syntax] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+make: *** [remote-validate] Error 1

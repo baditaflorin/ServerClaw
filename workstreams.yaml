@@ -250,6 +250,66 @@ workstreams:
     included_in_repo_version: null
     latest_receipts:
       fork_first_workstream_metadata: 2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply
+- id: ws-0336-live-apply
+  adr: '0336'
+  title: Verify ADR 0336 public entrypoint leakage validation on the latest origin/main
+  status: ready_for_merge
+  owner: codex
+  branch: codex/ws-0336-live-apply
+  worktree_path: .worktrees/ws-0336-live-apply
+  doc: docs/workstreams/ws-0336-live-apply.md
+  depends_on:
+  - adr-0168-automated-enforcement-of-agent-standards
+  - adr-0330-public-github-readiness-as-a-first-class-repository-lifecycle
+  - adr-0336-public-entrypoint-leakage-validation
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0336-live-apply.yaml
+  - docs/workstreams/ws-0336-live-apply.md
+  - docs/adr/0336-public-entrypoint-leakage-validation.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - scripts/validate_public_entrypoints.py
+  - scripts/validate_repo.sh
+  - tests/test_validate_public_entrypoints.py
+  - tests/test_validate_repo_cache.py
+  - tests/test_generate_discovery_artifacts.py
+  - receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-live-apply.json
+  - receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-mainline-live-apply.json
+  - receipts/live-applies/evidence/2026-04-04-ws-0336-*
+  ownership_manifest:
+    owned_surfaces:
+    - id: workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws0336_registry_source
+      paths:
+      - workstreams/active/ws-0336-live-apply.yaml
+      mode: exclusive
+    - id: ws0336_workstream_doc
+      paths:
+      - docs/workstreams/ws-0336-live-apply.md
+      mode: exclusive
+    - id: ws0336_adr_metadata
+      paths:
+      - docs/adr/0336-public-entrypoint-leakage-validation.md
+      mode: exclusive
+    - id: ws0336_generated_truth_artifacts
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: latest-main-generated-truth-v1
+    - id: ws0336_live_apply_receipts
+      paths:
+      - receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-live-apply.json
+      - receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-04-04-ws-0336-*
+      mode: exclusive
+  blockers: []
+  ready_to_merge: true
+  live_applied: true
 - id: ws-0328-live-apply
   adr: 0328
   title: Implement size-budgeted root summaries and automatic rollover ledgers
