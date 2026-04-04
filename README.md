@@ -200,7 +200,6 @@ Showing 25 of 296 merged or live-applied workstreams. Full history: [merged work
 | --- | --- | --- | --- |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
 | `0330` | Close out public GitHub readiness on the latest origin/main | `live_applied` | [ws-0330-main-closeout.md](docs/workstreams/ws-0330-main-closeout.md) |
-| `0314` | Live apply resumable multi-step flows and return-to-task reentry from latest origin/main | `live_applied` | [ws-0314-live-apply.md](docs/workstreams/ws-0314-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
@@ -223,6 +222,7 @@ Showing 25 of 296 merged or live-applied workstreams. Full history: [merged work
 | `0169` | Structured log field contract | `live_applied` | [adr-0169-structured-log-field-contract.md](docs/workstreams/adr-0169-structured-log-field-contract.md) |
 | `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](docs/workstreams/adr-0168-idempotency-ci.md) |
 | `0167` | Graceful degradation mode declarations | `live_applied` | [adr-0167-graceful-degradation-mode-declarations.md](docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md) |
+| `0166` | Canonical error response format and error code registry | `live_applied` | [adr-0166-canonical-error-response-format.md](docs/workstreams/adr-0166-canonical-error-response-format.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Next For Forks

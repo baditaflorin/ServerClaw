@@ -14,7 +14,7 @@ depends_on:
 conflicts_with: []
 shared_surfaces:
 - workstreams.yaml
-- workstreams/active/ws-0314-live-apply.yaml
+- workstreams/archive/2026/ws-0314-live-apply.yaml
 - docs/workstreams/ws-0314-live-apply.md
 - docs/adr/0314-resumable-multi-step-flows-and-return-to-task-reentry.md
 - docs/adr/.index.yaml
@@ -271,7 +271,7 @@ live_applied: true
 canonical_truth:
   changelog_entry: implements ADR 0314 by turning the shared runbook execution path into a resumable human task surface with durable progress, deep-link return-to-task entry, and portal reentry summaries
   release_bump: patch
-  included_in_repo_version: null
+  included_in_repo_version: 0.178.5
   latest_receipts:
     keycloak: 2026-04-04-ws-0314-mainline-keycloak-live-apply-r4
     api_gateway: 2026-04-04-ws-0314-mainline-api-gateway-live-apply-r11
