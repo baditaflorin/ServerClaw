@@ -358,6 +358,14 @@ def ensure_image(client: Any, image_ref: str) -> None:
         client.images.pull(image_ref)
 
 
+def docker_error_matches(docker_sdk: Any, exc: Exception, *, attr_name: str) -> bool:
+    errors_module = getattr(docker_sdk, "errors", None)
+    error_type = getattr(errors_module, attr_name, None)
+    if error_type is not None and isinstance(exc, error_type):
+        return True
+    return exc.__class__.__name__ == attr_name
+
+
 def run_atlas(
     client: Any,
     *,
@@ -384,13 +392,15 @@ def run_atlas(
             volumes=volumes or None,
             extra_hosts={"host.docker.internal": "host-gateway"},
         )
-    except docker_sdk.errors.ContainerError as exc:  # type: ignore[attr-defined]
-        stderr = decode_output(getattr(exc, "stderr", None))
-        raise RuntimeError(
-            f"Atlas command failed ({' '.join(command)}): {stderr or str(exc)}"
-        ) from exc
-    except docker_sdk.errors.APIError as exc:  # type: ignore[attr-defined]
-        raise RuntimeError(f"Atlas container API error: {exc}") from exc
+    except Exception as exc:  # noqa: BLE001
+        if docker_error_matches(docker_sdk, exc, attr_name="ContainerError"):
+            stderr = decode_output(getattr(exc, "stderr", None))
+            raise RuntimeError(
+                f"Atlas command failed ({' '.join(command)}): {stderr or str(exc)}"
+            ) from exc
+        if docker_error_matches(docker_sdk, exc, attr_name="APIError"):
+            raise RuntimeError(f"Atlas container API error: {exc}") from exc
+        raise
     return decode_output(output)
 
 
@@ -400,7 +410,9 @@ def guest_tunnel(context: dict[str, Any], guest_name: str, *, remote_bind: str):
     command = build_guest_ssh_tunnel_command(
         context,
         guest_name,
-        local_bind=f"127.0.0.1:{local_port}",
+        # Atlas runs in a sibling container, so Linux builders need the tunnel
+        # bound on the host gateway instead of loopback-only.
+        local_bind=f"0.0.0.0:{local_port}",
         remote_bind=remote_bind,
     )
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -698,7 +710,9 @@ def dev_postgres(client: Any, image_ref: str, database_name: str):
             "POSTGRES_PASSWORD": "postgres",
             "POSTGRES_DB": database_name,
         },
-        ports={"5432/tcp": ("127.0.0.1", local_port)},
+        # Atlas connects from a separate container, so loopback-only binds fail on
+        # Linux host-gateway networking.
+        ports={"5432/tcp": ("0.0.0.0", local_port)},
     )
     try:
         deadline = time.time() + DEFAULT_DEV_POSTGRES_WAIT_SECONDS

@@ -709,6 +709,40 @@ def test_lint_target_passes_latest_scope_to_atlas(monkeypatch) -> None:
     ]
 
 
+def test_run_atlas_falls_back_to_exception_class_names_when_docker_errors_is_missing(
+    monkeypatch,
+) -> None:
+    atlas_schema = load_module()
+
+    class ContainerError(Exception):
+        def __init__(self, message: str, *, stderr: bytes | None = None) -> None:
+            super().__init__(message)
+            self.stderr = stderr
+
+    class FakeContainers:
+        @staticmethod
+        def run(*args, **kwargs):
+            raise ContainerError("atlas failed", stderr=b"dial tcp 10.200.1.1:57004: connect: connection refused")
+
+    class FakeClient:
+        containers = FakeContainers()
+
+    monkeypatch.setattr(atlas_schema, "load_docker_sdk", lambda: object())
+    monkeypatch.setattr(atlas_schema, "ensure_image", lambda client, image_ref: None)
+
+    try:
+        atlas_schema.run_atlas(
+            FakeClient(),
+            image_ref="docker.io/arigaio/atlas:test",
+            command=["migrate", "lint"],
+        )
+    except RuntimeError as exc:
+        assert "Atlas command failed" in str(exc)
+        assert "connection refused" in str(exc)
+    else:
+        raise AssertionError("run_atlas should surface ContainerError failures even without docker.errors")
+
+
 def test_replace_loopback_host_rewrites_local_openbao_url_to_guest_ip() -> None:
     atlas_schema = load_module()
 
@@ -820,6 +854,7 @@ def test_resolve_postgres_endpoint_can_force_direct_guest_ip_without_reachabilit
 def test_dev_postgres_force_removes_ephemeral_container_on_cleanup(monkeypatch) -> None:
     atlas_schema = load_module()
     removed: list[tuple[list[str], float]] = []
+    captured_run_kwargs: dict[str, object] = {}
 
     class FakeExecResult:
         exit_code = 0
@@ -834,6 +869,7 @@ def test_dev_postgres_force_removes_ephemeral_container_on_cleanup(monkeypatch) 
         class containers:
             @staticmethod
             def run(*args, **kwargs):
+                captured_run_kwargs.update(kwargs)
                 return FakeContainer()
 
     monkeypatch.setattr(atlas_schema, "ensure_image", lambda client, image_ref: None)
@@ -849,8 +885,61 @@ def test_dev_postgres_force_removes_ephemeral_container_on_cleanup(monkeypatch) 
         assert database["host"] == "host.docker.internal"
         assert database["port"] == 55432
 
+    assert captured_run_kwargs["ports"] == {"5432/tcp": ("0.0.0.0", 55432)}
     assert len(removed) == 1
     assert removed[0][0][:3] == ["docker", "rm", "-f"]
     assert removed[0][0][3].startswith("atlas-lint-")
     assert removed[0][0][3].endswith("-55432")
     assert removed[0][1] == 10.0
+
+
+def test_guest_tunnel_binds_on_all_interfaces_for_sibling_containers(monkeypatch) -> None:
+    atlas_schema = load_module()
+    captured: dict[str, object] = {}
+
+    class FakeProcess:
+        def poll(self):
+            return None
+
+        def terminate(self):
+            captured["terminated"] = True
+
+        def wait(self, timeout):
+            captured["wait_timeout"] = timeout
+            return 0
+
+        def kill(self):
+            raise AssertionError("guest_tunnel should not need to kill a healthy tunnel")
+
+    def fake_build_guest_ssh_tunnel_command(context, guest_name, *, local_bind, remote_bind):
+        captured["context"] = context
+        captured["guest_name"] = guest_name
+        captured["local_bind"] = local_bind
+        captured["remote_bind"] = remote_bind
+        return ["ssh", "-N"]
+
+    def fake_popen(command, stdout, stderr, text):
+        captured["popen_command"] = command
+        captured["stdout"] = stdout
+        captured["stderr"] = stderr
+        captured["text"] = text
+        return FakeProcess()
+
+    def fake_wait_for_tunnel(process, port):
+        captured["wait_port"] = port
+
+    monkeypatch.setattr(atlas_schema, "reserve_local_port", lambda: 55432)
+    monkeypatch.setattr(atlas_schema, "build_guest_ssh_tunnel_command", fake_build_guest_ssh_tunnel_command)
+    monkeypatch.setattr(atlas_schema.subprocess, "Popen", fake_popen)
+    monkeypatch.setattr(atlas_schema, "wait_for_tunnel", fake_wait_for_tunnel)
+
+    context = {"host_user": "ops", "host_addr": "100.64.0.1", "guests": {"postgres-lv3": "10.10.10.50"}}
+    with atlas_schema.guest_tunnel(context, "postgres-lv3", remote_bind="127.0.0.1:5432") as local_port:
+        assert local_port == 55432
+
+    assert captured["guest_name"] == "postgres-lv3"
+    assert captured["local_bind"] == "0.0.0.0:55432"
+    assert captured["remote_bind"] == "127.0.0.1:5432"
+    assert captured["wait_port"] == 55432
+    assert captured["terminated"] is True
+    assert captured["wait_timeout"] == 3
