@@ -4,6 +4,7 @@ services:
     image: {{ gitea_openbao_agent_image }}
     container_name: {{ gitea_openbao_agent_container_name }}
     user: "0:0"
+    network_mode: host
     environment:
       BAO_SKIP_DROP_ROOT: "true"
     command:

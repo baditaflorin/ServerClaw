@@ -10,6 +10,13 @@ services:
       - "{{ excalidraw_runtime_bind_host }}:{{ excalidraw_runtime_app_port }}:{{ excalidraw_runtime_app_container_port }}"
     volumes:
       - {{ excalidraw_runtime_bootstrap_script }}:/opt/lv3/bootstrap-app.sh:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q -O /dev/null http://127.0.0.1 || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   excalidraw-room:
     image: {{ excalidraw_runtime_room_image }}

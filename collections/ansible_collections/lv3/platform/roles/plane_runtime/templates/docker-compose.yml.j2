@@ -39,6 +39,13 @@ services:
     restart: unless-stopped
     env_file:
       - {{ plane_env_file }}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q -O/dev/null http://127.0.0.1:3000/spaces/ || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
     depends_on:
       api:
         condition: service_started
