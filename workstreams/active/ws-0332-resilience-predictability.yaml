@@ -1,7 +1,7 @@
 id: ws-0332-resilience-predictability
 adr: '0346'
 title: Enforce health-gated compose dependencies for more predictable service recovery
-status: ready_for_merge
+status: ready
 owner: codex
 branch: codex/ws-0332-resilience-predictability
 worktree_path: .worktrees/ws-0332-resilience-predictability

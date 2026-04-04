@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0346](../adr/0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md)
 - Title: enforce health-gated compose dependencies for more predictable service recovery
-- Status: ready_for_merge
+- Status: ready
 - Included In Repo Version: not yet
 - Implemented On: 2026-04-04
 - Live Applied On: not yet
