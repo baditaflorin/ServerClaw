@@ -74,11 +74,14 @@ rewriting one operator's workstation paths.
 | Capability | Receipt |
 | --- | --- |
 | `woodpecker` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `searxng` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `plausible_analytics` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `outline` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `minio` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `jupyterhub` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `fork_first_workstream_metadata` | `2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply` |
+| `dozzle` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `directus` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `adr_discovery` | `2026-04-04-adr-0325-adr-discovery-mainline-live-apply` |
 | `workstream_registry_shards` | `2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply` |
@@ -90,9 +93,6 @@ rewriting one operator's workstation paths.
 | `open_webui` | `2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply` |
 | `ntfy` | `2026-04-03-adr-0299-ntfy-mainline-live-apply` |
 | `label_studio` | `2026-04-03-adr-0289-label-studio-mainline-live-apply` |
-| `homepage` | `2026-04-03-ws-0332-homepage-triage-mainline-live-apply` |
-| `glitchtip` | `2026-04-03-adr-0281-glitchtip-mainline-live-apply` |
-| `falco` | `2026-04-03-adr-0300-falco-mainline-live-apply` |
 
 Showing 20 of 167 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
@@ -194,10 +194,11 @@ Current values on `main`:
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 290 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 291 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0346` | Enforce health-gated compose dependencies for more predictable service recovery | `live_applied` | [ws-0332-resilience-predictability.md](docs/workstreams/ws-0332-resilience-predictability.md) |
 | `0337` | Re-verify fork-first workstream metadata from the latest origin/main | `live_applied` | [ws-0337-live-apply.md](docs/workstreams/ws-0337-live-apply.md) |
 | `0328` | Implement size-budgeted root summaries and automatic rollover ledgers | `live_applied` | [ws-0328-live-apply.md](docs/workstreams/ws-0328-live-apply.md) |
 | `0327` | Live apply sectional agent discovery registries and generated onboarding packs from latest origin/main | `live_applied` | [ws-0327-live-apply.md](docs/workstreams/ws-0327-live-apply.md) |
@@ -222,7 +223,6 @@ Showing 25 of 290 merged or live-applied workstreams. Full history: [merged work
 | `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
 | `0171` | Controlled fault injection for resilience validation | `live_applied` | [adr-0171-controlled-fault-injection.md](docs/workstreams/adr-0171-controlled-fault-injection.md) |
 | `0170` | Platform-wide timeout hierarchy | `live_applied` | [adr-0170-timeout-hierarchy.md](docs/workstreams/adr-0170-timeout-hierarchy.md) |
-| `0169` | Structured log field contract | `live_applied` | [adr-0169-structured-log-field-contract.md](docs/workstreams/adr-0169-structured-log-field-contract.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Next For Forks

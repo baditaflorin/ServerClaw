@@ -65,5 +65,8 @@
 
 ## Exact-Main Integration Status
 
-- Branch-local live apply is complete from `origin/main@20a66bbf0`; the remaining exact-main step is limited to merging this receipt and the canonical-truth metadata onto `main`.
-- `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml` remain untouched in this worktree until the exact-main integration step is replayed and revalidated.
+- Exact-main canonical truth now records the same live-apply receipt in `changelog.md`, `versions/stack.yaml`, `README.md`, `docs/status/history/live-apply-evidence.md`, `docs/status/history/merged-workstreams.md`, and `build/platform-manifest.json`.
+- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py status --json` still reports repository version `0.178.3`, platform version `0.130.98`, and unrelated `controller_dependency_gap` waiver blockers open through `2026-04-06`, so this workstream merges onto exact main without a numbered release cut.
+- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py --bump patch --dry-run` shows the next candidate repository version would be `0.178.4` once those unrelated blockers clear.
+- `./scripts/validate_repo.sh workstream-surfaces` is intentionally branch-scoped and therefore reports that the temporary integration branch `codex/ws-0332-main-integration-r2` is not registered in `workstreams.yaml`; the same gate already passed on the registered workstream branch before merge.
+- `Included In Repo Version` therefore remains `not yet`, while exact main now carries the branch-local live-apply evidence and canonical receipt mapping for `dozzle`, `minio`, and `searxng`.
