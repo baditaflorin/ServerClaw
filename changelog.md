@@ -12,14 +12,13 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- closes out ADR 0330 public GitHub readiness by making the controller-local secret contract repo-relative, adding fork-first example inventory and provider/publication profiles, and surfacing the public reference tier through discovery-driven onboarding
-
 ## Latest Release
 
-- [0.178.4 release notes](docs/release-notes/0.178.4.md)
+- [0.178.5 release notes](docs/release-notes/0.178.5.md)
 
 ## Previous Releases
 
+- [0.178.4 release notes](docs/release-notes/0.178.4.md)
 - [0.178.3 release notes](docs/release-notes/0.178.3.md)
 - [0.178.2 release notes](docs/release-notes/0.178.2.md)
 - [0.178.1 release notes](docs/release-notes/0.178.1.md)
@@ -31,9 +30,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.177.149 release notes](docs/release-notes/0.177.149.md)
 - [0.177.148 release notes](docs/release-notes/0.177.148.md)
 - [0.177.147 release notes](docs/release-notes/0.177.147.md)
-- [0.177.146 release notes](docs/release-notes/0.177.146.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (343 releases)](docs/release-notes/index/2026.md)
+- [2026 (344 releases)](docs/release-notes/index/2026.md)

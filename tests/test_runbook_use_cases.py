@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from platform.use_cases.runbooks import RunbookSurfaceError, RunbookUseCaseService, WindmillWorkflowRunner
+from platform.use_cases.runbooks import RunbookRunStore, RunbookSurfaceError, RunbookUseCaseService, WindmillWorkflowRunner
 
 
 class FakeRunner:
@@ -127,3 +127,100 @@ def test_windmill_workflow_runner_accepts_legacy_repo_root_argument(tmp_path: Pa
     runner = WindmillWorkflowRunner(base_url="https://windmill.example", token="token", repo_root=tmp_path)
 
     assert runner.repo_root == tmp_path
+
+
+def test_runbook_use_case_service_lists_task_reentry_models(runbook_repo: Path) -> None:
+    (runbook_repo / "docs" / "runbooks" / "portal-review.yaml").write_text(
+        """
+id: portal-review
+title: Portal review flow
+automation:
+  eligible: true
+  delivery_surfaces:
+    - ops_portal
+steps:
+  - id: diagnose
+    workflow_id: example-workflow
+    params: {}
+  - id: confirm
+    type: pause
+    description: Review the saved diagnostics before continuing.
+    params: {}
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    service = RunbookUseCaseService(repo_root=runbook_repo, workflow_runner=FakeRunner())
+    paused = service.execute("portal-review", {}, surface="ops_portal")
+    tasks = service.list_tasks(surface="ops_portal")
+
+    assert paused["status"] == "escalated"
+    assert tasks[0]["run_id"] == paused["run_id"]
+    assert tasks[0]["attention_required"] is True
+    assert tasks[0]["summary"]["headline"].startswith("Awaiting confirmation")
+
+
+def test_runbook_use_case_service_tolerates_legacy_task_records_without_titles(runbook_repo: Path) -> None:
+    (runbook_repo / "docs" / "runbooks" / "portal-review.yaml").write_text(
+        """
+id: portal-review
+title: Portal review flow
+automation:
+  eligible: true
+  delivery_surfaces:
+    - ops_portal
+steps:
+  - id: diagnose
+    workflow_id: example-workflow
+    params: {}
+  - id: confirm
+    type: pause
+    description: Review the saved diagnostics before continuing.
+    params: {}
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    store = RunbookRunStore(runbook_repo / ".local" / "runbooks" / "runs")
+    store.save(
+        {
+            "run_id": "legacy-run",
+            "runbook_id": "portal-review",
+            "runbook_source": str(runbook_repo / "docs" / "runbooks" / "portal-review.yaml"),
+            "delivery_surface": "ops_portal",
+            "status": "escalated",
+            "created_at": "2026-03-25T09:00:00Z",
+            "current_step": "confirm",
+            "next_step_index": 1,
+            "params": {},
+            "step_results": {
+                "diagnose": {
+                    "status": "completed",
+                    "finished_at": "2026-03-25T09:02:00Z",
+                    "result": {"summary": "ok"},
+                },
+                "confirm": {
+                    "status": "paused",
+                    "finished_at": "2026-03-25T09:03:00Z",
+                    "result": {"message": "Review the saved diagnostics before continuing."},
+                },
+            },
+            "history": [
+                {
+                    "step_id": "confirm",
+                    "status": "paused",
+                    "finished_at": "2026-03-25T09:03:00Z",
+                }
+            ],
+        }
+    )
+    service = RunbookUseCaseService(repo_root=runbook_repo, workflow_runner=FakeRunner(), store=store)
+
+    tasks = service.list_tasks(surface="ops_portal")
+
+    assert tasks[0]["run_id"] == "legacy-run"
+    assert tasks[0]["runbook_title"] == "Portal review flow"
+    assert tasks[0]["summary"]["headline"].startswith("Awaiting confirmation")
+    assert any(item["detail"] == "Portal review flow started from Ops Portal." for item in tasks[0]["activity"])

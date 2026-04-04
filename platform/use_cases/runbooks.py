@@ -26,6 +26,7 @@ DELIVERY_SURFACE_LABELS = {
     "ops_portal": "Ops Portal",
     "windmill": "Windmill",
 }
+COMPLETED_STEP_STATUSES = {"completed", "warning", "skipped"}
 LIVE_IMPACT_ORDER = {
     "repo_only": 0,
     "private_only": 1,
@@ -55,6 +56,26 @@ class WorkflowRunner(Protocol):
 
 def utc_now_iso() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def compact_json(value: Any, *, max_length: int = 160) -> str:
+    if value in (None, "", [], {}):
+        return ""
+    if isinstance(value, dict):
+        scalar_items = []
+        for key in sorted(value):
+            item = value[key]
+            if isinstance(item, (str, int, float, bool)) or item is None:
+                scalar_items.append(f"{key}={item}")
+        text = ", ".join(scalar_items) if scalar_items else json.dumps(value, sort_keys=True, default=str)
+    elif isinstance(value, list):
+        text = json.dumps(value, sort_keys=True, default=str)
+    else:
+        text = str(value)
+    text = text.strip()
+    if len(text) <= max_length:
+        return text
+    return text[: max_length - 3].rstrip() + "..."
 
 
 def viewify(value: Any) -> Any:
@@ -384,6 +405,15 @@ class RunbookRunStore:
         write_json(self.path_for(require_string(record.get("run_id"), "run.run_id")), record, sort_keys=False)
         return record
 
+    def list(self) -> list[dict[str, Any]]:
+        records: list[dict[str, Any]] = []
+        for path in sorted(self.root.glob("*.json")):
+            try:
+                records.append(require_mapping(load_json(path), f"run {path.stem}"))
+            except Exception:  # noqa: BLE001
+                continue
+        return records
+
 
 class WindmillWorkflowRunner:
     def __init__(
@@ -460,6 +490,7 @@ class RunbookUseCaseService:
                     "delivery_surfaces": list(runbook["automation"].get("delivery_surfaces") or []),
                     "execution_class": execution_class,
                     "live_impact": live_impact,
+                    "reentry_supported": True,
                     "step_count": len(runbook["steps"]),
                 }
             )
@@ -516,6 +547,7 @@ class RunbookUseCaseService:
             "next_step_index": 0,
             "step_results": {},
             "history": [],
+            "resume_events": [],
         }
         self.store.save(run_record)
         self._emit_audit(
@@ -524,6 +556,7 @@ class RunbookUseCaseService:
             actor_id=actor_id,
             outcome="success",
             evidence_ref=str(self.store.path_for(run_record["run_id"])),
+            surface=surface,
         )
         return self._run_steps(runbook, run_record)
 
@@ -534,6 +567,12 @@ class RunbookUseCaseService:
         runbook = self.registry.resolve(str(run_record.get("runbook_source") or run_record["runbook_id"]))
         run_record["status"] = "running"
         run_record["actor_id"] = actor_id
+        run_record.setdefault("resume_events", []).append(
+            {
+                "actor_id": actor_id,
+                "resumed_at": utc_now_iso(),
+            }
+        )
         self.store.save(run_record)
         self._emit_audit(
             "runbook.execute.resumed",
@@ -541,11 +580,37 @@ class RunbookUseCaseService:
             actor_id=actor_id,
             outcome="success",
             evidence_ref=str(self.store.path_for(run_id)),
+            surface=str(run_record.get("delivery_surface") or "cli"),
         )
         return self._run_steps(runbook, run_record)
 
     def status(self, run_id: str) -> dict[str, Any]:
         return self.store.load(run_id)
+
+    def describe_task(self, run_id: str) -> dict[str, Any]:
+        record = deepcopy(self.store.load(run_id))
+        record["reentry"] = self._build_task_model(record)
+        return record
+
+    def list_tasks(
+        self,
+        *,
+        surface: str | None = None,
+        limit: int = 20,
+        statuses: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        allowed_statuses = {item for item in (statuses or []) if item}
+        tasks: list[dict[str, Any]] = []
+        for record in self.store.list():
+            record_surface = str(record.get("delivery_surface") or "")
+            record_status = str(record.get("status") or "")
+            if surface is not None and record_surface != surface:
+                continue
+            if allowed_statuses and record_status not in allowed_statuses:
+                continue
+            tasks.append(self._build_task_model(record))
+        tasks.sort(key=lambda item: str(item.get("updated_at") or ""), reverse=True)
+        return tasks[:limit]
 
     def _run_steps(self, runbook: dict[str, Any], run_record: dict[str, Any]) -> dict[str, Any]:
         steps = runbook["steps"]
@@ -564,10 +629,26 @@ class RunbookUseCaseService:
                     "step_id": step["id"],
                     "status": outcome["status"],
                     "attempts": outcome["attempts"],
+                    "started_at": outcome["started_at"],
                     "finished_at": outcome["finished_at"],
+                    "error": outcome.get("error"),
+                    "workflow_id": outcome.get("workflow_id"),
                 }
             )
+            if outcome["status"] not in {"escalated", "failed", "paused"}:
+                run_record["next_step_index"] = index + 1
+                run_record["current_step"] = steps[index + 1]["id"] if index + 1 < len(steps) else None
             self.store.save(run_record)
+            if outcome["status"] == "paused":
+                run_record["status"] = "escalated"
+                run_record["next_step_index"] = int(outcome.get("resume_step_index") or (index + 1))
+                run_record["current_step"] = (
+                    steps[run_record["next_step_index"]]["id"]
+                    if run_record["next_step_index"] < len(steps)
+                    else None
+                )
+                self.store.save(run_record)
+                return run_record
             if outcome["status"] == "escalated":
                 run_record["status"] = "escalated"
                 self.store.save(run_record)
@@ -587,6 +668,7 @@ class RunbookUseCaseService:
             actor_id=run_record["actor_id"],
             outcome="success",
             evidence_ref=str(self.store.path_for(run_record["run_id"])),
+            surface=str(run_record.get("delivery_surface") or "cli"),
         )
         return run_record
 
@@ -612,6 +694,26 @@ class RunbookUseCaseService:
                 workflow_result=last_result or {},
             )
             rendered_params = render_template_value(step["params"], context, step_ids=step_ids)
+            if step["type"] == "pause":
+                self._emit_audit(
+                    f"runbook.step.{safe_step_alias(step['id'])}",
+                    runbook["id"],
+                    actor_id=run_record["actor_id"],
+                    outcome="paused",
+                    evidence_ref=str(self.store.path_for(run_record["run_id"])),
+                    surface=str(run_record.get("delivery_surface") or "cli"),
+                )
+                return {
+                    "step_id": step["id"],
+                    "status": "paused",
+                    "attempts": attempts,
+                    "workflow_id": None,
+                    "params": rendered_params,
+                    "result": {"message": step["description"]},
+                    "started_at": started_at,
+                    "finished_at": utc_now_iso(),
+                    "resume_step_index": step_ids.index(step["id"]) + 1,
+                }
 
             try:
                 self._validate_workflow(step["workflow_id"])
@@ -637,6 +739,7 @@ class RunbookUseCaseService:
                         actor_id=run_record["actor_id"],
                         outcome="success",
                         evidence_ref=str(self.store.path_for(run_record["run_id"])),
+                        surface=str(run_record.get("delivery_surface") or "cli"),
                     )
                     return {
                         "step_id": step["id"],
@@ -705,6 +808,7 @@ class RunbookUseCaseService:
                     actor_id=run_record["actor_id"],
                     outcome="failure",
                     evidence_ref=str(self.store.path_for(run_record["run_id"])),
+                    surface=str(run_record.get("delivery_surface") or "cli"),
                 )
                 return {
                     "step_id": step["id"],
@@ -778,14 +882,273 @@ class RunbookUseCaseService:
         except ValueError:
             return source_path
 
-    def _emit_audit(self, action: str, target: str, *, actor_id: str, outcome: str, evidence_ref: str) -> None:
+    def _resolve_runbook_for_record(self, record: dict[str, Any]) -> dict[str, Any] | None:
+        source = str(record.get("runbook_source") or record.get("runbook_id") or "")
+        if not source:
+            return None
+        try:
+            return self.registry.resolve(source)
+        except Exception:  # noqa: BLE001
+            return None
+
+    def _step_descriptor(self, runbook_steps: dict[str, dict[str, Any]], step_id: str | None) -> dict[str, Any] | None:
+        if not step_id:
+            return None
+        step = runbook_steps.get(step_id) or {}
+        return {
+            "id": step_id,
+            "label": str(step.get("description") or step_id),
+            "type": str(step.get("type") or "unknown"),
+            "workflow_id": step.get("workflow_id"),
+        }
+
+    def _build_task_model(self, record: dict[str, Any]) -> dict[str, Any]:
+        runbook = self._resolve_runbook_for_record(record)
+        run_id = require_string(record.get("run_id"), "run.run_id")
+        runbook_id = str(record.get("runbook_id") or (runbook or {}).get("id") or "unknown-runbook")
+        runbook_title = str(record.get("runbook_title") or (runbook or {}).get("title") or runbook_id)
+        runbook_step_list = runbook.get("steps") if isinstance(runbook, dict) and isinstance(runbook.get("steps"), list) else []
+        runbook_steps = {
+            step_id: step
+            for step in runbook_step_list
+            if isinstance(step, dict) and (step_id := str(step.get("id") or "").strip())
+        }
+        step_results_value = record.get("step_results")
+        step_results = step_results_value if isinstance(step_results_value, dict) else {}
+        step_order = list(runbook_steps)
+        for step_id in step_results:
+            if step_id not in step_order:
+                step_order.append(step_id)
+
+        try:
+            next_step_index = max(int(record.get("next_step_index") or 0), 0)
+        except (TypeError, ValueError):
+            next_step_index = 0
+        current_step_id = str(record.get("current_step") or "")
+        if not current_step_id and next_step_index < len(step_order):
+            current_step_id = step_order[next_step_index]
+
+        completed_step_ids = [
+            step_id
+            for step_id in step_order
+            if str((step_results.get(step_id) or {}).get("status") or "") in COMPLETED_STEP_STATUSES
+        ]
+        total_steps = len(step_order)
+        completed_steps = len(completed_step_ids)
+        progress_percent = int(round((completed_steps / total_steps) * 100)) if total_steps else 0
+        last_completed_step_id = completed_step_ids[-1] if completed_step_ids else None
+        last_completed_descriptor = self._step_descriptor(runbook_steps, last_completed_step_id)
+        last_completed_outcome = step_results.get(last_completed_step_id, {}) if last_completed_step_id else {}
+
+        next_step_id = step_order[next_step_index] if next_step_index < len(step_order) else None
+        next_step = self._step_descriptor(runbook_steps, next_step_id or current_step_id)
+
+        next_irreversible_step = None
+        for step_id in step_order[next_step_index:]:
+            step = runbook_steps.get(step_id) or {}
+            if step.get("type") == "mutation":
+                next_irreversible_step = self._step_descriptor(runbook_steps, step_id)
+                break
+
+        last_mutation_step = None
+        for step_id in reversed(step_order):
+            step = runbook_steps.get(step_id) or {}
+            if step.get("type") != "mutation":
+                continue
+            outcome = step_results.get(step_id) or {}
+            if str(outcome.get("status") or "") in COMPLETED_STEP_STATUSES:
+                last_mutation_step = self._step_descriptor(runbook_steps, step_id)
+                break
+
+        history = record.get("history") if isinstance(record.get("history"), list) else []
+        attention_entry = history[-1] if history else {}
+        attention_step_id = str(attention_entry.get("step_id") or current_step_id or next_step_id or "")
+        attention_status = str(attention_entry.get("status") or record.get("status") or "unknown")
+        attention_outcome = step_results.get(attention_step_id, {}) if attention_step_id else {}
+        attention_step = self._step_descriptor(runbook_steps, attention_step_id)
+
+        if last_completed_descriptor and last_completed_outcome:
+            last_safe_message = (
+                f"After {last_completed_descriptor['label']} at "
+                f"{last_completed_outcome.get('finished_at') or 'the latest checkpoint'}"
+            )
+        else:
+            last_safe_message = "Before the first step"
+
+        status = str(record.get("status") or "unknown")
+        if status == "escalated" and attention_status == "paused":
+            headline = (
+                f"Awaiting confirmation before {next_step['label']}"
+                if next_step is not None
+                else "Awaiting confirmation to continue"
+            )
+            what_happened = (
+                f"{runbook_title} completed {completed_steps} of {total_steps} steps and paused at "
+                f"{attention_step['label'] if attention_step else 'a review checkpoint'}."
+            )
+            next_human_action = "Review the saved evidence, then resume when you want the next step to continue."
+        elif status == "escalated":
+            blocked_label = attention_step["label"] if attention_step else "the current step"
+            headline = f"Paused at {blocked_label}"
+            detail = str(attention_outcome.get("error") or "").strip()
+            what_happened = f"{runbook_title} completed {completed_steps} of {total_steps} steps and paused at {blocked_label}."
+            if detail:
+                what_happened += f" Latest diagnostic: {detail}."
+            next_human_action = "Inspect the saved diagnostics and resume when the task is safe to retry."
+        elif status == "running":
+            current_label = next_step["label"] if next_step else (attention_step["label"] if attention_step else "the current step")
+            headline = f"In progress at {current_label}"
+            what_happened = f"{runbook_title} has completed {completed_steps} of {total_steps} steps."
+            next_human_action = "Reopen this task link to review current progress without losing the last safe resume point."
+        elif status == "completed":
+            headline = f"Completed {runbook_title}"
+            what_happened = f"All {total_steps} steps completed successfully."
+            next_human_action = "Review the evidence below or launch a fresh run from the portal when you need another pass."
+        else:
+            blocked_label = attention_step["label"] if attention_step else "the task"
+            headline = f"{runbook_title} ended at {blocked_label}"
+            what_happened = f"{runbook_title} stopped after {completed_steps} of {total_steps} completed steps."
+            next_human_action = "Review the saved state before deciding whether to relaunch the flow."
+
+        evidence: list[dict[str, Any]] = []
+        for step_id in step_order:
+            outcome = step_results.get(step_id)
+            if not isinstance(outcome, dict):
+                continue
+            descriptor = self._step_descriptor(runbook_steps, step_id) or {"id": step_id, "label": step_id}
+            detail = str(outcome.get("error") or "").strip() or compact_json(outcome.get("result"))
+            evidence.append(
+                {
+                    "step_id": step_id,
+                    "label": descriptor["label"],
+                    "status": str(outcome.get("status") or "unknown"),
+                    "finished_at": outcome.get("finished_at"),
+                    "workflow_id": outcome.get("workflow_id"),
+                    "detail": detail,
+                }
+            )
+
+        activity: list[dict[str, Any]] = [
+            {
+                "title": "Task created",
+                "detail": f"{runbook_title} started from {DELIVERY_SURFACE_LABELS.get(str(record.get('delivery_surface') or ''), 'the shared runbook surface')}.",
+                "timestamp": record.get("created_at"),
+                "status": "created",
+                "portal_path": f"/tasks/runbooks/{run_id}",
+            }
+        ]
+        for resume_event in record.get("resume_events", []):
+            if not isinstance(resume_event, dict):
+                continue
+            activity.append(
+                {
+                    "title": "Task resumed",
+                    "detail": f"Resumed by {resume_event.get('actor_id') or 'an operator'}.",
+                    "timestamp": resume_event.get("resumed_at"),
+                    "status": "resumed",
+                    "portal_path": f"/tasks/runbooks/{run_id}",
+                }
+            )
+        for item in history:
+            if not isinstance(item, dict):
+                continue
+            descriptor = self._step_descriptor(runbook_steps, str(item.get("step_id") or ""))
+            if descriptor is None:
+                continue
+            detail = str(item.get("error") or "").strip()
+            status_label = str(item.get("status") or "unknown")
+            if not detail:
+                detail = f"{descriptor['label']} finished with status {status_label}."
+            activity.append(
+                {
+                    "title": f"{descriptor['label']}: {status_label}",
+                    "detail": detail,
+                    "timestamp": item.get("finished_at"),
+                    "status": status_label,
+                    "portal_path": f"/tasks/runbooks/{run_id}",
+                }
+            )
+        activity.sort(key=lambda item: str(item.get("timestamp") or ""), reverse=True)
+
+        steps: list[dict[str, Any]] = []
+        for index, step_id in enumerate(step_order):
+            descriptor = self._step_descriptor(runbook_steps, step_id) or {"id": step_id, "label": step_id, "type": "unknown"}
+            outcome = step_results.get(step_id) if isinstance(step_results.get(step_id), dict) else {}
+            step_status = str(outcome.get("status") or ("pending" if index >= next_step_index else "pending"))
+            steps.append(
+                {
+                    "id": step_id,
+                    "label": descriptor["label"],
+                    "type": descriptor["type"],
+                    "status": step_status,
+                    "finished_at": outcome.get("finished_at"),
+                    "detail": str(outcome.get("error") or "").strip() or compact_json(outcome.get("result")),
+                }
+            )
+
+        mutation_state = (
+            f"Last committed mutation: {last_mutation_step['label']}"
+            if last_mutation_step is not None
+            else "No committed mutation step has succeeded yet."
+        )
+
+        return {
+            "run_id": run_id,
+            "runbook_id": runbook_id,
+            "runbook_title": runbook_title,
+            "owner_runbook": self._relative_repo_path(str((runbook or {}).get("source_path") or record.get("runbook_source") or "")),
+            "delivery_surface": str(record.get("delivery_surface") or ""),
+            "status": status,
+            "attention_required": status == "escalated",
+            "resume_available": status == "escalated",
+            "portal_path": f"/tasks/runbooks/{run_id}",
+            "created_at": record.get("created_at"),
+            "updated_at": record.get("updated_at"),
+            "current_step": current_step_id or None,
+            "params": deepcopy(record.get("params") if isinstance(record.get("params"), dict) else {}),
+            "progress": {
+                "completed_steps": completed_steps,
+                "total_steps": total_steps,
+                "percent": progress_percent,
+            },
+            "summary": {
+                "headline": headline,
+                "what_happened": what_happened,
+                "next_human_action": next_human_action,
+                "last_safe_resume_point": {
+                    "step_id": last_completed_step_id,
+                    "label": last_completed_descriptor["label"] if last_completed_descriptor else "Start",
+                    "timestamp": last_completed_outcome.get("finished_at"),
+                    "message": last_safe_message,
+                },
+                "next_step": next_step,
+                "next_irreversible_step": next_irreversible_step,
+                "mutation_state": mutation_state,
+            },
+            "evidence": evidence,
+            "activity": activity,
+            "steps": steps,
+        }
+
+    def _emit_audit(
+        self,
+        action: str,
+        target: str,
+        *,
+        actor_id: str,
+        outcome: str,
+        evidence_ref: str,
+        surface: str,
+    ) -> None:
+        audit_surface = "windmill" if surface == "windmill" else "manual"
+        audit_outcome = "success" if outcome == "paused" else outcome
         event = build_event(
             actor_class="automation",
             actor_id=actor_id,
-            surface="windmill",
+            surface=audit_surface,
             action=action,
             target=target,
-            outcome=outcome,
+            outcome=audit_outcome,
             evidence_ref=evidence_ref,
         )
         emit_event_best_effort(event, context="runbook-executor", stderr=self.stderr)

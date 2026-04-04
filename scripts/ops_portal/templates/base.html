@@ -85,6 +85,7 @@
               <div class="link-row">
                 <a href="/entry?neutral=1">Entry routing</a>
                 <a href="#activation">Activation</a>
+                <a href="#tasks">Return to task</a>
                 <a href="#runbooks">Runbooks</a>
                 <a href="#changelog">Recent changes</a>
               </div>
@@ -137,6 +138,12 @@
                 <a class="pf-v5-c-nav__link" href="#deployments">
                   <span class="pf-v5-c-nav__link-text">Deployments</span>
                   <span class="portal-shell-nav-count">{{ deployments|length }}</span>
+                </a>
+              </li>
+              <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#tasks">
+                  <span class="pf-v5-c-nav__link-text">Tasks</span>
+                  <span class="portal-shell-nav-count">{{ task_panel.attention_count }}</span>
                 </a>
               </li>
               <li class="pf-v5-c-nav__item">

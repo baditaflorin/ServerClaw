@@ -1,0 +1,3 @@
+Live apply receipts OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/receipts/live-applies
+Promotion receipts OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/receipts/promotions (0 file(s))
+Repository data models OK

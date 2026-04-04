@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.178.4
-platform_version: 0.130.98
+repo_version: 0.178.5
+platform_version: 0.130.99
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -15,7 +15,7 @@ live_apply_evidence:
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
     public_edge_publication: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
-    api_gateway: 2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply
+    api_gateway: 2026-04-04-ws-0314-mainline-api-gateway-live-apply-r11
     artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
     docker_publication: 2026-03-30-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
@@ -61,7 +61,7 @@ live_apply_evidence:
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
     platform_event_taxonomy: 2026-03-26-adr-0124-platform-event-taxonomy-live-apply
     netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
-    keycloak: 2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply
+    keycloak: 2026-04-04-ws-0314-mainline-keycloak-live-apply-r4
     n8n: 2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply
     platform_context: 2026-04-01-adr-0294-one-api-mainline-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
@@ -74,9 +74,10 @@ live_apply_evidence:
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     semaphore: 2026-03-25-adr-0149-semaphore-live-apply
     searxng: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
-    ops_portal: 2026-04-03-adr-0309-task-oriented-information-architecture-mainline-live-apply
+    ops_portal: 2026-04-04-ws-0314-mainline-ops-portal-live-apply-r18
     ollama: 2026-03-27-adr-0176-inventory-sharding-mainline-live-apply
     operator_access: 2026-04-02-adr-0315-canonical-page-states-mainline-live-apply
+    runbook_task_reentry: 2026-04-04-ws-0314-mainline-task-reentry-resume-r2
     preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
     staging_environment: 2026-03-27-adr-0183-staging-live-apply
     immutable_guest_replacement: 2026-03-27-adr-0191-immutable-guest-replacement-live-apply

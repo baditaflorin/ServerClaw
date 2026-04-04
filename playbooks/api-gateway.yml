@@ -1,4 +1,35 @@
 ---
+# Playbook: api-gateway.yml
+# Purpose: Converge the unified platform API gateway on runtime-control-lv3 with the governed auth, search, and runtime-assurance verification flow used by ADR 0314.
+# Use case: Run when the repo-managed API gateway code, service bundle, authentication dependencies, or platform verification checks must be reconciled on production or staging.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (path, required via make targets): SSH private key used for the Proxmox host and guest jump path.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Deployment environment selector.
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH routing mode for guest access.
+#   - platform_trace_id (string, optional): Mutation-audit trace identifier propagated by the make wrapper.
+#
+# Outputs:
+#   - API gateway runtime converged on the selected runtime-control guest with local auth-discovery, runtime-assurance, structured-search, and service-health verification.
+#
+# Idempotency: Fully idempotent
+#              Reruns reconcile the same service bundle, runtime dependencies, and verification checks without reapplying drift-free state.
+#
+# Dependencies:
+#   - ADR 0165: Requires committed playbook metadata headers.
+#   - ADR 0314: Defines the resumable task and return-to-task API surfaces that this gateway exposes.
+#   - ADR 0319: Places the control-plane gateway on the dedicated runtime-control pool guest.
+#   - Role: lv3.platform.linux_guest_firewall - refreshes the in-guest policy and bridge-chain recovery before publishing ports.
+#   - Role: lv3.platform.docker_runtime - ensures Docker, the bridge helpers, and publication prerequisites are present.
+#   - Role: lv3.platform.api_gateway_runtime - renders, deploys, and verifies the API gateway service bundle.
+#
+# Related ADRs: 0165, 0314, 0319
+# Related Runbooks: docs/runbooks/runbook-automation-executor.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-04
 - name: Converge the unified platform API gateway on the runtime-control VM
   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
@@ -22,6 +53,8 @@
 
   roles:
     - role: lv3.platform.linux_guest_firewall
+      vars:
+        linux_guest_firewall_recover_missing_docker_bridge_chains: true
     - role: lv3.platform.docker_runtime
     - role: lv3.platform.api_gateway_runtime
 

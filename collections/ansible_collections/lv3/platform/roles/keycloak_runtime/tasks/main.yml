@@ -19,6 +19,11 @@
       - keycloak_database_password_local_file | length > 0
       - keycloak_bootstrap_admin_username | length > 0
       - keycloak_bootstrap_admin_password_remote_file | length > 0
+      - keycloak_admin_client_id | length > 0
+      - keycloak_admin_client_secret_remote_file | length > 0
+      - keycloak_admin_client_secret_local_file | length > 0
+      - keycloak_recovery_admin_service_client_id | length > 0
+      - keycloak_recovery_admin_service_secret_remote_file | length > 0
       - keycloak_operator_username | length > 0
       - keycloak_operator_password_remote_file | length > 0
       - keycloak_service_topology.public_hostname | length > 0
@@ -105,6 +110,34 @@
   changed_when: "'changed' in keycloak_operator_password_generation.stdout"
   no_log: true
 
+- name: Generate the repo-managed Keycloak admin client secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ keycloak_admin_client_secret_remote_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ keycloak_admin_client_secret_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: keycloak_admin_client_secret_generation
+  changed_when: "'changed' in keycloak_admin_client_secret_generation.stdout"
+  no_log: true
+
+- name: Generate the temporary Keycloak recovery admin service secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ keycloak_recovery_admin_service_secret_remote_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ keycloak_recovery_admin_service_secret_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: keycloak_recovery_admin_service_secret_generation
+  changed_when: "'changed' in keycloak_recovery_admin_service_secret_generation.stdout"
+  no_log: true
+
 - name: Generate the Outline automation password
   ansible.builtin.shell: |
     set -euo pipefail
@@ -131,6 +164,18 @@
   register: keycloak_operator_password_raw
   no_log: true
 
+- name: Read the repo-managed Keycloak admin client secret
+  ansible.builtin.slurp:
+    src: "{{ keycloak_admin_client_secret_remote_file }}"
+  register: keycloak_admin_client_secret_raw
+  no_log: true
+
+- name: Read the temporary Keycloak recovery admin service secret
+  ansible.builtin.slurp:
+    src: "{{ keycloak_recovery_admin_service_secret_remote_file }}"
+  register: keycloak_recovery_admin_service_secret_raw
+  no_log: true
+
 - name: Read the Outline automation password
   ansible.builtin.slurp:
     src: "{{ keycloak_outline_automation_password_remote_file }}"
@@ -152,6 +197,8 @@
 - name: Record the Keycloak runtime secrets
   ansible.builtin.set_fact:
     keycloak_bootstrap_admin_password: "{{ keycloak_bootstrap_admin_password_raw.content | b64decode | trim }}"
+    keycloak_admin_client_secret: "{{ keycloak_admin_client_secret_raw.content | b64decode | trim }}"
+    keycloak_recovery_admin_service_secret: "{{ keycloak_recovery_admin_service_secret_raw.content | b64decode | trim }}"
     keycloak_operator_password: "{{ keycloak_operator_password_raw.content | b64decode | trim }}"
     keycloak_outline_automation_password: "{{ keycloak_outline_automation_password_raw.content | b64decode | trim }}"
     keycloak_database_password: "{{ lookup('ansible.builtin.file', keycloak_database_password_local_file) | trim }}"
@@ -172,6 +219,15 @@
   ansible.builtin.copy:
     dest: "{{ keycloak_bootstrap_admin_password_local_file }}"
     content: "{{ keycloak_bootstrap_admin_password }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the repo-managed Keycloak admin client secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ keycloak_admin_client_secret_local_file }}"
+    content: "{{ keycloak_admin_client_secret }}\n"
     mode: "0600"
   delegate_to: localhost
   become: false
@@ -665,12 +721,16 @@
       ansible.builtin.uri:
         url: "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
         method: GET
-        status_code: 200
+        return_content: true
+        status_code:
+          - 200
+          - 503
       register: keycloak_health_ready
       retries: "{{ keycloak_startup_probe_retries }}"
       delay: "{{ keycloak_startup_probe_delay }}"
-      until: keycloak_health_ready.status == 200
+      until: (keycloak_health_ready.status | default(0)) in [200, 503]
       changed_when: false
+      failed_when: (keycloak_health_ready.status | default(0)) != 200
 
     - name: Wait for the Keycloak admin API to answer
       ansible.builtin.uri:
@@ -682,91 +742,6 @@
       delay: "{{ keycloak_startup_probe_delay }}"
       until: keycloak_master_openid_config.status == 200
       changed_when: false
-
-    - name: Wait for the Keycloak bootstrap admin token endpoint to succeed
-      ansible.builtin.uri:
-        url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
-        method: POST
-        body_format: form-urlencoded
-        body:
-          grant_type: password
-          client_id: admin-cli
-          username: "{{ keycloak_bootstrap_admin_username }}"
-          password: "{{ keycloak_bootstrap_admin_password }}"
-        return_content: true
-        status_code:
-          - 200
-          - 400
-          - 401
-          - 500
-      register: keycloak_bootstrap_admin_token_probe
-      retries: "{{ keycloak_startup_probe_retries }}"
-      delay: "{{ keycloak_startup_probe_delay }}"
-      until: keycloak_bootstrap_admin_token_probe.status == 200
-      changed_when: false
-      no_log: true
-
-    - name: Wait for an authenticated Keycloak admin realm query to answer
-      ansible.builtin.uri:
-        url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
-        method: GET
-        headers:
-          Authorization: "Bearer {{ keycloak_bootstrap_admin_token_probe.json.access_token }}"
-        return_content: true
-        status_code:
-          - 200
-          - 404
-      register: keycloak_admin_realm_probe
-      retries: "{{ keycloak_startup_probe_retries }}"
-      delay: "{{ keycloak_startup_probe_delay }}"
-      until: keycloak_admin_realm_probe.status in [200, 404]
-      changed_when: false
-      no_log: true
-
-    - name: Allow the Keycloak admin API to settle after the first authenticated probe
-      ansible.builtin.pause:
-        seconds: "{{ keycloak_startup_probe_delay }}"
-      changed_when: false
-
-    - name: Reconfirm the Keycloak bootstrap admin token endpoint after the settle window
-      ansible.builtin.uri:
-        url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
-        method: POST
-        body_format: form-urlencoded
-        body:
-          grant_type: password
-          client_id: admin-cli
-          username: "{{ keycloak_bootstrap_admin_username }}"
-          password: "{{ keycloak_bootstrap_admin_password }}"
-        return_content: true
-        status_code:
-          - 200
-          - 400
-          - 401
-          - 500
-      register: keycloak_bootstrap_admin_token_probe_confirmed
-      retries: "{{ keycloak_startup_probe_retries }}"
-      delay: "{{ keycloak_startup_probe_delay }}"
-      until: keycloak_bootstrap_admin_token_probe_confirmed.status == 200
-      changed_when: false
-      no_log: true
-
-    - name: Reconfirm an authenticated Keycloak admin realm query after the settle window
-      ansible.builtin.uri:
-        url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
-        method: GET
-        headers:
-          Authorization: "Bearer {{ keycloak_bootstrap_admin_token_probe_confirmed.json.access_token }}"
-        return_content: true
-        status_code:
-          - 200
-          - 404
-      register: keycloak_admin_realm_probe_confirmed
-      retries: "{{ keycloak_startup_probe_retries }}"
-      delay: "{{ keycloak_startup_probe_delay }}"
-      until: keycloak_admin_realm_probe_confirmed.status in [200, 404]
-      changed_when: false
-      no_log: true
   rescue:
     - name: Detect whether the Docker service is active before Keycloak startup probe recovery
       ansible.builtin.command:
@@ -802,6 +777,22 @@
         that:
           - keycloak_startup_probe_recovery_docker_active_state.rc != 0 or keycloak_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_verify.rc | default(1)) == 0
         fail_msg: "Docker is running but the nat DOCKER chain is missing; Keycloak recovery cannot republish the admin endpoints."
+
+    - name: Clear stale Keycloak JDBC_PING rows before retrying the startup probes
+      ansible.builtin.command:
+        argv:
+          - psql
+          - -d
+          - "{{ keycloak_database_name }}"
+          - -v
+          - ON_ERROR_STOP=1
+          - -c
+          - DELETE FROM jgroups_ping;
+      delegate_to: "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+      become: true
+      become_user: postgres
+      register: keycloak_startup_probe_recovery_jgroups_cleanup
+      changed_when: "'DELETE ' in (keycloak_startup_probe_recovery_jgroups_cleanup.stdout | default(''))"
 
     - name: Recreate the Keycloak OpenBao agent before retrying the startup probes
       ansible.builtin.command:
@@ -882,12 +873,16 @@
       ansible.builtin.uri:
         url: "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
         method: GET
-        status_code: 200
+        return_content: true
+        status_code:
+          - 200
+          - 503
       register: keycloak_startup_probe_recovery_health_ready
       retries: "{{ keycloak_startup_probe_retries }}"
       delay: "{{ keycloak_startup_probe_delay }}"
-      until: keycloak_startup_probe_recovery_health_ready.status == 200
+      until: (keycloak_startup_probe_recovery_health_ready.status | default(0)) in [200, 503]
       changed_when: false
+      failed_when: (keycloak_startup_probe_recovery_health_ready.status | default(0)) != 200
 
     - name: Wait for the Keycloak admin API after startup probe recovery
       ansible.builtin.uri:
@@ -900,90 +895,622 @@
       until: keycloak_startup_probe_recovery_master_openid_config.status == 200
       changed_when: false
 
-    - name: Wait for the Keycloak bootstrap admin token endpoint after startup probe recovery
+- name: Ensure the repo-managed Keycloak admin client can authenticate before realm reconciliation
+  block:
+    - name: Wait for the repo-managed Keycloak admin client token endpoint to succeed
       ansible.builtin.uri:
         url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
         method: POST
+        timeout: "{{ keycloak_admin_connection_timeout }}"
         body_format: form-urlencoded
         body:
-          grant_type: password
-          client_id: admin-cli
-          username: "{{ keycloak_bootstrap_admin_username }}"
-          password: "{{ keycloak_bootstrap_admin_password }}"
+          grant_type: client_credentials
+          client_id: "{{ keycloak_admin_client_id }}"
+          client_secret: "{{ keycloak_admin_client_secret }}"
         return_content: true
         status_code:
           - 200
           - 400
           - 401
+          - 403
           - 500
-      register: keycloak_startup_probe_recovery_bootstrap_admin_token_probe
+      register: keycloak_admin_client_token_probe
       retries: "{{ keycloak_startup_probe_retries }}"
       delay: "{{ keycloak_startup_probe_delay }}"
-      until: keycloak_startup_probe_recovery_bootstrap_admin_token_probe.status == 200
+      until: (keycloak_admin_client_token_probe.status | default(0)) in [200, 400, 401, 403]
       changed_when: false
+      failed_when: (keycloak_admin_client_token_probe.status | default(0)) != 200
       no_log: true
 
-    - name: Wait for an authenticated Keycloak admin realm query after startup probe recovery
+    - name: Require an authenticated Keycloak admin realm query before accepting the repo-managed admin client
       ansible.builtin.uri:
         url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
         method: GET
         headers:
-          Authorization: "Bearer {{ keycloak_startup_probe_recovery_bootstrap_admin_token_probe.json.access_token }}"
+          Authorization: "Bearer {{ keycloak_admin_client_token_probe.json.access_token }}"
         return_content: true
         status_code:
           - 200
+          - 403
           - 404
-      register: keycloak_startup_probe_recovery_admin_realm_probe
+      register: keycloak_admin_realm_probe_preflight
       retries: "{{ keycloak_startup_probe_retries }}"
       delay: "{{ keycloak_startup_probe_delay }}"
-      until: keycloak_startup_probe_recovery_admin_realm_probe.status in [200, 404]
+      until: (keycloak_admin_realm_probe_preflight.status | default(0)) in [200, 403, 404]
       changed_when: false
+      failed_when: (keycloak_admin_realm_probe_preflight.status | default(0)) == 403
       no_log: true
-
-    - name: Allow the Keycloak admin API to settle after startup probe recovery
-      ansible.builtin.pause:
-        seconds: "{{ keycloak_startup_probe_delay }}"
+  rescue:
+    - name: Inspect the Keycloak service state before admin bootstrap recovery
+      ansible.builtin.shell: |
+        set -euo pipefail
+        container_id="$(docker ps -aq \
+          --filter label=com.docker.compose.project=keycloak \
+          --filter label=com.docker.compose.service=keycloak \
+          | head -n 1)"
+        if [ -z "${container_id}" ]; then
+          printf 'missing|missing keycloak container\n'
+          exit 0
+        fi
+        docker inspect --format '{% raw %}{{.State.Status}}|{{.State.Error}}{% endraw %}' "${container_id}"
+      args:
+        chdir: "{{ keycloak_site_dir }}"
+        executable: /bin/bash
+      register: keycloak_admin_access_container_state
       changed_when: false
+      failed_when: false
 
-    - name: Reconfirm the Keycloak bootstrap admin token endpoint after startup probe recovery
+    - name: Record whether the Keycloak runtime needs recovery before admin bootstrap fallback
+      ansible.builtin.set_fact:
+        keycloak_admin_access_runtime_recovery_needed: >-
+          {{
+            (keycloak_admin_access_container_state.rc | default(0)) != 0
+            or not (keycloak_admin_access_container_state.stdout | default('')) is search('^running\\|')
+          }}
+
+    - name: Recreate the Keycloak service after admin-client runtime drift
+      ansible.builtin.shell: |
+        set -euo pipefail
+        for attempt in $(seq 1 3); do
+          if [ "{{ keycloak_mail_platform_docker_network_name | length }}" -gt 0 ] \
+            && ! docker network inspect "{{ keycloak_mail_platform_docker_network_name }}" >/dev/null 2>&1; then
+            sleep 5
+            continue
+          fi
+
+          if docker compose --file "{{ keycloak_compose_file }}" up -d --force-recreate --no-deps keycloak; then
+            exit 0
+          fi
+
+          stale_ids="$(docker ps -aq \
+            --filter label=com.docker.compose.project=keycloak \
+            --filter label=com.docker.compose.service=keycloak)"
+          if [ -n "$stale_ids" ]; then
+            docker rm -f $stale_ids || true
+          fi
+          sleep 5
+        done
+        exit 1
+      args:
+        chdir: "{{ keycloak_site_dir }}"
+        executable: /bin/bash
+      register: keycloak_admin_access_recovery_up
+      changed_when: >-
+        'Creating' in (keycloak_admin_access_recovery_up.stdout | default(''))
+        or 'Recreating' in (keycloak_admin_access_recovery_up.stdout | default(''))
+        or 'Starting' in (keycloak_admin_access_recovery_up.stdout | default(''))
+      failed_when: false
+      when: keycloak_admin_access_runtime_recovery_needed | bool
+
+    - name: Wait for the Keycloak management port after admin-client runtime recovery
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ keycloak_local_management_port }}"
+        delay: 0
+        timeout: 240
+      when:
+        - keycloak_admin_access_runtime_recovery_needed | bool
+        - (keycloak_admin_access_recovery_up.rc | default(1)) == 0
+
+    - name: Wait for the Keycloak readiness endpoint after admin-client runtime recovery
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
+        method: GET
+        return_content: true
+        status_code:
+          - 200
+          - 503
+      register: keycloak_admin_access_recovery_health_ready
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: (keycloak_admin_access_recovery_health_ready.status | default(0)) in [200, 503]
+      changed_when: false
+      failed_when: (keycloak_admin_access_recovery_health_ready.status | default(0)) != 200
+      when:
+        - keycloak_admin_access_runtime_recovery_needed | bool
+        - (keycloak_admin_access_recovery_up.rc | default(1)) == 0
+
+    - name: Wait for the Keycloak admin API after admin-client runtime recovery
+      ansible.builtin.uri:
+        url: "{{ keycloak_local_admin_url }}/realms/master/.well-known/openid-configuration"
+        method: GET
+        status_code: 200
+      register: keycloak_admin_access_recovery_master_openid_config
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: keycloak_admin_access_recovery_master_openid_config.status == 200
+      changed_when: false
+      when:
+        - keycloak_admin_access_runtime_recovery_needed | bool
+        - (keycloak_admin_access_recovery_up.rc | default(1)) == 0
+
+    - name: Retry the repo-managed Keycloak admin client token endpoint after admin-client runtime recovery
       ansible.builtin.uri:
         url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
         method: POST
+        timeout: "{{ keycloak_admin_connection_timeout }}"
         body_format: form-urlencoded
         body:
-          grant_type: password
-          client_id: admin-cli
-          username: "{{ keycloak_bootstrap_admin_username }}"
-          password: "{{ keycloak_bootstrap_admin_password }}"
+          grant_type: client_credentials
+          client_id: "{{ keycloak_admin_client_id }}"
+          client_secret: "{{ keycloak_admin_client_secret }}"
         return_content: true
         status_code:
           - 200
           - 400
           - 401
+          - 403
           - 500
-      register: keycloak_startup_probe_recovery_bootstrap_admin_token_probe_confirmed
+      register: keycloak_admin_access_token_probe_recovery
       retries: "{{ keycloak_startup_probe_retries }}"
       delay: "{{ keycloak_startup_probe_delay }}"
-      until: keycloak_startup_probe_recovery_bootstrap_admin_token_probe_confirmed.status == 200
+      until: (keycloak_admin_access_token_probe_recovery.status | default(0)) in [200, 400, 401, 403]
       changed_when: false
+      failed_when: (keycloak_admin_access_token_probe_recovery.status | default(0)) != 200
       no_log: true
+      when:
+        - keycloak_admin_access_runtime_recovery_needed | bool
+        - (keycloak_admin_access_recovery_up.rc | default(1)) == 0
 
-    - name: Reconfirm an authenticated Keycloak admin realm query after startup probe recovery
+    - name: Retry the authenticated Keycloak admin realm query after admin-client runtime recovery
       ansible.builtin.uri:
         url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
         method: GET
         headers:
-          Authorization: "Bearer {{ keycloak_startup_probe_recovery_bootstrap_admin_token_probe_confirmed.json.access_token }}"
+          Authorization: "Bearer {{ keycloak_admin_access_token_probe_recovery.json.access_token }}"
         return_content: true
         status_code:
           - 200
+          - 403
           - 404
-      register: keycloak_startup_probe_recovery_admin_realm_probe_confirmed
+      register: keycloak_admin_access_realm_probe_recovery
       retries: "{{ keycloak_startup_probe_retries }}"
       delay: "{{ keycloak_startup_probe_delay }}"
-      until: keycloak_startup_probe_recovery_admin_realm_probe_confirmed.status in [200, 404]
+      until: (keycloak_admin_access_realm_probe_recovery.status | default(0)) in [200, 403, 404]
       changed_when: false
+      failed_when: (keycloak_admin_access_realm_probe_recovery.status | default(0)) == 403
       no_log: true
+      when:
+        - keycloak_admin_access_runtime_recovery_needed | bool
+        - (keycloak_admin_access_recovery_up.rc | default(1)) == 0
+        - (keycloak_admin_access_token_probe_recovery.status | default(0)) == 200
+
+    - name: Read the live Keycloak admin client secret directly from PostgreSQL when file-based auth fails
+      ansible.builtin.command:
+        argv:
+          - psql
+          - -d
+          - "{{ keycloak_database_name }}"
+          - -At
+          - -v
+          - ON_ERROR_STOP=1
+          - -c
+          - "SELECT secret FROM client WHERE client_id = '{{ keycloak_admin_client_id }}';"
+      delegate_to: "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+      become: true
+      become_user: postgres
+      register: keycloak_admin_client_live_secret_query
+      changed_when: false
+      failed_when: false
+      no_log: true
+      when: >-
+        (keycloak_admin_client_token_probe.status | default(0)) != 200
+        and (
+          not (keycloak_admin_access_runtime_recovery_needed | default(false))
+          or (keycloak_admin_access_token_probe_recovery.status | default(0)) != 200
+          or (keycloak_admin_access_realm_probe_recovery.status | default(403)) == 403
+        )
+
+    - name: Record the live Keycloak admin client secret from PostgreSQL when available
+      ansible.builtin.set_fact:
+        keycloak_admin_client_secret_live: "{{ keycloak_admin_client_live_secret_query.stdout | trim }}"
+      no_log: true
+      when: (keycloak_admin_client_live_secret_query.stdout | default('') | trim | length) > 0
+
+    - name: Retry the repo-managed Keycloak admin client token endpoint with the live PostgreSQL-backed secret
+      ansible.builtin.uri:
+        url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
+        method: POST
+        timeout: "{{ keycloak_admin_connection_timeout }}"
+        body_format: form-urlencoded
+        body:
+          grant_type: client_credentials
+          client_id: "{{ keycloak_admin_client_id }}"
+          client_secret: "{{ keycloak_admin_client_secret_live }}"
+        return_content: true
+        status_code:
+          - 200
+          - 400
+          - 401
+          - 403
+          - 500
+      register: keycloak_admin_client_live_secret_token_probe
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: (keycloak_admin_client_live_secret_token_probe.status | default(0)) in [200, 400, 401, 403]
+      changed_when: false
+      failed_when: (keycloak_admin_client_live_secret_token_probe.status | default(0)) != 200
+      no_log: true
+      when: (keycloak_admin_client_secret_live | default('') | length) > 0
+
+    - name: Retry the authenticated Keycloak admin realm query with the live PostgreSQL-backed secret
+      ansible.builtin.uri:
+        url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ keycloak_admin_client_live_secret_token_probe.json.access_token }}"
+        return_content: true
+        status_code:
+          - 200
+          - 403
+          - 404
+      register: keycloak_admin_client_live_secret_realm_probe
+      retries: "{{ keycloak_startup_probe_retries }}"
+      delay: "{{ keycloak_startup_probe_delay }}"
+      until: (keycloak_admin_client_live_secret_realm_probe.status | default(0)) in [200, 403, 404]
+      changed_when: false
+      failed_when: (keycloak_admin_client_live_secret_realm_probe.status | default(0)) == 403
+      no_log: true
+      when: (keycloak_admin_client_live_secret_token_probe.status | default(0)) == 200
+
+    - name: Reconcile the repo-managed Keycloak admin client using the live PostgreSQL-backed secret
+      ansible.builtin.include_tasks: reconcile_admin_client.yml
+      vars:
+        keycloak_admin_bootstrap_auth_realm: master
+        keycloak_admin_bootstrap_auth_client_id: "{{ keycloak_admin_client_id }}"
+        keycloak_admin_bootstrap_auth_client_secret: "{{ keycloak_admin_client_secret_live }}"
+      when: (keycloak_admin_client_live_secret_realm_probe.status | default(403)) in [200, 404]
+
+    - name: Record whether bootstrap admin recovery is still required after runtime and live-secret recovery
+      ansible.builtin.set_fact:
+        keycloak_admin_bootstrap_fallback_required: >-
+          {{
+            (keycloak_admin_access_realm_probe_recovery.status | default(403)) not in [200, 404]
+            and (keycloak_admin_client_live_secret_realm_probe.status | default(403)) not in [200, 404]
+          }}
+
+    - name: Recover repo-managed Keycloak admin access with bootstrap credentials when runtime recovery is insufficient
+      when: keycloak_admin_bootstrap_fallback_required | bool
+      block:
+        - name: Try the Keycloak bootstrap admin token endpoint as a fallback admin bootstrap path
+          ansible.builtin.uri:
+            url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
+            method: POST
+            body_format: form-urlencoded
+            body:
+              grant_type: password
+              client_id: admin-cli
+              username: "{{ keycloak_bootstrap_admin_username }}"
+              password: "{{ keycloak_bootstrap_admin_password }}"
+            return_content: true
+            status_code:
+              - 200
+              - 400
+              - 401
+              - 500
+          register: keycloak_bootstrap_admin_token_probe
+          changed_when: false
+          no_log: true
+
+        - name: Reconcile the repo-managed Keycloak admin client using the bootstrap admin fallback credentials
+          ansible.builtin.include_tasks: reconcile_admin_client.yml
+          vars:
+            keycloak_admin_bootstrap_auth_realm: master
+            keycloak_admin_bootstrap_auth_client_id: admin-cli
+            keycloak_admin_bootstrap_auth_username: "{{ keycloak_bootstrap_admin_username }}"
+            keycloak_admin_bootstrap_auth_password: "{{ keycloak_bootstrap_admin_password }}"
+          when: (keycloak_bootstrap_admin_token_probe.status | default(0)) == 200
+
+        - name: Stop the Keycloak service before offline admin recovery
+          ansible.builtin.command:
+            argv:
+              - docker
+              - compose
+              - --file
+              - "{{ keycloak_compose_file }}"
+              - stop
+              - keycloak
+          args:
+            chdir: "{{ keycloak_site_dir }}"
+          register: keycloak_admin_recovery_stop
+          changed_when: >-
+            'Stopping' in (keycloak_admin_recovery_stop.stdout | default(''))
+            or 'Stopped' in (keycloak_admin_recovery_stop.stdout | default(''))
+          when: (keycloak_bootstrap_admin_token_probe.status | default(0)) != 200
+
+        - name: Bootstrap the temporary Keycloak recovery admin service account while Keycloak is stopped
+          ansible.builtin.shell: |
+            set -euo pipefail
+            export KEYCLOAK_RECOVERY_ADMIN_SERVICE_CLIENT_SECRET="{{ keycloak_recovery_admin_service_secret }}"
+            docker compose --file "{{ keycloak_compose_file }}" run --rm --no-deps \
+              -e KEYCLOAK_RECOVERY_ADMIN_SERVICE_CLIENT_SECRET \
+              keycloak bootstrap-admin service --no-prompt \
+              --client-id "{{ keycloak_recovery_admin_service_client_id }}" \
+              --client-secret:env KEYCLOAK_RECOVERY_ADMIN_SERVICE_CLIENT_SECRET
+          args:
+            chdir: "{{ keycloak_site_dir }}"
+            executable: /bin/bash
+          register: keycloak_recovery_admin_service_bootstrap
+          retries: 3
+          delay: 5
+          until: keycloak_recovery_admin_service_bootstrap.rc == 0
+          changed_when: false
+          no_log: true
+          when: (keycloak_bootstrap_admin_token_probe.status | default(0)) != 200
+
+        - name: Start the Keycloak service after offline admin recovery bootstrap
+          ansible.builtin.command:
+            argv:
+              - docker
+              - compose
+              - --file
+              - "{{ keycloak_compose_file }}"
+              - up
+              - -d
+              - --no-deps
+              - keycloak
+          args:
+            chdir: "{{ keycloak_site_dir }}"
+          register: keycloak_admin_recovery_up
+          changed_when: >-
+            'Creating' in (keycloak_admin_recovery_up.stdout | default(''))
+            or 'Recreating' in (keycloak_admin_recovery_up.stdout | default(''))
+            or 'Starting' in (keycloak_admin_recovery_up.stdout | default(''))
+          when: (keycloak_bootstrap_admin_token_probe.status | default(0)) != 200
+
+        - name: Wait for the Keycloak management port after offline admin recovery
+          ansible.builtin.wait_for:
+            host: 127.0.0.1
+            port: "{{ keycloak_local_management_port }}"
+            delay: 0
+            timeout: 240
+          when: (keycloak_bootstrap_admin_token_probe.status | default(0)) != 200
+
+        - name: Wait for the Keycloak readiness endpoint after offline admin recovery
+          ansible.builtin.uri:
+            url: "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
+            method: GET
+            status_code: 200
+          register: keycloak_recovery_admin_service_health_ready
+          retries: "{{ keycloak_startup_probe_retries }}"
+          delay: "{{ keycloak_startup_probe_delay }}"
+          until: keycloak_recovery_admin_service_health_ready.status == 200
+          changed_when: false
+          when: (keycloak_bootstrap_admin_token_probe.status | default(0)) != 200
+
+        - name: Wait for the Keycloak admin API after offline admin recovery
+          ansible.builtin.uri:
+            url: "{{ keycloak_local_admin_url }}/realms/master/.well-known/openid-configuration"
+            method: GET
+            status_code: 200
+          register: keycloak_recovery_admin_service_openid_config
+          retries: "{{ keycloak_startup_probe_retries }}"
+          delay: "{{ keycloak_startup_probe_delay }}"
+          until: keycloak_recovery_admin_service_openid_config.status == 200
+          changed_when: false
+          when: (keycloak_bootstrap_admin_token_probe.status | default(0)) != 200
+
+        - name: Request the temporary Keycloak recovery admin service token
+          ansible.builtin.uri:
+            url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
+            method: POST
+            body_format: form-urlencoded
+            body:
+              grant_type: client_credentials
+              client_id: "{{ keycloak_recovery_admin_service_client_id }}"
+              client_secret: "{{ keycloak_recovery_admin_service_secret }}"
+            return_content: true
+            status_code:
+              - 200
+              - 400
+              - 401
+              - 403
+              - 500
+          register: keycloak_recovery_admin_service_token_probe
+          retries: "{{ keycloak_startup_probe_retries }}"
+          delay: "{{ keycloak_startup_probe_delay }}"
+          until: (keycloak_recovery_admin_service_token_probe.status | default(0)) in [200, 400, 401, 403]
+          changed_when: false
+          failed_when: false
+          no_log: true
+          when: (keycloak_bootstrap_admin_token_probe.status | default(0)) != 200
+
+        - name: Read the live temporary Keycloak recovery admin secret directly from PostgreSQL when file-based recovery auth fails
+          ansible.builtin.command:
+            argv:
+              - psql
+              - -d
+              - "{{ keycloak_database_name }}"
+              - -At
+              - -v
+              - ON_ERROR_STOP=1
+              - -c
+              - "SELECT secret FROM client WHERE client_id = '{{ keycloak_recovery_admin_service_client_id }}';"
+          delegate_to: "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+          become: true
+          become_user: postgres
+          register: keycloak_recovery_admin_service_live_secret_query
+          changed_when: false
+          failed_when: false
+          no_log: true
+          when:
+            - (keycloak_bootstrap_admin_token_probe.status | default(0)) != 200
+            - (keycloak_recovery_admin_service_token_probe.status | default(0)) != 200
+
+        - name: Record the live temporary Keycloak recovery admin secret from PostgreSQL when available
+          ansible.builtin.set_fact:
+            keycloak_recovery_admin_service_secret_live: "{{ keycloak_recovery_admin_service_live_secret_query.stdout | trim }}"
+          no_log: true
+          when:
+            - (keycloak_bootstrap_admin_token_probe.status | default(0)) != 200
+            - (keycloak_recovery_admin_service_live_secret_query.stdout | default('') | trim | length) > 0
+
+        - name: Retry the temporary Keycloak recovery admin service token endpoint with the live PostgreSQL-backed secret
+          ansible.builtin.uri:
+            url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
+            method: POST
+            body_format: form-urlencoded
+            body:
+              grant_type: client_credentials
+              client_id: "{{ keycloak_recovery_admin_service_client_id }}"
+              client_secret: "{{ keycloak_recovery_admin_service_secret_live }}"
+            return_content: true
+            status_code:
+              - 200
+              - 400
+              - 401
+              - 403
+              - 500
+          register: keycloak_recovery_admin_service_live_secret_token_probe
+          retries: "{{ keycloak_startup_probe_retries }}"
+          delay: "{{ keycloak_startup_probe_delay }}"
+          until: (keycloak_recovery_admin_service_live_secret_token_probe.status | default(0)) in [200, 400, 401, 403]
+          changed_when: false
+          failed_when: false
+          no_log: true
+          when:
+            - (keycloak_bootstrap_admin_token_probe.status | default(0)) != 200
+            - (keycloak_recovery_admin_service_secret_live | default('') | length) > 0
+
+        - name: Select the temporary Keycloak recovery admin secret that can authenticate
+          ansible.builtin.set_fact:
+            keycloak_recovery_admin_service_auth_client_secret: >-
+              {{
+                keycloak_recovery_admin_service_secret
+                if (keycloak_recovery_admin_service_token_probe.status | default(0)) == 200
+                else keycloak_recovery_admin_service_secret_live
+              }}
+          no_log: true
+          when:
+            - (keycloak_bootstrap_admin_token_probe.status | default(0)) != 200
+            - >-
+              (keycloak_recovery_admin_service_token_probe.status | default(0)) == 200
+              or (keycloak_recovery_admin_service_live_secret_token_probe.status | default(0)) == 200
+
+        - name: Reconcile the repo-managed Keycloak admin client using the temporary recovery admin service credentials
+          ansible.builtin.include_tasks: reconcile_admin_client.yml
+          vars:
+            keycloak_admin_bootstrap_auth_realm: master
+            keycloak_admin_bootstrap_auth_client_id: "{{ keycloak_recovery_admin_service_client_id }}"
+            keycloak_admin_bootstrap_auth_client_secret: "{{ keycloak_recovery_admin_service_auth_client_secret }}"
+          when:
+            - (keycloak_bootstrap_admin_token_probe.status | default(0)) != 200
+            - (keycloak_recovery_admin_service_auth_client_secret | default('') | length) > 0
+
+        - name: Remove the temporary Keycloak recovery admin service account now that permanent admin access is back
+          community.general.keycloak_client:
+            realm: master
+            client_id: "{{ keycloak_recovery_admin_service_client_id }}"
+            state: absent
+            auth_client_id: "{{ keycloak_admin_client_id }}"
+            auth_client_secret: "{{ keycloak_admin_client_secret }}"
+            auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+            auth_realm: master
+            validate_certs: false
+          register: keycloak_recovery_admin_service_client_absent
+          retries: "{{ keycloak_admin_reconciliation_retries }}"
+          delay: "{{ keycloak_admin_reconciliation_delay }}"
+          until: keycloak_recovery_admin_service_client_absent is succeeded
+          when: (keycloak_bootstrap_admin_token_probe.status | default(0)) != 200
+
+- name: Reconfirm the repo-managed Keycloak admin client token endpoint after bootstrap or recovery
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      grant_type: client_credentials
+      client_id: "{{ keycloak_admin_client_id }}"
+      client_secret: "{{ keycloak_admin_client_secret }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_admin_client_token_probe_confirmed
+  retries: "{{ keycloak_startup_probe_retries }}"
+  delay: "{{ keycloak_startup_probe_delay }}"
+  until: keycloak_admin_client_token_probe_confirmed.status == 200
+  changed_when: false
+  no_log: true
+
+- name: Wait for an authenticated Keycloak admin realm query to answer
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_client_token_probe_confirmed.json.access_token }}"
+    return_content: true
+    status_code:
+      - 200
+      - 403
+      - 404
+  register: keycloak_admin_realm_probe
+  retries: "{{ keycloak_startup_probe_retries }}"
+  delay: "{{ keycloak_startup_probe_delay }}"
+  until: (keycloak_admin_realm_probe.status | default(0)) in [200, 403, 404]
+  changed_when: false
+  failed_when: (keycloak_admin_realm_probe.status | default(0)) == 403
+  no_log: true
+
+- name: Allow the Keycloak admin API to settle after the first authenticated admin-client probe
+  ansible.builtin.pause:
+    seconds: "{{ keycloak_startup_probe_delay }}"
+  changed_when: false
+
+- name: Reconfirm the repo-managed Keycloak admin client token endpoint after the settle window
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      grant_type: client_credentials
+      client_id: "{{ keycloak_admin_client_id }}"
+      client_secret: "{{ keycloak_admin_client_secret }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_admin_client_token_probe_stable
+  retries: "{{ keycloak_startup_probe_retries }}"
+  delay: "{{ keycloak_startup_probe_delay }}"
+  until: keycloak_admin_client_token_probe_stable.status == 200
+  changed_when: false
+  no_log: true
+
+- name: Reconfirm an authenticated Keycloak admin realm query after the settle window
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_client_token_probe_stable.json.access_token }}"
+    return_content: true
+    status_code:
+      - 200
+      - 403
+      - 404
+  register: keycloak_admin_realm_probe_confirmed
+  retries: "{{ keycloak_startup_probe_retries }}"
+  delay: "{{ keycloak_startup_probe_delay }}"
+  until: (keycloak_admin_realm_probe_confirmed.status | default(0)) in [200, 403, 404]
+  changed_when: false
+  failed_when: (keycloak_admin_realm_probe_confirmed.status | default(0)) == 403
+  no_log: true
 
 - name: Verify Keycloak resolves the internal mail-platform relay host
   ansible.builtin.command:
@@ -1067,6 +1594,11 @@
   module_defaults:
     group/community.general.keycloak:
       connection_timeout: "{{ keycloak_admin_connection_timeout }}"
+      auth_client_id: "{{ keycloak_admin_client_id }}"
+      auth_client_secret: "{{ keycloak_admin_client_secret }}"
+      auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+      auth_realm: master
+      validate_certs: false
   block:
     - name: Ensure the LV3 realm exists
       community.general.keycloak_realm:
@@ -1087,12 +1619,6 @@
         sso_session_max_lifespan: 43200
         smtp_server: "{{ keycloak_realm_smtp_server }}"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_realm_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1104,12 +1630,6 @@
         name: "{{ item.name }}"
         attributes: "{{ item.attributes }}"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       loop: "{{ keycloak_realm_groups }}"
       loop_control:
         label: "{{ item.name }}"
@@ -1126,12 +1646,6 @@
         composite: "{{ (item.composites | default([])) | length > 0 }}"
         composites: "{{ item.composites | default([]) }}"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       loop: "{{ keycloak_realm_roles }}"
       loop_control:
         label: "{{ item.name }}"
@@ -1146,12 +1660,6 @@
         group_name: "{{ item.group_name }}"
         roles: "{{ item.roles }}"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       loop: "{{ keycloak_group_realm_role_mappings }}"
       loop_control:
         label: "{{ item.group_name }}"
@@ -1194,12 +1702,6 @@
               access.token.claim: "true"
               userinfo.token.claim: "true"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_grafana_client_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1239,12 +1741,6 @@
               access.token.claim: "true"
               userinfo.token.claim: "true"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_ops_portal_client_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1286,12 +1782,6 @@
               access.token.claim: "true"
               userinfo.token.claim: "true"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_gitea_client_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1321,12 +1811,6 @@
         web_origins:
           - "{{ keycloak_open_webui_root_url }}"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_open_webui_client_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1348,12 +1832,6 @@
         service_accounts_enabled: true
         full_scope_allowed: true
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_agent_client_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1385,12 +1863,6 @@
         web_origins:
           - "{{ keycloak_langfuse_root_url }}"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_langfuse_client_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1428,12 +1900,6 @@
               access.token.claim: "true"
               userinfo.token.claim: "true"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_directus_client_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1473,12 +1939,6 @@
               access.token.claim: "true"
               userinfo.token.claim: "true"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_outline_client_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1518,12 +1978,6 @@
               access.token.claim: "true"
               userinfo.token.claim: "true"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_paperless_client_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1562,12 +2016,6 @@
               access.token.claim: "true"
               userinfo.token.claim: "true"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_jupyterhub_client_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1607,12 +2055,6 @@
               access.token.claim: "true"
               userinfo.token.claim: "true"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_superset_client_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1652,12 +2094,6 @@
               access.token.claim: "true"
               userinfo.token.claim: "true"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_serverclaw_client_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1697,12 +2133,6 @@
               access.token.claim: "true"
               userinfo.token.claim: "true"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_grist_client_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1724,12 +2154,6 @@
         service_accounts_enabled: true
         full_scope_allowed: false
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_api_gateway_client_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1751,12 +2175,6 @@
         service_accounts_enabled: false
         full_scope_allowed: false
         state: absent
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_serverclaw_operator_cli_client_absent
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1778,12 +2196,6 @@
         service_accounts_enabled: true
         full_scope_allowed: true
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_serverclaw_runtime_client_reconcile
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1795,12 +2207,6 @@
         service_account_user_client_id: "{{ item.service_account_user_client_id }}"
         roles: "{{ item.roles }}"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       loop: "{{ keycloak_service_account_realm_role_mappings }}"
       loop_control:
         label: "{{ item.service_account_user_client_id }}"
@@ -1813,12 +2219,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_grafana_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_grafana_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1829,12 +2229,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_ops_portal_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_ops_portal_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1845,12 +2239,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_gitea_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_gitea_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1861,12 +2249,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_open_webui_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_open_webui_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1877,12 +2259,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_agent_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_agent_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1893,12 +2269,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_langfuse_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_langfuse_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1909,12 +2279,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_directus_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_directus_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1925,12 +2289,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_grist_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_grist_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1941,12 +2299,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_glitchtip_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_glitchtip_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1957,12 +2309,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_outline_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_outline_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1973,12 +2319,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_jupyterhub_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_jupyterhub_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -1989,12 +2329,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_paperless_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_paperless_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -2005,12 +2339,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_superset_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_superset_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -2021,12 +2349,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_serverclaw_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_serverclaw_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -2037,12 +2359,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_api_gateway_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_api_gateway_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -2053,12 +2369,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_serverclaw_runtime_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_serverclaw_runtime_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
@@ -2316,27 +2626,28 @@
       changed_when: false
       when: keycloak_repo_user_reconciliation_retryable | bool
 
-    - name: Wait for the Keycloak bootstrap admin token endpoint after repo-managed user reconciliation recovery
+    - name: Wait for the repo-managed Keycloak admin client token endpoint after repo-managed user reconciliation recovery
       ansible.builtin.uri:
         url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
         method: POST
         body_format: form-urlencoded
         body:
-          grant_type: password
-          client_id: admin-cli
-          username: "{{ keycloak_bootstrap_admin_username }}"
-          password: "{{ keycloak_bootstrap_admin_password }}"
+          grant_type: client_credentials
+          client_id: "{{ keycloak_admin_client_id }}"
+          client_secret: "{{ keycloak_admin_client_secret }}"
         return_content: true
         status_code:
           - 200
           - 400
           - 401
+          - 403
           - 500
-      register: keycloak_repo_user_reconciliation_bootstrap_admin_token_probe
+      register: keycloak_repo_user_reconciliation_admin_client_token_probe
       retries: "{{ keycloak_startup_probe_retries }}"
       delay: "{{ keycloak_startup_probe_delay }}"
-      until: keycloak_repo_user_reconciliation_bootstrap_admin_token_probe.status == 200
+      until: (keycloak_repo_user_reconciliation_admin_client_token_probe.status | default(0)) in [200, 400, 401, 403]
       changed_when: false
+      failed_when: (keycloak_repo_user_reconciliation_admin_client_token_probe.status | default(0)) != 200
       no_log: true
       when: keycloak_repo_user_reconciliation_retryable | bool
 
@@ -2345,16 +2656,18 @@
         url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
         method: GET
         headers:
-          Authorization: "Bearer {{ keycloak_repo_user_reconciliation_bootstrap_admin_token_probe.json.access_token }}"
+          Authorization: "Bearer {{ keycloak_repo_user_reconciliation_admin_client_token_probe.json.access_token }}"
         return_content: true
         status_code:
           - 200
+          - 403
           - 404
       register: keycloak_repo_user_reconciliation_admin_realm_probe
       retries: "{{ keycloak_startup_probe_retries }}"
       delay: "{{ keycloak_startup_probe_delay }}"
-      until: keycloak_repo_user_reconciliation_admin_realm_probe.status in [200, 404]
+      until: (keycloak_repo_user_reconciliation_admin_realm_probe.status | default(0)) in [200, 403, 404]
       changed_when: false
+      failed_when: (keycloak_repo_user_reconciliation_admin_realm_probe.status | default(0)) == 403
       no_log: true
       when: keycloak_repo_user_reconciliation_retryable | bool
 

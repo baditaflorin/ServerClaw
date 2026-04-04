@@ -194,6 +194,7 @@
     owner: root
     group: root
     mode: "0644"
+    unsafe_writes: true
   loop: "{{ ops_portal_source_files.files | sort(attribute='path') }}"
   loop_control:
     label: "{{ item.path | replace(ops_portal_repo_root ~ '/scripts/ops_portal/', '') }}"
@@ -207,7 +208,18 @@
     mode: "0755"
   loop: "{{ ops_portal_runtime_overlay_directories }}"
 
-- name: Ensure the critical ops portal runtime file parent directories exist
+- name: Gather controller checksums for explicit ops portal runtime files
+  ansible.builtin.stat:
+    path: "{{ item.src }}"
+    checksum_algorithm: sha1
+  loop: "{{ ops_portal_runtime_file_sources }}"
+  register: ops_portal_runtime_file_checksums
+  delegate_to: localhost
+  become: false
+  loop_control:
+    label: "{{ item.dest | replace(ops_portal_service_dir ~ '/', '') }}"
+
+- name: Ensure the parent directories for explicit ops portal runtime files exist
   ansible.builtin.file:
     path: "{{ item.dest | dirname }}"
     state: directory
@@ -220,14 +232,16 @@
 
 - name: Sync critical ops portal runtime files explicitly
   ansible.builtin.copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+    src: "{{ item.item.src }}"
+    dest: "{{ item.item.dest }}"
+    checksum: "{{ item.stat.checksum }}"
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ ops_portal_runtime_file_sources }}"
+    unsafe_writes: true
+  loop: "{{ ops_portal_runtime_file_checksums.results }}"
   loop_control:
-    label: "{{ item.dest | replace(ops_portal_service_dir ~ '/', '') }}"
+    label: "{{ item.item.dest | replace(ops_portal_service_dir ~ '/', '') }}"
 
 - name: Reset the synced search fabric package tree before refresh
   ansible.builtin.file:
@@ -371,24 +385,45 @@
   become: false
 
 - name: Ensure the synced ops portal directory-backed data subdirectories exist
-  ansible.builtin.file:
-    path: "{{ (item.0.item.dest ~ (item.1.path | replace(item.0.item.src, ''))) | dirname }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-  loop: "{{ ops_portal_directory_source_files.results | subelements('files', skip_missing=True) }}"
-  loop_control:
-    label: >-
-      {{ ((item.0.item.dest ~ (item.1.path | replace(item.0.item.src, ''))) | dirname)
-      | replace(ops_portal_data_dir ~ '/', '') }}
-  when: >-
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - |
+        import json
+        import os
+        import sys
+
+        created_paths = []
+        seen_paths = set()
+        for result in json.load(sys.stdin):
+            item = result.get("item") or {}
+            src = item.get("src", "")
+            dest = item.get("dest", "")
+            excludes = set(item.get("excludes") or [])
+            for file_entry in result.get("files") or []:
+                file_path = file_entry.get("path", "")
+                if not file_path or any(part in excludes for part in file_path.split("/")):
+                    continue
+                target_dir = os.path.dirname(dest + file_path.replace(src, "", 1))
+                if not target_dir or target_dir in seen_paths:
+                    continue
+                seen_paths.add(target_dir)
+                existed = os.path.isdir(target_dir)
+                os.makedirs(target_dir, mode=0o755, exist_ok=True)
+                os.chown(target_dir, 0, 0)
+                os.chmod(target_dir, 0o755)
+                if not existed:
+                    created_paths.append(target_dir)
+
+        print(json.dumps({"created": created_paths}))
+    stdin: "{{ ops_portal_directory_source_files.results | to_json }}"
+  register: ops_portal_directory_backed_data_subdirectories
+  changed_when: >-
     (
-      item.0.item.excludes | default([])
-      | select('in', item.1.path.split('/'))
-      | list
+      (ops_portal_directory_backed_data_subdirectories.stdout | from_json).created
       | length
-    ) == 0
+    ) > 0
 
 - name: Sync the ops portal directory-backed data source files
   ansible.builtin.copy:

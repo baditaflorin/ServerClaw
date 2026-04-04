@@ -17,23 +17,19 @@ ROLE_TASKS_PATH = (
 )
 
 
-def test_ops_portal_playbook_resolves_repo_root_from_the_git_worktree() -> None:
+def test_ops_portal_playbook_does_not_override_repo_root() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
     play = plays[0]
-    repo_root_expr = play["vars"]["ops_portal_repo_root"]
-
-    assert "ansible.builtin.pipe" in repo_root_expr
-    assert "git -C " in repo_root_expr
-    assert "(playbook_dir | quote)" in repo_root_expr
-    assert "rev-parse --show-toplevel" in repo_root_expr
-    assert "| trim" in repo_root_expr
+    assert "ops_portal_repo_root" not in play.get("vars", {})
 
 
-def test_ops_portal_playbook_enables_bridge_chain_recovery_on_shared_docker_runtime() -> None:
+def test_ops_portal_playbook_enables_docker_bridge_chain_recovery() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
-    play = plays[0]
 
-    assert play["vars"]["linux_guest_firewall_recover_missing_docker_bridge_chains"] is True
+    assert plays[0]["roles"][0] == {
+        "role": "lv3.platform.linux_guest_firewall",
+        "vars": {"linux_guest_firewall_recover_missing_docker_bridge_chains": True},
+    }
 
 
 def test_ops_portal_runtime_clears_previous_build_context_before_sync() -> None:
@@ -70,12 +66,20 @@ def test_ops_portal_runtime_removes_macos_metadata_sidecars_after_sync() -> None
 
 def test_ops_portal_runtime_retries_local_health_and_root_checks() -> None:
     tasks = yaml.safe_load((ROLE_TASKS_PATH / "verify.yml").read_text())
+    running_task = next(task for task in tasks if task["name"] == "Verify the ops portal container is running")
     health_task = next(task for task in tasks if task["name"] == "Verify the ops portal health endpoint responds locally")
     root_task = next(task for task in tasks if task["name"] == "Verify the ops portal root page renders locally")
     root_assert = next(
         task for task in tasks if task["name"] == "Assert the contextual help drawer is present on the ops portal root page"
     )
     attention_task = next(task for task in tasks if task["name"] == "Verify the attention center partial renders locally")
+
+    assert running_task["retries"] == 20
+    assert running_task["delay"] == 3
+    assert (
+        running_task["until"]
+        == "ops_portal_verify_running.stdout_lines | select('equalto', ops_portal_container_name) | list | length == 1"
+    )
 
     assert health_task["retries"] == 20
     assert health_task["delay"] == 3

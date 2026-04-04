@@ -36,6 +36,10 @@ keycloak_local_http_port: 18080
 keycloak_local_management_port: 19000
 keycloak_bootstrap_admin_username: lv3-bootstrap-admin
 keycloak_bootstrap_admin_password_remote_file: "{{ keycloak_secret_dir }}/bootstrap-admin-password"
+keycloak_admin_client_id: lv3-admin-runtime
+keycloak_admin_client_secret_remote_file: "{{ keycloak_secret_dir }}/admin-client-secret"
+keycloak_recovery_admin_service_client_id: lv3-recovery-admin
+keycloak_recovery_admin_service_secret_remote_file: "{{ keycloak_secret_dir }}/recovery-admin-service-secret"
 keycloak_operator_username: florin.badita
 keycloak_operator_first_name: Florin
 keycloak_operator_last_name: Badita
@@ -48,6 +52,7 @@ keycloak_outline_automation_email: outline.automation@lv3.org
 keycloak_outline_automation_password_remote_file: "{{ keycloak_secret_dir }}/outline.automation-password"
 keycloak_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak
 keycloak_bootstrap_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/bootstrap-admin-password.txt
+keycloak_admin_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/admin-client-secret.txt
 keycloak_operator_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-password.txt
 keycloak_outline_automation_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt
 keycloak_mail_platform_submission_username: "{{ smtp_username }}"

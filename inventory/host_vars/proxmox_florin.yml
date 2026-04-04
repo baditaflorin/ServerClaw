@@ -1166,27 +1166,30 @@ network_policy:
           ports:
             - 1587
             - 4222
+            - 9000
             - 8081
             - 8091
             - 8098
             - 9080
-          description: Private guest-to-guest access to the control-plane mail relay, event bus, identity, authz, and runtime-control router
+          description: Private guest-to-guest access to the control-plane mail relay, step-ca, event bus, identity, authz, and runtime-control router
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
             - 1587
             - 4222
+            - 9000
             - 8091
             - 9080
-          description: Local Docker workloads using the runtime-control mail relay, NATS listener, Keycloak API, and Traefik router
+          description: Local Docker workloads using the runtime-control mail relay, step-ca, NATS listener, Keycloak API, and Traefik router
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
             - 1587
             - 4222
+            - 9000
             - 8091
             - 9080
-          description: Local Docker workloads using the runtime-control mail relay, NATS listener, Keycloak API, and Traefik router
+          description: Local Docker workloads using the runtime-control mail relay, step-ca, NATS listener, Keycloak API, and Traefik router
         - source: docker-build-lv3
           protocol: tcp
           ports:
@@ -1422,6 +1425,11 @@ network_policy:
           ports:
             - 5432
           description: Host-side PostgreSQL TCP proxy
+        - source: runtime-control-lv3
+          protocol: tcp
+          ports:
+            - 5432
+          description: OpenBao and runtime-control services on the dedicated control pool
         - source: docker-runtime-lv3
           protocol: tcp
           ports:

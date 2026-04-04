@@ -86,10 +86,12 @@ class FakeGatewayClient:
         self.runtime_assurance_tokens: list[str | None] = []
         self.agent_coordination_tokens: list[str | None] = []
         self.runbook_fetch_tokens: list[str | None] = []
+        self.runbook_task_fetch_tokens: list[str | None] = []
         self.service_health_calls: list[dict[str, object]] = []
         self.deploy_calls: list[dict[str, object]] = []
         self.secret_calls: list[str] = []
         self.runbook_calls: list[dict[str, object]] = []
+        self.runbook_resume_calls: list[dict[str, object]] = []
         self.search_calls: list[dict[str, object]] = []
 
     async def fetch_platform_health(self, token: str | None = None) -> dict[str, object]:
@@ -285,7 +287,61 @@ class FakeGatewayClient:
         parameters: dict[str, object] | None = None,
     ) -> dict[str, object]:
         self.runbook_calls.append({"runbook_id": runbook_id, "parameters": parameters or {}, "token": token})
-        return {"status": "completed", "message": "Runbook completed successfully"}
+        return {
+            "status": "completed",
+            "message": "Runbook completed successfully",
+            "run_id": "runbook-1",
+            "task_path": "/tasks/runbooks/runbook-1",
+        }
+
+    async def fetch_runbook_tasks(
+        self,
+        *,
+        token: str | None = None,
+        delivery_surface: str = "ops_portal",
+        limit: int = 12,
+        statuses: list[str] | None = None,
+    ) -> dict[str, object]:
+        self.runbook_task_fetch_tokens.append(token)
+        return {"tasks": []}
+
+    async def fetch_runbook_task(self, run_id: str, *, token: str | None = None) -> dict[str, object]:
+        self.runbook_task_fetch_tokens.append(token)
+        return {
+            "run_id": run_id,
+            "runbook_id": "validation-gate-status",
+            "status": "completed",
+            "reentry": {
+                "run_id": run_id,
+                "runbook_id": "validation-gate-status",
+                "runbook_title": "Inspect validation gate status",
+                "status": "completed",
+                "resume_available": False,
+                "portal_path": f"/tasks/runbooks/{run_id}",
+                "progress": {"completed_steps": 1, "total_steps": 1, "percent": 100},
+                "summary": {
+                    "headline": "Completed Inspect validation gate status",
+                    "what_happened": "All 1 steps completed successfully.",
+                    "next_human_action": "Review the evidence below.",
+                    "last_safe_resume_point": {"message": "After summarize-gate at 2026-03-25T09:02:00Z"},
+                    "next_step": None,
+                    "next_irreversible_step": None,
+                    "mutation_state": "No committed mutation step has succeeded yet.",
+                },
+                "params": {},
+                "evidence": [],
+                "activity": [],
+            },
+        }
+
+    async def resume_runbook_task(self, run_id: str, *, token: str | None = None) -> dict[str, object]:
+        self.runbook_resume_calls.append({"run_id": run_id, "token": token})
+        return {
+            "status": "completed",
+            "message": "Runbook resumed successfully",
+            "run_id": run_id,
+            "task_path": f"/tasks/runbooks/{run_id}",
+        }
 
     async def search(
         self,
@@ -1369,9 +1425,197 @@ def test_runbook_action_accepts_json_parameters(portal_client: tuple[TestClient,
 
     assert response.status_code == 200
     assert "Runbook completed successfully" in response.text
+    assert "/tasks/runbooks/runbook-1" in response.text
     assert gateway.runbook_calls == [
         {"runbook_id": "validation-gate-status", "parameters": {"service": "grafana"}, "token": "test-token"}
     ]
+
+
+def test_dashboard_renders_return_to_task_panel(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, gateway = portal_client
+
+    async def task_payload(
+        *,
+        token: str | None = None,
+        delivery_surface: str = "ops_portal",
+        limit: int = 12,
+        statuses: list[str] | None = None,
+    ) -> dict[str, object]:
+        gateway.runbook_task_fetch_tokens.append(token)
+        return {
+            "tasks": [
+                {
+                    "run_id": "runbook-2",
+                    "runbook_id": "validation-gate-status",
+                    "runbook_title": "Inspect validation gate status",
+                    "status": "escalated",
+                    "attention_required": True,
+                    "resume_available": True,
+                    "portal_path": "/tasks/runbooks/runbook-2",
+                    "summary": {
+                        "headline": "Paused at summarize-gate",
+                        "what_happened": "Validation gate review paused for confirmation.",
+                        "next_human_action": "Inspect the evidence and resume when safe.",
+                        "last_safe_resume_point": {"message": "After summarize-gate at 2026-03-25T09:02:00Z"},
+                        "next_step": {"label": "summarize-gate"},
+                        "next_irreversible_step": None,
+                        "mutation_state": "No committed mutation step has succeeded yet.",
+                    },
+                    "progress": {"completed_steps": 1, "total_steps": 2, "percent": 50},
+                    "activity": [
+                        {
+                            "title": "Task resumed",
+                            "detail": "Resumed by operator:test-user.",
+                            "timestamp": "2026-03-25T09:03:00Z",
+                            "portal_path": "/tasks/runbooks/runbook-2",
+                            "status": "resumed",
+                        }
+                    ],
+                }
+            ]
+        }
+
+    gateway.fetch_runbook_tasks = task_payload  # type: ignore[method-assign]
+
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "Return To Task" in response.text
+    assert "Paused at summarize-gate" in response.text
+    assert "Recent task state changes" in response.text
+    assert gateway.runbook_task_fetch_tokens == ["test-token"]
+
+
+def test_runbook_task_detail_renders_resume_summary(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, gateway = portal_client
+
+    async def task_detail(run_id: str, *, token: str | None = None) -> dict[str, object]:
+        gateway.runbook_task_fetch_tokens.append(token)
+        return {
+            "run_id": run_id,
+            "runbook_id": "validation-gate-status",
+            "status": "escalated",
+            "reentry": {
+                "run_id": run_id,
+                "runbook_id": "validation-gate-status",
+                "runbook_title": "Inspect validation gate status",
+                "status": "escalated",
+                "resume_available": True,
+                "portal_path": f"/tasks/runbooks/{run_id}",
+                "progress": {"completed_steps": 1, "total_steps": 2, "percent": 50},
+                "summary": {
+                    "headline": "Awaiting confirmation before capture-post-review-summary",
+                    "what_happened": "The task paused at a review checkpoint.",
+                    "next_human_action": "Review the saved evidence, then resume when ready.",
+                    "last_safe_resume_point": {"message": "After summarize-gate at 2026-03-25T09:02:00Z"},
+                    "next_step": {"label": "capture-post-review-summary"},
+                    "next_irreversible_step": None,
+                    "mutation_state": "No committed mutation step has succeeded yet.",
+                },
+                "params": {"service": "grafana"},
+                "evidence": [
+                    {
+                        "label": "summarize-gate",
+                        "status": "completed",
+                        "finished_at": "2026-03-25T09:02:00Z",
+                        "detail": "checks=0",
+                    }
+                ],
+                "activity": [
+                    {
+                        "title": "Task created",
+                        "detail": "Inspect validation gate status started from Ops Portal.",
+                        "timestamp": "2026-03-25T09:00:00Z",
+                    }
+                ],
+            },
+        }
+
+    gateway.fetch_runbook_task = task_detail  # type: ignore[method-assign]
+
+    response = client.get("/tasks/runbooks/runbook-2")
+
+    assert response.status_code == 200
+    assert "Awaiting confirmation before capture-post-review-summary" in response.text
+    assert "Resume task" in response.text
+    assert "Draft vs committed state" in response.text
+
+
+def test_return_to_task_partial_tolerates_incomplete_task_payload(
+    portal_client: tuple[TestClient, FakeGatewayClient],
+) -> None:
+    client, gateway = portal_client
+
+    async def task_payload(
+        *,
+        token: str | None = None,
+        delivery_surface: str = "ops_portal",
+        limit: int = 12,
+        statuses: list[str] | None = None,
+    ) -> dict[str, object]:
+        gateway.runbook_task_fetch_tokens.append(token)
+        return {
+            "tasks": [
+                {
+                    "run_id": "runbook-3",
+                    "runbook_id": "validation-gate-status",
+                    "status": "escalated",
+                    "attention_required": True,
+                    "portal_path": "/tasks/runbooks/runbook-3",
+                    "summary": {},
+                    "activity": [],
+                }
+            ]
+        }
+
+    gateway.fetch_runbook_tasks = task_payload  # type: ignore[method-assign]
+
+    response = client.get("/partials/tasks")
+
+    assert response.status_code == 200
+    assert "Needs your review" in response.text
+    assert "Paused validation-gate-status" in response.text
+    assert "Saved run state is available, but the last safe resume point was not recorded." in response.text
+
+
+def test_runbook_task_detail_tolerates_incomplete_reentry_payload(
+    portal_client: tuple[TestClient, FakeGatewayClient],
+) -> None:
+    client, gateway = portal_client
+
+    async def task_detail(run_id: str, *, token: str | None = None) -> dict[str, object]:
+        gateway.runbook_task_fetch_tokens.append(token)
+        return {
+            "run_id": run_id,
+            "runbook_id": "validation-gate-status",
+            "status": "escalated",
+            "reentry": {
+                "run_id": run_id,
+                "runbook_id": "validation-gate-status",
+                "status": "escalated",
+                "portal_path": f"/tasks/runbooks/{run_id}",
+                "summary": {},
+            },
+        }
+
+    gateway.fetch_runbook_task = task_detail  # type: ignore[method-assign]
+
+    response = client.get("/tasks/runbooks/runbook-3")
+
+    assert response.status_code == 200
+    assert "Draft vs committed state" in response.text
+    assert "Paused validation-gate-status" in response.text
+    assert "Saved run state is available, but the last safe resume point was not recorded." in response.text
+
+
+def test_resume_runbook_task_redirects_back_to_detail(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, gateway = portal_client
+
+    response = client.post("/tasks/runbooks/runbook-2/resume", follow_redirects=False)
+
+    assert response.status_code == 303
+    assert "/tasks/runbooks/runbook-2?notice=" in response.headers["location"]
+    assert gateway.runbook_resume_calls == [{"run_id": "runbook-2", "token": "test-token"}]
 
 
 def test_search_action_renders_results(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:

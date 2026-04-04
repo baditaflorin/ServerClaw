@@ -15,10 +15,27 @@
       - inventory_hostname in hostvars[linux_guest_firewall_host_id].network_policy.guests
     fail_msg: "linux_guest_firewall requires canonical host vars and a network policy entry for the current guest."
 
+- name: Inspect nftables package status on the guest
+  ansible.builtin.command:
+    argv:
+      - dpkg-query
+      - -W
+      - -f=${Status}
+      - nftables
+  register: linux_guest_firewall_nftables_package_status
+  changed_when: false
+  failed_when: false
+
+- name: Record whether nftables is missing on the guest
+  ansible.builtin.set_fact:
+    linux_guest_firewall_nftables_missing: >-
+      {{ linux_guest_firewall_nftables_package_status.stdout != "install ok installed" }}
+
 - name: Ensure nftables is installed on the guest
   ansible.builtin.apt:
     name: nftables
     state: present
+  when: linux_guest_firewall_nftables_missing | bool
 
 - name: Snapshot the canonical guest firewall policy inputs
   ansible.builtin.set_fact:
@@ -83,12 +100,14 @@
           - reset-failed
           - "{{ linux_guest_firewall_docker_bridge_chain_service_name }}.service"
       changed_when: false
+      become_flags: -n
       when: linux_guest_firewall_recover_missing_docker_bridge_chains | bool
 
     - name: Restart Docker to restore bridge chains after guest firewall evaluation
       ansible.builtin.service:
         name: "{{ linux_guest_firewall_docker_bridge_chain_service_name }}"
         state: restarted
+      become_flags: -n
       when: linux_guest_firewall_recover_missing_docker_bridge_chains | bool
 
     - name: Re-assert Docker bridge chains after guest firewall recovery restart

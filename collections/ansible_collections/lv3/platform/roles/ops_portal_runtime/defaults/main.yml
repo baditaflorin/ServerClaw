@@ -39,7 +39,59 @@ ops_portal_bind_address: 0.0.0.0
 ops_portal_container_port: "{{ ops_portal_internal_port }}"
 ops_portal_verify_address: "{{ ansible_host | default('127.0.0.1') }}"
 ops_portal_internal_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.ops_portal_port | default(8092) }}"
-ops_portal_gateway_url: http://127.0.0.1:{{ hostvars['proxmox_florin'].platform_port_assignments.api_gateway_internal_port | default(8083) }}
+ops_portal_gateway_substrate_owner_vm: runtime-control-lv3
+ops_portal_gateway_substrate_port: 9080
+ops_portal_gateway_substrate_path: /api-gateway
+ops_portal_gateway_substrate_url: >-
+  {{
+    (
+      'http://'
+      ~ (ops_portal_gateway_service_topology.private_ip | default('', true))
+      ~ ':'
+      ~ (ops_portal_gateway_substrate_port | string)
+      ~ ops_portal_gateway_substrate_path
+      if (
+        (ops_portal_gateway_service_topology.owning_vm | default('', true)) == ops_portal_gateway_substrate_owner_vm
+        and (ops_portal_gateway_service_topology.private_ip | default('', true))
+      )
+      else ''
+    )
+  }}
+ops_portal_gateway_url: >-
+  {{
+    (
+      ops_portal_gateway_substrate_url
+      | default('', true)
+    )
+    or
+    (
+      ops_portal_gateway_service_topology.urls.internal
+      if (
+        ops_portal_gateway_service_topology.urls is defined
+        and ops_portal_gateway_service_topology.urls.internal is defined
+      )
+      | default('', true)
+    )
+    or
+    (
+      hostvars['proxmox_florin'].api_gateway_internal_url
+      | default('', true)
+    )
+    or
+    (
+      'http://'
+      ~ (ops_portal_gateway_service_topology.private_ip | default('', true))
+      ~ ':'
+      ~ (hostvars['proxmox_florin'].platform_port_assignments.api_gateway_internal_port | default(8083) | string)
+      if (ops_portal_gateway_service_topology.private_ip | default('', true))
+      else ''
+    )
+    or
+    (
+      'http://127.0.0.1:'
+      ~ (hostvars['proxmox_florin'].platform_port_assignments.api_gateway_internal_port | default(8083) | string)
+    )
+  }}
 ops_portal_public_base_url: https://ops.lv3.org
 ops_portal_docs_base_url: https://docs.lv3.org
 ops_portal_grafana_logs_url: https://grafana.lv3.org/explore?left=%7B%22queries%22:%5B%5D%7D
@@ -143,8 +195,12 @@ ops_portal_runtime_file_sources:
     dest: "{{ ops_portal_service_dir }}/ops_portal/templates/partials/runbooks.html"
   - src: "{{ ops_portal_repo_root }}/scripts/ops_portal/templates/partials/runtime_assurance.html"
     dest: "{{ ops_portal_service_dir }}/ops_portal/templates/partials/runtime_assurance.html"
+  - src: "{{ ops_portal_repo_root }}/scripts/ops_portal/templates/partials/tasks.html"
+    dest: "{{ ops_portal_service_dir }}/ops_portal/templates/partials/tasks.html"
   - src: "{{ ops_portal_repo_root }}/scripts/ops_portal/templates/partials/search.html"
     dest: "{{ ops_portal_service_dir }}/ops_portal/templates/partials/search.html"
+  - src: "{{ ops_portal_repo_root }}/scripts/ops_portal/templates/task_detail.html"
+    dest: "{{ ops_portal_service_dir }}/ops_portal/templates/task_detail.html"
 ops_portal_runtime_overlay_directories:
   - "{{ ops_portal_service_dir }}/ops_portal"
   - "{{ ops_portal_service_dir }}/ops_portal/static"

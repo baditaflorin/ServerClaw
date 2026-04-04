@@ -36,14 +36,37 @@
       - docker_runtime_apt_repo_uri
     common_assert_vars_fail_msg: "docker_runtime requires package, repository, and admin user inputs."
 
+- name: Inspect Docker repository prerequisite package status
+  ansible.builtin.command:
+    argv:
+      - dpkg-query
+      - -W
+      - -f=${Status}
+      - "{{ item }}"
+  loop: "{{ docker_runtime_prereq_packages }}"
+  register: docker_runtime_prereq_package_status
+  changed_when: false
+  failed_when: false
+
+- name: Record missing Docker repository prerequisites
+  ansible.builtin.set_fact:
+    docker_runtime_missing_prereq_packages: >-
+      {{
+        docker_runtime_prereq_package_status.results
+        | rejectattr("stdout", "equalto", "install ok installed")
+        | map(attribute="item")
+        | list
+      }}
+
 - name: Install Docker repository prerequisites
   ansible.builtin.apt:
-    name: "{{ docker_runtime_prereq_packages }}"
+    name: "{{ docker_runtime_missing_prereq_packages }}"
     state: present
     update_cache: true
     cache_valid_time: 3600
     lock_timeout: "{{ docker_runtime_apt_lock_timeout }}"
     force_apt_get: true
+  when: docker_runtime_missing_prereq_packages | length > 0
 
 - name: Ensure Docker-managed directories exist
   ansible.builtin.include_role:
@@ -66,20 +89,66 @@
     dest: "{{ docker_runtime_apt_repo_file }}"
     mode: "0644"
 
+- name: Inspect conflicting Docker package status
+  ansible.builtin.command:
+    argv:
+      - dpkg-query
+      - -W
+      - -f=${Status}
+      - "{{ item }}"
+  loop: "{{ docker_runtime_conflicting_packages }}"
+  register: docker_runtime_conflicting_package_status
+  changed_when: false
+  failed_when: false
+
+- name: Record conflicting Docker packages that are currently installed
+  ansible.builtin.set_fact:
+    docker_runtime_installed_conflicting_packages: >-
+      {{
+        docker_runtime_conflicting_package_status.results
+        | selectattr("stdout", "equalto", "install ok installed")
+        | map(attribute="item")
+        | list
+      }}
+
 - name: Remove conflicting Docker packages
   ansible.builtin.apt:
-    name: "{{ docker_runtime_conflicting_packages }}"
+    name: "{{ docker_runtime_installed_conflicting_packages }}"
     state: absent
     lock_timeout: "{{ docker_runtime_apt_lock_timeout }}"
+  when: docker_runtime_installed_conflicting_packages | length > 0
+
+- name: Inspect Docker runtime package status
+  ansible.builtin.command:
+    argv:
+      - dpkg-query
+      - -W
+      - -f=${Status}
+      - "{{ item }}"
+  loop: "{{ docker_runtime_engine_packages }}"
+  register: docker_runtime_engine_package_status
+  changed_when: false
+  failed_when: false
+
+- name: Record missing Docker runtime packages
+  ansible.builtin.set_fact:
+    docker_runtime_missing_engine_packages: >-
+      {{
+        docker_runtime_engine_package_status.results
+        | rejectattr("stdout", "equalto", "install ok installed")
+        | map(attribute="item")
+        | list
+      }}
 
 - name: Install Docker runtime packages
   ansible.builtin.apt:
-    name: "{{ docker_runtime_engine_packages }}"
+    name: "{{ docker_runtime_missing_engine_packages }}"
     state: present
     update_cache: true
     cache_valid_time: 3600
     lock_timeout: "{{ docker_runtime_apt_lock_timeout }}"
     force_apt_get: true
+  when: docker_runtime_missing_engine_packages | length > 0
 
 - name: Ensure docker admin group exists
   ansible.builtin.group:
@@ -272,24 +341,11 @@
   changed_when: false
   when: docker_runtime_kernel_modules | length > 0
 
-- name: Check whether Docker service is already active before disabling socket activation
-  ansible.builtin.command: systemctl is-active docker.service
-  register: docker_runtime_service_active
-  changed_when: false
-  failed_when: false
-
-- name: Disable Docker socket activation without stopping a live Docker daemon
+- name: Ensure Docker socket activation is enabled and listening
   ansible.builtin.systemd_service:
     name: docker.socket
-    enabled: false
-  when: docker_runtime_service_active.rc == 0
-
-- name: Disable Docker socket activation fully when Docker service is not active
-  ansible.builtin.systemd_service:
-    name: docker.socket
-    enabled: false
-    state: stopped
-  when: docker_runtime_service_active.rc != 0
+    enabled: true
+    state: started
 
 - name: Ensure Docker service is enabled and running
   ansible.builtin.include_role:

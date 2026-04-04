@@ -105,6 +105,12 @@ ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv
 - This pool is the first lightweight operator-and-support wave, not the final runtime-general service set. Keep the moved services limited to low-risk observability and operator surfaces until the broader wave is reviewed.
 - The current Proxmox host only exposes the base template VM `9000`, so `runtime-general-lv3` clones from `lv3-debian-base` and the playbook's `docker_runtime` role installs Docker during first converge.
 - The pool live apply replays `lv3.platform.proxmox_network` on the host after provisioning `runtime-general-lv3`. Keep that host-side step in place because the Nomad scheduler and other existing guests need their Proxmox VM firewall files refreshed whenever a new pool guest appears.
+- The dedicated `runtime-general-lv3` substrate replay now keeps an already
+  running Docker daemon online during the initial guest firewall converge and
+  relies on bounded bridge-chain recovery inside
+  `lv3.platform.linux_guest_firewall`. Treat an unexpected mid-run
+  `systemctl stop docker.service docker.socket` on this guest as drift from an
+  older checkout, not expected pool behavior.
 - The pool live apply also replays `lv3.platform.linux_guest_firewall` on `monitoring-lv3` after the new guest appears. Keep that targeted guest-side replay in place so the Nomad scheduler admits `runtime-general-lv3`, but do not broaden it back to the entire guest set unless the shared-runtime Docker bridge behavior is hardened first.
 - The first successful runtime-general service replay now restores the legacy `docker-runtime-lv3` Uptime Kuma data directory onto `runtime-general-lv3` before retirement and records `/opt/uptime-kuma/.legacy-data-restored` as the one-time migration marker. If that marker is absent unexpectedly, inspect both guests before forcing another replay.
 - The legacy-retirement phase now fails closed unless the same playbook run has already verified the `runtime-general-lv3` routes and the shared edge publication. Do not bypass that guard with `--start-at-task`, `--limit docker-runtime-lv3`, or ad hoc retirement-only replays.

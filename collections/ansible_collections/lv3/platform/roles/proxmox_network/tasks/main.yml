@@ -1,4 +1,10 @@
 ---
+# Purpose: Converge the Proxmox host bridge, nftables, and conntrack-helper configuration that exposes the managed guest networks and ingress rules.
+# Use case: Run during host bootstrap, ingress changes, or recovery when vmbr topology, forwarding, nftables, or firewall helper state must be replayed from repo truth.
+# Inputs: management_* and proxmox_* role variables describing the host uplink, internal bridge layout, optional staging bridge, and ingress/NAT helpers.
+# Outputs: Host bridge configuration rendered, IPv4 forwarding enabled, nftables/proxmox-firewall helpers installed, and the managed network rules applied.
+# Idempotency: Yes; templates, packages, and systemd/service tasks reconcile host network state and only apply when drift is detected.
+# Dependencies: ADR 0165, ADR 0270, Proxmox VE host networking, nftables, and pve-firewall.
 - name: Validate Proxmox network inputs
   ansible.builtin.assert:
     that:
@@ -144,9 +150,9 @@
       }}
 
 - name: Render per-guest Proxmox firewall policy to staging files
-  ansible.builtin.copy:
+  ansible.builtin.template:
+    src: vm.fw.j2
     dest: "/root/.lv3-vm-{{ guest.vmid }}.fw"
-    content: "{{ lookup('ansible.builtin.template', role_path ~ '/templates/vm.fw.j2') }}"
     mode: "0644"
   loop: "{{ proxmox_network_existing_guests }}"
   loop_control:

@@ -114,6 +114,12 @@ ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv
   the host and `lv3.platform.linux_guest_firewall` on `monitoring-lv3` because
   the Nomad scheduler and host proxy catalog must learn about the new guest
   before the control-plane services move.
+- The dedicated `runtime-control-lv3` substrate replay now keeps an already
+  running Docker daemon online during the initial guest firewall converge and
+  relies on bounded bridge-chain recovery inside
+  `lv3.platform.linux_guest_firewall`. Treat an unexpected mid-run
+  `systemctl stop docker.service docker.socket` on this guest as drift from an
+  older checkout, not expected pool behavior.
 - The legacy-retirement phase now fails closed unless the same playbook run has
   already verified the `runtime-control-lv3` routes. Do not bypass that guard
   with `--start-at-task`, `--limit docker-runtime-lv3`, or ad hoc

@@ -1,9 +1,10 @@
 # ADR 0314: Resumable Multi-Step Flows And Return-To-Task Reentry
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.178.5
+- Implemented In Platform Version: 0.130.99
+- Implemented On: 2026-04-04
 - Date: 2026-03-31
 
 ## Context

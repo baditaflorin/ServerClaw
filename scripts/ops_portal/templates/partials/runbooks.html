@@ -32,12 +32,27 @@
     {% if runbook.owner_runbook %}
     <p><a href="{{ docs_base_url }}/{{ runbook.owner_runbook }}" target="_blank" rel="noreferrer">Open runbook</a></p>
     {% endif %}
+    {% if runbook.latest_task %}
+    <div class="runbook-task-hint">
+      <p class="service-category">Latest task</p>
+      <p>
+        <a href="{{ runbook.latest_task.portal_path }}">{{ runbook.latest_task.summary.headline }}</a>
+      </p>
+      <p class="muted">{{ runbook.latest_task.summary.last_safe_resume_point.message }}</p>
+    </div>
+    {% endif %}
     <form
+      data-runbook-form
+      data-runbook-id="{{ runbook.id }}"
       hx-post="/actions/runbooks/{{ runbook.id }}"
       hx-target="#runbook-result-{{ runbook.id }}"
       hx-swap="innerHTML">
       <label class="form-label" for="params-{{ runbook.id }}">Parameters (JSON object)</label>
-      <textarea id="params-{{ runbook.id }}" name="parameters" rows="4">{}</textarea>
+      <textarea id="params-{{ runbook.id }}" name="parameters" rows="4" data-runbook-draft-input>{}</textarea>
+      <div class="runbook-form-meta">
+        <span class="muted" data-draft-status-for="{{ runbook.id }}">Drafts stay in this browser until you clear them.</span>
+        <button class="pf-v5-c-button pf-m-link pf-m-inline" type="button" data-clear-runbook-draft="{{ runbook.id }}">Clear draft</button>
+      </div>
       <button class="pf-v5-c-button pf-m-primary action-button" type="submit">Launch</button>
     </form>
     <div id="runbook-result-{{ runbook.id }}"></div>

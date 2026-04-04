@@ -46,8 +46,8 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.4` |
-| Platform version | `0.130.98` |
+| Repository version | `0.178.5` |
+| Platform version | `0.130.99` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -76,25 +76,25 @@ rewriting one operator's workstation paths.
 | `woodpecker` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `vaultwarden` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `searxng` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
+| `runbook_task_reentry` | `2026-04-04-ws-0314-mainline-task-reentry-resume-r2` |
 | `reference_deployment_samples` | `2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply` |
 | `public_github_readiness` | `2026-04-04-adr-0330-public-github-readiness-mainline-live-apply` |
 | `private_overlay_contract` | `2026-04-04-adr-0333-private-overlay-mainline-live-apply` |
 | `plausible_analytics` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `outline` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `ops_portal` | `2026-04-04-ws-0314-mainline-ops-portal-live-apply-r18` |
 | `minio` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `matrix_synapse` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `keycloak` | `2026-04-04-ws-0314-mainline-keycloak-live-apply-r4` |
 | `jupyterhub` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `harbor` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `grist` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `fork_first_workstream_metadata` | `2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply` |
 | `dozzle` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `directus` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
-| `adr_discovery` | `2026-04-04-adr-0325-adr-discovery-mainline-live-apply` |
-| `workstream_registry_shards` | `2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply` |
-| `uptime_kuma` | `2026-04-03-ws-0332-homepage-triage-mainline-live-apply` |
 
-Showing 20 of 170 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
+Showing 20 of 171 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
 
 The current access posture is:
@@ -173,8 +173,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.4` |
-| Platform version | `0.130.98` |
+| Repository version | `0.178.5` |
+| Platform version | `0.130.99` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -194,12 +194,13 @@ Current values on `main`:
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 295 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 296 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
 | `0330` | Close out public GitHub readiness on the latest origin/main | `live_applied` | [ws-0330-main-closeout.md](docs/workstreams/ws-0330-main-closeout.md) |
+| `0314` | Live apply resumable multi-step flows and return-to-task reentry from latest origin/main | `live_applied` | [ws-0314-live-apply.md](docs/workstreams/ws-0314-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
@@ -222,7 +223,6 @@ Showing 25 of 295 merged or live-applied workstreams. Full history: [merged work
 | `0169` | Structured log field contract | `live_applied` | [adr-0169-structured-log-field-contract.md](docs/workstreams/adr-0169-structured-log-field-contract.md) |
 | `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](docs/workstreams/adr-0168-idempotency-ci.md) |
 | `0167` | Graceful degradation mode declarations | `live_applied` | [adr-0167-graceful-degradation-mode-declarations.md](docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md) |
-| `0166` | Canonical error response format and error code registry | `live_applied` | [adr-0166-canonical-error-response-format.md](docs/workstreams/adr-0166-canonical-error-response-format.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Next For Forks

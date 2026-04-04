@@ -79,6 +79,14 @@ def test_mail_platform_runtime_verifies_plaintext_private_submission_auth() -> N
     assert verify_task["until"] == "mail_platform_submission_auth_check.rc == 0"
 
 
+def test_mail_platform_runtime_bootstraps_mailboxes_before_submission_auth_check() -> None:
+    tasks = yaml.safe_load(TASKS_PATH.read_text())
+    task_names = [task.get("name") for task in tasks]
+    assert task_names.index("Upsert the managed mailbox accounts through the mail gateway CRUD API") < task_names.index(
+        "Verify the private mail submission relay keeps STARTTLS disabled and accepts auth"
+    )
+
+
 def test_mail_platform_verify_role_checks_plaintext_private_submission_auth() -> None:
     verify_tasks = yaml.safe_load((REPO_ROOT / "roles" / "mail_platform_runtime" / "tasks" / "verify.yml").read_text())
     verify_task = next(
@@ -219,17 +227,12 @@ def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rota
     nat_restore = next(
         task
         for task in tasks
-        if task.get("name") == "Restore Docker networking when the nat chain is missing before mail-platform startup"
+        if task.get("name") == "Restore Docker networking when bridge chains are missing before mail-platform startup"
     )
     force_recreate_down = next(
         task
         for task in tasks
         if task.get("name") == "Reset the mail platform stack before a force recreate"
-    )
-    force_recreate_network_cleanup = next(
-        task
-        for task in tasks
-        if task.get("name") == "Remove stale mail platform compose networks before recovery"
     )
     force_recreate = next(
         task
@@ -244,7 +247,7 @@ def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rota
     rotate_nat_restore = next(
         task
         for task in rotate_tasks
-        if task.get("name") == "Restore Docker networking when the nat chain is missing before mail-platform rotation"
+        if task.get("name") == "Restore Docker networking when bridge chains are missing before mail-platform rotation"
     )
     rotate_force_recreate = next(
         task
@@ -294,7 +297,6 @@ def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rota
     assert nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
     assert nat_restore["ansible.builtin.service"]["name"] == "docker"
     assert force_recreate_down["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
-    assert "mail_platform_docker_network_name" in force_recreate_network_cleanup["ansible.builtin.shell"]
     assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
     assert force_recreate["failed_when"] is False
     assert "failed to create endpoint" in network_flag["ansible.builtin.set_fact"]["mail_platform_docker_network_missing"]

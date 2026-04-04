@@ -1,0 +1,71 @@
+# Purpose: Reconcile the permanent Keycloak admin client in the master realm using a bootstrap token.
+# Use case: Included when Keycloak needs a durable automation admin client after bootstrap-user or recovery-service auth succeeds.
+# Inputs: Bootstrap-capable admin credentials, the managed admin client id/secret, and the local Keycloak admin URL.
+# Outputs: The repo-managed master-realm admin client exists with the expected secret, emits its assigned admin scopes, and has the master admin composite role.
+# Idempotency: Fully idempotent because the tasks only create or update drifted Keycloak admin client state.
+# Dependencies: ADR 0165, ADR 0056, and ADR 0262.
+---
+- name: Ensure the repo-managed Keycloak admin client exists in the master realm
+  community.general.keycloak_client:
+    realm: master
+    client_id: "{{ keycloak_admin_client_id }}"
+    name: LV3 Keycloak Admin Runtime
+    description: Repo-managed confidential client used by platform automation to administer Keycloak without password grants.
+    enabled: true
+    protocol: openid-connect
+    public_client: false
+    client_authenticator_type: client-secret
+    secret: "{{ keycloak_admin_client_secret }}"
+    standard_flow_enabled: false
+    implicit_flow_enabled: false
+    direct_access_grants_enabled: false
+    service_accounts_enabled: true
+    full_scope_allowed: true
+    state: present
+    auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+    auth_realm: "{{ keycloak_admin_bootstrap_auth_realm | default(omit) }}"
+    auth_client_id: "{{ keycloak_admin_bootstrap_auth_client_id | default(omit) }}"
+    auth_client_secret: "{{ keycloak_admin_bootstrap_auth_client_secret | default(omit) }}"
+    auth_username: "{{ keycloak_admin_bootstrap_auth_username | default(omit) }}"
+    auth_password: "{{ keycloak_admin_bootstrap_auth_password | default(omit) }}"
+    token: "{{ keycloak_admin_bootstrap_token | default(omit) }}"
+    validate_certs: false
+  register: keycloak_admin_client_reconcile
+  retries: "{{ keycloak_admin_reconciliation_retries }}"
+  delay: "{{ keycloak_admin_reconciliation_delay }}"
+  until: keycloak_admin_client_reconcile is succeeded
+
+- name: Record the auth client secret that should work after the admin client secret is reconciled
+  ansible.builtin.set_fact:
+    keycloak_admin_bootstrap_auth_client_secret_after_reconcile: >-
+      {{
+        keycloak_admin_client_secret
+        if (keycloak_admin_bootstrap_auth_client_id | default('')) == keycloak_admin_client_id
+        else (keycloak_admin_bootstrap_auth_client_secret | default(''))
+      }}
+  no_log: true
+
+- name: Ensure the repo-managed Keycloak admin client service account has the master admin composite realm role
+  community.general.keycloak_user_rolemapping:
+    realm: master
+    service_account_user_client_id: "{{ keycloak_admin_client_id }}"
+    roles:
+      - name: admin
+    state: present
+    auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+    auth_realm: "{{ keycloak_admin_bootstrap_auth_realm | default(omit) }}"
+    auth_client_id: "{{ keycloak_admin_bootstrap_auth_client_id | default(omit) }}"
+    auth_client_secret: >-
+      {{
+        keycloak_admin_bootstrap_auth_client_secret_after_reconcile
+        if (keycloak_admin_bootstrap_auth_client_secret_after_reconcile | default('') | length) > 0
+        else omit
+      }}
+    auth_username: "{{ keycloak_admin_bootstrap_auth_username | default(omit) }}"
+    auth_password: "{{ keycloak_admin_bootstrap_auth_password | default(omit) }}"
+    token: "{{ keycloak_admin_bootstrap_token | default(omit) }}"
+    validate_certs: false
+  register: keycloak_admin_client_role_mapping
+  retries: "{{ keycloak_admin_reconciliation_retries }}"
+  delay: "{{ keycloak_admin_reconciliation_delay }}"
+  until: keycloak_admin_client_role_mapping is succeeded

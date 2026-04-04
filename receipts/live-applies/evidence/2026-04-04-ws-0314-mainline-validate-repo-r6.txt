@@ -1,0 +1,3 @@
+Workstream surface ownership validation
+Agent standards validation (ADR 0163-0168)
+WARNING: New top-level directories detected but .repo-structure.yaml not updated (ADR 0163)

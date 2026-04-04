@@ -33,6 +33,7 @@
       - "{{ '{{.ServerVersion}}' }}"
   register: common_docker_bridge_chains_info_ready
   changed_when: false
+  become_flags: -n
   retries: "{{ common_docker_bridge_chains_retries }}"
   delay: "{{ common_docker_bridge_chains_delay }}"
   until: common_docker_bridge_chains_info_ready.rc == 0
@@ -49,6 +50,7 @@
   register: common_docker_bridge_chains_nat_check
   changed_when: false
   failed_when: common_docker_bridge_chains_nat_check.rc not in [0, 1]
+  become_flags: -n
   when:
     - common_docker_bridge_chains_require_nat_chain | bool
     - common_docker_bridge_chains_active_state.rc == 0
@@ -62,6 +64,7 @@
   register: common_docker_bridge_chains_forward_check
   changed_when: false
   failed_when: common_docker_bridge_chains_forward_check.rc not in [0, 1]
+  become_flags: -n
   when: common_docker_bridge_chains_active_state.rc == 0
 
 - name: Check whether Docker has running containers
@@ -72,6 +75,7 @@
       - -q
   register: common_docker_bridge_chains_running_containers
   changed_when: false
+  become_flags: -n
   when: common_docker_bridge_chains_active_state.rc == 0
 
 - name: Check whether Docker has bridge networks beyond the default bridge
@@ -85,6 +89,7 @@
       - -q
   register: common_docker_bridge_chains_bridge_networks
   changed_when: false
+  become_flags: -n
   when: common_docker_bridge_chains_active_state.rc == 0
 
 - name: Decide whether Docker forward-chain enforcement is required
@@ -100,19 +105,26 @@
       }}
   when: common_docker_bridge_chains_active_state.rc == 0
 
+- name: Decide whether Docker bridge-chain recovery checks are required
+  ansible.builtin.set_fact:
+    common_docker_bridge_chains_needs_recovery_check: >-
+      {{
+        (
+          common_docker_bridge_chains_expect_forward_chain | default(false)
+          and common_docker_bridge_chains_forward_check.rc == 1
+        )
+        or (
+          (common_docker_bridge_chains_require_nat_chain | bool)
+          and common_docker_bridge_chains_nat_check.rc == 1
+        )
+      }}
+  when: common_docker_bridge_chains_active_state.rc == 0
+
 - name: Reset SSH connection before Docker bridge-chain recovery checks
-  ansible.builtin.meta: reset_connection
+  ansible.builtin.include_tasks: docker_bridge_chains_reset_connection.yml
   when:
     - common_docker_bridge_chains_active_state.rc == 0
-    - >
-      (
-        common_docker_bridge_chains_expect_forward_chain | default(false)
-        and common_docker_bridge_chains_forward_check.rc == 1
-      )
-      or (
-        (common_docker_bridge_chains_require_nat_chain | bool)
-        and common_docker_bridge_chains_nat_check.rc == 1
-      )
+    - common_docker_bridge_chains_needs_recovery_check | default(false)
 
 - name: Wait for SSH before Docker bridge-chain recovery checks
   ansible.builtin.wait_for_connection:
@@ -121,15 +133,7 @@
     sleep: "{{ [common_docker_bridge_chains_delay | int, 1] | max }}"
   when:
     - common_docker_bridge_chains_active_state.rc == 0
-    - >
-      (
-        common_docker_bridge_chains_expect_forward_chain | default(false)
-        and common_docker_bridge_chains_forward_check.rc == 1
-      )
-      or (
-        (common_docker_bridge_chains_require_nat_chain | bool)
-        and common_docker_bridge_chains_nat_check.rc == 1
-      )
+    - common_docker_bridge_chains_needs_recovery_check | default(false)
 
 - name: Wait briefly for Docker bridge chains to recover after daemon activation
   ansible.builtin.shell: |
@@ -146,17 +150,10 @@
   register: common_docker_bridge_chains_wait
   changed_when: false
   failed_when: false
+  become_flags: -n
   when:
     - common_docker_bridge_chains_active_state.rc == 0
-    - >
-      (
-        common_docker_bridge_chains_expect_forward_chain | default(false)
-        and common_docker_bridge_chains_forward_check.rc == 1
-      )
-      or (
-        (common_docker_bridge_chains_require_nat_chain | bool)
-        and common_docker_bridge_chains_nat_check.rc == 1
-      )
+    - common_docker_bridge_chains_needs_recovery_check | default(false)
 
 - name: Recheck Docker nat chain after health evaluation
   ansible.builtin.command:
@@ -169,6 +166,7 @@
   register: common_docker_bridge_chains_nat_recheck
   changed_when: false
   failed_when: common_docker_bridge_chains_nat_recheck.rc not in [0, 1]
+  become_flags: -n
   retries: "{{ common_docker_bridge_chains_retries }}"
   delay: "{{ common_docker_bridge_chains_delay }}"
   until: common_docker_bridge_chains_nat_recheck.rc == 0
@@ -185,76 +183,23 @@
   register: common_docker_bridge_chains_forward_recheck
   changed_when: false
   failed_when: common_docker_bridge_chains_forward_recheck.rc not in [0, 1]
+  become_flags: -n
   retries: "{{ common_docker_bridge_chains_retries }}"
   delay: "{{ common_docker_bridge_chains_delay }}"
   until: common_docker_bridge_chains_forward_recheck.rc == 0
   when: common_docker_bridge_chains_active_state.rc == 0
 
-- name: Verify Docker nat chain after retry loop
-  ansible.builtin.command:
-    argv:
-      - iptables
-      - -t
-      - nat
-      - -S
-      - DOCKER
-  register: common_docker_bridge_chains_nat_verify
-  changed_when: false
-  failed_when: common_docker_bridge_chains_nat_verify.rc not in [0, 1]
-  retries: "{{ common_docker_bridge_chains_retries }}"
-  delay: "{{ common_docker_bridge_chains_delay }}"
-  until: common_docker_bridge_chains_nat_verify.rc == 0
-  when:
-    - common_docker_bridge_chains_require_nat_chain | bool
-    - common_docker_bridge_chains_active_state.rc == 0
-
-- name: Verify Docker forward chain after retry loop
-  ansible.builtin.shell: |
-    set -euo pipefail
-    iptables -t filter -S DOCKER-FORWARD >/dev/null 2>&1 || iptables -t filter -S DOCKER >/dev/null 2>&1
-  args:
-    executable: /bin/bash
-  register: common_docker_bridge_chains_forward_verify
-  changed_when: false
-  failed_when: common_docker_bridge_chains_forward_verify.rc not in [0, 1]
-  retries: "{{ common_docker_bridge_chains_retries }}"
-  delay: "{{ common_docker_bridge_chains_delay }}"
-  until: common_docker_bridge_chains_forward_verify.rc == 0
-  when:
-    - common_docker_bridge_chains_active_state.rc == 0
-    - common_docker_bridge_chains_expect_forward_chain | default(false)
-
-- name: Capture final Docker nat chain state after retry loop
-  ansible.builtin.command:
-    argv:
-      - iptables
-      - -t
-      - nat
-      - -S
-      - DOCKER
-  register: common_docker_bridge_chains_nat_final
-  changed_when: false
-  failed_when: common_docker_bridge_chains_nat_final.rc not in [0, 1]
-  when:
-    - common_docker_bridge_chains_require_nat_chain | bool
-    - common_docker_bridge_chains_active_state.rc == 0
-
-- name: Capture final Docker forward chain state after retry loop
-  ansible.builtin.shell: |
-    set -euo pipefail
-    iptables -t filter -S DOCKER-FORWARD >/dev/null 2>&1 || iptables -t filter -S DOCKER >/dev/null 2>&1
-  args:
-    executable: /bin/bash
-  register: common_docker_bridge_chains_forward_final
-  changed_when: false
-  failed_when: common_docker_bridge_chains_forward_final.rc not in [0, 1]
-  when:
-    - common_docker_bridge_chains_active_state.rc == 0
-    - common_docker_bridge_chains_expect_forward_chain | default(false)
 - name: Assert Docker nat chain is present after health evaluation
   ansible.builtin.assert:
     that:
-      - common_docker_bridge_chains_nat_final.rc == 0
+      - >-
+        (
+          (
+            common_docker_bridge_chains_nat_recheck
+            if common_docker_bridge_chains_nat_recheck is defined
+            else common_docker_bridge_chains_nat_check
+          ).rc
+        ) == 0
     fail_msg: "Docker is running but the nat DOCKER chain is missing; published ports will fail."
   when:
     - common_docker_bridge_chains_require_nat_chain | bool
@@ -263,7 +208,14 @@
 - name: Assert Docker forward chain is present after health evaluation
   ansible.builtin.assert:
     that:
-      - common_docker_bridge_chains_forward_final.rc == 0
+      - >-
+        (
+          (
+            common_docker_bridge_chains_forward_recheck
+            if common_docker_bridge_chains_forward_recheck is defined
+            else common_docker_bridge_chains_forward_check
+          ).rc
+        ) == 0
     fail_msg: "Docker is running but neither the filter DOCKER-FORWARD chain nor the legacy filter DOCKER chain is present; bridge networking will fail."
   when:
     - common_docker_bridge_chains_active_state.rc == 0

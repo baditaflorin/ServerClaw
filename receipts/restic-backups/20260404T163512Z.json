@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "restic-config-backup-20260404T163512Z",
+  "recorded_at": "2026-04-04T16:35:12Z",
+  "recorded_on": "2026-04-04",
+  "recorded_by": "codex",
+  "triggered_by": "live-apply-service",
+  "source_commit": "unknown",
+  "repository": {
+    "bucket": "restic-config-backup",
+    "endpoint": "http://10.200.25.3:9000",
+    "repository_url": "s3:http://10.200.25.3:9000/restic-config-backup"
+  },
+  "summary": {
+    "governed_sources": 5,
+    "protected": 4,
+    "uncovered": 0,
+    "inactive": 1,
+    "uncovered_sources": [],
+    "inactive_sources": [
+      "falco_overrides"
+    ]
+  },
+  "source_results": [
+    {
+      "source_id": "config",
+      "result": "backed_up",
+      "host": "docker-runtime-lv3",
+      "files": 291,
+      "paths": [
+        "/srv/proxmox_florin_server/config"
+      ],
+      "retention": {
+        "keep_daily": 30,
+        "keep_monthly": 6
+      },
+      "restic_stdout": "{\"message_type\":\"status\",\"percent_done\":0.9989804153218635,\"total_files\":161,\"files_done\":158,\"total_bytes\":3744662,\"bytes_done\":3740844,\"current_files\":[\"/srv/proxmox_florin_server/config/restic-file-backup-catalog.json\"]}\n{\"message_type\":\"status\",\"percent_done\":0.9199497418332689,\"total_files\":236,\"files_done\":190,\"total_bytes\":4523046,\"bytes_done\":4160975}\n{\"message_type\":\"status\",\"percent_done\":1,\"total_files\":291,\"files_done\":291,\"total_bytes\":5004085,\"bytes_done\":5004085}\n{\"message_type\":\"summary\",\"files_new\":0,\"files_changed\":1,\"files_unmodified\":290,\"dirs_new\":0,\"dirs_changed\":3,\"dirs_unmodified\":54,\"data_blobs\":0,\"tree_blobs\":4,\"data_added\":37118,\"data_added_packed\":7919,\"total_files_processed\":291,\"total_bytes_processed\":5004085,\"total_duration\":0.969901423,\"backup_start\":\"2026-04-04T16:35:12.864854218Z\",\"backup_end\":\"2026-04-04T16:35:13.834755641Z\",\"snapshot_id\":\"eb799e80e16451754bd4fbdc99d3c732fc4e11ea26c4857b48fbdee0f9c3a369\"}",
+      "snapshot_id": "eb799e80e16451754bd4fbdc99d3c732fc4e11ea26c4857b48fbdee0f9c3a369"
+    },
+    {
+      "source_id": "versions_stack",
+      "result": "backed_up",
+      "host": "docker-runtime-lv3",
+      "files": 1,
+      "paths": [
+        "/srv/proxmox_florin_server/versions/stack.yaml"
+      ],
+      "retention": {
+        "keep_daily": 30
+      },
+      "restic_stdout": "{\"message_type\":\"summary\",\"files_new\":0,\"files_changed\":0,\"files_unmodified\":1,\"dirs_new\":0,\"dirs_changed\":0,\"dirs_unmodified\":3,\"data_blobs\":0,\"tree_blobs\":0,\"data_added\":0,\"data_added_packed\":0,\"total_files_processed\":1,\"total_bytes_processed\":49052,\"total_duration\":0.902252028,\"backup_start\":\"2026-04-04T16:35:15.107838148Z\",\"backup_end\":\"2026-04-04T16:35:16.010090176Z\",\"snapshot_id\":\"8460399ec53225b257161008cb7e73ee5f79f3fe41d5758e28add2481f99e613\"}",
+      "snapshot_id": "8460399ec53225b257161008cb7e73ee5f79f3fe41d5758e28add2481f99e613"
+    },
+    {
+      "source_id": "falco_overrides",
+      "result": "skipped_optional_missing",
+      "paths": [
+        "/srv/proxmox_florin_server/config/falco"
+      ],
+      "reason": "optional source path is not present on the runtime host"
+    }
+  ],
+  "latest_snapshot_receipt": "receipts/restic-snapshots-latest.json",
+  "notifications": []
+}

@@ -41,9 +41,18 @@ def test_linux_guest_firewall_reasserts_docker_bridge_chains_after_firewall_eval
     task_names = [task["name"] for task in tasks]
     defaults = load_defaults()
 
+    assert task_names.index("Inspect nftables package status on the guest") < task_names.index(
+        "Record whether nftables is missing on the guest"
+    )
+    assert task_names.index("Record whether nftables is missing on the guest") < task_names.index(
+        "Ensure nftables is installed on the guest"
+    )
     assert task_names.index("Wait for guest SSH after nftables changes") < task_names.index(
         "Ensure Docker bridge networking remains available after firewall evaluation"
     )
+    inspect_task = next(task for task in tasks if task["name"] == "Inspect nftables package status on the guest")
+    record_missing_task = next(task for task in tasks if task["name"] == "Record whether nftables is missing on the guest")
+    ensure_nftables_task = next(task for task in tasks if task["name"] == "Ensure nftables is installed on the guest")
     ensure_task = next(
         task
         for task in tasks
@@ -74,6 +83,15 @@ def test_linux_guest_firewall_reasserts_docker_bridge_chains_after_firewall_eval
         for task in ensure_task["rescue"]
         if task["name"] == "Surface Docker bridge-chain failures after guest firewall evaluation when recovery is disabled"
     )
+    assert inspect_task["ansible.builtin.command"]["argv"] == ["dpkg-query", "-W", "-f=${Status}", "nftables"]
+    assert inspect_task["register"] == "linux_guest_firewall_nftables_package_status"
+    assert inspect_task["changed_when"] is False
+    assert inspect_task["failed_when"] is False
+    assert record_missing_task["ansible.builtin.set_fact"] == {
+        "linux_guest_firewall_nftables_missing": '{{ linux_guest_firewall_nftables_package_status.stdout != "install ok installed" }}'
+    }
+    assert ensure_nftables_task["ansible.builtin.apt"] == {"name": "nftables", "state": "present"}
+    assert ensure_nftables_task["when"] == "linux_guest_firewall_nftables_missing | bool"
     assert include_role["name"] == "lv3.platform.common"
     assert include_role["tasks_from"] == "docker_bridge_chains"
     assert ensure_task["block"][0]["vars"]["common_docker_bridge_chains_service_name"] == (
@@ -84,11 +102,13 @@ def test_linux_guest_firewall_reasserts_docker_bridge_chains_after_firewall_eval
         "reset-failed",
         "{{ linux_guest_firewall_docker_bridge_chain_service_name }}.service",
     ]
+    assert reset_task["become_flags"] == "-n"
     assert reset_task["when"] == "linux_guest_firewall_recover_missing_docker_bridge_chains | bool"
     assert restart_task["ansible.builtin.service"] == {
         "name": "{{ linux_guest_firewall_docker_bridge_chain_service_name }}",
         "state": "restarted",
     }
+    assert restart_task["become_flags"] == "-n"
     assert restart_task["when"] == "linux_guest_firewall_recover_missing_docker_bridge_chains | bool"
     assert reassert_task["vars"]["common_docker_bridge_chains_service_name"] == (
         "{{ linux_guest_firewall_docker_bridge_chain_service_name }}"

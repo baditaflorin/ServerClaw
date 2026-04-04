@@ -121,28 +121,10 @@
         executable: /bin/bash
       changed_when: false
 
-    - name: Detect whether Docker is already active before the managed runtime converge
-      ansible.builtin.command:
-        argv:
-          - systemctl
-          - is-active
-          - docker.service
-      register: runtime_ai_preexisting_docker
-      changed_when: false
-      failed_when: runtime_ai_preexisting_docker.rc not in [0, 3, 4]
-
-    - name: Stop any preexisting Docker daemon before firewall evaluation
-      ansible.builtin.command:
-        argv:
-          - systemctl
-          - stop
-          - docker.service
-          - docker.socket
-      when: runtime_ai_preexisting_docker.rc == 0
-      changed_when: true
-
   roles:
     - role: lv3.platform.linux_guest_firewall
+      vars:
+        linux_guest_firewall_recover_missing_docker_bridge_chains: true
     - role: lv3.platform.linux_access
       vars:
         linux_access_admin_user: "{{ proxmox_guest_ci_user }}"

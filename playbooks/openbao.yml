@@ -220,7 +220,7 @@
           secret_id: "{{ openbao_verify_atlas_approle.secret_id }}"
         return_content: true
         status_code: 200
-      delegate_to: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+      delegate_to: "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
       register: openbao_verify_atlas_login
       no_log: true
 
@@ -232,7 +232,7 @@
           X-Vault-Token: "{{ openbao_verify_atlas_login.json.auth.client_token }}"
         return_content: true
         status_code: 200
-      delegate_to: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+      delegate_to: "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
       register: openbao_verify_atlas_dynamic_credential
       retries: 6
       delay: 5

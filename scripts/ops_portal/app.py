@@ -16,7 +16,7 @@ from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import httpx
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -1650,6 +1650,25 @@ class GatewayClient:
             },
         )
 
+    async def fetch_runbook_task(self, run_id: str, *, token: str | None = None) -> dict[str, Any]:
+        return await self._request("GET", f"/v1/platform/runbooks/{run_id}", token=token)
+
+    async def resume_runbook_task(self, run_id: str, *, token: str | None = None) -> dict[str, Any]:
+        return await self._request("POST", f"/v1/platform/runbooks/{run_id}/approve", token=token)
+
+    async def fetch_runbook_tasks(
+        self,
+        *,
+        token: str | None = None,
+        delivery_surface: str = "ops_portal",
+        limit: int = 12,
+        statuses: list[str] | None = None,
+    ) -> dict[str, Any]:
+        params: list[tuple[str, str]] = [("delivery_surface", delivery_surface), ("limit", str(limit))]
+        for item in statuses or []:
+            params.append(("status", item))
+        return await self._request("GET", f"/v1/platform/runbook-tasks?{httpx.QueryParams(params)}", token=token)
+
     async def search(
         self,
         query: str,
@@ -2849,6 +2868,7 @@ def build_runbook_models(
     runbooks: list[dict[str, Any]],
     activation: dict[str, Any],
     workbench_ia: dict[str, Any],
+    latest_tasks_by_runbook: dict[str, dict[str, Any]] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     featured_ids = {"validation-gate-status"}
     normalized: list[dict[str, Any]] = []
@@ -2864,13 +2884,18 @@ def build_runbook_models(
     featured = [item for item in normalized if item["id"] in featured_ids]
     remainder = [item for item in normalized if item["id"] not in featured_ids]
     combined = featured + remainder
+    task_index = latest_tasks_by_runbook or {}
     visible: list[dict[str, Any]] = []
     locked: list[dict[str, Any]] = []
     for item in combined[:6]:
-        if runbook_locked(item, activation):
-            locked.append(item)
+        model = dict(item)
+        latest_task = task_index.get(str(model.get("id", "")))
+        if latest_task is not None:
+            model["latest_task"] = latest_task
+        if runbook_locked(model, activation):
+            locked.append(model)
         else:
-            visible.append(item)
+            visible.append(model)
     return visible, locked
 
 
@@ -2892,6 +2917,187 @@ def enrich_runbook_metadata(
                 runbook[field] = workflow[field]
         enriched.append(runbook)
     return enriched
+
+
+def coerce_int(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def normalize_task_step_reference(value: Any) -> dict[str, Any] | None:
+    if not isinstance(value, dict):
+        return None
+    label = str(value.get("label") or value.get("id") or "").strip()
+    if not label:
+        return None
+    normalized = {"label": label}
+    if value.get("id"):
+        normalized["id"] = str(value["id"])
+    if value.get("type"):
+        normalized["type"] = str(value["type"])
+    if value.get("workflow_id"):
+        normalized["workflow_id"] = str(value["workflow_id"])
+    return normalized
+
+
+def default_task_headline(runbook_title: str, *, status: str, attention_required: bool) -> str:
+    if attention_required:
+        return f"Paused {runbook_title}"
+    if status == "completed":
+        return f"Completed {runbook_title}"
+    if status == "running":
+        return f"In progress at {runbook_title}"
+    return f"Task summary for {runbook_title}"
+
+
+def normalize_task_model(task: dict[str, Any]) -> dict[str, Any]:
+    normalized = dict(task)
+    run_id = str(task.get("run_id") or "").strip()
+    runbook_id = str(task.get("runbook_id") or "").strip() or "unknown-runbook"
+    runbook_title = str(task.get("runbook_title") or runbook_id or "Runbook task").strip() or "Runbook task"
+    status = str(task.get("status") or "unknown").strip() or "unknown"
+    attention_required = bool(task.get("attention_required")) or status == "escalated"
+    portal_path = str(task.get("portal_path") or f"/tasks/runbooks/{run_id}").strip() or "/tasks/runbooks"
+
+    progress = task.get("progress") if isinstance(task.get("progress"), dict) else {}
+    completed_steps = max(coerce_int(progress.get("completed_steps"), 0), 0)
+    total_steps = max(coerce_int(progress.get("total_steps"), completed_steps), completed_steps)
+    percent = coerce_int(progress.get("percent"), 0)
+    if total_steps == 0 and completed_steps > 0:
+        total_steps = completed_steps
+    percent = min(max(percent, 0), 100)
+    if percent == 0 and total_steps > 0 and completed_steps >= total_steps:
+        percent = 100
+
+    summary = task.get("summary") if isinstance(task.get("summary"), dict) else {}
+    last_safe_resume_point = (
+        summary.get("last_safe_resume_point") if isinstance(summary.get("last_safe_resume_point"), dict) else {}
+    )
+    next_step = normalize_task_step_reference(summary.get("next_step"))
+    next_irreversible_step = normalize_task_step_reference(summary.get("next_irreversible_step"))
+
+    if attention_required:
+        default_next_human_action = "Review the saved evidence, then resume when you are ready."
+    elif status == "completed":
+        default_next_human_action = "Review the saved evidence or launch a fresh run when you need another pass."
+    elif status == "running":
+        default_next_human_action = "Reopen this task to inspect the latest committed progress."
+    else:
+        default_next_human_action = "Open the task summary to inspect the saved evidence."
+
+    normalized["run_id"] = run_id
+    normalized["runbook_id"] = runbook_id
+    normalized["runbook_title"] = runbook_title
+    normalized["status"] = status
+    normalized["attention_required"] = attention_required
+    normalized["resume_available"] = bool(task.get("resume_available")) or attention_required
+    normalized["portal_path"] = portal_path
+    normalized["progress"] = {
+        "completed_steps": completed_steps,
+        "total_steps": total_steps,
+        "percent": percent,
+    }
+    normalized["params"] = task.get("params") if isinstance(task.get("params"), dict) else {}
+    normalized["summary"] = {
+        "headline": str(
+            summary.get("headline")
+            or default_task_headline(runbook_title, status=status, attention_required=attention_required)
+        ),
+        "what_happened": str(
+            summary.get("what_happened")
+            or f"{runbook_title} state is available for reentry, but the detailed summary has not been recorded yet."
+        ),
+        "next_human_action": str(summary.get("next_human_action") or default_next_human_action),
+        "last_safe_resume_point": {
+            "step_id": last_safe_resume_point.get("step_id"),
+            "label": str(last_safe_resume_point.get("label") or "Saved state"),
+            "timestamp": last_safe_resume_point.get("timestamp"),
+            "message": str(
+                last_safe_resume_point.get("message")
+                or "Saved run state is available, but the last safe resume point was not recorded."
+            ),
+        },
+        "next_step": next_step,
+        "next_irreversible_step": next_irreversible_step,
+        "mutation_state": str(summary.get("mutation_state") or "Mutation state is not available for this task yet."),
+    }
+
+    evidence = task.get("evidence") if isinstance(task.get("evidence"), list) else []
+    normalized["evidence"] = [
+        {
+            "label": str(item.get("label") or item.get("step_id") or "Recorded evidence"),
+            "status": str(item.get("status") or "unknown"),
+            "finished_at": item.get("finished_at"),
+            "detail": str(item.get("detail") or ""),
+        }
+        for item in evidence
+        if isinstance(item, dict)
+    ]
+
+    activity = task.get("activity") if isinstance(task.get("activity"), list) else []
+    normalized["activity"] = [
+        {
+            "title": str(item.get("title") or "Task update"),
+            "detail": str(item.get("detail") or "Saved task state updated."),
+            "timestamp": item.get("timestamp"),
+            "status": str(item.get("status") or "unknown"),
+            "portal_path": str(item.get("portal_path") or portal_path),
+            "runbook_title": str(item.get("runbook_title") or runbook_title),
+        }
+        for item in activity
+        if isinstance(item, dict)
+    ]
+    normalized["steps"] = task.get("steps") if isinstance(task.get("steps"), list) else []
+    return normalized
+
+
+def build_task_panel_model(tasks: list[dict[str, Any]]) -> dict[str, Any]:
+    normalized = [normalize_task_model(item) for item in tasks if isinstance(item, dict)]
+    attention = [item for item in normalized if item.get("attention_required")]
+    latest_by_runbook: dict[str, dict[str, Any]] = {}
+    for item in normalized:
+        runbook_id = str(item.get("runbook_id", "")).strip()
+        if runbook_id and runbook_id not in latest_by_runbook:
+            latest_by_runbook[runbook_id] = item
+
+    activity: list[dict[str, Any]] = []
+    seen_activity: set[tuple[str, str, str]] = set()
+    for item in normalized:
+        for event in item.get("activity", []):
+            if not isinstance(event, dict):
+                continue
+            key = (
+                str(item.get("run_id", "")),
+                str(event.get("timestamp", "")),
+                str(event.get("title", "")),
+            )
+            if key in seen_activity:
+                continue
+            seen_activity.add(key)
+            activity.append(
+                {
+                    "run_id": item.get("run_id"),
+                    "runbook_id": item.get("runbook_id"),
+                    "runbook_title": item.get("runbook_title"),
+                    "portal_path": event.get("portal_path") or item.get("portal_path"),
+                    "title": event.get("title"),
+                    "detail": event.get("detail"),
+                    "timestamp": event.get("timestamp"),
+                    "status": event.get("status"),
+                }
+            )
+    activity.sort(key=lambda entry: str(entry.get("timestamp") or ""), reverse=True)
+
+    return {
+        "attention": attention[:4],
+        "recent": normalized[:6],
+        "activity": activity[:8],
+        "attention_count": len(attention),
+        "recent_count": len(normalized),
+        "latest_by_runbook": latest_by_runbook,
+    }
 
 
 async def build_launcher_panel_context(request: Request, *, query: str = "") -> dict[str, Any]:
@@ -2968,6 +3174,14 @@ async def build_launcher_panel_context(request: Request, *, query: str = "") -> 
             "acknowledged_count": 0,
             "dismissed_count": 0,
             "activity_count": 0,
+        },
+        "task_panel": {
+            "attention": [],
+            "recent": [],
+            "activity": [],
+            "attention_count": 0,
+            "recent_count": 0,
+            "latest_by_runbook": {},
         },
         "contextual_help": build_ops_portal_help(request.app.state.settings.docs_base_url),
         "search_collections": available_collections(),
@@ -3072,6 +3286,13 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001
         runbook_payload = {"warning": str(exc), "runbooks": []}
     try:
+        task_payload = await gateway.fetch_runbook_tasks(
+            token=read_api_token(session, request.app.state.settings),
+            delivery_surface="ops_portal",
+        )
+    except Exception as exc:  # noqa: BLE001
+        task_payload = {"warning": str(exc), "tasks": []}
+    try:
         runtime_assurance_payload = await gateway.fetch_runtime_assurance(
             token=read_api_token(session, request.app.state.settings),
         )
@@ -3089,6 +3310,9 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     coordination = normalize_agent_coordination(coordination_payload)
     raw_runbooks = runbook_payload.get("runbooks") if isinstance(runbook_payload, dict) else []
     runbooks = enrich_runbook_metadata(raw_runbooks if isinstance(raw_runbooks, list) else [], workflows)
+    raw_tasks = task_payload.get("tasks") if isinstance(task_payload, dict) else []
+    tasks = raw_tasks if isinstance(raw_tasks, list) else []
+    task_panel = build_task_panel_model(tasks)
     capability_models, capability_summary = build_capability_contract_models(capability_contracts, services)
     service_models = build_service_models(
         services,
@@ -3141,7 +3365,12 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     }
     shell_navigation = build_shell_navigation(workbench_ia["pages"], section_counts)
 
-    visible_runbooks, locked_runbooks = build_runbook_models(runbooks, activation, workbench_ia)
+    visible_runbooks, locked_runbooks = build_runbook_models(
+        runbooks,
+        activation,
+        workbench_ia,
+        task_panel["latest_by_runbook"],
+    )
 
     return {
         "request": request,
@@ -3167,6 +3396,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "activities": activity_items,
         "runbooks": visible_runbooks,
         "locked_runbooks": locked_runbooks,
+        "task_panel": task_panel,
         "deployments": deployments[:10],
         "changelog_notes": changelog_notes,
         "drift_report": drift_report,
@@ -3178,6 +3408,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         ),
         "coordination_warning": coordination_payload.get("warning") if isinstance(coordination_payload, dict) else None,
         "runbook_warning": runbook_payload.get("warning") if isinstance(runbook_payload, dict) else None,
+        "task_warning": task_payload.get("warning") if isinstance(task_payload, dict) else None,
         "coordination": coordination,
         "deployment_events": deployment_console_seed(),
         "charts": chart_models,
@@ -3203,6 +3434,43 @@ async def build_activation_panel_context(request: Request) -> dict[str, Any]:
         "activation": launcher_context["activation"],
         "docs_base_url": request.app.state.settings.docs_base_url,
     }
+
+
+async def build_task_detail_context(
+    request: Request,
+    run_id: str,
+    *,
+    notice: str = "",
+    notice_tone: str = "ok",
+) -> dict[str, Any]:
+    context = await build_dashboard_context(request)
+    session = await ensure_session(request)
+    gateway: Any = request.app.state.gateway_client
+    try:
+        payload = await gateway.fetch_runbook_task(
+            run_id,
+            token=read_api_token(session, request.app.state.settings),
+        )
+    except httpx.HTTPStatusError as exc:
+        detail = exc.response.text.strip() or f"task {run_id} is unavailable"
+        raise HTTPException(status_code=exc.response.status_code, detail=detail) from exc
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=f"unable to load task {run_id}: {exc}") from exc
+
+    task = payload.get("reentry") if isinstance(payload, dict) else None
+    if not isinstance(task, dict):
+        raise HTTPException(status_code=502, detail=f"task {run_id} returned an invalid payload")
+
+    task = normalize_task_model(task)
+    context.update(
+        {
+            "task": task,
+            "task_record": payload,
+            "task_notice": notice,
+            "task_notice_tone": notice_tone,
+        }
+    )
+    return context
 
 
 def sse_encode(event: str, data: dict[str, Any]) -> str:
@@ -3285,6 +3553,16 @@ def create_app(
         journey["invalid_requested_url"] = invalid_requested_url
         return templates.TemplateResponse(request=request, name="entry.html", context={**context, "journey": journey})
 
+    @app.get("/tasks/runbooks/{run_id}", response_class=HTMLResponse)
+    async def runbook_task_detail(
+        request: Request,
+        run_id: str,
+        notice: str = "",
+        notice_tone: str = "ok",
+    ) -> HTMLResponse:
+        context = await build_task_detail_context(request, run_id, notice=notice, notice_tone=notice_tone)
+        return templates.TemplateResponse(request=request, name="task_detail.html", context=context)
+
     @app.get("/partials/launcher", response_class=HTMLResponse)
     async def launcher_partial(request: Request, query: str = "") -> HTMLResponse:
         context = await build_launcher_panel_context(request, query=query)
@@ -3330,6 +3608,11 @@ def create_app(
         context = await build_dashboard_context(request)
         context["page_lane"] = context["page_sections"].get("runbooks")
         return templates.TemplateResponse(request=request, name="partials/runbooks.html", context=context)
+
+    @app.get("/partials/tasks", response_class=HTMLResponse)
+    async def tasks_partial(request: Request) -> HTMLResponse:
+        context = await build_dashboard_context(request)
+        return templates.TemplateResponse(request=request, name="partials/tasks.html", context=context)
 
     @app.get("/partials/changelog", response_class=HTMLResponse)
     async def changelog_partial(request: Request) -> HTMLResponse:
@@ -3668,10 +3951,12 @@ def create_app(
                 event_type="runbook",
                 metadata={"runbook_id": runbook_id, "status": status},
             )
+            task_link = str(result.get("task_path") or f"/tasks/runbooks/{result.get('run_id', '')}").strip()
         except Exception as exc:  # noqa: BLE001
             detail = str(exc)
             tone = "danger"
             status = "failed"
+            task_link = ""
 
         context = {
             "request": request,
@@ -3681,9 +3966,34 @@ def create_app(
                 "detail": detail,
                 "tone": tone,
                 "timestamp": isoformat(utc_now()),
+                "link_url": task_link if task_link and status != "failed" else "",
+                "link_label": (
+                    "Review task summary"
+                    if task_link and status == "escalated"
+                    else "Open task details"
+                    if task_link
+                    else ""
+                ),
             },
         }
         return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
+
+    @app.post("/tasks/runbooks/{run_id}/resume")
+    async def resume_runbook_task(request: Request, run_id: str) -> RedirectResponse:
+        session = await ensure_session(request)
+        gateway = request.app.state.gateway_client
+        try:
+            result = await gateway.resume_runbook_task(
+                run_id,
+                token=read_api_token(session, request.app.state.settings),
+            )
+            notice = str(result.get("message") or f"Runbook task {run_id} resumed successfully.")
+            notice_tone = "ok" if str(result.get("status") or "") == "completed" else "warn"
+        except Exception as exc:  # noqa: BLE001
+            notice = str(exc)
+            notice_tone = "danger"
+        query = httpx.QueryParams({"notice": notice, "notice_tone": notice_tone})
+        return RedirectResponse(url=f"/tasks/runbooks/{run_id}?{query}", status_code=303)
 
     @app.post("/actions/search", response_class=HTMLResponse)
     async def search_action(

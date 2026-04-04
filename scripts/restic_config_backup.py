@@ -215,6 +215,23 @@ def container_compose_start_command(container: dict[str, Any]) -> tuple[list[str
     return command, (Path(working_dir) if working_dir else None)
 
 
+def container_compose_force_recreate_command(container: dict[str, Any]) -> tuple[list[str], Path | None] | None:
+    labels = ((container.get("Config") or {}).get("Labels") or {}) if isinstance(container, dict) else {}
+    working_dir = str(labels.get("com.docker.compose.project.working_dir") or "").strip()
+    config_files = str(labels.get("com.docker.compose.project.config_files") or "").strip()
+    service = str(labels.get("com.docker.compose.service") or "").strip()
+    if not service:
+        return None
+
+    command = ["docker", "compose"]
+    for config_file in config_files.split(","):
+        candidate = config_file.strip()
+        if candidate:
+            command.extend(["--file", candidate])
+    command.extend(["up", "-d", "--force-recreate", service])
+    return command, (Path(working_dir) if working_dir else None)
+
+
 def extract_container_addresses(container: dict[str, Any]) -> tuple[list[str], str | None]:
     networks = ((container.get("NetworkSettings") or {}).get("Networks") or {}) if isinstance(container, dict) else {}
     ipv4_addresses: list[str] = []
@@ -339,6 +356,46 @@ def ensure_container_running(
     )
 
 
+def ensure_container_network_attachment(
+    container_name: str,
+    *,
+    container: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    current = container or inspect_container(container_name)
+    addresses, invalid_address = extract_container_addresses(current)
+    if addresses:
+        return current
+
+    detail = (
+        f"reported an invalid container IP: {invalid_address!r}"
+        if invalid_address is not None
+        else "has no reachable container IP"
+    )
+    compose_recreate = container_compose_force_recreate_command(current)
+    if compose_recreate is not None:
+        command, cwd = compose_recreate
+        recovery = run_command(command, cwd=cwd)
+        failure_label = "docker compose force-recreate failed"
+    else:
+        recovery = run_command(["docker", "restart", container_name])
+        failure_label = "docker restart failed"
+
+    if recovery.returncode != 0:
+        error_detail = recovery.stderr.strip() or recovery.stdout.strip() or failure_label
+        raise RuntimeError(f"{container_name} {detail} and {failure_label}: {error_detail}")
+
+    recovered = inspect_container(container_name)
+    recovered_state = (recovered.get("State") or {}) if isinstance(recovered, dict) else {}
+    if bool(recovered_state.get("Running")):
+        return recovered
+
+    recovered_status = str(recovered_state.get("Status") or "unknown").strip() or "unknown"
+    raise RuntimeError(
+        f"{container_name} {detail} and is {recovered_status} after network recovery; "
+        "converge the MinIO runtime before rerunning restic config backup"
+    )
+
+
 def resolve_minio_endpoint(catalog: dict[str, Any]) -> tuple[str, str]:
     controller_host = catalog.get("controller_host", {})
     minio = controller_host.get("minio", {})
@@ -346,7 +403,8 @@ def resolve_minio_endpoint(catalog: dict[str, Any]) -> tuple[str, str]:
     if not container_name:
         raise ValueError("restic catalog is missing controller_host.minio.container_name")
     live_container_name, container = resolve_minio_container(container_name)
-    ensure_container_running(live_container_name, container=container)
+    running_container = ensure_container_running(live_container_name, container=container)
+    ensure_container_network_attachment(live_container_name, container=running_container)
     return wait_for_minio_endpoint(live_container_name)
 
 

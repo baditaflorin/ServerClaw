@@ -6,6 +6,12 @@ postgres_vm_client_allowed_sources_extra:
         playbook_execution_host_patterns.docker_runtime[playbook_execution_env]
       ].ipv4
     }}/32
+  - >-
+    {{
+      platform_guest_catalog.by_name[
+        playbook_execution_host_patterns.runtime_control[playbook_execution_env]
+      ].ipv4
+    }}/32
   - 172.16.0.0/12
   - 192.168.0.0/16
   - 10.200.0.0/16

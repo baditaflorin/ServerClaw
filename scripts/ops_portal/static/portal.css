@@ -1413,6 +1413,96 @@ select {
   pointer-events: none;
 }
 
+.section-head--compact {
+  margin-bottom: 0.9rem;
+}
+
+.task-grid,
+.task-detail-layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+}
+
+.task-column,
+.task-detail-card {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.task-card-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.task-card {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.task-card--attention {
+  border-color: rgba(178, 106, 0, 0.22);
+  box-shadow: 0 16px 40px rgba(178, 106, 0, 0.12);
+}
+
+.task-meta-list {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0;
+}
+
+.task-meta-list div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.task-meta-list dt {
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.task-meta-list dd {
+  margin: 0;
+}
+
+.task-json {
+  margin: 0;
+  padding: 1rem;
+  border-radius: 1rem;
+  overflow: auto;
+  background: rgba(20, 33, 61, 0.05);
+}
+
+.task-evidence-list {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.task-evidence-list li {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.runbook-form-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.45rem 0 0.85rem;
+}
+
+.runbook-task-hint {
+  padding: 0.8rem 0.95rem;
+  border: 1px solid rgba(20, 33, 61, 0.08);
+  border-radius: 1rem;
+  background: rgba(20, 33, 61, 0.03);
+}
+
 @keyframes shell-shimmer {
   0% {
     background-position: 200% 0;

@@ -34,6 +34,9 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
 
     assert playbook[1]["hosts"] == "runtime-general-lv3"
     assert playbook[1]["vars"]["runtime_pool_substrate_pool_id"] == "runtime-general"
+    pre_task_names = [task["name"] for task in playbook[1]["pre_tasks"]]
+    assert "Detect whether Docker is already active before the managed runtime converge" not in pre_task_names
+    assert "Stop any preexisting Docker daemon before firewall evaluation" not in pre_task_names
     assert [route["route_id"] for route in playbook[1]["vars"]["runtime_pool_substrate_routes"]] == [
         "uptime-kuma",
         "homepage",
@@ -46,6 +49,9 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
         "lv3.platform.nomad_cluster_member",
         "lv3.platform.runtime_pool_substrate",
     ]
+    assert playbook[1]["roles"][0]["vars"] == {
+        "linux_guest_firewall_recover_missing_docker_bridge_chains": True
+    }
 
     assert playbook[3]["hosts"] == "monitoring-lv3"
     assert [role["role"] for role in playbook[3]["roles"]] == ["lv3.platform.nomad_namespace"]

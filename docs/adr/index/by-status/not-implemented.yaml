@@ -10,7 +10,7 @@ generated: '2026-04-04'
 facet: status
 implementation_status: Not Implemented
 slug: not-implemented
-total_adrs: 28
+total_adrs: 27
 adrs:
   - adr: '0024'
     title: Docker Guest Security Baseline
@@ -444,21 +444,6 @@ adrs:
     summary: We will treat the platform's human-facing experience as one cohesive
     filename: 0307-platform-workbench-as-the-cohesive-first-party-app-frame.md
     path: docs/adr/0307-platform-workbench-as-the-cohesive-first-party-app-frame.md
-  - adr: '0314'
-    title: Resumable Multi-Step Flows And Return-To-Task Reentry
-    status: Accepted
-    implementation_status: Not Implemented
-    date: '2026-03-31'
-    concern: platform
-    keywords:
-      - resumable
-      - multi-step
-      - flows
-      - return-to-task
-      - reentry
-    summary: We will treat important multi-step human flows as resumable tasks with
-    filename: 0314-resumable-multi-step-flows-and-return-to-task-reentry.md
-    path: docs/adr/0314-resumable-multi-step-flows-and-return-to-task-reentry.md
   - adr: '0324'
     title: Service Definition Shards And Generated Service Catalog Assembly
     status: Accepted

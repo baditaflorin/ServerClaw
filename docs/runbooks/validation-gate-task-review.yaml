@@ -1,0 +1,29 @@
+id: validation-gate-task-review
+title: Review validation gate and return to task
+automation:
+  eligible: true
+  description: Capture the validation-gate summary, pause for human review, then resume into a final confirmation snapshot.
+  delivery_surfaces:
+    - api_gateway
+    - cli
+    - ops_portal
+    - windmill
+steps:
+  - id: capture-initial-summary
+    type: diagnostic
+    workflow_id: gate-status
+    params: {}
+    success_condition: "result != None"
+    on_failure: escalate
+
+  - id: operator-review
+    type: pause
+    description: Review the saved validation-gate evidence before continuing.
+    params: {}
+
+  - id: capture-post-review-summary
+    type: diagnostic
+    workflow_id: gate-status
+    params: {}
+    success_condition: "result != None"
+    on_failure: escalate

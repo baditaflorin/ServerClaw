@@ -1,6 +1,6 @@
 # Purpose: Reconcile repo-managed Keycloak users, credentials, and group memberships against the live realm.
 # Use case: Included by the Keycloak runtime role when named operator and service identities must match repo contracts.
-# Inputs: Keycloak admin endpoints, bootstrap admin credentials, repo-managed user definitions, and target group ids.
+# Inputs: Keycloak admin endpoints, the repo-managed admin client credentials, repo-managed user definitions, and target group ids.
 # Outputs: Repo-managed Keycloak users exist with the expected enabled state, passwords, and group assignments.
 # Idempotency: Fully idempotent because the task only creates or updates drifted identities.
 # Dependencies: ADR 0165, ADR 0056, and ADR 0262.
@@ -11,10 +11,9 @@
     timeout: "{{ keycloak_admin_connection_timeout }}"
     body_format: form-urlencoded
     body:
-      grant_type: password
-      client_id: admin-cli
-      username: "{{ keycloak_bootstrap_admin_username }}"
-      password: "{{ keycloak_bootstrap_admin_password }}"
+      grant_type: client_credentials
+      client_id: "{{ keycloak_admin_client_id }}"
+      client_secret: "{{ keycloak_admin_client_secret }}"
     return_content: true
     status_code: 200
   register: keycloak_repo_user_admin_token

@@ -5,6 +5,7 @@
 # Idempotency: Fully idempotent; verification tasks only read local runtime state and assert expected content.
 # Dependencies: ADR 0165, ADR 0310, ops_portal_runtime defaults, and a running local Docker runtime.
 ---
+# Purpose: Verify the live ops portal runtime serves the expected dashboard, contextual help, and return-to-task surfaces after deployment.
 - name: Verify the ops portal container is running
   ansible.builtin.command:
     argv:
@@ -18,6 +19,9 @@
       - "{{ '{{' }}.Names{{ '}}' }}"
   register: ops_portal_verify_running
   changed_when: false
+  retries: 20
+  delay: 3
+  until: ops_portal_verify_running.stdout_lines | select('equalto', ops_portal_container_name) | list | length == 1
 
 - name: Assert the ops portal container is running
   ansible.builtin.assert:
@@ -190,3 +194,23 @@
     fail_msg: >-
       Ops portal runtime assurance matrix partial rendered with degraded live
       gateway data instead of the authenticated runtime assurance view.
+
+- name: Verify the return-to-task partial renders locally
+  ansible.builtin.uri:
+    url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/partials/tasks"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: ops_portal_verify_tasks
+  changed_when: false
+  retries: 18
+  delay: 5
+  until: ops_portal_verify_tasks.status == 200
+
+- name: Assert the return-to-task panel is present
+  ansible.builtin.assert:
+    that:
+      - "'Return-to-task data is degraded' not in ops_portal_verify_tasks.content"
+      - "'Needs your review' in ops_portal_verify_tasks.content"
+      - "'Recent task state changes' in ops_portal_verify_tasks.content"
+    fail_msg: "Ops portal task reentry partial did not render the ADR 0314 return-to-task surface."

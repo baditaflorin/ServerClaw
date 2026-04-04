@@ -543,6 +543,68 @@ def test_resolve_minio_endpoint_starts_standalone_stopped_container(monkeypatch)
     ]
 
 
+def test_resolve_minio_endpoint_force_recreates_running_compose_managed_container_without_network(
+    monkeypatch,
+) -> None:
+    calls: list[list[str]] = []
+    inspect_count = 0
+
+    class FakeResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fake_run_command(argv, **kwargs):
+        nonlocal inspect_count
+        calls.append(argv)
+        if argv == ["docker", "inspect", "minio"]:
+            inspect_count += 1
+            networks = {} if inspect_count == 1 else {"minio_default": {"IPAddress": "10.200.18.7"}}
+            return types.SimpleNamespace(
+                returncode=0,
+                stdout=json.dumps(
+                    [
+                        {
+                            "State": {"Running": True, "Status": "running"},
+                            "Config": {
+                                "Labels": {
+                                    "com.docker.compose.project.working_dir": "/opt/minio",
+                                    "com.docker.compose.project.config_files": "/opt/minio/docker-compose.yml",
+                                    "com.docker.compose.service": "minio",
+                                }
+                            },
+                            "NetworkSettings": {"Networks": networks},
+                        }
+                    ]
+                ),
+                stderr="",
+            )
+        if argv == ["docker", "compose", "--file", "/opt/minio/docker-compose.yml", "up", "-d", "--force-recreate", "minio"]:
+            return types.SimpleNamespace(returncode=0, stdout="recreated\n", stderr="")
+        raise AssertionError(f"unexpected command: {argv}")
+
+    monkeypatch.setattr(restic_backup, "run_command", fake_run_command)
+    monkeypatch.setattr(restic_backup.time, "sleep", lambda _: None)
+    monkeypatch.setattr(restic_backup.urllib.request, "urlopen", lambda *args, **kwargs: FakeResponse())
+
+    host, endpoint = restic_backup.resolve_minio_endpoint(
+        {"controller_host": {"minio": {"container_name": "minio", "bucket": "restic-config-backup"}}}
+    )
+
+    assert host == "10.200.18.7"
+    assert endpoint == "http://10.200.18.7:9000"
+    assert calls == [
+        ["docker", "inspect", "minio"],
+        ["docker", "compose", "--file", "/opt/minio/docker-compose.yml", "up", "-d", "--force-recreate", "minio"],
+        ["docker", "inspect", "minio"],
+        ["docker", "inspect", "minio"],
+    ]
+
+
 def test_resolve_minio_endpoint_falls_back_to_outline_minio_when_dedicated_minio_is_absent(monkeypatch) -> None:
     commands: list[list[str]] = []
 
@@ -624,20 +686,30 @@ def test_resolve_minio_endpoint_reports_failed_container_restart() -> None:
         raise AssertionError("Expected resolve_minio_endpoint to reject containers that cannot be restarted")
 
 
-def test_resolve_minio_endpoint_rejects_invalid_container_ip(monkeypatch) -> None:
+def test_resolve_minio_endpoint_rejects_invalid_container_ip_after_network_recovery(monkeypatch) -> None:
     monkeypatch.setattr(restic_backup.time, "sleep", lambda _: None)
-    restic_backup.run_command = lambda argv, **kwargs: types.SimpleNamespace(
-        returncode=0,
-        stdout=json.dumps(
-            [
-                {
-                    "State": {"Running": True, "Status": "running"},
-                    "NetworkSettings": {"Networks": {"outline_default": {"IPAddress": "invalid IP"}}},
-                }
-            ]
-        ),
-        stderr="",
-    )
+    commands: list[list[str]] = []
+
+    def fake_run_command(argv, **kwargs):
+        commands.append(argv)
+        if argv == ["docker", "inspect", "minio"]:
+            return types.SimpleNamespace(
+                returncode=0,
+                stdout=json.dumps(
+                    [
+                        {
+                            "State": {"Running": True, "Status": "running"},
+                            "NetworkSettings": {"Networks": {"outline_default": {"IPAddress": "invalid IP"}}},
+                        }
+                    ]
+                ),
+                stderr="",
+            )
+        if argv == ["docker", "restart", "minio"]:
+            return types.SimpleNamespace(returncode=0, stdout="minio\n", stderr="")
+        raise AssertionError(f"unexpected command: {argv}")
+
+    restic_backup.run_command = fake_run_command
     monkeypatch.setattr(restic_backup.urllib.request, "urlopen", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError()))
 
     try:
@@ -646,6 +718,7 @@ def test_resolve_minio_endpoint_rejects_invalid_container_ip(monkeypatch) -> Non
         )
     except RuntimeError as exc:
         assert "minio reported an invalid container IP" in str(exc)
+        assert ["docker", "restart", "minio"] in commands
     else:
         raise AssertionError("Expected resolve_minio_endpoint to reject invalid MinIO container IPs")
 

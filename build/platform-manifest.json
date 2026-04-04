@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.4",
-  "platform_version": "0.130.98",
-  "generated_at": "2026-04-04T17:52:50Z",
-  "next_refresh_at": "2026-04-04T18:52:50Z",
+  "repo_version": "0.178.5",
+  "platform_version": "0.130.99",
+  "generated_at": "2026-04-04T20:34:18Z",
+  "next_refresh_at": "2026-04-04T21:34:18Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5797,7 +5797,7 @@
         "id": "platform-operations-portal",
         "title": "Platform Operations Portal",
         "agent_trust_required": "T3",
-        "steps": 45,
+        "steps": 53,
         "path": "docs/runbooks/platform-operations-portal.md",
         "workflow_ids": [
           "converge-ops-portal"
@@ -6155,10 +6155,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.3",
+    "last_version": "0.178.4",
     "deployed_at": "2026-04-04",
-    "summary": "recovers the remaining degraded public services after the runtime-pool stabilization merges by re-materializing OpenBao-backed runtime env files, preventing docker.socket shutdown from restarting a live Docker daemon on runtime-control-lv3, and replaying the Harbor and Vaultwarden recovery paths safely implements ADR 0325 by replacing the monolithic ADR metadata catalog with shard-backed discovery manifests, adding a committed ADR reservation ledger, and validating reservation-aware query and generator workflows from exact main",
-    "release_notes_url": "docs/release-notes/0.178.4.md"
+    "summary": "closes out ADR 0330 public GitHub readiness by making the controller-local secret contract repo-relative, adding fork-first example inventory and provider/publication profiles, and surfacing the public reference tier through discovery-driven onboarding implements ADR 0314 by turning the shared runbook execution path into a resumable human task surface with durable progress, deep-link return-to-task entry, and portal reentry summaries",
+    "release_notes_url": "docs/release-notes/0.178.5.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

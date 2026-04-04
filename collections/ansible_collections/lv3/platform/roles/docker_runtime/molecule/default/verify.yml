@@ -1,13 +1,45 @@
 ---
+# Playbook: collections/ansible_collections/lv3/platform/roles/docker_runtime/molecule/default/verify.yml
+# Purpose: Verify the docker_runtime role leaves the Molecule fixture with the expected Docker socket and service state.
+# Use case: Run after the Molecule default converge to assert the repo-managed Docker runtime recovery behavior on the ephemeral fixture.
+#
+# Inputs (required):
+#   - Molecule default scenario fixture (inventory host, required): The ephemeral target that has already converged the docker_runtime role.
+#
+# Inputs (optional):
+#   - None.
+#
+# Outputs:
+#   - Confirms docker.socket is enabled and active, docker is active, and the Docker CLI responds on the fixture.
+#
+# Idempotency: Fully idempotent
+#              The play only reads service state and asserts expected results without mutating the target.
+#
+# Dependencies:
+#   - ADR 0023: Docker Runtime On Managed Guests
+#   - ADR 0165: Playbook / Role Metadata Standard
+#   - Requires: Molecule default converge for the docker_runtime role has already completed
+#   - Role: docker_runtime — configures the managed Docker runtime that this verification play inspects
+#
+# Related ADRs: 0023, 0165
+# Related Runbooks: docs/runbooks/configure-runtime-control-pool.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-04
 - name: Verify docker_runtime on the ephemeral fixture
   hosts: all
   gather_facts: false
   tasks:
-    - name: Verify docker.socket is disabled
+    - name: Verify docker.socket is enabled
       ansible.builtin.command: systemctl is-enabled docker.socket
       register: docker_socket_enabled_state
       changed_when: false
       failed_when: false
+
+    - name: Verify docker.socket is active
+      ansible.builtin.command: systemctl is-active docker.socket
+      register: docker_socket_active_state
+      changed_when: false
 
     - name: Verify docker is active
       ansible.builtin.command: systemctl is-active docker
@@ -21,5 +53,6 @@
     - name: Assert docker is active
       ansible.builtin.assert:
         that:
-          - docker_socket_enabled_state.stdout == "disabled"
+          - docker_socket_enabled_state.stdout == "enabled"
+          - docker_socket_active_state.stdout == "active"
           - docker_service_state.stdout == "active"

@@ -30,16 +30,6 @@
   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
   become: true
   gather_facts: true
-  vars:
-    ops_portal_repo_root: >-
-      {{
-        lookup(
-          'ansible.builtin.pipe',
-          'git -C ' ~ (playbook_dir | quote) ~ ' rev-parse --show-toplevel'
-        )
-        | trim
-      }}
-    linux_guest_firewall_recover_missing_docker_bridge_chains: true
   tags:
     - tier-2
     - access
@@ -57,6 +47,8 @@
 
   roles:
     - role: lv3.platform.linux_guest_firewall
+      vars:
+        linux_guest_firewall_recover_missing_docker_bridge_chains: true
     - role: lv3.platform.docker_runtime
     - role: lv3.platform.ops_portal_runtime
 

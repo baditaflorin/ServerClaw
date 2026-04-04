@@ -1,0 +1,13 @@
+[2026-04-04T14:08:41Z] validate_repo workstream-surfaces rerun
+Workstream surface ownership validation
+Workstream surface ownership validation failed: workstream surface ownership validation failed:
+- collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml: outside declared owned surfaces for ws-0314-live-apply
+- collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml: outside declared owned surfaces for ws-0314-live-apply
+- collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains_reset_connection.yml: outside declared owned surfaces for ws-0314-live-apply
+- collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/open_webui_client.yml: outside declared owned surfaces for ws-0314-live-apply
+- collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml: outside declared owned surfaces for ws-0314-live-apply
+- receipts/sbom/host-runtime-control-lv3-2026-04-04.cdx.json: outside declared owned surfaces for ws-0314-live-apply
+- tests/test_api_gateway_runtime_role.py: outside declared owned surfaces for ws-0314-live-apply
+- tests/test_common_docker_bridge_chains_helper.py: outside declared owned surfaces for ws-0314-live-apply
+- tests/test_docker_runtime_role.py: outside declared owned surfaces for ws-0314-live-apply
+- tests/test_linux_guest_firewall_role.py: outside declared owned surfaces for ws-0314-live-apply

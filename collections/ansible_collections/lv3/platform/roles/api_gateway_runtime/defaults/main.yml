@@ -205,7 +205,7 @@ api_gateway_typesense_controller_url: >-
       ~ (hostvars['proxmox_florin'].typesense_host_proxy_port | string)
     )
   }}
-api_gateway_typesense_base_url: http://127.0.0.1:8108
+api_gateway_typesense_base_url: ""
 api_gateway_typesense_collection: platform-services
 api_gateway_typesense_api_key_local_file: "{{ api_gateway_shared_local_root }}/typesense/api-key.txt"
 api_gateway_typesense_sync_script: "{{ api_gateway_repo_root }}/scripts/typesense_catalog_sync.py"
@@ -230,6 +230,8 @@ api_gateway_sources:
     dest: ansible.cfg
   - src: "{{ api_gateway_repo_root }}/scripts/controller_automation_toolkit.py"
     dest: controller_automation_toolkit.py
+  - src: "{{ api_gateway_repo_root }}/scripts/canonical_errors.py"
+    dest: canonical_errors.py
   - src: "{{ api_gateway_repo_root }}/scripts/api_gateway_catalog.py"
     dest: api_gateway_catalog.py
   - src: "{{ api_gateway_repo_root }}/scripts/maintenance_window_tool.py"
@@ -297,6 +299,7 @@ api_gateway_keycloak_verify_token_delay: 5
 api_gateway_structured_search_verify_retries: 12
 api_gateway_structured_search_verify_delay: 5
 api_gateway_keycloak_docker_network: keycloak_default
+api_gateway_tree_sync_become_timeout: 60
 api_gateway_runtime_recovery_probe_retries: 18
 api_gateway_runtime_recovery_probe_delay: 5
 api_gateway_runtime_config_probe_path: /app/config/ledger-event-types.yaml

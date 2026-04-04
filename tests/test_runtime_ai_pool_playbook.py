@@ -34,6 +34,9 @@ def test_runtime_ai_pool_playbook_covers_provisioning_substrate_namespace_migrat
 
     substrate_roles = [role["role"] for role in playbook[1]["roles"]]
     assert playbook[1]["hosts"] == "runtime-ai-lv3"
+    pre_task_names = [task["name"] for task in playbook[1]["pre_tasks"]]
+    assert "Detect whether Docker is already active before the managed runtime converge" not in pre_task_names
+    assert "Stop any preexisting Docker daemon before firewall evaluation" not in pre_task_names
     assert substrate_roles == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.linux_access",
@@ -41,6 +44,9 @@ def test_runtime_ai_pool_playbook_covers_provisioning_substrate_namespace_migrat
         "lv3.platform.nomad_cluster_member",
         "lv3.platform.runtime_pool_substrate",
     ]
+    assert playbook[1]["roles"][0]["vars"] == {
+        "linux_guest_firewall_recover_missing_docker_bridge_chains": True
+    }
 
     peer_firewall_roles = [role["role"] for role in playbook[2]["roles"]]
     assert playbook[2]["hosts"] == "monitoring-lv3"

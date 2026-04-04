@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import httpx
+import yaml
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from platform.circuit import MemoryCircuitStateBackend
@@ -92,6 +93,15 @@ def test_gateway_runtime_compose_mounts_config_at_app_path() -> None:
     ).read_text(encoding="utf-8")
 
     assert "/app/config:ro" in template
+
+
+def test_api_gateway_playbook_enables_docker_bridge_chain_recovery() -> None:
+    playbook = yaml.safe_load((REPO_ROOT / "playbooks" / "api-gateway.yml").read_text())
+
+    assert playbook[0]["roles"][0] == {
+        "role": "lv3.platform.linux_guest_firewall",
+        "vars": {"linux_guest_firewall_recover_missing_docker_bridge_chains": True},
+    }
 
 
 def test_gateway_runtime_uses_memory_circuit_backend(tmp_path: Path) -> None:
@@ -1435,6 +1445,103 @@ def test_gateway_runbook_routes_enforce_delivery_surface_allowlist(tmp_path: Pat
                         json={"runbook_id": "validation-gate-status", "delivery_surface": "ops_portal"},
                     )
                     assert response.status_code == 403
+            finally:
+                await runtime.close()
+
+    import asyncio
+
+    asyncio.run(run())
+
+
+def test_gateway_exposes_resumable_runbook_tasks(tmp_path: Path) -> None:
+    def upstream(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "jwks.test":
+            return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+        return httpx.Response(200, json={"status": "ok"})
+
+    transport = httpx.MockTransport(upstream)
+    config, token = make_repo(tmp_path, "http://upstream.test")
+    write_yaml(
+        tmp_path / "docs" / "runbooks" / "validation-gate-task-review.yaml",
+        """id: validation-gate-task-review
+title: Review validation gate and return to task
+automation:
+  eligible: true
+  description: Capture the validation gate summary, pause for human review, then resume into a final confirmation snapshot.
+  delivery_surfaces:
+    - api_gateway
+steps:
+  - id: capture-initial-summary
+    type: diagnostic
+    workflow_id: gate-status
+    params: {}
+    success_condition: "result != None"
+    on_failure: escalate
+  - id: operator-review
+    type: pause
+    description: Review the saved validation gate evidence before continuing.
+    params: {}
+  - id: capture-post-review-summary
+    type: diagnostic
+    workflow_id: gate-status
+    params: {}
+    success_condition: "result != None"
+    on_failure: escalate
+""",
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            runtime._runbook_service = RunbookUseCaseService(
+                repo_root=config.repo_root,
+                workflow_runner=type(
+                    "FakeRunner",
+                    (),
+                    {
+                        "run_workflow": staticmethod(
+                            lambda workflow_id, payload, timeout_seconds=None: {"summary": "gate ok", "checks": []}
+                        )
+                    },
+                )(),
+                store=RunbookRunStore(config.runbook_runs_dir),
+            )
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    execute = await client.post(
+                        "/v1/platform/runbooks/execute",
+                        headers={"Authorization": f"Bearer {token}"},
+                        json={"runbook_id": "validation-gate-task-review"},
+                    )
+                    assert execute.status_code == 200
+                    payload = execute.json()
+                    assert payload["status"] == "escalated"
+                    assert payload["reentry"]["summary"]["headline"].startswith("Awaiting confirmation")
+
+                    listing = await client.get(
+                        "/v1/platform/runbook-tasks?delivery_surface=api_gateway",
+                        headers={"Authorization": f"Bearer {token}"},
+                    )
+                    assert listing.status_code == 200
+                    tasks = listing.json()["tasks"]
+                    assert tasks[0]["run_id"] == payload["run_id"]
+                    assert tasks[0]["attention_required"] is True
+                    assert tasks[0]["resume_available"] is True
+
+                    detail = await client.get(
+                        f"/v1/platform/runbooks/{payload['run_id']}",
+                        headers={"Authorization": f"Bearer {token}"},
+                    )
+                    assert detail.status_code == 200
+                    assert detail.json()["reentry"]["summary"]["last_safe_resume_point"]["message"].startswith(
+                        "After capture-initial-summary"
+                    )
             finally:
                 await runtime.close()
 

@@ -684,21 +684,6 @@
     or 'Network' in (mail_platform_force_recreate_down.stderr | default(''))
   when: mail_platform_force_recreate
 
-- name: Remove stale mail platform compose networks before recovery
-  ansible.builtin.shell: |
-    set -euo pipefail
-    stale_networks="$(docker network ls -q --filter name={{ mail_platform_docker_network_name }})"
-    if [ -n "${stale_networks}" ]; then
-      docker network rm ${stale_networks}
-      echo changed
-    fi
-  args:
-    chdir: "{{ mail_platform_site_dir }}"
-    executable: /bin/bash
-  register: mail_platform_force_recreate_network_cleanup
-  changed_when: "'changed' in mail_platform_force_recreate_network_cleanup.stdout"
-  when: mail_platform_force_recreate
-
 - name: Force-recreate the mail platform stack after Docker networking recovery
   ansible.builtin.command:
     argv:
@@ -823,28 +808,6 @@
     port: "{{ mail_platform_internal_submission_port }}"
     delay: 0
     timeout: 120
-
-- name: Verify the private mail submission relay keeps STARTTLS disabled and accepts auth
-  ansible.builtin.shell: |
-    python3 - <<'PY'
-    import smtplib
-    from pathlib import Path
-
-    password = Path("{{ mail_platform_mailbox_password_file }}").read_text().strip()
-    with smtplib.SMTP("{{ ansible_host }}", {{ mail_platform_internal_submission_port }}, timeout=10) as client:
-        client.ehlo()
-        if "starttls" in client.esmtp_features:
-            raise SystemExit("internal submission relay unexpectedly advertises STARTTLS")
-        code, response = client.login("{{ mail_platform_mailbox_login }}", password)
-        if code != 235:
-            raise SystemExit(f"unexpected SMTP auth response: {code} {response!r}")
-    PY
-  register: mail_platform_submission_auth_check
-  changed_when: false
-  retries: "{{ mail_platform_submission_auth_retries }}"
-  delay: "{{ mail_platform_submission_auth_delay_seconds }}"
-  until: mail_platform_submission_auth_check.rc == 0
-  no_log: true
 
 - name: Inspect the mail gateway startup state before waiting on the API
   ansible.builtin.command:
@@ -1051,6 +1014,28 @@
           | length
         ) == 0
     fail_msg: "One or more managed mailboxes are missing from Stalwart."
+
+- name: Verify the private mail submission relay keeps STARTTLS disabled and accepts auth
+  ansible.builtin.shell: |
+    python3 - <<'PY'
+    import smtplib
+    from pathlib import Path
+
+    password = Path("{{ mail_platform_mailbox_password_file }}").read_text().strip()
+    with smtplib.SMTP("{{ ansible_host }}", {{ mail_platform_internal_submission_port }}, timeout=10) as client:
+        client.ehlo()
+        if "starttls" in client.esmtp_features:
+            raise SystemExit("internal submission relay unexpectedly advertises STARTTLS")
+        code, response = client.login("{{ mail_platform_mailbox_login }}", password)
+        if code != 235:
+            raise SystemExit(f"unexpected SMTP auth response: {code} {response!r}")
+    PY
+  register: mail_platform_submission_auth_check
+  changed_when: false
+  retries: "{{ mail_platform_submission_auth_retries }}"
+  delay: "{{ mail_platform_submission_auth_delay_seconds }}"
+  until: mail_platform_submission_auth_check.rc == 0
+  no_log: true
 
 - name: Assert the notification profile catalog is present
   ansible.builtin.assert:

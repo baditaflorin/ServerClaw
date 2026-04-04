@@ -1,0 +1,9 @@
+# Purpose: Reset the SSH transport only after the parent helper has decided Docker bridge-chain recovery probes are required.
+# Use case: Included from the Docker bridge-chain helper before the next health probe when firewall or daemon state may have invalidated the connection.
+# Inputs: None directly; inclusion is gated by the parent helper.
+# Outputs: Forces Ansible to reconnect before bridge-chain recovery probes continue.
+# Idempotency: Safe to include repeatedly because reset_connection only refreshes transport state.
+# Dependencies: ADR 0165 metadata standard and the parent docker_bridge_chains helper.
+---
+- name: Reset the SSH connection before Docker bridge-chain recovery probes
+  ansible.builtin.meta: reset_connection

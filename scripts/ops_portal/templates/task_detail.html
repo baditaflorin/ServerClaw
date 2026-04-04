@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% from "macros/states.html" import state_message %}
+
+{% block title %}Return To Task{% endblock %}
+
+{% block content %}
+  <section class="pf-v5-c-page__main-section portal-section">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Return To Task</p>
+        <h2>{{ task.summary.headline }}</h2>
+        <p class="muted">{{ task.runbook_title }}</p>
+      </div>
+      <div class="section-meta">
+        <span class="pill">{{ task.progress.completed_steps }}/{{ task.progress.total_steps }} steps</span>
+        <span class="pill">{{ task.status }}</span>
+      </div>
+    </div>
+
+    {% if task_notice %}
+      {{ state_message("Task update", task_notice, task_notice_tone) }}
+    {% endif %}
+
+    <div class="task-detail-layout">
+      <article class="pf-v5-c-card panel task-detail-card">
+        <p class="service-category">Resume summary</p>
+        <p>{{ task.summary.what_happened }}</p>
+        <dl class="task-meta-list">
+          <div>
+            <dt>Last safe resume point</dt>
+            <dd>{{ task.summary.last_safe_resume_point.message }}</dd>
+          </div>
+          <div>
+            <dt>Next human action</dt>
+            <dd>{{ task.summary.next_human_action }}</dd>
+          </div>
+          <div>
+            <dt>Mutation state</dt>
+            <dd>{{ task.summary.mutation_state }}</dd>
+          </div>
+          {% if task.summary.next_step %}
+          <div>
+            <dt>Next step</dt>
+            <dd>{{ task.summary.next_step.label }}</dd>
+          </div>
+          {% endif %}
+          {% if task.summary.next_irreversible_step %}
+          <div>
+            <dt>Next irreversible step</dt>
+            <dd>{{ task.summary.next_irreversible_step.label }}</dd>
+          </div>
+          {% endif %}
+        </dl>
+        {% if task.resume_available %}
+        <form method="post" action="/tasks/runbooks/{{ task.run_id }}/resume">
+          <button class="pf-v5-c-button pf-m-primary action-button" type="submit">Resume task</button>
+        </form>
+        {% endif %}
+        <p class="muted">Direct deep link: <a href="{{ task.portal_path }}">{{ task.portal_path }}</a></p>
+      </article>
+
+      <article class="pf-v5-c-card panel task-detail-card">
+        <p class="service-category">Draft vs committed state</p>
+        <p>The browser draft stays separate from the saved run state. The values below are the committed task parameters and evidence used for reentry.</p>
+        <pre class="task-json">{{ task.params | tojson(indent=2) }}</pre>
+      </article>
+    </div>
+
+    <div class="task-detail-layout">
+      <article class="pf-v5-c-card panel task-detail-card">
+        <p class="service-category">Evidence</p>
+        {% if task.evidence %}
+          <ul class="task-evidence-list">
+          {% for item in task.evidence %}
+            <li>
+              <strong>{{ item.label }}</strong>
+              <span class="pill">{{ item.status }}</span>
+              {% if item.finished_at %}
+              <span class="muted">{{ item.finished_at|humanize_timestamp }}</span>
+              {% endif %}
+              {% if item.detail %}
+              <p class="muted">{{ item.detail }}</p>
+              {% endif %}
+            </li>
+          {% endfor %}
+          </ul>
+        {% else %}
+          <p class="muted">No step evidence has been recorded yet.</p>
+        {% endif %}
+      </article>
+
+      <article class="pf-v5-c-card panel task-detail-card">
+        <p class="service-category">Activity Timeline</p>
+        {% if task.activity %}
+          <ul class="timeline">
+          {% for item in task.activity %}
+            <li>
+              <strong>{{ item.title }}</strong>
+              <span class="muted">{{ item.timestamp|humanize_timestamp }}</span>
+              <p class="muted">{{ item.detail }}</p>
+            </li>
+          {% endfor %}
+          </ul>
+        {% else %}
+          <p class="muted">No task activity has been recorded yet.</p>
+        {% endif %}
+      </article>
+    </div>
+  </section>
+{% endblock %}

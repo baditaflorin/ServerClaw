@@ -1,0 +1,28 @@
+..............F...........                                               [100%]
+=================================== FAILURES ===================================
+___________ test_docker_runtime_waits_out_background_apt_maintenance ___________
+
+    def test_docker_runtime_waits_out_background_apt_maintenance() -> None:
+        tasks = load_tasks()
+        defaults = load_defaults()
+        prereq_task = next(task for task in tasks if task["name"] == "Install Docker repository prerequisites")
+        remove_conflicts_task = next(task for task in tasks if task["name"] == "Remove conflicting Docker packages")
+        install_runtime_task = next(task for task in tasks if task["name"] == "Install Docker runtime packages")
+
+        prereq_apt = prereq_task["ansible.builtin.apt"]
+        remove_conflicts_apt = remove_conflicts_task["ansible.builtin.apt"]
+        install_runtime_apt = install_runtime_task["ansible.builtin.apt"]
+
+        assert defaults["docker_runtime_apt_lock_timeout"] == 1200
+
+>       assert prereq_apt["name"] == "{{ docker_runtime_prereq_packages }}"
+E       AssertionError: assert '{{ docker_ru...q_packages }}' == '{{ docker_ru...q_packages }}'
+E
+E         - {{ docker_runtime_prereq_packages }}
+E         + {{ docker_runtime_missing_prereq_packages }}
+E         ?                  ++++++++
+
+tests/test_docker_runtime_role.py:1199: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_docker_runtime_role.py::test_docker_runtime_waits_out_background_apt_maintenance
+1 failed, 25 passed in 26.13s

@@ -25,6 +25,9 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
     assert playbook[1]["name"] == "Converge the dedicated runtime-control guest substrate"
     assert playbook[1]["hosts"] == "runtime-control-lv3"
     assert playbook[1]["vars"]["runtime_pool_substrate_pool_id"] == "runtime-control"
+    pre_task_names = [task["name"] for task in playbook[1]["pre_tasks"]]
+    assert "Detect whether Docker is already active before the managed runtime converge" not in pre_task_names
+    assert "Stop any preexisting Docker daemon before firewall evaluation" not in pre_task_names
     assert [route["route_id"] for route in playbook[1]["vars"]["runtime_pool_substrate_routes"]] == [
         "api-gateway",
         "gitea",
@@ -41,6 +44,9 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
         "lv3.platform.nomad_cluster_member",
         "lv3.platform.runtime_pool_substrate",
     ]
+    assert playbook[1]["roles"][0]["vars"] == {
+        "linux_guest_firewall_recover_missing_docker_bridge_chains": True
+    }
 
     assert playbook[3]["name"] == "Ensure the runtime-control Nomad namespace exists"
     assert playbook[3]["hosts"] == "monitoring-lv3"
@@ -48,10 +54,10 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
 
     import_playbooks = [entry["import_playbook"] for entry in playbook[4:17]]
     assert import_playbooks == [
+        "step-ca.yml",
+        "openbao.yml",
         "mail-platform.yml",
         "keycloak.yml",
-        "openbao.yml",
-        "step-ca.yml",
         "openfga.yml",
         "nats-jetstream.yml",
         "gitea.yml",
@@ -62,6 +68,12 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
         "windmill.yml",
         "api-gateway.yml",
     ]
+    assert import_playbooks.index("step-ca.yml") < import_playbooks.index("openbao.yml")
+    assert import_playbooks.index("openbao.yml") < import_playbooks.index("mail-platform.yml")
+    openbao_import = playbook[5]
+    assert openbao_import["import_playbook"] == "openbao.yml"
+    assert openbao_import["vars"]["openbao_migration_enabled"] is True
+    assert openbao_import["vars"]["openbao_migration_source_host"] == "docker-runtime-lv3"
 
     assert playbook[17]["name"] == "Verify the runtime-control substrate routes after the control-plane migration"
     assert playbook[17]["hosts"] == "runtime-control-lv3"

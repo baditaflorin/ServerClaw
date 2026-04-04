@@ -1,27 +1,27 @@
 # Purpose: Converge the dedicated ServerClaw public OAuth client and mirror its secret locally.
 # Use case: Run from the standalone ServerClaw play when only the public assistant client must be reconciled.
-# Inputs: Keycloak admin credentials, ServerClaw client settings, and local artifact paths.
+# Inputs: Keycloak admin client credentials, ServerClaw client settings, and local artifact paths.
 # Outputs: Ensures the Keycloak client exists and writes the mirrored client secret to the controller.
 # Idempotency: Partially idempotent because Keycloak reconciliation may refresh secrets and mirrored artifacts.
 # Dependencies: ADR 0165, ADR 0254, and the repo-managed Keycloak runtime.
 ---
-- name: Ensure the Keycloak bootstrap admin password exists on the control machine
+- name: Ensure the repo-managed Keycloak admin client secret exists on the control machine
   ansible.builtin.stat:
-    path: "{{ keycloak_bootstrap_admin_password_local_file }}"
+    path: "{{ keycloak_admin_client_secret_local_file }}"
   delegate_to: localhost
   become: false
-  register: keycloak_bootstrap_admin_password_local
+  register: keycloak_admin_client_secret_local
 
-- name: Fail if the Keycloak bootstrap admin password is missing locally
+- name: Fail if the repo-managed Keycloak admin client secret is missing locally
   ansible.builtin.fail:
     msg: >-
-      {{ keycloak_bootstrap_admin_password_local_file }} is missing on the control machine.
+      {{ keycloak_admin_client_secret_local_file }} is missing on the control machine.
       Converge Keycloak first so repo-managed OAuth clients can authenticate to the admin API.
-  when: not keycloak_bootstrap_admin_password_local.stat.exists
+  when: not keycloak_admin_client_secret_local.stat.exists
 
-- name: Record the Keycloak bootstrap admin password from the control machine
+- name: Record the repo-managed Keycloak admin client secret from the control machine
   ansible.builtin.set_fact:
-    keycloak_bootstrap_admin_password: "{{ lookup('ansible.builtin.file', keycloak_bootstrap_admin_password_local_file) | trim }}"
+    keycloak_admin_client_secret: "{{ lookup('ansible.builtin.file', keycloak_admin_client_secret_local_file) | trim }}"
   no_log: true
 
 - name: Ensure the local Keycloak artifact directory exists
@@ -54,22 +54,21 @@
   until: keycloak_serverclaw_admin_api_probe.status == 200
   changed_when: false
 
-- name: Wait for the Keycloak bootstrap admin token endpoint to succeed
+- name: Wait for the repo-managed Keycloak admin client token endpoint to succeed
   ansible.builtin.uri:
     url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
     method: POST
     body_format: form-urlencoded
     body:
-      grant_type: password
-      client_id: admin-cli
-      username: "{{ keycloak_bootstrap_admin_username }}"
-      password: "{{ keycloak_bootstrap_admin_password }}"
+      grant_type: client_credentials
+      client_id: "{{ keycloak_admin_client_id }}"
+      client_secret: "{{ keycloak_admin_client_secret }}"
     return_content: true
     status_code: 200
-  register: keycloak_serverclaw_bootstrap_admin_token_probe
+  register: keycloak_serverclaw_admin_client_token_probe
   retries: "{{ keycloak_startup_probe_retries }}"
   delay: "{{ keycloak_startup_probe_delay }}"
-  until: keycloak_serverclaw_bootstrap_admin_token_probe.status == 200
+  until: keycloak_serverclaw_admin_client_token_probe.status == 200
   changed_when: false
   no_log: true
 
@@ -78,7 +77,7 @@
     url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
     method: GET
     headers:
-      Authorization: "Bearer {{ keycloak_serverclaw_bootstrap_admin_token_probe.json.access_token }}"
+      Authorization: "Bearer {{ keycloak_serverclaw_admin_client_token_probe.json.access_token }}"
     status_code: 200
   register: keycloak_serverclaw_admin_probe
   retries: "{{ keycloak_startup_probe_retries }}"
@@ -91,6 +90,11 @@
   module_defaults:
     group/community.general.keycloak:
       connection_timeout: "{{ keycloak_admin_connection_timeout }}"
+      auth_client_id: "{{ keycloak_admin_client_id }}"
+      auth_client_secret: "{{ keycloak_admin_client_secret }}"
+      auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+      auth_realm: master
+      validate_certs: false
   block:
     - name: Ensure the ServerClaw OAuth client exists
       community.general.keycloak_client:
@@ -126,23 +130,11 @@
               access.token.claim: "true"
               userinfo.token.claim: "true"
         state: present
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
 
     - name: Read the ServerClaw client secret
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_serverclaw_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
-        validate_certs: false
       register: keycloak_serverclaw_client_secret_info
       no_log: true
 

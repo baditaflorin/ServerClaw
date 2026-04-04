@@ -2035,6 +2035,32 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
             "runbooks": runbooks,
         }
 
+    @app.get("/v1/platform/runbook-tasks")
+    async def platform_runbook_tasks(
+        request: Request,
+        delivery_surface: str = Query(default="api_gateway"),
+        limit: int = Query(default=20, ge=1, le=100),
+        status: list[str] | None = Query(default=None),
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        service = require_runbook_service(runtime)
+        tasks = await asyncio.to_thread(
+            service.list_tasks,
+            surface=delivery_surface,
+            limit=limit,
+            statuses=status or None,
+        )
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return {
+            "request_id": request.state.request_id,
+            "delivery_surface": delivery_surface,
+            "tasks": tasks,
+        }
+
     @app.post("/v1/platform/runbooks/execute")
     async def platform_runbook_execute(
         body: RunbookExecuteRequest,
@@ -2066,6 +2092,8 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
             "status": record["status"],
             "delivery_surface": body.delivery_surface,
             "message": f"Runbook {record['runbook_id']} finished with status {record['status']}.",
+            "task_path": f"/tasks/runbooks/{record['run_id']}",
+            "reentry": service.describe_task(record["run_id"])["reentry"],
         }
 
     @app.get("/v1/platform/runbooks/{run_id}")
@@ -2080,7 +2108,7 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
         runtime: GatewayRuntime = request.app.state.runtime
         service = require_runbook_service(runtime)
         try:
-            record = await asyncio.to_thread(service.status, run_id)
+            record = await asyncio.to_thread(service.describe_task, run_id)
         except FileNotFoundError as exc:
             raise HTTPException(status_code=404, detail=f"runbook run not found: {run_id}") from exc
         await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
@@ -2108,6 +2136,8 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
             "runbook_id": record["runbook_id"],
             "status": record["status"],
             "message": f"Runbook {record['runbook_id']} finished with status {record['status']}.",
+            "task_path": f"/tasks/runbooks/{record['run_id']}",
+            "reentry": service.describe_task(record["run_id"])["reentry"],
         }
 
     @app.post("/v1/dify-tools/{tool_name}")

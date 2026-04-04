@@ -108,6 +108,11 @@ curl -fsS -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/gotenberg
 - This pool is the first production slice, not the final partitioning end state. Keep the moved services limited to the document-extraction boundary until follow-on pools are planned.
 - The current Proxmox host only exposes the base template VM `9000`, so `runtime-ai-lv3` clones from `lv3-debian-base` and the playbook's `docker_runtime` role installs Docker during first converge. Do not switch this guest back to `lv3-docker-host` until the richer template is rebuilt and applied live.
 - The pool live apply now replays `lv3.platform.proxmox_network` on the host after provisioning `runtime-ai-lv3`. Keep that host-side step in place because the Nomad scheduler and other existing guests need their Proxmox VM firewall files refreshed whenever a new pool guest appears.
+- The dedicated `runtime-ai-lv3` substrate replay now keeps an already running
+  Docker daemon online during the initial guest firewall converge and relies on
+  bounded bridge-chain recovery inside `lv3.platform.linux_guest_firewall`.
+  Treat an unexpected mid-run `systemctl stop docker.service docker.socket` on
+  this guest as drift from an older checkout, not expected pool behavior.
 - The pool live apply also replays `lv3.platform.linux_guest_firewall` on `monitoring-lv3` after the new guest appears. Keep that targeted guest-side replay in place so the Nomad scheduler admits `runtime-ai-lv3`, but do not broaden it back to the entire guest set unless the shared-runtime Docker bridge behavior is hardened first.
 - The `monitoring-lv3` replay opts into bounded Docker bridge-chain recovery inside `lv3.platform.linux_guest_firewall`. That recovery is intentionally scoped to the monitoring guest for this ADR and is not the green light to auto-restart Docker on the shared runtime.
 - Traefik and Dapr on `runtime-ai-lv3` are private infrastructure surfaces. Do not publish them directly on the public edge.

@@ -26,10 +26,13 @@ POSTGRES_CLIENT_PLAYBOOKS = [
 def test_postgres_guest_group_vars_allow_docker_runtime_bridge_sources() -> None:
     group_vars = yaml.safe_load(POSTGRES_GROUP_VARS_PATH.read_text())
     host_source = group_vars["postgres_vm_client_allowed_sources_extra"][0]
+    runtime_control_source = group_vars["postgres_vm_client_allowed_sources_extra"][1]
 
     assert "playbook_execution_host_patterns.docker_runtime[playbook_execution_env]" in host_source
     assert host_source.endswith("}}/32")
-    assert group_vars["postgres_vm_client_allowed_sources_extra"][1:] == [
+    assert "playbook_execution_host_patterns.runtime_control[playbook_execution_env]" in runtime_control_source
+    assert runtime_control_source.endswith("}}/32")
+    assert group_vars["postgres_vm_client_allowed_sources_extra"][2:] == [
         "172.16.0.0/12",
         "192.168.0.0/16",
         "10.200.0.0/16",
@@ -42,6 +45,7 @@ def test_postgres_network_policy_allows_docker_runtime_bridge_sources() -> None:
     postgres_5432_sources = {rule["source"] for rule in postgres_rules if 5432 in rule.get("ports", [])}
 
     assert {
+        "runtime-control-lv3",
         "docker-runtime-lv3",
         "172.16.0.0/12",
         "192.168.0.0/16",

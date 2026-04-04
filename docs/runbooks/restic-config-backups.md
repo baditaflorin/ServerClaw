@@ -41,10 +41,11 @@ the repo-managed converge task and live-apply trigger still fall back to the
 older `outline-minio` container when that legacy runtime exists instead of the
 dedicated service.
 When `docker-runtime-lv3` has gone through a broad Docker recovery, the shared
-`minio` container may exist but remain stopped. The repo-managed converge task
-and live-apply trigger now treat that as recoverable and start the container
-before bucket bootstrap or Restic endpoint discovery instead of failing on the
-stale `invalid IP` inspect result.
+`minio` container may exist but remain stopped or stay half-running with no
+reachable Docker network attachment. The repo-managed converge task and
+live-apply trigger now treat both states as recoverable and repair the
+container before bucket bootstrap or Restic endpoint discovery instead of
+failing on the stale inspect state.
 
 ## Verification
 
@@ -78,9 +79,9 @@ make backup-coverage-ledger
   back to `/opt/api-gateway/service/scripts/restic_config_backup.py` and
   `/etc/lv3/restic-config-backup/restic-file-backup-catalog.json` if the worker
   checkout mirror is missing ADR 0302's executable or catalog surface.
-- `make converge-restic-config-backup env=production` auto-starts the shared
-  `minio` container when it exists but was left stopped after Docker/runtime
-  recovery.
+- `make converge-restic-config-backup env=production` auto-recovers the shared
+  `minio` container when it exists but was left stopped or detached from its
+  Docker network after broader Docker/runtime recovery.
 - The MinIO endpoint is resolved from the live shared `minio` container IP, with
   a fallback to `outline-minio` when older environments still expose the legacy
   embedded Outline bucket service instead of the dedicated MinIO runtime.

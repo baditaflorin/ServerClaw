@@ -1,0 +1,279 @@
+id: ws-0314-live-apply
+adr: "0314"
+title: Live apply resumable multi-step flows and return-to-task reentry from latest origin/main
+status: live_applied
+owner: codex
+branch: codex/ws-0314-mainline-integration
+worktree_path: .worktrees/ws-0314-live-apply
+doc: docs/workstreams/ws-0314-live-apply.md
+depends_on:
+- adr-0093-interactive-ops-portal
+- adr-0129-runbook-automation-executor
+- adr-0209-use-case-services-and-thin-delivery-adapters
+- adr-0234-human-app-shell
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- workstreams/active/ws-0314-live-apply.yaml
+- docs/workstreams/ws-0314-live-apply.md
+- docs/adr/0314-resumable-multi-step-flows-and-return-to-task-reentry.md
+- docs/adr/.index.yaml
+- docs/adr/index/**/*.yaml
+- README.md
+- RELEASE.md
+- VERSION
+- changelog.md
+- versions/stack.yaml
+- docs/release-notes/README.md
+- docs/release-notes/*.md
+- docs/status/history/live-apply-evidence.md
+- docs/status/history/merged-workstreams.md
+- docs/diagrams/agent-coordination-map.excalidraw
+- docs/site-generated/architecture/dependency-graph.md
+- build/platform-manifest.json
+- inventory/host_vars/proxmox_florin.yml
+- inventory/group_vars/postgres_guests.yml
+- inventory/group_vars/platform.yml
+- scripts/topology-snapshot.json
+- docs/runbooks/validation-gate-task-review.yaml
+- docs/runbooks/runbook-automation-executor.md
+- docs/runbooks/platform-operations-portal.md
+- docs/runbooks/configure-runtime-ai-pool.md
+- docs/runbooks/configure-runtime-control-pool.md
+- docs/runbooks/configure-runtime-general-pool.md
+- docs/runbooks/configure-keycloak.md
+- docs/runbooks/identity-taxonomy-and-managed-principals.md
+- docs/runbooks/restic-config-backups.md
+- playbooks/api-gateway.yml
+- playbooks/ops-portal.yml
+- playbooks/openbao.yml
+- playbooks/runtime-ai-pool.yml
+- playbooks/runtime-control-pool.yml
+- playbooks/runtime-general-pool.yml
+- playbooks/typesense.yml
+- collections/ansible_collections/lv3/platform/playbooks/api-gateway.yml
+- collections/ansible_collections/lv3/platform/playbooks/typesense.yml
+- collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml
+- collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+- collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains_reset_connection.yml
+- collections/ansible_collections/lv3/platform/roles/docker_runtime/molecule/default/verify.yml
+- collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/keycloak_runtime/meta/argument_specs.yml
+- collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/open_webui_client.yml
+- collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_admin_client.yml
+- collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml
+- collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/serverclaw_client.yml
+- collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+- collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+- platform/use_cases/runbooks.py
+- scripts/api_gateway/main.py
+- scripts/ops_portal/app.py
+- scripts/restic_config_backup.py
+- scripts/ops_portal/static/portal.css
+- scripts/ops_portal/static/portal.js
+- scripts/ops_portal/templates/base.html
+- scripts/ops_portal/templates/index.html
+- scripts/ops_portal/templates/partials/action_result.html
+- scripts/ops_portal/templates/partials/runbooks.html
+- scripts/ops_portal/templates/partials/tasks.html
+- scripts/ops_portal/templates/task_detail.html
+- tests/test_api_gateway.py
+- tests/test_api_gateway_runtime_role.py
+- tests/test_common_docker_bridge_chains_helper.py
+- tests/test_docker_runtime_role.py
+- tests/test_interactive_ops_portal.py
+- tests/test_keycloak_runtime_role.py
+- tests/test_linux_guest_firewall_role.py
+- tests/test_mail_platform_runtime_role.py
+- tests/test_openbao_playbook.py
+- tests/test_openbao_runtime_role.py
+- tests/test_ops_portal_playbook.py
+- tests/test_ops_portal_runtime_role.py
+- tests/test_postgres_vm_access_policy.py
+- tests/test_postgres_vm_config.py
+- tests/test_proxmox_network_role.py
+- tests/test_restic_config_backup.py
+- tests/test_runbook_executor.py
+- tests/test_runbook_use_cases.py
+- tests/test_runtime_ai_pool_playbook.py
+- tests/test_runtime_control_pool_playbook.py
+- tests/test_runtime_general_pool_playbook.py
+- tests/test_step_ca_runtime_role.py
+- tests/test_typesense_runtime_role.py
+- receipts/ops-portal-snapshot.html
+- receipts/restic-snapshots-latest.json
+- receipts/restic-backups/*.json
+- receipts/sbom/host-docker-runtime-lv3-*.cdx.json
+- receipts/sbom/host-runtime-control-lv3-*.cdx.json
+- receipts/live-applies/*adr-0314-*.json
+- receipts/live-applies/evidence/*ws-0314*
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws0314_workstream_doc
+    paths:
+    - docs/workstreams/ws-0314-live-apply.md
+    mode: exclusive
+  - id: ws0314_decision_record
+    paths:
+    - docs/adr/0314-resumable-multi-step-flows-and-return-to-task-reentry.md
+    - docs/runbooks/validation-gate-task-review.yaml
+    mode: exclusive
+  - id: ws0314_resumable_task_contract
+    paths:
+    - inventory/host_vars/proxmox_florin.yml
+    - inventory/group_vars/postgres_guests.yml
+    - scripts/topology-snapshot.json
+    - docs/runbooks/configure-runtime-ai-pool.md
+    - docs/runbooks/configure-runtime-control-pool.md
+    - docs/runbooks/configure-runtime-general-pool.md
+    - docs/runbooks/configure-keycloak.md
+    - docs/runbooks/identity-taxonomy-and-managed-principals.md
+    - docs/runbooks/restic-config-backups.md
+    - playbooks/api-gateway.yml
+    - playbooks/openbao.yml
+    - docs/runbooks/runbook-automation-executor.md
+    - docs/runbooks/platform-operations-portal.md
+    - playbooks/ops-portal.yml
+    - playbooks/runtime-ai-pool.yml
+    - playbooks/runtime-control-pool.yml
+    - playbooks/runtime-general-pool.yml
+    - playbooks/typesense.yml
+    - collections/ansible_collections/lv3/platform/playbooks/api-gateway.yml
+    - collections/ansible_collections/lv3/platform/playbooks/typesense.yml
+    - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains_reset_connection.yml
+    - collections/ansible_collections/lv3/platform/roles/docker_runtime/molecule/default/verify.yml
+    - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/meta/argument_specs.yml
+    - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/open_webui_client.yml
+    - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_admin_client.yml
+    - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml
+    - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/serverclaw_client.yml
+    - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+    - collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+    - platform/use_cases/runbooks.py
+    - scripts/api_gateway/main.py
+    - scripts/ops_portal/app.py
+    - scripts/restic_config_backup.py
+    - scripts/ops_portal/static/portal.css
+    - scripts/ops_portal/static/portal.js
+    - scripts/ops_portal/templates/base.html
+    - scripts/ops_portal/templates/index.html
+    - scripts/ops_portal/templates/partials/action_result.html
+    - scripts/ops_portal/templates/partials/runbooks.html
+    - scripts/ops_portal/templates/partials/tasks.html
+    - scripts/ops_portal/templates/task_detail.html
+    - tests/test_api_gateway.py
+    - tests/test_api_gateway_runtime_role.py
+    - tests/test_common_docker_bridge_chains_helper.py
+    - tests/test_docker_runtime_role.py
+    - tests/test_interactive_ops_portal.py
+    - tests/test_keycloak_runtime_role.py
+    - tests/test_linux_guest_firewall_role.py
+    - tests/test_mail_platform_runtime_role.py
+    - tests/test_openbao_playbook.py
+    - tests/test_openbao_runtime_role.py
+    - tests/test_ops_portal_playbook.py
+    - tests/test_ops_portal_runtime_role.py
+    - tests/test_postgres_vm_access_policy.py
+    - tests/test_postgres_vm_config.py
+    - tests/test_proxmox_network_role.py
+    - tests/test_restic_config_backup.py
+    - tests/test_runbook_executor.py
+    - tests/test_runbook_use_cases.py
+    - tests/test_runtime_ai_pool_playbook.py
+    - tests/test_runtime_control_pool_playbook.py
+    - tests/test_runtime_general_pool_playbook.py
+    - tests/test_step_ca_runtime_role.py
+    - tests/test_typesense_runtime_role.py
+    - receipts/sbom/host-docker-runtime-lv3-*.cdx.json
+    - receipts/sbom/host-runtime-control-lv3-*.cdx.json
+    mode: shared_contract
+    contract: ws0314-resumable-task-surface-v1
+  - id: ws0314_adr_index
+    paths:
+    - docs/adr/.index.yaml
+    - docs/adr/index/**/*.yaml
+    mode: shared_contract
+    contract: adr-index-generator-v1
+  - id: ws0314_generated_history
+    paths:
+    - build/platform-manifest.json
+    - docs/status/history/live-apply-evidence.md
+    - docs/status/history/merged-workstreams.md
+    - docs/diagrams/agent-coordination-map.excalidraw
+    mode: shared_contract
+    contract: latest-main-generated-truth-v1
+  - id: ws0314_generated_diagrams
+    paths:
+    - docs/site-generated/architecture/dependency-graph.md
+    mode: shared_contract
+    contract: ws0314-generated-diagrams-v1
+  - id: ws0314_generated_platform_vars
+    paths:
+    - inventory/group_vars/platform.yml
+    mode: shared_contract
+    contract: ws0314-generated-platform-vars-v1
+  - id: ws0314_topology_snapshot
+    paths:
+    - scripts/topology-snapshot.json
+    mode: shared_contract
+    contract: topology-snapshot-v1
+  - id: ws0314_mainline_integration
+    paths:
+    - README.md
+    - RELEASE.md
+    - VERSION
+    - changelog.md
+    - versions/stack.yaml
+    - docs/release-notes/README.md
+    - docs/release-notes/*.md
+    mode: shared_contract
+    contract: ws0314-mainline-integration-v1
+  - id: ws0314_live_apply_receipts
+    paths:
+    - receipts/ops-portal-snapshot.html
+    - receipts/restic-snapshots-latest.json
+    - receipts/restic-backups/*.json
+    - receipts/live-applies/*adr-0314-*.json
+    - receipts/live-applies/evidence/*ws-0314*
+    mode: shared_contract
+    contract: ws0314-live-apply-receipts-v1
+blockers: []
+ready_to_merge: true
+live_applied: true
+canonical_truth:
+  changelog_entry: implements ADR 0314 by turning the shared runbook execution path into a resumable human task surface with durable progress, deep-link return-to-task entry, and portal reentry summaries
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts:
+    keycloak: 2026-04-04-ws-0314-mainline-keycloak-live-apply-r4
+    api_gateway: 2026-04-04-ws-0314-mainline-api-gateway-live-apply-r11
+    ops_portal: 2026-04-04-ws-0314-mainline-ops-portal-live-apply-r18
+    runbook_task_reentry: 2026-04-04-ws-0314-mainline-task-reentry-resume-r2

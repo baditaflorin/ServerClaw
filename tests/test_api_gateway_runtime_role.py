@@ -86,6 +86,7 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "api_gateway_runtime_recovery_probe_delay: 5" in defaults
     assert "api_gateway_structured_search_verify_retries: 12" in defaults
     assert "api_gateway_structured_search_verify_delay: 5" in defaults
+    assert "api_gateway_tree_sync_become_timeout: 60" in defaults
     assert "api_gateway_network_mode: host" in defaults
     assert "api_gateway_keycloak_docker_network: keycloak_default" in defaults
     assert "/realms/lv3/protocol/openid-connect/certs" in defaults
@@ -207,6 +208,7 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "scripts/maintenance_window_tool.py" in defaults
     assert "scripts/slo_tracking.py" in defaults
     assert "scripts/runtime_assurance.py" in defaults
+    assert "scripts/canonical_errors.py" in defaults
     assert "api_gateway_tree_sync_specs" in defaults
     assert ".githooks/pre-push" in defaults
     assert ".github/workflows/validate.yml" in defaults
@@ -250,6 +252,7 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "api_gateway_container_image_drifted" in tasks
     assert "Derive a per-run guest archive path for {{ api_gateway_tree_sync_spec.name }}" in sync_tree_tasks
     assert "api_gateway_tree_remote_archive_path" in sync_tree_tasks
+    assert 'ansible_become_timeout: "{{ api_gateway_tree_sync_become_timeout }}"' in sync_tree_tasks
     assert "(api_gateway_tree_archive_local.path | basename)" in sync_tree_tasks
     assert 'dest: "{{ api_gateway_tree_remote_archive_path }}"' in sync_tree_tasks
     assert "COPYFILE_DISABLE=1" in sync_tree_tasks
@@ -330,6 +333,7 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "COPY .pre-commit-config.yaml ./.pre-commit-config.yaml" in tasks
     assert "COPY README.md ./README.md" in tasks
     assert "COPY ansible.cfg ./ansible.cfg" in tasks
+    assert "COPY canonical_errors.py ./canonical_errors.py" in tasks
     assert "COPY maintenance_window_tool.py ./maintenance_window_tool.py" in tasks
     assert "COPY slo_tracking.py ./slo_tracking.py" in tasks
     assert "COPY runtime_assurance.py ./runtime_assurance.py" in tasks
@@ -372,13 +376,15 @@ def test_api_gateway_role_syncs_the_typesense_platform_catalog() -> None:
     assert "api_gateway_typesense_controller_url" in defaults
     assert "platform_service_topology | service_topology_get('typesense')" in defaults
     assert "hostvars['proxmox_florin'].typesense_host_proxy_port" in defaults
-    assert "api_gateway_typesense_base_url: http://127.0.0.1:8108" in defaults
+    assert 'api_gateway_typesense_base_url: ""' in defaults
     assert "api_gateway_typesense_collection: platform-services" in defaults
     assert "api_gateway_typesense_api_key_local_file" in defaults
     assert "api_gateway_typesense_sync_script" in defaults
     assert "Resolve the API gateway structured-search Typesense connection settings" in tasks
     assert "api_gateway_resolved_typesense_base_url" in tasks
     assert "api_gateway_resolved_typesense_api_key" in tasks
+    assert "api_gateway_typesense_service_topology.urls.internal" in tasks
+    assert "else 'http://127.0.0.1:8108'" in tasks
     assert "Assert the API gateway structured-search Typesense connection settings resolved" in tasks
     assert "Check whether the controller-local Typesense API key exists" in tasks
     assert "Wait for the controller-visible Typesense health endpoint" in tasks

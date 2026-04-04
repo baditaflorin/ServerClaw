@@ -21,6 +21,9 @@ The current portal combines:
 - repo-synced catalogs and receipts mirrored into `/opt/ops-portal/data`
 - dashboard actions such as the runbook launcher
 - a shared masthead application launcher with task-lane grouping, persona filters,
+- a return-to-task surface for resumable runbook flows, including a task
+  notification lane and activity timeline
+- a shared masthead application launcher with task-lane grouping, persona filters,
   favorites, and recent destinations
 
 ## Task-Lane Information Architecture
@@ -164,6 +167,14 @@ make converge-ops-portal env=production
 For the governed production replay used during live applies:
 
 ```bash
+make ensure-resource-lock-registry
+make resource-lock-acquire \
+  RESOURCE='vm:120/service:ops_portal' \
+  HOLDER='agent:<workstream-or-operator>' \
+  LOCK_TYPE=exclusive \
+  TTL_SECONDS=3600 \
+  CONTEXT_ID='<workstream-or-ticket>'
+
 ALLOW_IN_PLACE_MUTATION=true \
 make live-apply-service service=ops_portal env=production \
   EXTRA_ARGS='-e bypass_promotion=true'
@@ -188,15 +199,31 @@ payloads stay in the repo as authoritative branch history, but they are not
 copied into `/opt/ops-portal/data/` because the interactive runtime reads
 deployment receipt JSON documents rather than raw transcript blobs.
 
+Before starting the replay, confirm no competing branch-local `ops_portal`
+production apply is still active:
+
+```bash
+ps -axo pid=,etime=,command= | rg 'ws-.*ops_portal.*playbooks/services/ops_portal.yml'
+```
+
 Do not run two branch-local `ops_portal` production replays at the same time.
 Concurrent applies share `/opt/ops-portal/service` on `docker-runtime-lv3` and
 can clobber each other's uploaded tree, which leaves partial routes such as
-`/partials/launcher` missing even when the playbook itself reached the verify
-phase. The runtime role now refreshes `/opt/ops-portal/service` again
-immediately before syncing the Docker build context, and it checks
-`/partials/launcher` locally during replay so drift fails closed instead of
-silently publishing an incomplete shell. That extra refresh narrows the overlap
-window, but it does not make concurrent production replays safe.
+`/partials/launcher` or `/partials/tasks` missing even when the playbook itself
+reached the verify phase. The runtime role now refreshes
+`/opt/ops-portal/service` again immediately before syncing the Docker build
+context, and it checks these live partials locally during replay so drift fails
+closed instead of silently publishing an incomplete shell. That extra refresh
+narrows the overlap window, but it does not make concurrent production replays
+safe.
+
+After the replay completes or fails, release the shared lock:
+
+```bash
+make resource-lock-release \
+  RESOURCE='vm:120/service:ops_portal' \
+  HOLDER='agent:<workstream-or-operator>'
+```
 
 After a live ADR 0313 replay, also confirm the root page contains the help
 drawer strings and the task-lane shell cues from the guest-local runtime:
@@ -428,6 +455,35 @@ Portal operators do not need to know how the workflow is wired underneath:
 - the portal parses JSON parameters and forwards them as a thin adapter
 - the API gateway enforces auth and resolves the shared runbook contract
 - the shared use-case service owns runbook lookup, surface allowlists, templating, workflow sequencing, and persisted run records
+- browser-local drafts stay separate from committed task state so an unfinished
+  form does not pollute the audit trail or the persisted resume summary
+
+## Return To Task
+
+Portal-launched resumable flows now reopen through the shared task route
+`/tasks/runbooks/<run_id>`.
+
+Operator flow:
+
+1. Launch a portal-exposed runbook that intentionally pauses or escalates.
+2. Reopen the task from the **Return To Task** section on the home surface.
+3. Use the saved resume summary to inspect what already happened and which step
+   comes next.
+4. Resume only after reviewing the stored evidence and the next human action.
+
+The dashboard keeps two reentry lanes visible:
+
+- **Notification Center** cards for tasks that currently need review
+- **Activity Timeline** entries that deep-link back to the same task detail page
+
+The safest resumable verification path is the repo-managed
+`docs/runbooks/validation-gate-task-review.yaml` flow:
+
+1. launch it from the portal
+2. confirm the task pauses after the first validation-gate summary
+3. reopen `/tasks/runbooks/<run_id>` and confirm the resume summary shows the
+   last safe resume point and the next action
+4. resume the task and confirm the final diagnostic snapshot completes
 
 ## Declared-To-Live Attestation
 

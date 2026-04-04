@@ -3,4 +3,7 @@
 {% if result.job_id %}
 <p class="muted action-result-meta">Job {{ result.job_id }}</p>
 {% endif %}
+{% if result.link_url %}
+<p class="action-result-meta"><a href="{{ result.link_url }}">{{ result.link_label or "Open details" }}</a></p>
+{% endif %}
 <p class="muted action-result-meta">{{ result.timestamp|humanize_timestamp }}</p>

@@ -44,6 +44,80 @@
     });
   }
 
+  function storageAvailable() {
+    try {
+      const key = "__lv3_portal_storage_test__";
+      window.localStorage.setItem(key, "ok");
+      window.localStorage.removeItem(key);
+      return true;
+    } catch (_error) {
+      return false;
+    }
+  }
+
+  const hasLocalStorage = storageAvailable();
+
+  function draftStorageKey(runbookId) {
+    return `lv3.runbookDraft.${runbookId}`;
+  }
+
+  function setDraftStatus(runbookId, message) {
+    const status = document.querySelector(`[data-draft-status-for="${runbookId}"]`);
+    if (status) {
+      status.textContent = message;
+    }
+  }
+
+  function bindRunbookDrafts(root = document) {
+    root.querySelectorAll("form[data-runbook-form]").forEach((form) => {
+      if (!(form instanceof HTMLFormElement) || form.dataset.draftBound === "true") {
+        return;
+      }
+
+      const runbookId = form.dataset.runbookId;
+      const input = form.querySelector("[data-runbook-draft-input]");
+      const clearButton = form.querySelector("[data-clear-runbook-draft]");
+      if (!runbookId || !(input instanceof HTMLTextAreaElement)) {
+        return;
+      }
+
+      form.dataset.draftBound = "true";
+      if (hasLocalStorage) {
+        const savedDraft = window.localStorage.getItem(draftStorageKey(runbookId));
+        if (savedDraft && (!input.value.trim() || input.value.trim() === "{}")) {
+          input.value = savedDraft;
+          setDraftStatus(runbookId, "Draft restored from this browser.");
+        }
+      } else {
+        setDraftStatus(runbookId, "Browser-local drafts are unavailable in this session.");
+      }
+
+      input.addEventListener("input", () => {
+        if (!hasLocalStorage) {
+          return;
+        }
+        const value = input.value.trim();
+        if (!value || value === "{}") {
+          window.localStorage.removeItem(draftStorageKey(runbookId));
+          setDraftStatus(runbookId, "Drafts stay in this browser until you clear them.");
+          return;
+        }
+        window.localStorage.setItem(draftStorageKey(runbookId), input.value);
+        setDraftStatus(runbookId, "Draft saved in this browser.");
+      });
+
+      if (clearButton instanceof HTMLButtonElement) {
+        clearButton.addEventListener("click", () => {
+          input.value = "{}";
+          if (hasLocalStorage) {
+            window.localStorage.removeItem(draftStorageKey(runbookId));
+          }
+          setDraftStatus(runbookId, "Draft cleared for this runbook.");
+        });
+      }
+    });
+  }
+
   if (navToggle && sidebar) {
     navToggle.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -202,14 +276,17 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     initCharts(document);
+    bindRunbookDrafts(document);
     connectDeploymentStream();
   });
 
   document.body.addEventListener("htmx:afterSwap", (event) => {
     if (event.target instanceof HTMLElement) {
       initCharts(event.target);
+      bindRunbookDrafts(event.target);
     } else {
       initCharts(document);
+      bindRunbookDrafts(document);
     }
     resizeCharts();
   });

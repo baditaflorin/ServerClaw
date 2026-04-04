@@ -69,6 +69,16 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert 'ops_portal_build_context_dir: "{{ ops_portal_site_dir }}/build-context"' in defaults
     assert 'ops_portal_state_dir: "{{ ops_portal_site_dir }}/state"' in defaults
     assert 'ops_portal_attention_state_file: "{{ ops_portal_state_dir }}/attention-state.json"' in defaults
+    assert "ops_portal_gateway_service_topology" in defaults
+    assert "ops_portal_gateway_substrate_owner_vm: runtime-control-lv3" in defaults
+    assert "ops_portal_gateway_substrate_port: 9080" in defaults
+    assert "ops_portal_gateway_substrate_path: /api-gateway" in defaults
+    assert "ops_portal_gateway_substrate_url" in defaults
+    assert "ops_portal_gateway_service_topology.owning_vm" in defaults
+    assert "ops_portal_gateway_service_topology.urls.internal" in defaults
+    assert "hostvars['proxmox_florin'].api_gateway_internal_url" in defaults
+    assert "ops_portal_gateway_service_topology.private_ip" in defaults
+    assert "~ ops_portal_gateway_substrate_path" in defaults
     assert "ops_portal_build_context_dir" in tasks
     assert "ops_portal_state_dir" in tasks
     assert "Remove stale ops portal service sources before sync" in tasks
@@ -76,9 +86,16 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert "Ensure the synced ops portal application file parent directories exist" in tasks
     assert "Sync the ops portal application files" in tasks
     assert 'src: "{{ item.path }}"' in tasks
+    assert 'unsafe_writes: true' in tasks
     assert "Ensure the ops portal overlay directories exist" in tasks
-    assert "Ensure the critical ops portal runtime file parent directories exist" in tasks
+    assert "Gather controller checksums for explicit ops portal runtime files" in tasks
+    assert 'checksum_algorithm: sha1' in tasks
+    assert "Ensure the parent directories for explicit ops portal runtime files exist" in tasks
     assert "Sync critical ops portal runtime files explicitly" in tasks
+    assert 'src: "{{ item.item.src }}"' in tasks
+    assert 'dest: "{{ item.item.dest }}"' in tasks
+    assert 'checksum: "{{ item.stat.checksum }}"' in tasks
+    assert "unsafe_writes: true" in tasks
     assert "Reset the synced search fabric package tree before refresh" in tasks
     assert "Sync the shared search fabric files" in tasks
     assert "ops_portal_service_dir ~ '/search_fabric/'" in tasks
@@ -105,8 +122,11 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert "depth: \"{{ item.depth | default(omit) }}\"" in tasks
     assert "item.excludes | default([])" in tasks
     assert "Ensure the synced ops portal directory-backed data subdirectories exist" in tasks
-    assert "select('in', item.1.path.split('/'))" in tasks
-    assert "ops_portal_directory_source_files.results | subelements('files', skip_missing=True)" in tasks
+    assert 'stdin: "{{ ops_portal_directory_source_files.results | to_json }}"' in tasks
+    assert "ops_portal_directory_backed_data_subdirectories" in tasks
+    assert "os.makedirs(target_dir, mode=0o755, exist_ok=True)" in tasks
+    assert "os.chown(target_dir, 0, 0)" in tasks
+    assert "ops_portal_directory_backed_data_subdirectories.stdout | from_json" in tasks
     assert "Sync the ops portal directory-backed data source files" in tasks
     assert "Remove stale ops portal build-context ignore and metadata files" in tasks
     assert "{{ ops_portal_build_context_dir }}/._publication_contract.py" in tasks
@@ -171,9 +191,14 @@ def test_ops_portal_verify_checks_launcher_and_runtime_assurance_partials() -> N
     assert "Ops portal runtime assurance matrix partial did not render the ADR 0244 view." in verify_tasks
     assert "Assert the runtime assurance matrix panel is not degraded" in verify_tasks
     assert "'Runtime assurance data is degraded:' not in ops_portal_verify_runtime_assurance.content" in verify_tasks
+    assert "Verify the return-to-task partial renders locally" in verify_tasks
+    assert "/partials/tasks" in verify_tasks
+    assert "Needs your review" in verify_tasks
+    assert "Recent task state changes" in verify_tasks
+    assert "ADR 0314 return-to-task surface" in verify_tasks
 
 
-def test_ops_portal_runtime_file_sources_include_launcher_and_activation_assets() -> None:
+def test_ops_portal_runtime_file_sources_include_activation_launcher_and_task_assets() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
 
     assert "scripts/ops_portal/templates/entry.html" in defaults
@@ -184,3 +209,5 @@ def test_ops_portal_runtime_file_sources_include_launcher_and_activation_assets(
     assert "scripts/ops_portal/templates/partials/launcher.html" in defaults
     assert "scripts/ops_portal/templates/partials/runtime_assurance.html" in defaults
     assert "scripts/ops_portal/templates/partials/attention.html" in defaults
+    assert "scripts/ops_portal/templates/partials/tasks.html" in defaults
+    assert "scripts/ops_portal/templates/task_detail.html" in defaults

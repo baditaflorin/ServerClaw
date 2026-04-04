@@ -184,6 +184,60 @@ steps:
     assert resumed["step_results"]["verify"]["attempts"] == 2
 
 
+def test_executor_supports_pause_steps_and_reentry_summary(runbook_repo: Path) -> None:
+    (runbook_repo / "docs" / "runbooks" / "review-gate.yaml").write_text(
+        """
+id: review-gate
+title: Review validation gate and return to task
+automation:
+  eligible: true
+  delivery_surfaces:
+    - api_gateway
+steps:
+  - id: summarize-gate
+    type: diagnostic
+    workflow_id: verify-service-health
+    params:
+      service: "{{ params.service }}"
+    success_condition: "result.status == 'healthy'"
+    on_failure: escalate
+  - id: operator-review
+    type: pause
+    description: Review the saved validation gate summary before continuing.
+    params: {}
+  - id: summarize-after-review
+    type: diagnostic
+    workflow_id: verify-service-health
+    params:
+      service: "{{ params.service }}"
+    success_condition: "result.status == 'healthy'"
+    on_failure: escalate
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    runner = FakeRunner(lambda *_args, **_kwargs: {"status": "healthy"})
+    store = executor_module.RunbookRunStore(runbook_repo / ".local" / "runbooks" / "runs")
+    executor = executor_module.RunbookExecutor(
+        repo_root=runbook_repo,
+        workflow_runner=runner,
+        store=store,
+        sleep_fn=lambda *_args, **_kwargs: None,
+    )
+
+    paused = executor.execute("review-gate", {"service": "grafana"}, surface="api_gateway")
+    described = executor.describe_task(paused["run_id"])
+    resumed = executor.resume(paused["run_id"])
+
+    assert paused["status"] == "escalated"
+    assert paused["next_step_index"] == 2
+    assert described["reentry"]["summary"]["headline"].startswith("Awaiting confirmation")
+    assert described["reentry"]["summary"]["last_safe_resume_point"]["message"].startswith("After summarize-gate")
+    assert resumed["status"] == "completed"
+    assert [call[0] for call in runner.calls] == ["verify-service-health", "verify-service-health"]
+
+
 def test_executor_enforces_delivery_surface_allowlist(runbook_repo: Path) -> None:
     (runbook_repo / "docs" / "runbooks" / "gateway-only.yaml").write_text(
         """

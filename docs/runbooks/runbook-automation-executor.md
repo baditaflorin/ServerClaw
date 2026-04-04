@@ -71,6 +71,8 @@ Each step can declare one `on_failure` strategy:
 - `skip`: skip a diagnostic step
 - `continue`: record a warning and continue
 - `rollback`: run `rollback_workflow_id`, then escalate
+- `pause`: preserve the completed evidence, move the resume pointer to the next
+  safe step, and wait for an explicit human resume action
 
 ## Delivery Surfaces
 
@@ -153,6 +155,27 @@ When verifying from an SSH shell on `docker-runtime-lv3`, use the guest-local li
 
 The `http://100.64.0.1:8005` Windmill endpoint is the Proxmox host Tailscale proxy and is not expected to listen on the guest loopback.
 
+List resumable runbook tasks for one delivery surface:
+
+```bash
+curl -sS 'http://100.64.0.1:8083/v1/platform/runbook-tasks?delivery_surface=ops_portal' \
+  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt)"
+```
+
+Open one persisted task together with its reentry summary:
+
+```bash
+curl -sS http://100.64.0.1:8083/v1/platform/runbooks/<run_id> \
+  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt)"
+```
+
+Resume a paused task:
+
+```bash
+curl -sS -X POST http://100.64.0.1:8083/v1/platform/runbooks/<run_id>/approve \
+  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt)"
+```
+
 ## Windmill Worker Path
 
 From a worker checkout mounted at `/srv/proxmox_florin_server`:
@@ -180,4 +203,7 @@ uv run --with pyyaml python scripts/lv3_cli.py runbook execute docs/runbooks/ren
 - Run records are repository-local state. They are intentionally not committed.
 - The shared use-case service writes execution trace events through the mutation-audit sink, while each adapter keeps only transport-specific parsing and rendering.
 - `docs/runbooks/validation-gate-status.yaml` is the preferred safe verification path for the API gateway and ops portal adapters.
+- `docs/runbooks/validation-gate-task-review.yaml` is the preferred safe
+  resumable verification path for ADR 0314 because it pauses for review without
+  mutating live production state.
 - Markdown runbooks without automation front matter remain documentation only.

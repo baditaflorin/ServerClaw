@@ -66,6 +66,21 @@
   register: openbao_init_payload_local
   no_log: true
 
+- name: Read the persisted OpenBao init payload for migration-aware recovery
+  ansible.builtin.slurp:
+    src: "{{ openbao_init_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: openbao_existing_init_payload_raw
+  when: openbao_init_payload_local.stat.exists
+  no_log: true
+
+- name: Record the persisted OpenBao init payload facts for migration-aware recovery
+  ansible.builtin.set_fact:
+    openbao_existing_init_payload: "{{ openbao_existing_init_payload_raw.content | b64decode | from_json }}"
+  when: openbao_init_payload_local.stat.exists
+  no_log: true
+
 - name: Reset the OpenBao data and log directories before first initialization
   ansible.builtin.file:
     path: "{{ item }}"
@@ -548,6 +563,173 @@
   until: openbao_init_status.status == 200
   changed_when: false
 
+- name: Record whether OpenBao is already initialized
+  ansible.builtin.set_fact:
+    openbao_runtime_initialized: "{{ openbao_init_status.json.initialized | default(false) | bool }}"
+
+- name: Restore the existing OpenBao raft state onto a blank runtime target during migration
+  when:
+    - openbao_migration_enabled | bool
+    - openbao_init_payload_local.stat.exists
+    - not (openbao_runtime_initialized | bool)
+  block:
+    - name: Verify the migration source OpenBao runtime is healthy before snapshot capture
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
+        method: GET
+        headers:
+          X-Vault-Token: "{{ openbao_existing_init_payload.root_token }}"
+        return_content: true
+        status_code: 200
+      delegate_to: "{{ openbao_migration_source_host }}"
+      register: openbao_migration_source_health
+      retries: 12
+      delay: 2
+      until: openbao_migration_source_health.status == 200
+      changed_when: false
+      no_log: true
+
+    - name: Create a temporary raft snapshot file on the migration source host
+      ansible.builtin.tempfile:
+        state: file
+        suffix: .snap
+      delegate_to: "{{ openbao_migration_source_host }}"
+      register: openbao_migration_source_snapshot
+
+    - name: Create a controller-local directory for the migrated raft snapshot
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: openbao-migration
+      delegate_to: localhost
+      become: false
+      register: openbao_migration_controller_snapshot_dir
+
+    - name: Save the source OpenBao raft snapshot for migration
+      ansible.builtin.shell: |
+        set -euo pipefail
+        curl -fsS \
+          --header "X-Vault-Token: {{ openbao_existing_init_payload.root_token }}" \
+          http://127.0.0.1:{{ openbao_http_port }}/v1/sys/storage/raft/snapshot \
+          > "{{ openbao_migration_source_snapshot.path }}"
+      args:
+        executable: /bin/bash
+      delegate_to: "{{ openbao_migration_source_host }}"
+      no_log: true
+
+    - name: Fetch the source OpenBao raft snapshot to the controller
+      ansible.builtin.fetch:
+        src: "{{ openbao_migration_source_snapshot.path }}"
+        dest: "{{ openbao_migration_controller_snapshot_dir.path }}/openbao-raft.snap"
+        flat: true
+      delegate_to: "{{ openbao_migration_source_host }}"
+      no_log: true
+
+    - name: Create a temporary raft snapshot file on the target runtime host
+      ansible.builtin.tempfile:
+        state: file
+        suffix: .snap
+      register: openbao_migration_target_snapshot
+
+    - name: Stage the migrated OpenBao raft snapshot on the target runtime host
+      ansible.builtin.copy:
+        src: "{{ openbao_migration_controller_snapshot_dir.path }}/openbao-raft.snap"
+        dest: "{{ openbao_migration_target_snapshot.path }}"
+        mode: "0600"
+      no_log: true
+
+    - name: Initialize the blank target OpenBao runtime for snapshot restore bootstrap
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/init"
+        method: POST
+        body_format: json
+        body:
+          secret_shares: "{{ openbao_init_key_shares }}"
+          secret_threshold: "{{ openbao_init_key_threshold }}"
+        return_content: true
+        status_code: 200
+      register: openbao_migration_bootstrap_init
+      changed_when: true
+      no_log: true
+      tags:
+        - mutation
+
+    - name: Record the temporary OpenBao bootstrap payload for snapshot restore
+      ansible.builtin.set_fact:
+        openbao_migration_bootstrap_payload: "{{ openbao_migration_bootstrap_init.json }}"
+      no_log: true
+
+    - name: Ensure the blank target OpenBao runtime is unsealed before snapshot restore
+      ansible.builtin.include_tasks: ensure_unsealed.yml
+      vars:
+        openbao_unseal_context: migration snapshot restore bootstrap
+        openbao_unseal_init_payload: "{{ openbao_migration_bootstrap_payload }}"
+
+    - name: Force-restore the migrated OpenBao raft snapshot onto the target runtime
+      ansible.builtin.shell: |
+        set -euo pipefail
+        curl -fsS \
+          --request POST \
+          --header "X-Vault-Token: {{ openbao_migration_bootstrap_payload.root_token }}" \
+          --data-binary "@{{ openbao_migration_target_snapshot.path }}" \
+          http://127.0.0.1:{{ openbao_http_port }}/v1/sys/storage/raft/snapshot-force
+      args:
+        executable: /bin/bash
+      register: openbao_migration_restore
+      changed_when: true
+      no_log: true
+      tags:
+        - mutation
+
+    - name: Wait for OpenBao to answer after the migration snapshot restore
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ openbao_http_port }}"
+        delay: 0
+        timeout: 120
+
+    - name: Ensure OpenBao is unsealed with the migrated cluster keys after snapshot restore
+      ansible.builtin.include_tasks: ensure_unsealed.yml
+      vars:
+        openbao_unseal_context: migrated raft snapshot recovery
+        openbao_unseal_init_payload: "{{ openbao_existing_init_payload }}"
+
+    - name: Re-read OpenBao initialization status after migration snapshot restore
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/init"
+        method: GET
+        return_content: true
+        status_code: 200
+      register: openbao_init_status
+      retries: 12
+      delay: 2
+      until: openbao_init_status.status == 200
+      changed_when: false
+
+    - name: Record the restored OpenBao initialization state after migration snapshot restore
+      ansible.builtin.set_fact:
+        openbao_runtime_initialized: "{{ openbao_init_status.json.initialized | default(false) | bool }}"
+  always:
+    - name: Remove the staged migration raft snapshot from the target runtime host
+      ansible.builtin.file:
+        path: "{{ openbao_migration_target_snapshot.path }}"
+        state: absent
+      when: openbao_migration_target_snapshot is defined
+
+    - name: Remove the temporary migration raft snapshot from the source host
+      ansible.builtin.file:
+        path: "{{ openbao_migration_source_snapshot.path }}"
+        state: absent
+      delegate_to: "{{ openbao_migration_source_host }}"
+      when: openbao_migration_source_snapshot is defined
+
+    - name: Remove the controller-local migration snapshot directory
+      ansible.builtin.file:
+        path: "{{ openbao_migration_controller_snapshot_dir.path }}"
+        state: absent
+      delegate_to: localhost
+      become: false
+      when: openbao_migration_controller_snapshot_dir is defined
+
 - name: Fail if OpenBao is initialized remotely but the local init payload is missing
   ansible.builtin.fail:
     msg: >-
@@ -555,7 +737,7 @@
       {{ openbao_init_local_file }} is missing on the control machine.
       Restore the controller-local init payload before rerunning automation.
   when:
-    - openbao_init_status.json.initialized | bool
+    - openbao_runtime_initialized | bool
     - not openbao_init_payload_local.stat.exists
 
 - name: Fail if a local init payload exists but the remote service is not initialized
@@ -564,7 +746,7 @@
       {{ openbao_init_local_file }} exists on the control machine, but OpenBao on
       {{ inventory_hostname }} is not initialized. Resolve the drift before rerunning automation.
   when:
-    - not (openbao_init_status.json.initialized | bool)
+    - not (openbao_runtime_initialized | bool)
     - openbao_init_payload_local.stat.exists
 
 - name: Initialize OpenBao
@@ -582,7 +764,7 @@
     return_content: true
     status_code: 200
   when:
-    - not (openbao_init_status.json.initialized | bool)
+    - not (openbao_runtime_initialized | bool)
     - not openbao_init_payload_local.stat.exists
   register: openbao_init_response
   changed_when: true

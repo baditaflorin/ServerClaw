@@ -101,6 +101,26 @@ argument_specs:
         required: true
         description:
           - Guest-local file containing the generated bootstrap admin password.
+      keycloak_admin_client_id:
+        type: str
+        required: true
+        description:
+          - Confidential client id used by repo-managed Keycloak automation admin flows.
+      keycloak_admin_client_secret_remote_file:
+        type: path
+        required: true
+        description:
+          - Guest-local file containing the repo-managed Keycloak automation admin client secret.
+      keycloak_recovery_admin_service_client_id:
+        type: str
+        required: true
+        description:
+          - Temporary admin service-account client id used only for offline Keycloak admin access recovery.
+      keycloak_recovery_admin_service_secret_remote_file:
+        type: path
+        required: true
+        description:
+          - Guest-local file containing the temporary Keycloak recovery admin service secret.
       keycloak_operator_username:
         type: str
         required: true
@@ -136,6 +156,11 @@ argument_specs:
         required: true
         description:
           - Controller-local file used to mirror the bootstrap admin password.
+      keycloak_admin_client_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the repo-managed Keycloak automation admin client secret.
       keycloak_operator_password_local_file:
         type: path
         required: true

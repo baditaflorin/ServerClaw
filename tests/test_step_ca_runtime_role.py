@@ -26,6 +26,7 @@ TASKS_PATH = (
     / "tasks"
     / "main.yml"
 )
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 
 
 def test_step_ca_runtime_defaults_anchor_service_topology_to_proxmox_hostvars() -> None:
@@ -47,3 +48,12 @@ def test_step_ca_runtime_recovers_detached_empty_default_network_before_compose_
     assert "step_ca_default_network_inspect.stdout | from_json | first" in tasks
     assert ".Containers | default({})" in tasks
     assert '      - network\n      - rm' in tasks
+
+
+def test_runtime_control_network_policy_allows_step_ca_from_peer_guests_and_local_docker_workloads() -> None:
+    host_vars = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
+    rules = host_vars["network_policy"]["guests"]["runtime-control-lv3"]["allowed_inbound"]
+
+    assert any(rule["source"] == "all_guests" and 9000 in rule["ports"] for rule in rules)
+    assert any(rule["source"] == "172.16.0.0/12" and 9000 in rule["ports"] for rule in rules)
+    assert any(rule["source"] == "192.168.0.0/16" and 9000 in rule["ports"] for rule in rules)

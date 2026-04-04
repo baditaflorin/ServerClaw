@@ -2115,7 +2115,7 @@ adrs:
   - adr: '0314'
     title: Resumable Multi-Step Flows And Return-To-Task Reentry
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -2127,6 +2127,9 @@ adrs:
     summary: We will treat important multi-step human flows as resumable tasks with
     filename: 0314-resumable-multi-step-flows-and-return-to-task-reentry.md
     path: docs/adr/0314-resumable-multi-step-flows-and-return-to-task-reentry.md
+    implemented_in_repo_version: 0.178.5
+    implemented_in_platform_version: 0.130.99
+    implemented_on: '2026-04-04'
   - adr: '0315'
     title: Canonical Page States And Next-Best-Action Guidance For Human Surfaces
     status: Accepted

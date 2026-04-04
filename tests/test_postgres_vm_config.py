@@ -37,6 +37,17 @@ POSTGRES_VM_TEMPLATE_PATH = (
     / "templates"
     / "postgresql-lv3.conf.j2"
 )
+POSTGRES_VM_TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "postgres_vm"
+    / "tasks"
+    / "main.yml"
+)
 
 
 def test_postgres_vm_defaults_raise_the_managed_connection_ceiling() -> None:
@@ -59,3 +70,10 @@ def test_postgres_vm_template_renders_the_managed_connection_limit() -> None:
     assert "max_connections = {{ postgres_vm_max_connections }}" in template
     assert "superuser_reserved_connections = {{ postgres_vm_superuser_reserved_connections }}" in template
     assert "reserved_connections = {{ postgres_vm_reserved_connections }}" in template
+
+
+def test_postgres_vm_refreshes_apt_cache_before_package_installs() -> None:
+    tasks = POSTGRES_VM_TASKS_PATH.read_text()
+
+    assert 'argv:\n      - apt-get\n      - update' in tasks
+    assert tasks.count("update_cache: true") == 0

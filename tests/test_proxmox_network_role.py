@@ -24,10 +24,10 @@ HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 def test_proxmox_network_renders_vm_firewall_from_active_role_path() -> None:
     tasks = yaml.safe_load(ROLE_TASKS.read_text(encoding="utf-8"))
     render_task = next(task for task in tasks if task["name"] == "Render per-guest Proxmox firewall policy to staging files")
-    copy_module = render_task["ansible.builtin.copy"]
+    template_module = render_task["ansible.builtin.template"]
 
-    assert copy_module["dest"] == "/root/.lv3-vm-{{ guest.vmid }}.fw"
-    assert "role_path ~ '/templates/vm.fw.j2'" in copy_module["content"]
+    assert template_module["src"] == "vm.fw.j2"
+    assert template_module["dest"] == "/root/.lv3-vm-{{ guest.vmid }}.fw"
 
 
 def test_proxmox_network_defaults_define_udp_forward_contract() -> None:

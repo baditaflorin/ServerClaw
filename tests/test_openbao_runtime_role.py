@@ -85,6 +85,7 @@ PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH = (
     / "seed_rotation_metadata.yml"
 )
 GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "all.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 
 
 def load_openbao_runtime_tasks() -> list[dict]:
@@ -116,13 +117,16 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     assert "ansible_host" in defaults
     assert "@{{ openbao_postgres_host }}:5432/postgres?sslmode=disable" in defaults
     assert "creation_statements: !unsafe |-" in defaults
-    assert 'CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD \'{{ password }}\' VALID UNTIL \'{{ expiration }}\';' in defaults
-    assert 'GRANT lv3_openbao_connect_all TO "{{ name }}";' in defaults
-    assert 'GRANT pg_read_all_data TO "{{ name }}";' in defaults
-    assert 'GRANT pg_use_reserved_connections TO "{{ name }}";' in defaults
+    assert 'CREATE ROLE "{{name}}" WITH LOGIN PASSWORD \'{{password}}\' VALID UNTIL \'{{expiration}}\';' in defaults
+    assert 'GRANT lv3_openbao_connect_all TO "{{name}}";' in defaults
+    assert 'GRANT pg_read_all_data TO "{{name}}";' in defaults
+    assert 'GRANT pg_use_reserved_connections TO "{{name}}";' in defaults
     assert "revocation_statements: !unsafe |-" in defaults
-    assert 'DROP ROLE IF EXISTS "{{ name }}";' in defaults
+    assert 'DROP ROLE IF EXISTS "{{name}}";' in defaults
+    assert "{{ expiration }}" not in defaults
     assert "openbao_http_extra_bind_addresses: []" in defaults
+    assert "openbao_migration_enabled: false" in defaults
+    assert "openbao_migration_source_host: docker-runtime-lv3" in defaults
     assert 'openbao_atlas_approle_local_file: "{{ openbao_local_artifact_dir }}/atlas-approle.json"' in defaults
     assert 'path "database/creds/postgres-atlas-readonly"' in (
         REPO_ROOT
@@ -147,6 +151,15 @@ def test_generated_platform_vars_pin_openbao_to_postgres_primary_ip() -> None:
 
     assert platform_vars["openbao_postgres_host"] == primary_guest["ipv4"]
     assert platform_vars["platform_postgres_host"] == "database.lv3.org"
+
+
+def test_runtime_control_network_policy_allows_openbao_to_reach_the_postgres_primary() -> None:
+    host_vars = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
+    postgres_rules = host_vars["network_policy"]["guests"]["postgres-lv3"]["allowed_inbound"]
+    runtime_control_rule = next(rule for rule in postgres_rules if rule["source"] == "runtime-control-lv3")
+
+    assert runtime_control_rule["protocol"] == "tcp"
+    assert runtime_control_rule["ports"] == [5432]
 
 
 def test_guest_side_postgres_clients_use_the_primary_guest_address() -> None:
@@ -216,6 +229,8 @@ def test_openbao_runtime_retries_seal_status_during_restart_window() -> None:
     assert "- name: Read OpenBao initialization status" in tasks
     assert "register: openbao_init_status" in tasks
     assert "until: openbao_init_status.status == 200" in tasks
+    assert "- name: Record whether OpenBao is already initialized" in tasks
+    assert 'openbao_runtime_initialized: "{{ openbao_init_status.json.initialized | default(false) | bool }}"' in tasks
     assert "changed_when: false" in tasks
     assert "- name: Ensure OpenBao is unsealed after bootstrap or restart" in tasks
     assert "include_tasks: ensure_unsealed.yml" in tasks
@@ -228,6 +243,24 @@ def test_openbao_runtime_retries_seal_status_during_restart_window() -> None:
     assert "openbao_runtime_unsealed_status.status == 200" in ensure_unsealed_tasks
     assert "not (openbao_runtime_unsealed_status.json.sealed | bool)" in ensure_unsealed_tasks
     assert "changed_when: false" in ensure_unsealed_tasks
+
+
+def test_openbao_runtime_restores_a_blank_runtime_target_from_a_migrated_raft_snapshot() -> None:
+    tasks = read_openbao_runtime_tasks_text()
+
+    assert "- name: Restore the existing OpenBao raft state onto a blank runtime target during migration" in tasks
+    assert "openbao_migration_enabled | bool" in tasks
+    assert "Read the persisted OpenBao init payload for migration-aware recovery" in tasks
+    assert "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/storage/raft/snapshot" in tasks
+    assert "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/storage/raft/snapshot-force" in tasks
+    assert "Initialize the blank target OpenBao runtime for snapshot restore bootstrap" in tasks
+    assert "Ensure the blank target OpenBao runtime is unsealed before snapshot restore" in tasks
+    assert "migration snapshot restore bootstrap" in tasks
+    assert "Ensure OpenBao is unsealed with the migrated cluster keys after snapshot restore" in tasks
+    assert "migrated raft snapshot recovery" in tasks
+    assert "Fetch the source OpenBao raft snapshot to the controller" in tasks
+    assert "Record the restored OpenBao initialization state after migration snapshot restore" in tasks
+    assert "Remove the controller-local migration snapshot directory" in tasks
 
 
 def test_openbao_runtime_continues_after_docker_chain_recheck_when_compose_health_checks_guard_recovery() -> None:
@@ -643,13 +676,13 @@ def test_openbao_inventory_exports_controller_local_artifact_paths_used_outside_
     assert group_vars["openbao_postgres_connect_role"] == "lv3_openbao_connect_all"
     assert (
         group_vars["openbao_controller_approle_local_file"]
-        == "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/controller-automation-approle.json"
+        == "{{ repo_shared_local_root }}/openbao/controller-automation-approle.json"
     )
     assert (
         group_vars["openbao_atlas_approle_local_file"]
-        == "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/atlas-approle.json"
+        == "{{ repo_shared_local_root }}/openbao/atlas-approle.json"
     )
     assert (
         group_vars["openbao_mail_platform_approle_local_file"]
-        == "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/mail-platform-approle.json"
+        == "{{ repo_shared_local_root }}/openbao/mail-platform-approle.json"
     )

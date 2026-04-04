@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0.0",
-  "recorded_at": "2026-04-03T16:26:52Z",
-  "recorded_on": "2026-04-03",
+  "recorded_at": "2026-04-04T16:35:12Z",
+  "recorded_on": "2026-04-04",
   "recorded_by": "codex",
   "repository": {
     "bucket": "restic-config-backup",
-    "endpoint": "http://10.200.25.2:9000"
+    "endpoint": "http://10.200.25.3:9000"
   },
   "summary": {
     "governed_sources": 5,
@@ -33,13 +33,13 @@
         "keep_monthly": 12
       },
       "latest_snapshot": {
-        "snapshot_id": "08ecf92dc9bcedeed02c6d50d4651d9c5e67cb87850cddecf6fb05e72ca95081",
-        "recorded_at": "2026-04-03T06:35:38Z",
+        "snapshot_id": "29b31242d1579b85dbd2f26f195041f19cfa6dfac1b7dc7a71bd10a68e13e552",
+        "recorded_at": "2026-04-04T14:00:06Z",
         "host": "docker-runtime-lv3",
         "paths": [
           "receipts"
         ],
-        "files": 4595
+        "files": 4612
       },
       "last_restore_verification": {
         "recorded_at": "2026-03-31T22:43:48Z",
@@ -65,8 +65,8 @@
         "keep_monthly": 6
       },
       "latest_snapshot": {
-        "snapshot_id": "6797e2409fe77b040b6a2d78d09a9125509893700a32902c288ae9720b2ef02a",
-        "recorded_at": "2026-04-03T16:26:52Z",
+        "snapshot_id": "eb799e80e16451754bd4fbdc99d3c732fc4e11ea26c4857b48fbdee0f9c3a369",
+        "recorded_at": "2026-04-04T16:35:12Z",
         "host": "docker-runtime-lv3",
         "paths": [
           "config"
@@ -92,8 +92,8 @@
         "keep_daily": 30
       },
       "latest_snapshot": {
-        "snapshot_id": "e1c3452403b7e381ac3f818df0217f19163edbd1efa51b7612ce53f19a17d349",
-        "recorded_at": "2026-04-03T16:26:52Z",
+        "snapshot_id": "8460399ec53225b257161008cb7e73ee5f79f3fe41d5758e28add2481f99e613",
+        "recorded_at": "2026-04-04T16:35:12Z",
         "host": "docker-runtime-lv3",
         "paths": [
           "versions/stack.yaml"
@@ -119,8 +119,8 @@
         "keep_daily": 90
       },
       "latest_snapshot": {
-        "snapshot_id": "aac71f5cd03dc48e628bcf64efffed043601c8d87823eab2aa7daf8fdc8ad245",
-        "recorded_at": "2026-04-03T06:35:40Z",
+        "snapshot_id": "cb77f7dc400f40a6cc11c3a2d332c575fa209fbda338c870b5dd39e6cede7c7b",
+        "recorded_at": "2026-04-04T14:00:12Z",
         "host": "docker-runtime-lv3",
         "paths": [
           "config/controller-local-secrets.json"

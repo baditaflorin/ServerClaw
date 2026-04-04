@@ -1,0 +1,71 @@
+{% from "macros/states.html" import empty_state, state_message, unauthorized_state %}
+{% if task_warning %}
+  {% if "401" in task_warning or "403" in task_warning %}
+    {{ unauthorized_state("The shared gateway rejected the portal session while loading resumable tasks. Refresh the browser session and retry.") }}
+  {% else %}
+    {{ state_message("Return-to-task data is degraded", task_warning, "warning") }}
+  {% endif %}
+{% endif %}
+
+<div class="task-grid">
+  <section class="task-column">
+    <div class="section-head section-head--compact">
+      <div>
+        <p class="section-kicker">Notification Center</p>
+        <h3>Needs your review</h3>
+      </div>
+    </div>
+    {% if task_panel.attention %}
+      <div class="task-card-grid">
+      {% for task in task_panel.attention %}
+        <article class="pf-v5-c-card panel task-card task-card--attention">
+          <p class="service-category">{{ task.runbook_id }}</p>
+          <h3><a href="{{ task.portal_path }}">{{ task.summary.headline }}</a></h3>
+          <p class="muted">{{ task.summary.what_happened }}</p>
+          <dl class="task-meta-list">
+            <div>
+              <dt>Last safe resume point</dt>
+              <dd>{{ task.summary.last_safe_resume_point.message }}</dd>
+            </div>
+            <div>
+              <dt>Next action</dt>
+              <dd>{{ task.summary.next_human_action }}</dd>
+            </div>
+            {% if task.summary.next_irreversible_step %}
+            <div>
+              <dt>Next irreversible step</dt>
+              <dd>{{ task.summary.next_irreversible_step.label }}</dd>
+            </div>
+            {% endif %}
+          </dl>
+          <p><a href="{{ task.portal_path }}">Open task summary</a></p>
+        </article>
+      {% endfor %}
+      </div>
+    {% else %}
+      {{ empty_state("No resumable task needs review", "When a runbook pauses for confirmation or escalation, it will appear here with the saved resume summary.") }}
+    {% endif %}
+  </section>
+
+  <section class="task-column">
+    <div class="section-head section-head--compact">
+      <div>
+        <p class="section-kicker">Activity Timeline</p>
+        <h3>Recent task state changes</h3>
+      </div>
+    </div>
+    {% if task_panel.activity %}
+      <ul class="timeline">
+      {% for event in task_panel.activity %}
+        <li>
+          <strong><a href="{{ event.portal_path }}">{{ event.title }}</a></strong>
+          <span class="muted">{{ event.timestamp|humanize_timestamp }}</span>
+          <p class="muted">{{ event.runbook_title }}: {{ event.detail }}</p>
+        </li>
+      {% endfor %}
+      </ul>
+    {% else %}
+      {{ empty_state("No recent task activity", "Launch a portal-exposed runbook to start a resumable task timeline.") }}
+    {% endif %}
+  </section>
+</div>

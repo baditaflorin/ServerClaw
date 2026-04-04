@@ -7,6 +7,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULTS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "defaults" / "main.yml"
 TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "main.yml"
 REPO_USER_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "reconcile_repo_managed_users.yml"
+ADMIN_CLIENT_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "reconcile_admin_client.yml"
 COMPOSE_TEMPLATE_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "templates" / "docker-compose.yml.j2"
 SERVERCLAW_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "serverclaw_client.yml"
 OPEN_WEBUI_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "open_webui_client.yml"
@@ -34,6 +35,10 @@ def load_serverclaw_tasks() -> list[dict]:
 
 def load_open_webui_client_tasks() -> list[dict]:
     return yaml.safe_load(OPEN_WEBUI_TASKS_PATH.read_text())
+
+
+def load_admin_client_tasks() -> list[dict]:
+    return yaml.safe_load(ADMIN_CLIENT_TASKS_PATH.read_text())
 
 
 def assert_task_retries(task: dict, register: str) -> None:
@@ -77,6 +82,9 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_serverclaw_runtime_client_secret_local_file"].endswith(
         "/.local/keycloak/serverclaw-runtime-client-secret.txt"
     )
+    assert defaults["keycloak_admin_client_id"] == "lv3-admin-runtime"
+    assert defaults["keycloak_admin_client_secret_local_file"].endswith("/.local/keycloak/admin-client-secret.txt")
+    assert defaults["keycloak_recovery_admin_service_client_id"] == "lv3-recovery-admin"
     assert defaults["keycloak_grist_client_id"] == "grist"
     assert defaults["keycloak_grist_client_secret_local_file"].endswith("/.local/keycloak/grist-client-secret.txt")
     assert defaults["keycloak_outline_automation_username"] == "outline.automation"
@@ -404,10 +412,20 @@ def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile(
     startup_block = next(
         task for task in tasks if task.get("name") == "Warm the Keycloak admin APIs before realm reconciliation"
     )
+    admin_access_block = next(
+        task
+        for task in tasks
+        if task.get("name") == "Ensure the repo-managed Keycloak admin client can authenticate before realm reconciliation"
+    )
     readiness_task = next(task for task in tasks if task.get("name") == "Wait for the Keycloak readiness endpoint")
     admin_api_task = next(task for task in tasks if task.get("name") == "Wait for the Keycloak admin API to answer")
     token_probe_task = next(
-        task for task in tasks if task.get("name") == "Wait for the Keycloak bootstrap admin token endpoint to succeed"
+        task for task in admin_access_block["block"] if task.get("name") == "Wait for the repo-managed Keycloak admin client token endpoint to succeed"
+    )
+    preflight_admin_probe_task = next(
+        task
+        for task in admin_access_block["block"]
+        if task.get("name") == "Require an authenticated Keycloak admin realm query before accepting the repo-managed admin client"
     )
     admin_probe_task = next(
         task for task in tasks if task.get("name") == "Wait for an authenticated Keycloak admin realm query to answer"
@@ -415,12 +433,12 @@ def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile(
     settle_task = next(
         task
         for task in tasks
-        if task.get("name") == "Allow the Keycloak admin API to settle after the first authenticated probe"
+        if task.get("name") == "Allow the Keycloak admin API to settle after the first authenticated admin-client probe"
     )
     token_probe_confirmed_task = next(
         task
         for task in tasks
-        if task.get("name") == "Reconfirm the Keycloak bootstrap admin token endpoint after the settle window"
+        if task.get("name") == "Reconfirm the repo-managed Keycloak admin client token endpoint after the settle window"
     )
     admin_probe_confirmed_task = next(
         task
@@ -439,27 +457,95 @@ def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile(
         for task in startup_block["rescue"]
         if task.get("name") == "Wait for the Keycloak runtime env file after startup probe recovery"
     )
+    recovery_jgroups_cleanup = next(
+        task
+        for task in startup_block["rescue"]
+        if task.get("name") == "Clear stale Keycloak JDBC_PING rows before retrying the startup probes"
+    )
     recovery_recreate = next(
         task
         for task in startup_block["rescue"]
         if task.get("name") == "Recreate the Keycloak service before retrying the startup probes"
     )
-    recovery_token_probe_task = next(
+    recovery_readiness_task = next(
         task
         for task in startup_block["rescue"]
-        if task.get("name") == "Wait for the Keycloak bootstrap admin token endpoint after startup probe recovery"
+        if task.get("name") == "Wait for the Keycloak readiness endpoint after startup probe recovery"
     )
-    recovery_confirmed_token_probe_task = next(
+    runtime_recovery_inspect_task = next(
         task
-        for task in startup_block["rescue"]
-        if task.get("name") == "Reconfirm the Keycloak bootstrap admin token endpoint after startup probe recovery"
+        for task in admin_access_block["rescue"]
+        if task.get("name") == "Inspect the Keycloak service state before admin bootstrap recovery"
+    )
+    runtime_recovery_fact_task = next(
+        task
+        for task in admin_access_block["rescue"]
+        if task.get("name") == "Record whether the Keycloak runtime needs recovery before admin bootstrap fallback"
+    )
+    runtime_recovery_recreate_task = next(
+        task
+        for task in admin_access_block["rescue"]
+        if task.get("name") == "Recreate the Keycloak service after admin-client runtime drift"
+    )
+    runtime_recovery_token_probe_task = next(
+        task
+        for task in admin_access_block["rescue"]
+        if task.get("name")
+        == "Retry the repo-managed Keycloak admin client token endpoint after admin-client runtime recovery"
+    )
+    runtime_recovery_admin_probe_task = next(
+        task
+        for task in admin_access_block["rescue"]
+        if task.get("name") == "Retry the authenticated Keycloak admin realm query after admin-client runtime recovery"
+    )
+    runtime_live_secret_query_task = next(
+        task
+        for task in admin_access_block["rescue"]
+        if task.get("name")
+        == "Read the live Keycloak admin client secret directly from PostgreSQL when file-based auth fails"
+    )
+    runtime_live_secret_token_probe_task = next(
+        task
+        for task in admin_access_block["rescue"]
+        if task.get("name")
+        == "Retry the repo-managed Keycloak admin client token endpoint with the live PostgreSQL-backed secret"
+    )
+    runtime_live_secret_admin_probe_task = next(
+        task
+        for task in admin_access_block["rescue"]
+        if task.get("name")
+        == "Retry the authenticated Keycloak admin realm query with the live PostgreSQL-backed secret"
+    )
+    runtime_live_secret_reconcile_task = next(
+        task
+        for task in admin_access_block["rescue"]
+        if task.get("name")
+        == "Reconcile the repo-managed Keycloak admin client using the live PostgreSQL-backed secret"
+    )
+    fallback_block = next(
+        task
+        for task in admin_access_block["rescue"]
+        if task.get("name")
+        == "Recover repo-managed Keycloak admin access with bootstrap credentials when runtime recovery is insufficient"
+    )
+    fallback_bootstrap_task = next(
+        task for task in tasks if task.get("name") == "Try the Keycloak bootstrap admin token endpoint as a fallback admin bootstrap path"
+    )
+    recovery_stop_task = next(
+        task for task in tasks if task.get("name") == "Stop the Keycloak service before offline admin recovery"
     )
     assert readiness_task["retries"] == "{{ keycloak_startup_probe_retries }}"
     assert readiness_task["delay"] == "{{ keycloak_startup_probe_delay }}"
+    assert readiness_task["ansible.builtin.uri"]["return_content"] is True
+    assert readiness_task["ansible.builtin.uri"]["status_code"] == [200, 503]
+    assert readiness_task["until"] == "(keycloak_health_ready.status | default(0)) in [200, 503]"
+    assert readiness_task["failed_when"] == "(keycloak_health_ready.status | default(0)) != 200"
     assert admin_api_task["retries"] == "{{ keycloak_startup_probe_retries }}"
     assert admin_api_task["delay"] == "{{ keycloak_startup_probe_delay }}"
     assert token_probe_task["retries"] == "{{ keycloak_startup_probe_retries }}"
     assert token_probe_task["delay"] == "{{ keycloak_startup_probe_delay }}"
+    assert preflight_admin_probe_task["retries"] == "{{ keycloak_startup_probe_retries }}"
+    assert preflight_admin_probe_task["delay"] == "{{ keycloak_startup_probe_delay }}"
     assert admin_probe_task["retries"] == "{{ keycloak_startup_probe_retries }}"
     assert admin_probe_task["delay"] == "{{ keycloak_startup_probe_delay }}"
     assert settle_task["ansible.builtin.pause"]["seconds"] == "{{ keycloak_startup_probe_delay }}"
@@ -468,26 +554,241 @@ def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile(
     assert admin_probe_confirmed_task["retries"] == "{{ keycloak_startup_probe_retries }}"
     assert admin_probe_confirmed_task["delay"] == "{{ keycloak_startup_probe_delay }}"
     assert token_probe_task["ansible.builtin.uri"]["return_content"] is True
+    assert preflight_admin_probe_task["ansible.builtin.uri"]["url"] == (
+        "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
+    )
+    assert preflight_admin_probe_task["ansible.builtin.uri"]["headers"]["Authorization"] == (
+        "Bearer {{ keycloak_admin_client_token_probe.json.access_token }}"
+    )
+    assert preflight_admin_probe_task["ansible.builtin.uri"]["status_code"] == [200, 403, 404]
+    assert preflight_admin_probe_task["until"] == (
+        "(keycloak_admin_realm_probe_preflight.status | default(0)) in [200, 403, 404]"
+    )
+    assert preflight_admin_probe_task["failed_when"] == (
+        "(keycloak_admin_realm_probe_preflight.status | default(0)) == 403"
+    )
     assert admin_probe_task["ansible.builtin.uri"]["url"] == "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
     assert admin_probe_task["ansible.builtin.uri"]["headers"]["Authorization"] == (
-        "Bearer {{ keycloak_bootstrap_admin_token_probe.json.access_token }}"
+        "Bearer {{ keycloak_admin_client_token_probe_confirmed.json.access_token }}"
     )
+    assert admin_probe_task["ansible.builtin.uri"]["status_code"] == [200, 403, 404]
+    assert admin_probe_task["until"] == "(keycloak_admin_realm_probe.status | default(0)) in [200, 403, 404]"
+    assert admin_probe_task["failed_when"] == "(keycloak_admin_realm_probe.status | default(0)) == 403"
     assert token_probe_confirmed_task["ansible.builtin.uri"]["return_content"] is True
     assert admin_probe_confirmed_task["ansible.builtin.uri"]["headers"]["Authorization"] == (
-        "Bearer {{ keycloak_bootstrap_admin_token_probe_confirmed.json.access_token }}"
+        "Bearer {{ keycloak_admin_client_token_probe_stable.json.access_token }}"
+    )
+    assert admin_probe_confirmed_task["ansible.builtin.uri"]["status_code"] == [200, 403, 404]
+    assert admin_probe_confirmed_task["until"] == (
+        "(keycloak_admin_realm_probe_confirmed.status | default(0)) in [200, 403, 404]"
+    )
+    assert admin_probe_confirmed_task["failed_when"] == (
+        "(keycloak_admin_realm_probe_confirmed.status | default(0)) == 403"
     )
     assert recovery_bridge_helper["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
     assert recovery_bridge_helper["ansible.builtin.include_role"]["tasks_from"] == "docker_bridge_chains"
     assert recovery_bridge_helper["vars"]["common_docker_bridge_chains_require_nat_chain"] is True
     assert 'grep -Fqx "KC_DB_URL_HOST={{ keycloak_database_host }}" "{{ keycloak_env_file }}"' in recovery_runtime_env_wait["ansible.builtin.shell"]
+    assert recovery_jgroups_cleanup["ansible.builtin.command"]["argv"] == [
+        "psql",
+        "-d",
+        "{{ keycloak_database_name }}",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-c",
+        "DELETE FROM jgroups_ping;",
+    ]
+    assert recovery_jgroups_cleanup["delegate_to"] == "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+    assert recovery_jgroups_cleanup["become"] is True
+    assert recovery_jgroups_cleanup["become_user"] == "postgres"
+    assert recovery_jgroups_cleanup["changed_when"] == (
+        "'DELETE ' in (keycloak_startup_probe_recovery_jgroups_cleanup.stdout | default(''))"
+    )
     assert (
         "docker compose --file \"{{ keycloak_compose_file }}\" up -d --force-recreate --no-deps keycloak"
         in recovery_recreate["ansible.builtin.shell"]
     )
-    assert recovery_token_probe_task["retries"] == "{{ keycloak_startup_probe_retries }}"
-    assert recovery_token_probe_task["delay"] == "{{ keycloak_startup_probe_delay }}"
-    assert recovery_confirmed_token_probe_task["retries"] == "{{ keycloak_startup_probe_retries }}"
-    assert recovery_confirmed_token_probe_task["delay"] == "{{ keycloak_startup_probe_delay }}"
+    assert recovery_readiness_task["ansible.builtin.uri"]["return_content"] is True
+    assert recovery_readiness_task["ansible.builtin.uri"]["status_code"] == [200, 503]
+    assert recovery_readiness_task["until"] == (
+        "(keycloak_startup_probe_recovery_health_ready.status | default(0)) in [200, 503]"
+    )
+    assert recovery_readiness_task["failed_when"] == (
+        "(keycloak_startup_probe_recovery_health_ready.status | default(0)) != 200"
+    )
+    assert "label=com.docker.compose.project=keycloak" in runtime_recovery_inspect_task["ansible.builtin.shell"]
+    assert "label=com.docker.compose.service=keycloak" in runtime_recovery_inspect_task["ansible.builtin.shell"]
+    assert runtime_recovery_fact_task["ansible.builtin.set_fact"][
+        "keycloak_admin_access_runtime_recovery_needed"
+    ].startswith("{{")
+    assert "{{ keycloak_mail_platform_docker_network_name }}" in runtime_recovery_recreate_task["ansible.builtin.shell"]
+    assert "--force-recreate --no-deps keycloak" in runtime_recovery_recreate_task["ansible.builtin.shell"]
+    assert runtime_recovery_recreate_task["failed_when"] is False
+    assert runtime_recovery_token_probe_task["ansible.builtin.uri"]["status_code"] == [200, 400, 401, 403, 500]
+    assert runtime_recovery_token_probe_task["failed_when"] == (
+        "(keycloak_admin_access_token_probe_recovery.status | default(0)) != 200"
+    )
+    assert runtime_recovery_admin_probe_task["ansible.builtin.uri"]["status_code"] == [200, 403, 404]
+    assert runtime_recovery_admin_probe_task["failed_when"] == (
+        "(keycloak_admin_access_realm_probe_recovery.status | default(0)) == 403"
+    )
+    assert runtime_live_secret_query_task["ansible.builtin.command"]["argv"] == [
+        "psql",
+        "-d",
+        "{{ keycloak_database_name }}",
+        "-At",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-c",
+        "SELECT secret FROM client WHERE client_id = '{{ keycloak_admin_client_id }}';",
+    ]
+    assert runtime_live_secret_query_task["delegate_to"] == (
+        "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+    )
+    assert runtime_live_secret_query_task["become"] is True
+    assert runtime_live_secret_query_task["become_user"] == "postgres"
+    assert runtime_live_secret_token_probe_task["ansible.builtin.uri"]["body"]["client_secret"] == (
+        "{{ keycloak_admin_client_secret_live }}"
+    )
+    assert runtime_live_secret_token_probe_task["ansible.builtin.uri"]["status_code"] == [200, 400, 401, 403, 500]
+    assert runtime_live_secret_token_probe_task["until"] == (
+        "(keycloak_admin_client_live_secret_token_probe.status | default(0)) in [200, 400, 401, 403]"
+    )
+    assert runtime_live_secret_token_probe_task["failed_when"] == (
+        "(keycloak_admin_client_live_secret_token_probe.status | default(0)) != 200"
+    )
+    assert runtime_live_secret_admin_probe_task["ansible.builtin.uri"]["headers"]["Authorization"] == (
+        "Bearer {{ keycloak_admin_client_live_secret_token_probe.json.access_token }}"
+    )
+    assert runtime_live_secret_admin_probe_task["ansible.builtin.uri"]["status_code"] == [200, 403, 404]
+    assert runtime_live_secret_admin_probe_task["failed_when"] == (
+        "(keycloak_admin_client_live_secret_realm_probe.status | default(0)) == 403"
+    )
+    assert runtime_live_secret_reconcile_task["ansible.builtin.include_tasks"] == "reconcile_admin_client.yml"
+    assert runtime_live_secret_reconcile_task["vars"] == {
+        "keycloak_admin_bootstrap_auth_realm": "master",
+        "keycloak_admin_bootstrap_auth_client_id": "{{ keycloak_admin_client_id }}",
+        "keycloak_admin_bootstrap_auth_client_secret": "{{ keycloak_admin_client_secret_live }}",
+    }
+    assert fallback_block["when"] == "keycloak_admin_bootstrap_fallback_required | bool"
+    assert fallback_bootstrap_task["ansible.builtin.uri"]["body"]["client_id"] == "admin-cli"
+    assert recovery_stop_task["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "compose",
+        "--file",
+        "{{ keycloak_compose_file }}",
+        "stop",
+        "keycloak",
+    ]
+
+
+def test_admin_client_repair_paths_use_refreshable_credentials() -> None:
+    tasks = load_tasks()
+    bootstrap_include = next(
+        task for task in tasks if task.get("name") == "Reconcile the repo-managed Keycloak admin client using the bootstrap admin fallback credentials"
+    )
+    admin_live_secret_include = next(
+        task
+        for task in tasks
+        if task.get("name") == "Reconcile the repo-managed Keycloak admin client using the live PostgreSQL-backed secret"
+    )
+    recovery_include = next(
+        task
+        for task in tasks
+        if task.get("name") == "Reconcile the repo-managed Keycloak admin client using the temporary recovery admin service credentials"
+    )
+    recovery_live_secret_query = next(
+        task
+        for task in tasks
+        if task.get("name")
+        == "Read the live temporary Keycloak recovery admin secret directly from PostgreSQL when file-based recovery auth fails"
+    )
+    recovery_live_secret_token_probe = next(
+        task
+        for task in tasks
+        if task.get("name")
+        == "Retry the temporary Keycloak recovery admin service token endpoint with the live PostgreSQL-backed secret"
+    )
+    assert bootstrap_include["ansible.builtin.include_tasks"] == "reconcile_admin_client.yml"
+    assert bootstrap_include["vars"] == {
+        "keycloak_admin_bootstrap_auth_realm": "master",
+        "keycloak_admin_bootstrap_auth_client_id": "admin-cli",
+        "keycloak_admin_bootstrap_auth_username": "{{ keycloak_bootstrap_admin_username }}",
+        "keycloak_admin_bootstrap_auth_password": "{{ keycloak_bootstrap_admin_password }}",
+    }
+    assert admin_live_secret_include["ansible.builtin.include_tasks"] == "reconcile_admin_client.yml"
+    assert admin_live_secret_include["vars"] == {
+        "keycloak_admin_bootstrap_auth_realm": "master",
+        "keycloak_admin_bootstrap_auth_client_id": "{{ keycloak_admin_client_id }}",
+        "keycloak_admin_bootstrap_auth_client_secret": "{{ keycloak_admin_client_secret_live }}",
+    }
+    assert recovery_include["ansible.builtin.include_tasks"] == "reconcile_admin_client.yml"
+    assert recovery_include["vars"] == {
+        "keycloak_admin_bootstrap_auth_realm": "master",
+        "keycloak_admin_bootstrap_auth_client_id": "{{ keycloak_recovery_admin_service_client_id }}",
+        "keycloak_admin_bootstrap_auth_client_secret": "{{ keycloak_recovery_admin_service_auth_client_secret }}",
+    }
+    assert recovery_live_secret_query["ansible.builtin.command"]["argv"] == [
+        "psql",
+        "-d",
+        "{{ keycloak_database_name }}",
+        "-At",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-c",
+        "SELECT secret FROM client WHERE client_id = '{{ keycloak_recovery_admin_service_client_id }}';",
+    ]
+    assert recovery_live_secret_query["delegate_to"] == (
+        "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+    )
+    assert recovery_live_secret_query["become"] is True
+    assert recovery_live_secret_query["become_user"] == "postgres"
+    assert recovery_live_secret_token_probe["ansible.builtin.uri"]["body"]["client_secret"] == (
+        "{{ keycloak_recovery_admin_service_secret_live }}"
+    )
+    assert recovery_live_secret_token_probe["ansible.builtin.uri"]["status_code"] == [200, 400, 401, 403, 500]
+    assert recovery_live_secret_token_probe["until"] == (
+        "(keycloak_recovery_admin_service_live_secret_token_probe.status | default(0)) in [200, 400, 401, 403]"
+    )
+
+
+def test_reconcile_admin_client_accepts_refreshable_auth_inputs() -> None:
+    tasks = load_admin_client_tasks()
+    client_task = next(
+        task for task in tasks if task.get("name") == "Ensure the repo-managed Keycloak admin client exists in the master realm"
+    )
+    post_reconcile_secret_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Record the auth client secret that should work after the admin client secret is reconciled"
+    )
+    role_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Ensure the repo-managed Keycloak admin client service account has the master admin composite realm role"
+    )
+    assert client_task["community.general.keycloak_client"]["full_scope_allowed"] is True
+    assert "client_id" not in role_task["community.general.keycloak_user_rolemapping"]
+    assert role_task["community.general.keycloak_user_rolemapping"]["roles"] == [{"name": "admin"}]
+    client_module_args = client_task["community.general.keycloak_client"]
+    assert client_module_args["auth_keycloak_url"] == "{{ keycloak_local_admin_url }}"
+    assert client_module_args["auth_realm"] == "{{ keycloak_admin_bootstrap_auth_realm | default(omit) }}"
+    assert client_module_args["auth_client_id"] == "{{ keycloak_admin_bootstrap_auth_client_id | default(omit) }}"
+    assert client_module_args["auth_client_secret"] == "{{ keycloak_admin_bootstrap_auth_client_secret | default(omit) }}"
+    assert client_module_args["auth_username"] == "{{ keycloak_admin_bootstrap_auth_username | default(omit) }}"
+    assert client_module_args["auth_password"] == "{{ keycloak_admin_bootstrap_auth_password | default(omit) }}"
+    assert client_module_args["token"] == "{{ keycloak_admin_bootstrap_token | default(omit) }}"
+    assert post_reconcile_secret_task["ansible.builtin.set_fact"][
+        "keycloak_admin_bootstrap_auth_client_secret_after_reconcile"
+    ].startswith("{{")
+    role_module_args = role_task["community.general.keycloak_user_rolemapping"]
+    assert role_module_args["auth_keycloak_url"] == "{{ keycloak_local_admin_url }}"
+    assert role_module_args["auth_realm"] == "{{ keycloak_admin_bootstrap_auth_realm | default(omit) }}"
+    assert role_module_args["auth_client_id"] == "{{ keycloak_admin_bootstrap_auth_client_id | default(omit) }}"
+    assert "keycloak_admin_bootstrap_auth_client_secret_after_reconcile" in role_module_args["auth_client_secret"]
+    assert role_module_args["auth_username"] == "{{ keycloak_admin_bootstrap_auth_username | default(omit) }}"
+    assert role_module_args["auth_password"] == "{{ keycloak_admin_bootstrap_auth_password | default(omit) }}"
+    assert role_module_args["token"] == "{{ keycloak_admin_bootstrap_token | default(omit) }}"
 
 
 def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
@@ -613,7 +914,9 @@ def test_role_manages_open_webui_client_secret() -> None:
         "{{ keycloak_open_webui_post_logout_redirect_uris }}"
     )
     assert open_webui_client_task["community.general.keycloak_client"]["web_origins"] == ["{{ keycloak_open_webui_root_url }}"]
+    assert "auth_client_id" not in open_webui_client_task["community.general.keycloak_client"]
     assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_open_webui_client_id }}"
+    assert "auth_client_id" not in read_secret_task["community.general.keycloak_clientsecret_info"]
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_open_webui_client_secret_local_file }}"
 
 
@@ -801,7 +1104,7 @@ def test_serverclaw_client_tasks_wait_for_keycloak_then_mirror_secret() -> None:
     readiness_task = next(task for task in tasks if task.get("name") == "Wait for the Keycloak readiness endpoint")
     admin_api_task = next(task for task in tasks if task.get("name") == "Wait for the Keycloak admin API to answer")
     token_probe_task = next(
-        task for task in tasks if task.get("name") == "Wait for the Keycloak bootstrap admin token endpoint to succeed"
+        task for task in tasks if task.get("name") == "Wait for the repo-managed Keycloak admin client token endpoint to succeed"
     )
     realm_block = next(task for task in tasks if task.get("name") == "Converge the dedicated ServerClaw Keycloak client")
     serverclaw_client_task = next(
@@ -810,7 +1113,7 @@ def test_serverclaw_client_tasks_wait_for_keycloak_then_mirror_secret() -> None:
     mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the ServerClaw client secret to the control machine")
     assert readiness_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
     assert admin_api_task["ansible.builtin.uri"]["url"] == "{{ keycloak_local_admin_url }}/realms/master/.well-known/openid-configuration"
-    assert token_probe_task["ansible.builtin.uri"]["body"]["client_id"] == "admin-cli"
+    assert token_probe_task["ansible.builtin.uri"]["body"]["client_id"] == "{{ keycloak_admin_client_id }}"
     assert serverclaw_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_serverclaw_client_id }}"
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_serverclaw_client_secret_local_file }}"
 
@@ -820,7 +1123,7 @@ def test_open_webui_client_tasks_wait_for_keycloak_then_mirror_secret() -> None:
     readiness_task = next(task for task in tasks if task.get("name") == "Wait for the Keycloak readiness endpoint")
     admin_api_task = next(task for task in tasks if task.get("name") == "Wait for the Keycloak admin API to answer")
     token_probe_task = next(
-        task for task in tasks if task.get("name") == "Wait for the Keycloak bootstrap admin token endpoint to succeed"
+        task for task in tasks if task.get("name") == "Wait for the repo-managed Keycloak admin client token endpoint to succeed"
     )
     realm_block = next(task for task in tasks if task.get("name") == "Converge the dedicated Open WebUI Keycloak client")
     open_webui_client_task = next(
@@ -829,8 +1132,13 @@ def test_open_webui_client_tasks_wait_for_keycloak_then_mirror_secret() -> None:
     mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Open WebUI client secret to the control machine")
     assert readiness_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
     assert admin_api_task["ansible.builtin.uri"]["url"] == "{{ keycloak_local_admin_url }}/realms/master/.well-known/openid-configuration"
-    assert token_probe_task["ansible.builtin.uri"]["body"]["client_id"] == "admin-cli"
+    assert token_probe_task["ansible.builtin.uri"]["body"]["grant_type"] == "client_credentials"
+    assert token_probe_task["ansible.builtin.uri"]["body"]["client_id"] == "{{ keycloak_admin_client_id }}"
+    assert token_probe_task["ansible.builtin.uri"]["body"]["client_secret"] == "{{ keycloak_admin_client_secret }}"
+    assert realm_block["module_defaults"]["group/community.general.keycloak"]["auth_client_id"] == "{{ keycloak_admin_client_id }}"
+    assert realm_block["module_defaults"]["group/community.general.keycloak"]["auth_client_secret"] == "{{ keycloak_admin_client_secret }}"
     assert open_webui_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_open_webui_client_id }}"
+    assert "auth_client_id" not in open_webui_client_task["community.general.keycloak_client"]
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_open_webui_client_secret_local_file }}"
 
 
@@ -853,7 +1161,12 @@ def test_role_manages_the_outline_automation_identity() -> None:
         task
         for task in repo_user_reconciliation["rescue"]
         if task.get("name")
-        == "Wait for the Keycloak bootstrap admin token endpoint after repo-managed user reconciliation recovery"
+        == "Wait for the repo-managed Keycloak admin client token endpoint after repo-managed user reconciliation recovery"
+    )
+    recovery_admin_probe_task = next(
+        task
+        for task in repo_user_reconciliation["rescue"]
+        if task.get("name") == "Wait for an authenticated Keycloak admin realm query after repo-managed user reconciliation recovery"
     )
     recovery_retry_task = next(
         task
@@ -902,11 +1215,25 @@ def test_role_manages_the_outline_automation_identity() -> None:
     ]
     assert recovery_token_probe_task["retries"] == "{{ keycloak_startup_probe_retries }}"
     assert recovery_token_probe_task["delay"] == "{{ keycloak_startup_probe_delay }}"
+    assert recovery_token_probe_task["until"] == (
+        "(keycloak_repo_user_reconciliation_admin_client_token_probe.status | default(0)) in [200, 400, 401, 403]"
+    )
+    assert recovery_token_probe_task["failed_when"] == (
+        "(keycloak_repo_user_reconciliation_admin_client_token_probe.status | default(0)) != 200"
+    )
+    assert recovery_admin_probe_task["ansible.builtin.uri"]["status_code"] == [200, 403, 404]
+    assert recovery_admin_probe_task["until"] == (
+        "(keycloak_repo_user_reconciliation_admin_realm_probe.status | default(0)) in [200, 403, 404]"
+    )
+    assert recovery_admin_probe_task["failed_when"] == (
+        "(keycloak_repo_user_reconciliation_admin_realm_probe.status | default(0)) == 403"
+    )
     assert recovery_retry_task["ansible.builtin.include_tasks"] == "reconcile_repo_managed_users.yml"
     assert admin_token_task["ansible.builtin.uri"]["url"] == (
         "{{ keycloak_repo_user_admin_url }}/realms/master/protocol/openid-connect/token"
     )
-    assert admin_token_task["ansible.builtin.uri"]["body"]["client_id"] == "admin-cli"
+    assert admin_token_task["ansible.builtin.uri"]["body"]["grant_type"] == "client_credentials"
+    assert admin_token_task["ansible.builtin.uri"]["body"]["client_id"] == "{{ keycloak_admin_client_id }}"
     assert admin_token_task["retries"] == "{{ keycloak_repo_user_reconciliation_retries }}"
     assert admin_token_task["delay"] == "{{ keycloak_repo_user_reconciliation_delay }}"
     assert "json.access_token" in admin_token_task["until"]

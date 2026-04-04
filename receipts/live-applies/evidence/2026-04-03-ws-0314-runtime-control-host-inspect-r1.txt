@@ -1,0 +1,34 @@
+Warning: Permanently added '100.64.0.1' (ED25519) to the list of known hosts.
+status: running
+---
+#cloud-config
+hostname: runtime-control-lv3
+fqdn: runtime-control-lv3.lv3.org
+manage_etc_hosts: true
+package_update: false
+package_upgrade: false
+ssh_pwauth: false
+disable_root: true
+
+users:
+  - default
+  - name: ops
+    gecos: LV3 Operations
+    groups: sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server
+
+packages:
+  - qemu-guest-agent
+  - sudo
+  - curl
+  - ca-certificates
+  - jq
+
+runcmd:
+  - systemctl enable --now qemu-guest-agent
+
+final_message: "runtime-control-lv3 cloud-init completed."

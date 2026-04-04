@@ -1,4 +1,10 @@
 ---
+# Purpose: Converge the managed PostgreSQL guest baseline, access policy, and runtime tuning used by ADR 0314 follow-on control-plane services.
+# Use case: Run during PostgreSQL guest provisioning, recovery, or drift reconciliation when package, config, or role policy state must match repo truth.
+# Inputs: postgres_vm_* role variables covering packages, service naming, cluster tuning, HBA policy, and managed database roles.
+# Outputs: PostgreSQL installed and started with the managed config, pg_hba policy, requested extensions, and repo-defined admin/runtime roles.
+# Idempotency: Yes; package, file, SQL, and service tasks reconcile desired state and only change the guest when drift exists.
+# Dependencies: ADR 0165, ADR 0231, guest package repositories, and access to the managed PostgreSQL cluster files under /etc/postgresql.
 - name: Validate PostgreSQL role inputs
   ansible.builtin.assert:
     that:
@@ -16,11 +22,20 @@
     fail_msg: "postgres_vm requires PostgreSQL package and listener inputs, and postgres_vm_admin_role must be a safe identifier."
 
 - name: Install PostgreSQL guest packages
+  ansible.builtin.command:
+    argv:
+      - apt-get
+      - update
+  register: postgres_vm_apt_cache_refresh
+  changed_when: false
+  retries: 5
+  delay: 5
+  until: postgres_vm_apt_cache_refresh.rc == 0
+
+- name: Install PostgreSQL guest packages
   ansible.builtin.apt:
     name: "{{ postgres_vm_packages }}"
     state: present
-    update_cache: true
-    cache_valid_time: 3600
     force_apt_get: true
 
 - name: Ensure PostgreSQL service is enabled and started
@@ -58,8 +73,6 @@
   ansible.builtin.apt:
     name: "postgresql-{{ postgres_vm_cluster_major_version }}-pgaudit"
     state: present
-    update_cache: true
-    cache_valid_time: 3600
     force_apt_get: true
   when:
     - postgres_vm_pgaudit_enabled | bool
