@@ -42,3 +42,17 @@ entries:
     format: "YAML \u2014 one file per host named after hostname"
     use_for: Per-host customisation that differs from group defaults
     structure: 'One file per host: inventory/host_vars/<hostname>.yml'
+  reference-deployments/catalog.yaml:
+    purpose: Canonical reference deployment sample catalog for new forks
+    owner: human and automation
+    format: YAML
+    use_for: Mapping starter samples to their live canonical counterparts and renderable template sets
+    update_when: Adding a new reference deployment sample or changing the starter render set
+    validation: uv run --with pyyaml python3 scripts/reference_deployment_samples.py validate
+  config/reference-provider-profiles.yaml:
+    purpose: Replaceable example provider and publication values for reference deployment samples
+    owner: human
+    format: YAML
+    use_for: Selecting example provider profiles when rendering starter inventory, publication, and overlay files
+    update_when: Adding a new example provider shape or changing the placeholder values used by a sample
+    validation: uv run --with pyyaml python3 scripts/reference_deployment_samples.py validate

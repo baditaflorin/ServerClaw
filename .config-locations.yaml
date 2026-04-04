@@ -48,7 +48,7 @@ section_index:
     file: docs/discovery/config-locations/inventory.yaml
     summary: Host, group, and topology inputs for the platform inventory model.
     when_to_read: Use this section when changing hosts, groups, host vars, or topology declarations.
-    entry_count: 6
+    entry_count: 8
   - id: automation
     title: Automation And Tooling Config
     file: docs/discovery/config-locations/automation.yaml
@@ -80,3 +80,7 @@ onboarding_packs:
     title: Service Catalog Onboarding
     file: build/onboarding/service-catalog.yaml
     summary: Discovery surfaces for locating service topology, runtime config, and generated service-related truth.
+  - id: fork-bootstrap
+    title: Fork Bootstrap Onboarding
+    file: build/onboarding/fork-bootstrap.yaml
+    summary: Example-first discovery surfaces for starting a new deployment fork from reference samples and private overlays.

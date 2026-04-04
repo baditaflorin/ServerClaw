@@ -10,7 +10,7 @@ generated: '2026-04-04'
 facet: status
 implementation_status: Not Implemented
 slug: not-implemented
-total_adrs: 30
+total_adrs: 29
 adrs:
   - adr: '0024'
     title: Docker Guest Security Baseline
@@ -498,22 +498,3 @@ adrs:
     summary: Primary onboarding catalogs should move toward example-first inventories and
     filename: 0334-example-first-inventory-and-service-identity-catalogs.md
     path: docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md
-  - adr: 0339
-    title: Reference Deployment Samples And Replaceable Provider Profiles
-    status: Accepted
-    implementation_status: Not Implemented
-    date: '2026-04-02'
-    concern: vm-topology
-    keywords:
-      - samples
-      - templates
-      - provider
-      - onboarding
-      - replication
-      - reference
-      - deployment
-      - replaceable
-      - profiles
-    summary: We will provide reference deployment samples and replaceable provider profiles
-    filename: 0339-reference-deployment-samples-and-replaceable-provider-profiles.md
-    path: docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md

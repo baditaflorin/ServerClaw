@@ -17,55 +17,53 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 290
+  total_workstreams: 289
   by_year:
-    '2026': 290
+    '2026': 289
 workstreams:
-- id: ws-0332-resilience-predictability
-  adr: '0346'
-  title: Enforce health-gated compose dependencies for more predictable service recovery
+- id: ws-0339-live-apply
+  adr: 0339
+  title: Live apply reference deployment samples and replaceable provider profiles
+    from latest origin/main
   status: live_applied
   owner: codex
-  branch: codex/ws-0332-live-apply-r1
-  worktree_path: .worktrees/ws-0332-live-apply
-  doc: docs/workstreams/ws-0332-resilience-predictability.md
+  branch: codex/ws-0339-live-apply
+  worktree_path: .worktrees/ws-0339-live-apply
+  doc: docs/workstreams/ws-0339-live-apply.md
   depends_on:
-  - adr-0064-health-probe-contracts-for-all-services
-  - adr-0107-platform-extension-model
-  - adr-0204-self-correcting-automation-loops
-  - adr-0246-startup-readiness-liveness-and-degraded-state-semantics
-  - adr-0319-runtime-pools-as-the-service-partition-boundary
-  - adr-0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline
+  - adr-0168-automated-enforcement-of-agent-standards
+  - adr-0327-sectional-agent-discovery-registries-and-generated-onboarding-packs
+  - adr-0333-private-overlay-files-for-deployment-specific-secrets-and-identities
+  - adr-0334-example-first-inventory-and-service-identity-catalogs
+  - adr-0339-reference-deployment-samples-and-replaceable-provider-profiles
   conflicts_with: []
   shared_surfaces:
   - workstreams.yaml
-  - workstreams/active/ws-0332-resilience-predictability.yaml
-  - docs/workstreams/ws-0332-resilience-predictability.md
-  - docs/adr/0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md
+  - workstreams/active/ws-0339-live-apply.yaml
+  - docs/workstreams/ws-0339-live-apply.md
+  - docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
   - docs/adr/.index.yaml
   - docs/adr/index/by-range/*.yaml
   - docs/adr/index/by-concern/*.yaml
   - docs/adr/index/by-status/*.yaml
-  - docs/adr/index/reservations.yaml
+  - docs/runbooks/reference-deployment-samples.md
+  - docs/runbooks/validate-repository-automation.md
+  - docs/discovery/onboarding-packs.yaml
+  - docs/discovery/repo-structure/automation-and-infrastructure.yaml
+  - docs/discovery/config-locations/inventory.yaml
+  - .repo-structure.yaml
+  - .config-locations.yaml
+  - build/onboarding/*.yaml
   - docs/diagrams/agent-coordination-map.excalidraw
-  - docs/runbooks/compose-runtime-resilience.md
-  - README.md
-  - changelog.md
-  - versions/stack.yaml
-  - build/platform-manifest.json
-  - docs/status/history/live-apply-evidence.md
-  - docs/status/history/merged-workstreams.md
-  - receipts/live-applies/2026-04-04-adr-0346-*
-  - receipts/live-applies/evidence/2026-04-04-ws-0332-*
-  - config/service-completeness.json
-  - scripts/service_completeness.py
-  - collections/ansible_collections/lv3/platform/roles/dozzle_runtime/templates/docker-compose.yml.j2
-  - collections/ansible_collections/lv3/platform/roles/minio_runtime/templates/docker-compose.yml.j2
-  - collections/ansible_collections/lv3/platform/roles/searxng_runtime/templates/docker-compose.yml.j2
-  - tests/test_validate_service_completeness.py
-  - tests/test_dozzle_runtime_role.py
-  - tests/test_minio_runtime_role.py
-  - tests/test_searxng_runtime_role.py
+  - reference-deployments/**
+  - config/reference-provider-profiles.yaml
+  - scripts/reference_deployment_samples.py
+  - scripts/validate_repository_data_models.py
+  - tests/test_reference_deployment_samples.py
+  - tests/test_generate_discovery_artifacts.py
+  - receipts/live-applies/2026-04-04-adr-0339-reference-deployment-samples-live-apply.json
+  - receipts/live-applies/2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply.json
+  - receipts/live-applies/evidence/2026-04-04-ws-0339-*
   ownership_manifest:
     owned_surfaces:
     - id: workstream_registry
@@ -73,73 +71,66 @@ workstreams:
       - workstreams.yaml
       mode: shared_contract
       contract: workstream-registry-v1
-    - id: ws0332_registry_source
-      paths:
-      - workstreams/active/ws-0332-resilience-predictability.yaml
-      mode: exclusive
-    - id: ws0332_docs
-      paths:
-      - docs/workstreams/ws-0332-resilience-predictability.md
-      - docs/adr/0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md
-      - docs/runbooks/compose-runtime-resilience.md
-      mode: exclusive
-    - id: ws0332_live_apply_receipts
-      paths:
-      - receipts/live-applies/2026-04-04-adr-0346-*
-      - receipts/live-applies/evidence/2026-04-04-ws-0332-*
-      mode: exclusive
-    - id: ws0332_generated_history
-      paths:
-      - build/platform-manifest.json
-      - docs/status/history/live-apply-evidence.md
-      - docs/status/history/merged-workstreams.md
-      - docs/diagrams/agent-coordination-map.excalidraw
-      mode: shared_contract
-      contract: latest-main-generated-truth-v1
-    - id: ws0332_canonical_truth
-      paths:
-      - README.md
-      - changelog.md
-      - versions/stack.yaml
-      mode: shared_contract
-      contract: canonical-truth-v1
-    - id: ws0332_adr_index
+    - id: adr_index_generation
       paths:
       - docs/adr/.index.yaml
       - docs/adr/index/by-range/*.yaml
       - docs/adr/index/by-concern/*.yaml
       - docs/adr/index/by-status/*.yaml
-      - docs/adr/index/reservations.yaml
       mode: shared_contract
       contract: adr-index-generator-v1
-    - id: ws0332_resilience_contract
+    - id: ws0339_docs
       paths:
-      - config/service-completeness.json
-      - scripts/service_completeness.py
-      - collections/ansible_collections/lv3/platform/roles/dozzle_runtime/templates/docker-compose.yml.j2
-      - collections/ansible_collections/lv3/platform/roles/minio_runtime/templates/docker-compose.yml.j2
-      - collections/ansible_collections/lv3/platform/roles/searxng_runtime/templates/docker-compose.yml.j2
+      - docs/workstreams/ws-0339-live-apply.md
+      - docs/runbooks/reference-deployment-samples.md
+      - docs/runbooks/validate-repository-automation.md
+      - docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
       mode: exclusive
-    - id: ws0332_resilience_tests
+    - id: ws0339_reference_samples
       paths:
-      - tests/test_validate_service_completeness.py
-      - tests/test_dozzle_runtime_role.py
-      - tests/test_minio_runtime_role.py
-      - tests/test_searxng_runtime_role.py
+      - reference-deployments/**
+      - config/reference-provider-profiles.yaml
       mode: exclusive
-  canonical_truth:
-    changelog_entry: enforces health-gated compose dependency startup as part of service
-      completeness, fixes the low-risk runtime templates that were still using blind
-      startup ordering, and records the remaining bounded exception explicitly
-    release_bump: patch
-    included_in_repo_version: null
-    latest_receipts:
-      dozzle: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
-      minio: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
-      searxng: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
+    - id: ws0339_discovery_sources
+      paths:
+      - docs/discovery/onboarding-packs.yaml
+      - docs/discovery/repo-structure/automation-and-infrastructure.yaml
+      - docs/discovery/config-locations/inventory.yaml
+      mode: exclusive
+    - id: ws0339_generated_discovery_outputs
+      paths:
+      - .repo-structure.yaml
+      - .config-locations.yaml
+      - build/onboarding/*.yaml
+      mode: exclusive
+    - id: ws0339_generated_truth_artifacts
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: latest-main-generated-truth-v1
+    - id: ws0339_validation_tooling
+      paths:
+      - scripts/reference_deployment_samples.py
+      - scripts/validate_repository_data_models.py
+      - tests/test_reference_deployment_samples.py
+      - tests/test_generate_discovery_artifacts.py
+      mode: exclusive
+    - id: ws0339_live_apply_receipts
+      paths:
+      - receipts/live-applies/2026-04-04-adr-0339-reference-deployment-samples-live-apply.json
+      - receipts/live-applies/2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-04-04-ws-0339-*
+      mode: exclusive
   blockers: []
   ready_to_merge: true
   live_applied: true
+  canonical_truth:
+    changelog_entry: implements ADR 0339 by adding governed reference deployment samples,
+      replaceable example provider profiles, a render-and-validate bootstrap tool,
+      and discovery plus runbook guidance for fork-first onboarding
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
 - id: ws-0337-live-apply
   adr: '0337'
   title: Re-verify fork-first workstream metadata from the latest origin/main

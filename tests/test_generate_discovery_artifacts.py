@@ -53,6 +53,25 @@ def test_generated_service_catalog_pack_contains_selected_sections() -> None:
     assert payload["root_entrypoints"][".config-locations.yaml"].startswith("Generated root discovery entrypoint")
 
 
+def test_generated_fork_bootstrap_pack_contains_bootstrap_sections() -> None:
+    outputs = generator.render_outputs()
+    payload = _load_generated_yaml(outputs[generator.ONBOARDING_OUTPUT_DIR / "fork-bootstrap.yaml"])
+
+    assert payload["pack"]["id"] == "fork-bootstrap"
+    assert [section["id"] for section in payload["repo_structure_sections"]] == [
+        "root-entrypoints",
+        "documentation-and-history",
+        "automation-and-infrastructure",
+    ]
+    assert [section["id"] for section in payload["config_location_sections"]] == [
+        "agent-discovery",
+        "inventory",
+        "automation",
+        "versioning",
+    ]
+    assert "docs/discovery/onboarding-packs.yaml" in payload["generated_from"]
+
+
 def test_generated_root_outputs_keep_concise_section_summaries() -> None:
     outputs = generator.render_outputs()
     payload = _load_generated_yaml(outputs[generator.REPO_STRUCTURE_OUTPUT])

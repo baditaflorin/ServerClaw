@@ -46,7 +46,7 @@ section_index:
     summary: Ansible, IaC, policy, inventory, scripts, and tests that define and validate the platform.
     when_to_read: Use this section when changing provisioning, topology, repo automation, or validation logic.
     entry_counts:
-      directories: 13
+      directories: 14
   - id: runtime-and-delivery
     title: Runtime Packaging And Delivery
     file: docs/discovery/repo-structure/runtime-and-delivery.yaml
@@ -74,3 +74,7 @@ onboarding_packs:
     title: Service Catalog Onboarding
     file: build/onboarding/service-catalog.yaml
     summary: Discovery surfaces for locating service topology, runtime config, and generated service-related truth.
+  - id: fork-bootstrap
+    title: Fork Bootstrap Onboarding
+    file: build/onboarding/fork-bootstrap.yaml
+    summary: Example-first discovery surfaces for starting a new deployment fork from reference samples and private overlays.

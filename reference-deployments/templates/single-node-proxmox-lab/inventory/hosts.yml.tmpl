@@ -1,0 +1,30 @@
+all:
+  vars:
+    playbook_execution_env: "{{ env | default('production') }}"
+    playbook_execution_allowed_envs:
+      - production
+  children:
+    production:
+      hosts:
+        {{ sample_proxmox_host_label }}:
+        {{ sample_public_edge_guest_name }}:
+        {{ sample_runtime_guest_name }}:
+    platform:
+      children:
+        proxmox_hosts:
+        lv3_guests:
+    proxmox_hosts:
+      hosts:
+        {{ sample_proxmox_host_label }}:
+          ansible_host: {{ sample_proxmox_management_tailscale_ipv4 }}
+          ansible_user: {{ sample_ops_user }}
+          ansible_become: true
+          ansible_become_method: sudo
+    lv3_guests:
+      hosts:
+        {{ sample_public_edge_guest_name }}:
+          ansible_host: {{ sample_public_edge_ipv4 }}
+          deployment_environment: production
+        {{ sample_runtime_guest_name }}:
+          ansible_host: {{ sample_runtime_ipv4 }}
+          deployment_environment: production

@@ -1,0 +1,26 @@
+schema_version: 1.0.0
+samples:
+- id: single-node-proxmox-lab
+  title: Single-node Proxmox lab
+  description: Example-first bootstrap set for one Proxmox host, one public edge guest, and one runtime guest.
+  canonical_examples:
+  - inventory/hosts.yml
+  - inventory/host_vars/proxmox_florin.yml
+  - config/api-publication.json
+  - config/controller-local-secrets.json
+  supported_provider_profiles:
+  - dedicated-public-edge
+  - cloud-lab-public-edge
+  render_files:
+  - source: reference-deployments/templates/single-node-proxmox-lab/inventory/hosts.yml.tmpl
+    destination: inventory/hosts.yml
+    description: Starter Ansible inventory showing the host groups and example IP layout for the reference deployment.
+  - source: reference-deployments/templates/single-node-proxmox-lab/inventory/host_vars/reference-proxmox.yml.tmpl
+    destination: inventory/host_vars/reference-proxmox.yml
+    description: Starter host variables for the reference Proxmox hypervisor and its internal guest network.
+  - source: reference-deployments/templates/single-node-proxmox-lab/config/api-publication.json.tmpl
+    destination: config/api-publication.json
+    description: Starter publication catalog showing one operator-only API path, one public-edge hostname, and one private-only surface.
+  - source: reference-deployments/templates/single-node-proxmox-lab/local-overlays/controller-local-secrets.json.tmpl
+    destination: .local/reference-deployment/controller-local-secrets.json
+    description: Starter private-overlay manifest for local secrets and generated bootstrap artifacts.

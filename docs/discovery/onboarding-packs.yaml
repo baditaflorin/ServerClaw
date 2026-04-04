@@ -52,3 +52,22 @@ packs:
   - inventory
   - service-configuration
   - automation
+- id: fork-bootstrap
+  title: Fork Bootstrap Onboarding
+  summary: Example-first discovery surfaces for starting a new deployment fork from reference samples and private overlays.
+  root_entrypoints:
+  - README.md
+  - AGENTS.md
+  - .repo-structure.yaml
+  - .config-locations.yaml
+  - docs/adr/.index.yaml
+  - workstreams.yaml
+  repo_structure_sections:
+  - root-entrypoints
+  - documentation-and-history
+  - automation-and-infrastructure
+  config_location_sections:
+  - agent-discovery
+  - inventory
+  - automation
+  - versioning

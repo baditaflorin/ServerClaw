@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "default_publication_tier": "internal-only",
+  "tiers": {
+    "internal-only": {
+      "title": "Internal-Only",
+      "summary": "Reachable only from the private guest network or controller-local paths.",
+      "approval_rule": "Use this tier unless a service has an explicit operator-only or public-edge reason."
+    },
+    "operator-only": {
+      "title": "Operator-Only",
+      "summary": "Reachable only from approved operator devices over the private access path.",
+      "approval_rule": "Operator surfaces stay private by default even when they are convenient to proxy."
+    },
+    "public-edge": {
+      "title": "Public Edge",
+      "summary": "Intentionally published through the shared reverse-proxy edge on an example hostname.",
+      "approval_rule": "Only publish a hostname when the sample needs to demonstrate a real public-facing entrypoint."
+    }
+  },
+  "surfaces": [
+    {
+      "id": "proxmox-management-api",
+      "title": "Proxmox management API",
+      "publication_tier": "operator-only",
+      "private_entrypoint": "{{ sample_proxmox_api_url }}",
+      "reachability": "Reachable only over the operator mesh at {{ sample_proxmox_api_url }}.",
+      "approval_notes": "Reference sample {{ sample_id }} keeps hypervisor access private to the operator path."
+    },
+    {
+      "id": "shared-edge-app",
+      "title": "Shared edge app",
+      "publication_tier": "public-edge",
+      "public_hostnames": [
+        "app.{{ sample_public_base_domain }}"
+      ],
+      "reachability": "Published through the shared edge at https://app.{{ sample_public_base_domain }} via {{ sample_public_edge_hostname }}.",
+      "approval_notes": "Public hostnames are examples and should be replaced through the selected provider profile."
+    },
+    {
+      "id": "internal-control-api",
+      "title": "Internal control API",
+      "publication_tier": "internal-only",
+      "reachability": "Reachable only on the private guest network and controller-local paths.",
+      "approval_notes": "Internal service APIs remain unpublished by default."
+    }
+  ]
+}

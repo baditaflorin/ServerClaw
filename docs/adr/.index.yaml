@@ -112,7 +112,7 @@ facets:
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
-      count: 30
+      count: 29
     - implementation_status: Deprecated
       slug: deprecated
       path: docs/adr/index/by-status/deprecated.yaml
@@ -168,9 +168,10 @@ latest_adrs:
     implemented_on: '2026-04-03'
   - adr: 0339
     title: Reference Deployment Samples And Replaceable Provider Profiles
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     concern: vm-topology
     path: docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+    implemented_on: '2026-04-04'
   - adr: 0338
     title: Public Documentation Tiers And Private History Boundaries
     implementation_status: Partial

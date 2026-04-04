@@ -5853,6 +5853,26 @@ adrs:
     filename: 0337-fork-first-workstream-and-worktree-metadata.md
     path: docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
     implemented_on: '2026-04-04'
+  - adr: 0339
+    title: Reference Deployment Samples And Replaceable Provider Profiles
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: vm-topology
+    keywords:
+      - samples
+      - templates
+      - provider
+      - onboarding
+      - replication
+      - reference
+      - deployment
+      - replaceable
+      - profiles
+    summary: We will provide reference deployment samples and replaceable provider profiles
+    filename: 0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+    path: docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+    implemented_on: '2026-04-04'
   - adr: '0340'
     title: Dedicated Coolify Apps VM Separation
     status: Accepted
