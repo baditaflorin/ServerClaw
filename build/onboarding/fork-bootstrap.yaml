@@ -1,0 +1,827 @@
+# ============================================================================
+# Onboarding Pack - Fork Bootstrap Onboarding
+# ============================================================================
+# GENERATED FILE - do not edit by hand
+# Regenerate: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
+# ============================================================================
+schema_version: 1
+generated: '2026-04-04'
+generated_from:
+  - docs/discovery/onboarding-packs.yaml
+  - docs/discovery/repo-structure/root-entrypoints.yaml
+  - docs/discovery/repo-structure/documentation-and-history.yaml
+  - docs/discovery/repo-structure/automation-and-infrastructure.yaml
+  - docs/discovery/config-locations/agent-discovery.yaml
+  - docs/discovery/config-locations/inventory.yaml
+  - docs/discovery/config-locations/automation.yaml
+  - docs/discovery/config-locations/versioning.yaml
+pack:
+  id: fork-bootstrap
+  title: Fork Bootstrap Onboarding
+  summary: Example-first discovery surfaces for starting a new deployment fork from reference samples and private overlays.
+root_entrypoints:
+  README.md: Current project status, merged platform truth, and fork-level orientation.
+  AGENTS.md: Working rules, handoff protocol, and collaboration conventions for agents.
+  .repo-structure.yaml: Generated root discovery entrypoint for repository layout and section navigation.
+  .config-locations.yaml: Generated root discovery entrypoint for canonical configuration locations.
+  docs/adr/.index.yaml: Generated ADR discovery index for keyword, concern, and reservation-aware queries.
+  workstreams.yaml: Active workstream registry plus ownership contracts and merge state.
+repo_structure_sections:
+  - id: root-entrypoints
+    title: Root Entrypoints And Governance
+    summary: The top-level files every agent reads first, plus release and workflow control surfaces.
+    when_to_read: Start here when orienting a worktree, checking repo-wide rules, or finding the primary human entrypoints.
+    file: docs/discovery/repo-structure/root-entrypoints.yaml
+    entries:
+      top_level_files:
+        README.md:
+          purpose: Project overview, deployment status, current topology, next steps
+          for_agents: START HERE - current state of the platform
+        AGENTS.md:
+          purpose: Rules and conventions for LLM agents; handoff protocol (ADR 0167)
+          for_agents: MUST READ before making any changes
+        RELEASE.md:
+          purpose: Current release notes and upgrade instructions
+          for_agents: Check before bumping VERSION or writing release notes
+        VERSION:
+          purpose: Current repository semantic version (X.Y.Z)
+          for_agents: Bump when merging to main; read to identify release boundaries
+        changelog.md:
+          purpose: Human-readable changelog index pointing to versioned release notes
+          for_agents: Update when cutting a new version
+        workstreams.yaml:
+          purpose: Active workstream registry - branch, assignee, status, ADR ref
+          for_agents: Check for in-flight work; update your entry at start/end
+        Makefile:
+          purpose: Task runner - validate, test, build, deploy, generate docs
+          for_agents: Run 'make validate-data-models' before pushing
+        ansible.cfg:
+          purpose: Ansible configuration and collection paths
+          for_agents: Understand Ansible runtime behaviour
+        mkdocs.yml:
+          purpose: MkDocs documentation-site configuration
+          for_agents: Understand how docs are published for your fork or docs site
+        pyproject.toml:
+          purpose: Python project metadata, tool config (black, ruff, mypy)
+          for_agents: Check Python dependencies and linting settings
+        .repo-structure.yaml:
+          purpose: THIS FILE - machine-readable directory index
+          for_agents: Use to navigate; keep updated when adding new directories
+        .config-locations.yaml:
+          purpose: Registry of every canonical configuration file and its purpose
+          for_agents: Find where specific config lives; where to write changes
+  - id: documentation-and-history
+    title: Documentation And Operational History
+    summary: Narrative ADRs, runbooks, workstreams, release notes, discovery sources, and audit evidence.
+    when_to_read: Use this section when you need design rationale, operator procedures, or historical receipts.
+    file: docs/discovery/repo-structure/documentation-and-history.yaml
+    entries:
+      directories:
+        docs/adr:
+          purpose: Architecture Decision Records - every major design decision
+          contains: ADR markdown files, compact .index.yaml root manifest, and shard metadata under index/
+          concern: governance, architecture
+          keywords:
+            - decisions
+            - architecture
+            - history
+            - rationale
+            - consequences
+            - adr
+          for_agents: 'Read .index.yaml to find relevant ADRs by keyword, concern, or reservation context. Load one shard under docs/adr/index/ when you need focused browsing instead of the full corpus.
+
+            '
+          key_files:
+            .index.yaml: Root ADR discovery manifest with shard pointers and reservation summary
+            index/reservations.yaml: ADR number and window reservation ledger for parallel authoring
+        docs/runbooks:
+          purpose: Operational runbooks and procedures for routine tasks
+          contains: Step-by-step guides for deployment, troubleshooting, recovery
+          concern: operations
+          keywords:
+            - procedures
+            - operational
+            - how-to
+            - runbook
+            - recovery
+            - deployment
+          for_agents: Find specific operational procedures and recovery steps
+        docs/reference-deployments:
+          purpose: Public-safe reference deployment samples and fork-first onboarding maps
+          contains: Example inventory, publication-profile, and overlay guidance for fresh forks
+          concern: documentation, onboarding
+          keywords:
+            - reference
+            - examples
+            - fork
+            - onboarding
+            - samples
+          for_agents: Start here when translating the repo into a new environment without reusing the integrated live topology verbatim.
+        docs/workstreams:
+          purpose: ADR-style documentation for active workstreams
+          contains: adr-XXXX-workstream-name.md files for each active branch
+          concern: project-management, branch-work
+          keywords:
+            - workstreams
+            - parallel
+            - branch
+            - in-progress
+            - tasks
+          for_agents: Understand what work is in progress and planned; create one here
+        docs/release-notes:
+          purpose: Versioned release notes and generated release-history indexes
+          contains: X.Y.Z.md files for each platform release plus index/*.md archive ledgers
+          concern: release, versioning
+          keywords:
+            - release
+            - notes
+            - version
+            - changelog
+          for_agents: Check before writing release notes; create here on new release
+        docs/status/history:
+          purpose: Generated history ledgers for bounded root summaries
+          contains: Full live-apply evidence and merged-workstream history once the root README rolls older rows away
+          concern: documentation, generated, history
+          keywords:
+            - history
+            - status
+            - generated
+            - rollover
+            - readme
+          for_agents: Generated by status-doc tooling; refresh through make generate-status-docs
+        docs/site-generated:
+          purpose: Auto-generated documentation artefacts (do not edit)
+          contains: architecture diagrams, dependency graphs, status documents
+          concern: documentation, generated
+          keywords:
+            - generated
+            - diagram
+            - architecture
+            - auto
+          for_agents: READ ONLY - regenerated by 'make generate-docs'; do not edit
+        docs/discovery:
+          purpose: Canonical sectional discovery registries and onboarding-pack definitions
+          contains: repo-structure/, config-locations/, onboarding-packs.yaml
+          concern: documentation, agent-discovery
+          keywords:
+            - discovery
+            - onboarding
+            - registries
+            - packs
+            - generated
+          for_agents: Edit these section files, then regenerate the root onboarding entrypoints and build/onboarding packs.
+        receipts:
+          purpose: Operational receipts and audit trail
+          contains: live-applies/, gate-bypasses/, deployment receipts
+          concern: audit, operational-history
+          keywords:
+            - receipts
+            - audit
+            - history
+            - deployment
+            - live-apply
+          for_agents: 'Create a receipt here for every live-apply or deployment. gate-bypasses/ records --no-verify overrides with justification.
+
+            '
+        versions:
+          purpose: Canonical deployed state and version snapshots
+          contains: stack.yaml (canonical services), version metadata
+          concern: state-tracking, versioning
+          keywords:
+            - versions
+            - state
+            - stack
+            - canonical
+            - deployed
+            - services
+          for_agents: 'versions/stack.yaml is the source of truth for deployed service versions. Update ONLY after a successful deployment.
+
+            '
+        build:
+          purpose: Generated build artefacts (do not commit manually)
+          contains: platform-manifest.json, changelog-portal/, onboarding/
+          concern: build, generated
+          keywords:
+            - build
+            - generated
+            - manifest
+            - artefacts
+          for_agents: READ ONLY - generated by build and discovery generators; do not edit generated outputs by hand.
+  - id: automation-and-infrastructure
+    title: Automation And Infrastructure Surfaces
+    summary: Ansible, IaC, policy, inventory, scripts, and tests that define and validate the platform.
+    when_to_read: Use this section when changing provisioning, topology, repo automation, or validation logic.
+    file: docs/discovery/repo-structure/automation-and-infrastructure.yaml
+    entries:
+      directories:
+        playbooks:
+          purpose: Ansible playbooks for host and VM provisioning
+          contains: site.yml, bootstrap.yml, per-service playbooks, groups/
+          concern: automation, infrastructure-deployment
+          keywords:
+            - ansible
+            - playbooks
+            - deployment
+            - automation
+            - idempotent
+            - provision
+          for_agents: 'Check metadata header (first 30 lines) of each playbook for Purpose, Inputs, Outputs, Dependencies. Template at playbooks/.metadata-template.yml
+
+            '
+          key_files:
+            site.yml: Full host bootstrap from bare Debian 13
+            bootstrap.yml: First-run SSH and base packages
+            .metadata-template.yml: Standard metadata header for new playbooks
+        roles:
+          purpose: Ansible roles referenced by playbooks (legacy location)
+          contains: Reusable role implementations
+          concern: automation, shared-logic
+          keywords:
+            - roles
+            - reusable
+            - task-groups
+            - handlers
+          for_agents: 'Most roles live in collections/ansible_collections/lv3/platform/roles/. Check meta/main.yml for each role''s documented contract.
+
+            '
+        collections/ansible_collections/lv3/platform:
+          purpose: Custom Ansible collection - all modern platform roles/plugins
+          contains: roles/, plugins/, modules/ specific to this infrastructure
+          concern: shared-automation, extensibility
+          keywords:
+            - collection
+            - custom
+            - modules
+            - plugins
+            - reusable
+            - lv3
+          for_agents: PRIMARY location for roles; check roles/ subdirectory
+        inventory:
+          purpose: Ansible inventory, host groups, and variable definitions
+          contains: hosts.yml, group_vars/, host_vars/, examples/
+          concern: infrastructure-topology, declarative-state
+          keywords:
+            - inventory
+            - hosts
+            - groups
+            - variables
+            - topology
+            - ansible
+          for_agents: 'hosts.yml defines all VMs; group_vars/all.yml has shared vars; host_vars/<name>.yml has per-host overrides.
+
+            '
+        reference-deployments:
+          purpose: Example-first deployment samples, templates, and starter overlays for new forks
+          contains: catalog.yaml, templates/, README.md
+          concern: onboarding, forkability, examples
+          keywords:
+            - reference
+            - samples
+            - templates
+            - fork
+            - onboarding
+            - examples
+          for_agents: Start here when you need example inventory, publication, and private-overlay starter files instead of one deployment's live truth.
+        config:
+          purpose: Service and application configuration (YAML/JSON/CONF)
+          contains: Per-service config directories for all deployed services plus examples/
+          concern: service-configuration, applications
+          keywords:
+            - config
+            - templates
+            - services
+            - settings
+            - configuration
+          for_agents: 'One subdirectory per service (e.g., config/gitea/, config/keycloak/). Read .config-locations.yaml for which file controls which behaviour.
+
+            '
+          key_files:
+            network-impairment-matrix.yaml: ADR 0189 governed preview/staging network impairment catalog
+            stage-smoke-suites.json: ADR 0251 catalog of stage-scoped smoke suites mapped to service/environment bindings
+        policy:
+          purpose: Shared Rego policy bundles and tests for OPA and Conftest
+          contains: decisions/, conftest/, tests/
+          concern: policy, validation, shared-decision-logic
+          keywords:
+            - policy
+            - opa
+            - conftest
+            - rego
+            - approvals
+            - promotion
+          for_agents: 'Shared decision logic lives here for command approval, promotion eligibility, and repository invariants. Validate changes with scripts/policy_checks.py before updating callers.
+
+            '
+        scripts:
+          purpose: Utility and helper scripts (Python, Bash)
+          contains: Validation, data generation, CI helpers, operational utilities
+          concern: automation, tooling, ci
+          keywords:
+            - scripts
+            - utilities
+            - helpers
+            - tools
+            - validation
+            - python
+          for_agents: 'validate_repo.sh runs all local checks. generate_adr_index.py regenerates docs/adr/.index.yaml plus docs/adr/index/. adr_query_tool.py reads the ADR shards and reservation ledger. platform_manifest.py generates build/platform-manifest.json.
+
+            '
+          key_files:
+            adr_query_tool.py: ADR 0325 discovery query helper and reservation-safe ADR window allocator
+            generate_adr_index.py: ADR 0325 generator for docs/adr/.index.yaml and docs/adr/index/ shards
+            network_impairment_matrix.py: ADR 0189 CLI and validation helper for governed network impairment scenarios
+            policy_checks.py: ADR 0230 validator for the shared OPA and Conftest policy bundle and toolchain
+            stage_smoke_suites.py: ADR 0251 validator and runner for stage-scoped smoke suite catalogs and receipt-ready evidence
+        tests:
+          purpose: Test suites for automated validation
+          contains: pytest unit + integration tests, molecule scenarios
+          concern: validation, quality-assurance
+          keywords:
+            - tests
+            - validation
+            - pytest
+            - molecule
+            - integration
+          for_agents: Run 'pytest tests/' before pushing; check tests/ for test patterns
+        tofu:
+          purpose: OpenTofu/Terraform infrastructure code
+          contains: Infrastructure-as-code for cloud resources
+          concern: infrastructure-provisioning, iac
+          keywords:
+            - tofu
+            - terraform
+            - provisioning
+            - iac
+            - cloud
+          for_agents: Find infrastructure code for cloud provisioning
+        packer:
+          purpose: Packer templates for VM image building
+          contains: Debian cloud-init templates, image build configurations
+          concern: image-building, templates
+          keywords:
+            - packer
+            - image
+            - template
+            - vm
+            - cloud-init
+          for_agents: Understand how VM images are built from templates
+        molecule:
+          purpose: Molecule test scenarios for Ansible role testing
+          contains: Test scenarios for validating Ansible roles in containers
+          concern: testing, role-validation
+          keywords:
+            - molecule
+            - testing
+            - scenarios
+            - validation
+            - ansible-role
+          for_agents: Find role-testing configurations and scenarios
+        migrations:
+          purpose: Database and schema migration scripts
+          contains: Timestamped migration files for data changes
+          concern: data-management, backward-compatibility
+          keywords:
+            - migrations
+            - database
+            - schema
+            - evolution
+          for_agents: Find data schema changes and migration history
+        platform:
+          purpose: Platform management tooling (CLI, utilities)
+          contains: Platform CLI and helper utilities
+          concern: tooling, platform-management
+          keywords:
+            - platform
+            - cli
+            - tooling
+            - management
+          for_agents: Platform-level management utilities
+          key_files:
+            faults/network_impairment_matrix.py: ADR 0189 typed loader and execution helpers for governed network impairment profiles
+            policy/engine.py: ADR 0230 shared OPA evaluation helpers for command approval and promotion gating
+            runtime_assurance/declared_live_attestation.py: ADR 0245 declared-to-live witness collection shared by the CLI and API gateway
+config_location_sections:
+  - id: agent-discovery
+    title: Agent Discovery And Onboarding
+    summary: The files and generated artifacts that orient agents and collaborators inside the repo.
+    when_to_read: Use this section when changing onboarding surfaces, discovery metadata, or generated packs.
+    file: docs/discovery/config-locations/agent-discovery.yaml
+    entries:
+      .repo-structure.yaml:
+        purpose: "Generated root repository discovery entrypoint assembled from docs/discovery/repo-structure/ \u2014 ADR 0163 / ADR 0327"
+        owner: automation
+        format: YAML
+        use_for: Fast onboarding and section-level navigation of the repository
+        update_by: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
+        update_when: After changing docs/discovery/repo-structure/ or docs/discovery/onboarding-packs.yaml
+      .config-locations.yaml:
+        purpose: "Generated root configuration discovery entrypoint assembled from docs/discovery/config-locations/ \u2014 ADR 0166 / ADR 0327"
+        owner: automation
+        format: YAML
+        use_for: Fast onboarding and section-level navigation of canonical configuration locations
+        update_by: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
+        update_when: After changing docs/discovery/config-locations/ or docs/discovery/onboarding-packs.yaml
+      docs/discovery/repo-structure/:
+        purpose: Canonical sectional source registry for repository-structure discovery metadata
+        owner: human and automation
+        format: "YAML directory \u2014 one section file per concern"
+        use_for: Editing the source data that generates .repo-structure.yaml and onboarding packs
+        update_when: Adding new repo sections, directories, or top-level entrypoint guidance
+      docs/discovery/config-locations/:
+        purpose: Canonical sectional source registry for configuration-location discovery metadata
+        owner: human and automation
+        format: "YAML directory \u2014 one section file per concern"
+        use_for: Editing the source data that generates .config-locations.yaml and onboarding packs
+        update_when: Adding new canonical config paths or changing section-level navigation metadata
+      docs/discovery/onboarding-packs.yaml:
+        purpose: Canonical pack-selection manifest for generated onboarding bundles
+        owner: human and automation
+        format: YAML
+        use_for: Declaring which discovery sections belong in each generated onboarding pack
+        update_when: Adding a new onboarding pack or changing pack membership
+      build/onboarding/:
+        purpose: Generated concern-specific onboarding packs assembled from docs/discovery/ sources
+        owner: automation
+        format: YAML directory
+        use_for: Consuming small task-shaped onboarding bundles instead of loading every discovery source by default
+        update_by: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
+        update_when: After changing docs/discovery/ or onboarding pack definitions
+      docs/adr/.index.yaml:
+        purpose: "Searchable ADR discovery root manifest with shard pointers and reservation summaries \u2014 ADR 0164 / ADR 0325"
+        owner: automation
+        format: YAML
+        use_for: Finding relevant ADRs by keyword or concern and learning which shard or reservation surface to open next
+        update_by: python scripts/generate_adr_index.py --write
+        update_when: When new ADRs are added or status changes
+      docs/adr/index/:
+        purpose: ADR discovery shard directory grouped by range, concern, and implementation status
+        owner: automation
+        format: YAML directory
+        use_for: Loading one ADR metadata shard instead of the full root manifest when you need targeted discovery
+        update_by: python scripts/generate_adr_index.py --write
+        update_when: When ADR metadata changes or shard layout changes
+      docs/adr/index/reservations.yaml:
+        purpose: ADR 0325 reservation ledger for ADR number windows claimed by active parallel work
+        owner: human and automation
+        format: YAML
+        use_for: Checking or recording reserved ADR number windows before writing new ADRs in parallel
+        update_by: python scripts/generate_adr_index.py --write
+        update_when: Before allocating ADR numbers and after releasing or consuming reserved windows
+      AGENTS.md:
+        purpose: "Rules, conventions, and handoff protocol for LLM agents \u2014 ADR 0167"
+        owner: human
+        format: Markdown
+        use_for: Understanding how to work in this repository
+        update_when: Learning new lessons or conventions
+  - id: inventory
+    title: Inventory And Topology
+    summary: Host, group, and topology inputs for the platform inventory model.
+    when_to_read: Use this section when changing hosts, groups, host vars, or topology declarations.
+    file: docs/discovery/config-locations/inventory.yaml
+    entries:
+      inventory/hosts.yml:
+        purpose: "Ansible inventory \u2014 defines all hosts and group memberships"
+        owner: human
+        format: "YAML \u2014 Ansible hosts and groups"
+        use_for: Defining which hosts exist and their relationships
+        update_when: Adding/removing hosts or changing group memberships
+        validation: ansible-inventory --list
+      inventory/group_vars/all.yml:
+        purpose: Variables applied to ALL hosts
+        owner: human and automation
+        format: "YAML \u2014 variable definitions"
+        use_for: Shared infrastructure settings across all hosts
+        update_when: Changing default behaviour across all hosts
+        coverage: All hosts inherit these variables
+      inventory/group_vars/platform.yml:
+        purpose: Variables for the full platform group
+        owner: human
+        format: YAML
+        use_for: Platform-wide configuration (service endpoints, domains)
+      inventory/group_vars/proxmox_host.yml:
+        purpose: Variables specific to the Proxmox hypervisor
+        owner: human
+        format: YAML
+        use_for: Proxmox-specific config (networking, storage, firewall rules)
+        examples: pve_node_name, bridge configs (vmbr0/vmbr10), firewall rules
+      inventory/group_vars/guests.yml:
+        purpose: Default variables for all guest VMs
+        owner: human
+        format: YAML
+        use_for: Default VM configuration (OS, network, packages)
+        examples: guest_os, network_bridge, cloud_init_template
+      inventory/host_vars/:
+        purpose: Per-host overrides to group_vars
+        owner: human
+        format: "YAML \u2014 one file per host named after hostname"
+        use_for: Per-host customisation that differs from group defaults
+        structure: 'One file per host: inventory/host_vars/<hostname>.yml'
+      reference-deployments/catalog.yaml:
+        purpose: Canonical reference deployment sample catalog for new forks
+        owner: human and automation
+        format: YAML
+        use_for: Mapping starter samples to their live canonical counterparts and renderable template sets
+        update_when: Adding a new reference deployment sample or changing the starter render set
+        validation: uv run --with pyyaml python3 scripts/reference_deployment_samples.py validate
+      config/reference-provider-profiles.yaml:
+        purpose: Replaceable example provider and publication values for reference deployment samples
+        owner: human
+        format: YAML
+        use_for: Selecting example provider profiles when rendering starter inventory, publication, and overlay files
+        update_when: Adding a new example provider shape or changing the placeholder values used by a sample
+        validation: uv run --with pyyaml python3 scripts/reference_deployment_samples.py validate
+  - id: automation
+    title: Automation And Tooling Config
+    summary: Canonical tool registries, collections, build-server settings, and automation manifests.
+    when_to_read: Use this section when changing workflows, automation catalogs, or supporting build/runtime tooling.
+    file: docs/discovery/config-locations/automation.yaml
+    entries:
+      config/examples/:
+        purpose: Public-safe example profiles for publication, provider, and controller-local overlay setup
+        owner: human
+        format: YAML and JSON example files
+        use_for: Bootstrapping a fork with replaceable sample values instead of copying live integrated deployment identifiers
+        update_when: The fork-first onboarding flow or required example profile contract changes
+        validation: uv run --with pytest --with pyyaml python -m pytest -q tests/test_public_reference_samples.py
+        related_files:
+          - 'inventory/examples/reference-platform/: example topology paired with these profiles'
+          - 'docs/reference-deployments/README.md: public reference tier and boundary guide'
+          - 'docs/runbooks/fork-reference-platform.md: step-by-step fork procedure'
+      config/semgrep/rules/:
+        purpose: Canonical local Semgrep rule packs for repo-managed SAST, secret-pattern detection, and Dockerfile policy checks
+        owner: human
+        format: YAML
+        use_for: Declaring the reviewed Semgrep rules enforced by `make validate`, the remote validation gate, and CI workflows
+        update_when: Adding or tuning a Semgrep rule after review of false-positive and false-negative impact
+        update_by: Agent or human implementing ADR 0301
+        validation: ./scripts/validate_repo.sh semgrep
+        related_files:
+          - 'config/semgrep/rule-pins.yaml: Governance record for any upstream rule references'
+          - 'scripts/semgrep_gate.py: Shared Semgrep wrapper that emits SARIF and mutation-audit summaries'
+          - 'docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md: Decision record'
+          - 'docs/runbooks/validation-gate.md: Operator procedure'
+      config/semgrep/rule-pins.yaml:
+        purpose: Canonical governance file for pinned upstream Semgrep rule revisions
+        owner: human
+        format: YAML
+        use_for: Recording the exact upstream Semgrep rule revision hashes referenced by the local rule packs
+        update_when: Adding or changing an upstream Semgrep registry rule reference
+        update_by: Agent or human implementing ADR 0301 follow-up rule governance
+        validation: python3 -c "import yaml,sys; yaml.safe_load(open(sys.argv[1]))" config/semgrep/rule-pins.yaml
+        related_files:
+          - 'config/semgrep/rules/: Local Semgrep rule packs'
+          - 'docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md: Decision record'
+      config/validation-runner-contracts.json:
+        purpose: Canonical ADR 0266 catalog of validation runner capability contracts, supported lanes, and runtime attestation expectations
+        owner: human
+        format: JSON
+        use_for: Declaring which runners may execute each validation lane across controller-local fallback, the remote build server, and the worker post-merge gate
+        update_when: Adding a new validation runner, changing lane eligibility, or tightening runner capability requirements
+        update_by: Agent or human implementing ADR 0266 validation-runner changes
+        validation: uv run --with pyyaml --with jsonschema python3 scripts/validation_runner_contracts.py --validate
+        related_files:
+          - 'docs/schema/validation-runner-contracts.schema.json: Schema for the validation runner contract catalog'
+          - 'scripts/validation_runner_contracts.py: Contract validation, attestation, and lane eligibility helper'
+          - 'config/build-server.json: Remote build-server command routing and runner identities'
+          - 'docs/runbooks/remote-build-gateway.md: Operator procedure for remote validation'
+      config/gate-bypass-waiver-catalog.json:
+        purpose: Canonical ADR 0267 taxonomy and escalation policy for governed validation-gate bypass waivers
+        owner: human
+        format: JSON
+        use_for: Validating structured reason codes, expiry windows, and repeated-reason escalation before a gate bypass receipt is recorded or summarized
+        update_when: Adding or changing allowed waiver reason codes, expiry windows, or repeat-after-expiry escalation thresholds
+        update_by: Agent or human implementing ADR 0267 governance work
+        validation: python3 scripts/gate_bypass_waivers.py --validate
+        related_files:
+          - 'docs/schema/gate-bypass-waiver-catalog.schema.json: JSON schema for the waiver catalog'
+          - 'docs/schema/gate-bypass-waiver-receipt.schema.json: JSON schema for governed waiver receipts'
+          - 'scripts/gate_bypass_waivers.py: Loader, validator, and summary helper'
+          - 'docs/runbooks/validation-gate.md: operator procedure'
+      config/checkov/policy-gate.yaml:
+        purpose: Canonical ADR 0306 policy-level contract for the repo-managed IaC policy scan
+        owner: human
+        format: YAML
+        use_for: Declaring which IaC surfaces the Checkov wrapper scans, which rule ids are blocking, and how the current Compose-template gap is recorded
+        update_when: Adjusting Checkov gating levels, adding or removing governed scan groups, or changing the documented Compose handling boundary
+        validation: python3 scripts/iac_policy_scan.py
+        related_files:
+          - 'config/checkov/skip-checks.yaml: repo-managed suppression catalog'
+          - 'scripts/iac_policy_scan.py: Checkov wrapper, summary writer, and SARIF emitter'
+          - 'docs/runbooks/iac-policy-scanning.md: operator procedure'
+      config/checkov/skip-checks.yaml:
+        purpose: Canonical ADR 0306 suppression catalog for path-scoped Checkov findings
+        owner: human
+        format: YAML
+        use_for: Recording governed Checkov suppressions with explicit path scope, reason, and decision reference instead of inline source comments
+        update_when: Adding or removing a justified IaC policy suppression
+        validation: python3 scripts/iac_policy_scan.py
+        related_files:
+          - 'config/checkov/policy-gate.yaml: gate levels and scan groups'
+          - 'docs/runbooks/iac-policy-scanning.md: suppression governance procedure'
+      keys/gitea-release-bundle-cosign.pub:
+        purpose: Committed ADR 0233 Cosign public verifier for signed private Gitea release bundles
+        owner: human
+        format: PEM public key
+        use_for: Verifying the detached Cosign signatures published alongside ADR 0233 release bundles
+        update_when: Rotating the release-bundle signing material
+        update_by: python3 scripts/release_bundle.py init-signing --force
+        related_files:
+          - 'scripts/release_bundle.py: bundle build, publish, and verification helper'
+          - 'docs/runbooks/signed-release-bundles.md: operator procedure'
+          - 'config/controller-local-secrets.json: controller-local private-key and password contract'
+      config/replaceability-review-catalog.json:
+        purpose: Canonical ADR 0212 catalog of critical integrated product ADRs that must carry replaceability scorecards and vendor exit plans
+        owner: human
+        format: JSON
+        use_for: Declaring which ADRs are governed by the replaceability fitness function and which capability-definition references anchor each review
+        update_when: Adding or removing a governed critical product ADR, or changing its capability identifier or definition references
+        update_by: Agent or human implementing ADR 0212 governance work
+        validation: python3 scripts/replaceability_scorecards.py --validate
+        related_files:
+          - 'docs/schema/replaceability-review-catalog.schema.json: Schema for the governed replaceability catalog'
+          - 'scripts/replaceability_scorecards.py: ADR section validator and summary report'
+          - 'docs/runbooks/replaceability-scorecards.md: authoring and review procedure'
+      config/seed-data-catalog.json:
+        purpose: Canonical contract for anonymized seed-data snapshot classes and storage paths
+        owner: human
+        format: JSON
+        use_for: Building deterministic tiny/standard/recovery seed snapshots and resolving the managed backup-lv3 store
+        update_when: Adjusting seed classes, dataset volumes, or storage locations
+        validation: uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate
+      config/network-impairment-matrix.yaml:
+        purpose: Canonical ADR 0189 matrix of governed latency, loss, and outage profiles for preview and staging fault drills
+        owner: human
+        format: YAML
+        use_for: Declaring named network impairment scenarios, scope, and allowed execution surfaces
+        update_when: Adding or changing governed impairment profiles, preview/staging eligibility, or scenario metadata
+        validation: uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate
+        related_files:
+          - 'platform/faults/network_impairment_matrix.py: typed loader and execution helpers'
+          - 'scripts/network_impairment_matrix.py: CLI and repo-surface validation'
+          - 'config/windmill/scripts/network-impairment-matrix.py: mirrored worker entrypoint'
+          - 'docs/runbooks/network-impairment-matrix.md: operator procedure'
+      config/provider-boundary-catalog.yaml:
+        purpose: Canonical ADR 0207 catalog of provider boundaries that must translate raw provider payloads into canonical internal facts
+        owner: human
+        format: YAML
+        use_for: Declaring which provider integrations are governed by anti-corruption validation and how their implementation guardrails are enforced
+        update_when: Adding a new critical provider boundary or tightening the validation contract for an existing one
+        validation: uv run --with pyyaml python scripts/provider_boundary_catalog.py --validate
+        related_files:
+          - 'scripts/provider_boundary_catalog.py: validator and catalog reader'
+          - 'docs/runbooks/subdomain-governance.md: operator workflow for DNS-boundary usage'
+          - 'docs/runbooks/validation-gate.md: remote and post-merge validation path'
+      policy/:
+        purpose: Canonical ADR 0230 shared Rego bundle for Open Policy Agent and Conftest decisions
+        owner: human
+        format: Rego modules and tests
+        use_for: Command approval, promotion eligibility, runner admission, and repository invariant checks through one shared policy engine
+        update_when: Adding or changing governed decision logic that must stay consistent across controller and worker callers
+        validation: python3 scripts/policy_checks.py --validate
+        related_files:
+          - 'platform/policy/engine.py: shared Python adapters around OPA evaluation'
+          - 'scripts/policy_toolchain.py: local and remote OPA or Conftest bootstrap helper'
+          - 'policy/tests/: Rego policy test coverage'
+      config/command-catalog.json:
+        purpose: Canonical catalog of governed mutating commands, approval policies, and execution profiles
+        owner: human
+        format: JSON
+        use_for: Declaring which command ids exist, which approval policy each uses, and which runtime envelope executes them
+        update_when: Adding or changing recurring mutating command surfaces, approval classes, or execution profiles
+        validation: python3 scripts/command_catalog.py --validate
+        related_files:
+          - 'policy/decisions/command_approval.rego: ADR 0230 shared approval decision logic'
+          - 'scripts/command_catalog.py: catalog validator and approval evaluator'
+          - 'docs/runbooks/command-catalog-and-approval-gates.md: operator procedure'
+      config/workflow-catalog.json:
+        purpose: Canonical workflow registry for operator and automation entrypoints
+        owner: human
+        format: JSON
+        use_for: Resolving preferred entrypoints, runbooks, verification commands, and worker-mirrored workflow wrappers including ADR 0251 smoke-suite entrypoints
+        update_when: Adding or changing reusable workflows or their implementation references
+        validation: python3 scripts/workflow_catalog.py --validate
+        related_files:
+          - 'config/command-catalog.json: command layer that references these workflow ids'
+          - 'config/worktree-bootstrap-manifests.json: generated-artifact and local-helper bootstrap inputs referenced by workflow preflight'
+          - 'config/windmill/scripts/: worker-side wrappers for selected workflows'
+          - 'docs/runbooks/command-catalog-and-approval-gates.md: operator procedure'
+      config/worktree-bootstrap-manifests.json:
+        purpose: Canonical fresh-worktree bootstrap manifest catalog for generated artifacts and controller-local helper inputs
+        owner: human
+        format: JSON
+        use_for: Declaring which governed workflows may auto-materialize generated artifacts and which local helper paths must fail early
+        update_when: Adding or changing worktree bootstrap requirements for a governed workflow
+        validation: uv run --with pyyaml python scripts/workflow_catalog.py --validate
+        related_files:
+          - 'config/workflow-catalog.json: workflows that reference bootstrap manifest ids'
+          - 'scripts/preflight_controller_local.py: controller-side preflight executor'
+          - 'docs/runbooks/controller-local-secrets-and-preflight.md: operator procedure'
+      config/controller-local-secrets.json:
+        purpose: Canonical controller-local secret manifest for the integrated deployment, using repo-relative `.local/...` paths for file-backed material
+        owner: human
+        format: JSON
+        use_for: Declaring which controller-local files and environment variables the repo-managed workflows depend on
+        update_when: Adding or changing a controller-local secret, or relocating repo-local bootstrap material
+        validation: uv run --with pytest --with pyyaml python -m pytest -q tests/test_public_reference_samples.py
+        related_files:
+          - 'config/examples/reference-controller-local-secrets.json: public-safe starter manifest for fresh forks'
+          - 'docs/runbooks/controller-local-secrets-and-preflight.md: operator procedure'
+      config/persona-catalog.json:
+        purpose: Canonical persona catalog for shared human launcher defaults and purpose-focused navigation
+        owner: human
+        format: JSON
+        use_for: Declaring the operator personas, their preferred launcher purposes, and their default favorites
+        update_when: Adding or changing shared persona defaults for first-party browser navigation
+        validation: uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate
+        related_files:
+          - 'docs/schema/persona-catalog.schema.json: JSON Schema for launcher persona metadata'
+          - 'scripts/ops_portal/app.py: interactive launcher rendering and session-backed preferences'
+          - 'docs/runbooks/platform-operations-portal.md: operator usage of the shared launcher'
+      playbooks/site.yml:
+        purpose: "Main site playbook \u2014 full host bootstrap from bare Debian 13"
+        owner: human
+        format: Ansible playbook YAML
+        use_for: Complete host setup from Debian 13
+        metadata_header: "Check lines 1\u201330 for Purpose/Inputs/Outputs/Dependencies"
+        runs_when: Fresh Debian 13 installed or full site refresh
+        validation: ansible-playbook --syntax-check
+      playbooks/bootstrap.yml:
+        purpose: "Bootstrap \u2014 initial SSH access and base packages"
+        owner: human
+        format: Ansible playbook YAML
+        use_for: First-run access and initial security setup
+        runs_when: Immediately after OS installation
+      playbooks/.metadata-template.yml:
+        purpose: Template for new playbook metadata headers (ADR 0165)
+        owner: human
+        format: YAML comments
+        use_for: Copy this header into every new playbook
+        validation: grep '# Purpose:' <playbook>
+      collections/ansible_collections/lv3/platform/roles/:
+        purpose: Custom Ansible roles for this platform (PRIMARY roles location)
+        owner: human
+        format: Standard Ansible role structure
+        metadata: Check meta/main.yml for each role's documented contract
+        use_for: All infrastructure automation roles
+      roles/:
+        purpose: Legacy roles (prefer collections/ for new work)
+        owner: human
+        format: Standard Ansible role structure
+        use_for: Older roles not yet migrated to collections
+  - id: versioning
+    title: Versioning And Releases
+    summary: Release bookkeeping, semantic versioning, and release-note locations.
+    when_to_read: Use this section when preparing a merge-to-main integration or release cut.
+    file: docs/discovery/config-locations/versioning.yaml
+    entries:
+      VERSION:
+        purpose: Current repository semantic version number
+        owner: human
+        format: "Plain text \u2014 X.Y.Z (e.g., 0.172.1)"
+        use_for: Tracking repository version and identifying release boundaries
+        update_when: When merging workstreams to main
+        update_by: Integration agent or human
+        validation: Must match regex ^[0-9]+\.[0-9]+\.[0-9]+$
+        related_files:
+          - 'changelog.md: Release notes index'
+          - 'docs/release-notes/X.Y.Z.md: Detailed notes for this version'
+          - 'workstreams.yaml: What is included in this version'
+      changelog.md:
+        purpose: Human-readable changelog scratchpad plus bounded recent-release index
+        owner: human
+        format: "Markdown \u2014 `Unreleased`, latest release, bounded previous-release list, and archive links"
+        use_for: Understanding pending changes, the latest cut, and where deeper release history moved
+        update_when: When VERSION changes
+        update_by: Integration agent or human
+        structure: '## Unreleased
+
+          ## Latest Release
+
+          - [X.Y.Z release notes](docs/release-notes/X.Y.Z.md)
+
+          ## Previous Releases
+
+          ## Release Archives '
+        related_files:
+          - 'config/root-summary-budgets.yaml: entry and line budgets for root summaries'
+          - 'docs/release-notes/index/README.md: generated archive overview after rollover'
+      docs/release-notes/:
+        purpose: Versioned detailed release notes plus generated archive indexes
+        owner: human
+        format: "Markdown \u2014 one file per version: X.Y.Z.md plus generated index/*.md ledgers"
+        use_for: Detailed change description per release and deeper release-history navigation after rollover
+        update_when: When cutting a new version
+        update_by: Integration agent or human
+        naming_convention: X.Y.Z.md
+      config/root-summary-budgets.yaml:
+        purpose: Canonical ADR 0328 budget and rollover policy for the root README, changelog, and release-note index
+        owner: human
+        format: YAML \u2014 per-surface line budgets, recent-entry limits, and archive ledger paths
+        use_for: Keeping top-level summary documents concise while routing older history into generated ledgers
+        update_when: Tuning root-summary budgets, archive locations, or rollover limits
+        update_by: Agent or human implementing ADR 0328 follow-ups
+        validation: '`uv run --with pyyaml python scripts/generate_release_notes.py --check-root-summaries` and `uvx --from pyyaml python scripts/generate_status_docs.py --check`'
+        related_files:
+          - 'platform/root_summary.py: shared budget loader and archive helpers'
+          - 'docs/status/history/: generated README history ledgers'
+          - 'docs/release-notes/index/: generated release-note archive indexes'

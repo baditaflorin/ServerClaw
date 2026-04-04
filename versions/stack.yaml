@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.178.3
+repo_version: 0.178.4
 platform_version: 0.130.98
 
 live_apply_evidence:
@@ -22,7 +22,7 @@ live_apply_evidence:
     dozzle: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
     falco: 2026-04-03-adr-0300-falco-mainline-live-apply
     gitea: 2026-03-26-adr-0143-gitea-live-apply
-    grist: 2026-04-01-adr-0279-grist-mainline-live-apply
+    grist: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     homepage: 2026-04-03-ws-0332-homepage-triage-mainline-live-apply
     langfuse: 2026-03-26-adr-0146-langfuse-live-apply
     livekit: 2026-04-01-adr-0293-livekit-mainline-live-apply
@@ -33,13 +33,13 @@ live_apply_evidence:
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
     backup_coverage: 2026-03-29-adr-0271-backup-coverage-ledger-mainline-live-apply
     restic_config_backup: 2026-03-31-adr-0302-restic-config-backup-mainline-live-apply
-    minio: 2026-03-31-adr-0274-minio-object-storage-mainline-live-apply
+    minio: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
     guest_network_policy: 2026-03-22-adr-0067-guest-network-policy-live-apply
     runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
     mail_platform: 2026-03-24-keycloak-password-reset-mail-live-apply
     step_ca: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     openbao: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
-    vaultwarden: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply
+    vaultwarden: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     certificate_lifecycle: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     windmill: 2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply
     woodpecker: 2026-04-04-ws-0335-service-recovery-followup-live-apply
@@ -120,7 +120,7 @@ live_apply_evidence:
     operator_access_guided_onboarding: 2026-03-28-adr-0242-guided-human-onboarding-live-apply
     runtime_state_semantics: 2026-03-28-adr-0246-runtime-state-semantics-live-apply
     docs_portal: 2026-04-02-adr-0313-contextual-help-mainline-live-apply
-    harbor: 2026-03-29-adr-0201-harbor-mainline-live-apply
+    harbor: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     ops_portal_visualizations: 2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply
     nomad_scheduler: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
     serverclaw: 2026-04-01-adr-0294-one-api-mainline-live-apply
@@ -132,7 +132,7 @@ live_apply_evidence:
     https_tls_assurance: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
     validation_gate: 2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply
     validation_runner_contracts: 2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply
-    matrix_synapse: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
+    matrix_synapse: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     stage_smoke_suites: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
     gotenberg: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
     nextcloud: 2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply
@@ -173,6 +173,7 @@ live_apply_evidence:
     adr_discovery: 2026-04-04-adr-0325-adr-discovery-mainline-live-apply
     fork_first_workstream_metadata: 2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply
     private_overlay_contract: 2026-04-04-adr-0333-private-overlay-mainline-live-apply
+    reference_deployment_samples: 2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply
     public_github_readiness: 2026-04-04-adr-0330-public-github-readiness-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
@@ -1187,7 +1188,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.3
+    current: 0.178.4
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.98

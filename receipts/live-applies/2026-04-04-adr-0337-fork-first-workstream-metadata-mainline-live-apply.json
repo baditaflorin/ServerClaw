@@ -82,7 +82,7 @@
     "tests/test_workstream_surface_ownership.py",
     "versions/stack.yaml",
     "workstreams.yaml",
-    "workstreams/active/ws-0337-live-apply.yaml",
+    "workstreams/archive/2026/ws-0337-live-apply.yaml",
     "receipts/live-applies/2026-04-04-adr-0337-fork-first-workstream-metadata-live-apply.json",
     "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-generated-surfaces-r1.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0337-mainline-registry-r1.txt",

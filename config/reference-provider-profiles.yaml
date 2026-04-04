@@ -1,0 +1,54 @@
+schema_version: 1.0.0
+profiles:
+- id: dedicated-public-edge
+  title: Dedicated host with public edge
+  description: Example single-host deployment with one public edge guest and routine operator access over a private mesh.
+  values:
+    sample_ops_user: ops
+    sample_proxmox_host_label: reference-proxmox
+    sample_proxmox_node_name: reference-proxmox-node
+    sample_public_edge_guest_name: edge-gateway
+    sample_runtime_guest_name: runtime-apps
+    sample_proxmox_management_ipv4: 203.0.113.10
+    sample_proxmox_management_ipv4_cidr: "24"
+    sample_proxmox_management_gateway4: 203.0.113.1
+    sample_proxmox_management_tailscale_ipv4: 100.64.10.1
+    sample_internal_gateway_ipv4: 10.42.0.1
+    sample_internal_cidr: "24"
+    sample_internal_network_cidr: 10.42.0.0/24
+    sample_public_edge_ipv4: 10.42.0.10
+    sample_runtime_ipv4: 10.42.0.20
+    sample_public_base_domain: apps.example.test
+    sample_operator_base_domain: private.example.test
+    sample_public_edge_hostname: edge.apps.example.test
+    sample_proxmox_api_url: https://proxmox.private.example.test:8006/api2/json
+    sample_overlay_root: .local/reference-platform/dedicated-public-edge
+    sample_dns_provider: dns-provider
+    sample_infrastructure_provider: dedicated-host-provider
+    sample_requester_email: ops@example.test
+- id: cloud-lab-public-edge
+  title: Cloud lab with public edge
+  description: Example small cloud or nested-virtualization lab with one public edge guest and private operator access.
+  values:
+    sample_ops_user: ops
+    sample_proxmox_host_label: reference-proxmox
+    sample_proxmox_node_name: reference-proxmox-node
+    sample_public_edge_guest_name: edge-gateway
+    sample_runtime_guest_name: runtime-apps
+    sample_proxmox_management_ipv4: 198.51.100.20
+    sample_proxmox_management_ipv4_cidr: "24"
+    sample_proxmox_management_gateway4: 198.51.100.1
+    sample_proxmox_management_tailscale_ipv4: 100.64.20.1
+    sample_internal_gateway_ipv4: 10.55.0.1
+    sample_internal_cidr: "24"
+    sample_internal_network_cidr: 10.55.0.0/24
+    sample_public_edge_ipv4: 10.55.0.10
+    sample_runtime_ipv4: 10.55.0.20
+    sample_public_base_domain: lab.example.test
+    sample_operator_base_domain: mesh.example.test
+    sample_public_edge_hostname: edge.lab.example.test
+    sample_proxmox_api_url: https://proxmox.mesh.example.test:8006/api2/json
+    sample_overlay_root: .local/reference-platform/cloud-lab-public-edge
+    sample_dns_provider: managed-dns-provider
+    sample_infrastructure_provider: vm-cloud-provider
+    sample_requester_email: operator@example.test

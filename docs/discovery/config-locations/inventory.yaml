@@ -42,12 +42,17 @@ entries:
     format: "YAML \u2014 one file per host named after hostname"
     use_for: Per-host customisation that differs from group defaults
     structure: 'One file per host: inventory/host_vars/<hostname>.yml'
-  inventory/examples/reference-platform/:
-    purpose: Public-safe starter inventory for forks that need an obviously replaceable topology sample
+  reference-deployments/catalog.yaml:
+    purpose: Canonical reference deployment sample catalog for new forks
+    owner: human and automation
+    format: YAML
+    use_for: Mapping starter samples to their live canonical counterparts and renderable template sets
+    update_when: Adding a new reference deployment sample or changing the starter render set
+    validation: uv run --with pyyaml python3 scripts/reference_deployment_samples.py validate
+  config/reference-provider-profiles.yaml:
+    purpose: Replaceable example provider and publication values for reference deployment samples
     owner: human
-    format: Directory of YAML examples and a README
-    use_for: Copying a minimal Proxmox-plus-guests inventory shape before replacing provider, network, and hostname values
-    update_when: The inventory contract changes in a way that affects new-fork onboarding
-    related_files:
-    - 'config/examples/reference-provider-profile.yaml: example provider contract paired with the reference inventory'
-    - 'docs/runbooks/fork-reference-platform.md: fork-first operator procedure'
+    format: YAML
+    use_for: Selecting example provider profiles when rendering starter inventory, publication, and overlay files
+    update_when: Adding a new example provider shape or changing the placeholder values used by a sample
+    validation: uv run --with pyyaml python3 scripts/reference_deployment_samples.py validate

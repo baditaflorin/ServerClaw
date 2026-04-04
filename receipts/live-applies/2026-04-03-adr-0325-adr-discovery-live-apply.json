@@ -69,7 +69,7 @@
     "docs/adr/index/reservations.yaml",
     "docs/runbooks/adr-discovery-and-reservations.md",
     "docs/workstreams/ws-0325-live-apply.md",
-    "workstreams/active/ws-0325-live-apply.yaml",
+    "workstreams/archive/2026/ws-0325-live-apply.yaml",
     "workstreams.yaml",
     "scripts/adr_discovery.py",
     "scripts/adr_query_tool.py",

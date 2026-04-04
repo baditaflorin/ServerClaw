@@ -144,8 +144,10 @@ blockers: []
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implements ADR 0325 by replacing the monolithic ADR metadata catalog with shard-backed discovery manifests, adding a committed ADR reservation ledger, and validating reservation-aware query and generator workflows from exact main
+  changelog_entry: implements ADR 0325 by replacing the monolithic ADR metadata catalog
+    with shard-backed discovery manifests, adding a committed ADR reservation ledger,
+    and validating reservation-aware query and generator workflows from exact main
   release_bump: patch
-  included_in_repo_version: null
+  included_in_repo_version: 0.178.4
   latest_receipts:
     adr_discovery: 2026-04-04-adr-0325-adr-discovery-mainline-live-apply

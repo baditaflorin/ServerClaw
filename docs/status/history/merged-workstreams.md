@@ -8,15 +8,8 @@ This generated ledger preserves the full merged and live-applied workstream hist
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
-| `0346` | Enforce health-gated compose dependencies for more predictable service recovery | `live_applied` | [ws-0332-resilience-predictability.md](../../workstreams/ws-0332-resilience-predictability.md) |
-| `0337` | Re-verify fork-first workstream metadata from the latest origin/main | `live_applied` | [ws-0337-live-apply.md](../../workstreams/ws-0337-live-apply.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](../../workstreams/ws-0336-live-apply.md) |
-| `0333` | Finish the shared private-overlay bootstrap alias contract and verify it from a dedicated worktree | `live_applied` | [adr-0333-private-overlay-live-apply.md](../../workstreams/adr-0333-private-overlay-live-apply.md) |
 | `0330` | Close out public GitHub readiness on the latest origin/main | `live_applied` | [ws-0330-main-closeout.md](../../workstreams/ws-0330-main-closeout.md) |
-| `0328` | Implement size-budgeted root summaries and automatic rollover ledgers | `live_applied` | [ws-0328-live-apply.md](../../workstreams/ws-0328-live-apply.md) |
-| `0327` | Live apply sectional agent discovery registries and generated onboarding packs from latest origin/main | `live_applied` | [ws-0327-live-apply.md](../../workstreams/ws-0327-live-apply.md) |
-| `0325` | Live apply faceted ADR index shards and reservation windows from latest origin/main | `live_applied` | [ws-0325-live-apply.md](../../workstreams/ws-0325-live-apply.md) |
-| `0319` | Investigate and recover the remaining degraded services after the runtime-pool stabilization merges | `live_applied` | [ws-0335-service-recovery-followup.md](../../workstreams/ws-0335-service-recovery-followup.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](../../workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](../../workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](../../workstreams/ws-0295-live-apply.md) |
@@ -172,6 +165,14 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](../../workstreams/adr-0020-backups.md) |
 | `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](../../workstreams/adr-0014-tailscale.md) |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](../../workstreams/adr-0011-monitoring.md) |
+| `0346` | Enforce health-gated compose dependencies for more predictable service recovery | `live_applied` | [ws-0332-resilience-predictability.md](../../workstreams/ws-0332-resilience-predictability.md) |
+| `0339` | Live apply reference deployment samples and replaceable provider profiles from latest origin/main | `live_applied` | [ws-0339-live-apply.md](../../workstreams/ws-0339-live-apply.md) |
+| `0337` | Re-verify fork-first workstream metadata from the latest origin/main | `live_applied` | [ws-0337-live-apply.md](../../workstreams/ws-0337-live-apply.md) |
+| `0333` | Finish the shared private-overlay bootstrap alias contract and verify it from a dedicated worktree | `live_applied` | [adr-0333-private-overlay-live-apply.md](../../workstreams/adr-0333-private-overlay-live-apply.md) |
+| `0328` | Implement size-budgeted root summaries and automatic rollover ledgers | `live_applied` | [ws-0328-live-apply.md](../../workstreams/ws-0328-live-apply.md) |
+| `0327` | Live apply sectional agent discovery registries and generated onboarding packs from latest origin/main | `live_applied` | [ws-0327-live-apply.md](../../workstreams/ws-0327-live-apply.md) |
+| `0325` | Live apply faceted ADR index shards and reservation windows from latest origin/main | `live_applied` | [ws-0325-live-apply.md](../../workstreams/ws-0325-live-apply.md) |
+| `0319` | Investigate and recover the remaining degraded services after the runtime-pool stabilization merges | `live_applied` | [ws-0335-service-recovery-followup.md](../../workstreams/ws-0335-service-recovery-followup.md) |
 | `0341` | Integrate Open WebUI into Keycloak-backed routine operator authentication | `live_applied` | [ws-0334-auth-convergence.md](../../workstreams/ws-0334-auth-convergence.md) |
 | `0326` | Implement shard-backed workstream registry source files with generated compatibility assembly | `live_applied` | [adr-0326-workstream-registry-shards.md](../../workstreams/adr-0326-workstream-registry-shards.md) |
 | `0318` | Live apply ADR 0318 repeatable operator onboarding from latest origin/main | `live_applied` | [ws-0318-live-apply.md](../../workstreams/ws-0318-live-apply.md) |

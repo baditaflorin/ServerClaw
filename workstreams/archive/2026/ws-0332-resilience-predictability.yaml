@@ -105,9 +105,11 @@ ownership_manifest:
     - tests/test_searxng_runtime_role.py
     mode: exclusive
 canonical_truth:
-  changelog_entry: enforces health-gated compose dependency startup as part of service completeness, fixes the low-risk runtime templates that were still using blind startup ordering, and records the remaining bounded exception explicitly
+  changelog_entry: enforces health-gated compose dependency startup as part of service
+    completeness, fixes the low-risk runtime templates that were still using blind
+    startup ordering, and records the remaining bounded exception explicitly
   release_bump: patch
-  included_in_repo_version: null
+  included_in_repo_version: 0.178.4
   latest_receipts:
     dozzle: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
     minio: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply

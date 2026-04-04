@@ -95,7 +95,7 @@
     "tests/test_provision_operator.py",
     "tests/test_validation_runner_contracts.py",
     "workstreams.yaml",
-    "workstreams/active/adr-0333-private-overlay-live-apply.yaml",
+    "workstreams/archive/2026/adr-0333-private-overlay-live-apply.yaml",
     "versions/stack.yaml",
     "receipts/live-applies/2026-04-04-adr-0333-private-overlay-live-apply.json",
     "receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-targeted-tests-r4.txt",

@@ -1,14 +1,19 @@
-# Release 0.178.3
+# Release 0.178.4
 
-- Date: 2026-04-03
+- Date: 2026-04-04
 
 ## Summary
-- proves ADR 0318 end to end from a dedicated worktree by making the fallback onboarding script worktree-safe, role-contract aligned, and recoverable with ephemeral runtime secret overrides while live-provisioning and auditing the temporary admin operator florin-tmp-002
-- implements ADR 0326 by making per-workstream shard files the authored source of truth, generating a compact active-only workstreams.yaml compatibility surface, and teaching release and validation automation to consume the sharded registry safely
-- implements ADR 0341 by making Open WebUI use a repo-managed Keycloak OIDC client for routine operator sign-in, keeping the local bootstrap admin as a break-glass path, and aligning the stale Keycloak topology and client reconciliation surfaces with the live docker-runtime placement
+- recovers the remaining degraded public services after the runtime-pool stabilization merges by re-materializing OpenBao-backed runtime env files, preventing docker.socket shutdown from restarting a live Docker daemon on runtime-control-lv3, and replaying the Harbor and Vaultwarden recovery paths safely
+- implements ADR 0325 by replacing the monolithic ADR metadata catalog with shard-backed discovery manifests, adding a committed ADR reservation ledger, and validating reservation-aware query and generator workflows from exact main
+- implements ADR 0327 by splitting the root agent-discovery registries into sectional source files, generating concise public-safe root entrypoints, tracking generated onboarding packs under build/onboarding, and validating the discovery artifacts plus public entrypoints through the rebased exact-main automation gates
+- implements ADR 0328 by enforcing explicit line budgets for the root README, changelog, and release-note index, rolling older release and status rows into generated archive ledgers, and teaching the validation plus release automation to keep those bounded summaries current
+- implements ADR 0333 by moving the remaining active controller-local bootstrap-key and private-overlay path contracts onto shared `.local` aliases, teaching fresh worktrees to materialize those aliases automatically, and validating the build-server plus controller automation surfaces from exact main
+- hardens ADR 0337 by normalizing the sharded workstream registry to repo-root-relative metadata, preserving canonical in-repo workstream doc links, hardening worktree creation and service scaffolding against out-of-repo paths, and re-verifying the portability gate from the latest realistic mainline
+- implements ADR 0339 by adding governed reference deployment samples, replaceable example provider profiles, a render-and-validate bootstrap tool, and discovery plus runbook guidance for fork-first onboarding
+- enforces health-gated compose dependency startup as part of service completeness, fixes the low-risk runtime templates that were still using blind startup ordering, and records the remaining bounded exception explicitly
 
 ## Platform Impact
-- no live platform version bump; this release records the already-verified ADR 0341 Open WebUI Keycloak auth rollout on current platform version 0.130.98 alongside the pending ADR 0318 and ADR 0326 repository integrations
+- no live platform version bump; this release updates repository automation, release metadata, and operator tooling only
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

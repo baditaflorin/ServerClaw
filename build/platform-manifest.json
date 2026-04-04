@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.3",
+  "repo_version": "0.178.4",
   "platform_version": "0.130.98",
-  "generated_at": "2026-04-04T16:54:08Z",
-  "next_refresh_at": "2026-04-04T17:54:08Z",
+  "generated_at": "2026-04-04T17:52:50Z",
+  "next_refresh_at": "2026-04-04T18:52:50Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6155,10 +6155,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.2",
+    "last_version": "0.178.3",
     "deployed_at": "2026-04-04",
-    "summary": "proves ADR 0318 end to end from a dedicated worktree by making the fallback onboarding script worktree-safe, role-contract aligned, and recoverable with ephemeral runtime secret overrides while live-provisioning and auditing the temporary admin operator florin-tmp-002 implements ADR 0326 by making per-workstream shard files the authored source of truth, generating a compact active-only workstreams.yaml compatibility surface, and teaching release and validation automation to consume the sharded registry safely",
-    "release_notes_url": "docs/release-notes/0.178.3.md"
+    "summary": "recovers the remaining degraded public services after the runtime-pool stabilization merges by re-materializing OpenBao-backed runtime env files, preventing docker.socket shutdown from restarting a live Docker daemon on runtime-control-lv3, and replaying the Harbor and Vaultwarden recovery paths safely implements ADR 0325 by replacing the monolithic ADR metadata catalog with shard-backed discovery manifests, adding a committed ADR reservation ledger, and validating reservation-aware query and generator workflows from exact main",
+    "release_notes_url": "docs/release-notes/0.178.4.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

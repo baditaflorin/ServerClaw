@@ -3,7 +3,7 @@
 - ADR: [ADR 0325](../adr/0325-faceted-adr-index-shards-and-reservation-windows.md)
 - Title: Live apply faceted ADR index shards and reservation windows from the latest `origin/main`
 - Status: live_applied
-- Included In Repo Version: `not yet`
+- Included In Repo Version: `0.178.4`
 - Branch-Local Receipt: `receipts/live-applies/2026-04-03-adr-0325-adr-discovery-live-apply.json`
 - Mainline Receipt: `receipts/live-applies/2026-04-04-adr-0325-adr-discovery-mainline-live-apply.json`
 - Implemented On: 2026-04-03
@@ -54,12 +54,6 @@
 
 ## Exact-Main Integration Status
 
-- The exact-main integration is complete on the latest `origin/main`, with the
-  shard-backed ADR discovery rollout, reservation ledger, and generated
-  discovery entrypoints refreshed from source rather than hand-merged.
-- `VERSION` remains `0.178.3` and `Implemented In Repo Version` remains `not yet`
-  because the release manager still blocks a fresh numbered cut on unrelated
-  open waiver receipts outside this workstream.
-- Because ADR 0325 is a repo-only control-plane change, no platform version bump
-  should accompany the merge; the live platform version context remains
-  `0.130.98`.
+- The exact-main integration rolled into repository release `0.178.4`, preserving ADR 0325's mainline receipt and the shard-backed ADR discovery surfaces on the final release tree.
+- Repository release `0.178.4` now records ADR 0325 in `VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, and the generated release-note indexes.
+- Because ADR 0325 is a repo-only control-plane change, the platform version context remains `0.130.98`.

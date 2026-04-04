@@ -63,6 +63,7 @@ runner `docker-build-lv3`.
 - provider-boundary anti-corruption guards keep raw provider payload selectors confined to the declared boundary translation step
 - the ADR 0204 correction-loop catalog covers every governed mutating workflow exactly once
 - reusable `platform/` modules do not import outward into `scripts/` composition roots or dynamically load script-only helpers
+- ADR 0339 reference deployment samples and replaceable provider profiles stay renderable, repository-relative, and example-safe for fresh forks
 - generated status documents are current for their canonical inputs
 - ADR 0328 root-summary rollovers keep `README.md`, `changelog.md`, and `docs/release-notes/README.md` within their declared line budgets while regenerating the deeper history ledgers under `docs/status/history/` and `docs/release-notes/index/`
 - the workflow catalog, command catalog, control-plane lane catalog, and controller-local secret manifest cross-reference cleanly
@@ -119,6 +120,7 @@ make validate-dependency-direction
 make validate-architecture-fitness
 make validate-health-probes
 make validate-generated-docs
+uv run --with pyyaml python3 scripts/reference_deployment_samples.py validate
 ```
 
 The root-summary subset can also be replayed directly:

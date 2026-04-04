@@ -3,7 +3,7 @@
 - ADR: [ADR 0337](../adr/0337-fork-first-workstream-and-worktree-metadata.md)
 - Title: re-verify fork-first workstream and worktree metadata from latest origin/main
 - Status: live_applied
-- Included In Repo Version: not yet
+- Included In Repo Version: 0.178.4
 - Branch-Local Receipt: `receipts/live-applies/2026-04-04-adr-0337-fork-first-workstream-metadata-live-apply.json`
 - Mainline Receipt: `receipts/live-applies/2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply.json`
 - Implemented On: 2026-04-04
@@ -65,17 +65,6 @@
 
 ## Exact-Main Integration Status
 
-- exact-main canonical truth now records ADR 0337 in `README.md`,
-  `changelog.md`, `versions/stack.yaml`, and
-  `docs/status/history/live-apply-evidence.md` via the mainline receipt
-  `2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply`
-- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py
-  status --json` still reports repository version `0.178.3`, platform version
-  `0.130.98`, and a blocked release cut only because three unrelated
-  `controller_dependency_gap` waiver receipts remain open through `2026-04-06`
-- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py
-  --bump patch --dry-run` shows the next candidate repository release would be
-  `0.178.4` once those unrelated blockers clear
-- because the global release manager remains blocked outside this ADR,
-  `Included In Repo Version` remains `not yet` even though the exact-main merge
-  and repository-only live-apply replay are complete
+- Exact-main canonical truth and repository release `0.178.4` now record ADR 0337 via the mainline receipt `2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply`.
+- Repository release `0.178.4` captures ADR 0337 in `VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, and `docs/status/history/live-apply-evidence.md`.
+- ADR 0337 remains a repo-only metadata change, so the platform version context stays `0.130.98`.

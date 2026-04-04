@@ -76,7 +76,7 @@
     "tests/test_validate_public_entrypoints.py",
     "tests/test_workstream_surface_ownership.py",
     "workstreams.yaml",
-    "workstreams/active/ws-0337-live-apply.yaml",
+    "workstreams/archive/2026/ws-0337-live-apply.yaml",
     "receipts/live-applies/evidence/2026-04-04-ws-0337-workstream-registry-check-r1.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0337-validate-public-entrypoints-r1.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0337-workstream-surfaces-r1.txt",

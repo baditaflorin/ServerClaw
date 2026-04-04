@@ -100,6 +100,7 @@ from platform.workstream_registry import (
     load_workstreams as load_workstream_registry_entries,
 )
 from preview_environment import load_profile_catalog, validate_profile_catalog
+from reference_deployment_samples import validate_reference_deployment_sources
 from repo_deploy_profiles import load_repo_deploy_catalog, validate_repo_deploy_catalog
 from repo_deploy_image_cache import load_profile_catalog as load_repo_deploy_base_image_profile_catalog
 from repo_deploy_image_cache import validate_profile_catalog as validate_repo_deploy_base_image_profile_catalog
@@ -3100,6 +3101,10 @@ def validate_preview_environment_profiles() -> None:
     validate_profile_catalog(load_profile_catalog())
 
 
+def validate_reference_deployment_data() -> None:
+    validate_reference_deployment_sources()
+
+
 def validate_repo_deploy_base_image_profiles() -> None:
     payload = load_repo_deploy_base_image_profile_catalog(REPO_DEPLOY_BASE_IMAGE_PROFILES_PATH)
     validate_repo_deploy_base_image_profile_catalog(payload, path=REPO_DEPLOY_BASE_IMAGE_PROFILES_PATH)
@@ -3187,6 +3192,7 @@ def validate_repository_data_models() -> int:
     validate_runtime_assurance_matrix_data()
     validate_repo_deploy_catalog_data()
     validate_preview_environment_profiles()
+    validate_reference_deployment_data()
     validate_repo_deploy_base_image_profiles()
     validate_ephemeral_pool_catalog()
     validate_restore_readiness_profiles()

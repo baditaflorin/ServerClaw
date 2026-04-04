@@ -3,7 +3,7 @@
 - ADR: [ADR 0346](../adr/0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md)
 - Title: enforce health-gated compose dependencies for more predictable service recovery
 - Status: live_applied
-- Included In Repo Version: not yet
+- Included In Repo Version: 0.178.4
 - Branch-Local Receipt: `receipts/live-applies/2026-04-04-adr-0346-compose-dependency-health-gates-live-apply.json`
 - Implemented On: 2026-04-04
 - Live Applied On: 2026-04-04
@@ -65,8 +65,6 @@
 
 ## Exact-Main Integration Status
 
-- Exact-main canonical truth now records the same live-apply receipt in `changelog.md`, `versions/stack.yaml`, `README.md`, `docs/status/history/live-apply-evidence.md`, `docs/status/history/merged-workstreams.md`, and `build/platform-manifest.json`.
-- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py status --json` still reports repository version `0.178.3`, platform version `0.130.98`, and unrelated `controller_dependency_gap` waiver blockers open through `2026-04-06`, so this workstream merges onto exact main without a numbered release cut.
-- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py --bump patch --dry-run` shows the next candidate repository version would be `0.178.4` once those unrelated blockers clear.
-- `./scripts/validate_repo.sh workstream-surfaces` stays green on the registered workstream branch `codex/ws-0332-live-apply-r1`, which is the branch used for the final exact-main push path after the temporary integration branches were discarded.
-- `Included In Repo Version` therefore remains `not yet`, while exact main now carries the branch-local live-apply evidence and canonical receipt mapping for `dozzle`, `minio`, and `searxng`.
+- Exact-main canonical truth and repository release `0.178.4` now record the ADR 0346 receipt mapping for `dozzle`, `minio`, and `searxng`.
+- Repository release `0.178.4` captures ADR 0346 in `VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, `docs/status/history/live-apply-evidence.md`, `docs/status/history/merged-workstreams.md`, and `build/platform-manifest.json`.
+- The dependency-health changes were already verified live on platform version `0.130.98`, so the numbered repo release does not add another platform-version bump.

@@ -83,7 +83,7 @@
     "build/platform-manifest.json",
     "docs/diagrams/agent-coordination-map.excalidraw",
     "workstreams.yaml",
-    "workstreams/active/ws-0328-live-apply.yaml",
+    "workstreams/archive/2026/ws-0328-live-apply.yaml",
     "receipts/live-applies/evidence/2026-04-03-ws-0328-targeted-tests-r1-0.178.3.txt",
     "receipts/live-applies/evidence/2026-04-03-ws-0328-validate-repo-r5-0.178.3.txt",
     "receipts/live-applies/evidence/2026-04-03-ws-0328-release-status-r1.json",

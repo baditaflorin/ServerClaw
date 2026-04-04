@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-04",
+  "recorded_on": "2026-04-04",
+  "recorded_at": "2026-04-04T17:33:01Z",
+  "recorded_by": "codex",
+  "source_commit": "44616dedf5ca0cf519ec16364af5f88ac0348f38",
+  "repo_version_context": "0.178.4",
+  "platform_version_context": "0.130.98",
+  "workflow_id": "adr-0339-reference-deployment-samples-mainline-live-apply",
+  "adr": "0339",
+  "summary": "Replayed ADR 0339 from the latest realistic `origin/main` tip by keeping the governed reference deployment sample catalog, replaceable provider profiles, and render-and-validate bootstrap tooling on the exact-main `0.178.4` release tree, then refreshing canonical truth and release surfaces from that release state.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    },
+    {
+      "kind": "artifact",
+      "name": "reference-deployments/"
+    },
+    {
+      "kind": "artifact",
+      "name": "config/reference-provider-profiles.yaml"
+    },
+    {
+      "kind": "artifact",
+      "name": "versions/stack.yaml"
+    },
+    {
+      "kind": "artifact",
+      "name": "build/platform-manifest.json"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Latest-main branch proof",
+      "result": "pass",
+      "observed": "The rebased ADR 0339 branch proof passed sample validation, targeted tests, rendered-inventory loading, and repo-gate checks on `origin/main@c48bdae01f6fe4d0df004e247baa8a3d9f6e013b`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-reference-samples-validate-r2-0.178.3.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0339-targeted-tests-r2-0.178.3.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0339-render-r2-0.178.3.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0339-rendered-inventory-r2-0.178.3.json`, `receipts/live-applies/evidence/2026-04-04-ws-0339-workstream-surfaces-r2-0.178.3.txt`, and `receipts/live-applies/evidence/2026-04-04-ws-0339-validate-repo-r4-0.178.3.txt`."
+    },
+    {
+      "check": "Release-readiness snapshot",
+      "result": "partial",
+      "observed": "Before the exact-main release cut, `LV3_SKIP_OUTLINE_SYNC=1 python3 scripts/release_manager.py status --json` still reported repo version `0.178.3`, platform version `0.130.98`, and only the pre-existing waiver blockers through `2026-04-06`, while `--dry-run --bump patch` still resolved the next numbered release to `0.178.4`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-release-status-r2-0.178.3.json` and `receipts/live-applies/evidence/2026-04-04-ws-0339-release-dry-run-r2-0.178.3.txt`."
+    },
+    {
+      "check": "Exact-main release rewrite",
+      "result": "pass",
+      "observed": "The lower-level exact-main release replay successfully wrote repository release `0.178.4`, archived the eight pending live-applied workstreams, refreshed canonical truth, and regenerated the protected release surfaces, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-release-lower-level-r2-0.178.4.txt`."
+    },
+    {
+      "check": "Exact-main repository and promotion gates",
+      "result": "pass",
+      "observed": "The finished exact-main `0.178.4` tree passed `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs generated-portals`, `make validate`, `make remote-validate`, and `make pre-push-gate`. The shared remote runner still hit the familiar remote `atlas-lint` connectivity timeout, but both `make remote-validate` and `make pre-push-gate` reran only the unresolved `atlas-lint` check locally and merged that passing fallback into the recorded gate status, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-validate-repo-r2-0.178.4.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-make-validate-r1-0.178.4.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-remote-validate-r1-0.178.4.txt`, and `receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-pre-push-gate-r1-0.178.4.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "build/platform-manifest.json",
+    "changelog.md",
+    "docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md",
+    "docs/release-notes/0.178.4.md",
+    "docs/status/history/live-apply-evidence.md",
+    "docs/status/history/merged-workstreams.md",
+    "docs/workstreams/ws-0339-live-apply.md",
+    "reference-deployments/README.md",
+    "reference-deployments/catalog.yaml",
+    "config/reference-provider-profiles.yaml",
+    "scripts/reference_deployment_samples.py",
+    "tests/test_reference_deployment_samples.py",
+    "versions/stack.yaml",
+    "workstreams/archive/2026/ws-0339-live-apply.yaml",
+    "receipts/live-applies/2026-04-04-adr-0339-reference-deployment-samples-live-apply.json",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-reference-samples-validate-r2-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-targeted-tests-r2-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-render-r2-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-rendered-inventory-r2-0.178.3.json",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-workstream-surfaces-r2-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-validate-repo-r4-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-release-status-r2-0.178.3.json",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-release-dry-run-r2-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-release-lower-level-r2-0.178.4.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-validate-repo-r2-0.178.4.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-make-validate-r1-0.178.4.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-remote-validate-r1-0.178.4.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0339-mainline-pre-push-gate-r1-0.178.4.txt"
+  ],
+  "notes": [
+    "This receipt becomes the canonical exact-main audit trail for ADR 0339 while preserving the earlier branch-local receipt as the first proof that the reference deployment sample flow worked on the rebased latest-main tree.",
+    "Repository release `0.178.4` is the first numbered repo version to include ADR 0339.",
+    "ADR 0339 changes fork bootstrap assets, onboarding packs, and repository validation behavior rather than a running service on the current deployment, so the platform version context remains `0.130.98`.",
+    "The final exact-main validation bundle succeeded end to end; only the already-known remote-runner `atlas-lint` connectivity issue required the repo's built-in unresolved-check local fallback before the merged gate status could be marked passing."
+  ]
+}
