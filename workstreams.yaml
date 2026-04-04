@@ -135,7 +135,7 @@ workstreams:
   adr: '0333'
   title: Finish the shared private-overlay bootstrap alias contract and verify it
     from a dedicated worktree
-  status: in_progress
+  status: live_applied
   owner: codex
   branch: codex/ws-0333-private-overlay
   worktree_path: .worktrees/ws-0333-private-overlay
@@ -153,9 +153,11 @@ workstreams:
   - docs/workstreams/adr-0333-private-overlay-live-apply.md
   - docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
   - docs/adr/.index.yaml
+  - docs/adr/index/**/*.yaml
   - docs/runbooks/controller-local-secrets-and-preflight.md
   - docs/runbooks/initial-access.md
   - docs/runbooks/operator-onboarding.md
+  - docs/diagrams/agent-coordination-map.excalidraw
   - Makefile
   - config/controller-local-secrets.json
   - config/workflow-catalog.json
@@ -199,8 +201,18 @@ workstreams:
       - workstreams/active/adr-0333-private-overlay-live-apply.yaml
       - docs/workstreams/adr-0333-private-overlay-live-apply.md
       - docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
-      - docs/adr/.index.yaml
       mode: exclusive
+    - id: adr0333_adr_index
+      paths:
+      - docs/adr/.index.yaml
+      - docs/adr/index/**/*.yaml
+      mode: shared_contract
+      contract: adr-index-generator-v1
+    - id: adr0333_generated_workstream_diagram
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: latest-main-generated-truth-v1
     - id: adr0333_controller_overlay_contract
       paths:
       - docs/runbooks/controller-local-secrets-and-preflight.md
@@ -246,8 +258,8 @@ workstreams:
       - receipts/live-applies/evidence/2026-04-04-adr-0333-*
       mode: exclusive
   blockers: []
-  ready_to_merge: false
-  live_applied: false
+  ready_to_merge: true
+  live_applied: true
   canonical_truth:
     changelog_entry: implements ADR 0333 by moving the remaining active controller-local
       bootstrap-key and private-overlay path contracts onto shared `.local` aliases,
@@ -256,7 +268,7 @@ workstreams:
     release_bump: patch
     included_in_repo_version: null
     latest_receipts:
-      private_overlay_contract: 2026-04-04-adr-0333-private-overlay-mainline-live-apply
+      private_overlay_contract: 2026-04-04-adr-0333-private-overlay-live-apply
 - id: ws-0328-live-apply
   adr: 0328
   title: Implement size-budgeted root summaries and automatic rollover ledgers
