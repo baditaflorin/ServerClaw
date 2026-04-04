@@ -374,7 +374,7 @@ adrs:
   - adr: 0338
     title: Public Documentation Tiers And Private History Boundaries
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-04-02'
     concern: documentation
     keywords:
@@ -389,5 +389,4 @@ adrs:
     summary: We will manage documentation with explicit public tiers and private-history
     filename: 0338-public-documentation-tiers-and-private-history-boundaries.md
     path: docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
-    implemented_in_repo_version: 0.177.143
-    implemented_on: '2026-04-02'
+    implemented_on: '2026-04-04'

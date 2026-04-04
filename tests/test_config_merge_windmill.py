@@ -1171,6 +1171,32 @@ def test_intent_queue_dispatcher_resolves_token_from_worker_checkout(tmp_path: P
     assert module._resolve_windmill_token(repo_root) == "worker-secret"
 
 
+def test_intent_queue_dispatcher_resolves_token_from_repo_relative_manifest_path(tmp_path: Path) -> None:
+    module = load_module("intent_queue_relative_manifest_secret", REPO_ROOT / "scripts" / "intent_queue_dispatcher.py")
+    repo_root = tmp_path / "repo"
+    secret_file = repo_root / ".local" / "windmill" / "superadmin-secret.txt"
+    secret_file.parent.mkdir(parents=True)
+    secret_file.write_text("manifest-secret\n", encoding="utf-8")
+    manifest_path = repo_root / "config" / "controller-local-secrets.json"
+    manifest_path.parent.mkdir(parents=True)
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "secrets": {
+                    "windmill_superadmin_secret": {
+                        "kind": "file",
+                        "path": ".local/windmill/superadmin-secret.txt",
+                    }
+                }
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    assert module._resolve_windmill_token(repo_root) == "manifest-secret"
+
+
 def test_lane_scheduler_resolves_token_from_worker_checkout(tmp_path: Path) -> None:
     module = load_module("lane_scheduler_worker_secret", LANE_SCHEDULER_WRAPPER_PATH)
     repo_root = tmp_path / "repo"

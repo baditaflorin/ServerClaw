@@ -1,0 +1,144 @@
+id: ws-0330-main-closeout
+adr: '0330'
+title: Close out public GitHub readiness on the latest origin/main
+status: live_applied
+owner: codex
+branch: codex/ws-0330-main-closeout
+worktree_path: .worktrees/ws-0330-main-closeout
+doc: docs/workstreams/ws-0330-main-closeout.md
+depends_on:
+- adr-0163-repository-structure-index-for-agent-discovery
+- adr-0166-canonical-configuration-locations-registry
+- adr-0168-automated-enforcement-of-agent-standards
+- adr-0330-public-github-readiness-as-a-first-class-repository-lifecycle
+- adr-0333-private-overlay-files-for-deployment-specific-secrets-and-identities
+- adr-0334-example-first-inventory-and-service-identity-catalogs
+- adr-0338-public-documentation-tiers-and-private-history-boundaries
+- adr-0339-reference-deployment-samples-and-replaceable-provider-profiles
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- workstreams/active/ws-0330-main-closeout.yaml
+- docs/workstreams/ws-0330-main-closeout.md
+- docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+- docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+- docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md
+- docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
+- docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+- docs/adr/.index.yaml
+- docs/adr/index/by-range/*.yaml
+- docs/adr/index/by-concern/*.yaml
+- docs/adr/index/by-status/*.yaml
+- docs/reference-deployments/README.md
+- docs/runbooks/controller-local-secrets-and-preflight.md
+- docs/runbooks/fork-reference-platform.md
+- docs/runbooks/validate-repository-automation.md
+- docs/discovery/repo-structure/documentation-and-history.yaml
+- docs/discovery/repo-structure/automation-and-infrastructure.yaml
+- docs/discovery/config-locations/inventory.yaml
+- docs/discovery/config-locations/automation.yaml
+- .repo-structure.yaml
+- .config-locations.yaml
+- build/onboarding/**
+- config/controller-local-secrets.json
+- config/examples/**
+- inventory/examples/reference-platform/**
+- platform/repo.py
+- platform/agent/coordination.py
+- platform/maintenance/windows.py
+- scripts/controller_automation_toolkit.py
+- scripts/drift_lib.py
+- scripts/intent_queue_dispatcher.py
+- scripts/ntfy_publish.py
+- scripts/uptime_robot_tool.py
+- scripts/seed_data_snapshots.py
+- scripts/topology-snapshot.json
+- tests/test_config_merge_windmill.py
+- tests/test_ntfy_publish.py
+- tests/test_public_reference_samples.py
+- receipts/live-applies/2026-04-04-adr-0330-public-github-readiness-live-apply.json
+- receipts/live-applies/2026-04-04-adr-0330-public-github-readiness-mainline-live-apply.json
+- receipts/live-applies/evidence/2026-04-04-ws-0330-*
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws0330_workstream_source
+    paths:
+    - workstreams/active/ws-0330-main-closeout.yaml
+    mode: exclusive
+  - id: adr_index_generation
+    paths:
+    - docs/adr/.index.yaml
+    - docs/adr/index/by-range/*.yaml
+    - docs/adr/index/by-concern/*.yaml
+    - docs/adr/index/by-status/*.yaml
+    mode: shared_contract
+    contract: adr-index-generator-v2
+  - id: ws0330_adrs
+    paths:
+    - docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+    - docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+    - docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md
+    - docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
+    - docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+    - docs/workstreams/ws-0330-main-closeout.md
+    mode: exclusive
+  - id: ws0330_reference_docs
+    paths:
+    - docs/reference-deployments/README.md
+    - docs/runbooks/controller-local-secrets-and-preflight.md
+    - docs/runbooks/fork-reference-platform.md
+    - docs/runbooks/validate-repository-automation.md
+    mode: exclusive
+  - id: ws0330_discovery_sources
+    paths:
+    - docs/discovery/repo-structure/documentation-and-history.yaml
+    - docs/discovery/repo-structure/automation-and-infrastructure.yaml
+    - docs/discovery/config-locations/inventory.yaml
+    - docs/discovery/config-locations/automation.yaml
+    mode: exclusive
+  - id: ws0330_generated_discovery_entrypoints
+    paths:
+    - .repo-structure.yaml
+    - .config-locations.yaml
+    - build/onboarding/**
+    mode: exclusive
+  - id: ws0330_reference_samples
+    paths:
+    - config/controller-local-secrets.json
+    - config/examples/**
+    - inventory/examples/reference-platform/**
+    mode: exclusive
+  - id: ws0330_runtime_helpers
+    paths:
+    - platform/repo.py
+    - platform/agent/coordination.py
+    - platform/maintenance/windows.py
+    - scripts/controller_automation_toolkit.py
+    - scripts/drift_lib.py
+    - scripts/intent_queue_dispatcher.py
+    - scripts/ntfy_publish.py
+    - scripts/uptime_robot_tool.py
+    - scripts/seed_data_snapshots.py
+    - scripts/topology-snapshot.json
+    - tests/test_config_merge_windmill.py
+    - tests/test_ntfy_publish.py
+    - tests/test_public_reference_samples.py
+    mode: exclusive
+  - id: ws0330_live_apply_receipts
+    paths:
+    - receipts/live-applies/2026-04-04-adr-0330-public-github-readiness-live-apply.json
+    - receipts/live-applies/2026-04-04-adr-0330-public-github-readiness-mainline-live-apply.json
+    - receipts/live-applies/evidence/2026-04-04-ws-0330-*
+    mode: exclusive
+blockers: []
+ready_to_merge: true
+live_applied: true
+canonical_truth:
+  changelog_entry: closes out ADR 0330 public GitHub readiness by making the controller-local secret contract repo-relative, adding fork-first example inventory and provider/publication profiles, and surfacing the public reference tier through discovery-driven onboarding
+  release_bump: patch
+  included_in_repo_version: null

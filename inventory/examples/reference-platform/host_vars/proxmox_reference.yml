@@ -1,0 +1,19 @@
+host_public_hostname: proxmox-reference.example.internal
+proxmox_node_name: proxmox-reference
+management_interface: enp1s0
+management_ipv4: 203.0.113.10
+management_tailscale_ipv4: 100.64.0.10
+management_ipv4_cidr: 24
+management_gateway4: 203.0.113.1
+proxmox_wan_bridge: vmbr0
+proxmox_internal_bridge: vmbr10
+proxmox_internal_ipv4: 10.30.10.1
+proxmox_internal_cidr: 24
+proxmox_internal_network: 10.30.10.0/24
+proxmox_public_edge_ipv4: 10.30.10.10
+proxmox_tailscale_hostname: proxmox-reference-subnet-router
+proxmox_tailscale_advertise_routes:
+  - "{{ proxmox_internal_network }}"
+proxmox_public_ingress_tcp_ports:
+  - 80
+  - 443

@@ -31,7 +31,7 @@ SECRET_MANIFEST_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
 if str(REPO_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from controller_automation_toolkit import emit_cli_error, load_yaml  # noqa: E402
+from controller_automation_toolkit import emit_cli_error, load_yaml, resolve_repo_local_path  # noqa: E402
 
 
 NTFY_SEQUENCE_ID_REGEX = re.compile(r"^[-_A-Za-z0-9]{1,64}$")
@@ -73,7 +73,7 @@ def load_secret_manifest(path: Path) -> dict[str, Any]:
 def read_secret_file(path: str | None) -> str:
     if not path:
         return ""
-    candidate = Path(path).expanduser()
+    candidate = resolve_repo_local_path(path, repo_root=REPO_ROOT)
     if not candidate.exists():
         return ""
     return candidate.read_text(encoding="utf-8").strip()

@@ -69,6 +69,7 @@ runner `docker-build-lv3`.
 - the API publication catalog classifies every governed API and webhook surface
 - structured live-apply receipts reference valid workflows and files, and record exact source git hashes; clone-local object availability can be audited explicitly with `LV3_REQUIRE_RECEIPT_SOURCE_COMMIT_OBJECTS=1`
 - shard-backed workstream registry sources stay in sync with the generated `workstreams.yaml` compatibility artifact
+- reference inventory, publication-profile, and controller-local-secret example surfaces stay parseable and free of live deployment values
 
 ## Tooling Model
 

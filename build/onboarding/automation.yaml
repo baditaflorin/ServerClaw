@@ -76,7 +76,7 @@ repo_structure_sections:
           for_agents: PRIMARY location for roles; check roles/ subdirectory
         inventory:
           purpose: Ansible inventory, host groups, and variable definitions
-          contains: hosts.yml, group_vars/, host_vars/
+          contains: hosts.yml, group_vars/, host_vars/, examples/
           concern: infrastructure-topology, declarative-state
           keywords:
             - inventory
@@ -90,7 +90,7 @@ repo_structure_sections:
             '
         config:
           purpose: Service and application configuration (YAML/JSON/CONF)
-          contains: Per-service config directories for all deployed services
+          contains: Per-service config directories for all deployed services plus examples/
           concern: service-configuration, applications
           keywords:
             - config
@@ -369,12 +369,32 @@ config_location_sections:
         format: "YAML \u2014 one file per host named after hostname"
         use_for: Per-host customisation that differs from group defaults
         structure: 'One file per host: inventory/host_vars/<hostname>.yml'
+      inventory/examples/reference-platform/:
+        purpose: Public-safe starter inventory for forks that need an obviously replaceable topology sample
+        owner: human
+        format: Directory of YAML examples and a README
+        use_for: Copying a minimal Proxmox-plus-guests inventory shape before replacing provider, network, and hostname values
+        update_when: The inventory contract changes in a way that affects new-fork onboarding
+        related_files:
+          - 'config/examples/reference-provider-profile.yaml: example provider contract paired with the reference inventory'
+          - 'docs/runbooks/fork-reference-platform.md: fork-first operator procedure'
   - id: automation
     title: Automation And Tooling Config
     summary: Canonical tool registries, collections, build-server settings, and automation manifests.
     when_to_read: Use this section when changing workflows, automation catalogs, or supporting build/runtime tooling.
     file: docs/discovery/config-locations/automation.yaml
     entries:
+      config/examples/:
+        purpose: Public-safe example profiles for publication, provider, and controller-local overlay setup
+        owner: human
+        format: YAML and JSON example files
+        use_for: Bootstrapping a fork with replaceable sample values instead of copying live integrated deployment identifiers
+        update_when: The fork-first onboarding flow or required example profile contract changes
+        validation: uv run --with pytest --with pyyaml python -m pytest -q tests/test_public_reference_samples.py
+        related_files:
+          - 'inventory/examples/reference-platform/: example topology paired with these profiles'
+          - 'docs/reference-deployments/README.md: public reference tier and boundary guide'
+          - 'docs/runbooks/fork-reference-platform.md: step-by-step fork procedure'
       config/semgrep/rules/:
         purpose: Canonical local Semgrep rule packs for repo-managed SAST, secret-pattern detection, and Dockerfile policy checks
         owner: human
@@ -543,6 +563,16 @@ config_location_sections:
         related_files:
           - 'config/workflow-catalog.json: workflows that reference bootstrap manifest ids'
           - 'scripts/preflight_controller_local.py: controller-side preflight executor'
+          - 'docs/runbooks/controller-local-secrets-and-preflight.md: operator procedure'
+      config/controller-local-secrets.json:
+        purpose: Canonical controller-local secret manifest for the integrated deployment, using repo-relative `.local/...` paths for file-backed material
+        owner: human
+        format: JSON
+        use_for: Declaring which controller-local files and environment variables the repo-managed workflows depend on
+        update_when: Adding or changing a controller-local secret, or relocating repo-local bootstrap material
+        validation: uv run --with pytest --with pyyaml python -m pytest -q tests/test_public_reference_samples.py
+        related_files:
+          - 'config/examples/reference-controller-local-secrets.json: public-safe starter manifest for fresh forks'
           - 'docs/runbooks/controller-local-secrets-and-preflight.md: operator procedure'
       config/persona-catalog.json:
         purpose: Canonical persona catalog for shared human launcher defaults and purpose-focused navigation

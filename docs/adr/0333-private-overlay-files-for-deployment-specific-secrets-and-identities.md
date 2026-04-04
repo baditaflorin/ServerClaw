@@ -1,10 +1,10 @@
 # ADR 0333: Private Overlay Files For Deployment-Specific Secrets And Identities
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: 0.177.143
+- Implementation Status: Implemented
+- Implemented In Repo Version: not yet
 - Implemented In Platform Version: N/A
-- Implemented On: 2026-04-02
+- Implemented On: 2026-04-04
 - Date: 2026-04-02
 - Tags: overlays, secrets, identities, local-state, forkability
 

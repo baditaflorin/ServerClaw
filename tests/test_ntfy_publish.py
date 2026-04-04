@@ -97,3 +97,14 @@ def test_main_dry_run_reports_normalized_sequence_id(capsys, tmp_path: Path) -> 
     assert payload["requested_sequence_id"] == requested_sequence_id
     assert payload["sequence_id"] == ntfy_publish.normalize_sequence_id(requested_sequence_id)
     assert payload["headers"]["X-Sequence-ID"] == payload["sequence_id"]
+
+
+def test_read_secret_file_supports_repo_relative_paths(tmp_path: Path, monkeypatch) -> None:
+    repo_root = tmp_path / "repo"
+    secret_file = repo_root / ".local" / "ntfy" / "publisher-token.txt"
+    secret_file.parent.mkdir(parents=True)
+    secret_file.write_text("publisher-token\n", encoding="utf-8")
+
+    monkeypatch.setattr(ntfy_publish, "REPO_ROOT", repo_root)
+
+    assert ntfy_publish.read_secret_file(".local/ntfy/publisher-token.txt") == "publisher-token"

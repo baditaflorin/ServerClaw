@@ -12,6 +12,12 @@ import sys
 from pathlib import Path
 from typing import Any
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from controller_automation_toolkit import resolve_repo_local_path
+
 
 def _read_proc_env_var(*names: str, proc_environ_path: str = "/proc/1/environ") -> str:
     proc_environ = Path(proc_environ_path)
@@ -72,7 +78,7 @@ def _resolve_windmill_token(repo_root: Path) -> str | None:
     secret_path = entry.get("path")
     if not isinstance(secret_path, str):
         return None
-    path = Path(secret_path).expanduser()
+    path = resolve_repo_local_path(secret_path, repo_root=repo_root)
     if not path.exists():
         return None
     return path.read_text(encoding="utf-8").strip()

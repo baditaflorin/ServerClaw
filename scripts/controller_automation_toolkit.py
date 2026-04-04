@@ -34,9 +34,10 @@ def resolve_repo_local_path(path_value: str | Path, *, repo_root: Path = REPO_RO
     marker = ".local"
     if marker not in path.parts:
         return path
-    marker_index = path.parts.index(marker)
-    candidate = repo_root.joinpath(*path.parts[marker_index:])
-    return candidate if _path_exists(candidate) else path
+    marker_index = path.parts.index(marker) + 1
+    root = Path(repo_root)
+    shared_root = root.parent.parent if root.parent.name == ".worktrees" else root
+    return shared_root.joinpath(marker, *path.parts[marker_index:])
 
 
 def _load_yaml_without_pyyaml(path: Path):

@@ -1,10 +1,10 @@
 # ADR 0334: Example-First Inventory And Service Identity Catalogs
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: not yet
 - Implemented In Platform Version: N/A
-- Implemented On: N/A
+- Implemented On: 2026-04-04
 - Date: 2026-04-02
 - Tags: inventory, examples, templates, identities, forkability
 

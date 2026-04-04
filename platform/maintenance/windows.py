@@ -14,7 +14,7 @@ from platform.datetime_compat import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from platform.repo import load_json, load_yaml, write_json
+from platform.repo import load_json, load_yaml, resolve_repo_local_path, write_json
 
 
 MAINTENANCE_BUCKET = "maintenance-windows"
@@ -74,15 +74,20 @@ def state_file_path() -> Path | None:
 
 
 def load_controller_context(*, repo_root: Path | None = None) -> dict[str, Any]:
+    root = Path(__file__).resolve().parents[2] if repo_root is None else Path(repo_root)
     host_vars_path = _repo_path(repo_root, "inventory", "host_vars", "proxmox_florin.yml")
     group_vars_path = _repo_path(repo_root, "inventory", "group_vars", "all.yml")
     secret_manifest_path = _repo_path(repo_root, "config", "controller-local-secrets.json")
     host_vars = load_yaml(host_vars_path)
     group_vars = load_yaml(group_vars_path)
     secret_manifest = load_json(secret_manifest_path)
-    bootstrap_key = Path(secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"]).expanduser()
+    bootstrap_key = resolve_repo_local_path(
+        secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"],
+        repo_root=root,
+    )
     guests = {guest["name"]: guest["ipv4"] for guest in host_vars["proxmox_guests"]}
     return {
+        "repo_root": root,
         "host_vars": host_vars,
         "group_vars": group_vars,
         "secret_manifest": secret_manifest,
@@ -106,7 +111,10 @@ def resolve_nats_credentials(context: dict[str, Any] | None = None) -> dict[str,
     secret_manifest = context.get("secret_manifest", {})
     secret_entry = secret_manifest.get("secrets", {}).get("nats_jetstream_admin_password")
     if isinstance(secret_entry, dict) and secret_entry.get("kind") == "file":
-        password_path = Path(secret_entry["path"]).expanduser()
+        password_path = resolve_repo_local_path(
+            secret_entry["path"],
+            repo_root=Path(context.get("repo_root") or Path(__file__).resolve().parents[2]),
+        )
         if password_path.exists():
             return {"user": "jetstream-admin", "password": password_path.read_text().strip()}
     return {}

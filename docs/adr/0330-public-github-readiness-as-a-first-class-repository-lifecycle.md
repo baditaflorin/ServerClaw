@@ -1,10 +1,10 @@
 # ADR 0330: Public GitHub Readiness As A First-Class Repository Lifecycle
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: 0.177.143
+- Implementation Status: Implemented
+- Implemented In Repo Version: not yet
 - Implemented In Platform Version: N/A
-- Implemented On: 2026-04-02
+- Implemented On: 2026-04-04
 - Date: 2026-04-02
 - Tags: github, publication, template, governance, public
 

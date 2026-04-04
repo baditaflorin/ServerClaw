@@ -1,0 +1,21 @@
+reference_platform:
+  profile_id: public-github-proxmox
+  provider: hetzner-dedicated
+  publication_domain: platform.example.com
+  public_edge_hostname: edge.platform.example.com
+  internal_domain: platform.example.internal
+  tailscale_tailnet: reference.ts.net
+
+platform_host:
+  id: proxmox_reference
+  management:
+    interface: enp1s0
+    ipv4: 203.0.113.10
+    ipv4_cidr: 24
+    gateway4: 203.0.113.1
+    tailscale_ipv4: 100.64.0.10
+  network:
+    wan_bridge: vmbr0
+    internal_bridge: vmbr10
+    internal_network: 10.30.10.0/24
+    public_edge_ipv4: 10.30.10.10

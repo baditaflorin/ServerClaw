@@ -50,7 +50,7 @@ entries:
       for_agents: PRIMARY location for roles; check roles/ subdirectory
     inventory:
       purpose: Ansible inventory, host groups, and variable definitions
-      contains: hosts.yml, group_vars/, host_vars/
+      contains: hosts.yml, group_vars/, host_vars/, examples/
       concern: infrastructure-topology, declarative-state
       keywords:
       - inventory
@@ -64,7 +64,7 @@ entries:
         '
     config:
       purpose: Service and application configuration (YAML/JSON/CONF)
-      contains: Per-service config directories for all deployed services
+      contains: Per-service config directories for all deployed services plus examples/
       concern: service-configuration, applications
       keywords:
       - config

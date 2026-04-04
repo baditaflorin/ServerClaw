@@ -7,7 +7,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-from controller_automation_toolkit import emit_cli_error, load_json, repo_path
+from controller_automation_toolkit import emit_cli_error, load_json, repo_path, resolve_repo_local_path
 
 
 DEFAULT_API_KEY_FILE = repo_path(".local", "uptime-robot", "api-key.txt")
@@ -30,7 +30,7 @@ def load_controller_secret_paths() -> dict[str, Path]:
     result: dict[str, Path] = {}
     for secret_id, secret in secrets.items():
         if isinstance(secret, dict) and secret.get("kind") == "file" and secret.get("path"):
-            result[secret_id] = Path(secret["path"]).expanduser()
+            result[secret_id] = resolve_repo_local_path(secret["path"], repo_root=REPO_ROOT)
     return result
 
 

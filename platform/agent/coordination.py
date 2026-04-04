@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from platform.events.publisher import publish_nats_events
+from platform.repo import resolve_repo_local_path
 from platform.world_state._db import isoformat, parse_timestamp, utc_now
 
 
@@ -86,7 +87,7 @@ def _resolve_nats_credentials(repo_root: Path) -> dict[str, str]:
     candidate = secret_entry.get("path")
     if not isinstance(candidate, str) or not candidate.strip():
         return {}
-    password_path = Path(candidate).expanduser()
+    password_path = resolve_repo_local_path(candidate, repo_root=repo_root)
     if not password_path.exists():
         return {}
     return {"user": "jetstream-admin", "password": password_path.read_text(encoding="utf-8").strip()}

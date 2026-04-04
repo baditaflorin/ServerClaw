@@ -105,6 +105,17 @@ repo_structure_sections:
             - recovery
             - deployment
           for_agents: Find specific operational procedures and recovery steps
+        docs/reference-deployments:
+          purpose: Public-safe reference deployment samples and fork-first onboarding maps
+          contains: Example inventory, publication-profile, and overlay guidance for fresh forks
+          concern: documentation, onboarding
+          keywords:
+            - reference
+            - examples
+            - fork
+            - onboarding
+            - samples
+          for_agents: Start here when translating the repo into a new environment without reusing the integrated live topology verbatim.
         docs/workstreams:
           purpose: ADR-style documentation for active workstreams
           contains: adr-XXXX-workstream-name.md files for each active branch

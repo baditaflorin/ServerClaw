@@ -10,7 +10,7 @@ generated: '2026-04-04'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 10
+total_adrs: 7
 adrs:
   - adr: '0014'
     title: Operator Access To Private Guest Network
@@ -140,66 +140,3 @@ adrs:
     summary: Shared Docker bridge-chain preflight checks on a shared runtime pool must
     filename: 0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
     path: docs/adr/0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
-  - adr: '0330'
-    title: Public GitHub Readiness As A First-Class Repository Lifecycle
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-04-02'
-    concern: vm-topology
-    keywords:
-      - github
-      - publication
-      - template
-      - governance
-      - public
-      - readiness
-      - as
-      - first-class
-      - repository
-      - lifecycle
-    summary: We will treat public GitHub readiness as a first-class repository lifecycle,
-    filename: 0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
-    path: docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
-    implemented_in_repo_version: 0.177.143
-    implemented_on: '2026-04-02'
-  - adr: '0333'
-    title: Private Overlay Files For Deployment-Specific Secrets And Identities
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-04-02'
-    concern: security
-    keywords:
-      - overlays
-      - secrets
-      - identities
-      - local-state
-      - forkability
-      - private
-      - overlay
-      - files
-      - deployment-specific
-    summary: Deployment-specific secrets, identities, and one-off bootstrap artefacts must
-    filename: 0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
-    path: docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
-    implemented_in_repo_version: 0.177.143
-    implemented_on: '2026-04-02'
-  - adr: 0338
-    title: Public Documentation Tiers And Private History Boundaries
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-04-02'
-    concern: documentation
-    keywords:
-      - documentation
-      - publication
-      - history
-      - boundaries
-      - governance
-      - public
-      - tiers
-      - private
-    summary: We will manage documentation with explicit public tiers and private-history
-    filename: 0338-public-documentation-tiers-and-private-history-boundaries.md
-    path: docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
-    implemented_in_repo_version: 0.177.143
-    implemented_on: '2026-04-02'

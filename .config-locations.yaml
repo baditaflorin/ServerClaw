@@ -48,13 +48,13 @@ section_index:
     file: docs/discovery/config-locations/inventory.yaml
     summary: Host, group, and topology inputs for the platform inventory model.
     when_to_read: Use this section when changing hosts, groups, host vars, or topology declarations.
-    entry_count: 6
+    entry_count: 7
   - id: automation
     title: Automation And Tooling Config
     file: docs/discovery/config-locations/automation.yaml
     summary: Canonical tool registries, collections, build-server settings, and automation manifests.
     when_to_read: Use this section when changing workflows, automation catalogs, or supporting build/runtime tooling.
-    entry_count: 21
+    entry_count: 23
   - id: service-configuration
     title: Service Configuration
     file: docs/discovery/config-locations/service-configuration.yaml

@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "profile_id": "public-github-proxmox",
+  "publication_domain": "platform.example.com",
+  "public_edge_hostname": "edge.platform.example.com",
+  "api_publication": [
+    {
+      "id": "platform-api-gateway",
+      "publication_tier": "public-edge",
+      "public_hostnames": [
+        "api.platform.example.com"
+      ],
+      "notes": "Replace the sample domain and upstream auth contract before any live apply."
+    },
+    {
+      "id": "proxmox-management-api",
+      "publication_tier": "operator-only",
+      "public_hostnames": [
+        "proxmox.platform.example.com"
+      ],
+      "notes": "Keep routine administration private even if an informational hostname exists."
+    }
+  ],
+  "subdomains": [
+    {
+      "fqdn": "api.platform.example.com",
+      "service_id": "api_gateway",
+      "exposure": "edge-published"
+    },
+    {
+      "fqdn": "proxmox.platform.example.com",
+      "service_id": "proxmox_management_api",
+      "exposure": "informational-only"
+    }
+  ]
+}

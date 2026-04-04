@@ -1,0 +1,23 @@
+schema_version: 1
+profile:
+  id: public-github-proxmox
+  provider: hetzner-dedicated
+  hypervisor: proxmox-ve
+  base_os: debian-13
+  public_domain: platform.example.com
+  internal_domain: platform.example.internal
+  public_edge_fqdn: edge.platform.example.com
+  management_access:
+    ssh_user: ops
+    ssh_transport: tailscale
+    tailscale_ipv4: 100.64.0.10
+  network:
+    public_ipv4: 203.0.113.10
+    internal_cidr: 10.30.10.0/24
+    public_edge_ipv4: 10.30.10.10
+  replace_before_live_apply:
+    - public_domain
+    - internal_domain
+    - public_ipv4
+    - tailscale_ipv4
+    - ssh_user

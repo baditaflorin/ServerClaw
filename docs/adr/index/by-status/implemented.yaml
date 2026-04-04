@@ -10,7 +10,7 @@ generated: '2026-04-04'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 324
+total_adrs: 329
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -5734,6 +5734,27 @@ adrs:
     filename: 0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md
     path: docs/adr/0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md
     implemented_on: '2026-04-03'
+  - adr: '0330'
+    title: Public GitHub Readiness As A First-Class Repository Lifecycle
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: vm-topology
+    keywords:
+      - github
+      - publication
+      - template
+      - governance
+      - public
+      - readiness
+      - as
+      - first-class
+      - repository
+      - lifecycle
+    summary: We will treat public GitHub readiness as a first-class repository lifecycle,
+    filename: 0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+    path: docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+    implemented_on: '2026-04-04'
   - adr: '0331'
     title: Repository-Relative Paths For Public Metadata And Generated Docs
     status: Accepted
@@ -5776,6 +5797,46 @@ adrs:
     path: docs/adr/0332-relative-release-and-status-links-in-generated-root-surfaces.md
     implemented_in_repo_version: 0.177.143
     implemented_on: '2026-04-02'
+  - adr: '0333'
+    title: Private Overlay Files For Deployment-Specific Secrets And Identities
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: security
+    keywords:
+      - overlays
+      - secrets
+      - identities
+      - local-state
+      - forkability
+      - private
+      - overlay
+      - files
+      - deployment-specific
+    summary: Deployment-specific secrets, identities, and one-off bootstrap artefacts must
+    filename: 0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+    path: docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+    implemented_on: '2026-04-04'
+  - adr: '0334'
+    title: Example-First Inventory And Service Identity Catalogs
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: vm-topology
+    keywords:
+      - inventory
+      - examples
+      - templates
+      - identities
+      - forkability
+      - example-first
+      - service
+      - identity
+      - catalogs
+    summary: Primary onboarding catalogs should move toward example-first inventories and
+    filename: 0334-example-first-inventory-and-service-identity-catalogs.md
+    path: docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md
+    implemented_on: '2026-04-04'
   - adr: '0335'
     title: Public-Safe Agent Onboarding Entrypoints
     status: Accepted
@@ -5833,6 +5894,45 @@ adrs:
     path: docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
     implemented_in_repo_version: 0.177.143
     implemented_on: '2026-04-02'
+  - adr: 0338
+    title: Public Documentation Tiers And Private History Boundaries
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: documentation
+    keywords:
+      - documentation
+      - publication
+      - history
+      - boundaries
+      - governance
+      - public
+      - tiers
+      - private
+    summary: We will manage documentation with explicit public tiers and private-history
+    filename: 0338-public-documentation-tiers-and-private-history-boundaries.md
+    path: docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
+    implemented_on: '2026-04-04'
+  - adr: 0339
+    title: Reference Deployment Samples And Replaceable Provider Profiles
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-02'
+    concern: vm-topology
+    keywords:
+      - samples
+      - templates
+      - provider
+      - onboarding
+      - replication
+      - reference
+      - deployment
+      - replaceable
+      - profiles
+    summary: We will provide reference deployment samples and replaceable provider profiles
+    filename: 0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+    path: docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+    implemented_on: '2026-04-04'
   - adr: '0340'
     title: Dedicated Coolify Apps VM Separation
     status: Accepted

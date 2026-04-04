@@ -39,7 +39,7 @@ section_index:
     summary: Narrative ADRs, runbooks, workstreams, release notes, discovery sources, and audit evidence.
     when_to_read: Use this section when you need design rationale, operator procedures, or historical receipts.
     entry_counts:
-      directories: 10
+      directories: 11
   - id: automation-and-infrastructure
     title: Automation And Infrastructure Surfaces
     file: docs/discovery/repo-structure/automation-and-infrastructure.yaml

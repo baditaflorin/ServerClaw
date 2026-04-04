@@ -14,7 +14,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json
+from controller_automation_toolkit import emit_cli_error, load_json, repo_path, resolve_repo_local_path, write_json
 
 
 SEED_CATALOG_PATH = repo_path("config", "seed-data-catalog.json")
@@ -83,7 +83,7 @@ def anonymization_secret_path(catalog: dict[str, Any] | None = None) -> Path:
         raise ValueError(f"Unknown controller secret '{secret_id}' in {CONTROLLER_SECRETS_PATH}")
     if str(secret_entry.get("kind")) != "file":
         raise ValueError(f"Controller secret '{secret_id}' must use kind=file")
-    return Path(str(secret_entry["path"])).expanduser()
+    return resolve_repo_local_path(str(secret_entry["path"]), repo_root=catalog_repo_root())
 
 
 def ensure_anonymization_secret(catalog: dict[str, Any] | None = None) -> str:

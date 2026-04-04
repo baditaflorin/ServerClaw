@@ -35,6 +35,13 @@ def _shared_worktree_root() -> Path | None:
     return REPO_ROOT.parent.parent
 
 
+def _shared_repo_root(repo_root: Path = REPO_ROOT) -> Path:
+    root = Path(repo_root)
+    if root.parent.name == ".worktrees":
+        return root.parent.parent
+    return root
+
+
 def repo_path(*parts: str) -> Path:
     if not parts:
         return REPO_ROOT
@@ -57,6 +64,17 @@ def repo_path(*parts: str) -> Path:
                 return shared_candidate
 
     return candidate
+
+
+def resolve_repo_local_path(path_value: str | Path, *, repo_root: Path = REPO_ROOT) -> Path:
+    path = Path(path_value).expanduser()
+    if _path_exists(path):
+        return path
+    marker = ".local"
+    if marker not in path.parts:
+        return path
+    marker_index = path.parts.index(marker) + 1
+    return _shared_repo_root(Path(repo_root)).joinpath(marker, *path.parts[marker_index:])
 
 
 WORKFLOW_CATALOG_PATH: Final[Path] = repo_path("config", "workflow-catalog.json")
