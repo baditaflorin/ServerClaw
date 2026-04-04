@@ -1,7 +1,7 @@
 id: ws-0336-live-apply
 adr: "0336"
 title: Verify ADR 0336 public entrypoint leakage validation on the latest origin/main
-status: ready_for_merge
+status: merged
 owner: codex
 branch: codex/ws-0336-live-apply
 worktree_path: .worktrees/ws-0336-live-apply

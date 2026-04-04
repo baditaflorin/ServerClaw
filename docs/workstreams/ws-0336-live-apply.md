@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0336](../adr/0336-public-entrypoint-leakage-validation.md)
 - Title: verify ADR 0336 public entrypoint leakage validation on the latest origin/main
-- Status: ready_for_merge
+- Status: merged
 - Included In Repo Version: not yet
 - Branch-Local Receipt: `receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-live-apply.json`
 - Mainline Receipt: `receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-mainline-live-apply.json`
@@ -40,5 +40,5 @@
 ## Exact-Main Integration Status
 
 - The validator already ships on `origin/main`; this workstream exists to make that state auditable from a dedicated branch/worktree without reintroducing absolute worktree metadata or hand-waving the verification trail.
-- The branch-local closeout is complete: `workstreams.yaml` is regenerated, the branch is registered, the focused and promotion-facing gates are recorded, and the branch-local receipt is ready for exact-main merge.
-- The only remaining exact-main step is the mainline closeout itself: fast-forward `main`, write the mainline receipt, push `origin/main`, and archive the workstream as terminal history so the registry no longer carries it as active.
+- The branch-local closeout completed on `codex/ws-0336-live-apply`, and the mainline closeout archives the workstream as terminal history so the registry no longer carries it as active.
+- Because another local worktree already owns a dirty `main` branch, the exact-main push for this workstream is performed by pushing the verified integration commit directly to `origin/main` instead of mutating that unrelated local `main` checkout.

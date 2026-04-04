@@ -200,6 +200,7 @@ Showing 25 of 291 merged or live-applied workstreams. Full history: [merged work
 | --- | --- | --- | --- |
 | `0346` | Enforce health-gated compose dependencies for more predictable service recovery | `live_applied` | [ws-0332-resilience-predictability.md](docs/workstreams/ws-0332-resilience-predictability.md) |
 | `0337` | Re-verify fork-first workstream metadata from the latest origin/main | `live_applied` | [ws-0337-live-apply.md](docs/workstreams/ws-0337-live-apply.md) |
+| `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
 | `0328` | Implement size-budgeted root summaries and automatic rollover ledgers | `live_applied` | [ws-0328-live-apply.md](docs/workstreams/ws-0328-live-apply.md) |
 | `0327` | Live apply sectional agent discovery registries and generated onboarding packs from latest origin/main | `live_applied` | [ws-0327-live-apply.md](docs/workstreams/ws-0327-live-apply.md) |
 | `0325` | Live apply faceted ADR index shards and reservation windows from latest origin/main | `live_applied` | [ws-0325-live-apply.md](docs/workstreams/ws-0325-live-apply.md) |

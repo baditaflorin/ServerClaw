@@ -61,7 +61,7 @@
     "docs/adr/0336-public-entrypoint-leakage-validation.md",
     "docs/workstreams/ws-0336-live-apply.md",
     "workstreams.yaml",
-    "workstreams/active/ws-0336-live-apply.yaml",
+    "workstreams/archive/2026/ws-0336-live-apply.yaml",
     "docs/diagrams/agent-coordination-map.excalidraw",
     "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-public-entrypoints-r1.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0336-targeted-tests-r1.txt",
@@ -77,6 +77,6 @@
   ],
   "notes": [
     "ADR 0336 is repository-only; the platform-version field remains not applicable and no live host mutation was required for this closeout.",
-    "The branch deliberately kept `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml` untouched, because the validator was already integrated on `origin/main` and this workstream is recording exact-main verification rather than introducing a new release-bound feature."
+    "The branch deliberately kept `VERSION`, `changelog.md`, and `versions/stack.yaml` untouched; `README.md` only changed later during the mainline archive closeout when canonical truth refreshed the merged-workstream history."
   ]
 }
